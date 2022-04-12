@@ -50,7 +50,7 @@ var parseXlsx = {
                         }
                         if (options.firstLineNumber) lineDebut = options.firstLineNumber;
                         for (var i = lineDebut; i <= lineFin; i++) {
-                            for (var j = 0; j < colNames.length; j++) {
+                            for (let j = 0; j < colNames.length; j++) {
                                 var key = colNames[j] + i;
 
                                 if (!worksheet[key]) {
@@ -71,7 +71,7 @@ var parseXlsx = {
                             }
                         }
 
-                        for (var key in data) {
+                        for (let key in data) {
                             dataArray.push(data[key]);
                         }
 
@@ -97,7 +97,9 @@ var parseXlsx = {
             }
         );
     },
-    loadSheet: function (_filePath, _callback) {},
+    loadSheet: function (_filePath, _callback) {
+        // Pass
+    },
     generateTriples: function (sheetNames, mappingFilter) {
         var graphUrisMap = {
             quantumUri: "http://data.total.com/resource/quantum/vocab#",
@@ -182,136 +184,136 @@ var parseXlsx = {
 
 module.exports = parseXlsx;
 
-if (false) {
-    //parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\MDM Rev 4 SQL export_03122020.xlsx")
-    var sheets = [
-        // "tblFunctionalClass",
-        // "tblAttribute",
-        "tblPhysicalClass",
-        // "tblAttributePickListValue",
-        //"tblFunctionalClToPhysicalCl",
-        //  "tblFunctionalClToPhysicalCl"
-    ];
-    var mappingFilter = ["ParentPhysicalClassID"];
-    parseXlsx.generateTriples(sheets, mappingFilter);
-}
+// if (false) {
+//     //parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\MDM Rev 4 SQL export_03122020.xlsx")
+//     var sheets = [
+//         // "tblFunctionalClass",
+//         // "tblAttribute",
+//         "tblPhysicalClass",
+//         // "tblAttributePickListValue",
+//         //"tblFunctionalClToPhysicalCl",
+//         //  "tblFunctionalClToPhysicalCl"
+//     ];
+//     var mappingFilter = ["ParentPhysicalClassID"];
+//     parseXlsx.generateTriples(sheets, mappingFilter);
+// }
 
-if (false) {
-    var options = { firstSheetNumber: 4, firstLineNumber: 7 };
-    parseXlsx.parse("D:\\NLP\\ontologies\\CFIHOS\\CFIHOS RDL\\Reference Data Library\\CFIHOS - Reference Data Library V1.4.xlsx", options);
-}
+// if (false) {
+//     var options = { firstSheetNumber: 4, firstLineNumber: 7 };
+//     parseXlsx.parse("D:\\NLP\\ontologies\\CFIHOS\\CFIHOS RDL\\Reference Data Library\\CFIHOS - Reference Data Library V1.4.xlsx", options);
+// }
 
-if (false) {
-    var options = { firstSheetNumber: 1, firstLineNumber: 1 };
-    parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04.xlsx", options);
-    //   parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\test.xlsx",options);
-}
+// if (false) {
+//     var options = { firstSheetNumber: 1, firstLineNumber: 1 };
+//     parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04.xlsx", options);
+//     //   parseXlsx.parse("D:\\NLP\\ontologies\\quantum\\test.xlsx",options);
+// }
 
-if (false) {
-    var groups = {
-        mainObjects: [
-            "tblAttribute",
-            "tblCompany",
-            "tblDiscipline",
-            "tblDocument",
-            "tblDocumentType",
-            "tblFunctionalClass",
-            "tblModel",
-            "tblPhysicalClass",
-            "tblPickListValueGrouping",
-            "tblPurchaseOrder",
-            "tblTag",
-            "tblTagAttribute",
-            "tblUnitOfMeasure",
-        ],
-        objects: [
-            "tblAttributePickListValue",
-            "tblDocumentAttribute",
-            "tblModelAttribute",
-            "tblModelItem",
-            "tblModelItemAttribute",
-            "tblTagFormat",
-            "tblTagFormatGroup",
-            "tblTagFormatPermittedValue",
-            "tblUnitOfMeasureDimension",
-        ],
-        relations: [
-            "tblDisciplineDocumentType",
-            "tblDocumentToDocument",
-            "tblFunctionalClassToAttribute",
-            "tblFunctionalClassToDiscDocType",
-            "tblFunctionalClToPhysicalCl",
-            "tblModelItemToDocument",
-            "tblModelToDocument",
-            "tblPhysicalClassToAttribute",
-            "tblPhysicalClassToDiscDocType",
-            "tblTagToAlias",
-            "tblTagToDocument",
-            "tblTagToModel",
-            "tblTagToModelItem",
-            "tblTagToTag",
-        ],
-        util: [
-            //'tblKGChangeManagement',
-            "tblBreakdownAttribute",
-            "tblBreakdownToBreakdown",
-            "tblBreakdownToDocument",
-            "tblCodification",
-            "tblComments",
-            "tblEntities",
-            //  'tblMappingSource',
-            //  'tblMappingSourceDetails',
-            "tblMappingSourceOrigin",
-            "tblRDLChangeManagement",
-            "tblRequirementOrigin",
-            "tblRLChangeManagement",
-            "tblSource",
-            "tblSSLChangeManagement",
-            "tblTagToTagToTypicalAssemblyReq",
-            "tblTypicalAssemblyPattern",
-            "tblTypicalAssemblyRequirement",
-        ],
-    };
-    if (false) {
-        var model = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__20210107_MDM_Rev04.model.json";
-        var data = JSON.parse(fs.readFileSync(model));
-        var obj = {};
-        for (var key in groups) {
-            obj[key] = {};
-            groups[key].forEach(function (fileName) {
-                obj[key][fileName] = data[fileName];
-            });
-        }
-        var file = model.replace(".json", "2.json");
-        fs.writeFileSync(file, JSON.stringify(obj, null, 2));
-    }
+// if (false) {
+//     var groups = {
+//         mainObjects: [
+//             "tblAttribute",
+//             "tblCompany",
+//             "tblDiscipline",
+//             "tblDocument",
+//             "tblDocumentType",
+//             "tblFunctionalClass",
+//             "tblModel",
+//             "tblPhysicalClass",
+//             "tblPickListValueGrouping",
+//             "tblPurchaseOrder",
+//             "tblTag",
+//             "tblTagAttribute",
+//             "tblUnitOfMeasure",
+//         ],
+//         objects: [
+//             "tblAttributePickListValue",
+//             "tblDocumentAttribute",
+//             "tblModelAttribute",
+//             "tblModelItem",
+//             "tblModelItemAttribute",
+//             "tblTagFormat",
+//             "tblTagFormatGroup",
+//             "tblTagFormatPermittedValue",
+//             "tblUnitOfMeasureDimension",
+//         ],
+//         relations: [
+//             "tblDisciplineDocumentType",
+//             "tblDocumentToDocument",
+//             "tblFunctionalClassToAttribute",
+//             "tblFunctionalClassToDiscDocType",
+//             "tblFunctionalClToPhysicalCl",
+//             "tblModelItemToDocument",
+//             "tblModelToDocument",
+//             "tblPhysicalClassToAttribute",
+//             "tblPhysicalClassToDiscDocType",
+//             "tblTagToAlias",
+//             "tblTagToDocument",
+//             "tblTagToModel",
+//             "tblTagToModelItem",
+//             "tblTagToTag",
+//         ],
+//         util: [
+//             //'tblKGChangeManagement',
+//             "tblBreakdownAttribute",
+//             "tblBreakdownToBreakdown",
+//             "tblBreakdownToDocument",
+//             "tblCodification",
+//             "tblComments",
+//             "tblEntities",
+//             //  'tblMappingSource',
+//             //  'tblMappingSourceDetails',
+//             "tblMappingSourceOrigin",
+//             "tblRDLChangeManagement",
+//             "tblRequirementOrigin",
+//             "tblRLChangeManagement",
+//             "tblSource",
+//             "tblSSLChangeManagement",
+//             "tblTagToTagToTypicalAssemblyReq",
+//             "tblTypicalAssemblyPattern",
+//             "tblTypicalAssemblyRequirement",
+//         ],
+//     };
+//     if (false) {
+//         var model = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__20210107_MDM_Rev04.model.json";
+//         var data = JSON.parse(fs.readFileSync(model));
+//         var obj = {};
+//         for (var key in groups) {
+//             obj[key] = {};
+//             groups[key].forEach(function (fileName) {
+//                 obj[key][fileName] = data[fileName];
+//             });
+//         }
+//         var file = model.replace(".json", "2.json");
+//         fs.writeFileSync(file, JSON.stringify(obj, null, 2));
+//     }
 
-    if (false) {
-        for (var key in groups) {
-            var obj = {};
+//     if (false) {
+//         for (var key in groups) {
+//             var obj = {};
 
-            groups[key].forEach(function (fileName) {
-                var file = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._" + fileName + ".json";
-                if (!fs.existsSync(file)) {
-                    return console.log(file);
-                }
-                var data = JSON.parse(fs.readFileSync(file));
-                obj[fileName] = data;
-            });
-            var file = "D:\\NLP\\ontologies\\quantum\\__" + key + ".json";
-            fs.writeFileSync(file, JSON.stringify(obj, null, 2));
-        }
-    }
-}
+//             groups[key].forEach(function (fileName) {
+//                 var file = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\20210107_MDM_Rev04._" + fileName + ".json";
+//                 if (!fs.existsSync(file)) {
+//                     return console.log(file);
+//                 }
+//                 var data = JSON.parse(fs.readFileSync(file));
+//                 obj[fileName] = data;
+//             });
+//             var file = "D:\\NLP\\ontologies\\quantum\\__" + key + ".json";
+//             fs.writeFileSync(file, JSON.stringify(obj, null, 2));
+//         }
+//     }
+// }
 
-if (false) {
-    var filePath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\Quantum_Cfihos_AttrMapping.xlsx";
-    var options = { firstSheetNumber: 1, firstLineNumber: 1 };
-    parseXlsx.parse(filePath, options);
-}
+// if (false) {
+//     var filePath = "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\Quantum_Cfihos_AttrMapping.xlsx";
+//     var options = { firstSheetNumber: 1, firstLineNumber: 1 };
+//     parseXlsx.parse(filePath, options);
+// }
 
-if (true) {
-    var filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A FJ-BC.XLSX";
-    var options = { firstSheetNumber: 1, firstLineNumber: 1 };
-    parseXlsx.parse(filePath, options);
-}
+// if (true) {
+//     var filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\TO-G-6010A FJ-BC.XLSX";
+//     var options = { firstSheetNumber: 1, firstLineNumber: 1 };
+//     parseXlsx.parse(filePath, options);
+// }

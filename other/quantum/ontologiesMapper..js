@@ -373,46 +373,46 @@ var ontologiesMapper = {
             idKey: "ID",
         };
 
-        var originMap = {
-            "TOTAL-SA0000000004": "CFIHOS",
-            "TOTAL-SA0000000005": "CFIHOS",
-            "TOTAL-SA0000000006": "CFIHOS",
-            "TOTAL-SA0000000007": "CFIHOS",
-            "TOTAL-SA0000000008": "CFIHOS",
-            "TOTAL-SA0000000009": "CFIHOS",
-            "TOTAL-SA0000000010": "CFIHOS",
-            "TOTAL-SA0000000011": "CFIHOS",
-            "TOTAL-SA0000000012": "CFIHOS",
-            "TOTAL-SA0000000037": "CFIHOS",
-            "TOTAL-SA0000000038": "CFIHOS",
-            "TOTAL-SA0000000039": "CFIHOS",
-            "TOTAL-SA0000000040": "CFIHOS",
-            "TOTAL-SA0000000041": "CFIHOS",
-            "TOTAL-SA0000000048": "CFIHOS",
-            "TOTAL-SA0000000042": "TOTAL-CTG",
-            "TOTAL-SA0000000001": "TOTAL-GS",
-            "TOTAL-SA0000000002": "TOTAL-GS",
-            "TOTAL-SA0000000013": "TOTAL-GS",
-            "TOTAL-SA0000000036": "TOTAL-GS",
-            "TOTAL-SA0000000049": "TOTAL-GS",
-            "TOTAL-SA0000000050": "TOTAL-GS",
-            "TOTAL-SA0000000051": "TOTAL-GS",
-            "TOTAL-SA0000000052": "TOTAL-GS",
-            "TOTAL-SA0000000003": "ICAPS",
-            "TOTAL-SA0000000014": "ICAPS",
-            "TOTAL-SA0000000053": "ISO-14224",
-            "TOTAL-SA0000000054": "ISO-14224",
-            "TOTAL-SA0000000055": "ISO-14224",
-            "TOTAL-SA0000000017": "ISO-14926-Part4",
-            "TOTAL-SA0000000019": "ISO-14926-Part4",
-            "TOTAL-SA0000000025": "ISO-14926-Part4",
-            "TOTAL-SA0000000028": "ISO-14926-Part4",
-            "TOTAL-SA0000000043": "MEL",
-            "TOTAL-SA0000000044": "MEL",
-            "TOTAL-SA0000000045": "MEL",
-            "TOTAL-SA0000000046": "MEL",
-            "TOTAL-SA0000000047": "MEL",
-        };
+        // var originMap = {
+        //     "TOTAL-SA0000000004": "CFIHOS",
+        //     "TOTAL-SA0000000005": "CFIHOS",
+        //     "TOTAL-SA0000000006": "CFIHOS",
+        //     "TOTAL-SA0000000007": "CFIHOS",
+        //     "TOTAL-SA0000000008": "CFIHOS",
+        //     "TOTAL-SA0000000009": "CFIHOS",
+        //     "TOTAL-SA0000000010": "CFIHOS",
+        //     "TOTAL-SA0000000011": "CFIHOS",
+        //     "TOTAL-SA0000000012": "CFIHOS",
+        //     "TOTAL-SA0000000037": "CFIHOS",
+        //     "TOTAL-SA0000000038": "CFIHOS",
+        //     "TOTAL-SA0000000039": "CFIHOS",
+        //     "TOTAL-SA0000000040": "CFIHOS",
+        //     "TOTAL-SA0000000041": "CFIHOS",
+        //     "TOTAL-SA0000000048": "CFIHOS",
+        //     "TOTAL-SA0000000042": "TOTAL-CTG",
+        //     "TOTAL-SA0000000001": "TOTAL-GS",
+        //     "TOTAL-SA0000000002": "TOTAL-GS",
+        //     "TOTAL-SA0000000013": "TOTAL-GS",
+        //     "TOTAL-SA0000000036": "TOTAL-GS",
+        //     "TOTAL-SA0000000049": "TOTAL-GS",
+        //     "TOTAL-SA0000000050": "TOTAL-GS",
+        //     "TOTAL-SA0000000051": "TOTAL-GS",
+        //     "TOTAL-SA0000000052": "TOTAL-GS",
+        //     "TOTAL-SA0000000003": "ICAPS",
+        //     "TOTAL-SA0000000014": "ICAPS",
+        //     "TOTAL-SA0000000053": "ISO-14224",
+        //     "TOTAL-SA0000000054": "ISO-14224",
+        //     "TOTAL-SA0000000055": "ISO-14224",
+        //     "TOTAL-SA0000000017": "ISO-14926-Part4",
+        //     "TOTAL-SA0000000019": "ISO-14926-Part4",
+        //     "TOTAL-SA0000000025": "ISO-14926-Part4",
+        //     "TOTAL-SA0000000028": "ISO-14926-Part4",
+        //     "TOTAL-SA0000000043": "MEL",
+        //     "TOTAL-SA0000000044": "MEL",
+        //     "TOTAL-SA0000000045": "MEL",
+        //     "TOTAL-SA0000000046": "MEL",
+        //     "TOTAL-SA0000000047": "MEL",
+        // };
 
         var matchingFieldsMap = {
             tblPhysicalClass: "PhysicalClassID",
@@ -424,7 +424,7 @@ var ontologiesMapper = {
             tblTag: "TagId",
         };
 
-        var sourceData = JSON.parse(fs.readFileSync(sourceConfig.filePath));
+        // var sourceData = JSON.parse(fs.readFileSync(sourceConfig.filePath));
         var targetData = JSON.parse(fs.readFileSync(targetConfig.filePath));
         var targetMap = {};
         var idField = sourceConfig.table.substring(3) + "ID";
@@ -439,66 +439,66 @@ var ontologiesMapper = {
             targetMap[item[idField]] = item;
         });
 
-        var tableData = sourceData[sourceConfig.table];
-        var str = "";
+        // var tableData = sourceData[sourceConfig.table];
+        // var _str = "";
 
-        tableData.forEach(function (item) {
-            var id = item[sourceConfig.idKey];
-            str += id;
-            var target = targetMap[id];
-            if (target) {
-                str +=
-                    "\t" +
-                    target.ID +
-                    "\t" +
-                    target.SourceCode.replace(/[\n\r\t]/g, " ") +
-                    "\t" +
-                    target.SourceDescription.replace(/[\n\r\t]/g, " ") +
-                    "\t" +
-                    target.ChangeRequestNumber.replace(/[\n\r\t]/g, " ") +
-                    "\t" +
-                    target.MappingSourceOriginID +
-                    "\t" +
-                    target.ItemStatus.replace(/[\n\r\t]/g, " ") +
-                    "\t";
+        // tableData.forEach(function (item) {
+        //     var id = item[sourceConfig.idKey];
+        //     str += id;
+        //     var target = targetMap[id];
+        //     if (target) {
+        //         str +=
+        //             "\t" +
+        //             target.ID +
+        //             "\t" +
+        //             target.SourceCode.replace(/[\n\r\t]/g, " ") +
+        //             "\t" +
+        //             target.SourceDescription.replace(/[\n\r\t]/g, " ") +
+        //             "\t" +
+        //             target.ChangeRequestNumber.replace(/[\n\r\t]/g, " ") +
+        //             "\t" +
+        //             target.MappingSourceOriginID +
+        //             "\t" +
+        //             target.ItemStatus.replace(/[\n\r\t]/g, " ") +
+        //             "\t";
 
-                var originType = originMap[target.MappingSourceOriginID];
-                if (originType) str += originType + "\t";
-                else str += "" + "\t";
-            }
-            str += "\n";
-        });
+        //         var originType = originMap[target.MappingSourceOriginID];
+        //         if (originType) str += originType + "\t";
+        //         else str += "" + "\t";
+        //     }
+        //     str += "\n";
+        // });
 
-        if (false) {
-            tableData.forEach(function (item) {
-                var id = item[sourceConfig.idKey];
-                str += id;
-                var target = targetMap[id];
-                if (target) {
-                    str +=
-                        "\t" +
-                        target.ID +
-                        "\t" +
-                        target.SourceCode.replace(/[\n\r\t]/g, " ") +
-                        "\t" +
-                        target.SourceDescription.replace(/[\n\r\t]/g, " ") +
-                        "\t" +
-                        target.ChangeRequestNumber.replace(/[\n\r\t]/g, " ") +
-                        "\t" +
-                        target.MappingSourceOriginID +
-                        "\t" +
-                        target.ItemStatus.replace(/[\n\r\t]/g, " ") +
-                        "\t";
+        // if (false) {
+        //     tableData.forEach(function (item) {
+        //         var id = item[sourceConfig.idKey];
+        //         str += id;
+        //         var target = targetMap[id];
+        //         if (target) {
+        //             str +=
+        //                 "\t" +
+        //                 target.ID +
+        //                 "\t" +
+        //                 target.SourceCode.replace(/[\n\r\t]/g, " ") +
+        //                 "\t" +
+        //                 target.SourceDescription.replace(/[\n\r\t]/g, " ") +
+        //                 "\t" +
+        //                 target.ChangeRequestNumber.replace(/[\n\r\t]/g, " ") +
+        //                 "\t" +
+        //                 target.MappingSourceOriginID +
+        //                 "\t" +
+        //                 target.ItemStatus.replace(/[\n\r\t]/g, " ") +
+        //                 "\t";
 
-                    var originType = originMap[target.MappingSourceOriginID];
-                    if (originType) str += originType + "\t";
-                    else str += "" + "\t";
-                }
-                str += "\n";
-            });
+        //             var originType = originMap[target.MappingSourceOriginID];
+        //             if (originType) str += originType + "\t";
+        //             else str += "" + "\t";
+        //         }
+        //         str += "\n";
+        //     });
 
-            fs.writeFileSync(targetConfig.filePath.replace(".json", "_" + sourceConfig.table + ".txt"), str);
-        }
+        //     fs.writeFileSync(targetConfig.filePath.replace(".json", "_" + sourceConfig.table + ".txt"), str);
+        // }
     },
 
     normalizeMappingSources: function () {

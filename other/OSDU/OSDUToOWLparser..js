@@ -288,59 +288,57 @@ var buildOwl = function (json, graphUri) {
 
 var dirPathMasterData = { dir: "D:\\NLP\\ontologies\\OSDU\\301018_Shell_SDU_JSON_Schemas_for_OSDU\\resource-group-type__master-data\\", prefix: "master_data" };
 
-if (true) {
-    var doAll = false;
-    var currentDir = dirPathMasterData;
+var doAll = false;
+var currentDir = dirPathMasterData;
 
-    //  var currentDir = dirPathCommon
-    var dirPath = currentDir.dir;
-    var prefix = currentDir.prefix;
+//  var currentDir = dirPathCommon
+var dirPath = currentDir.dir;
+var prefix = currentDir.prefix;
 
-    var graphUri = "http://souslesens.org/osdu/ontology/" + prefix + "/";
+var graphUri = "http://souslesens.org/osdu/ontology/" + prefix + "/";
 
-    async.series(
-        [
-            //concat all json together
-            function (callbackSeries) {
-                if (!doAll) return callbackSeries();
+async.series(
+    [
+        //concat all json together
+        function (callbackSeries) {
+            if (!doAll) return callbackSeries();
 
-                var globalJson = {};
-                var dirPaths = [dirPath];
-                async.eachSeries(
-                    dirPaths,
-                    function (dirPath, callbackEachDir) {
-                        var files = fs.readdirSync(dirPath);
-                        async.eachSeries(
-                            files,
-                            function (file, callbackEach) {
-                                if (file.endsWith(".json")) {
-                                    var json = JSON.parse(fs.readFileSync(dirPath + file));
-                                    var objName = file.substring(0, file.indexOf("."));
-                                    globalJson[objName] = json;
-                                    callbackEach();
-                                } else callbackEach();
-                            },
-                            function (err) {
-                                callbackEachDir(err);
-                            }
-                        );
-                    },
-                    function (err) {
-                        if (err) return callbackSeries(err);
-                        fs.writeFileSync(dirPath + prefix + "merged.json", JSON.stringify(globalJson, null, 2));
-                        callbackSeries(err);
-                        console.log("done");
-                    }
-                );
-            },
-            //concat all json together
-            function (_callbackSeries) {
-                var json = JSON.parse(fs.readFileSync(dirPath + prefix + "merged.json"));
-                buildOwl(json, graphUri);
-            },
-        ],
-        function (_err) {
-            /*pass*/
-        }
-    );
-}
+            var globalJson = {};
+            var dirPaths = [dirPath];
+            async.eachSeries(
+                dirPaths,
+                function (dirPath, callbackEachDir) {
+                    var files = fs.readdirSync(dirPath);
+                    async.eachSeries(
+                        files,
+                        function (file, callbackEach) {
+                            if (file.endsWith(".json")) {
+                                var json = JSON.parse(fs.readFileSync(dirPath + file));
+                                var objName = file.substring(0, file.indexOf("."));
+                                globalJson[objName] = json;
+                                callbackEach();
+                            } else callbackEach();
+                        },
+                        function (err) {
+                            callbackEachDir(err);
+                        }
+                    );
+                },
+                function (err) {
+                    if (err) return callbackSeries(err);
+                    fs.writeFileSync(dirPath + prefix + "merged.json", JSON.stringify(globalJson, null, 2));
+                    callbackSeries(err);
+                    console.log("done");
+                }
+            );
+        },
+        //concat all json together
+        function (_callbackSeries) {
+            var json = JSON.parse(fs.readFileSync(dirPath + prefix + "merged.json"));
+            buildOwl(json, graphUri);
+        },
+    ],
+    function (_err) {
+        /*pass*/
+    }
+);

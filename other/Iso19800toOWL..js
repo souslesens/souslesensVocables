@@ -6,8 +6,6 @@ const SPARQLutil = require("../bin/SPARQLutil.");
 var Iso19800toOWL = {
     parse: function (sourcePath, prefix, _callback) {
         var data;
-        var headers;
-        var triples = [];
         var triples = [];
         var classesMap = {};
         var graphUri = "http://souslesens.org/iso19008/" + prefix.toLowerCase() + "/";
@@ -91,8 +89,6 @@ var Iso19800toOWL = {
 
     parseMappings: function (sourcePath) {
         var data;
-        var headers;
-        var triples = [];
         var triples = [];
         var classesMap = {};
         var graphUri = "http://souslesens.org/iso19008/";
@@ -114,7 +110,7 @@ var Iso19800toOWL = {
                         if (item.cORCode && item.sABCode) {
                             var uri = graphUri + util.formatStringForTriple(item.cORCode, true);
                         }
-                        var uri = graphUri + util.formatStringForTriple(item.cORCode, true);
+                        uri = graphUri + util.formatStringForTriple(item.cORCode, true);
                         classesMap[item.cORCode] = uri;
 
                         triples.push({
@@ -179,8 +175,8 @@ var Iso19800toOWL = {
 };
 module.exports = Iso19800toOWL;
 
-var sourcePath = "D:\\NLP\\ontologies\\19008\\annexeA_PBS.csv";
-var sourcePath = "D:\\NLP\\ontologies\\19008\\annexeB_SAB.csv";
+// var sourcePath = "D:\\NLP\\ontologies\\19008\\annexeA_PBS.csv";
+// var sourcePath = "D:\\NLP\\ontologies\\19008\\annexeB_SAB.csv";
 var sourcePath = "D:\\NLP\\ontologies\\19008\\annexeC_COR.csv";
 Iso19800toOWL.parse(sourcePath, "cOR");
 

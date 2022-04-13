@@ -40,7 +40,7 @@
 
         <div id="LineagePropertiesTab">
             <div>
-                <input id='LineageProperties_searchAllSourcesTermInput' style="width: 200px" value="">
+                <input id='LineageProperties_searchAllSourcesTermInput' style="width: 200px" value=""  onkeyup="if (event.keyCode == 13)Lineage_properties.searchAllSourcesTerm()">
                 <button class='btn btn-sm my-1 py-0 btn-outline-primary' id="LineageProperties_onSearchAllInput" onclick='Lineage_properties.searchAllSourcesTerm()'>
                     Search
                 </button>
@@ -146,7 +146,11 @@
     $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html",function () {
         $("#GenericTools_searchInAllSources").prop("checked", false)
 
+
     })
+
+
+
 
 
 

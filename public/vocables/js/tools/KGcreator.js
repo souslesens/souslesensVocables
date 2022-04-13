@@ -22,6 +22,7 @@ var KGcreator = (function () {
         "",
         "_function",
         "_restriction",
+        "_part14Predefined",
         ""
 
 
@@ -46,6 +47,23 @@ var KGcreator = (function () {
 
     ]
 
+
+  self.predefinedPart14Relations = [["Location", "Location", "hasSubLocation"],
+        ["Location", "Activity", "hasActivityPart"],
+        ["Location", "FunctionalObject", "hasFunctionalPart"],
+        ["Location", "System", "hasFunctionalPart"],
+        ["Activity", "Activity", "hasActivityPart"],
+        ["Activity", "Location", "residesIn"],
+        ["Activity", "FunctionalObject", "hasParticipant"],
+        ["Activity", "System", "hasParticipant"],
+        ["FunctionalObject", "FunctionalObject", "hasFunctionalPart"],
+        ["FunctionalObject", "Location", ""],
+        ["FunctionalObject", "Activity", "participantIn"],
+        ["FunctionalObject", "System", "functionalPartOf"],
+        ["System", "System", "hasFunctionalPart"],
+        ["System", "Location", "residesIn"],
+        ["System", "Activity", "participantIn"],
+        ["System", "FunctionalObject", "hasFunctionalPart"]]
 
     self.onLoaded = function () {
 
@@ -364,6 +382,11 @@ var KGcreator = (function () {
             return alert("missing predicate")
         if (!object)
             return alert("missing object")
+        if(predicate=="_part14Predefined"){
+            predicate=self.getPredefinedPart14PredicateFromClasses(subject,object)
+
+
+        }
 
 
         var tripleObj =
@@ -644,6 +667,8 @@ var KGcreator = (function () {
             }
         }
 
+            options.addAllPredefinedPart14PredicatesTriples=$("#KGcreator_addAllPredefinedPart14PredicatesTriples").prop("checked")
+
         self.saveMappings(function (err, result) {
             $("#KGcreator_dataSampleDiv").val("")
             var payload = {
@@ -700,6 +725,30 @@ var KGcreator = (function () {
                 return MainController.UI.message(err)
             }
         })
+    }
+
+    self.addAllPredefinedPart14PredicatesTriples=function() {
+
+    }
+
+
+
+    self.getPredefinedPart14PredicateFromClasses= function (subjectClass, objectClass) {
+
+
+        var pred = null;
+        self.predefinedPart14Relations.forEach(function (item) {
+
+            if (item[0] == subjectClass && item[1] == objectClass) {
+                pred = "part14:" + item[2]
+            }
+
+        })
+        if(!pred)
+            return alert(" no Predicate between "+subjectClass +" and "+objectClass)
+
+        return pred
+
     }
 
     return self;

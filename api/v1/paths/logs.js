@@ -25,6 +25,7 @@ module.exports = function () {
             .map((line) => {
                 const jsonLine = JSON.parse(line);
                 const message = jsonLine.message.split(",");
+                console.log(message);
                 return {
                     user: message[0],
                     tool: message[1],

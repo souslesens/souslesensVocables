@@ -1,9 +1,8 @@
+const modelUsers = require("../../../model/users");
 const path = require("path");
-const fs = require("fs");
 const profilesJSON = path.resolve("config/users/users.json");
 exports.profilesJSON = profilesJSON;
-const _ = require("lodash");
-const { readRessource, writeRessource, responseSchema, ressourceCreated, ressourceUpdated, ressourceFetched } = require("./utils");
+const { readRessource, writeRessource, responseSchema, ressourceCreated, ressourceUpdated, successfullyFetched } = require("./utils");
 const bcrypt = require("bcrypt");
 module.exports = function () {
     let operations = {
@@ -12,14 +11,12 @@ module.exports = function () {
         PUT,
     };
     function GET(req, res, _next) {
-        fs.readFile(profilesJSON, "utf8", (err, data) => {
-            if (err) {
-                res.status(500).json({ message: "I couldn't read users.json" });
-            } else {
-                const profiles = JSON.parse(data);
-                ressourceFetched(res, profiles);
-            }
-        });
+        try {
+            const users = modelUsers.getUsers();
+            res.status(200).json(successfullyFetched(users));
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
     }
 
     async function PUT(req, res, _next) {

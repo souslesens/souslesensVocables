@@ -614,7 +614,7 @@ if (false) {
     // var rdfPath = "D:\\NLP\\commonConcepts_TERM_SCIENCE_CTG2.rdf";
     const rdfPath = "D:\\NLP\\temp.rdf";
     skoReader.skosEditorToRdf(rdfPath, data, {}, function (_err, _result) {
-        /*pass*/
+        //pass
     });
 }
 */

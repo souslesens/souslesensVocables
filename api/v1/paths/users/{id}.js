@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs");
+const modelUsers = require("../../../../model/users");
 const profilesJSON = path.resolve("config/users/users.json");
-const _ = require("lodash");
 const util = require("util");
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
@@ -13,19 +13,17 @@ module.exports = function () {
     };
 
     function GET(req, res, _next) {
-        fs.readFile(profilesJSON, "utf8", (err, data) => {
-            if (err) {
-                res.status(500).json({ message: "I couldn't read profiles.json" });
+        const userId = req.params.id;
+        try {
+            const users = modelUsers.getUsers();
+            if (users[userId] !== undefined) {
+                res.status(200).json(users[userId]);
             } else {
-                const profiles = JSON.parse(data);
-                const profile = profiles[req.params.id];
-                req.params.id
-                    ? profile
-                        ? res.status(200).json(profiles[req.params.id])
-                        : res.status(400).json({ message: `Profile with id ${req.params.id} not found` })
-                    : res.status(200).json(profiles);
+                res.status(404).json({ message: `User ${userId} not found` });
             }
-        });
+        } catch (error) {
+            res.status(500).json({ message: error.message });
+        }
     }
     async function DELETE(req, res, _next) {
         const profiles = await readFile(profilesJSON).catch((err) => res.status(500).json(err));

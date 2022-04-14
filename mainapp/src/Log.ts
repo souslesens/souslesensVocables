@@ -1,4 +1,4 @@
-type Log = { user: string; tool: string; timestamp: string };
+type Log = { user: string; tool: string; source: string; timestamp: string };
 
 const endpoint = "/api/v1/logs";
 async function getLogs(): Promise<Log[]> {

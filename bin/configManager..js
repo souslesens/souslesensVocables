@@ -37,15 +37,8 @@ var ConfigManager = {
             // in that case return the string content not parsed
             err = e;
         } finally {
-            if (callback) return callback(err, config);
+            if (callback) callback(err, config);
         }
-    },
-
-    getDictionary: function (dictionary, callback) {
-        var dictionaryPath = path.join(__dirname, "../data/dictionaries/" + dictionary);
-        jsonFileStorage.retrieve(path.resolve(dictionaryPath), function (err, profiles) {
-            callback(err, profiles);
-        });
     },
     getProfiles: function (options, callback) {
         var profilesPath = path.join(__dirname, "../config/profiles.json");
@@ -112,7 +105,7 @@ var ConfigManager = {
                             };
                         }
 
-                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, sources) {
+                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, _sources) {
                             callbackSeries(err);
                         });
                     });
@@ -139,7 +132,7 @@ var ConfigManager = {
                         if (err) return callback(err);
                         delete sources[sourceName];
 
-                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, sources) {
+                        jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, _sources) {
                             callbackSeries(err);
                         });
                     });

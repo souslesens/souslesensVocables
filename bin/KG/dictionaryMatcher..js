@@ -1,15 +1,12 @@
-var httpProxy = require("../../bin/httpProxy.");
 var csvCrawler = require("../../bin/_csvCrawler.");
 var elasticRestProxy = require("../../bin/elasticRestProxy.");
 var fs = require("fs");
 var async = require("async");
 var dictionaryMatcher = {
     getSimilars: function (filePath, index, fileField, indexLabelField, indexIdField, callback) {
-        var elasticServerUrl = "http://vps254642.ovh.net:2009/";
         var data = [];
         var matchesMap = {};
         var orphans = [];
-        var headers = [];
         var count = 0;
         async.series(
             [
@@ -18,7 +15,6 @@ var dictionaryMatcher = {
                     csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {
                         if (err) return callbackseries(err);
                         data = result.data;
-                        headers = result.headers;
                         return callbackseries();
                     });
                 },
@@ -118,19 +114,17 @@ var dictionaryMatcher = {
                                             });
                                         });
                                     }
-                                } else {
-                                    var x = 3;
                                 }
                                 callbackEach();
                             });
                         },
-                        function (err) {
+                        function (_err) {
                             callbackSeries();
                         }
                     );
                 },
             ],
-            function (err) {
+            function (_err) {
                 fs.writeFileSync(filePath + "_" + index + "_orphans.json", JSON.stringify(orphans, null, 2));
                 fs.writeFileSync(filePath + "_" + index + "_matches.json", JSON.stringify(matchesMap, null, 2));
                 if (callback) return callback(null, matchesMap);
@@ -173,31 +167,31 @@ var dictionaryMatcher = {
 };
 
 module.exports = dictionaryMatcher;
+
+/*
 if (false) {
     var file = "D:\\NLP\\ontologies\\dictionaries\\bomaftwinequip2.csv_orphans.json";
-    var csvFile = "label\t";
     var data = JSON.parse(fs.readFileSync(file));
-    data.forEach(function (line) {
+    data.forEach(function (_line) {
         var matches = JSON.parse(fs.readFileSync(dir + file));
 
-        matches.forEach(function (match) {});
+        matches.forEach(function (_match) {});
     });
-    csvFile += "";
 }
+*/
 
 //dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\dictionaries\\readiLabel.csv", "bomaftwin","label","equipmentDescription","materialNumber ")
-if (true) {
-    dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\TEPDK\\tblCodification.csv", "tepdk_tags", "assetTagCode", "Functional_Location_code", "tagName", function (err, result) {
-        var str = "";
-        for (var code in result) {
-            result[code].forEach(function (tag) {
-                str += tag.id + "\t" + code + "\n";
-            });
-        }
-        fs.writeFileSync("D:\\NLP\\ontologies\\TEPDK\\" + "tagsCodes.csv", str);
-    });
-}
+dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\TEPDK\\tblCodification.csv", "tepdk_tags", "assetTagCode", "Functional_Location_code", "tagName", function (err, result) {
+    var str = "";
+    for (var code in result) {
+        result[code].forEach(function (tag) {
+            str += tag.id + "\t" + code + "\n";
+        });
+    }
+    fs.writeFileSync("D:\\NLP\\ontologies\\TEPDK\\" + "tagsCodes.csv", str);
+});
 
+/*
 if (false) {
     var file = "bomaftwinequip2.csv";
     var file = "Quantum_physicalClasses.txt";
@@ -212,6 +206,8 @@ if (false) {
 
     dictionaryMatcher.getSimilars("D:\\NLP\\ontologies\\dictionaries\\" + file, "pca", "name", "label", "subject");
 }
+*/
+/*
 if (false) {
     var files = {
         "Quantum_functionalClasses.txt": {
@@ -256,3 +252,4 @@ if (false) {
     var dir = "D:\\NLP\\ontologies\\dictionaries\\";
     dictionaryMatcher.merge(files, "pca", dir);
 }
+*/

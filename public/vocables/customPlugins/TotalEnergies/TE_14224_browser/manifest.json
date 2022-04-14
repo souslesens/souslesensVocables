@@ -1,23 +1,19 @@
 {
-  "uri_icons": {
-    "http://w3id.org/readi/rdl/CFIHOS-30000311": "icons/artefact.png",
-    "http://w3id.org/readi/z018-rdl/Discipline": "icons/discipline.png",
-    "http://standards.iso.org/iso/15926/part14/FunctionalObject": "icons/function.png",
-    "http://w3id.org/readi/z018-rdl/prod_SYS": "icons/system.png",
-    "http://w3id.org/readi/rdl/Z101001232": "icons/component.png",
-    "http://standards.iso.org/iso/15926/part14/Location": "icons/location.png",
-    "http://w3id.org/readi/rdl/D101001495": "icons/tag.png"
-
-  },
-  "tools": [
-
-     {
-      "label": "TE_14224_browser",
-      "noSource": 1,
-      "controller": "TE_14224_browser",
-      "toolDescriptionImg": null
-    }
-
-
-  ]
+    "uri_icons": {
+        "http://w3id.org/readi/rdl/CFIHOS-30000311": "icons/artefact.png",
+        "http://w3id.org/readi/z018-rdl/Discipline": "icons/discipline.png",
+        "http://standards.iso.org/iso/15926/part14/FunctionalObject": "icons/function.png",
+        "http://w3id.org/readi/z018-rdl/prod_SYS": "icons/system.png",
+        "http://w3id.org/readi/rdl/Z101001232": "icons/component.png",
+        "http://standards.iso.org/iso/15926/part14/Location": "icons/location.png",
+        "http://w3id.org/readi/rdl/D101001495": "icons/tag.png"
+    },
+    "tools": [
+        {
+            "label": "TE_14224_browser",
+            "noSource": 1,
+            "controller": "TE_14224_browser",
+            "toolDescriptionImg": null
+        }
+    ]
 }

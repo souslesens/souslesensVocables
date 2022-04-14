@@ -1,22 +1,19 @@
-var createError = require("http-errors");
-var express = require("express");
-var fs = require("fs");
-var path = require("path");
-var passport = require("passport");
-var ensureLoggedIn = require("connect-ensure-login").ensureLoggedIn;
-var cookieParser = require("cookie-parser");
-var logger = require("morgan");
-var bodyParser = require("body-parser");
-var indexRouter = require("./routes/index");
-//var usersRouter = require("./routes/users");
-var httpProxy = require("./bin/httpProxy.");
-var configManager = require("./bin/configManager.");
-
+const createError = require("http-errors");
+const express = require("express");
+const path = require("path");
+const passport = require("passport");
+const cookieParser = require("cookie-parser");
+const logger = require("morgan");
+const bodyParser = require("body-parser");
 const fileUpload = require("express-fileupload");
+const openapi = require("express-openapi");
+const swaggerUi = require("swagger-ui-express");
 
-var mainConfigFilePath = path.join(__dirname, "./config/mainConfig.json");
-var str = fs.readFileSync(mainConfigFilePath);
-var config = JSON.parse("" + str);
+const indexRouter = require(path.resolve("routes/index"));
+const httpProxy = require(path.resolve("bin/httpProxy."));
+const userManager = require(path.resolve("bin/user."));
+
+const config = require(path.resolve("config/mainConfig.json"));
 
 var app = express();
 
@@ -73,8 +70,59 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
+// API
+openapi.initialize({
+    apiDoc: require("./api/v1/api-doc.js"),
+    app: app,
+    paths: "./api/v1/paths",
+    securityHandlers: {
+        loginScheme: function (req, _scopes, _definition) {
+            if (!config.disableAuth) {
+                config.auth == "keycloak" ? passport.authenticate("keycloak", { failureRedirect: "/login" }) : null;
+                if (!req.isAuthenticated || !req.isAuthenticated()) {
+                    throw {
+                        status: 401,
+                        message: "You must authenticate to access this ressource.",
+                    };
+                }
+            }
+            return Promise.resolve(true);
+        },
+        restrictAdmin: function (req, _scopes, _definition) {
+            const currentUser = userManager.getUser(req.user);
+
+            if (!currentUser.logged) {
+                throw {
+                    status: 401,
+                    message: "You must authenticate to access this ressource.",
+                };
+            }
+
+            if (!currentUser.user.groups.includes("admin")) {
+                throw {
+                    status: 401,
+                    message: "You must be admin to access this ressource.",
+                };
+            }
+
+            return Promise.resolve(true);
+        },
+    },
+});
+
+// OpenAPI UI
+app.use(
+    "/api/v1",
+    swaggerUi.serve,
+    swaggerUi.setup(null, {
+        swaggerOptions: {
+            url: "/api/v1/api-docs",
+        },
+    })
+);
+
+// main router
 app.use("/", indexRouter);
-//app.use("/users", usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -82,7 +130,7 @@ app.use(function (req, res, next) {
 });
 
 // error handler
-app.use(function (err, req, res, next) {
+app.use(function (err, req, res, _next) {
     // set locals, only providing error in development
     res.locals.message = err.message;
     res.locals.error = req.app.get("env") === "development" ? err : {};

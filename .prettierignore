@@ -1,3 +1,7 @@
 #React build output
+mainapp/lib/
 mainapp/static/mainapp.js
 mainapp/static/mainapp.js.map
+# Vendored libraries
+public/yasguy/
+public/vocables/js/external

@@ -1,11 +1,4 @@
 {
-  "verbose": true,
-  "ignore": [
-    "config/users", 
-    "config_templates",
-    "mainapp",
-    "public",
-    "scripts",
-    "views"
-  ]
+    "verbose": true,
+    "ignore": ["config/users", "config_templates", "mainapp", "public", "scripts", "views"]
 }

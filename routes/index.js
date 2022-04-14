@@ -1,112 +1,56 @@
 var express = require("express");
-const bcrypt = require("bcrypt");
 var fs = require("fs");
-var router = express.Router();
 var path = require("path");
 var passport = require("passport");
-var serverParams = { routesRootUrl: "" };
-var ensureLoggedIn = require("connect-ensure-login").ensureLoggedIn;
-
-var elasticRestProxy = require("../bin/elasticRestProxy..js");
-var authentication = require("../bin/authentication..js");
-var logger = require("../bin/logger..js");
+require("../bin/authentication.");
 var httpProxy = require("../bin/httpProxy.");
-var mediawikiTaggger = require("../bin/mediawiki/mediawikiTagger.");
-
 var RDF_IO = require("../bin/RDF_IO.");
-var KGcontroller = require("../bin/KG/KGcontroller.");
 var DataController = require("../bin/dataController.");
-var KGbuilder = require("../bin/KG/KGbuilder.");
 var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.");
 var configManager = require("../bin/configManager.");
-var DictionariesManager = require("../bin/KG/dictionariesManager.");
 var CsvTripleBuilder = require("../bin/KG/CsvTripleBuilder.");
-const promiseFs = require("fs").promises;
 
-var mainConfigFilePath = path.join(__dirname, "../config/mainConfig.json");
-var str = fs.readFileSync(mainConfigFilePath);
-var config = JSON.parse("" + str);
+const config = require(path.resolve("config/mainConfig.json"));
 
-/* GET home page. */
-router.get("/", ensureLoggedIn(), function (req, res, next) {
+var router = express.Router();
+var serverParams = { routesRootUrl: "" };
+
+// ensureLoggedIn function
+// TODO: Remove this when the API is moved to OpenAPI as OpenApi uses securityHandlers
+// see : https://github.com/kogosoftwarellc/open-api/tree/master/packages/express-openapi#argssecurityhandlers
+let ensureLoggedIn;
+if (!config.disableAuth) {
+    ensureLoggedIn = function ensureLoggedIn(_options) {
+        config.auth == "keycloak" ? passport.authenticate("keycloak", { failureRedirect: "/login" }) : null;
+        return function (req, res, next) {
+            if (!req.isAuthenticated || !req.isAuthenticated()) {
+                return res.redirect(401, "/login");
+            }
+            next();
+        };
+    };
+} else {
+    ensureLoggedIn = function ensureLoggedIn(_options) {
+        return function (req, res, next) {
+            next();
+        };
+    };
+}
+
+// Home (redirect to /vocables)
+router.get("/", function (req, res, _next) {
     res.redirect("vocables");
 });
 
+// Login routes
 if (!config.disableAuth) {
-    router.get("/auth/check", function (req, res, next) {
-        const auth =
-            config.auth == "keycloak"
-                ? {
-                      realm: config.keycloak.realm,
-                      clientID: config.keycloak.clientID,
-                      authServerURL: config.keycloak.authServerURL,
-                  }
-                : {};
-
-        // get user from json to get groups
-        const usersLocation = path.join(__dirname, "../config/users/users.json");
-        let users = JSON.parse("" + fs.readFileSync(usersLocation));
-        let findUser = Object.keys(users)
-            .map(function (key, index) {
-                return {
-                    id: users[key].id,
-                    login: users[key].login,
-                    groups: users[key].groups,
-                    source: users[key].source,
-                };
-            })
-            .find((user) => user.login == req.user.login);
-
-        res.send({
-            logged: req.user ? true : false,
-            user: {
-                login: findUser.login,
-                groups: findUser.groups,
-            },
-            authSource: config.auth,
-            auth: auth,
-        });
-    });
-
     if (config.auth == "keycloak") {
-        ensureLoggedIn = function ensureLoggedIn(options) {
-            passport.authenticate("keycloak", { failureRedirect: "/login" });
-            return function (req, res, next) {
-                if (!req.isAuthenticated || !req.isAuthenticated()) {
-                    return res.redirect(401, "/login");
-                }
-                next();
-            };
-        };
-
         router.get("/login", passport.authenticate("provider", { scope: ["openid", "email", "profile"] }));
-
         router.get("/login/callback", passport.authenticate("provider", { successRedirect: "/", failureRedirect: "/login" }));
-
-        router.get("/auth/logout", function (req, res, next) {
-            req.logout();
-            res.send({
-                logged: req.user ? true : false,
-                user: req.user,
-                redirect: config.keycloak.authServerURL + "/realms/" + config.keycloak.realm + "/protocol/openid-connect/logout?redirect_uri=" + config.souslesensUrl,
-            });
-        });
-
-        // Default login is json
     } else {
-        ensureLoggedIn = function ensureLoggedIn(options) {
-            return function (req, res, next) {
-                if (!req.isAuthenticated || !req.isAuthenticated()) {
-                    return res.redirect(401, "/login");
-                }
-                next();
-            };
-        };
-
-        router.get("/login", function (req, res, next) {
+        router.get("/login", function (req, res, _next) {
             res.render("login", { title: "souslesensVocables - Login" });
         });
-
         router.post(
             "/auth/login",
             passport.authenticate("local", {
@@ -115,110 +59,19 @@ if (!config.disableAuth) {
                 failureMessage: true,
             })
         );
-
-        router.get("/auth/logout", function (req, res, next) {
-            req.logout();
-            res.send({
-                logged: req.user ? true : false,
-                user: req.user,
-                authSource: null,
-                auth: {},
-            });
-        });
     }
 } else {
-    ensureLoggedIn = function ensureLoggedIn(options) {
-        return function (req, res, next) {
-            next();
-        };
-    };
-    // Login route
-    router.get("/login", function (req, res, next) {
+    router.get("/login", function (req, res, _next) {
         res.redirect("vocables");
-    });
-    router.get("/auth/check", function (req, res, next) {
-        res.send({
-            logged: true,
-            user: {
-                login: "admin",
-                groups: ["admin"],
-            },
-        });
-    });
-    router.get("/auth/logout", function (req, res, next) {
-        res.send({
-            logged: true,
-            user: {
-                login: "admin",
-                groups: ["admin"],
-            },
-        });
     });
 }
 
-router.get("/users", ensureLoggedIn(), function (req, res, next) {
-    res.sendFile(path.join(__dirname, "/../config/users/users.json"));
-});
-router.put("/users", ensureLoggedIn(), async function (req, res, next) {
-    // Hash password that are not hashed yet
-    Object.keys(req.body).forEach(function (key, index) {
-        if (req.body[key].password && !req.body[key].password.startsWith("$2b$")) {
-            req.body[key].password = bcrypt.hashSync(req.body[key].password, 10);
-        }
-    });
-    // Write the file
-    try {
-        await promiseFs.writeFile(path.join(__dirname, "/../config/users/users.json"), JSON.stringify(req.body, null, 2));
-        res.sendFile(path.join(__dirname, "/../config/users/users.json"));
-    } catch (err) {
-        res.sendStatus(500);
-        console.log(err);
-    }
-});
-
-router.get("/profiles", ensureLoggedIn(), function (req, res, next) {
-    res.sendFile(path.join(__dirname, "/../config/profiles.json"));
-});
-
-router.put("/profiles", ensureLoggedIn(), async function (req, res, next) {
-    try {
-        await promiseFs.writeFile(path.join(__dirname, "/../config/profiles.json"), JSON.stringify(req.body, null, 2));
-        res.sendFile(path.join(__dirname, "/../config/profiles.json"));
-    } catch (err) {
-        res.sendStatus(500);
-        console.log(err);
-    }
-});
-
-router.get("/sources", ensureLoggedIn(), function (req, res, next) {
-    res.sendFile(path.join(__dirname, "/../config/sources.json"));
-});
-
-router.put("/sources", ensureLoggedIn(), async function (req, res, next) {
-    try {
-        await promiseFs.writeFile(path.join(__dirname, "/../config/sources.json"), JSON.stringify(req.body, null, 2));
-        res.sendFile(path.join(__dirname, "/../config/sources.json"));
-    } catch (err) {
-        res.sendStatus(500);
-        console.log(err);
-    }
-});
-
-router.get("/config", ensureLoggedIn(), function (req, res, next) {
-    res.send({
-        auth: config.auth,
-    });
-});
-
 router.post("/upload", ensureLoggedIn(), function (req, response) {
-    let sampleFile;
-    let uploadPath;
-
     if (!req.files || Object.keys(req.files).length === 0) {
-        return res.status(400).send("No files were uploaded.");
+        return response.status(400).send("No files were uploaded.");
     }
     if (req.files.EvaluateToolZipFile) {
-        var zipFile = req.files.EvaluateToolZipFile;
+        const zipFile = req.files.EvaluateToolZipFile;
         DirContentAnnotator.uploadAndAnnotateCorpus(zipFile, req.body.corpusName, JSON.parse(req.body.sources), JSON.parse(req.body.options), function (err, result) {
             processResponse(response, err, result);
         });
@@ -229,41 +82,6 @@ router.post(
     serverParams.routesRootUrl + "/slsv",
     ensureLoggedIn(),
     function (req, response) {
-        if (req.body.getGeneralConfig) {
-            configManager.getGeneralConfig(function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.elasticSearch) {
-            elasticRestProxy.executePostQuery(req.body.url, JSON.parse(req.body.executeQuery), JSON.parse(req.body.indexes), function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.executeMsearch) {
-            elasticRestProxy.executeMsearch(req.body.ndjson, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.tryLoginJSON) {
-            authentication.authentify(req.body.login, req.body.password, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.getProfiles) {
-            configManager.getProfiles({}, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.getSources) {
-            configManager.getSources({}, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
         if (req.body.getBlenderSources) {
             configManager.getBlenderSources({}, function (err, result) {
                 processResponse(response, err, result);
@@ -283,13 +101,6 @@ router.post(
             configManager.addImportToSource(req.body.parentSource, req.body.importedSource, function (err, result) {
                 processResponse(response, err, result);
             });
-        }
-
-        if (req.body.KGmappingDictionary) {
-            if (req.body.load)
-                configManager.getDictionary(req.body.load, function (err, result) {
-                    processResponse(response, err, result);
-                });
         }
 
         if (req.body.httpProxy) {
@@ -313,98 +124,12 @@ router.post(
             }
         }
 
-        if (req.body.analyzeSentence) {
-            elasticRestProxy.analyzeSentence(req.body.analyzeSentence, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.annotateLive) {
-            var annotatorLive = require("../bin/annotatorLive.");
-            var sources = JSON.parse(req.body.sources);
-            annotatorLive.annotate(req.body.text, sources, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.getConceptsSubjectsTree) {
-            DirContentAnnotator.getConceptsSubjectsTree(req.body.corpusName, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.annotateAndStoreCorpus) {
-            DirContentAnnotator.annotateAndStoreCorpus(req.body.corpusPath, JSON.parse(req.body.sources), req.body.corpusName, JSON.parse(req.body.options), function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-        if (req.body.getAnnotatedCorpusList) {
-            DirContentAnnotator.getAnnotatedCorpusList(req.body.group, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-        if (req.body.SpacyExtract) {
-            DirContentAnnotator.SpacyExtract(req.body.text, JSON.parse(req.body.types), JSON.parse(req.body.options), function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.writeUserLog) {
-            var ip = req.header("x-forwarded-for") || req.connection.remoteAddress;
-            req.body.infos += "," + ip;
-
-            logger.info(req.body.infos);
-            processResponse(response, null, { done: 1 });
-        }
-        if (req.body.KGquery) {
-            KGcontroller.KGquery(req, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-        if (req.body.buildKG) {
-            var mappingFileNames = JSON.parse(req.body.mappingFileNames);
-            KGbuilder.buidlKG(
-                mappingFileNames,
-                req.body.sparqlServerUrl,
-                req.body.adlGraphUri,
-                JSON.parse(req.body.replaceGraph),
-                JSON.parse(req.body.dataSource),
-                JSON.parse(req.body.options),
-                function (err, result) {
-                    processResponse(response, err, result);
-                }
-            );
-        }
-        if (req.body.KG_GetMappings) {
-            KGcontroller.getMappings(req.body.KG_GetMappings, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.dictionaries_listIndexes) {
-            DictionariesManager.listIndexes(function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.dictionaries_indexSource) {
-            DictionariesManager.indexSource(req.body.indexName, JSON.parse(req.body.data), JSON.parse(req.body.options), function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.getAssetGlobalMappings) {
-            KGcontroller.getAssetGlobalMappings(req.body.getAssetGlobalMappings, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
         if (req.query.SPARQLquery) {
-            var query = req.body.query;
+            let query = req.body.query;
+            const headers = {};
             if (req.query.graphUri) query = query.replace(/where/gi, "from <" + req.query.graphUri + "> WHERE ");
 
             if (req.query.method == "POST") {
-                var headers = {};
                 headers["Accept"] = "application/sparql-results+json";
                 headers["Content-Type"] = "application/x-www-form-urlencoded";
 
@@ -412,7 +137,6 @@ router.post(
                     processResponse(response, err, result);
                 });
             } else if (req.query.method == "GET") {
-                var headers = {};
                 headers["Accept"] = "application/sparql-results+json";
                 headers["Content-Type"] = "application/x-www-form-urlencoded";
 
@@ -431,32 +155,8 @@ router.post(
                 processResponse(response, err, result);
             });
         }
-
-        if (req.body.KG_SaveMappings) {
-            KGcontroller.saveMappings(req.body.KGsource, req.body.mappings, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.saveData) {
-            DataController.saveDataToFile(req.body.dir, req.body.fileName, req.body.data, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.listDirFiles) {
-            DataController.getFilesList(req.body.dir, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
         if (req.body.readCsv) {
             DataController.readCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
-        if (req.body.readDataFile) {
-            DataController.readfile(req.body.dir, req.body.fileName, function (err, result) {
                 processResponse(response, err, result);
             });
         }
@@ -471,7 +171,7 @@ router.post(
             });
         }
     },
-    router.get("/heatMap", ensureLoggedIn(), function (req, res, next) {
+    router.get("/heatMap", ensureLoggedIn(), function (req, res, _next) {
         var elasticQuery = JSON.parse(req.query.query);
 
         statistics.getEntitiesMatrix(null, elasticQuery, function (err, result) {
@@ -479,12 +179,12 @@ router.post(
         });
     }),
 
-    router.get("/httpProxy", ensureLoggedIn(), function (req, res, next) {
+    router.get("/httpProxy", ensureLoggedIn(), function (req, res, _next) {
         httpProxy.get(req.query, function (err, result) {
             processResponse(res, err, result);
         });
     }),
-    router.get("/ontology/*", ensureLoggedIn(), function (req, res, next) {
+    router.get("/ontology/*", ensureLoggedIn(), function (req, res, _next) {
         if (req.params.length == 0) return req.send("missing ontology label");
         var name = req.params[0];
         RDF_IO.getOntology(name, function (err, result) {
@@ -492,7 +192,7 @@ router.post(
             res.status(200).send(result);
         });
     }),
-    router.get("/getJsonFile", ensureLoggedIn(), function (req, res, next) {
+    router.get("/getJsonFile", ensureLoggedIn(), function (req, res, _next) {
         //  if (req.body.filePath){}
         var filePath = req.query.filePath;
         var realPath = path.join(__dirname, "../public/vocables/" + filePath);

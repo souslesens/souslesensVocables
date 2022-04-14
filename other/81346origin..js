@@ -4,7 +4,7 @@ var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
 
 //source	class	system	code1	code2	code3	ClassName	ClassDefinition	ExamplesOfTerms	Criteria
 
-mappingsMap = {
+let mappingsMap = {
     systems81346: {
         type: "owl:Class",
 
@@ -34,7 +34,7 @@ mappingsMap = {
             {
                 s: "class",
                 p: "rdf:type",
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     return line.class == "Function" ? "part14:Function" : "part14:Location";
                 },
             },
@@ -46,7 +46,7 @@ mappingsMap = {
             {
                 s: "system",
                 p: "rdf:type",
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     return line.system == "object functions" ? "part14:FunctionalObject" : "part14:System";
                 },
             },
@@ -60,7 +60,7 @@ mappingsMap = {
             {
                 s: "code1",
                 p: "rdf:type",
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     return line.system == "object functions" ? "part14:FunctionalObject" : "part14:System";
                 },
             },
@@ -70,8 +70,7 @@ mappingsMap = {
                 s: "code1",
                 p: "rdfs:label",
                 isString: true,
-                o: function (line, mapping) {
-                    if (line.ClassName == "Assembly system") var x = 3;
+                o: function (line, _mapping) {
                     if (line.code1 && !line.code2 && !line.code3) return util.formatStringForTriple(line.ClassName);
                     return "";
                 },
@@ -81,7 +80,7 @@ mappingsMap = {
                 s: "code1",
                 p: "skos:definition",
                 isString: true,
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (line.code1 && !line.code2 && !line.code3) return util.formatStringForTriple(line.ClassDefinition);
                     return "";
                 },
@@ -90,7 +89,7 @@ mappingsMap = {
                 s: "code1",
                 p: "skos:example",
                 isString: true,
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (line.code1 && !line.code2 && !line.code3) return util.formatStringForTriple(line.ExamplesOfTerms);
                     return "";
                 },
@@ -100,7 +99,6 @@ mappingsMap = {
                 p: "<http://souslesens.org/resource/vocabulary/hasCode>",
                 isString: true,
                 o: "code1",
-                isString: true,
             },
 
             { s: "code2", p: "rdf:type", o: "owl:Class" },
@@ -108,7 +106,7 @@ mappingsMap = {
                 s: "code2",
                 p: "rdfs:label",
                 isString: true,
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (!line.code2 || line.code3) return "";
                     return util.formatStringForTriple(line.ClassName);
                 },
@@ -116,7 +114,7 @@ mappingsMap = {
             {
                 s: "code2",
                 p: "rdf:type",
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     return line.system == "object functions" ? "part14:FunctionalObject" : "part14:System";
                 },
             },
@@ -126,7 +124,7 @@ mappingsMap = {
                 s: "code2",
                 p: "skos:definition",
                 isString: true,
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (!line.code2 || line.code3) return "";
                     return util.formatStringForTriple(line.ClassDefinition);
                 },
@@ -135,7 +133,7 @@ mappingsMap = {
                 s: "code2",
                 p: "skos:example",
                 isString: true,
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (!line.code2 || line.code3) return "";
                     return util.formatStringForTriple(line.ExamplesOfTerms);
                 },
@@ -145,7 +143,6 @@ mappingsMap = {
                 p: "<http://souslesens.org/resource/vocabulary/hasCode>",
                 isString: true,
                 o: "code2",
-                isString: true,
             },
 
             { s: "code3", p: "rdf:type", o: "owl:Class" },
@@ -153,7 +150,7 @@ mappingsMap = {
                 s: "code3",
                 p: "rdfs:label",
                 isString: true,
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (!line.code3) return "";
                     return util.formatStringForTriple(line.ClassName);
                 },
@@ -161,7 +158,7 @@ mappingsMap = {
             {
                 s: "code3",
                 p: "rdf:type",
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     return line.system == "object functions" ? "part14:FunctionalObject" : "part14:System";
                 },
             },
@@ -173,7 +170,7 @@ mappingsMap = {
                 s: "code3",
                 p: "skos:definition",
                 isString: true,
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (!line.code3) return "";
                     return util.formatStringForTriple(line.ClassDefinition);
                 },
@@ -182,7 +179,7 @@ mappingsMap = {
                 s: "code3",
                 p: "skos:example",
                 isString: true,
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (!line.code3) return "";
                     return util.formatStringForTriple(line.ExamplesOfTerms);
                 },
@@ -192,7 +189,6 @@ mappingsMap = {
                 p: "<http://souslesens.org/resource/vocabulary/hasCode>",
                 isString: true,
                 o: "code3",
-                isString: true,
             },
         ],
     },
@@ -234,7 +230,7 @@ mappingsMap = {
                 return "http://data.total.com/resource/tsf/IEC_ISO_81346/" + util.formatStringForTriple(line.system, true) + "/" + line.code3;
             },
 
-            example: function (value, role, prop, line) {
+            example: function (value, role, _prop, _line) {
                 if (role == "s") {
                     return "http://data.total.com/resource/tsf/IEC_ISO_81346/exampleTerm/" + util.formatStringForTriple(value, true);
                 } else {
@@ -247,7 +243,7 @@ mappingsMap = {
             {
                 s: "example",
                 p: "<http://www.w3.org/2004/02/skos/core#member>",
-                o: function (line, mapping) {
+                o: function (line, _mapping) {
                     if (line.code3) return "http://data.total.com/resource/tsf/IEC_ISO_81346/" + util.formatStringForTriple(line.system, true) + "/" + line.code3;
                     else if (line.code2) return "http://data.total.com/resource/tsf/IEC_ISO_81346/" + util.formatStringForTriple(line.system, true) + "/" + line.code2;
                     else if (line.code1) return "http://data.total.com/resource/tsf/IEC_ISO_81346/" + util.formatStringForTriple(line.system, true) + "/" + line.code1;
@@ -267,19 +263,16 @@ mappingsMap = {
 //var mappingNames = ["CLASSES_4"];
 //var mappingNames = ["CLASSES_3"]
 
-var mappingNames = ["systems81346", "examples81346"];
 var mappingNames = ["examples81346"];
 var mappings = [];
 mappingNames.forEach(function (mappingName) {
     mappings.push(mappingsMap[mappingName]);
 });
 
-var graphUri = "http://data.total.com/resource/tsf/iso_14224/requirements/";
-var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
-var graphUri = "http://data.total.com/resource/tsf/IEC_ISO_81346/";
+// var graphUri = "http://data.total.com/resource/tsf/iso_14224/requirements/";
+// var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
+// var graphUri = "http://data.total.com/resource/tsf/IEC_ISO_81346/";
 var graphUri = "http://data.total.com/resource/tsf/IEC_ISO_81346/";
 
-if (true) {
-    //  graphUri="http://data.total.com/resource/tsf/top_ontology/"
-    processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
-}
+//  graphUri="http://data.total.com/resource/tsf/top_ontology/"
+processor.processSubClasses(mappings, graphUri, sparqlServerUrl);

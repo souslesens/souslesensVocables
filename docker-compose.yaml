@@ -1,61 +1,59 @@
 version: "3"
 services:
+    vocables:
+        restart: unless-stopped
+        image: souslesensvocables:${TAG:-latest}
+        build:
+            context: .
+            dockerfile: Dockerfile
+        ports:
+            - "${VOCABLES_LISTEN_PORT:-3010}:3010"
+        volumes:
+            - "${DATA_ROOT_DIR:-/tmp}/vocables/app/config:\
+              /app/config"
+        env_file:
+            - default.env
+            - .env
+        networks:
+            - backend
 
-  vocables:
-    restart: unless-stopped
-    image: souslesensvocables:${TAG:-latest}
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports:
-      - "${VOCABLES_LISTEN_PORT:-3010}:3010"
-    volumes:
-      - "${DATA_ROOT_DIR:-/tmp}/vocables/app/config:\
-      /app/config"
-    env_file:
-      - default.env
-      - .env
-    networks:
-      - backend
+    virtuoso:
+        image: askomics/virtuoso:7.2.5.1
+        ports:
+            - ${VIRTUOSO_LISTEN_PORT:-8890}:8890
+        volumes:
+            - "${DATA_ROOT_DIR:-/tmp}/vocables/virtuoso/data:\
+              /data"
+        networks:
+            - backend
 
-  virtuoso:
-    image: askomics/virtuoso:7.2.5.1
-    ports:
-      - ${VIRTUOSO_LISTEN_PORT:-8890}:8890
-    volumes:
-      - "${DATA_ROOT_DIR:-/tmp}/vocables/virtuoso/data:\
-        /data"
-    networks:
-      - backend
+    sqlserver:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        environment:
+            ACCEPT_EULA: "Y"
+            SA_PASSWORD: ${SA_PASSWORD:-superSecretP4ssword!}
+        volumes:
+            - "${DATA_ROOT_DIR:-/tmp}/vocables/sqlserver:\
+              /var/opt/mssql"
+        networks:
+            - backend
 
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    environment:
-      ACCEPT_EULA: "Y"
-      SA_PASSWORD: ${SA_PASSWORD:-superSecretP4ssword!}
-    volumes:
-      - "${DATA_ROOT_DIR:-/tmp}/vocables/sqlserver:\
-      /var/opt/mssql"
-    networks:
-      - backend
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+        environment:
+            ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+            discovery.type: single-node
+        volumes:
+            - "${DATA_ROOT_DIR:-/tmp}/vocables/elasticsearch/data:\
+              /usr/share/elasticsearch/data"
+        networks:
+            - backend
 
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
-    environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
-      discovery.type: single-node
-    volumes:
-      - "${DATA_ROOT_DIR:-/tmp}/vocables/elasticsearch/data:\
-      /usr/share/elasticsearch/data"
-    networks:
-      - backend
-
-  spacyserver:
-    image: neelkamath/spacy-server:2-en_core_web_sm
-    networks:
-      - backend
-
+    spacyserver:
+        image: neelkamath/spacy-server:2-en_core_web_sm
+        networks:
+            - backend
 
 networks:
-  backend:
-    driver: "bridge"
+    backend:
+        driver: "bridge"

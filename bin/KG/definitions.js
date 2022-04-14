@@ -1,9 +1,7 @@
-var fs = require("fs");
-var path = require("path");
+const fs = require("fs");
 const util = require("../util.");
-const xlsx2json = require("../xlsx2json.");
 const async = require("async");
-var httpProxy = require("../httpProxy.");
+const httpProxy = require("../httpProxy.");
 
 var uris = [
     "<http://data.posccaesar.org/dm/CartesianProductOfQuantityKind>",
@@ -2075,7 +2073,6 @@ var query =
     "" +
     " filter(?sub in(";
 
-var data = [];
 var dataStr = "";
 async.eachSeries(
     slices,
@@ -2086,9 +2083,8 @@ async.eachSeries(
             str += item;
         });
         var sparqlServerUrl = "http://staging.data.posccaesar.org/rdl/";
-        var query2 = query + str + "))} ";
-        var params = { query: query2 };
-        var query2 = encodeURIComponent(query2);
+        let query2 = query + str + "))} ";
+        query2 = encodeURIComponent(query2);
         query2 = query2.replace(/%2B/g, "+").trim();
         var url = "";
         url = sparqlServerUrl + "?query=" + query2 + "&format=json";
@@ -2099,14 +2095,13 @@ async.eachSeries(
             if (result.results.bindings.length > 0) {
                 result.results.bindings.forEach(function (item) {
                     dataStr += item.sub.value + "\t" + item.rdl_hasDefinition.value.replace(/\t\n/g, "") + "\n";
-                    // data.push(item.sub.value+"\t"+item.rdl_hasDefinition.value+"\n")
                 });
             }
 
             callbackEach();
         });
     },
-    function (err) {
+    function (_err) {
         fs.writeFileSync("D:\\NLP\\ontologies\\dataDomains\\definitions.txt", dataStr);
     }
 );

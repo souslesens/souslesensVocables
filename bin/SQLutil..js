@@ -14,7 +14,7 @@ var SQLutil = {
             fs.createReadStream(csvFilePath).pipe(
                 csv({
                     separator: separator,
-                    mapHeaders: ({ header, index }) => util.normalizeHeader(headers, header),
+                    mapHeaders: ({ header }) => util.normalizeHeader(headers, header),
                 })
                     .on("header", function (header) {
                         headers.push(header);
@@ -45,7 +45,6 @@ var SQLutil = {
         SQLutil.csvToJson(csvFilePath, 1000, function (err, result) {
             var columns = {};
 
-            var insertStr = "";
             var insertStr = "";
             result.data[0].forEach(function (item, index) {
                 if (index > 0) insertStr += ",";
@@ -90,7 +89,7 @@ var SQLutil = {
             }
             CreateTableStr += ")";
 
-            var insertStr = "INSERT into " + tableName + " VALUES \n" + insertStr + "\n";
+            insertStr = "INSERT into " + tableName + " VALUES \n" + insertStr + "\n";
             var str = "";
             var dropTable = true;
             if (dropTable) str = "DROP TABLE " + tableName + ";";
@@ -106,7 +105,7 @@ var SQLutil = {
         //console.log(str)
         if (typeof str != "string") return str;
 
-        str = str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, function (char) {
+        str = str.replace(/[\0\x08\x09\x1a\n\r"'\\%]/g, function (char) {
             switch (char) {
                 case "\0":
                     return "\\0";
@@ -155,4 +154,4 @@ var SQLutil = {
 
 module.exports = SQLutil;
 
-SQLutil.createTableFromCsv(null, "", "testX", "C:\\Users\\claud\\Downloads\\TAG_PI&FL_CLV_2.csv", function (err, result) {});
+// SQLutil.createTableFromCsv(null, "", "testX", "C:\\Users\\claud\\Downloads\\TAG_PI&FL_CLV_2.csv", function (err, result) {});

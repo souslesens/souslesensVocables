@@ -1,70 +1,54 @@
 <style>
-
     .Standardizer_TA {
         width: 300px;
         height: 500px;
         overflow: auto;
-
     }
-    .jstreeContainer{
-        height:600px;
+
+    .jstreeContainer {
+        height: 600px;
         overflow: auto;
-        width:330px
+        width: 330px;
     }
-
 </style>
 
-
 <div id="Standardizer_leftTab">
-
-
     <ul>
-
         <li><a href="#Standardizer_leftTab_words">Words</a></li>
         <li><a href="#Standardizer_leftTab_text">text</a></li>
         <li><a href="#Standardizer_leftTab_source">Sources</a></li>
 
-
         <!--   <li><a href="#KGqueryTab">Asset Q</a></li>-->
-
     </ul>
 
-
     <div id="Standardizer_leftTab_words">
-        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Standardizer.splitWords()">Split words</button>
-        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Standardizer.initAction('compareWordsList')">Standardize words</button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Standardizer.splitWords()">Split words</button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Standardizer.initAction('compareWordsList')">Standardize words</button>
         <textarea id="Standardizer_wordsTA" class="Standardizer_TA"></textarea>
     </div>
 
     <div id="Standardizer_leftTab_text">
-        Paste here text <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Standardizer.initAction('compareText')">extract nouns</button>
+        Paste here text <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Standardizer.initAction('compareText')">extract nouns</button>
         <textarea id="Standardizer_textTA" class="Standardizer_TA"></textarea>
     </div>
 
     <div id="Standardizer_leftTab_source">
-        <div style="margin: -5px;padding :5px">
+        <div style="margin: -5px; padding: 5px">
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Standardizer.compare()">Compare</button>
 
-            <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Standardizer.compare()">Compare</button>
-
-
-
-
-            <br>
-            <div class="jstreeContainer" >
+            <br />
+            <div class="jstreeContainer">
                 <div id="Standardizer_sourcesTree"></div>
             </div>
         </div>
     </div>
-
 </div>
-<div id="Standardizer_filterClassesDialogDiv"    style="margin-bottom: 10px;">
+<div id="Standardizer_filterClassesDialogDiv" style="margin-bottom: 10px">
     <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#Standardizer_filterClassesDialogDiv').dialog('close')">Cancel</button>
     <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Standardizer.compareSource(null,true)">Compare</button>
-    <div class="jstreeContainer" >
+    <div class="jstreeContainer">
         <div id="Standardizer_filterClassesTree"></div>
     </div>
-
-
 </div>
 
 <script>
@@ -74,6 +58,4 @@
         width: 300,
         modal: false,
     });
-
-
 </script>

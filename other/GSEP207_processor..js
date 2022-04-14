@@ -1,21 +1,21 @@
 var processor = require("../bin/KG/CsvTripleBuilder.");
 
-var x = [
-    "classFamily",
-    "classDescription",
-    "subClass",
-    "subClassDescription",
-    "fLRecommended",
-    "eQManagement",
-    "classType",
-    "owner",
-    "equipmentCategory",
-    "fAMERelevant",
-    "subseaApplicable",
-    "catISO14224",
-    "action2021",
-];
-mappingsMap = {
+// var x = [
+//     "classFamily",
+//     "classDescription",
+//     "subClass",
+//     "subClassDescription",
+//     "fLRecommended",
+//     "eQManagement",
+//     "classType",
+//     "owner",
+//     "equipmentCategory",
+//     "fAMERelevant",
+//     "subseaApplicable",
+//     "catISO14224",
+//     "action2021",
+// ];
+let mappingsMap = {
     CLASSES: {
         type: "owl:Class",
         topClass: "<http://w3id.org/readi/rdl/CFIHOS-30000311>",
@@ -197,75 +197,73 @@ mappingNames.forEach(function (mappingName) {
 
 var graphUri = "http://data.total.com/resource/tsf/gs_ep_exp_207_11/";
 var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
-if (true) {
-    if (mappings.length == 1) return processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
-    var triples = [
-        { s: "<http://w3id.org/readi/z018-rdl/prod_SYS>", p: "rdfs:label", o: "'READI_SYTEMS'" },
-        { s: "<http://w3id.org/readi/z018-rdl/prod_SYS>", p: "rdf:type", o: "owl:Class" },
-        {
-            s: "<http://w3id.org/readi/z018-rdl/prod_SYS>",
-            p: "rdfs:subClassOf",
-            o: "<http://standards.iso.org/iso/15926/part14/System>",
-        },
-        { s: "<http://w3id.org/readi/rdl/CFIHOS-30000311>", p: "rdfs:label", o: "'READI_ARTEFACT'" },
-        { s: "<http://w3id.org/readi/rdl/CFIHOS-30000311>", p: "rdf:type", o: "owl:Class" },
-        {
-            s: "<http://w3id.org/readi/rdl/CFIHOS-30000311>",
-            p: "rdfs:subClassOf",
-            o: "<http://w3id.org/readi/rdl/D101001053>",
-        },
+if (mappings.length == 1) return processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
+var triples = [
+    { s: "<http://w3id.org/readi/z018-rdl/prod_SYS>", p: "rdfs:label", o: "'READI_SYTEMS'" },
+    { s: "<http://w3id.org/readi/z018-rdl/prod_SYS>", p: "rdf:type", o: "owl:Class" },
+    {
+        s: "<http://w3id.org/readi/z018-rdl/prod_SYS>",
+        p: "rdfs:subClassOf",
+        o: "<http://standards.iso.org/iso/15926/part14/System>",
+    },
+    { s: "<http://w3id.org/readi/rdl/CFIHOS-30000311>", p: "rdfs:label", o: "'READI_ARTEFACT'" },
+    { s: "<http://w3id.org/readi/rdl/CFIHOS-30000311>", p: "rdf:type", o: "owl:Class" },
+    {
+        s: "<http://w3id.org/readi/rdl/CFIHOS-30000311>",
+        p: "rdfs:subClassOf",
+        o: "<http://w3id.org/readi/rdl/D101001053>",
+    },
 
-        {
-            s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
-            p: "rdfs:label",
-            o: "'PART_14_Functional_Object'",
-        },
-        { s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>", p: "rdf:type", o: "owl:Class" },
-        {
-            s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
-            p: "rdfs:subClassOf",
-            o: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
-        },
+    {
+        s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
+        p: "rdfs:label",
+        o: "'PART_14_Functional_Object'",
+    },
+    { s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>", p: "rdf:type", o: "owl:Class" },
+    {
+        s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
+        p: "rdfs:subClassOf",
+        o: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
+    },
 
-        {
-            s: "<http://w3id.org/readi/rdl/Z101001232>",
-            p: "rdfs:label",
-            o: "'IEC/ISO 81346 Component'",
-        },
+    {
+        s: "<http://w3id.org/readi/rdl/Z101001232>",
+        p: "rdfs:label",
+        o: "'IEC/ISO 81346 Component'",
+    },
 
-        { s: "<http://w3id.org/readi/rdl/Z101001232>", p: "rdf:type", o: "owl:Class" },
-        {
-            s: "<http://w3id.org/readi/rdl/Z101001232>",
-            p: "rdfs:subClassOf",
-            o: "<http://w3id.org/readi/rdl/Z101001232>",
-        },
+    { s: "<http://w3id.org/readi/rdl/Z101001232>", p: "rdf:type", o: "owl:Class" },
+    {
+        s: "<http://w3id.org/readi/rdl/Z101001232>",
+        p: "rdfs:subClassOf",
+        o: "<http://w3id.org/readi/rdl/Z101001232>",
+    },
 
-        {
-            s: "<http://w3id.org/readi/z018-rdl/Discipline>",
-            p: "rdfs:label",
-            o: "'Discipline'",
-        },
+    {
+        s: "<http://w3id.org/readi/z018-rdl/Discipline>",
+        p: "rdfs:label",
+        o: "'Discipline'",
+    },
 
-        { s: "<http://w3id.org/readi/z018-rdl/Discipline>", p: "rdf:type", o: "owl:Class" },
-        {
-            s: "<http://w3id.org/readi/z018-rdl/Discipline>",
-            p: "rdfs:subClassOf",
-            o: "<http://w3id.org/readi/z018-rdl/Discipline>",
-        },
-    ];
+    { s: "<http://w3id.org/readi/z018-rdl/Discipline>", p: "rdf:type", o: "owl:Class" },
+    {
+        s: "<http://w3id.org/readi/z018-rdl/Discipline>",
+        p: "rdfs:subClassOf",
+        o: "<http://w3id.org/readi/z018-rdl/Discipline>",
+    },
+];
 
-    //   var graphUri = "http://data.total.com/resource/tsf/gs_ep_exp_207_11/";
+//   var graphUri = "http://data.total.com/resource/tsf/gs_ep_exp_207_11/";
 
-    processor.clearGraph(graphUri, sparqlServerUrl, function (err, result) {
+processor.clearGraph(graphUri, sparqlServerUrl, function (err, _result) {
+    if (err) return console.log(err);
+    processor.writeTriples(triples, graphUri, sparqlServerUrl, function (err, _result) {
         if (err) return console.log(err);
-        processor.writeTriples(triples, graphUri, sparqlServerUrl, function (err, result) {
-            if (err) return console.log(err);
-            processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
-        });
+        processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
     });
-}
+});
 
-if (false) {
-    var mappingNames = ["CLASSES_4"];
-    processor.processSubClasses(mappings, graphUri);
-}
+// if (false) {
+//     var mappingNames = ["CLASSES_4"];
+//     processor.processSubClasses(mappings, graphUri);
+// }

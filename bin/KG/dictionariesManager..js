@@ -6,9 +6,6 @@ var util = require("../util.");
 const request = require("request");
 var DictionariesManager = {
     getOneModelSuperClasses: function (callback) {
-        var column = "*";
-        var table = "[onemodel].[dbo].[superClasses]";
-        var sqlQuery = " select distinct " + column + " from " + table; //+ " limit " + Config.KG.maxDistinctValuesForAdvancedMapping;
         SQLserverConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, function (err, data) {
             if (err) {
                 return callback(err.responseText);
@@ -17,27 +14,13 @@ var DictionariesManager = {
         });
     },
     getReferenceDictionary: function (superClassId, sources, callback) {
-        var sourceStr = "";
-        if (sources) {
-            if (!Array.isArray(sources)) sources = [sources];
-            sources.forEach(function (source, index) {
-                if (index > 0) sourceStr += ",";
-                sourceStr += source;
-            });
-            sourceStr = " and source in ('" + sourceStr + "')";
-        }
-
-        var column = "*";
-        var table = "[onemodel].[dbo].[reference_dictionary]";
-        var where = " where superClassUri='" + superClassId + "'" + sourceStr;
-        var sqlQuery = " select distinct " + column + " from " + table + where; //+ " limit " + Config.KG.maxDistinctValuesForAdvancedMapping;
         SQLserverConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, function (err, data) {
             if (err) {
                 return callback(err.responseText);
             }
 
             var referenceDictionary = {};
-            data.forEach(function (item, index) {
+            data.forEach(function (item, _index) {
                 if (item.term) {
                     if (!referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()]) referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()] = {};
                     if (!referenceDictionary[item.superClassUri].terms[item.term.toLowerCase()][item.source])
@@ -56,7 +39,7 @@ var DictionariesManager = {
         ConfigManager.getGeneralConfig(function (err, config) {
             console.log("ee");
             if (err) return callback(err);
-            elasticUrl = config.ElasticSearch.url;
+            const elasticUrl = config.ElasticSearch.url;
             ElasticRestProxy.listIndexes(elasticUrl, function (err, indexes) {
                 return callback(err, indexes);
             });
@@ -80,7 +63,7 @@ var DictionariesManager = {
                 //delete index
                 function (callbackSeries) {
                     if (!_options.replaceIndex) return callbackSeries();
-                    ElasticRestProxy.deleteIndex(elasticUrl, indexName, function (err, result) {
+                    ElasticRestProxy.deleteIndex(elasticUrl, indexName, function (err, _result) {
                         callbackSeries(err);
                     });
                 },
@@ -161,7 +144,7 @@ var DictionariesManager = {
                         },
                         url: elasticUrl + indexName,
                     };
-                    request(options, function (error, response, body) {
+                    request(options, function (error, _response, _body) {
                         if (error) {
                             return callbackSeries(error);
                         }
@@ -169,12 +152,10 @@ var DictionariesManager = {
                     });
                 },
                 function (callbackSeries) {
-                    var totalLines = 0;
                     var bulkStr = "";
 
-                    data.forEach(function (item, indexedLine) {
+                    data.forEach(function (item, _indexedLine) {
                         if (_options.owlType) item.owlType = _options.owlType;
-                        var lineContent = "";
                         var id = "R" + util.getRandomHexaId(10);
                         bulkStr += JSON.stringify({ index: { _index: indexName, _type: indexName, _id: id } }) + "\r\n";
                         bulkStr += JSON.stringify(item) + "\r\n";
@@ -195,7 +176,7 @@ var DictionariesManager = {
                             return callbackSeries(error);
                         }
                         const elasticRestProxy = require("../elasticRestProxy..js");
-                        elasticRestProxy.checkBulkQueryResponse(body, function (err, result) {
+                        elasticRestProxy.checkBulkQueryResponse(body, function (err, _result) {
                             if (err) return callbackSeries(err);
                             callbackSeries();
                         });

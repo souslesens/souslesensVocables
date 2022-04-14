@@ -2,8 +2,6 @@ var fs = require("fs");
 var path = require("path");
 var async = require("async");
 
-var KGSqlConnector = require("./KGSqlConnector.");
-var SQLserverConnector = require("./SQLserverConnector.");
 var ConfigManager = require("../configManager.");
 
 var KGcontroller = {
@@ -12,27 +10,31 @@ var KGcontroller = {
         return path.resolve(filePath) + path.sep;
     },
 
-    saveMappings: function (source, jsonStr, callback) {
+    saveMappings: function (source, mappings, callback) {
         var filePath = KGcontroller.getMappingsDirPath() + source + ".json";
-        fs.writeFile(filePath, jsonStr, null, function (err, result) {
+        fs.writeFile(filePath, JSON.stringify(mappings, null, 2), null, function (err, _result) {
             callback(err);
         });
     },
     getMappings: function (source, callback) {
         var filePath = KGcontroller.getMappingsDirPath() + source + ".json";
-        if (!fs.existsSync(filePath)) return callback(null, null);
+        console.log("filePath", filePath);
+        if (!fs.existsSync(filePath)) return callback("file " + source + ".json not found", null);
         fs.readFile(filePath, function (err, result) {
             try {
                 var json = JSON.parse(result);
                 //  json.data.fileName=filePath
                 callback(err, json);
             } catch (e) {
-                callback(e);
+                console.error(e);
+                return callback("file " + source + ".json not valid", null);
             }
         });
     },
 
-    generateTriples: function (config) {},
+    generateTriples: function (_config) {
+        // do nothing ? XXX
+    },
     getAssetGlobalMappings: function (source, callback) {
         var dir = KGcontroller.getMappingsDirPath();
         var files = fs.readdirSync(dir);
@@ -96,33 +98,7 @@ var KGcontroller = {
                     predicatesMap[subjectType].push(objectType);
                 }
             });
-
-            var x = predicatesMap;
         });
-    },
-    KGquery: function (req, callback) {
-        // obsolete
-        if (req.body.getFromSparql) {
-            KGSqlConnector.getFromSparql(req.body.assetType, JSON.parse(req.body.quantumObjs), callback);
-        }
-
-        if (req.body.getModel) {
-            req.body.getModel = JSON.parse(req.body.getModel);
-            if (req.body.getModel.type == "sql.sqlserver") {
-                SQLserverConnector.getKGmodel(req.body.getModel.dbName, callback);
-            } else {
-                KGSqlConnector.getKGmodel(req.body.getModel.dbName, callback);
-            }
-        }
-
-        if (req.body.getData) {
-            req.body.dataSource = JSON.parse(req.body.dataSource);
-            if (req.body.dataSource.type == "sql.sqlserver") {
-                SQLserverConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, callback);
-            } else {
-                KGSqlConnector.getData(req.body.dataSource.dbName, req.body.sqlQuery, callback);
-            }
-        }
     },
 
     relationalKeysMap: {
@@ -274,10 +250,8 @@ var KGcontroller = {
         "tbltypicalassemblypatterntofunctionalclasschild.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributeparent.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributeparent.attributeid": "tblAttribute.ID",
-        "tbltypicalassemblypatterntoattributeparent.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributechild.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
         "tbltypicalassemblypatterntoattributechild.attributeid": "tblAttribute.ID",
-        "tbltypicalassemblypatterntoattributechild.typicalassemblypatternid": "tblTypicalAssemblyPattern.ID",
     },
 };
 

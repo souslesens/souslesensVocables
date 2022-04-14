@@ -82,8 +82,6 @@ var annotatorLive = {
                                     query += " filter " + filter + "} limit 10000";
 
                                     var url = source.sparql_server.url;
-                                    var queryOptions = ""; // "&should-sponge=&format=application%2Fsparql-results%2Bjson&timeout=20000&debug=off"
-
                                     var params = { query: query };
                                     var headers = {
                                         Accept: "application/sparql-results+json",
@@ -93,8 +91,6 @@ var annotatorLive = {
                                         if (err) {
                                             return callbackEachNounsSlice(err);
                                         }
-                                        var bindings = [];
-                                        var ids = [];
                                         if (result.results.bindings.length > 0) {
                                             result.results.bindings.forEach(function (item) {
                                                 var key = item.prefLabel.value.toLowerCase();
@@ -152,7 +148,7 @@ var annotatorLive = {
             color: "#17becf",
         };
 
-        annotatorLive.annotate(text, [source], function (err, result) {
+        annotatorLive.annotate(text, [source], function (err, _result) {
             if (err) return err;
         });
     },

@@ -1,7 +1,6 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
+<meta charset="utf-8" />
 <style>
-
     body {
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         margin: auto;
@@ -14,83 +13,90 @@
         right: 10px;
         top: 10px;
     }
-
 </style>
 <form>
-    <label><input type="radio" name="mode" value="size"> Size</label>
-    <label><input type="radio" name="mode" value="count" checked> Count</label>
+    <label><input type="radio" name="mode" value="size" /> Size</label>
+    <label><input type="radio" name="mode" value="count" checked /> Count</label>
 </form>
 <script src="../../js/external/d3/d3.v3.min.js"></script>
 <script>
-
     var width = 960,
         height = 700,
         radius = Math.min(width, height) / 2,
-       color = d3.scale.category10();
-        indexColors={"iso_15926-pca":"#green","cfihos_readi":"blue"}
+        color = d3.scale.category10();
+    indexColors = { "iso_15926-pca": "#green", cfihos_readi: "blue" };
 
-
-
-
-    var svg = d3.select("body").append("svg")
+    var svg = d3
+        .select("body")
+        .append("svg")
         .attr("width", width)
         .attr("height", height)
         .append("g")
-        .attr("transform", "translate(" + width / 2 + "," + height * .52 + ")");
+        .attr("transform", "translate(" + width / 2 + "," + height * 0.52 + ")");
 
-    var partition = d3.layout.partition()
+    var partition = d3.layout
+        .partition()
         .sort(null)
         .size([2 * Math.PI, radius * radius])
-        .value(function(d) { return 1; });
-
-    var arc = d3.svg.arc()
-        .startAngle(function(d) { return d.x; })
-        .endAngle(function(d) { return d.x + d.dx; })
-        .innerRadius(function(d) { return Math.sqrt(d.y); })
-        .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
-
-    d3.json("slsv.json", function(error, root) {
-        if (error) throw error;
-
-        var path = svg.datum(root).selectAll("path")
-            .data(partition.nodes)
-            .enter().append("path")
-            .attr("display", function(d) { return d.depth ? null : "none"; }) // hide inner ring
-            .attr("d", arc)
-            .style("stroke", "#fff")
-            .style("fill", function(d) {
-
-                return color(
-                (d.children ? d : d.parent).index); })
-            .style("fill-rule", "evenodd")
-            .each(stash)
-        .on("click",function(d){
-           onClick(d);
-        }).on("mouseover",function(d){
-                onMouseOver(d);
-            })
-
-        d3.selectAll("input").on("change", function change() {
-            var value = this.value === "count"
-                ? function() { return 1; }
-                : function(d) { return d.size; };
-
-            path
-                .data(partition.value(value).nodes)
-                .transition()
-                .duration(1500)
-                .attrTween("d", arcTween);
+        .value(function (d) {
+            return 1;
         });
 
+    var arc = d3.svg
+        .arc()
+        .startAngle(function (d) {
+            return d.x;
+        })
+        .endAngle(function (d) {
+            return d.x + d.dx;
+        })
+        .innerRadius(function (d) {
+            return Math.sqrt(d.y);
+        })
+        .outerRadius(function (d) {
+            return Math.sqrt(d.y + d.dy);
+        });
+
+    d3.json("slsv.json", function (error, root) {
+        if (error) throw error;
+
+        var path = svg
+            .datum(root)
+            .selectAll("path")
+            .data(partition.nodes)
+            .enter()
+            .append("path")
+            .attr("display", function (d) {
+                return d.depth ? null : "none";
+            }) // hide inner ring
+            .attr("d", arc)
+            .style("stroke", "#fff")
+            .style("fill", function (d) {
+                return color((d.children ? d : d.parent).index);
+            })
+            .style("fill-rule", "evenodd")
+            .each(stash)
+            .on("click", function (d) {
+                onClick(d);
+            })
+            .on("mouseover", function (d) {
+                onMouseOver(d);
+            });
+
+        d3.selectAll("input").on("change", function change() {
+            var value =
+                this.value === "count"
+                    ? function () {
+                          return 1;
+                      }
+                    : function (d) {
+                          return d.size;
+                      };
+
+            path.data(partition.value(value).nodes).transition().duration(1500).attrTween("d", arcTween);
+        });
     });
-    var tooltip = d3.select("body")
-        .append("div")
-        .attr("id", "tooltip")
-        .style("position", "absolute")
-        .style("z-index", "10")
-        .style("opacity", 0)
-        .style("left","430px")
-        .style("top","350px")
+    var tooltip = d3.select("body").append("div").attr("id", "tooltip").style("position", "absolute").style("z-index", "10").style("opacity", 0).style("left", "430px").style("top", "350px");
 
     // Stash the old values for transition.
     function stash(d) {
@@ -100,8 +106,8 @@
 
     // Interpolate the arcs in data space.
     function arcTween(a) {
-        var i = d3.interpolate({x: a.x0, dx: a.dx0}, a);
-        return function(t) {
+        var i = d3.interpolate({ x: a.x0, dx: a.dx0 }, a);
+        return function (t) {
             var b = i(t);
             a.x0 = b.x;
             a.dx0 = b.dx;
@@ -110,26 +116,17 @@
     }
     function onClick(d) {
         // d3.select(this).attr("stroke","black")
-        var text=d.name;
+        var text = d.name;
         tooltip.html(text);
-        return tooltip.transition()
-            .duration(50)
-            .style("opacity", 0.9);
+        return tooltip.transition().duration(50).style("opacity", 0.9);
     }
     function onMouseOver(d) {
         // d3.select(this).attr("stroke","black")
-        var text=d.name;
-        if(!text)
-            text=d.index
+        var text = d.name;
+        if (!text) text = d.index;
         tooltip.html(text);
-        return tooltip.transition()
-            .duration(50)
-            .style("opacity", 0.9);
+        return tooltip.transition().duration(50).style("opacity", 0.9);
     }
 
-
-
-
     d3.select(self.frameElement).style("height", height + "px");
-
 </script>

@@ -9,9 +9,7 @@
  */
 
 var fs = require("fs");
-var path = require("path");
 const util = require("../util.");
-const xlsx2json = require("../xlsx2json.");
 const async = require("async");
 var httpProxy = require("../httpProxy.");
 var sqlConnector = require("./KGSqlConnector.");
@@ -20,12 +18,10 @@ var socket = require("../socketManager.");
 
 var KGcontroller = require("./KGcontroller.");
 
-var idsCache = {};
-
 var originalKGproperty = "http://data.total.com/resource/one-model#originalIdOf";
-var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlId";
-var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlUri";
-var totalRdlKGgraphUri = "http://data.total.com/resource/one-model/quantum-rdl/";
+// var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlId";
+// var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlUri";
+// var totalRdlKGgraphUri = "http://data.total.com/resource/one-model/quantum-rdl/";
 
 var triplesFetchtLength = 1000;
 
@@ -38,11 +34,6 @@ var KGbuilder = {
     generateMappingFileTriples(mappings, data, KGgraphUri, options, callback) {
         if (!options) options = {};
 
-        var triples = [];
-
-        var dataArray = [];
-        var missingTotalSubjects = [];
-        var missingTotalObjects = [];
         var existingUrisMap = options.existingUrisMap;
         var ARDLdictionary = options.ARDLdictionary;
         var oneModelReferenceDictionary = options.oneModelReferenceDictionary;
@@ -61,18 +52,18 @@ var KGbuilder = {
         }
 
         //decode mappings
-        mappings.forEach(function (mapping, indexMapping) {
+        mappings.forEach(function (mapping, _indexMapping) {
             var obj = util.deconcatSQLTableColumn(mapping.subject);
             if (obj && obj.column) mapping.subject = obj.column;
-            var obj = util.deconcatSQLTableColumn(mapping.object);
+            obj = util.deconcatSQLTableColumn(mapping.object);
             if (obj && obj.column) mapping.object = obj.column;
         });
 
         ///process type and label
         var rejectedItems = [];
         var triples = [];
-        data.forEach(function (item, indexItem) {
-            mappings.forEach(function (mapping, indexMapping) {
+        data.forEach(function (item, _indexItem) {
+            mappings.forEach(function (mapping, _indexMapping) {
                 if (mapping.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                     var subjectValue = getItemSubjectValue(mapping, item);
                     if (!subjectValue) return;
@@ -80,9 +71,9 @@ var KGbuilder = {
 
                     var classType = oneModelSuperClasses[objectClass];
                     var processAsNoSubclass = false;
-
+                    var uri = "";
                     if (classType == "ARDL-SPECIFIC") {
-                        var uri = KGgraphUri + subjectValue;
+                        uri = KGgraphUri + subjectValue;
                         if (ARDLdictionary[subjectValue]) {
                             triples.push({
                                 subject: uri,
@@ -121,7 +112,7 @@ var KGbuilder = {
                     }
 
                     if (classType == "NO-SUBCLASSES" || processAsNoSubclass) {
-                        var uri = existingUrisMap[subjectValue];
+                        uri = existingUrisMap[subjectValue];
                         if (!uri) {
                             uri = KGgraphUri + util.getRandomHexaId(options.generateIds);
                             existingUrisMap[subjectValue] = uri;
@@ -148,8 +139,8 @@ var KGbuilder = {
 
         //process ObjectProperties
 
-        data.forEach(function (item, indexItem) {
-            mappings.forEach(function (mapping, indexMapping) {
+        data.forEach(function (item, _indexItem) {
+            mappings.forEach(function (mapping, _indexMapping) {
                 if (mapping.predicate == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") return;
 
                 var subjectValue = item[mapping.subject];
@@ -168,13 +159,13 @@ var KGbuilder = {
                 }
                 if (!objectValue) return;
                 if (objectValue.trim) objectValue = objectValue.trim();
-
+                let objectSuffix = "";
                 if (mapping.predicate == "http://www.w3.org/2002/07/owl#DatatypeProperty") {
                     if (util.isInt(objectValue)) {
-                        objectSuffix = "^^xsd:integer";
+                        const objectSuffix = "^^xsd:integer";
                         objectValue = "'" + objectValue + "'" + objectSuffix;
                     } else if (util.isFloat(objectValue)) {
-                        objectSuffix = "^^xsd:float";
+                        const objectSuffix = "^^xsd:float";
                         objectValue = "'" + objectValue + "'" + objectSuffix;
                     }
 
@@ -207,10 +198,6 @@ var KGbuilder = {
         options.sparqlServerUrl += "?timeout=600000&debug=on";
         var sqlParams = { fetchSize: 2000 };
         var existingUrisMap = {};
-        var mappingSheets = [];
-        var dataArray = [];
-        var allTriples = [];
-        var allSheetsdata = {};
         var mappings;
         var ARDLdictionary = {};
         var oneModelReferenceDictionary = {};
@@ -218,7 +205,6 @@ var KGbuilder = {
         var sqlTable = "";
         var dbConnection = null;
         var totalTriples = 0;
-        var selectColumns = [];
         var uniqueTriples = {};
 
         async.series(
@@ -231,7 +217,7 @@ var KGbuilder = {
                     var queryDeleteGraph = " CLEAR GRAPH <" + KGgraphUri + ">";
                     var params = { query: queryDeleteGraph };
                     socket.message("KGbuild", "delete graph " + KGgraphUri);
-                    httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
+                    httpProxy.post(options.sparqlServerUrl, null, params, function (err, _result) {
                         callbackSeries(err);
                     });
                 },
@@ -281,8 +267,6 @@ var KGbuilder = {
                                     classLabel: item.classLabel,
                                     source: item.source,
                                 };
-                            } else {
-                                var x = item.source;
                             }
                         });
                         return callbackSeries();
@@ -347,7 +331,6 @@ var KGbuilder = {
                         options.oneModelReferenceDictionary = oneModelReferenceDictionary;
                         options.oneModelSuperClasses = oneModelSuperClasses;
                         options.existingUrisMap = existingUrisMap;
-                        options._options = options._options;
 
                         KGbuilder.generateMappingFileTriples(mappings.mappings, data, KGgraphUri, options, function (err, result) {
                             if (err) return callbackProcessor(err);
@@ -385,7 +368,7 @@ var KGbuilder = {
 
                                     var params = { query: queryGraph };
 
-                                    httpProxy.post(options.sparqlServerUrl, null, params, function (err, result) {
+                                    httpProxy.post(options.sparqlServerUrl, null, params, function (err, _result) {
                                         if (err) {
                                             socket.message(err);
                                             return callbackEach(err);
@@ -405,7 +388,7 @@ var KGbuilder = {
                         });
                     };
                     var selectStr = "";
-                    for (var mapping in mappings.mappings) {
+                    for (var _mapping in mappings.mappings) {
                         mappings.mappings.forEach(function (mapping) {
                             var column = mapping.subject;
                             column = column.substring(column.lastIndexOf(".") + 1);
@@ -428,7 +411,7 @@ var KGbuilder = {
                             var sqlQuery = "select distinct " + selectStr + " from  " + dbConnection.dbName + "." + sqlTable + " ";
 
                             //sqlQuery += " ORDER BY " + selectStr + " "
-                            SQLserverConnector.getFetchedData(dbConnection.dbName, sqlQuery, processor, sqlParams.fetchSize, uniqueTriples, function (err, result) {
+                            SQLserverConnector.getFetchedData(dbConnection.dbName, sqlQuery, processor, sqlParams.fetchSize, uniqueTriples, function (err, _result) {
                                 //  SQLserverConnector.processFetchedData(dbConnection, sqlQuery, sqlParams.fetchSize, (options.startOffset || 0), sqlParams.maxOffset, processor, uniqueTriples, function (err, result) {
                                 if (err) return callbackSeries(err);
 
@@ -444,7 +427,7 @@ var KGbuilder = {
                             sqlParams.maxOffset,
                             processor,
                             uniqueTriples,
-                            function (err, result) {
+                            function (err, _result) {
                                 if (err) return callbackSeries(err);
                                 callbackSeries();
                             }
@@ -464,7 +447,7 @@ var KGbuilder = {
                     } catch (e) {
                         return callbackSeries(e);
                     }
-                    fs.writeFile(mappingFilePath, JSON.stringify(mappings, null, 2), function (err, result) {
+                    fs.writeFile(mappingFilePath, JSON.stringify(mappings, null, 2), function (err, _result) {
                         return callbackSeries(err);
                     });
                 },
@@ -535,15 +518,14 @@ var KGbuilder = {
         );
     },
     buidlKG: function (mappingFilePaths, sparqlServerUrl, graphUri, replaceGraph, dataSource, _options, callback) {
-        var totalTriples = 0;
         var count = 0;
         async.eachSeries(
             mappingFilePaths,
-            function (mappingFilePath, callbackEach) {
+            function (mappingFilePath1, callbackEach) {
                 if (count++ > 0) replaceGraph = false;
-                socket.message("KGbuild", "-----------Processing " + mappingFilePath + "--------------");
+                socket.message("KGbuild", "-----------Processing " + mappingFilePath1 + "--------------");
 
-                var mappingFilePath = KGcontroller.getMappingsDirPath() + mappingFilePath;
+                mappingFilePath = KGcontroller.getMappingsDirPath() + mappingFilePath;
 
                 if (mappingFilePath.indexOf(".json") < 0) mappingFilePath += ".json";
                 //   mappingFilePath = path.resolve(mappingFilePath);*/
@@ -554,15 +536,13 @@ var KGbuilder = {
                 var options = {
                     generateIds: 15,
                     sparqlServerUrl: sparqlServerUrl,
-                    rdlGraphUri: rdlGraphUri,
-                    oneModelGraphUri: oneModelGraphUri,
                     replaceGraph: replaceGraph,
                     dataSource: dataSource,
                     _options: _options,
                 };
 
                 socket.message("KGbuild", "creating triples for mapping " + mappingFilePath);
-                KGbuilder.generateAdlSqlTriples(mappingFilePath, graphUri, options, function (err, result) {
+                KGbuilder.generateAdlSqlTriples(mappingFilePath, graphUri, options, function (err, _result) {
                     if (err) return callbackEach(err);
                     //  totalTriples += result.length
                     return callbackEach();
@@ -578,31 +558,23 @@ var KGbuilder = {
 };
 
 module.exports = KGbuilder;
-
+/*
 if (false) {
+    // eslint-disable-next-line no-constant-condition
     if (false) {
         // AFtwin UK
 
-        var mappingsDirPath = "D:\\webstorm\\souslesensVocables\\bin\\KG\\data\\";
         var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
         var rdlGraphUri = "http://data.total.com/resource/one-model/quantum-rdl/";
         var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/";
         var adlGraphUri = "http://data.total.com/resource/one-model/assets/aftwin-uk/0.1/";
         var mappingFilePaths = ["MDM_2.3_AFTWIN_adl.tblModel.json", "MDM_2.3_AFTWIN_adl.tblModelAttribute.json"];
 
-        var dbConnection = {
-            host: "localhost",
-            user: "root",
-            password: "vi0lon",
-            database: "quantum",
-            fetchSize: 5000,
-            //  maxOffset:6000,
-        };
         var replaceGraph = true;
     }
 
-    KGbuilder.buidlKG(mappingFilePaths, sparqlServerUrl, adlGraphUri, replaceGraph, function (err, result) {
+    KGbuilder.buidlKG(mappingFilePaths, sparqlServerUrl, adlGraphUri, replaceGraph, function (err, _result) {
         if (err) return socket.message("KGbuild", err);
         return socket.message("KGbuild", "ALL DONE");
     });
-}
+}*/

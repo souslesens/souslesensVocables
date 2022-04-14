@@ -1,20 +1,19 @@
 {
-  "mappings": [
-    {
-      "subject": "tag2model.TagID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
-    },
-    {
-      "subject": "tag2model.ModelID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/CFIHOS-00000008"
-    },
-    {
-      "subject": "tag2model.TagID",
-      "predicate": "http://standards.iso.org/iso/15926/part14/concretizedBy",
-      "object": "tag2model.ModelID"
-    }
-
-  ]
+    "mappings": [
+        {
+            "subject": "tag2model.TagID",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://w3id.org/readi/rdl/CFIHOS-00000028"
+        },
+        {
+            "subject": "tag2model.ModelID",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://w3id.org/readi/rdl/CFIHOS-00000008"
+        },
+        {
+            "subject": "tag2model.TagID",
+            "predicate": "http://standards.iso.org/iso/15926/part14/concretizedBy",
+            "object": "tag2model.ModelID"
+        }
+    ]
 }

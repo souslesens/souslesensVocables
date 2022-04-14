@@ -116,3 +116,4 @@ data/**/*.zip
 #React build output
 mainapp/static/mainapp.js
 mainapp/static/mainapp.js.map
+mainapp/lib

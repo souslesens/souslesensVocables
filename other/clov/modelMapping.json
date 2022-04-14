@@ -1,34 +1,34 @@
 {
-  "mappings": [
-    {
-      "subject": "model.ID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://w3id.org/readi/rdl/CFIHOS-00000008"
-    },
-    {
-      "subject": "model.ID",
-      "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
-      "object": "model.ModelNumber"
-    },
-    {
-      "subject": "model.OEMID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/Organization"
-    },
-    {
-      "subject": "model.PhysicalClassID",
-      "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-      "object": "http://standards.iso.org/iso/15926/part14/PhysicalObject"
-    },
-    {
-      "subject": "model.ID",
-      "predicate": "http://w3id.org/readi/rdl/D101001101",
-      "object": "model.OEMID"
-    },
-    {
-      "subject": "model.ID",
-      "predicate": "http://standards.iso.org/iso/15926/part14/hasInstalled",
-      "object": "model.PhysicalClassID"
-    }
-  ]
+    "mappings": [
+        {
+            "subject": "model.ID",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://w3id.org/readi/rdl/CFIHOS-00000008"
+        },
+        {
+            "subject": "model.ID",
+            "predicate": "http://www.w3.org/2000/01/rdf-schema#label",
+            "object": "model.ModelNumber"
+        },
+        {
+            "subject": "model.OEMID",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://standards.iso.org/iso/15926/part14/Organization"
+        },
+        {
+            "subject": "model.PhysicalClassID",
+            "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            "object": "http://standards.iso.org/iso/15926/part14/PhysicalObject"
+        },
+        {
+            "subject": "model.ID",
+            "predicate": "http://w3id.org/readi/rdl/D101001101",
+            "object": "model.OEMID"
+        },
+        {
+            "subject": "model.ID",
+            "predicate": "http://standards.iso.org/iso/15926/part14/hasInstalled",
+            "object": "model.PhysicalClassID"
+        }
+    ]
 }

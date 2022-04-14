@@ -2,13 +2,10 @@ var fs = require("fs");
 const async = require("async");
 var httpProxy = require("../../bin/httpProxy.");
 var util = require("../../bin/util.");
-var distinctTags = {};
 var sliceSize = 50;
 
 var ontologiesMapper = {
     formatLabel: function (str, forUri) {
-        if (!str) var x = 3;
-
         str = str.trim().toLowerCase().replace(/['$]/g, "");
         str = str.replace(/\\/g, "");
         str = str.replace(/\(/gm, "");
@@ -20,20 +17,6 @@ var ontologiesMapper = {
         return str;
     },
     mapClasses: function (sourceConfig, targetConfigs, callback) {
-        function decapitalize(str) {
-            var str2 = "";
-            for (var i = 0; i < str.length; i++) {
-                var code = str.charCodeAt(i);
-                var char = str.charAt(i);
-                if (code > 64 && code < 91) str2 += " " + String.fromCharCode(code + 32);
-                else str2 += char;
-            }
-
-            return str2.trim();
-        }
-
-        // var x=  decapitalize("FibreOpticPatchPanelsCabinet")
-
         var sourceClassesLabels = {};
         var sourceClassesIds = {};
         async.series(
@@ -76,10 +59,9 @@ var ontologiesMapper = {
                     var data = JSON.parse(fs.readFileSync(sourceConfig.filePath));
                     var tableData = data[sourceConfig.table];
                     if (!tableData) return callbackSeries("no key " + sourceConfig.table);
-                    var labels = tableData.forEach(function (item) {
+                    tableData.forEach(function (item) {
                         var label = ontologiesMapper.formatLabel(item[sourceConfig.labelKey]);
                         var id = item[sourceConfig.idKey];
-                        if (id == "TOTAL-P0000002823") var x = 3;
                         var parent = item[sourceConfig.table.replace("tbl", "Parent") + "ID"];
                         if (!parent) parent = null;
                         sourceClassesLabels[label] = {
@@ -121,7 +103,6 @@ var ontologiesMapper = {
                                 function (labels, callbackEachSlice) {
                                     var fitlerStr = "";
                                     labels.forEach(function (label, index) {
-                                        if (label.indexOf("\\") > -1) var x = "3";
                                         if (index > 0) fitlerStr += "|";
                                         fitlerStr += "^" + label.replace(/\\/g, "") + "$";
                                     });
@@ -138,7 +119,6 @@ var ontologiesMapper = {
 
                                     function setTargetValues(source, bindings) {
                                         bindings.forEach(function (item) {
-                                            var x = item;
                                             var id = item.concept.value;
                                             var label = ontologiesMapper.formatLabel(item.conceptLabel.value);
                                             for (var id2 in sourceClassesIds)
@@ -198,7 +178,7 @@ var ontologiesMapper = {
                                 }
                             );
                         },
-                        function (err) {
+                        function (_err) {
                             callbackSeries();
                         }
                     );
@@ -274,7 +254,7 @@ var ontologiesMapper = {
             tblTag: "TagId",
         };
         var mappingSourceEntityFields = [];
-        for (var key in matchingFieldsMap) {
+        for (const key in matchingFieldsMap) {
             mappingSourceEntityFields.push(matchingFieldsMap[key]);
         }
 
@@ -284,17 +264,14 @@ var ontologiesMapper = {
         var triplesType = "";
 
         var mappingLabelMap = {};
-        for (var key in json) {
-            var id = json[key].sourceId;
+        for (const key in json) {
+            const id = json[key].sourceId;
             mappingLabelMap[id] = json[key];
         }
 
         var mappingSourceNormalMap = {}; // keys =sum of all tables id fields
-        var entityIdField = matchingFieldsMap[table];
 
         mappingSourceArray.forEach(function (item) {
-            var obj = {};
-
             mappingSourceEntityFields.forEach(function (entityField) {
                 if (item[entityField]) {
                     var obj = { entityId: item[entityField] };
@@ -315,7 +292,7 @@ var ontologiesMapper = {
 
         orphans += "\n";
         var tableType = "http://data.total.com/resource/quantum/table/" + table + "";
-        for (var id in mappingLabelMap) {
+        for (const id in mappingLabelMap) {
             var mappingLabelItem = mappingLabelMap[id];
             var mappingSourceItem = mappingSourceNormalMap[id];
 
@@ -332,7 +309,7 @@ var ontologiesMapper = {
 
             triplesLabel += "<http://data.total.com/resource/quantum/" + mappingLabelItem.sourceId + "> <http://www.w3.org/2000/01/rdf-schema#label> '" + mappingLabelItem.sourceLabel + "'.\n";
 
-            sources.forEach(function (source, indexSource) {
+            sources.forEach(function (source, _indexSource) {
                 var orphansMatch = "";
                 if (mappingLabelItem.targets[source.name].length == 0) {
                     orphans += orphansMatch + "\t";
@@ -360,7 +337,7 @@ var ontologiesMapper = {
                 });
                 orphans += originMap[mappingSourceItem["MappingSourceOriginID"]] + "\t";
             } else {
-                sources.forEach(function (source, indexSource) {
+                sources.forEach(function (_source, _indexSource) {
                     orphans += "\t";
                 });
             }
@@ -396,46 +373,46 @@ var ontologiesMapper = {
             idKey: "ID",
         };
 
-        var originMap = {
-            "TOTAL-SA0000000004": "CFIHOS",
-            "TOTAL-SA0000000005": "CFIHOS",
-            "TOTAL-SA0000000006": "CFIHOS",
-            "TOTAL-SA0000000007": "CFIHOS",
-            "TOTAL-SA0000000008": "CFIHOS",
-            "TOTAL-SA0000000009": "CFIHOS",
-            "TOTAL-SA0000000010": "CFIHOS",
-            "TOTAL-SA0000000011": "CFIHOS",
-            "TOTAL-SA0000000012": "CFIHOS",
-            "TOTAL-SA0000000037": "CFIHOS",
-            "TOTAL-SA0000000038": "CFIHOS",
-            "TOTAL-SA0000000039": "CFIHOS",
-            "TOTAL-SA0000000040": "CFIHOS",
-            "TOTAL-SA0000000041": "CFIHOS",
-            "TOTAL-SA0000000048": "CFIHOS",
-            "TOTAL-SA0000000042": "TOTAL-CTG",
-            "TOTAL-SA0000000001": "TOTAL-GS",
-            "TOTAL-SA0000000002": "TOTAL-GS",
-            "TOTAL-SA0000000013": "TOTAL-GS",
-            "TOTAL-SA0000000036": "TOTAL-GS",
-            "TOTAL-SA0000000049": "TOTAL-GS",
-            "TOTAL-SA0000000050": "TOTAL-GS",
-            "TOTAL-SA0000000051": "TOTAL-GS",
-            "TOTAL-SA0000000052": "TOTAL-GS",
-            "TOTAL-SA0000000003": "ICAPS",
-            "TOTAL-SA0000000014": "ICAPS",
-            "TOTAL-SA0000000053": "ISO-14224",
-            "TOTAL-SA0000000054": "ISO-14224",
-            "TOTAL-SA0000000055": "ISO-14224",
-            "TOTAL-SA0000000017": "ISO-14926-Part4",
-            "TOTAL-SA0000000019": "ISO-14926-Part4",
-            "TOTAL-SA0000000025": "ISO-14926-Part4",
-            "TOTAL-SA0000000028": "ISO-14926-Part4",
-            "TOTAL-SA0000000043": "MEL",
-            "TOTAL-SA0000000044": "MEL",
-            "TOTAL-SA0000000045": "MEL",
-            "TOTAL-SA0000000046": "MEL",
-            "TOTAL-SA0000000047": "MEL",
-        };
+        // var originMap = {
+        //     "TOTAL-SA0000000004": "CFIHOS",
+        //     "TOTAL-SA0000000005": "CFIHOS",
+        //     "TOTAL-SA0000000006": "CFIHOS",
+        //     "TOTAL-SA0000000007": "CFIHOS",
+        //     "TOTAL-SA0000000008": "CFIHOS",
+        //     "TOTAL-SA0000000009": "CFIHOS",
+        //     "TOTAL-SA0000000010": "CFIHOS",
+        //     "TOTAL-SA0000000011": "CFIHOS",
+        //     "TOTAL-SA0000000012": "CFIHOS",
+        //     "TOTAL-SA0000000037": "CFIHOS",
+        //     "TOTAL-SA0000000038": "CFIHOS",
+        //     "TOTAL-SA0000000039": "CFIHOS",
+        //     "TOTAL-SA0000000040": "CFIHOS",
+        //     "TOTAL-SA0000000041": "CFIHOS",
+        //     "TOTAL-SA0000000048": "CFIHOS",
+        //     "TOTAL-SA0000000042": "TOTAL-CTG",
+        //     "TOTAL-SA0000000001": "TOTAL-GS",
+        //     "TOTAL-SA0000000002": "TOTAL-GS",
+        //     "TOTAL-SA0000000013": "TOTAL-GS",
+        //     "TOTAL-SA0000000036": "TOTAL-GS",
+        //     "TOTAL-SA0000000049": "TOTAL-GS",
+        //     "TOTAL-SA0000000050": "TOTAL-GS",
+        //     "TOTAL-SA0000000051": "TOTAL-GS",
+        //     "TOTAL-SA0000000052": "TOTAL-GS",
+        //     "TOTAL-SA0000000003": "ICAPS",
+        //     "TOTAL-SA0000000014": "ICAPS",
+        //     "TOTAL-SA0000000053": "ISO-14224",
+        //     "TOTAL-SA0000000054": "ISO-14224",
+        //     "TOTAL-SA0000000055": "ISO-14224",
+        //     "TOTAL-SA0000000017": "ISO-14926-Part4",
+        //     "TOTAL-SA0000000019": "ISO-14926-Part4",
+        //     "TOTAL-SA0000000025": "ISO-14926-Part4",
+        //     "TOTAL-SA0000000028": "ISO-14926-Part4",
+        //     "TOTAL-SA0000000043": "MEL",
+        //     "TOTAL-SA0000000044": "MEL",
+        //     "TOTAL-SA0000000045": "MEL",
+        //     "TOTAL-SA0000000046": "MEL",
+        //     "TOTAL-SA0000000047": "MEL",
+        // };
 
         var matchingFieldsMap = {
             tblPhysicalClass: "PhysicalClassID",
@@ -447,7 +424,7 @@ var ontologiesMapper = {
             tblTag: "TagId",
         };
 
-        var sourceData = JSON.parse(fs.readFileSync(sourceConfig.filePath));
+        // var sourceData = JSON.parse(fs.readFileSync(sourceConfig.filePath));
         var targetData = JSON.parse(fs.readFileSync(targetConfig.filePath));
         var targetMap = {};
         var idField = sourceConfig.table.substring(3) + "ID";
@@ -462,68 +439,66 @@ var ontologiesMapper = {
             targetMap[item[idField]] = item;
         });
 
-        var tableData = sourceData[sourceConfig.table];
-        var str = "";
+        // var tableData = sourceData[sourceConfig.table];
+        // var _str = "";
 
-        var outputArray = [];
-        tableData.forEach(function (item) {
-            var id;
-            var id = item[sourceConfig.idKey];
-            str += id;
-            var target = targetMap[id];
-            if (target) {
-                str +=
-                    "\t" +
-                    target.ID +
-                    "\t" +
-                    target.SourceCode.replace(/[\n\r\t]/g, " ") +
-                    "\t" +
-                    target.SourceDescription.replace(/[\n\r\t]/g, " ") +
-                    "\t" +
-                    target.ChangeRequestNumber.replace(/[\n\r\t]/g, " ") +
-                    "\t" +
-                    target.MappingSourceOriginID +
-                    "\t" +
-                    target.ItemStatus.replace(/[\n\r\t]/g, " ") +
-                    "\t";
+        // tableData.forEach(function (item) {
+        //     var id = item[sourceConfig.idKey];
+        //     str += id;
+        //     var target = targetMap[id];
+        //     if (target) {
+        //         str +=
+        //             "\t" +
+        //             target.ID +
+        //             "\t" +
+        //             target.SourceCode.replace(/[\n\r\t]/g, " ") +
+        //             "\t" +
+        //             target.SourceDescription.replace(/[\n\r\t]/g, " ") +
+        //             "\t" +
+        //             target.ChangeRequestNumber.replace(/[\n\r\t]/g, " ") +
+        //             "\t" +
+        //             target.MappingSourceOriginID +
+        //             "\t" +
+        //             target.ItemStatus.replace(/[\n\r\t]/g, " ") +
+        //             "\t";
 
-                var originType = originMap[target.MappingSourceOriginID];
-                if (originType) str += originType + "\t";
-                else str += "" + "\t";
-            }
-            str += "\n";
-        });
+        //         var originType = originMap[target.MappingSourceOriginID];
+        //         if (originType) str += originType + "\t";
+        //         else str += "" + "\t";
+        //     }
+        //     str += "\n";
+        // });
 
-        if (false) {
-            tableData.forEach(function (item) {
-                var id = item[sourceConfig.idKey];
-                str += id;
-                var target = targetMap[id];
-                if (target) {
-                    str +=
-                        "\t" +
-                        target.ID +
-                        "\t" +
-                        target.SourceCode.replace(/[\n\r\t]/g, " ") +
-                        "\t" +
-                        target.SourceDescription.replace(/[\n\r\t]/g, " ") +
-                        "\t" +
-                        target.ChangeRequestNumber.replace(/[\n\r\t]/g, " ") +
-                        "\t" +
-                        target.MappingSourceOriginID +
-                        "\t" +
-                        target.ItemStatus.replace(/[\n\r\t]/g, " ") +
-                        "\t";
+        // if (false) {
+        //     tableData.forEach(function (item) {
+        //         var id = item[sourceConfig.idKey];
+        //         str += id;
+        //         var target = targetMap[id];
+        //         if (target) {
+        //             str +=
+        //                 "\t" +
+        //                 target.ID +
+        //                 "\t" +
+        //                 target.SourceCode.replace(/[\n\r\t]/g, " ") +
+        //                 "\t" +
+        //                 target.SourceDescription.replace(/[\n\r\t]/g, " ") +
+        //                 "\t" +
+        //                 target.ChangeRequestNumber.replace(/[\n\r\t]/g, " ") +
+        //                 "\t" +
+        //                 target.MappingSourceOriginID +
+        //                 "\t" +
+        //                 target.ItemStatus.replace(/[\n\r\t]/g, " ") +
+        //                 "\t";
 
-                    var originType = originMap[target.MappingSourceOriginID];
-                    if (originType) str += originType + "\t";
-                    else str += "" + "\t";
-                }
-                str += "\n";
-            });
+        //             var originType = originMap[target.MappingSourceOriginID];
+        //             if (originType) str += originType + "\t";
+        //             else str += "" + "\t";
+        //         }
+        //         str += "\n";
+        //     });
 
-            fs.writeFileSync(targetConfig.filePath.replace(".json", "_" + sourceConfig.table + ".txt"), str);
-        }
+        //     fs.writeFileSync(targetConfig.filePath.replace(".json", "_" + sourceConfig.table + ".txt"), str);
+        // }
     },
 
     normalizeMappingSources: function () {
@@ -556,8 +531,6 @@ var ontologiesMapper = {
         data.forEach(function (item) {
             tableFields.forEach(function (field, fieldIndex) {
                 if (item[field]) {
-                    if (item[field].indexOf("-F00") > -1) var x = 3;
-                    if (fieldIndex == 6) var x = 3;
                     if (fieldIndex < tableFields.length - 1 && !item[tableFields[fieldIndex + 1]]) {
                         if (multipleFields.indexOf(field) > -1) {
                             var obj = { entityId: item[field] };
@@ -567,8 +540,6 @@ var ontologiesMapper = {
                             });
 
                             data2.push(obj);
-                        } else {
-                            var x = 3;
                         }
                     }
                 }
@@ -643,43 +614,6 @@ var ontologiesMapper = {
         fs.writeFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\attributesSubClassOf.nt", triples);
     },
     getQuantumPickListSuperclassesTriples: function () {
-        var dimensionsMap = {
-            "TOTAL-UD0000000035": "CFIHOS-45000001",
-            "TOTAL-UD0000000114": "CFIHOS-45000002",
-            "TOTAL-UD0000000043": "CFIHOS-45000004",
-            "TOTAL-UD0000000044": "CFIHOS-45000005",
-            "TOTAL-UD0000000050": "CFIHOS-45000007",
-            "TOTAL-UD0000000074": "CFIHOS-45000009",
-            "TOTAL-UD0000000082": "CFIHOS-45000010",
-            "TOTAL-UD0000000083": "CFIHOS-45000011",
-            "TOTAL-UD0000000051": "CFIHOS-45000012",
-            "TOTAL-UD0000000107": "CFIHOS-45000013",
-            "TOTAL-UD0000000113": "CFIHOS-45000014",
-            "TOTAL-UD0000000112": "CFIHOS-45000015",
-            "TOTAL-UD0000000130": "CFIHOS-45000016",
-            "TOTAL-UD0000000134": "CFIHOS-45000017",
-            "TOTAL-UD0000000135": "CFIHOS-45000018",
-            "TOTAL-UD0000000143": "CFIHOS-45000019",
-            "TOTAL-UD0000000055": "CFIHOS-45000020",
-            "TOTAL-UD0000000093": "CFIHOS-45000021",
-            "TOTAL-UD0000000064": "CFIHOS-45000022",
-            "TOTAL-UD0000000156": "CFIHOS-45000023",
-            "TOTAL-UD0000000088": "CFIHOS-45000025",
-            "TOTAL-UD0000000028": "CFIHOS-45000026",
-            "TOTAL-UD0000000072": "CFIHOS-45000027",
-            "TOTAL-UD0000000165": "CFIHOS-45000028",
-            "TOTAL-UD0000000162": "CFIHOS-45000029",
-            "TOTAL-UD0000000163": "CFIHOS-45000030",
-            "TOTAL-UD0000000166": "CFIHOS-45000031",
-            "TOTAL-UD0000000171": "CFIHOS-45000033",
-            "TOTAL-UD0000000178": "CFIHOS-45000034",
-            "TOTAL-UD0000000024": "CFIHOS-45000036",
-            "TOTAL-UD0000000037": "CFIHOS-45000037",
-            "TOTAL-UD0000000054": "CFIHOS-45000038",
-            "TOTAL-UD0000000068": "CFIHOS-45000039",
-            "TOTAL-UD0000000120": "CFIHOS-45000041",
-            "TOTAL-UD0000000179": "CFIHOS-45000044",
-        };
         var sourceConfig = {
             type: "jsonMap",
             filePath: "D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\__mainObjects.json",
@@ -939,44 +873,6 @@ var ontologiesMapper = {
 
     // donne aux attributs de Quantum les attributs parents d'une classe de la sources
     setQuantumAttributesParents: function (sourceLabel) {
-        var readiPhysicalQuantities = {
-            "http://w3id.org/readi/rdl/CFIHOS-45000001": "Capacitance",
-            "http://w3id.org/readi/rdl/CFIHOS-45000002": "Density",
-            "http://w3id.org/readi/rdl/CFIHOS-45000004": "Dynamic Viscosity",
-            "http://w3id.org/readi/rdl/CFIHOS-45000005": "Electrical Charge",
-            "http://w3id.org/readi/rdl/CFIHOS-45000007": "Electrical Current / Amperage",
-            "http://w3id.org/readi/rdl/CFIHOS-45000009": "Frequency",
-            "http://w3id.org/readi/rdl/CFIHOS-45000010": "Kinematic Viscosity",
-            "http://w3id.org/readi/rdl/CFIHOS-45000011": "Length",
-            "http://w3id.org/readi/rdl/CFIHOS-45000012": "Linear Electric Current Density",
-            "http://w3id.org/readi/rdl/CFIHOS-45000013": "Mass / Weight",
-            "http://w3id.org/readi/rdl/CFIHOS-45000014": "Mass Flow Rate",
-            "http://w3id.org/readi/rdl/CFIHOS-45000015": "Mass Proportion",
-            "http://w3id.org/readi/rdl/CFIHOS-45000016": "Power",
-            "http://w3id.org/readi/rdl/CFIHOS-45000017": "Pressure",
-            "http://w3id.org/readi/rdl/CFIHOS-45000018": "Pressure Rate Change",
-            "http://w3id.org/readi/rdl/CFIHOS-45000019": "Ratio",
-            "http://w3id.org/readi/rdl/CFIHOS-45000020": "Resistance",
-            "http://w3id.org/readi/rdl/CFIHOS-45000021": "Sound",
-            "http://w3id.org/readi/rdl/CFIHOS-45000022": "Specific Energy",
-            "http://w3id.org/readi/rdl/CFIHOS-45000023": "Specific Heat Capacity",
-            "http://w3id.org/readi/rdl/CFIHOS-45000025": "Speed",
-            "http://w3id.org/readi/rdl/CFIHOS-45000026": "Surface / area",
-            "http://w3id.org/readi/rdl/CFIHOS-45000027": "Surface Tension",
-            "http://w3id.org/readi/rdl/CFIHOS-45000028": "Temperature",
-            "http://w3id.org/readi/rdl/CFIHOS-45000029": "Thermal Conductivity",
-            "http://w3id.org/readi/rdl/CFIHOS-45000030": "Thermal Insulation",
-            "http://w3id.org/readi/rdl/CFIHOS-45000031": "Time",
-            "http://w3id.org/readi/rdl/CFIHOS-45000033": "Volume",
-            "http://w3id.org/readi/rdl/CFIHOS-45000034": "Volume Flow Rate",
-            "http://w3id.org/readi/rdl/CFIHOS-45000036": "Angular velocity",
-            "http://w3id.org/readi/rdl/CFIHOS-45000037": "Count",
-            "http://w3id.org/readi/rdl/CFIHOS-45000038": "Electrical Tension / Voltage",
-            "http://w3id.org/readi/rdl/CFIHOS-45000039": "Force",
-            "http://w3id.org/readi/rdl/CFIHOS-45000041": "Moment of force",
-            "http://w3id.org/readi/rdl/CFIHOS-45000044": "Volume proportion",
-        };
-
         var sourceConfig = ontologiesMapper.sources[sourceLabel];
         var quantumConfig = ontologiesMapper.sources["QUANTUM"];
         var map = {};
@@ -1013,8 +909,8 @@ var ontologiesMapper = {
                     });
                 },
                 function (callbackSeries) {
-                    function processResult(bindings) {
-                        bindings.forEach(function (item) {});
+                    function processResult(_bindings) {
+                        /*pass*/
                     }
 
                     var filter = "";
@@ -1038,7 +934,7 @@ var ontologiesMapper = {
                                 var query2 = encodeURIComponent(query);
                                 query2 = query2.replace(/%2B/g, "+").trim();
 
-                                var body = {
+                                const body = {
                                     url: targetConfig.sparql_server.url + "?output=json&format=json&query=" + query2,
                                     params: { query: query },
                                     headers: {
@@ -1053,12 +949,12 @@ var ontologiesMapper = {
                                         //cas GEMET
                                         data = JSON.parse(data.result.trim());
 
-                                    processResult(result.results.bindings);
+                                    processResult(data.results.bindings);
 
                                     callbackEach();
                                 });
                             } else {
-                                var body = {
+                                const body = {
                                     url: sourceConfig.sparql_server.url,
                                     params: { query: query },
                                     headers: {
@@ -1073,14 +969,13 @@ var ontologiesMapper = {
                                 });
                             }
                         },
-                        function (err) {
+                        function (_err) {
                             callbackSeries();
                         }
                     );
                 },
             ],
             function (err) {
-                var x = map;
                 console.log(err);
             }
         );
@@ -1132,8 +1027,6 @@ var ontologiesMapper = {
     getTurboGenAttrsTriples: function (filePath) {
         var data = JSON.parse(fs.readFileSync(filePath));
         var existingNodes = {};
-        var triples = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
-        var tripleTags = "";
         var str = "";
         data.forEach(function (item) {
             // var id=item["AttributeID"]
@@ -1161,8 +1054,6 @@ var ontologiesMapper = {
     getTurboGenTagToTagTriples: function (filePath) {
         var data = JSON.parse(fs.readFileSync(filePath));
         var existingNodes = {};
-        var triples = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ";
-        var tripleTags = "";
         var str = "";
         data.forEach(function (item) {
             // var id=item["AttributeID"]
@@ -1489,30 +1380,17 @@ if (false) {
 
 //getTurboGenTriples
 if (false) {
-    var filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_data.json";
+    const filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_data.json";
     ontologiesMapper.getTurboGenTriples(filePath);
 }
 
 //getTurboGenTriplesAttrs
 if (false) {
-    var filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_TagtoAttributes.json";
+    const filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_TagtoAttributes.json";
     ontologiesMapper.getTurboGenAttrsTriples(filePath);
 }
 
 if (true) {
-    var mapping = [
-        {
-            subject: "oneModel:PrimaryTagID_Lookup",
-            predicate: "part14:contains",
-            object: "oneModel:LinkTagID_Lookup",
-        },
-        {
-            subject: "_:",
-            predicate: "rdf:type",
-            object: " owl:Restriction",
-        },
-        {},
-    ];
     // rdf:type owl:Restriction ;
     // owl:onProperty npdv:operatorForField ;
     // owl:someValuesFrom npdv:Field
@@ -1536,7 +1414,7 @@ if (true) {
     "RequirementID": "TOTAL-RB0000000028"
     }*/
 
-    var filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_TagtoAttributes.json";
+    const filePath = "D:\\NLP\\ontologies\\assets\\turbogenerator\\turboGeneratorA_TagtoAttributes.json";
     ontologiesMapper.getTurboGenAttrsTriples(filePath);
 }
 

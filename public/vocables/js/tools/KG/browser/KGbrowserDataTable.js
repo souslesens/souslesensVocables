@@ -1,64 +1,49 @@
-var KGbrowserDataTable=(function(){
-    var self={}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+var KGbrowserDataTable = (function () {
+    var self = {};
 
-
-    self.showQueryResult= function (data, options) {
-
-
+    self.showQueryResult = function (data, options) {
         var dataSet = [];
         var cols = [];
-var keys={}
+        var keys = {};
 
-            options.selectVars.forEach(function (varName) {
-
-                var key = varName.substring(1)
-                cols.push({title: key,"defaultContent": ""})
-                cols.push({title: key+"Label","defaultContent": ""})
-                keys[key] = 1
-                keys[key+"Label"] = 1
-            })
-        data.data.forEach(function (item, indexRow) {
-            var line = []
-         for(var key in keys  ){
-                if (item[key])
-                    line.push(item[key].value);
-                else
-                    line.push("");
+        options.selectVars.forEach(function (varName) {
+            var key = varName.substring(1);
+            cols.push({ title: key, defaultContent: "" });
+            cols.push({ title: key + "Label", defaultContent: "" });
+            keys[key] = 1;
+            keys[key + "Label"] = 1;
+        });
+        data.data.forEach(function (item, _indexRow) {
+            var line = [];
+            for (var key in keys) {
+                if (item[key]) line.push(item[key].value);
+                else line.push("");
             }
-            dataSet.push(line)
-        })
+            dataSet.push(line);
+        });
 
+        $("#mainDialogDiv").dialog("open");
 
-        //  $("#KGquery_tabs").tabs("option", "active", 1);
-        $('#mainDialogDiv').dialog("open")
-
-        $('#mainDialogDiv').html("<table id='dataTableDiv'></table>");
+        $("#mainDialogDiv").html("<table id='dataTableDiv'></table>");
         setTimeout(function () {
-
-            $('#dataTableDiv').DataTable({
+            $("#dataTableDiv").DataTable({
                 data: dataSet,
                 columns: cols,
-                // async: false,
-                "pageLength": 10,
-                dom: 'Bfrtip',
-                /*buttons: [
-                    'copy', 'csv', 'excel', 'pdf', 'print'
-                ]*/
+                pageLength: 10,
+                dom: "Bfrtip",
                 buttons: [
                     {
-                        extend: 'csvHtml5',
-                        text: 'Export CSV',
-                        fieldBoundary: '',
-                        fieldSeparator: ';'
+                        extend: "csvHtml5",
+                        text: "Export CSV",
+                        fieldBoundary: "",
+                        fieldSeparator: ";",
                     },
-                    'copy'
-                ]
-
-            })
-                , 500
-        })
-
-
-    }
+                    "copy",
+                ],
+            }),
+                500;
+        });
+    };
     return self;
-})()
+})();

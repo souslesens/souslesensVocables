@@ -1,24 +1,22 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Config = (function () {
     var self = {};
 
-    self.onSourceSelect = function () {}
+    self.onSourceSelect = function () {
+        // Pass
+    };
 
     self.onLoaded = function () {
+        $("#accordion").accordion("option", { active: 2 });
 
-            $("#accordion").accordion("option", {active: 2});
-
-            setTimeout(function () {
-                $("#graphDiv").html("");
-                $("#graphDiv").html(`
+        setTimeout(function () {
+            $("#graphDiv").html("");
+            $("#graphDiv").html(`
                     <div id="mount-app-here"></div>
                 `);
-                $.getScript("/mainapp.js");
-
-            }, 200)
-
-    }
+            $.getScript("/mainapp.js");
+        }, 200);
+    };
 
     return self;
-
-})
-()
+})();

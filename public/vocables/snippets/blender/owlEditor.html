@@ -1,5 +1,4 @@
 <style>
-
     #owlEditor_jstreeDiv {
         height: 700px !important;
         overflow: auto;
@@ -12,14 +11,11 @@
         margin: 5px;
         padding: 5px;
         width: 400px;
-
     }
 
     .OwlEditorItemPropertyValueDiv {
-
         background-color: #fff;
         width: 350px;
-
     }
 
     .OwlEditorItemPropertyValueDiv2 {
@@ -38,30 +34,25 @@
         color: blueviolet;
         font-weight: bold;
     }
-
-
 </style>
 
 <div>
-    Owl sources <select id="owlEditor_SourcesSelect" onchange="OwlEditor.loadSource($(this).val())"></select>
-    <div style="display: flex;flex-direction: row">
-        <div style="height: 100%;width: 400px;overflow: auto">
-            <div id="owlEditor_jstreeDiv" class="jstree">
-            </div>
+    Owl sources
+    <select id="owlEditor_SourcesSelect" onchange="OwlEditor.loadSource($(this).val())"></select>
+    <div style="display: flex; flex-direction: row">
+        <div style="height: 100%; width: 400px; overflow: auto">
+            <div id="owlEditor_jstreeDiv" class="jstree"></div>
         </div>
 
-        <div style="height: 100%;width: 60%">
-
-
+        <div style="height: 100%; width: 60%">
             <div>
-                <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="OwlEditor.newItem()">+</button>
-                <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="OwlEditor.saveEditingNode()">Save</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="OwlEditor.newItem()">+</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="OwlEditor.saveEditingNode()">Save</button>
                 <span id="owlEditor_messageDiv" class="messageDiv"></span>
             </div>
             <div id="owlEditor_propertiesDiv"></div>
 
             <div id="owlEditor_otherPropertiesDiv"></div>
         </div>
-
     </div>
 </div>

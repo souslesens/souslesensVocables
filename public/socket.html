@@ -1,18 +1,16 @@
 <!--Index.html-->
 
-
 <script src="/socket.io/socket.io.js"></script>
 <script>
     const socket = io();
-    socket.on('connect', function(data) {
-        socket.emit('join', 'Hello World from client');
+    socket.on("connect", function (data) {
+        socket.emit("join", "Hello World from client");
     });
-    socket.connect()
-    socket.on("hello",function(data){
-        var x=data
-    })
+    socket.connect();
+    socket.on("hello", function (data) {
+        var x = data;
+    });
 </script>
-
 
 <!--
 <script>

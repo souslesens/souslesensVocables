@@ -9,184 +9,160 @@
  */
 
 var Annotator = (function () {
+    var self = {};
+    self.selectedSources;
 
-        var self = {}
-        self.selectedSources;
+    self.onLoaded = function () {
+        var html = "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Annotator.showActionPanel()'>OK</button>";
+        $("#sourceDivControlPanelDiv").html(html);
+    };
 
-        self.onLoaded = function () {
-            var html = "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Annotator.showActionPanel()'>OK</button>"
-            $("#sourceDivControlPanelDiv").html(html)
+    self.onSourceSelect = function () {
+        // Pass
+    };
 
-        }
-
-        self.onSourceSelect = function () {
-
-        }
-
-
-        self.showActionPanel = function () {
-            self.selectedSources = $("#sourcesTreeDiv").jstree(true).get_checked()
-            $("#actionDiv").html("")
-            $("#graphDiv").load("snippets/annotator.html")
-            $("#accordion").accordion("option", {active: 2});
-
-        }
-
+    self.showActionPanel = function () {
+        self.selectedSources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        $("#actionDiv").html("");
+        $("#graphDiv").load("snippets/annotator.html");
+        $("#accordion").accordion("option", { active: 2 });
+    };
 
     self.uploadAndaAnnotate = function () {
+        // Pass
+    };
+    self.annotate = function () {
+        $("#waitImg").css("display", "block");
+        MainController.UI.message("querying Spacy library (can take time...)");
+        var text = $("#Annotator_textArea").val();
+        var sourcesLabels = self.selectedSources;
+        var sources = [];
+        sourcesLabels.forEach(function (label) {
+            var source = Config.sources[label];
+            source.name = label;
+            sources.push(source);
+        });
+        var payload = {
+            text: text,
+            sources: sources,
+        };
 
-
-    }
-        self.annotate = function () {
-            $("#waitImg").css("display", "block");
-            MainController.UI.message("querying Spacy library (can take time...)")
-            var text = $("#Annotator_textArea").val();
-            var sourcesLabels = self.selectedSources;
-            var sources = [];
-            sourcesLabels.forEach(function (label) {
-                var source = Config.sources[label]
-                source.name = label;
-                sources.push(source)
-            })
-            var payload = {
-                annotateLive: 1,
-                text: text,
-                sources: JSON.stringify(sources)
-            }
-
-
-            $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: payload,
-                dataType: "json",
-                /* beforeSend: function(request) {
+        $.ajax({
+            type: "POST",
+            url: Config.apiUrl + "/annotate",
+            data: payload,
+            dataType: "json",
+            /* beforeSend: function(request) {
                      request.setRequestHeader('Age', '10000');
                  },*/
 
-                success: function (data, textStatus, jqXHR) {
-                    MainController.UI.message("")
-                    $("#waitImg").css("display", "none");
-                    var x = data
-                    self.showAnnotationResult(data)
-                }
+            success: function (data, _textStatus, _jqXHR) {
+                MainController.UI.message("");
+                $("#waitImg").css("display", "none");
+                self.showAnnotationResult(data);
+            },
 
-                , error: function (err) {
-                    MainController.UI.message(err)
-                    $("#waitImg").css("display", "none");
-                }
-            })
-
+            error: function (err) {
+                MainController.UI.message(err);
+                $("#waitImg").css("display", "none");
+            },
+        });
+    };
+    self.showAnnotationResult = function (data) {
+        if (Object.keys(data.entities).length == 0 && data.missingNouns.length == 0) {
+            $("#Annotator_AnnotationResultDiv").html("");
+            return alert("no matching concepts");
         }
-        self.showAnnotationResult = function (data) {
 
-            if (Object.keys(data.entities).length == 0 && data.missingNouns.length == 0) {
-                $("#Annotator_AnnotationResultDiv").html("")
-                return alert("no matching concepts")
-            }
+        var html = "<table  class='center' >";
+        html += "<tr><td>&nbsp;</td>";
+        var sourcesLabels = self.selectedSources;
+        sourcesLabels.forEach(function (source) {
+            html += "<td>" + source + "</td>";
+        });
 
+        html += "</tr>";
+        for (var word in data.entities) {
+            html += "<tr><td>" + word + "</td>";
 
-            var html = "<table  class='center' >"
-            html += "<tr><td>&nbsp;</td>"
-            var sourcesLabels = self.selectedSources;
             sourcesLabels.forEach(function (source) {
-                html += "<td>" + source + "</td>"
-            })
-
-
-            html += "</tr>"
-            for (var word in data.entities) {
-                html += "<tr><td>" + word + "</td>"
-
-                sourcesLabels.forEach(function (source) {
-                    var value = "";
-                    if (data.entities[word][source]) {
-                        data.entities[word][source].forEach(function (entity) {
-
-                            if (entity.source == source)
-
-                                var id = ("AnnotatorEntity|" + source + "|" + entity.id)
-                       //     console.log(id)
-                            value += "<span class='Annotator_entitySpan' data-source='" + source + "' data-label='" + word + "'  data-id='" + entity.id + "' id='" + id + "'>" + "+" + "</span>"
-                        })
-                    }
-                    html += "<td>" + value + "</td>"
-
-                })
-                html += "</tr>"
-            }
-            html += "</table>"
-
-            $("#Annotator_AnnotationResultDiv").html(html)
-            $(".Annotator_entitySpan").bind("click", Annotator.onNodeClick)
-
-
-            var html = ""
-            var uniqueMissingNouns={}
-            data.missingNouns.forEach(function (item) {
-                if(!uniqueMissingNouns[item]) {
-                    uniqueMissingNouns[item]=1
-                    html += "<span class='Annotator_orphanNouns' id='Annotator_noun|" + "orphan" + "|" + item + "'>" + item + "</span>"
+                var value = "";
+                if (data.entities[word][source]) {
+                    data.entities[word][source].forEach(function (entity) {
+                        if (entity.source == source) var id = "AnnotatorEntity|" + source + "|" + entity.id;
+                        //     console.log(id)
+                        value += "<span class='Annotator_entitySpan' data-source='" + source + "' data-label='" + word + "'  data-id='" + entity.id + "' id='" + id + "'>" + "+" + "</span>";
+                    });
                 }
-
-            })
-            $("#Annotator_orphanNounsDiv").html(html)
-            $(".Annotator_orphanNouns").bind("click", function (e) {
-                if(e.ctrlKey)
-                Clipboard.copy({type: "word", source: "none", label: $(this).html()}, $(this).attr("id"),e)
-            })
-
+                html += "<td>" + value + "</td>";
+            });
+            html += "</tr>";
         }
+        html += "</table>";
 
-        self.onNodeClick = function (e) {
-            var source = $(this).data("source")
-            var label = $(this).data("label")
-            var id = $(this).data("id")
-            if (e.ctrlKey) {
-                Clipboard.copy({type: "node", source: source, id: id, label: label}, $(this).attr("id"), e)
+        $("#Annotator_AnnotationResultDiv").html(html);
+        $(".Annotator_entitySpan").bind("click", Annotator.onNodeClick);
 
-            } else
-                self.getEntityInfo(e)
-        }
+        html = "";
+        var uniqueMissingNouns = {};
+        data.missingNouns.forEach(function (item) {
+            if (!uniqueMissingNouns[item]) {
+                uniqueMissingNouns[item] = 1;
+                html += "<span class='Annotator_orphanNouns' id='Annotator_noun|" + "orphan" + "|" + item + "'>" + item + "</span>";
+            }
+        });
+        $("#Annotator_orphanNounsDiv").html(html);
+        $(".Annotator_orphanNouns").bind("click", function (e) {
+            if (e.ctrlKey) Clipboard.copy({ type: "word", source: "none", label: $(this).html() }, $(this).attr("id"), e);
+        });
+    };
 
+    self.onNodeClick = function (e) {
+        var source = $(this).data("source");
+        var label = $(this).data("label");
+        var id = $(this).data("id");
+        if (e.ctrlKey) {
+            Clipboard.copy({ type: "node", source: source, id: id, label: label }, $(this).attr("id"), e);
+        } else self.getEntityInfo(e);
+    };
 
-        self.getEntityInfo = function (e) {
+    self.getEntityInfo = function (e) {
+        var id = e.target.id;
+        var array = id.split("|");
+        var source = array[1];
+        id = array[2];
+        SourceBrowser.showNodeInfos(source, id, "Annotator_EntityDetailsDiv");
+        Sparql_generic.getSingleNodeAllGenealogy(source, id, function (err, result) {
+            if (err) return MainController.UI.message(err);
 
-            var id = e.target.id;
-            var array = id.split("|")
-            var source = array[1]
-            id = array[2]
-            SourceBrowser.showNodeInfos(source, id,"Annotator_EntityDetailsDiv")
-          /*  Sparql_generic.getNodeInfos(source, id, null, function (err, result) {
-                if (err)
-                    return MainController.UI.message(err)
-                SourceEditor.showNodeInfos("Annotator_EntityDetailsDiv", "en", id, result);
-            })*/
-            Sparql_generic.getSingleNodeAllGenealogy(source, id, function (err, result) {
-                if (err)
-                    return MainController.UI.message(err)
+            var html = "Genealogy : ";
+            result.forEach(function (item) {
+                html +=
+                    "<span class='Annotator_entityGenealogySpan'  data-source='" +
+                    source +
+                    "' data-id='" +
+                    item.broader.value +
+                    "'  data-label='" +
+                    item.broaderLabel.value +
+                    "' id='Annotator_entity|" +
+                    source +
+                    "|" +
+                    item.broader.value +
+                    "'>" +
+                    item.broaderLabel.value +
+                    "</span>";
+            });
 
-                var html = "Genealogy : "
-                result.forEach(function (item) {
-                    html += "<span class='Annotator_entityGenealogySpan'  data-source='" + source + "' data-id='" + item.broader.value + "'  data-label='" + item.broaderLabel.value + "' id='Annotator_entity|" + source + "|" + item.broader.value + "'>" + item.broaderLabel.value + "</span>"
+            $("#Annotator_EntityGenealogyDiv").html(html);
+            $(".Annotator_entityGenealogySpan").bind("click", Annotator.onNodeClick);
+        });
+    };
 
-                })
+    self.setTestText = function () {
+        var text =
+            "Compaction drives characteristically exhibit elevated rock compressibilities, often 10 to 50 times greater than normal. Rock compressibility is called pore volume (PV), or pore, compressibility and is expressed in units of PV change per unit PV per unit pressure change. Rock compressibility is a function of pressure. Normal compressibilities range from 3 to 8 × 10–6 psi–1 at pressures greater than approximately 1,000 psia. In contrast, elevated rock compressibilities can reach as high as 150 × 10–6 psi–1 or higher at comparable pressures. [1]\n";
+        $("#Annotator_textArea").val(text);
+    };
 
-                $("#Annotator_EntityGenealogyDiv").html(html)
-                $(".Annotator_entityGenealogySpan").bind("click", Annotator.onNodeClick)
-
-            })
-
-        }
-
-        self.setTestText = function () {
-            var text = "Compaction drives characteristically exhibit elevated rock compressibilities, often 10 to 50 times greater than normal. Rock compressibility is called pore volume (PV), or pore, compressibility and is expressed in units of PV change per unit PV per unit pressure change. Rock compressibility is a function of pressure. Normal compressibilities range from 3 to 8 × 10–6 psi–1 at pressures greater than approximately 1,000 psia. In contrast, elevated rock compressibilities can reach as high as 150 × 10–6 psi–1 or higher at comparable pressures. [1]\n"
-                           $("#Annotator_textArea").val(text);
-        }
-
-
-        return self;
-
-    }
-    ()
-)
+    return self;
+})();

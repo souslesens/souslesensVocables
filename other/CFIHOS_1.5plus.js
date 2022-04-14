@@ -1,7 +1,7 @@
 var processor = require("../bin/KG/CsvTripleBuilder.");
 var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
 
-mappingsMap = {
+let mappingsMap = {
     SYSTEMS: {
         type: "owl:Class",
         fileName: "D:\\NLP\\ontologies\\14224\\systems.txt",
@@ -26,7 +26,7 @@ mappingsMap = {
         type: "owl:Class",
         fileName: "D:\\NLP\\ontologies\\14224\\classes_3.txt",
         transform: {
-            label2: function (value, role, prop) {
+            label2: function (value, _role, _prop) {
                 return "Pack-" + value;
             },
         },
@@ -49,7 +49,7 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\14224\\classes_4.txt",
         lookups: [],
         transform: {
-            label2: function (value, role, prop) {
+            label2: function (value, _role, _prop) {
                 return "Equip-" + value;
             },
         },
@@ -70,7 +70,7 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\14224\\functionalObjects.txt",
         lookups: [],
         transform: {
-            xx: function (value, role, prop) {
+            xx: function (value, _role, _prop) {
                 return "Class-" + value;
             },
         },
@@ -91,7 +91,7 @@ mappingsMap = {
         fileName: "D:\\NLP\\ontologies\\14224\\components.txt",
         lookups: [],
         transform: {
-            xx: function (value, role, prop) {
+            xx: function (value, _role, _prop) {
                 return "Class-" + value;
             },
         },
@@ -111,44 +111,42 @@ mappingsMap = {
 
 var graphUri = "http://data.total.com/resource/tsf/maintenance/romain_14224/";
 
-if (true) {
-    var files = [
-        "CFIHOS application condition group member v1.5.csv",
-        "CFIHOS application condition group v1.5.csv",
-        "CFIHOS application condition v1.5.csv",
-        "CFIHOS discipline document type v1.5.csv",
-        "CFIHOS discipline v1.5.csv",
-        "CFIHOS document type v1.5.csv",
-        "CFIHOS entities v1.5.csv",
-        "CFIHOS entity attribute relationships v1.5.csv",
-        "CFIHOS entity attributes v1.5.csv",
-        "CFIHOS equipment class properties v1.5.csv",
-        "CFIHOS equipment class v1.5.csv",
-        "CFIHOS handover event v1.5.csv",
-        "CFIHOS object equivalent mapping v1.5.csv",
-        "CFIHOS property picklist v1.5.csv",
-        "CFIHOS property picklist value v1.5.csv",
-        "CFIHOS property v1.5.csv",
-        "CFIHOS RDL Master Objects v1.5.csv",
-        "CFIHOS source standard document and data requirement condition v1.5.csv",
-        "CFIHOS source standard document and data requirement v1.5.csv",
-        "CFIHOS source standard v1.5.csv",
-        "CFIHOS submission reference date v1.5.csv",
-        "CFIHOS tag class properties v1.5.csv",
-        "CFIHOS tag class required discipline document type v1.5.csv",
-        "CFIHOS tag class v1.5.csv",
-        "CFIHOS tag equipment class relationship v1.5.csv",
-        "CFIHOS tag or equipment class source standard v1.5.csv",
-        "CFIHOS unit of measure dimension v1.5.csv",
-        "CFIHOS unit of measure v1.5.csv",
-    ];
+// var files = [
+//     "CFIHOS application condition group member v1.5.csv",
+//     "CFIHOS application condition group v1.5.csv",
+//     "CFIHOS application condition v1.5.csv",
+//     "CFIHOS discipline document type v1.5.csv",
+//     "CFIHOS discipline v1.5.csv",
+//     "CFIHOS document type v1.5.csv",
+//     "CFIHOS entities v1.5.csv",
+//     "CFIHOS entity attribute relationships v1.5.csv",
+//     "CFIHOS entity attributes v1.5.csv",
+//     "CFIHOS equipment class properties v1.5.csv",
+//     "CFIHOS equipment class v1.5.csv",
+//     "CFIHOS handover event v1.5.csv",
+//     "CFIHOS object equivalent mapping v1.5.csv",
+//     "CFIHOS property picklist v1.5.csv",
+//     "CFIHOS property picklist value v1.5.csv",
+//     "CFIHOS property v1.5.csv",
+//     "CFIHOS RDL Master Objects v1.5.csv",
+//     "CFIHOS source standard document and data requirement condition v1.5.csv",
+//     "CFIHOS source standard document and data requirement v1.5.csv",
+//     "CFIHOS source standard v1.5.csv",
+//     "CFIHOS submission reference date v1.5.csv",
+//     "CFIHOS tag class properties v1.5.csv",
+//     "CFIHOS tag class required discipline document type v1.5.csv",
+//     "CFIHOS tag class v1.5.csv",
+//     "CFIHOS tag equipment class relationship v1.5.csv",
+//     "CFIHOS tag or equipment class source standard v1.5.csv",
+//     "CFIHOS unit of measure dimension v1.5.csv",
+//     "CFIHOS unit of measure v1.5.csv",
+// ];
 
-    var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "COMPONENTS", "FUNCTIONALOBJECT"];
-    //var mappingNames = ["FUNCTIONALOBJECT"];
+var mappingNames = ["SYSTEMS", "CLASSES_3", "CLASSES_4", "COMPONENTS", "FUNCTIONALOBJECT"];
+//var mappingNames = ["FUNCTIONALOBJECT"];
 
-    var mappings = [];
-    mappingNames.forEach(function (mappingName) {
-        mappings.push(mappingsMap[mappingName]);
-    });
-    processor.processSubClasses(mappings, graphUri, sparqlServerUrl);
-}
+var mappings = [];
+mappingNames.forEach(function (mappingName) {
+    mappings.push(mappingsMap[mappingName]);
+});
+processor.processSubClasses(mappings, graphUri, sparqlServerUrl);

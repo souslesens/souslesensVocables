@@ -1,70 +1,69 @@
+import React from "react";
+import { ulid } from "ulid";
+import { failure, success } from "srd";
+import { Msg } from "./Admin";
+import { Msg_, Type, Mode } from "../src/Component/UsersTable";
+const endpoint = "/api/v1/users";
 
-import { ulid } from 'ulid';
-import { SRD, RD, notAsked, loading, failure, success } from 'srd'
-import { Msg } from './Admin'
-
-
-async function getUsers(url: string): Promise<User[]> {
-
-    const response = await fetch(url);
-    const json = await response.json();
-    const users: [string, UserJSON][] = Object.entries(json);
-    const mapped_users = users.map(([key, val]) => decodeUser(val))
-
-    return mapped_users
+async function getUsers(): Promise<User[]> {
+    const response = await fetch(endpoint);
+    const { ressources } = (await response.json()) as { message: string; ressources: User[] };
+    return mapUsers(ressources);
+}
+function mapUsers(ressources: User[]) {
+    const users: [string, UserJSON][] = Object.entries(ressources);
+    const mapped_users = users.map(([, val]) => decodeUser(val));
+    return mapped_users;
 }
 
-async function putUsers(url: string, body: User[]): Promise<User[]> {
+async function putUsers(body: User[]): Promise<User[]> {
+    const response = await fetch(endpoint, { method: "put", body: JSON.stringify(body, null, "\t"), headers: { "Content-Type": "application/json" } });
+    const json = (await response.json()) as { message: string; ressources: User[] };
 
-    const usersToObject = body.reduce((obj, item) => ({ ...obj, [item.id]: item }), {});
-    const response = await fetch(url, { method: "put", body: JSON.stringify(usersToObject, null, '\t'), headers: { 'Content-Type': 'application/json' } });
-    const json = await response.json();
-    const users: [string, UserJSON][] = Object.entries(json);
-    const decoded_users = users.map(([key, val]) => decodeUser(val))
-
-    return decoded_users
+    return mapUsers(json.ressources);
 }
 
-function deleteUser(users: User[], user: User, updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>> = () => console.log("modal closed")) {
-    const updatedUsers = users.filter(prevUsers => prevUsers.id !== user.id);
-    return () => {
-        putUsers('/users', updatedUsers)
-            .then((users) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(users) }))
-            .then(() => setModal(false))
-            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }));
-    };
+async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
+    try {
+        const response = await fetch(endpoint, {
+            method: mode === Mode.Edition ? "put" : "post",
+            body: JSON.stringify({ [body.id]: body }, null, "\t"),
+            headers: { "Content-Type": "application/json" },
+        });
+        const { message, ressources } = (await response.json()) as { message: string; ressources: User[] };
+        if (response.status === 200) {
+            updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(ressources)) });
+            updateLocal({ type: Type.UserClickedModal, payload: false });
+            updateLocal({ type: Type.ResetUser, payload: mode });
+        } else {
+            updateModel({ type: "ServerRespondedWithUsers", payload: failure(`${response.status}, ${message}`) });
+        }
+    } catch (e) {
+        updateModel({ type: "ServerRespondedWithUsers", payload: failure(e) });
+    }
 }
 
-function saveUser(updateModel: React.Dispatch<Msg>, users: User[], user: User, localUser: User, setModal: React.Dispatch<React.SetStateAction<boolean>>) {
-    return () => {
-
-        updateModel({ type: 'UserClickedSaveChanges', payload: {} });
-        putUsers('/users', users.map(u => u.id === user.id ? localUser : u))
-            .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
-            .then(() => setModal(false))
-            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }));
-    };
+async function deleteUser(user: User, updateModel: React.Dispatch<Msg>) {
+    try {
+        const response = await fetch(`${endpoint}/${user.id}`, { method: "delete" });
+        const { message, ressources } = (await response.json()) as { message: string; ressources: User[] };
+        if (response.status === 200) {
+            updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(ressources)) });
+        } else {
+            updateModel({ type: "ServerRespondedWithUsers", payload: failure(`${response.status}, ${message}`) });
+        }
+    } catch (e) {
+        updateModel({ type: "ServerRespondedWithUsers", payload: failure(e) });
+    }
 }
 
 function restoreUsers(updateModel: React.Dispatch<Msg>, setModal: React.Dispatch<React.SetStateAction<boolean>>) {
     return () => {
-        getUsers('/users')
-            .then((person) => updateModel({ type: 'ServerRespondedWithUsers', payload: success(person) }))
+        getUsers()
+            .then((person) => updateModel({ type: "ServerRespondedWithUsers", payload: success(person) }))
             .then(() => setModal(false))
-            .catch((err) => updateModel({ type: 'ServerRespondedWithUsers', payload: failure(err.msg) }));
+            .catch((err: { msg: string }) => updateModel({ type: "ServerRespondedWithUsers", payload: failure(err.msg) }));
     };
-}
-
-
-const encodeUser = (user: User): UserJSON => {
-    return {
-        login: user.login,
-        password: user.password,
-        groups: user.groups,
-        source: user.source,
-        id: user.id,
-
-    }
 }
 
 const decodeUser = (user: UserJSON): User => {
@@ -76,20 +75,17 @@ const decodeUser = (user: UserJSON): User => {
         login: user.login,
         password: user.password,
         groups: user.groups,
-        source: user.source ? user.source : 'json',
-        _type: 'user'
+        source: user.source ? user.source : "json",
+        _type: "user",
+    };
+};
 
-    }
-}
+type UserJSON = { id?: string; login: string; password: string; groups: string[]; source?: string };
 
-type UserJSON = { id?: string, login: string, password: string, groups: string[], source?: string }
+type User = { id: string; _type: string; login: string; password: string; groups: string[]; source: string };
 
-type User = { id: string, _type: string, login: string, password: string, groups: string[], source: string }
+const newUser = (key: string): User => {
+    return { id: key, _type: "user", login: "", password: "", groups: [], source: "json" };
+};
 
-const newUser = (key: string): User => { return ({ id: key, _type: 'user', login: '', password: '', groups: [], source: 'json' }) }
-
-
-
-export { getUsers, newUser, restoreUsers, saveUser, deleteUser, putUsers, User }
-
-
+export { getUsers, newUser, saveUserBis as putUsersBis, restoreUsers, deleteUser, putUsers, User };

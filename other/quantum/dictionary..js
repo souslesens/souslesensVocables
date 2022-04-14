@@ -19,7 +19,7 @@ async.eachSeries(
             console.log(err);
             writeStream.end();
         });
-        readStream.on("end", function (err) {
+        readStream.on("end", function (_err) {
             callbackEach();
         });
         writeStream.on("error", function (err) {
@@ -30,7 +30,7 @@ async.eachSeries(
             console.log(err);
         });
     },
-    function (err) {
+    function (_err) {
         writeStream.end();
     }
 );

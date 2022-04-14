@@ -16,10 +16,9 @@
     }
 
     .KGbrowser_filterDiv {
-
         border: #6e2500 solid 2px;
         background-color: #d7d4f0;
-        width:90%;
+        width: 90%;
         border-radius: 3px;
         margin: 3px;
         margin-left: -2px;
@@ -29,19 +28,14 @@
         flex-direction: row;
     }
 
-
-
-
     .KGbrowser_mainPalette {
-
         width: 350px;
         display: flex;
         flex-direction: row;
-
-
     }
 
-    .KGbrowser_mainPalette button,.KGbrowserTabs_FiltersTabButtons button{
+    .KGbrowser_mainPalette button,
+    .KGbrowserTabs_FiltersTabButtons button {
         border: #6e2500 solid 2px;
         border-radius: 3px;
         margin: 2px;
@@ -49,32 +43,26 @@
         margin-top: 10px;
     }
 
-    #KGbrowser_ClassesTab, #KGbrowserTabs_FiltersTab, #KGbrowser_GraphTab, #KGbrowser_TableTab {
-   margin-left: 0px !important;
+    #KGbrowser_ClassesTab,
+    #KGbrowserTabs_FiltersTab,
+    #KGbrowser_GraphTab,
+    #KGbrowser_TableTab {
+        margin-left: 0px !important;
     }
-
-
 </style>
 
 <div>
-    <div style="display: flex;flex-direction: column">
+    <div style="display: flex; flex-direction: column">
         <div class="KGbrowser_mainPalette">
-
             <!-- <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions.queryFilters('graph')">Graph</button>
              <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>
              <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions.queryFilters('table')">Table</button
             <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="   $('#KGbrowser_accordion').accordion('option', {active: 1});">Go...</button>>-->
-            <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions.backToModel()">Back to Model</button>
-            <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions.resetAllFilters()">Reset All</button>
-
-
-
-
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGbrowserQuery.graphActions.backToModel()">Back to Model</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGbrowserQuery.graphActions.resetAllFilters()">Reset All</button>
         </div>
 
-
-        <div id="KGbrowser_accordion" style="width:360px;">
-
+        <div id="KGbrowser_accordion" style="width: 360px">
             <!--   <ul>
                    <li><a href="#KGbrowserTabs_FiltersTab">KG</a></li>
                    <li><a href="#KGbrowser_GraphTab">Graph</a></li>
@@ -90,83 +78,53 @@
             </div>
 
             <h3><span class="title">Filters </span></h3>
-            <div id="KGbrowserTabs_FiltersTab" style="width:100%; display: flex;flex-direction: column">
+            <div id="KGbrowserTabs_FiltersTab" style="width: 100%; display: flex; flex-direction: column">
                 <div class="KGbrowserTabs_FiltersTabButtons">
                     <!--    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery..executeShortestPathQuery('graph')">Graph</button>
                       <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions..executeShortestPathQuery('graph')">Table</button>
                       <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions..executeShortestPathQuery('graph',true)">Graph+</button>-->
 
-                      <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions.queryFilters('graph')">Graph</button>
-                   <!--   <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>-->
-                      <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions.queryFilters('table')">Table</button>
-                    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions.resetAllFilters()">Reset</button>
-                  <!--  <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions.clearIndividualsFilter()">???</button>-->
-
-
+                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGbrowserQuery.graphActions.queryFilters('graph')">Graph</button>
+                    <!--   <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions.queryFilters('graph',true)">Graph+</button>-->
+                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGbrowserQuery.graphActions.queryFilters('table')">Table</button>
+                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGbrowserQuery.graphActions.resetAllFilters()">Reset</button>
+                    <!--  <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions.clearIndividualsFilter()">???</button>-->
                 </div>
 
-                <div id="KGbrowser_filterDiv"
-                     style="width:100%; min-height:300px;display: flex;flex-direction: column">
-
-
+                <div id="KGbrowser_filterDiv" style="width: 100%; min-height: 300px; display: flex; flex-direction: column">
                     <div class="jstree" id="KGbrowser_adlJstreeDiv"></div>
-
                 </div>
                 <!--   <div  id="KGbrowser_adlJstreeActionDiv">
                        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="KGbrowserQuery.graphActions.addIndividualsFilter()">add filter</button>-->
-
-
             </div>
 
             <h3><span class="title">Graph </span></h3>
             <div id="KGbrowser_GraphTab">
-                expand<select id="KGbrowserGraph_expandSelect"
-                              onchange="KGbrowserGraph.expandGraph($(this).val())"></select><br>
-                <div>
-
-                </div>
-                <div id="KGbrowserGraph_nodesJstree" class="jstree" style="width: 300px;height: 400px">
-
-                </div>
-
-
+                expand<select id="KGbrowserGraph_expandSelect" onchange="KGbrowserGraph.expandGraph($(this).val())"></select
+                ><br />
+                <div></div>
+                <div id="KGbrowserGraph_nodesJstree" class="jstree" style="width: 300px; height: 400px"></div>
             </div>
-
 
             <h3><span class="title">Table </span></h3>
-            <div id="KGbrowser_TableTab">
-
-            </div>
-
-
+            <div id="KGbrowser_TableTab"></div>
         </div>
     </div>
 </div>
 
-
 <script>
+    $("#KGbrowser_searchAllDiv").load("./snippets/searchAll.html", function () {
+        $("#GenericTools_searchInAllSources").prop("checked", false);
 
-
-    $("#KGbrowser_searchAllDiv").load("./snippets/searchAll.html",function () {
-        $("#GenericTools_searchInAllSources").prop("checked", false)
-
-
-        $("#KGbrowser_accordion").accordion()
-        $("#KGbrowser_accordion").accordion("option", {active: 0});
+        $("#KGbrowser_accordion").accordion();
+        $("#KGbrowser_accordion").accordion("option", { active: 0 });
         $("#KGbrowser_accordion").on("accordionbeforeactivate", function (event, ui) {
-            if (!KGmappings.checkMappingEditionSave())
-                return false;
-        })
+            if (!KGmappings.checkMappingEditionSave()) return false;
+        });
         $("#KGbrowser_accordion").on("accordionactivate", function (event, ui) {
-
-
             if (ui.newPanel[0].id == "KGbrowser_GraphTab") {
-                KGbrowserGraph.initGraphTab()
-
+                KGbrowserGraph.initGraphTab();
             }
-        })
-
-    })
-
-
+        });
+    });
 </script>

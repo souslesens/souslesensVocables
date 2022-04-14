@@ -1,34 +1,71 @@
-import { ulid } from 'ulid'
+import { ulid } from "ulid";
+import { Mode, Type, Msg_ } from "./Component/SourcesTable";
+import { failure, success } from "srd";
+import { Msg } from "./Admin";
+import React from "react";
 
+const endpoint = "/api/v1/sources";
+
+type Response = { message: string; ressources: SourceJson[] };
 
 async function getSources(): Promise<Source[]> {
-
-    const response = await fetch('/sources');
-    const json = await response.json();
-    const entries: [string, SourceJson][] = Object.entries(json)
-    const decodedEntries = entries.map(([name, val]) => decodeSource(name, val))
-
-
-    return decodedEntries
+    const response = await fetch(endpoint);
+    const json = (await response.json()) as Response;
+    return mapSources(json.ressources);
 }
 
 export async function putSources(body: Source[]): Promise<Source[]> {
-
     const sourcesToObject = body.reduce((obj, item) => ({ ...obj, [item.name]: item }), {});
-    const response = await fetch("/sources", { method: "put", body: JSON.stringify(sourcesToObject, null, '\t'), headers: { 'Content-Type': 'application/json' } });
-    const json = await response.json();
-    const entries: [string, SourceJson][] = Object.entries(json);
-    const decodedEntries = entries.map(([key, val]) => decodeSource(key, val))
-
-    return decodedEntries
+    const response = await fetch("/sources", { method: "put", body: JSON.stringify(sourcesToObject, null, "\t"), headers: { "Content-Type": "application/json" } });
+    const json = (await response.json()) as Response;
+    return mapSources(json.ressources);
+}
+function mapSources(ressources: SourceJson[]) {
+    const sources: [string, SourceJson][] = Object.entries(ressources);
+    const mapped_users = sources.map(([key, val]) => decodeSource(key, val));
+    return mapped_users;
 }
 
+export async function saveSource(body: Source, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
+    try {
+        const response = await fetch(endpoint, {
+            method: mode === Mode.Edition ? "put" : "post",
+            body: JSON.stringify({ [body.id]: body }, null, "\t"),
+            headers: { "Content-Type": "application/json" },
+        });
+        const { message, ressources } = (await response.json()) as Response;
+        if (response.status === 200) {
+            updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(ressources)) });
+            updateLocal({ type: Type.UserClickedModal, payload: false });
+            updateLocal({ type: Type.ResetSource, payload: mode });
+        } else {
+            updateModel({ type: "ServerRespondedWithSources", payload: failure(`${response.status}, ${message}`) });
+        }
+    } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        updateModel({ type: "ServerRespondedWithSources", payload: failure(`Uncatched : ${e}`) });
+    }
+}
 
-const decodeSource = (name: string, source: SourceJson): Source => {
+export async function deleteSource(source: Source, updateModel: React.Dispatch<Msg>) {
+    try {
+        const response = await fetch(`${endpoint}/${source.id}`, { method: "delete" });
+        const { message, ressources } = (await response.json()) as Response;
+        if (response.status === 200) {
+            updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(ressources)) });
+        } else {
+            updateModel({ type: "ServerRespondedWithSources", payload: failure(`${response.status}, ${message}`) });
+        }
+    } catch (e) {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        updateModel({ type: "ServerRespondedWithSources", payload: failure(`Unhandled Error : ${e}`) });
+    }
+}
 
+const decodeSource = (key: string, source: SourceJson): Source => {
     const decodedSource = {
-        name: name,
-        _type: 'source',
+        name: source.name ? source.name : key,
+        _type: "source",
         id: source.id ? source.id : ulid(),
         type: source.type ? source.type : "missing type",
         graphUri: source.graphUri ? source.graphUri : "",
@@ -43,21 +80,19 @@ const decodeSource = (name: string, source: SourceJson): Source => {
         color: source.color ? source.color : "default color",
         predicates: source.predicates ? source.predicates : defaultSource(ulid()).predicates,
         group: source.group ? source.group : "",
-        imports: source.imports ? source.imports : []
-    }
-    return decodedSource
-}
+        imports: source.imports ? source.imports : [],
+    };
+    return decodedSource;
+};
 
 function controllerDefault(schemaType: string | undefined): string {
     if (schemaType === "OWL") {
-        return "Sparql_OWL"
+        return "Sparql_OWL";
     } else if (schemaType === "SKOS") {
-        return "Sparql_SKOS"
-
+        return "Sparql_SKOS";
     } else {
-        return "default controller"
+        return "default controller";
     }
-
 }
 
 export type Source = {
@@ -75,15 +110,15 @@ export type Source = {
     editable: boolean;
     color: string;
     isDraft: boolean;
-    predicates: { broaderPredicate: string, lang: string };
+    predicates: { broaderPredicate: string; lang: string };
     group: string;
     imports: string[];
-}
+};
 
 export const defaultSource = (id: string): Source => {
-    return ({
+    return {
         name: "",
-        _type: 'source',
+        _type: "source",
         id: id,
         type: "",
         graphUri: "",
@@ -98,12 +133,13 @@ export const defaultSource = (id: string): Source => {
         isDraft: false,
         predicates: { broaderPredicate: "", lang: "" },
         group: "",
-        imports: []
-    })
+        imports: [],
+    };
 };
 
 interface SourceJson {
     id?: string;
+    name?: string;
     type?: string;
     graphUri?: string;
     sparql_server?: SparqlServer;
@@ -115,33 +151,33 @@ interface SourceJson {
     dataSource?: null | DataSource;
     schema?: null;
     color?: string;
-    predicates?: { broaderPredicate: string, lang: string };
+    predicates?: { broaderPredicate: string; lang: string };
     group?: string;
     imports?: string[];
 }
 
 interface CommonSource {
-    id: string,
-    graphUri: string[],
-    sparql_server: { url: string, method: string, headers: string[] },
-    color: string,
-    controller: string,
-    topClassFilter: string
+    id: string;
+    graphUri: string[];
+    sparql_server: { url: string; method: string; headers: string[] };
+    color: string;
+    controller: string;
+    topClassFilter: string;
 }
 
 interface SkosSpecificSource {
-    editable: boolean,
-    isDraft: boolean,
-    predicates: { broaderPredicate: string, lang: string }
+    editable: boolean;
+    isDraft: boolean;
+    predicates: { broaderPredicate: string; lang: string };
 }
 
 //Data modeling source.json could be better
 
-export type Knowledge_GraphSource = CommonSource & DataSource
+export type Knowledge_GraphSource = CommonSource & DataSource;
 
-export type SkosSource = CommonSource & SkosSpecificSource
+export type SkosSource = CommonSource & SkosSpecificSource;
 
-export type _Source = Knowledge_GraphSource | SkosSource
+export type _Source = Knowledge_GraphSource | SkosSource;
 
 export interface DataSource {
     type: string[];
@@ -156,8 +192,8 @@ const defaultDataSource: DataSource = {
     connection: "_default",
     dbName: "",
     table_schema: "",
-    local_dictionary: { table: "", idColumn: "", labelColumn: "" }
-}
+    local_dictionary: { table: "", idColumn: "", labelColumn: "" },
+};
 
 interface LocalDictionary {
     table: string;
@@ -171,5 +207,4 @@ interface SparqlServer {
     headers: string[];
 }
 
-export { getSources, defaultDataSource }
-
+export { getSources, defaultDataSource };

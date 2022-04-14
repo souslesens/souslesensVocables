@@ -177,9 +177,7 @@ var util = {
     },
 
     formatStringForTriple: function (str, forUri) {
-
-        if(str.indexOf(":")>-1)
-            var x=3
+        if (str.indexOf(":") > -1) var x = 3;
         if (!str || !str.replace) return null;
         str = str.trim();
         str = str.replace(/\\/gm, "");
@@ -197,19 +195,14 @@ var util = {
         str = str.replace(/:/gm, "");
         str = str.replace(/\:/gm, "");
 
-
-
-
         if (forUri) {
-
-           str = str.replace(/ /gm, "_");
+            str = str.replace(/ /gm, "_");
             //  str = str.replace(/\-/gm, "_");
             str = str.replace(/:/gm, "_");
             str = str.replace(/\(/gm, "_");
             str = str.replace(/\)/gm, "_");
 
-
-  str=   str.replace(/[^a-zA-Z0-9-_]/g, '');
+            str = str.replace(/[^a-zA-Z0-9-_]/g, "");
             /*  str = encodeURIComponent(str);
              str = str.replace(/%2F/gm, "/");*/
         }
@@ -220,7 +213,7 @@ var util = {
         var readStream = fs.createReadStream(file, { start: 0, end: 5000, encoding: "utf8" });
         var separator = ",";
         var line = "";
-        var separators = ["\t" ,";",",", ];
+        var separators = ["\t", ";", ","];
         readStream
             .on("data", function (chunk) {
                 line += chunk;
@@ -353,13 +346,12 @@ var util = {
 
         return callback(null, dirFilesMap);
     },
-    decapitalizeLabel:function(label){
-
+    decapitalizeLabel: function (label) {
         var altLabel = label.replace(/[A-Z]/g, function (maj) {
-            return " " + maj
-        })
+            return " " + maj;
+        });
         return altLabel.trim();
-    }
+    },
 };
 
 module.exports = util;

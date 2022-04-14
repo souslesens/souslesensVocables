@@ -71,7 +71,7 @@ Csv2Sql = {
             if (err) return callback(err);
             var sliceIndex = 0;
             var totalRecords = 0;
-            var sliceSize =100;
+            var sliceSize = 100;
             var slices = util.sliceArray(result.data[0], sliceSize);
 
             async.eachSeries(
@@ -151,10 +151,6 @@ var tableName = "moho_north_fl";
 
 var input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\systems.txt";
 var tableName = "systems";
-
-
-
-
 
 var input = "D:\\NLP\\ontologies\\Evolen_MOHO-NORTH\\Moho_N_instruments.csv";
 var tableName = "instruments";

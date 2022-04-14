@@ -240,7 +240,7 @@ var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISOIEC-81346-2_2019.xml";
 var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\ISOIEC-81346-12_2018.xml";
 var openXmlFilePath = "D:\\NLP\\ontologies\\ISO 81346\\RDS-OG Library.xml";
 
-var openXmlFilePath = "D:\\NLP\\ontologies\\15663\\document.xml"
+var openXmlFilePath = "D:\\NLP\\ontologies\\15663\\document.xml";
 
 options = {
     rotate: false,

@@ -2,7 +2,7 @@ const modelUsers = require("../../../model/users");
 const path = require("path");
 const profilesJSON = path.resolve("config/users/users.json");
 exports.profilesJSON = profilesJSON;
-const { readRessource, writeRessource, responseSchema, ressourceCreated, ressourceUpdated, successfullyFetched } = require("./utils");
+const { readResource, writeResource, responseSchema, resourceCreated, resourceUpdated, successfullyFetched } = require("./utils");
 const bcrypt = require("bcrypt");
 module.exports = function () {
     let operations = {
@@ -20,15 +20,15 @@ module.exports = function () {
     }
 
     async function PUT(req, res, _next) {
-        const updatedProfile = ressourceWithHashedPassword(req);
+        const updatedProfile = resourceWithHashedPassword(req);
         try {
-            const oldProfiles = await readRessource(profilesJSON, res);
+            const oldProfiles = await readResource(profilesJSON, res);
             const updatedProfiles = { ...oldProfiles, ...updatedProfile };
             if (Object.keys(oldProfiles).includes(Object.keys(req.body)[0])) {
-                const savedProfiles = await writeRessource(profilesJSON, updatedProfiles, res);
-                ressourceUpdated(res, savedProfiles);
+                const savedProfiles = await writeResource(profilesJSON, updatedProfiles, res);
+                resourceUpdated(res, savedProfiles);
             } else {
-                res.status(400).json({ message: "Ressource does not exist. If you want to create another ressource, use POST instead." });
+                res.status(400).json({ message: "Resource does not exist. If you want to create another resource, use POST instead." });
             }
         } catch (e) {
             res.status(500).json({ message: e });
@@ -36,16 +36,16 @@ module.exports = function () {
     }
 
     async function POST(req, res, _next) {
-        const userToAdd = ressourceWithHashedPassword(req);
+        const userToAdd = resourceWithHashedPassword(req);
         try {
-            const oldUsers = await readRessource(profilesJSON, res);
+            const oldUsers = await readResource(profilesJSON, res);
             const userDoesntExist = !Object.keys(oldUsers).includes(Object.keys(userToAdd)[0]);
             const newUsers = { ...oldUsers, ...userToAdd };
             if (userDoesntExist) {
-                const saved = await writeRessource(profilesJSON, newUsers, res);
-                ressourceCreated(res, saved);
+                const saved = await writeResource(profilesJSON, newUsers, res);
+                resourceCreated(res, saved);
             } else {
-                res.status(400).json({ message: "Ressource already exists. If you want to update an existing ressource, use PUT instead." });
+                res.status(400).json({ message: "Resource already exists. If you want to update an existing resource, use PUT instead." });
             }
         } catch (e) {
             res.status(500);
@@ -85,6 +85,6 @@ module.exports = function () {
     return operations;
 };
 
-function ressourceWithHashedPassword(req) {
+function resourceWithHashedPassword(req) {
     return Object.fromEntries(Object.entries(req.body).map(([key, val]) => [key, { ...val, password: val.password.startsWith("$2b$") ? val.password : bcrypt.hashSync(val.password, 10) }]));
 }

@@ -82,7 +82,7 @@ openapi.initialize({
                 if (!req.isAuthenticated || !req.isAuthenticated()) {
                     throw {
                         status: 401,
-                        message: "You must authenticate to access this ressource.",
+                        message: "You must authenticate to access this resource.",
                     };
                 }
             }
@@ -94,14 +94,14 @@ openapi.initialize({
             if (!currentUser.logged) {
                 throw {
                     status: 401,
-                    message: "You must authenticate to access this ressource.",
+                    message: "You must authenticate to access this resource.",
                 };
             }
 
             if (!currentUser.user.groups.includes("admin")) {
                 throw {
                     status: 401,
-                    message: "You must be admin to access this ressource.",
+                    message: "You must be admin to access this resource.",
                 };
             }
 

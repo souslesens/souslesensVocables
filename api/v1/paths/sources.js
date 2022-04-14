@@ -5,7 +5,7 @@ const profilesJSON = path.resolve("config/profiles.json");
 exports.profilesJSON = sourcesJSON;
 const _ = require("lodash");
 const util = require("util");
-const { readRessource, writeRessource, ressourceCreated, ressourceUpdated, responseSchema, ressourceFetched } = require("./utils");
+const { readResource, writeResource, resourceCreated, resourceUpdated, responseSchema, resourceFetched } = require("./utils");
 const userManager = require(path.resolve("bin/user."));
 const read = util.promisify(fs.readFile);
 module.exports = function () {
@@ -54,7 +54,7 @@ module.exports = function () {
             } else {
                 const sources = JSON.parse(data);
                 const filteredSources = filterSources(allowedSources, sources, allowedSources, req);
-                ressourceFetched(res, filteredSources);
+                resourceFetched(res, filteredSources);
             }
         });
     }
@@ -65,12 +65,12 @@ module.exports = function () {
         const userInfo = userManager.getUser(req.user);
         const allowedSources = getAllowedSources(userInfo.user, profiles);
         try {
-            const oldSources = await readRessource(sourcesJSON, res);
+            const oldSources = await readResource(sourcesJSON, res);
             const updatedSources = { ...oldSources, ...updatedSource };
             if (Object.keys(oldSources).includes(Object.keys(req.body)[0])) {
-                ressourceUpdated(res, filterSources(allowedSources, updatedSources));
+                resourceUpdated(res, filterSources(allowedSources, updatedSources));
             } else {
-                res.status(400).json({ message: "Ressource does not exist. If you want to create another ressource, use POST instead." });
+                res.status(400).json({ message: "Resource does not exist. If you want to create another resource, use POST instead." });
             }
         } catch (err) {
             res.status(500).json({ message: err });
@@ -81,15 +81,15 @@ module.exports = function () {
         const profileToAdd = req.body;
         //        const successfullyCreated = newProfiles[req.params.id]
         try {
-            const oldProfiles = await readRessource(sourcesJSON, res);
+            const oldProfiles = await readResource(sourcesJSON, res);
             const profileDoesntExist = !Object.keys(oldProfiles).includes(Object.keys(profileToAdd)[0]);
             const objectToCreateKey = req.body;
             const newProfiles = { ...oldProfiles, ...objectToCreateKey };
             if (profileDoesntExist) {
-                const saved = await writeRessource(sourcesJSON, newProfiles, res);
-                ressourceCreated(res, saved);
+                const saved = await writeResource(sourcesJSON, newProfiles, res);
+                resourceCreated(res, saved);
             } else {
-                res.status(400).json({ message: "Ressource already exists. If you want to update an existing ressource, use PUT instead." });
+                res.status(400).json({ message: "Resource already exists. If you want to update an existing resource, use PUT instead." });
             }
         } catch (e) {
             res.status(500);

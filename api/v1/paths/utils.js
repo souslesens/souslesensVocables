@@ -3,53 +3,53 @@ const util = require("util");
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
 
-async function writeRessource(pathToRessource, newRessource, _res) {
+async function writeResource(pathToResource, newResource, _res) {
     try {
-        const savedFile = await writeFile(pathToRessource, JSON.stringify(newRessource, null, 2)).then(async () => await readFile(pathToRessource));
+        const savedFile = await writeFile(pathToResource, JSON.stringify(newResource, null, 2)).then(async () => await readFile(pathToResource));
         return JSON.parse(savedFile);
     } catch (error) {
         throw "ERROR WHEN SAVING";
     }
 }
 
-async function readRessource(pathToRessource, _res) {
+async function readResource(pathToResource, _res) {
     try {
-        const file = await readFile(pathToRessource);
+        const file = await readFile(pathToResource);
         return JSON.parse(file);
     } catch (e) {
         throw `ERROR: ${e}`;
     }
 }
-function success(res, updatedRessources, msg) {
+function success(res, updatedResources, msg) {
     res.status(200).json({
         message: msg,
-        ressources: updatedRessources,
+        resources: updatedResources,
     });
 }
-function ressourceCreated(res, updatedRessources) {
-    success(res, updatedRessources, "ressource successfully created");
+function resourceCreated(res, updatedResources) {
+    success(res, updatedResources, "resource successfully created");
 }
-function ressourceUpdated(res, updatedRessources) {
-    success(res, updatedRessources, "ressource successfully updated");
+function resourceUpdated(res, updatedResources) {
+    success(res, updatedResources, "resource successfully updated");
 }
-function ressourceDeleted(res, updatedRessources) {
-    success(res, updatedRessources, "ressource successfully deleted");
+function resourceDeleted(res, updatedResources) {
+    success(res, updatedResources, "resource successfully deleted");
 }
-function ressourceFetched(res, updatedRessources) {
-    success(res, updatedRessources, "ressources successfully fetched");
+function resourceFetched(res, updatedResources) {
+    success(res, updatedResources, "resources successfully fetched");
 }
 
 const successfullyCreated = (resource) => {
-    return { message: "resources successfully created", ressources: resource };
+    return { message: "resource successfully created", resources: resource };
 };
 const successfullyUpdated = (resource) => {
-    return { message: "resources successfully updated", ressources: resource };
+    return { message: "resource successfully updated", resources: resource };
 };
 const successfullyDeleted = (resource) => {
-    return { message: "resources successfully deleted", ressources: resource };
+    return { message: "resource successfully deleted", resources: resource };
 };
 const successfullyFetched = (resource) => {
-    return { message: "resources successfully fetched", ressources: resource };
+    return { message: "resource successfully fetched", resources: resource };
 };
 
 function failure(res, code, errMsg) {
@@ -77,16 +77,16 @@ function verbToHuman(verb) {
     }
 }
 
-function responseSchema(ressourceName, verb) {
+function responseSchema(resourceName, verb) {
     return {
         200: {
-            description: `${ressourceName} successfully ${verbToHuman(verb)}`,
+            description: `${resourceName} successfully ${verbToHuman(verb)}`,
             schema: {
                 properties: {
                     message: { type: "string" },
-                    ressources: {
+                    resources: {
                         type: "object",
-                        $ref: `#/definitions/${ressourceName}`,
+                        $ref: `#/definitions/${resourceName}`,
                     },
                 },
             },
@@ -101,14 +101,14 @@ function responseSchema(ressourceName, verb) {
     };
 }
 module.exports = {
-    writeRessource,
+    writeResource,
     failure,
     responseSchema,
-    ressourceFetched,
-    readRessource,
-    ressourceCreated,
-    ressourceUpdated,
-    ressourceDeleted,
+    resourceFetched,
+    readResource,
+    resourceCreated,
+    resourceUpdated,
+    resourceDeleted,
     successfullyCreated,
     successfullyUpdated,
     successfullyDeleted,

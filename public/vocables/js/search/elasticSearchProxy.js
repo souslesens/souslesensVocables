@@ -24,7 +24,7 @@ var ElasticSearchProxy = (function () {
                 callback(null, data);
             },
             error: function (err) {
-                console.error('ElasticSearchProxy.queryElastic', err.responseText);
+                console.error("ElasticSearchProxy.queryElastic", err.responseText);
                 if (callback) {
                     return callback(err);
                 }

@@ -44,7 +44,8 @@ export const LogsTable = () => {
                                     <TableHead>
                                         <TableRow>
                                             <TableCell style={{ fontWeight: "bold" }}>User</TableCell>
-                                            <TableCell style={{ fontWeight: "bold" }}>tool</TableCell>
+                                            <TableCell style={{ fontWeight: "bold" }}>Tool</TableCell>
+                                            <TableCell style={{ fontWeight: "bold" }}>Source</TableCell>
                                             <TableCell style={{ fontWeight: "bold" }}>at</TableCell>
                                         </TableRow>
                                     </TableHead>
@@ -55,8 +56,8 @@ export const LogsTable = () => {
                                                 return (
                                                     <TableRow key={log.timestamp}>
                                                         <TableCell>{log.user}</TableCell>
-
                                                         <TableCell>{log.tool}</TableCell>
+                                                        <TableCell>{log.source}</TableCell>
                                                         <TableCell>{log.timestamp}</TableCell>
                                                     </TableRow>
                                                 );

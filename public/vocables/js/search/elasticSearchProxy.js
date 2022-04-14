@@ -24,8 +24,7 @@ var ElasticSearchProxy = (function () {
                 callback(null, data);
             },
             error: function (err) {
-                // eslint-disable-next-line no-console
-                console.log(err.responseText);
+                console.error('ElasticSearchProxy.queryElastic', err.responseText);
                 if (callback) {
                     return callback(err);
                 }

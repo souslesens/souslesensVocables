@@ -39,6 +39,19 @@ function ressourceFetched(res, updatedRessources) {
     success(res, updatedRessources, "ressources successfully fetched");
 }
 
+const successfullyCreated = (resource) => {
+    return { message: "resources successfully created", ressources: resource };
+};
+const successfullyUpdated = (resource) => {
+    return { message: "resources successfully updated", ressources: resource };
+};
+const successfullyDeleted = (resource) => {
+    return { message: "resources successfully deleted", ressources: resource };
+};
+const successfullyFetched = (resource) => {
+    return { message: "resources successfully fetched", ressources: resource };
+};
+
 function failure(res, code, errMsg) {
     switch (code) {
         case 400:
@@ -87,4 +100,17 @@ function responseSchema(ressourceName, verb) {
         },
     };
 }
-module.exports = { writeRessource, failure, responseSchema, ressourceFetched, readRessource, ressourceCreated, ressourceUpdated, ressourceDeleted };
+module.exports = {
+    writeRessource,
+    failure,
+    responseSchema,
+    ressourceFetched,
+    readRessource,
+    ressourceCreated,
+    ressourceUpdated,
+    ressourceDeleted,
+    successfullyCreated,
+    successfullyUpdated,
+    successfullyDeleted,
+    successfullyFetched,
+};

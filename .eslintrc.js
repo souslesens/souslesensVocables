@@ -13,7 +13,7 @@ module.exports = {
     },
     overrides: [
         {
-            files: ["app.js", "scripts/*.js", "routes/*.js", "other/**/*.js", "bin/**/*.js", "api/**/*.js", "**/webpack.config.js", ".eslintrc.js"],
+            files: ["app.js", "scripts/*.js", "routes/*.js", "other/**/*.js", "bin/**/*.js", "api/**/*.js", "**/webpack.config.js", ".eslintrc.js", "model/*.js"],
             env: {
                 node: true,
             },

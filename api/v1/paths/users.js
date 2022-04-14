@@ -10,9 +10,9 @@ module.exports = function () {
         POST,
         PUT,
     };
-    function GET(req, res, _next) {
+    async function GET(req, res, _next) {
         try {
-            const users = modelUsers.getUsers();
+            const users = await modelUsers.getUsers();
             res.status(200).json(successfullyFetched(users));
         } catch (error) {
             res.status(500).json({ message: error.message });

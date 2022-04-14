@@ -12,10 +12,10 @@ module.exports = function () {
         DELETE,
     };
 
-    function GET(req, res, _next) {
+    async function GET(req, res, _next) {
         const userId = req.params.id;
         try {
-            const users = modelUsers.getUsers();
+            const users = await modelUsers.getUsers();
             if (users[userId] !== undefined) {
                 res.status(200).json(users[userId]);
             } else {

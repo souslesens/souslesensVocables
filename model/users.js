@@ -2,8 +2,8 @@ const path = require("path");
 const fs = require("fs");
 const usersJSON = path.resolve("config/users/users.json");
 
-const getUsers = () => {
-    const data = fs.readFileSync(usersJSON, "utf8");
+const getUsers = async () => {
+    const data = await fs.readFile(usersJSON, "utf8");
     const users = {};
     Object.entries(JSON.parse(data)).map(([key, value]) => {
         users[key] = {

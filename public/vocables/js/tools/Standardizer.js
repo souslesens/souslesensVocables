@@ -76,8 +76,8 @@ var Standardizer = (function () {
             dictionaries_listIndexes: 1,
         };
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
+            type: "GET",
+            url: Config.apiUrl + "/elasticsearch/indices",
             data: payload,
             dataType: "json",
             success: function (indexes, _textStatus, _jqXHR) {
@@ -1671,14 +1671,13 @@ var Standardizer = (function () {
             chunks,
             function (chunk, callbackEach) {
                 var payload = {
-                    SpacyExtract: 1,
                     text: chunk,
-                    options: JSON.stringify(options),
-                    types: JSON.stringify(["NN"]),
+                    options: options,
+                    types: ["NN"],
                 };
                 $.ajax({
                     type: "POST",
-                    url: Config.serverUrl,
+                    url: Config.apiUrl + "/annotator/spacyextract",
                     data: payload,
                     dataType: "json",
                     success: function (tokens, _textStatus, _jqXHR) {

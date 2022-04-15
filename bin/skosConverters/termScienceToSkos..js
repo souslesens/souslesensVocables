@@ -466,7 +466,6 @@ var termScienceToSkos = {
 // });
 // }
 
-
 // if (false) {
 //     const rdfPath = "D:\\NLP\\thesaurus_CTG_Product.rdf";
 //     termScienceToSkos.commonConcepts(rdfPath, function (_err, _result) {
@@ -521,7 +520,6 @@ var termScienceToSkos = {
 //         }
 //     );
 // }
-
 
 // if (false) {
 //     var rdfPath = "D:\\NLP\\termScience\\termSciences_Physics.rdf";

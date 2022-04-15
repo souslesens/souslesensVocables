@@ -817,8 +817,6 @@ var visjsGraph = (function () {
         });
     };
     self.listSavedGraphs = function (callback) {
-        if (!Config || !Config.serverUrl) return;
-
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/data/files",

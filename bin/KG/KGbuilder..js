@@ -459,7 +459,7 @@ var KGbuilder = {
         );
     },
 
-    getExistingLabelUriMap: function (serverUrl, graphUri, type, callbackX) {
+    getExistingLabelUriMap: function (sparqlUrl, graphUri, type, callbackX) {
         var fetchLimit = 10000;
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -487,7 +487,7 @@ var KGbuilder = {
                 //iterate
                 var query2 = query + " OFFSET " + offset;
                 var body = {
-                    url: serverUrl,
+                    url: sparqlUrl,
                     params: { query: query2 },
                     headers: {
                         Accept: "application/sparql-results+json",

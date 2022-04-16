@@ -440,9 +440,9 @@ var MainController = (function () {
             else $("#toolPanelLabel").html(Config.tools[self.currentTool].label);
         },
 
-        showPopup: function (point, popupDiv) {
+        showPopup: function (point, popupDiv, absolutePosition) {
             if (!popupDiv) popupDiv = "popupDiv";
-            $("#" + popupDiv).css("left", point.x + leftPanelWidth);
+            $("#" + popupDiv).css("left", point.x + (absolutePosition ? 0 : leftPanelWidth));
             $("#" + popupDiv).css("top", point.y);
             $("#" + popupDiv).css("display", "flex");
         },

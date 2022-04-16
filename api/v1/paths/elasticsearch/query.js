@@ -7,7 +7,7 @@ module.exports = function () {
     };
 
     function POST(req, res, _next) {
-        elasticRestProxy.executePostQuery(req.body.url, req.body.executeQuery, req.body.indexes, function (err, result) {
+        elasticRestProxy.executePostQuery(req.body.url, req.body.query, req.body.indexes, function (err, result) {
             if (err) {
                 return res.status(400).json({ error: err });
             }

@@ -37,7 +37,12 @@ var SearchUtil = (function () {
                                 if (err) return callbackSeries(err);
 
                                 indexes = [];
-                                if (toSources && !Array.isArray(toSources)) toSources = [toSources];
+                                if (toSources) {
+                                    if (!Array.isArray(toSources)) toSources = [toSources];
+                                    toSources.forEach(function (_source) {
+                                        indexes.push(_source.toLowerCase());
+                                    });
+                                }
                                 indexedSources.forEach(function (source) {
                                     if (!toSources || toSources.length == 0 || toSources.indexOf(source) > -1) {
                                         indexes.push(source.toLowerCase());

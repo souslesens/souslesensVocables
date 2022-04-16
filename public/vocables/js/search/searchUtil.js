@@ -185,7 +185,7 @@ var SearchUtil = (function () {
         if (ids) {
             size = ids.length + 10;
             var str = "";
-            var header = { index: index };
+            var header = {index: index};
             ids.forEach(function (id) {
                 var query = {
                     query: {
@@ -208,7 +208,7 @@ var SearchUtil = (function () {
                 return callback(null, hits);
             });
         } else {
-            var queryObj = { match_all: {} };
+            var queryObj = {match_all: {}};
 
             var query = {
                 query: queryObj,
@@ -218,7 +218,7 @@ var SearchUtil = (function () {
                     excludes: ["attachment.content"],
                 },
                 sort: {
-                    "label.keyword": { order: "asc" },
+                    "label.keyword": {order: "asc"},
                 },
             };
 
@@ -288,7 +288,7 @@ var SearchUtil = (function () {
                 };
             }
             var header = {};
-            if (indexes) header = { index: indexes };
+            if (indexes) header = {index: indexes};
 
             var query = {
                 query: queryObj,
@@ -309,6 +309,8 @@ var SearchUtil = (function () {
         async.eachSeries(
             slices,
             function (wordSlice, callbackEach) {
+                if (wordSlice.length == 0)
+                    return callbackEach();
                 bulQueryStr = "";
                 wordSlice.forEach(function (word) {
                     if (!word) return;
@@ -331,9 +333,10 @@ var SearchUtil = (function () {
     self.indexData = function (indexName, data, replaceIndex, callback) {
         if (data.length == 0) return callback();
         //  MainController.UI.message("indexing " + data.length)
-        var options = { replaceIndex: replaceIndex, owlType: "Class" };
+        var options = {replaceIndex: replaceIndex, owlType: "Class"};
         var payload = {
-            dictionaries_indexSource: 1,
+            // dictionaries_indexSource: 1,
+            indexSource: 1,
             indexName: indexName,
             data: JSON.stringify(data),
             options: JSON.stringify(options),
@@ -365,7 +368,7 @@ var SearchUtil = (function () {
             sources,
             function (sourceLabel, callbackEachSource) {
                 var totalLines = 0;
-                var options = { withoutImports: true };
+                var options = {withoutImports: true};
 
                 //    if (Config.sources[sourceLabel].schemaType == "OWL") {
                 Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
@@ -411,7 +414,7 @@ var SearchUtil = (function () {
     self.addObjectsToIndex = function (sourceLabel, ids, callback) {
         var filter = " filter (?concept =<" + self.currentNodeId + ">) ";
         filter = Sparql_common.setFilter("concept", ids);
-        Sparql_generic.getSourceTaxonomy(sourceLabel, { filter: filter }, function (err, result) {
+        Sparql_generic.getSourceTaxonomy(sourceLabel, {filter: filter}, function (err, result) {
             var classesArray = [];
             for (var key in result.classesMap) {
                 classesArray.push(result.classesMap[key]);
@@ -511,7 +514,7 @@ var SearchUtil = (function () {
                 },
             ],
             function (err) {
-                return callback(err, { data: allData, labelsMap: allLabelsMap });
+                return callback(err, {data: allData, labelsMap: allLabelsMap});
             }
         );
     };

@@ -10,7 +10,6 @@ var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.");
 var configManager = require("../bin/configManager.");
 var CsvTripleBuilder = require("../bin/KG/CsvTripleBuilder.");
 
-
 const config = require(path.resolve("config/mainConfig.json"));
 
 var router = express.Router();

@@ -30,6 +30,7 @@ var SQLquery = (function () {
         const datasource = Config.sources[source].dataSource;
 
         const params = new URLSearchParams({
+            dir: "graphs",
             dbName: datasource.dbName,
             type: datasource.type,
             sqlQuery: query,

@@ -63,14 +63,18 @@ var KGcreator = (function () {
 
     self.loadCsvDirs = function () {
         var payload = {
-            listDirFiles: 1,
-            dir: "CSV/",
+            dir: "CSV",
         };
         $.ajax({
-            type: "POST",
+            type: "GET",
+            url: Config.apiUrl + "/data/files",
+            dataType: "json",
+            data: payload,
+
+            /*   type: "POST",
             url: Config.serverUrl,
             data: payload,
-            dataType: "json",
+            dataType: "json",*/
             success: function (result, _textStatus, _jqXHR) {
                 common.fillSelectOptions("KGcreator_csvDirsSelect", result, true);
             },
@@ -83,12 +87,11 @@ var KGcreator = (function () {
     self.listFiles = function () {
         self.currentCsvDir = $("#KGcreator_csvDirsSelect").val();
         var payload = {
-            listDirFiles: 1,
             dir: "CSV/" + self.currentCsvDir,
         };
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
+            type: "GET",
+            url: `${Config.apiUrl}/data/files`,
             data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
@@ -140,17 +143,17 @@ var KGcreator = (function () {
         if (obj.node.children.length > 0) return;
 
         // load csv columns
-        var payload = {
-            readCsv: 1,
+        const payload = {
             dir: "CSV/" + self.currentCsvDir,
-            fileName: obj.node.id,
+            name: obj.node.id,
             options: JSON.stringify({ lines: 100 }),
         };
+
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: payload,
+            type: "GET",
+            url: `${Config.apiUrl}/data/csv`,
             dataType: "json",
+            data: payload,
             success: function (result, _textStatus, _jqXHR) {
                 var jstreeData = [];
 
@@ -437,14 +440,13 @@ var KGcreator = (function () {
         }
         self.currentJsonObject = data;
         var payload = {
-            saveData: 1,
             dir: "CSV/" + self.currentCsvDir,
             fileName: self.currentJsonObject.fileName + ".json",
             data: JSON.stringify(self.currentJsonObject),
         };
         $.ajax({
             type: "POST",
-            url: Config.serverUrl,
+            url: `${Config.apiUrl}/data/file`,
             data: payload,
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
@@ -486,17 +488,16 @@ var KGcreator = (function () {
             self.mainJsonEditor.load(self.currentJsonObject);
 
             var payload = {
-                readDataFile: 1,
                 dir: "CSV/" + self.currentCsvDir,
-                fileName: csvFileName + ".json",
+                name: csvFileName + ".json",
             };
             $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
+                type: "GET",
+                url: `${Config.apiUrl}/data/file`,
                 data: payload,
                 dataType: "json",
                 success: function (result, _textStatus, _jqXHR) {
-                    self.currentJsonObject = JSON.parse(result.result);
+                    self.currentJsonObject = JSON.parse(result);
 
                     if (!self.currentJsonObject.graphUri) self.currentJsonObject.graphUri = self.currentGraphUri || "";
                     else self.currentGraphUri = self.currentJsonObject.graphUri;

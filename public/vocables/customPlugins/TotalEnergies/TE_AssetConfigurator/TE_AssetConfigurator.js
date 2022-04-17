@@ -289,7 +289,7 @@ var TE_AssetConfigurator = (function () {
             if (visjsData.edges.length > 0) visjsGraph.data.edges.add(visjsData.edges);
             $("#graphDiv").focus();
         } else {
-            var options = {
+            var _options = {
                 layout: {
                     hierarchical: {
                         enabled: true,
@@ -331,7 +331,7 @@ var TE_AssetConfigurator = (function () {
                 },
             };
             if (_options && _options.manipulation)
-                options.manipulation = {
+                _options.manipulation = {
                     enabled: {
                         addNode: function (nodeData, callback) {
                             if (!TE_AssetDataManager.currentTreeNode) return select("an asset node first");
@@ -346,7 +346,7 @@ var TE_AssetConfigurator = (function () {
                     },
                 };
 
-            options.dndCtrlFn = function (startNode, endNode, _point) {
+            _options.dndCtrlFn = function (startNode, endNode, _point) {
                 if (confirm("Create relation between " + startNode.data.label + " and " + endNode.data.label))
                     self.createRelation(startNode, endNode, function (_err, _visjsData) {
                         // Pass
@@ -362,9 +362,9 @@ var TE_AssetConfigurator = (function () {
             _options.onHoverNodeFn = function (node, _point, _options) {
                 self.showGraphNodeInfos(node);
             };
-            options.onRightClickFn = TE_AssetConfigurator.showGraphPopupMenus;
+            _options.onRightClickFn = TE_AssetConfigurator.showGraphPopupMenus;
 
-            visjsGraph.draw("graphDiv", visjsData, options, function () {
+            visjsGraph.draw("graphDiv", visjsData, _options, function () {
                 // Pass
             });
         }

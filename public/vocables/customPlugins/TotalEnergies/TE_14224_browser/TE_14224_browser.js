@@ -316,7 +316,7 @@ var TE_14224_browser = (function () {
                     }
 
                     MainController.UI.message("looking for ISO_14424 classes");
-                    SearchUtil.getSimilarLabelsInSources(null, self.referenceOntologySource.toLowerCase(), words, null, "exactMatch", { parentlabels: true }, function (err, result) {
+                    SearchUtil.getSimilarLabelsInSources(null, [self.referenceOntologySource.toLowerCase()], words, null, "exactMatch", { parentlabels: true }, function (err, result) {
                         if (err) return alert(err);
 
                         var ids = [];

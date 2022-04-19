@@ -38,7 +38,6 @@ var SearchUtil = (function () {
 
                                 indexes = [];
                                 if (toSources) {
-                                    if (!Array.isArray(toSources)) toSources = [toSources];
                                     toSources.forEach(function (_source) {
                                         indexes.push(_source.toLowerCase());
                                     });
@@ -222,7 +221,7 @@ var SearchUtil = (function () {
                 },
             };
 
-            ElasticSearchProxy.queryElastic(query, index, function (err, result) {
+            ElasticSearchProxy.queryElastic(query, [index], function (err, result) {
                 if (err) {
                     return callback(err);
                 }
@@ -331,7 +330,6 @@ var SearchUtil = (function () {
 
     self.indexData = function (indexName, data, replaceIndex, callback) {
         if (data.length == 0) return callback();
-        //  MainController.UI.message("indexing " + data.length)
         var options = { replaceIndex: replaceIndex, owlType: "Class" };
         var payload = {
             indexName: indexName,

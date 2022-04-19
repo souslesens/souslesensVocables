@@ -335,14 +335,15 @@ var SearchUtil = (function () {
         var options = { replaceIndex: replaceIndex, owlType: "Class" };
         var payload = {
             indexName: indexName,
-            data: JSON.stringify(data),
-            options: JSON.stringify(options),
+            data: data,
+            options: options,
         };
 
         $.ajax({
             type: "POST",
             url: Config.apiUrl + "/elasticsearch/indexsource",
-            data: payload,
+            data: JSON.stringify(payload),
+            contentType: "application/json",
             dataType: "json",
             success: function (_data2, _textStatus, _jqXHR) {
                 callback(null, data);

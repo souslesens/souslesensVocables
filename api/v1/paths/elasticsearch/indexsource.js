@@ -7,6 +7,7 @@ module.exports = function () {
     };
 
     function POST(req, res, _next) {
+        console.log("REGARDE", req.body);
         dictionariesManager.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, result) {
             if (err) {
                 return res.status(400).json({ error: err });
@@ -32,10 +33,24 @@ module.exports = function () {
                             type: "string",
                         },
                         data: {
-                            type: "string",
+                            type: "array",
+                            items: {
+                                type: "object",
+                                properties: {
+                                    id: { type: "string" },
+                                    label: { type: "string" },
+                                    type: { type: "string" },
+                                    parents: { type: "array", items: { type: "string" } },
+                                    skosLabel: { type: "array", items: { type: "string" } },
+                                },
+                            },
                         },
                         options: {
-                            type: "string",
+                            type: "object",
+                            properties: {
+                                owlType: { type: "string" },
+                                replaceIndex: { type: "boolean" },
+                            },
                         },
                     },
                 },

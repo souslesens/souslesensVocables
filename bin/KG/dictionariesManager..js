@@ -47,8 +47,6 @@ var DictionariesManager = {
     },
 
     indexSource: function (indexName, data, options, callback) {
-        if (typeof data === "string") data = JSON.parse(data);
-        if (typeof options === "string") options = JSON.parse(options);
         if (!options) options = {};
         var elasticUrl;
         async.series(

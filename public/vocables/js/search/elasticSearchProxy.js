@@ -4,12 +4,6 @@ var ElasticSearchProxy = (function () {
 
     self.queryElastic = function (query, indexes, callback) {
         if (!indexes) indexes = context.curentSearchIndexes;
-        if (!Array.isArray(indexes)) {
-            indexes = [indexes];
-        }
-
-        /*    console.log(JSON.stringify(indexes, null, 2))
-            console.log(JSON.stringify(query, null, 2))*/
 
         var payload = {
             query: query,
@@ -17,7 +11,6 @@ var ElasticSearchProxy = (function () {
             indexes: indexes,
         };
 
-        var x = JSON.stringify(payload);
         $.ajax({
             type: "POST",
             url: Config.apiUrl + "/elasticsearch/query",

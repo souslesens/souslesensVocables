@@ -727,7 +727,7 @@ var TE_AssetConfigurator = (function () {
                             },
                         },
                     };
-                    ElasticSearchProxy.queryElastic(queryObj, self.currentSource.toLowerCase(), function (err, result) {
+                    ElasticSearchProxy.queryElastic(queryObj, [self.currentSource.toLowerCase()], function (err, result) {
                         if (err) MainController.UI.message(err);
                         matchingHits = result.hits.hits;
                         if (matchingHits.length == 0) return callbackSeries("no result");
@@ -798,7 +798,7 @@ var TE_AssetConfigurator = (function () {
                             },
                         });
                     }
-                    ElasticSearchProxy.queryElastic(queryObj, self.currentSource.toLowerCase(), function (err, result) {
+                    ElasticSearchProxy.queryElastic(queryObj, [self.currentSource.toLowerCase()], function (err, result) {
                         if (err) MainController.UI.message(err);
                         matchingHits = result.hits.hits;
                         if (matchingHits.length == 0) return callbackSeries("no result");

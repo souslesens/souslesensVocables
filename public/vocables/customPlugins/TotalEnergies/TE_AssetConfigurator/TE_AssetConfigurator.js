@@ -289,7 +289,7 @@ var TE_AssetConfigurator = (function () {
             if (visjsData.edges.length > 0) visjsGraph.data.edges.add(visjsData.edges);
             $("#graphDiv").focus();
         } else {
-            var _options = {
+            _options = {
                 layout: {
                     hierarchical: {
                         enabled: true,

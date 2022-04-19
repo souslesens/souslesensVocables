@@ -6,13 +6,13 @@ const profiles = path.resolve("config/profiles.json");
 const users = path.resolve("config/users/users.json");
 const bcrypt = require("bcrypt");
 
-async function sanitize(ressource) {
+async function sanitize(resource) {
     try {
-        fs.readFile(ressource, (_err, data) => {
+        fs.readFile(resource, (_err, data) => {
             const parsedData = JSON.parse(data);
             const sanitizedData = Object.fromEntries(Object.entries(parsedData).map(([key, val]) => addFields(key, val)));
             //.reduce((obj, item) => ({ ...obj, [item.id]: item }), {})
-            fs.writeFile(ressource, JSON.stringify(sanitizedData, null, 2), (err) => {
+            fs.writeFile(resource, JSON.stringify(sanitizedData, null, 2), (err) => {
                 if (err) {
                     console.log(err);
                 }

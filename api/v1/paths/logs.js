@@ -28,6 +28,7 @@ module.exports = function () {
                 return {
                     user: message[0],
                     tool: message[1],
+                    source: message[2],
                     timestamp: jsonLine.timestamp,
                 };
             });

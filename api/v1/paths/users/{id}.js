@@ -12,10 +12,10 @@ module.exports = function () {
         DELETE,
     };
 
-    function GET(req, res, _next) {
+    async function GET(req, res, _next) {
         const userId = req.params.id;
         try {
-            const users = modelUsers.getUsers();
+            const users = await modelUsers.getUsers();
             if (users[userId] !== undefined) {
                 res.status(200).json(users[userId]);
             } else {
@@ -42,12 +42,12 @@ module.exports = function () {
             const updatedProfiles = await readFile(profilesJSON).catch((_err) => res.status(500).json({ message: "Couldn't read users json" }));
             res.status(200).json({
                 message: `${req.params.id} successfully deleted`,
-                ressources: JSON.parse(updatedProfiles),
+                resources: JSON.parse(updatedProfiles),
             });
         } else if (!req.params.id) {
-            res.status(500).json({ message: "I need a ressource ID to perform this request" });
+            res.status(500).json({ message: "I need a resource ID to perform this request" });
         } else {
-            res.status(500).json({ message: `I couldn't delete ressource ${req.params.id}. Maybe it has been deleted already? Does the id field matches the object property name ?` });
+            res.status(500).json({ message: `I couldn't delete resource ${req.params.id}. Maybe it has been deleted already? Does the id field matches the object property name ?` });
         }
     }
     GET.apiDoc = {

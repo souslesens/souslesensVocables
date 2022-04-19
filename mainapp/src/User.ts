@@ -7,20 +7,20 @@ const endpoint = "/api/v1/users";
 
 async function getUsers(): Promise<User[]> {
     const response = await fetch(endpoint);
-    const { ressources } = (await response.json()) as { message: string; ressources: User[] };
-    return mapUsers(ressources);
+    const { resources } = (await response.json()) as { message: string; resources: User[] };
+    return mapUsers(resources);
 }
-function mapUsers(ressources: User[]) {
-    const users: [string, UserJSON][] = Object.entries(ressources);
+function mapUsers(resources: User[]) {
+    const users: [string, UserJSON][] = Object.entries(resources);
     const mapped_users = users.map(([, val]) => decodeUser(val));
     return mapped_users;
 }
 
 async function putUsers(body: User[]): Promise<User[]> {
     const response = await fetch(endpoint, { method: "put", body: JSON.stringify(body, null, "\t"), headers: { "Content-Type": "application/json" } });
-    const json = (await response.json()) as { message: string; ressources: User[] };
+    const json = (await response.json()) as { message: string; resources: User[] };
 
-    return mapUsers(json.ressources);
+    return mapUsers(json.resources);
 }
 
 async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
@@ -30,9 +30,9 @@ async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<M
             body: JSON.stringify({ [body.id]: body }, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
-        const { message, ressources } = (await response.json()) as { message: string; ressources: User[] };
+        const { message, resources } = (await response.json()) as { message: string; resources: User[] };
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(ressources)) });
+            updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(resources)) });
             updateLocal({ type: Type.UserClickedModal, payload: false });
             updateLocal({ type: Type.ResetUser, payload: mode });
         } else {
@@ -46,9 +46,9 @@ async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<M
 async function deleteUser(user: User, updateModel: React.Dispatch<Msg>) {
     try {
         const response = await fetch(`${endpoint}/${user.id}`, { method: "delete" });
-        const { message, ressources } = (await response.json()) as { message: string; ressources: User[] };
+        const { message, resources } = (await response.json()) as { message: string; resources: User[] };
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(ressources)) });
+            updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(resources)) });
         } else {
             updateModel({ type: "ServerRespondedWithUsers", payload: failure(`${response.status}, ${message}`) });
         }

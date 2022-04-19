@@ -13,7 +13,7 @@ var fs = require("fs");
 var httpProxy = require("./httpProxy.");
 var util = require("./util.");
 var exportGraph = {
-    execute: function (serverUrl, graphUri, filePath, callback) {
+    execute: function (sparqlUrl, graphUri, filePath, callback) {
         var limit = 2000;
         var resultSize = 100;
         var offset = 0;
@@ -31,7 +31,7 @@ var exportGraph = {
 
                 var query2 = query + " OFFSET " + offset;
                 var body = {
-                    url: serverUrl,
+                    url: sparqlUrl,
                     params: { query: query2 },
                     headers: {
                         Accept: "application/sparql-results+json",

@@ -6,22 +6,22 @@ import React from "react";
 
 const endpoint = "/api/v1/sources";
 
-type Response = { message: string; ressources: SourceJson[] };
+type Response = { message: string; resources: SourceJson[] };
 
 async function getSources(): Promise<Source[]> {
     const response = await fetch(endpoint);
     const json = (await response.json()) as Response;
-    return mapSources(json.ressources);
+    return mapSources(json.resources);
 }
 
 export async function putSources(body: Source[]): Promise<Source[]> {
     const sourcesToObject = body.reduce((obj, item) => ({ ...obj, [item.name]: item }), {});
     const response = await fetch("/sources", { method: "put", body: JSON.stringify(sourcesToObject, null, "\t"), headers: { "Content-Type": "application/json" } });
     const json = (await response.json()) as Response;
-    return mapSources(json.ressources);
+    return mapSources(json.resources);
 }
-function mapSources(ressources: SourceJson[]) {
-    const sources: [string, SourceJson][] = Object.entries(ressources);
+function mapSources(resources: SourceJson[]) {
+    const sources: [string, SourceJson][] = Object.entries(resources);
     const mapped_users = sources.map(([key, val]) => decodeSource(key, val));
     return mapped_users;
 }
@@ -33,9 +33,9 @@ export async function saveSource(body: Source, mode: Mode, updateModel: React.Di
             body: JSON.stringify({ [body.id]: body }, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
-        const { message, ressources } = (await response.json()) as Response;
+        const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(ressources)) });
+            updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(resources)) });
             updateLocal({ type: Type.UserClickedModal, payload: false });
             updateLocal({ type: Type.ResetSource, payload: mode });
         } else {
@@ -50,9 +50,9 @@ export async function saveSource(body: Source, mode: Mode, updateModel: React.Di
 export async function deleteSource(source: Source, updateModel: React.Dispatch<Msg>) {
     try {
         const response = await fetch(`${endpoint}/${source.id}`, { method: "delete" });
-        const { message, ressources } = (await response.json()) as Response;
+        const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(ressources)) });
+            updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(resources)) });
         } else {
             updateModel({ type: "ServerRespondedWithSources", payload: failure(`${response.status}, ${message}`) });
         }

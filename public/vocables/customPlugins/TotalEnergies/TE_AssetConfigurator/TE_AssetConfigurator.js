@@ -971,7 +971,7 @@ var TE_AssetConfigurator = (function () {
             }
         });
 
-        var existingNodes = visjsGraph.getExistingIdsMap();
+        existingNodes = visjsGraph.getExistingIdsMap();
         visjsGraph.data.nodes.update(visjsData.nodes);
         visjsGraph.data.edges.update(visjsData.edges);
 
@@ -1090,7 +1090,7 @@ var TE_AssetConfigurator = (function () {
             if (!self.currentGraphNode) return alert("select a node in the graph");
             // JSON.stringify(rdsNodeData, null,2).replace("\\n","<br>")
 
-            var headers = Object.keys(self.currentGraphNode.data);
+            const headers = Object.keys(self.currentGraphNode.data);
 
             var nodeId = self.currentGraphNode.data.label;
             var str = "<div style=overflow: auto'>" + "RDS Infos <table class='infosTable'>";
@@ -1112,7 +1112,7 @@ var TE_AssetConfigurator = (function () {
             str += "Asset Infos <table class='infosTable'>";
 
             if (self.currentGraphNode.data["assetNode"]) {
-                var headers = Object.keys(self.currentGraphNode.data["assetNode"]);
+                const headers = Object.keys(self.currentGraphNode.data["assetNode"]);
 
                 headers.forEach(function (key) {
                     str += "<tr class='infos_table'>";

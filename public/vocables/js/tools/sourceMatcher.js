@@ -41,7 +41,7 @@ var SourceMatcher = (function () {
         if (!fromSourceId) fromSourceId = MainController.currentSource;
 
         if (!toSourceId) toSourceId = $("#SourceMatcher_targetGraphUriSelect").val();
-        if (!fromSourceId) return MainController.UI.message("choose a target ressource");
+        if (!fromSourceId) return MainController.UI.message("choose a target resource");
 
         if (!output) output = $("#SourceMatcher_outputTypeSelect").val();
 

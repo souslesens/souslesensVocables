@@ -334,8 +334,6 @@ var SearchUtil = (function () {
         //  MainController.UI.message("indexing " + data.length)
         var options = { replaceIndex: replaceIndex, owlType: "Class" };
         var payload = {
-            // dictionaries_indexSource: 1,
-            // indexSource: 1,
             indexName: indexName,
             data: JSON.stringify(data),
             options: JSON.stringify(options),

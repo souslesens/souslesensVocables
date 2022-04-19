@@ -741,8 +741,8 @@ var Standardizer = (function () {
             },
         };
 
-        var index = source.toLowerCase();
-        ElasticSearchProxy.queryElastic(query, index, function (err, result) {
+        var indexes = [source.toLowerCase()];
+        ElasticSearchProxy.queryElastic(query, indexes, function (err, result) {
             if (err) {
                 if (callback) return callback(err);
                 return alert(err);
@@ -1605,7 +1605,8 @@ var Standardizer = (function () {
                 });
             },
             function (_err) {
-                // $("#" + resultDiv).html(html)
+                if (dataSet.length == 0) return;
+
                 $("#" + resultDiv).html();
                 $("#" + resultDiv).html("<table id='dataTableDiv'></table>");
 

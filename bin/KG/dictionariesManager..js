@@ -46,8 +46,8 @@ var DictionariesManager = {
         });
     },
 
-    indexSource: function (indexName, data, _options, callback) {
-        if (!_options) _options = {};
+    indexSource: function (indexName, data, options, callback) {
+        if (!options) options = {};
         var elasticUrl;
         async.series(
             [
@@ -62,7 +62,7 @@ var DictionariesManager = {
 
                 //delete index
                 function (callbackSeries) {
-                    if (!_options.replaceIndex) return callbackSeries();
+                    if (!options.replaceIndex) return callbackSeries();
                     ElasticRestProxy.deleteIndex(elasticUrl, indexName, function (err, _result) {
                         callbackSeries(err);
                     });
@@ -70,7 +70,7 @@ var DictionariesManager = {
 
                 //set mappings
                 function (callbackSeries) {
-                    if (!_options.replaceIndex) return callbackSeries();
+                    if (!options.replaceIndex) return callbackSeries();
 
                     var mappings = {
                         settings: {
@@ -134,7 +134,7 @@ var DictionariesManager = {
                             },
                         },
                     };
-                    var options = {
+                    var requestOptions = {
                         method: "PUT",
                         json: mappings,
                         encoding: null,
@@ -144,7 +144,7 @@ var DictionariesManager = {
                         },
                         url: elasticUrl + indexName,
                     };
-                    request(options, function (error, _response, _body) {
+                    request(requestOptions, function (error, _response, _body) {
                         if (error) {
                             return callbackSeries(error);
                         }
@@ -155,7 +155,7 @@ var DictionariesManager = {
                     var bulkStr = "";
 
                     data.forEach(function (item, _indexedLine) {
-                        if (_options.owlType) item.owlType = _options.owlType;
+                        if (options.owlType) item.owlType = options.owlType;
                         var id = "R" + util.getRandomHexaId(10);
                         bulkStr += JSON.stringify({ index: { _index: indexName, _type: indexName, _id: id } }) + "\r\n";
                         bulkStr += JSON.stringify(item) + "\r\n";

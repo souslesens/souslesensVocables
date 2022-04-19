@@ -729,6 +729,7 @@ var visjsGraph = (function () {
             fileName: fileName,
             data: data,
         };
+
         $.ajax({
             type: "POST",
             url: Config.apiUrl + "/data",

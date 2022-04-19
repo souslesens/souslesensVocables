@@ -5,9 +5,6 @@ var ElasticSearchProxy = (function () {
     self.queryElastic = function (query, indexes, callback) {
         if (!indexes) indexes = context.curentSearchIndexes;
 
-        /*    console.log(JSON.stringify(indexes, null, 2))
-            console.log(JSON.stringify(query, null, 2))*/
-
         var payload = {
             query: query,
             url: "_search",

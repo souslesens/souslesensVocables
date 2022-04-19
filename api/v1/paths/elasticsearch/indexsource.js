@@ -7,7 +7,7 @@ module.exports = function () {
     };
 
     function POST(req, res, _next) {
-        dictionariesManager.indexSource(req.body.name, req.body.data, req.body.options, function (err, result) {
+        dictionariesManager.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, result) {
             if (err) {
                 return res.status(400).json({ error: err });
             }
@@ -28,24 +28,27 @@ module.exports = function () {
                 schema: {
                     type: "object",
                     properties: {
-                        name: {
+                        indexName: {
                             type: "string",
                         },
                         data: {
                             type: "array",
                             items: {
                                 type: "object",
+                                properties: {
+                                    id: { type: "string" },
+                                    label: { type: "string" },
+                                    type: { type: "string" },
+                                    parents: { type: "array", items: { type: "string" } },
+                                    skosLabel: { type: "array", items: { type: "string" } },
+                                },
                             },
                         },
                         options: {
                             type: "object",
                             properties: {
-                                replaceIndex: {
-                                    type: "boolean",
-                                },
-                                owlType: {
-                                    type: "string",
-                                },
+                                owlType: { type: "string" },
+                                replaceIndex: { type: "boolean" },
                             },
                         },
                     },

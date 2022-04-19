@@ -37,7 +37,11 @@ var SearchUtil = (function () {
                                 if (err) return callbackSeries(err);
 
                                 indexes = [];
-                                if (toSources && !Array.isArray(toSources)) toSources = [toSources];
+                                if (toSources) {
+                                    toSources.forEach(function (_source) {
+                                        indexes.push(_source.toLowerCase());
+                                    });
+                                }
                                 indexedSources.forEach(function (source) {
                                     if (!toSources || toSources.length == 0 || toSources.indexOf(source) > -1) {
                                         indexes.push(source.toLowerCase());
@@ -217,7 +221,7 @@ var SearchUtil = (function () {
                 },
             };
 
-            ElasticSearchProxy.queryElastic(query, index, function (err, result) {
+            ElasticSearchProxy.queryElastic(query, [index], function (err, result) {
                 if (err) {
                     return callback(err);
                 }
@@ -304,6 +308,7 @@ var SearchUtil = (function () {
         async.eachSeries(
             slices,
             function (wordSlice, callbackEach) {
+                if (wordSlice.length == 0) return callbackEach();
                 bulQueryStr = "";
                 wordSlice.forEach(function (word) {
                     if (!word) return;
@@ -325,19 +330,18 @@ var SearchUtil = (function () {
 
     self.indexData = function (indexName, data, replaceIndex, callback) {
         if (data.length == 0) return callback();
-        //  MainController.UI.message("indexing " + data.length)
         var options = { replaceIndex: replaceIndex, owlType: "Class" };
         var payload = {
-            dictionaries_indexSource: 1,
             indexName: indexName,
-            data: JSON.stringify(data),
-            options: JSON.stringify(options),
+            data: data,
+            options: options,
         };
 
         $.ajax({
             type: "POST",
-            url: Config.serverUrl,
-            data: payload,
+            url: Config.apiUrl + "/elasticsearch/indexsource",
+            data: JSON.stringify(payload),
+            contentType: "application/json",
             dataType: "json",
             success: function (_data2, _textStatus, _jqXHR) {
                 callback(null, data);

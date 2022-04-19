@@ -52,13 +52,14 @@ var elasticRestProxy = {
             if (error) return callback(error);
 
             if (url.indexOf("_bulk") > -1) {
-                checkBulkQueryResponse.checkBulkQueryResponse(body, function (err, result) {
+                elasticRestProxy.checkBulkQueryResponse.checkBulkQueryResponse(body, function (err, result) {
                     if (err) return callback(err);
                     var message = "indexed " + result.length + " records ";
-                    if (socket) socket.message(message);
+                    if (elasticRestProxy.socket) elasticRestProxy.socket.message(message);
                     return callback(null, result);
                 });
             } else {
+                if (typeof body == "object") return callback(null, body);
                 callback(null, JSON.parse(body));
             }
         });

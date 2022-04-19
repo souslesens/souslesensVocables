@@ -7,7 +7,6 @@ module.exports = function () {
     };
 
     function POST(req, res, _next) {
-        console.log("REGARDE", req.body);
         dictionariesManager.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, result) {
             if (err) {
                 return res.status(400).json({ error: err });

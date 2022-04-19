@@ -120,6 +120,16 @@ app.use(
         },
     })
 );
+app.use("/api/v1/*", function (err, req, res, _next) {
+    console.debug("GlobalErr", err);
+    const error = err.status ? err : err.stack;
+
+    if (req.app.get("env") === "development") {
+        res.status(err.status || 500).json(error);
+    } else {
+        res.status(err.status || 500);
+    }
+});
 
 // main router
 app.use("/", indexRouter);

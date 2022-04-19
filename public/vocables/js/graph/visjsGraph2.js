@@ -757,10 +757,9 @@ var visjsGraph = (function () {
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/data/" + fileName,
-            data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
-                var data = JSON.parse(result.result);
+                var data = JSON.parse(result);
                 var positions = data.positions;
                 var options = data.context.options;
                 var visjsData = { nodes: [], edges: [] };

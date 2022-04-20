@@ -6,10 +6,10 @@ module.exports = function () {
         POST,
     };
 
-    function POST(req, res, _next) {
+    function POST(req, res, next) {
         elasticRestProxy.executePostQuery(req.body.url, req.body.query, req.body.indexes, function (err, result) {
             if (err) {
-                return res.status(400).json({ error: err });
+                next(err);
             }
             return res.status(200).json(result);
         });

@@ -3,7 +3,7 @@ const fs = require("fs");
 const usersJSON = path.resolve("config/users/users.json");
 
 const getUsers = async () => {
-    const data = await fs.readFile(usersJSON, "utf8");
+    const data = await fs.promises.readFile(usersJSON);
     const users = {};
     Object.entries(JSON.parse(data)).map(([key, value]) => {
         users[key] = {

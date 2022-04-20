@@ -245,12 +245,18 @@ var SearchUtil = (function () {
                         should: [
                             {
                                 term: {
-                                    [field]: word.toLowerCase(),
+                                    [field]: {
+                                        value: word,
+                                        case_insensitive: true,
+                                    },
                                 },
                             },
                             {
                                 term: {
-                                    "skoslabels.keyword": word,
+                                    "skoslabels.keyword": {
+                                        value: word,
+                                        case_insensitive: true,
+                                    },
                                 },
                             },
                         ],

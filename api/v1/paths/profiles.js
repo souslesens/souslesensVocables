@@ -11,14 +11,26 @@ module.exports = function () {
         POST,
         PUT,
     };
+
+    ///// GET api/v1/profiles
     async function GET(req, res, _next) {
-        const profiles = await readResource(profilesJSON, res);
-        // I need to have the db indexed by a unique id.
-        //const sanitizedDB = await writeResource(profilesJSON, profiles, res)
-
-        resourceFetched(res, profiles);
+        try {
+            const profiles = await readResource(profilesJSON, res);
+            // I need to have the db indexed by a unique id.
+            //const sanitizedDB = await writeResource(profilesJSON, profiles, res)
+            resourceFetched(res, profiles);
+        } catch (error) {
+            next(error);
+        }
     }
+    GET.apiDoc = {
+        summary: "Returns all profiles",
+        security: [{ loginScheme: [] }],
+        operationId: "getProfiles",
+        responses: responseSchema("Profiles", "GET"),
+    };
 
+    ///// PUT api/v1/profiles
     async function PUT(req, res, next) {
         try {
             const updatedProfile = req.body;
@@ -35,7 +47,15 @@ module.exports = function () {
             next(err);
         }
     }
+    PUT.apiDoc = {
+        summary: "Update profiles one by one",
+        security: [{ restrictAdmin: [] }],
+        operationId: "updateProfiles",
+        parameters: [],
+        responses: responseSchema("Profiles", "PUT"),
+    };
 
+    ///// POST api/v1/profiles
     async function POST(req, res, next) {
         const profileToAdd = req.body;
         //        const successfullyCreated = newProfiles[req.params.id]
@@ -53,23 +73,6 @@ module.exports = function () {
             next(err);
         }
     }
-
-    // NOTE: We could also use a YAML string here.
-    GET.apiDoc = {
-        summary: "Returns all profiles",
-        security: [{ loginScheme: [] }],
-        operationId: "getProfiles",
-        responses: responseSchema("Profiles", "GET"),
-    };
-
-    PUT.apiDoc = {
-        summary: "Update profiles one by one",
-        security: [{ restrictAdmin: [] }],
-        operationId: "updateProfiles",
-        parameters: [],
-        responses: responseSchema("Profiles", "PUT"),
-    };
-
     POST.apiDoc = {
         summary: "Create a new profile",
         security: [{ restrictAdmin: [] }],

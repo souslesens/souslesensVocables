@@ -43,6 +43,7 @@ module.exports = function () {
         return Array.from(new Set(acc));
     };
 
+    ///// GET api/v1/sources
     async function GET(req, res, next) {
         try {
             const profiles = await read(profilesJSON);
@@ -57,7 +58,14 @@ module.exports = function () {
             next(err);
         }
     }
+    GET.apiDoc = {
+        summary: "Returns all sources",
+        security: [{ loginScheme: [] }],
+        operationId: "getSources",
+        responses: responseSchema("Sources", "GET"),
+    };
 
+    ///// PUT api/v1/sources
     async function PUT(req, res, next) {
         try {
             const updatedSource = req.body;
@@ -75,7 +83,15 @@ module.exports = function () {
             next(err);
         }
     }
+    PUT.apiDoc = {
+        summary: "Update Sources",
+        security: [{ restrictAdmin: [] }],
+        operationId: "updateSources",
+        parameters: [],
+        responses: responseSchema("Sources", "PUT"),
+    };
 
+    ///// POST api/v1/sources
     async function POST(req, res, next) {
         try {
             const profileToAdd = req.body;
@@ -94,20 +110,6 @@ module.exports = function () {
             next(err);
         }
     }
-
-    GET.apiDoc = {
-        summary: "Returns all sources",
-        security: [{ loginScheme: [] }],
-        operationId: "getSources",
-        responses: responseSchema("Sources", "GET"),
-    };
-    PUT.apiDoc = {
-        summary: "Update Sources",
-        security: [{ restrictAdmin: [] }],
-        operationId: "updateSources",
-        parameters: [],
-        responses: responseSchema("Sources", "PUT"),
-    };
     POST.apiDoc = {
         summary: "Update Sources",
         security: [{ restrictAdmin: [] }],

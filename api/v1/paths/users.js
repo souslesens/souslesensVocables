@@ -10,6 +10,8 @@ module.exports = function () {
         POST,
         PUT,
     };
+
+    ///// GET api/v1/users
     async function GET(req, res, next) {
         try {
             const users = await modelUsers.getUsers();
@@ -18,7 +20,15 @@ module.exports = function () {
             next(error);
         }
     }
+    GET.apiDoc = {
+        summary: "Return a list of all User Accounts",
+        security: [{ restrictAdmin: [] }],
+        operationId: "getAllUsers",
+        parameters: [],
+        responses: responseSchema("Users", "GET"),
+    };
 
+    ///// PUT api/v1/users
     async function PUT(req, res, next) {
         try {
             const updatedProfile = resourceWithHashedPassword(req);
@@ -34,7 +44,15 @@ module.exports = function () {
             next(error);
         }
     }
+    PUT.apiDoc = {
+        summary: "Update a User Account",
+        security: [{ restrictAdmin: [] }],
+        operationId: "updateUsers",
+        parameters: [],
+        responses: responseSchema("Users", "PUT"),
+    };
 
+    ///// POST api/v1/users
     async function POST(req, res, next) {
         try {
             const userToAdd = resourceWithHashedPassword(req);
@@ -51,21 +69,6 @@ module.exports = function () {
             next(error);
         }
     }
-
-    GET.apiDoc = {
-        summary: "Returns all users",
-        security: [{ restrictAdmin: [] }],
-        operationId: "getAllUsers",
-        parameters: [],
-        responses: responseSchema("Users", "GET"),
-    };
-    PUT.apiDoc = {
-        summary: "Update users",
-        security: [{ restrictAdmin: [] }],
-        operationId: "updateUsers",
-        parameters: [],
-        responses: responseSchema("Users", "PUT"),
-    };
     POST.apiDoc = {
         summary: "Create a new user",
         security: [{ restrictAdmin: [] }],

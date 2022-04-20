@@ -450,8 +450,6 @@ var KGadvancedMapping = (function () {
     };
 
     self.setAsMatchCandidate = function (candidateId) {
-        if (self.setAsMatchCandidateExternalFn); // return   self.setAsMatchCandidateExternalFn(candidateId)
-
         var candidateEntityObj = self.currentdictionaryEntryEntities[candidateId];
         $(".KGmapping_candidateEntity").removeClass("KGmapping_columnValues_isCandidate");
         $("#" + candidateId).addClass("KGmapping_columnValues_isCandidate");

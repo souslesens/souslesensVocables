@@ -52,7 +52,6 @@ var Standardizer = (function () {
             });
 
             common.fillSelectOptions("KGmapping_distinctColumnSortSelect", sortList, false, "text", "value");
-            KGadvancedMapping.setAsMatchCandidateExternalFn = Standardizer.setAsMatchCandidate;
             self.matchCandidates = {};
 
             //   common.fillSelectOptions("Standardizer_sourcesSelect", sources, true);

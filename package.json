@@ -6,6 +6,7 @@
         "start": "DEBUG=cypress:* node ./bin/www",
         "build:ci": "cd mainapp && npm run build",
         "dev": "nodemon ./bin/www & (cd mainapp && npm run build:watch)",
+        "typecheck": "tsc",
         "lint": "eslint .",
         "format": "prettier -w .",
         "ncu": "ncu",
@@ -20,7 +21,8 @@
         "eslint": "^8.13.0",
         "eslint-plugin-prettier": "^4.0.0",
         "npm-check": "^5.9.2",
-        "prettier": "^2.6.2"
+        "prettier": "^2.6.2",
+        "typescript": "^4.6.3"
     },
     "dependencies": {
         "@futpib/tika-server-client": "0.0.5",

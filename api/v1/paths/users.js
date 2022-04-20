@@ -10,18 +10,18 @@ module.exports = function () {
         POST,
         PUT,
     };
-    async function GET(req, res, _next) {
+    async function GET(req, res, next) {
         try {
             const users = await modelUsers.getUsers();
             res.status(200).json(successfullyFetched(users));
         } catch (error) {
-            res.status(500).json({ message: error.message });
+            next(error);
         }
     }
 
-    async function PUT(req, res, _next) {
-        const updatedProfile = resourceWithHashedPassword(req);
+    async function PUT(req, res, next) {
         try {
+            const updatedProfile = resourceWithHashedPassword(req);
             const oldProfiles = await readResource(profilesJSON, res);
             const updatedProfiles = { ...oldProfiles, ...updatedProfile };
             if (Object.keys(oldProfiles).includes(Object.keys(req.body)[0])) {
@@ -30,14 +30,14 @@ module.exports = function () {
             } else {
                 res.status(400).json({ message: "Resource does not exist. If you want to create another resource, use POST instead." });
             }
-        } catch (e) {
-            res.status(500).json({ message: e });
+        } catch (error) {
+            next(error);
         }
     }
 
-    async function POST(req, res, _next) {
-        const userToAdd = resourceWithHashedPassword(req);
+    async function POST(req, res, next) {
         try {
+            const userToAdd = resourceWithHashedPassword(req);
             const oldUsers = await readResource(profilesJSON, res);
             const userDoesntExist = !Object.keys(oldUsers).includes(Object.keys(userToAdd)[0]);
             const newUsers = { ...oldUsers, ...userToAdd };
@@ -47,8 +47,8 @@ module.exports = function () {
             } else {
                 res.status(400).json({ message: "Resource already exists. If you want to update an existing resource, use PUT instead." });
             }
-        } catch (e) {
-            res.status(500);
+        } catch (error) {
+            next(error);
         }
     }
 

@@ -3,8 +3,6 @@ var SearchUtil = (function () {
     var self = {};
 
     /**
-     *
-     *
      * @param fromSource if null ids or labels are mandatory
      * @param toSources if null search in all sources
      * @param labels an array  or labels
@@ -38,8 +36,8 @@ var SearchUtil = (function () {
 
                                 indexes = [];
                                 if (toSources) {
-                                    toSources.forEach(function (_source) {
-                                        indexes.push(_source.toLowerCase());
+                                    toSources.forEach(function (source) {
+                                        indexes.push(source.toLowerCase());
                                     });
                                 }
                                 indexedSources.forEach(function (source) {
@@ -177,6 +175,9 @@ var SearchUtil = (function () {
         );
     };
 
+    /**
+     * @param {string} index - Name of the ElasticSearch index to search
+     */
     self.getSourceLabels = function (index, ids, offset, size, callback) {
         if (!offset) offset = 0;
         if (!size) size = 10000;
@@ -433,6 +434,9 @@ var SearchUtil = (function () {
         });
     };
 
+    /**
+     * @param {Array<string>} indexes - List of ElasticSearch indexes to search
+     */
     self.getParentAllDescendants = function (parentId, indexes, options, callback) {
         var allData = [];
         var allLabelsMap = {};

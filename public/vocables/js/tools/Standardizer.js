@@ -741,8 +741,7 @@ var Standardizer = (function () {
             },
         };
 
-        var indexes = [source.toLowerCase()];
-        ElasticSearchProxy.queryElastic(query, indexes, function (err, result) {
+        ElasticSearchProxy.queryElastic(query, [source.toLowerCase()], function (err, result) {
             if (err) {
                 if (callback) return callback(err);
                 return alert(err);

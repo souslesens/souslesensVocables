@@ -9,7 +9,7 @@ const fileUpload = require("express-fileupload");
 const openapi = require("express-openapi");
 const swaggerUi = require("swagger-ui-express");
 
-const indexRouter = require(path.resolve("routes/index"));
+const indexRouter = require("./legacy_routes");
 const httpProxy = require(path.resolve("bin/httpProxy."));
 const userManager = require(path.resolve("bin/user."));
 

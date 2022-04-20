@@ -2,15 +2,15 @@ var express = require("express");
 var fs = require("fs");
 var path = require("path");
 var passport = require("passport");
-require("../bin/authentication.");
-var httpProxy = require("../bin/httpProxy.");
-var RDF_IO = require("../bin/RDF_IO.");
-var DataController = require("../bin/dataController.");
-var DirContentAnnotator = require("../bin/annotator/dirContentAnnotator.");
-var configManager = require("../bin/configManager.");
-var CsvTripleBuilder = require("../bin/KG/CsvTripleBuilder.");
+require("./bin/authentication.");
+var httpProxy = require("./bin/httpProxy.");
+var RDF_IO = require("./bin/RDF_IO.");
+var DataController = require("./bin/dataController.");
+var DirContentAnnotator = require("./bin/annotator/dirContentAnnotator.");
+var configManager = require("./bin/configManager.");
+var CsvTripleBuilder = require("./bin/KG/CsvTripleBuilder.");
 
-const config = require(path.resolve("config/mainConfig.json"));
+const config = require("./config/mainConfig.json");
 
 var router = express.Router();
 var serverParams = { routesRootUrl: "" };

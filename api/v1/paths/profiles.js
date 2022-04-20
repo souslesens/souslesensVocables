@@ -19,9 +19,9 @@ module.exports = function () {
         resourceFetched(res, profiles);
     }
 
-    async function PUT(req, res, _next) {
-        const updatedProfile = req.body;
+    async function PUT(req, res, next) {
         try {
+            const updatedProfile = req.body;
             const objectToUpdateKey = Object.keys(req.body)[0];
             const oldProfiles = await readResource(profilesJSON, res); //.catch(e => res.status((500).json({ message: 'I couldn\'t read the resource' })));
             const updatedProfiles = { ...oldProfiles, ...updatedProfile };
@@ -31,12 +31,12 @@ module.exports = function () {
             } else {
                 res.status(400).json({ message: "Resource does not exist. If you want to create another resource, use POST instead." });
             }
-        } catch (e) {
-            res.status(500);
+        } catch (err) {
+            next(err);
         }
     }
 
-    async function POST(req, res, _next) {
+    async function POST(req, res, next) {
         const profileToAdd = req.body;
         //        const successfullyCreated = newProfiles[req.params.id]
         try {
@@ -49,8 +49,8 @@ module.exports = function () {
             } else {
                 res.status(400).json({ message: "Resource already exists. If you want to update an existing resource, use PUT instead." });
             }
-        } catch (e) {
-            res.status(500);
+        } catch (err) {
+            next(err);
         }
     }
 

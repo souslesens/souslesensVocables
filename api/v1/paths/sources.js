@@ -1,5 +1,6 @@
 const path = require("path");
 const fs = require("fs");
+const fsPromises = require("fs/promises");
 const sourcesJSON = path.resolve("config/sources.json");
 const profilesJSON = path.resolve("config/profiles.json");
 exports.profilesJSON = sourcesJSON;
@@ -42,29 +43,27 @@ module.exports = function () {
         return Array.from(new Set(acc));
     };
 
-    async function GET(req, res, _next) {
-        const profiles = await read(profilesJSON);
-        const parsedProfiles = await JSON.parse(profiles);
-        const userInfo = userManager.getUser(req.user);
-        const allowedSources = getAllowedSources(userInfo.user, parsedProfiles);
-
-        fs.readFile(sourcesJSON, "utf8", (err, data) => {
-            if (err) {
-                res.status(500).json({ message: "I couldn't read profiles.json" });
-            } else {
-                const sources = JSON.parse(data);
-                const filteredSources = filterSources(allowedSources, sources, allowedSources, req);
-                resourceFetched(res, filteredSources);
-            }
-        });
+    async function GET(req, res, next) {
+        try {
+            const profiles = await read(profilesJSON);
+            const parsedProfiles = JSON.parse(profiles);
+            const userInfo = userManager.getUser(req.user);
+            const allowedSources = getAllowedSources(userInfo.user, parsedProfiles);
+            const sources = await read(sourcesJSON);
+            const parsedSources = JSON.parse(sources);
+            const filteredSources = filterSources(allowedSources, parsedSources, allowedSources, req);
+            resourceFetched(res, filteredSources);
+        } catch (err) {
+            next(err);
+        }
     }
 
-    async function PUT(req, res, _next) {
-        const updatedSource = req.body;
-        const profiles = await read(profilesJSON).then((p) => JSON.parse(p));
-        const userInfo = userManager.getUser(req.user);
-        const allowedSources = getAllowedSources(userInfo.user, profiles);
+    async function PUT(req, res, next) {
         try {
+            const updatedSource = req.body;
+            const profiles = await read(profilesJSON).then((p) => JSON.parse(p));
+            const userInfo = userManager.getUser(req.user);
+            const allowedSources = getAllowedSources(userInfo.user, profiles);
             const oldSources = await readResource(sourcesJSON, res);
             const updatedSources = { ...oldSources, ...updatedSource };
             if (Object.keys(oldSources).includes(Object.keys(req.body)[0])) {
@@ -73,14 +72,14 @@ module.exports = function () {
                 res.status(400).json({ message: "Resource does not exist. If you want to create another resource, use POST instead." });
             }
         } catch (err) {
-            res.status(500).json({ message: err });
+            next(err);
         }
     }
 
-    async function POST(req, res, _next) {
-        const profileToAdd = req.body;
-        //        const successfullyCreated = newProfiles[req.params.id]
+    async function POST(req, res, next) {
         try {
+            const profileToAdd = req.body;
+            //        const successfullyCreated = newProfiles[req.params.id]
             const oldProfiles = await readResource(sourcesJSON, res);
             const profileDoesntExist = !Object.keys(oldProfiles).includes(Object.keys(profileToAdd)[0]);
             const objectToCreateKey = req.body;
@@ -91,8 +90,8 @@ module.exports = function () {
             } else {
                 res.status(400).json({ message: "Resource already exists. If you want to update an existing resource, use PUT instead." });
             }
-        } catch (e) {
-            res.status(500);
+        } catch (err) {
+            next(err);
         }
     }
 

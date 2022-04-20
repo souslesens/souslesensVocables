@@ -454,7 +454,7 @@ var Standardizer = (function () {
 
                         objects.push(hit._source);
                     });
-                    Standardizer.getClassesLabels(sourceClassUri, self.currentSource.toLowerCase(), function (err, result) {
+                    Standardizer.getClassesLabels(sourceClassUri, [self.currentSource.toLowerCase()], function (err, result) {
                         if (err) return callbackWhilst(err);
                         objects.forEach(function (item) {
                             item.parentLabel = result[item.parent] || Sparql_common.getLabelFromURI(item.id);

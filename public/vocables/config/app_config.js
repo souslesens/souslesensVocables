@@ -150,10 +150,10 @@ var Config = (function () {
 
     self.tools["admin"] = { label: "Admin", multiSources: 1, controller: Admin, toolDescriptionImg: null }; //"images/taxonomy.png"}
 
-    self.tools["Config"] = {
-        label: "Config",
+    self.tools["ConfigEditor"] = {
+        label: "ConfigEditor",
         noSource: 1,
-        controller: Config,
+        controller: ConfigEditor,
         toolDescriptionImg: null,
     };
 

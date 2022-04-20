@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-var Config = (function () {
+var ConfigEditor = (function () {
     var self = {};
 
     self.onSourceSelect = function () {

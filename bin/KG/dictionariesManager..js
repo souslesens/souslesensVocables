@@ -161,7 +161,7 @@ var DictionariesManager = {
                         bulkStr += JSON.stringify(item) + "\r\n";
                     });
 
-                    var options = {
+                    const requestOptions = {
                         method: "POST",
                         body: bulkStr,
                         encoding: null,
@@ -171,7 +171,7 @@ var DictionariesManager = {
                         },
                         url: elasticUrl + "_bulk?refresh=wait_for",
                     };
-                    request(options, function (error, response, body) {
+                    request(requestOptions, function (error, response, body) {
                         if (error) {
                             return callbackSeries(error);
                         }

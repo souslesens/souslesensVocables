@@ -419,7 +419,25 @@ var Lineage_classes = (function () {
             // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
             //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
         };
+        if( true) {
+            options.manipulation = {
+                enabled: true,
 
+                addEdge: function (edgeData, callback) {
+                    return callback(null)
+                    if (edgeData.from === edgeData.to) {
+                        var r = confirm("Do you want to connect the node to itself?");
+                        if (r === true) {
+                            callback(edgeData);
+                        }
+                    } else {
+                        callback(edgeData);
+                    }
+
+
+                }
+            }
+        }
         visjsGraph.draw("graphDiv", visjsData, options, function () {
             Lineage_decoration.colorGraphNodesByType();
         });

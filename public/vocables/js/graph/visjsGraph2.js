@@ -729,6 +729,7 @@ var visjsGraph = (function () {
             fileName: fileName,
             data: data,
         };
+
         $.ajax({
             type: "POST",
             url: Config.apiUrl + "/data",
@@ -757,10 +758,10 @@ var visjsGraph = (function () {
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/data/" + fileName,
-            data: payload,
+          //  data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
-                var data = JSON.parse(result.result);
+                var data = JSON.parse(result);
                 var positions = data.positions;
                 var options = data.context.options;
                 var visjsData = { nodes: [], edges: [] };
@@ -822,6 +823,7 @@ var visjsGraph = (function () {
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/data/files",
+           // data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 if (callback) return callback(null, result);

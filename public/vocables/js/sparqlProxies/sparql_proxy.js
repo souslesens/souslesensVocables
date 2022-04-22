@@ -121,7 +121,7 @@ var Sparql_proxy = (function () {
             if (sourceParams.sparql_server.headers) {
                 body = JSON.stringify({ headers: sourceParams.server.headers });
             }
-            if (sourceParams && sourceParams.sparql_server.type == "fuseki") url = url.replace("&query=", "");
+            if (sourceParams.sparql_server.type == "fuseki") url = url.replace("&query=", "");
 
             headers["Accept"] = "application/sparql-results+json";
             headers["Content-Type"] = "application/x-www-form-urlencoded";

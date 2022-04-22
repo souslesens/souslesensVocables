@@ -1,6 +1,4 @@
-const path = require("path");
 const fs = require("fs");
-const usersJSON = path.resolve("config/users/users.json");
 
 /**
  * @typedef {Object} UserAccount

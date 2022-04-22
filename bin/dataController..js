@@ -3,8 +3,8 @@ var path = require("path");
 var csvCrawler = require("../bin/_csvCrawler.");
 
 var DataController = {
-    getFilesList: function (callback) {
-        var dirPath = path.join(__dirname, "../data/graphs");
+    getFilesList: function (dir, callback) {
+        var dirPath = path.join(__dirname, "../data/" + dir + "");
         if (!fs.existsSync(dirPath)) return callback(null, null);
 
         fs.readdir(dirPath, function (err, result) {
@@ -12,14 +12,14 @@ var DataController = {
         });
     },
 
-    saveDataToFile: function (fileName, data, callback) {
-        var filePath = path.join(__dirname, "../data/graphs/" + fileName);
+    saveDataToFile: function (dir, fileName, data, callback) {
+        var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
         fs.writeFile(filePath, JSON.stringify(data, null, 2), {}, function (err, _result) {
             return callback(err, "file saved");
         });
     },
-    readfile: function (fileName, callback) {
-        var filePath = path.join(__dirname, "../data/graphs/" + fileName);
+    readfile: function (dir, fileName, callback) {
+        var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
         if (!fs.existsSync(filePath)) return callback("file does not exist", null);
         fs.readFile(filePath, function (err, result) {
             var data = "" + result;

@@ -45,7 +45,9 @@ var Lineage_classes = (function () {
 
         MainController.UI.openRightPanel();
 
+        // @ts-ignore
         $("#actionDivContolPanelDiv").load("snippets/lineage/lineage.html", function () {
+            // @ts-ignore
             $("#rightPanelDiv").load("snippets/lineage/lineageRightPanel.html", function () {
                 $("#GenericTools_searchSchemaType").val("OWL");
 
@@ -419,24 +421,20 @@ var Lineage_classes = (function () {
             // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
             //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
         };
-        if( true) {
+        if (true) {
             options.manipulation = {
                 enabled: true,
 
                 addEdge: function (edgeData, callback) {
-                    return callback(null)
+                    Lineage_properties.getPropertiesjsTreeData("ISO_15926-part-14_PCA");
+
                     if (edgeData.from === edgeData.to) {
-                        var r = confirm("Do you want to connect the node to itself?");
-                        if (r === true) {
-                            callback(edgeData);
-                        }
+                        return callback(null);
                     } else {
                         callback(edgeData);
                     }
-
-
-                }
-            }
+                },
+            };
         }
         visjsGraph.draw("graphDiv", visjsData, options, function () {
             Lineage_decoration.colorGraphNodesByType();

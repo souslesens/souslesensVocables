@@ -816,11 +816,15 @@ var visjsGraph = (function () {
             },
         });
     };
+
     self.listSavedGraphs = function (callback) {
+        var payload = {
+            dir: "graphs",
+        };
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/data/files",
-           // data: payload,
+            data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 if (callback) return callback(null, result);

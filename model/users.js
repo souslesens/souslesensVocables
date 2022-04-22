@@ -10,6 +10,9 @@ const fs = require("fs");
  */
 
 class UserModel {
+    /**
+     * @param {string} configPath - path of the config directory
+     */
     constructor(configPath) {
         this.configPath = configPath;
         this.userPath = this.configPath + "/users/users.json";
@@ -18,9 +21,11 @@ class UserModel {
     /**
      * @returns {Promise<Record<string, UserAccount>>} a collection of UserAccount
      */
-
     getUserAccounts = async () => {
         const data = await fs.promises.readFile(this.userPath);
+        /**
+         * @type {Record<string, UserAccount>}
+         */
         const users = {};
         Object.entries(JSON.parse(data)).map(([key, value]) => {
             users[key] = {

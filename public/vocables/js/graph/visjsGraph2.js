@@ -757,8 +757,7 @@ var visjsGraph = (function () {
         self.message("Loading Graph...");
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "/data/" + fileName,
-          //  data: payload,
+            url: `${Config.apiUrl}/data/file?dir=graphs&name=${fileName}`,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 var data = JSON.parse(result);
@@ -818,8 +817,6 @@ var visjsGraph = (function () {
         });
     };
     self.listSavedGraphs = function (callback) {
-        if (!Config || !Config.serverUrl) return;
-
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/data/files",

@@ -142,7 +142,7 @@ Lineage_relations = (function () {
                     obj.creator = item.creator ? item.creator.value : null;
                     obj.status = item.status ? item.status.value : null;
                     obj.provenance = item.provenance ? item.provenance.value : null;
-                    obj.creationDate = item.creationDate ? item.creationDate.value : nul;
+                    obj.creationDate = item.creationDate ? item.creationDate.value : null;
                 }
                 restrictions.push(obj);
             });
@@ -605,6 +605,7 @@ Lineage_relations = (function () {
                             Standardizer.listSourceLabels(fromIndex, offset, size, null, function (err, hits) {
                                 if (err) return callbackWhilst(err);
                                 resultSize = hits.length;
+                                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                                 totalProcessed += resultSize;
 
                                 offset += size;

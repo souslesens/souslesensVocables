@@ -3,8 +3,6 @@ var SearchUtil = (function () {
     var self = {};
 
     /**
-     *
-     *
      * @param fromSource if null ids or labels are mandatory
      * @param toSources if null search in all sources
      * @param labels an array  or labels
@@ -37,7 +35,11 @@ var SearchUtil = (function () {
                                 if (err) return callbackSeries(err);
 
                                 indexes = [];
-                                if (toSources && !Array.isArray(toSources)) toSources = [toSources];
+                                if (toSources) {
+                                    toSources.forEach(function (source) {
+                                        indexes.push(source.toLowerCase());
+                                    });
+                                }
                                 indexedSources.forEach(function (source) {
                                     if (!toSources || toSources.length == 0 || toSources.indexOf(source) > -1) {
                                         indexes.push(source.toLowerCase());
@@ -173,6 +175,9 @@ var SearchUtil = (function () {
         );
     };
 
+    /**
+     * @param {string} index - Name of the ElasticSearch index to search
+     */
     self.getSourceLabels = function (index, ids, offset, size, callback) {
         if (!offset) offset = 0;
         if (!size) size = 10000;
@@ -217,7 +222,7 @@ var SearchUtil = (function () {
                 },
             };
 
-            ElasticSearchProxy.queryElastic(query, index, function (err, result) {
+            ElasticSearchProxy.queryElastic(query, [index], function (err, result) {
                 if (err) {
                     return callback(err);
                 }
@@ -240,7 +245,7 @@ var SearchUtil = (function () {
                         should: [
                             {
                                 term: {
-                                    [field]: word.toLowerCase(),
+                                    [field]: word,
                                 },
                             },
                             {
@@ -304,6 +309,7 @@ var SearchUtil = (function () {
         async.eachSeries(
             slices,
             function (wordSlice, callbackEach) {
+                if (wordSlice.length == 0) return callbackEach();
                 bulQueryStr = "";
                 wordSlice.forEach(function (word) {
                     if (!word) return;
@@ -325,19 +331,18 @@ var SearchUtil = (function () {
 
     self.indexData = function (indexName, data, replaceIndex, callback) {
         if (data.length == 0) return callback();
-        //  MainController.UI.message("indexing " + data.length)
         var options = { replaceIndex: replaceIndex, owlType: "Class" };
         var payload = {
-            dictionaries_indexSource: 1,
             indexName: indexName,
-            data: JSON.stringify(data),
-            options: JSON.stringify(options),
+            data: data,
+            options: options,
         };
 
         $.ajax({
             type: "POST",
-            url: Config.serverUrl,
-            data: payload,
+            url: Config.apiUrl + "/elasticsearch/indexsource",
+            data: JSON.stringify(payload),
+            contentType: "application/json",
             dataType: "json",
             success: function (_data2, _textStatus, _jqXHR) {
                 callback(null, data);
@@ -429,6 +434,9 @@ var SearchUtil = (function () {
         });
     };
 
+    /**
+     * @param {Array<string>} indexes - List of ElasticSearch indexes to search
+     */
     self.getParentAllDescendants = function (parentId, indexes, options, callback) {
         var allData = [];
         var allLabelsMap = {};

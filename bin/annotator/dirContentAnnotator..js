@@ -24,7 +24,6 @@ var Inflector = require("inflected");
 var tikaServer = null;
 // var tikaserverStarted = false;
 var unzipper = require("unzipper");
-// var MemoryStream = require("memory-stream");
 var jsonData = {};
 var DirContentAnnotator = {
     socket: {

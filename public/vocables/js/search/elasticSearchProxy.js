@@ -2,12 +2,12 @@
 var ElasticSearchProxy = (function () {
     var self = {};
 
+    /**
+     * @param {Object} query - An ElasticSearch query object
+     * @param {Array<string> | null} indexes - List of names of the indexes to search (search all indexes if null)
+     * @param {Function} callback - Function that will process the result
+     */
     self.queryElastic = function (query, indexes, callback) {
-        if (!indexes) indexes = context.curentSearchIndexes;
-
-        /*    console.log(JSON.stringify(indexes, null, 2))
-            console.log(JSON.stringify(query, null, 2))*/
-
         var payload = {
             query: query,
             url: "_search",

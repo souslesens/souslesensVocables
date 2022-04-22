@@ -4,16 +4,16 @@ import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import React from "react";
 
-type Response = { message: string; ressources: ProfileJson[] };
+type Response = { message: string; resources: ProfileJson[] };
 const endpoint = "/api/v1/profiles";
 async function getProfiles(): Promise<Profile[]> {
     const response = await fetch(endpoint);
     const json = (await response.json()) as Response;
-    return mapProfiles(json.ressources);
+    return mapProfiles(json.resources);
 }
 
-function mapProfiles(ressources: ProfileJson[]) {
-    const profiles: [string, ProfileJson][] = Object.entries(ressources);
+function mapProfiles(resources: ProfileJson[]) {
+    const profiles: [string, ProfileJson][] = Object.entries(resources);
     const mapped_users = profiles.map(([key, val]) => {
         return decodeProfile(key, val);
     });
@@ -28,9 +28,9 @@ export async function saveProfile(body: Profile, mode: Mode, updateModel: React.
             body: JSON.stringify({ [body.id]: body }, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
-        const { message, ressources } = (await response.json()) as Response;
+        const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(ressources)) });
+            updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(resources)) });
             updateLocal({ type: Type.UserClickedModal, payload: false });
             updateLocal({ type: Type.ResetProfile, payload: mode });
         } else {
@@ -44,9 +44,9 @@ export async function saveProfile(body: Profile, mode: Mode, updateModel: React.
 async function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>) {
     try {
         const response = await fetch(`${endpoint}/${profile.id}`, { method: "delete" });
-        const { message, ressources } = (await response.json()) as Response;
+        const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(ressources)) });
+            updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(resources)) });
         } else {
             updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`${response.status}, ${message}`) });
         }

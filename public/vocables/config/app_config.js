@@ -12,11 +12,9 @@
 var Config = (function () {
     var self = {};
     self.serverUrl = "/slsv";
-    self.apiUrl = "/api/v1";
     if (window.location.href.indexOf("localhost") < 0) self.serverUrl = "../slsv";
-    //   self.default_sparql_url = "http://51.178.139.80:8890/sparql"
-    //  self.default_sparql_url = "http://10.28.171.139:8890/sparql"
-    //    self.default_sparql_url="http://opeppa-updtlb03.main.glb.corp.local:8890/sparql"
+
+    self.apiUrl = "/api/v1";
 
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/";
 
@@ -152,10 +150,10 @@ var Config = (function () {
 
     self.tools["admin"] = { label: "Admin", multiSources: 1, controller: Admin, toolDescriptionImg: null }; //"images/taxonomy.png"}
 
-    self.tools["Config"] = {
-        label: "Config",
+    self.tools["ConfigEditor"] = {
+        label: "ConfigEditor",
         noSource: 1,
-        controller: Config,
+        controller: ConfigEditor,
         toolDescriptionImg: null,
     };
 

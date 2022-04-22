@@ -289,7 +289,7 @@ var TE_AssetConfigurator = (function () {
             if (visjsData.edges.length > 0) visjsGraph.data.edges.add(visjsData.edges);
             $("#graphDiv").focus();
         } else {
-            var options = {
+            _options = {
                 layout: {
                     hierarchical: {
                         enabled: true,
@@ -331,7 +331,7 @@ var TE_AssetConfigurator = (function () {
                 },
             };
             if (_options && _options.manipulation)
-                options.manipulation = {
+                _options.manipulation = {
                     enabled: {
                         addNode: function (nodeData, callback) {
                             if (!TE_AssetDataManager.currentTreeNode) return select("an asset node first");
@@ -346,7 +346,7 @@ var TE_AssetConfigurator = (function () {
                     },
                 };
 
-            options.dndCtrlFn = function (startNode, endNode, _point) {
+            _options.dndCtrlFn = function (startNode, endNode, _point) {
                 if (confirm("Create relation between " + startNode.data.label + " and " + endNode.data.label))
                     self.createRelation(startNode, endNode, function (_err, _visjsData) {
                         // Pass
@@ -362,9 +362,9 @@ var TE_AssetConfigurator = (function () {
             _options.onHoverNodeFn = function (node, _point, _options) {
                 self.showGraphNodeInfos(node);
             };
-            options.onRightClickFn = TE_AssetConfigurator.showGraphPopupMenus;
+            _options.onRightClickFn = TE_AssetConfigurator.showGraphPopupMenus;
 
-            visjsGraph.draw("graphDiv", visjsData, options, function () {
+            visjsGraph.draw("graphDiv", visjsData, _options, function () {
                 // Pass
             });
         }
@@ -727,7 +727,7 @@ var TE_AssetConfigurator = (function () {
                             },
                         },
                     };
-                    ElasticSearchProxy.queryElastic(queryObj, self.currentSource.toLowerCase(), function (err, result) {
+                    ElasticSearchProxy.queryElastic(queryObj, [self.currentSource.toLowerCase()], function (err, result) {
                         if (err) MainController.UI.message(err);
                         matchingHits = result.hits.hits;
                         if (matchingHits.length == 0) return callbackSeries("no result");
@@ -798,7 +798,7 @@ var TE_AssetConfigurator = (function () {
                             },
                         });
                     }
-                    ElasticSearchProxy.queryElastic(queryObj, self.currentSource.toLowerCase(), function (err, result) {
+                    ElasticSearchProxy.queryElastic(queryObj, [self.currentSource.toLowerCase()], function (err, result) {
                         if (err) MainController.UI.message(err);
                         matchingHits = result.hits.hits;
                         if (matchingHits.length == 0) return callbackSeries("no result");
@@ -971,7 +971,7 @@ var TE_AssetConfigurator = (function () {
             }
         });
 
-        var existingNodes = visjsGraph.getExistingIdsMap();
+        existingNodes = visjsGraph.getExistingIdsMap();
         visjsGraph.data.nodes.update(visjsData.nodes);
         visjsGraph.data.edges.update(visjsData.edges);
 
@@ -1090,7 +1090,7 @@ var TE_AssetConfigurator = (function () {
             if (!self.currentGraphNode) return alert("select a node in the graph");
             // JSON.stringify(rdsNodeData, null,2).replace("\\n","<br>")
 
-            var headers = Object.keys(self.currentGraphNode.data);
+            const headers = Object.keys(self.currentGraphNode.data);
 
             var nodeId = self.currentGraphNode.data.label;
             var str = "<div style=overflow: auto'>" + "RDS Infos <table class='infosTable'>";
@@ -1112,7 +1112,7 @@ var TE_AssetConfigurator = (function () {
             str += "Asset Infos <table class='infosTable'>";
 
             if (self.currentGraphNode.data["assetNode"]) {
-                var headers = Object.keys(self.currentGraphNode.data["assetNode"]);
+                const headers = Object.keys(self.currentGraphNode.data["assetNode"]);
 
                 headers.forEach(function (key) {
                     str += "<tr class='infos_table'>";

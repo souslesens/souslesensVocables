@@ -10,7 +10,7 @@
 
 var KGquery = (function () {
     var self = {};
-    self.currentProperty;
+    self.currentProperty = null;
     self.currentNode;
 
     self.queryClassPath = {};

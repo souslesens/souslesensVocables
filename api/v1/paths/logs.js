@@ -9,13 +9,7 @@ module.exports = function () {
         GET,
     };
 
-    function POST(req, res, _next) {
-        const ip = req.header("x-forwarded-for") || req.connection.remoteAddress;
-        req.body.infos += "," + ip;
-        logger.info(req.body.infos);
-        return res.status(200).json({ done: true });
-    }
-
+    ///// GET api/v1/logs
     function GET(req, res, _next) {
         const logsArray = fs
             .readFileSync(path.resolve(config.logDir + "/vocables.log"))
@@ -28,12 +22,12 @@ module.exports = function () {
                 return {
                     user: message[0],
                     tool: message[1],
+                    source: message[2],
                     timestamp: jsonLine.timestamp,
                 };
             });
         return res.status(200).json(logsArray);
     }
-
     GET.apiDoc = {
         security: [{ restrictAdmin: [] }],
         summary: "Get users logs",
@@ -63,6 +57,13 @@ module.exports = function () {
         },
     };
 
+    ///// POST api/v1/logs
+    function POST(req, res, _next) {
+        const ip = req.header("x-forwarded-for") || req.connection.remoteAddress;
+        req.body.infos += "," + ip;
+        logger.info(req.body.infos);
+        return res.status(200).json({ done: true });
+    }
     POST.apiDoc = {
         security: [{ loginScheme: [] }],
         summary: "Write user logs",

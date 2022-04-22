@@ -395,9 +395,12 @@ var KGadvancedMapping = (function () {
                 excludes: ["attachment.content"],
             },
         };
-        var indexes = ["readi", "pca", "cfihos"];
         var selectedSource = $("#KGadvancedMapping_filterCandidateMappingsSelect").val();
-        if (selectedSource != "all") indexes = [selectedSource];
+        if (selectedSource == "all") {
+            indexes = null; // XXX was ["readi", "pca", "cfihos"];
+        } else {
+            indexes = [selectedSource];
+        }
 
         ElasticSearchProxy.queryElastic(query, indexes, function (err, result) {
             if (err) return alert(err);
@@ -447,8 +450,6 @@ var KGadvancedMapping = (function () {
     };
 
     self.setAsMatchCandidate = function (candidateId) {
-        if (self.setAsMatchCandidateExternalFn); // return   self.setAsMatchCandidateExternalFn(candidateId)
-
         var candidateEntityObj = self.currentdictionaryEntryEntities[candidateId];
         $(".KGmapping_candidateEntity").removeClass("KGmapping_columnValues_isCandidate");
         $("#" + candidateId).addClass("KGmapping_columnValues_isCandidate");

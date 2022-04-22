@@ -9,7 +9,7 @@ const fileUpload = require("express-fileupload");
 const openapi = require("express-openapi");
 const swaggerUi = require("swagger-ui-express");
 
-const indexRouter = require(path.resolve("routes/index"));
+const indexRouter = require("./legacy_routes");
 const httpProxy = require(path.resolve("bin/httpProxy."));
 const userManager = require(path.resolve("bin/user."));
 
@@ -82,7 +82,7 @@ openapi.initialize({
                 if (!req.isAuthenticated || !req.isAuthenticated()) {
                     throw {
                         status: 401,
-                        message: "You must authenticate to access this ressource.",
+                        message: "You must authenticate to access this resource.",
                     };
                 }
             }
@@ -94,14 +94,14 @@ openapi.initialize({
             if (!currentUser.logged) {
                 throw {
                     status: 401,
-                    message: "You must authenticate to access this ressource.",
+                    message: "You must authenticate to access this resource.",
                 };
             }
 
             if (!currentUser.user.groups.includes("admin")) {
                 throw {
                     status: 401,
-                    message: "You must be admin to access this ressource.",
+                    message: "You must be admin to access this resource.",
                 };
             }
 
@@ -120,6 +120,16 @@ app.use(
         },
     })
 );
+app.use("/api/v1/*", function (err, req, res, _next) {
+    console.debug("GlobalErr", err);
+    const error = err.status ? err : err.stack;
+
+    if (req.app.get("env") === "development") {
+        res.status(err.status || 500).json(error);
+    } else {
+        res.status(err.status || 500);
+    }
+});
 
 // main router
 app.use("/", indexRouter);

@@ -231,8 +231,7 @@ var Sparql_OWL = (function () {
             fromStr +
             "  WHERE {{";
 
-        //   query += "?concept rdf:type ?type. "
-        query += "?concept rdf:type* owl:Class. ";
+        query += "?concept rdf:type  ?type. filter (?type not in(owl:Restriction)) ";
         if (words) {
             query += " ?concept rdfs:label ?conceptLabel.";
         } else {

@@ -46,7 +46,7 @@ var MainController = (function () {
             url: "/api/v1/sources",
             dataType: "json",
             success: function (data_, _textStatus, _jqXHR) {
-                const data = data_.ressources;
+                const data = data_.resources;
                 for (var source in data) {
                     if (data[source].sparql_server && data[source].sparql_server.url == "_default") {
                         data[source].sparql_server.url = Config.default_sparql_url;
@@ -100,7 +100,7 @@ var MainController = (function () {
             url: "/api/v1/profiles",
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-                Config.profiles = data.ressources;
+                Config.profiles = data.resources;
                 if (callback) return callback();
             },
             error: function (err) {
@@ -440,9 +440,9 @@ var MainController = (function () {
             else $("#toolPanelLabel").html(Config.tools[self.currentTool].label);
         },
 
-        showPopup: function (point, popupDiv) {
+        showPopup: function (point, popupDiv, absolutePosition) {
             if (!popupDiv) popupDiv = "popupDiv";
-            $("#" + popupDiv).css("left", point.x + leftPanelWidth);
+            $("#" + popupDiv).css("left", point.x + (absolutePosition ? 0 : leftPanelWidth));
             $("#" + popupDiv).css("top", point.y);
             $("#" + popupDiv).css("display", "flex");
         },

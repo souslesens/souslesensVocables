@@ -52,7 +52,6 @@ var Standardizer = (function () {
             });
 
             common.fillSelectOptions("KGmapping_distinctColumnSortSelect", sortList, false, "text", "value");
-            KGadvancedMapping.setAsMatchCandidateExternalFn = Standardizer.setAsMatchCandidate;
             self.matchCandidates = {};
 
             //   common.fillSelectOptions("Standardizer_sourcesSelect", sources, true);
@@ -76,8 +75,8 @@ var Standardizer = (function () {
             dictionaries_listIndexes: 1,
         };
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
+            type: "GET",
+            url: Config.apiUrl + "/elasticsearch/indices",
             data: payload,
             dataType: "json",
             success: function (indexes, _textStatus, _jqXHR) {
@@ -454,7 +453,7 @@ var Standardizer = (function () {
 
                         objects.push(hit._source);
                     });
-                    Standardizer.getClassesLabels(sourceClassUri, self.currentSource.toLowerCase(), function (err, result) {
+                    Standardizer.getClassesLabels(sourceClassUri, [self.currentSource.toLowerCase()], function (err, result) {
                         if (err) return callbackWhilst(err);
                         objects.forEach(function (item) {
                             item.parentLabel = result[item.parent] || Sparql_common.getLabelFromURI(item.id);
@@ -741,8 +740,7 @@ var Standardizer = (function () {
             },
         };
 
-        var index = source.toLowerCase();
-        ElasticSearchProxy.queryElastic(query, index, function (err, result) {
+        ElasticSearchProxy.queryElastic(query, [source.toLowerCase()], function (err, result) {
             if (err) {
                 if (callback) return callback(err);
                 return alert(err);
@@ -1605,7 +1603,8 @@ var Standardizer = (function () {
                 });
             },
             function (_err) {
-                // $("#" + resultDiv).html(html)
+                if (dataSet.length == 0) return;
+
                 $("#" + resultDiv).html();
                 $("#" + resultDiv).html("<table id='dataTableDiv'></table>");
 
@@ -1671,14 +1670,13 @@ var Standardizer = (function () {
             chunks,
             function (chunk, callbackEach) {
                 var payload = {
-                    SpacyExtract: 1,
                     text: chunk,
-                    options: JSON.stringify(options),
-                    types: JSON.stringify(["NN"]),
+                    options: options,
+                    types: ["NN"],
                 };
                 $.ajax({
                     type: "POST",
-                    url: Config.serverUrl,
+                    url: Config.apiUrl + "/annotator/spacyextract",
                     data: payload,
                     dataType: "json",
                     success: function (tokens, _textStatus, _jqXHR) {

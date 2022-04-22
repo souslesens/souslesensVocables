@@ -1,11 +1,12 @@
 const path = require("path");
 const fs = require("fs");
+const fsPromises = require("fs/promises");
 const sourcesJSON = path.resolve("config/sources.json");
 const profilesJSON = path.resolve("config/profiles.json");
 exports.profilesJSON = sourcesJSON;
 const _ = require("lodash");
 const util = require("util");
-const { readRessource, writeRessource, ressourceCreated, ressourceUpdated, responseSchema, ressourceFetched } = require("./utils");
+const { readResource, writeResource, resourceCreated, resourceUpdated, responseSchema, resourceFetched } = require("./utils");
 const userManager = require(path.resolve("bin/user."));
 const read = util.promisify(fs.readFile);
 module.exports = function () {
@@ -35,73 +36,51 @@ module.exports = function () {
 
             if (hasAny) {
                 acc = acc.concat(val.allowedSources);
-            } else {
-                return acc;
             }
         }
         return Array.from(new Set(acc));
     };
 
-    async function GET(req, res, _next) {
-        const profiles = await read(profilesJSON);
-        const parsedProfiles = await JSON.parse(profiles);
-        const userInfo = userManager.getUser(req.user);
-        const allowedSources = getAllowedSources(userInfo.user, parsedProfiles);
-
-        fs.readFile(sourcesJSON, "utf8", (err, data) => {
-            if (err) {
-                res.status(500).json({ message: "I couldn't read profiles.json" });
-            } else {
-                const sources = JSON.parse(data);
-                const filteredSources = filterSources(allowedSources, sources, allowedSources, req);
-                ressourceFetched(res, filteredSources);
-            }
-        });
-    }
-
-    async function PUT(req, res, _next) {
-        const updatedSource = req.body;
-        const profiles = await read(profilesJSON).then((p) => JSON.parse(p));
-        const userInfo = userManager.getUser(req.user);
-        const allowedSources = getAllowedSources(userInfo.user, profiles);
+    ///// GET api/v1/sources
+    async function GET(req, res, next) {
         try {
-            const oldSources = await readRessource(sourcesJSON, res);
-            const updatedSources = { ...oldSources, ...updatedSource };
-            if (Object.keys(oldSources).includes(Object.keys(req.body)[0])) {
-                ressourceUpdated(res, filterSources(allowedSources, updatedSources));
-            } else {
-                res.status(400).json({ message: "Ressource does not exist. If you want to create another ressource, use POST instead." });
-            }
+            const profiles = await read(profilesJSON);
+            const parsedProfiles = JSON.parse(profiles);
+            const userInfo = userManager.getUser(req.user);
+            const allowedSources = getAllowedSources(userInfo.user, parsedProfiles);
+            const sources = await read(sourcesJSON);
+            const parsedSources = JSON.parse(sources);
+            const filteredSources = filterSources(allowedSources, parsedSources, allowedSources, req);
+            resourceFetched(res, filteredSources);
         } catch (err) {
-            res.status(500).json({ message: err });
+            next(err);
         }
     }
-
-    async function POST(req, res, _next) {
-        const profileToAdd = req.body;
-        //        const successfullyCreated = newProfiles[req.params.id]
-        try {
-            const oldProfiles = await readRessource(sourcesJSON, res);
-            const profileDoesntExist = !Object.keys(oldProfiles).includes(Object.keys(profileToAdd)[0]);
-            const objectToCreateKey = req.body;
-            const newProfiles = { ...oldProfiles, ...objectToCreateKey };
-            if (profileDoesntExist) {
-                const saved = await writeRessource(sourcesJSON, newProfiles, res);
-                ressourceCreated(res, saved);
-            } else {
-                res.status(400).json({ message: "Ressource already exists. If you want to update an existing ressource, use PUT instead." });
-            }
-        } catch (e) {
-            res.status(500);
-        }
-    }
-
     GET.apiDoc = {
         summary: "Returns all sources",
         security: [{ loginScheme: [] }],
         operationId: "getSources",
         responses: responseSchema("Sources", "GET"),
     };
+
+    ///// PUT api/v1/sources
+    async function PUT(req, res, next) {
+        try {
+            const updatedSource = req.body;
+            const profiles = await read(profilesJSON).then((p) => JSON.parse(p));
+            const userInfo = userManager.getUser(req.user);
+            const allowedSources = getAllowedSources(userInfo.user, profiles);
+            const oldSources = await readResource(sourcesJSON, res);
+            const updatedSources = { ...oldSources, ...updatedSource };
+            if (Object.keys(oldSources).includes(Object.keys(req.body)[0])) {
+                resourceUpdated(res, filterSources(allowedSources, updatedSources));
+            } else {
+                res.status(400).json({ message: "Resource does not exist. If you want to create another resource, use POST instead." });
+            }
+        } catch (err) {
+            next(err);
+        }
+    }
     PUT.apiDoc = {
         summary: "Update Sources",
         security: [{ restrictAdmin: [] }],
@@ -109,6 +88,26 @@ module.exports = function () {
         parameters: [],
         responses: responseSchema("Sources", "PUT"),
     };
+
+    ///// POST api/v1/sources
+    async function POST(req, res, next) {
+        try {
+            const profileToAdd = req.body;
+            //        const successfullyCreated = newProfiles[req.params.id]
+            const oldProfiles = await readResource(sourcesJSON, res);
+            const profileDoesntExist = !Object.keys(oldProfiles).includes(Object.keys(profileToAdd)[0]);
+            const objectToCreateKey = req.body;
+            const newProfiles = { ...oldProfiles, ...objectToCreateKey };
+            if (profileDoesntExist) {
+                const saved = await writeResource(sourcesJSON, newProfiles, res);
+                resourceCreated(res, saved);
+            } else {
+                res.status(400).json({ message: "Resource already exists. If you want to update an existing resource, use PUT instead." });
+            }
+        } catch (err) {
+            next(err);
+        }
+    }
     POST.apiDoc = {
         summary: "Update Sources",
         security: [{ restrictAdmin: [] }],
@@ -121,5 +120,8 @@ module.exports = function () {
 };
 
 function filterSources(allowedSources, sources) {
-    return allowedSources.includes("ALL") ? sources : Object.fromEntries(Object.entries(sources).filter((source) => allowedSources.some((s) => s === source.schemaType)));
+    if (allowedSources.includes("ALL")) {
+        return sources;
+    }
+    return Object.fromEntries(Object.entries(sources).filter(([sourceId, _source]) => allowedSources.includes(sourceId)));
 }

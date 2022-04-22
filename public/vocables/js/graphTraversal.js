@@ -55,8 +55,6 @@ var GraphTraversal = (function () {
     };
 
     self.getShortestPaths = function (fromNodeObj, toNodeObj, allClassesMap) {
-        //   const Graph = require('dijkstra-short-path');
-
         var obj = self.initRoute(allClassesMap);
 
         var route = obj.route;

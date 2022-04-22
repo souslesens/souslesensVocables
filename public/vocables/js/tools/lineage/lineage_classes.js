@@ -544,7 +544,7 @@ var Lineage_classes = (function () {
 
     self.drawSimilarsNodes = function (_similarType, _node, _sources, _descendantsAlso) {
         var fromSource = null;
-        var toSources = Lineage_common.currentSource;
+        var toSources = [Lineage_common.currentSource];
         var nodes = visjsGraph.data.nodes.get();
         var labels = [];
         var ids = null;

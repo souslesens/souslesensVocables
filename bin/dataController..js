@@ -3,22 +3,44 @@ var path = require("path");
 var csvCrawler = require("../bin/_csvCrawler.");
 
 var DataController = {
+    /**
+     * Gets the list of files in a sub-directory of `data`
+     * @param {string} dir - directory in which to look for files
+     * @param {(err: NodeJS.ErrnoException | null, data: string[] | null) => void} callback -
+     *   function to be called once the file has been saved
+     */
     getFilesList: function (dir, callback) {
         var dirPath = path.join(__dirname, "../data/" + dir + "");
         if (!fs.existsSync(dirPath)) return callback(null, null);
 
         fs.readdir(dirPath, function (err, result) {
-            return callback(null, result);
+            return callback(err, result);
         });
     },
 
+    /**
+     * Saves a file in a sub-directory of `data`
+     * @param {string} dir - directory the file must be saved in
+     * @param {string} fileName - name of the file to create
+     * @param {string} data - file content
+     * @param {(err: NodeJS.ErrnoException | null, data: "file saved" | null) => void} callback -
+     *   function to be called once the file has been saved
+     */
     saveDataToFile: function (dir, fileName, data, callback) {
         var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
-        fs.writeFile(filePath, JSON.stringify(data, null, 2), {}, function (err, _result) {
+        fs.writeFile(filePath, data, {}, function (err) {
             return callback(err, "file saved");
         });
     },
-    readfile: function (dir, fileName, callback) {
+
+    /**
+     * Reads a file in a sub-directory of `data`
+     * @param {string} dir - directory path under data
+     * @param {string} fileName - name of the file to read
+     * @param {(err: Error | string | null, data: string | null) => void} callback -
+     *   function to be called with the file content as second argument
+     */
+    readFile: function (dir, fileName, callback) {
         var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
         if (!fs.existsSync(filePath)) return callback("file does not exist", null);
         fs.readFile(filePath, function (err, result) {
@@ -27,13 +49,32 @@ var DataController = {
         });
     },
 
+    /**
+     * @typedef {Object} ReadCsvOptions
+     * @prop {number=} lines - only read the first `lines` lines of the file
+     */
+
+    /**
+     * @typedef {Object} ReadCsvResult
+     * @prop {string[]} headers - name of the columns
+     * @prop {Record<string, string>[]} data - rows as objects with column names as keys
+     */
+
+    /**
+     * Reads a file in the data directory
+     * @param {string} dir - directory path under data
+     * @param {string} fileName - name of the file to read
+     * @param {ReadCsvOptions| undefined} options -
+     * @param {(err: Error | string | null, result: ReadCsvResult | null) => void} callback -
+     *   function to be called with the file content as second argument
+     */
     readCsv: function (dir, fileName, options, callback) {
         if (!options) options = {};
 
         var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
         if (!fs.existsSync(filePath)) return callback("file " + filePath + "does not exist", null);
         csvCrawler.readCsv({ filePath: filePath }, options.lines || 100000, function (err, result) {
-            if (err) return callback(err);
+            if (err) return callback(err, null);
             var data = result.data;
             var headers = result.headers;
             return callback(null, { headers: headers, data: data });

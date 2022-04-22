@@ -12,6 +12,13 @@
 var Sparql_proxy = (function () {
     var self = {};
 
+    /**
+     * @param {string} url - URL of the sparql endpoint to query
+     * @param {string} query - SPARQL query to execute
+     * @param {string} queryOptions - NOT USED
+     * @param {Object} options - NOT USED
+     * @param {Function} callback - Function called to process the result of the query
+     */
     self.querySPARQL_GET_proxy_cursor = function (url, query, queryOptions, options, callback) {
         var offset = 0;
         var limit = Config.queryLimit;
@@ -24,14 +31,13 @@ var Sparql_proxy = (function () {
         if (p > -1) query = query.substring(0, p);
         query += " LIMIT " + limit;
 
+        // XXX rewrite this data generator with fetch + async + await
         async.whilst(
             function (_callbackTest) {
-                //test
                 return resultSize > 0;
             },
             function (callbackWhilst) {
                 //iterate
-
                 var queryCursor = query + " OFFSET " + offset;
 
                 var body = {
@@ -44,7 +50,6 @@ var Sparql_proxy = (function () {
 
                 $("#waitImg").css("display", "block");
 
-                //   url="http://vps475829.ovh.net:8890/sparql"
                 var payload = {
                     httpProxy: 1,
                     url: url,
@@ -56,10 +61,6 @@ var Sparql_proxy = (function () {
                     url: Config.serverUrl,
                     data: payload,
                     dataType: "json",
-                    /* beforeSend: function(request) {
-                         request.setRequestHeader('Age', '10000');
-                     },*/
-
                     success: function (data, _textStatus, _jqXHR) {
                         callbackWhilst(null, data);
                         resultSize = data.results.bindings.length;
@@ -68,7 +69,6 @@ var Sparql_proxy = (function () {
                     },
                     error: function (err) {
                         $("#messageDiv").html(err.responseText);
-
                         $("#waitImg").css("display", "none");
                         // eslint-disable-next-line no-console
                         console.log(JSON.stringify(err));
@@ -84,11 +84,17 @@ var Sparql_proxy = (function () {
         );
     };
 
+    /**
+     * @param {string} url - URL of the sparql endpoint to query
+     * @param {string} query - SPARQL query to execute
+     * @param {string} queryOptions - appended to the url
+     * @param {Object} options - options.source is the name of the source being queried
+     * @param {Function} callback - Function called to process the result of the query
+     */
     self.querySPARQL_GET_proxy = function (url, query, queryOptions, options, callback) {
         if (url.indexOf("_default") == 0) url = Config.default_sparql_url;
 
         self.currentQuery = query;
-        //  common.copyTextToClipboard(query)
         if (!options) options = {};
 
         $("#waitImg").css("display", "block");
@@ -133,16 +139,11 @@ var Sparql_proxy = (function () {
             payload.body = JSON.stringify(body);
             payload.url = url + queryOptions;
         }
-        //console.log(options.source +"  "+payload.url)
         $.ajax({
             type: "POST",
             url: Config.serverUrl,
             data: payload,
             dataType: "json",
-            /* beforeSend: function(request) {
-                 request.setRequestHeader('Age', '10000');
-             },*/
-
             success: function (data, _textStatus, _jqXHR) {
                 if (data.result && typeof data.result != "object") data = JSON.parse(data.result.trim());
 

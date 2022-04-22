@@ -569,10 +569,10 @@ var Evaluate = (function () {
     self.contextMenuFn = function (_treeDiv) {
         var items = {};
         items.matchAllResources = {
-            label: "match all ressources",
+            label: "match all resources",
             action: function (_e, _xx) {
                 // pb avec source
-                self.treeMenu.matchAllRessources();
+                self.treeMenu.matchAllResources();
             },
         };
         /*    self.currentTreeNode = obj.node
@@ -580,7 +580,7 @@ var Evaluate = (function () {
                 self.showMissingWords(obj.node)*/
     };
     self.treeMenu = {
-        matchAllRessources: function () {
+        matchAllResources: function () {
             // pass
         },
     };

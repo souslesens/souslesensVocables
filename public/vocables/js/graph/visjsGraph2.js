@@ -816,17 +816,28 @@ var visjsGraph = (function () {
             },
         });
     };
+    /**
+     * Load graphs from the "/data/graphs" directory
+     *
+     * The loaded graphs are then added as options to the `select` element with
+     * id "visjsGraph_savedGraphsSelect".
+     *
+     * @param {(err: string | null, result?: string[]) => void} callback
+     *
+     * @todo Can't find the place where visjsGraph_savedGraphsSelect is
+     * declared in HTML files.
+     */
     self.listSavedGraphs = function (callback) {
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/data/files",
-           // data: payload,
+            data: { dir: "graphs" },
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 if (callback) return callback(null, result);
                 common.fillSelectOptions("visjsGraph_savedGraphsSelect", result, true);
             },
-            error(err) {
+            error(_jqXHR, _status, err) {
                 if (callback) return callback(err);
                 return alert(err);
             },

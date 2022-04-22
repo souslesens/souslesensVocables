@@ -12,8 +12,11 @@ module.exports = {
         "@typescript-eslint/no-unused-vars": ["error", { ignoreRestSiblings: true, varsIgnorePattern: "^_", argsIgnorePattern: "^_" }],
     },
     overrides: [
+        /**
+         * Backend files
+         */
         {
-            files: ["app.js", "scripts/*.js", "routes/*.js", "other/**/*.js", "bin/**/*.js", "api/**/*.js", "**/webpack.config.js", ".eslintrc.js", "model/*.js"],
+            files: ["app.js", "scripts/*.js", "routes/*.js", "other/**/*.js", "bin/**/*.js", "api/**/*.js", "**/webpack.config.js", ".eslintrc.js", "model/**/*.js"],
             env: {
                 node: true,
             },
@@ -22,6 +25,23 @@ module.exports = {
                 "no-console": "off",
             },
         },
+        /**
+         * Jest unit tests
+         */
+        {
+            extends: ["plugin:jest/recommended"],
+            files: ["tests/**/*.js"],
+            env: {
+                node: true,
+                "jest/globals": true,
+            },
+            rules: {
+                "@typescript-eslint/no-var-requires": "off",
+            },
+        },
+        /**
+         * Frontend files
+         */
         {
             files: ["public/**/*.js"],
             globals: {

@@ -5,7 +5,7 @@ module.exports = {
             version: "detect",
         },
     },
-    extends: ["plugin:prettier/recommended", "eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:react/recommended"],
+    extends: ["plugin:prettier/recommended", "plugin:cypress/recommended", "eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:react/recommended"],
 
     rules: {
         "no-console": ["error", { allow: ["error", "warn"] }],

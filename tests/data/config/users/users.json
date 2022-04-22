@@ -1,0 +1,11 @@
+{
+    "admin": {
+        "id": "admin",
+        "login": "admin",
+        "password": "$2b$10$ed6ZDHUbN7NfOGrufiDniudK9EMLCFg9qFgJ0N/T.nRTBPlA5Mm9C",
+        "groups": ["admin"],
+        "source": "json",
+        "_type": "user",
+        "name": "admin"
+    }
+}

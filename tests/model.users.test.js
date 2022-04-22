@@ -1,7 +1,7 @@
 const path = require("path");
-const { UserModel } = require(path.resolve("model/users"));
+const { UserModel } = require("../model/users");
 
-const userModel = new UserModel(path.resolve("tests/data/config"));
+const userModel = new UserModel(path.join(__dirname, "data/config"));
 
 test("The list of users is returned", async () => {
     const users = await userModel.getUserAccounts();

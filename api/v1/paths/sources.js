@@ -36,8 +36,6 @@ module.exports = function () {
 
             if (hasAny) {
                 acc = acc.concat(val.allowedSources);
-            } else {
-                return acc;
             }
         }
         return Array.from(new Set(acc));

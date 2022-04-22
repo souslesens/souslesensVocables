@@ -120,5 +120,8 @@ module.exports = function () {
 };
 
 function filterSources(allowedSources, sources) {
-    return allowedSources.includes("ALL") ? sources : Object.fromEntries(Object.entries(sources).filter((source) => allowedSources.some((s) => s === source.schemaType)));
+    if (allowedSources.includes("ALL")) {
+        return sources;
+    }
+    return Object.fromEntries(Object.entries(sources).filter(([sourceId, _source]) => allowedSources.includes(sourceId)));
 }

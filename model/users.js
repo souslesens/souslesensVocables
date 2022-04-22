@@ -27,7 +27,7 @@ class UserModel {
          * @type {Record<string, UserAccount>}
          */
         const users = {};
-        Object.entries(JSON.parse(data)).map(([key, value]) => {
+        Object.entries(JSON.parse(data.toString())).map(([key, value]) => {
             users[key] = {
                 id: value.id,
                 login: value.login,

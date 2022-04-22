@@ -45,7 +45,6 @@ module.exports = {
         {
             files: ["public/**/*.js"],
             globals: {
-                $: "readable",
                 Admin: "readable",
                 Blender: "readable",
                 C2S: "readable",
@@ -188,7 +187,7 @@ module.exports = {
                 "no-empty-function": "warn",
                 "no-unreachable": "warn",
             },
-            env: { browser: true },
+            env: { browser: true, jquery: true },
         },
         {
             files: ["mainapp/src/**/*.ts", "mainapp/src/**/*.tsx"],

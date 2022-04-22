@@ -1,4 +1,4 @@
-const modelUsers = require("../../../model/users");
+const { userModel } = require("../../../model/users");
 const path = require("path");
 const profilesJSON = path.resolve("config/users/users.json");
 exports.profilesJSON = profilesJSON;
@@ -14,7 +14,7 @@ module.exports = function () {
     ///// GET api/v1/users
     async function GET(req, res, next) {
         try {
-            const users = await modelUsers.getUsers();
+            const users = await userModel.getUserAccounts();
             res.status(200).json(successfullyFetched(users));
         } catch (error) {
             next(error);

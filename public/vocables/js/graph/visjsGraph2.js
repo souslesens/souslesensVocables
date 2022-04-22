@@ -826,7 +826,7 @@ var visjsGraph = (function () {
                 if (callback) return callback(null, result);
                 common.fillSelectOptions("visjsGraph_savedGraphsSelect", result, true);
             },
-            error(err) {
+            error(_jqXHR, _status, err) {
                 if (callback) return callback(err);
                 return alert(err);
             },

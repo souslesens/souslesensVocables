@@ -11,22 +11,32 @@ const usersJSON = path.resolve("config/users/users.json");
  * @prop {"user"} _type
  */
 
-/**
- * @returns {Promise<Record<string, UserAccount>>} a collection of UserAccount
- */
-const getUsers = async () => {
-    const data = await fs.promises.readFile(usersJSON);
-    const users = {};
-    Object.entries(JSON.parse(data)).map(([key, value]) => {
-        users[key] = {
-            id: value.id,
-            login: value.login,
-            groups: value.groups,
-            source: value.source,
-            _type: value._type,
-        };
-    });
-    return users;
-};
+class UserModel {
+    constructor(configPath) {
+        this.configPath = configPath;
+        this.userPath = this.configPath + "/users/users.json";
+    }
 
-module.exports = { getUsers };
+    /**
+     * @returns {Promise<Record<string, UserAccount>>} a collection of UserAccount
+     */
+
+    getUserAccounts = async () => {
+        const data = await fs.promises.readFile(this.userPath);
+        const users = {};
+        Object.entries(JSON.parse(data)).map(([key, value]) => {
+            users[key] = {
+                id: value.id,
+                login: value.login,
+                groups: value.groups,
+                source: value.source,
+                _type: value._type,
+            };
+        });
+        return users;
+    };
+}
+
+const userModel = new UserModel("config");
+
+module.exports = { userModel, UserModel };

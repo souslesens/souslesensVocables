@@ -9,18 +9,21 @@
         "typecheck": "tsc",
         "lint": "eslint .",
         "format": "prettier -w .",
+        "prettier": "prettier --check .",
         "ncu": "ncu",
         "ci": "npm run lint && npm run ncu",
         "patch": " npm version --no-git-tag-version --no-commit-hooks patch",
         "minor": " npm version --no-git-tag-version --no-commit-hooks minor",
         "major": " npm version --no-git-tag-version --no-commit-hooks major",
-        "test": "cypress open"
+        "uitest": "cypress open",
+        "test": "jest --rootDir tests"
     },
     "devDependencies": {
         "@types/jquery": "^3.5.14",
         "cypress": "^9.5.4",
         "eslint": "^8.13.0",
         "eslint-plugin-prettier": "^4.0.0",
+        "jest": "^27.5.1",
         "npm-check": "^5.9.2",
         "prettier": "^2.6.2",
         "typescript": "^4.6.3"

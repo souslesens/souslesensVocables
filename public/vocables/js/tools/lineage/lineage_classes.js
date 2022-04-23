@@ -187,12 +187,12 @@ var Lineage_classes = (function () {
             },
         };
         /*   items.addSameAs = {
-                   label: "add similars (sameAs)",
-                   action: function (e) {
-                       Lineage_classes.drawSimilarsNodes("sameAs")
+           label: "add similars (sameAs)",
+           action: function (e) {
+               Lineage_classes.drawSimilarsNodes("sameAs")
 
-                   }
-               }*/
+           }
+       }*/
         items.wikiPage = {
             label: "Wiki page",
             action: function (_e) {
@@ -426,12 +426,55 @@ var Lineage_classes = (function () {
                 enabled: true,
 
                 addEdge: function (edgeData, callback) {
-                    Lineage_properties.getPropertiesjsTreeData("ISO_15926-part-14_PCA");
+                    let source = "ISO_15926-part-14_PCA";
+                    let sourceNode=visjsGraph.data.nodes.get(edgeData.from).data
+                    let targetNode=visjsGraph.data.nodes.get(edgeData.to).data
+                    Lineage_properties.getPropertiesjsTreeData(source, null, null, {}, function (err, jstreeData) {
+                        var html = "" +
+                          "<div>" +
+                          "<b>"+sourceNode.label+" -> " +targetNode.label+"</b>"+
+                          "<div style='width:270px;height:270px;overflow: auto'> <div id='Lineage_propertiesTreePopup'></div> </div>" +
+                            "<button onclick=''>Cancel</button><button onclick=''>OK</button>"
+                          "</div>";
+                        $("#graphPopupDiv").html(html);
+
+                        let options = {
+                            openAll: true,
+                            selectTreeNodeFn: function (event, obj) {
+                                event.stopPropagation();
+
+
+                                Lineage_blend.createRelationFromGraph(sourceNode,targetNode, obj.node.data.id, function (err, result) {
+                                    let newEdge = edgeData;
+                                    newEdge.label = "<i>" + obj.node.data.label+ "</i>";
+                                    newEdge.font={ multi: true, size: 10 },
+
+                                        (newEdge.arrows = {
+                                            to: {
+                                                enabled: true,
+                                                type: Lineage_classes.defaultEdgeArrowType,
+                                                scaleFactor: 0.5,
+                                            },
+                                        });
+                                    newEdge.data = { source: source };
+                                    visjsGraph.data.edges.add([newEdge]);
+                                });
+                            },
+                        };
+                        jstreeData.push({
+                            id: source,
+                            text: source,
+                            parent: "#",
+                        });
+                        common.jstree.loadJsTree("Lineage_propertiesTreePopup", jstreeData, options);
+                        let point = visjsGraph.currentDraggingMousePosition;
+                        MainController.UI.showPopup(point, "graphPopupDiv");
+                    });
 
                     if (edgeData.from === edgeData.to) {
                         return callback(null);
                     } else {
-                        callback(edgeData);
+                        return callback(null);
                     }
                 },
             };
@@ -683,8 +726,8 @@ var Lineage_classes = (function () {
 
     self.graphNodeNeighborhood = function (nodeData, propFilter) {
         /*    var sourceOptions=Config.sources[Lineage_common.currentSource].options;
-                if(sourceOptions && sourceOptions.graphPropertiesFilterRegex)
-                     var graphPropertiesFilterRegex =new RegExp(sourceOptions.graphPropertiesFilterRegex);*/
+        if(sourceOptions && sourceOptions.graphPropertiesFilterRegex)
+             var graphPropertiesFilterRegex =new RegExp(sourceOptions.graphPropertiesFilterRegex);*/
 
         if (propFilter == "ranges") {
             Sparql_OWL.getObjectProperties(Lineage_common.currentSource, [nodeData.id], {}, function (err, result) {
@@ -1617,17 +1660,17 @@ var Lineage_classes = (function () {
         if (!node) return;
         graphContext.clickOptions = event;
         var html =
-            '    <span  class="popupMenuItem"onclick="Lineage_classes.graphActions.showNodeInfos();"> Node infos</span>' +
+            '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showNodeInfos();"> Node infos</span>' +
             '   <span  id=\'lineage_graphPopupMenuItem\' class="popupMenuItem" onclick="Lineage_classes.graphActions.expand();"> Expand</span>' +
             '    <span class="popupMenuItem" onclick="Lineage_classes.graphActions.drawParents();"> Parents</span>' +
             '    <span class="popupMenuItem" onclick="Lineage_classes.graphActions.drawSimilars();"> Similars</span>' +
-            '    <span  class="popupMenuItem"onclick="Lineage_classes.graphActions.collapse();">Collapse</span>' +
-            '    <span  class="popupMenuItem"onclick="Lineage_classes.graphActions.showObjectProperties();">ObjectProperties</span>' +
-            '    <span  class="popupMenuItem"onclick="Lineage_classes.graphActions.showRestrictions();">Restrictions</span>' +
-            '    <span  class="popupMenuItem"onclick="Lineage_classes.graphActions.showIndividuals();">Individuals</span>' +
-            '    <span  class="popupMenuItem"onclick="Lineage_classes.graphActions.graphNodeNeighborhoodUI();">Neighborhood</span>' +
-            '    <span  class="popupMenuItem"onclick="Lineage_classes.graphActions.removeFromGraph();">Remove from graph</span>' +
-            '    <span  class="popupMenuItem"onclick="Lineage_classes.graphActions.removeOthersFromGraph();">Remove others</span>';
+            '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.collapse();">Collapse</span>' +
+            '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showObjectProperties();">ObjectProperties</span>' +
+            '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showRestrictions();">Restrictions</span>' +
+            '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showIndividuals();">Individuals</span>' +
+            '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.graphNodeNeighborhoodUI();">Neighborhood</span>' +
+            '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.removeFromGraph();">Remove from graph</span>' +
+            '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.removeOthersFromGraph();">Remove others</span>';
 
         if (node.id && node.id.indexOf("_cluster") > 0) {
             html = "";
@@ -1637,8 +1680,8 @@ var Lineage_classes = (function () {
         }
 
         /*  if (Config.showAssetQueyMenu && node.data && node.data.source && Config.sources[node.data.source].KGqueryController) {
-                  html += "    <span class=\"popupMenuItem\" onclick=\"KGquery.showNodeProperties();\"> add to Asset Query</span>"
-              }*/
+          html += "    <span class=\"popupMenuItem\" onclick=\"KGquery.showNodeProperties();\"> add to Asset Query</span>"
+      }*/
         $("#graphPopupDiv").html(html);
     };
     self.zoomGraphOnNode = function (nodeId) {
@@ -1770,10 +1813,10 @@ var Lineage_classes = (function () {
                         }
                     } else {
                         /*    var id=item["broader" + (i-1)].value;
-                                if(upperNodeIds.indexOf(id)<0) {
-                                    upperNodeIds.push(id);
+        if(upperNodeIds.indexOf(id)<0) {
+            upperNodeIds.push(id);
 
-                                }*/
+        }*/
                     }
                 }
             });
@@ -1915,9 +1958,9 @@ var Lineage_classes = (function () {
         },
 
         graphNodeNeighborhoodUI: function () {
-            var html = ' <span  class="popupMenuItem"onclick="Lineage_classes.graphActions.graphNodeNeighborhood(\'incoming\');">incoming</span>';
-            html += ' <span  class="popupMenuItem"onclick="Lineage_classes.graphActions.graphNodeNeighborhood(\'outcoming\');">outcoming</span>';
-            html += ' <span  class="popupMenuItem"onclick="Lineage_classes.graphActions.graphNodeNeighborhood(\'ranges\');">ranges</span>';
+            var html = ' <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.graphNodeNeighborhood(\'incoming\');">incoming</span>';
+            html += ' <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.graphNodeNeighborhood(\'outcoming\');">outcoming</span>';
+            html += ' <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.graphNodeNeighborhood(\'ranges\');">ranges</span>';
 
             $("#graphPopupDiv").html(html);
             setTimeout(function () {
@@ -2026,7 +2069,11 @@ var Lineage_classes = (function () {
         var allNodes = visjsGraph.data.nodes.get();
         var newNodes = [];
         allNodes.forEach(function (node) {
-            if (node && node.data && node.data.source == Lineage_common.currentSource) newNodes.push({ id: node.id, hidden: visible });
+            if (node && node.data && node.data.source == Lineage_common.currentSource)
+                newNodes.push({
+                    id: node.id,
+                    hidden: visible,
+                });
         });
         visjsGraph.data.nodes.update(newNodes);
 

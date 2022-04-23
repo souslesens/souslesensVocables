@@ -124,7 +124,6 @@ Lineage_properties = (function () {
                             source: Lineage_common.currentSource,
                         },
                     });
-                    run;
                 }
             });
             common.jstree.addNodesToJstree("Lineage_propertiesTree", node.id, jstreeData);
@@ -750,7 +749,6 @@ Lineage_properties = (function () {
                             jstreeData.push(item);
                         }
                     });
-
 
                     jstreeData.forEach(function (item) {
                         if (!uniqueIds[item.parent]) item.parent = sourceLabel;

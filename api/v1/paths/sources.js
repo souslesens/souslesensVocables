@@ -3,7 +3,6 @@ const fs = require("fs");
 const sourcesJSON = path.resolve("config/sources.json");
 const profilesJSON = path.resolve("config/profiles.json");
 exports.profilesJSON = sourcesJSON;
-const _ = require("lodash");
 const util = require("util");
 const { readResource, writeResource, resourceCreated, resourceUpdated, responseSchema, resourceFetched } = require("./utils");
 const userManager = require(path.resolve("bin/user."));

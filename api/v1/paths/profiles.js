@@ -2,7 +2,6 @@ const path = require("path");
 const ulid = require("ulid");
 const profilesJSON = path.resolve("config/profiles.json");
 exports.profilesJSON = profilesJSON;
-const _ = require("lodash");
 const { readResource, writeResource, resourceFetched, resourceUpdated, responseSchema, resourceCreated } = require("./utils");
 
 module.exports = function () {

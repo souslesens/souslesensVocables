@@ -18,6 +18,7 @@ describe("Lineage", function () {
 
         cy.get(".jstree-container-ul > #OWL > .jstree-children > #CFIHOS-ISO > #CFIHOS-ISO_anchor").click();
 
+        //FIXME: https://forge.extranet.logilab.fr/totalenergies/tsf/-/issues/140
         cy.on("uncaught:exception", (_err, _runnable) => {
             return false;
         });

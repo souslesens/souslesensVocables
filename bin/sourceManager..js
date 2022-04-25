@@ -1,11 +1,13 @@
 var httpProxy = require("./httpProxy.");
 var async = require("async");
 var util = require("./util.");
+var fs = require("fs");
 var SourceManager = {
     // eslint-disable-next-line no-unused-vars
     createNewOwlSourceGraph: function (_sourceName, _graphUri, _targetSparqlServerUrl, _options, _callback) {
         // do nothing ? XXX
     },
+
     createNewSkosSourceGraph: function (_sourceName, graphUri, targetSparqlServerUrl, options, callback) {
         var referenceSource = options.referenceSource;
         options.createCollectionRootNode = true;
@@ -48,8 +50,6 @@ var SourceManager = {
                         sourceData = result.results.bindings;
                         callbackSeries();
                     });
-
-                    sourceData;
                 },
 
                 function (callbackSeries) {
@@ -168,6 +168,31 @@ var SourceManager = {
             callback(err, "graph deleted");
         });
     },
+
+    sourcesToCsv: function () {
+        var str = "" + fs.readFileSync("../config/sources.json");
+        var json = JSON.parse(str);
+        var sep = ";";
+        var str2 = "source" + sep;
+        var fields = ["schemaType", "group", "sparql_server", "editable", "imports", "topClassFilter", "taxonomyPredicates"];
+        fields.forEach(function (field) {
+            str2 += field + sep;
+        });
+        str2 += "\n";
+
+        for (var key in json) {
+            str2 += key + sep;
+            var source = json[key];
+            fields.forEach(function (field) {
+                var value = source[field];
+                if (typeof value == "object") value = JSON.stringify(value);
+                str2 += (value || "") + sep;
+            });
+            str2 += "\n";
+        }
+        fs.writeFileSync("../config/sources.json.csv", str2);
+    },
 };
 
 module.exports = SourceManager;
+SourceManager.sourcesToCsv();

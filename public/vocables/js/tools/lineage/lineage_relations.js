@@ -412,8 +412,9 @@ Lineage_relations = (function () {
                                     data: {
                                         propertyId: item.prop,
                                         source: propSource,
-                                        id: edgeId,
+                                        bNodeId: item.node,
                                         from: item.range,
+
                                     },
                                     arrows: {
                                         from: {

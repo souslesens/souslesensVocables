@@ -6,10 +6,10 @@ module.exports = function () {
         GET,
     };
 
-    function GET(req, res, _next) {
-        dataController.getFilesList(function (err, result) {
+    function GET(req, res, next) {
+        dataController.getFilesList(req.query.dir, function (err, result) {
             if (err) {
-                return res.status(400).json({ error: err });
+                next(err);
             }
             return res.status(200).json(result);
         });
@@ -20,7 +20,15 @@ module.exports = function () {
         summary: "List files in data directory",
         description: "List files in data directory",
         operationId: "List files in data directory",
-        parameters: [],
+        parameters: [
+            {
+                name: "dir",
+                description: "subDirectory in /dataDir",
+                type: "string",
+                in: "query",
+                required: true,
+            },
+        ],
 
         responses: {
             200: {

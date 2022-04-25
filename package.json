@@ -19,6 +19,7 @@
         "test": "jest --rootDir tests"
     },
     "devDependencies": {
+        "@types/jest": "^27.4.1",
         "@types/jquery": "^3.5.14",
         "cypress": "^9.5.4",
         "eslint": "^8.13.0",
@@ -45,6 +46,7 @@
         "debug": "~4.3.4",
         "elasticsearch": "^16.7.2",
         "eslint-config-prettier": "^8.5.0",
+        "eslint-plugin-jest": "^26.1.4",
         "eslint-plugin-react": "^7.29.4",
         "etl": "^0.7.0",
         "express": "~4.17.3",

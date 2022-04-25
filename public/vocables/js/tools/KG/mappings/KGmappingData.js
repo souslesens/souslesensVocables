@@ -10,9 +10,7 @@ var KGmappingData = (function () {
         for (var key in Config.sources) {
             var sourceObj = Config.sources[key];
             // eslint-disable-next-line no-console
-            if (!sourceObj.schemaType) console.log(key);
-
-            if (sourceObj.schemaType.indexOf("KNOWLEDGE_GRAPH") > -1) {
+            if (sourceObj.schemaType && sourceObj.schemaType.indexOf("KNOWLEDGE_GRAPH") > -1) {
                 // eslint-disable-next-line no-console
                 if (!sourceObj.dataSource || !sourceObj.dataSource.dbName) console.log("KNOWLEDGE_GRAPH source " + key + " should have a datasource declared");
                 else {
@@ -24,13 +22,6 @@ var KGmappingData = (function () {
         common.fillSelectOptions("KGmappings_DatabaseSelect", adls, true);
     };
 
-    /**
-     *
-     *
-     *
-     *
-     *
-     */
     self.loadKG_SQLModel = function (dbName) {
         //  if(KGmappings.currentMappedColumns && Object.keys(KGmappings.currentMappedColumns.mappings)>0)
         KGmappings.clearMappings();
@@ -43,6 +34,7 @@ var KGmappingData = (function () {
         self.currentKGgraphURI = Config.sources[KGmappings.currentKGsource].graphUri;
 
         const params = new URLSearchParams({
+            dir: "graphs",
             name: self.currentKGdataSource.dbName,
             type: self.currentKGdataSource.type,
         });

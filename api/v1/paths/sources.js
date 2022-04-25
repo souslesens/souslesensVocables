@@ -1,6 +1,5 @@
 const path = require("path");
 const fs = require("fs");
-const fsPromises = require("fs/promises");
 const sourcesJSON = path.resolve("config/sources.json");
 const profilesJSON = path.resolve("config/profiles.json");
 exports.profilesJSON = sourcesJSON;

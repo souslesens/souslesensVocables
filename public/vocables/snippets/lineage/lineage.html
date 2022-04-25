@@ -27,12 +27,6 @@
         background: #eee;
     / / width: 150 px;
     }
-    .Lineage_legendTypeDivHidden {
-        opacity:0.3
-    }
-    .Lineage_legendTypeDivHidden {
-        border: solid 3px blue;
-    }
     .Lineage_selectedSourceDiv {
         border: solid 3px blue;
     }
@@ -226,7 +220,11 @@
 
     <div class="lineage_actionDiv" style="margin: 5px; display: block">
         Graph decoration
-        <select style="width: 100px" id="Lineage_classes_graphDecoration_operationSelect" onchange="Lineage_decoration.run($(this).val())"></select>
+        <select style="width: 100px" id="Lineage_classes_graphDecoration_operationSelect" onchange="Lineage_classes.graphDecoration.run($(this).val())"></select>
+        <!--    <button class='btn btn-sm my-1 py-0 btn-outline-primary'
+                    onclick="Lineage_classes.graphDecoration.showGraphDecorationDialog()">+
+            </button>-->
+
         <div id="Lineage_classes_graphDecoration_legendDiv" class="Lineage_objectDivContainer"></div>
     </div>
     <!--   <div>

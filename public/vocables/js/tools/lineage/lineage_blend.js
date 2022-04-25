@@ -83,6 +83,14 @@ var Lineage_blend = (function () {
         });
     };
 
+    self.createRelationFromGraph = function (sourceNode, targetNode, propId, callback) {
+        self.createRelation(propId, sourceNode, targetNode, true, true, function (err, _result) {
+            if (err) return callback(err);
+            MainController.UI.message("relation added", true);
+            return callback(null, _result);
+        });
+    };
+
     self.createRelation = function (type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, callback) {
         if (type != "http://www.w3.org/2002/07/owl#sameAs") createInverseRelation = false;
 

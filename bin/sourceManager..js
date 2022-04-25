@@ -195,4 +195,4 @@ var SourceManager = {
 };
 
 module.exports = SourceManager;
-SourceManager.sourcesToCsv();
+//SourceManager.sourcesToCsv();

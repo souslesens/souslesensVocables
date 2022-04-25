@@ -414,7 +414,6 @@ Lineage_relations = (function () {
                                         source: propSource,
                                         bNodeId: item.node,
                                         from: item.range,
-
                                     },
                                     arrows: {
                                         from: {

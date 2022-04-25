@@ -427,15 +427,20 @@ var Lineage_classes = (function () {
 
                 addEdge: function (edgeData, callback) {
                     let source = "ISO_15926-part-14_PCA";
-                    let sourceNode=visjsGraph.data.nodes.get(edgeData.from).data
-                    let targetNode=visjsGraph.data.nodes.get(edgeData.to).data
+                    let sourceNode = visjsGraph.data.nodes.get(edgeData.from).data;
+                    let targetNode = visjsGraph.data.nodes.get(edgeData.to).data;
                     Lineage_properties.getPropertiesjsTreeData(source, null, null, {}, function (err, jstreeData) {
-                        var html = "" +
-                          "<div>" +
-                          "<b>"+sourceNode.label+" -> " +targetNode.label+"</b>"+
-                          "<div style='width:270px;height:270px;overflow: auto'> <div id='Lineage_propertiesTreePopup'></div> </div>" +
-                            "<button onclick=''>Cancel</button><button onclick=''>OK</button>"
-                          "</div>";
+                        var html =
+                            "" +
+                            "<div>" +
+                            "<b>" +
+                            sourceNode.label +
+                            " -> " +
+                            targetNode.label +
+                            "</b>" +
+                            "<div style='width:270px;height:270px;overflow: auto'> <div id='Lineage_propertiesTreePopup'></div> </div>" +
+                            "<button onclick=''>Cancel</button><button onclick=''>OK</button>";
+                        ("</div>");
                         $("#graphPopupDiv").html(html);
 
                         let options = {
@@ -443,12 +448,10 @@ var Lineage_classes = (function () {
                             selectTreeNodeFn: function (event, obj) {
                                 event.stopPropagation();
 
-
-                                Lineage_blend.createRelationFromGraph(sourceNode,targetNode, obj.node.data.id, function (err, result) {
+                                Lineage_blend.createRelationFromGraph(sourceNode, targetNode, obj.node.data.id, function (err, result) {
                                     let newEdge = edgeData;
-                                    newEdge.label = "<i>" + obj.node.data.label+ "</i>";
-                                    newEdge.font={ multi: true, size: 10 },
-
+                                    newEdge.label = "<i>" + obj.node.data.label + "</i>";
+                                    (newEdge.font = { multi: true, size: 10 }),
                                         (newEdge.arrows = {
                                             to: {
                                                 enabled: true,

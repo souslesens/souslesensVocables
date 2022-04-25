@@ -2,7 +2,6 @@ const path = require("path");
 const ulid = require("ulid");
 const profilesJSON = path.resolve("config/profiles.json");
 exports.profilesJSON = profilesJSON;
-const _ = require("lodash");
 const { readResource, writeResource, resourceFetched, resourceUpdated, responseSchema, resourceCreated } = require("./utils");
 
 module.exports = function () {
@@ -13,7 +12,7 @@ module.exports = function () {
     };
 
     ///// GET api/v1/profiles
-    async function GET(req, res, _next) {
+    async function GET(req, res, next) {
         try {
             const profiles = await readResource(profilesJSON, res);
             // I need to have the db indexed by a unique id.

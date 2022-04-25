@@ -1,5 +1,5 @@
 {
-    "include": ["public/vocables/js/**/*.js", "public/vocables/config/*.js", "bin/**/*.js", "app.js", "./model", "./tests"],
+    "include": ["public/vocables/js/**/*.js", "public/vocables/config/*.js", "public/vocables/customPlugins/**/*.js", "bin/**/*.js", "app.js", "./model", "./tests"],
     "exclude": ["public/vocables/js/external/**/*.js"],
 
     "compilerOptions": {

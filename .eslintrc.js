@@ -16,7 +16,7 @@ module.exports = {
          * Backend files
          */
         {
-            files: ["app.js", "scripts/*.js", "routes/*.js", "other/**/*.js", "bin/**/*.js", "api/**/*.js", "**/webpack.config.js", ".eslintrc.js", "model/**/*.js"],
+            files: ["app.js", "scripts/*.js", "./legacy_routes.js", "other/**/*.js", "bin/**/*.js", "api/**/*.js", "**/webpack.config.js", ".eslintrc.js", "model/**/*.js"],
             env: {
                 node: true,
             },
@@ -53,6 +53,7 @@ module.exports = {
                 stopInterv: "writable",
                 Collection: "readable",
                 Config: "writable",
+                ConfigEditor: "readable",
                 CustomPluginController: "readable",
                 ElasticSearchProxy: "readable",
                 Evaluate: "readable",
@@ -60,6 +61,7 @@ module.exports = {
                 Genealogy: "readable",
                 GraphController: "readable",
                 GraphFilter: "readable",
+                GraphMlExport: "readable",
                 GraphTraversal: "readable",
                 JsonEditor: "readable",
                 KGadvancedMapping: "readable",
@@ -75,6 +77,7 @@ module.exports = {
                 KGmappingData: "readable",
                 KGmappingGraph: "readable",
                 KGmappings: "readable",
+                KGpropertyFilter: "readable",
                 KGquery: "readable",
                 Lineage_blend: "readable",
                 Lineage_classes: "readable",
@@ -104,6 +107,7 @@ module.exports = {
                 SQLquery: "readable",
                 Standardizer: "readable",
                 Sunburst: "readable",
+                SVGexport: "readable",
                 TE_14224_browser: "readable",
                 TE_AssetConfigurator: "readable",
                 TE_AssetDataManager: "readable",

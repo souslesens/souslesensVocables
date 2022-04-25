@@ -5,7 +5,7 @@ module.exports = {
             version: "detect",
         },
     },
-    extends: ["plugin:prettier/recommended", "eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:react/recommended"],
+    extends: ["plugin:prettier/recommended", "plugin:cypress/recommended", "eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:react/recommended"],
 
     rules: {
         "no-console": ["error", { allow: ["error", "warn"] }],
@@ -45,7 +45,6 @@ module.exports = {
         {
             files: ["public/**/*.js"],
             globals: {
-                $: "readable",
                 Admin: "readable",
                 Blender: "readable",
                 C2S: "readable",
@@ -188,7 +187,7 @@ module.exports = {
                 "no-empty-function": "warn",
                 "no-unreachable": "warn",
             },
-            env: { browser: true },
+            env: { browser: true, jquery: true },
         },
         {
             files: ["mainapp/src/**/*.ts", "mainapp/src/**/*.tsx"],

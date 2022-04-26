@@ -177,10 +177,7 @@
             referrerpolicy="no-referrer"
         />
 
-        <script
-          src="https://unpkg.com/@sentry/browser@latest/build/bundle.min.js"
-          crossorigin="anonymous"
-        ></script>
+        <script src="https://unpkg.com/@sentry/browser@latest/build/bundle.min.js" crossorigin="anonymous"></script>
 
         <script>
             var leftPanelWidth = 400;
@@ -197,10 +194,9 @@
 
             $(function () {
                 MainController.initConfig(function (err) {
-
                     // sentry/glitchtip
                     if (Config.sentryDsnJsFront) {
-                      Sentry.init({ dsn: Config.sentryDsnJsFront });
+                        Sentry.init({ dsn: Config.sentryDsnJsFront });
                     }
 
                     authentication.init();

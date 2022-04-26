@@ -17,6 +17,12 @@ const config = require(path.resolve("config/mainConfig.json"));
 
 var app = express();
 
+// sentry/glitchtip
+if (config.sentryDsn) {
+    const Sentry = require("@sentry/node");
+    Sentry.init({ dsn: config.sentryDsn });
+}
+
 // App middleware for authentication and session handling
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

@@ -13,6 +13,7 @@ module.exports = function () {
             default_sparql_url: config.default_sparql_url,
             wiki: config.wiki,
             version: process.env.npm_package_version,
+            sentryDsnJsFront: config.sentryDsnJsFront,
         };
 
         res.status(200).json(result);

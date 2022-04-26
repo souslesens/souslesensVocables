@@ -25,6 +25,7 @@ var MainController = (function () {
                 Config.default_lang = serverConfig.default_lang;
                 Config.default_sparql_url = serverConfig.default_sparql_url;
                 Config.wiki = serverConfig.wiki;
+                Config.sentryDsnJsFront = serverConfig.sentryDsnJsFront;
 
                 // display version number
                 $("#souslesensversion").html(serverConfig.version);

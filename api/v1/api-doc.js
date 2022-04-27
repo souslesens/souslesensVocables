@@ -44,6 +44,10 @@ const apiDoc = {
             type: "object",
             additionalProperties: { $ref: "#/definitions/Source" },
         },
+        BlenderSources: {
+            type: "object",
+            additionalProperties: { $ref: "#/definitions/BlenderSource" },
+        },
 
         User: {
             type: "object",

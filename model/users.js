@@ -1,12 +1,7 @@
 const fs = require("fs");
 
 /**
- * @typedef {Object} UserAccount
- * @prop {string} id
- * @prop {string} login
- * @prop {string[]} groups
- * @prop {string} source
- * @prop {"user"} _type
+ * @typedef {import("../mainapp/lib/User").UserAccount} UserAccount
  */
 
 class UserModel {
@@ -19,12 +14,12 @@ class UserModel {
     }
 
     /**
-     * @returns {Promise<Record<string, UserAccount>>} a collection of UserAccount
+     * @returns {Promise<UserAccount>} a collection of UserAccount
      */
     getUserAccounts = async () => {
         const data = await fs.promises.readFile(this.userPath);
         /**
-         * @type {Record<string, UserAccount>}
+         * @type {UserAccount}
          */
         const users = {};
         Object.entries(JSON.parse(data.toString())).map(([key, value]) => {
@@ -32,6 +27,7 @@ class UserModel {
                 id: value.id,
                 login: value.login,
                 groups: value.groups,
+                password: value.password,
                 source: value.source,
                 _type: value._type,
             };

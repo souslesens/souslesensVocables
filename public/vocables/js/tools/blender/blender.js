@@ -30,16 +30,12 @@ var Blender = (function () {
             }
             $("#Blender_createDeleteResourceDiv").css("display", displayCreateDeleteResourceDiv);
 
-            var payload = {
-                getBlenderSources: 1,
-            };
             $.ajax({
-                type: "POST",
-                url: Config.serverUrl,
-                data: payload,
+                type: "GET",
+                url: Config.apiUrl + "/getBlenderSources",
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
-                    for (var key in data) {
+                    for (var key in data.resources) {
                         Config.sources[key] = data[key];
                     }
 

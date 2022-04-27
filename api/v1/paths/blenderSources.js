@@ -18,7 +18,7 @@ module.exports = function () {
         security: [{ restrictAdmin: [] }],
         operationId: "getAllBlenderSources",
         parameters: [],
-        responses: responseSchema("blenderSources", "GET"),
+        responses: responseSchema("BlenderSources", "GET"),
     };
     return operations;
 };

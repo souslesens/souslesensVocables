@@ -18,6 +18,14 @@ var Sparql_common = (function () {
         return c1 == c2;
     };
 
+    self.getLangFilter = function (source, conceptName) {
+        var sourceObj = Config.sources[source];
+        if (!sourceObj) return "";
+        var pref_lang = sourceObj.pref_lang;
+        if (!pref_lang) return "";
+        return " FILTER (lang(?" + conceptName + ")='" + pref_lang + "')";
+    };
+
     self.getBindingsValues = function (bindings) {
         var values = [];
         bindings.forEach(function (item) {
@@ -93,11 +101,16 @@ var Sparql_common = (function () {
                     if (ids[0] == null) return "";
                     var conceptIdsStr = "";
                     ids.forEach(function (id, _index) {
-                        if (id.match && !id.match(/.+:.+|http.+|_:+/)) return;
+                        /*  if (id.match && !id.match(/.+:.+|http.+|_:+/)) {
+                            return (conceptIdsStr += "<" + id + ">");
+                        }*/
                         if (id != "") {
                             if (conceptIdsStr != "") conceptIdsStr += ",";
-                            if (id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1 || id.indexOf("_:") > -1) conceptIdsStr += "<" + id + ">";
-                            else conceptIdsStr += id;
+                            if ((id.match && !id.match(/.+:.+|http.+|_:+/)) || id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1 || id.indexOf("_:") > -1) {
+                                conceptIdsStr += "<" + id + ">";
+                            } else {
+                                conceptIdsStr += id;
+                            }
                         }
                     });
 

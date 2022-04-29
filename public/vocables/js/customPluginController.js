@@ -48,6 +48,7 @@ var CustomPluginController = (function () {
     };
 
     self.setGraphNodesIcons = function () {
+        return;
         if (!self.pluginDir) self.pluginDir = "TotalEnergies";
         //  var nodes=visjsGraph.data.nodes.get();
         var newNodes = [];

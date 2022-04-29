@@ -862,6 +862,8 @@ var Lineage_classes = (function () {
             var distinctProps = {};
             data.forEach(function (item) {
                 if (true) {
+                    if(item.value.type=="literal")
+                        return;
                     if (!distinctProps[item.prop.value]) distinctProps[item.prop.value] = 1;
                     if (!item.prop.value.match(/rdf|owl|skos/) || item.prop.value.indexOf("sameAs") > -1 || item.prop.value.indexOf("partOf") > -1) {
                         // if (item.prop.value.indexOf("rdf") < 0 && item.prop.value.indexOf("owl") < 0) {
@@ -1348,6 +1350,8 @@ var Lineage_classes = (function () {
                 var existingNodes = visjsGraph.getExistingIdsMap();
                 self.currentExpandLevel += 1;
                 result.forEach(function (item) {
+                    if(!item.domain && item.range )
+                        return
                     if (!item.range) {
                         item.range = { value: "?_" + item.prop.value };
                     }
@@ -1372,12 +1376,14 @@ var Lineage_classes = (function () {
                             },
                         });
                     }
+
                     if (!item.domain) {
                         item.domain = { value: "?" };
                     }
                     if (!item.range) {
                         item.range = { range: "?" };
                     }
+
 
                     var edgeId = item.domain.value + "_" + item.range.value + "_" + item.prop.value;
                     var edgeIdInv = item.range.value + "_" + item.range.value + "_" + item.prop.value;

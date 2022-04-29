@@ -91,10 +91,10 @@ var Lineage_decoration = (function () {
             });
             // console.log(JSON.stringify(nodesTypesMap, null, 2))
             var newNodes = [];
-            var neutralColor = "#ccc";
+            var neutralColor = null;//"#ccc";
 
             for (var nodeId in existingNodes) {
-                if (nodeId.indexOf("legend_") == 0) legendNodes.push(nodeId);
+                if (false && nodeId.indexOf("legend_") == 0) legendNodes.push(nodeId);
                 else {
                     var color = neutralColor;
                     var type = null;
@@ -102,11 +102,12 @@ var Lineage_decoration = (function () {
                         color = nodesTypesMap[nodeId].color;
                         type = nodesTypesMap[nodeId].type;
                     }
-                    newNodes.push({ id: nodeId, color: color, legendType: type });
+                    if (color)
+                        newNodes.push({ id: nodeId, color: color, legendType: type });
                 }
             }
 
-            visjsGraph.data.nodes.remove(legendNodes);
+            //  visjsGraph.data.nodes.remove(legendNodes);
             visjsGraph.data.nodes.update(newNodes);
 
             var legendNodes = [];

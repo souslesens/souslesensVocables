@@ -448,7 +448,9 @@ var Standardizer = (function () {
                     hits.forEach(function (hit) {
                         words.push(hit._source.label);
                         hit._source.parent = hit._source.parents[hit._source.parents.length - 1];
-                        sourceClassUri.push(hit._source.parent);
+                        if (hit._source.parent && hit._source.parent.length > 1) {
+                            sourceClassUri.push(hit._source.parent);
+                        }
                         allWords = allWords.concat(words);
 
                         objects.push(hit._source);

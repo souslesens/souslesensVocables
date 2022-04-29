@@ -38,7 +38,7 @@ var TextAnnotator = (function () {
                 if (event.ctrlKey) {
                     var text = self.currentTextSelection.toString();
                     $("#GenericTools_searchAllSourcesTermInput").val(text);
-                    $("#GenericTools_allExactMatchSearchCBX").removeAttr("checked");
+                    $("#GenericTools_allExactMatchSearchCBX").removeProp("checked");
                     SourceBrowser.searchAllSourcesTerm();
                 }
 

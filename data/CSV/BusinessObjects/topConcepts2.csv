@@ -1,13 +1,24 @@
-topClass,
-Knowledge/Speciality/Discipline
-Activity
-Compound
-Event
-FunctionalObject
-InformationObject
-Location
-Organization
-PeriodInTime
-PointInTime
-Quality
-RealizableEntity
+top1Label	top1Uri	top2Label	top2Uri
+Activity	 http://rds.posccaesar.org/ontology/lis14/rdl/Activity	Process	 http://data.15926.org/rdl/RDS16015785
+Compound	 http://rds.posccaesar.org/ontology/lis14/rdl/Compound
+Discipline	 http://data.15926.org/rdl/RDS6811233
+Event	 http://rds.posccaesar.org/ontology/lis14/rdl/Event	Incident	 http://data.15926.org/rdl/RDS9706382
+FunctionalObject	 http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject
+InformationObject	 http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject	Description	 http://data.15926.org/dm/Description
+InformationObject	 http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject	Data	 http://data.15926.org/rdl/RDS11708918
+InformationObject	 http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject	Log	 http://data.15926.org/rdl/RDS17691813
+InformationObject	 http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject	Report	 http://data.15926.org/rdl/RDS337454
+InformationObject	 http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject	Nomenclature	 http://data.15926.org/rdl/RDS398560071
+InformationObject	 http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject	Chart	 http://data.15926.org/rdl/RDS7952395
+InformationObject	 http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject	Study	 http://data.15926.org/rdl/RDS7952395
+InformationObject	 http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject	Calculation sheet	 http://data.15926.org/rdl/RDS9690677
+Location	 http://rds.posccaesar.org/ontology/lis14/rdl/Location
+Organization	 http://rds.posccaesar.org/ontology/lis14/rdl/Organization
+PeriodInTime	 http://rds.posccaesar.org/ontology/lis14/rdl/PeriodInTime	LifeCycleStage	http://data.15926.org/dm/LifecycleStage
+PointInTime	 http://rds.posccaesar.org/ontology/lis14/rdl/PointInTime
+Quality	 http://rds.posccaesar.org/ontology/lis14/rdl/Quality	List	 http://data.15926.org/rdl/RDS7950100
+Quality	 http://rds.posccaesar.org/ontology/lis14/rdl/Quality	PhysicalQuantity	http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalQuantity
+RealizableEntity	 http://rds.posccaesar.org/ontology/lis14/rdl/RealizableEntity	Target	 http://data.15926.org/rdl/RDS13704727
+RealizableEntity	 http://rds.posccaesar.org/ontology/lis14/rdl/RealizableEntity	Requirement	 http://data.15926.org/rdl/RDS2224730
+RealizableEntity	 http://rds.posccaesar.org/ontology/lis14/rdl/RealizableEntity	Plan	 http://data.15926.org/rdl/RDS7952931
+RealizableEntity	 http://rds.posccaesar.org/ontology/lis14/rdl/RealizableEntity	Planning	 http://data.15926.org/rdl/RDS9659447

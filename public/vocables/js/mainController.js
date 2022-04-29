@@ -441,9 +441,18 @@ var MainController = (function () {
         },
 
         showPopup: function (point, popupDiv, absolutePosition) {
+            var popupH = Math.min(300, $("#" + popupDiv).height());
+            var popupW = Math.min(200, $("#" + popupDiv).width());
+            var divMaxY = $("#graphDiv").height() + 50;
+            var divMaxX = $("#graphDiv").width() + (absolutePosition ? 0 : leftPanelWidth);
+            var vertOverlap = point.y + popupH - divMaxY;
+            var horOverlap = point.x + popupW - divMaxX;
+            horOverlap = 0;// horOverlap > 0 ? 0 : horOverlap - 5;
+            vertOverlap = 0;// vertOverlap > 0 ? 0 : vertOverlap - 5;
+
             if (!popupDiv) popupDiv = "popupDiv";
-            $("#" + popupDiv).css("left", point.x + (absolutePosition ? 0 : leftPanelWidth));
-            $("#" + popupDiv).css("top", point.y);
+            $("#" + popupDiv).css("left", point.x + (absolutePosition ? 0 : leftPanelWidth) + horOverlap);
+            $("#" + popupDiv).css("top", point.y + vertOverlap);
             $("#" + popupDiv).css("display", "flex");
         },
         hidePopup: function (popupDiv) {

@@ -158,9 +158,19 @@ var CsvTripleBuilder = {
 
                         function (callbackSeries) {
                             function getLookupValue(lookupName, value) {
-                                if (!lookUpMap[lookupName]) return "badLookupName";
-                                var target = lookUpMap[lookupName].dictionary[value];
-                                if (target && lookUpMap[lookupName].transformFn) target = lookUpMap[lookupName].transformFn(target);
+                                var lookupArray = lookupName.split("|");
+                                var target = null;
+                                lookupArray.forEach(function (lookup, index) {
+                                    if(index>0)
+                                        var x=3
+                                    if (target) return;
+                                    target = lookUpMap[lookup].dictionary[value];
+                                    if (target && lookUpMap[lookup].transformFn) {
+                                        target = lookUpMap[lookup].transformFn(target);
+                                    }
+                                });
+                                if( target==null)
+                                    var x=3
                                 return target;
                             }
 
@@ -217,6 +227,7 @@ var CsvTripleBuilder = {
                                         } else objectStr = line[item.o];
 
                                         if (item.lookup_o) {
+                                            var lookupValue = getLookupValue(item.lookup_o, objectStr);
                                             if (!lookupValue) console.log("missing lookup_o: " + line[item.o]);
                                             else if (lookupValue == "badLookupName");
                                             else objectStr = lookupValue;

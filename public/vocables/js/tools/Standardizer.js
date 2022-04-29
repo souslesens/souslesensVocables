@@ -58,12 +58,12 @@ var Standardizer = (function () {
         });
         setTimeout(function () {
             /*  $("#graphDiv").html("")// sinon ne monte pas en dehors du timeout
-                  $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
-                  setTimeout(function () {
-                      $("#standardizerCentral_tabs").tabs({});
-                      if(callback)
-                          callback()
-                  }, 500)*/
+            $("#graphDiv").load("snippets/standardizer/standardizer_central.html")
+            setTimeout(function () {
+                $("#standardizerCentral_tabs").tabs({});
+                if(callback)
+                    callback()
+            }, 500)*/
 
             if (callback) callback();
         }, 500);
@@ -261,7 +261,11 @@ var Standardizer = (function () {
             var hits = item.hits.hits;
             hits.forEach(function (hit) {
                 if (!indexClassMap[hit._index]) indexClassMap[hit._index] = {};
-                if (!indexClassMap[hit._index][hit._source.id]) indexClassMap[hit._index][hit._source.id] = { words: [], data: hit._source };
+                if (!indexClassMap[hit._index][hit._source.id])
+                    indexClassMap[hit._index][hit._source.id] = {
+                        words: [],
+                        data: hit._source,
+                    };
                 indexClassMap[hit._index][hit._source.id].words.push(hit._source.label);
             });
         });
@@ -503,8 +507,8 @@ var Standardizer = (function () {
     };
 
     self.onMatrixWordExactMatchClick = function (_event) {
-        // var cellData = self.matrixDivsMap[this.id];
-        //  self.editCellData(cellData)
+        var cellData = self.matrixDivsMap[this.id];
+        self.editCellData(cellData);
     };
     self.onMatrixWordNoMatchClick = function (_event) {
         var word = self.matrixDivsMap[this.id].word;
@@ -533,8 +537,13 @@ var Standardizer = (function () {
         var html =
             'search<input class="KGadvancedMapping_searchEntitiesInput" id="Standardizer_searchEntitiesInput2" ' +
             "onkeyup=\"if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,'Standardizer_searchResulDiv2')\">" +
-            "<br><input type='checkbox' id='Standardizer_fuzzySearchAllsourcesCBX'>All sources" +
-            "<button onclick='Standardizer.clearFuzzyMatch()'>Clear fuzzyMatch</button>";
+            "<br><input type=";
+        checkbox;
+        (" id=");
+        Standardizer_fuzzySearchAllsourcesCBX;
+        ">All sources" + "<button onclick=";
+        Standardizer.clearFuzzyMatch();
+        (">Clear fuzzyMatch</button>");
         //"<button onclick='SourceBrowser.showSearchableSourcesTreeDialog()'> filter Sources</button>"
         html += '<div id="Standardizer_searchResulDiv2" </div>';
         $("#Standardizer_matrixCellDataDiv").html(html);
@@ -545,14 +554,24 @@ var Standardizer = (function () {
     };
 
     self.editCellData = function (cellData) {
-        var html = "<b>" + cellData.index + "</b>";
+        var index = cellData.index || self.currentSource;
+        var html = "<b>" + index + "</b>";
 
         html += "<br><table>";
 
         for (var key in cellData) {
-            var value = "" + cellData[key];
-            if (value.indexOf("http://") == 0) value = "<a target='_blank' href='" + value + "'>" + value + "</a>";
-            html += "<tr><td>" + key + "</td><td>" + value + "</td></tr>";
+            var value = cellData[key];
+            if (typeof value === "object") {
+                for (var key2 in value) {
+                    var value2 = "" + value[key2];
+                    if (value2.indexOf("http://") == 0) value2 = "<a target='_blank' href='" + value2 + "'>" + value2 + "</a>";
+                    html += "<tr><td>" + key2 + "</td><td>" + value2 + "</td></tr>";
+                }
+            } else {
+                value = "" + value;
+                if (value.indexOf("http://") == 0) value = "<a target='_blank' href='" + value + "'>" + value + "</a>";
+                html += "<tr><td>" + key + "</td><td>" + value + "</td></tr>";
+            }
         }
         html += "</table>" + "<br>";
         $("#Standardizer_matrixCellDataDiv").html(html);
@@ -1331,10 +1350,10 @@ var Standardizer = (function () {
                                 },
                             },
                             /*  layoutHierarchical: {
-                                  direction: "UD",
-                                  sortMethod: "hubsize",
+                    direction: "UD",
+                    sortMethod: "hubsize",
 
-                              }*/
+                }*/
                         };
 
                         visjsGraph.draw(graphDivId, visjsData, options);
@@ -1709,20 +1728,20 @@ var Standardizer = (function () {
         );
 
         /*  ElasticSearchProxy.analyzeSentence(text, function (err, result) {
-            if (err)
-                return alert(err)
-            var str = ""
-            result.tokens.forEach(function (item) {
+        if (err)
+            return alert(err)
+        var str = ""
+        result.tokens.forEach(function (item) {
 
-                var word = item.token
-                if (word.length > 4) {
-                    str += word + "\n"
-                }
-            })
-            $("#Standardizer_wordsTA").val(str)
+            var word = item.token
+            if (word.length > 4) {
+                str += word + "\n"
+            }
+        })
+        $("#Standardizer_wordsTA").val(str)
 
 
-        }) */
+    }) */
     };
 
     self.selectAsFuzzyMatch = function (source, itemId) {
@@ -1961,10 +1980,10 @@ var Standardizer = (function () {
                             Lineage_blend.createRelationTriples(slice, true, dictionarySourceLabel, function (err, _result) {
                                 if (err) return callbackEach(err);
                                 /*   slice.forEach(function(relation){
-                               var labelTriples=[
-                                   { subject: relation.sourceNode.id, predicate: "http://www.w3.org/2000/01/rdf-schema#label",object:relation.sourceNode.label},
-                                   { subject: relation.targetNode.id, predicate: "http://www.w3.org/2000/01/rdf-schema#label",object:relation.targetNode.label},
-                                   })*/
+               var labelTriples=[
+                   { subject: relation.sourceNode.id, predicate: "http://www.w3.org/2000/01/rdf-schema#label",object:relation.sourceNode.label},
+                   { subject: relation.targetNode.id, predicate: "http://www.w3.org/2000/01/rdf-schema#label",object:relation.targetNode.label},
+                   })*/
 
                                 totalCreated += sliceLength;
                                 MainController.UI.message(totalCreated + " relations created in " + dictionarySourceLabel);

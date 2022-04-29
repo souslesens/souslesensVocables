@@ -4,6 +4,7 @@ describe("standardizer", function () {
 
         cy.visit("/");
 
+        //cy.intercept("GET", "/api/v1/sources", { fixture: "sources" });
         cy.get(".modal-content > .modal-body > form > .form-group > #username").click();
 
         cy.get(".modal-content > .modal-body > form > .form-group > #username").type("admin");

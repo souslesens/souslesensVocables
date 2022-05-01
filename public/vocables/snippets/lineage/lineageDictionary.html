@@ -1,0 +1,23 @@
+<div>
+
+  <div class="lineage_actionDiv">
+    <div class="lineage_actionDiv_title">Similars selection</div>
+
+
+    <div>
+      TargetSource
+      <select style="width: 300px" id="LineageDictionary_rangeSourceSelect"></select>
+    </div>
+  </div>
+  <div class="lineage_actionDiv">
+    <div class="lineage_actionDiv_title">Selection</div>
+    Nodes Selection
+    <select style="width: 300px" id="LineageDictionary_nodesSelectionSelect">
+      <option value="currentGraphNodes">Current Graph Nodes</option>
+      <option value="selectedNodeDescendants">Selected node descendants</option>
+      <option value="allNodes">All Nodes</option>
+    </select>
+
+  </div>
+  <button onclick="Lineage_dictionary.drawDictionarySameAs()">OK</button>
+</div>

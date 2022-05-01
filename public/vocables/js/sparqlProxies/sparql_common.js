@@ -229,12 +229,12 @@ var Sparql_common = (function () {
             }
         }
 
-        /* if(!excludeDictionaries ){
+         if(self.includeImports ){
             for( var source in Config.sources){
                 if(Config.sources[source].isDictionary)
                     fromStr += from + "  <" +  Config.sources[source].graphUri + "> "
             }
-        }*/
+        }
         if (options.includeSources) {
             if (!Array.isArray(options.includeSources)) options.includeSources = [options.includeSources];
             options.includeSources.forEach(function (source) {

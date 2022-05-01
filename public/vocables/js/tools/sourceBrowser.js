@@ -37,8 +37,8 @@ var SourceBrowser = (function () {
                 "</script>"
 
             /*  "<div id='SourceBrowser_collectionDiv'>" +
-          "Collection<select id='SourceBrowser_collectionSelect' onchange='Collection.filterBrowserCollection()'></select>" +
-          "</div>"*/
+    "Collection<select id='SourceBrowser_collectionSelect' onchange='Collection.filterBrowserCollection()'></select>" +
+    "</div>"*/
         );
 
         if (Config.enableCollections) {
@@ -108,7 +108,7 @@ var SourceBrowser = (function () {
             }
 
             /*  var html = "<div id='"+self.currentTargetDiv+"'></div>"
-            $("#actionDiv").html(html);*/
+      $("#actionDiv").html(html);*/
 
             var jsTreeOptions = options;
             if (!options.contextMenu) jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
@@ -121,7 +121,7 @@ var SourceBrowser = (function () {
             $("#GenericTools_searchAllSourcesTermInput").val("");
             /* Collection.Sparql.getCollections(sourceLabel, options, function (err, result) {
 
-             })*/
+       })*/
         });
     };
 
@@ -227,13 +227,13 @@ var SourceBrowser = (function () {
             },
         };
         /*    items.toDataTable = {
-                label: "export to Table",
-                action: function (e) {// pb avec source
-                    Export.exportTeeToDataTable()
+            label: "export to Table",
+            action: function (e) {// pb avec source
+                Export.exportTeeToDataTable()
 
-                }
+            }
 
-            }*/
+        }*/
 
         items.exportAllDescendants = {
             label: "Export all descendants",
@@ -284,14 +284,14 @@ var SourceBrowser = (function () {
         SourceBrowser.showNodeInfos(sourceLabel, node.data.id, "graphDiv");
 
         /*  Sparql_generic.getNodeInfos(sourceLabel, node.data.id, null, function (err, result) {
-              if (err) {
-                  return MainController.UI.message(err);
-              }
-              //    SkosConceptEditor.editConcept("graphDiv",result)
-              SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
+          if (err) {
+              return MainController.UI.message(err);
+          }
+          //    SkosConceptEditor.editConcept("graphDiv",result)
+          SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
 
-          })*/
+      })*/
     };
 
     self.onNodeDetailsLangChange = function (property, lang) {
@@ -370,7 +370,7 @@ var SourceBrowser = (function () {
                         if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
                             if (selectedSources.length > 0 && selectedSources.indexOf(sourceLabel) > -1) searchedSources.push(sourceLabel);
                         /*     else
-                         searchedSources.push(sourceLabel)*/
+             searchedSources.push(sourceLabel)*/
                     }
                 }
             }
@@ -593,7 +593,7 @@ var SourceBrowser = (function () {
 
                 items.forEach(function (match) {
                     /*   if(match.label.toLowerCase().indexOf(term)<0 )
-                     return*/
+           return*/
 
                     if (match.parents) {
                         //} && match.parents.split) {
@@ -710,7 +710,8 @@ var SourceBrowser = (function () {
     self.showNodeInfos = function (sourceLabel, nodeId, divId, options, callback) {
         self.newProperties = null;
         self.currentNodeId = nodeId;
-        self.currentSource = sourceLabel;
+        if (!sourceLabel) sourceLabel = self.currentSource;
+        else self.currentSource = sourceLabel;
         self.divId = divId;
         if (!options) {
             options = {};
@@ -845,7 +846,7 @@ var SourceBrowser = (function () {
                         if (!item["xml:lang"]) valueLabelsMap[value] = item.valueLabel.value;
                     }
                     /*   if (item.valueLabel)
-                 value = item.valueLabel.value;*/
+       value = item.valueLabel.value;*/
 
                     if (!self.propertiesMap.properties[propName])
                         self.propertiesMap.properties[propName] = {
@@ -879,13 +880,13 @@ var SourceBrowser = (function () {
 
                 var defaultLang = Config.default_lang;
                 /* if (!defaultLang)
-             defaultLang = 'en';*/
+     defaultLang = 'en';*/
 
                 for (var key in self.propertiesMap.properties) {
                     if (defaultProps.indexOf(key) < 0) defaultProps.push(key);
                 }
                 var str = "<div style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
-                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_slsv2' href='" + nodeId + "'>" + nodeId + "</a></td></tr>";
+                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_slsvCallback' href='" + nodeId + "'>" + nodeId + "</a></td></tr>";
                 str += "<tr><td class='detailsCellName'>GRAPH</td><td>" + graphUri + "</td></tr>";
                 str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
 
@@ -912,8 +913,8 @@ var SourceBrowser = (function () {
                             }
 
                             if (value.indexOf("http") == 0) {
-                                if (valueLabelsMap[value]) value = "<a target='_slsv2' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
-                                else value = "<a target='_slsv2' href='" + value + "'>" + value + "</a>";
+                                if (valueLabelsMap[value]) value = "<a target='_slsvCallback' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
+                                else value = "<a target='_slsvCallback' href='" + value + "'>" + value + "</a>";
                             }
                             if (index > 0) valuesStr += "<br>";
                             valuesStr += value + optionalStr;
@@ -934,8 +935,8 @@ var SourceBrowser = (function () {
                             valuesStr = "";
                             values.forEach(function (value, index) {
                                 if (value.indexOf("http") == 0) {
-                                    if (valueLabelsMap[value]) value = "<a target='_slsv2' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
-                                    else value += "<a target='_slsv2' href='" + value + "'>" + value + "</a>";
+                                    if (valueLabelsMap[value]) value = "<a target='_slsvCallback' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
+                                    else value += "<a target='_slsvCallback' href='" + value + "'>" + value + "</a>";
                                 }
                                 if (index > 0) valuesStr += "<br>";
                                 valuesStr += value;
@@ -1077,7 +1078,7 @@ var SourceBrowser = (function () {
 
     self.showWikiPage = function (sourceLabel) {
         var wikiUrl = Config.wiki.url + "Source " + sourceLabel;
-        window.open(wikiUrl, "_slsv2");
+        window.open(wikiUrl, "_slsvWiki");
     };
 
     self.addProperty = function (property, value, source, createNewNode) {

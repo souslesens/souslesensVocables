@@ -12,6 +12,7 @@
         width: inherit !important;
     }
 </style>
+<div>  <input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))" id="Lineage_classes_showImportsCBX" />Include  imports in results</div>
 <div>
     <div id="Lineage_Tabs" style="width: 360px">
         <ul>
@@ -36,19 +37,31 @@
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Export.exportTeeToDataTable('Lineage_propertiesTree','#')">Export</button>
             </div>
             <div><input type="checkbox" id="LineageProperties_allExactMatchSearchCBX" />Exact Match</div>
-            <div class="jstreeContainer" style="width: 90%">
+
+
+            <div class="jstreeContainer" style="width: 90%;height:75%;min-height:400px ;margin: 3px; padding: 3px">
                 <div class="jstree" id="Lineage_propertiesTree"></div>
+            </div>
+            <div style="border:1px solid brown">
+
+                <select style="width: 300px" id="LineagePropertie_nodesSelectionSelect" style="margin: 3px">
+                    <option value="currentGraphNodes">Current Graph Nodes</option>
+                    <option value="allNodes">All Nodes</option>
+                </select>
+               <!-- <div style="margin: 3px">Dictionary<select style="width: 300px" id="LineagePropertie_dictionarySelect" ></select></div>-->
+                 <button onclick="Lineage_properties.drawRangeAndDomainsGraph(null);" style="margin: 3px">Graph All</button>
             </div>
         </div>
         <div id="LineageRelationsTab" style="display: flex; flex-direction: column">
             <div class="lineage_actionDiv">
                 <div class="lineage_actionDiv_title">Selection</div>
-                <input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))" id="Lineage_classes_showImportsCBX" /> imports Nodes Selection
+                Nodes Selection
                 <select style="width: 300px" id="LineageRelations_nodesSelectionSelect">
                     <option value="currentGraphNodes">Current Graph Nodes</option>
                     <option value="selectedNodeDescendants">Selected node descendants</option>
                     <option value="allNodes">All Nodes</option>
                 </select>
+
             </div>
             <div></div>
             <div class="lineage_actionDiv">
@@ -66,6 +79,10 @@
                             <select style="width: 300px" id="LineageRelations_propertiesSelect"></select>
                         </div>
                         <div>
+                            TargetSource
+                            <select style="width: 300px" id="LineageRelations_targetSourceSelect"></select>
+                        </div>
+                        <div>
                             Status
                             <select style="width: 300px" id="LineageRelations_statusSelect"></select>
                         </div>
@@ -77,6 +94,7 @@
                             Creator
                             <select style="width: 300px" id="LineageRelations_creatorSelect"></select>
                         </div>
+
                     </div>
 
                     Restrictions

@@ -282,10 +282,10 @@ var Standardizer = (function () {
         array.sort(function (a, b) {
             return b.count - a.count;
         });
-        var html = "<B>Sources ranking</B><br><table>";
+        var html = "<B>Sources ranking</B><br><table style='border: 1px black solid'>";
         array.forEach(function (item) {
             var percent = Math.round((item.count / self.currentWordsCount) * 100);
-            html += "<tr><td>" + item.index + "</td><td> " + item.count + "</td><td>" + percent + "%</td></tr>";
+            html += "<tr><td>" + item.index + "</td><td> matches : " + item.count + "</td><td>&nbsp;&nbsp;%&nbsp;" + percent + "</td></tr>";
         });
         html += "</table>";
 
@@ -536,22 +536,23 @@ var Standardizer = (function () {
     self.showFuzzyMatchSearch = function (word) {
         var html =
             'search<input class="KGadvancedMapping_searchEntitiesInput" id="Standardizer_searchEntitiesInput2" ' +
-            "onkeyup=\"if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,'Standardizer_searchResulDiv2')\">" +
-            "<br><input type=";
-        checkbox;
-        (" id=");
-        Standardizer_fuzzySearchAllsourcesCBX;
-        ">All sources" + "<button onclick=";
-        Standardizer.clearFuzzyMatch();
-        (">Clear fuzzyMatch</button>");
+            "onkeyup=\"if (event.keyCode == 13) Standardizer.fireFuzzyMatchSearch($(this).val())\">" +
+            "<br><input type='checkbox' id='Standardizer_fuzzySearchAllsourcesCBX' onchange='Standardizer.fireFuzzyMatchSearch()'>All sources" +
+            "<button onclick='Standardizer.clearFuzzyMatch()'>Clear fuzzyMatch</button>";
         //"<button onclick='SourceBrowser.showSearchableSourcesTreeDialog()'> filter Sources</button>"
         html += '<div id="Standardizer_searchResulDiv2" </div>';
         $("#Standardizer_matrixCellDataDiv").html(html);
         setTimeout(function () {
             $("#Standardizer_searchEntitiesInput2").val(word);
-            Standardizer.searchFuzzyMatches($("#Standardizer_searchEntitiesInput2").val(), null, "Standardizer_searchResulDiv2");
+            Standardizer.fireFuzzyMatchSearch(word)
+           // Standardizer.searchFuzzyMatches($("#Standardizer_searchEntitiesInput2").val(), null, "Standardizer_searchResulDiv2");
         }, 200);
     };
+    self.fireFuzzyMatchSearch=function(word){
+        if( word)
+            word=$("#Standardizer_searchEntitiesInput2").val()
+        Standardizer.searchFuzzyMatches(word, null, "Standardizer_searchResulDiv2");
+    }
 
     self.editCellData = function (cellData) {
         var index = cellData.index || self.currentSource;
@@ -1858,6 +1859,37 @@ var Standardizer = (function () {
 
     self.exportExactMatchMatrix = function (callback) {
         var cols = [];
+        cols.push({ title: "Source", defaultContent: "" });
+        cols.push({ title: "Label", defaultContent: "" });
+        cols.push({ title: "Uri", defaultContent: "" });
+        cols.push({ title: "MatchSource", defaultContent: "" });
+        cols.push({ title: "MatchLabel", defaultContent: "" });
+        cols.push({ title: "MatchUri", defaultContent: "" });
+
+
+        var dataSet = [];
+
+        for (var key in self.matrixWordsMap.entities) {
+
+            var obj = self.matrixWordsMap.entities[key];
+
+            obj.forEach(function (entity) {
+
+                if (entity == null) return;
+                else {
+                     line = [self.currentSource,entity.sourceHit.label,entity.sourceHit.id];
+                    line.push(entity.index, entity.label, entity.id);
+                    dataSet.push(line);
+                }
+            });
+          //  line.splice(1, 0, matchesCount);
+
+        }
+        if (callback) return callback(null, { cols: cols, data: dataSet });
+        Export.showDataTable(null, cols, dataSet);
+    };
+    self.exportExactMatchMatrixOld = function (callback) {
+        var cols = [];
 
         cols.push({ title: "word", defaultContent: "" });
         cols.push({ title: "matches", defaultContent: "" });
@@ -1898,112 +1930,7 @@ var Standardizer = (function () {
         Export.showDataTable(null, cols, dataSet);
     };
 
-    self.createSameAsRelations = function (type) {
-        var relations = [];
-        var targetSources = [];
-        var dictionarySourceLabel = Config.dictionarySource;
 
-        if (type == "exactMatch") {
-            for (var key in self.matrixWordsMap.entities) {
-                self.matrixWordsMap.entities[key].forEach(function (obj) {
-                    if (obj) {
-                        var targetSource = self.indexSourcesMap[obj.index];
-                        if (targetSources.indexOf(targetSource) < 0) targetSources.push(targetSource);
-                        relations.push({
-                            sourceNode: {
-                                source: self.currentSource,
-                                label: obj.sourceHit.label,
-                                id: obj.sourceHit.id,
-                            },
-                            targetNode: {
-                                source: targetSource,
-                                label: obj.label,
-                                id: obj.id,
-                            },
-                            type: "http://www.w3.org/2002/07/owl#sameAs",
-                        });
-                    }
-                });
-            }
-        } else if (type == "fuzzyMatch") {
-            self.fuzzyMatches.forEach(function (item) {
-                if (item) {
-                    relations.push({
-                        sourceNode: {
-                            source: self.currentSource,
-                            label: item.sourceNode.label,
-                            id: item.sourceNode.id,
-                        },
-                        targetNode: {
-                            source: item.targetNode.source,
-                            label: item.targetNode.label,
-                            id: item.targetNode.id,
-                        },
-                        type: "http://www.w3.org/2002/07/owl#sameAs",
-                    });
-                }
-            });
-        }
-
-        if (!confirm("create " + relations.length + " relations sameAs in " + dictionarySourceLabel)) return;
-
-        var sliceLength = 10;
-        var totalCreated = 0;
-
-        async.series(
-            [
-                function (callbackSeries) {
-                    return callbackSeries();
-
-                    // async.eachSeries(
-                    //     targetSources,
-                    //     function (targetSource, callbackEach) {
-                    //         if (Config.sources[dictionarySourceLabel].imports.indexOf(targetSource)) return callbackEach();
-                    //         MainController.UI.message(" adding " + targetSource + " in   dictionarySourceLabel imports");
-                    //         Lineage_blend.addImportToCurrentSource("dictionarySourceLabel", targetSource, function (err, result) {
-                    //             return callbackEach(err);
-
-                    //             //  return alert(" coming soon");
-                    //         });
-                    //     },
-                    //     function (err) {
-                    //         callbackSeries(err);
-                    //     }
-                    // );
-                },
-                function (callbackSeries) {
-                    var slices = common.array.slice(relations, sliceLength);
-                    MainController.UI.message(" Creating relations  in +" + dictionarySourceLabel + "...");
-                    async.eachSeries(
-                        slices,
-                        function (slice, callbackEach) {
-                            Lineage_blend.createRelationTriples(slice, true, dictionarySourceLabel, function (err, _result) {
-                                if (err) return callbackEach(err);
-                                /*   slice.forEach(function(relation){
-               var labelTriples=[
-                   { subject: relation.sourceNode.id, predicate: "http://www.w3.org/2000/01/rdf-schema#label",object:relation.sourceNode.label},
-                   { subject: relation.targetNode.id, predicate: "http://www.w3.org/2000/01/rdf-schema#label",object:relation.targetNode.label},
-                   })*/
-
-                                totalCreated += sliceLength;
-                                MainController.UI.message(totalCreated + " relations created in " + dictionarySourceLabel);
-
-                                return callbackEach();
-                            });
-                        },
-                        function (_err) {
-                            callbackSeries();
-                        }
-                    );
-                },
-            ],
-            function (err) {
-                if (err) return alert(err);
-
-                MainController.UI.message(totalCreated + " relations created in " + dictionarySourceLabel, true);
-            }
-        );
-    };
 
     return self;
 })();

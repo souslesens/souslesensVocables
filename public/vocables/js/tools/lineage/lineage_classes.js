@@ -994,6 +994,13 @@ var Lineage_classes = (function () {
                                         id: edgeId,
                                         from: item.concept.value,
                                         to: item.broader1.value,
+                                        arrows: {
+                                            to: {
+                                                enabled: true,
+                                                type: Lineage_classes.defaultEdgeArrowType,
+                                                scaleFactor: 0.5,
+                                            },
+                                        },
                                     };
                                     visjsData.edges.push(edge);
                                 }
@@ -1424,7 +1431,7 @@ var Lineage_classes = (function () {
         );
     };
 
-    self.drawRestrictions = function (source, classIds, descendants, withoutImports, options) {
+    self.drawRestrictions = function (source, classIds, descendants, withoutImports, options,callback) {
         if (!options) options = {};
         if (!classIds) {
             if (!source) source = Lineage_common.currentSource;
@@ -1441,9 +1448,17 @@ var Lineage_classes = (function () {
             {
                 withoutImports: withoutImports || self.withoutImports,
                 addInverseRestrictions: 1,
+                getMetadata:options.getMetadata,
+                filter:options.filter
             },
             function (err, result) {
-                if (err) return MainController.UI.message(err);
+                if (err) {
+                    MainController.UI.message(err);
+                    if (callback) {
+                        return callback()
+                    }
+                    return;
+                }
 
                 if (result.length == 0) {
                     $("#waitImg").css("display", "none");
@@ -1550,25 +1565,14 @@ var Lineage_classes = (function () {
                 if (options.processorFn) {
                     options.processorFn(result);
                 }
+                if(callback){
+                    return callback()
+                }
             }
         );
     };
 
-    self.drawDictionarySameAs = function () {
-        function processMetadata(restrictionNodes) {
-            var restrictionIds = [];
-            restrictionNodes.forEach(function (bNode) {
-                restrictionIds.push(bNode.node.id);
-            });
-        }
 
-        var existingNodes = visjsGraph.data.nodes.getIds();
-        var options = {
-            processorFn: processMetadata,
-            filter: " FILTER (?prop in <http://www.w3.org/2002/07/owl#sameAs>) ",
-        };
-        self.drawRestrictions(Config.dictionarySource, existingNodes, false, false, options);
-    };
 
     self.drawNamedIndividuals = function (classIds) {
         var source = Lineage_common.currentSource;
@@ -2041,6 +2045,9 @@ var Lineage_classes = (function () {
             "\")'>" +
             source +
             "</div>";
+
+
+
 
         $("#lineage_drawnSources").append(html);
         //  self.setCurrentSource(encodeURIComponent(source))

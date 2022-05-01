@@ -56,6 +56,7 @@
         <script src="js/tools/lineage/lineage_common.js"></script>
         <script src="js/tools/lineage/lineage_blend.js"></script>
         <script src="js/tools/lineage/lineage_relations.js"></script>
+        <script src="js/tools/lineage/lineage_dictionary.js"></script>
 
         <script src="js/tools/lineage/lineage_decoration.js"></script>
 
@@ -238,6 +239,17 @@
                         modal: false,
                     });
 
+                    $(document).on("click", "a", function() {
+
+
+                        var target=$(this).attr("target");
+                        if(false && target=="_slsvCallback"){
+                            var id=$(this).attr("href");
+                            event.stopPropagation()
+                            SourceBrowser.showNodeInfos(null,id, "mainDialogDiv")
+                        }
+                     //   alert("You're trying to go to " + href);
+                    });
 
                     MainController.UI.setCredits();
                 });

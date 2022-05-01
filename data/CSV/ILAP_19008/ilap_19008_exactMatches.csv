@@ -1,0 +1,1095 @@
+Source	Label	Uri	MatchSource	MatchLabel	MatchUri
+ISO19008_PBS	Above ground storage	http://souslesens.org/iso19008/pbs/BACABA	ilap	Above Ground Storage	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBAAA
+ISO19008_PBS	Access from main road	http://souslesens.org/iso19008/pbs/BHA	ilap	Access from Main Road	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BCDA
+ISO19008_COR	Accessories	http://souslesens.org/iso19008/cor/BEE	ilap	Accessories	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BJG
+ISO19008_COR	Accommodation ladders/gangways	http://souslesens.org/iso19008/cor/EVYV	ilap	Accommodation ladders/gangways	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYV
+ISO19008_SAB	Activities related to major assemblies	http://souslesens.org/iso19008/sab/423	ilap	Activities related to major assemblies	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_443
+ISO19008_COR	Actuated doors	http://souslesens.org/iso19008/cor/EAAD	ilap	Actuated doors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EAAD
+ISO19008_COR	Administration	http://souslesens.org/iso19008/cor/HBA	ilap	Administration	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HBA
+ISO19008_PBS	Administration buildings	http://souslesens.org/iso19008/pbs/BCBA	ilap	Administration Buildings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BCBA
+ISO19008_COR	Air conditioners	http://souslesens.org/iso19008/cor/EGGF	ilap	Air conditioners	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EGGF
+ISO19008_COR	Air cooled heat exchangers	http://souslesens.org/iso19008/cor/ERHC	ilap	Air cooled heat exchangers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERHC
+ISO19008_PBS	Air cooling	http://souslesens.org/iso19008/pbs/BABDC	ilap	Air Cooling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BADC
+ISO19008_COR	Air distribution header	http://souslesens.org/iso19008/cor/EJJA	ilap	Air distribution header	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJA
+ISO19008_COR	Air driven motors/starters	http://souslesens.org/iso19008/cor/ERDF	ilap	Air driven motors/starters	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERDF
+ISO19008_COR	Air handling	http://souslesens.org/iso19008/cor/EGGA	ilap	Air handling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EGGA
+ISO19008_PBS	Air systems	http://souslesens.org/iso19008/pbs/BABI	ilap	Air Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAI
+ISO19008_COR	Alarm equipment	http://souslesens.org/iso19008/cor/EEEW	ilap	Alarm equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEW
+ISO19008_PBS	Alkylation	http://souslesens.org/iso19008/pbs/BAAACI	ilap	Alkylation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCI
+ISO19008_COR	Ambulances	http://souslesens.org/iso19008/cor/ESSF	ilap	Ambulances	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSF
+ISO19008_PBS	Ammonia	http://souslesens.org/iso19008/pbs/BABHC	ilap	Ammonia	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAHC
+ISO19008_PBS	Anchor base/foundations	http://souslesens.org/iso19008/pbs/ABQCC	ilap	Anchor Base/Foundations	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABLCC
+ISO19008_COR	Anchor pendant buoys	http://souslesens.org/iso19008/cor/EVYP	ilap	Anchor pendant buoys	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYP
+ISO19008_COR	Anchors	http://souslesens.org/iso19008/cor/EVYM	ilap	Anchors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYM
+ISO19008_PBS	Anchors/piles	http://souslesens.org/iso19008/pbs/ABMFB	ilap	Anchors/Piles	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABPCB
+ISO19008_COR	Anodes	http://souslesens.org/iso19008/cor/BMC	ilap	Anodes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BMC
+ISO19008_COR	Architectural and building	http://souslesens.org/iso19008/cor/KC	ilap	Architectural and building	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KC
+ISO19008_COR	Architectural and building bulk	http://souslesens.org/iso19008/cor/BC	ilap	Architectural and building bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BC
+ISO19008_COR	Architectural and building direct labour	http://souslesens.org/iso19008/cor/LC	ilap	Architectural and building direct labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LC
+ISO19008_COR	Architectural equipment	http://souslesens.org/iso19008/cor/EAA	ilap	Architectural equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EA
+ISO19008_PBS	Artificial seabed	http://souslesens.org/iso19008/pbs/ABS	ilap	Artificial Seabed	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABS
+ISO19008_PBS	Asphalt blowing	http://souslesens.org/iso19008/pbs/BAAACP	ilap	Asphalt Blowing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCP
+ISO19008_SAB	Atshore construction	http://souslesens.org/iso19008/sab/42	ilap	Atshore construction	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_42
+ISO19008_COR	Authorization and certification fees	http://souslesens.org/iso19008/cor/AAA	ilap	Authorization and certification fees	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AAA
+ISO19008_PBS	Auxilliary buoyancy	http://souslesens.org/iso19008/pbs/ABACA	ilap	Auxilliary Buoyancy	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABDCA
+ISO19008_COR	Axial compressors	http://souslesens.org/iso19008/cor/ERKD	ilap	Axial compressors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERKD
+ISO19008_SAB	Back filling	http://souslesens.org/iso19008/sab/5223	ilap	Back filling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5223
+ISO19008_PBS	Ballast water	http://souslesens.org/iso19008/pbs/BABKC	ilap	Ballast Water	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAKC
+ISO19008_PBS	Ballast/bilge	http://souslesens.org/iso19008/pbs/ABLBA	ilap	Ballast/Bilge	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABLBA
+ISO19008_PBS	Ballasting/alignment	http://souslesens.org/iso19008/pbs/BDBCB	ilap	Ballasting/Alignment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBCB
+ISO19008_PBS	Barge type substructure	http://souslesens.org/iso19008/pbs/ABN	ilap	Barge Type Substructure	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABN
+ISO19008_COR	Barges	http://souslesens.org/iso19008/cor/XK	ilap	Barges	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XK
+ISO19008_PBS	Base	http://souslesens.org/iso19008/pbs/ABCD	ilap	Base	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABCD
+ISO19008_COR	Batch pigs	http://souslesens.org/iso19008/cor/EYAE	ilap	Batch pigs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYAE
+ISO19008_COR	Batteries	http://souslesens.org/iso19008/cor/EEEB	ilap	Batteries	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEB
+ISO19008_COR	Batteries and power supply	http://souslesens.org/iso19008/cor/ETRL	ilap	Batteries and power supply	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRL
+ISO19008_PBS	Beach	http://souslesens.org/iso19008/pbs/AEALB	ilap	Beach	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEALB
+ISO19008_COR	Belt conveyors	http://souslesens.org/iso19008/cor/ERNA	ilap	Belt conveyors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNA
+ISO19008_COR	Bin activators	http://souslesens.org/iso19008/cor/ERNT	ilap	Bin activators	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNT
+ISO19008_COR	Bins	http://souslesens.org/iso19008/cor/ERTJ	ilap	Bins	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERTJ
+ISO19008_COR	Blenders	http://souslesens.org/iso19008/cor/ERNS	ilap	Blenders	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNS
+ISO19008_PBS	Blending systems	http://souslesens.org/iso19008/pbs/BACDC	ilap	Blending Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBDC
+ISO19008_COR	Blowers	http://souslesens.org/iso19008/cor/ERKF	ilap	Blowers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERKF
+ISO19008_COR	Boilers and heaters	http://souslesens.org/iso19008/cor/EGGC	ilap	Boilers and heaters	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EGGC
+ISO19008_PBS	Booster station	http://souslesens.org/iso19008/pbs/BDAGE	ilap	Booster Station	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAGE
+ISO19008_PBS	Booster stations	http://souslesens.org/iso19008/pbs/AEAJ	ilap	Booster Stations	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAJ
+ISO19008_PBS	Bracing nodes	http://souslesens.org/iso19008/pbs/ABDAC	ilap	Bracing Nodes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABAAC
+ISO19008_PBS	Bracing tubulars	http://souslesens.org/iso19008/pbs/ABDAB	ilap	Bracing Tubulars	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABDAB
+ISO19008_PBS	Bracings	http://souslesens.org/iso19008/pbs/ABKAD	ilap	Bracings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABKAD
+ISO19008_PBS	Branch drilled wells	http://souslesens.org/iso19008/pbs/ACB	ilap	Branch Drilled Wells	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACB
+ISO19008_PBS	Branched injectors	http://souslesens.org/iso19008/pbs/ACCD	ilap	Branched Injectors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACCD
+ISO19008_PBS	Branched producers	http://souslesens.org/iso19008/pbs/ACCB	ilap	Branched Producers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACCB
+ISO19008_PBS	Bridges	http://souslesens.org/iso19008/pbs/AEJ	ilap	Bridges	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEJ
+ISO19008_COR	Bridges	http://souslesens.org/iso19008/cor/SBC	ilap	Bridges	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEJ
+ISO19008_COR	Bucket elevators	http://souslesens.org/iso19008/cor/ERNB	ilap	Bucket elevators	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNB
+ISO19008_PBS	Bucket foundations	http://souslesens.org/iso19008/pbs/ABAAH	ilap	Bucket Foundations	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABAAH
+ISO19008_PBS	Buildings	http://souslesens.org/iso19008/pbs/BCB	ilap	Buildings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SBA
+ISO19008_COR	Buildings	http://souslesens.org/iso19008/cor/SBA	ilap	Buildings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SBA
+ISO19008_COR	Buildings and facilities	http://souslesens.org/iso19008/cor/ADB	ilap	Buildings and facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ADB
+ISO19008_PBS	Buildings/foundations	http://souslesens.org/iso19008/pbs/BDDGA	ilap	Buildings/Foundations	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDDGA
+ISO19008_SAB	Bulk	http://souslesens.org/iso19008/sab/32	ilap	Bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_32
+ISO19008_PBS	Bulk loading	http://souslesens.org/iso19008/pbs/BACCD	ilap	Bulk Loading	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBCD
+ISO19008_PBS	Bulk packing systems	http://souslesens.org/iso19008/pbs/BACDE	ilap	Bulk Packing Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBDE
+ISO19008_PBS	Bundled line	http://souslesens.org/iso19008/pbs/ADKAB	ilap	Bundled Line	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADKAB
+ISO19008_COR	Buoyancy elements/modules	http://souslesens.org/iso19008/cor/EYBD	ilap	Buoyancy elements/modules	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYBD
+ISO19008_COR	Bus ducts, bars and accessories	http://souslesens.org/iso19008/cor/EEEV	ilap	Bus ducts, bars and accessories	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEV
+ISO19008_COR	Business travel	http://souslesens.org/iso19008/cor/REA	ilap	Business travel	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_REA
+ISO19008_PBS	Cable protection	http://souslesens.org/iso19008/pbs/AEHB	ilap	Cable Protection	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEEC
+ISO19008_COR	Cable supports and transits	http://souslesens.org/iso19008/cor/BEB	ilap	Cable supports and transits	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BEB
+ISO19008_COR	Cablelaying spread	http://souslesens.org/iso19008/cor/XXD	ilap	Cablelaying spread	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XXD
+ISO19008_PBS	Cables	http://souslesens.org/iso19008/pbs/AEHA	ilap	Cables	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEFA
+ISO19008_COR	Cables and cable accessories	http://souslesens.org/iso19008/cor/BJC	ilap	Cables and cable accessories	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BTC
+ISO19008_PBS	Cables for subsea facilities	http://souslesens.org/iso19008/pbs/ADLA	ilap	Cables for Subsea Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADLA
+ISO19008_PBS	Caissons	http://souslesens.org/iso19008/pbs/ABAED	ilap	Caissons	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABAED
+ISO19008_COR	Camp operation	http://souslesens.org/iso19008/cor/CDB	ilap	Camp operation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CDB
+ISO19008_COR	Camp running	http://souslesens.org/iso19008/cor/CD	ilap	Camp running	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CD
+ISO19008_COR	Capital spares	http://souslesens.org/iso19008/cor/AEA	ilap	Capital spares	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AEA
+ISO19008_COR	Capstans	http://souslesens.org/iso19008/cor/EVYK	ilap	Capstans	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYK
+ISO19008_COR	Casing hanger	http://souslesens.org/iso19008/cor/EDWH	ilap	Casing hanger	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWH
+ISO19008_COR	Catalyst packages	http://souslesens.org/iso19008/cor/ERXG	ilap	Catalyst packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERXG
+ISO19008_PBS	Catalytic reforming	http://souslesens.org/iso19008/pbs/BAAACG	ilap	Catalytic Reforming	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCG
+ISO19008_COR	Catering	http://souslesens.org/iso19008/cor/CDA	ilap	Catering	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CDA
+ISO19008_COR	Catering (flotel and LQ)	http://souslesens.org/iso19008/cor/XP	ilap	Catering (flotel and LQ)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XP
+ISO19008_COR	Ceilings	http://souslesens.org/iso19008/cor/BCC	ilap	Ceilings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BCC
+ISO19008_PBS	Cells	http://souslesens.org/iso19008/pbs/ABBAC	ilap	Cells	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBAC
+ISO19008_PBS	Cells/shafts	http://souslesens.org/iso19008/pbs/ABBAD	ilap	Cells/Shafts	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBAD
+ISO19008_COR	Cementing package	http://souslesens.org/iso19008/cor/EDBI	ilap	Cementing package	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBI
+ISO19008_COR	Central vacuum cleaner system equipment	http://souslesens.org/iso19008/cor/EAAV	ilap	Central vacuum cleaner system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EAAV
+ISO19008_COR	Centrifugal compressors	http://souslesens.org/iso19008/cor/ERKA	ilap	Centrifugal compressors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERKA
+ISO19008_COR	Centrifugal pumps	http://souslesens.org/iso19008/cor/ERPA	ilap	Centrifugal pumps	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERPA
+ISO19008_COR	Centrifuge packages	http://souslesens.org/iso19008/cor/ERCM	ilap	Centrifuge packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCM
+ISO19008_COR	Centrifuges	http://souslesens.org/iso19008/cor/ERCC	ilap	Centrifuges	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCC
+ISO19008_COR	Chemical feeders	http://souslesens.org/iso19008/cor/ERCH	ilap	Chemical feeders	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCH
+ISO19008_COR	Chemical injection packages	http://souslesens.org/iso19008/cor/ERXR	ilap	Chemical injection packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERXR
+ISO19008_PBS	Chemical injection systems	http://souslesens.org/iso19008/pbs/BABH	ilap	Chemical Injection Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AACBC
+ISO19008_PBS	Chemical liquids loading	http://souslesens.org/iso19008/pbs/BACCC	ilap	Chemical Liquids Loading	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBCC
+ISO19008_COR	Chemical treatment packages	http://souslesens.org/iso19008/cor/ERXQ	ilap	Chemical treatment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERXQ
+ISO19008_PBS	Chlorination	http://souslesens.org/iso19008/pbs/BABHB	ilap	Chlorination	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAHB
+ISO19008_COR	Choke/production/injection and test manifolds	http://souslesens.org/iso19008/cor/EDBS	ilap	Choke/production/injection and test manifolds	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBS
+ISO19008_PBS	Circular barge type substructure	http://souslesens.org/iso19008/pbs/ABR	ilap	Circular Barge Type Substructure	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABR
+ISO19008_COR	Civil engineering	http://souslesens.org/iso19008/cor/KQ	ilap	Civil engineering	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KQ
+ISO19008_COR	Civil work	http://souslesens.org/iso19008/cor/SA	ilap	Civil work	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_422
+ISO19008_SAB	Civil work	http://souslesens.org/iso19008/sab/442	ilap	Civil work	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_422
+ISO19008_COR	Civil works bulk	http://souslesens.org/iso19008/cor/BQ	ilap	Civil works bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BQ
+ISO19008_COR	Civil works direct labour	http://souslesens.org/iso19008/cor/LQ	ilap	Civil works direct labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LQ
+ISO19008_COR	Classifiers	http://souslesens.org/iso19008/cor/ERNV	ilap	Classifiers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNV
+ISO19008_COR	Cleaning	http://souslesens.org/iso19008/cor/MD	ilap	Cleaning	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_MD
+ISO19008_COR	Closed circuit television system equipment	http://souslesens.org/iso19008/cor/ETRC	ilap	Closed circuit television system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRC
+ISO19008_COR	Clump weights	http://souslesens.org/iso19008/cor/EVYN	ilap	Clump weights	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYN
+ISO19008_PBS	CO2 recovery plant	http://souslesens.org/iso19008/pbs/BAAFE	ilap	CO2 Recovery Plant	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BTE
+ISO19008_COR	Coalescers	http://souslesens.org/iso19008/cor/ERVJ	ilap	Coalescers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVJ
+ISO19008_COR	Coating	http://souslesens.org/iso19008/cor/BMB	ilap	Coating	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BMB
+ISO19008_PBS	Coke calcining	http://souslesens.org/iso19008/pbs/BAAACQ	ilap	Coke Calcining	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCQ
+ISO19008_PBS	Coking	http://souslesens.org/iso19008/pbs/BAAACB	ilap	Coking	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCB
+ISO19008_PBS	Column section	http://souslesens.org/iso19008/pbs/ABQAA	ilap	Column Section	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABQAA
+ISO19008_PBS	Columns	http://souslesens.org/iso19008/pbs/ABLAA	ilap	Columns	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABLAA
+ISO19008_COR	Columns/towers	http://souslesens.org/iso19008/cor/ERVE	ilap	Columns/towers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVE
+ISO19008_COR	Comminutors	http://souslesens.org/iso19008/cor/ERCU	ilap	Comminutors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCU
+ISO19008_SAB	Commissioning	http://souslesens.org/iso19008/sab/437	ilap	Commissioning	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5273
+ISO19008_COR	Commissioning personnel	http://souslesens.org/iso19008/cor/HFB	ilap	Commissioning personnel	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HFB
+ISO19008_COR	Commissioning spares	http://souslesens.org/iso19008/cor/AEB	ilap	Commissioning spares	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AEB
+ISO19008_COR	Common telecom equipment	http://souslesens.org/iso19008/cor/ETRO	ilap	Common telecom equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRO
+ISO19008_PBS	Communication	http://souslesens.org/iso19008/pbs/BGE	ilap	Communication	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BGE
+ISO19008_PBS	Communication systems	http://souslesens.org/iso19008/pbs/BDBEE	ilap	Communication Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAC
+ISO19008_PBS	Communications	http://souslesens.org/iso19008/pbs/BDCCG	ilap	Communications	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDCCG
+ISO19008_COR	Compact heat exchangers	http://souslesens.org/iso19008/cor/ERHJ	ilap	Compact heat exchangers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERHJ
+ISO19008_SAB	Company provided bulk	http://souslesens.org/iso19008/sab/321	ilap	Company provided bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_321
+ISO19008_SAB	Company provided equipment	http://souslesens.org/iso19008/sab/311	ilap	Company provided equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_311
+ISO19008_PBS	Completion	http://souslesens.org/iso19008/pbs/ACC	ilap	Completion	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACC
+ISO19008_PBS	Compliant tower	http://souslesens.org/iso19008/pbs/ABD	ilap	Compliant Tower	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABD
+ISO19008_PBS	Compression equipment	http://souslesens.org/iso19008/pbs/ADDD	ilap	Compression Equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADDD
+ISO19008_PBS	Compression/drying	http://souslesens.org/iso19008/pbs/BAAFEC	ilap	Compression/Drying	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BTEC
+ISO19008_COR	Compressors, blowers and expanders	http://souslesens.org/iso19008/cor/ERK	ilap	Compressors, blowers and expanders	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERK
+ISO19008_COR	Compressors/gas turbine driver sets	http://souslesens.org/iso19008/cor/ERKK	ilap	Compressors/gas turbine driver sets	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERKK
+ISO19008_PBS	Computer systems	http://souslesens.org/iso19008/pbs/BABBC	ilap	Computer Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BABC
+ISO19008_PBS	Concrete beams	http://souslesens.org/iso19008/pbs/AAHC	ilap	Concrete Beams	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAHC
+ISO19008_PBS	Concrete paving	http://souslesens.org/iso19008/pbs/BDCCC	ilap	Concrete Paving	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDCCC
+ISO19008_PBS	Concrete structure	http://souslesens.org/iso19008/pbs/ABBA	ilap	Concrete Structure	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBA
+ISO19008_COR	Concrete, cement, sand and aggregates	http://souslesens.org/iso19008/cor/BQA	ilap	Concrete, cement, sand and aggregates	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BQA
+ISO19008_COR	Condensate control drums	http://souslesens.org/iso19008/cor/ERVW	ilap	Condensate control drums	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVW
+ISO19008_PBS	Condensate system	http://souslesens.org/iso19008/pbs/BABFD	ilap	Condensate System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAFD
+ISO19008_PBS	Conductor framing	http://souslesens.org/iso19008/pbs/ABDAF	ilap	Conductor Framing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABDAF
+ISO19008_COR	Conductor housing, extensions and guides, hub connectors	http://souslesens.org/iso19008/cor/EDWF	ilap	Conductor housing, extensions and guides, hub connectors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWF
+ISO19008_COR	Conductors and casings	http://souslesens.org/iso19008/cor/BDA	ilap	Conductors and casings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BDA
+ISO19008_PBS	Construction camp	http://souslesens.org/iso19008/pbs/BGA	ilap	Construction camp	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SDA
+ISO19008_COR	Construction camp	http://souslesens.org/iso19008/cor/SDA	ilap	Construction camp	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SDA
+ISO19008_COR	Construction camp catering	http://souslesens.org/iso19008/cor/SDC	ilap	Construction camp catering	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SDC
+ISO19008_COR	Construction camp operation	http://souslesens.org/iso19008/cor/SDB	ilap	Construction camp operation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SDB
+ISO19008_COR	Construction facilities	http://souslesens.org/iso19008/cor/CBA	ilap	Construction facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CBA
+ISO19008_COR	Construction management	http://souslesens.org/iso19008/cor/CAA	ilap	Construction management	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CAA
+ISO19008_SAB	Construction management	http://souslesens.org/iso19008/sab/12	ilap	Construction management	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CAA
+ISO19008_COR	Construction supervision	http://souslesens.org/iso19008/cor/HEB	ilap	Construction supervision	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_23
+ISO19008_COR	Consumables	http://souslesens.org/iso19008/cor/BZA	ilap	Consumables	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BZA
+ISO19008_COR	Consumables and first fill	http://souslesens.org/iso19008/cor/BZ	ilap	Consumables and first fill	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BZ
+ISO19008_COR	Contactors	http://souslesens.org/iso19008/cor/ERVB	ilap	Contactors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVB
+ISO19008_COR	Containers	http://souslesens.org/iso19008/cor/YZS	ilap	Containers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERTK
+ISO19008_COR	Contingency	http://souslesens.org/iso19008/cor/AV	ilap	Contingency	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AV
+ISO19008_COR	Contracting and legal	http://souslesens.org/iso19008/cor/HCA	ilap	Contracting and legal	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HCA
+ISO19008_SAB	Contractor provided bulk	http://souslesens.org/iso19008/sab/322	ilap	Contractor provided bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_322
+ISO19008_SAB	Contractor provided equipment	http://souslesens.org/iso19008/sab/312	ilap	Contractor provided equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_312
+ISO19008_COR	Contributions	http://souslesens.org/iso19008/cor/AHD	ilap	Contributions	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AHD
+ISO19008_PBS	Control centre	http://souslesens.org/iso19008/pbs/BDAGG	ilap	Control Centre	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAGG
+ISO19008_COR	Control equipment (panels, relay boxes)	http://souslesens.org/iso19008/cor/EEEC	ilap	Control equipment (panels, relay boxes)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEC
+ISO19008_COR	Control panels with instruments, controllers, etc.	http://souslesens.org/iso19008/cor/EJJB	ilap	Control panels with instruments, controllers, etc.	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJB
+ISO19008_PBS	Control system	http://souslesens.org/iso19008/pbs/ADDH	ilap	Control System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADBC
+ISO19008_PBS	Conventional risers	http://souslesens.org/iso19008/pbs/AEAE	ilap	Conventional Risers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAE
+ISO19008_PBS	Conveyor belt systems	http://souslesens.org/iso19008/pbs/BACDB	ilap	Conveyor Belt Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBDB
+ISO19008_PBS	Cooling systems	http://souslesens.org/iso19008/pbs/BABD	ilap	Cooling Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAE
+ISO19008_COR	Cooling towers	http://souslesens.org/iso19008/cor/ERXI	ilap	Cooling towers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERXI
+ISO19008_COR	Cooling units, refrigeration units	http://souslesens.org/iso19008/cor/EGGB	ilap	Cooling units, refrigeration units	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EGGB
+ISO19008_COR	Core type heat exchangers	http://souslesens.org/iso19008/cor/ERHG	ilap	Core type heat exchangers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERHG
+ISO19008_COR	Cost control	http://souslesens.org/iso19008/cor/HDB	ilap	Cost control	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HDB
+ISO19008_COR	Crane telecom equipment	http://souslesens.org/iso19008/cor/ETRI	ilap	Crane telecom equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRI
+ISO19008_PBS	Cranes	http://souslesens.org/iso19008/pbs/AAGB	ilap	Cranes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAGB
+ISO19008_COR	Cranes	http://souslesens.org/iso19008/cor/YM	ilap	Cranes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAGB
+ISO19008_COR	Crew boats	http://souslesens.org/iso19008/cor/XYD	ilap	Crew boats	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XYD
+ISO19008_PBS	Crossings	http://souslesens.org/iso19008/pbs/AEGD	ilap	Crossings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADEC
+ISO19008_PBS	Crude distillation	http://souslesens.org/iso19008/pbs/BAAACA	ilap	Crude Distillation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCA
+ISO19008_PBS	Crude oil/distillate loading	http://souslesens.org/iso19008/pbs/BACCB	ilap	Crude Oil/Distillate Loading	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBCB
+ISO19008_COR	Currency impact	http://souslesens.org/iso19008/cor/ABC	ilap	Currency impact	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ABC
+ISO19008_SAB	Cutting of structures	http://souslesens.org/iso19008/sab/5281	ilap	Cutting of structures	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5281
+ISO19008_COR	Cuttings disposal package	http://souslesens.org/iso19008/cor/EDBE	ilap	Cuttings disposal package	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBE
+ISO19008_COR	Cyclones	http://souslesens.org/iso19008/cor/ERCE	ilap	Cyclones	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCE
+ISO19008_COR	Dams/reservoirs/ponds	http://souslesens.org/iso19008/cor/SBF	ilap	Dams/reservoirs/ponds	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SBF
+ISO19008_COR	Data communication network equipment	http://souslesens.org/iso19008/cor/ETRQ	ilap	Data communication network equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRQ
+ISO19008_COR	Data processing	http://souslesens.org/iso19008/cor/HBC	ilap	Data processing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_RC
+ISO19008_COR	Data purchases	http://souslesens.org/iso19008/cor/ADC	ilap	Data purchases	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ADC
+ISO19008_COR	DC Distribution boards	http://souslesens.org/iso19008/cor/EEED	ilap	DC distribution boards	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEED
+ISO19008_COR	Deaerators	http://souslesens.org/iso19008/cor/ERVH	ilap	Deaerators	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVH
+ISO19008_PBS	Deasphalting	http://souslesens.org/iso19008/pbs/BAAACK	ilap	Deasphalting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCK
+ISO19008_PBS	Deck appurtenances	http://souslesens.org/iso19008/pbs/AAG	ilap	Deck Appurtenances	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAG
+ISO19008_PBS	Dehydration	http://souslesens.org/iso19008/pbs/BABHA	ilap	Dehydration	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAHA
+ISO19008_PBS	Demineralized water system	http://souslesens.org/iso19008/pbs/BABEB	ilap	Demineralized Water System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAEB
+ISO19008_COR	Demisters	http://souslesens.org/iso19008/cor/ERCK	ilap	Demisters	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCK
+ISO19008_COR	Depreciation	http://souslesens.org/iso19008/cor/ABB	ilap	Depreciation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ABB
+ISO19008_PBS	Derrick	http://souslesens.org/iso19008/pbs/BEB	ilap	Derrick	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAAA
+ISO19008_COR	Diaphragm compressors	http://souslesens.org/iso19008/cor/ERKJ	ilap	Diaphragm compressors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERKJ
+ISO19008_COR	Diaphragm pumps	http://souslesens.org/iso19008/cor/ERPF	ilap	Diaphragm pumps	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERPF
+ISO19008_COR	Diesel engines	http://souslesens.org/iso19008/cor/ERDD	ilap	Diesel engines	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERDD
+ISO19008_COR	Dimensional control	http://souslesens.org/iso19008/cor/ML	ilap	Dimensional control	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ML
+ISO19008_COR	Direct electrical heating cable	http://souslesens.org/iso19008/cor/EYEA	ilap	Direct electrical heating cable	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYEA
+ISO19008_COR	Direct fired heaters incl. stack and ducting	http://souslesens.org/iso19008/cor/ERFA	ilap	Direct fired heaters incl. stack and ducting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERFA
+ISO19008_PBS	Disconnectable turret system	http://souslesens.org/iso19008/pbs/ABMD	ilap	Disconnectable Turret System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABMD
+ISO19008_COR	Distribution frames	http://souslesens.org/iso19008/cor/ETRF	ilap	Distribution frames	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRF
+ISO19008_COR	Diverter system equipment	http://souslesens.org/iso19008/cor/EDWM	ilap	Diverter system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWM
+ISO19008_COR	Diverters	http://souslesens.org/iso19008/cor/EDBN	ilap	Diverters	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBN
+ISO19008_COR	Diving support vessels	http://souslesens.org/iso19008/cor/XT	ilap	Diving support vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XT
+ISO19008_COR	Document control	http://souslesens.org/iso19008/cor/HBD	ilap	Document control	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KAE
+ISO19008_COR	Domestic water heaters	http://souslesens.org/iso19008/cor/EGGI	ilap	Domestic water heaters	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EGGI
+ISO19008_COR	Doors and windows	http://souslesens.org/iso19008/cor/BCD	ilap	Doors and windows	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BCD
+ISO19008_COR	Double pipe heat exchangers	http://souslesens.org/iso19008/cor/ERHF	ilap	Double pipe heat exchangers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERHF
+ISO19008_PBS	Downhole completion	http://souslesens.org/iso19008/pbs/BFB	ilap	Downhole Completion	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BFB
+ISO19008_COR	Downhole completion devices and accessories	http://souslesens.org/iso19008/cor/BDD	ilap	Downhole completion devices and accessories	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BDD
+ISO19008_PBS	Downhole separation	http://souslesens.org/iso19008/pbs/ACCBF	ilap	Downhole Separation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACCBF
+ISO19008_PBS	Drain system	http://souslesens.org/iso19008/pbs/BABKD	ilap	Drain System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAKD
+ISO19008_PBS	Drainage system	http://souslesens.org/iso19008/pbs/BDAE	ilap	Drainage System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAE
+ISO19008_PBS	Drainage systems	http://souslesens.org/iso19008/pbs/BDCAD	ilap	Drainage Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDCAD
+ISO19008_COR	Drawworks/rotary table and drawworks package	http://souslesens.org/iso19008/cor/EDBG	ilap	Drawworks/rotary table and drawworks package	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBG
+ISO19008_SAB	Dredging	http://souslesens.org/iso19008/sab/5222	ilap	Dredging	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5222
+ISO19008_COR	Dredging vessels	http://souslesens.org/iso19008/cor/XG	ilap	Dredging vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XG
+ISO19008_COR	Drillers talk-back system equipment	http://souslesens.org/iso19008/cor/ETRD	ilap	Drillers talk-back system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRD
+ISO19008_PBS	Drilling	http://souslesens.org/iso19008/pbs/ABBBB	ilap	Drilling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BFA
+ISO19008_COR	Drilling	http://souslesens.org/iso19008/cor/KD	ilap	Drilling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BFA
+ISO19008_SAB	Drilling	http://souslesens.org/iso19008/sab/812	ilap	Drilling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BFA
+ISO19008_SAB	Drilling and Completion	http://souslesens.org/iso19008/sab/81	ilap	Drilling and completion	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_54
+ISO19008_COR	Drilling and drilling services	http://souslesens.org/iso19008/cor/SEA	ilap	Drilling and drilling services	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SEA
+ISO19008_COR	Drilling and services	http://souslesens.org/iso19008/cor/SE	ilap	Drilling and services	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SE
+ISO19008_PBS	Drilling area	http://souslesens.org/iso19008/pbs/AAA	ilap	Drilling Area	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAA
+ISO19008_COR	Drilling bulk	http://souslesens.org/iso19008/cor/BD	ilap	Drilling bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BD
+ISO19008_COR	Drilling equipment	http://souslesens.org/iso19008/cor/EDB	ilap	Drilling equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ED
+ISO19008_PBS	Drilling facilities	http://souslesens.org/iso19008/pbs/BE	ilap	Drilling Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BE
+ISO19008_COR	Drilling fluids and consumables	http://souslesens.org/iso19008/cor/BDB	ilap	Drilling fluids and consumables	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BDB
+ISO19008_COR	Drilling labour	http://souslesens.org/iso19008/cor/LD	ilap	Drilling labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LD
+ISO19008_COR	Drilling panels	http://souslesens.org/iso19008/cor/EDBP	ilap	Drilling panels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBP
+ISO19008_COR	Drilling risers	http://souslesens.org/iso19008/cor/EDBD	ilap	Drilling risers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBD
+ISO19008_PBS	Drilling utilities	http://souslesens.org/iso19008/pbs/BEE	ilap	Drilling Utilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BEE
+ISO19008_COR	Drivers and power transmissions	http://souslesens.org/iso19008/cor/ERD	ilap	Drivers and power transmissions	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERD
+ISO19008_PBS	Dry bulk loading	http://souslesens.org/iso19008/pbs/AACDF	ilap	Dry Bulk Loading	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AACDF
+ISO19008_COR	Dry Chemical Equipment	http://souslesens.org/iso19008/cor/ESSL	ilap	Dry chemical equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSL
+ISO19008_COR	Dryers	http://souslesens.org/iso19008/cor/ERVK	ilap	Dryers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVK
+ISO19008_COR	Dual Agent Unit	http://souslesens.org/iso19008/cor/ESSK	ilap	Dual agent unit	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSK
+ISO19008_COR	Duct supports, hangers	http://souslesens.org/iso19008/cor/BHC	ilap	Duct supports, hangers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BHC
+ISO19008_COR	Ducting	http://souslesens.org/iso19008/cor/BHA	ilap	Ducting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BHA
+ISO19008_COR	Dust collectors	http://souslesens.org/iso19008/cor/ERNW	ilap	Dust collectors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNW
+ISO19008_COR	Dynamic positioning control system equipment (DP)	http://souslesens.org/iso19008/cor/EJJU	ilap	Dynamic positioning control system equipment (DP)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJU
+ISO19008_PBS	Earth retention	http://souslesens.org/iso19008/pbs/BDCAE	ilap	Earth Retention	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBAE
+ISO19008_COR	Earthing bars	http://souslesens.org/iso19008/cor/EEEP	ilap	Earthing bars	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEP
+ISO19008_PBS	Earthing system	http://souslesens.org/iso19008/pbs/BABAE	ilap	Earthing System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAAE
+ISO19008_COR	Eductors and ejectors	http://souslesens.org/iso19008/cor/ERCQ	ilap	Eductors and ejectors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCQ
+ISO19008_PBS	Effluent disposal systems	http://souslesens.org/iso19008/pbs/BDBEI	ilap	Effluent Disposal Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBEI
+ISO19008_PBS	Effluent treatment package	http://souslesens.org/iso19008/pbs/BABKA	ilap	Effluent Treatment Package	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAKA
+ISO19008_COR	Electric heaters	http://souslesens.org/iso19008/cor/ERFE	ilap	Electric heaters	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERFE
+ISO19008_PBS	Electric power	http://souslesens.org/iso19008/pbs/BHB	ilap	Electric Power	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BCDB
+ISO19008_COR	Electrical	http://souslesens.org/iso19008/cor/KE	ilap	Electrical	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KE
+ISO19008_COR	Electrical bulk	http://souslesens.org/iso19008/cor/BE	ilap	Electrical bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BE
+ISO19008_COR	Electrical cathodic protection	http://souslesens.org/iso19008/cor/EEEU	ilap	Electrical cathodic protection	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEU
+ISO19008_COR	Electrical direct labour	http://souslesens.org/iso19008/cor/LE	ilap	Electrical direct labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LE
+ISO19008_COR	Electrical distribution system equipment	http://souslesens.org/iso19008/cor/EUUO	ilap	Electrical distribution system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUO
+ISO19008_COR	Electrical equipment	http://souslesens.org/iso19008/cor/EEE	ilap	Electrical equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EE
+ISO19008_PBS	Electrical heating	http://souslesens.org/iso19008/pbs/BABGB	ilap	Electrical Heating	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAGB
+ISO19008_COR	Electrical motors	http://souslesens.org/iso19008/cor/ERDE	ilap	Electrical motors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERDE
+ISO19008_PBS	Electrical power	http://souslesens.org/iso19008/pbs/AACC	ilap	Electrical Power	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AACC
+ISO19008_PBS	Electrical power distribution	http://souslesens.org/iso19008/pbs/BABAC	ilap	Electrical Power Distribution	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAAC
+ISO19008_PBS	Electrical power generation	http://souslesens.org/iso19008/pbs/BABAB	ilap	Electrical Power Generation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAAB
+ISO19008_PBS	Electrical power supply	http://souslesens.org/iso19008/pbs/BABAA	ilap	Electrical Power Supply	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAAA
+ISO19008_PBS	Electrical power systems	http://souslesens.org/iso19008/pbs/BABA	ilap	Electrical Power Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAA
+ISO19008_PBS	Electrical power transmission line	http://souslesens.org/iso19008/pbs/BDD	ilap	Electrical Power Transmission Line	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDD
+ISO19008_COR	Electrode boiler packages	http://souslesens.org/iso19008/cor/ERFH	ilap	Electrode boiler packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERFH
+ISO19008_COR	Elevators, escalators and lifts	http://souslesens.org/iso19008/cor/ERMC	ilap	Elevators, escalators and lifts	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMC
+ISO19008_COR	Embedment items	http://souslesens.org/iso19008/cor/BQL	ilap	Embedment items	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BQL
+ISO19008_COR	Emergency distribution panels	http://souslesens.org/iso19008/cor/EEEE	ilap	Emergency distribution panels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEE
+ISO19008_COR	Emergency power generator sets	http://souslesens.org/iso19008/cor/EEEO	ilap	Emergency power generator sets	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEO
+ISO19008_PBS	Emergency power system	http://souslesens.org/iso19008/pbs/BABAD	ilap	Emergency Power System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAAD
+ISO19008_PBS	Emergency shut down	http://souslesens.org/iso19008/pbs/BABBE	ilap	Emergency Shut Down	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BABE
+ISO19008_COR	Emergency telephone	http://souslesens.org/iso19008/cor/ETRG	ilap	Emergency telephone	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRG
+ISO19008_SAB	Engineering	http://souslesens.org/iso19008/sab/21	ilap	Engineering	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_21
+ISO19008_COR	Engineering management and administration	http://souslesens.org/iso19008/cor/KA	ilap	Engineering management and administration	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KA
+ISO19008_COR	Engineering studies and verifications	http://souslesens.org/iso19008/cor/RH	ilap	Engineering studies and verifications	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_RH
+ISO19008_COR	Engineering supervision	http://souslesens.org/iso19008/cor/HEA	ilap	Engineering supervision	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HEA
+ISO19008_COR	Entertainment system equipment	http://souslesens.org/iso19008/cor/ETRE	ilap	Entertainment system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRE
+ISO19008_COR	Environment monitoring system equipment	http://souslesens.org/iso19008/cor/ETRW	ilap	Environment monitoring system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRW
+ISO19008_COR	Environmental charges and fees	http://souslesens.org/iso19008/cor/AAB	ilap	Environmental charges and fees	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AAB
+ISO19008_PBS	Environmental control systems	http://souslesens.org/iso19008/pbs/BABBD	ilap	Environmental Control Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BABD
+ISO19008_SAB	Equipment	http://souslesens.org/iso19008/sab/31	ilap	Equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_31
+ISO19008_PBS	Equipment for cargo	http://souslesens.org/iso19008/pbs/ABMBA	ilap	Equipment for Cargo	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABMBA
+ISO19008_COR	Escape equipment	http://souslesens.org/iso19008/cor/ESSD	ilap	Escape equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSD
+ISO19008_PBS	ESD valve station	http://souslesens.org/iso19008/pbs/AEAHC	ilap	ESD Valve Station	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAHC
+ISO19008_COR	Estimating	http://souslesens.org/iso19008/cor/HDA	ilap	Estimating	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HDA
+ISO19008_COR	Expanders	http://souslesens.org/iso19008/cor/ERKH	ilap	Expanders	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERKH
+ISO19008_COR	Expansion bellows	http://souslesens.org/iso19008/cor/EYAJ	ilap	Expansion bellows	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYAJ
+ISO19008_PBS	Expansion loops	http://souslesens.org/iso19008/pbs/AEAB	ilap	Expansion Loops	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAB
+ISO19008_COR	Expediting/traffic/logistics	http://souslesens.org/iso19008/cor/HCC	ilap	Expediting/traffic/logistics	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HCC
+ISO19008_PBS	Exploration well	http://souslesens.org/iso19008/pbs/ACBG	ilap	Exploration Well	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACAG
+ISO19008_PBS	Export risers	http://souslesens.org/iso19008/pbs/ABDFB	ilap	Export Risers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBCB
+ISO19008_COR	Extractors	http://souslesens.org/iso19008/cor/ERCD	ilap	Extractors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCD
+ISO19008_PBS	Facilities	http://souslesens.org/iso19008/pbs/BDAG	ilap	Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAG
+ISO19008_COR	Facility construction/expansion	http://souslesens.org/iso19008/cor/CBD	ilap	Facility construction/expansion	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CBD
+ISO19008_COR	Fairleads	http://souslesens.org/iso19008/cor/EVYS	ilap	Fairleads	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYS
+ISO19008_COR	Fans	http://souslesens.org/iso19008/cor/ERKE	ilap	Fans	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERKE
+ISO19008_COR	Feeders	http://souslesens.org/iso19008/cor/ERNU	ilap	Feeders	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNU
+ISO19008_COR	Fencing materials, guard rails, steel manholes and sign posts	http://souslesens.org/iso19008/cor/BQJ	ilap	Fencing materials, guard rails, steel manholes and sign posts	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BQJ
+ISO19008_COR	Fenders	http://souslesens.org/iso19008/cor/EVYO	ilap	Fenders	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYO
+ISO19008_COR	Fiber optical cable	http://souslesens.org/iso19008/cor/EYEC	ilap	Fiber optical cable	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYEC
+ISO19008_COR	Field termination and cross connection cabinets	http://souslesens.org/iso19008/cor/EJJF	ilap	Field termination and cross connection cabinets	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJF
+ISO19008_COR	Filters and compensation equipment	http://souslesens.org/iso19008/cor/EEEY	ilap	Filters and compensation equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEY
+ISO19008_COR	Finance and accounting	http://souslesens.org/iso19008/cor/HBB	ilap	Finance and accounting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HBB
+ISO19008_COR	Financial costs	http://souslesens.org/iso19008/cor/ABA	ilap	Financial costs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ABA
+ISO19008_COR	Financing and related costs	http://souslesens.org/iso19008/cor/AB	ilap	Financing and related costs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AB
+ISO19008_COR	Fines sifters and screens	http://souslesens.org/iso19008/cor/ERNR	ilap	Fines sifters and screens	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNR
+ISO19008_PBS	Fire fighting training area	http://souslesens.org/iso19008/pbs/BABLF	ilap	Fire Fighting Training Area	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BALF
+ISO19008_COR	Fire guards	http://souslesens.org/iso19008/cor/MH	ilap	Fire guards	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_MH
+ISO19008_COR	Fire water monitors (towers)	http://souslesens.org/iso19008/cor/ESSS	ilap	Fire water monitors (towers)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSS
+ISO19008_PBS	Fire water system	http://souslesens.org/iso19008/pbs/BABLA	ilap	Fire Water System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BALA
+ISO19008_COR	Fire water system equipment	http://souslesens.org/iso19008/cor/ESSM	ilap	Fire water system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSM
+ISO19008_COR	Firefighting vessels	http://souslesens.org/iso19008/cor/XYC	ilap	Firefighting vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XYC
+ISO19008_COR	Firetrucks	http://souslesens.org/iso19008/cor/ESSG	ilap	Firetrucks	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSG
+ISO19008_COR	First fill	http://souslesens.org/iso19008/cor/BZB	ilap	First fill	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BZB
+ISO19008_PBS	Fischer-Tropsch synthesis	http://souslesens.org/iso19008/pbs/BAADD	ilap	Fischer-Tropsch Synthesis	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BND
+ISO19008_PBS	Fixed drilling rig	http://souslesens.org/iso19008/pbs/BFBA	ilap	Fixed Drilling Rig	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BFBA
+ISO19008_COR	Fixed Foam Unit	http://souslesens.org/iso19008/cor/ESSJ	ilap	Fixed foam unit	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSJ
+ISO19008_PBS	Fixed turret	http://souslesens.org/iso19008/pbs/ABMC	ilap	Fixed Turret	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABMC
+ISO19008_PBS	Fjord crossing	http://souslesens.org/iso19008/pbs/BDAFD	ilap	Fjord Crossing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAFD
+ISO19008_PBS	Flare	http://souslesens.org/iso19008/pbs/AAF	ilap	Flare	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAF
+ISO19008_COR	Flare tips and accessories	http://souslesens.org/iso19008/cor/ERFC	ilap	Flare tips and accessories	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERFC
+ISO19008_PBS	Flare/venting station	http://souslesens.org/iso19008/pbs/BDAGC	ilap	Flare/Venting Station	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAGC
+ISO19008_COR	Flares ground	http://souslesens.org/iso19008/cor/ERFD	ilap	Flares ground	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERFD
+ISO19008_COR	Flexible line pipe	http://souslesens.org/iso19008/cor/BYB	ilap	Flexible line pipe	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BYB
+ISO19008_COR	Flexible pipeline-/cablelaying vessels	http://souslesens.org/iso19008/cor/XE	ilap	Flexible pipeline-/cablelaying vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XE
+ISO19008_COR	Flexipipe-laying spread	http://souslesens.org/iso19008/cor/XXC	ilap	Flexipipe-laying spread	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XXC
+ISO19008_COR	Floors	http://souslesens.org/iso19008/cor/BCB	ilap	Floors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BCB
+ISO19008_SAB	Flotel/LQ/camps	http://souslesens.org/iso19008/sab/534	ilap	Flotel/LQ/camps	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_534
+ISO19008_COR	Flotels	http://souslesens.org/iso19008/cor/XO	ilap	Flotels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XO
+ISO19008_PBS	Fluid catalytic cracking	http://souslesens.org/iso19008/pbs/BAAACD	ilap	Fluid Catalytic Cracking	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCD
+ISO19008_COR	Foremen/supervision	http://souslesens.org/iso19008/cor/MA	ilap	Foremen/supervision	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_MA
+ISO19008_PBS	Formation works	http://souslesens.org/iso19008/pbs/BDCAC	ilap	Formation Works	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBAC
+ISO19008_COR	Forms	http://souslesens.org/iso19008/cor/BQK	ilap	Forms	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BQK
+ISO19008_PBS	Foundation/piles	http://souslesens.org/iso19008/pbs/ABDE	ilap	Foundation/Piles	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABDE
+ISO19008_COR	Foundations	http://souslesens.org/iso19008/cor/SAB	ilap	Foundations	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SAB
+ISO19008_PBS	Fractionation	http://souslesens.org/iso19008/pbs/BAAABA	ilap	Fractionation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKBA
+ISO19008_COR	Freight	http://souslesens.org/iso19008/cor/AEC	ilap	Freight	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AEC
+ISO19008_COR	Fresh water maker packages	http://souslesens.org/iso19008/cor/ERXD	ilap	Fresh water maker packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERXD
+ISO19008_PBS	Freshwater cooling	http://souslesens.org/iso19008/pbs/BABDB	ilap	Freshwater Cooling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BADB
+ISO19008_PBS	Freshwater supply	http://souslesens.org/iso19008/pbs/BABEA	ilap	Freshwater Supply	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BCDD
+ISO19008_PBS	Fuel supply systems	http://souslesens.org/iso19008/pbs/BDBEG	ilap	Fuel Supply Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBEG
+ISO19008_PBS	Fuel systems	http://souslesens.org/iso19008/pbs/BABJ	ilap	Fuel Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAJ
+ISO19008_COR	Furnaces	http://souslesens.org/iso19008/cor/ERFI	ilap	Furnaces	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERFI
+ISO19008_COR	Gantry and portal cranes	http://souslesens.org/iso19008/cor/ERMV	ilap	Gantry and portal cranes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMV
+ISO19008_PBS	Gas conditioning	http://souslesens.org/iso19008/pbs/AACABC	ilap	Gas Conditioning	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AACAE
+ISO19008_COR	Gas engines	http://souslesens.org/iso19008/cor/ERDA	ilap	Gas engines	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERDA
+ISO19008_COR	Gas holders	http://souslesens.org/iso19008/cor/ERVP	ilap	Gas holders	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVP
+ISO19008_PBS	Gas injector	http://souslesens.org/iso19008/pbs/ACCCB	ilap	Gas Injector	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACBD
+ISO19008_COR	Gas metering package	http://souslesens.org/iso19008/cor/EJJI	ilap	Gas metering package	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJI
+ISO19008_PBS	Gas producer	http://souslesens.org/iso19008/pbs/ACBB	ilap	Gas Producer	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACBB
+ISO19008_PBS	Gas storage	http://souslesens.org/iso19008/pbs/BACAA	ilap	Gas Storage	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBAA
+ISO19008_PBS	Gas sweetening	http://souslesens.org/iso19008/pbs/AACABD	ilap	Gas Sweetening	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AACAF
+ISO19008_COR	Gas turbines	http://souslesens.org/iso19008/cor/ERDT	ilap	Gas turbines	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERDT
+ISO19008_PBS	Gaseous fuels	http://souslesens.org/iso19008/pbs/BABJB	ilap	Gaseous Fuels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAJB
+ISO19008_COR	Gear pumps	http://souslesens.org/iso19008/cor/ERPE	ilap	Gear pumps	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERPE
+ISO19008_COR	Gearboxes and couplings	http://souslesens.org/iso19008/cor/ERDB	ilap	Gearboxes and couplings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERDB
+ISO19008_PBS	General instruments	http://souslesens.org/iso19008/pbs/BABBB	ilap	General Instruments	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BABB
+ISO19008_COR	General office administration	http://souslesens.org/iso19008/cor/RA	ilap	General office administration	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_RA
+ISO19008_COR	General site administration	http://souslesens.org/iso19008/cor/CAB	ilap	General site administration	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CAB
+ISO19008_COR	Generators	http://souslesens.org/iso19008/cor/EEEG	ilap	Generators	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEG
+ISO19008_COR	Geoscience	http://souslesens.org/iso19008/cor/KG	ilap	Geoscience	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KG
+ISO19008_COR	Granulators	http://souslesens.org/iso19008/cor/ERNI	ilap	Granulators	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNI
+ISO19008_PBS	Gravel packed completion	http://souslesens.org/iso19008/pbs/ACCAB	ilap	Gravel Packed Completion	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACCBB
+ISO19008_COR	Gravel/rock dumping vessels	http://souslesens.org/iso19008/cor/XH	ilap	Gravel/rock dumping vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XH
+ISO19008_COR	Gravity impact crushers	http://souslesens.org/iso19008/cor/ERNJ	ilap	Gravity impact crushers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNJ
+ISO19008_PBS	Grease production	http://souslesens.org/iso19008/pbs/BAAACO	ilap	Grease Production	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCO
+ISO19008_COR	Grillage/seafastening/load out	http://souslesens.org/iso19008/cor/BND	ilap	Grillage/seafastening/load out	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BND
+ISO19008_COR	Ground materials	http://souslesens.org/iso19008/cor/BQH	ilap	Ground materials	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BQH
+ISO19008_SAB	Grouting	http://souslesens.org/iso19008/sab/5233	ilap	Grouting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5233
+ISO19008_COR	Grouting vessels	http://souslesens.org/iso19008/cor/XYF	ilap	Grouting vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XYF
+ISO19008_COR	Guide base	http://souslesens.org/iso19008/cor/EDWK	ilap	Guide base	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWK
+ISO19008_COR	Hammermills	http://souslesens.org/iso19008/cor/ERNK	ilap	Hammermills	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNK
+ISO19008_COR	Health, medical and social care	http://souslesens.org/iso19008/cor/AFA	ilap	Health, medical and social care	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AFA
+ISO19008_COR	Health, safety and environment (HSE)	http://souslesens.org/iso19008/cor/KS	ilap	Health, safety and environment (HSE)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KS
+ISO19008_COR	Heat transfer equipment	http://souslesens.org/iso19008/cor/ERH	ilap	Heat transfer equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERH
+ISO19008_COR	Heaters, boilers, furnaces and flares	http://souslesens.org/iso19008/cor/ERF	ilap	Heaters, boilers, furnaces and flares	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERF
+ISO19008_COR	Heating and cooling coils	http://souslesens.org/iso19008/cor/EGGG	ilap	Heating and cooling coils	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EGGG
+ISO19008_PBS	Heating systems	http://souslesens.org/iso19008/pbs/BABG	ilap	Heating systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAG
+ISO19008_COR	Heating, ventilation and air conditioning (HVAC) equipment	http://souslesens.org/iso19008/cor/EG	ilap	Heating, ventilation and air conditioning (HVAC) equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EG
+ISO19008_SAB	Heavy Lift Transport	http://souslesens.org/iso19008/sab/5262	ilap	Heavy lift transport	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5262
+ISO19008_COR	Heavy transport vessels	http://souslesens.org/iso19008/cor/XS	ilap	Heavy transport vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XS
+ISO19008_COR	Helicopter fuel packages	http://souslesens.org/iso19008/cor/ERXH	ilap	Helicopter fuel packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERXH
+ISO19008_COR	Helicopters	http://souslesens.org/iso19008/cor/XU	ilap	Helicopters	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XU
+ISO19008_PBS	Helideck	http://souslesens.org/iso19008/pbs/AAE	ilap	Helideck	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAE
+ISO19008_PBS	Heliport	http://souslesens.org/iso19008/pbs/BHE	ilap	Heliport	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BCDE
+ISO19008_PBS	High pressure process	http://souslesens.org/iso19008/pbs/BABMA	ilap	High Pressure Process	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBEA
+ISO19008_COR	Hoists and trolleys	http://souslesens.org/iso19008/cor/ERMB	ilap	Hoists and trolleys	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMB
+ISO19008_COR	Hoppers	http://souslesens.org/iso19008/cor/ERTE	ilap	Hoppers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERTE
+ISO19008_COR	Hoppers/mud guns/blenders	http://souslesens.org/iso19008/cor/EDBY	ilap	Hoppers/mud guns/blenders	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBY
+ISO19008_PBS	Hot oil heating	http://souslesens.org/iso19008/pbs/BABGA	ilap	Hot Oil Heating	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAGA
+ISO19008_PBS	Hull outfitting	http://souslesens.org/iso19008/pbs/ABCCA	ilap	Hull Outfitting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABRBA
+ISO19008_COR	Humidifiers/dehumidifiers	http://souslesens.org/iso19008/cor/EGGE	ilap	Humidifiers/dehumidifiers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EGGE
+ISO19008_COR	HVAC	http://souslesens.org/iso19008/cor/KH	ilap	HVAC	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KH
+ISO19008_COR	HVAC bulk	http://souslesens.org/iso19008/cor/BH	ilap	HVAC bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BH
+ISO19008_COR	HVAC direct labour	http://souslesens.org/iso19008/cor/LH	ilap	HVAC direct labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LH
+ISO19008_COR	HVAC Fans	http://souslesens.org/iso19008/cor/EGGH	ilap	HVAC fans	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EGGH
+ISO19008_COR	Hydraulic connectors	http://souslesens.org/iso19008/cor/EDWO	ilap	Hydraulic connectors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWO
+ISO19008_COR	Hydraulic emergency shut-down system equipment	http://souslesens.org/iso19008/cor/EJJW	ilap	Hydraulic emergency shut-down system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJW
+ISO19008_COR	Hydraulic motors/starters	http://souslesens.org/iso19008/cor/ERDV	ilap	Hydraulic motors/starters	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERDV
+ISO19008_COR	Hydraulic power unit	http://souslesens.org/iso19008/cor/EUUM	ilap	Hydraulic power unit	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUM
+ISO19008_COR	Hydraulic units	http://souslesens.org/iso19008/cor/ERCT	ilap	Hydraulic units	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCT
+ISO19008_PBS	Hydrocracking	http://souslesens.org/iso19008/pbs/BAAACE	ilap	Hydrocracking	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCE
+ISO19008_COR	Hydrogen units	http://souslesens.org/iso19008/cor/ERVU	ilap	Hydrogen units	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVU
+ISO19008_PBS	Hydrotreating	http://souslesens.org/iso19008/pbs/BAAACF	ilap	Hydrotreating	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCF
+ISO19008_COR	Impact breakers	http://souslesens.org/iso19008/cor/ERNG	ilap	Impact breakers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNG
+ISO19008_COR	Import/export risers	http://souslesens.org/iso19008/cor/EYBC	ilap	Import/export risers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYBC
+ISO19008_PBS	In open landscape	http://souslesens.org/iso19008/pbs/BDAEC	ilap	In Open Landscape	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAEC
+ISO19008_PBS	In sump	http://souslesens.org/iso19008/pbs/BDAEB	ilap	In Sump	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAEB
+ISO19008_PBS	In tunnel	http://souslesens.org/iso19008/pbs/BDAEA	ilap	In Tunnel	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAEA
+ISO19008_COR	Incinerators	http://souslesens.org/iso19008/cor/ERCP	ilap	Incinerators	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCP
+ISO19008_PBS	Inert gas	http://souslesens.org/iso19008/pbs/AACDJ	ilap	Inert Gas	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AACDJ
+ISO19008_COR	Inert gas equipment	http://souslesens.org/iso19008/cor/ESSH	ilap	Inert gas equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSH
+ISO19008_COR	Inert gas generator package	http://souslesens.org/iso19008/cor/ESSI	ilap	Inert gas generator package	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSI
+ISO19008_COR	Inert gas units	http://souslesens.org/iso19008/cor/ERVV	ilap	Inert gas units	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVV
+ISO19008_PBS	Infield pipelines	http://souslesens.org/iso19008/pbs/ADK	ilap	Infield Pipelines	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADK
+ISO19008_PBS	Injection line	http://souslesens.org/iso19008/pbs/AEAAB	ilap	Injection Line	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAAB
+ISO19008_COR	Injection risers	http://souslesens.org/iso19008/cor/EYBB	ilap	Injection risers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYBB
+ISO19008_COR	Inline items and dampers	http://souslesens.org/iso19008/cor/BHB	ilap	Inline items and dampers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BHB
+ISO19008_SAB	Inshore construction	http://souslesens.org/iso19008/sab/43	ilap	Inshore construction	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_43
+ISO19008_SAB	Installation	http://souslesens.org/iso19008/sab/523	ilap	Installation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_523
+ISO19008_PBS	Installation system	http://souslesens.org/iso19008/pbs/ABDBA	ilap	Installation System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABDBA
+ISO19008_SAB	Installation/assembly/erection	http://souslesens.org/iso19008/sab/4332	ilap	Installation/assembly/erection	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_4232
+ISO19008_COR	Instrument air package	http://souslesens.org/iso19008/cor/EJJM	ilap	Instrument air package	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJM
+ISO19008_COR	Instrument bulk	http://souslesens.org/iso19008/cor/BJ	ilap	Instrument bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BJ
+ISO19008_COR	Instrument direct labour	http://souslesens.org/iso19008/cor/LJ	ilap	Instrument direct labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LJ
+ISO19008_PBS	Instrument systems	http://souslesens.org/iso19008/pbs/BABB	ilap	Instrument Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAB
+ISO19008_COR	Instrument valves	http://souslesens.org/iso19008/cor/BJB	ilap	Instrument valves	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BJB
+ISO19008_COR	Instrumentation	http://souslesens.org/iso19008/cor/KJ	ilap	Instrumentation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KJ
+ISO19008_COR	Instrumentation equipment	http://souslesens.org/iso19008/cor/EJJ	ilap	Instrumentation equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJ
+ISO19008_COR	Instruments	http://souslesens.org/iso19008/cor/BJA	ilap	Instruments	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BJA
+ISO19008_COR	Insulation	http://souslesens.org/iso19008/cor/SFD	ilap	Insulation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BCG
+ISO19008_COR	Insurance	http://souslesens.org/iso19008/cor/AC	ilap	Insurance	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AC
+ISO19008_COR	Intelligent pigs	http://souslesens.org/iso19008/cor/EYAC	ilap	Intelligent pigs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYAC
+ISO19008_COR	Intervention control system equipment	http://souslesens.org/iso19008/cor/EUUT	ilap	Intervention control system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUT
+ISO19008_PBS	Intervention system	http://souslesens.org/iso19008/pbs/ADAF	ilap	Intervention System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADAF
+ISO19008_COR	Intervention system equipment and tools (ROT)	http://souslesens.org/iso19008/cor/EUUR	ilap	Intervention system equipment and tools (ROT)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUR
+ISO19008_COR	Investment taxes	http://souslesens.org/iso19008/cor/AGB	ilap	Investment taxes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AGB
+ISO19008_PBS	Isomerisation	http://souslesens.org/iso19008/pbs/BAAACH	ilap	Isomerisation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCH
+ISO19008_PBS	Jacket	http://souslesens.org/iso19008/pbs/ABA	ilap	Jacket	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABA
+ISO19008_PBS	Jacket structure	http://souslesens.org/iso19008/pbs/ABAA	ilap	Jacket Structure	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABAA
+ISO19008_PBS	Jack-up	http://souslesens.org/iso19008/pbs/ABC	ilap	Jack-Up	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABC
+ISO19008_COR	Jaw crushers	http://souslesens.org/iso19008/cor/ERNF	ilap	Jaw crushers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNF
+ISO19008_COR	Jetties and quays	http://souslesens.org/iso19008/cor/SBD	ilap	Jetties and quays	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SBD
+ISO19008_PBS	J-tubes	http://souslesens.org/iso19008/pbs/ABDFC	ilap	J-Tubes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABAEC
+ISO19008_COR	Junction boxes	http://souslesens.org/iso19008/cor/BTD	ilap	Junction boxes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BED
+ISO19008_COR	Junction Boxes	http://souslesens.org/iso19008/cor/BED	ilap	Junction boxes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BED
+ISO19008_COR	Kitchen equipment	http://souslesens.org/iso19008/cor/EAAB	ilap	Kitchen equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EAAB
+ISO19008_PBS	Laboratories	http://souslesens.org/iso19008/pbs/BCBC	ilap	Laboratories	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BCBC
+ISO19008_COR	Land acquisition	http://souslesens.org/iso19008/cor/ADA	ilap	Land acquisition	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ADA
+ISO19008_COR	Landing base	http://souslesens.org/iso19008/cor/EDWL	ilap	Landing base	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWL
+ISO19008_COR	Landscaping	http://souslesens.org/iso19008/cor/SAE	ilap	Landscaping	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SAE
+ISO19008_COR	Laundry equipment	http://souslesens.org/iso19008/cor/EAAE	ilap	Laundry equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EAAE
+ISO19008_SAB	Laying	http://souslesens.org/iso19008/sab/5251	ilap	Laying	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5251
+ISO19008_PBS	Leg nodes	http://souslesens.org/iso19008/pbs/ABDAG	ilap	Leg Nodes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABDAG
+ISO19008_PBS	Leg tubulars	http://souslesens.org/iso19008/pbs/ABDAA	ilap	Leg Tubulars	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABDAA
+ISO19008_PBS	Legs	http://souslesens.org/iso19008/pbs/ABCB	ilap	Legs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABCB
+ISO19008_COR	Licences and permits	http://souslesens.org/iso19008/cor/AAE	ilap	Licences and permits	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AAE
+ISO19008_PBS	Lifeboat stations	http://souslesens.org/iso19008/pbs/AAGA	ilap	Lifeboat Stations	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAGA
+ISO19008_COR	Lifeboats and davits	http://souslesens.org/iso19008/cor/ESSA	ilap	Lifeboats and davits	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSA
+ISO19008_PBS	Lift appurtenances	http://souslesens.org/iso19008/pbs/ABDCC	ilap	Lift Appurtenances	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABDCC
+ISO19008_SAB	Lifting	http://souslesens.org/iso19008/sab/5231	ilap	Lifting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5231
+ISO19008_COR	Lifting spread	http://souslesens.org/iso19008/cor/XXA	ilap	Lifting spread	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XXA
+ISO19008_COR	Lifting vessels	http://souslesens.org/iso19008/cor/XC	ilap	Lifting vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XC
+ISO19008_COR	Lighting	http://souslesens.org/iso19008/cor/BEC	ilap	Lighting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BEC
+ISO19008_COR	Lighting and minor distribution panels	http://souslesens.org/iso19008/cor/EEEM	ilap	Lighting and minor distribution panels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEM
+ISO19008_PBS	Lighting systems	http://souslesens.org/iso19008/pbs/BDBEC	ilap	Lighting Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBEC
+ISO19008_COR	Lightning arrestors	http://souslesens.org/iso19008/cor/EEES	ilap	Lightning arrestors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEES
+ISO19008_COR	Liquefaction heat exchangers (cryogenic)	http://souslesens.org/iso19008/cor/ERHH	ilap	Liquefaction heat exchangers (cryogenic)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERHH
+ISO19008_PBS	Liquefaction/sub-cooling	http://souslesens.org/iso19008/pbs/BAAADC	ilap	Liquefaction/Sub-Cooling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKDC
+ISO19008_PBS	Liquid burner system	http://souslesens.org/iso19008/pbs/BABMC	ilap	Liquid Burner System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBEC
+ISO19008_PBS	Liquid fuels	http://souslesens.org/iso19008/pbs/BABJA	ilap	Liquid Fuels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAJA
+ISO19008_PBS	Liquid packing systems	http://souslesens.org/iso19008/pbs/BACDF	ilap	Liquid Packing Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBDF
+ISO19008_PBS	Liquid storage	http://souslesens.org/iso19008/pbs/BACAB	ilap	Liquid Storage	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBAB
+ISO19008_PBS	Load transfer frame (LTF)	http://souslesens.org/iso19008/pbs/AAHD	ilap	Load Transfer Frame (LTF)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAHD
+ISO19008_PBS	Loading facilities	http://souslesens.org/iso19008/pbs/BDCBD	ilap	Loading Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBBD
+ISO19008_PBS	Loading system	http://souslesens.org/iso19008/pbs/AECC	ilap	Loading System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AECC
+ISO19008_PBS	Local offtake systems	http://souslesens.org/iso19008/pbs/AEB	ilap	Local Offtake Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEB
+ISO19008_COR	Loggers, printers and copiers	http://souslesens.org/iso19008/cor/EJJK	ilap	Loggers, printers and copiers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJK
+ISO19008_SAB	Logistics	http://souslesens.org/iso19008/sab/53	ilap	Logistics	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_53
+ISO19008_PBS	Low pressure system	http://souslesens.org/iso19008/pbs/BABMB	ilap	Low Pressure System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBEB
+ISO19008_PBS	Lower domes	http://souslesens.org/iso19008/pbs/ABBAB	ilap	Lower Domes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBAB
+ISO19008_COR	Lube and seal oil units	http://souslesens.org/iso19008/cor/ERCS	ilap	Lube and seal oil units	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCS
+ISO19008_PBS	Lube systems	http://souslesens.org/iso19008/pbs/BDBEH	ilap	Lube Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBEH
+ISO19008_PBS	Lube treatment	http://souslesens.org/iso19008/pbs/BAAACN	ilap	Lube Treatment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCN
+ISO19008_PBS	Machinery main components	http://souslesens.org/iso19008/pbs/ABMBD	ilap	Machinery Main Components	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABMBD
+ISO19008_COR	Main power generator sets	http://souslesens.org/iso19008/cor/EEEN	ilap	Main power generator sets	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEN
+ISO19008_PBS	Maintenance facilities	http://souslesens.org/iso19008/pbs/BDCD	ilap	Maintenance Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDCD
+ISO19008_COR	Management services	http://souslesens.org/iso19008/cor/QH	ilap	Management services	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_QH
+ISO19008_SAB	Management Services	http://souslesens.org/iso19008/sab/13	ilap	Management services	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_QH
+ISO19008_COR	Manifold header, valves and piping	http://souslesens.org/iso19008/cor/EUUH	ilap	Manifold header, valves and piping	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUH
+ISO19008_PBS	Manifold protection structure	http://souslesens.org/iso19008/pbs/ADBAC	ilap	Manifold Protection Structure	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADBAC
+ISO19008_PBS	Manifold station	http://souslesens.org/iso19008/pbs/ADB	ilap	Manifold Station	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADB
+ISO19008_PBS	Manifold/piping area	http://souslesens.org/iso19008/pbs/ADAB	ilap	Manifold/Piping Area	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADDE
+ISO19008_COR	Manually operated valves	http://souslesens.org/iso19008/cor/BLB	ilap	Manually operated valves	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BLB
+ISO19008_COR	Marine engineering	http://souslesens.org/iso19008/cor/KV	ilap	Marine engineering	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KV
+ISO19008_PBS	Marine systems	http://souslesens.org/iso19008/pbs/BABBF	ilap	Marine Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BABF
+ISO19008_COR	Masonry	http://souslesens.org/iso19008/cor/BQD	ilap	Masonry	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BQD
+ISO19008_COR	Material and product handling equipment	http://souslesens.org/iso19008/cor/ERM	ilap	Material and product handling equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERM
+ISO19008_COR	Material control/inspection	http://souslesens.org/iso19008/cor/HCD	ilap	Material control/inspection	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HCD
+ISO19008_COR	Material related costs	http://souslesens.org/iso19008/cor/AE	ilap	Material related costs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AE
+ISO19008_COR	Material storage facilities	http://souslesens.org/iso19008/cor/CBB	ilap	Material storage facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CBB
+ISO19008_COR	Material technology	http://souslesens.org/iso19008/cor/KM	ilap	Material technology	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KM
+ISO19008_SAB	Mating	http://souslesens.org/iso19008/sab/5234	ilap	Mating	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5234
+ISO19008_COR	Matrix and mimic panels	http://souslesens.org/iso19008/cor/EJJL	ilap	Matrix and mimic panels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJL
+ISO19008_COR	MC and commissioning personnel	http://souslesens.org/iso19008/cor/HF	ilap	MC and commissioning personnel	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HF
+ISO19008_COR	Mechanical	http://souslesens.org/iso19008/cor/KR	ilap	Mechanical	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KR
+ISO19008_COR	Mechanical completion personnel	http://souslesens.org/iso19008/cor/HFA	ilap	Mechanical completion personnel	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HFA
+ISO19008_COR	Mechanical direct labour	http://souslesens.org/iso19008/cor/LR	ilap	Mechanical direct labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LR
+ISO19008_COR	Mechanical equipment	http://souslesens.org/iso19008/cor/ER	ilap	Mechanical equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ER
+ISO19008_PBS	Mechanical outfitting	http://souslesens.org/iso19008/pbs/ABBB	ilap	Mechanical Outfitting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBB
+ISO19008_COR	Mechanical separators/shakers	http://souslesens.org/iso19008/cor/ERCF	ilap	Mechanical separators/shakers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCF
+ISO19008_PBS	Medium heating	http://souslesens.org/iso19008/pbs/BABGC	ilap	Medium Heating	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAGC
+ISO19008_COR	Meeting expenses	http://souslesens.org/iso19008/cor/RFB	ilap	Meeting expenses	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_RFB
+ISO19008_PBS	Metering station	http://souslesens.org/iso19008/pbs/BDAGA	ilap	Metering Station	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAGA
+ISO19008_PBS	Methanol	http://souslesens.org/iso19008/pbs/BAACA	ilap	Methanol	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BMA
+ISO19008_PBS	Methanol synthesis	http://souslesens.org/iso19008/pbs/BAACAC	ilap	Methanol Synthesis	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BMAC
+ISO19008_COR	Misc. coolers and condensers	http://souslesens.org/iso19008/cor/ERHE	ilap	Misc. coolers and condensers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERHE
+ISO19008_COR	Misc. vessels and equipment	http://souslesens.org/iso19008/cor/XY	ilap	Misc. vessels and equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XY
+ISO19008_COR	Miscellaneous expenses	http://souslesens.org/iso19008/cor/RF	ilap	Miscellaneous expenses	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_RF
+ISO19008_COR	Miscellaneous mechanical equipment	http://souslesens.org/iso19008/cor/ERC	ilap	Miscellaneous mechanical equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERC
+ISO19008_COR	Miscellaneous overhead costs	http://souslesens.org/iso19008/cor/CE	ilap	Miscellaneous overhead costs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CE
+ISO19008_COR	Miscellaneous package units	http://souslesens.org/iso19008/cor/ERX	ilap	Miscellaneous package units	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERX
+ISO19008_COR	Miscellaneous unit work	http://souslesens.org/iso19008/cor/SF	ilap	Miscellaneous unit work	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SF
+ISO19008_PBS	Mixed fuels	http://souslesens.org/iso19008/pbs/BABJD	ilap	Mixed Fuels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAJD
+ISO19008_COR	Mixers/agitators	http://souslesens.org/iso19008/cor/ERCJ	ilap	Mixers/agitators	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCJ
+ISO19008_COR	Mobile cranes	http://souslesens.org/iso19008/cor/ERME	ilap	Mobile cranes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERME
+ISO19008_PBS	Mobile drilling rig	http://souslesens.org/iso19008/pbs/BFAB	ilap	Mobile Drilling Rig	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BFBB
+ISO19008_COR	Mobile fire extinguishers	http://souslesens.org/iso19008/cor/ESSP	ilap	Mobile fire extinguishers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSP
+ISO19008_PBS	Mobile fire fighting	http://souslesens.org/iso19008/pbs/BABLD	ilap	Mobile Fire Fighting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BALD
+ISO19008_SAB	Mobilisation	http://souslesens.org/iso19008/sab/441	ilap	Mobilisation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_441
+ISO19008_COR	Model building	http://souslesens.org/iso19008/cor/SFH	ilap	Model building	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SFH
+ISO19008_COR	Model tests	http://souslesens.org/iso19008/cor/RM	ilap	Model tests	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_RM
+ISO19008_SAB	Modification	http://souslesens.org/iso19008/sab/445	ilap	Modification	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_425
+ISO19008_COR	Molecular sieves	http://souslesens.org/iso19008/cor/ERCI	ilap	Molecular sieves	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCI
+ISO19008_COR	Mooring and marine equipment	http://souslesens.org/iso19008/cor/EV	ilap	Mooring and marine equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVY
+ISO19008_PBS	Mooring equipment	http://souslesens.org/iso19008/pbs/ABMCC	ilap	Mooring Equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABMCC
+ISO19008_PBS	Mooring items	http://souslesens.org/iso19008/pbs/ABKC	ilap	Mooring Items	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABKC
+ISO19008_PBS	Mooring items for positioning	http://souslesens.org/iso19008/pbs/ABLD	ilap	Mooring Items for Positioning	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABLD
+ISO19008_PBS	Mooring lines	http://souslesens.org/iso19008/pbs/ABLDA	ilap	Mooring Lines	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABMFA
+ISO19008_COR	Mooring lines	http://souslesens.org/iso19008/cor/EVYL	ilap	Mooring Lines	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABMFA
+ISO19008_PBS	Mooring winches	http://souslesens.org/iso19008/pbs/AAGC	ilap	Mooring Winches	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAGC
+ISO19008_COR	Mooring winches	http://souslesens.org/iso19008/cor/EVYJ	ilap	Mooring Winches	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAGC
+ISO19008_COR	Motor control centres	http://souslesens.org/iso19008/cor/EEEL	ilap	Motor control centres	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEL
+ISO19008_PBS	MTBE (methyl tertiary butyl ether)	http://souslesens.org/iso19008/pbs/BAAACJ	ilap	MTBE (Methyl Tertiary Butyl Ether)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCJ
+ISO19008_COR	Mud burner/mud burner package	http://souslesens.org/iso19008/cor/EDBF	ilap	Mud burner/mud burner package	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBF
+ISO19008_PBS	Mud handling	http://souslesens.org/iso19008/pbs/BEC	ilap	Mud Handling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BEC
+ISO19008_COR	Mud pits	http://souslesens.org/iso19008/cor/ERTF	ilap	Mud pits	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERTF
+ISO19008_COR	Mud pump package	http://souslesens.org/iso19008/cor/EDBK	ilap	Mud pump package	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBK
+ISO19008_PBS	Multicolumn deep floater	http://souslesens.org/iso19008/pbs/ABP	ilap	Multicolumn Deep Floater	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABP
+ISO19008_COR	Multidiscipline	http://souslesens.org/iso19008/cor/KZ	ilap	Multidiscipline	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KZ
+ISO19008_COR	Multi-flo conveyors	http://souslesens.org/iso19008/cor/ERNE	ilap	Multi-flo conveyors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNE
+ISO19008_COR	Multiphase metering package	http://souslesens.org/iso19008/cor/EJJJ	ilap	Multiphase metering package	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJJ
+ISO19008_COR	Multiplexer and network switch	http://souslesens.org/iso19008/cor/ETRM	ilap	Multiplexer and network switch	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRM
+ISO19008_PBS	Multi-well protection structure	http://souslesens.org/iso19008/pbs/ADAAE	ilap	Multi-Well Protection Structure	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADAAE
+ISO19008_COR	Navigation, positioning and distance measuring equipment	http://souslesens.org/iso19008/cor/ETRN	ilap	Navigation, positioning and distance measuring equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRN
+ISO19008_COR	Nitrogen generation packages	http://souslesens.org/iso19008/cor/ERXU	ilap	Nitrogen generation packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERXU
+ISO19008_PBS	Nodes	http://souslesens.org/iso19008/pbs/ABLAC	ilap	Nodes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABLAC
+ISO19008_COR	Non-regenerative filters	http://souslesens.org/iso19008/cor/ERCB	ilap	Non-regenerative filters	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCB
+ISO19008_PBS	NOx removal	http://souslesens.org/iso19008/pbs/BAAFD	ilap	Nox Removal	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BTD
+ISO19008_COR	Office administration	http://souslesens.org/iso19008/cor/QA	ilap	Office administration	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_QA
+ISO19008_PBS	Office buildings	http://souslesens.org/iso19008/pbs/BGC	ilap	Office Buildings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BGC
+ISO19008_COR	Office expenses	http://souslesens.org/iso19008/cor/CAC	ilap	Office expenses	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_QD
+ISO19008_COR	Office facilities	http://souslesens.org/iso19008/cor/QB	ilap	Office facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_QB
+ISO19008_COR	Office intercommunication system equipment	http://souslesens.org/iso19008/cor/ETRH	ilap	Office intercommunication system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRH
+ISO19008_COR	Office supplies and stationery	http://souslesens.org/iso19008/cor/QDC	ilap	Office supplies and stationery	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_RDC
+ISO19008_SAB	Offshore construction	http://souslesens.org/iso19008/sab/44	ilap	Offshore construction	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_44
+ISO19008_PBS	Offshore subsea storage system	http://souslesens.org/iso19008/pbs/AED	ilap	Offshore Subsea Storage System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AED
+ISO19008_PBS	Offshore surface storage system	http://souslesens.org/iso19008/pbs/AEC	ilap	Offshore Surface Storage System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEC
+ISO19008_PBS	Offshore wind park	http://souslesens.org/iso19008/pbs/AW	ilap	Offshore Wind Park	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AW
+ISO19008_COR	Oil metering package	http://souslesens.org/iso19008/cor/EJJH	ilap	Oil metering package	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJH
+ISO19008_PBS	Oil producer	http://souslesens.org/iso19008/pbs/ACBA	ilap	Oil Producer	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACBA
+ISO19008_COR	Oily water treatment packages	http://souslesens.org/iso19008/cor/ERXA	ilap	Oily water treatment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERXA
+ISO19008_SAB	Onshore construction	http://souslesens.org/iso19008/sab/41	ilap	Onshore construction	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_41
+ISO19008_COR	Onshore pipelaying	http://souslesens.org/iso19008/cor/SCA	ilap	Onshore pipelaying	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SCA
+ISO19008_COR	Onshore pipeline crossings	http://souslesens.org/iso19008/cor/SCF	ilap	Onshore pipeline crossings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SCF
+ISO19008_COR	Onshore pipeline direct labour	http://souslesens.org/iso19008/cor/LY	ilap	Onshore pipeline direct labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LY
+ISO19008_PBS	Onshore wells	http://souslesens.org/iso19008/pbs/BF	ilap	Onshore Wells	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BF
+ISO19008_PBS	Open air storage	http://souslesens.org/iso19008/pbs/BACACC	ilap	Open Air Storage	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBACC
+ISO19008_PBS	Open hole completion	http://souslesens.org/iso19008/pbs/ACCBC	ilap	Open Hole Completion	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACCBC
+ISO19008_PBS	Open truss	http://souslesens.org/iso19008/pbs/AAHA	ilap	Open Truss	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAHA
+ISO19008_COR	Operation and maintenance	http://souslesens.org/iso19008/cor/KO	ilap	Operation and maintenance	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KO
+ISO19008_PBS	Other	http://souslesens.org/iso19008/pbs/AECBG	ilap	Other	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABMBG
+ISO19008_COR	Other	http://souslesens.org/iso19008/cor/YZZ	ilap	Other	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABMBG
+ISO19008_COR	Other architectural and building bulk	http://souslesens.org/iso19008/cor/BCZ	ilap	Other architectural and building bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BCZ
+ISO19008_COR	Other architectural equipment	http://souslesens.org/iso19008/cor/EAAZ	ilap	Other architectural equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EAAZ
+ISO19008_PBS	Other building facilities	http://souslesens.org/iso19008/pbs/BCBE	ilap	Other Building Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BCBE
+ISO19008_PBS	Other chemical injection facilities	http://souslesens.org/iso19008/pbs/BABHD	ilap	Other Chemical Injection Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAHD
+ISO19008_COR	Other civil works bulk	http://souslesens.org/iso19008/cor/BQZ	ilap	Other civil works bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BQZ
+ISO19008_COR	Other compressors, blowers and expanders	http://souslesens.org/iso19008/cor/ERKZ	ilap	Other compressors, blowers and expanders	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERKZ
+ISO19008_COR	Other construction overheads	http://souslesens.org/iso19008/cor/CZ	ilap	Other construction overheads	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CZ
+ISO19008_PBS	Other deck appurtenances	http://souslesens.org/iso19008/pbs/AAGD	ilap	Other Deck Appurtenances	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAGD
+ISO19008_COR	Other direct labour	http://souslesens.org/iso19008/cor/LZ	ilap	Other direct labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LZ
+ISO19008_COR	Other drilling bulk	http://souslesens.org/iso19008/cor/BDZ	ilap	Other drilling bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BDZ
+ISO19008_COR	Other drilling equipment	http://souslesens.org/iso19008/cor/EDBZ	ilap	Other drilling equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBZ
+ISO19008_COR	Other drilling equipment packages	http://souslesens.org/iso19008/cor/EDBX	ilap	Other drilling equipment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBX
+ISO19008_COR	Other drivers	http://souslesens.org/iso19008/cor/ERDZ	ilap	Other drivers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERDZ
+ISO19008_COR	Other electrical bulk	http://souslesens.org/iso19008/cor/BEZ	ilap	Other electrical bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BEZ
+ISO19008_COR	Other electrical equipment	http://souslesens.org/iso19008/cor/EEEZ	ilap	Other electrical equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEZ
+ISO19008_COR	Other electrical equipment packages	http://souslesens.org/iso19008/cor/EEEX	ilap	Other electrical equipment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEX
+ISO19008_COR	Other engineering overheads	http://souslesens.org/iso19008/cor/RZ	ilap	Other engineering overheads	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_RZ
+ISO19008_SAB	Other fabrication activities	http://souslesens.org/iso19008/sab/434	ilap	Other fabrication activities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_424
+ISO19008_COR	Other general costs	http://souslesens.org/iso19008/cor/AZ	ilap	Other general costs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AZ
+ISO19008_COR	Other heat transfer equipment	http://souslesens.org/iso19008/cor/ERHZ	ilap	Other heat transfer equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERHZ
+ISO19008_COR	Other heat transfer equipment packages	http://souslesens.org/iso19008/cor/ERHX	ilap	Other heat transfer equipment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERHX
+ISO19008_COR	Other heater, furnace and boiler packages	http://souslesens.org/iso19008/cor/ERFX	ilap	Other heater, furnace and boiler packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERFX
+ISO19008_COR	Other heating, burning and boiling equipment	http://souslesens.org/iso19008/cor/ERFZ	ilap	Other heating, burning and boiling equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERFZ
+ISO19008_COR	Other HVAC bulk	http://souslesens.org/iso19008/cor/BHZ	ilap	Other HVAC bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BHZ
+ISO19008_COR	Other HVAC equipment	http://souslesens.org/iso19008/cor/EGGZ	ilap	Other HVAC equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EGGZ
+ISO19008_COR	Other HVAC packages	http://souslesens.org/iso19008/cor/EGGX	ilap	Other HVAC packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EGGX
+ISO19008_COR	Other indirect labour	http://souslesens.org/iso19008/cor/MZ	ilap	Other indirect labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_MZ
+ISO19008_COR	Other instrument equipment	http://souslesens.org/iso19008/cor/EJJZ	ilap	Other instrument equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJZ
+ISO19008_COR	Other instrument equipment packages	http://souslesens.org/iso19008/cor/EJJX	ilap	Other instrument equipment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJX
+ISO19008_PBS	Other jetties	http://souslesens.org/iso19008/pbs/BCCB	ilap	Other Jetties	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BCCB
+ISO19008_PBS	Other loading systems	http://souslesens.org/iso19008/pbs/AECCB	ilap	Other Loading Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AECCB
+ISO19008_COR	Other material and product handling equipment	http://souslesens.org/iso19008/cor/ERMZ	ilap	Other material and product handling equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMZ
+ISO19008_COR	Other material and product handling equipment packages	http://souslesens.org/iso19008/cor/ERMX	ilap	Other material and product handling equipment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMX
+ISO19008_COR	Other misc. equipment packages	http://souslesens.org/iso19008/cor/ERXX	ilap	Other misc. equipment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERXX
+ISO19008_COR	Other miscellanous mechanical equipment	http://souslesens.org/iso19008/cor/ERCZ	ilap	Other miscellanous mechanical equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCZ
+ISO19008_COR	Other mooring and marine equipment	http://souslesens.org/iso19008/cor/EVYZ	ilap	Other mooring and marine equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYZ
+ISO19008_COR	Other mooring and marine equipment packages	http://souslesens.org/iso19008/cor/EVYX	ilap	Other mooring and marine equipment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYX
+ISO19008_COR	Other pipeline bulk	http://souslesens.org/iso19008/cor/BYZ	ilap	Other pipeline bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BYZ
+ISO19008_COR	Other piping bulk	http://souslesens.org/iso19008/cor/BLZ	ilap	Other piping bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BLZ
+ISO19008_COR	Other pump packages	http://souslesens.org/iso19008/cor/ERPX	ilap	Other pump packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERPX
+ISO19008_COR	Other pumps	http://souslesens.org/iso19008/cor/ERPZ	ilap	Other pumps	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERPZ
+ISO19008_COR	Other safety, escape and firefighting equipment	http://souslesens.org/iso19008/cor/ESSZ	ilap	Other safety, escape and firefighting equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSZ
+ISO19008_COR	Other solids mechanical equipment	http://souslesens.org/iso19008/cor/ERNZ	ilap	Other solids mechanical equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNZ
+ISO19008_COR	Other structural bulk	http://souslesens.org/iso19008/cor/BNZ	ilap	Other structural bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BNZ
+ISO19008_COR	Other subsea equipment	http://souslesens.org/iso19008/cor/EUUZ	ilap	Other subsea equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUZ
+ISO19008_COR	Other subsea equipment packages	http://souslesens.org/iso19008/cor/EUUX	ilap	Other subsea equipment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUX
+ISO19008_COR	Other surface protection bulk	http://souslesens.org/iso19008/cor/BMZ	ilap	Other surface protection bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BMZ
+ISO19008_COR	Other tanks	http://souslesens.org/iso19008/cor/ERTZ	ilap	Other tanks	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERTZ
+ISO19008_COR	Other telecom equipment	http://souslesens.org/iso19008/cor/ETRZ	ilap	Other telecom equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRZ
+ISO19008_COR	Other telecom equipment packages	http://souslesens.org/iso19008/cor/ETRX	ilap	Other telecom equipment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRX
+ISO19008_COR	Other telecommunication bulk	http://souslesens.org/iso19008/cor/BTZ	ilap	Other telecommunication bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BTZ
+ISO19008_COR	Other transfer and control equipment	http://souslesens.org/iso19008/cor/EYZ	ilap	Other transfer and control equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYZ
+ISO19008_COR	Other transfer and control equipment packages	http://souslesens.org/iso19008/cor/EYX	ilap	Other transfer and control equipment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYX
+ISO19008_PBS	Other turrets	http://souslesens.org/iso19008/pbs/ABME	ilap	Other Turrets	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABME
+ISO19008_COR	Other unit work	http://souslesens.org/iso19008/cor/SZ	ilap	Other unit work	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SZ
+ISO19008_COR	Other vessels and columns	http://souslesens.org/iso19008/cor/ERVZ	ilap	Other vessels and columns	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVZ
+ISO19008_COR	Other vessels and equipment	http://souslesens.org/iso19008/cor/XZ	ilap	Other vessels and equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XZ
+ISO19008_COR	Other wellhead equipment	http://souslesens.org/iso19008/cor/EDWZ	ilap	Other wellhead equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWZ
+ISO19008_COR	Other wellhead equipment packages	http://souslesens.org/iso19008/cor/EDWX	ilap	Other wellhead equipment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWX
+ISO19008_PBS	Outfitting	http://souslesens.org/iso19008/pbs/ABMCB	ilap	Outfitting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAFB
+ISO19008_COR	Overhead cranes	http://souslesens.org/iso19008/cor/ERMF	ilap	Overhead cranes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMF
+ISO19008_PBS	Overhead power lines	http://souslesens.org/iso19008/pbs/BDBEB	ilap	Overhead Power Lines	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBEB
+ISO19008_COR	Oxygen generation packages	http://souslesens.org/iso19008/cor/ERXV	ilap	Oxygen generation packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERXV
+ISO19008_PBS	Oxygen production	http://souslesens.org/iso19008/pbs/BAADB	ilap	Oxygen Production	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BNB
+ISO19008_COR	Oxygen units	http://souslesens.org/iso19008/cor/ERVT	ilap	Oxygen units	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVT
+ISO19008_COR	Packing, calibrating and measurement equipment	http://souslesens.org/iso19008/cor/ERMQ	ilap	Packing, calibrating and measurement equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMQ
+ISO19008_COR	Paint	http://souslesens.org/iso19008/cor/BMA	ilap	Paint	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BMA
+ISO19008_SAB	Particular abandonment operations	http://souslesens.org/iso19008/sab/528	ilap	Particular abandonment operations	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_528
+ISO19008_COR	Particular onshore building materials	http://souslesens.org/iso19008/cor/BCM	ilap	Particular onshore building materials	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BCM
+ISO19008_COR	Passive fire protection	http://souslesens.org/iso19008/cor/BSA	ilap	Passive fire protection	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BSA
+ISO19008_COR	Patented process licences	http://souslesens.org/iso19008/cor/AAD	ilap	Patented process licences	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AAD
+ISO19008_COR	Pedestal cranes	http://souslesens.org/iso19008/cor/ERMA	ilap	Pedestal cranes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMA
+ISO19008_COR	Personnel expenses	http://souslesens.org/iso19008/cor/CAD	ilap	Personnel expenses	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CAD
+ISO19008_COR	Personnel registration/paging/tracking system equipment	http://souslesens.org/iso19008/cor/ETRV	ilap	Personnel registration/paging/tracking system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRV
+ISO19008_COR	Personnel related costs	http://souslesens.org/iso19008/cor/AF	ilap	Personnel related costs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AF
+ISO19008_SAB	Personnel transport	http://souslesens.org/iso19008/sab/533	ilap	Personnel transport	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_533
+ISO19008_COR	Pick-up boats and davits	http://souslesens.org/iso19008/cor/ESSB	ilap	Pick-up boats and davits	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSB
+ISO19008_COR	Pig launchers/pig receivers	http://souslesens.org/iso19008/cor/EYAB	ilap	Pig launchers/pig receivers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYAB
+ISO19008_PBS	Pig station	http://souslesens.org/iso19008/pbs/BDAGB	ilap	Pig Station	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAGB
+ISO19008_COR	Pigging facilities	http://souslesens.org/iso19008/cor/EUUI	ilap	Pigging facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUI
+ISO19008_COR	Pile driving equipment	http://souslesens.org/iso19008/cor/YQ	ilap	Pile driving equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XN
+ISO19008_COR	Pile driving/piling	http://souslesens.org/iso19008/cor/SAC	ilap	Pile driving/piling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SAC
+ISO19008_PBS	Pile guides	http://souslesens.org/iso19008/pbs/ABAAE	ilap	Pile Guides	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABDAE
+ISO19008_PBS	Pile sleeves/mudmats	http://souslesens.org/iso19008/pbs/ABDAD	ilap	Pile Sleeves/Mudmats	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABAAD
+ISO19008_PBS	Piles	http://souslesens.org/iso19008/pbs/ABAD	ilap	Piles	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABAD
+ISO19008_COR	Piles	http://souslesens.org/iso19008/cor/BQE	ilap	Piles	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABAD
+ISO19008_SAB	Piling	http://souslesens.org/iso19008/sab/5232	ilap	Piling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5232
+ISO19008_COR	Piling vessels/barges	http://souslesens.org/iso19008/cor/XM	ilap	Piling vessels/barges	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XM
+ISO19008_PBS	Pipe handling	http://souslesens.org/iso19008/pbs/AAAC	ilap	Pipe Handling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BED
+ISO19008_COR	Pipe handling equipment	http://souslesens.org/iso19008/cor/EDBC	ilap	Pipe handling equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBC
+ISO19008_SAB	Pipelaying	http://souslesens.org/iso19008/sab/5133	ilap	Pipelaying	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5241
+ISO19008_COR	Pipelaying spread	http://souslesens.org/iso19008/cor/XXB	ilap	Pipelaying spread	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XXB
+ISO19008_PBS	Pipeline	http://souslesens.org/iso19008/pbs/BDAC	ilap	Pipeline	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYCA
+ISO19008_COR	Pipeline	http://souslesens.org/iso19008/cor/EYCA	ilap	Pipeline	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYCA
+ISO19008_COR	Pipeline accessories	http://souslesens.org/iso19008/cor/BYC	ilap	Pipeline accessories	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BYC
+ISO19008_COR	Pipeline bulk	http://souslesens.org/iso19008/cor/BY	ilap	Pipeline bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BY
+ISO19008_COR	Pipeline coating	http://souslesens.org/iso19008/cor/SCB	ilap	Pipeline coating	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SCB
+ISO19008_PBS	Pipeline crossing	http://souslesens.org/iso19008/pbs/AEGDB	ilap	Pipeline Crossing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEADB
+ISO19008_COR	Pipeline heating	http://souslesens.org/iso19008/cor/SCD	ilap	Pipeline heating	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SCD
+ISO19008_COR	Pipeline inspection tools	http://souslesens.org/iso19008/cor/EYAG	ilap	Pipeline inspection tools	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYAG
+ISO19008_COR	Pipeline insulation	http://souslesens.org/iso19008/cor/SCC	ilap	Pipeline insulation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SCC
+ISO19008_SAB	Pipeline operations	http://souslesens.org/iso19008/sab/524	ilap	Pipeline operations	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_513
+ISO19008_PBS	Pipeline protection	http://souslesens.org/iso19008/pbs/ADKD	ilap	Pipeline Protection	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADKD
+ISO19008_COR	Pipeline repair system	http://souslesens.org/iso19008/cor/EYAH	ilap	Pipeline repair system	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYAH
+ISO19008_COR	Pipeline RFO	http://souslesens.org/iso19008/cor/SCH	ilap	Pipeline RFO	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SCH
+ISO19008_PBS	Pipeline systems	http://souslesens.org/iso19008/pbs/AEA	ilap	Pipeline Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEA
+ISO19008_PBS	Pipelines	http://souslesens.org/iso19008/pbs/ADKA	ilap	Pipelines	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KY
+ISO19008_COR	Pipelines	http://souslesens.org/iso19008/cor/KY	ilap	Pipelines	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KY
+ISO19008_PBS	Piperacks/pipetracks	http://souslesens.org/iso19008/pbs/BDAFF	ilap	Piperacks/Pipetracks	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAFF
+ISO19008_PBS	Pipeways	http://souslesens.org/iso19008/pbs/BACDA	ilap	Pipeways	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBDA
+ISO19008_PBS	Pipeways flare systems	http://souslesens.org/iso19008/pbs/BACDAB	ilap	Pipeways Flare Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBDAB
+ISO19008_PBS	Pipeways product	http://souslesens.org/iso19008/pbs/BACDAA	ilap	Pipeways Product	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBDAA
+ISO19008_COR	Pipework	http://souslesens.org/iso19008/cor/BLA	ilap	Pipework	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BLA
+ISO19008_COR	Piping	http://souslesens.org/iso19008/cor/KL	ilap	Piping	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KL
+ISO19008_COR	Piping bulk	http://souslesens.org/iso19008/cor/BL	ilap	Piping bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BL
+ISO19008_COR	Piping direct labour	http://souslesens.org/iso19008/cor/LL	ilap	Piping direct labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LL
+ISO19008_COR	Planning and scheduling	http://souslesens.org/iso19008/cor/HDC	ilap	Planning and scheduling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HDC
+ISO19008_PBS	Plant air	http://souslesens.org/iso19008/pbs/BABIB	ilap	Plant Air	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAIB
+ISO19008_PBS	Plant lighting system	http://souslesens.org/iso19008/pbs/BABAF	ilap	Plant Lighting System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAAF
+ISO19008_COR	Plate heat exchangers	http://souslesens.org/iso19008/cor/ERHB	ilap	Plate heat exchangers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERHB
+ISO19008_PBS	Plated/plate girder	http://souslesens.org/iso19008/pbs/AAHB	ilap	Plated/Plate Girder	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AAHB
+ISO19008_PBS	Platform utilities	http://souslesens.org/iso19008/pbs/AACD	ilap	Platform Utilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AACD
+ISO19008_PBS	Pontoons	http://souslesens.org/iso19008/pbs/ABLAB	ilap	Pontoons	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABKAB
+ISO19008_PBS	Potable water system	http://souslesens.org/iso19008/pbs/BABEC	ilap	Potable Water System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAEC
+ISO19008_COR	Potable water treatment packages	http://souslesens.org/iso19008/cor/ERXE	ilap	Potable water treatment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERXE
+ISO19008_COR	Power cables	http://souslesens.org/iso19008/cor/EYEB	ilap	Power cables	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYEB
+ISO19008_PBS	Power cables for overseas supply/import	http://souslesens.org/iso19008/pbs/AEH	ilap	Power Cables for Overseas Supply/Import	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEH
+ISO19008_PBS	Power equipment	http://souslesens.org/iso19008/pbs/ADDG	ilap	Power Equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADDG
+ISO19008_PBS	Power plant	http://souslesens.org/iso19008/pbs/BAAFC	ilap	Power Plant	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BTC
+ISO19008_PBS	Power pylons/poles	http://souslesens.org/iso19008/pbs/BDDC	ilap	Power Pylons/Poles	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDDC
+ISO19008_COR	Precast concrete elements	http://souslesens.org/iso19008/cor/BQC	ilap	Precast concrete elements	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BQC
+ISO19008_PBS	Precooling step	http://souslesens.org/iso19008/pbs/BAAADA	ilap	Precooling Step	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKDA
+ISO19008_COR	Prefabricated modules	http://souslesens.org/iso19008/cor/BCH	ilap	Prefabricated modules	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BCH
+ISO19008_SAB	Prefabrication	http://souslesens.org/iso19008/sab/4431	ilap	Prefabrication	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_4441
+ISO19008_PBS	Pretreatment	http://souslesens.org/iso19008/pbs/BAAFEA	ilap	Pretreatment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BTEA
+ISO19008_PBS	Pretreatment facilities	http://souslesens.org/iso19008/pbs/BAAAAB	ilap	Pretreatment Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKAB
+ISO19008_COR	Primary, secondary and outfitting structures	http://souslesens.org/iso19008/cor/BNA	ilap	Primary, secondary and outfitting structures	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BNA
+ISO19008_PBS	Process	http://souslesens.org/iso19008/pbs/BAA	ilap	Process	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AACA
+ISO19008_COR	Process	http://souslesens.org/iso19008/cor/KP	ilap	Process	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AACA
+ISO19008_PBS	Process support	http://souslesens.org/iso19008/pbs/AACB	ilap	Process Support	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AACB
+ISO19008_COR	Procurement	http://souslesens.org/iso19008/cor/HC	ilap	Procurement	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_22
+ISO19008_SAB	Procurement	http://souslesens.org/iso19008/sab/22	ilap	Procurement	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_22
+ISO19008_PBS	Product jetties	http://souslesens.org/iso19008/pbs/BCCA	ilap	Product Jetties	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BCCA
+ISO19008_PBS	Product loading	http://souslesens.org/iso19008/pbs/BACC	ilap	Product Loading	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBC
+ISO19008_COR	Product loading and vapour return arms	http://souslesens.org/iso19008/cor/ERMU	ilap	Product loading and vapour return arms	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMU
+ISO19008_PBS	Product metering	http://souslesens.org/iso19008/pbs/BACB	ilap	Product Metering	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBB
+ISO19008_PBS	Product purification	http://souslesens.org/iso19008/pbs/BAACAD	ilap	Product Purification	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BMAD
+ISO19008_PBS	Product storage	http://souslesens.org/iso19008/pbs/BACA	ilap	Product Storage	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBA
+ISO19008_PBS	Product treatment	http://souslesens.org/iso19008/pbs/BAAABB	ilap	Product Treatment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKBB
+ISO19008_COR	Production fees, royalties and costs	http://souslesens.org/iso19008/cor/AHB	ilap	Production fees, royalties and costs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AHB
+ISO19008_PBS	Production risers	http://souslesens.org/iso19008/pbs/ABLEA	ilap	Production Risers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABDFA
+ISO19008_COR	Production risers	http://souslesens.org/iso19008/cor/EYBA	ilap	Production Risers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABDFA
+ISO19008_PBS	Production station	http://souslesens.org/iso19008/pbs/ADA	ilap	Production Station	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADA
+ISO19008_PBS	Production/trunk line	http://souslesens.org/iso19008/pbs/AEAAA	ilap	Production/Trunk Line	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAEA
+ISO19008_COR	Project administration	http://souslesens.org/iso19008/cor/HB	ilap	Project administration	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HB
+ISO19008_COR	Project control	http://souslesens.org/iso19008/cor/HD	ilap	Project control	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HD
+ISO19008_COR	Project management	http://souslesens.org/iso19008/cor/HA	ilap	Project management	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HA
+ISO19008_SAB	Project management	http://souslesens.org/iso19008/sab/11	ilap	Project management	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HA
+ISO19008_COR	Project managers	http://souslesens.org/iso19008/cor/HAA	ilap	Project managers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HAA
+ISO19008_COR	Project reserve	http://souslesens.org/iso19008/cor/AW	ilap	Project reserve	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AW
+ISO19008_PBS	Propulsion/DP system	http://souslesens.org/iso19008/pbs/ABLBE	ilap	Propulsion/DP System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABLBE
+ISO19008_COR	Protection structure	http://souslesens.org/iso19008/cor/EUUF	ilap	Protection structure	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUF
+ISO19008_COR	Public address and alarm system equipment	http://souslesens.org/iso19008/cor/ETRA	ilap	Public address and alarm system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRA
+ISO19008_SAB	Pull-in and connection	http://souslesens.org/iso19008/sab/5252	ilap	Pull-in and connection	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5252
+ISO19008_COR	Pull-in and connection equipment	http://souslesens.org/iso19008/cor/EUUG	ilap	Pull-in and connection equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUG
+ISO19008_PBS	Pumping equipment	http://souslesens.org/iso19008/pbs/ADDC	ilap	Pumping Equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADDC
+ISO19008_COR	Pumps	http://souslesens.org/iso19008/cor/ERP	ilap	Pumps	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERP
+ISO19008_COR	Purchases and rentals	http://souslesens.org/iso19008/cor/AD	ilap	Purchases and rentals	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AD
+ISO19008_COR	Purchasing	http://souslesens.org/iso19008/cor/HCB	ilap	Purchasing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HCB
+ISO19008_COR	Quality assurance	http://souslesens.org/iso19008/cor/HAB	ilap	Quality assurance	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HAB
+ISO19008_COR	Quality control	http://souslesens.org/iso19008/cor/MB	ilap	Quality control	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_MB
+ISO19008_PBS	Quarry	http://souslesens.org/iso19008/pbs/BDBAA	ilap	Quarry	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDCAA
+ISO19008_COR	Quench coolers	http://souslesens.org/iso19008/cor/ERHD	ilap	Quench coolers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERHD
+ISO19008_COR	Radar system equipment, marine and aviation	http://souslesens.org/iso19008/cor/ETRR	ilap	Radar system equipment, marine and aviation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRR
+ISO19008_PBS	Radio communication system	http://souslesens.org/iso19008/pbs/BABCC	ilap	Radio Communication System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BACC
+ISO19008_COR	Rafts	http://souslesens.org/iso19008/cor/ESSW	ilap	Rafts	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSW
+ISO19008_PBS	Rail crossing	http://souslesens.org/iso19008/pbs/BDAFB	ilap	Rail Crossing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDDFB
+ISO19008_COR	Railroad and road loading equipment	http://souslesens.org/iso19008/cor/ERMG	ilap	Railroad and road loading equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMG
+ISO19008_PBS	Railway	http://souslesens.org/iso19008/pbs/BDB	ilap	Railway	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDB
+ISO19008_PBS	Railway utilities	http://souslesens.org/iso19008/pbs/BDBE	ilap	Railway Utilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBE
+ISO19008_COR	Railways	http://souslesens.org/iso19008/cor/SBG	ilap	Railways	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SBG
+ISO19008_PBS	Ravine crossing	http://souslesens.org/iso19008/pbs/BDAFE	ilap	Ravine Crossing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAFE
+ISO19008_COR	Reactors	http://souslesens.org/iso19008/cor/ERVF	ilap	Reactors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVF
+ISO19008_COR	Reboilers/evaporators	http://souslesens.org/iso19008/cor/ERHI	ilap	Reboilers/evaporators	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERHI
+ISO19008_PBS	Receiving facilities	http://souslesens.org/iso19008/pbs/BAAFA	ilap	Receiving Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDCBE
+ISO19008_PBS	Receiving facilities/feed gas treatment	http://souslesens.org/iso19008/pbs/BAADA	ilap	Receiving Facilities/Feed Gas Treatment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BNA
+ISO19008_COR	Reciprocating compressors	http://souslesens.org/iso19008/cor/ERKB	ilap	Reciprocating compressors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERKB
+ISO19008_COR	Reciprocating pumps	http://souslesens.org/iso19008/cor/ERPB	ilap	Reciprocating pumps	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERPB
+ISO19008_COR	Rectifiers and inverters	http://souslesens.org/iso19008/cor/EEER	ilap	Rectifiers and inverters	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEER
+ISO19008_SAB	Refitting	http://souslesens.org/iso19008/sab/4452	ilap	Refitting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_4452
+ISO19008_PBS	Refrigerant make-up	http://souslesens.org/iso19008/pbs/BAAADE	ilap	Refrigerant Make-up	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKDE
+ISO19008_PBS	Refrigerant Make-up	http://souslesens.org/iso19008/pbs/AACAEF	ilap	Refrigerant Make-up	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKDE
+ISO19008_COR	Refrigerated storage tanks	http://souslesens.org/iso19008/cor/ERTR	ilap	Refrigerated storage tanks	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERTR
+ISO19008_COR	Refrigeration and freezing system equipment	http://souslesens.org/iso19008/cor/EAAR	ilap	Refrigeration and freezing system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EAAR
+ISO19008_COR	Regenerative filters	http://souslesens.org/iso19008/cor/ERCA	ilap	Regenerative filters	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCA
+ISO19008_COR	Regenerators	http://souslesens.org/iso19008/cor/ERVC	ilap	Regenerators	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVC
+ISO19008_COR	Reinforcement bars/rods and pre-stressing cables	http://souslesens.org/iso19008/cor/BQB	ilap	Reinforcement bars/rods and pre-stressing cables	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BQB
+ISO19008_SAB	Relocate	http://souslesens.org/iso19008/sab/4354	ilap	Relocate	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_4154
+ISO19008_COR	Relocation expenses and living allowances	http://souslesens.org/iso19008/cor/QEB	ilap	Relocation expenses and living allowances	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_QEB
+ISO19008_PBS	Remote control of other facilities	http://souslesens.org/iso19008/pbs/BHG	ilap	Remote Control of Other Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BCDF
+ISO19008_COR	Remote operated foam monitors	http://souslesens.org/iso19008/cor/ESSN	ilap	Remote operated foam monitors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESSN
+ISO19008_SAB	Removal/lifting	http://souslesens.org/iso19008/sab/5283	ilap	Removal/lifting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5283
+ISO19008_COR	Reporting	http://souslesens.org/iso19008/cor/HDD	ilap	Reporting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HDD
+ISO19008_COR	Representation	http://souslesens.org/iso19008/cor/RFA	ilap	Representation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_QFA
+ISO19008_COR	Reproduction	http://souslesens.org/iso19008/cor/QDA	ilap	Reproduction	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_RDA
+ISO19008_COR	Research and development	http://souslesens.org/iso19008/cor/AJ	ilap	Research and development	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AJ
+ISO19008_COR	Reservoir	http://souslesens.org/iso19008/cor/KF	ilap	Reservoir	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KF
+ISO19008_PBS	Restoration	http://souslesens.org/iso19008/pbs/BDCAF	ilap	Restoration	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBAF
+ISO19008_SAB	Revamp	http://souslesens.org/iso19008/sab/4353	ilap	Revamp	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_4353
+ISO19008_COR	Reversible impactors	http://souslesens.org/iso19008/cor/ERNL	ilap	Reversible impactors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNL
+ISO19008_SAB	RFO	http://souslesens.org/iso19008/sab/5244	ilap	RFO	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5244
+ISO19008_PBS	Riegel	http://souslesens.org/iso19008/pbs/ABBAJ	ilap	Riegel	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBAI
+ISO19008_COR	Rigging	http://souslesens.org/iso19008/cor/MF	ilap	Rigging	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_MF
+ISO19008_COR	Rigid line pipe	http://souslesens.org/iso19008/cor/BYA	ilap	Rigid line pipe	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BYA
+ISO19008_PBS	Rigid risers	http://souslesens.org/iso19008/pbs/ABQE	ilap	Rigid Risers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABCE
+ISO19008_PBS	Riser area	http://souslesens.org/iso19008/pbs/AABB	ilap	Riser Area	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AABB
+ISO19008_PBS	Riser base	http://souslesens.org/iso19008/pbs/ADKG	ilap	Riser Base	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADKG
+ISO19008_PBS	Riser bases	http://souslesens.org/iso19008/pbs/AEAF	ilap	Riser Bases	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAF
+ISO19008_PBS	Risers	http://souslesens.org/iso19008/pbs/ADLD	ilap	Risers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEGB
+ISO19008_COR	Risers	http://souslesens.org/iso19008/cor/EYCC	ilap	Risers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEGB
+ISO19008_PBS	Risers/J-tubes	http://souslesens.org/iso19008/pbs/ABBC	ilap	Risers/J-Tubes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBC
+ISO19008_PBS	River crossing	http://souslesens.org/iso19008/pbs/BDAFC	ilap	River Crossing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAFC
+ISO19008_PBS	River/fjord crossings	http://souslesens.org/iso19008/pbs/BDBBA	ilap	River/Fjord Crossings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBBA
+ISO19008_PBS	Road completion	http://souslesens.org/iso19008/pbs/BDCC	ilap	Road Completion	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDCC
+ISO19008_PBS	Road crossing	http://souslesens.org/iso19008/pbs/BDDFA	ilap	Road Crossing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAFA
+ISO19008_PBS	Road crossings	http://souslesens.org/iso19008/pbs/BDBBB	ilap	Road Crossings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBBB
+ISO19008_PBS	Roads	http://souslesens.org/iso19008/pbs/BDC	ilap	Roads	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SBB
+ISO19008_COR	Roads	http://souslesens.org/iso19008/cor/SBB	ilap	Roads	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SBB
+ISO19008_SAB	Rock dumping	http://souslesens.org/iso19008/sab/5224	ilap	Rock dumping	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5224
+ISO19008_COR	Rod and ball mills	http://souslesens.org/iso19008/cor/ERNN	ilap	Rod and ball mills	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNN
+ISO19008_COR	Roll crushers	http://souslesens.org/iso19008/cor/ERNM	ilap	Roll crushers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNM
+ISO19008_PBS	Rolling stock operation facilities	http://souslesens.org/iso19008/pbs/BDBD	ilap	Rolling Stock Operation Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBD
+ISO19008_COR	Rotary pumps	http://souslesens.org/iso19008/cor/ERPC	ilap	Rotary pumps	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERPC
+ISO19008_SAB	Route preparation	http://souslesens.org/iso19008/sab/5141	ilap	Route Preparation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDDA
+ISO19008_SAB	Route restoration	http://souslesens.org/iso19008/sab/5144	ilap	Route Restoration	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDDE
+ISO19008_COR	ROV/ROMV and tools	http://souslesens.org/iso19008/cor/EUUS	ilap	ROV/ROMV and tools	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUS
+ISO19008_COR	Safety	http://souslesens.org/iso19008/cor/MK	ilap	Safety	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_MK
+ISO19008_COR	Safety appliances	http://souslesens.org/iso19008/cor/BSB	ilap	Safety appliances	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BSB
+ISO19008_COR	Safety bulk	http://souslesens.org/iso19008/cor/BS	ilap	Safety bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BS
+ISO19008_COR	Safety direct labour	http://souslesens.org/iso19008/cor/LS	ilap	Safety direct labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LS
+ISO19008_PBS	Safety systems	http://souslesens.org/iso19008/pbs/BDCCE	ilap	Safety Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDCCE
+ISO19008_COR	Safety/escape and firefighting equipment	http://souslesens.org/iso19008/cor/ES	ilap	Safety/escape and firefighting equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ESS
+ISO19008_COR	Sales and marketing	http://souslesens.org/iso19008/cor/AHA	ilap	Sales and marketing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AHA
+ISO19008_COR	Sanitary piping and components (plumbing)	http://souslesens.org/iso19008/cor/BHE	ilap	Sanitary piping and components (plumbing)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BHE
+ISO19008_COR	Satellite and fibre-optical communication system equipment	http://souslesens.org/iso19008/cor/ETRS	ilap	Satellite and fibre-optical communication system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRS
+ISO19008_COR	Scaffolding	http://souslesens.org/iso19008/cor/SFG	ilap	Scaffolding	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_MC
+ISO19008_COR	Scraper pigs	http://souslesens.org/iso19008/cor/EYAF	ilap	Scraper pigs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYAF
+ISO19008_COR	Screw pumps	http://souslesens.org/iso19008/cor/ERPG	ilap	Screw pumps	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERPG
+ISO19008_COR	Screw/rotary compressors	http://souslesens.org/iso19008/cor/ERKC	ilap	Screw/rotary compressors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERKC
+ISO19008_COR	Scrubbers	http://souslesens.org/iso19008/cor/ERVG	ilap	Scrubbers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVG
+ISO19008_SAB	Seabed preparation	http://souslesens.org/iso19008/sab/522	ilap	Seabed preparation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_522
+ISO19008_COR	Seal rings/seals	http://souslesens.org/iso19008/cor/EDWJ	ilap	Seal rings/seals	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWJ
+ISO19008_COR	Sealing pigs	http://souslesens.org/iso19008/cor/EYAD	ilap	Sealing pigs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYAD
+ISO19008_PBS	Seawater cooling	http://souslesens.org/iso19008/pbs/BABDA	ilap	Seawater Cooling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BADA
+ISO19008_COR	Security	http://souslesens.org/iso19008/cor/AFB	ilap	Security	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AFB
+ISO19008_PBS	Separation	http://souslesens.org/iso19008/pbs/BAAFEB	ilap	Separation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BTEB
+ISO19008_PBS	Separation equipment	http://souslesens.org/iso19008/pbs/ADDB	ilap	Separation Equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADDB
+ISO19008_PBS	Separation facilities	http://souslesens.org/iso19008/pbs/BAAAAC	ilap	Separation Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKAC
+ISO19008_COR	Separators	http://souslesens.org/iso19008/cor/ERVA	ilap	Separators	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVA
+ISO19008_COR	Service to company	http://souslesens.org/iso19008/cor/CC	ilap	Service to company	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CC
+ISO19008_COR	Settling tanks, knock-out drums and flash drums	http://souslesens.org/iso19008/cor/ERVD	ilap	Settling tanks, knock-out drums and flash drums	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVD
+ISO19008_COR	Sewage/waste water treatment packages	http://souslesens.org/iso19008/cor/ERXF	ilap	Sewage/waste water treatment packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERXF
+ISO19008_PBS	Shafts	http://souslesens.org/iso19008/pbs/ABBAF	ilap	Shafts	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBAF
+ISO19008_COR	Shell and tube heat exchangers	http://souslesens.org/iso19008/cor/ERHA	ilap	Shell and tube heat exchangers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERHA
+ISO19008_PBS	Ship common systems	http://souslesens.org/iso19008/pbs/ABNBF	ilap	Ship Common Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABMBF
+ISO19008_PBS	Ship equipment	http://souslesens.org/iso19008/pbs/AECBB	ilap	Ship Equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABMBB
+ISO19008_PBS	Ship outfitting	http://souslesens.org/iso19008/pbs/AECB	ilap	Ship Outfitting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABNB
+ISO19008_PBS	Ship type substructure (monohull)	http://souslesens.org/iso19008/pbs/ABM	ilap	Ship Type Substructure (Monohull)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABM
+ISO19008_PBS	Shore approach	http://souslesens.org/iso19008/pbs/AEHD	ilap	Shore Approach	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADLL
+ISO19008_PBS	Shore improvements	http://souslesens.org/iso19008/pbs/BCCC	ilap	Shore Improvements	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BCCC
+ISO19008_COR	Signal buoys	http://souslesens.org/iso19008/cor/EVYQ	ilap	Signal buoys	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYQ
+ISO19008_PBS	Signals/control systems	http://souslesens.org/iso19008/pbs/BDBCC	ilap	Signals/Control Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBCC
+ISO19008_PBS	Signals/signs	http://souslesens.org/iso19008/pbs/BDCCD	ilap	Signals/Signs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDCCD
+ISO19008_COR	Signs	http://souslesens.org/iso19008/cor/BCF	ilap	Signs	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BCF
+ISO19008_PBS	Silo/container storage	http://souslesens.org/iso19008/pbs/BACACB	ilap	Silo/Container Storage	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBACB
+ISO19008_PBS	Single column deep floater	http://souslesens.org/iso19008/pbs/ABQ	ilap	Single Column Deep Floater	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABQ
+ISO19008_PBS	Single line	http://souslesens.org/iso19008/pbs/ADKAA	ilap	Single Line	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADKAA
+ISO19008_PBS	Single satellite protection structure	http://souslesens.org/iso19008/pbs/ADAAF	ilap	Single Satellite Protection Structure	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADAAF
+ISO19008_COR	Site facilities	http://souslesens.org/iso19008/cor/CB	ilap	Site facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CB
+ISO19008_COR	Site preparation	http://souslesens.org/iso19008/cor/SAA	ilap	Site preparation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SAA
+ISO19008_COR	Site services	http://souslesens.org/iso19008/cor/SDD	ilap	Site services	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SDD
+ISO19008_COR	Skid jacks	http://souslesens.org/iso19008/cor/EDBM	ilap	Skid jacks	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBM
+ISO19008_PBS	Skirts	http://souslesens.org/iso19008/pbs/ABBAA	ilap	Skirts	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBAA
+ISO19008_COR	Slug catcher	http://souslesens.org/iso19008/cor/EYAA	ilap	Slug catcher	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYAA
+ISO19008_PBS	Smart well completion	http://souslesens.org/iso19008/pbs/ACCBD	ilap	Smart Well Completion	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACCAD
+ISO19008_COR	SOLAS/GMDSS radio and general radio system equipment	http://souslesens.org/iso19008/cor/ETRB	ilap	SOLAS/GMDSS radio and general radio system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRB
+ISO19008_PBS	Solid ballast	http://souslesens.org/iso19008/pbs/ABBAH	ilap	Solid ballast	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BQM
+ISO19008_COR	Solid ballast	http://souslesens.org/iso19008/cor/BQM	ilap	Solid ballast	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BQM
+ISO19008_PBS	Solid fuels	http://souslesens.org/iso19008/pbs/BABJC	ilap	Solid Fuels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAJC
+ISO19008_COR	Solid waste disposal units	http://souslesens.org/iso19008/cor/ERCN	ilap	Solid waste disposal units	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCN
+ISO19008_PBS	Solids (bulk) storage	http://souslesens.org/iso19008/pbs/BACAC	ilap	Solids (Bulk) Storage	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBAC
+ISO19008_SAB	Spare parts	http://souslesens.org/iso19008/sab/33	ilap	Spare parts	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_33
+ISO19008_COR	Special boilers	http://souslesens.org/iso19008/cor/ERFG	ilap	Special boilers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERFG
+ISO19008_COR	Special cables	http://souslesens.org/iso19008/cor/EYE	ilap	Special cables	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYE
+ISO19008_COR	Special commissioning plant/equipment	http://souslesens.org/iso19008/cor/CBC	ilap	Special commissioning plant/equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_CBC
+ISO19008_COR	Special heaters	http://souslesens.org/iso19008/cor/ERFF	ilap	Special heaters	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERFF
+ISO19008_COR	Special metering pumps	http://souslesens.org/iso19008/cor/ERPD	ilap	Special metering pumps	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERPD
+ISO19008_COR	Special studies	http://souslesens.org/iso19008/cor/AAC	ilap	Special studies	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AAC
+ISO19008_COR	Specialized concrete structures	http://souslesens.org/iso19008/cor/SBH	ilap	Specialized concrete structures	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SBH
+ISO19008_COR	Spheres	http://souslesens.org/iso19008/cor/ERVQ	ilap	Spheres	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVQ
+ISO19008_COR	Spreads	http://souslesens.org/iso19008/cor/XX	ilap	Spreads	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XX
+ISO19008_PBS	Standard completion	http://souslesens.org/iso19008/pbs/ACCBA	ilap	Standard Completion	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACCBA
+ISO19008_PBS	Standard drilled wells	http://souslesens.org/iso19008/pbs/ACA	ilap	Standard Drilled Wells	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACA
+ISO19008_PBS	Standard injectors	http://souslesens.org/iso19008/pbs/ACCC	ilap	Standard Injectors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACCC
+ISO19008_PBS	Standard producers	http://souslesens.org/iso19008/pbs/ACCA	ilap	Standard Producers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACCA
+ISO19008_COR	Standby/rescue AHTS vessels	http://souslesens.org/iso19008/cor/XYA	ilap	Standby/rescue AHTS vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XYA
+ISO19008_COR	Standby/rescue vessels	http://souslesens.org/iso19008/cor/XYB	ilap	Standby/rescue vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XYB
+ISO19008_PBS	Station buildings	http://souslesens.org/iso19008/pbs/BDBBF	ilap	Station Buildings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBBF
+ISO19008_COR	Statutory costs, licences and permits	http://souslesens.org/iso19008/cor/AA	ilap	Statutory costs, licences and permits	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AA
+ISO19008_COR	Steam boilers incl. stack and ducting	http://souslesens.org/iso19008/cor/ERFB	ilap	Steam boilers incl. stack and ducting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERFB
+ISO19008_PBS	Steam systems	http://souslesens.org/iso19008/pbs/BABF	ilap	Steam Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAF
+ISO19008_COR	Steam turbines	http://souslesens.org/iso19008/cor/ERDC	ilap	Steam turbines	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERDC
+ISO19008_PBS	Stock yards/storage yards	http://souslesens.org/iso19008/pbs/BDBDB	ilap	Stock Yards/Storage Yards	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBDB
+ISO19008_PBS	Storage yards/warehouses	http://souslesens.org/iso19008/pbs/BDCDB	ilap	Storage Yards/Warehouses	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDCDB
+ISO19008_SAB	Stripping/dismantling	http://souslesens.org/iso19008/sab/4251	ilap	Stripping/dismantling	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_4451
+ISO19008_COR	Structural	http://souslesens.org/iso19008/cor/KN	ilap	Structural	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KN
+ISO19008_COR	Structural bulk	http://souslesens.org/iso19008/cor/BN	ilap	Structural bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BN
+ISO19008_COR	Structural direct labour	http://souslesens.org/iso19008/cor/LN	ilap	Structural direct labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LN
+ISO19008_PBS	Structural outfitting	http://souslesens.org/iso19008/pbs/ABKBD	ilap	Structural Outfitting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBBE
+ISO19008_PBS	Structure	http://souslesens.org/iso19008/pbs/ADKGA	ilap	Structure	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEDA
+ISO19008_PBS	Structure/hull	http://souslesens.org/iso19008/pbs/ABCA	ilap	Structure/Hull	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AECA
+ISO19008_PBS	Sub-base/base courses	http://souslesens.org/iso19008/pbs/BDCCA	ilap	Sub-Base/Base Courses	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDCCA
+ISO19008_COR	Submerged pumps with non-submerged motors	http://souslesens.org/iso19008/cor/ERPH	ilap	Submerged pumps with non-submerged motors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERPH
+ISO19008_COR	Submerged pumps with submerged motors	http://souslesens.org/iso19008/cor/ERPI	ilap	Submerged pumps with submerged motors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERPI
+ISO19008_COR	Subsea	http://souslesens.org/iso19008/cor/KU	ilap	Subsea	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KU
+ISO19008_PBS	Subsea completion system	http://souslesens.org/iso19008/pbs/ADDF	ilap	Subsea Completion System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADAC
+ISO19008_COR	Subsea distribution equipment	http://souslesens.org/iso19008/cor/EUUW	ilap	Subsea distribution equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUW
+ISO19008_COR	Subsea equipment	http://souslesens.org/iso19008/cor/EU	ilap	Subsea equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EU
+ISO19008_PBS	Subsea separation/booster station/injection station	http://souslesens.org/iso19008/pbs/ADD	ilap	Subsea Separation/Booster Station/Injection Station	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADD
+ISO19008_COR	Subsea station structure and appurtenances	http://souslesens.org/iso19008/cor/EUUE	ilap	Subsea station structure and appurtenances	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUE
+ISO19008_SAB	Subsea structure operations	http://souslesens.org/iso19008/sab/527	ilap	Subsea structure operations	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_527
+ISO19008_PBS	Substation	http://souslesens.org/iso19008/pbs/AWB	ilap	Substation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AWB
+ISO19008_PBS	Substation foundations	http://souslesens.org/iso19008/pbs/AWBB	ilap	Substation Foundations	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AWBB
+ISO19008_PBS	Substation topside	http://souslesens.org/iso19008/pbs/AWBA	ilap	Substation Topside	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AWBA
+ISO19008_PBS	Substructures	http://souslesens.org/iso19008/pbs/AB	ilap	Substructures	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AB
+ISO19008_COR	Sumps	http://souslesens.org/iso19008/cor/ERTG	ilap	Sumps	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERTG
+ISO19008_COR	Supervision and surveillance	http://souslesens.org/iso19008/cor/HE	ilap	Supervision and surveillance	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_HE
+ISO19008_SAB	Supply and distribution	http://souslesens.org/iso19008/sab/532	ilap	Supply and distribution	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_532
+ISO19008_SAB	Supply base/terminal	http://souslesens.org/iso19008/sab/531	ilap	Supply base/terminal	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_531
+ISO19008_COR	Support base	http://souslesens.org/iso19008/cor/XV	ilap	Support base	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XV
+ISO19008_PBS	Support structure (tower)	http://souslesens.org/iso19008/pbs/AEJC	ilap	Support Structure (Tower)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEJC
+ISO19008_COR	Supports	http://souslesens.org/iso19008/cor/BLC	ilap	Supports	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BLC
+ISO19008_PBS	Surface control facilities	http://souslesens.org/iso19008/pbs/AEAK	ilap	Surface Control Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAK
+ISO19008_COR	Surface protection bulk	http://souslesens.org/iso19008/cor/BM	ilap	Surface protection bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BM
+ISO19008_COR	Surface protection direct labour	http://souslesens.org/iso19008/cor/LM	ilap	Surface protection direct labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LM
+ISO19008_SAB	Surplus bulk	http://souslesens.org/iso19008/sab/323	ilap	Surplus bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_323
+ISO19008_SAB	Surplus equipment	http://souslesens.org/iso19008/sab/313	ilap	Surplus equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_313
+ISO19008_SAB	Survey	http://souslesens.org/iso19008/sab/521	ilap	Survey	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_521
+ISO19008_COR	Survey vessels	http://souslesens.org/iso19008/cor/XA	ilap	Survey vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XA
+ISO19008_PBS	Switch yard	http://souslesens.org/iso19008/pbs/BDDG	ilap	Switch Yard	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDDG
+ISO19008_PBS	Synthesis gas production	http://souslesens.org/iso19008/pbs/BAADC	ilap	Synthesis Gas Production	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BNC
+ISO19008_PBS	System for machinery main components	http://souslesens.org/iso19008/pbs/AECBE	ilap	System for Machinery Main Components	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AECBE
+ISO19008_PBS	Systems for bucket foundations	http://souslesens.org/iso19008/pbs/ABACD	ilap	Systems for Bucket Foundations	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABACD
+ISO19008_PBS	Systems for machinery main components	http://souslesens.org/iso19008/pbs/ABMBE	ilap	Systems for Machinery Main Components	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABNBE
+ISO19008_COR	Tank cleaning/crude oil washing equipment	http://souslesens.org/iso19008/cor/EVYU	ilap	Tank cleaning/crude oil washing equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYU
+ISO19008_COR	Tank erection	http://souslesens.org/iso19008/cor/SBI	ilap	Tank erection	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SBI
+ISO19008_COR	Tariffs and transport charges	http://souslesens.org/iso19008/cor/AHC	ilap	Tariffs and transport charges	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AHC
+ISO19008_PBS	Tarmac paving	http://souslesens.org/iso19008/pbs/BDCCB	ilap	Tarmac Paving	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDCCB
+ISO19008_COR	Tax differential	http://souslesens.org/iso19008/cor/REC	ilap	Tax differential	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_QEC
+ISO19008_COR	Taxes	http://souslesens.org/iso19008/cor/AG	ilap	Taxes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AG
+ISO19008_PBS	T-connection	http://souslesens.org/iso19008/pbs/AEAHB	ilap	T-Connection	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAHB
+ISO19008_COR	Telecommunication	http://souslesens.org/iso19008/cor/KT	ilap	Telecommunication	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KT
+ISO19008_COR	Telecommunication appliances	http://souslesens.org/iso19008/cor/BTA	ilap	Telecommunication appliances	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BTA
+ISO19008_COR	Telecommunication bulk	http://souslesens.org/iso19008/cor/BT	ilap	Telecommunication bulk	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BT
+ISO19008_COR	Telecommunication direct labour	http://souslesens.org/iso19008/cor/LT	ilap	Telecommunication direct labour	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_LT
+ISO19008_COR	Telecommunication equipment	http://souslesens.org/iso19008/cor/ET	ilap	Telecommunication equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ET
+ISO19008_COR	Telecommunications	http://souslesens.org/iso19008/cor/QDB	ilap	Telecommunications	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_RDB
+ISO19008_COR	Telemetry system equipment	http://souslesens.org/iso19008/cor/ETRT	ilap	Telemetry system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRT
+ISO19008_PBS	Telephone/telemetry	http://souslesens.org/iso19008/pbs/BHC	ilap	Telephone/Telemetry	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BCDC
+ISO19008_PBS	Template structure	http://souslesens.org/iso19008/pbs/ADAA	ilap	Template Structure	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADBA
+ISO19008_COR	Temporaries contracts	http://souslesens.org/iso19008/cor/SD	ilap	Temporaries contracts	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SD
+ISO19008_COR	Temporary construction services	http://souslesens.org/iso19008/cor/MN	ilap	Temporary construction services	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_MN
+ISO19008_PBS	Temporary facilities	http://souslesens.org/iso19008/pbs/BG	ilap	Temporary Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BG
+ISO19008_COR	Temporary installation aids	http://souslesens.org/iso19008/cor/BNC	ilap	Temporary installation aids	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BNC
+ISO19008_PBS	Temporary outfitting	http://souslesens.org/iso19008/pbs/ABDC	ilap	Temporary Outfitting	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABDC
+ISO19008_COR	Temporary telecom equipment	http://souslesens.org/iso19008/cor/ETRY	ilap	Temporary telecom equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRY
+ISO19008_COR	Terminal units	http://souslesens.org/iso19008/cor/EGGD	ilap	Terminal units	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EGGD
+ISO19008_COR	Test equipment	http://souslesens.org/iso19008/cor/EUUU	ilap	Test equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUU
+ISO19008_PBS	Test facilities	http://souslesens.org/iso19008/pbs/AEAJC	ilap	Test Facilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAJC
+ISO19008_SAB	Testing	http://souslesens.org/iso19008/sab/5253	ilap	Testing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5253
+ISO19008_COR	Tether anchor latches	http://souslesens.org/iso19008/cor/EVYH	ilap	Tether anchor latches	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYH
+ISO19008_COR	Tether deployment tools	http://souslesens.org/iso19008/cor/EVYI	ilap	Tether deployment tools	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYI
+ISO19008_PBS	Tether equipment	http://souslesens.org/iso19008/pbs/ABQCA	ilap	Tether Equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABLCA
+ISO19008_COR	Tether tensioner/motion compensator	http://souslesens.org/iso19008/cor/EVYD	ilap	Tether tensioner/motion compensator	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYD
+ISO19008_COR	Tether tie-off assembly	http://souslesens.org/iso19008/cor/EVYE	ilap	Tether tie-off assembly	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYE
+ISO19008_PBS	Tethering system	http://souslesens.org/iso19008/pbs/ABLC	ilap	Tethering System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABLC
+ISO19008_PBS	Tethers	http://souslesens.org/iso19008/pbs/ABQCB	ilap	Tethers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABLCB
+ISO19008_COR	Tethers/tendons, tether couplings	http://souslesens.org/iso19008/cor/EVYA	ilap	Tethers/tendons, tether couplings	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYA
+ISO19008_COR	TFL Equipment	http://souslesens.org/iso19008/cor/EDBT	ilap	TFL equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBT
+ISO19008_COR	Thruster packages	http://souslesens.org/iso19008/cor/EVYT	ilap	Thruster packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYT
+ISO19008_SAB	Tie-in	http://souslesens.org/iso19008/sab/5242	ilap	Tie-in	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5242
+ISO19008_COR	Tie-in of pipelines onshore	http://souslesens.org/iso19008/cor/SCG	ilap	Tie-in of pipelines onshore	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SCG
+ISO19008_COR	Timber/wood products	http://souslesens.org/iso19008/cor/BQF	ilap	Timber/wood products	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BQF
+ISO19008_COR	Tool pool (rented tools)	http://souslesens.org/iso19008/cor/EUUV	ilap	Tool pool (rented tools)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUV
+ISO19008_PBS	Tools system	http://souslesens.org/iso19008/pbs/ADF	ilap	Tools System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADF
+ISO19008_COR	Top drive units/packages	http://souslesens.org/iso19008/cor/EDBJ	ilap	Top drive units/packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBJ
+ISO19008_PBS	Top shafts	http://souslesens.org/iso19008/pbs/ABBAG	ilap	Top Shafts	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBAG
+ISO19008_PBS	Topside (surface) production control system	http://souslesens.org/iso19008/pbs/ADADA	ilap	Topside (Surface) Production Control System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADADA
+ISO19008_COR	Topside control equipment	http://souslesens.org/iso19008/cor/EUUK	ilap	Topside control equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUK
+ISO19008_PBS	Topside related systems	http://souslesens.org/iso19008/pbs/ABMBH	ilap	Topside Related Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABMBH
+ISO19008_PBS	Topsides	http://souslesens.org/iso19008/pbs/AA	ilap	Topsides	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AA
+ISO19008_COR	Torque tools and tether handling equipment	http://souslesens.org/iso19008/cor/EVYF	ilap	Torque tools and tether handling equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYF
+ISO19008_COR	Tote tanks	http://souslesens.org/iso19008/cor/ERVS	ilap	Tote tanks	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERVS
+ISO19008_SAB	Towing	http://souslesens.org/iso19008/sab/5261	ilap	Towing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5261
+ISO19008_COR	Towing vessels	http://souslesens.org/iso19008/cor/XJ	ilap	Towing vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XJ
+ISO19008_PBS	Tracklaying	http://souslesens.org/iso19008/pbs/BDBCA	ilap	Tracklaying	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBCA
+ISO19008_PBS	Trackwork	http://souslesens.org/iso19008/pbs/BDBC	ilap	Trackwork	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBC
+ISO19008_COR	Training and courses	http://souslesens.org/iso19008/cor/RFC	ilap	Training and courses	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AFC
+ISO19008_COR	Transfer and control equipment	http://souslesens.org/iso19008/cor/EY	ilap	Transfer and control equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EY
+ISO19008_COR	Transformers	http://souslesens.org/iso19008/cor/EEET	ilap	Transformers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEET
+ISO19008_COR	Transport	http://souslesens.org/iso19008/cor/ME	ilap	Transport	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ME
+ISO19008_SAB	Transport	http://souslesens.org/iso19008/sab/526	ilap	Transport	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ME
+ISO19008_PBS	Transport systems	http://souslesens.org/iso19008/pbs/BD	ilap	Transport Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BD
+ISO19008_COR	Trash racks/collectors	http://souslesens.org/iso19008/cor/ERCR	ilap	Trash racks/collectors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCR
+ISO19008_COR	Trash stop gates	http://souslesens.org/iso19008/cor/ERCV	ilap	Trash stop gates	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCV
+ISO19008_COR	Trays	http://souslesens.org/iso19008/cor/ERCL	ilap	Trays	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERCL
+ISO19008_PBS	Treating	http://souslesens.org/iso19008/pbs/BAAACL	ilap	Treating	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCL
+ISO19008_SAB	Trenching	http://souslesens.org/iso19008/sab/5221	ilap	Trenching	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_5221
+ISO19008_COR	Trenching and backfilling for onshore pipelines	http://souslesens.org/iso19008/cor/SCE	ilap	Trenching and backfilling for onshore pipelines	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SCE
+ISO19008_COR	Trenching and backfilling for piping and cables	http://souslesens.org/iso19008/cor/SAD	ilap	Trenching and backfilling for piping and cables	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SAD
+ISO19008_COR	Trenching vessels	http://souslesens.org/iso19008/cor/XF	ilap	Trenching vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XF
+ISO19008_COR	Trucks, carts, forklifts, etc.	http://souslesens.org/iso19008/cor/ERMD	ilap	Trucks, carts, forklifts, etc.	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMD
+ISO19008_PBS	Truss section	http://souslesens.org/iso19008/pbs/ABQAB	ilap	Truss Section	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABQAB
+ISO19008_COR	Tube-flo conveyors	http://souslesens.org/iso19008/cor/ERND	ilap	Tube-flo conveyors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERND
+ISO19008_COR	Tubing	http://souslesens.org/iso19008/cor/BJE	ilap	Tubing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BJE
+ISO19008_COR	Tubing hanger	http://souslesens.org/iso19008/cor/EDWI	ilap	Tubing hanger	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWI
+ISO19008_COR	Tubing hanger system equipment	http://souslesens.org/iso19008/cor/EUUB	ilap	Tubing hanger system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUB
+ISO19008_COR	Tubing shear ram	http://souslesens.org/iso19008/cor/EDWB	ilap	Tubing shear ram	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWB
+ISO19008_PBS	Tunnel	http://souslesens.org/iso19008/pbs/AEALA	ilap	Tunnel	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEALA
+ISO19008_PBS	Tunnels	http://souslesens.org/iso19008/pbs/BDBBC	ilap	Tunnels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDCBC
+ISO19008_COR	Tunnels and caverns	http://souslesens.org/iso19008/cor/SBE	ilap	Tunnels and caverns	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_SBE
+ISO19008_COR	Turret equipment	http://souslesens.org/iso19008/cor/EVYW	ilap	Turret equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EVYW
+ISO19008_COR	Twin rotor impactors	http://souslesens.org/iso19008/cor/ERNH	ilap	Twin rotor impactors	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNH
+ISO19008_COR	UHF/VHF radio (onboard)	http://souslesens.org/iso19008/cor/ETRU	ilap	UHF/VHF radio (onboard)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ETRU
+ISO19008_SAB	Umbilical and cable operations	http://souslesens.org/iso19008/sab/525	ilap	Umbilical and cable operations	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_525
+ISO19008_PBS	Umbilical protection	http://souslesens.org/iso19008/pbs/ADEB	ilap	Umbilical Protection	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAGB
+ISO19008_PBS	Umbilical risers	http://souslesens.org/iso19008/pbs/AEAGD	ilap	Umbilical Risers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADED
+ISO19008_PBS	Umbilical system	http://souslesens.org/iso19008/pbs/ADE	ilap	Umbilical System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADE
+ISO19008_PBS	Umbilical/cable crossing	http://souslesens.org/iso19008/pbs/AEFDA	ilap	Umbilical/Cable Crossing	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEHDA
+ISO19008_PBS	Umbilical/cable system	http://souslesens.org/iso19008/pbs/AEAG	ilap	Umbilical/Cable System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAG
+ISO19008_PBS	Umbilicals	http://souslesens.org/iso19008/pbs/ADEA	ilap	Umbilicals	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADEA
+ISO19008_COR	umbilicals	http://souslesens.org/iso19008/cor/EYD	ilap	Umbilicals	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADEA
+ISO19008_PBS	Umbilicals/cables	http://souslesens.org/iso19008/pbs/AEAGA	ilap	Umbilicals/Cables	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAGA
+ISO19008_PBS	Umbilicals/cables for remote platform control	http://souslesens.org/iso19008/pbs/AEE	ilap	Umbilicals/Cables for Remote Platform Control	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEE
+ISO19008_PBS	Underground storage	http://souslesens.org/iso19008/pbs/BACABB	ilap	Underground Storage	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBAAB
+ISO19008_COR	Uninterruptible power supply (UPS)	http://souslesens.org/iso19008/cor/EEEQ	ilap	Uninterruptible power supply (UPS)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EEEQ
+ISO19008_PBS	Upper domes	http://souslesens.org/iso19008/pbs/ABBAE	ilap	Upper Domes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBAE
+ISO19008_PBS	Utilities	http://souslesens.org/iso19008/pbs/ABBBD	ilap	Utilities	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABBBD
+ISO19008_PBS	Utility construction	http://souslesens.org/iso19008/pbs/BGB	ilap	Utility Construction	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BGB
+ISO19008_PBS	Utility systems	http://souslesens.org/iso19008/pbs/ABLBC	ilap	Utility Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABKBC
+ISO19008_COR	Vacuum units packages	http://souslesens.org/iso19008/cor/ERXJ	ilap	Vacuum units packages	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERXJ
+ISO19008_COR	Value added taxes	http://souslesens.org/iso19008/cor/AGA	ilap	Value added taxes	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AGA
+ISO19008_PBS	Valve station	http://souslesens.org/iso19008/pbs/BDAGD	ilap	Valve Station	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDAGD
+ISO19008_PBS	Valve stations/connection points	http://souslesens.org/iso19008/pbs/AEAH	ilap	Valve Stations/Connection Points	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAH
+ISO19008_COR	Valves	http://souslesens.org/iso19008/cor/BYD	ilap	Valves	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BYD
+ISO19008_COR	Vehicle rental and expenses	http://souslesens.org/iso19008/cor/RED	ilap	Vehicle rental and expenses	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_QED
+ISO19008_SAB	Vendor assistance	http://souslesens.org/iso19008/sab/446	ilap	Vendor assistance	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/SAB_436
+ISO19008_COR	Vendor rep. costs (ATS)	http://souslesens.org/iso19008/cor/AK	ilap	Vendor rep. costs (ATS)	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_AK
+ISO19008_COR	Vibrating packers	http://souslesens.org/iso19008/cor/ERNO	ilap	Vibrating packers	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNO
+ISO19008_COR	Vibrating screens	http://souslesens.org/iso19008/cor/ERNP	ilap	Vibrating screens	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERNP
+ISO19008_COR	Vibrating/displacement measuring systems equipment	http://souslesens.org/iso19008/cor/EJJY	ilap	Vibrating/displacement measuring systems equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJY
+ISO19008_PBS	Visbreaking	http://souslesens.org/iso19008/pbs/BAAACC	ilap	Visbreaking	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCC
+ISO19008_PBS	Volumetric flow metering	http://souslesens.org/iso19008/pbs/BACBA	ilap	Volumetric Flow Metering	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBBA
+ISO19008_PBS	Walkways/ladders	http://souslesens.org/iso19008/pbs/ABABC	ilap	Walkways/Ladders	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ABDBC
+ISO19008_COR	Walls	http://souslesens.org/iso19008/cor/BCA	ilap	Walls	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_BCA
+ISO19008_PBS	Warehouse or sheltered storage	http://souslesens.org/iso19008/pbs/BACACA	ilap	Warehouse or Sheltered Storage	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBACA
+ISO19008_PBS	Warehouses	http://souslesens.org/iso19008/pbs/BCBD	ilap	Warehouses	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BCBD
+ISO19008_PBS	Warehouses and workshops	http://souslesens.org/iso19008/pbs/BGD	ilap	Warehouses and Workshops	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BGD
+ISO19008_PBS	Waste disposal systems	http://souslesens.org/iso19008/pbs/BABK	ilap	Waste Disposal Systems	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BAK
+ISO19008_PBS	Water injector	http://souslesens.org/iso19008/pbs/ACCDA	ilap	Water Injector	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACCCA
+ISO19008_PBS	Water producer	http://souslesens.org/iso19008/pbs/ACBC	ilap	Water Producer	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACAC
+ISO19008_PBS	Water supply	http://souslesens.org/iso19008/pbs/BDBEF	ilap	Water Supply	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BDBEF
+ISO19008_PBS	Water treatment	http://souslesens.org/iso19008/pbs/AACAD	ilap	Water Treatment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AACDB
+ISO19008_PBS	Wax/oil separation	http://souslesens.org/iso19008/pbs/BAAACM	ilap	Wax/Oil Separation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BKCM
+ISO19008_COR	Weighing screws	http://souslesens.org/iso19008/cor/ERMR	ilap	Weighing screws	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMR
+ISO19008_COR	Weight and quantity control	http://souslesens.org/iso19008/cor/KW	ilap	Weight and quantity control	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_KW
+ISO19008_PBS	Weight metering	http://souslesens.org/iso19008/pbs/BACBB	ilap	Weight Metering	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BBBB
+ISO19008_COR	Weight scales	http://souslesens.org/iso19008/cor/EJJV	ilap	Weight scales	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EJJV
+ISO19008_COR	Welding bladders	http://souslesens.org/iso19008/cor/EYAI	ilap	Welding bladders	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EYAI
+ISO19008_PBS	Well stimulation	http://souslesens.org/iso19008/pbs/ACCBE	ilap	Well Stimulation	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ACCAE
+ISO19008_COR	Well stimulation vessels	http://souslesens.org/iso19008/cor/XYE	ilap	Well stimulation vessels	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_XYE
+ISO19008_PBS	Wellhead	http://souslesens.org/iso19008/pbs/BEA	ilap	Wellhead	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BEA
+ISO19008_COR	Wellhead	http://souslesens.org/iso19008/cor/EUUA	ilap	Wellhead	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_BEA
+ISO19008_PBS	Wellhead area	http://souslesens.org/iso19008/pbs/AABA	ilap	Wellhead Area	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AABA
+ISO19008_PBS	Wellhead system	http://souslesens.org/iso19008/pbs/ADACA	ilap	Wellhead System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADACA
+ISO19008_COR	Wellhead, wellhead housing and extension	http://souslesens.org/iso19008/cor/EDWD	ilap	Wellhead, wellhead housing and extension	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWD
+ISO19008_COR	Winches	http://souslesens.org/iso19008/cor/ERMK	ilap	Winches	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMK
+ISO19008_PBS	Windmill	http://souslesens.org/iso19008/pbs/AWA	ilap	Windmill	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AWA
+ISO19008_COR	Wireline equipment	http://souslesens.org/iso19008/cor/EDBU	ilap	Wireline equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDBU
+ISO19008_COR	Wireline pressure retaining equipment	http://souslesens.org/iso19008/cor/EDWQ	ilap	Wireline pressure retaining equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWQ
+ISO19008_COR	Wireline unit/wireline equipment	http://souslesens.org/iso19008/cor/EDWP	ilap	Wireline unit/wireline equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWP
+ISO19008_COR	Workover control system equipment	http://souslesens.org/iso19008/cor/EUUQ	ilap	Workover control system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUQ
+ISO19008_COR	Workover riser system equipment	http://souslesens.org/iso19008/cor/EUUP	ilap	Workover riser system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUP
+ISO19008_PBS	Workover system	http://souslesens.org/iso19008/pbs/ADAE	ilap	Workover System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADAE
+ISO19008_COR	Workshop machines	http://souslesens.org/iso19008/cor/ERMH	ilap	Workshop machines	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_ERMH
+ISO19008_PBS	WTG foundations	http://souslesens.org/iso19008/pbs/AWAB	ilap	WTG Foundations	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AWAB
+ISO19008_PBS	X-mas tree system	http://souslesens.org/iso19008/pbs/ADACB	ilap	X-mas Tree System	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_ADACB
+ISO19008_COR	X-mas tree system equipment	http://souslesens.org/iso19008/cor/EUUC	ilap	X-mas tree system equipment	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EUUC
+ISO19008_COR	X-mas trees	http://souslesens.org/iso19008/cor/EDWA	ilap	X-mas trees	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/COR_EDWA
+ISO19008_PBS	Y-connection	http://souslesens.org/iso19008/pbs/AEAHA	ilap	Y-Connection	http://data.posccaesar.org/ilap/refdata/NORSOK/Z-014/SCCSCoding/PBS_AEAHA

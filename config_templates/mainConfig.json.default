@@ -1,5 +1,6 @@
 {
-"souslesensUrl": "http://localhost:3010",
+  "souslesensUrl": "http://localhost:3010",
+  "listenPort": "3010",
   "serverUrl" :"../slsv",
   "default_sparql_url": "http://xxxxxx:8890/sparql",
   "disableAuth": false,

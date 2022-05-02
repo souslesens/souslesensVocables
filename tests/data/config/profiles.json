@@ -1,0 +1,15 @@
+{
+    "admin": {
+        "name": "admin",
+        "_type": "profile",
+        "id": "admin",
+        "allowedSourceSchemas": ["SKOS", "OWL", "INDIVIDUAL"],
+        "allowedSources": "ALL",
+        "forbiddenSources": ["Dbpedia"],
+        "allowedTools": "ALL",
+        "forbiddenTools": [],
+        "blender": {
+            "contextMenuActionStartLevel": 0
+        }
+    }
+}

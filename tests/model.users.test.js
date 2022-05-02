@@ -20,6 +20,20 @@ describe("UserModel", () => {
                 source: "json",
                 _type: "user",
             },
+            regular1: {
+                id: "regular1",
+                login: "regular1",
+                groups: ["regular1"],
+                source: "json",
+                _type: "user",
+            },
+            regular2: {
+                id: "regular2",
+                login: "regular2",
+                groups: ["regular2"],
+                source: "json",
+                _type: "user",
+            },
         });
     });
 });

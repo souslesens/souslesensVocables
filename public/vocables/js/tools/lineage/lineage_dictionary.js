@@ -25,7 +25,8 @@ var Lineage_dictionary = (function() {
     if (rangeSourceLabel)
       filter += "  FILTER (?rangeSourceLabel ='" + rangeSourceLabel + "')";
     var nodes = null;
-    if ($("#LineageDictionary_nodesSelectionSelect").val() == "Current Graph Nodes")
+    var mode=$("#LineageDictionary_nodesSelectionSelect").val()
+    if(mode=="currentGraphNodes")
       nodes = visjsGraph.data.nodes.getIds();
     var options = {
       // processorFn: processMetadata,
@@ -185,6 +186,18 @@ var labelTriples=[
       }
     );
   };
+
+
+  exportTSFdictionary=function(){
+    var query="PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>SELECT * from <http://data.total.com/resource/tsf/dictionary/> WHERE {{ ?concept rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction. ?node owl:onProperty ?prop . OPTIONAL {?prop rdfs:label ?propLabel} OPTIONAL {?concept rdfs:label ?conceptLabel}?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}  filter (?prop=<http://www.w3.org/2002/07/owl#sameAs>) } OPTIONAL {?node <http://data.souslesens.org/property#domainSourceLabel> ?domainSource}\n" +
+      "  OPTIONAL {?node <http://data.souslesens.org/property#rangeSourceLabel> ?rangeSource} \n" +
+      "   OPTIONAL {?node <purl.org/dc/terms/created> ?creationDate} \n" +
+      "  OPTIONAL {?node <https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status> ?status} \n" +
+      "  OPTIONAL {?node <http://purl.org/dc/terms/creator> ?author} \n" +
+      "  \n" +
+      "\n" +
+      "} limit 10000"
+  }
   return self;
 })
 ();

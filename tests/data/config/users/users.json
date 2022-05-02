@@ -7,5 +7,23 @@
         "source": "json",
         "_type": "user",
         "name": "admin"
+    },
+    "regular1": {
+        "id": "regular1",
+        "login": "regular1",
+        "password": "$2b$10$ed6ZDHUbN7NfOGrufiDniudK9EMLCFg9qFgJ0N/T.nRTBPlA5Mm9C",
+        "groups": ["regular1"],
+        "source": "json",
+        "_type": "user",
+        "name": "regular1"
+    },
+    "regular2": {
+        "id": "regular2",
+        "login": "regular2",
+        "password": "$2b$10$ed6ZDHUbN7NfOGrufiDniudK9EMLCFg9qFgJ0N/T.nRTBPlA5Mm9C",
+        "groups": ["regular2"],
+        "source": "json",
+        "_type": "user",
+        "name": "regular2"
     }
 }

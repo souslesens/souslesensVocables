@@ -1,0 +1,27 @@
+{
+  "BFO": {
+    "name": "BFO",
+    "_type": "source",
+    "id": "01G22MJFKCFFJVYDX0RV2C75D8",
+    "type": "",
+    "graphUri": "http://purl.obolibrary.org/obo/bfo.owl",
+    "sparql_server": {
+      "url": "_default",
+      "method": "Get"
+    },
+    "editable": true,
+    "controller": "Sparql_OWL",
+    "topClassFilter": "?any rdfs:subClassOf ?topConcept",
+    "schemaType": "OWL",
+    "dataSource": null,
+    "schema": null,
+    "color": "",
+    "isDraft": false,
+    "predicates": {
+      "broaderPredicate": "",
+      "lang": ""
+    },
+    "group": "",
+    "imports": []
+  }
+}

@@ -1,0 +1,40 @@
+{
+    "souslesensUrl": "http://localhost:3011",
+    "listenPort": "3011",
+    "serverUrl": "../slsv",
+    "default_sparql_url": "http://localhost:8891/sparql",
+    "datalab_sparql_url": "http://opeppa-updtlb03.main.glb.corp.local:8890/sparql",
+    "disableAuth": false,
+    "auth": "json",
+    "defaultGroups": [],
+    "logDir": "logs",
+    "sentryDsnNode": "",
+    "sentryDsnJsFront": "",
+    "keycloak": {
+        "realm": "",
+        "publicClient": false,
+        "clientID": "",
+        "clientSecret": "",
+        "authServerURL": ""
+    },
+    "SQLserver": {
+        "user": "sa",
+        "password": "superSecretP4ssword",
+        "server": "localhost",
+        "database": "master",
+        "trustServerCertificate": true
+    },
+    "ElasticSearch": {
+        "url": "http://localhost:9201/",
+        "other_servers": []
+    },
+    "annotator": {
+        "tikaServerUrl": "localhost:41001",
+        "spacyServerUrl": "localhost:8001/pos",
+        "parsedDocumentsHomeDir": null,
+        "uploadDirPath": null
+    },
+    "wiki": {
+        "url": ""
+    }
+}

@@ -10,6 +10,9 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 var visjsGraph = (function () {
+    /**
+     * @type {{ network: null | string; simulationTimeOut?: number; data?: any; legendLabels?: string[]; context?: any; currentScale?: any; simulationOn?: any; globalOptions?: any; defaultTextSize?: number; defaultNodeSize?: number; showNodesLabelMinScale?: any; currentContext?: any; drawingDone?: any; redraw?: any; draw?: any; lastAddedNodes?: any; canvasDimension?: any; processClicks?: any; onScaleChange?: any; lastMovedNode?: any; listSavedGraphs?: any; setLayout?: any; exportGraph?: any; importGraph?: any; clearGraph?: any; drawLegend?: any; removeNodes?: any; removeOtherNodesFromGraph?: any; defaultNodeShape?: any; labelsVisible?: any; getExistingIdsMap?: any; isGraphNotEmpty?: any; graphCsvToClipBoard?: any; toCsv?: any; getNodeDescendantIds?: any; getNodeDescendants?: any; getNodesPosition?: any; collapseNode?: any; focusOnNode?: any; setNodesProperty?: any; hideShowNodes?: any; toSVG?: any; toGraphMl?: any; searchNode?: any; saveGraph?: any; message?: any; loadGraph?: any; showGraphConfig?: any; }}
+     */
     var self = {};
     self.network = null;
     self.simulationTimeOut = 3000;
@@ -34,7 +37,12 @@ var visjsGraph = (function () {
         var visjsData = { nodes: self.data.nodes.get(), edges: self.data.edges.get() };
         self.draw(self.currentContext.divId, visjsData, self.currentContext.options, self.currentContext.callback);
     };
-    self.draw = function (divId, visjsData, _options, callback) {
+    self.draw = function (
+        /** @type {string} */ divId,
+        /** @type {{ labels: any; nodes: any; edges: any; }} */ visjsData,
+        /** @type {{ [x: string]: any; onAddNodeToGraph?: any; layoutHierarchical?: any; onRightClickFn?: any; onHoverNodeFn?: any; }} */ _options,
+        /** @type {() => void} */ callback
+    ) {
         self.drawingDone = false;
         self.currentContext = { divId: divId, options: _options, callback: callback };
         if (!_options) _options = {};
@@ -44,7 +52,7 @@ var visjsGraph = (function () {
 
         var nodesDataSet = new vis.DataSet(visjsData.nodes);
         var edgesDataSet = new vis.DataSet(visjsData.edges);
-        nodesDataSet.on("*", function (event, properties, senderId) {
+        nodesDataSet.on("*", function (/** @type {string} */ event, /** @type {{ items: any; }} */ properties, /** @type {any} */ senderId) {
             if (_options.onAddNodeToGraph) {
                 if (event == "add") _options.onAddNodeToGraph(properties, senderId);
             }
@@ -103,11 +111,11 @@ var visjsGraph = (function () {
             // }
         }, self.simulationTimeOut);
 
-        self.network.on("afterDrawing", function (_params) {
+        self.network.on("afterDrawing", function (/** @type {any} */ _params) {
             self.drawingDone = true;
         });
 
-        self.network.on("oncontext", function (params) {
+        self.network.on("oncontext", function (/** @type {{ event: { preventDefault: () => void; which: number; }; pointer: { DOM: any; }; }} */ params) {
             params.event.preventDefault();
             if (params.event.which == 3) {
                 if (_options.onRightClickFn) {
@@ -125,17 +133,17 @@ var visjsGraph = (function () {
             } //rigth click
         });
 
-        self.network.on("doubleClick", function (params) {
+        self.network.on("doubleClick", function (/** @type {any} */ params) {
             self.processClicks(params, _options, true);
         });
 
         self.network
-            .on("click", function (params) {
+            .on("click", function (/** @type {{ pointer: { DOM: { x: any; y: any; }; }; }} */ params) {
                 // eslint-disable-next-line no-console
                 console.log(self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y));
                 self.processClicks(params, _options);
             })
-            .on("hoverNode", function (params) {
+            .on("hoverNode", function (/** @type {{ node: any; pointer: { DOM: any; }; }} */ params) {
                 var nodeId = params.node;
                 var node = self.data.nodes.get(nodeId);
                 // eslint-disable-next-line no-console
@@ -152,24 +160,24 @@ var visjsGraph = (function () {
               }*/
                 if (_options.onHoverNodeFn) _options.onHoverNodeFn(node, point, options);
             })
-            .on("blurNode", function (_params) {
+            .on("blurNode", function (/** @type {any} */ _params) {
                 // $("#graphPopupDiv").css("display", "none")
             })
-            .on("zoom", function (_params) {
+            .on("zoom", function (/** @type {any} */ _params) {
                 self.onScaleChange();
             })
-            .on("hoverEdge", function (params) {
+            .on("hoverEdge", function (/** @type {{ edge: any; }} */ params) {
                 var edgeId = params.edge;
                 var edge = self.data.edges.get(edgeId);
                 edge.fromNode = self.data.nodes.get(edge.from);
                 edge.toNode = self.data.nodes.get(edge.to);
                 //   sinequaResultVis.onEdgeHover(edge, point)
             })
-            .on("blurEdge", function (_params) {
+            .on("blurEdge", function (/** @type {any} */ _params) {
                 //  sinequaResultVis.onEdgeBlur()
             })
 
-            .on("dragStart", function (params) {
+            .on("dragStart", function (/** @type {{ nodes: any[]; }} */ params) {
                 var nodeId = params.nodes[0];
                 if (!nodeId) return;
                 //   var nodes = self.data.nodes.getIds();
@@ -181,12 +189,12 @@ var visjsGraph = (function () {
                 visjsGraph.data.nodes.update(newNodes);
             })
 
-            .on("dragging", function (_params) {
+            .on("dragging", function (/** @type {any} */ _params) {
                 /* if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
                 return false;
                 }*/
             })
-            .on("dragEnd", function (params) {
+            .on("dragEnd", function (/** @type {{ event: { srcEvent: { ctrlKey: any; altKey: any; }; }; pointer: { DOM: any; }; nodes: string | any[]; }} */ params) {
                 if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
                     var dropCtrlNodeId = self.network.getNodeAt(params.pointer.DOM);
                     if (!dropCtrlNodeId) return;
@@ -265,7 +273,7 @@ var visjsGraph = (function () {
             }, 300);
         }
     };
-    self.setLayout = function (layout) {
+    self.setLayout = function (/** @type {string} */ layout) {
         if (layout == "hierarchical vertical") {
             self.currentContext.options.layoutHierarchical = {
                 direction: "UD",
@@ -314,10 +322,10 @@ var visjsGraph = (function () {
         var nodes = visjsGraph.data.nodes.get();
         var edges = visjsGraph.data.edges.get();
         var nodesMap = {};
-        nodes.forEach(function (node) {
+        nodes.forEach(function (/** @type {{ id: string | number; }} */ node) {
             nodesMap[node.id] = node;
         });
-        edges.forEach(function (edge) {
+        edges.forEach(function (/** @type {{ fromNode: any; from: string | number; toNode: any; to: string | number; }} */ edge) {
             edge.fromNode = nodesMap[edge.from];
             edge.toNode = nodesMap[edge.to];
         });
@@ -325,14 +333,14 @@ var visjsGraph = (function () {
         common.copyTextToClipboard(str);
     };
 
-    self.importGraph = function (str) {
+    self.importGraph = function (/** @type {string} */ str) {
         var nodes = visjsGraph.data.nodes.get();
         var edges = visjsGraph.data.edges.get();
         var nodesMap = {};
-        nodes.forEach(function (node) {
+        nodes.forEach(function (/** @type {{ id: string | number; }} */ node) {
             nodesMap[node.id] = node;
         });
-        edges.forEach(function (edge) {
+        edges.forEach(function (/** @type {{ fromNode: any; from: string | number; toNode: any; to: string | number; }} */ edge) {
             edge.fromNode = nodesMap[edge.from];
             edge.toNode = nodesMap[edge.to];
         });
@@ -354,34 +362,46 @@ var visjsGraph = (function () {
         // Pass
     };
 
-    self.removeNodes = function (key, value, removeEdges) {
+    self.removeNodes = function (/** @type {string | number} */ key, /** @type {any} */ value, /** @type {any} */ removeEdges) {
+        /**
+         * @type {any[]}
+         */
         var nodeIds = [];
         var nodes = visjsGraph.data.nodes.get();
-        nodes.forEach(function (node) {
+        nodes.forEach(function (/** @type {{ [x: string]: any; id: any; }} */ node) {
             if (node[key] == value) nodeIds.push(node.id);
         });
         visjsGraph.data.nodes.remove(nodeIds);
 
         if (removeEdges) {
+            /**
+             * @type {any[]}
+             */
             var edgeIds = [];
             var edges = visjsGraph.data.edges.get();
-            edges.forEach(function (edge) {
+            edges.forEach(function (/** @type {{ [x: string]: any; id: any; }} */ edge) {
                 if (edge[key] == value) edgeIds.push(edge.id);
             });
             visjsGraph.data.edges.remove(edgeIds);
         }
     };
 
-    (self.removeOtherNodesFromGraph = function (nodeId) {
+    (self.removeOtherNodesFromGraph = function (/** @type {any} */ nodeId) {
         var nodes = visjsGraph.data.nodes.get();
+        /**
+         * @type {any[]}
+         */
         var nodeIds = [];
-        nodes.forEach(function (node) {
+        nodes.forEach(function (/** @type {{ id: any; }} */ node) {
             if (node.id != nodeId) nodeIds.push(node.id);
         });
         visjsGraph.data.nodes.remove(nodeIds);
         var edges = visjsGraph.data.edges.get();
+        /**
+         * @type {any[]}
+         */
         var edgesIds = [];
-        edges.forEach(function (edge) {
+        edges.forEach(function (/** @type {{ from: any; to: any; id: any; }} */ edge) {
             if (nodeIds.indexOf(edge.from) > -1 || nodeIds.indexOf(edge.to) > -1) edgesIds.push(edge.id);
         });
         visjsGraph.data.edges.remove(edgesIds);
@@ -399,7 +419,7 @@ var visjsGraph = (function () {
                 else fontSize = self.defaultTextSize / (scaleCoef * 1.3);
 
                 var nodes = self.data.nodes.get();
-                nodes.forEach(function (node) {
+                nodes.forEach(function (/** @type {{ size: number; originalSize: number; hiddenLabel: any; label: null; shape: any; font: { size: number; }; }} */ node) {
                     if (node.size) {
                         if (!node.originalSize) node.originalSize = node.size;
                         size = node.originalSize * scaleCoef;
@@ -427,12 +447,12 @@ var visjsGraph = (function () {
             self.currentScale = scale;
         });
 
-    self.getExistingIdsMap = function (nodesOnly) {
+    self.getExistingIdsMap = function (/** @type {any} */ nodesOnly) {
         var existingVisjsIds = {};
         if (!visjsGraph.data || !visjsGraph.data.nodes) return {};
         var oldIds = visjsGraph.data.nodes.getIds();
         if (!nodesOnly) oldIds = oldIds.concat(visjsGraph.data.edges.getIds());
-        oldIds.forEach(function (id) {
+        oldIds.forEach(function (/** @type {string | number} */ id) {
             existingVisjsIds[id] = 1;
         });
         return existingVisjsIds;
@@ -445,13 +465,13 @@ var visjsGraph = (function () {
 
     self.graphCsvToClipBoard = function () {
         var csv = visjsGraph.toCsv();
-        common.copyTextToClipboard(csv, function (err, _result) {
+        common.copyTextToClipboard(csv, function (/** @type {any} */ err, /** @type {any} */ _result) {
             if (err) MainController.UI.message(err);
             MainController.UI.message("csv copied in system clipboard");
         });
     };
 
-    self.toCsv = function (dataFields) {
+    self.toCsv = function (/** @type {any[]} */ dataFields) {
         var sep = ",";
         if (dataFields && !Array.isArray(dataFields)) dataFields = [dataFields];
 
@@ -460,11 +480,14 @@ var visjsGraph = (function () {
         var nodesMap = {};
         var csvStr = "";
 
+        /**
+         * @param {{ id: string; label: string; data: { [x: string]: string; }; }} node
+         */
         function getNodeStr(node) {
             if (node) var str = node.id + sep + node.label;
             if (dataFields && node.data) {
                 sep +
-                    dataFields.forEach(function (field) {
+                    dataFields.forEach(function (/** @type {string | number} */ field) {
                         str += node.data[field];
                     });
             }
@@ -472,18 +495,18 @@ var visjsGraph = (function () {
             return str;
         }
 
-        nodes.forEach(function (node) {
+        nodes.forEach(function (/** @type {{ id: string | number; }} */ node) {
             nodesMap[node.id] = node;
             if (edges.length == 0) {
                 csvStr += getNodeStr(node) + "\n";
             }
         });
-        edges.sort(function (a, b) {
+        edges.sort(function (/** @type {{ from: number; }} */ a, /** @type {{ from: number; }} */ b) {
             if (a.from > b.from) return 1;
             if (a.from < b.from) return -1;
             return 0;
         });
-        edges.forEach(function (edge) {
+        edges.forEach(function (/** @type {{ label: string; from: string | number; to: string | number; }} */ edge) {
             var edgeLabel = "->";
             if (edge.label) edgeLabel = edge.label;
             csvStr += getNodeStr(nodesMap[edge.from]) + sep + edgeLabel + sep + getNodeStr(nodesMap[edge.to]) + "\n";
@@ -491,15 +514,18 @@ var visjsGraph = (function () {
 
         return csvStr;
     };
-    self.getNodeDescendantIds = function (nodeIds, includeParents) {
+    self.getNodeDescendantIds = function (/** @type {any[]} */ nodeIds, /** @type {any} */ includeParents) {
         if (!Array.isArray(nodeIds)) nodeIds = [nodeIds];
         var nodes = [];
         if (includeParents) nodes = nodeIds;
         var allEdges = self.data.edges.get();
         var allNodes = {};
 
+        /**
+         * @param {any} nodeId
+         */
         function recurse(nodeId) {
-            allEdges.forEach(function (edge) {
+            allEdges.forEach(function (/** @type {{ from: any; to: string | number; }} */ edge) {
                 if (edge.from == nodeId) {
                     if (!allNodes[edge.to]) {
                         allNodes[edge.to] = 1;
@@ -514,13 +540,13 @@ var visjsGraph = (function () {
             });
         }
 
-        nodeIds.forEach(function (parentId) {
+        nodeIds.forEach(function (/** @type {any} */ parentId) {
             recurse(parentId);
         });
         return nodes;
     };
 
-    self.getNodeDescendants = function (nodeIds, includeParents) {
+    self.getNodeDescendants = function (/** @type {any} */ nodeIds, /** @type {any} */ includeParents) {
         nodeIds = self.getNodeDescendantIds(nodeIds, includeParents);
         return self.data.nodes.get(nodeIds);
     };
@@ -530,7 +556,11 @@ var visjsGraph = (function () {
         return positions;
     };
 
-    self.processClicks = function (params, _options, isDbleClick) {
+    self.processClicks = function (
+        /** @type {{ edges: string | any[]; nodes: string | any[]; event: { srcEvent: { ctrlKey: any; altKey: any; shiftKey: any; }; }; pointer: { DOM: any; }; }} */ params,
+        /** @type {{ fixedLayout: any; onclickFn: (arg0: null, arg1: any, arg2: { dbleClick?: any; ctrlKey?: number; altKey?: number; shiftKey?: number; }) => void; onClusterClickFn: (arg0: any, arg1: any, arg2: { dbleClick: any; ctrlKey: number; altKey: number; shiftKey: number; }) => any; }} */ _options,
+        /** @type {any} */ isDbleClick
+    ) {
         var now = new Date();
         if (now - lastClickTime < dbleClickIntervalDuration) {
             lastClickTime = now;
@@ -588,11 +618,17 @@ var visjsGraph = (function () {
         }
     };
 
-    self.collapseNode = function (nodeId) {
+    self.collapseNode = function (/** @type {any} */ nodeId) {
         var nodeEdges = visjsGraph.data.edges.get();
+        /**
+         * @type {any[]}
+         */
         var targetEdges = [];
+        /**
+         * @type {any[]}
+         */
         var targetNodes = [];
-        nodeEdges.forEach(function (edge) {
+        nodeEdges.forEach(function (/** @type {{ from: any; id: any; to: any; }} */ edge) {
             if (edge.from == nodeId) {
                 targetEdges.push(edge.id);
                 if (targetNodes.indexOf(edge.to) < 0) targetNodes.push(edge.to);
@@ -602,10 +638,13 @@ var visjsGraph = (function () {
         visjsGraph.data.nodes.remove(targetNodes);
     };
 
-    self.focusOnNode = function (id, _label) {
+    self.focusOnNode = function (/** @type {any} */ id, /** @type {any} */ _label) {
         if (id) {
+            /**
+             * @type {{ id: any; shape: string; size: any; }[]}
+             */
             var newNodes = [];
-            self.data.nodes.getIds().forEach(function (nodeId) {
+            self.data.nodes.getIds().forEach(function (/** @type {any} */ nodeId) {
                 var shape = "dot";
                 var size = self.defaultNodeSize;
                 if (nodeId == id) {
@@ -625,10 +664,13 @@ var visjsGraph = (function () {
         }
     };
 
-    self.setNodesProperty = function (conditions, hide) {
+    self.setNodesProperty = function (/** @type {{ [x: string]: any; }} */ conditions, /** @type {any} */ hide) {
         var nodes = self.data.nodes.get();
+        /**
+         * @type {{ id: any; hidden: any; }[]}
+         */
         var newNodes = [];
-        nodes.forEach(function (node) {
+        nodes.forEach(function (/** @type {{ data: { [x: string]: any; }; id: any; }} */ node) {
             for (var key in conditions) {
                 if (node.data[key] == conditions[key]) {
                     newNodes.push({ id: node.id, hidden: hide });
@@ -638,10 +680,13 @@ var visjsGraph = (function () {
         visjsGraph.data.nodes.update(newNodes);
     };
 
-    self.hideShowNodes = function (conditions, hide) {
+    self.hideShowNodes = function (/** @type {{ [x: string]: any; }} */ conditions, /** @type {any} */ hide) {
         var nodes = self.data.nodes.get();
+        /**
+         * @type {{ id: any; hidden: any; }[]}
+         */
         var newNodes = [];
-        nodes.forEach(function (node) {
+        nodes.forEach(function (/** @type {{ data: { [x: string]: any; }; id: any; }} */ node) {
             for (var key in conditions) {
                 if (node.data[key] == conditions[key]) {
                     newNodes.push({ id: node.id, hidden: hide });
@@ -664,7 +709,7 @@ var visjsGraph = (function () {
         common.copyTextToClipboard(xmlStr);
     };
 
-    self.searchNode = function (id, word) {
+    self.searchNode = function (/** @type {any} */ id, /** @type {string | number | string[] | undefined} */ word) {
         /*   if (word === null && !id)
             return;*/
         if (word == "") {
@@ -673,9 +718,15 @@ var visjsGraph = (function () {
         }
 
         var nodes = visjsGraph.data.nodes.get();
+        /**
+         * @type {any[]}
+         */
         var matches = [];
+        /**
+         * @type {{ id: any; shape: string; size: any; }[]}
+         */
         var newNodes = [];
-        nodes.forEach(function (node) {
+        nodes.forEach(function (/** @type {{ data: { label: string; }; id: any; }} */ node) {
             var shape = "dot";
             var size = self.defaultNodeSize;
             var ok = false;
@@ -705,7 +756,10 @@ var visjsGraph = (function () {
         });
     };
 
-    self.saveGraph = function (fileName, raw) {
+    self.saveGraph = function (
+        /** @type {string | number | boolean | string[] | ((this: HTMLElement, index: number, attr: string) => string | number | void | undefined) | ((this: HTMLElement, index: number, text: string) => string | number | boolean) | null} */ fileName,
+        /** @type {any} */ raw
+    ) {
         if (!self.currentContext) return;
         var positions = self.network.getPositions();
 
@@ -745,11 +799,15 @@ var visjsGraph = (function () {
         });
     };
 
-    self.message = function (message) {
+    self.message = function (/** @type {string | JQuery.Node | ((this: HTMLElement, index: number, oldhtml: string) => string | JQuery.Node)} */ message) {
         $("#VisJsGraph_message").html(message);
     };
 
-    self.loadGraph = function (fileName, add, callback) {
+    self.loadGraph = function (
+        /** @type {string | number | string[] | undefined} */ fileName,
+        /** @type {any} */ add,
+        /** @type {(arg0: null, arg1: { nodes: never[]; edges: never[]; }) => void} */ callback
+    ) {
         if (!fileName) fileName = $("#visjsGraph_savedGraphsSelect").val();
         var addToCurrentGraph = $("#visjsGraph_addToCurrentGraphCBX").prop("checked");
         if (!fileName || fileName == "") return;
@@ -766,7 +824,7 @@ var visjsGraph = (function () {
                 var visjsData = { nodes: [], edges: [] };
                 var existingNodes = {};
                 if (addToCurrentGraph) existingNodes = self.getExistingIdsMap();
-                data.nodes.forEach(function (node) {
+                data.nodes.forEach(function (/** @type {{ id: string | number; fixed: { x: boolean; y: boolean; }; x: any; y: any; }} */ node) {
                     if (!existingNodes[node.id]) {
                         existingNodes[node.id] = 1;
                         if ((node.fixed && positions[node.id]) || options.nodes.fixed) {
@@ -778,7 +836,7 @@ var visjsGraph = (function () {
                     }
                 });
 
-                data.edges.forEach(function (edge) {
+                data.edges.forEach(function (/** @type {{ id: string | number; }} */ edge) {
                     if (!existingNodes[edge.id]) {
                         existingNodes[edge.id] = 1;
                         visjsData.edges.push(edge);

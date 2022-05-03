@@ -13,6 +13,9 @@ var Lineage_classes = (function () {
     var sourceColors = {};
     var propertyColors = {};
 
+    /**
+     * @type {{ showLimit?: any; propertyColors?: any; defaultShape?: any; defaultShapeSize?: any; orphanShape?: any; nodeShadow?: any; objectPropertyColor?: any; defaultEdgeArrowType?: any; defaultEdgeColor?: any; restrictionColor?: any; namedIndividualShape?: any; namedIndividualColor?: any; sourcesGraphUriMap?: any; maxChildrenDrawn?: any; soucesLevelMap?: any; mainSource?: any; isLoaded?: any; currentExpandLevel?: any; onLoaded?: any; currentOwlType?: any; onSourceSelect?: any; initUI?: any; registerSourceImports?: any; onGraphOrTreeNodeClick?: any; jstreeContextMenu?: any; selectTreeNodeFn?: any; currentTreeNode?: any; clearLastAddedNodes?: any; drawTopConcepts?: any; getSourceColor?: any; drawNewGraph?: any; getGraphIdsFromSource?: any; addSourceChildrenToGraph?: any; addChildrenToGraph?: any; listClusterToClipboard?: any; listClusterContent?: any; openCluster?: any; drawSimilarsNodes?: any; initIndividualsPropertiesSelect?: any; graphNodeNeighborhood?: any; drawRestrictions?: any; addParentsToGraph?: any; showHideCurrentSourceNodes?: any; drawIndividualsProperties?: any; currentIndividualsProperties?: any; getPropertyColor?: any; drawObjectProperties?: any; withoutImports?: any; drawDictionarySameAs?: any; drawNamedIndividuals?: any; collapseNode?: any; setGraphPopupMenus?: any; zoomGraphOnNode?: any; drawNodeAndParents?: any; registerSource?: any; graphActions?: any; currentGraphEdge?: any; currentGraphNode?: any; setCurrentSource?: any; showHideHelp?: any; }}
+     */
     var self = {};
     self.showLimit = 200;
 
@@ -36,7 +39,7 @@ var Lineage_classes = (function () {
     self.isLoaded = false;
     self.currentExpandLevel = 1;
 
-    self.onLoaded = function (callback) {
+    self.onLoaded = function (/** @type {() => void} */ callback) {
         if (self.isLoaded); // return;
         self.isLoaded = true;
 
@@ -64,7 +67,7 @@ var Lineage_classes = (function () {
                 sourceLabels.sort();
                 //  common.fillSelectOptions("Lineage_toSource", sourceLabels, true)
                 $("#Lineage_Tabs").tabs({
-                    activate: function (e, ui) {
+                    activate: function (/** @type {any} */ e, /** @type {{ newPanel: { selector: any; }; }} */ ui) {
                         self.currentOwlType = "Class";
                         var divId = ui.newPanel.selector;
                         if (divId == "#LineageTypesTab") {
@@ -89,7 +92,10 @@ var Lineage_classes = (function () {
         });
     };
 
-    self.onSourceSelect = function (sourceLabel, event) {
+    self.onSourceSelect = function (
+        /** @type {string | Element | Comment | Document | DocumentFragment | ((this: HTMLElement, index: number, oldhtml: string) => string | JQuery.Node)} */ sourceLabel,
+        /** @type {{ button: number; }} */ event
+    ) {
         if (!sourceLabel) return;
 
         if (event.button == 0)
@@ -106,7 +112,7 @@ var Lineage_classes = (function () {
         $("#accordion").accordion("option", { active: 2 });
         MainController.currentSource = sourceLabel;
         if (!Lineage_common.currentSource) {
-            Lineage_classes.drawTopConcepts(sourceLabel, function (err) {
+            Lineage_classes.drawTopConcepts(sourceLabel, function (/** @type {any} */ err) {
                 if (err) return MainController.UI.message(err);
                 SourceBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineagejsTreeDiv" });
             });
@@ -138,7 +144,11 @@ var Lineage_classes = (function () {
         });
     };
 
-    self.onGraphOrTreeNodeClick = function (node, nodeEvent, options) {
+    self.onGraphOrTreeNodeClick = function (
+        /** @type {{ data: { source: string | number; id: any; }; from: any; }} */ node,
+        /** @type {{ ctrlKey: any; shiftKey: any; altKey: any; }} */ nodeEvent,
+        /** @type {{ callee?: any; }} */ options
+    ) {
         if (!Config.sources[node.data.source]) return;
         if (!options) options = {};
 
@@ -168,10 +178,10 @@ var Lineage_classes = (function () {
 
         items.drawTopConcepts = {
             label: "draw taxonomy",
-            action: function (_e) {
+            action: function (/** @type {any} */ _e) {
                 // pb avec source
                 $("#Lineage_topClassesRadio").prop("checked", true);
-                Lineage_classes.drawTopConcepts(null, function (err, _result) {
+                Lineage_classes.drawTopConcepts(null, function (/** @type {any} */ err, /** @type {any} */ _result) {
                     if (err) return MainController.UI.message(err);
                     SourceBrowser.showThesaurusTopConcepts(Lineage_common.currentSource, { targetDiv: "LineagejsTreeDiv" });
                     //   self.showThesaurusTopConcepts()
@@ -180,7 +190,7 @@ var Lineage_classes = (function () {
         };
         items.addSimilarlabels = {
             label: "add similars (label)",
-            action: function (_e) {
+            action: function (/** @type {any} */ _e) {
                 Lineage_classes.drawSimilarsNodes("sameLabel");
             },
         };
@@ -193,7 +203,7 @@ var Lineage_classes = (function () {
                }*/
         items.wikiPage = {
             label: "Wiki page",
-            action: function (_e) {
+            action: function (/** @type {any} */ _e) {
                 SourceBrowser.showWikiPage(Lineage_common.currentSource);
             },
         };
@@ -201,7 +211,7 @@ var Lineage_classes = (function () {
         return items;
     };
 
-    self.selectTreeNodeFn = function (event, propertiesMap) {
+    self.selectTreeNodeFn = function (/** @type {{ which: number; }} */ event, /** @type {{ node: { data: any; }; event: { ctrlKey: any; }; }} */ propertiesMap) {
         SourceBrowser.currentTreeNode = propertiesMap.node;
         self.currentTreeNode = propertiesMap.node;
         var data = propertiesMap.node.data;
@@ -234,7 +244,7 @@ var Lineage_classes = (function () {
         if (nodes && nodes.length > 0) visjsGraph.data.nodes.remove(nodes);
     };
 
-    self.drawTopConcepts = function (source, callback) {
+    self.drawTopConcepts = function (/** @type {string} */ source, /** @type {(arg0: string | undefined) => any} */ callback) {
         self.currentExpandLevel = 1;
 
         if (!source) source = Lineage_common.currentSource;
@@ -271,7 +281,7 @@ var Lineage_classes = (function () {
             }
         }
         if (imports) {
-            imports.forEach(function (importedSource) {
+            imports.forEach(function (/** @type {string} */ importedSource) {
                 self.soucesLevelMap[importedSource] = { visible: true, children: 0 };
                 var graphUri = Config.sources[importedSource].graphUri;
                 var color = self.getSourceColor(importedSource);
@@ -316,10 +326,10 @@ var Lineage_classes = (function () {
         allSources.push(source);
         async.eachSeries(
             allSources,
-            function (source, callbackEach) {
+            function (/** @type {string} */ source, /** @type {(arg0: undefined) => void} */ callbackEach) {
                 MainController.UI.message("loading source " + source);
                 var options = { withoutImports: true };
-                Sparql_generic.getTopConcepts(source, options, function (err, result) {
+                Sparql_generic.getTopConcepts(source, options, function (/** @type {any} */ err, /** @type {any[]} */ result) {
                     if (err) return callbackEach(err);
                     if (result.length == 0) {
                         $("#waitImg").css("display", "none");
@@ -332,8 +342,11 @@ var Lineage_classes = (function () {
                         if (callback) return callback("too may nodes");
                         return;
                     }
+                    /**
+                     * @type {any[]}
+                     */
                     var ids = [];
-                    result.forEach(function (item) {
+                    result.forEach(function (/** @type {{ topConcept: { value: any; }; }} */ item) {
                         ids.push(item.topConcept.value);
                     });
                     if (!expandedLevels[source]) expandedLevels[source] = [];
@@ -341,7 +354,7 @@ var Lineage_classes = (function () {
                     $("#Lineage_levelDepthSpan").html("level :" + expandedLevels[source].length);
 
                     var shape = self.defaultShape;
-                    result.forEach(function (item) {
+                    result.forEach(function (/** @type {{ topConcept: { value: string; }; topConceptLabel: { value: any; }; }} */ item) {
                         if (!existingNodes[item.topConcept.value]) {
                             existingNodes[item.topConcept.value] = 1;
                             var node = {
@@ -380,7 +393,7 @@ var Lineage_classes = (function () {
                     callbackEach();
                 });
             },
-            function (err, _result) {
+            function (/** @type {any} */ err, /** @type {any} */ _result) {
                 if (err) {
                     if (callback) return callback(err);
                     return alert(err);
@@ -400,7 +413,7 @@ var Lineage_classes = (function () {
         );
     };
 
-    self.drawNewGraph = function (visjsData) {
+    self.drawNewGraph = function (/** @type {any} */ visjsData) {
         graphContext = {};
         var options = {
             keepNodePositionOnDrag: true,
@@ -413,7 +426,7 @@ var Lineage_classes = (function () {
                 },
                 minVelocity: 0.75,
             },
-            onAddNodeToGraph: function (_properties, _senderId) {
+            onAddNodeToGraph: function (/** @type {any} */ _properties, /** @type {any} */ _senderId) {
                 Lineage_decoration.colorGraphNodesByType();
             },
             // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
@@ -427,11 +440,14 @@ var Lineage_classes = (function () {
         $("#waitImg").css("display", "none");
     };
 
-    self.getGraphIdsFromSource = function (source) {
+    self.getGraphIdsFromSource = function (/** @type {any} */ source) {
         if (!visjsGraph.data || !visjsGraph.data.nodes) return null;
         var existingNodes = visjsGraph.data.nodes.get();
+        /**
+         * @type {any[]}
+         */
         var sourceNodes = [];
-        existingNodes.forEach(function (item) {
+        existingNodes.forEach(function (/** @type {{ id: string; data: { source: any; id: any; }; }} */ item) {
             if (item.id != "#" && item.data && item.data.source == source) {
                 sourceNodes.push(item.data.id || item.id);
             }
@@ -446,21 +462,24 @@ var Lineage_classes = (function () {
         self.addChildrenToGraph(source, sourceNodes);
     };
 
-    self.listClusterToClipboard = function (clusterNode) {
+    self.listClusterToClipboard = function (/** @type {{ data: { cluster: any[]; }; }} */ clusterNode) {
         var text = "";
-        clusterNode.data.cluster.forEach(function (item, _index) {
+        clusterNode.data.cluster.forEach(function (/** @type {{ child: string; childLabel: string; }} */ item, /** @type {any} */ _index) {
             text += item.child + "," + item.childLabel + "\n";
         });
 
-        common.copyTextToClipboard(text, function (err, result) {
+        common.copyTextToClipboard(text, function (/** @type {any} */ err, /** @type {any} */ result) {
             if (err) return MainController.UI.message(err);
             MainController.UI.message(result);
         });
     };
 
-    self.listClusterContent = function (clusterNode) {
+    self.listClusterContent = function (/** @type {{ data: { cluster: any[]; source: any; }; }} */ clusterNode) {
+        /**
+         * @type {{ id: any; text: any; parent: string; data: { source: any; id: any; label: any; }; }[]}
+         */
         var jstreeData = [];
-        clusterNode.data.cluster.forEach(function (item, _index) {
+        clusterNode.data.cluster.forEach(function (/** @type {{ child: any; childLabel: any; }} */ item, /** @type {any} */ _index) {
             jstreeData.push({
                 id: item.child,
                 text: item.childLabel,
@@ -471,7 +490,7 @@ var Lineage_classes = (function () {
 
         var jstreeOptions = {
             openAll: true,
-            selectTreeNodeFn: function (event, propertiesMap) {
+            selectTreeNodeFn: function (/** @type {any} */ event, /** @type {any} */ propertiesMap) {
                 return Lineage_classes.selectTreeNodeFn(event, propertiesMap);
             },
             contextMenu: SourceBrowser.getJstreeConceptsContextMenu(),
@@ -480,7 +499,7 @@ var Lineage_classes = (function () {
         common.jstree.loadJsTree(SourceBrowser.currentTargetDiv, jstreeData, jstreeOptions);
     };
 
-    self.openCluster = function (clusterNode) {
+    self.openCluster = function (/** @type {{ data: { cluster: any[]; source: any; }; id: any; }} */ clusterNode) {
         MainController.UI.message("");
         if (clusterNode.data.cluster.length > self.showLimit) {
             self.listClusterToClipboard(clusterNode);
@@ -490,7 +509,7 @@ var Lineage_classes = (function () {
         var color = self.getSourceColor(clusterNode.data.source);
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = visjsGraph.getExistingIdsMap();
-        clusterNode.data.cluster.forEach(function (item) {
+        clusterNode.data.cluster.forEach(function (/** @type {{ child1: string; child1Label: any; concept: string; }} */ item) {
             if (!existingNodes[item.child1]) {
                 existingNodes[item.child1] = 1;
                 visjsData.nodes.push({
@@ -524,27 +543,30 @@ var Lineage_classes = (function () {
         MainController.UI.message("");
     };
 
-    self.drawSimilarsNodes = function (_similarType, _node, _sources, _descendantsAlso) {
+    self.drawSimilarsNodes = function (/** @type {any} */ _similarType, /** @type {any} */ _node, /** @type {any} */ _sources, /** @type {any} */ _descendantsAlso) {
         var fromSource = null;
         var toSources = [Lineage_common.currentSource];
         var nodes = visjsGraph.data.nodes.get();
+        /**
+         * @type {any[]}
+         */
         var labels = [];
         var ids = null;
         var labelsMap = {};
-        nodes.forEach(function (node) {
+        nodes.forEach(function (/** @type {{ data: { label: string | number; }; }} */ node) {
             if (node.data && node.data.label) labels.push(node.data.label);
             labelsMap[node.data.label] = node;
         });
 
-        SearchUtil.getSimilarLabelsInSources(fromSource, toSources, labels, ids, "exactMatch", null, function (err, result) {
+        SearchUtil.getSimilarLabelsInSources(fromSource, toSources, labels, ids, "exactMatch", null, function (/** @type {any} */ err, /** @type {any[]} */ result) {
             if (err) return alert(err);
 
             var existingNodes = visjsGraph.getExistingIdsMap();
             var visjsData = { nodes: [], edges: [] };
-            result.forEach(function (item) {
+            result.forEach(function (/** @type {{ label: string | number; matches: { [x: string]: any[]; }; }} */ item) {
                 var sourceNode = labelsMap[item.label];
                 for (var source in item.matches) {
-                    item.matches[source].forEach(function (match) {
+                    item.matches[source].forEach(function (/** @type {{ id: string; label: any; }} */ match) {
                         if (match.id == sourceNode.id) return;
                         if (!existingNodes[match.id]) {
                             existingNodes[match.id] = 1;
@@ -605,15 +627,18 @@ var Lineage_classes = (function () {
         MainController.UI.message("", true);
     };
 
-    self.initIndividualsPropertiesSelect = function (sourceLabel) {
+    self.initIndividualsPropertiesSelect = function (/** @type {string | number} */ sourceLabel) {
         var schemaType = Config.sources[sourceLabel].schemaType;
         if (schemaType == "INDIVIDUAL") {
             var preferredProperties = Config.sources[sourceLabel].preferredProperties;
             if (!preferredProperties) return alert("no preferredProperties in source configuration");
 
+            /**
+             * @type {{ id: any; text: any; parent: any; }[]}
+             */
             var jstreeData = [];
             var uriPrefixes = {};
-            preferredProperties.forEach(function (item) {
+            preferredProperties.forEach(function (/** @type {string} */ item) {
                 var p;
                 p = item.lastIndexOf("#");
                 if (p < 0) p = item.lastIndexOf("/");
@@ -665,13 +690,13 @@ var Lineage_classes = (function () {
         }
     };
 
-    self.graphNodeNeighborhood = function (nodeData, propFilter) {
+    self.graphNodeNeighborhood = function (/** @type {{ id: string; label: string; }} */ nodeData, /** @type {string} */ propFilter) {
         /*    var sourceOptions=Config.sources[Lineage_common.currentSource].options;
                 if(sourceOptions && sourceOptions.graphPropertiesFilterRegex)
                      var graphPropertiesFilterRegex =new RegExp(sourceOptions.graphPropertiesFilterRegex);*/
 
         if (propFilter == "ranges") {
-            Sparql_OWL.getObjectProperties(Lineage_common.currentSource, [nodeData.id], {}, function (err, result) {
+            Sparql_OWL.getObjectProperties(Lineage_common.currentSource, [nodeData.id], {}, function (/** @type {any} */ err, /** @type {any[]} */ result) {
                 if (err) {
                     return MainController.UI.message(err);
                 }
@@ -683,7 +708,7 @@ var Lineage_classes = (function () {
                 var existingIds = visjsGraph.getExistingIdsMap();
                 var hasProperties = false;
                 var labelStr = "<b>" + nodeData.label + "</b>\n";
-                result.forEach(function (item) {
+                result.forEach(function (/** @type {{ propLabel: { value: any; }; prop: { value: any; }; rangeLabel: { value: any; }; range: { value: any; }; }} */ item) {
                     hasProperties = true;
                     var propLabel;
                     if (item.propLabel) propLabel = item.propLabel.value;
@@ -764,7 +789,7 @@ var Lineage_classes = (function () {
         query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} ";
         query += "}";
         var url = sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Lineage_common.currentSource }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Lineage_common.currentSource }, function (/** @type {any} */ err, /** @type {{ results: { bindings: any; }; }} */ result) {
             if (err) {
                 return MainController.UI.message(err);
             }
@@ -798,7 +823,7 @@ var Lineage_classes = (function () {
                 visjsData.nodes.push(node);
             }
             var distinctProps = {};
-            data.forEach(function (item) {
+            data.forEach(function (/** @type {{ prop: { value: string; }; value: { value: string; }; valueLabel: { value: any; }; propLabel: { value: any; }; }} */ item) {
                 if (true) {
                     if (!distinctProps[item.prop.value]) distinctProps[item.prop.value] = 1;
                     if (!item.prop.value.match(/rdf|owl|skos/) || item.prop.value.indexOf("sameAs") > -1 || item.prop.value.indexOf("partOf") > -1) {
@@ -876,7 +901,7 @@ var Lineage_classes = (function () {
         });
     };
 
-    self.addParentsToGraph = function (source, nodeIds, callback) {
+    self.addParentsToGraph = function (/** @type {any} */ source, /** @type {any} */ nodeIds, /** @type {(arg0: undefined) => void} */ callback) {
         if (!nodeIds) {
             if (!source) source = Lineage_common.currentSource;
             if (!source) return alert("select a source");
@@ -888,8 +913,8 @@ var Lineage_classes = (function () {
 
         async.eachSeries(
             slices,
-            function (slice, callbackEach) {
-                Sparql_generic.getNodeParents(source, null, slice, 2, { exactMatch: 1 }, function (err, result) {
+            function (/** @type {any} */ slice, /** @type {(arg0: undefined) => void} */ callbackEach) {
+                Sparql_generic.getNodeParents(source, null, slice, 2, { exactMatch: 1 }, function (/** @type {any} */ err, /** @type {any[]} */ result) {
                     if (err) return callbackEach(err);
 
                     if (result.length == 0) {
@@ -900,7 +925,7 @@ var Lineage_classes = (function () {
                     var existingNodes = visjsGraph.getExistingIdsMap();
                     var visjsData = { nodes: [], edges: [] };
                     var shape = self.defaultShape;
-                    result.forEach(function (item) {
+                    result.forEach(function (/** @type {{ broader1: { value: string; }; broader1Label: { value: any; }; concept: { value: string; }; }} */ item) {
                         if (item.broader1) {
                             if (!existingNodes[item.broader1.value]) {
                                 existingNodes[item.broader1.value] = 1;
@@ -946,7 +971,7 @@ var Lineage_classes = (function () {
                     callbackEach();
                 });
             },
-            function (err) {
+            function (/** @type {any} */ err) {
                 $("#waitImg").css("display", "none");
                 if (err) {
                     if (callback) return callback(err);
@@ -958,7 +983,7 @@ var Lineage_classes = (function () {
             }
         );
     };
-    self.addChildrenToGraph = function (source, nodeIds, options) {
+    self.addChildrenToGraph = function (/** @type {string | number} */ source, /** @type {any} */ nodeIds, /** @type {{ owlType?: any; depth?: any; dontClusterNodes?: any; }} */ options) {
         self.showHideCurrentSourceNodes(true);
         var parentIds;
         if (!source) {
@@ -971,7 +996,7 @@ var Lineage_classes = (function () {
         } else {
             parentIds = [];
             var nodes = visjsGraph.data.nodes.get();
-            nodes.forEach(function (node) {
+            nodes.forEach(function (/** @type {{ data: { source: any; id: any; }; }} */ node) {
                 if ((source == Lineage_common.currentSource || (node.data && node.data.source == source)) && node.data.id && node.data.id != source) {
                     parentIds.push(node.data.id);
                 }
@@ -984,8 +1009,11 @@ var Lineage_classes = (function () {
         if (self.currentOwlType == "ObjectProperty") options.owlType = "ObjectProperty";
         var depth = 1;
         if (options.depth) depth = options.depth;
-        Sparql_generic.getNodeChildren(source, null, parentIds, depth, { skipRestrictions: 1 }, function (err, result) {
+        Sparql_generic.getNodeChildren(source, null, parentIds, depth, { skipRestrictions: 1 }, function (/** @type {any} */ err, /** @type {any[]} */ result) {
             if (err) return MainController.UI.message(err);
+            /**
+             * @type {never[]}
+             */
             var map = [];
             var ids = [];
 
@@ -995,7 +1023,9 @@ var Lineage_classes = (function () {
             }
             var color = self.getSourceColor(source);
 
-            result.forEach(function (item) {
+            result.forEach(function (
+                /** @type {{ concept: { value: string | number; }; conceptLabel: { value: any; }; child1: { value: any; }; child1Label: { value: any; }; child2: { value: any; }; child2Label: { value: any; }; child3: { value: any; }; child3Label: { value: any; }; }} */ item
+            ) {
                 if (!map[item.concept.value]) map[item.concept.value] = [];
                 map[item.concept.value].push({
                     concept: item.concept.value,
@@ -1014,11 +1044,14 @@ var Lineage_classes = (function () {
             var existingNodes = visjsGraph.getExistingIdsMap(true);
             var visjsData = { nodes: [], edges: [] };
             self.currentExpandLevel += 1;
+            /**
+             * @type {any[]}
+             */
             var expandedLevel = [];
             for (var key in map) {
                 //check if cluster is already open
                 var cancelCluster = true;
-                map[key].forEach(function (item) {
+                map[key].forEach(function (/** @type {{ child1: string | number; }} */ item) {
                     if (existingNodes[item.child1]) cancelCluster = true;
                 });
 
@@ -1068,7 +1101,7 @@ var Lineage_classes = (function () {
                 } else {
                     var existingIds = visjsGraph.getExistingIdsMap();
                     var visjsData2 = { nodes: [], edges: [] };
-                    map[key].forEach(function (item) {
+                    map[key].forEach(function (/** @type {{ [x: string]: any; id: any; concept: any; }} */ item) {
                         var nodeSource = source;
                         var shape = Lineage_classes.defaultShape;
                         var shapeSize = Lineage_classes.defaultShapeSize;
@@ -1136,7 +1169,7 @@ var Lineage_classes = (function () {
             $("#waitImg").css("display", "none");
         });
     };
-    self.drawIndividualsProperties = function (propertyId, classIds, options) {
+    self.drawIndividualsProperties = function (/** @type {any} */ propertyId, /** @type {any} */ classIds, /** @type {{ inverse?: any; }} */ options) {
         if (!options) {
             options = {};
         }
@@ -1162,7 +1195,7 @@ var Lineage_classes = (function () {
             subjects = classIds;
         }
         MainController.UI.message("");
-        Sparql_OWL.getIndividualProperties(source, subjects, [propertyId], objects, null, function (err, result) {
+        Sparql_OWL.getIndividualProperties(source, subjects, [propertyId], objects, null, function (/** @type {any} */ err, /** @type {any[]} */ result) {
             if ($("#lineage_clearIndividualsPropertiesCBX").prop("checked")) {
                 var oldIds = Object.keys(self.currentIndividualsProperties);
                 visjsGraph.data.nodes.remove(oldIds);
@@ -1179,7 +1212,9 @@ var Lineage_classes = (function () {
             var existingNodes = visjsGraph.getExistingIdsMap();
             var color = self.getPropertyColor(propertyId);
 
-            result.forEach(function (item) {
+            result.forEach(function (
+                /** @type {{ subject: { value: any; }; property: { value: string; }; subjectLabel: { value: any; }; object: { value: any; }; objectLabel: { value: any; }; propertyLabel: { value: string; }; }} */ item
+            ) {
                 if (!item.subject) {
                     item.subject = { value: "?_" + item.property.value };
                 }
@@ -1260,7 +1295,7 @@ var Lineage_classes = (function () {
         });
     };
 
-    self.drawObjectProperties = function (source, classIds, _descendantsAlso) {
+    self.drawObjectProperties = function (/** @type {any} */ source, /** @type {string | null} */ classIds, /** @type {any} */ _descendantsAlso) {
         if (!classIds) {
             if (!source) source = Lineage_common.currentSource;
             if (!source) return alert("select a source");
@@ -1275,7 +1310,7 @@ var Lineage_classes = (function () {
                 withoutImports: 1,
                 addInverseRestrictions: 1,
             },
-            function (err, result) {
+            function (/** @type {any} */ err, /** @type {any[]} */ result) {
                 if (err) return MainController.UI.message(err);
                 if (result.length == 0) {
                     $("#waitImg").css("display", "none");
@@ -1285,7 +1320,9 @@ var Lineage_classes = (function () {
                 var visjsData = { nodes: [], edges: [] };
                 var existingNodes = visjsGraph.getExistingIdsMap();
                 self.currentExpandLevel += 1;
-                result.forEach(function (item) {
+                result.forEach(function (
+                    /** @type {{ range: { value?: any; range?: string; }; prop: { value: string; }; rangeLabel: { value: any; }; domain: { value: any; }; propLabel: { value: string; }; }} */ item
+                ) {
                     if (!item.range) {
                         item.range = { value: "?_" + item.prop.value };
                     }
@@ -1356,7 +1393,13 @@ var Lineage_classes = (function () {
         );
     };
 
-    self.drawRestrictions = function (source, classIds, descendants, withoutImports, options) {
+    self.drawRestrictions = function (
+        /** @type {any} */ source,
+        /** @type {string | null} */ classIds,
+        /** @type {any} */ descendants,
+        /** @type {any} */ withoutImports,
+        /** @type {{ processorFn?: any; }} */ options
+    ) {
         if (!options) options = {};
         if (!classIds) {
             if (!source) source = Lineage_common.currentSource;
@@ -1374,7 +1417,7 @@ var Lineage_classes = (function () {
                 withoutImports: withoutImports || self.withoutImports,
                 addInverseRestrictions: 1,
             },
-            function (err, result) {
+            function (/** @type {any} */ err, /** @type {any[]} */ result) {
                 if (err) return MainController.UI.message(err);
 
                 if (result.length == 0) {
@@ -1386,7 +1429,9 @@ var Lineage_classes = (function () {
                 self.currentExpandLevel += 1;
 
                 var shape = Lineage_classes.defaultShape;
-                result.forEach(function (item) {
+                result.forEach(function (
+                    /** @type {{ concept: { value: string; }; conceptLabel: { value: any; }; value: { value: any; }; prop: { value: string; }; valueLabel: { value: any; }; propLabel: { value: string; }; node: { value: any; }; }} */ item
+                ) {
                     if (!existingNodes[item.concept.value]) {
                         existingNodes[item.concept.value] = 1;
                         var color = self.getSourceColor(source);
@@ -1487,9 +1532,12 @@ var Lineage_classes = (function () {
     };
 
     self.drawDictionarySameAs = function () {
+        /**
+         * @param {any[]} restrictionNodes
+         */
         function processMetadata(restrictionNodes) {
             var restrictionIds = [];
-            restrictionNodes.forEach(function (bNode) {
+            restrictionNodes.forEach(function (/** @type {{ node: { id: any; }; }} */ bNode) {
                 restrictionIds.push(bNode.node.id);
             });
         }
@@ -1502,7 +1550,7 @@ var Lineage_classes = (function () {
         self.drawRestrictions(Config.dictionarySource, existingNodes, false, false, options);
     };
 
-    self.drawNamedIndividuals = function (classIds) {
+    self.drawNamedIndividuals = function (/** @type {any[]} */ classIds) {
         var source = Lineage_common.currentSource;
         if (!source) return alert("select a source");
         if (!classIds) {
@@ -1510,7 +1558,7 @@ var Lineage_classes = (function () {
         }
         MainController.UI.message("");
 
-        Sparql_OWL.getNamedIndividuals(source, classIds, null, function (err, result) {
+        Sparql_OWL.getNamedIndividuals(source, classIds, null, function (/** @type {any} */ err, /** @type {any[]} */ result) {
             if (err) return MainController.UI.message(err);
             if (result.length == 0) {
                 $("#waitImg").css("display", "none");
@@ -1522,7 +1570,7 @@ var Lineage_classes = (function () {
             //  console.log(JSON.stringify(result, null, 2))
 
             if (!Array.isArray(classIds)) classIds = [classIds];
-            result.forEach(function (item) {
+            result.forEach(function (/** @type {{ node: { value: string; }; nodeLabel: { value: any; }; concept: { value: string; }; conceptLabel: { value: any; }; }} */ item) {
                 if (!existingNodes[item.node.value]) {
                     existingNodes[item.node.value] = 1;
                     visjsData.nodes.push({
@@ -1585,7 +1633,7 @@ var Lineage_classes = (function () {
         });
     };
 
-    self.collapseNode = function (nodeId) {
+    self.collapseNode = function (/** @type {any} */ nodeId) {
         if (nodeId) {
             var children = visjsGraph.network.getConnectedNodes(nodeId, "from");
             visjsGraph.data.nodes.remove(children);
@@ -1597,7 +1645,7 @@ var Lineage_classes = (function () {
         }
     };
 
-    self.setGraphPopupMenus = function (node, event) {
+    self.setGraphPopupMenus = function (/** @type {{ id: string | string[]; data: { cluster: string | any[]; }; }} */ node, /** @type {any} */ event) {
         if (!node) return;
         graphContext.clickOptions = event;
         var html =
@@ -1625,7 +1673,7 @@ var Lineage_classes = (function () {
               }*/
         $("#graphPopupDiv").html(html);
     };
-    self.zoomGraphOnNode = function (nodeId) {
+    self.zoomGraphOnNode = function (/** @type {any} */ nodeId) {
         var nodes = visjsGraph.data.nodes.getIds();
         if (nodes.indexOf(nodeId) < 0) return;
         visjsGraph.network.focus(nodeId, {
@@ -1634,9 +1682,12 @@ var Lineage_classes = (function () {
             animation: true,
         });
 
+        /**
+         * @type {{ id: any; size: any; shadow: any; shape: any; font: { color: string; }; }[]}
+         */
         var newNodes = [];
         nodes = visjsGraph.data.nodes.get();
-        nodes.forEach(function (node) {
+        nodes.forEach(function (/** @type {{ data: { initialParams: { size: any; shape: any; shadow?: any; }; }; shape: any; size: any; id: any; }} */ node) {
             if (!node.data) return;
             //  if (!node.data.initialParams) {
             node.data.initialParams = {
@@ -1661,14 +1712,20 @@ var Lineage_classes = (function () {
         visjsGraph.data.nodes.update(newNodes);
     };
 
-    self.drawNodeAndParents = function (nodeData, callback) {
+    self.drawNodeAndParents = function (
+        /** @type {{ source: string | number; label: any; text: any; id: string | number; }} */ nodeData,
+        /** @type {(arg0: string | null, arg1: { nodes: never[]; edges: never[]; } | undefined) => any} */ callback
+    ) {
+        /**
+         * @param {any[]} result
+         */
         function drawNodeAndparent(result) {
             var visjsData = { nodes: [], edges: [] };
             var color = self.getSourceColor(nodeData.source);
             var newNodeIds = [];
             if (!nodeData.label && nodeData.text) nodeData.label = nodeData.text;
             var existingNodes = visjsGraph.getExistingIdsMap();
-            result.forEach(function (item) {
+            result.forEach(function (/** @type {{ [x: string]: { value: any; }; concept: { value: string | number; }; conceptLabel: { value: any; }; }} */ item) {
                 if (!existingNodes[item.concept.value]) {
                     existingNodes[item.concept.value] = 1;
                     visjsData.nodes.push({
@@ -1794,7 +1851,7 @@ var Lineage_classes = (function () {
         var schemaType = Config.sources[nodeData.source].schemaType;
         if (schemaType == "OWL" || schemaType == "SKOS") {
             var ancestorsDepth = 7;
-            Sparql_generic.getNodeParents(nodeData.source, null, nodeData.id, ancestorsDepth, { skipRestrictions: 1 }, function (err, result) {
+            Sparql_generic.getNodeParents(nodeData.source, null, nodeData.id, ancestorsDepth, { skipRestrictions: 1 }, function (/** @type {any} */ err, /** @type {string | any[]} */ result) {
                 if (err) {
                     if (callback) return callback(err);
                     return MainController.UI.message(err);
@@ -1823,7 +1880,7 @@ var Lineage_classes = (function () {
     };
 
     self.graphActions = {
-        showGraphPopupMenu: function (node, point, event) {
+        showGraphPopupMenu: function (/** @type {{ from: any; }} */ node, /** @type {any} */ point, /** @type {any} */ event) {
             if (node.from) {
                 self.currentGraphEdge = node;
                 if (!self.currentGraphEdge.data || !self.currentGraphEdge.data.propertyId) return;
@@ -1835,7 +1892,7 @@ var Lineage_classes = (function () {
             }
         },
 
-        onNodeClick: function (node, point, options) {
+        onNodeClick: function (/** @type {{ data: { cluster: any; }; }} */ node, /** @type {any} */ point, /** @type {{ dbleClick: any; }} */ options) {
             if (!node) {
                 MainController.UI.hidePopup("graphPopupDiv");
                 Lineage_blend.clearAssociationNodes();
@@ -1894,7 +1951,7 @@ var Lineage_classes = (function () {
             SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv");
         },
 
-        graphNodeNeighborhood: function (filter) {
+        graphNodeNeighborhood: function (/** @type {any} */ filter) {
             Lineage_classes.graphNodeNeighborhood(self.currentGraphNode.data, filter);
         },
 
@@ -1931,7 +1988,7 @@ var Lineage_classes = (function () {
         },
     };
 
-    self.getSourceColor = function (source, nodeId, palette) {
+    self.getSourceColor = function (/** @type {string | number} */ source, /** @type {string | string[]} */ nodeId, /** @type {string} */ palette) {
         if (!palette) palette = "paletteIntense";
 
         if (nodeId) {
@@ -1949,13 +2006,13 @@ var Lineage_classes = (function () {
         }
         return sourceColors[source];
     };
-    self.getPropertyColor = function (propertyName, palette) {
+    self.getPropertyColor = function (/** @type {string | number} */ propertyName, /** @type {string} */ palette) {
         if (!palette) palette = "paletteIntense";
         if (!propertyColors[propertyName]) propertyColors[propertyName] = common[palette][Object.keys(propertyColors).length];
         return propertyColors[propertyName];
     };
 
-    self.registerSource = function (source) {
+    self.registerSource = function (/** @type {string | number | boolean} */ source) {
         if (expandedLevels[source]) return;
         var id = "Lineage_source_" + encodeURIComponent(source);
         if (document.getElementById(id) !== null) return;
@@ -1978,17 +2035,17 @@ var Lineage_classes = (function () {
         //  self.setCurrentSource(encodeURIComponent(source))
     };
 
-    self.registerSourceImports = function (sourceLabel) {
+    self.registerSourceImports = function (/** @type {string | number} */ sourceLabel) {
         self.registerSource(sourceLabel);
         var imports = Config.sources[sourceLabel].imports;
         if (!imports) imports = [];
 
-        imports.forEach(function (source) {
+        imports.forEach(function (/** @type {any} */ source) {
             self.registerSource(source);
         });
     };
 
-    self.setCurrentSource = function (sourceId) {
+    self.setCurrentSource = function (/** @type {string | number | boolean} */ sourceId) {
         $(".Lineage_sourceLabelDiv").removeClass("Lineage_selectedSourceDiv");
         $("#Lineage_source_" + sourceId).addClass("Lineage_selectedSourceDiv");
         Lineage_common.currentSource = encodeURIComponent(sourceId);
@@ -1997,8 +2054,11 @@ var Lineage_classes = (function () {
             self.drawTopConcepts(sourceId);
         }
     };
-    self.showHideCurrentSourceNodes = function (show) {
+    self.showHideCurrentSourceNodes = function (/** @type {any} */ show) {
         if (Lineage_common.currentSource == Lineage_classes.mainSource) return;
+        /**
+         * @type {boolean}
+         */
         var visible;
         if (show)
             // force passage à visible
@@ -2008,8 +2068,11 @@ var Lineage_classes = (function () {
         else self.soucesLevelMap[Lineage_common.currentSource].visible = true;
 
         var allNodes = visjsGraph.data.nodes.get();
+        /**
+         * @type {{ id: any; hidden: any; }[]}
+         */
         var newNodes = [];
-        allNodes.forEach(function (node) {
+        allNodes.forEach(function (/** @type {{ data: { source: any; }; id: any; }} */ node) {
             if (node && node.data && node.data.source == Lineage_common.currentSource) newNodes.push({ id: node.id, hidden: visible });
         });
         visjsGraph.data.nodes.update(newNodes);

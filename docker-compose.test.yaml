@@ -1,6 +1,5 @@
 version: "3"
 services:
-
     virtuoso:
         image: askomics/virtuoso:7.2.6.1a
         environment:

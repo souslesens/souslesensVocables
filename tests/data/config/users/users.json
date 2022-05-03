@@ -8,22 +8,22 @@
         "_type": "user",
         "name": "admin"
     },
-    "regular1": {
-        "id": "regular1",
-        "login": "regular1",
+    "owl_user": {
+        "id": "owl_user",
+        "login": "owl_user",
         "password": "$2b$10$ed6ZDHUbN7NfOGrufiDniudK9EMLCFg9qFgJ0N/T.nRTBPlA5Mm9C",
-        "groups": ["regular1"],
+        "groups": ["owl_only"],
         "source": "json",
         "_type": "user",
-        "name": "regular1"
+        "name": "owl_user"
     },
-    "regular2": {
-        "id": "regular2",
-        "login": "regular2",
+    "skos_user": {
+        "id": "skos_user",
+        "login": "skos_user",
         "password": "$2b$10$ed6ZDHUbN7NfOGrufiDniudK9EMLCFg9qFgJ0N/T.nRTBPlA5Mm9C",
-        "groups": ["regular2"],
+        "groups": ["skos_only"],
         "source": "json",
         "_type": "user",
-        "name": "regular2"
+        "name": "skos_user"
     }
 }

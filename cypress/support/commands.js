@@ -23,3 +23,19 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+Cypress.Commands.add('login', (username) => {
+    cy.visit("http://localhost:3011/login");
+    cy.get("#username").click();
+    cy.get("#username").type(username);
+    cy.get("#password").type("admin");
+    cy.get(".btn").click();
+})
+
+Cypress.Commands.add('logout', () => {
+    // FIXME:
+    cy.on("uncaught:exception", (_err, _runnable) => {
+        return false;
+    });
+    cy.get('#user-username').click();
+    cy.get('li:nth-child(2) > .dropdown-item').click();
+})

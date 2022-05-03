@@ -1,17 +1,40 @@
 describe("Lineage", function () {
-    it("When I log in as Admin and when I click lineage and click BFO, a graph pops up", function () {
-        cy.viewport(960, 630);
+
+    // Logout after each test
+    afterEach(() => {
+        cy.logout()
+    })
+
+    it("When I log in as admin and when I click lineage and click BFO, a graph pops up", function () {
+        // cy.viewport(960, 630);
 
         // Login as admin
-        cy.visit("http://localhost:3011/login");
-        cy.get("#username").click();
-        cy.get("#username").type("admin");
-        cy.get("#password").type("admin");
-        cy.get(".btn").click();
-        cy.url().should("contains", "http://localhost:3011/vocables/");
+        cy.login("admin")
 
         // test BFO source
         cy.get("#lineage_anchor").click();
         cy.get("#BFO_anchor").click();
+    });
+
+    it("When I log in as owl_user and when I click lineage and click BFO, a graph pops up", function () {
+        // cy.viewport(960, 630);
+
+        // Login as owl_user
+        cy.login("owl_user")
+
+        // test BFO source
+        cy.get("#lineage_anchor").click();
+        cy.get("#BFO_anchor").click();
+    });
+
+    it("When I log in as skos_user and when I click lineage and click BFO, NO graph pops up", function () {
+        // cy.viewport(960, 630);
+
+        // Login as skos_user
+        cy.login("skos_user")
+
+        // test BFO source is not available
+        cy.get("#lineage_anchor").click();
+        cy.get("#BFO_anchor").should('not.exist');
     });
 });

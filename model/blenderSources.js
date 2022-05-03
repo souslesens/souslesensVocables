@@ -4,7 +4,7 @@ const fs = require("fs");
  * @typedef {Object} BlenderSource
  * @prop {boolean} editable
  * @prop {string} controller
- * @prop {Sparql_Server} sparql_server
+ * @prop {SparqlServer} sparql_server
  * @prop {string} graphUri
  * @prop {Predicates} predicates
  * @prop {boolean} protected
@@ -18,8 +18,11 @@ const fs = require("fs");
  */
 
 /**
- * @typedef {Object} Sparql_Server
+ * @typedef {Object} SparqlServer
  * @prop {string} url
+ */
+/**
+ * @typedef {Record<string, BlenderSource>} BlenderSourcesMap
  */
 class BlenderSources {
     /**
@@ -32,16 +35,12 @@ class BlenderSources {
     }
 
     /**
-     * @returns {Promise<Record<string, BlenderSource>>} a collection of UserAccount
+     * @returns {Promise<BlenderSourcesMap>} a collection of blenderSources
      */
 
     get = async () => {
         const data = await fs.promises.readFile(this.blenderSourcePath);
-        //  /**
-        //   * @type {Record<string, BlenderSource>}
-        //   */
         const blenderSources = JSON.parse(data.toString());
-
         return blenderSources;
     };
 }

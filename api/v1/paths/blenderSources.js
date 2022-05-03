@@ -1,5 +1,5 @@
 const { blenderSources } = require("../../../model/blenderSources");
-const { responseSchema, successfullyFetched, failure } = require("./utils");
+const { responseSchema, successfullyFetched } = require("./utils");
 module.exports = function () {
     let operations = {
         GET,
@@ -9,7 +9,6 @@ module.exports = function () {
             const blenderSourcesData = await blenderSources.get();
             res.status(200).json(successfullyFetched(blenderSourcesData));
         } catch (error) {
-            failure(res, 500, "");
             next(error);
         }
     }

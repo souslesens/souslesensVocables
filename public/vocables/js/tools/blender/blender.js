@@ -32,7 +32,7 @@ var Blender = (function () {
 
             $.ajax({
                 type: "GET",
-                url: Config.apiUrl + "/getBlenderSources",
+                url: Config.apiUrl + "/blenderSources",
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
                     for (var key in data.resources) {

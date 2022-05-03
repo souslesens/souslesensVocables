@@ -21,9 +21,7 @@ var KeyCloakStrategy = require("passport-keycloak-oauth2-oidc").Strategy;
 const ULID = require("ulid");
 
 // Get config
-var mainConfigFilePath = path.join(__dirname, "../config/mainConfig.json");
-var str = fs.readFileSync(mainConfigFilePath);
-var config = JSON.parse("" + str);
+const { config } = require("../model/config");
 
 if (config.auth == "keycloak") {
     // Configure auth client (Keycloak)

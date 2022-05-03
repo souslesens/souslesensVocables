@@ -1,5 +1,5 @@
 const path = require("path");
-const config = require(path.resolve("config/mainConfig.json"));
+const { config } = require(path.resolve("model/config"));
 const logger = require(path.resolve("bin/logger..js"));
 const fs = require("fs");
 

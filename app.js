@@ -13,7 +13,7 @@ const indexRouter = require("./legacy_routes");
 const httpProxy = require(path.resolve("bin/httpProxy."));
 const userManager = require(path.resolve("bin/user."));
 
-const config = require(path.resolve("config/mainConfig.json"));
+const { config } = require("./model/config");
 
 var app = express();
 

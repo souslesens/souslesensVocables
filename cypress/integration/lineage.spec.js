@@ -1,28 +1,40 @@
 describe("Lineage", function () {
-    it("When I log in as Admin and when I click lineage and click CFIHOS a graph pops up", function () {
-        cy.viewport(960, 630);
 
-        cy.visit("http://localhost:3010/login");
+    // Logout after each test
+    afterEach(() => {
+        cy.logout()
+    })
 
-        cy.get(".modal-content > .modal-body > form > .form-group > #username").click();
+    it("When I log in as admin and when I click lineage and click BFO, a graph pops up", function () {
+        // cy.viewport(960, 630);
 
-        cy.get(".modal-content > .modal-body > form > .form-group > #username").type("admin");
+        // Login as admin
+        cy.login("admin")
 
-        cy.get(".modal-content > .modal-body > form > .form-group > #password").type("admin");
+        // test BFO source
+        cy.get("#lineage_anchor").click();
+        cy.get("#BFO_anchor").click();
+    });
 
-        cy.get(".modal-dialog > .modal-content > .modal-body > form > .btn").click();
+    it("When I log in as owl_user and when I click lineage and click BFO, a graph pops up", function () {
+        // cy.viewport(960, 630);
 
-        cy.visit("http://localhost:3010/vocables/");
+        // Login as owl_user
+        cy.login("owl_user")
 
-        cy.get("#ui-id-2 > #toolsTreeDiv > .jstree-container-ul > #lineage > #lineage_anchor").click();
+        // test BFO source
+        cy.get("#lineage_anchor").click();
+        cy.get("#BFO_anchor").click();
+    });
 
-        cy.get(".jstree-container-ul > #OWL > .jstree-children > #CFIHOS-ISO > #CFIHOS-ISO_anchor").click();
+    it("When I log in as skos_user and when I click lineage and click BFO, NO graph pops up", function () {
+        // cy.viewport(960, 630);
 
-        //FIXME: https://forge.extranet.logilab.fr/totalenergies/tsf/-/issues/140
-        cy.on("uncaught:exception", (_err, _runnable) => {
-            return false;
-        });
+        // Login as skos_user
+        cy.login("skos_user")
 
-        cy.get("div > #centralPanelDiv > #graphDiv > .vis-network > canvas").click();
+        // test BFO source is not available
+        cy.get("#lineage_anchor").click();
+        cy.get("#BFO_anchor").should('not.exist');
     });
 });

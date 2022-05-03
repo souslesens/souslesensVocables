@@ -1,4 +1,5 @@
 const fs = require("fs");
+const { configPath: defaultConfigPath } = require("./config");
 
 /**
  * @typedef {import("../mainapp/lib/User").UserAccount} UserAccount
@@ -36,6 +37,6 @@ class UserModel {
     };
 }
 
-const userModel = new UserModel("config");
+const userModel = new UserModel(defaultConfigPath);
 
 module.exports = { userModel, UserModel };

@@ -15,51 +15,47 @@ var SourceManager = require("./sourceManager.");
 var path = require("path");
 var async = require("async");
 var fs = require("fs");
+const { configPath, config } = require("../model/config");
 
 var ConfigManager = {
-    config: {},
     getGeneralConfig: function (callback) {
-        var mainConfigFilePath = path.join(__dirname, "../config/mainConfig.json");
-
-        var str = fs.readFileSync(mainConfigFilePath);
         //   console.log(str)
-        var config = null;
+        var editableConfig = config;
         var err = null;
         try {
-            config = JSON.parse("" + str);
-            config.version = process.env.npm_package_version;
-            console.log(config, null, 2);
-            if (!config.data_dir) config.data_dir = path.join(__dirname, "../data/");
+            editableConfig.version = process.env.npm_package_version;
+            console.log(editableConfig, null, 2);
+            if (!editableConfig.data_dir) editableConfig.data_dir = path.join(__dirname, "../data/");
 
-            ConfigManager.config = config;
+            ConfigManager.config = editableConfig;
         } catch (e) {
             console.log(e);
             // in that case return the string content not parsed
             err = e;
         } finally {
-            if (callback) callback(err, config);
+            if (callback) callback(err, editableConfig);
         }
     },
     getProfiles: function (options, callback) {
-        var profilesPath = path.join(__dirname, "../config/profiles.json");
+        var profilesPath = path.join(__dirname, "../" + configPath + "/profiles.json");
         jsonFileStorage.retrieve(path.resolve(profilesPath), function (err, profiles) {
             callback(err, profiles);
         });
     },
     getUsers: function (options, callback) {
-        var profilesPath = path.join(__dirname, "../config/users.json");
+        var profilesPath = path.join(__dirname, "../" + configPath + "/users.json");
         jsonFileStorage.retrieve(path.resolve(profilesPath), function (err, profiles) {
             callback(err, profiles);
         });
     },
     getSources: function (options, callback) {
-        var sourcesPath = path.join(__dirname, "../config/sources.json");
+        var sourcesPath = path.join(__dirname, "../" + configPath + "/sources.json");
         jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
             callback(err, sources);
         });
     },
     getBlenderSources: function (options, callback) {
-        var sourcesPath = path.join(__dirname, "../config/blenderSources.json");
+        var sourcesPath = path.join(__dirname, "../" + configPath + "/blenderSources.json");
         jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
             callback(err, sources);
         });
@@ -76,7 +72,7 @@ var ConfigManager = {
                     else if (options.type == "OWL") return callbackSeries(null);
                 },
                 function (callbackSeries) {
-                    var sourcesPath = path.join(__dirname, "../config/blenderSources.json");
+                    var sourcesPath = path.join(__dirname, "../" + configPath + "/blenderSources.json");
                     jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
                         if (err) return callback(err);
                         if (options.type == "SKOS") {
@@ -127,7 +123,7 @@ var ConfigManager = {
                     });
                 },
                 function (callbackSeries) {
-                    var sourcesPath = path.join(__dirname, "../config/blenderSources.json");
+                    var sourcesPath = path.join(__dirname, "../" + configPath + "/blenderSources.json");
                     jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
                         if (err) return callback(err);
                         delete sources[sourceName];
@@ -157,7 +153,7 @@ var ConfigManager = {
         });
     },
     saveSources: function (sources, callback) {
-        var sourcesPath = path.join(__dirname, "../config/sources.json");
+        var sourcesPath = path.join(__dirname, "../" + configPath + "/sources.json");
         jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, message) {
             callback(err, message);
         });

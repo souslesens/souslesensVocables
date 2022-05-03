@@ -9,6 +9,9 @@ on:
     pull_request:
         branches: [master]
 
+env:
+    CONFIG_PATH: tests/data/config
+
 jobs:
     test:
         runs-on: ubuntu-latest

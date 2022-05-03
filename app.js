@@ -13,9 +13,15 @@ const indexRouter = require("./legacy_routes");
 const httpProxy = require(path.resolve("bin/httpProxy."));
 const userManager = require(path.resolve("bin/user."));
 
-const config = require(path.resolve("config/mainConfig.json"));
+const { config } = require("./model/config");
 
 var app = express();
+
+// sentry/glitchtip
+if (config.sentryDsnNode) {
+    const Sentry = require("@sentry/node");
+    Sentry.init({ dsn: config.sentryDsnNode });
+}
 
 // App middleware for authentication and session handling
 app.use(express.json());

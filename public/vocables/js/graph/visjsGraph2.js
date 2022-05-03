@@ -188,8 +188,10 @@ var visjsGraph = (function () {
                 newNodes.push({ id: nodeId, fixed: fixed });
                 visjsGraph.data.nodes.update(newNodes);
             })
-
-            .on("dragging", function (/** @type {any} */ _params) {
+            .on("controlNodeDragging", function (params) {
+                self.currentDraggingMousePosition = params.pointer.DOM;
+            })
+            .on("dragging", function (_params) {
                 /* if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
                 return false;
                 }*/

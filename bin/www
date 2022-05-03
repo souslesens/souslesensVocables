@@ -7,6 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('souslesensvocables:server');
 var http = require('http');
+const { config } = require("../model/config");
 //var socket = require('../routes/socket.js');
 
 
@@ -19,7 +20,7 @@ var http = require('http');
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3010');
+var port = normalizePort(process.env.PORT || (config.listenPort || '3010'));
 app.set('port', port);
 
 /**

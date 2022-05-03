@@ -23,19 +23,21 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-Cypress.Commands.add('login', (username) => {
+Cypress.Commands.add("login", (username) => {
     cy.visit("http://localhost:3011/login");
+    cy.viewport(1920, 1200);
     cy.get("#username").click();
     cy.get("#username").type(username);
     cy.get("#password").type("admin");
     cy.get(".btn").click();
-})
+});
 
-Cypress.Commands.add('logout', () => {
+Cypress.Commands.add("logout", () => {
     // FIXME:
     cy.on("uncaught:exception", (_err, _runnable) => {
         return false;
     });
-    cy.get('#user-username').click();
-    cy.get('li:nth-child(2) > .dropdown-item').click();
-})
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.get("#user-username").click();
+    cy.get("li:nth-child(2) > .dropdown-item").click();
+});

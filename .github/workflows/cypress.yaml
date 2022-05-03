@@ -16,16 +16,24 @@ jobs:
               uses: actions/checkout@v2
             # Install NPM dependencies, cache them correctly
             # and run all Cypress tests
+            - name: Install packages
+              run: |
+                sudo apt-get update
+                sudo apt install -y docker-compose
+            - name: Deploy containers & load data
+              run: |
+                  sudo docker-compose -f docker-compose.test.yaml up -d
+                  sleep 1m
+                  bash tests/load_data.sh
+                  sleep 30s
             - name: Build mainapp
               working-directory: ./mainapp
               run: node & npm ci && npm run build
-            - name: Generates config
-              run: node scripts/init_configs.js
             - name: Cypress run
               uses: cypress-io/github-action@v2
               with:
-                  start: npm start
-                  wait-on: "http://localhost:3010"
+                  start: CONFIG_PATH=tests/data/config npm start
+                  wait-on: "http://localhost:3011"
                   wait-on-timeout: 120
                   config-file: cypress.json
                   headless: true

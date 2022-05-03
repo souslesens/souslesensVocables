@@ -11,11 +11,16 @@ jobs:
         runs-on: ubuntu-latest
         timeout-minutes: 10
 
+    env:
+      CONFIG_PATH: tests/data/config
+
         steps:
             - name: Checkout
               uses: actions/checkout@v2
             # Install NPM dependencies, cache them correctly
             # and run all Cypress tests
+            - name: check env
+              run: echo ${CONFIG_PATH}
             - name: Install packages
               run: |
                 sudo apt-get update
@@ -32,7 +37,7 @@ jobs:
             - name: Cypress run
               uses: cypress-io/github-action@v2
               with:
-                  start: CONFIG_PATH=tests/data/config npm start
+                  start: npm start
                   wait-on: "http://localhost:3011"
                   wait-on-timeout: 120
                   config-file: cypress.json

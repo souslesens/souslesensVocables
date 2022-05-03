@@ -6,16 +6,13 @@ on:
     pull_request:
         branches: [master]
 
-
 env:
-  CONFIG_PATH: tests/data/config
-
+    CONFIG_PATH: tests/data/config
 
 jobs:
     cypress-run:
         runs-on: ubuntu-latest
         timeout-minutes: 10
-
 
         steps:
             - name: Checkout
@@ -26,8 +23,8 @@ jobs:
               run: echo ${CONFIG_PATH}
             - name: Install packages
               run: |
-                sudo apt-get update
-                sudo apt install -y docker-compose
+                  sudo apt-get update
+                  sudo apt install -y docker-compose
             - name: Deploy containers & load data
               run: |
                   sudo docker-compose -f docker-compose.test.yaml up -d

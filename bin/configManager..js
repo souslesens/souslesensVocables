@@ -15,7 +15,7 @@ var SourceManager = require("./sourceManager.");
 var path = require("path");
 var async = require("async");
 var fs = require("fs");
-const { config } = require("../model/config");
+const { configPath, config } = require("../model/config");
 
 var ConfigManager = {
     getGeneralConfig: function (callback) {
@@ -37,25 +37,25 @@ var ConfigManager = {
         }
     },
     getProfiles: function (options, callback) {
-        var profilesPath = path.join(__dirname, "../config/profiles.json");
+        var profilesPath = path.join(__dirname, "../" + configPath + "/profiles.json");
         jsonFileStorage.retrieve(path.resolve(profilesPath), function (err, profiles) {
             callback(err, profiles);
         });
     },
     getUsers: function (options, callback) {
-        var profilesPath = path.join(__dirname, "../config/users.json");
+        var profilesPath = path.join(__dirname, "../" + configPath + "/users.json");
         jsonFileStorage.retrieve(path.resolve(profilesPath), function (err, profiles) {
             callback(err, profiles);
         });
     },
     getSources: function (options, callback) {
-        var sourcesPath = path.join(__dirname, "../config/sources.json");
+        var sourcesPath = path.join(__dirname, "../" + configPath + "/sources.json");
         jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
             callback(err, sources);
         });
     },
     getBlenderSources: function (options, callback) {
-        var sourcesPath = path.join(__dirname, "../config/blenderSources.json");
+        var sourcesPath = path.join(__dirname, "../" + configPath + "/blenderSources.json");
         jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
             callback(err, sources);
         });
@@ -72,7 +72,7 @@ var ConfigManager = {
                     else if (options.type == "OWL") return callbackSeries(null);
                 },
                 function (callbackSeries) {
-                    var sourcesPath = path.join(__dirname, "../config/blenderSources.json");
+                    var sourcesPath = path.join(__dirname, "../" + configPath + "/blenderSources.json");
                     jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
                         if (err) return callback(err);
                         if (options.type == "SKOS") {
@@ -123,7 +123,7 @@ var ConfigManager = {
                     });
                 },
                 function (callbackSeries) {
-                    var sourcesPath = path.join(__dirname, "../config/blenderSources.json");
+                    var sourcesPath = path.join(__dirname, "../" + configPath + "/blenderSources.json");
                     jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
                         if (err) return callback(err);
                         delete sources[sourceName];
@@ -153,7 +153,7 @@ var ConfigManager = {
         });
     },
     saveSources: function (sources, callback) {
-        var sourcesPath = path.join(__dirname, "../config/sources.json");
+        var sourcesPath = path.join(__dirname, "../" + configPath + "/sources.json");
         jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, message) {
             callback(err, message);
         });

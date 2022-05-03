@@ -1,6 +1,7 @@
 const { userModel } = require("../../../model/users");
+const { configPath, config } = require("../../../model/config");
 const path = require("path");
-const profilesJSON = path.resolve("config/users/users.json");
+const profilesJSON = path.resolve(configPath + "/users/users.json");
 exports.profilesJSON = profilesJSON;
 const { readResource, writeResource, responseSchema, resourceCreated, resourceUpdated, successfullyFetched } = require("./utils");
 const bcrypt = require("bcrypt");

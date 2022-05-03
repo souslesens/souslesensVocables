@@ -1,7 +1,8 @@
 const path = require("path");
 const fs = require("fs");
 const modelUsers = require("../../../../model/users");
-const profilesJSON = path.resolve("config/users/users.json");
+const { configPath, config } = require("../../../../model/config");
+const profilesJSON = path.resolve(configPath + "/users/users.json");
 const util = require("util");
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);

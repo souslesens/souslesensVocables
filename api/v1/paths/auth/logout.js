@@ -1,5 +1,5 @@
 const path = require("path");
-const config = require(path.resolve("config/mainConfig.json"));
+const { config } = require(path.resolve("model/config"));
 
 module.exports = function () {
     let operations = {

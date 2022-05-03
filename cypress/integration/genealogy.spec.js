@@ -22,16 +22,14 @@ describe("Genealogy tests suit", function () {
 
         cy.get("#toolPanelDiv > #actionDiv > #dialogDiv > div:nth-child(2) > .btn").click();
 
-        cy.get("#CFIHOS-ISO > .jstree-children > #http\3A//data.15926.org/rdl/RDS479744 > #http\3A//data.15926.org/rdl/RDS479744_anchor > .tree_level_2").click();
+        cy.get("span[class='tree_level_2']").contains("CARBON / undefined").click();
 
         cy.get("#toolPanelDiv > #actionDiv > #dialogDiv > #conceptOperationsDiv > .btn").click();
 
         cy.get("div > #centralPanelDiv > #graphDiv > .vis-network > canvas").click();
+        // We cant run those steps because those elements are inside a canvas div.
+        //cy.get("#accordion > #toolPanelDiv > #actionDiv > #graphPopupDiv > .popupMenuItem:nth-child(2)").click();
 
-        cy.get("#accordion > #toolPanelDiv > #actionDiv > #graphPopupDiv > .popupMenuItem:nth-child(2)").click();
-
-        cy.get(".infosTable > tbody > tr:nth-child(1) > td > a").click();
-
-        cy.visit("http://data.15926.org/dm/PossibleIndividual");
+        //cy.get(".infosTable > tbody > tr:nth-child(1) > td > a");
     });
 });

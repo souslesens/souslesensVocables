@@ -1,7 +1,8 @@
 const path = require("path");
 const fs = require("fs");
-const sourcesJSON = path.resolve("config/sources.json");
-const profilesJSON = path.resolve("config/profiles.json");
+const { configPath, config } = require("../../../model/config");
+const sourcesJSON = path.resolve(configPath + "/sources.json");
+const profilesJSON = path.resolve(configPath + "/profiles.json");
 exports.profilesJSON = sourcesJSON;
 const util = require("util");
 const { readResource, writeResource, resourceCreated, resourceUpdated, responseSchema, resourceFetched } = require("./utils");

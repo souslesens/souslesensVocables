@@ -21,7 +21,7 @@ var KeyCloakStrategy = require("passport-keycloak-oauth2-oidc").Strategy;
 const ULID = require("ulid");
 
 // Get config
-const { config } = require("../model/config");
+const { configPath, config } = require("../model/config");
 
 if (config.auth == "keycloak") {
     // Configure auth client (Keycloak)
@@ -37,7 +37,7 @@ if (config.auth == "keycloak") {
         },
         function (accessToken, refreshToken, profile, done) {
             // Auth user here
-            const usersLocation = path.join(__dirname, "../config/users/users.json");
+            const usersLocation = path.join(__dirname, "../" + configPath + "/users/users.json");
             let users = JSON.parse("" + fs.readFileSync(usersLocation));
 
             // Search users
@@ -95,7 +95,7 @@ if (config.auth == "keycloak") {
 } else if (config.auth === "json") {
     passport.use(
         new Strategy(function (username, password, cb) {
-            var usersLocation = path.join(__dirname, "../config/users/users.json");
+            var usersLocation = path.join(__dirname, "../" + configPath + "/users/users.json");
             jsonFileStorage.retrieve(path.resolve(usersLocation), function (err, users) {
                 // console.log(users)
                 if (err) {

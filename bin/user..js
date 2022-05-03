@@ -1,11 +1,11 @@
 const fs = require("fs");
 const path = require("path");
-const { config } = require("../model/config");
+const { configPath, config } = require("../model/config");
 
 const user = {
     getUser: function (reqUser) {
         //TODO: replace with model/users
-        const usersLocation = path.join(__dirname, "../config/users/users.json");
+        const usersLocation = path.join(__dirname, "../" + configPath + "/users/users.json");
         let users = JSON.parse("" + fs.readFileSync(usersLocation));
 
         let result = {};

@@ -1,5 +1,5 @@
 describe("Lineage", function () {
-    it("When I log in as Admin and when I click lineage and click CFIHOS a graph pops up", function () {
+    it("When I log in as Admin and when I click lineage and click BFO, a graph pops up", function () {
         cy.viewport(960, 630);
 
         // Login as admin

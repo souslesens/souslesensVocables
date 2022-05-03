@@ -18,10 +18,10 @@ describe("Browser test suit", function () {
 
         cy.get(".jstree-container-ul > #OWL > .jstree-children > #CFIHOS-ISO > #CFIHOS-ISO_anchor").click();
 
-        cy.get("#currentSourceTreeDiv > .jstree-container-ul > #http\3A//data.15926.org/dm/AbstractObject_6171 > #http\3A//data.15926.org/dm/AbstractObject_6171_anchor > .treeType_Class").click();
+        cy.get('span[class="treeType_Class"]').contains("AbstractObject").click();
 
         cy.get(".infosTable > tbody > tr:nth-child(1) > td > a").click();
 
-        cy.visit("http://data.15926.org/dm/AbstractObject");
+        cy.get('a[href="http://data.15926.org/dm/AbstractObject"]');
     });
 });

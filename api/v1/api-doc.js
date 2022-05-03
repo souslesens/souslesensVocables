@@ -57,10 +57,10 @@ const apiDoc = {
                 protected: { type: "boolean" },
                 color: { type: "string" },
                 isBlenderTemplate: { type: "boolean" },
-                sparql_server: { type: "object", additionalProperties: { $ref: "#/definitions/Sparql_Server" } },
+                sparql_server: { type: "object", additionalProperties: { $ref: "#/definitions/SparqlServer" } },
             },
         },
-        Sparql_Server: {
+        SparqlServer: {
             type: "object",
             properties: { url: { type: "string" } },
         },

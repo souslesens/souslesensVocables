@@ -45,4 +45,5 @@ jobs:
                   browser: chrome
                   spec: |
                       cypress/integration/login.spec.js
+                      cypress/integration/lineage.spec.js
                   runTests: true

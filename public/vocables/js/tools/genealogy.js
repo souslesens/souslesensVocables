@@ -65,7 +65,7 @@ var Genealogy = (function () {
         async.eachSeries(
             sourceLabels,
             function (sourceId, callbackEach) {
-                if (!Config.sources[sourceId].controller) callbackEach();
+                if (!Config.sources[sourceId].controller) return callbackEach();
                 //  setTimeout(function () {
                 MainController.UI.message("searching in " + sourceId);
                 //    callbackEach()

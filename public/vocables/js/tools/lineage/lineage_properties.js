@@ -100,6 +100,7 @@ Lineage_properties = (function () {
     self.openNode = function (node) {
         var options = { subPropIds: node.id };
         MainController.UI.message("searching in " + Lineage_common.currentSource);
+        // @ts-ignore
         Sparql_OWL.getObjectProperties(Lineage_common.currentSource, null, options, function (err, result) {
             if (err) return MainController.UI.message(err);
             var data = common.array.sort(common.array.distinctValues(result, "prop"), "propLabel");

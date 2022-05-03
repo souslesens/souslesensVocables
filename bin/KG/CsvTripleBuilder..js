@@ -50,6 +50,15 @@ var CsvTripleBuilder = {
         });
     },
 
+    /**
+     * Generate triples
+     *
+     * @param mappings - ?
+     * @param {string} graphUri - URI of the graph to generate
+     * @param {string} sparqlServerUrl - URL of the sparql endpoint
+     * @param {Object} options - {sampleSize: , }
+     * @param {Function} callback - Node-style async Function called to proccess result or handle error
+     */
     createTriples: function (mappings, graphUri, sparqlServerUrl, options, callback) {
         //  var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/test/"
         var totalTriples = 0;
@@ -399,6 +408,16 @@ var CsvTripleBuilder = {
             }
         );
     },
+
+    /**
+     * Query <graphUri> at <sparqlServerUrl> to select all `?s part14:hasPart ?o` and
+     * generate owl#Restrictions that are added to the same graph.
+     *
+     * @param {string} graphUri - URI of the graph to query
+     * @param {string} sparqlServerUrl - URL of the sparql endpoint
+     * @param {Object} options - NOT USED XXX
+     * @param {Function} callback - Node-style async Function called to proccess result or handle error
+     */
     addAllPredefinedPart14PredicatesTriples: function (graphUri, sparqlServerUrl, options, callback) {
         var objIds = [];
         async.series(
@@ -406,15 +425,15 @@ var CsvTripleBuilder = {
                 function (callbackSeries) {
                     var queryGraph =
                         "PREFIX xs: <http://www.w3.org/2001/XMLSchema#>" +
+                        "PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                        "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                         "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
                         "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                         "PREFIX iso14224: <http://data.total.com/resource/tsf/iso_14224#>" +
                         "PREFIX req: <https://w3id.org/requirement-ontology/rdl/>" +
                         "PREFIX part14: <http://standards.iso.org/iso/15926/part14/>";
 
-                    queryGraph += " select  * from <" + graphUri + "> where {";
+                    queryGraph += " select * from <" + graphUri + "> where {";
                     queryGraph +=
                         " ?s part14:hasPart ?o." +
                         " ?s rdfs:subClassOf ?sType." +
@@ -493,6 +512,14 @@ var CsvTripleBuilder = {
         );
     },
 
+    /**
+     * Write <triples> in <graphUri> at <sparqlServerUrl>
+     *
+     * @param {Array} triples - array of {s: ,p: ,o: }
+     * @param {string} graphUri - URI to name the graph that will be written
+     * @param {string} sparqlServerUrl - URL of the sparql endpoint where to write the graph
+     * @param {Function} callback - Node-style async Function called to proccess result or handle error
+     */
     writeTriples: function (triples, graphUri, sparqlServerUrl, callback) {
         var insertTriplesStr = "";
         var totalTriples = 0;
@@ -504,8 +531,8 @@ var CsvTripleBuilder = {
 
         var queryGraph =
             "PREFIX xs: <http://www.w3.org/2001/XMLSchema#>" +
+            "PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
             "PREFIX iso14224: <http://data.total.com/resource/tsf/iso_14224#>" +
@@ -532,6 +559,13 @@ var CsvTripleBuilder = {
         });
     },
 
+    /**
+     * Delete graph named <graphUri> from sparql endpoint at <sparqlServerUrl>
+     *
+     * @param {string} graphUri - URI of the graph to delete
+     * @param {string} sparqlServerUrl - URL of the sparql endpoint
+     * @param {Function} callback - Node-style async Function called to proccess result or handle error
+     */
     clearGraph: function (graphUri, sparqlServerUrl, callback) {
         async.series(
             [
@@ -564,6 +598,15 @@ var CsvTripleBuilder = {
             }
         );
     },
+
+    /**
+     * Generate triples from a CSV file
+     *
+     * @param {string} dirName - the subdirectory of <src-dir>/data where to look for <mappingFileName>
+     * @param {string} mappingFileName - name of the csv file to generate triples from
+     * @param {Object} options - keys: sparqlServerUrl, deleteOldGraph, graphUri
+     * @param {Function} callback - Node-style async Function called to proccess result or handle error
+     */
     createTriplesFromCsv: function (dirName, mappingFileName, options, callback) {
         var sparqlServerUrl;
         var output = "";

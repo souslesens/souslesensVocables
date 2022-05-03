@@ -165,6 +165,7 @@ var visjsGraph = (function () {
                 edge.toNode = self.data.nodes.get(edge.to);
                 //   sinequaResultVis.onEdgeHover(edge, point)
             })
+
             .on("blurEdge", function (_params) {
                 //  sinequaResultVis.onEdgeBlur()
             })
@@ -180,7 +181,9 @@ var visjsGraph = (function () {
                 newNodes.push({ id: nodeId, fixed: fixed });
                 visjsGraph.data.nodes.update(newNodes);
             })
-
+            .on("controlNodeDragging", function (params) {
+                self.currentDraggingMousePosition = params.pointer.DOM;
+            })
             .on("dragging", function (_params) {
                 /* if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
                 return false;

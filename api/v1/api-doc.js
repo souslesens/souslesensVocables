@@ -52,7 +52,7 @@ const apiDoc = {
             type: "object",
             properties: {
                 editable: { type: "boolean" },
-                controlloer: { type: "string" },
+                controller: { type: "string" },
                 graphUri: { type: "string" },
                 protected: { type: "boolean" },
                 color: { type: "string" },

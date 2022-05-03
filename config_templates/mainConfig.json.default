@@ -6,6 +6,8 @@
   "auth": "json",
   "defaultGroups": [],
   "logDir": "logs",
+  "sentryDsnNode": "",
+  "sentryDsnJsFront": "",
   "keycloak": {
     "realm": "master",
     "publicClient": false,

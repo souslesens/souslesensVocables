@@ -2,7 +2,7 @@ describe("Lineage", function () {
     it("When I log in as Admin and when I click lineage and click CFIHOS a graph pops up", function () {
         cy.viewport(960, 630);
 
-        cy.visit("http://localhost:3010/login");
+        cy.visit("http://localhost:3011/login");
 
         cy.get(".modal-content > .modal-body > form > .form-group > #username").click();
 

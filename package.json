@@ -15,7 +15,7 @@
         "patch": " npm version patch",
         "minor": " npm version minor",
         "major": " npm version major",
-        "uitest": "cypress open",
+        "uitest": "CONFIG_PATH=tests/data/config npm start & cypress open",
         "test": "jest --rootDir tests"
     },
     "devDependencies": {

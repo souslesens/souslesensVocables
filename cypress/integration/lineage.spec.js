@@ -5,8 +5,6 @@ describe("Lineage", function () {
     });
 
     it("When I log in as admin and when I click lineage and click BFO, a graph pops up", function () {
-        // cy.viewport(960, 630);
-
         // Login as admin
         cy.login("admin");
 
@@ -16,8 +14,6 @@ describe("Lineage", function () {
     });
 
     it("When I log in as owl_user and when I click lineage and click BFO, a graph pops up", function () {
-        // cy.viewport(960, 630);
-
         // Login as owl_user
         cy.login("owl_user");
 
@@ -27,8 +23,6 @@ describe("Lineage", function () {
     });
 
     it("When I log in as skos_user and when I click lineage and click BFO, NO graph pops up", function () {
-        // cy.viewport(960, 630);
-
         // Login as skos_user
         cy.login("skos_user");
 

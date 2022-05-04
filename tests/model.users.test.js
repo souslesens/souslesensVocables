@@ -20,17 +20,17 @@ describe("UserModel", () => {
                 source: "json",
                 _type: "user",
             },
-            regular1: {
-                id: "regular1",
-                login: "regular1",
-                groups: ["regular1"],
+            owl_user: {
+                id: "owl_user",
+                login: "owl_user",
+                groups: ["owl_only"],
                 source: "json",
                 _type: "user",
             },
-            regular2: {
-                id: "regular2",
-                login: "regular2",
-                groups: ["regular2"],
+            skos_user: {
+                id: "skos_user",
+                login: "skos_user",
+                groups: ["skos_only"],
                 source: "json",
                 _type: "user",
             },

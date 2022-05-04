@@ -41,3 +41,13 @@ Cypress.Commands.add("logout", () => {
     cy.get("#user-username").click();
     cy.get("li:nth-child(2) > .dropdown-item").click();
 });
+
+Cypress.Commands.add("refreshBfoIndex", () => {
+    cy.login("admin");
+    cy.visit("http://localhost:3011/vocables/");
+    cy.get("#graphDiv").click();
+    cy.get("#admin_anchor").click();
+    cy.get("#BFO_anchor > .jstree-checkbox").click();
+    cy.get(".my-1:nth-child(1)").click();
+    cy.logout();
+});

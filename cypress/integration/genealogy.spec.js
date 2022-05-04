@@ -1,18 +1,10 @@
 describe("Genealogy tests suit", function () {
+    afterEach(() => {
+        cy.logout();
+    });
+
     it("When I logged as an admin and when I click on genealogy, choose a source, and compare with a term ", function () {
-        cy.viewport(1920, 975);
-
-        cy.visit("http://localhost:3010/login");
-
-        cy.get(".modal-content > .modal-body > form > .form-group > #username").click();
-
-        cy.get(".modal-content > .modal-body > form > .form-group > #username").type("admin");
-
-        cy.get(".modal-content > .modal-body > form > .form-group > #password").type("admin");
-
-        cy.get(".modal-dialog > .modal-content > .modal-body > form > .btn").click();
-
-        cy.visit("http://localhost:3010/vocables/");
+        cy.login("admin");
 
         cy.get("#ui-id-2 > #toolsTreeDiv > .jstree-container-ul > #ancestors > #ancestors_anchor").click();
 

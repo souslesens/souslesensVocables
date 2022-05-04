@@ -1,27 +1,59 @@
-describe("Genealogy tests suit", function () {
+describe("Genealogy test suit", function () {
+    before(() => {
+        cy.refreshBfoIndex();
+    });
     afterEach(() => {
         cy.logout();
     });
 
-    it("When I logged as an admin and when I click on genealogy, choose a source, and compare with a term ", function () {
-        cy.login("admin");
+    context("Given I'm an admin", function () {
+        beforeEach(() => {
+            cy.login("admin");
+        });
 
-        cy.get("#ui-id-2 > #toolsTreeDiv > .jstree-container-ul > #ancestors > #ancestors_anchor").click();
+        it("when I click genealogy, it display graph ancestor", () => {
+            cy.visit("http://localhost:3011/vocables/");
+            cy.get("#ancestors_anchor").click();
+            cy.get("#BFO_anchor > .jstree-checkbox").click();
+            cy.get(".my-1:nth-child(1)").click();
+            cy.get("#searchWordInput").dblclick();
+            cy.get("#searchWordInput").clear().type("quality");
+            cy.get("div:nth-child(2) > .my-1").click();
+            cy.get("#conceptOperationsDiv > .btn").click();
+            cy.get('span[class="tree_level_1"]').contains("BFO");
+            cy.get('div[class="vis-network"]');
+        });
+    });
 
-        cy.get(".jstree-container-ul > #OWL > .jstree-children > #CFIHOS-ISO > #CFIHOS-ISO_anchor").click();
+    context("Given I'm an owl_user", function () {
+        beforeEach(() => {
+            cy.login("owl_user");
+        });
 
-        cy.get("#leftPanelDiv > #accordion > #sourcesPanel > #sourceDivControlPanelDiv > .btn").click();
+        it("when I click genealogy, it display graph ancestor", () => {
+            cy.visit("http://localhost:3011/vocables/");
+            cy.get("#ancestors_anchor").click();
+            cy.get("#BFO_anchor > .jstree-checkbox").click();
+            cy.get(".my-1:nth-child(1)").click();
+            cy.get("#searchWordInput").dblclick();
+            cy.get("#searchWordInput").clear().type("quality");
+            cy.get("div:nth-child(2) > .my-1").click();
+            cy.get("#conceptOperationsDiv > .btn").click();
+            cy.get('span[class="tree_level_1"]').contains("BFO");
+            cy.get('div[class="vis-network"]');
+        });
+    });
 
-        cy.get("#toolPanelDiv > #actionDiv > #dialogDiv > div:nth-child(2) > .btn").click();
+    context("Given I'm a skos_user", function () {
+        beforeEach(() => {
+            cy.login("skos_user");
+        });
 
-        cy.get("span[class='tree_level_2']").contains("CARBON / undefined").click();
-
-        cy.get("#toolPanelDiv > #actionDiv > #dialogDiv > #conceptOperationsDiv > .btn").click();
-
-        cy.get("div > #centralPanelDiv > #graphDiv > .vis-network > canvas").click();
-        // We cant run those steps because those elements are inside a canvas div.
-        //cy.get("#accordion > #toolPanelDiv > #actionDiv > #graphPopupDiv > .popupMenuItem:nth-child(2)").click();
-
-        //cy.get(".infosTable > tbody > tr:nth-child(1) > td > a");
+        it("when I click genealogy, it can't display the BFO source", () => {
+            cy.visit("http://localhost:3011/vocables/");
+            cy.get("#ancestors_anchor").click();
+            cy.get("#BFO_anchor").should("not.exist");
+            cy.get('div[class="vis-network"]').should("not.exist");
+        });
     });
 });

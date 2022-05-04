@@ -1,18 +1,9 @@
 describe("Browser test suit", function () {
+    afterEach(() => {
+        cy.logout();
+    });
     it("Given I'm an admin, when I click browser and choose the first source, I can click on uri link and visit Abstract Object page", function () {
-        cy.viewport(960, 968);
-
-        cy.visit("http://localhost:3010/login");
-
-        cy.get(".modal-content > .modal-body > form > .form-group > #username").click();
-
-        cy.get(".modal-content > .modal-body > form > .form-group > #username").type("admin");
-
-        cy.get(".modal-content > .modal-body > form > .form-group > #password").type("admin");
-
-        cy.get(".modal-dialog > .modal-content > .modal-body > form > .btn").click();
-
-        cy.visit("http://localhost:3010/vocables/");
+        cy.login("admin");
 
         cy.get("#ui-id-2 > #toolsTreeDiv > .jstree-container-ul > #sourceBrowser > #sourceBrowser_anchor").click();
 

@@ -8,6 +8,14 @@ services:
             - 8891:8890
         volumes:
             - ./tests/data/rdf:/usr/local/virtuoso-opensource/var/lib/virtuoso/db/dumps
+        command: |
+            sh /virtuoso/virtuoso.sh &
+            sleep 10s
+            isql-v -U dba -P dba  <<EOF
+                ld_dir('dumps', 'bfo_classes_only.owl', 'http://purl.obolibrary.org/obo/bfo.owl');
+                rdf_loader_run();
+                exit;
+            EOF
         networks:
             - test-backend
 

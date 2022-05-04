@@ -7,7 +7,7 @@
         "graphUri": "http://purl.obolibrary.org/obo/bfo.owl",
         "sparql_server": {
             "url": "_default",
-            "method": "Get"
+            "method": "GET"
         },
         "editable": true,
         "controller": "Sparql_OWL",
@@ -23,17 +23,5 @@
         },
         "group": "",
         "imports": []
-    },
-    "CFIHOS-ISO": {
-        "graphUri": "",
-        "sparql_server": {
-            "url": "http://192.236.179.169/sparql",
-            "method": "GET"
-        },
-        "controller": "Sparql_OWL",
-        "topClassFilter": "  ?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
-        "schemaType": "OWL",
-        "schema": null,
-        "color": "#bcbd22"
     }
 }

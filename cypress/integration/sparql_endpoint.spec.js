@@ -9,12 +9,11 @@ describe("SPARQL endpoint test suit", function () {
         });
 
         it("when I click SPARQL endpoint, I can perform a sparql query", () => {
-            cy.visit('http://localhost:3011/vocables/');
-            cy.get('#SPARQL_anchor').click();
-            cy.get('#BFO_anchor').click();
-            cy.get('#queryIcon').click();
-            cy.get('table[id="DataTables_Table_0"]')
-
+            cy.visit("http://localhost:3011/vocables/");
+            cy.get("#SPARQL_anchor").click();
+            cy.get("#BFO_anchor").click();
+            cy.get("#queryIcon").click();
+            cy.get('table[id="DataTables_Table_0"]');
         });
     });
 
@@ -24,11 +23,11 @@ describe("SPARQL endpoint test suit", function () {
         });
 
         it("when I click SPARQL endpoint, I can perform a sparql query", () => {
-            cy.visit('http://localhost:3011/vocables/');
-            cy.get('#SPARQL_anchor').click();
-            cy.get('#BFO_anchor').click();
-            cy.get('#queryIcon').click();
-            cy.get('table[id="DataTables_Table_0"]')
+            cy.visit("http://localhost:3011/vocables/");
+            cy.get("#SPARQL_anchor").click();
+            cy.get("#BFO_anchor").click();
+            cy.get("#queryIcon").click();
+            cy.get('table[id="DataTables_Table_0"]');
         });
     });
 
@@ -38,8 +37,8 @@ describe("SPARQL endpoint test suit", function () {
         });
 
         it("when I click genealogy, it can't display the BFO source", () => {
-            cy.visit('http://localhost:3011/vocables/');
-            cy.get('#SPARQL_anchor').click();
+            cy.visit("http://localhost:3011/vocables/");
+            cy.get("#SPARQL_anchor").click();
             cy.get("#BFO_anchor").should("not.exist");
             cy.get('table[id="DataTables_Table_0"]').should("not.exist");
         });

@@ -4,8 +4,10 @@ var Admin = (function () {
 
     self.onLoaded = function () {
         var html =
+          " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showTSFdictionary()'>TSF Dictionary</button>" +
             "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.refreshIndexes()'>refreshIndexes </button>&nbsp;<input type='checkbox'  id='admin_refreshIndexWithImportCBX' > Imports also<br>" +
             " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportTaxonomyToCsv()'>export Taxonomy To Csv </button>" +
+        
             " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportNT()'>export NT </button>" +
             " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.getClassesLineage()'>getLineage </button>" +
             " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showUserSources()'>showUserSources </button>" +
@@ -17,6 +19,10 @@ var Admin = (function () {
     self.onSourceSelect = function () {
         // Pass
     };
+    
+    self.showTSFdictionary=function(){
+        Lineage_dictionary.showTSFdictionaryDialog('Lineage_dictionary')
+    }
     self.refreshIndexes = function () {
         var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
         if (!sources || sources.length == 0) return alert(" no source selected");

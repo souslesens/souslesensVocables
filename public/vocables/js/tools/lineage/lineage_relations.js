@@ -15,7 +15,7 @@ Lineage_relations = (function () {
         if (Object.keys(visjsGraph.getExistingIdsMap().length == 0)) $("#LineageRelations_nodesSelectionSelect").val("All Nodes");
 
         common.fillSelectOptions("LineageRelations_setExactMatchSameAsSourceSelect", sources, true);
-        common.fillSelectOptions("LineageRelations_propertiesSelect", [], true);
+        common.fillSelectOptions("LineageRelations_property_select", [], true);
         var statusList = [
             { id: "http://data.souslesens.org/status/candidate", label: "candidate" },
             { id: "http://data.souslesens.org/status/reference", label: "reference" },
@@ -46,7 +46,7 @@ Lineage_relations = (function () {
                 });
                 if (!asSamAsProp) props.splice(0, 0, { id: "http://www.w3.org/2002/07/owl#sameAs", label: "sameAs" });
 
-                common.fillSelectOptions("LineageRelations_propertiesSelect", props, true, "label", "id");
+                common.fillSelectOptions("LineageRelations_property_select", props, true, "label", "id");
                 // self.initProjectedGraphs()
 
 
@@ -164,12 +164,12 @@ Lineage_relations = (function () {
 
         var restrictions = [];
         var filter = "";
-        var propertyFilter = $("#LineageRelations_propertiesSelect").val();
+        var propertyFilter = $("#LineageRelations_property_select").val();
         var creatorFilter = $("#LineageRelations_creatorSelect").val();
         var statusFilter = $("#LineageRelations_statusSelect").val();
         var provenanceFilter = $("#LineageRelations_provenanceSelect").val();
 
-        // $("#LineageRelations_propertiesSelect").val("")
+        // $("#LineageRelations_property_select").val("")
         if (propertyFilter && propertyFilter != "") filter += " filter (?prop=<" + propertyFilter + ">)";
         if (creatorFilter && creatorFilter != "") filter += " filter (?creator='" + creatorFilter + "')";
         if (statusFilter && statusFilter != "") filter += " filter (?status=<" + statusFilter + ">)";

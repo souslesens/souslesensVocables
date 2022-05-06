@@ -4,20 +4,52 @@
     <div class="lineage_actionDiv_title">Similars selection</div>
 
 
-    <div>
+   <!-- <div>
       TargetSource
       <select style="width: 300px" id="LineageDictionary_rangeSourceSelect"></select>
-    </div>
+    </div>-->
   </div>
   <div class="lineage_actionDiv">
-    <div class="lineage_actionDiv_title">Selection</div>
+    <div class="lineage_actionDiv_title" id="LineageDictionary_nodesSelectionDiv" style="display:none">
     Nodes Selection
     <select style="width: 300px" id="LineageDictionary_nodesSelectionSelect">
       <option value="currentGraphNodes">Current Graph Nodes</option>
       <option value="selectedNodeDescendants">Selected node descendants</option>
       <option value="allNodes">All Nodes</option>
     </select>
+    </div>
+  </div>
+  <div style="display: flex;flex-direction: column;width: 300px;">
+    filters
+    <div>
+      DomainSource
+      <select style="width: 300px"  class="dictionary_filter"  id="LineageDictionary_domainSourceLabel_select" onchange="Lineage_dictionary.onChangeFilterSelect($(this).val())"></select>
+    </div>
+    <div>
+      RangeSource
+      <select style="width: 300px"  class="dictionary_filter"  id="LineageDictionary_rangeSourceLabel_select" onchange="Lineage_dictionary.onChangeFilterSelect($(this).val())"></select>
+    </div>
+    <div>
+      Status
+      <select style="width: 300px"  class="dictionary_filter"  id="LineageDictionary_status_select"></select>
+    </div>
+    <div>
+      Provenance
+      <select style="width: 300px"  class="dictionary_filter"  id="LineageDictionary_provenance_select"></select>
+    </div>
+    <div>
+      Creator
+      <select style="width: 300px" class="dictionary_filter"   id="LineageDictionary_creator_select"></select>
+    </div>
+    <div>
+      StartDate
+      <input style="width: 300px"  class="dictionary_filter"  id="LineageDictionary_startDate_input"></input>
+
+      EndDate
+      <input style="width: 300px"  class="dictionary_filter"  id="LineageDictionary_endDate_input"></input>
+    </div>
 
   </div>
-  <button onclick="Lineage_dictionary.drawDictionarySameAs()">OK</button>
+  <button  id="LineageDictionary_drawSimilars" onclick="Lineage_dictionary.drawDictionarySameAs()" style="display:none">Draw Similars</button>
+  <button  id="LineageDictionary_listDictionary" onclick="Lineage_dictionary.exportDictionaryToTable()">List Similars</button>
 </div>

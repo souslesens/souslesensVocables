@@ -341,6 +341,13 @@ var util = {
         });
         return altLabel.trim();
     },
+    getSparqlDate:function(date){
+        if(!date)
+            date=new Date()
+        var str=JSON.stringify(date)
+        return str+'^^xsd:dateTime '
+
+    }
 };
 
 module.exports = util;

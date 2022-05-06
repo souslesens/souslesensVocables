@@ -246,5 +246,15 @@ var Sparql_common = (function () {
         return fromStr;
     };
 
+    self.getSparqlDate=function(date){
+        if(!date)
+         date=new Date()
+       var str=JSON.stringify(date)
+        return str+'^^xsd:dateTime'
+
+    }
     return self;
 })();
+
+
+

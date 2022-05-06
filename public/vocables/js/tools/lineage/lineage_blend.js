@@ -397,7 +397,7 @@ var Lineage_blend = (function() {
     var metaDataTriples = [];
     if (!options) options = {};
     var login = authentication.currentUser.login;
-    var authorUri = Config.sousLeSensVocablesGraphUri + "users/" + login;
+    var authorUri = Config.defaultNewUriRoot + "users/" + login;
     var dateTime = common.dateToRDFString(new Date()) + "^^xsd:dateTime";
 
     metaDataTriples.push({

@@ -75,24 +75,31 @@
                     <div>
                         filters
                         <div>
-                            Properties
-                            <select style="width: 300px" id="LineageRelations_propertiesSelect"></select>
+                            Property
+                            <select style="width: 300px"  class="relation_filter"  id="LineageRelations_property_select" onchange="Lineage_dictionary.onSelectDomainSourceLabel($(this).val())"></select>
                         </div>
                         <div>
                             TargetSource
-                            <select style="width: 300px" id="LineageRelations_targetSourceSelect"></select>
+                            <select style="width: 300px" class="relation_filter"   id="LineageRelations_rangeSource_select" onchange="Lineage_dictionary.onChangeFilterSelect($(this).val())"></select>
                         </div>
                         <div>
                             Status
-                            <select style="width: 300px" id="LineageRelations_statusSelect"></select>
+                            <select style="width: 300px"  class="relation_filter"  id="LineageRelations_status_select"></select>
                         </div>
                         <div>
                             Provenance
-                            <select style="width: 300px" id="LineageRelations_provenanceSelect"></select>
+                            <select style="width: 300px"  class="relation_filter"  id="LineageRelations_provenance_select"></select>
                         </div>
                         <div>
                             Creator
-                            <select style="width: 300px" id="LineageRelations_creatorSelect"></select>
+                            <select style="width: 300px"  class="relation_filter"  id="LineageRelations_creator_select"></select>
+                        </div>
+                        <div>
+                            StartDate
+                            <input style="width: 300px"  class="relation_filter"  id="LineageRelations_startDate_input"></input>
+
+                            EndDate
+                            <input style="width: 300px"  class="relation_filter"  id="LineageRelations_endDate_input"></input>
                         </div>
 
                     </div>

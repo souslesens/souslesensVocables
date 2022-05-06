@@ -1930,6 +1930,96 @@ var Standardizer = (function () {
         Export.showDataTable(null, cols, dataSet);
     };
 
+    self.createSameAsRelations = function(type) {
+        var relations = [];
+        var targetSources = [];
+        var dictionarySourceLabel = Config.dictionarySource;
+
+        if (type == "exactMatch") {
+            for (var key in self.matrixWordsMap.entities) {
+                self.matrixWordsMap.entities[key].forEach(function(obj) {
+                    if (obj) {
+                        var targetSource = self.indexSourcesMap[obj.index];
+                        if (targetSources.indexOf(targetSource) < 0) targetSources.push(targetSource);
+                        relations.push({
+                            sourceNode: {
+                                source: self.currentSource,
+                                label: obj.sourceHit.label,
+                                id: obj.sourceHit.id
+                            },
+                            targetNode: {
+                                source: targetSource,
+                                label: obj.label,
+                                id: obj.id
+                            },
+                            type: "http://www.w3.org/2002/07/owl#sameAs"
+                        });
+                    }
+                });
+            }
+        } else if (type == "fuzzyMatch") {
+            self.fuzzyMatches.forEach(function(item) {
+                if (item) {
+                    relations.push({
+                        sourceNode: {
+                            source: self.currentSource,
+                            label: item.sourceNode.label,
+                            id: item.sourceNode.id
+                        },
+                        targetNode: {
+                            source: item.targetNode.source,
+                            label: item.targetNode.label,
+                            id: item.targetNode.id
+                        },
+                        type: "http://www.w3.org/2002/07/owl#sameAs"
+                    });
+                }
+            });
+        }
+
+        if (!confirm("create " + relations.length + " relations sameAs in " + dictionarySourceLabel)) return;
+
+        var sliceLength = 10;
+        var totalCreated = 0;
+
+        async.series(
+          [
+              function(callbackSeries) {
+                  return callbackSeries();
+              },
+              function(callbackSeries) {
+                  var slices = common.array.slice(relations, sliceLength);
+                  MainController.UI.message(" Creating relations  in +" + dictionarySourceLabel + "...");
+                  async.eachSeries(
+                    slices,
+                    function(slice, callbackEach) {
+                        Lineage_blend.createRelationTriples(slice, true, dictionarySourceLabel, function(err, _result) {
+                            if (err) return callbackEach(err);
+                            /*   slice.forEach(function(relation){
+            var labelTriples=[
+            { subject: relation.sourceNode.id, predicate: "http://www.w3.org/2000/01/rdf-schema#label",object:relation.sourceNode.label},
+            { subject: relation.targetNode.id, predicate: "http://www.w3.org/2000/01/rdf-schema#label",object:relation.targetNode.label},
+            })*/
+
+                            totalCreated += sliceLength;
+                            MainController.UI.message(totalCreated + " relations created in " + dictionarySourceLabel);
+
+                            return callbackEach();
+                        });
+                    },
+                    function(_err) {
+                        callbackSeries();
+                    }
+                  );
+              }
+          ],
+          function(err) {
+              if (err) return alert(err);
+
+              MainController.UI.message(totalCreated + " relations created in " + dictionarySourceLabel, true);
+          }
+        );
+    };
 
 
     return self;

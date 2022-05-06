@@ -52,15 +52,15 @@ const apiDoc = {
             type: "object",
             properties: {
                 editable: { type: "boolean" },
-                controlloer: { type: "string" },
+                controller: { type: "string" },
                 graphUri: { type: "string" },
                 protected: { type: "boolean" },
                 color: { type: "string" },
                 isBlenderTemplate: { type: "boolean" },
-                sparql_server: { type: "object", additionalProperties: { $ref: "#/definitions/Sparql_Server" } },
+                sparql_server: { type: "object", additionalProperties: { $ref: "#/definitions/SparqlServer" } },
             },
         },
-        Sparql_Server: {
+        SparqlServer: {
             type: "object",
             properties: { url: { type: "string" } },
         },

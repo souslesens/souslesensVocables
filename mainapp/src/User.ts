@@ -84,9 +84,8 @@ type UserJSON = { id?: string; login: string; password: string; groups: string[]
 
 type User = { id: string; _type: string; login: string; password: string; groups: string[]; source: string };
 
-type UserAccount = Record<string, User>;
 const newUser = (key: string): User => {
     return { id: key, _type: "user", login: "", password: "", groups: [], source: "json" };
 };
 
-export { getUsers, UserAccount, newUser, saveUserBis as putUsersBis, restoreUsers, deleteUser, putUsers, User };
+export { getUsers, newUser, saveUserBis as putUsersBis, restoreUsers, deleteUser, putUsers, User };

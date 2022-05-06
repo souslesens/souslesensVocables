@@ -7,7 +7,7 @@
         "graphUri": "http://purl.obolibrary.org/obo/bfo.owl",
         "sparql_server": {
             "url": "_default",
-            "method": "Get"
+            "method": "GET"
         },
         "editable": true,
         "controller": "Sparql_OWL",

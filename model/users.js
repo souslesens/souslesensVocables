@@ -2,12 +2,7 @@ const fs = require("fs");
 const { configPath: defaultConfigPath } = require("./config");
 
 /**
- * @typedef {Object} UserAccount
- * @prop {string} id
- * @prop {string} login
- * @prop {string[]} groups
- * @prop {string} source
- * @prop {"user"} _type
+ * @typedef {import("./UserTypes").UserAccounts} UserAccounts
  */
 
 class UserModel {
@@ -20,12 +15,12 @@ class UserModel {
     }
 
     /**
-     * @returns {Promise<Record<string, UserAccount>>} a collection of UserAccount
+     * @returns {Promise<UserAccounts>} a collection of UserAccount
      */
     getUserAccounts = async () => {
         const data = await fs.promises.readFile(this.userPath);
         /**
-         * @type {Record<string, UserAccount>}
+         * @type {UserAccounts}
          */
         const users = {};
         Object.entries(JSON.parse(data.toString())).map(([key, value]) => {

@@ -82,11 +82,6 @@ router.post(
     serverParams.routesRootUrl + "/slsv",
     ensureLoggedIn(),
     function (req, response) {
-        if (req.body.getBlenderSources) {
-            configManager.getBlenderSources({}, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
         if (req.body.createNewResource) {
             configManager.createNewResource(req.body.sourceName, req.body.graphUri, req.body.targetSparqlServerUrl, JSON.parse(req.body.options), function (err, result) {
                 processResponse(response, err, result);

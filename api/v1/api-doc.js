@@ -44,6 +44,26 @@ const apiDoc = {
             type: "object",
             additionalProperties: { $ref: "#/definitions/Source" },
         },
+        BlenderSources: {
+            type: "object",
+            additionalProperties: { $ref: "#/definitions/BlenderSource" },
+        },
+        BlenderSource: {
+            type: "object",
+            properties: {
+                editable: { type: "boolean" },
+                controller: { type: "string" },
+                graphUri: { type: "string" },
+                protected: { type: "boolean" },
+                color: { type: "string" },
+                isBlenderTemplate: { type: "boolean" },
+                sparql_server: { type: "object", additionalProperties: { $ref: "#/definitions/SparqlServer" } },
+            },
+        },
+        SparqlServer: {
+            type: "object",
+            properties: { url: { type: "string" } },
+        },
 
         User: {
             type: "object",

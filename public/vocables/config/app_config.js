@@ -36,12 +36,13 @@ var Config = (function () {
         prop:'http://www.w3.org/2002/07/owl#onProperty',
         range:'http://www.w3.org/2002/07/owl#someValuesFrom',
         domain:'http://www.w3.org/2000/01/rdf-schema#subClassOf',
-        author:'http://purl.org/dc/terms/creator',
+        status:'https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status',
         domainSourceLabel:'http://data.souslesens.org/property#domainSourceLabel',
         rangeSourceLabel:'http://data.souslesens.org/property#rangeSourceLabel',
+        author:'http://purl.org/dc/terms/creator',
         provenance:'http://purl.org/dc/terms/source',
         creationDate:'purl.org/dc/terms/created',
-        status:'https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status',
+
 
 
 

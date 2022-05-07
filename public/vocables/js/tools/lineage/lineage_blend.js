@@ -105,7 +105,8 @@ var Lineage_blend = (function() {
 
         function(callbackSeries) {
           var relations = { type: type, sourceNode: sourceNode, targetNode: targetNode };
-          self.createRelationTriples(relations, createInverseRelation, Lineage_classes.mainSource, function(err, _result) {
+          var options={}
+          self.createRelationTriples(relations, createInverseRelation, Lineage_classes.mainSource,options, function(err, _result) {
             callbackSeries(err);
           });
         }
@@ -120,7 +121,7 @@ var Lineage_blend = (function() {
     );
   };
 
-  self.createRelationTriples = function(relations, createInverseRelation, source, callback) {
+  self.createRelationTriples = function(relations, createInverseRelation, source,options, callback) {
     var allTriples = [];
     if (!Array.isArray(relations)) relations = [relations];
     relations.forEach(function(relation) {
@@ -132,7 +133,12 @@ var Lineage_blend = (function() {
         domainSourceLabel: relation.sourceNode.source,
         rangeSourceLabel: relation.targetNode.source
       };
-      var metaDataTriples = self.getCommonMetaDataTriples(normalBlankNode, "manual", "candidate", metadataOptions);
+      if( !options)
+        options={}
+      var  origin=options.origin || "manual"
+      var  status=options.status || "candidate"
+
+      var metaDataTriples = self.getCommonMetaDataTriples(normalBlankNode, origin, status, metadataOptions);
       restrictionTriples = restrictionTriples.concat(metaDataTriples);
 
       if (createInverseRelation) {
@@ -143,7 +149,7 @@ var Lineage_blend = (function() {
           domainSourceLabel: relation.targetNode.source,
           rangeSourceLabel: relation.sourceNode.source
         };
-        var inverseMetaDataTriples = self.getCommonMetaDataTriples(inverseBlankNode, "manual", "candidate", inverseMetadataOptions);
+        var inverseMetaDataTriples = self.getCommonMetaDataTriples(inverseBlankNode, origin, status, inverseMetadataOptions);
         restrictionTriples = restrictionTriples.concat(inverseMetaDataTriples);
 
         restrictionTriples.push({
@@ -482,7 +488,8 @@ var Lineage_blend = (function() {
       }
     });
     if (relations.length > 0) {
-      self.createRelationTriples(relations, true, Lineage_classes.mainSource, function(err, _result) {
+      var options={}
+      self.createRelationTriples(relations, true, Lineage_classes.mainSource,options, function(err, _result) {
         if (err) return alert(err);
         visjsGraph.data.edges.remove(sameLabelEdgeIds);
         MainController.UI.message(relations.length + "  sameAs relations created", true);

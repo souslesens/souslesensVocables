@@ -1,5 +1,7 @@
+const fs = require("fs");
 const path = require("path");
 const { UserModel } = require("../model/users");
+const tmp = require("tmp");
 
 describe("UserModel", () => {
     /**
@@ -10,7 +12,7 @@ describe("UserModel", () => {
         userModel = new UserModel(path.join(__dirname, "data/config"));
     });
 
-    test("getUserAccounts returns the list of users", async () => {
+    test("read the list of users with get()", async () => {
         const users = await userModel.getUserAccounts();
         expect(users).toStrictEqual({
             admin: {
@@ -35,5 +37,49 @@ describe("UserModel", () => {
                 _type: "user",
             },
         });
+    });
+    test("append a new user with add()", async () => {
+        tmpDir = tmp.dirSync({ unsafeCleanup: true });
+        fs.mkdirSync(path.join(tmpDir.name, "users"));
+        fs.writeFileSync(path.join(tmpDir.name, "users", "users.json"), "{}");
+        const tmpUserModel = new UserModel(tmpDir.name);
+        const newUser = {
+            id: "ID",
+            login: "LOGIN",
+            groups: [],
+            source: "",
+            _type: "user",
+        };
+        await tmpUserModel.addUserAccount(newUser);
+        const users = await tmpUserModel.getUserAccounts();
+        expect(users).toStrictEqual({ ID: newUser });
+        tmpDir.removeCallback();
+    });
+    test("update an existing user with update()", async () => {
+        const USERS = {
+            ID1: {
+                id: "ID1",
+                login: "LOGIN1",
+                groups: [],
+                source: "",
+                _type: "user",
+            },
+            ID2: { id: "ID2", login: "LOGIN2", groups: [], source: "", _type: "user" },
+        };
+        tmpDir = tmp.dirSync({ unsafeCleanup: true });
+        fs.mkdirSync(path.join(tmpDir.name, "users"));
+        fs.writeFileSync(path.join(tmpDir.name, "users", "users.json"), JSON.stringify(USERS));
+        const tmpUserModel = new UserModel(tmpDir.name);
+        const modifiedUser = {
+            id: "ID1",
+            login: "login",
+            groups: [],
+            source: "",
+            _type: "user",
+        };
+        await tmpUserModel.updateUserAccount(modifiedUser);
+        const users = await tmpUserModel.getUserAccounts();
+        expect(users).toStrictEqual({ ID1: modifiedUser, ID2: USERS["ID2"] });
+        tmpDir.removeCallback();
     });
 });

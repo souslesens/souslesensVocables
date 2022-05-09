@@ -44,7 +44,7 @@ var MainController = (function () {
         };
         $.ajax({
             type: "GET",
-            url: "/api/v1/sources",
+            url: Config.apiUrl + "/sources",
             dataType: "json",
             success: function (data_, _textStatus, _jqXHR) {
                 const data = data_.resources;
@@ -98,7 +98,7 @@ var MainController = (function () {
     self.loadProfiles = function (callback) {
         $.ajax({
             type: "GET",
-            url: "/api/v1/profiles",
+            url: Config.apiUrl + "/profiles",
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
                 Config.profiles = data.resources;

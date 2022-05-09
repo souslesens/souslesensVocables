@@ -51,3 +51,8 @@ Cypress.Commands.add("refreshBfoIndex", () => {
     cy.get(".my-1:nth-child(1)").click();
     cy.logout();
 });
+
+Cypress.Commands.add("resetConfig", (configName) => {
+    cy.exec("rm -r tests/data/config/");
+    cy.exec(`cp -r tests/data/config_templates/${configName} tests/data/config`);
+});

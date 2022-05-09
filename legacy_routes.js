@@ -66,6 +66,7 @@ if (!config.disableAuth) {
     });
 }
 
+// XXX move to api/v1/paths/upload
 router.post("/upload", ensureLoggedIn(), function (req, response) {
     if (!req.files || Object.keys(req.files).length === 0) {
         return response.status(400).send("No files were uploaded.");
@@ -78,138 +79,126 @@ router.post("/upload", ensureLoggedIn(), function (req, response) {
     }
 });
 
-router.post(
-    serverParams.routesRootUrl + "/slsv",
-    ensureLoggedIn(),
-    function (req, response) {
-        if (req.body.createNewResource) {
-            configManager.createNewResource(req.body.sourceName, req.body.graphUri, req.body.targetSparqlServerUrl, JSON.parse(req.body.options), function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-        if (req.body.deleteResource) {
-            configManager.deleteResource(req.body.sourceName, req.body.graphUri, req.body.sparqlServerUrl, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-        if (req.body.addImportToSource) {
-            configManager.addImportToSource(req.body.parentSource, req.body.importedSource, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
+router.post(serverParams.routesRootUrl + "/slsv", ensureLoggedIn(), function (req, response) {
+    // XXX refactor to POST api/v1/paths/blenderSource
+    if (req.body.createNewResource) {
+        configManager.createNewResource(req.body.sourceName, req.body.graphUri, req.body.targetSparqlServerUrl, JSON.parse(req.body.options), function (err, result) {
+            processResponse(response, err, result);
+        });
+    }
+    // XXX refactor to DELETE api/v1/paths/blenderSource
+    if (req.body.deleteResource) {
+        configManager.deleteResource(req.body.sourceName, req.body.graphUri, req.body.sparqlServerUrl, function (err, result) {
+            processResponse(response, err, result);
+        });
+    }
+    // XXX refactor to PUT api/v1/paths/blenderSource/{id}
+    if (req.body.addImportToSource) {
+        configManager.addImportToSource(req.body.parentSource, req.body.importedSource, function (err, result) {
+            processResponse(response, err, result);
+        });
+    }
+    // XXX refactor to GET/POST api/v1/paths/httpProxy
+    if (req.body.httpProxy) {
+        httpProxy.setProxyForServerDomain(req.headers.host);
 
-        if (req.body.httpProxy) {
-            httpProxy.setProxyForServerDomain(req.headers.host);
-
-            if (req.body.POST) {
-                var body = JSON.parse(req.body.body);
-                httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
-                    processResponse(response, err, result);
-                });
-            } else {
-                var options = {};
-                if (req.body.options) {
-                    if (typeof req.body.options == "string") options = JSON.parse(req.body.options);
-                    else options = req.body.options;
-                }
-                options.host = req.headers.host;
-                httpProxy.get(req.body.url, options, function (err, result) {
-                    processResponse(response, err, result);
-                });
+        if (req.body.POST) {
+            var body = JSON.parse(req.body.body);
+            httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
+                processResponse(response, err, result);
+            });
+        } else {
+            var options = {};
+            if (req.body.options) {
+                if (typeof req.body.options == "string") options = JSON.parse(req.body.options);
+                else options = req.body.options;
             }
-        }
-
-        if (req.query.SPARQLquery) {
-            let query = req.body.query;
-            const headers = {};
-            if (req.query.graphUri) query = query.replace(/where/gi, "from <" + req.query.graphUri + "> WHERE ");
-
-            if (req.query.method == "POST") {
-                headers["Accept"] = "application/sparql-results+json";
-                headers["Content-Type"] = "application/x-www-form-urlencoded";
-
-                httpProxy.post(req.query.url, headers, { query: query }, function (err, result) {
-                    processResponse(response, err, result);
-                });
-            } else if (req.query.method == "GET") {
-                headers["Accept"] = "application/sparql-results+json";
-                headers["Content-Type"] = "application/x-www-form-urlencoded";
-
-                var query2 = encodeURIComponent(query);
-                query2 = query2.replace(/%2B/g, "+").trim();
-                var url = req.query.url + "?format=json&query=" + query2;
-                httpProxy.get(url, headers, function (err, result) {
-                    if (result && typeof result === "string") result = JSON.parse(result.trim());
-                    processResponse(response, err, result);
-                });
-            }
-        }
-
-        if (req.body.uploadOntologyFromOwlFile) {
-            RDF_IO.uploadOntologyFromOwlFile(req.body.graphUri, req.body.filePath, function (err, result) {
+            options.host = req.headers.host;
+            httpProxy.get(req.body.url, options, function (err, result) {
                 processResponse(response, err, result);
             });
         }
-        if (req.body.readCsv) {
-            DataController.readCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-        if (req.body.saveData) {
-            DataController.saveDataToFile(req.body.dir, req.body.fileName, req.body.data, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
+    }
+    // XXX refactor to GET/POST api/v1/paths/httpProxy ?
+    if (req.query.SPARQLquery) {
+        let query = req.body.query;
+        const headers = {};
+        if (req.query.graphUri) query = query.replace(/where/gi, "from <" + req.query.graphUri + "> WHERE ");
 
-        if (req.body.createTriplesFromCsv) {
-            CsvTripleBuilder.createTriplesFromCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
+        if (req.query.method == "POST") {
+            headers["Accept"] = "application/sparql-results+json";
+            headers["Content-Type"] = "application/x-www-form-urlencoded";
+            httpProxy.post(req.query.url, headers, { query: query }, function (err, result) {
                 processResponse(response, err, result);
             });
-        }
-        if (req.body.clearGraph) {
-            CsvTripleBuilder.clearGraph(req.body.clearGraph, req.body.sparqlServerUrl || null, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-    },
-    router.get("/heatMap", ensureLoggedIn(), function (req, res, _next) {
-        var elasticQuery = JSON.parse(req.query.query);
+        } else if (req.query.method == "GET") {
+            headers["Accept"] = "application/sparql-results+json";
+            headers["Content-Type"] = "application/x-www-form-urlencoded";
 
-        statistics.getEntitiesMatrix(null, elasticQuery, function (err, result) {
-            processResponse(res, err, result);
+            var query2 = encodeURIComponent(query);
+            query2 = query2.replace(/%2B/g, "+").trim();
+            var url = req.query.url + "?format=json&query=" + query2;
+            httpProxy.get(url, headers, function (err, result) {
+                if (result && typeof result === "string") result = JSON.parse(result.trim());
+                processResponse(response, err, result);
+            });
+        }
+    }
+
+    // XXX refactor to POST api/v1/paths/uploadGraph
+    if (req.body.uploadOntologyFromOwlFile) {
+        RDF_IO.uploadOntologyFromOwlFile(req.body.graphUri, req.body.filePath, function (err, result) {
+            processResponse(response, err, result);
         });
-    }),
+    }
+    // XXX refactor to GET api/v1/paths/readCsv
+    if (req.body.readCsv) {
+        DataController.readCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
+            processResponse(response, err, result);
+        });
+    }
+    // XXX refactor to GET api/v1/paths/createTriplesFromCsv
+    if (req.body.createTriplesFromCsv) {
+        CsvTripleBuilder.createTriplesFromCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
+            processResponse(response, err, result);
+        });
+    }
+    // XXX refactor to POST api/v1/paths/clearGraph
+    if (req.body.clearGraph) {
+        CsvTripleBuilder.clearGraph(req.body.clearGraph, req.body.sparqlServerUrl || null, function (err, result) {
+            processResponse(response, err, result);
+        });
+    }
+});
 
-    router.get("/httpProxy", ensureLoggedIn(), function (req, res, _next) {
-        httpProxy.get(req.query, function (err, result) {
-            processResponse(res, err, result);
-        });
-    }),
-    router.get("/ontology/*", ensureLoggedIn(), function (req, res, _next) {
-        if (req.params.length == 0) return req.send("missing ontology label");
-        var name = req.params[0];
-        RDF_IO.getOntology(name, function (err, result) {
-            res.contentType("text/plain");
-            res.status(200).send(result);
-        });
-    }),
-    router.get("/getJsonFile", ensureLoggedIn(), function (req, res, _next) {
-        //  if (req.body.filePath){}
-        var filePath = req.query.filePath;
-        var realPath = path.join(__dirname, "../public/vocables/" + filePath);
-        var data = "" + fs.readFileSync(realPath);
-        var json = JSON.parse(data);
-        processResponse(res, null, json);
-    })
-);
+// XXX refactor to GET api/v1/paths/httpProxy
+router.get("/httpProxy", ensureLoggedIn(), function (req, res, _next) {
+    httpProxy.get(req.query, function (err, result) {
+        processResponse(res, err, result);
+    });
+});
+
+// XXX refactor to GET api/v1/paths/ontology
+router.get("/ontology/*", ensureLoggedIn(), function (req, res, _next) {
+    if (req.params.length == 0) return req.send("missing ontology label");
+    var name = req.params[0];
+    RDF_IO.getOntology(name, function (err, result) {
+        res.contentType("text/plain");
+        res.status(200).send(result);
+    });
+});
+
+// XXX refactor to models/plugins and GET api/v1/paths/plugins
+router.get("/getJsonFile", ensureLoggedIn(), function (req, res, _next) {
+    var filePath = req.query.filePath;
+    var realPath = path.join(__dirname, "../public/vocables/" + filePath);
+    var data = "" + fs.readFileSync(realPath);
+    var json = JSON.parse(data);
+    processResponse(res, null, json);
+});
 
 function processResponse(response, error, result) {
     if (response && !response.finished) {
-        /*   res.setHeader('Access-Control-Allow-Origin', '*');
-            res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE'); // If needed
-            res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,contenttype'); // If needed
-            res.setHeader('Access-Control-Allow-Credentials', true); // If needed.setHeader('Content-Type', 'application/json');*/
-
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE"); // If needed
         response.setHeader("Access-Control-Allow-Headers", "X-Requested-With,contenttype"); // If needed
@@ -221,27 +210,18 @@ function processResponse(response, error, result) {
                 else error = JSON.stringify(error, null, 2);
             }
             console.log("ERROR !!" + error);
-
-            return response.status(404).send({ ERROR: error });
+            response.status(404).send({ ERROR: error });
         } else if (!result) {
-            return response.send({ done: true });
+            response.send({ done: true });
+        } else if (typeof result == "string") {
+            response.send(JSON.stringify({ result: result }));
+        } else if (result.contentType && result.data) {
+            response.setHeader("Content-type", result.contentType);
+            if (typeof result.data == "object") response.send(JSON.stringify(result.data));
+            else response.send(result.data);
         } else {
-            if (typeof result == "string") {
-                resultObj = { result: result };
-
-                response.send(JSON.stringify(resultObj));
-            } else {
-                if (result.contentType && result.data) {
-                    response.setHeader("Content-type", result.contentType);
-                    if (typeof result.data == "object") response.send(JSON.stringify(result.data));
-                    else response.send(result.data);
-                } else {
-                    var resultObj = result;
-                    response.setHeader("Content-type", "application/json");
-                    // response.send(JSON.stringify(resultObj));
-                    response.send(resultObj);
-                }
-            }
+            response.setHeader("Content-type", "application/json");
+            response.send(result);
         }
     }
 }

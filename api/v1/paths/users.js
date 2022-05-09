@@ -1,10 +1,9 @@
 const { userModel } = require("../../../model/users");
-const { configPath, config } = require("../../../model/config");
+const { configPath } = require("../../../model/config");
 const path = require("path");
 const profilesJSON = path.resolve(configPath + "/users/users.json");
 exports.profilesJSON = profilesJSON;
 const { readResource, writeResource, responseSchema, resourceCreated, resourceUpdated, successfullyFetched } = require("./utils");
-const bcrypt = require("bcrypt");
 module.exports = function () {
     let operations = {
         GET,
@@ -32,7 +31,7 @@ module.exports = function () {
     ///// PUT api/v1/users
     async function PUT(req, res, next) {
         try {
-            const updatedProfile = resourceWithHashedPassword(req);
+            const updatedProfile = req.body;
             const oldProfiles = await readResource(profilesJSON, res);
             const updatedProfiles = { ...oldProfiles, ...updatedProfile };
             if (Object.keys(oldProfiles).includes(Object.keys(req.body)[0])) {
@@ -56,7 +55,7 @@ module.exports = function () {
     ///// POST api/v1/users
     async function POST(req, res, next) {
         try {
-            const userToAdd = resourceWithHashedPassword(req);
+            const userToAdd = req.body;
             const oldUsers = await readResource(profilesJSON, res);
             const userDoesntExist = !Object.keys(oldUsers).includes(Object.keys(userToAdd)[0]);
             const newUsers = { ...oldUsers, ...userToAdd };
@@ -88,7 +87,3 @@ module.exports = function () {
 
     return operations;
 };
-
-function resourceWithHashedPassword(req) {
-    return Object.fromEntries(Object.entries(req.body).map(([key, val]) => [key, { ...val, password: val.password.startsWith("$2b$") ? val.password : bcrypt.hashSync(val.password, 10) }]));
-}

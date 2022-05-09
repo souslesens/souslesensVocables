@@ -171,16 +171,6 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
                             variant="standard"
                             disabled={user.source == "json" ? false : true}
                         />
-                        <TextField
-                            fullWidth
-                            onChange={handleFieldUpdate("password")}
-                            value={userModel.userForm.password}
-                            id={`password`}
-                            type="password"
-                            label={"Password"}
-                            variant="standard"
-                            disabled={user.source == "json" ? false : true}
-                        />
                         <FormControl>
                             <InputLabel id="select-groups-label">Groups</InputLabel>
                             <Select

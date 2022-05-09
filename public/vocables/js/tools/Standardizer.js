@@ -566,23 +566,15 @@ var Standardizer = (function () {
     self.showFuzzyMatchSearch = function (word) {
         var html =
             'search<input class="KGadvancedMapping_searchEntitiesInput" id="Standardizer_searchEntitiesInput2" ' +
-            'onkeyup="if (event.keyCode == 13) Standardizer.fireFuzzyMatchSearch($(this).val())">' +
-            "<br><input type=";
-        checkbox;
-        (" id=");
-        Standardizer_fuzzySearchAllsourcesCBX;
-        (" onchange=");
-        Standardizer.fireFuzzyMatchSearch();
-        ">All sources" + "<button onclick=";
-        Standardizer.clearFuzzyMatch();
-        (">Clear fuzzyMatch</button>");
+            "onkeyup=\"if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,'Standardizer_searchResulDiv2')\">" +
+            "<br><input type='checkbox' id='Standardizer_fuzzySearchAllsourcesCBX'>All sources" +
+            "<button onclick='Standardizer.clearFuzzyMatch()'>Clear fuzzyMatch</button>";
         //"<button onclick='SourceBrowser.showSearchableSourcesTreeDialog()'> filter Sources</button>"
         html += '<div id="Standardizer_searchResulDiv2" </div>';
         $("#Standardizer_fuzzySearchDivDiv").html(html);
         setTimeout(function () {
             $("#Standardizer_searchEntitiesInput2").val(word);
-            Standardizer.fireFuzzyMatchSearch(word);
-            // Standardizer.searchFuzzyMatches($("#Standardizer_searchEntitiesInput2").val(), null, "Standardizer_searchResulDiv2");
+            Standardizer.searchFuzzyMatches($("#Standardizer_searchEntitiesInput2").val(), null, "Standardizer_searchResulDiv2");
         }, 200);
     };
 
@@ -595,7 +587,7 @@ var Standardizer = (function () {
         if (cellData.sourceObject) cellData = cellData.sourceObject;
 
         var index = cellData.index || self.currentSource;
-        var html = "<b>" + index || "" + "</b>";
+        var html = "<div style='font-size:12px;font-weight: normal>'><b>" + index || "" + "</b>";
 
         html += "<br><table>";
 
@@ -629,7 +621,7 @@ var Standardizer = (function () {
                 html += "<tr><td>" + key + "</td><td>" + value + "</td></tr>";
             }
         }
-        html += "</table>" + "<br>";
+        html += "</table>" + "<br></div>";
         $("#Standardizer_matrixCellDataDiv").html(html);
         MainController.UI.message("", true);
     };

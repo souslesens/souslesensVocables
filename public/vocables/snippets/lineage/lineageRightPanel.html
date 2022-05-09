@@ -12,7 +12,7 @@
         width: inherit !important;
     }
 </style>
-<div>  <input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))" id="Lineage_classes_showImportsCBX" />Include  imports in results</div>
+<div><input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))" id="Lineage_classes_showImportsCBX" />Include imports in results</div>
 <div>
     <div id="Lineage_Tabs" style="width: 360px">
         <ul>
@@ -38,18 +38,16 @@
             </div>
             <div><input type="checkbox" id="LineageProperties_allExactMatchSearchCBX" />Exact Match</div>
 
-
-            <div class="jstreeContainer" style="width: 90%;height:75%;min-height:400px ;margin: 3px; padding: 3px">
+            <div class="jstreeContainer" style="width: 90%; height: 75%; min-height: 400px; margin: 3px; padding: 3px">
                 <div class="jstree" id="Lineage_propertiesTree"></div>
             </div>
-            <div style="border:1px solid brown">
-
+            <div style="border: 1px solid brown">
                 <select style="width: 300px" id="LineagePropertie_nodesSelectionSelect" style="margin: 3px">
                     <option value="currentGraphNodes">Current Graph Nodes</option>
                     <option value="allNodes">All Nodes</option>
                 </select>
-               <!-- <div style="margin: 3px">Dictionary<select style="width: 300px" id="LineagePropertie_dictionarySelect" ></select></div>-->
-                 <button onclick="Lineage_properties.drawRangeAndDomainsGraph(null);" style="margin: 3px">Graph All</button>
+                <!-- <div style="margin: 3px">Dictionary<select style="width: 300px" id="LineagePropertie_dictionarySelect" ></select></div>-->
+                <button onclick="Lineage_properties.drawRangeAndDomainsGraph(null);" style="margin: 3px">Graph All</button>
             </div>
         </div>
         <div id="LineageRelationsTab" style="display: flex; flex-direction: column">
@@ -61,7 +59,6 @@
                     <option value="selectedNodeDescendants">Selected node descendants</option>
                     <option value="allNodes">All Nodes</option>
                 </select>
-
             </div>
             <div></div>
             <div class="lineage_actionDiv">
@@ -76,32 +73,31 @@
                         filters
                         <div>
                             Property
-                            <select style="width: 300px"  class="relation_filter"  id="LineageRelations_property_select" onchange="Lineage_dictionary.onSelectDomainSourceLabel($(this).val())"></select>
+                            <select style="width: 300px" class="relation_filter" id="LineageRelations_property_select" onchange="Lineage_dictionary.onSelectDomainSourceLabel($(this).val())"></select>
                         </div>
                         <div>
                             TargetSource
-                            <select style="width: 300px" class="relation_filter"   id="LineageRelations_rangeSource_select" onchange="Lineage_dictionary.onChangeFilterSelect($(this).val())"></select>
+                            <select style="width: 300px" class="relation_filter" id="LineageRelations_rangeSource_select" onchange="Lineage_dictionary.onChangeFilterSelect($(this).val())"></select>
                         </div>
                         <div>
                             Status
-                            <select style="width: 300px"  class="relation_filter"  id="LineageRelations_status_select"></select>
+                            <select style="width: 300px" class="relation_filter" id="LineageRelations_status_select"></select>
                         </div>
                         <div>
                             Provenance
-                            <select style="width: 300px"  class="relation_filter"  id="LineageRelations_provenance_select"></select>
+                            <select style="width: 300px" class="relation_filter" id="LineageRelations_provenance_select"></select>
                         </div>
                         <div>
                             Creator
-                            <select style="width: 300px"  class="relation_filter"  id="LineageRelations_creator_select"></select>
+                            <select style="width: 300px" class="relation_filter" id="LineageRelations_creator_select"></select>
                         </div>
                         <div>
                             StartDate
-                            <input style="width: 300px"  class="relation_filter"  id="LineageRelations_startDate_input"/>
+                            <input style="width: 300px" class="relation_filter" id="LineageRelations_startDate_input" />
 
                             EndDate
-                            <input style="width: 300px"  class="relation_filter"  id="LineageRelations_endDate_input"/>
+                            <input style="width: 300px" class="relation_filter" id="LineageRelations_endDate_input" />
                         </div>
-
                     </div>
 
                     Restrictions

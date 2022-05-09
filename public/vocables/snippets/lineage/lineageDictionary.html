@@ -1,71 +1,61 @@
 <div>
-  <div id="LineageDictionary_Tabs" style="width: 100%">
-    <ul>
-      <li><a href="#LineageDictionary_selectionTab">Selection</a></li>
-      <li><a href="#LineageDictionary_dataTab">Data</a></li>
-    </ul>
+    <div id="LineageDictionary_Tabs" style="width: 100%">
+        <ul>
+            <li><a href="#LineageDictionary_selectionTab">Selection</a></li>
+            <li><a href="#LineageDictionary_dataTab">Data</a></li>
+        </ul>
 
-    <div class="lineage_actionDiv" id="LineageDictionary_selectionTab">
-      <div class="lineage_actionDiv_title">Similars selection</div>
+        <div class="lineage_actionDiv" id="LineageDictionary_selectionTab">
+            <div class="lineage_actionDiv_title">Similars selection</div>
 
-
-      <!-- <div>
+            <!-- <div>
          TargetSource
          <select style="width: 300px" id="LineageDictionary_rangeSourceSelect"></select>
        </div>-->
 
-      <div class="lineage_actionDiv">
-        <div class="lineage_actionDiv_title" id="LineageDictionary_nodesSelectionDiv" style="display:none">
-          Nodes Selection
-          <select style="width: 300px" id="LineageDictionary_nodesSelectionSelect">
-            <option value="currentGraphNodes">Current Graph Nodes</option>
-            <option value="selectedNodeDescendants">Selected node descendants</option>
-            <option value="allNodes">All Nodes</option>
-          </select>
-        </div>
-      </div>
-      <div style="display: flex;flex-direction: column;width: 300px;">
-        filters
-        <div>
-          DomainSource
-          <select style="width: 300px" class="dictionary_filter" id="LineageDictionary_domainSourceLabel_select"
-                  onchange="Lineage_dictionary.onChangeFilterSelect($(this).val())"></select>
-        </div>
-        <div>
-          RangeSource
-          <select style="width: 300px" class="dictionary_filter" id="LineageDictionary_rangeSourceLabel_select"
-                  onchange="Lineage_dictionary.onChangeFilterSelect($(this).val())"></select>
-        </div>
-        <div>
-          Status
-          <select style="width: 300px" class="dictionary_filter" id="LineageDictionary_status_select"></select>
-        </div>
-        <div>
-          Provenance
-          <select style="width: 300px" class="dictionary_filter" id="LineageDictionary_provenance_select"></select>
-        </div>
-        <div>
-          Author
-          <select style="width: 300px" class="dictionary_filter" id="LineageDictionary_author_select"></select>
-        </div>
-        <div>
-          StartDate
-          <input style="width: 300px" class="dictionary_filter" id="LineageDictionary_startDate_input"/>
+            <div class="lineage_actionDiv">
+                <div class="lineage_actionDiv_title" id="LineageDictionary_nodesSelectionDiv" style="display: none">
+                    Nodes Selection
+                    <select style="width: 300px" id="LineageDictionary_nodesSelectionSelect">
+                        <option value="currentGraphNodes">Current Graph Nodes</option>
+                        <option value="selectedNodeDescendants">Selected node descendants</option>
+                        <option value="allNodes">All Nodes</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; width: 300px">
+                filters
+                <div>
+                    DomainSource
+                    <select style="width: 300px" class="dictionary_filter" id="LineageDictionary_domainSourceLabel_select" onchange="Lineage_dictionary.onChangeFilterSelect($(this).val())"></select>
+                </div>
+                <div>
+                    RangeSource
+                    <select style="width: 300px" class="dictionary_filter" id="LineageDictionary_rangeSourceLabel_select" onchange="Lineage_dictionary.onChangeFilterSelect($(this).val())"></select>
+                </div>
+                <div>
+                    Status
+                    <select style="width: 300px" class="dictionary_filter" id="LineageDictionary_status_select"></select>
+                </div>
+                <div>
+                    Provenance
+                    <select style="width: 300px" class="dictionary_filter" id="LineageDictionary_provenance_select"></select>
+                </div>
+                <div>
+                    Author
+                    <select style="width: 300px" class="dictionary_filter" id="LineageDictionary_author_select"></select>
+                </div>
+                <div>
+                    StartDate
+                    <input style="width: 300px" class="dictionary_filter" id="LineageDictionary_startDate_input" />
 
-          EndDate
-          <input style="width: 300px" class="dictionary_filter" id="LineageDictionary_endDate_input"/>
+                    EndDate
+                    <input style="width: 300px" class="dictionary_filter" id="LineageDictionary_endDate_input" />
+                </div>
+            </div>
+            <button id="LineageDictionary_drawSimilars" onclick="Lineage_dictionary.drawDictionarySameAs()" style="display: none">Draw Similars</button>
+            <button id="LineageDictionary_listDictionary" onclick="Lineage_dictionary.exportDictionaryToTable()">List Similars</button>
         </div>
-
-      </div>
-      <button id="LineageDictionary_drawSimilars" onclick="Lineage_dictionary.drawDictionarySameAs()"
-              style="display:none">Draw Similars
-      </button>
-      <button id="LineageDictionary_listDictionary" onclick="Lineage_dictionary.exportDictionaryToTable()">List Similars
-      </button>
-
+        <div class="lineage_actionDiv" id="LineageDictionary_dataTab"></div>
     </div>
-    <div class="lineage_actionDiv" id="LineageDictionary_dataTab">
-
-    </div>
-  </div>
 </div>

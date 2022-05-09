@@ -91,7 +91,7 @@ var Lineage_decoration = (function () {
             });
             // console.log(JSON.stringify(nodesTypesMap, null, 2))
             var newNodes = [];
-            var neutralColor = null;//"#ccc";
+            var neutralColor = null; //"#ccc";
 
             for (var nodeId in existingNodes) {
                 if (false && nodeId.indexOf("legend_") == 0) legendNodes.push(nodeId);
@@ -102,8 +102,7 @@ var Lineage_decoration = (function () {
                         color = nodesTypesMap[nodeId].color;
                         type = nodesTypesMap[nodeId].type;
                     }
-                    if (color)
-                        newNodes.push({ id: nodeId, color: color, legendType: type });
+                    if (color) newNodes.push({ id: nodeId, color: color, legendType: type });
                 }
             }
 

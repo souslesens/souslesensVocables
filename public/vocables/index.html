@@ -239,16 +239,14 @@
                         modal: false,
                     });
 
-                    $(document).on("click", "a", function() {
-
-
-                        var target=$(this).attr("target");
-                        if(false && target=="_slsvCallback"){
-                            var id=$(this).attr("href");
-                            event.stopPropagation()
-                            SourceBrowser.showNodeInfos(null,id, "mainDialogDiv")
+                    $(document).on("click", "a", function () {
+                        var target = $(this).attr("target");
+                        if (false && target == "_slsvCallback") {
+                            var id = $(this).attr("href");
+                            event.stopPropagation();
+                            SourceBrowser.showNodeInfos(null, id, "mainDialogDiv");
                         }
-                     //   alert("You're trying to go to " + href);
+                        //   alert("You're trying to go to " + href);
                     });
 
                     MainController.UI.setCredits();

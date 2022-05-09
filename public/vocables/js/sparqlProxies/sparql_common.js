@@ -229,10 +229,9 @@ var Sparql_common = (function () {
             }
         }
 
-         if(self.includeImports ){
-            for( var source in Config.sources){
-                if(Config.sources[source].isDictionary)
-                    fromStr += from + "  <" +  Config.sources[source].graphUri + "> "
+        if (self.includeImports) {
+            for (var source in Config.sources) {
+                if (Config.sources[source].isDictionary) fromStr += from + "  <" + Config.sources[source].graphUri + "> ";
             }
         }
         if (options.includeSources) {
@@ -246,15 +245,10 @@ var Sparql_common = (function () {
         return fromStr;
     };
 
-    self.getSparqlDate=function(date){
-        if(!date)
-         date=new Date()
-       var str=JSON.stringify(date)
-        return str+'^^xsd:dateTime'
-
-    }
+    self.getSparqlDate = function (date) {
+        if (!date) date = new Date();
+        var str = JSON.stringify(date);
+        return str + "^^xsd:dateTime";
+    };
     return self;
 })();
-
-
-

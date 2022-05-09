@@ -32,25 +32,22 @@ var Config = (function () {
     self.searchLimit = 500;
     self.searchDepth = 6;
     self.dictionarySource = "TSF-DICTIONARY";
-    self.dictionaryMetaDataPropertiesMap={
-        prop:'http://www.w3.org/2002/07/owl#onProperty',
-        range:'http://www.w3.org/2002/07/owl#someValuesFrom',
-        domain:'http://www.w3.org/2000/01/rdf-schema#subClassOf',
-        status:'https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status',
-        domainSourceLabel:'http://data.souslesens.org/property#domainSourceLabel',
-        rangeSourceLabel:'http://data.souslesens.org/property#rangeSourceLabel',
-        author:'http://purl.org/dc/terms/creator',
-        provenance:'http://purl.org/dc/terms/source',
-        creationDate:'purl.org/dc/terms/created',
-
-
-
-
-
-
-    }
-
-
+    self.dictionaryMetaDataPropertiesMap = {
+        prop: "http://www.w3.org/2002/07/owl#onProperty",
+        range: "http://www.w3.org/2002/07/owl#someValuesFrom",
+        domain: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+        status: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
+        domainSourceLabel: "http://data.souslesens.org/property#domainSourceLabel",
+        rangeSourceLabel: "http://data.souslesens.org/property#rangeSourceLabel",
+        author: "http://purl.org/dc/terms/creator",
+        provenance: "http://purl.org/dc/terms/source",
+        creationDate: "purl.org/dc/terms/created",
+    };
+    self.dictionaryStatusMap = {
+        promote: "OK",
+        unPromote: "Candidate",
+        trash: "KO",
+    };
     self.Blender = {
         openTaxonomyTreeOnLoad: 3,
         pasteDescendantsMaxDepth: 6,
@@ -180,6 +177,12 @@ var Config = (function () {
         label: "KGcreator",
         noSource: 1,
         controller: KGcreator,
+        toolDescriptionImg: null,
+    };
+    self.tools["TSF_Dictionary"] = {
+        label: "TSF_Dictionary",
+        noSource: 1,
+        controller: Lineage_dictionary,
         toolDescriptionImg: null,
     };
 

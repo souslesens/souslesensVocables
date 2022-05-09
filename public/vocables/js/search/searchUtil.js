@@ -185,9 +185,8 @@ var SearchUtil = (function () {
         if (ids) {
             size = ids.length + 10;
             var str = "";
-            var header={}
-            if( index)
-             header = { index: index  };
+            var header = {};
+            if (index) header = { index: index };
             ids.forEach(function (id) {
                 var query = {
                     query: {
@@ -521,13 +520,12 @@ var SearchUtil = (function () {
         );
     };
 
-    self.getSourceLabelFromIndexName=function(index){
-        for( var source in Config.sources){
-           if(source.toLowerCase()==index)
-               return source;
+    self.getSourceLabelFromIndexName = function (index) {
+        for (var source in Config.sources) {
+            if (source.toLowerCase() == index) return source;
         }
         return null;
-    }
+    };
 
     return self;
 })();

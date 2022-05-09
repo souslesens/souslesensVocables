@@ -862,8 +862,7 @@ var Lineage_classes = (function () {
             var distinctProps = {};
             data.forEach(function (item) {
                 if (true) {
-                    if(item.value.type=="literal")
-                        return;
+                    if (item.value.type == "literal") return;
                     if (!distinctProps[item.prop.value]) distinctProps[item.prop.value] = 1;
                     if (!item.prop.value.match(/rdf|owl|skos/) || item.prop.value.indexOf("sameAs") > -1 || item.prop.value.indexOf("partOf") > -1) {
                         // if (item.prop.value.indexOf("rdf") < 0 && item.prop.value.indexOf("owl") < 0) {
@@ -1357,8 +1356,7 @@ var Lineage_classes = (function () {
                 var existingNodes = visjsGraph.getExistingIdsMap();
                 self.currentExpandLevel += 1;
                 result.forEach(function (item) {
-                    if(!item.domain && item.range )
-                        return
+                    if (!item.domain && item.range) return;
                     if (!item.range) {
                         item.range = { value: "?_" + item.prop.value };
                     }
@@ -1390,7 +1388,6 @@ var Lineage_classes = (function () {
                     if (!item.range) {
                         item.range = { range: "?" };
                     }
-
 
                     var edgeId = item.domain.value + "_" + item.range.value + "_" + item.prop.value;
                     var edgeIdInv = item.range.value + "_" + item.range.value + "_" + item.prop.value;
@@ -1431,7 +1428,7 @@ var Lineage_classes = (function () {
         );
     };
 
-    self.drawRestrictions = function (source, classIds, descendants, withoutImports, options,callback) {
+    self.drawRestrictions = function (source, classIds, descendants, withoutImports, options, callback) {
         if (!options) options = {};
         if (!classIds) {
             if (!source) source = Lineage_common.currentSource;
@@ -1448,14 +1445,14 @@ var Lineage_classes = (function () {
             {
                 withoutImports: withoutImports || self.withoutImports,
                 addInverseRestrictions: 1,
-                getMetadata:options.getMetadata,
-                filter:options.filter
+                getMetadata: options.getMetadata,
+                filter: options.filter,
             },
             function (err, result) {
                 if (err) {
                     MainController.UI.message(err);
                     if (callback) {
-                        return callback()
+                        return callback();
                     }
                     return;
                 }
@@ -1565,14 +1562,12 @@ var Lineage_classes = (function () {
                 if (options.processorFn) {
                     options.processorFn(result);
                 }
-                if(callback){
-                    return callback()
+                if (callback) {
+                    return callback();
                 }
             }
         );
     };
-
-
 
     self.drawNamedIndividuals = function (classIds) {
         var source = Lineage_common.currentSource;
@@ -2045,9 +2040,6 @@ var Lineage_classes = (function () {
             "\")'>" +
             source +
             "</div>";
-
-
-
 
         $("#lineage_drawnSources").append(html);
         //  self.setCurrentSource(encodeURIComponent(source))

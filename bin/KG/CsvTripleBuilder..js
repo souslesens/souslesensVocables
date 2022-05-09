@@ -157,20 +157,21 @@ var CsvTripleBuilder = {
                         },
 
                         function (callbackSeries) {
+                            function getNewBlankNodeId() {
+                                return "<_:b" + util.getRandomHexaId(10) + ">";
+                            }
                             function getLookupValue(lookupName, value) {
                                 var lookupArray = lookupName.split("|");
                                 var target = null;
                                 lookupArray.forEach(function (lookup, index) {
-                                    if(index>0)
-                                        var x=3
+                                    if (index > 0) var x = 3;
                                     if (target) return;
                                     target = lookUpMap[lookup].dictionary[value];
                                     if (target && lookUpMap[lookup].transformFn) {
                                         target = lookUpMap[lookup].transformFn(target);
                                     }
                                 });
-                                if( target==null)
-                                    var x=3
+                                if (target == null) var x = 3;
                                 return target;
                             }
 
@@ -182,6 +183,7 @@ var CsvTripleBuilder = {
 
                                 var subjectStr = null;
                                 var objectStr = null;
+                                var currentBlankNode = null;
 
                                 mapping.tripleModels.forEach(function (item) {
                                     subjectStr = null;
@@ -193,6 +195,9 @@ var CsvTripleBuilder = {
                                         if (item.s_type == "fixed") subjectStr = item.s;
                                         else if (typeof item.s === "function") {
                                             subjectStr = item.s(line, item);
+                                        } else if (item.s === "_blankNode") {
+                                            currentBlankNode = currentBlankNode || getNewBlankNodeId();
+                                            subjectStr = currentBlankNode;
                                         } else if (mapping.transform && line[item.s] && mapping.transform[item.s]) {
                                             subjectStr = mapping.transform[item.s](line[item.s], "s", item.p, line);
                                         } else if (item.s.match(/.+:.+|http.+/)) {
@@ -220,6 +225,9 @@ var CsvTripleBuilder = {
                                         }
                                         if (typeof item.o === "function") {
                                             objectStr = item.o(line, item);
+                                        } else if (item.o === "_blankNode") {
+                                            currentBlankNode = currentBlankNode || getNewBlankNodeId();
+                                            objectStr = currentBlankNode;
                                         } else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
                                             objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line);
                                         } else if (item.o.match(/.+:.+|http.+/)) {
@@ -300,7 +308,8 @@ var CsvTripleBuilder = {
                                             if (item.inverseRestrictionProperty) {
                                                 propStr = item.inverseRestrictionProperty;
 
-                                                blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
+                                                // blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
+                                                blankNode = getNewBlankNodeId();
                                                 prop = propStr;
                                                 if (prop.indexOf("$") == 0) prop = line[prop.substring(1)];
                                                 if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
@@ -535,9 +544,11 @@ var CsvTripleBuilder = {
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
+                var x = queryGraph;
                 return callback(err);
             }
             totalTriples += triples.length;
+
             console.log(totalTriples);
             return callback(null, totalTriples);
         });

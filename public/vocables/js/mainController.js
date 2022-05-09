@@ -447,8 +447,8 @@ var MainController = (function () {
             var divMaxX = $("#graphDiv").width() + (absolutePosition ? 0 : leftPanelWidth);
             var vertOverlap = point.y + popupH - divMaxY;
             var horOverlap = point.x + popupW - divMaxX;
-            horOverlap = 0;// horOverlap > 0 ? 0 : horOverlap - 5;
-            vertOverlap = 0;// vertOverlap > 0 ? 0 : vertOverlap - 5;
+            horOverlap = 0; // horOverlap > 0 ? 0 : horOverlap - 5;
+            vertOverlap = 0; // vertOverlap > 0 ? 0 : vertOverlap - 5;
 
             if (!popupDiv) popupDiv = "popupDiv";
             $("#" + popupDiv).css("left", point.x + (absolutePosition ? 0 : leftPanelWidth) + horOverlap);

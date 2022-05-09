@@ -170,9 +170,8 @@ var util = {
     },
 
     formatStringForTriple: function (str, forUri) {
-        str=str.trim()
-        if ( str.indexOf("http://") == 0)
-            return str;
+        str = str.trim();
+        if (str.indexOf("http://") == 0) return str;
         if (!str || !str.replace) return null;
         str = str.trim();
         str = str.replace(/\\/gm, "");
@@ -341,13 +340,11 @@ var util = {
         });
         return altLabel.trim();
     },
-    getSparqlDate:function(date){
-        if(!date)
-            date=new Date()
-        var str=JSON.stringify(date)
-        return str+'^^xsd:dateTime '
-
-    }
+    getSparqlDate: function (date) {
+        if (!date) date = new Date();
+        var str = JSON.stringify(date);
+        return str + "^^xsd:dateTime ";
+    },
 };
 
 module.exports = util;

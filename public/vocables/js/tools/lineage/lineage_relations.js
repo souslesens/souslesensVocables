@@ -48,17 +48,9 @@ Lineage_relations = (function () {
 
                 common.fillSelectOptions("LineageRelations_property_select", props, true, "label", "id");
                 // self.initProjectedGraphs()
-
-
-
-
-
-
             }
         );
     };
-
-
 
     self.listAllRestrictions = function () {
         Sparql_OWL.getObjectRestrictions(Lineage_common.currentSource, null, {}, function (err, _result) {

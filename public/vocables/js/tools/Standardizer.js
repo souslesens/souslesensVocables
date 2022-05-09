@@ -590,7 +590,6 @@ var Standardizer = (function () {
         var html = "<div style='font-size:12px;font-weight: normal>'><b>" + index || "" + "</b>";
 
         html += "<br><table>";
-
         if (cellData.dictionary) {
             cellData.dictionary.forEach(function (item) {
                 html +=

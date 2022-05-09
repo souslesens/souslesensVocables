@@ -106,6 +106,7 @@ var Lineage_decoration = (function() {
         }
       }
 
+
       //  visjsGraph.data.nodes.remove(legendNodes);
       if (visjsGraph.data && visjsGraph.data.nodes)
         visjsGraph.data.nodes.update(newNodes);

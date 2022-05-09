@@ -44,6 +44,15 @@ jobs:
                   headless: true
                   browser: chrome
                   spec: |
+                      cypress/integration/browser.spec.js
+                      cypress/integration/genealogy.spec.js
+                      cypress/integration/kgmapping.spec.js
                       cypress/integration/login.spec.js
+                      cypress/integration/sparql_endpoint.spec.js
+                      cypress/integration/standardizer.spec.js
+                      cypress/integration/ConfigEditor.spec.js
+                      cypress/integration/KGbrowser.spec.js
                       cypress/integration/lineage.spec.js
+                      cypress/integration/match.spec.js
+                      cypress/integration/SQLquery.spec.js
                   runTests: true

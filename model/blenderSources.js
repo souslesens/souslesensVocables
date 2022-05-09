@@ -43,6 +43,30 @@ class BlenderSources {
         const blenderSources = JSON.parse(data.toString());
         return blenderSources;
     };
+
+    add = async () => {
+        const data = await fs.promises.readFile(this.blenderSourcePath);
+        const blenderSources = JSON.parse(data.toString());
+        // if ID already exists raise error
+        // add ID to data
+        // write sources file back to disk
+    };
+
+    del = async () => {
+        const data = await fs.promises.readFile(this.blenderSourcePath);
+        const blenderSources = JSON.parse(data.toString());
+        // if ID does not exist raise error
+        // remove ID from data
+        // write sources file back to disk
+    };
+
+    update = async () => {
+        const data = await fs.promises.readFile(this.blenderSourcePath);
+        const blenderSources = JSON.parse(data.toString());
+        // if ID does not exist raise error
+        // update data with record ID
+        // write sources file back to disk
+    };
 }
 
 const blenderSources = new BlenderSources("config");

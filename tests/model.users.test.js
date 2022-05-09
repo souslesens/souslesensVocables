@@ -20,6 +20,20 @@ describe("UserModel", () => {
                 source: "json",
                 _type: "user",
             },
+            owl_user: {
+                id: "owl_user",
+                login: "owl_user",
+                groups: ["owl_only"],
+                source: "json",
+                _type: "user",
+            },
+            skos_user: {
+                id: "skos_user",
+                login: "skos_user",
+                groups: ["skos_only"],
+                source: "json",
+                _type: "user",
+            },
         });
     });
 });

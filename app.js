@@ -13,9 +13,16 @@ const indexRouter = require("./legacy_routes");
 const httpProxy = require(path.resolve("bin/httpProxy."));
 const userManager = require(path.resolve("bin/user."));
 
-const config = require(path.resolve("config/mainConfig.json"));
+const { config } = require("./model/config");
 
 var app = express();
+const Sentry = require("@sentry/node");
+
+// sentry/glitchtip
+if (config.sentryDsnNode) {
+    Sentry.init({ dsn: config.sentryDsnNode });
+    app.use(Sentry.Handlers.requestHandler());
+}
 
 // App middleware for authentication and session handling
 app.use(express.json());
@@ -138,6 +145,20 @@ app.use("/", indexRouter);
 app.use(function (req, res, next) {
     next(createError(404));
 });
+
+// sentry/glitchtip
+if (config.sentryDsnNode) {
+    // The error handler must be before any other error middleware and after all controllers
+    app.use(Sentry.Handlers.errorHandler());
+
+    // Optional fallthrough error handler
+    app.use(function onError(err, req, res, next) {
+        // The error id is attached to `res.sentry` to be returned
+        // and optionally displayed to the user for support.
+        res.statusCode = 500;
+        res.end(res.sentry + "\n");
+    });
+}
 
 // error handler
 app.use(function (err, req, res, _next) {

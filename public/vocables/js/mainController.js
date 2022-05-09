@@ -25,6 +25,7 @@ var MainController = (function () {
                 Config.default_lang = serverConfig.default_lang;
                 Config.default_sparql_url = serverConfig.default_sparql_url;
                 Config.wiki = serverConfig.wiki;
+                Config.sentryDsnJsFront = serverConfig.sentryDsnJsFront;
 
                 // display version number
                 $("#souslesensversion").html(serverConfig.version);
@@ -364,14 +365,15 @@ var MainController = (function () {
                     if (controller.onSourceSelect) controller.onSourceSelect(self.currentSource);
                 }
             }
+            if (Config.tools[self.currentTool].toolDescriptionImg) {
+                $("#graphDiv").html("<img src='" + Config.tools[self.currentTool].toolDescriptionImg + "' width='600px' style='toolDescriptionImg'>");
+            } else $("#graphDiv").html(self.currentTool);
 
             if (controller.onLoaded)
                 controller.onLoaded(function (err, result) {
                     if (callback) callback(err, result);
                 });
-            if (Config.tools[self.currentTool].toolDescriptionImg) {
-                $("#graphDiv").html("<img src='" + Config.tools[self.currentTool].toolDescriptionImg + "' width='600px' style='toolDescriptionImg'>");
-            } else $("#graphDiv").html(self.currentTool);
+
         },
 
         getJstreeConceptsContextMenu: function () {

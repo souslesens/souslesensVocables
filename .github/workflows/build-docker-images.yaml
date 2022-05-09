@@ -4,11 +4,8 @@ on:
     push:
         branches:
             - "master"
-            - "openapi"
         tags:
             - "*.*.*"
-    pull_request:
-        branches: [master]
 
 jobs:
     docker:

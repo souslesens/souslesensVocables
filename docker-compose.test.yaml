@@ -1,0 +1,49 @@
+version: "3"
+services:
+    virtuoso:
+        image: askomics/virtuoso:7.2.6.1a
+        environment:
+            VIRT_SPARQL_DefaultQuery: SELECT DISTINCT ?graph count(?s) as ?number_of_triples WHERE { GRAPH ?graph { ?s ?p ?o . }}
+        ports:
+            - 8891:8890
+        volumes:
+            - ./tests/data/rdf:/usr/local/virtuoso-opensource/var/lib/virtuoso/db/dumps
+        command: |
+            sh /virtuoso/virtuoso.sh &
+            sleep 10s
+            isql-v -U dba -P dba  <<EOF
+                ld_dir('dumps', 'bfo_classes_only.owl', 'http://purl.obolibrary.org/obo/bfo.owl');
+                rdf_loader_run();
+                exit;
+            EOF
+        networks:
+            - test-backend
+
+    sqlserver:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        environment:
+            ACCEPT_EULA: "Y"
+            SA_PASSWORD: "superSecretP4ssword"
+        networks:
+            - test-backend
+
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+        ports:
+            - 9201:9200
+        environment:
+            # ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+            discovery.type: single-node
+        networks:
+            - test-backend
+
+    spacyserver:
+        image: neelkamath/spacy-server:2-en_core_web_sm
+        ports:
+            - 8001:8000
+        networks:
+            - test-backend
+
+networks:
+    test-backend:
+        driver: "bridge"

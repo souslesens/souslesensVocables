@@ -1,18 +1,10 @@
 describe("standardizer", function () {
-    it("When no sources are selected and compare is clicked, an alert pops up", function () {
-        cy.viewport(1920, 975);
+    afterEach(() => {
+        cy.logout();
+    });
 
-        cy.visit("/");
-
-        cy.get(".modal-content > .modal-body > form > .form-group > #username").click();
-
-        cy.get(".modal-content > .modal-body > form > .form-group > #username").type("admin");
-
-        cy.get(".modal-content > .modal-body > form > .form-group > #password").type("admin");
-
-        cy.get(".modal-dialog > .modal-content > .modal-body > form > .btn").click();
-
-        cy.visit("vocables/");
+    it("As an Admin, When no sources are selected and compare is clicked, an alert pops up", function () {
+        cy.login("admin");
 
         cy.get("#ui-id-2 > #toolsTreeDiv > .jstree-container-ul > #Standardizer > #Standardizer_anchor").click();
 

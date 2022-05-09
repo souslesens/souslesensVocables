@@ -10,7 +10,7 @@ var DirContentAnnotator = require("./bin/annotator/dirContentAnnotator.");
 var configManager = require("./bin/configManager.");
 var CsvTripleBuilder = require("./bin/KG/CsvTripleBuilder.");
 
-const config = require("./config/mainConfig.json");
+const { config } = require(path.resolve("model/config"));
 
 var router = express.Router();
 var serverParams = { routesRootUrl: "" };
@@ -82,11 +82,6 @@ router.post(
     serverParams.routesRootUrl + "/slsv",
     ensureLoggedIn(),
     function (req, response) {
-        if (req.body.getBlenderSources) {
-            configManager.getBlenderSources({}, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
         if (req.body.createNewResource) {
             configManager.createNewResource(req.body.sourceName, req.body.graphUri, req.body.targetSparqlServerUrl, JSON.parse(req.body.options), function (err, result) {
                 processResponse(response, err, result);

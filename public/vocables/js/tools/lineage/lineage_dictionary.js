@@ -11,8 +11,10 @@ var Lineage_dictionary = (function () {
 
     self.showTSFdictionaryDialog = function (context) {
         var targetDiv;
-        if (false && context == "Lineage_dictionary") {
-            $("#graphDiv").html("<div id='LineageDictionary_mainDiv' style='width:100%;height:800px'></div>");
+        if (true && context == "Lineage_dictionary") {
+            $("#graphDiv").html("<div id='LineageDictionary_mainDiv' style='width:800px;height:800px;overflow: auto'></div>");
+            $("#LineageDictionary_mainDiv").height($("#graphDiv").height()-100)
+            $("#LineageDictionary_mainDiv").width($("#graphDiv").width())
             targetDiv = "LineageDictionary_mainDiv";
         } else {
             targetDiv = "mainDialogDiv";

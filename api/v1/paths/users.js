@@ -32,6 +32,7 @@ module.exports = function () {
     async function PUT(req, res, next) {
         try {
             const updatedProfile = req.body;
+            delete updatedProfile.password;
             const oldProfiles = await readResource(profilesJSON, res);
             const updatedProfiles = { ...oldProfiles, ...updatedProfile };
             if (Object.keys(oldProfiles).includes(Object.keys(req.body)[0])) {
@@ -56,6 +57,7 @@ module.exports = function () {
     async function POST(req, res, next) {
         try {
             const userToAdd = req.body;
+            delete userToAdd.password;
             const oldUsers = await readResource(profilesJSON, res);
             const userDoesntExist = !Object.keys(oldUsers).includes(Object.keys(userToAdd)[0]);
             const newUsers = { ...oldUsers, ...userToAdd };

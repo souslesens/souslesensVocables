@@ -47,6 +47,7 @@ var Config = (function () {
         promote: "OK",
         unPromote: "Candidate",
         trash: "KO",
+        delete:"DELETED"
     };
     self.Blender = {
         openTaxonomyTreeOnLoad: 3,

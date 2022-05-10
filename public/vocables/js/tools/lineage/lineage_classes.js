@@ -68,6 +68,13 @@ var Lineage_classes = (function () {
                 }
                 sourceLabels.sort();
                 //  common.fillSelectOptions("Lineage_toSource", sourceLabels, true)
+
+                $("#LineagePopup").dialog({
+                    autoOpen: false,
+                   height: 450,
+                    width: 450,
+                    modal: true,
+                })
                 $("#Lineage_Tabs").tabs({
                     activate: function (/** @type {any} */ e, /** @type {{ newPanel: { selector: any; }; }} */ ui) {
                         self.currentOwlType = "Class";
@@ -159,8 +166,8 @@ var Lineage_classes = (function () {
             else if (options.callee == "Tree") Lineage_classes.drawNodeAndParents(node.data);
         } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
             if (node.from) {
-                //edge
-                Lineage_blend.deleteRestriction(node);
+                let inSource=Lineage_classes.mainSource;
+                Lineage_blend.deleteRestriction(inSource,node);
             } else {
                 Lineage_blend.addNodeToAssociationNode(node, "source", true);
             }
@@ -439,59 +446,11 @@ var Lineage_classes = (function () {
                 enabled: true,
 
                 addEdge: function (edgeData, callback) {
-                    let source = "ISO_15926-part-14_PCA";
-                    let sourceNode = visjsGraph.data.nodes.get(edgeData.from).data;
-                    let targetNode = visjsGraph.data.nodes.get(edgeData.to).data;
-                    Lineage_properties.getPropertiesjsTreeData(source, null, null, {}, function (err, jstreeData) {
-                        var html =
-                            "" +
-                            "<div>" +
-                            "<b>" +
-                            sourceNode.label +
-                            " -> " +
-                            targetNode.label +
-                            "</b>" +
-                            "<div style='width:270px;height:270px;overflow: auto'> <div id='Lineage_propertiesTreePopup'></div> </div>" +
-                            "<button onclick=''>Cancel</button><button onclick=''>OK</button>";
-                        ("</div>");
-                        $("#graphPopupDiv").html(html);
-
-                        let options = {
-                            openAll: true,
-                            selectTreeNodeFn: function (event, obj) {
-                                event.stopPropagation();
-
-                                Lineage_blend.createRelationFromGraph(sourceNode, targetNode, obj.node.data.id, function (err, result) {
-                                    let newEdge = edgeData;
-                                    newEdge.label = "<i>" + obj.node.data.label + "</i>";
-                                    (newEdge.font = { multi: true, size: 10 }),
-                                        (newEdge.arrows = {
-                                            to: {
-                                                enabled: true,
-                                                type: Lineage_classes.defaultEdgeArrowType,
-                                                scaleFactor: 0.5,
-                                            },
-                                        });
-                                    newEdge.data = { source: source };
-                                    visjsGraph.data.edges.add([newEdge]);
-                                });
-                            },
-                        };
-                        jstreeData.push({
-                            id: source,
-                            text: source,
-                            parent: "#",
-                        });
-                        common.jstree.loadJsTree("Lineage_propertiesTreePopup", jstreeData, options);
-                        let point = visjsGraph.currentDraggingMousePosition;
-                        MainController.UI.showPopup(point, "graphPopupDiv");
-                    });
-
-                    if (edgeData.from === edgeData.to) {
-                        return callback(null);
-                    } else {
-                        return callback(null);
-                    }
+                   Lineage_blend.graphModification.showAddEdgeFromGraphDialog(edgeData,function(err,result){
+                       if(err)
+                           return callback(err.responseText)
+                       return null;
+                   })
                 },
             };
         }

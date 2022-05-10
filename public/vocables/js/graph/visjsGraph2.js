@@ -167,6 +167,8 @@ var visjsGraph = (function () {
                 self.onScaleChange();
             })
             .on("hoverEdge", function (/** @type {{ edge: any; }} */ params) {
+                if(!self.data || ! self.data.edges)
+                    return;
                 var edgeId = params.edge;
                 var edge = self.data.edges.get(edgeId);
                 edge.fromNode = self.data.nodes.get(edge.from);

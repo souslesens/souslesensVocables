@@ -8,6 +8,7 @@ import { identity, style } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import Autocomplete from "@mui/material/Autocomplete";
+import CsvDownloader from "react-csv-downloader";
 
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
@@ -30,6 +31,7 @@ const SourcesTable = () => {
             success: (gotSources: Source[]) => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <Stack>
+                        <CsvDownloader filename="sources.csv" datas={gotSources} />
                         <Autocomplete
                             disablePortal
                             id="search-sources"
@@ -112,9 +114,9 @@ type Msg_ =
     | { type: Type.UserUpdatedPredicates; payload: { broaderPredicate: string; lang: string } }
     | { type: Type.UserClickedAddDataSource; payload: boolean }
     | {
-          type: Type.UserUpdatedDataSource;
-          payload: { type: string[]; table_schema: string; connection: string; dbName: string; local_dictionary: { table: string; labelColumn: string; idColumn: string } };
-      }
+        type: Type.UserUpdatedDataSource;
+        payload: { type: string[]; table_schema: string; connection: string; dbName: string; local_dictionary: { table: string; labelColumn: string; idColumn: string } };
+    }
     | { type: Type.UserUpdatedsparql_server; payload: { url: string; method: string; headers: string[] } };
 
 const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): SourceEditionState => {

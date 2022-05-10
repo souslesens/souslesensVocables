@@ -8,6 +8,7 @@ import { newUser, deleteUser, putUsersBis, User } from "../User";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import Autocomplete from "@mui/material/Autocomplete";
+import CsvDownloader from "react-csv-downloader";
 
 const UsersTable = () => {
     const { model, updateModel } = useModel();
@@ -29,6 +30,7 @@ const UsersTable = () => {
             success: (gotUsers: User[]) => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <Stack spacing={2}>
+                        <CsvDownloader filename="users.csv" datas={gotUsers} />
                         <Autocomplete
                             disablePortal
                             id="search-users"

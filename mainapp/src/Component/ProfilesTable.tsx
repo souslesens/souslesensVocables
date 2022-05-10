@@ -8,6 +8,7 @@ import { identity, style } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import Autocomplete from "@mui/material/Autocomplete";
+import CsvDownloader from "react-csv-downloader";
 
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();
@@ -28,6 +29,7 @@ const ProfilesTable = () => {
             success: (gotProfiles: Profile[]) => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <Stack>
+                        <CsvDownloader filename="profiles.csv" datas={gotProfiles} />
                         <Autocomplete
                             disablePortal
                             id="filter profiles"

@@ -461,7 +461,7 @@ var Lineage_classes = (function () {
                             selectTreeNodeFn: function (event, obj) {
                                 event.stopPropagation();
 
-                                Lineage_blend.createRelationFromGraph(sourceNode, targetNode, obj.node.data.id, function (err, result) {
+                                Lineage_blend.createRelationFromGraph(sourceNode, targetNode, obj.node.data.id, function (_err, _result) {
                                     let newEdge = edgeData;
                                     newEdge.label = "<i>" + obj.node.data.label + "</i>";
                                     (newEdge.font = { multi: true, size: 10 }),

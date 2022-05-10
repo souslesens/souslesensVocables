@@ -60,11 +60,6 @@ const apiDoc = {
                 sparql_server: { type: "object", additionalProperties: { $ref: "#/definitions/SparqlServer" } },
             },
         },
-        SparqlServer: {
-            type: "object",
-            properties: { url: { type: "string" } },
-        },
-
         User: {
             type: "object",
             additionalProperties: false,

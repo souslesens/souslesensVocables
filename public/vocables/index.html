@@ -197,8 +197,9 @@
 
             $(function () {
                 MainController.initConfig(function (err) {
+
                     // sentry/glitchtip
-                    if (Config.sentryDsnJsFront) {
+                    if (Config.sentryDsnJsFront && typeof Sentry == 'object') {
                         Sentry.init({ dsn: Config.sentryDsnJsFront });
                     }
 

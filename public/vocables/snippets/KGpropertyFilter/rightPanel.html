@@ -12,13 +12,24 @@
 <div>
     <!-- <button onclick="KGpropertyFilter.associateFiltersToPropertyRestriction()"></button>-->
 </div>
+
+
 <div id="KGpropertyFilter_rightPanelTabs" class="jstreeContainer">
     <ul>
+        <li style="background-color: #d9bb73"><a href="#KGpropertyFilter_MDMentities_accordionPanel">MDM entities</a></li>
         <li style="background-color: beige"><a href="#KGpropertyFilter_LCI_accordionPanel">LifeCycle</a></li>
         <li style="background-color: #d9bb73"><a href="#KGpropertyFilter_disiciplines_accordionPanel">Disciplines</a></li>
         <li style="background-color: #d9bb73"><a href="#KGpropertyFilter_organization_accordionPanel">Organizations</a></li>
+
     </ul>
 
+    <div class="max-height" id="KGpropertyFilter_MDMentities_accordionPanel">
+        <div class="KGpropertyFilter_tripleDiv">
+            <div class="jstreeContainer KGpropertyFilter_tree">
+                <div id="KGpropertyFilter_MDMentitiesTree"></div>
+            </div>
+        </div>
+    </div>
     <div class="max-height" id="KGpropertyFilter_LCI_accordionPanel">
         <div class="KGpropertyFilter_tripleDiv">
             <div class="jstreeContainer KGpropertyFilter_tree">

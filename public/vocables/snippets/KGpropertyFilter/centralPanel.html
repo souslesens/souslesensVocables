@@ -27,97 +27,28 @@
         color: #0000ff;
     }
 </style>
+<div id="KGpropertyFilter_currentPropertyDiv" style="font-weight: bold; display: none; border: #0000cc solid 2px;background-color: #ddd">
+    <span id="KGpropertyFilter_currentPropertySpan"></span>
+    <button onclick="KGpropertyFilter.associateFiltersToPropertyRestriction()">Associate Filters</button>
+    <button onclick="KGpropertyFilter.saveNewRestrictionFilterTriples()">Save Filters</button>
+</div>
 <div id="KGcreator_centralPanelTabs" style="width: 100%">
     <ul>
-        <li style="background-color: beige"><a href="#KGcreator_ConfigureTab">Configure filters</a></li>
-        <li style="background-color: #d9bb73"><a href="#KGcreator_PropertiesSetTab">Use Properties sets</a></li>
+        <li style="background-color: beige"><a href="#KGcreator_ConfigureTab"> filters</a></li>
+       <!-- <li style="background-color: #d9bb73"><a href="#KGcreator_PropertiesSetTab">Use Properties sets</a></li>-->
     </ul>
     <div id="KGcreator_ConfigureTab">
-        <div id="KGpropertyFilter_currentPropertyDiv" style="font-weight: bold; display: none; border: #0000cc solid 2px">
-            <span id="KGpropertyFilter_currentPropertySpan"></span>
-            <button onclick="KGpropertyFilter.associateFiltersToPropertyRestriction()">Associate Filters</button>
-            <button onclick="KGpropertyFilter.saveNewRestrictionFilterTriples()">Save Filters</button>
-        </div>
+
         <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
             <div id="KGpropertyFilter_filteringResult"></div>
-            <!--
 
-            <div class="KGpropertyFilter_tripleDiv">
-                LifeCycle filters <br>
-                <div class="jstreeContainer"
-                     id="KGpropertyFilter_lifeCycleTree"></div>
+       </div>
 
-
-            </div>
-            <div class="KGpropertyFilter_tripleDiv">
-                LifeCycle filters <br>
-                <div class="jstreeContainer"
-                     id="KGpropertyFilter_disciplineTree"></div>
-
-
-            </div>
-            <div class="KGpropertyFilter_tripleDiv">
-                Discipline filters <br>
-                <select size="35" class="KGpropertyFilter_filterSelect" multiple=true
-                        id="KGpropertyFilter_disciplineSelect"
-                        onchange="KGpropertyFilter.onSelectFilter('discipline',$(this).val())"></select>
-
-            </div>
-            <div class="KGpropertyFilter_tripleDiv">
-                Stake holder filters <br>
-                <select size="35" class="KGpropertyFilter_filterSelect" multiple=true
-                        id="KGpropertyFilter_organizationSelect"
-                        onchange="KGpropertyFilter.onSelectFilter('organization',$(this).val())"></select>
-
-            </div>
-
-
-        </div>
-        --></div>
-
-        <div id="KGcreator_PropertiesSetTab">
+     <!--   <div id="KGcreator_PropertiesSetTab">
             <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
-                <!--
-            <div class="KGpropertyFilter_tripleDiv">
-                LifeCycle filters <br>
-                <div class="jstreeContainer"
-                     id="KGpropertyFilter_lifeCycleTree2"></div>
-
 
             </div>
-            <div class="KGpropertyFilter_tripleDiv">
-                LifeCycle filters <br>
-                <div class="jstreeContainer"
-                     id="KGpropertyFilter_disciplineTree2"></div>
-
-
-            </div>
-
-
-            <div class="KGpropertyFilter_tripleDiv">
-                Discipline filters <br>
-                <select class="KGpropertyFilter_filterSelect"
-                        id="KGpropertyFilter_disciplineSelect2"
-                        onchange="KGpropertyFilter.onSelectFilter('discipline',$(this).val())"></select>
-
-            </div>
-            <div class="KGpropertyFilter_tripleDiv">
-                Stake holder filters <br>
-                <select class="KGpropertyFilter_filterSelect"
-                        id="KGpropertyFilter_organizationSelect2"
-                        onchange="KGpropertyFilter.onSelectFilter('organization',$(this).val())"></select>
-
-            </div>
-            <div>
-                <span id="KGpropertyFilter_currentPropertySpan2"></span>
-                <button onclick="KGpropertyFilter.client.filterProperties()">filter Properties</button>
-            </div>
-
-        </div>
-
-        -->
-            </div>
-        </div>
+        </div>-->
 
         <div id="KGpropertyFilter_dialogDiv"></div>
     </div>

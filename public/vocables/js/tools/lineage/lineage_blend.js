@@ -658,6 +658,10 @@ var Lineage_blend = (function() {
 
             ,
             function(callbackSeries) {
+              if(!Config.sources[Lineage_classes.mainSource].editable > -1) {
+                $("#lineageAddEdgeDialog_part14PropertiesTreeDiv").html("source "+Lineage_classes.mainSource+ " is not editable")
+                return callbackSeries()
+              }
               let inSource = "ISO_15926-part-14_PCA";
               Lineage_properties.getPropertiesjsTreeData(inSource, null, null, {}, function(err, jstreeData) {
                 if (err)
@@ -679,7 +683,11 @@ var Lineage_blend = (function() {
               });
             },
            function(callbackSeries) {
-             let inSource = "ISO_15926-part-14_PCA";
+             if(!Config.sources[Lineage_classes.mainSource].editable > -1) {
+               $("#lineageAddEdgeDialog_currentSourcePropertiesTreeDiv").html("source "+Lineage_classes.mainSource+ " is not editable")
+               return callbackSeries()
+             }
+             let inSource = "Lineage_classes.mainSource";
               Lineage_properties.getPropertiesjsTreeData(inSource,null, null, {}, function(err, jstreeData3) {
                 if (err)
                   return callbackSeries(err);

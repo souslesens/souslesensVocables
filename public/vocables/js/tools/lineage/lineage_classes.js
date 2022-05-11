@@ -441,7 +441,7 @@ var Lineage_classes = (function () {
             // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
             //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
         };
-        if (true) {
+      if (authentication.currentUser.groupes.indexOf("admin") > -1 ){
             options.manipulation = {
                 enabled: true,
 

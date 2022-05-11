@@ -1593,7 +1593,7 @@ sortMethod: "hubsize",
   };
 
   self.searchFuzzyMatches = function(words, indexes, resultDiv) {
-    return MainController.UI.message("",true);
+   MainController.UI.message("",true);
     if (!words || words == "") return alert(" no word Selected");
     var searchType = "fuzzyMatch";
 

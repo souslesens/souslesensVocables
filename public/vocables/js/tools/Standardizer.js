@@ -1604,6 +1604,11 @@ sortMethod: "hubsize",
       }
       words = [words];
     }
+    var filteredIndexes = $("#Standardizer_fuzzySearchAllsourcesCBX").prop("checked");
+    if (!indexes && !filteredIndexes) {
+      indexes = self.getSelectedIndexes(true);
+    }
+
 
     if (!indexes && !filteredIndexes) {
       indexes = self.getSelectedIndexes(true);

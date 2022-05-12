@@ -80,14 +80,13 @@ When you write those files from the Admin interface, nodemon will restart and, f
 
 ### Test
 
+Run End-to-End testing with `npm run uitest`
+
 If you want to add tests, you can add files to `cypress/integration/`
 
 To run uitest within a test bed:
 `docker-compose -f docker-compose.test.yaml up -d`
 `bash tests/load_data.sh`
-`npm run start`
-
-Run End-to-End testing with `npm run uitest`
 
 ```bash
 npm start

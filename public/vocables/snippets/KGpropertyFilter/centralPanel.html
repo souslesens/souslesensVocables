@@ -27,29 +27,24 @@
         color: #0000ff;
     }
 </style>
-<div id="KGpropertyFilter_currentPropertyDiv" style="font-weight: bold; display: none; border: #0000cc solid 2px;background-color: #ddd">
-    <span id="KGpropertyFilter_currentPropertySpan"></span>
-    <button onclick="KGpropertyFilter.associateFiltersToPropertyRestriction()">Associate Filters</button>
-    <button onclick="KGpropertyFilter.saveNewRestrictionFilterTriples()">Save Filters</button>
+<div id="KGpropertyFilter_currentPropertyDiv"
+     style="font-weight: bold; display: none; border: #0000cc solid 2px;background-color: #ddd">
+  <span id="KGpropertyFilter_currentPropertySpan"></span>
+
 </div>
-<div id="KGcreator_centralPanelTabs" style="width: 100%">
-    <ul>
-        <li style="background-color: beige"><a href="#KGcreator_ConfigureTab"> filters</a></li>
-       <!-- <li style="background-color: #d9bb73"><a href="#KGcreator_PropertiesSetTab">Use Properties sets</a></li>-->
-    </ul>
-    <div id="KGcreator_ConfigureTab">
+<div id="KGpropertyFilter_centralPanelTabs" style="width: 100%">
+  <ul>
+    <li style="background-color: beige"><a href="#KGpropertyFilter_ConfigureTab"> filters</a></li>
+  </ul>
 
-        <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
-            <div id="KGpropertyFilter_filteringResult"></div>
+  <div id="KGpropertyFilter_ConfigureTab">
 
-       </div>
+    <div id="KGpropertyFilter_filteringResult" style="overflow: auto"></div>
 
-     <!--   <div id="KGcreator_PropertiesSetTab">
-            <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
+  </div>
 
-            </div>
-        </div>-->
 
-        <div id="KGpropertyFilter_dialogDiv"></div>
-    </div>
+
 </div>
+<div id="KGpropertyFilter_dialogDiv"></div>
+

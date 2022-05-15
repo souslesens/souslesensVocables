@@ -278,9 +278,14 @@ var Lineage_dictionary = (function() {
           MainController.UI.message("Drawing table...");
           var dataset = [];
           var cols = [];
-          // cols.push({ title: "", defaultContent: "" });
-          cols.push({ title: "restrictionNode", defaultContent: "" }); // ATTENTION cette colonne doit toujours etre la premiere
-          // cols.push({ title: "", defaultContent: "" });
+
+          cols.push({ title: "Selection", defaultContent: "" ,
+            title: "Selection",
+              className: "select-checkbox",
+            render: function(datum, type, row) {
+            return  "";
+          }
+          })       // cols.push({ title: "", defaultContent: "" });
 
           self.dataTablesOrderedColumns.forEach(function(item) {
             cols.push({ title: item, defaultContent: "" });

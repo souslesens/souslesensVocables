@@ -681,33 +681,7 @@ var Lineage_classes = (function () {
             });
             common.jstree.loadJsTree("lineage_individualsPropertiesTree", jstreeData, { openAll: true });
 
-            if (false) {
-                //Sparql_OWL.getIndividualProperties(sourceLabel, null, null, null, { distinct: "property" }, function (err, result) {
-                //    if (err) return MainController.UI.message(err);
-                //    var uriPrefixes = {};
-                //    var jstreeData = [];
-                //    result.forEach(function (item) {
-                //        var p;
-                //        p = item.property.value.lastIndexOf("/");
-                //        if (p < 0) p = item.property.value.lastIndexOf("#");
-                //        var graphPrefix = item.property.value.substring(0, p);
-                //        if (!uriPrefixes[graphPrefix]) {
-                //            uriPrefixes[graphPrefix] = 1;
-                //            jstreeData.push({
-                //                id: graphPrefix,
-                //                text: graphPrefix,
-                //                parent: "#",
-                //            });
-                //        }
-                //        jstreeData.push({
-                //            id: item.property.value,
-                //            text: item.property.value.substring(p + 1),
-                //            parent: graphPrefix,
-                //        });
-                //    });
-                //    common.jstree.loadJsTree("lineage_individualsPropertiesTree", jstreeData);
-                //});
-            }
+
         }
     };
 

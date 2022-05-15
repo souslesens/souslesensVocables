@@ -373,7 +373,6 @@ var MainController = (function () {
                 controller.onLoaded(function (err, result) {
                     if (callback) callback(err, result);
                 });
-
         },
 
         getJstreeConceptsContextMenu: function () {

@@ -160,14 +160,14 @@ var KGpropertyFilter = (function () {
         items.associate = {
             label: "Associate",
             action: function (_e) {
-                KGpropertyFilter.associateFiltersToPropertyRestriction()
-               // KGpropertyFilter.showAssociateDialog();
+                KGpropertyFilter.associateFiltersToPropertyRestriction();
+                // KGpropertyFilter.showAssociateDialog();
             },
         };
         return items;
     };
     self.showGraphPopupMenu = function () {};
-  /*  self.showAssociateDialog = function () {
+    /*  self.showAssociateDialog = function () {
         var selectedProperties = common.jstree.getjsTreeNodes("KGpropertyFilter_propertiesTreeDiv", true, "#");
 
         for (var key in self.aspectsMap)
@@ -312,7 +312,7 @@ var KGpropertyFilter = (function () {
                     {
                         text: "Delete",
                         action: function (e, dt, node, config) {
-                          return alert( "in construction")
+                            return alert("in construction");
                             var data = KGpropertyFilter.dictionaryDataTable.rows({ selected: true }).data();
                             KGpropertyFilter.deleteFilters(data);
                         },

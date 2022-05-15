@@ -71,10 +71,10 @@ var Lineage_classes = (function () {
 
                 $("#LineagePopup").dialog({
                     autoOpen: false,
-                   height: 450,
+                    height: 450,
                     width: 450,
                     modal: true,
-                })
+                });
                 $("#Lineage_Tabs").tabs({
                     activate: function (/** @type {any} */ e, /** @type {{ newPanel: { selector: any; }; }} */ ui) {
                         self.currentOwlType = "Class";
@@ -166,8 +166,8 @@ var Lineage_classes = (function () {
             else if (options.callee == "Tree") Lineage_classes.drawNodeAndParents(node.data);
         } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
             if (node.from) {
-                let inSource=Lineage_classes.mainSource;
-                Lineage_blend.deleteRestriction(inSource,node);
+                let inSource = Lineage_classes.mainSource;
+                Lineage_blend.deleteRestriction(inSource, node);
             } else {
                 Lineage_blend.addNodeToAssociationNode(node, "source", true);
             }
@@ -441,16 +441,15 @@ var Lineage_classes = (function () {
             // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
             //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
         };
-      if (authentication.currentUser.groupes.indexOf("admin") > -1 ){
+        if (authentication.currentUser.groupes.indexOf("admin") > -1) {
             options.manipulation = {
                 enabled: true,
 
                 addEdge: function (edgeData, callback) {
-                   Lineage_blend.graphModification.showAddEdgeFromGraphDialog(edgeData,function(err,result){
-                       if(err)
-                           return callback(err.responseText)
-                       return null;
-                   })
+                    Lineage_blend.graphModification.showAddEdgeFromGraphDialog(edgeData, function (err, result) {
+                        if (err) return callback(err.responseText);
+                        return null;
+                    });
                 },
             };
         }
@@ -680,8 +679,6 @@ var Lineage_classes = (function () {
                 });
             });
             common.jstree.loadJsTree("lineage_individualsPropertiesTree", jstreeData, { openAll: true });
-
-
         }
     };
 

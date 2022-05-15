@@ -183,39 +183,41 @@ var SearchUtil = (function () {
         if (!size) size = 10000;
 
         if (_ids) {
-          var slices=common.array.slice(_ids,100)
-            var allHits=[]
-            async.eachSeries(slices,function(ids,callbackEach) {
-                var str = "";
-                var header = {};
-                if (index) header = { index: index };
-                ids.forEach(function(id) {
-                    var query = {
-                        query: {
-                            term: {
-                                "id.keyword": id,
+            var slices = common.array.slice(_ids, 100);
+            var allHits = [];
+            async.eachSeries(
+                slices,
+                function (ids, callbackEach) {
+                    var str = "";
+                    var header = {};
+                    if (index) header = { index: index };
+                    ids.forEach(function (id) {
+                        var query = {
+                            query: {
+                                term: {
+                                    "id.keyword": id,
+                                },
                             },
-                        },
-                    };
-                    str += JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
-                });
-                MainController.UI.message("getting labels "+allHits.length+" ...")
-                ElasticSearchProxy.executeMsearch(str, function(err, result) {
-                    if (err) {
-                        return callbackEach(err);
-                    }
-                    var hits = [];
-                    result.forEach(function(item) {
-                        if (item.hits.hits.length > 0) hits.push(item.hits.hits[0]);
+                        };
+                        str += JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
                     });
-                    allHits=allHits.concat(hits)
-                    return callbackEach()
-
-                });
-            },function(err){
-                return callback(null, allHits);
-            })
-
+                    MainController.UI.message("getting labels " + allHits.length + " ...");
+                    ElasticSearchProxy.executeMsearch(str, function (err, result) {
+                        if (err) {
+                            return callbackEach(err);
+                        }
+                        var hits = [];
+                        result.forEach(function (item) {
+                            if (item.hits.hits.length > 0) hits.push(item.hits.hits[0]);
+                        });
+                        allHits = allHits.concat(hits);
+                        return callbackEach();
+                    });
+                },
+                function (err) {
+                    return callback(null, allHits);
+                }
+            );
         } else {
             var queryObj = { match_all: {} };
 

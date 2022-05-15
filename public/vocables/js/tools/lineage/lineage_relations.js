@@ -168,7 +168,7 @@ Lineage_relations = (function () {
         if (provenanceFilter && provenanceFilter != "") filter += " filter (?provenance='" + provenanceFilter + "')";
 
         var includeSources = null;
-      //  if (propertyFilter == "http://www.w3.org/2002/07/owl#sameAs") includeSources = "TSF-DICTIONARY";
+        //  if (propertyFilter == "http://www.w3.org/2002/07/owl#sameAs") includeSources = "TSF-DICTIONARY";
         self.getFromSourceSelection(function (err, selectedNodes) {
             if (err) return callback(err);
 

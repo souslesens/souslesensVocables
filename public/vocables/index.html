@@ -199,7 +199,11 @@
                 MainController.initConfig(function (err) {
                     // sentry/glitchtip
                     if (Config.sentryDsnJsFront) {
-                        Sentry.init({ dsn: Config.sentryDsnJsFront });
+                        if (typeof Sentry == "object") {
+                            Sentry.init({ dsn: Config.sentryDsnJsFront });
+                        } else {
+                            console.warn("Sentry DSN found in config, but library could not be loaded and initialized.");
+                        }
                     }
 
                     authentication.init();

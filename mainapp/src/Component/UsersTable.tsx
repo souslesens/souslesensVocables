@@ -63,7 +63,7 @@ const UsersTable = () => {
                                                         <TableCell>{user.groups.join(", ")}</TableCell>
                                                         <TableCell>
                                                             <Box sx={{ display: "flex" }}>
-                                                                <UserForm maybeuser={user} />
+                                                                <UserForm id={`edit-button-${user.id}`} maybeuser={user} />
                                                                 <ButtonWithConfirmation disabled={user.source == "json" ? false : true} label="Delete" msg={() => deleteUser(user, updateModel)} />{" "}
                                                             </Box>
                                                         </TableCell>
@@ -75,7 +75,7 @@ const UsersTable = () => {
                             </TableContainer>
                         </Box>
                         <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                            <UserForm create={true} />
+                            <UserForm id={`create-button`} create={true} />
                         </Box>
                     </Stack>
                 </Box>
@@ -128,9 +128,10 @@ const updateUser = (userEditionState: UserEditionState, msg: Msg_): UserEditionS
 type UserFormProps = {
     maybeuser?: User;
     create?: boolean;
+    id: string;
 };
 
-const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
+const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) => {
     const user = maybeUser ? maybeUser : newUser(ulid());
     const { model, updateModel } = useModel();
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
@@ -152,7 +153,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
 
     const config = SRD.unwrap({ auth: "json" }, identity, model.config);
     const createEditButton = (
-        <Button color="primary" variant="contained" onClick={handleOpen}>
+        <Button id={id} color="primary" variant="contained" onClick={handleOpen}>
             {create ? "Create User" : "Edit"}
         </Button>
     );

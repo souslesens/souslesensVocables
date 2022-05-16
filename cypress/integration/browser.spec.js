@@ -9,6 +9,7 @@ describe("Browser test suit", function () {
     context("Given I'm an admin", function () {
         beforeEach(() => {
             cy.login("admin");
+            cy.reset("config_1");
         });
         it("when I click browser and choose the first source, I can click on uri link and visit Abstract Object page", function () {
             cy.visit("http://localhost:3011/vocables/");
@@ -19,7 +20,7 @@ describe("Browser test suit", function () {
         });
     });
 
-    context("Given I'm an owl_user", function () {
+    context.skip("Given I'm an owl_user", function () {
         beforeEach(() => {
             cy.login("owl_user");
         });
@@ -32,7 +33,7 @@ describe("Browser test suit", function () {
         });
     });
 
-    context("Given I'm a skos_user", function () {
+    context.skip("Given I'm a skos_user", function () {
         beforeEach(() => {
             cy.login("skos_user");
         });

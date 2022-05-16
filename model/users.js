@@ -1,8 +1,14 @@
 const fs = require("fs");
 const { configPath: defaultConfigPath } = require("./config");
-
+const { Lock } = require("async-await-mutex-lock");
 /**
- * @typedef {import("./UserTypes").UserAccounts} UserAccounts
+ * @typedef {import("./UserTypes").UserAccountWithPassword} UserAccountWithPassword
+ * @typedef {import("./UserTypes").UserAccount} UserAccount
+ */
+const lock = new Lock();
+/**
+ * UserModel provides add/get/update/remove operations on the
+ * user database (the JSON file at `<configPath>/users/users.json`)
  */
 
 class UserModel {
@@ -15,24 +21,69 @@ class UserModel {
     }
 
     /**
-     * @returns {Promise<UserAccounts>} a collection of UserAccount
+     * @returns {Promise<Record<string, UserAccountWithPassword>>} a collection of UserAccount
+     */
+    _read = async () => {
+        return fs.promises.readFile(this.userPath).then((data) => JSON.parse(data.toString()));
+    };
+
+    /**
+     * @param {Record<string,UserAccount>} userAccounts - a collection of UserAccount
+     */
+    _write = async (userAccounts) => {
+        await fs.promises.writeFile(this.userPath, JSON.stringify(userAccounts, null, 2));
+    };
+
+    /**
+     * @returns {Promise<Record<string,UserAccount>>} a collection of UserAccount
      */
     getUserAccounts = async () => {
-        const data = await fs.promises.readFile(this.userPath);
+        const userAccountsWithPassword = await this._read();
         /**
-         * @type {UserAccounts}
+         * @type {Record<string, UserAccount>}
          */
-        const users = {};
-        Object.entries(JSON.parse(data.toString())).map(([key, value]) => {
-            users[key] = {
-                id: value.id,
-                login: value.login,
-                groups: value.groups,
-                source: value.source,
-                _type: value._type,
-            };
+        const usersNoPasswords = {};
+        Object.entries(userAccountsWithPassword).map(([key, value]) => {
+            usersNoPasswords[key] = { id: value.id, login: value.login, groups: value.groups, _type: value._type, source: value.source };
         });
-        return users;
+        return usersNoPasswords;
+    };
+
+    /**
+     * @param {UserAccount} newUserAccount
+     */
+    addUserAccount = async (newUserAccount) => {
+        await lock.acquire("UsersThread");
+        try {
+            const userAccounts = await this._read();
+            if (newUserAccount.id === undefined) newUserAccount.id = newUserAccount.login;
+            if (Object.keys(userAccounts).includes(newUserAccount.id)) {
+                throw Error("UserAccount exists already, try updating it.");
+            }
+            userAccounts[newUserAccount.id] = newUserAccount;
+            await this._write(userAccounts);
+        } finally {
+            lock.release("UsersThread");
+        }
+    };
+
+    /**
+     * @param {UserAccount} modifiedUserAccount
+     */
+    updateUserAccount = async (modifiedUserAccount) => {
+        await lock.acquire("UsersThread");
+        try {
+            const userAccounts = await this._read();
+            if (!Object.keys(userAccounts).includes(modifiedUserAccount.id)) {
+                console.log("ID", modifiedUserAccount.id);
+                console.log("USERS", userAccounts);
+                throw Error("UserAccount does not exist, try adding it.");
+            }
+            userAccounts[modifiedUserAccount.id] = { ...userAccounts[modifiedUserAccount.id], ...modifiedUserAccount };
+            await this._write(userAccounts);
+        } finally {
+            lock.release("UsersThread");
+        }
     };
 }
 

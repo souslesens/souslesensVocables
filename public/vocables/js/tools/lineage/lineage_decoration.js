@@ -139,8 +139,6 @@ var Lineage_decoration = (function () {
             '    <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(true);"> Hide Type</span>' +
             ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType();"> Show Type</span>' +
             ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(null,true);"> Show Only</span>';
-        //   " <span  class=\"popupMenuItem\"onclick=\"Lineage_decoration.colorByShowDialog();\"> Color by...</span>"+
-
         $("#graphPopupDiv").html(html);
     };
     self.hideShowLegendType = function (hide, only) {
@@ -167,9 +165,6 @@ var Lineage_decoration = (function () {
         });
         visjsGraph.data.nodes.update(newNodes);
     };
-
-    self.colorByShowDialog = function () {};
-    self.colorBy = function () {};
 
     return self;
 })();

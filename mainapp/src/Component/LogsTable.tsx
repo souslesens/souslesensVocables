@@ -6,6 +6,7 @@ import * as React from "react";
 import { SRD } from "srd";
 import { Log } from "../Log";
 import { TextField } from "@material-ui/core";
+import CsvDownloader from "react-csv-downloader";
 
 export const LogsTable = () => {
     const { model } = useModel();
@@ -28,6 +29,7 @@ export const LogsTable = () => {
             success: (gotLogs: Log[]) => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <Stack>
+                        <CsvDownloader filename="logs.csv" datas={gotLogs} />
                         <Autocomplete
                             disablePortal
                             id="search-logs"

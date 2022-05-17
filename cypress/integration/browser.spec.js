@@ -2,17 +2,13 @@ describe("Browser test suit", function () {
     before(() => {
         cy.refreshBfoIndex();
     });
-    afterEach(() => {
-        cy.logout();
-    });
 
     context("Given I'm an admin", function () {
         beforeEach(() => {
+            cy.resetConfig();
             cy.login("admin");
-            cy.reset("config_1");
         });
         it("when I click browser and choose the first source, I can click on uri link and visit Abstract Object page", function () {
-            cy.visit("http://localhost:3011/vocables/");
             cy.get("#sourceBrowser_anchor").click();
             cy.get("#BFO_anchor").click();
             cy.get('span[class="treeType_Class"]').contains("continuant").click();
@@ -20,7 +16,10 @@ describe("Browser test suit", function () {
         });
     });
 
-    context.skip("Given I'm an owl_user", function () {
+    context("Given I'm an owl_user", function () {
+        afterEach(() => {
+            cy.logout();
+        });
         beforeEach(() => {
             cy.login("owl_user");
         });
@@ -33,7 +32,10 @@ describe("Browser test suit", function () {
         });
     });
 
-    context.skip("Given I'm a skos_user", function () {
+    context("Given I'm a skos_user", function () {
+        afterEach(() => {
+            cy.logout();
+        });
         beforeEach(() => {
             cy.login("skos_user");
         });

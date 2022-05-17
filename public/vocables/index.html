@@ -447,9 +447,9 @@
                     <i class="fas fa-user"></i><span id="user-username">...</span>
                 </a>
 
-                <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+                <ul id="user-account-dropdown" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
                     <li id="manage-account-li"><a id="manage-account" class="dropdown-item" href="#">Manage account</a></li>
-                    <li><button onclick="authentication.logout()" class="dropdown-item">Logout</button></li>
+                    <li><button id="logout-button" onclick="authentication.logout()" class="dropdown-item">Logout</button></li>
                 </ul>
             </div>
         </div>

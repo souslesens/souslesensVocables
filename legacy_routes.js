@@ -155,12 +155,6 @@ router.post(
                 processResponse(response, err, result);
             });
         }
-        if (req.body.saveData) {
-            DataController.saveDataToFile(req.body.dir, req.body.fileName, req.body.data, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-
         if (req.body.createTriplesFromCsv) {
             CsvTripleBuilder.createTriplesFromCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
                 processResponse(response, err, result);

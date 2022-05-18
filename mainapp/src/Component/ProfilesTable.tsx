@@ -24,12 +24,11 @@ import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
 import { defaultProfile, saveProfile, Profile, deleteProfile } from "../Profile";
-import { identity, style } from "../Utils";
+import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import Autocomplete from "@mui/material/Autocomplete";
 import CsvDownloader from "react-csv-downloader";
-import { joinWhenArray } from "./joinWhenArray";
 
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();

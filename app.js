@@ -24,9 +24,13 @@ if (config.sentryDsnNode) {
     app.use(Sentry.Handlers.requestHandler());
 }
 
-// App middleware for authentication and session handling
+// body
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+/**
+ * App middleware for authentication and session handling
+ */
 app.use(cookieParser());
 app.use(
     require("express-session")({
@@ -126,6 +130,26 @@ app.use(
         },
     })
 );
+
+// legacy routes
+app.use("/", legacyRoutes);
+
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+    next(createError(404));
+});
+
+/**
+ * Error handlers
+ */
+
+// sentry/glitchtip
+// (this error handler must be before any other error middleware and after all controllers)
+if (config.sentryDsnNode) {
+    app.use(Sentry.Handlers.errorHandler());
+}
+
+// openapi error handler
 app.use("/api/v1/*", function (err, req, res, _next) {
     console.debug("GlobalErr", err);
     const error = err.status ? err : err.stack;
@@ -137,29 +161,7 @@ app.use("/api/v1/*", function (err, req, res, _next) {
     }
 });
 
-// legacy routes
-app.use("/", legacyRoutes);
-
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-    next(createError(404));
-});
-
-// sentry/glitchtip
-if (config.sentryDsnNode) {
-    // The error handler must be before any other error middleware and after all controllers
-    app.use(Sentry.Handlers.errorHandler());
-
-    // Optional fallthrough error handler
-    app.use(function onError(err, req, res, next) {
-        // The error id is attached to `res.sentry` to be returned
-        // and optionally displayed to the user for support.
-        res.statusCode = 500;
-        res.end(res.sentry + "\n");
-    });
-}
-
-// error handler
+// default error handler
 app.use(function (err, req, res, _next) {
     // set locals, only providing error in development
     res.locals.message = err.message;

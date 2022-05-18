@@ -9,13 +9,13 @@ const fileUpload = require("express-fileupload");
 const openapi = require("express-openapi");
 const swaggerUi = require("swagger-ui-express");
 
-const indexRouter = require("./legacy_routes");
+const legacyRoutes = require("./legacy_routes");
 const httpProxy = require(path.resolve("bin/httpProxy."));
 const userManager = require(path.resolve("bin/user."));
 
 const { config } = require("./model/config");
 
-var app = express();
+const app = express();
 const Sentry = require("@sentry/node");
 
 // sentry/glitchtip
@@ -40,7 +40,7 @@ app.use(
 app.use(function (req, res, next) {
     var msgs = req.session.messages || [];
     res.locals.messages = msgs;
-    res.locals.hasMessages = !!msgs.length;
+    res.locals.hasMessages = msgs.length > 0;
     req.session.messages = [];
     next();
 });
@@ -59,23 +59,22 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 httpProxy.app = app;
 
-var jsonParser = bodyParser.json({ limit: 1024 * 1024 * 20, type: "application/json" });
+// body parser
 app.use(bodyParser({ limit: "50mb" }));
+
+var jsonParser = bodyParser.json({ limit: 1024 * 1024 * 20, type: "application/json" });
+app.use(jsonParser);
+
 var urlencodedParser = bodyParser.urlencoded({
     extended: true,
     limit: 1024 * 1024 * 20,
     type: "application/x-www-form-urlencoded",
 });
-
-app.use(jsonParser);
 app.use(urlencodedParser);
 
 app.use(fileUpload());
 
 app.use(logger("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 
 // API
 openapi.initialize({
@@ -138,8 +137,8 @@ app.use("/api/v1/*", function (err, req, res, _next) {
     }
 });
 
-// main router
-app.use("/", indexRouter);
+// legacy routes
+app.use("/", legacyRoutes);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

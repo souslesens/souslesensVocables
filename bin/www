@@ -70,7 +70,7 @@ server.on("error", (error) => {
  * https://github.com/websockets/ws
  */
 const socketio = require("socket.io");
-const io = socketio(server, options);
+const io = socketio(server);
 const SocketManager = require("./socketManager.");
 
 io.on("connection", (clientSocket) => {

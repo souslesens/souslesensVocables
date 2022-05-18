@@ -1,12 +1,18 @@
 const identity = <Type>(a: Type): Type => a;
 
+function joinWhenArray(stringOrArray: string | string[]): string {
+    return Array.isArray(stringOrArray) ? stringOrArray.join(";") : stringOrArray;
+}
+
 function sanitizeValue(value: string | string[]): string[] {
     return typeof value === "string" ? value.split(",") : value;
 }
-export function exhaustiveCheck(): never {
+
+function exhaustiveCheck(): never {
     throw new Error("Missing type");
 }
-export const style = {
+
+const style = {
     position: "absolute" as const,
     top: "50%",
     left: "50%",
@@ -18,4 +24,5 @@ export const style = {
     boxShadow: 24,
     p: 4,
 };
-export { identity, sanitizeValue };
+
+export { identity, joinWhenArray, sanitizeValue, exhaustiveCheck, style };

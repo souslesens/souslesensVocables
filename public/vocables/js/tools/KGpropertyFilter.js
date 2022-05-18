@@ -778,10 +778,10 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
   };
 
   self.matrix = {
-    initMatrix: function(indexes) {
-      //titre des colonnes
-      self.currentWordsCount = 0;
-      var html = "<div class='matrix'>";
+
+    getMatrixHtml: function(filters, aspect) {
+
+      let html = "<div class='matrix'>";
       html += "<div class='matrixRow'>";
       html += "<div class='matrixRowTitle'></div>";
       indexes.forEach(function(index) {
@@ -790,10 +790,17 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       html += "<div style='width:50px'></div>";
       html += "</div>";
 
-      return html;
-    },
-    getMatrixHtml: function(filters, aspect) {
+
       var aspectsMap = {};
+
+      self.matrixDivsMap = {};
+
+      var usedFiltersArray= []
+      filters.forEach(function(item) {
+        if(usedFiltersArray.indexOf(item.filterLabel)<0)
+          usedFiltersArray.push(item.filterLabel)
+      })
+
 
       filters.forEach(function(item) {
         if (!aspectsMap[item.aspectLabel])
@@ -801,27 +808,40 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         let key = item.class + "|" + item.property;
         if (!aspectsMap[item.aspectLabel][key])
           aspectsMap[item.aspectLabel][key] = [];
+        let itemFilters=[]
+        usedFiltersArray.forEach(function(filterValue){
+         var exists=item.filter==filterValue
+            itemFilters.push(exists);
+        })
+        item.filters=itemFilters
         aspectsMap[item.aspectLabel][key].push(item);
+
 
       });
 
 
-      let html = "";
       for (var prop in aspectsMap[aspect]) {
         let propObj = aspectsMap[prop];
+        let rowHtml = "";
         let cellHtml = "";
         let specificClassStr = "";
+        let rowDivId = "R" + common.getRandomHexaId(8);
+
         propObj.forEach(function(filterObj) {
+          let matrixFilterClass="matrixFilterClass"
+          let cellDivId = "C" + common.getRandomHexaId(8);
+          self.matrixDivsMap[cellDivId]=filterObj
+          cellHtml = "<div id='" + cellDivId + "' class='matrixCell " + matrixFilterClass + "' >" + filterObj.classLabel + filterObj.propertyLabel + "</div>";
 
-          cellHtml += "<div id='" + divId + "' class='matrixCell " + specificClassStr + "' >" + filterObj. + "</div>";
+
+          rowHtml = "<div class='matrixRow'>";
+
+
+          rowHtml += "<div id='" + wordDivId + "' class='matrixRowTitle " + hasMatchesClassStr + "'>" + word + "</div>";
+          rowHtml += cellHtml + "</div>";
+          html += rowHtml;
+
         });
-
-        var rowHtml = "<div class='matrixRow'>";
-
-
-        rowHtml += "<div id='" + wordDivId + "' class='matrixRowTitle " + hasMatchesClassStr + "'>" + word + "</div>";
-        rowHtml += cellHtml + "</div>";
-        html += rowHtml;
       }
       return html;
 

@@ -715,7 +715,7 @@ var visjsGraph = (function () {
     self.searchNode = function (/** @type {any} */ id, /** @type {string | number | string[] | undefined} */ word) {
         /*   if (word === null && !id)
             return;*/
-        if (word == "") {
+        if (!word || word == "") {
             word = $("#visjsGraph_searchInput").val();
             if (word == "") return;
         }

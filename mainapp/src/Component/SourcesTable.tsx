@@ -1,15 +1,34 @@
-import { Box, CircularProgress, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack } from "@mui/material";
+import {
+    Button,
+    Checkbox,
+    FormControl,
+    FormControlLabel,
+    Grid,
+    InputLabel,
+    MenuItem,
+    Modal,
+    Select,
+    TextField,
+    Box,
+    CircularProgress,
+    Table,
+    TableBody,
+    TableCell,
+    Paper,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Stack,
+} from "@mui/material";
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
 import { Source, saveSource, defaultSource, deleteSource } from "../Source";
-import { Button, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Modal, Select, TextField } from "@material-ui/core";
-import { identity, style } from "../Utils";
+import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import Autocomplete from "@mui/material/Autocomplete";
 import CsvDownloader from "react-csv-downloader";
-
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
 
@@ -28,57 +47,69 @@ const SourcesTable = () => {
                     ,<p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
                 </Box>
             ),
-            success: (gotSources: Source[]) => (
-                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    <Stack>
-                        <CsvDownloader filename="sources.csv" datas={gotSources} />
-                        <Autocomplete
-                            disablePortal
-                            id="search-sources"
-                            options={gotSources.map((source) => source.name)}
-                            sx={{ width: 300 }}
-                            onInputChange={(event, newInputValue) => {
-                                setFilteringChars(newInputValue);
-                            }}
-                            renderInput={(params) => <TextField {...params} label="Search Sources by name" />}
-                        />{" "}
-                        <Box id="table-container" sx={{ justifyContent: "center", height: "400px", display: "flex" }}>
-                            <TableContainer sx={{ height: "400px" }} component={Paper}>
-                                <Table>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell style={{ fontWeight: "bold" }}>Name</TableCell>
-                                            <TableCell style={{ fontWeight: "bold" }}>graphUri</TableCell>
-                                            <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody sx={{ width: "100%", overflow: "visible" }}>
-                                        {gotSources
-                                            .filter((source) => source.name.includes(filteringChars))
-                                            .map((source) => {
-                                                return (
-                                                    <TableRow key={source.name}>
-                                                        <TableCell>{source.name}</TableCell>
-                                                        <TableCell>{source.graphUri}</TableCell>
-                                                        <TableCell>
-                                                            <Box sx={{ display: "flex" }}>
-                                                                <SourceForm source={source} />
-                                                                <ButtonWithConfirmation label="Delete" msg={() => deleteSource(source, updateModel)} />
-                                                            </Box>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                );
-                                            })}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </Box>
-                        <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                            <SourceForm create={true} />
-                        </Box>
-                    </Stack>
-                </Box>
-            ),
+            success: (gotSources: Source[]) => {
+                const datas = gotSources.map((source) => {
+                    const { sparql_server, dataSource, predicates, imports, isDraft, editable, ...restOfProperties } = source;
+                    const processedData = {
+                        ...restOfProperties,
+                        editable: editable ? "Editable" : "Not Editable",
+                        isDarft: isDraft ? "IsDraft" : "Not a draft",
+                        imports: joinWhenArray(imports),
+                    };
+                    return { ...processedData };
+                });
+                return (
+                    <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                        <Stack>
+                            <CsvDownloader filename="sources.csv" datas={datas} />
+                            <Autocomplete
+                                disablePortal
+                                id="search-sources"
+                                options={gotSources.map((source) => source.name)}
+                                sx={{ width: 300 }}
+                                onInputChange={(event, newInputValue) => {
+                                    setFilteringChars(newInputValue);
+                                }}
+                                renderInput={(params) => <TextField {...params} label="Search Sources by name" />}
+                            />{" "}
+                            <Box id="table-container" sx={{ justifyContent: "center", height: "400px", display: "flex" }}>
+                                <TableContainer sx={{ height: "400px" }} component={Paper}>
+                                    <Table>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell style={{ fontWeight: "bold" }}>Name</TableCell>
+                                                <TableCell style={{ fontWeight: "bold" }}>graphUri</TableCell>
+                                                <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                            {gotSources
+                                                .filter((source) => source.name.includes(filteringChars))
+                                                .map((source) => {
+                                                    return (
+                                                        <TableRow key={source.name}>
+                                                            <TableCell>{source.name}</TableCell>
+                                                            <TableCell>{source.graphUri}</TableCell>
+                                                            <TableCell>
+                                                                <Box sx={{ display: "flex" }}>
+                                                                    <SourceForm source={source} />
+                                                                    <ButtonWithConfirmation label="Delete" msg={() => deleteSource(source, updateModel)} />
+                                                                </Box>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </Box>
+                            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                                <SourceForm create={true} />
+                            </Box>
+                        </Stack>
+                    </Box>
+                );
+            },
         },
         model.sources
     );
@@ -181,7 +212,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
-    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) =>
+    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
     const _handleFieldUpdate = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserAddedGraphUri, payload: event.target.value });
 
@@ -333,7 +364,7 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
         props.update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } });
     const handlePredicateUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) =>
         props.update({ type: Type.UserUpdatedPredicates, payload: { ...props.model.sourceForm.predicates, [fieldName]: event.target.value } });
-    const handleDataSourceUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) =>
+    const handleDataSourceUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         props.update({
             type: Type.UserUpdatedDataSource,
             payload: props.model.sourceForm.dataSource

@@ -22,7 +22,7 @@ describe("ConfigEditor tests suit", function () {
             cy.get('[data-value="skos_only"]').click();
             cy.get('[data-value="owl_only"]').click().type("{esc}");
             cy.intercept("/api/v1/users").as("UsersRoute");
-            cy.get(".css-678bp8-MuiStack-root > .MuiButtonBase-root").as("SaveUserButton").click();
+            cy.get("#btn-save-user").as("SaveUserButton").click();
             cy.wait("@UsersRoute").its("response.statusCode").should("eq", 200);
         });
         it("I can create a new user ", function () {
@@ -34,7 +34,7 @@ describe("ConfigEditor tests suit", function () {
             cy.get('[data-value="skos_only"]').click();
             cy.get('[data-value="owl_only"]').click().type("{esc}");
             cy.intercept("/api/v1/users").as("UsersRoute");
-            cy.get(".css-678bp8-MuiStack-root > .MuiButtonBase-root").as("SaveUserButton").click();
+            cy.get("#btn-save-user").as("SaveUserButton").click();
             cy.wait("@UsersRoute").its("response.statusCode").should("eq", 200);
         });
     });

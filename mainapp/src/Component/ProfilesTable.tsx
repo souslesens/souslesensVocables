@@ -1,10 +1,30 @@
-import { Box, CircularProgress, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack } from "@mui/material";
+import {
+    Button,
+    Checkbox,
+    FormControl,
+    FormControlLabel,
+    FormGroup,
+    InputLabel,
+    MenuItem,
+    Modal,
+    Select,
+    TextField,
+    Box,
+    CircularProgress,
+    Table,
+    TableBody,
+    TableCell,
+    Paper,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Stack,
+} from "@mui/material";
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
 import { defaultProfile, saveProfile, Profile, deleteProfile } from "../Profile";
-import { Button, Checkbox, FormControl, FormControlLabel, FormGroup, InputLabel, MenuItem, Modal, Select, TextField } from "@material-ui/core";
-import { identity, style } from "../Utils";
+import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -15,7 +35,8 @@ const ProfilesTable = () => {
     const [filteringChars, setFilteringChars] = React.useState("");
     const renderProfiles = SRD.match(
         {
-            notAsked: () => <p>Let&aposs fetch some data!</p>,
+            // eslint-disable-next-line react/no-unescaped-entities
+            notAsked: () => <p>Let's fetch some data!</p>,
             loading: () => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                     <CircularProgress />
@@ -26,55 +47,69 @@ const ProfilesTable = () => {
                     ,<p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
                 </Box>
             ),
-            success: (gotProfiles: Profile[]) => (
-                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    <Stack>
-                        <CsvDownloader filename="profiles.csv" datas={gotProfiles} />
-                        <Autocomplete
-                            disablePortal
-                            id="filter profiles"
-                            options={gotProfiles.map((profile) => profile.name)}
-                            sx={{ width: 300 }}
-                            onInputChange={(event, newInputValue) => {
-                                setFilteringChars(newInputValue);
-                            }}
-                            renderInput={(params) => <TextField {...params} label="Search Profiles by name" />}
-                        />
-                        <Box sx={{ justifyContent: "center", display: "flex" }}>
-                            <TableContainer sx={{ height: "400px" }} component={Paper}>
-                                <Table>
-                                    <TableHead>
-                                        <TableRow>
-                                            <TableCell style={{ fontWeight: "bold" }}>Name</TableCell>
-                                            <TableCell style={{ fontWeight: "bold" }}>Allowed Sources</TableCell>
-                                            <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody sx={{ width: "100%", overflow: "visible" }}>
-                                        {gotProfiles
-                                            .filter((profile) => profile.name.includes(filteringChars))
-                                            .map((profile) => {
-                                                return (
-                                                    <TableRow key={profile.id}>
-                                                        <TableCell>{profile.name}</TableCell>
-                                                        <TableCell>{profile.allowedSourceSchemas.join(", ")}</TableCell>
-                                                        <TableCell>
-                                                            <ProfileForm profile={profile} />
-                                                            <ButtonWithConfirmation label="Delete" msg={() => deleteProfile(profile, updateModel)} />
-                                                        </TableCell>
-                                                    </TableRow>
-                                                );
-                                            })}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </Box>
-                        <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                            <ProfileForm create={true} />
-                        </Box>
-                    </Stack>
-                </Box>
-            ),
+            success: (gotProfiles: Profile[]) => {
+                const datas = gotProfiles.map((profile) => {
+                    const { allowedSourceSchemas, allowedSources, forbiddenTools, allowedTools, forbiddenSources, blender, ...restOfProperties } = profile;
+                    const processedData = {
+                        ...restOfProperties,
+                        forbiddenTools: joinWhenArray(forbiddenTools),
+                        allowedTools: joinWhenArray(allowedTools),
+                        allowedSources: joinWhenArray(allowedSources),
+                        forbiddenSources: joinWhenArray(forbiddenSources),
+                        allowedSourceSchemas: allowedSourceSchemas.join(";"),
+                    };
+                    return { ...processedData };
+                });
+                return (
+                    <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                        <Stack>
+                            <CsvDownloader filename="profiles.csv" datas={datas} />
+                            <Autocomplete
+                                disablePortal
+                                id="filter profiles"
+                                options={gotProfiles.map((profile) => profile.name)}
+                                sx={{ width: 300 }}
+                                onInputChange={(event, newInputValue) => {
+                                    setFilteringChars(newInputValue);
+                                }}
+                                renderInput={(params) => <TextField {...params} label="Search Profiles by name" />}
+                            />
+                            <Box sx={{ justifyContent: "center", display: "flex" }}>
+                                <TableContainer sx={{ height: "400px" }} component={Paper}>
+                                    <Table>
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell style={{ fontWeight: "bold" }}>Name</TableCell>
+                                                <TableCell style={{ fontWeight: "bold" }}>Allowed Sources</TableCell>
+                                                <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                            {gotProfiles
+                                                .filter((profile) => profile.name.includes(filteringChars))
+                                                .map((profile) => {
+                                                    return (
+                                                        <TableRow key={profile.id}>
+                                                            <TableCell>{profile.name}</TableCell>
+                                                            <TableCell>{profile.allowedSourceSchemas.join(", ")}</TableCell>
+                                                            <TableCell>
+                                                                <ProfileForm profile={profile} />
+                                                                <ButtonWithConfirmation label="Delete" msg={() => deleteProfile(profile, updateModel)} />
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </Box>
+                            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                                <ProfileForm create={true} />
+                            </Box>
+                        </Stack>
+                    </Box>
+                );
+            },
         },
         model.profiles
     );
@@ -148,7 +183,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
 
-    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) =>
+    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
     const handleCheckedAll = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckAll, payload: { fieldname: fieldname, value: event.target.checked } });

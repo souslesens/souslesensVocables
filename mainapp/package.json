@@ -39,12 +39,12 @@
     "dependencies": {
         "@emotion/react": "^11.9.0",
         "@emotion/styled": "^11.8.1",
-        "@mui/material": "^5.6.4",
+        "@mui/material": "^5.8.0",
         "@mui/x-data-grid": "^5.10.0",
         "@types/react": "^17.0.37",
-        "mui-tables": "^2.0.4",
         "npm-check-updates": "^12.5.11",
         "react": "^17.0.2",
+        "react-csv-downloader": "^2.8.0",
         "react-dom": "^17.0.2",
         "srd": "^1.0.5",
         "ulid": "^2.3.0"

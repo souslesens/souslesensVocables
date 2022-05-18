@@ -221,7 +221,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
                             </Select>
                         </FormControl>
 
-                        <Button color="primary" variant="contained" onClick={saveSources}>
+                        <Button id="btn-save-user" color="primary" variant="contained" onClick={saveSources}>
                             Save User
                         </Button>
                     </Stack>

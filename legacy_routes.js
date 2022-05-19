@@ -99,31 +99,6 @@ router.post(serverParams.routesRootUrl + "/slsv", ensureLoggedIn(), function (re
             processResponse(response, err, result);
         });
     }
-    // XXX refactor to GET/POST api/v1/paths/httpProxy ?
-    if (req.query.SPARQLquery) {
-        let query = req.body.query;
-        const headers = {};
-        if (req.query.graphUri) query = query.replace(/where/gi, "from <" + req.query.graphUri + "> WHERE ");
-
-        if (req.query.method == "POST") {
-            headers["Accept"] = "application/sparql-results+json";
-            headers["Content-Type"] = "application/x-www-form-urlencoded";
-            httpProxy.post(req.query.url, headers, { query: query }, function (err, result) {
-                processResponse(response, err, result);
-            });
-        } else if (req.query.method == "GET") {
-            headers["Accept"] = "application/sparql-results+json";
-            headers["Content-Type"] = "application/x-www-form-urlencoded";
-
-            var query2 = encodeURIComponent(query);
-            query2 = query2.replace(/%2B/g, "+").trim();
-            var url = req.query.url + "?format=json&query=" + query2;
-            httpProxy.get(url, headers, function (err, result) {
-                if (result && typeof result === "string") result = JSON.parse(result.trim());
-                processResponse(response, err, result);
-            });
-        }
-    }
 
     // XXX refactor to POST api/v1/paths/uploadGraph
     if (req.body.uploadOntologyFromOwlFile) {

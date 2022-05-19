@@ -30,7 +30,7 @@ var SPARQL_endpoint = (function () {
         var graphUri = sourceObj.graphUri;
 
         if (!method) method = "POST";
-        var url2 = "/slsv?SPARQLquery=1&url=" + url + "&graphUri=" + graphUri + "&method=" + method + "&t=" + new Date() / 1;
+        var url2 = `${Config.apiUrl}/sparqlQuery?url=${url}&graphUri=${graphUri}&method=${method}&t=${new Date().getTime()}`;
 
         new Yasgui(document.getElementById("yasgui"), {
             requestConfig: { endpoint: url2 },

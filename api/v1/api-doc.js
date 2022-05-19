@@ -272,6 +272,64 @@ const apiDoc = {
             },
             required: [],
         },
+        SparqlQueryResponse: {
+            properties: {
+                head: {
+                    type: "object",
+                    properties: {
+                        link: {
+                            type: "array",
+                            items: {
+                                type: "string",
+                            },
+                        },
+                        vars: {
+                            type: "array",
+                            items: {
+                                type: "string",
+                            },
+                        },
+                    },
+                },
+                results: {
+                    properties: {
+                        distinct: { type: "boolean" },
+                        order: { type: "boolean" },
+                        bindings: {
+                            type: "array",
+                            items: {
+                                $ref: "#/definitions/SparqlBinding",
+                            },
+                        },
+                    },
+                },
+            },
+        },
+        SparqlBinding: {
+            type: "object",
+            properties: {
+                sub: {
+                    $ref: "#/definitions/SparqlTypeValuePair",
+                },
+                pred: {
+                    $ref: "#/definitions/SparqlTypeValuePair",
+                },
+                obj: {
+                    $ref: "#/definitions/SparqlTypeValuePair",
+                },
+            },
+        },
+        SparqlTypeValuePair: {
+            type: "object",
+            properties: {
+                type: {
+                    type: "string",
+                },
+                value: {
+                    type: "string",
+                },
+            },
+        },
     },
 };
 

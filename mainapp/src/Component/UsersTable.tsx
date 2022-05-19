@@ -1,13 +1,31 @@
-import { Box, CircularProgress, Table, TableBody, TableCell, Paper, TableContainer, TableHead, TableRow, Stack } from "@mui/material";
+import {
+    Button,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Modal,
+    Select,
+    TextField,
+    Box,
+    CircularProgress,
+    Table,
+    TableBody,
+    TableCell,
+    Paper,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Stack,
+} from "@mui/material";
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
-import { Button, FormControl, InputLabel, MenuItem, Modal, Select, TextField } from "@material-ui/core";
 import { identity, style } from "../Utils";
 import { newUser, deleteUser, putUsersBis, User } from "../User";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import Autocomplete from "@mui/material/Autocomplete";
+import CsvDownloader from "react-csv-downloader";
 
 const UsersTable = () => {
     const { model, updateModel } = useModel();
@@ -26,58 +44,69 @@ const UsersTable = () => {
                     ,<p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
                 </Box>
             ),
-            success: (gotUsers: User[]) => (
-                <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    <Stack spacing={2}>
-                        <Autocomplete
-                            disablePortal
-                            id="search-users"
-                            options={gotUsers.map((user) => user.login)}
-                            sx={{ width: 300 }}
-                            onInputChange={(event, newInputValue) => {
-                                setFilteringChars(newInputValue);
-                            }}
-                            renderInput={(params) => <TextField {...params} label="Search Users by login" />}
-                        />
-                        <Box id="table-container" sx={{ justifyContent: "center", display: "flex", width: "600" }}>
-                            <TableContainer sx={{ maxHeight: "400px" }} component={Paper}>
-                                <Table sx={{ width: "100%" }}>
-                                    <TableHead>
-                                        <TableRow style={{ fontWeight: "bold" }}>
-                                            <TableCell style={{ fontWeight: "bold" }}>Source</TableCell>
-                                            <TableCell style={{ fontWeight: "bold" }}>Name</TableCell>
-                                            <TableCell style={{ fontWeight: "bold" }}>groups</TableCell>
-                                            <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
-                                        </TableRow>
-                                    </TableHead>
-                                    <TableBody sx={{ width: "100%", overflow: "visible" }}>
-                                        {gotUsers
-                                            .filter((user) => user.login.includes(filteringChars))
-                                            .map((user) => {
-                                                return (
-                                                    <TableRow key={user.id}>
-                                                        <TableCell>{user.source}</TableCell>
-                                                        <TableCell>{user.login}</TableCell>
-                                                        <TableCell>{user.groups.join(", ")}</TableCell>
-                                                        <TableCell>
-                                                            <Box sx={{ display: "flex" }}>
-                                                                <UserForm maybeuser={user} />
-                                                                <ButtonWithConfirmation disabled={user.source == "json" ? false : true} label="Delete" msg={() => deleteUser(user, updateModel)} />{" "}
-                                                            </Box>
-                                                        </TableCell>
-                                                    </TableRow>
-                                                );
-                                            })}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </Box>
-                        <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                            <UserForm create={true} />
-                        </Box>
-                    </Stack>
-                </Box>
-            ),
+            success: (gotUsers: User[]) => {
+                const datas = gotUsers.map((user) => {
+                    const { groups, ...restOfProperties } = user;
+                    return { ...restOfProperties };
+                });
+                return (
+                    <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                        <Stack spacing={2}>
+                            <CsvDownloader filename="users.csv" datas={datas} />
+                            <Autocomplete
+                                disablePortal
+                                id="search-users"
+                                options={gotUsers.map((user) => user.login)}
+                                sx={{ width: 300 }}
+                                onInputChange={(event, newInputValue) => {
+                                    setFilteringChars(newInputValue);
+                                }}
+                                renderInput={(params) => <TextField {...params} label="Search Users by login" />}
+                            />
+                            <Box id="table-container" sx={{ justifyContent: "center", display: "flex", width: "600" }}>
+                                <TableContainer sx={{ maxHeight: "400px" }} component={Paper}>
+                                    <Table sx={{ width: "100%" }}>
+                                        <TableHead>
+                                            <TableRow style={{ fontWeight: "bold" }}>
+                                                <TableCell style={{ fontWeight: "bold" }}>Source</TableCell>
+                                                <TableCell style={{ fontWeight: "bold" }}>Name</TableCell>
+                                                <TableCell style={{ fontWeight: "bold" }}>groups</TableCell>
+                                                <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody sx={{ width: "100%", overflow: "visible" }}>
+                                            {gotUsers
+                                                .filter((user) => user.login.includes(filteringChars))
+                                                .map((user) => {
+                                                    return (
+                                                        <TableRow key={user.id}>
+                                                            <TableCell>{user.source}</TableCell>
+                                                            <TableCell>{user.login}</TableCell>
+                                                            <TableCell>{user.groups.join(", ")}</TableCell>
+                                                            <TableCell>
+                                                                <Box sx={{ display: "flex" }}>
+                                                                    <UserForm id={`edit-button-${user.id}`} maybeuser={user} />
+                                                                    <ButtonWithConfirmation
+                                                                        disabled={user.source == "json" ? false : true}
+                                                                        label="Delete"
+                                                                        msg={() => deleteUser(user, updateModel)}
+                                                                    />{" "}
+                                                                </Box>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    );
+                                                })}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                            </Box>
+                            <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+                                <UserForm id={`create-button`} create={true} />
+                            </Box>
+                        </Stack>
+                    </Box>
+                );
+            },
         },
         model.users
     );
@@ -126,9 +155,10 @@ const updateUser = (userEditionState: UserEditionState, msg: Msg_): UserEditionS
 type UserFormProps = {
     maybeuser?: User;
     create?: boolean;
+    id: string;
 };
 
-const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
+const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) => {
     const user = maybeUser ? maybeUser : newUser(ulid());
     const { model, updateModel } = useModel();
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
@@ -137,7 +167,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
-    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) =>
+    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
 
     const saveSources = () => {
@@ -150,7 +180,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
 
     const config = SRD.unwrap({ auth: "json" }, identity, model.config);
     const createEditButton = (
-        <Button color="primary" variant="contained" onClick={handleOpen}>
+        <Button id={id} color="primary" variant="contained" onClick={handleOpen}>
             {create ? "Create User" : "Edit"}
         </Button>
     );
@@ -168,16 +198,6 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
                             value={userModel.userForm.login}
                             id={`login`}
                             label={"Login"}
-                            variant="standard"
-                            disabled={user.source == "json" ? false : true}
-                        />
-                        <TextField
-                            fullWidth
-                            onChange={handleFieldUpdate("password")}
-                            value={userModel.userForm.password}
-                            id={`password`}
-                            type="password"
-                            label={"Password"}
                             variant="standard"
                             disabled={user.source == "json" ? false : true}
                         />
@@ -201,7 +221,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false }: UserFormProps) => {
                             </Select>
                         </FormControl>
 
-                        <Button color="primary" variant="contained" onClick={saveSources}>
+                        <Button id="btn-save-user" color="primary" variant="contained" onClick={saveSources}>
                             Save User
                         </Button>
                     </Stack>

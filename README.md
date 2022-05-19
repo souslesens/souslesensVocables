@@ -1,8 +1,9 @@
 # SouslesensVocables
 
-![Lint](https://github.com/souslesens/souslesensVocables/actions/workflows/lint.yaml/badge.svg)
-![Check updates](https://github.com/souslesens/souslesensVocables/actions/workflows/check-updates.yaml/badge.svg)
-![Docker](https://github.com/souslesens/souslesensVocables/actions/workflows/build-docker-images.yaml/badge.svg)
+[![Prettier](https://github.com/souslesens/souslesensVocables/actions/workflows/prettier.yaml/badge.svg)](https://github.com/souslesens/souslesensVocables/actions/workflows/prettier.yaml)
+[![Jest](https://github.com/souslesens/souslesensVocables/actions/workflows/jest.yaml/badge.svg)](https://github.com/souslesens/souslesensVocables/actions/workflows/jest.yaml)
+[![Cypress Tests](https://github.com/souslesens/souslesensVocables/actions/workflows/cypress.yaml/badge.svg)](https://github.com/souslesens/souslesensVocables/actions/workflows/cypress.yaml)
+[![Docker build and push](https://github.com/souslesens/souslesensVocables/actions/workflows/build-docker-images.yaml/badge.svg)](https://github.com/souslesens/souslesensVocables/actions/workflows/build-docker-images.yaml)
 
 ![sousLeSensVocables large](https://user-images.githubusercontent.com/1880078/130787939-adf887d3-0054-4aa7-9867-0fbcd5bfc7a2.png)
 
@@ -79,9 +80,14 @@ When you write those files from the Admin interface, nodemon will restart and, f
 
 ### Test
 
-Run End-to-End testing with `npm run test`
-
 If you want to add tests, you can add files to `cypress/integration/`
+
+To run uitest within a test bed:
+`docker-compose -f docker-compose.test.yaml up -d`
+`bash tests/load_data.sh`
+`npm run start`
+
+Run End-to-End testing with `npm run uitest`
 
 ```bash
 npm start

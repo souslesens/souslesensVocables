@@ -26,10 +26,16 @@
 Cypress.Commands.add("login", (username) => {
     cy.visit("http://localhost:3011/login");
     cy.viewport(1920, 1200);
+    cy.intercept("http://localhost:3011/api/v1/config").as("getConfig");
+    cy.intercept("http://localhost:3011/api/v1/sources").as("getSources");
+    cy.intercept("http://localhost:3011/api/v1/profiles").as("getProfiles");
     cy.get("#username").click();
     cy.get("#username").type(username);
     cy.get("#password").type("admin");
     cy.get(".btn").click();
+    cy.wait("@getConfig").its("response.statusCode").should("to.be.oneOf", [200, 304]);
+    cy.wait("@getSources").its("response.statusCode").should("to.be.oneOf", [200, 304]);
+    cy.wait("@getProfiles").its("response.statusCode").should("to.be.oneOf", [200, 304]);
 });
 
 Cypress.Commands.add("logout", () => {
@@ -38,8 +44,9 @@ Cypress.Commands.add("logout", () => {
         return false;
     });
     // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.get("#user-username").click();
-    cy.get("li:nth-child(2) > .dropdown-item").click();
+    // eslint-disable-next-line cypress/no-unnecessary-waiting
+    cy.get("#dropdownMenuLink").click();
+    cy.get("#logout-button").click();
 });
 
 Cypress.Commands.add("refreshBfoIndex", () => {
@@ -49,5 +56,21 @@ Cypress.Commands.add("refreshBfoIndex", () => {
     cy.get("#admin_anchor").click();
     cy.get("#BFO_anchor > .jstree-checkbox").click();
     cy.get(".my-1:nth-child(1)").click();
+    cy.on("uncaught:exception", (_err, _runnable) => {
+        return false;
+    });
     cy.logout();
+});
+
+Cypress.Commands.add("resetConfig", (configName = "config_1") => {
+    cy.exec("rm -rf tests/data/config");
+    cy.exec("mkdir -p tests/data/config");
+    cy.exec(`cp -r tests/data/config_templates/${configName}/* tests/data/config/`);
+});
+
+Cypress.Commands.add("waitForProfilesAndSources", () => {
+    cy.intercept("http://localhost:3011/api/v1/sources").as("getSources");
+    cy.wait("@getSources");
+    cy.intercept("http://localhost:3011/api/v1/profiles").as("getProfiles");
+    cy.wait("@getProfiles");
 });

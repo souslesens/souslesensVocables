@@ -18,8 +18,8 @@ var fs = require("fs");
 const { configPath, config } = require("../model/config");
 
 var ConfigManager = {
+    // TODO move to model/config
     getGeneralConfig: function (callback) {
-        //   console.log(str)
         var editableConfig = config;
         var err = null;
         try {
@@ -36,30 +36,21 @@ var ConfigManager = {
             if (callback) callback(err, editableConfig);
         }
     },
+    // TODO move to model/profiles
     getProfiles: function (options, callback) {
         var profilesPath = path.join(__dirname, "../" + configPath + "/profiles.json");
         jsonFileStorage.retrieve(path.resolve(profilesPath), function (err, profiles) {
             callback(err, profiles);
         });
     },
-    getUsers: function (options, callback) {
-        var profilesPath = path.join(__dirname, "../" + configPath + "/users.json");
-        jsonFileStorage.retrieve(path.resolve(profilesPath), function (err, profiles) {
-            callback(err, profiles);
-        });
-    },
+    // TODO move to model/sources
     getSources: function (options, callback) {
         var sourcesPath = path.join(__dirname, "../" + configPath + "/sources.json");
         jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
             callback(err, sources);
         });
     },
-    getBlenderSources: function (options, callback) {
-        var sourcesPath = path.join(__dirname, "../" + configPath + "/blenderSources.json");
-        jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
-            callback(err, sources);
-        });
-    },
+    // TODO move to model/blenderSources
     createNewResource: function (sourceName, graphUri, targetSparqlServerUrl, options, callback) {
         async.series(
             [
@@ -112,7 +103,7 @@ var ConfigManager = {
             }
         );
     },
-
+    // TODO move to model/blenderSources
     deleteResource: function (sourceName, graphUri, targetSparqlServerUrl, callback) {
         async.series(
             [
@@ -139,7 +130,7 @@ var ConfigManager = {
             }
         );
     },
-
+    // TODO move to model/sources
     addImportToSource: function (parentSource, importedSource, callback) {
         ConfigManager.getSources(null, function (err, sources) {
             if (err) return callback(err);
@@ -152,38 +143,13 @@ var ConfigManager = {
             });
         });
     },
+    // TODO move to model/sources
     saveSources: function (sources, callback) {
         var sourcesPath = path.join(__dirname, "../" + configPath + "/sources.json");
         jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, message) {
             callback(err, message);
         });
     },
-
-    /*  getProfilesSourcesMatrix: function (callback) {
-        ConfigManager.getProfiles(null, function (err, profiles) {
-            if (err)
-                return callback(err)
-
-        })
-
-
-    }
-    ,
-    getUserSourcesMatrix: function () {
-        ConfigManager.getProfiles(null, function (err, profiles) {
-            if (err)
-                return callback(err)
-            ConfigManager.getUsers(null, function (err, profiles) {
-                if (err)
-                    return callback(err)
-
-            })
-        })
-
-
-    }*/
 };
 ConfigManager.getGeneralConfig();
 module.exports = ConfigManager;
-
-//ConfigManager.getProfilesSourcesMatrix()

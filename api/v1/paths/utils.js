@@ -100,6 +100,37 @@ function responseSchema(resourceName, verb) {
         },
     };
 }
+
+// XXX Is it really useful in all cases ?
+function processResponse(response, error, result) {
+    if (response && !response.finished) {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE"); // If needed
+        response.setHeader("Access-Control-Allow-Headers", "X-Requested-With,contenttype"); // If needed
+        response.setHeader("Access-Control-Allow-Credentials", true); // If needed*/
+
+        if (error) {
+            if (typeof error == "object") {
+                if (error.message) error = error.message;
+                else error = JSON.stringify(error, null, 2);
+            }
+            console.log("ERROR !!" + error);
+            response.status(404).send({ ERROR: error });
+        } else if (!result) {
+            response.send({ done: true });
+        } else if (typeof result == "string") {
+            response.send(JSON.stringify({ result: result }));
+        } else if (result.contentType && result.data) {
+            response.setHeader("Content-type", result.contentType);
+            if (typeof result.data == "object") response.send(JSON.stringify(result.data));
+            else response.send(result.data);
+        } else {
+            response.setHeader("Content-type", "application/json");
+            response.send(result);
+        }
+    }
+}
+
 module.exports = {
     writeResource,
     failure,
@@ -113,4 +144,5 @@ module.exports = {
     successfullyUpdated,
     successfullyDeleted,
     successfullyFetched,
+    processResponse,
 };

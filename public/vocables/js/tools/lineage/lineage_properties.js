@@ -135,6 +135,8 @@ Lineage_properties = (function() {
     });
   };
 
+
+
   self.getPropertiesjsTreeData = function(source, ids, words, options, callback) {
     if (!options) options = {};
 

@@ -51,14 +51,13 @@ var Sparql_proxy = (function () {
                 $("#waitImg").css("display", "block");
 
                 var payload = {
-                    httpProxy: 1,
                     url: url,
                     body: body,
                     POST: true,
                 };
                 $.ajax({
                     type: "POST",
-                    url: Config.serverUrl,
+                    url: `${Config.apiUrl}/httpProxy`,
                     data: payload,
                     dataType: "json",
                     success: function (data, _textStatus, _jqXHR) {
@@ -100,7 +99,6 @@ var Sparql_proxy = (function () {
         $("#waitImg").css("display", "block");
 
         var payload = {
-            httpProxy: 1,
             options: {},
         };
         if (!queryOptions) queryOptions = "";
@@ -141,7 +139,7 @@ var Sparql_proxy = (function () {
         }
         $.ajax({
             type: "POST",
-            url: Config.serverUrl,
+            url: `${Config.apiUrl}/httpProxy`,
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {

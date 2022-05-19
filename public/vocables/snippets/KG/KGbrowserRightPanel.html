@@ -116,15 +116,6 @@
     $("#KGbrowser_searchAllDiv").load("./snippets/searchAll.html", function () {
         $("#GenericTools_searchInAllSources").prop("checked", false);
 
-        $("#KGbrowser_accordion").accordion();
-        $("#KGbrowser_accordion").accordion("option", { active: 0 });
-        $("#KGbrowser_accordion").on("accordionbeforeactivate", function (event, ui) {
-            if (!KGmappings.checkMappingEditionSave()) return false;
-        });
-        $("#KGbrowser_accordion").on("accordionactivate", function (event, ui) {
-            if (ui.newPanel[0].id == "KGbrowser_GraphTab") {
-                KGbrowserGraph.initGraphTab();
-            }
-        });
+
     });
 </script>

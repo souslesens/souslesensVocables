@@ -354,6 +354,7 @@ var KGassetGraph = (function () {
 
                 function (callbackSeries) {
                     var existingNodes = {};
+                    var fontColor="#111"
                     for (var subject in self.classes) {
                         if (subject.indexOf("xsd:") < 0) {
                             if (!existingNodes[subject]) {
@@ -373,7 +374,7 @@ var KGassetGraph = (function () {
                                     label: label,
                                     shape: shape,
                                     imagePadding: 3,
-                                    font: { bold: true, size: 18, color: color },
+                                    font: { bold: true, size: 18, color: fontColor },
                                     fixed: true,
                                     color: color,
 
@@ -388,6 +389,7 @@ var KGassetGraph = (function () {
                                 visjsData.nodes.push(obj);
                             }
                             for (var predicate in self.classes[subject]) {
+
                                 self.classes[subject][predicate].forEach(function (object) {
                                     if (object.indexOf("xsd:") > -1) return;
 
@@ -408,14 +410,19 @@ var KGassetGraph = (function () {
                                     }
 
                                     if (!existingNodes[object]) {
+                                        if(! self.model[object]){
+                                            return console.log("missing in model "+object)
+                                        }
                                         existingNodes[object] = 1;
                                         var label = self.model[object].label;
                                         var color = options.nodeColor || self.buildClasses[object].color;
+
                                         if (!options.nodeColor) self.model[object].color = color;
                                         var shape = "box";
                                         if (object.indexOf("xsd:") > -1) {
                                             shape = "star";
                                             color = "#ffe0aa";
+
                                         }
                                         visjsData.nodes.push({
                                             id: object,
@@ -424,7 +431,7 @@ var KGassetGraph = (function () {
                                             imagePadding: 3,
                                             color: color,
                                             fixed: true,
-                                            font: { bold: true, size: 18, color: color },
+                                            font: { bold: true, size: 18, color: fontColor },
                                             data: {
                                                 id: object,
                                                 type: "subject",

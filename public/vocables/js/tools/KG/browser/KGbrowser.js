@@ -30,6 +30,18 @@ var KGbrowser = (function () {
         $("#accordion").accordion("option", { active: 1 });
         MainController.UI.openRightPanel();
         $("#rightPanelDiv").load("snippets/KG/KGbrowserRightPanel.html", function () {
+
+            $("#KGbrowser_accordion").accordion();
+            $("#KGbrowser_accordion").accordion("option", { active: 0 });
+            $("#KGbrowser_accordion").on("accordionbeforeactivate", function (event, ui) {
+                if (!KGmappings.checkMappingEditionSave()) return false;
+            });
+            $("#KGbrowser_accordion").on("accordionactivate", function (event, ui) {
+                if (ui.newPanel[0].id == "KGbrowser_GraphTab") {
+                    KGbrowserGraph.initGraphTab();
+                }
+            });
+
             SourceBrowser.currentTargetDiv = "KGbrowserItemsjsTreeDiv";
             $("#GenericTools_searchSchemaType").val("INDIVIDUAL");
             $("#sourcesTreeDiv").load("snippets/KG/KGbrowser.html", function () {

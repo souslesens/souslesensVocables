@@ -99,27 +99,6 @@ router.post(serverParams.routesRootUrl + "/slsv", ensureLoggedIn(), function (re
             processResponse(response, err, result);
         });
     }
-    // XXX refactor to GET/POST api/v1/paths/httpProxy
-    if (req.body.httpProxy) {
-        httpProxy.setProxyForServerDomain(req.headers.host);
-
-        if (req.body.POST) {
-            var body = JSON.parse(req.body.body);
-            httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
-                processResponse(response, err, result);
-            });
-        } else {
-            var options = {};
-            if (req.body.options) {
-                if (typeof req.body.options == "string") options = JSON.parse(req.body.options);
-                else options = req.body.options;
-            }
-            options.host = req.headers.host;
-            httpProxy.get(req.body.url, options, function (err, result) {
-                processResponse(response, err, result);
-            });
-        }
-    }
     // XXX refactor to GET/POST api/v1/paths/httpProxy ?
     if (req.query.SPARQLquery) {
         let query = req.body.query;

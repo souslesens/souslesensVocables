@@ -33,7 +33,7 @@ module.exports = function () {
     }
     POST.apiDoc = {
         summary: "Create a new blender source",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: "createBlenderSource",
         parameters: [
             {
@@ -63,7 +63,7 @@ module.exports = function () {
     }
     DELETE.apiDoc = {
         summary: "Delete blender source",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictAdmin: [] }],
         operationId: "deleteBlenderSource",
         parameters: [
             {

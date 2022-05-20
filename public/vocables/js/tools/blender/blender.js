@@ -42,7 +42,7 @@ var Blender = (function () {
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
                     for (var key in data.resources) {
-                        Config.sources[key] = data[key];
+                        Config.sources[key] = data.resources[key];
                     }
 
                     self.availableSources = [];

@@ -87,13 +87,6 @@ router.post(serverParams.routesRootUrl + "/slsv", ensureLoggedIn(), function (re
             processResponse(response, err, result);
         });
     }
-
-    // XXX refactor to POST api/v1/paths/uploadGraph
-    if (req.body.uploadOntologyFromOwlFile) {
-        RDF_IO.uploadOntologyFromOwlFile(req.body.graphUri, req.body.filePath, function (err, result) {
-            processResponse(response, err, result);
-        });
-    }
     // XXX refactor to GET api/v1/paths/readCsv
     if (req.body.readCsv) {
         DataController.readCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {

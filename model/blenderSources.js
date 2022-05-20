@@ -43,6 +43,20 @@ class BlenderSources {
         const blenderSources = JSON.parse(data.toString());
         return blenderSources;
     };
+    create = async () => {
+        await lock.acquire("UsersThread");
+        try {
+            const userAccounts = await this._read();
+            if (newUserAccount.id === undefined) newUserAccount.id = newUserAccount.login;
+            if (Object.keys(userAccounts).includes(newUserAccount.id)) {
+                throw Error("UserAccount exists already, try updating it.");
+            }
+            userAccounts[newUserAccount.id] = newUserAccount;
+            await this._write(userAccounts);
+        } finally {
+            lock.release("UsersThread");
+        }
+    };
 }
 
 const blenderSources = new BlenderSources("config");

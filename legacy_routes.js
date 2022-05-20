@@ -81,18 +81,6 @@ router.post("/upload", ensureLoggedIn(), function (req, response) {
 });
 
 router.post(serverParams.routesRootUrl + "/slsv", ensureLoggedIn(), function (req, response) {
-    // XXX refactor to POST api/v1/paths/blenderSource
-    if (req.body.createNewResource) {
-        configManager.createNewResource(req.body.sourceName, req.body.graphUri, req.body.targetSparqlServerUrl, JSON.parse(req.body.options), function (err, result) {
-            processResponse(response, err, result);
-        });
-    }
-    // XXX refactor to DELETE api/v1/paths/blenderSource
-    if (req.body.deleteResource) {
-        configManager.deleteResource(req.body.sourceName, req.body.graphUri, req.body.sparqlServerUrl, function (err, result) {
-            processResponse(response, err, result);
-        });
-    }
     // XXX refactor to PUT api/v1/paths/blenderSource/{id}
     if (req.body.addImportToSource) {
         configManager.addImportToSource(req.body.parentSource, req.body.importedSource, function (err, result) {

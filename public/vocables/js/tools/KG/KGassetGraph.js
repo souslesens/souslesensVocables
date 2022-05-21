@@ -312,7 +312,7 @@ var KGassetGraph = (function () {
                     }
 
                     KGassetGraph.getAssetGlobalMappings(source, function (_err, result) {
-                        KGbrowserCustom.initsuperClassesPalette();
+                      //  KGbrowserCustom.initsuperClassesPalette();
                         self.model = result.model;
                         for (var predicate in result.predicates) {
                             for (var subject in result.predicates[predicate]) {

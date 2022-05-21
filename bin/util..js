@@ -170,6 +170,8 @@ var util = {
     },
 
     formatStringForTriple: function (str, forUri) {
+        if(!str)
+            return str;
         str = str.trim();
         if (str.indexOf("http://") == 0) return str;
         if (!str || !str.replace) return null;

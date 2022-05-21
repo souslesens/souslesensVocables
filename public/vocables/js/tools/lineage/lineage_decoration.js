@@ -56,6 +56,8 @@ var Lineage_decoration = (function () {
                         return callback(err);
                     }
                     data = data.concat(result.results.bindings);
+                    if(data.length>100)
+                        console.error(query)
                     return callbackEach();
                 });
             },
@@ -68,10 +70,13 @@ var Lineage_decoration = (function () {
         self.colorGraphNodesByType(true);
     };
 
-    self.colorGraphNodesByType = function (part14TopTypes) {
-        var existingNodes = visjsGraph.getExistingIdsMap(true);
-        var ids = Object.keys(existingNodes);
-        self.listGraphNodeTypes(ids, part14TopTypes, function (err, result) {
+    self.colorGraphNodesByType = function (nodeIds,part14TopTypes) {
+        return;
+        if(!nodeIds)
+            nodeIds=visjsGraph.data.nodes.getIds()
+       // var existingNodes = visjsGraph.getExistingIdsMap(true);
+     //  var ids = Object.keys(existingNodes);
+        self.listGraphNodeTypes(nodeIds, part14TopTypes, function (err, result) {
             if (err) return alert(err);
             var nodesTypesMap = {};
             var colorsMap = {};
@@ -93,7 +98,8 @@ var Lineage_decoration = (function () {
             var newNodes = [];
             var neutralColor = null; //"#ccc";
 
-            for (var nodeId in existingNodes) {
+
+                nodeIds.forEach(function(nodeId){
                 if (false && nodeId.indexOf("legend_") == 0) legendNodes.push(nodeId);
                 else {
                     var color = neutralColor;
@@ -104,7 +110,7 @@ var Lineage_decoration = (function () {
                     }
                     if (color) newNodes.push({ id: nodeId, color: color, legendType: type });
                 }
-            }
+            })
 
             //  visjsGraph.data.nodes.remove(legendNodes);
             if (visjsGraph.data && visjsGraph.data.nodes) visjsGraph.data.nodes.update(newNodes);

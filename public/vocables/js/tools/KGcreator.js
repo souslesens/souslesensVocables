@@ -331,6 +331,7 @@ var KGcreator = (function () {
         var subjectLookupName = $("#KGcreator_subjectLookupName").val();
         var objectLookupName = $("#KGcreator_objectLookupName").val();
         var isRestrictionCBX = $("#KGcreator_isRestrictionCBX").prop("checked");
+        var isSpecificPredicate = $("#KGcreator_isSpecificPredicateCBX").prop("checked");
 
         if (!subject) return alert("missing subject");
         if (!predicate) return alert("missing predicate");
@@ -350,6 +351,9 @@ var KGcreator = (function () {
             if (self.propertiesMap[predicate] && self.propertiesMap[predicate].inversePropLabel) {
                 tripleObj.inverseRestrictionProperty = self.propertiesMap[predicate].inversePropLabel;
             }
+        }
+        if(isSpecificPredicate){
+            tripleObj.isSpecificPredicate=true
         }
 
         self.currentJsonObject.tripleModels.push(tripleObj);

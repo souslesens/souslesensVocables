@@ -101,9 +101,9 @@ var Sparql_common = (function () {
                     if (ids[0] == null) return "";
                     var conceptIdsStr = "";
                     ids.forEach(function (id, _index) {
-                        /*  if (id.match && !id.match(/.+:.+|http.+|_:+/)) {
-                            return (conceptIdsStr += "<" + id + ">");
-                        }*/
+                          if (!id.match  || !id.match(/.+:.+|http.+|_:+/)) {
+                            return // (conceptIdsStr += "<" + id + ">");
+                        }
                         if (id != "") {
                             if (conceptIdsStr != "") conceptIdsStr += ",";
                             if ((id.match && !id.match(/.+:.+|http.+|_:+/)) || id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1 || id.indexOf("_:") > -1) {

@@ -29,6 +29,47 @@ var CsvTripleBuilder = {
         ["System", "Activity", "participantIn"],
         ["System", "FunctionalObject", "hasFunctionalPart"],
     ],
+
+    sparqlPrefixes:{
+        xs:"<http://www.w3.org/2001/XMLSchema#>",
+        rdf:"<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+        rdfs:"<http://www.w3.org/2000/01/rdf-schema#>",
+        owl:"<http://www.w3.org/2002/07/owl#>",
+        skos:"<http://www.w3.org/2004/02/skos/core#>",
+        iso14224:"<http://data.total.com/resource/tsf/iso_14224#>",
+        req:"<https://w3id.org/requirement-ontology/rdl/>",
+        part14:"<http://standards.iso.org/iso/15926/part14/>",
+        iso81346:"<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
+        slsv:"<http://souslesens.org/resource/vocabulary/>",
+        dcterms:"<http://purl.org/dc/terms/>"
+    },
+
+    getSparqlPrefixesStr:function(){
+        var str=""
+        for(var key in CsvTripleBuilder.sparqlPrefixes){
+            str+="PREFIX "+key+": "+CsvTripleBuilder.sparqlPrefixes[key]+" "
+        }
+        return str;
+
+
+    },
+    isUri:function(str){
+        if(!str)
+            return false;
+        var prefixesArray=  Object.keys(CsvTripleBuilder.sparqlPrefixes)
+                    var array=str.split(":")
+                if(array.length==0)
+                    return false;
+             else{
+                    if (prefixesArray.indexOf(array[0])>-1|| array[0].indexOf("http")==0)
+                        return true;
+                    return false
+                }
+
+
+
+    },
+
     readCsv: function (filePath, callback) {
         csvCrawler.readCsv({ filePath: filePath }, 500000, function (err, result) {
             if (err) return callback(err);
@@ -186,19 +227,23 @@ var CsvTripleBuilder = {
 
                             lines.forEach(function (line, _indexLine) {
                                 //clean line content
-                                for (var key in line) {
-                                    line[key] = util.formatStringForTriple(line[key]);
-                                }
 
                                 var subjectStr = null;
                                 var objectStr = null;
                                 var currentBlankNode = null;
 
                                 mapping.tripleModels.forEach(function (item) {
+
+                                    for (var key in line) {
+                                       if(line[key] && !CsvTripleBuilder.isUri(line[key]))
+                                            line[key] = util.formatStringForTriple(line[key]);
+
+                                    }
+
+
                                     subjectStr = null;
                                     objectStr = null;
 
-                                    if (line[item.s] == "CFIHOS-30000310") var x = 3;
                                     //get value for Subject
                                     {
                                         if (item.s_type == "fixed") subjectStr = item.s;
@@ -275,7 +320,8 @@ var CsvTripleBuilder = {
                                         else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                     }
 
-                                    if (!item.p.match(/.+:.+|http.+/)) {
+
+                                    if (!item.isSpecificPredicate && !item.p.match(/.+:.+|http.+/) ) {
                                         item.p = "<" + graphUri + util.formatStringForTriple(item.p, true) + ">";
                                     }
                                     if (item.isRestriction) {
@@ -355,7 +401,10 @@ var CsvTripleBuilder = {
                                     else {
                                         // get value for property
                                         var propertyStr = item.p;
-                                        if (item.p.indexOf("$") == 0) propertyStr = line[item.p.substring(1)];
+                                        if(item.isSpecificPredicate){
+                                            propertyStr = line[item.p];
+                                        }
+                                      else  if (item.p.indexOf("$") == 0) propertyStr = line[item.p.substring(1)];
                                         else if (typeof item.p === "function") {
                                             propertyStr = item.p(line, line);
                                         }
@@ -443,15 +492,8 @@ var CsvTripleBuilder = {
         async.series(
             [
                 function (callbackSeries) {
-                    var queryGraph =
-                        "PREFIX xs: <http://www.w3.org/2001/XMLSchema#>" +
-                        "PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                        "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-                        "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
-                        "PREFIX iso14224: <http://data.total.com/resource/tsf/iso_14224#>" +
-                        "PREFIX req: <https://w3id.org/requirement-ontology/rdl/>" +
-                        "PREFIX part14: <http://standards.iso.org/iso/15926/part14/>";
+                    var queryGraph =CsvTripleBuilder.getSparqlPrefixesStr()
+
 
                     queryGraph += " select * from <" + graphUri + "> where {";
                     queryGraph +=
@@ -549,19 +591,8 @@ var CsvTripleBuilder = {
             insertTriplesStr += str;
         });
 
-        var queryGraph =
-            "PREFIX xs: <http://www.w3.org/2001/XMLSchema#>" +
-            "PREFIX rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
-            "PREFIX iso14224: <http://data.total.com/resource/tsf/iso_14224#>" +
-            "PREFIX req: <https://w3id.org/requirement-ontology/rdl/>" +
-            "PREFIX part14: <http://standards.iso.org/iso/15926/part14/>" +
-            "PREFIX iso81346: <http://data.total.com/resource/tsf/IEC_ISO_81346/>" +
-            "PREFIX slsv: <http://souslesens.org/resource/vocabulary/>" +
-            "PREFIX dcterms: <http://purl.org/dc/terms/>" +
-            "";
+        var queryGraph =CsvTripleBuilder.getSparqlPrefixesStr()
+
 
         queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
         // console.log(query)

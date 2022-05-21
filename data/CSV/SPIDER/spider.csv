@@ -1,0 +1,101 @@
+part-14-from	from	description	prop	to	part14-to
+part14:Quality	Man-hours	Gather all information useful for maanagement information and decision on a daily basis	part14:hasQuality	Daily progress report	part14:InformationObject
+part14:Quality	Man-hours planned	Forecast the personnel mobilisation in time   within a contract scope of work. 	part14:hasQuality	Mobilization Plan	part14:RealizableEntity
+part14:RealizableEntity	Baseline planning	Forecast the  amount of man-hour will be necessary to achieve the plan. 	part14:hasQuality	Planned Man hours	part14:Quality
+part14:RealizableEntity	contractual variation	dedicate a service to manage the cost matter	part14:hasQuality	Cost	part14:Quality
+part14:RealizableEntity	HSE management plan	measure the overall amount of man-hour worked within a project perimeter. 	part14:hasQuality	Actual manhours	part14:Quality
+part14:Location	country	Gather all the working and non working days in a document in order to plan the activities 	part14:occursRelativeTo	Calendar	part14:Event
+part14:Thing	exhibits	Document that rule the contractual relationship between company and à contractor.	part14:any	Contract	part14:RealizableEntity
+part14:Thing	interface	Keep track of all the interfaces open or closed between two contractors.	part14:any	interface register	part14:InformationObject
+part14:FunctionalObject	facilities	Breaddown the installation  in a manner that allow a logical follow up of activities. 	part14:functionalPartOf	Systems / sub  systems	part14:System
+part14:RealizableEntity	Contract	install facilities that are required only for the duration of the construction phase and that will be decommissioned at the end of the project (workers accomodations and offices, storages zone, …)	part14:hasFunctionalPart	Temporary facilities	part14:FunctionalObject
+part14:RealizableEntity	Contractual strategy	Order directly some pieces of equipment to optimize the cost/planning and limit project risksaccording to the contract styrategie.	part14:hasFunctionalPart	Company provided items	part14:FunctionalObject
+part14:RealizableEntity	Contractual strategy	Breakdown all the project task in a logical way that allows  the progress mesurement and a gate system	part14:hasFunctionalPart	WBS	part14:System
+part14:FunctionalObject	equipment	Resquest the contractor to provide the project with som pices of equipment. 	part14:hasFunctionalPart	Contractors provided items	part14:FunctionalObject
+part14:FunctionalObject	material take off	Resquest the contractor to provide the project with som pices of equipment. 	part14:hasFunctionalPart	Contractors provided items	part14:FunctionalObject
+part14:RealizableEntity	Mobilization Plan	install facilities that are required only for the duration of the construction phase and that will be decommissioned at the end of the project (workers accomodations and offices, storages zone, …)	part14:hasFunctionalPart	Temporary facilities	part14:FunctionalObject
+part14:Organization	Company	Document that rule the contractual relationship between company and à contractor.	part14:hasInterestIn	Contract	part14:RealizableEntity
+part14:Organization	Contractor	Resquest the contractor to provide the project with som pices of equipment. 	part14:hasInterestIn	Contractors provided items	part14:FunctionalObject
+part14:Organization	Contractor	Agree a variation in the contract between company and contractor and formalize the impact on cost, planning, scope of work.	part14:hasInterestIn	Contract Actual variation 	part14:InformationObject
+part14:Organization	Contractor	claim the completion of a piece of work rewarded by an agree amount of money.	part14:hasInterestIn	Invoice	part14:InformationObject
+part14:Organization	Contractor	Agree with the contractor the use of sub contractors to exectute part of the scope of work such as specialities. 	part14:hasInterestIn	Sub Contractor	part14:Organization
+part14:Organization	Contractor	Document that rule the contractual relationship between company and à contractor.	part14:hasInterestIn	Contract	part14:RealizableEntity
+part14:Organization	vendor	Formalise and engage with a vendor an agreed delivery of a piece of equipment that can be on the shelf or fabricated.	part14:hasInterestIn	Purchase Order	part14:InformationObject
+part14:InformationObject	3D Model	Represent the asset's state  in digitalized 3D based on a timeline.	part14:hasPart	4D plan	part14:InformationObject
+part14:InformationObject	3D model	Summarize the material requirement within a  P&ID or plot plan.	part14:hasPart	Material Take off	part14:InformationObject
+part14:RealizableEntity	Actual planning	determine what would be the progress in the futur according to the current progress trend. 	part14:hasPart	Forecast plan	part14:RealizableEntity
+part14:RealizableEntity	Actual planning		part14:hasPart	Planning	part14:RealizableEntity
+part14:RealizableEntity	Baseline planning	Mesure and fomalize the achieved progress (plan & cost)	part14:hasPart	Actual planning	part14:RealizableEntity
+part14:RealizableEntity	Baseline planning		part14:hasPart	Planning	part14:RealizableEntity
+part14:RealizableEntity	Baseline planning	Organise and plan the activities in a sequence in order to fulfi the scope of work requirement according the project milestones in an optimistic plan.	part14:hasPart	Baseline early plan	part14:RealizableEntity
+part14:RealizableEntity	Baseline planning	Organise and plan the activities in a sequence in order to fulfi the scope of work requirement according the project milestones in an pessimistic plan.	part14:hasPart	Baseline late plan	part14:RealizableEntity
+part14:InformationObject	Correspondance	Gather all the correspondance related to a contract (exit technical correspondance which should be à technical query)	part14:hasPart	Contractual Correspondance Register	part14:InformationObject
+part14:InformationObject	engineering 1D/2D docuents	List all the deliverables documents due within a contract scope of work. 	part14:hasPart	Master document Register	part14:InformationObject
+part14:RealizableEntity	forecast planning	In case of a planning drift an running late, reorganise the tasks to insure the milestone fulfilment.	part14:hasPart	Baseline recovery plan	part14:RealizableEntity
+part14:InformationObject	logbook:progress	Gather all information useful for maanagement information and decision on a daily basis	part14:hasPart	Daily progress report	part14:InformationObject
+part14:RealizableEntity	planning	Mesure and fomalize the achieved progress (plan & cost)	part14:hasPart	Actual planning	part14:RealizableEntity
+part14:InformationObject	scope of work	produce documents that describe the constructed assets. 	part14:hasPart	Engineering documents (1D/2D)	part14:InformationObject
+part14:InformationObject	scope of work	List all the deliverables documents due within a contract scope of work. 	part14:hasPart	Master document Register	part14:InformationObject
+part14:RealizableEntity	specification	agree any change in the contractual technical specification.	part14:hasPart	Derogation	part14:RealizableEntity
+part14:Location	Construction site	measure the overall amount of man-hour worked within a project perimeter. 	part14:hasQuality	Actual manhours	part14:Quality
+part14:Location	Construction Yard	measure the overall amount of man-hour worked within a project perimeter. 	part14:hasQuality	Actual manhours	part14:Quality
+part14:Activity	cost control procedure	dedicate a service to manage the cost matter	part14:hasQuality	Cost	part14:Quality
+part14:Activity	insurance Claim	dedicate a service to manage the cost matter	part14:hasQuality	Cost	part14:Quality
+part14:RealizableEntity	Contract	Select a bidder which is able to execute the scope of work at the best ratio quality, cost, safety	part14:interestOf	Contractor	part14:Organization
+part14:RealizableEntity	Contract	Agree with the contractor the use of sub contractors to exectute part of the scope of work such as specialities. 	part14:interestOf	Sub Contractor	part14:Organization
+part14:RealizableEntity	Contractual strategy	Select a place that is fit for purpose in terms of technical and workforce capabilities, safety requirement to fabricate some pieces of equpments required by the scop of work. 	part14:locatedRelativeTo	Construction Yard	part14:Location
+part14:RealizableEntity	statement of requirement	determine the place where the asset to be completed by the project is installed. 	part14:locatedRelativeTo	Construction site	part14:Location
+part14:Event	Calendar	Organise and plan the activities in a sequence in order to fulfi the scope of work requirement according the project milestones.	part14:occursRelativeTo	Baseline planning	part14:RealizableEntity
+part14:Event	local day off calendar	Gather all the working and non working days in a document in order to plan the activities 	part14:occursRelativeTo	Calendar	part14:Event
+part14:Event	milestone	Organise and plan the activities in a sequence in order to fulfi the scope of work requirement according the project milestones in an optimistic plan.	part14:occursRelativeTo	Baseline early plan	part14:RealizableEntity
+part14:Event	milestone	Organise and plan the activities in a sequence in order to fulfi the scope of work requirement according the project milestones in an pessimistic plan.	part14:occursRelativeTo	Baseline late plan	part14:RealizableEntity
+part14:Event	milestone	In case of a planning drift an running late, reorganise the tasks to insure the milestone fulfilment.	part14:occursRelativeTo	Baseline recovery plan	part14:RealizableEntity
+part14:Event	Payment calendar	Document that rule the contractual relationship between company and à contractor.	part14:occursRelativeTo	Contract	part14:RealizableEntity
+part14:Organization	Affiliates	establish an organisation the achieve à piece of work	part14:participantIn	Project	part14:Activity
+part14:Organization	Contractor	Declare any incident or accident that leads to injuries and/or lost of money	part14:participantIn	insurance Claim	part14:Activity
+part14:System	WBS	Agree with contractor the way the cost control will be executed.	part14:participantIn	Cost Control procedure	part14:Activity
+part14:Activity	procedures	Document that rule the contractual relationship between company and à contractor.	part14:realizedIn	Contract	part14:RealizableEntity
+part14:Activity	project	Document that rule the contractual relationship between company and à contractor.	part14:realizedIn	Contract	part14:RealizableEntity
+part14:RealizableEntity	Contract	Declare any incident or accident that leads to injuries and/or lost of money	part14:realizes	insurance Claim	part14:Activity
+part14:RealizableEntity	Contract	Agree with contractor the way the invoicing will be executed.	part14:realizes	Invoicing procedure	part14:Activity
+part14:RealizableEntity	insurance	Declare any incident or accident that leads to injuries and/or lost of money	part14:realizes	insurance Claim	part14:Activity
+part14:FunctionalObject	Assets	Represent the asset in digitalized 3D	part14:representedIn	3D Model	part14:InformationObject
+part14:FunctionalObject	equipment	Formalise and engage with a vendor an agreed delivery of a piece of equipment that can be on the shelf or fabricated.	part14:representedIn	Purchase Order	part14:InformationObject
+part14:Activity	invoicing procedure	claim the completion of a piece of work rewarded by an agree amount of money.	part14:representedIn	Invoice	part14:InformationObject
+part14:RealizableEntity	Actual planning	Compare the baseline plan against en actual plan to get the progress 	part14:representedIn	Planning progress 	part14:InformationObject
+part14:RealizableEntity	Baseline planning	Compare the baseline plan against en actual plan to get the progress 	part14:representedIn	Planning progress 	part14:InformationObject
+part14:RealizableEntity	Contract	Agree a variation in the contract between company and contractor and formalize the impact on cost, planning, scope of work.	part14:representedIn	Contract Actual variation 	part14:InformationObject
+part14:RealizableEntity	Contract	Organise the way the contract between company and contractor will be executed,	part14:representedIn	Contract coordination manual	part14:InformationObject
+part14:RealizableEntity	Contract	formalize and estimate the impact of  a foreseen  contract variation in term of  planning, scope and/or  cost.(potential variation is not contractally enforced 	part14:representedIn	Contract Potential Variation	part14:InformationObject
+part14:RealizableEntity	Contract	claim the completion of a piece of work rewarded by an agree amount of money.	part14:representedIn	Invoice	part14:InformationObject
+part14:RealizableEntity	Contract	List all the deliverables documents due within a contract scope of work. 	part14:representedIn	Master document Register	part14:InformationObject
+part14:RealizableEntity	Contract	determine a set of milestone for strategic phzases of the project that the project team commit on. 	part14:representedIn	Milestone list	part14:InformationObject
+part14:RealizableEntity	Contract actual variation	List  all the  variations (actual or potential) related to a contract	part14:representedIn	Contract Variation register	part14:InformationObject
+part14:RealizableEntity	Contract Potential Variation	List  all the  variations (actual or potential) related to a contract	part14:representedIn	Contract Variation register	part14:InformationObject
+part14:RealizableEntity	cost plan	Compare the baseline plan against en actual plan to get the progress.	part14:representedIn	Cost progress	part14:InformationObject
+part14:RealizableEntity	Derogation	keep track of all the agreed and forecasted derogations. 	part14:representedIn	Derogation register	part14:InformationObject
+part14:RealizableEntity	planning	Represent the asset's state  in digitalized 3D based on a timeline.	part14:representedIn	4D plan	part14:InformationObject
+part14:RealizableEntity	specification	Formalise and engage with a vendor an agreed delivery of a piece of equipment that can be on the shelf or fabricated.	part14:representedIn	Purchase Order	part14:InformationObject
+part14:RealizableEntity	Specifications	List all the deliverables documents due within a contract scope of work. 	part14:representedIn	Master document Register	part14:InformationObject
+part14:RealizableEntity	statement of requirement	determine a set of milestone for strategic phzases of the project that the project team commit on. 	part14:representedIn	Milestone list	part14:InformationObject
+part14:InformationObject	Appendix	Document that rule the contractual relationship between company and à contractor.	part14:represents	Contract	part14:RealizableEntity
+part14:InformationObject	Contract Variation register	Document that rule the contractual relationship between company and à contractor.	part14:represents	Contract	part14:RealizableEntity
+part14:InformationObject	Documentation	Determine  the amount of material, equipment, man hours, consomable, will be required to achieve the project. 	part14:represents	Quantities	part14:Quality
+part14:InformationObject	logbook	measure the overall amount of man-hour worked within a project perimeter. 	part14:represents	Actual manhours	part14:Quality
+part14:InformationObject	progress	dedicate a service to manage the cost matter	part14:represents	Cost	part14:Quality
+part14:InformationObject	progress report	Mesure and fomalize the achieved progress (plan & cost)	part14:represents	Actual planning	part14:RealizableEntity
+part14:InformationObject	progress report	determine what would be the progress in the futur according to the current progress trend. 	part14:represents	Forecast plan	part14:RealizableEntity
+part14:InformationObject	scope of work	Resquest the contractor to provide the project with som pices of equipment. 	part14:represents	Contractors provided items	part14:FunctionalObject
+part14:InformationObject	scope of work	install facilities that are required only for the duration of the construction phase and that will be decommissioned at the end of the project (workers accomodations and offices, storages zone, …)	part14:represents	Temporary facilities	part14:FunctionalObject
+part14:InformationObject	scope of work	Select a place that is fit for purpose in terms of technical and workforce capabilities, safety requirement to fabricate some pieces of equpments required by the scop of work. 	part14:represents	Construction Yard	part14:Location
+part14:InformationObject	scope of work	Agree with the contractor the use of sub contractors to exectute part of the scope of work such as specialities. 	part14:represents	Sub Contractor	part14:Organization
+part14:InformationObject	scope of work	Forecast the  amount of man-hour will be necessary to achieve the plan. 	part14:represents	Planned Man hours	part14:Quality
+part14:InformationObject	scope of work	Determine  the amount of material, equipment, man hours, consomable, will be required to achieve the project. 	part14:represents	Quantities	part14:Quality
+part14:InformationObject	scope of work	Organise and plan the activities in a sequence in order to fulfi the scope of work requirement according the project milestones in an optimistic plan.	part14:represents	Baseline early plan	part14:RealizableEntity
+part14:InformationObject	scope of work	Organise and plan the activities in a sequence in order to fulfi the scope of work requirement according the project milestones in an pessimistic plan.	part14:represents	Baseline late plan	part14:RealizableEntity
+part14:InformationObject	scope of work	Organise and plan the activities in a sequence in order to fulfi the scope of work requirement according the project milestones.	part14:represents	Baseline planning	part14:RealizableEntity
+part14:InformationObject	scope of work	In case of a planning drift an running late, reorganise the tasks to insure the milestone fulfilment.	part14:represents	Baseline recovery plan	part14:RealizableEntity
+part14:InformationObject	scope of work	Document that rule the contractual relationship between company and à contractor.	part14:represents	Contract	part14:RealizableEntity
+part14:InformationObject	scope of work	Contractually describe the technical requirement for equipement of worflow procedure to achieve the contractual pieces of work. 	part14:represents	Specifications	part14:RealizableEntity
+part14:InformationObject	scope of work	Breakdown all the project task in a logical way that allows  the progress mesurement and a gate system	part14:represents	WBS	part14:System
+	 			Planning	part14:RealizableEntity

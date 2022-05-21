@@ -149,9 +149,14 @@ var Sparql_proxy = (function () {
 
                 if (!data.results) return callback(null, { results: { bindings: [] } });
 
+                if(data.results.bindings.length>500)
+                    console.log(data.results.bindings.length)
+                if(data.results.bindings.length==0)
+                   MainController.UI.message("No data found", true)
                 callback(null, data);
             },
             error: function (err) {
+                console.error(err);
                 if (err.responseText.indexOf("Virtuoso 42000") > -1) {
                     //Virtuoso 42000 The estimated execution time
                     alert(err.responseText.substring(0, err.responseText.indexOf(".")) + "\n select more detailed data");

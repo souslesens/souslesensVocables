@@ -284,6 +284,8 @@ var Sparql_OWL = (function () {
         });
     };
 
+
+
     self.getIndividualProperties = function (sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
         if (!options) options = {};
 
@@ -490,7 +492,7 @@ var Sparql_OWL = (function () {
         var filterStr;
 
         if (options.inverseRestriction) filterStr = Sparql_common.setFilter("value", ids,null,options);
-        else filterStr = Sparql_common.setFilter("concept", null,options);
+        else filterStr = Sparql_common.setFilter("concept", ids,null,options);
 
         var fromStr = "";
         if (sourceLabel) {

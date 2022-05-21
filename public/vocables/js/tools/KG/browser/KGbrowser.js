@@ -9,7 +9,7 @@ var KGbrowser = (function () {
     self.defaultNodeSize = 10;
 
     self.getPropertyColor = function (type, palette) {
-        return KGbrowserCustom.superClassesMap(type);
+      //  return KGbrowserCustom.superClassesMap(type);
         // eslint-disable-next-line no-unreachable
         if (!palette) palette = "paletteIntense";
         if (!typeColors[type]) typeColors[type] = common[palette][Object.keys(typeColors).length];

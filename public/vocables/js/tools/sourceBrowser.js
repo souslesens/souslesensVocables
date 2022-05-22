@@ -650,6 +650,9 @@ var SourceBrowser = (function () {
                 });
             }
         });
+        if(_callback){
+            return _callback(null,jstreeData)
+        }
 
         var jstreeOptions = {
             openAll: true,
@@ -744,7 +747,7 @@ var SourceBrowser = (function () {
                 },
                 function (callbackSeries) {
                     var str = "<div>";
-                    if (authentication.currentUser.groupes.indexOf("admin") > -1) {
+                    if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons) {
                         str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
                         if (Config.sources[self.currentSource].editable) {
                             //} &&  self.propertiesMap.properties["type"]=="http://www.w3.org/2002/07/owl#Class") {
@@ -901,7 +904,7 @@ var SourceBrowser = (function () {
                         var valuesStr = "";
                         values.forEach(function (value, index) {
                             var optionalStr = "";
-                            if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1) {
+                            if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1  && !_options.hideButtons) {
                                 var propUri = self.propertiesMap.properties[key].propUri;
                                 optionalStr =
                                     "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='font-size: 10px'" +

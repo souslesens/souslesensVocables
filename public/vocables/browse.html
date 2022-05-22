@@ -217,20 +217,122 @@
       });
     });
   </script>
+  <style>
+      .selectedItem{
+          background: #00b7ff;
+      }
+      #Browse_nodeInfosDiv{
+
+
+
+      }
+      .Browse_nodeParents{
+          font-weight: bold;
+      }
+  </style>
 </head>
 <body>
-<div style="display: flex; flex-direction: column;justify-content:center;width:100%;height: 800px">
+<div style="display: flex; flex-direction: row;justify-content:center;width:100%;height: 100px" />
 
-    <input id="Browse_searchAllSourcesTermInput" style="width: 200px" value="" />
+<input id="Browse_searchAllSourcesTermInput" style="width: 300px;height: 30px;margin: 15px;padding: 5px" value="pump" />
 
+</div>
+<div style="display: flex; flex-direction: row;width:100%;height: 800px">
+  <div id="Browse_searchListDiv" class="Browse_searchList" style="width: 350px;max-height: 750px;overflow: auto"></div>
+  <div id="Browse_indexHitsDiv" class="Browse_indexList"  style="width: 350px;max-height: 750px;overflow: auto"></div>
+  <div id="Browse_hitDetailsDiv" class="Browse_hitDetail"  style="width: 500px;max-height: 750px;overflow: auto"></div>
 </div>
 </body>
 <script>
+
+  var currentSearchResult = null;
+  var currentHit = null;
   $("#Browse_searchAllSourcesTermInput").keypress(function(e) {
     if (e.which == 13) {
-      SourceBrowser.searchAllSourcesTerm();
+      var term = $("#Browse_searchAllSourcesTermInput").val();
+      var exactMatch = $("#Browse_allExactMatchSearchCBX").prop("checked");
+      var mode = "fuzzyMatch";
+      if (exactMatch) mode = "exactMatch";
+      var options =  { parentlabels:true }
+      if (!term || term == "") return alert(" enter a word ");
+      SearchUtil.getSimilarLabelsInSources(null, null, [term], null, mode, options, function(_err, result) {
+
+        if (_err)
+          return alert(err);
+        currentSearchResult = result[0].matches;
+        currentSearchResult.parentIdsLabelsMap=result.parentIdsLabelsMap
+
+        var html = "<ul>";
+
+        for (var index in currentSearchResult) {
+          html += "<li  class= \"Browse_searchList\" id='" + index + "' onclick='listIndexHits(\"" + index + "\")'>" + index + " : " + currentSearchResult[index].length + "</li>";
+        }
+        html += "</ul>";
+        $("#Browse_searchListDiv").html(html);
+        $("#Browse_indexHitsDiv").html("");
+        $("#Browse_hitDetailsDiv").html("");
+      });
     }
   });
+function encodeUriForHtmlId(uri){
+ var str =btoa(uri).replace(/=/g,"")
+  return str
+}
+
+  listIndexHits = function(index) {
+    var html = "<ul>";
+    var distinctIds = {};
+    $(".Browse_searchList").removeClass("selectedItem")
+    $("#"+index).addClass("selectedItem")
+    currentSearchResult[index].forEach(function(hit) {
+
+      if (!distinctIds[hit.id]) {
+        distinctIds[hit.id] = 1;
+
+        html += "<li   class=\"Browse_indexList\" id='" + encodeUriForHtmlId(hit.id) + "' onclick='showHitDetails(\"" + index + "|" + hit.id + "\")'>" + hit.label + "</li>";
+      }
+
+    });
+    html += "</ul>";
+    $("#Browse_indexHitsDiv").html(html);
+    $("#Browse_hitDetailsDiv").html("");
+
+  };
+  showHitDetails = function(hitKey) {
+    var array = hitKey.split("|")
+    var hit;
+    currentSearchResult[array[0]].forEach(function(item){
+      if(item.id=array[1])
+        hit=item
+    })
+    if(!hit)
+      return console.log("no hit")
+    $(".Browse_indexList").removeClass("selectedItem")
+    $("#"+encodeUriForHtmlId(hit.id)).addClass("selectedItem")
+var html=""
+    if(hit.parents) {
+      html += "<div class='Browse_nodeParents'>"
+      hit.parents.forEach(function(parent, index) {
+        if (html != "")
+          html += " -> "
+        var parentLabel = currentSearchResult.parentIdsLabelsMap[parent]
+        if (parentLabel)
+          html += parentLabel
+      })
+      html += "</div>"
+    }
+   html+="<div  id='Browse_nodeInfosDiv'></div>"
+    if (!Config.sources[hit.source].controllerName) {
+      Config.sources[hit.source].controllerName = "" + Config.sources[hit.source].controller;
+      Config.sources[hit.source].controller = eval(Config.sources[hit.source].controller);
+    }
+    SourceBrowser.showNodeInfos(hit.source, hit.id, "Browse_nodeInfosDiv", { hideButtons:true })
+
+
+    $("#Browse_hitDetailsDiv").html(html);
+
+  };
+
 </script>
 
 </html>

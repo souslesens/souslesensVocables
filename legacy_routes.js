@@ -107,14 +107,4 @@ router.post(serverParams.routesRootUrl + "/slsv", ensureLoggedIn(), function (re
     }
 });
 
-
-// XXX refactor to models/plugins and GET api/v1/paths/plugins
-router.get("/getJsonFile", ensureLoggedIn(), function (req, res, _next) {
-    var filePath = req.query.filePath;
-    var realPath = path.join(__dirname, "../public/vocables/" + filePath);
-    var data = "" + fs.readFileSync(realPath);
-    var json = JSON.parse(data);
-    processResponse(res, null, json);
-});
-
 module.exports = router;

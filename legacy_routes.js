@@ -93,12 +93,6 @@ router.post(serverParams.routesRootUrl + "/slsv", ensureLoggedIn(), function (re
             processResponse(response, err, result);
         });
     }
-    // XXX refactor to POST api/v1/paths/clearGraph
-    if (req.body.clearGraph) {
-        CsvTripleBuilder.clearGraph(req.body.clearGraph, req.body.sparqlServerUrl || null, function (err, result) {
-            processResponse(response, err, result);
-        });
-    }
 });
 
 // XXX refactor to GET api/v1/paths/httpProxy

@@ -4,6 +4,7 @@ const httpProxy = require("../../../bin/httpProxy.");
 module.exports = function () {
     let operations = {
         POST,
+        GET,
     };
 
     async function POST(req, res, next) {
@@ -41,6 +42,16 @@ module.exports = function () {
             },
         },
     };
+
+    function GET(req, res, next) {
+        try {
+            httpProxy.get(req.query, function (err, result) {
+                processResponse(res, err, result);
+            });
+        } catch (e) {
+            next(e);
+        }
+    }
 
     return operations;
 };

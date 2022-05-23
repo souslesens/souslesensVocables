@@ -107,13 +107,6 @@ router.post(serverParams.routesRootUrl + "/slsv", ensureLoggedIn(), function (re
     }
 });
 
-// XXX refactor to GET api/v1/paths/httpProxy
-router.get("/httpProxy", ensureLoggedIn(), function (req, res, _next) {
-    httpProxy.get(req.query, function (err, result) {
-        processResponse(res, err, result);
-    });
-});
-
 // XXX refactor to GET api/v1/paths/ontology
 router.get("/ontology/*", ensureLoggedIn(), function (req, res, _next) {
     if (req.params.length == 0) return req.send("missing ontology label");

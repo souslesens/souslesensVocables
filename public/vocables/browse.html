@@ -221,26 +221,32 @@
       .selectedItem{
           background: #00b7ff;
       }
+
       #Browse_nodeInfosDiv{
 
 
 
       }
       .Browse_nodeParents{
+          font-weight: normal;
+          color:#00b7ff;
+      }
+      .tsfSlsv{
           font-weight: bold;
       }
   </style>
 </head>
 <body>
 <div style="display: flex; flex-direction: row;justify-content:center;width:100%;height: 100px" />
-
-<input id="Browse_searchAllSourcesTermInput" style="width: 300px;height: 30px;margin: 15px;padding: 5px" value="pump" />
-
+<div>
+<span class="tsfSlsv">TSF slsv</span><input id="Browse_searchAllSourcesTermInput" style="width: 300px;height: 30px;margin: 15px;padding: 5px" value="" />
+<!--<img src="images/souslesensVocables.png" style="display: block; margin-left: auto; margin-right: auto; width: 200px;margin: auto;">-->
+</div>
 </div>
 <div style="display: flex; flex-direction: row;width:100%;height: 800px">
   <div id="Browse_searchListDiv" class="Browse_searchList" style="width: 350px;max-height: 750px;overflow: auto"></div>
   <div id="Browse_indexHitsDiv" class="Browse_indexList"  style="width: 350px;max-height: 750px;overflow: auto"></div>
-  <div id="Browse_hitDetailsDiv" class="Browse_hitDetail"  style="width: 500px;max-height: 750px;overflow: auto"></div>
+  <div id="Browse_hitDetailsDiv" class="Browse_hitDetail"  style="width: 700px;max-height: 750px;overflow: auto"></div>
 </div>
 </body>
 <script>
@@ -311,17 +317,20 @@ function encodeUriForHtmlId(uri){
     $("#"+encodeUriForHtmlId(hit.id)).addClass("selectedItem")
 var html=""
     if(hit.parents) {
-      html += "<div class='Browse_nodeParents'>"
+      html += "<div class='Browse_nodeParents'>";
+      var notFirst=false
       hit.parents.forEach(function(parent, index) {
-        if (html != "")
+        if (notFirst)
           html += " -> "
         var parentLabel = currentSearchResult.parentIdsLabelsMap[parent]
-        if (parentLabel)
+        if (parentLabel && typeof parentLabel=="string") {
           html += parentLabel
+          notFirst=true
+        }
       })
       html += "</div>"
     }
-   html+="<div  id='Browse_nodeInfosDiv'></div>"
+   html+="<div  id='Browse_nodeInfosDiv' style='background-color: beige;'></div>"
     if (!Config.sources[hit.source].controllerName) {
       Config.sources[hit.source].controllerName = "" + Config.sources[hit.source].controller;
       Config.sources[hit.source].controller = eval(Config.sources[hit.source].controller);

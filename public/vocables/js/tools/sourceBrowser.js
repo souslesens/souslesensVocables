@@ -746,8 +746,9 @@ var SourceBrowser = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    var str = "<div>";
+
                     if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons) {
+                        var str = "<div>";
                         str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
                         if (Config.sources[self.currentSource].editable) {
                             //} &&  self.propertiesMap.properties["type"]=="http://www.w3.org/2002/07/owl#Class") {
@@ -760,7 +761,7 @@ var SourceBrowser = (function () {
                             "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
 
                         str += "</div>";
-                    }
+
 
                     if (self.visitedNodes.length > 1) {
                         str +=
@@ -770,6 +771,7 @@ var SourceBrowser = (function () {
 
                     str += "</div>";
                     $("#" + divId).prepend(str);
+                    }
                     callbackSeries();
                 },
                 function (callbackSeries) {
@@ -1021,7 +1023,7 @@ var SourceBrowser = (function () {
             var data = result.results.bindings;
 
             if (data.length == 0) {
-                return;
+                return callback();
             } else {
                 var str = "<b>NamedIndividuals</b><br><table>";
 

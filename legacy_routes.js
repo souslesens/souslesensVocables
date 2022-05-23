@@ -107,15 +107,6 @@ router.post(serverParams.routesRootUrl + "/slsv", ensureLoggedIn(), function (re
     }
 });
 
-// XXX refactor to GET api/v1/paths/ontology
-router.get("/ontology/*", ensureLoggedIn(), function (req, res, _next) {
-    if (req.params.length == 0) return req.send("missing ontology label");
-    var name = req.params[0];
-    RDF_IO.getOntology(name, function (err, result) {
-        res.contentType("text/plain");
-        res.status(200).send(result);
-    });
-});
 
 // XXX refactor to models/plugins and GET api/v1/paths/plugins
 router.get("/getJsonFile", ensureLoggedIn(), function (req, res, _next) {

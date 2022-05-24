@@ -63,9 +63,7 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 httpProxy.app = app;
 
-// body parser
-app.use(bodyParser({ limit: "50mb" }));
-
+// body parsers
 var jsonParser = bodyParser.json({ limit: 1024 * 1024 * 20, type: "application/json" });
 app.use(jsonParser);
 

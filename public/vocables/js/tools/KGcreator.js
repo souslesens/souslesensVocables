@@ -600,9 +600,11 @@ var KGcreator = (function () {
         if (!self.currentJsonObject.graphUri) return alert("no graphUri");
 
         if (!confirm("clear graph " + self.currentJsonObject.graphUri)) return;
+        const payload = { graphUri: self.currentJsonObject.graphUri };
         $.ajax({
-            type: "DELETE",
-            url: `${Config.apiUrl}/kg/graph/${self.currentJsonObject.graphUri}`,
+            type: "POST",
+            url: `${Config.apiUrl}/kg/clearGraph`,
+            payload: payload,
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
                 return MainController.UI.message("graph deleted " + self.currentJsonObject.graphUri);

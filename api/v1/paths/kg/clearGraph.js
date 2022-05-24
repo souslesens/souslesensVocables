@@ -1,14 +1,14 @@
-const CsvTripleBuilder = require("../../../../../bin/KG/CsvTripleBuilder.");
-const { processResponse } = require("../../utils");
+const CsvTripleBuilder = require("../../../../bin/KG/CsvTripleBuilder.");
+const { processResponse } = require("../utils");
 
 module.exports = function () {
     let operations = {
-        DELETE,
+        POST,
     };
 
-    function DELETE(req, res, next) {
+    function POST(req, res, next) {
         try {
-            CsvTripleBuilder.clearGraph(req.params.graphUri, req.body.sparqlServerUrl || null, function (err, result) {
+            CsvTripleBuilder.clearGraph(req.body.graphUri, function (err, result) {
                 processResponse(res, err, result);
             });
         } catch (e) {
@@ -16,19 +16,12 @@ module.exports = function () {
         }
     }
 
-    DELETE.apiDoc = {
+    POST.apiDoc = {
         security: [{ loginScheme: [] }],
         summary: "Creates triples from csv file",
         description: "Takes a csv filename and directory and returns triples",
         operationId: "createTriplesFromCsv",
         parameters: [
-            {
-                name: "graphUri",
-                description: "Graph's Uri to clear",
-                in: "path",
-                type: "string",
-                required: true,
-            },
             {
                 name: "body",
                 description: "sparqlServerUrl",
@@ -36,7 +29,7 @@ module.exports = function () {
                 schema: {
                     type: "object",
                     properties: {
-                        sparqlServerUrl: { type: "string" },
+                        graphUri: { type: "string" },
                     },
                 },
                 required: false,

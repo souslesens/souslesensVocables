@@ -7,7 +7,7 @@ const sanitizePath = (/** @type {string} */ user_input) => {
     if (user_input.indexOf("\0") !== -1) {
         throw Error("Bad Input");
     }
-    if (!/^[a-z0-9]+$/.test(user_input)) {
+    if (!/^[-_/A-Za-z0-9]+$/.test(user_input)) {
         throw Error("Bad Input");
     }
     const safe_input = path.normalize(user_input).replace(/^(\.\.(\/|\\|$))+/, "");

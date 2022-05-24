@@ -3,19 +3,18 @@ const express = require("express");
 const path = require("path");
 const passport = require("passport");
 const cookieParser = require("cookie-parser");
-const logger = require("morgan");
-const bodyParser = require("body-parser");
+const morganLogger = require("morgan");
 const fileUpload = require("express-fileupload");
 const openapi = require("express-openapi");
 const swaggerUi = require("swagger-ui-express");
 
-const indexRouter = require("./legacy_routes");
+const legacyRoutes = require("./legacy_routes");
 const httpProxy = require(path.resolve("bin/httpProxy."));
 const userManager = require(path.resolve("bin/user."));
 
 const { config } = require("./model/config");
 
-var app = express();
+const app = express();
 const Sentry = require("@sentry/node");
 
 // sentry/glitchtip
@@ -24,9 +23,17 @@ if (config.sentryDsnNode) {
     app.use(Sentry.Handlers.requestHandler());
 }
 
-// App middleware for authentication and session handling
+// body parsers
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
+app.use(fileUpload());
+
+// logger
+app.use(morganLogger("dev"));
+
+/**
+ * App middleware for authentication and session handling
+ */
 app.use(cookieParser());
 app.use(
     require("express-session")({
@@ -40,7 +47,7 @@ app.use(
 app.use(function (req, res, next) {
     var msgs = req.session.messages || [];
     res.locals.messages = msgs;
-    res.locals.hasMessages = !!msgs.length;
+    res.locals.hasMessages = msgs.length > 0;
     req.session.messages = [];
     next();
 });
@@ -50,7 +57,11 @@ if (!config.disableAuth) {
     app.use(passport.authenticate("session"));
 }
 
-// Static dirs
+/**
+ * Routes
+ */
+
+// Static content
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "mainapp/static")));
 
@@ -58,24 +69,6 @@ app.use(express.static(path.join(__dirname, "mainapp/static")));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 httpProxy.app = app;
-
-var jsonParser = bodyParser.json({ limit: 1024 * 1024 * 20, type: "application/json" });
-app.use(bodyParser({ limit: "50mb" }));
-var urlencodedParser = bodyParser.urlencoded({
-    extended: true,
-    limit: 1024 * 1024 * 20,
-    type: "application/x-www-form-urlencoded",
-});
-
-app.use(jsonParser);
-app.use(urlencodedParser);
-
-app.use(fileUpload());
-
-app.use(logger("dev"));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
 
 // API
 openapi.initialize({
@@ -117,7 +110,7 @@ openapi.initialize({
     },
 });
 
-// OpenAPI UI
+// OpenAPI UI and documentation
 app.use(
     "/api/v1",
     swaggerUi.serve,
@@ -127,8 +120,28 @@ app.use(
         },
     })
 );
+
+// legacy routes
+app.use("/", legacyRoutes);
+
+// catch 404 and forward to error handler
+app.use(function (req, res, next) {
+    next(createError(404));
+});
+
+/**
+ * Error handlers
+ */
+
+// sentry/glitchtip
+// (this error handler must be before any other error middleware and after all controllers)
+if (config.sentryDsnNode) {
+    app.use(Sentry.Handlers.errorHandler());
+}
+
+// openapi error handler
 app.use("/api/v1/*", function (err, req, res, _next) {
-    console.debug("GlobalErr", err);
+    console.debug("API error", err);
     const error = err.status ? err : err.stack;
 
     if (req.app.get("env") === "development") {
@@ -138,29 +151,7 @@ app.use("/api/v1/*", function (err, req, res, _next) {
     }
 });
 
-// main router
-app.use("/", indexRouter);
-
-// catch 404 and forward to error handler
-app.use(function (req, res, next) {
-    next(createError(404));
-});
-
-// sentry/glitchtip
-if (config.sentryDsnNode) {
-    // The error handler must be before any other error middleware and after all controllers
-    app.use(Sentry.Handlers.errorHandler());
-
-    // Optional fallthrough error handler
-    app.use(function onError(err, req, res, next) {
-        // The error id is attached to `res.sentry` to be returned
-        // and optionally displayed to the user for support.
-        res.statusCode = 500;
-        res.end(res.sentry + "\n");
-    });
-}
-
-// error handler
+// default error handler
 app.use(function (err, req, res, _next) {
     // set locals, only providing error in development
     res.locals.message = err.message;

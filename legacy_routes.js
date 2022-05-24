@@ -80,31 +80,5 @@ router.post("/upload", ensureLoggedIn(), function (req, response) {
     }
 });
 
-router.post(serverParams.routesRootUrl + "/slsv", ensureLoggedIn(), function (req, response) {
-    // XXX refactor to PUT api/v1/paths/blenderSource/{id}
-    if (req.body.addImportToSource) {
-        configManager.addImportToSource(req.body.parentSource, req.body.importedSource, function (err, result) {
-            processResponse(response, err, result);
-        });
-    }
-    // XXX refactor to GET api/v1/paths/readCsv
-    if (req.body.readCsv) {
-        DataController.readCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
-            processResponse(response, err, result);
-        });
-    }
-    // XXX refactor to GET api/v1/paths/createTriplesFromCsv
-    if (req.body.createTriplesFromCsv) {
-        CsvTripleBuilder.createTriplesFromCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
-            processResponse(response, err, result);
-        });
-    }
-    // XXX refactor to POST api/v1/paths/clearGraph
-    if (req.body.clearGraph) {
-        CsvTripleBuilder.clearGraph(req.body.clearGraph, req.body.sparqlServerUrl || null, function (err, result) {
-            processResponse(response, err, result);
-        });
-    }
-});
 
 module.exports = router;

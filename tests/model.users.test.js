@@ -40,14 +40,13 @@ describe("UserModel", () => {
     });
     test("find a user with findUserAccount()", async () => {
         const users = await userModel.findUserAccount("admin");
-        expect(users).toStrictEqual(
-            {
-                id: "admin",
-                login: "admin",
-                groups: ["admin"],
-                source: "json",
-                _type: "user",
-            });
+        expect(users).toStrictEqual({
+            id: "admin",
+            login: "admin",
+            groups: ["admin"],
+            source: "json",
+            _type: "user",
+        });
     });
     test("fail to find a user with findUserAccount()", async () => {
         const emptyArray = await userModel.findUserAccount("unknown");

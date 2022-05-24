@@ -570,14 +570,13 @@ var KGcreator = (function () {
         self.saveMappings(function (_err, _result) {
             $("#KGcreator_dataSampleDiv").val("");
             var payload = {
-                createTriplesFromCsv: 1,
                 dir: "CSV/" + self.currentCsvDir,
                 fileName: self.currentJsonObject.fileName + ".json",
                 options: JSON.stringify(options),
             };
             $.ajax({
                 type: "POST",
-                url: Config.serverUrl,
+                url: `${Config.apiUrl}/kg/csv/triples`,
                 data: payload,
                 dataType: "json",
                 success: function (result, _textStatus, _jqXHR) {
@@ -601,13 +600,11 @@ var KGcreator = (function () {
         if (!self.currentJsonObject.graphUri) return alert("no graphUri");
 
         if (!confirm("clear graph " + self.currentJsonObject.graphUri)) return;
-        var payload = {
-            clearGraph: self.currentJsonObject.graphUri,
-        };
+        const payload = { graphUri: self.currentJsonObject.graphUri };
         $.ajax({
             type: "POST",
-            url: Config.serverUrl,
-            data: payload,
+            url: `${Config.apiUrl}/kg/clearGraph`,
+            payload: payload,
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
                 return MainController.UI.message("graph deleted " + self.currentJsonObject.graphUri);

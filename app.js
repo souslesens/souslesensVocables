@@ -121,8 +121,27 @@ app.use(
     })
 );
 
-// legacy routes
-app.use("/", legacyRoutes);
+/**
+* Router
+*/
+const router = express.Router();
+
+// Home (redirect to /vocables)
+router.get("/", function (req, res, _next) {
+    res.redirect("vocables");
+});
+
+// Login
+router.get("/login", function(req, res, next) {
+    if (config.disableAuth) {
+        res.redirect("vocables");
+    } else if (config.auth == "keycloak") {
+        passport.authenticate("provider", { scope: ["openid", "email", "profile"] })(req, res, next);
+    } else {
+        res.render("login", { title: "souslesensVocables - Login" });
+    }
+});
+app.use("/", router);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

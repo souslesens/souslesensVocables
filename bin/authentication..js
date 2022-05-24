@@ -33,7 +33,7 @@ if (config.auth == "keycloak") {
             clientSecret: config.keycloak.clientSecret,
             sslRequired: "external",
             authServerURL: config.keycloak.authServerURL,
-            callbackURL: "/login/callback",
+            callbackURL: "/api/v1/auth/login/callback",
         },
         function (accessToken, refreshToken, profile, done) {
             // Auth user here

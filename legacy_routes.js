@@ -38,35 +38,6 @@ if (!config.disableAuth) {
     };
 }
 
-// Home (redirect to /vocables)
-router.get("/", function (req, res, _next) {
-    res.redirect("vocables");
-});
-
-// Login routes
-if (!config.disableAuth) {
-    if (config.auth == "keycloak") {
-        router.get("/login", passport.authenticate("provider", { scope: ["openid", "email", "profile"] }));
-        router.get("/login/callback", passport.authenticate("provider", { successRedirect: "/", failureRedirect: "/login" }));
-    } else {
-        router.get("/login", function (req, res, _next) {
-            res.render("login", { title: "souslesensVocables - Login" });
-        });
-        router.post(
-            "/auth/login",
-            passport.authenticate("local", {
-                successRedirect: "/vocables",
-                failureRedirect: "/login",
-                failureMessage: true,
-            })
-        );
-    }
-} else {
-    router.get("/login", function (req, res, _next) {
-        res.redirect("vocables");
-    });
-}
-
 // XXX move to api/v1/paths/upload
 router.post("/upload", ensureLoggedIn(), function (req, response) {
     if (!req.files || Object.keys(req.files).length === 0) {

@@ -1,6 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const { processResponse } = require("../utils");
+const { processResponse, sanitizePath } = require("../utils");
 
 module.exports = function () {
     let operations = {
@@ -9,13 +9,13 @@ module.exports = function () {
 
     function GET(req, res, next) {
         try {
-            var filePath = req.query.filePath;
-            var realPath = path.resolve(`public/vocables/${filePath}`);
-            var data = "" + fs.readFileSync(realPath);
-            var json = JSON.parse(data);
+            const filePath = sanitizePath(req.query.filePath);
+            const realPath = path.resolve(`public/vocables/${filePath}`);
+            const data = fs.readFileSync(realPath).toString();
+            const json = JSON.parse(data);
             processResponse(res, null, json);
-        } catch (e) {
-            next(e);
+        } catch (error) {
+            next(error);
         }
     }
 

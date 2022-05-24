@@ -9,7 +9,7 @@ module.exports = function () {
             if (!req.params.id) return req.send("missing ontology label");
             var name = req.params.id;
             RDF_IO.getOntology(name, function (err, result) {
-                res.contentType("text/plain");
+                res.contentType("text/turtle");
                 res.status(200).send(result);
             });
         } catch (error) {

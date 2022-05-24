@@ -80,5 +80,4 @@ router.post("/upload", ensureLoggedIn(), function (req, response) {
     }
 });
 
-
 module.exports = router;

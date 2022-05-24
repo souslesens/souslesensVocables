@@ -52,7 +52,7 @@ app.use(function (req, res, next) {
     next();
 });
 
-if (!config.disableAuth) {
+if (config.auth !== "disabled") {
     app.use(passport.initialize());
     app.use(passport.authenticate("session"));
 }
@@ -77,14 +77,16 @@ openapi.initialize({
     paths: "./api/v1/paths",
     securityHandlers: {
         loginScheme: function (req, _scopes, _definition) {
-            if (!config.disableAuth) {
-                config.auth == "keycloak" ? passport.authenticate("keycloak", { failureRedirect: "/login" }) : null;
-                if (!req.isAuthenticated || !req.isAuthenticated()) {
-                    throw {
-                        status: 401,
-                        message: "You must authenticate to access this resource.",
-                    };
-                }
+            if (config.auth == "keycloak") {
+                passport.authenticate("keycloak", { failureRedirect: "/login" });
+            } else if (config.auth == "local") {
+                // TODO: what ?
+            }
+            if (!req.isAuthenticated || !req.isAuthenticated()) {
+                throw {
+                    status: 401,
+                    message: "You must authenticate to access this resource.",
+                };
             }
             return Promise.resolve(true);
         },
@@ -133,12 +135,14 @@ router.get("/", function (req, res, _next) {
 
 // Login
 router.get("/login", function(req, res, next) {
-    if (config.disableAuth) {
+    if (config.auth == "disabled") {
         res.redirect("vocables");
     } else if (config.auth == "keycloak") {
         passport.authenticate("provider", { scope: ["openid", "email", "profile"] })(req, res, next);
-    } else {
+    } else if (config.auth == "local") {
         res.render("login", { title: "souslesensVocables - Login" });
+    } else {
+        throw Error("bad configuration");
     }
 });
 app.use("/", router);

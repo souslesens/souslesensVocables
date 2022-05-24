@@ -20,7 +20,7 @@ var serverParams = { routesRootUrl: "" };
 // TODO: Remove this when the API is moved to OpenAPI as OpenApi uses securityHandlers
 // see : https://github.com/kogosoftwarellc/open-api/tree/master/packages/express-openapi#argssecurityhandlers
 let ensureLoggedIn;
-if (!config.disableAuth) {
+if (config.auth !== "disabled") {
     ensureLoggedIn = function ensureLoggedIn(_options) {
         config.auth == "keycloak" ? passport.authenticate("keycloak", { failureRedirect: "/login" }) : null;
         return function (req, res, next) {

@@ -12,7 +12,7 @@ module.exports = function () {
             passport.authenticate("provider", { scope: ["openid", "email", "profile"] });
             // TODO: what to return ?
             // see also /api/v1/paths/auth/login/callback.js
-        } else if (config.auth == "json") {
+        } else if (config.auth == "local") {
             passport.authenticate("local", {
                 successRedirect: "/vocables",
                 failureRedirect: "/login",

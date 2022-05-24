@@ -56,7 +56,6 @@ class UserModel {
         const userAccounts = await this.getUserAccounts();
         const findUserKey = Object.keys(userAccounts).find((key) => userAccounts[key].login == login);
         return findUserKey ? userAccounts[findUserKey] : undefined;
-
     };
 
     /**

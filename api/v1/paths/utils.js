@@ -156,5 +156,5 @@ module.exports = {
     successfullyDeleted,
     successfullyFetched,
     processResponse,
-    validatePath,
+    sanitizePath,
 };

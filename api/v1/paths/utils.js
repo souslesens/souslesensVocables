@@ -2,6 +2,17 @@ const fs = require("fs");
 const util = require("util");
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
+const path = require("path");
+const sanitizePath = (/** @type {string} */ user_input) => {
+    if (user_input.indexOf("\0") !== -1) {
+        throw Error("Bad Input");
+    }
+    if (!/^[a-z0-9]+$/.test(user_input)) {
+        throw Error("Bad Input");
+    }
+    const safe_input = path.normalize(user_input).replace(/^(\.\.(\/|\\|$))+/, "");
+    return safe_input;
+};
 
 async function writeResource(pathToResource, newResource, _res) {
     try {
@@ -145,4 +156,5 @@ module.exports = {
     successfullyDeleted,
     successfullyFetched,
     processResponse,
+    validatePath,
 };

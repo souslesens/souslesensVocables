@@ -131,7 +131,7 @@ var Evaluate = (function () {
         formData.append("sources", JSON.stringify(sources));
         formData.append("corpusName", corpusName);
         formData.append("options", JSON.stringify({}));
-        if (fileObject.type != "application/x-zip-compressed") return alert("zip files are accepted");
+        if (fileObject.type !== "application/x-zip-compressed" && fileObject.type !== "application/zip") return alert("zip files are accepted");
 
         if (fileObject.size > Config.evaluate.maxZipFileSize) return alert("file too big : " + fileObject.size / 1000 + "ko, max " + self.maxZipFileSize / 1000 + "ko");
         self.serverMessage("Uploading zip file " + fileObject.name);

@@ -48,7 +48,7 @@ Annotate new Corpus
     <div>
         <td>
             <img src="./images/waitAnimated.gif" id="annotate_waitImg" style="display: none; width: 15px; text-align: justify" />
-            <form ref="uploadForm" id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+            <form ref="uploadForm" id="uploadForm" action="api/v1/annotator/uploadZipFile" method="post" enctype="multipart/form-data">
                 <span>upload zipped corpus root directory</span>
                 <input type="file" id="fileButton" name="EvaluateToolZipFile" />
 

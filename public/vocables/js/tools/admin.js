@@ -53,7 +53,7 @@ var Admin = (function () {
         MainController.UI.message(sources[0] + " processing...");
         $.ajax({
             type: "GET",
-            url: "/ontology/" + sources[0],
+            url: `${Config.apiUrl}/admin/ontology/${sources[0]}`,
             dataType: "text/plain",
             success: function (_data2, _textStatus, _jqXHR) {
                 // no success see index.js

@@ -42,7 +42,7 @@ var Blender = (function () {
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
                     for (var key in data.resources) {
-                        Config.sources[key] = data[key];
+                        Config.sources[key] = data.resources[key];
                     }
 
                     self.availableSources = [];
@@ -1310,7 +1310,6 @@ var Blender = (function () {
             };
 
             var payload = {
-                createNewResource: 1,
                 sourceName: name,
                 graphUri: graphUri,
                 targetSparqlServerUrl: Config.default_sparql_url,
@@ -1318,7 +1317,7 @@ var Blender = (function () {
             };
             $.ajax({
                 type: "POST",
-                url: Config.serverUrl,
+                url: `${Config.apiUrl}/blenderSources`,
                 data: payload,
                 dataType: "json",
                 success: function (_data, _textStatus, _jqXHR) {
@@ -1343,14 +1342,13 @@ var Blender = (function () {
             if (confirm("delete  resource " + source + " ?")) {
                 if (confirm("Do you really want to delete resource " + source + " ?")) {
                     var payload = {
-                        deleteResource: 1,
                         sourceName: source,
                         graphUri: sourceObj.graphUri,
                         sparqlServerUrl: Config.default_sparql_url,
                     };
                     $.ajax({
-                        type: "POST",
-                        url: Config.serverUrl,
+                        type: "DELETE",
+                        url: `${Config.apiUrl}/blenderSources`,
                         data: payload,
                         dataType: "json",
                         success: function (_data, _textStatus, _jqXHR) {

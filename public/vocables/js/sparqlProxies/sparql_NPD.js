@@ -14,7 +14,6 @@ var Sparql_NPD = (function () {
 
     self.ancestorsDepth = 6;
     self.sparql_url = "http://51.178.139.80:8890/sparql";
-    self.serverUrl = Config.serverUrl;
 
     self.getTopConcepts = function (sourceLabel, options, callback) {
         self.graphUri = Config.sources[sourceLabel].graphUri;
@@ -156,7 +155,6 @@ var Sparql_NPD = (function () {
             },
         };
         var payload = {
-            httpProxy: 1,
             url: url,
             body: body,
             options: { a: 1 },
@@ -165,7 +163,7 @@ var Sparql_NPD = (function () {
 
         $.ajax({
             type: "POST",
-            url: self.serverUrl,
+            url: `${Config.apiUrl}/httpProxy`,
             data: payload,
             dataType: "json",
             /* beforeSend: function(request) {

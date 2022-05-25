@@ -687,14 +687,12 @@ $("#actionDiv").html(html);*/
         if (Array.isArray(Config.sources[Lineage_common.currentSource].graphUri)) graphUri = Config.sources[Lineage_common.currentSource].graphUri[0];
         else graphUri = Config.sources[Lineage_common.currentSource].graphUri;
         var payload = {
-            uploadOntologyFromOwlFile: 1,
-
             graphUri: graphUri,
             filePath: Config.sources[Lineage_common.currentSource].protegeFilePath,
         };
         $.ajax({
             type: "POST",
-            url: Config.serverUrl,
+            url: `${Config.apiUrl}/uploadGraph`,
             data: payload,
             dataType: "json",
 

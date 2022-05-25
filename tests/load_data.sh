@@ -3,7 +3,7 @@
 BFO_DATA_URL="https://raw.githubusercontent.com/BFO-ontology/BFO/v2019-08-26/bfo_classes_only.owl"
 
 # Load test data into Virtuoso
-sudo docker-compose -f docker-compose.test.yaml exec -T virtuoso isql-v -U dba -P dba  <<EOF
+docker-compose -f docker-compose.test.yaml exec -T virtuoso isql-v -U dba -P dba  <<EOF
     ld_dir('dumps', 'bfo_classes_only.owl', 'http://purl.obolibrary.org/obo/bfo.owl');
     rdf_loader_run();
     exit;

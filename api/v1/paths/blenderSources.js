@@ -1,8 +1,11 @@
 const { blenderSources } = require("../../../model/blenderSources");
-const { responseSchema, successfullyFetched } = require("./utils");
+const configManager = require("../../../bin/configManager.");
+const { responseSchema, processResponse, successfullyFetched } = require("./utils");
 module.exports = function () {
     let operations = {
         GET,
+        POST,
+        DELETE,
     };
     async function GET(req, res, next) {
         try {
@@ -14,10 +17,69 @@ module.exports = function () {
     }
     GET.apiDoc = {
         summary: "Returns blender sources",
-        security: [{ restrictAdmin: [] }],
+        security: [{ loginScheme: [] }],
         operationId: "getAllBlenderSources",
         parameters: [],
         responses: responseSchema("BlenderSources", "GET"),
+    };
+    function POST(req, res, next) {
+        try {
+            configManager.createNewResource(req.body.sourceName, req.body.graphUri, req.body.targetSparqlServerUrl, JSON.parse(req.body.options), function (err, result) {
+                processResponse(res, err, result);
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+    POST.apiDoc = {
+        summary: "Create a new blender source",
+        security: [{ restrictAdmin: [] }],
+        operationId: "createBlenderSource",
+        parameters: [
+            {
+                in: "body",
+                name: "body",
+                schema: {
+                    type: "object",
+                    properties: {
+                        sourceName: { type: "string" },
+                        graphUri: { type: "string" },
+                        targetSparqlServerUrl: { type: "string" },
+                        options: { type: "string" },
+                    },
+                },
+            },
+        ],
+        responses: responseSchema("BlenderSources", "POST"),
+    };
+    async function DELETE(req, res, next) {
+        try {
+            configManager.deleteResource(req.body.sourceName, req.body.graphUri, req.body.sparqlServerUrl, function (err, result) {
+                processResponse(res, err, result);
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+    DELETE.apiDoc = {
+        summary: "Delete blender source",
+        security: [{ restrictAdmin: [] }],
+        operationId: "deleteBlenderSource",
+        parameters: [
+            {
+                in: "body",
+                name: "body",
+                schema: {
+                    type: "object",
+                    properties: {
+                        sourceName: { type: "string" },
+                        graphUri: { type: "string" },
+                        sparqlServerUrl: { type: "string" },
+                    },
+                },
+            },
+        ],
+        responses: responseSchema("BlenderSources", "DELETE"),
     };
     return operations;
 };

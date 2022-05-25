@@ -282,13 +282,11 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
 
     self.addImportToCurrentSource = function (parentSourceLabel, importedSourceLabel, callback) {
         var payload = {
-            addImportToSource: 1,
-            parentSource: parentSourceLabel,
             importedSource: importedSourceLabel,
         };
         $.ajax({
             type: "POST",
-            url: Config.serverUrl,
+            url: `${Config.apiUrl}/sources/${parentSourceLabel}/imports`,
             data: payload,
             dataType: "json",
             success: function (_data, _textStatus, _jqXHR) {

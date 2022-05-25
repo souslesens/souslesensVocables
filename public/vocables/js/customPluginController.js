@@ -3,14 +3,15 @@ var CustomPluginController = (function () {
     var self = {};
     self.rootDir = "customPlugins/";
     self.typeUrisIcons = {};
-    self.pluginDir;
+    self.pluginDir = "TotalEnergies";
     self.customTools = self.init = function (customPlugins, callback) {
         self.pluginDir = customPlugins[0];
 
         if (self.pluginDir) {
             $.ajax({
                 type: "GET",
-                url: "/getJsonFile",
+                url: `${Config.apiUrl}/pluginController/jsonFile`,
+
                 data: { filePath: self.rootDir + self.pluginDir + "/manifest.json" },
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {

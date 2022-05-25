@@ -16,7 +16,7 @@ module.exports = {
          * Backend files
          */
         {
-            files: ["app.js", "scripts/*.js", "./legacy_routes.js", "other/**/*.js", "bin/**/*.js", "api/**/*.js", "**/webpack.config.js", ".eslintrc.js", "model/**/*.js"],
+            files: ["app.js", "scripts/*.js", "other/**/*.js", "bin/**/*.js", "api/**/*.js", "**/webpack.config.js", ".eslintrc.js", "model/**/*.js"],
             env: {
                 node: true,
             },

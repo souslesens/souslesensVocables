@@ -7,11 +7,9 @@ const morganLogger = require("morgan");
 const fileUpload = require("express-fileupload");
 const openapi = require("express-openapi");
 const swaggerUi = require("swagger-ui-express");
-
-const legacyRoutes = require("./legacy_routes");
 const httpProxy = require(path.resolve("bin/httpProxy."));
 const userManager = require(path.resolve("bin/user."));
-
+require("./bin/authentication.");
 const { config } = require("./model/config");
 
 const app = express();
@@ -122,8 +120,35 @@ app.use(
 );
 
 // legacy routes
-app.use("/", legacyRoutes);
 
+// Home (redirect to /vocables)
+app.get("/", function (req, res, _next) {
+    res.redirect("vocables");
+});
+
+// Login routes
+if (!config.disableAuth) {
+    if (config.auth == "keycloak") {
+        app.get("/login", passport.authenticate("provider", { scope: ["openid", "email", "profile"] }));
+        app.get("/login/callback", passport.authenticate("provider", { successRedirect: "/", failureRedirect: "/login" }));
+    } else {
+        app.get("/login", function (req, res, _next) {
+            res.render("login", { title: "souslesensVocables - Login" });
+        });
+        app.post(
+            "/auth/login",
+            passport.authenticate("local", {
+                successRedirect: "/vocables",
+                failureRedirect: "/login",
+                failureMessage: true,
+            })
+        );
+    }
+} else {
+    app.get("/login", function (req, res, _next) {
+        res.redirect("vocables");
+    });
+}
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     next(createError(404));

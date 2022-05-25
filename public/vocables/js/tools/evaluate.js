@@ -137,7 +137,7 @@ var Evaluate = (function () {
         self.serverMessage("Uploading zip file " + fileObject.name);
         $.ajax({
             method: "POST",
-            url: "/upload",
+            url: `${Config.apiUrl}/annotator/uploadZipFile`,
             data: formData,
             cache: false,
             contentType: false,

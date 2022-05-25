@@ -67,17 +67,4 @@ if (!config.disableAuth) {
     });
 }
 
-// XXX move to api/v1/paths/upload
-router.post("/upload", ensureLoggedIn(), function (req, response) {
-    if (!req.files || Object.keys(req.files).length === 0) {
-        return response.status(400).send("No files were uploaded.");
-    }
-    if (req.files.EvaluateToolZipFile) {
-        const zipFile = req.files.EvaluateToolZipFile;
-        DirContentAnnotator.uploadAndAnnotateCorpus(zipFile, req.body.corpusName, JSON.parse(req.body.sources), JSON.parse(req.body.options), function (err, result) {
-            processResponse(response, err, result);
-        });
-    }
-});
-
 module.exports = router;

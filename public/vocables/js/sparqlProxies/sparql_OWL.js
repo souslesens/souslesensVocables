@@ -596,7 +596,10 @@ var Sparql_OWL = (function () {
             " WHERE ";
         if (options.selectGraph) query += " graph ?g ";
         query +=
-            "{ ?concept rdf:type ?node. " + filterStr + " ?concept rdf:type owl:NamedIndividual ." + " OPTIONAL {?concept rdfs:label ?conceptLabel}" + " OPTIONAL {?node rdfs:label ?nodeLabel}" + " }";
+            "{ ?concept rdf:type ?node. " + filterStr + " OPTIONAL {?concept rdfs:label ?conceptLabel}" + " OPTIONAL {?node rdfs:label ?nodeLabel}"
+          if(options.typeNameIndividual)
+              query+=  " ?concept rdf:type owl:NamedIndividual ."
+        query+=  " }";
         var limit = options.limit || Config.queryLimit;
         query += " limit " + limit;
 

@@ -787,7 +787,7 @@ to: {
     var exactMatch = $("#LineageProperties_allExactMatchSearchCBX").prop("checked");
     var searchAllSources = $("#LineageProperties_searchInAllSources").prop("checked");
     var searchType = $("#LineageProperties_searchAllType").val();
-    if (searchType)
+    //if (searchType)
       var searchedSources = [];
     if (searchAllSources) {
       for (var sourceLabel in Config.sources) {

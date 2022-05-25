@@ -404,7 +404,8 @@ var SearchUtil = (function () {
                             });
                         },
                         function (err) {
-                            MainController.UI.message("DONE " + sourceLabel + " total indexed : " + totalLinesAllsources, true);
+
+                           // MainController.UI.message("DONE " + sourceLabel + " total indexed : " + totalLinesAllsources, true);
                             return callbackEachSource(err);
                         }
                     );
@@ -413,6 +414,9 @@ var SearchUtil = (function () {
                 // }
             },
             function (err) {
+                if(err)
+                    alert(err.responseText)
+                else
                 MainController.UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
                 if (callback) return callback(err);
             }

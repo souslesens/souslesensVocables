@@ -270,9 +270,15 @@
 
         var html = "<ul>";
 
-        for (var index in currentSearchResult) {
+        var array=Object.keys(currentSearchResult)
+        array.sort(function(a, b){
+          return currentSearchResult[b].length-currentSearchResult[a].length
+        })
+        array.forEach(function(index){
+       // for (var index in currentSearchResult) {
+          if(index!="parentIdsLabelsMap" )
           html += "<li  class= \"Browse_searchList\" id='" + index + "' onclick='listIndexHits(\"" + index + "\")'>" + index + " : " + currentSearchResult[index].length + "</li>";
-        }
+        })
         html += "</ul>";
         $("#Browse_searchListDiv").html(html);
         $("#Browse_indexHitsDiv").html("");
@@ -290,6 +296,15 @@ function encodeUriForHtmlId(uri){
     var distinctIds = {};
     $(".Browse_searchList").removeClass("selectedItem")
     $("#"+index).addClass("selectedItem")
+
+    currentSearchResult[index].sort(function(a,b){
+      if(a.label>b.label)
+        return 1;
+      if(a.label<b.label)
+        return -1;
+      return 0;
+    })
+
     currentSearchResult[index].forEach(function(hit) {
 
       if (!distinctIds[hit.id]) {

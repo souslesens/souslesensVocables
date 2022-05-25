@@ -31,7 +31,9 @@ var Config = (function () {
     self.queryLimit = 10000;
     self.searchLimit = 500;
     self.searchDepth = 6;
+    self.predicatesSource = "TSF-PREDICATES";
     self.dictionarySource = "TSF-DICTIONARY";
+
     self.dictionaryMetaDataPropertiesMap = {
         prop: "http://www.w3.org/2002/07/owl#onProperty",
         range: "http://www.w3.org/2002/07/owl#someValuesFrom",

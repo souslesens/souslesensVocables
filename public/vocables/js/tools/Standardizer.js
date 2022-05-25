@@ -39,7 +39,7 @@ var Standardizer = (function () {
                 selectTreeNodeFn: Standardizer.onselectSourcesTreeNodeFn,
                 tie_selection: false,
             };
-            MainController.UI.showSources("Standardizer_sourcesTree", true, sources, ["OWL","KNOWLEDGE_GRAPH","SKOS"], options);
+            MainController.UI.showSources("Standardizer_sourcesTree", true, sources, ["OWL", "KNOWLEDGE_GRAPH", "SKOS"], options);
             sources.sort();
 
             var candidateEntities = sources;
@@ -164,7 +164,7 @@ setTimeout(function () {
         self.currentWordsCount = 0;
         var html = "<div class='matrix'>";
         html += "<div class='matrixRow'>";
-        html += "<div class='matrixRowTitle'>"+self.currentSource+"</div>";
+        html += "<div class='matrixRowTitle'>" + self.currentSource + "</div>";
         indexes.forEach(function (index) {
             html += "<div class='matrixColTitle'>" + index + "&nbsp;&nbsp;</div>";
         });

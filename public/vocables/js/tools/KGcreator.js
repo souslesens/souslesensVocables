@@ -352,8 +352,8 @@ var KGcreator = (function () {
                 tripleObj.inverseRestrictionProperty = self.propertiesMap[predicate].inversePropLabel;
             }
         }
-        if(isSpecificPredicate){
-            tripleObj.isSpecificPredicate=true
+        if (isSpecificPredicate) {
+            tripleObj.isSpecificPredicate = true;
         }
 
         self.currentJsonObject.tripleModels.push(tripleObj);

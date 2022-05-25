@@ -312,7 +312,7 @@ var KGassetGraph = (function () {
                     }
 
                     KGassetGraph.getAssetGlobalMappings(source, function (_err, result) {
-                      //  KGbrowserCustom.initsuperClassesPalette();
+                        //  KGbrowserCustom.initsuperClassesPalette();
                         self.model = result.model;
                         for (var predicate in result.predicates) {
                             for (var subject in result.predicates[predicate]) {
@@ -354,7 +354,7 @@ var KGassetGraph = (function () {
 
                 function (callbackSeries) {
                     var existingNodes = {};
-                    var fontColor="#111"
+                    var fontColor = "#111";
                     for (var subject in self.classes) {
                         if (subject.indexOf("xsd:") < 0) {
                             if (!existingNodes[subject]) {
@@ -389,7 +389,6 @@ var KGassetGraph = (function () {
                                 visjsData.nodes.push(obj);
                             }
                             for (var predicate in self.classes[subject]) {
-
                                 self.classes[subject][predicate].forEach(function (object) {
                                     if (object.indexOf("xsd:") > -1) return;
 
@@ -410,8 +409,8 @@ var KGassetGraph = (function () {
                                     }
 
                                     if (!existingNodes[object]) {
-                                        if(! self.model[object]){
-                                            return console.log("missing in model "+object)
+                                        if (!self.model[object]) {
+                                            return console.log("missing in model " + object);
                                         }
                                         existingNodes[object] = 1;
                                         var label = self.model[object].label;
@@ -422,7 +421,6 @@ var KGassetGraph = (function () {
                                         if (object.indexOf("xsd:") > -1) {
                                             shape = "star";
                                             color = "#ffe0aa";
-
                                         }
                                         visjsData.nodes.push({
                                             id: object,

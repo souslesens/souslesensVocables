@@ -1,21 +1,5 @@
-var KGbrowser_2=(function(){
+var KGbrowser_2 = (function () {
+    var self = {};
 
-  var self={}
-
-
-
-
-
-
-
-  return self;
-
-
-
-
-
-
-
-
-
-})()
+    return self;
+})();

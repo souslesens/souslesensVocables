@@ -44,7 +44,7 @@ var KGadvancedMapping = (function () {
                 });
 
                 typesMap[type].forEach(function (item) {
-                    var group ="zz"// KGbrowserCustom.superClassesMap[item.superClassUri].group;
+                    var group = "zz"; // KGbrowserCustom.superClassesMap[item.superClassUri].group;
                     self.referenceDictionary[item.superClassUri] = {
                         uri: item.superClassUri,
                         label: item.superClassLabel,

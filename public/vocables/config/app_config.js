@@ -137,14 +137,12 @@ var Config = (function () {
 
     self.tools["lineage"] = { label: "Lineage", noSource: 0, controller: Lineage_classes, toolDescriptionImg: null }; //"images/taxonomy.png"}
 
-
-  /*  self.tools["KGmappings"] = {
+    /*  self.tools["KGmappings"] = {
         label: "KGmappings",
         multiSources: 0,
         controller: KGmappings,
         toolDescriptionImg: null,
     };*/
-
 
     self.tools["Standardizer"] = {
         label: "Standardizer",
@@ -152,9 +150,6 @@ var Config = (function () {
         controller: Standardizer,
         toolDescriptionImg: null,
     }; //"images/taxonomy.png"}
-
-
-
 
     self.tools["TSF_Dictionary"] = {
         label: "TSF_Dictionary",
@@ -171,7 +166,6 @@ var Config = (function () {
     };
 
     self.tools["KGbrowser"] = { label: "KGbrowser", multiSources: 0, controller: KGbrowser, toolDescriptionImg: null }; //"images/taxonomy.png"}
-
 
     self.tools["KGpropertyFilter"] = {
         label: "KGpropertyFilter",
@@ -217,7 +211,6 @@ var Config = (function () {
         controller: ConfigEditor,
         toolDescriptionImg: null,
     };
-
 
     return self;
 })();

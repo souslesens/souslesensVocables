@@ -9,7 +9,7 @@ var KGbrowser = (function () {
     self.defaultNodeSize = 10;
 
     self.getPropertyColor = function (type, palette) {
-      //  return KGbrowserCustom.superClassesMap(type);
+        //  return KGbrowserCustom.superClassesMap(type);
         // eslint-disable-next-line no-unreachable
         if (!palette) palette = "paletteIntense";
         if (!typeColors[type]) typeColors[type] = common[palette][Object.keys(typeColors).length];
@@ -30,7 +30,6 @@ var KGbrowser = (function () {
         $("#accordion").accordion("option", { active: 1 });
         MainController.UI.openRightPanel();
         $("#rightPanelDiv").load("snippets/KG/KGbrowserRightPanel.html", function () {
-
             $("#KGbrowser_accordion").accordion();
             $("#KGbrowser_accordion").accordion("option", { active: 0 });
             $("#KGbrowser_accordion").on("accordionbeforeactivate", function (event, ui) {

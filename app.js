@@ -124,8 +124,8 @@ app.use(
 );
 
 /**
-* Router
-*/
+ * Router
+ */
 const router = express.Router();
 
 // Home (redirect to /vocables)
@@ -134,7 +134,7 @@ router.get("/", function (req, res, _next) {
 });
 
 // Login
-router.get("/login", function(req, res, next) {
+router.get("/login", function (req, res, next) {
     if (config.auth == "disabled") {
         res.redirect("vocables");
     } else if (config.auth == "keycloak") {

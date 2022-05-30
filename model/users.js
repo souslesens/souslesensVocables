@@ -56,9 +56,8 @@ class UserModel {
         const userAccounts = await this.getUserAccounts();
         const findUser = Object.keys(userAccounts).find((user) => user.login == login);
         return findUser;
-
     };
-    
+
     /**
      * @param {UserAccount} newUserAccount
      */

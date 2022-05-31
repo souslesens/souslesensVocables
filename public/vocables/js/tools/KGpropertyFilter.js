@@ -806,6 +806,15 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       self.matrixDivsMap = {};
 
       var aspectsArray = [];
+
+      filters.sort(function(a,b){
+        if((a.classLabel+a.propertyLabel)>(b.classLabel+b.propertyLabel))
+          return 1;
+        if((a.classLabel+a.propertyLabel)<(b.classLabel+b.propertyLabel))
+          return -1;
+        return 0;
+      })
+
       filters.forEach(function(item) {
         if (aspectsArray.indexOf(item.filterLabel) < 0) aspectsArray.push(item.filterLabel);
       });
@@ -836,16 +845,24 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         html +=rowHtml+ "</div>"
       }
 
-
+var classesArray=[]
       for (var propId in propsMap) {
           var prop = propsMap[propId];
           let matrixFilterClass = "matrixFilterClass";
           let rowDivId = "r" + common.getRandomHexaId(8);
           self.matrixDivsMap[rowDivId] = prop;
+            //changeOf classLabel
+          if(classesArray.indexOf(prop.classLabel)<0){
+            classesArray.push(prop.classLabel)
+            html+= "<div id='" + rowDivId + "' class='matrixClassRowTitle " + "" + "'>" +
+            prop.classLabel+"</div>"
+
+          }
           let rowHtml = "";
           rowHtml += "<div id='" + rowDivId + "' class='matrixRow " + "" + "'>"
 
-            rowHtml+="<div class='matrixRowTitle'>"+ prop.classLabel + "." + prop.propertyLabel+"</div>";
+           // rowHtml+="<div class='matrixRowTitle'>"+ prop.classLabel + "." + prop.propertyLabel+"</div>";
+        rowHtml+="<div class='matrixRowTitle'>"+  prop.propertyLabel+"</div>";
 
           prop.propAspects.forEach(function(aspect) {
             let cellDivId = "C" + common.getRandomHexaId(8);

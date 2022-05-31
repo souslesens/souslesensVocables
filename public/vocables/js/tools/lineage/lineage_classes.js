@@ -72,7 +72,7 @@ var Lineage_classes = (function () {
                 $("#LineagePopup").dialog({
                     autoOpen: false,
                     height: 450,
-                    width: 450,
+                    width: 700,
                     modal: true,
                 });
                 $("#Lineage_Tabs").tabs({
@@ -455,7 +455,13 @@ var Lineage_classes = (function () {
                         if (err) return callback(err.responseText);
                         return null;
                     });
+                }, addNode: function (nodeData, callback) {
+                    Lineage_blend.graphModification.showAddNodeGraphDialog(function (err, result) {
+                        if (err) return callback(err.responseText);
+                        return null;
+                    });
                 },
+
             };
         }
         visjsGraph.draw("graphDiv", visjsData, options, function () {

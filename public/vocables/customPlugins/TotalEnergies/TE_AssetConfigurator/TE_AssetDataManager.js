@@ -10,11 +10,11 @@ var TE_AssetDataManager = (function () {
             self.failuresTable = "";
             self.currentDbName = "data14224";
             self.currentFLcolumn = "functionalLocationDescription";
-            self.currenTable = girassol;
+            self.currenTable = "girassol";
         } else if (asset == "absheron") {
             self.currentTable_14224Field = "RDLRelation";
             self.currentDbName = "data14224";
-            self.currenTable = absheron;
+            self.currenTable = "absheron";
         } else if (asset == "Moho_N") {
             self.currentTable_14224Field = "RDScode";
             self.currentDbName = "evolen";

@@ -70,7 +70,7 @@ var Lineage_decoration = (function () {
     };
 
     self.colorGraphNodesByType = function (nodeIds, part14TopTypes) {
-        return;
+     //   return;
         if (!nodeIds) nodeIds = visjsGraph.data.nodes.getIds();
         // var existingNodes = visjsGraph.getExistingIdsMap(true);
         //  var ids = Object.keys(existingNodes);

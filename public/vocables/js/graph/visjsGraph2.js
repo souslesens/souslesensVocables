@@ -111,6 +111,7 @@ var visjsGraph = (function () {
             // }
         }, self.simulationTimeOut);
 
+
         self.network.on("afterDrawing", function (/** @type {any} */ _params) {
             self.drawingDone = true;
         });

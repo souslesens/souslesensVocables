@@ -34,6 +34,19 @@ var Config = (function () {
     self.predicatesSource = "TSF-PREDICATES";
     self.dictionarySource = "TSF-DICTIONARY";
 
+    self.defaultSparqlPrefixes={
+        "xs": "<http://www.w3.org/2001/XMLSchema#>",
+          "rdf": "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+          "rdfs": "<http://www.w3.org/2000/01/rdf-schema#>",
+          "owl": "<http://www.w3.org/2002/07/owl#>",
+          "skos": "<http://www.w3.org/2004/02/skos/core#>",
+          "iso14224": "<http://data.total.com/resource/tsf/iso_14224#>",
+          "req": "<https://w3id.org/requirement-ontology/rdl/>",
+          "part14": "<http://standards.iso.org/iso/15926/part14/>",
+          "iso81346":"<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
+          "slsv": "<http://souslesens.org/resource/vocabulary/>",
+          "dcterms": "<http://purl.org/dc/terms/>",
+    },
     self.dictionaryMetaDataPropertiesMap = {
         prop: "http://www.w3.org/2002/07/owl#onProperty",
         range: "http://www.w3.org/2002/07/owl#someValuesFrom",

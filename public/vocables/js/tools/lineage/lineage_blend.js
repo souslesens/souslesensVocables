@@ -592,6 +592,8 @@ var xx = result
 
   self.graphModification = {
     showAddNodeGraphDialog: function() {
+      self.graphModification.creatingNodeTriples=[]
+      self.graphModification.creatingNodeUri=null;
       $("#LineagePopup").dialog("open");
       $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function() {
         common.fillSelectOptions("KGcreator_predicateSelect", KGcreator.usualProperties, true);
@@ -615,13 +617,19 @@ var xx = result
     },
     addTripleToCreatingNode: function() {
 
-      if (!self.graphModification.creatingNodeTriples) {
+      if (! self.graphModification.creatingNodeUri) {
         let graphUri = Config.sources[Lineage_common.currentSource].graphUri;
         self.graphModification.creatingNodeUri = graphUri + common.getRandomHexaId(10);
-        self.graphModification.creatingNodeTriples = [];
+       // self.graphModification.creatingNodeTriples = [];
       }
       let predicate = $("#KGcreator_predicateInput").val();
       let object = $("#KGcreator_objectInput").val();
+
+      $("#KGcreator_predicateInput").val("");
+      $("#KGcreator_objectInput").val("");
+      $("#KGcreator_predicateSelect").val("");
+      $("#KGcreator_objectSelect").val("");
+
       if (!predicate)
         return alert("no value for predicate");
       if (!object)
@@ -632,20 +640,29 @@ var xx = result
         predicate: predicate,
         object: object
       };
-      $("#LineageBlend_creatingNodeTiplesDiv").append("<div>" + triple.subject+"     "+triple.predicate+"    "+triple.object + "</div>")
+      $("#LineageBlend_creatingNodeTiplesDiv").append("<div class='blendCreateNode_triplesDiv'>" + triple.subject+"&nbsp;&nbsp;<b>"+triple.predicate+" </b>&nbsp;&nbsp;   "+triple.object + "</div>")
       self.graphModification.creatingNodeTriples.push(triple);
     },
 
     createNode:function(){
       if (!self.graphModification.creatingNodeTriples)
         return alert("no predicates for node")
+      var str=JSON.stringify(self.graphModification.creatingNodeTriples)
+      if ( str.indexOf("rdf:type")<0)
+        return alert("a tyep must be declared")
+      if ( str.indexOf("owl:Class")>-1 && str.indexOf("rdfs:subClassOf")<0)
+        return alert("a class must be a rdfs:subClassOf anotherClass")
+      if ( str.indexOf("owl:Class")>-1 && str.indexOf("rdfs:label")<0)
+        return alert("a class must have a rdfs:label")
       if( confirm("create node")){
         Sparql_generic.insertTriples(Lineage_common.currentSource,  self.graphModification.creatingNodeTriples, {}, function(err, _result) {
           if (err) return alert(err);
+          $("#LineagePopup").dialog("close");
           var nodeData={
             id:self.graphModification.creatingNodeUri,
             source:Lineage_common.currentSource
           }
+          self.graphModification.creatingNodeTriples=[]
           Lineage_classes.drawNodeAndParents(nodeData);
         });
       }

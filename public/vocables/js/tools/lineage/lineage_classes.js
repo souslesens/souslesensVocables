@@ -449,6 +449,7 @@ var Lineage_classes = (function () {
         if (authentication.currentUser.groupes.indexOf("admin") > -1) {
             options.manipulation = {
                 enabled: true,
+                initiallyActive:true,
 
                 addEdge: function (edgeData, callback) {
                     Lineage_blend.graphModification.showAddEdgeFromGraphDialog(edgeData, function (err, result) {

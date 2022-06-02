@@ -32,7 +32,7 @@ var Admin = (function () {
             function (source, callbackEach) {
                 if (!Config.sources[source] || !Config.sources[source].schemaType) return callbackEach();
                 $("#waitImg").css("display", "block");
-                SearchUtil.generateElasticIndex(source, function (err, _result) {
+                SearchUtil.generateElasticIndex(source, null,function (err, _result) {
                     MainController.UI.message("DONE " + source, true);
                     callbackEach(err);
                 });

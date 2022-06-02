@@ -358,14 +358,19 @@ var allowedPrefixes=Object.keys(Config.defaultSparqlPrefixes)
       if (elt.indexOf("_:b") == 0) {
         return "<" + elt + ">";
       }
-      if (elt.indexOf("http:"  || item.valueType == "uri") == 0) {
+      if (elt.indexOf("http")==0  || item.valueType == "uri" ) {
         return "<" + elt + ">";
       }
+
+       if ((p = elt.indexOf("^^")) > 0) //xsd type
+        return  "'" + item.object.substring(0, p) + "'" + item.object.substring(p) ;
+
       var array=elt.split(":")
       if (array.length>1 && allowedPrefixes.indexOf(array[0])) {
 
         return  elt;
       }
+
       return "'"+elt+"'";
 
 

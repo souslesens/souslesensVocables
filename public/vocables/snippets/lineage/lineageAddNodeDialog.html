@@ -1,21 +1,23 @@
 <style>
-    .blendCreateNode_lineDiv{
+    .blendCreateNode_lineDiv {
         display: flex;
-        flex-direction:column;
-        margin:5px;
-        padding:5px;
-        gap:10px;
+        flex-direction: column;
+        margin: 5px;
+        padding: 5px;
+        gap: 10px;
     }
 
-   .blendCreateNode_triplesDiv {
+    .blendCreateNode_triplesDiv {
         background-color: #ddd;
-        margin: 3px;
-       font-style: 12px;
+        margin: 2px;
+        font-style: 12px;
     }
-    button{
+
+    button {
         margin: 5px;
         padding: 5px;
     }
+
     .KGcreator_tripleInput {
         width: 200px;
         margin: 3px;
@@ -24,41 +26,46 @@
         border-radius: 3px;
         background-color: #ddd;
     }
+
+    #LineageBlend_creatingNodeTiplesDiv {
+        height: 200px;
+        overflow: auto;
+
+    }
 </style>
-
-
-
+<div><b>Create Node :  </b>  <button onclick="Lineage_blend.graphModification.addClassStiples()" style="width:100px">Class</button></div>
 
 <div id="lineageAddEdgeDialog_mainDiv" style="background-color: white;display: flex;flex-direction: row">
-    <b>Create Node : </b>
 
-    <div class="blendCreateNode_lineDiv" >
-        Predicate
-        <select id="KGcreator_predicateSelect" onchange="KGcreator.onTripleModelSelect('p',$(this).val())"></select>
-        <input id="KGcreator_predicateInput" class="KGcreator_tripleInput" />
-    </div>
-    <div class="blendCreateNode_lineDiv" >
-        Object
-        <select id="KGcreator_objectSelect" onchange="KGcreator.onTripleModelSelect('o',$(this).val());Lineage_blend.graphModification.addTripleToCreatingNode();"></select>
-        <input id="KGcreator_objectInput" class="KGcreator_tripleInput" /></br>
-     </div>
-</div>
-    <div style="">
-        <div>
-        <button onclick="Lineage_blend.graphModification.addTripleToCreatingNode()">Add</button>
-        </div>
-    <div id="LineageBlend_creatingNodeTiplesDiv" ></div>
-    </div>
+
+  <div class="blendCreateNode_lineDiv">
+    Predicate
+    <select id="KGcreator_predicateSelect" onchange="KGcreator.onTripleModelSelect('p',$(this).val())"></select>
+    <input id="KGcreator_predicateInput" class="KGcreator_tripleInput" />
+  </div>
+  <div class="blendCreateNode_lineDiv">
+    Object
+    <select id="KGcreator_objectSelect"
+            onchange="KGcreator.onTripleModelSelect('o',$(this).val());Lineage_blend.graphModification.addTripleToCreatingNode();"></select>
     <div>
-        <button onclick="Lineage_blend.graphModification.createNode()">Create node</button>
+      <input id="KGcreator_objectInput" class="KGcreator_tripleInput" />
+      <button onclick="Lineage_blend.graphModification.addTripleToCreatingNode()" style="width:50px">Add</button>
     </div>
-        <!-- <button onclick='$("#mainDialog").dialog("close")'>Cancel</button>
-    <button onclick="Lineage_blend.graphModification.execAddEdgeFromGraph()">OK</button>-->
+  </div>
+</div>
+<div style="">
+  <div id="LineageBlend_creatingNodeTiplesDiv"></div>
+</div>
+<div>
+  <button onclick="Lineage_blend.graphModification.createNode()">Create node</button>
+</div>
+<!-- <button onclick='$("#mainDialog").dialog("close")'>Cancel</button>
+<button onclick="Lineage_blend.graphModification.execAddEdgeFromGraph()">OK</button>-->
 
 <script>
-    $("#KGcreator_tripleInput").keypress(function (e) {
-        if (e.which == 13) {
-            Lineage_blend.graphModification.addTripleToCreatingNode();
-        }
-    })
+  $("#KGcreator_tripleInput").keypress(function(e) {
+    if (e.which == 13) {
+      Lineage_blend.graphModification.addTripleToCreatingNode();
+    }
+  });
 </script>

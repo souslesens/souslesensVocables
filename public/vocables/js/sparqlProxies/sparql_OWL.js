@@ -531,7 +531,7 @@ var Sparql_OWL = (function () {
         if (options.getMetadata)
             query +=
                 " ?node  <https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status>" +
-                " ?status.?node <purl.org/dc/terms/created> ?creationDate. " +
+                " ?status.?node <http://purl.org/dc/terms/created> ?creationDate. " +
                 "?node  <http://purl.org/dc/terms/creator> ?creator." +
                 "?node  <http://purl.org/dc/terms/source> ?provenance." +
                 "?node <http://data.souslesens.org/property#domainSourceLabel> ?domainSourceLabel." +

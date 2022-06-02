@@ -56,7 +56,7 @@ var Config = (function () {
         rangeSourceLabel: "http://data.souslesens.org/property#rangeSourceLabel",
         author: "http://purl.org/dc/terms/creator",
         provenance: "http://purl.org/dc/terms/source",
-        creationDate: "purl.org/dc/terms/created",
+        creationDate: "http://purl.org/dc/terms/created",
     };
     self.dictionaryStatusMap = {
         promote: "OK",

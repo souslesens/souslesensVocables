@@ -411,7 +411,7 @@ return;*/
 
     metaDataTriples.push({
       subject: subjectUri,
-      predicate: "purl.org/dc/terms/created",
+      predicate: "http://purl.org/dc/terms/created",
       object: dateTime
     });
 
@@ -615,15 +615,17 @@ var xx = result
 
       })
     },
-    addTripleToCreatingNode: function() {
+    addTripleToCreatingNode: function(predicate,object) {
 
       if (! self.graphModification.creatingNodeUri) {
         let graphUri = Config.sources[Lineage_common.currentSource].graphUri;
         self.graphModification.creatingNodeUri = graphUri + common.getRandomHexaId(10);
        // self.graphModification.creatingNodeTriples = [];
       }
-      let predicate = $("#KGcreator_predicateInput").val();
-      let object = $("#KGcreator_objectInput").val();
+      if(!predicate)
+      predicate = $("#KGcreator_predicateInput").val();
+      if(!object)
+      object = $("#KGcreator_objectInput").val();
 
       $("#KGcreator_predicateInput").val("");
       $("#KGcreator_objectInput").val("");
@@ -640,16 +642,29 @@ var xx = result
         predicate: predicate,
         object: object
       };
-      $("#LineageBlend_creatingNodeTiplesDiv").append("<div class='blendCreateNode_triplesDiv'>" + triple.subject+"&nbsp;&nbsp;<b>"+triple.predicate+" </b>&nbsp;&nbsp;   "+triple.object + "</div>")
-      self.graphModification.creatingNodeTriples.push(triple);
-    },
+      var num=self.graphModification.creatingNodeTriples.length
+          self.graphModification.creatingNodeTriples.push(triple);
+      $("#LineageBlend_creatingNodeTiplesDiv").append("<div id='triple_"+num+"' class='blendCreateNode_triplesDiv' >" + triple.subject+"&nbsp;&nbsp;<b>"+triple.predicate+"" +
+        " </b>&nbsp;&nbsp;   "+triple.object + "&nbsp;<button  style='font-size: 8px;' onclick='Lineage_blend.graphModification.removeTriple("+num+")'>X</button></div>")
 
+    },
+    addClassStiples:function(){
+      self.graphModification. addTripleToCreatingNode("rdf:type","owl:Class")
+      self.graphModification. addTripleToCreatingNode("rdfs:subClassOf","owl:Thing")
+     var label= prompt("rdfs:label")
+      if(label)
+        self.graphModification. addTripleToCreatingNode("rdfs:label",label)
+    },
+    removeTriple:function(index){
+      self.graphModification.creatingNodeTriples.splice(index,1)
+      $("#triple_"+index).remove()
+    },
     createNode:function(){
       if (!self.graphModification.creatingNodeTriples)
         return alert("no predicates for node")
       var str=JSON.stringify(self.graphModification.creatingNodeTriples)
       if ( str.indexOf("rdf:type")<0)
-        return alert("a tyep must be declared")
+        return alert("a type must be declared")
       if ( str.indexOf("owl:Class")>-1 && str.indexOf("rdfs:subClassOf")<0)
         return alert("a class must be a rdfs:subClassOf anotherClass")
       if ( str.indexOf("owl:Class")>-1 && str.indexOf("rdfs:label")<0)
@@ -661,10 +676,18 @@ var xx = result
           var nodeData={
             id:self.graphModification.creatingNodeUri,
             source:Lineage_common.currentSource
+
           }
+          MainController.UI.message("node Created")
           self.graphModification.creatingNodeTriples=[]
           Lineage_classes.drawNodeAndParents(nodeData);
+          SearchUtil.generateElasticIndex(Lineage_common.currentSource,{ids:[self.graphModification.creatingNodeUri]},function(err, result){
+            if(err)
+              return alert(err.responseText)
+            MainController.UI.message("node Created and Indexed")
+          })
         });
+
       }
 
     },

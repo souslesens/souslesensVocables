@@ -11,7 +11,6 @@
 var Sparql_ISO_15926 = (function () {
     var self = {};
     self.ancestorsDepth = 6;
-    var elasticUrl = Config.serverUrl;
 
     self.getTopConcepts = function (sourceLabel, _options, callback) {
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -148,7 +147,6 @@ var Sparql_ISO_15926 = (function () {
             },
         };
         var payload = {
-            httpProxy: 1,
             url: url,
             body: body,
             options: { a: 1 },
@@ -157,7 +155,7 @@ var Sparql_ISO_15926 = (function () {
 
         $.ajax({
             type: "POST",
-            url: elasticUrl,
+            url: Config.apiUrl,
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {

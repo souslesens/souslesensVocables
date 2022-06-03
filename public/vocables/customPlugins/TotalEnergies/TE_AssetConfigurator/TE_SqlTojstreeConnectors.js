@@ -178,22 +178,15 @@ var TE_SqlTojstreeConnectors = (function () {
     };
 
     self.querySQLserver = function (dbName, sqlQuery, callback) {
-        var dataSource = {
+        const params = new URLSearchParams({
             type: "sql.sqlserver",
-            connection: "_default",
             dbName: dbName,
-            table_schema: "dbo",
-        };
+            sqlQuery: sqlQuery,
+        });
 
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: {
-                KGquery: 1,
-                getData: 1,
-                dataSource: JSON.stringify(dataSource),
-                sqlQuery: sqlQuery,
-            },
+            type: "GET",
+            url: Config.apiUrl+"kg/data?"+params.toString(),
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {

@@ -21,7 +21,6 @@ var MainController = (function () {
             url: Config.apiUrl + "/config",
             dataType: "json",
             success: function (serverConfig, _textStatus, _jqXHR) {
-                //  Config.serverUrl = serverConfig.serverUrl
                 Config.default_lang = serverConfig.default_lang;
                 Config.default_sparql_url = serverConfig.default_sparql_url;
                 Config.wiki = serverConfig.wiki;

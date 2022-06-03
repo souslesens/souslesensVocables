@@ -13,8 +13,6 @@ var Sparql_ISO_15926_part4 = (function () {
     var self = {};
     self.ancestorsDepth = 6;
 
-    var elasticUrl = Config.serverUrl;
-
     self.getTopConcepts = function (sourceLabel, _options, callback) {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -159,7 +157,6 @@ var Sparql_ISO_15926_part4 = (function () {
             },
         };
         var payload = {
-            httpProxy: 1,
             url: url,
             body: body,
             options: { a: 1 },
@@ -168,12 +165,9 @@ var Sparql_ISO_15926_part4 = (function () {
 
         $.ajax({
             type: "POST",
-            url: elasticUrl,
+            url: Config.apiUrl+"/httpProxy",
             data: payload,
             dataType: "json",
-            /* beforeSend: function(request) {
-                     request.setRequestHeader('Age', '10000');
-                 },*/
 
             success: function (data, _textStatus, _jqXHR) {
                 if (typeof data === "string") data = JSON.parse(data);

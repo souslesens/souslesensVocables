@@ -165,7 +165,7 @@ var Sparql_ISO_15926_part4 = (function () {
 
         $.ajax({
             type: "POST",
-            url: Config.apiUrl+"/httpProxy",
+            url: Config.apiUrl + "/httpProxy",
             data: payload,
             dataType: "json",
 

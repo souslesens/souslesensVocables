@@ -187,7 +187,7 @@ var TE_14224_browser = (function () {
 
         $.ajax({
             type: "GET",
-            url: Config.apiUrl+'/kg/data?' + params.toString(),
+            url: Config.apiUrl + "/kg/data?" + params.toString(),
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {

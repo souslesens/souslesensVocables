@@ -718,6 +718,44 @@ to: {
                         });
                     }
                 }
+                if (item.inverseProperty) {
+                    if (!existingNodes[item.inverseProperty.value]) {
+
+                        existingNodes[item.inverseProperty.value] = 1;
+
+                        visjsData.nodes.push({
+                            id: item.inverseProperty.value,
+                            label: item.inversePropertyLabel.value,
+                            data: {
+                                id: item.inverseProperty.value,
+                                label: item.inversePropertyLabel.value,
+                                source: Lineage_common.currentSource,
+                            },
+                            color:Lineage_classes.getSourceColor[source] ,
+                            size: self.defaultShapeSize,
+                            shape: self.defaultShape,
+                        });
+                    }
+                    edgeId = item.inverseProperty.value + "_" + item.property.value;
+                    if (!existingNodes[edgeId]) {
+                        existingNodes[edgeId] = 1;
+                        visjsData.edges.push({
+                            id: edgeId,
+                            from: item.property.value,
+                            to: item.inverseProperty.value,
+                            color: "#ccc",
+                            label:"inverseOf",
+                            dashes: true,
+                            arrows: {
+                                to: {
+                                    enabled: true,
+                                    type: Lineage_classes.defaultEdgeArrowType,
+                                    scaleFactor: 0.5,
+                                },
+                            },
+                        });
+                    }
+                }
             });
 
             if (!visjsGraph.data || !visjsGraph.data.nodes) {

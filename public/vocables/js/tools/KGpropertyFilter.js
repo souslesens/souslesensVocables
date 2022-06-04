@@ -440,7 +440,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     //  var classIds = ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/EquipmentClass/CFIHOS-30000521"];
     // classIds = null
 
-    var options = { filter: "  FILTER (?prop=<http://standards.iso.org/iso/15926/part14/hasQuality>)" };
+    var options = { filter: "  FILTER (?prop=<http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasQuality>)" };
     Sparql_OWL.getObjectRestrictions(self.currentSource, classIds, options, function(err, result) {
       if (err) {
         return MainController.UI.message(err.responseText);
@@ -516,7 +516,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       common.array.sort(jstreeData, "text");
       var options = { openAll: false, withCheckboxes: true };
       common.jstree.loadJsTree("KGpropertyFilter_lifeCycleTree", jstreeData, options, function() {
-        $("#KGpropertyFilter_lifeCycleTree").jstree().open_node("http://standards.iso.org/iso/15926/part14/Activity");
+        $("#KGpropertyFilter_lifeCycleTree").jstree().open_node("http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Activity");
       });
 
       callback();
@@ -723,7 +723,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       "  ?class rdfs:label ?classLabel.\n" +
       "  ?restriction rdf:type owl:Restriction.\n" +
       "  ?restriction ?aspect ?filterId.\n" +
-      " ?restriction owl:onProperty <http://standards.iso.org/iso/15926/part14/hasQuality>.\n" +
+      " ?restriction owl:onProperty <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasQuality>.\n" +
       " ?restriction owl:someValuesFrom ?property.\n" +
       "   ?property rdfs:label ?propertyLabel.\n";
 

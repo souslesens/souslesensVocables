@@ -1471,12 +1471,12 @@ var TreeMap = (function () {
                 children: [
                     {
                         name: "PhysicalObject",
-                        id: "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                        id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
                         size: 87159,
                         children: [
                             {
                                 name: "InanimatePhysicalObject",
-                                id: "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                 size: 7489,
                                 children: [
                                     {
@@ -1510,18 +1510,18 @@ var TreeMap = (function () {
                 size: null,
                 children: [
                     {
-                        name: "http://standards.iso.org/iso/15926/part14/Object",
-                        id: "http://standards.iso.org/iso/15926/part14/Object",
+                        name: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Object",
+                        id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Object",
                         size: 2,
                         children: [
                             {
                                 name: "PhysicalObject",
-                                id: "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                                id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
                                 size: 87159,
                                 children: [
                                     {
                                         name: "InanimatePhysicalObject",
-                                        id: "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                        id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                         size: 7489,
                                         children: [
                                             {
@@ -1630,13 +1630,13 @@ var TreeMap = (function () {
                 size: null,
                 children: [
                     {
-                        name: "http://standards.iso.org/iso/15926/part14/Object",
-                        id: "http://standards.iso.org/iso/15926/part14/Object",
+                        name: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Object",
+                        id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Object",
                         size: 2,
                         children: [
                             {
                                 name: "FunctionalObject",
-                                id: "http://standards.iso.org/iso/15926/part14/FunctionalObject",
+                                id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject",
                                 size: 2,
                                 children: [],
                             },

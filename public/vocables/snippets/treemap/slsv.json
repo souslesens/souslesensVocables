@@ -5383,22 +5383,22 @@
             "classes": [],
             "ancestors": [
                 "CFIHOS_READI",
-                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                 "http://w3id.org/readi/rdl/D101001053"
             ],
             "countChildren": 794199,
             "parentId": "indexes",
             "children": [
                 {
-                    "id": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                    "id": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
                     "parent": "CFIHOS_READI",
                     "index": "cfihos_readi",
                     "classes": [],
                     "ancestors": [
                         "CFIHOS_READI",
-                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                         "http://w3id.org/readi/rdl/D101001053"
                     ],
                     "countChildren": 87159,
@@ -5406,23 +5406,23 @@
                     "name": "PhysicalObject",
                     "children": [
                         {
-                            "id": "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
-                            "parent": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                            "id": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
+                            "parent": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
                             "index": "cfihos_readi",
                             "classes": [],
                             "ancestors": [
                                 "CFIHOS_READI",
-                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                 "http://w3id.org/readi/rdl/D101001053"
                             ],
                             "countChildren": 7489,
-                            "parentId": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                            "parentId": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
                             "name": "InanimatePhysicalObject",
                             "children": [
                                 {
                                     "id": "http://w3id.org/readi/rdl/D101001053",
-                                    "parent": "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                    "parent": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                     "index": "cfihos_readi",
                                     "classes": [
                                         "http://w3id.org/readi/rdl/CFIHOS-30000508",
@@ -5553,12 +5553,12 @@
                                     ],
                                     "ancestors": [
                                         "CFIHOS_READI",
-                                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                         "http://w3id.org/readi/rdl/D101001053"
                                     ],
                                     "countChildren": 457,
-                                    "parentId": "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                    "parentId": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                     "name": "Artefact",
                                     "children": [
                                         {
@@ -6215,8 +6215,8 @@
                                             "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000415", "http://w3id.org/readi/rdl/CFIHOS-30000473", "http://w3id.org/readi/rdl/CFIHOS-30000452"],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000675"
                                             ],
@@ -6262,8 +6262,8 @@
                                             ],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000311",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000310"
@@ -6350,8 +6350,8 @@
                                                     ],
                                                     "ancestors": [
                                                         "CFIHOS_READI",
-                                                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                         "http://w3id.org/readi/rdl/D101001053",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000311",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000310"
@@ -6394,8 +6394,8 @@
                                                     "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000084"],
                                                     "ancestors": [
                                                         "CFIHOS_READI",
-                                                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                         "http://w3id.org/readi/rdl/D101001053",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000311",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000098"
@@ -6418,8 +6418,8 @@
                                                     "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000079", "http://w3id.org/readi/rdl/CFIHOS-30000037"],
                                                     "ancestors": [
                                                         "CFIHOS_READI",
-                                                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                         "http://w3id.org/readi/rdl/D101001053",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000311",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000261"
@@ -6447,8 +6447,8 @@
                                                     "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000071"],
                                                     "ancestors": [
                                                         "CFIHOS_READI",
-                                                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                         "http://w3id.org/readi/rdl/D101001053",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000311",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000097"
@@ -6471,8 +6471,8 @@
                                                     "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000008", "http://w3id.org/readi/rdl/CFIHOS-30000007"],
                                                     "ancestors": [
                                                         "CFIHOS_READI",
-                                                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                         "http://w3id.org/readi/rdl/D101001053",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000311",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000303"
@@ -6510,8 +6510,8 @@
                                             ],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000313"
                                             ],
@@ -6574,8 +6574,8 @@
                                             ],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000661"
                                             ],
@@ -6642,8 +6642,8 @@
                                             "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000263"],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000606"
                                             ],
@@ -6677,8 +6677,8 @@
                                             ],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000314",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000181"
@@ -6756,8 +6756,8 @@
                                                     ],
                                                     "ancestors": [
                                                         "CFIHOS_READI",
-                                                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                         "http://w3id.org/readi/rdl/D101001053",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000314",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000181"
@@ -6810,8 +6810,8 @@
                                                     ],
                                                     "ancestors": [
                                                         "CFIHOS_READI",
-                                                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                         "http://w3id.org/readi/rdl/D101001053",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000314",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000291"
@@ -6862,8 +6862,8 @@
                                                     ],
                                                     "ancestors": [
                                                         "CFIHOS_READI",
-                                                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                         "http://w3id.org/readi/rdl/D101001053",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000314",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000230"
@@ -6941,8 +6941,8 @@
                                                     "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000053"],
                                                     "ancestors": [
                                                         "CFIHOS_READI",
-                                                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                         "http://w3id.org/readi/rdl/D101001053",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000314",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000312"
@@ -6965,8 +6965,8 @@
                                                     "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000116"],
                                                     "ancestors": [
                                                         "CFIHOS_READI",
-                                                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                         "http://w3id.org/readi/rdl/D101001053",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000314",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000129"
@@ -6999,8 +6999,8 @@
                                             ],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000676"
                                             ],
@@ -7052,8 +7052,8 @@
                                             "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000063", "http://w3id.org/readi/rdl/CFIHOS-30000464"],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000664"
                                             ],
@@ -7090,8 +7090,8 @@
                                             ],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000640"
                                             ],
@@ -7153,8 +7153,8 @@
                                             "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000315", "http://w3id.org/readi/rdl/CFIHOS-30000538"],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000594"
                                             ],
@@ -7188,8 +7188,8 @@
                                             ],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000583"
                                             ],
@@ -7236,8 +7236,8 @@
                                             "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000649", "http://w3id.org/readi/rdl/CFIHOS-30000636", "http://w3id.org/readi/rdl/CFIHOS-30000639"],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000660"
                                             ],
@@ -7267,8 +7267,8 @@
                                                     "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000466", "http://w3id.org/readi/rdl/CFIHOS-30000295"],
                                                     "ancestors": [
                                                         "CFIHOS_READI",
-                                                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                         "http://w3id.org/readi/rdl/D101001053",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000660",
                                                         "http://w3id.org/readi/rdl/CFIHOS-30000653"
@@ -7298,8 +7298,8 @@
                                             "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000457", "http://w3id.org/readi/rdl/CFIHOS-30000492"],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000665"
                                             ],
@@ -7331,8 +7331,8 @@
                                             ],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000390"
                                             ],
@@ -7369,8 +7369,8 @@
                                             "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000340"],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000684"
                                             ],
@@ -7392,8 +7392,8 @@
                                             "classes": ["http://w3id.org/readi/rdl/CFIHOS-30000369", "http://w3id.org/readi/rdl/CFIHOS-30000330"],
                                             "ancestors": [
                                                 "CFIHOS_READI",
-                                                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                                                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                                                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                                                 "http://w3id.org/readi/rdl/D101001053",
                                                 "http://w3id.org/readi/rdl/CFIHOS-30000370"
                                             ],
@@ -7419,7 +7419,7 @@
                         },
                         {
                             "id": "http://w3id.org/readi/z018-rdl/prod_P",
-                            "parent": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                            "parent": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
                             "index": "cfihos_readi",
                             "classes": [
                                 "http://w3id.org/readi/z018-rdl/NOZTI_P0003",
@@ -7452,9 +7452,9 @@
                                 "http://w3id.org/readi/z018-rdl/NOZTI_P0012",
                                 "http://w3id.org/readi/z018-rdl/NOZTI_P0005"
                             ],
-                            "ancestors": ["CFIHOS_READI", "http://standards.iso.org/iso/15926/part14/PhysicalObject", "http://w3id.org/readi/z018-rdl/prod_P"],
+                            "ancestors": ["CFIHOS_READI", "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject", "http://w3id.org/readi/z018-rdl/prod_P"],
                             "countChildren": 29,
-                            "parentId": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                            "parentId": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
                             "name": "Product",
                             "children": [
                                 {
@@ -7606,7 +7606,7 @@
                         },
                         {
                             "id": "http://w3id.org/readi/z018-rdl/prod_PG",
-                            "parent": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                            "parent": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
                             "index": "cfihos_readi",
                             "classes": [
                                 "http://w3id.org/readi/z018-rdl/NOZTI_P0274",
@@ -7621,9 +7621,9 @@
                                 "http://w3id.org/readi/z018-rdl/NOZTI_P0361",
                                 "http://w3id.org/readi/z018-rdl/NOZTI_P0343"
                             ],
-                            "ancestors": ["CFIHOS_READI", "http://standards.iso.org/iso/15926/part14/PhysicalObject", "http://w3id.org/readi/z018-rdl/prod_PG"],
+                            "ancestors": ["CFIHOS_READI", "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject", "http://w3id.org/readi/z018-rdl/prod_PG"],
                             "countChildren": 11,
-                            "parentId": "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                            "parentId": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
                             "name": "Product Group",
                             "children": [
                                 {
@@ -7703,9 +7703,9 @@
             "classes": [],
             "ancestors": [
                 "ONE-MODEL",
-                "http://standards.iso.org/iso/15926/part14/Object",
-                "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Object",
+                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                 "http://w3id.org/readi/rdl/D101001053",
                 "http://w3id.org/readi/rdl/CFIHOS-30000661"
             ],
@@ -7713,15 +7713,15 @@
             "parentId": "indexes",
             "children": [
                 {
-                    "id": "http://standards.iso.org/iso/15926/part14/Object",
+                    "id": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Object",
                     "parent": "ONE-MODEL",
                     "index": "one-model",
                     "classes": [],
                     "ancestors": [
                         "ONE-MODEL",
-                        "http://standards.iso.org/iso/15926/part14/Object",
-                        "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-                        "http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject",
+                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Object",
+                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+                        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject",
                         "http://w3id.org/readi/rdl/D101001053",
                         "http://w3id.org/readi/rdl/CFIHOS-30000661"
                     ],
@@ -7729,24 +7729,24 @@
                     "parentId": "ONE-MODEL",
                     "children": [
                         {
-                            "id": "http://standards.iso.org/iso/15926/part14/FunctionalObject",
-                            "parent": "http://standards.iso.org/iso/15926/part14/Object",
+                            "id": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject",
+                            "parent": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Object",
                             "index": "fmea",
                             "classes": ["http://www.semanticweb.org/asset/HeatExchanger", "http://www.semanticweb.org/asset/Fan"],
-                            "ancestors": ["FMEA", "http://standards.iso.org/iso/15926/part14/Object", "http://standards.iso.org/iso/15926/part14/FunctionalObject"],
+                            "ancestors": ["FMEA", "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Object", "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject"],
                             "countChildren": 2,
-                            "parentId": "http://standards.iso.org/iso/15926/part14/Object",
+                            "parentId": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Object",
                             "name": "FunctionalObject",
                             "children": [
                                 {
                                     "id": "http://www.semanticweb.org/asset/HeatExchanger",
                                     "name": "Heat exchanger",
-                                    "parentId": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+                                    "parentId": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject"
                                 },
                                 {
                                     "id": "http://www.semanticweb.org/asset/Fan",
                                     "name": "Fan",
-                                    "parentId": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+                                    "parentId": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject"
                                 }
                             ]
                         }
@@ -8156,7 +8156,7 @@
             "parent": null,
             "index": "fmea",
             "classes": [],
-            "ancestors": ["FMEA", "http://standards.iso.org/iso/15926/part14/Object", "http://standards.iso.org/iso/15926/part14/FunctionalObject"],
+            "ancestors": ["FMEA", "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Object", "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject"],
             "countChildren": 2,
             "parentId": "indexes"
         }

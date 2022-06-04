@@ -111,18 +111,18 @@
         {
             "subject": "view_adl_tagmodelattribute.tag_FunctionalClassID",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject"
         },
 
         {
             "subject": "view_adl_tagmodelattribute.model_PhysicalClassID",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/PhysicalObject"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject"
         },
         {
             "subject": "view_adl_tagmodelattribute.model_OEMID",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/Organization"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Organization"
         },
         {
             "subject": "view_adl_tagmodelattribute.model_OEMID",
@@ -131,17 +131,17 @@
         },
         {
             "subject": "view_adl_tagmodelattribute.tag_ID",
-            "predicate": "http://standards.iso.org/iso/15926/part14/concretizedBy",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/concretizedBy",
             "object": "view_adl_tagmodelattribute.model_ID"
         },
         {
             "subject": "view_adl_tagmodelattribute.tag_ID",
-            "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasFunctionalPart",
             "object": "view_adl_tagmodelattribute.tag_FunctionalClassID"
         },
         {
             "subject": "view_adl_tagmodelattribute.tag_ID",
-            "predicate": "http://standards.iso.org/iso/15926/part14/hasQuality",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasQuality",
             "object": "view_adl_tagmodelattribute.tag_attribute_ID"
         },
         {
@@ -151,12 +151,12 @@
         },
         {
             "subject": "view_adl_tagmodelattribute.model_ID",
-            "predicate": "http://standards.iso.org/iso/15926/part14/hasQuality",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasQuality",
             "object": "view_adl_tagmodelattribute.model_attribute_ID"
         },
         {
             "subject": "view_adl_tagmodelattribute.model_ID",
-            "predicate": "http://standards.iso.org/iso/15926/part14/hasInstalled",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasInstalled",
             "object": "view_adl_tagmodelattribute.model_PhysicalClassID"
         }
     ]

@@ -154,6 +154,7 @@ var Sparql_schema = (function () {
                 filterStr +
                 "  OPTIONAL {?property rdfs:range ?range. ?range rdf:type ?rangeType. OPTIONAL{?range rdfs:label ?rangeLabel.} }" +
                 "  OPTIONAL {?property rdfs:domain ?domain.  ?domain rdf:type ?domainType. OPTIONAL{?domain rdfs:label ?domainLabel.}}" +
+                "  OPTIONAL { ?property owl:inverseOf ?inverseProperty optional {?inverseProperty rdfs:label ?inversePropertyLabel}}"+
                 "} order by ?propertyLabel limit " +
                 self.queryLimit;
 

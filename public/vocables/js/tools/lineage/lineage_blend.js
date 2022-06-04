@@ -571,7 +571,7 @@ var xx = result
       fromNode.id +
       "> )     }}}\n" +
       "  \n" +
-      /*    "WHERE {?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel} optional{?b owl:someValuesFrom ?toAncestor} " + //filter (regex(str(?p),\"http://standards.iso.org/iso/15926/part14/\",\"i\"))" +
+      /*    "WHERE {?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel} optional{?b owl:someValuesFrom ?toAncestor} " + //filter (regex(str(?p),\"http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/\",\"i\"))" +
 " {SELECT ?fromAncestor ?toAncestor ?from ?to" +
 "    WHERE { ?from rdfs:subClassOf+ ?fromAncestor. filter (str(?from)=\"" + fromNode.id + "\" )" +
 "        optional  { ?to rdfs:subClassOf+ ?toAncestor. filter (str(?to)=\"" + toNode.id + "\" )}" +
@@ -592,20 +592,20 @@ var xx = result
 
   self.graphModification = {
     showAddNodeGraphDialog: function() {
-      self.graphModification.creatingNodeTriples=[]
-      self.graphModification.creatingNodeUri=null;
+      self.graphModification.creatingNodeTriples = [];
+      self.graphModification.creatingNodeUri = null;
       $("#LineagePopup").dialog("open");
       $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function() {
         common.fillSelectOptions("KGcreator_predicateSelect", KGcreator.usualProperties, true);
-        Sparql_OWL.getDictionary("ISO_15926-part-14_PCA", null, null, function (err, result) {
+        Sparql_OWL.getDictionary("ISO_15926-part-14_PCA", null, null, function(err, result) {
           if (err) callbackSeries(err);
-          result.sort(function (a, b) {
+          result.sort(function(a, b) {
             if (!a.label || !b.label) return 0;
             if (a.label.value > b.label.value) return 1;
             if (a.label.value < b.label.value) return -1;
             return 0;
           });
-          result.forEach(function (item) {
+          result.forEach(function(item) {
             if (item.id.type == "bnode") return;
             KGcreator.usualObjectClasses.push("part14:" + item.label.value);
           });
@@ -613,19 +613,19 @@ var xx = result
 
         });
 
-      })
+      });
     },
-    addTripleToCreatingNode: function(predicate,object) {
+    addTripleToCreatingNode: function(predicate, object) {
 
-      if (! self.graphModification.creatingNodeUri) {
+      if (!self.graphModification.creatingNodeUri) {
         let graphUri = Config.sources[Lineage_common.currentSource].graphUri;
         self.graphModification.creatingNodeUri = graphUri + common.getRandomHexaId(10);
-       // self.graphModification.creatingNodeTriples = [];
+        // self.graphModification.creatingNodeTriples = [];
       }
-      if(!predicate)
-      predicate = $("#KGcreator_predicateInput").val();
-      if(!object)
-      object = $("#KGcreator_objectInput").val();
+      if (!predicate)
+        predicate = $("#KGcreator_predicateInput").val();
+      if (!object)
+        object = $("#KGcreator_objectInput").val();
 
       $("#KGcreator_predicateInput").val("");
       $("#KGcreator_objectInput").val("");
@@ -642,50 +642,50 @@ var xx = result
         predicate: predicate,
         object: object
       };
-      var num=self.graphModification.creatingNodeTriples.length
-          self.graphModification.creatingNodeTriples.push(triple);
-      $("#LineageBlend_creatingNodeTiplesDiv").append("<div id='triple_"+num+"' class='blendCreateNode_triplesDiv' >" + triple.subject+"&nbsp;&nbsp;<b>"+triple.predicate+"" +
-        " </b>&nbsp;&nbsp;   "+triple.object + "&nbsp;<button  style='font-size: 8px;' onclick='Lineage_blend.graphModification.removeTriple("+num+")'>X</button></div>")
+      var num = self.graphModification.creatingNodeTriples.length;
+      self.graphModification.creatingNodeTriples.push(triple);
+      $("#LineageBlend_creatingNodeTiplesDiv").append("<div id='triple_" + num + "' class='blendCreateNode_triplesDiv' >" + triple.subject + "&nbsp;&nbsp;<b>" + triple.predicate + "" +
+        " </b>&nbsp;&nbsp;   " + triple.object + "&nbsp;<button  style='font-size: 8px;' onclick='Lineage_blend.graphModification.removeTriple(" + num + ")'>X</button></div>");
 
     },
-    addClassStiples:function(){
-      self.graphModification. addTripleToCreatingNode("rdf:type","owl:Class")
-      self.graphModification. addTripleToCreatingNode("rdfs:subClassOf","owl:Thing")
-     var label= prompt("rdfs:label")
-      if(label)
-        self.graphModification. addTripleToCreatingNode("rdfs:label",label)
+    addClassStiples: function() {
+      self.graphModification.addTripleToCreatingNode("rdf:type", "owl:Class");
+      self.graphModification.addTripleToCreatingNode("rdfs:subClassOf", "owl:Thing");
+      var label = prompt("rdfs:label");
+      if (label)
+        self.graphModification.addTripleToCreatingNode("rdfs:label", label);
     },
-    removeTriple:function(index){
-      self.graphModification.creatingNodeTriples.splice(index,1)
-      $("#triple_"+index).remove()
+    removeTriple: function(index) {
+      self.graphModification.creatingNodeTriples.splice(index, 1);
+      $("#triple_" + index).remove();
     },
-    createNode:function(){
+    createNode: function() {
       if (!self.graphModification.creatingNodeTriples)
-        return alert("no predicates for node")
-      var str=JSON.stringify(self.graphModification.creatingNodeTriples)
-      if ( str.indexOf("rdf:type")<0)
-        return alert("a type must be declared")
-      if ( str.indexOf("owl:Class")>-1 && str.indexOf("rdfs:subClassOf")<0)
-        return alert("a class must be a rdfs:subClassOf anotherClass")
-      if ( str.indexOf("owl:Class")>-1 && str.indexOf("rdfs:label")<0)
-        return alert("a class must have a rdfs:label")
-      if( confirm("create node")){
-        Sparql_generic.insertTriples(Lineage_common.currentSource,  self.graphModification.creatingNodeTriples, {}, function(err, _result) {
+        return alert("no predicates for node");
+      var str = JSON.stringify(self.graphModification.creatingNodeTriples);
+      if (str.indexOf("rdf:type") < 0)
+        return alert("a type must be declared");
+      if (str.indexOf("owl:Class") > -1 && str.indexOf("rdfs:subClassOf") < 0)
+        return alert("a class must be a rdfs:subClassOf anotherClass");
+      if (str.indexOf("owl:Class") > -1 && str.indexOf("rdfs:label") < 0)
+        return alert("a class must have a rdfs:label");
+      if (confirm("create node")) {
+        Sparql_generic.insertTriples(Lineage_common.currentSource, self.graphModification.creatingNodeTriples, {}, function(err, _result) {
           if (err) return alert(err);
           $("#LineagePopup").dialog("close");
-          var nodeData={
-            id:self.graphModification.creatingNodeUri,
-            source:Lineage_common.currentSource
+          var nodeData = {
+            id: self.graphModification.creatingNodeUri,
+            source: Lineage_common.currentSource
 
-          }
-          MainController.UI.message("node Created")
-          self.graphModification.creatingNodeTriples=[]
+          };
+          MainController.UI.message("node Created");
+          self.graphModification.creatingNodeTriples = [];
           Lineage_classes.drawNodeAndParents(nodeData);
-          SearchUtil.generateElasticIndex(Lineage_common.currentSource,{ids:[self.graphModification.creatingNodeUri]},function(err, result){
-            if(err)
-              return alert(err.responseText)
-            MainController.UI.message("node Created and Indexed")
-          })
+          SearchUtil.generateElasticIndex(Lineage_common.currentSource, { ids: [self.graphModification.creatingNodeUri] }, function(err, result) {
+            if (err)
+              return alert(err.responseText);
+            MainController.UI.message("node Created and Indexed");
+          });
         });
 
       }
@@ -718,6 +718,7 @@ var xx = result
                 //soit  dans predicateSource
                 inSource = Config.predicatesSource;
             }
+
 
             Lineage_blend.graphModification.createRelationFromGraph(inSource, self.sourceNode, self.targetNode, obj.node.data.id, options, function(err, result) {
               if (err) return callback(err);
@@ -785,6 +786,9 @@ var xx = result
                 return callbackSeries();
               }
               let inSource = "ISO_15926-part-14_PCA";
+
+              self.getAuthorizedProperties(inSource, self.sourceNode.id, self.targetNode.id);
+
               Lineage_properties.getPropertiesjsTreeData(inSource, null, null, {}, function(err, jstreeData) {
                 if (err) return callbackSeries(err);
                 jstreeData.forEach(function(item) {
@@ -857,6 +861,7 @@ var xx = result
         });
       } else {
 
+
         self.createRelation(inSource, propId, sourceNode, targetNode, true, true, {}, function(err, _result) {
           if (err) return callback(err);
           MainController.UI.message("relation added", true);
@@ -865,6 +870,72 @@ var xx = result
       }
     }
   };
+
+  self.getAuthorizedProperties = function(sourceLabel, domain, range) {
+
+    var fromStr = Sparql_common.getFromStr(sourceLabel);
+    var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+      "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+      "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+      "SELECT * from <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/> WHERE {\n" +
+      "   ?prop rdf:type owl:ObjectProperty.\n" +
+      "   optional { ?prop rdfs:label ?propLabel}" +
+      "   optional { ?prop owl:inverseOf ?inverseProp optional {?inverseProp rdfs:label ?inversePropLabel}}" +
+      "   optional { ?prop rdfs:domain ?propDomain. ?domain  rdfs:subClassOf* ?propDomain. Filter (?domain in (<" + domain + ">))}" +
+      "   optional { ?prop rdfs:range ?propRange. ?range  rdfs:subClassOf* ?propRange. Filter (?range in (<" + range + ">))}"
+
+    query += "} LIMIT 1000";
+
+    var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+    Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function(err, _result) {
+        var authorizeBindings = [];
+        var foma;
+        var distinctProps = {};
+        _result.results.bindings.forEach(function(item) {
+          if (!distinctProps[item.prop.value])
+            distinctProps[item.prop.value] = {
+              inverseProp: item.inverseProp ? item.inverseProp.value : null,
+              inversePropLabel: item.inversePropLabel ? item.inversePropLabel.value :(item.inverseProp?Sparql_common.getLabelFromURI(item.inverseProp):"")
+            };
+
+        });
+        let propObj = {};
+        _result.results.bindings.forEach(function(item) {
+
+            if ((item.domain && item.domain.value == domain))
+              if (!propObj[item.prop.value]) {
+                var matchRange = (item.range && item.range.value == range);
+                propObj[item.prop.value] = {
+                  prop: item.prop.value,
+                  matchRange: matchRange,
+                  label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.propLabel)
+                };
+              }
+
+
+
+            var inverseProp = distinctProps[item.prop.value].inverseProp;
+            if (inverseProp && !propObj[inverseProp]) {
+              var matchRange = (item.range && item.domain.range == domain);
+
+
+                propObj[inverseProp] = {
+                  prop: inverseProp,
+                  matchRange: matchRange,
+                  label:   inverseProp.inversePropLabel
+                };
+
+            }
+
+          }
+        );
+        let xx = propObj;
+        return callback(err, triples.length);
+      }
+    )
+    ;
+  };
+
 
   return self;
 })();

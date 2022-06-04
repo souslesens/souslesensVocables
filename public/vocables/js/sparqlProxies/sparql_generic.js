@@ -815,6 +815,14 @@ WHERE {
     } else {
       return alert("no schema type");
     }
+    if(options.ids){
+      var idFilter=Sparql_common.setFilter("concept",options.ids)
+      if(! options.filter)
+        options.filter=""
+      options.filter+=" "+idFilter
+
+
+    }
 
     var allClassesMap = {};
     var allLabels = {};

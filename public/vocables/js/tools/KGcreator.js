@@ -594,7 +594,11 @@ var KGcreator = (function () {
                         $("#KGcreator_dataSampleDiv").val(str);
                     } else {
                         $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
-                    }
+
+                    /*    SearchUtil.generateElasticIndex(Lineage_common.currentSource,{ids:[self.graphModification.creatingNodeUri]},function(err, result) {
+                        })*/
+
+                        }
                 },
                 error(err) {
                     return alert(err.responseText);

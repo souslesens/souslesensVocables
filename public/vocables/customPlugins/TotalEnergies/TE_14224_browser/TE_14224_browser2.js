@@ -765,17 +765,17 @@ var TE_14224_browser = (function () {
                 {
                     id: "http://data.total.com/resource/tsf/maintenance/romain_14224/bad731c1e7",
                     label: "Failure",
-                    type: "http://standards.iso.org/iso/15926/part14/Event",
+                    type: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Event",
                 },
                 {
                     id: "http://data.total.com/resource/tsf/maintenance/romain_14224/6fcb03c2dd",
                     label: "maintenance",
-                    type: "http://standards.iso.org/iso/15926/part14/Activity",
+                    type: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Activity",
                 },
                 {
                     id: "http://data.total.com/resource/tsf/maintenance/romain_14224/08e53090d3",
                     label: "O&G systems",
-                    type: "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                    type: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
                 },
             ];
 
@@ -1027,17 +1027,17 @@ var TE_14224_browser = (function () {
         showAssetData: function () {
             /*          id: "http://data.total.com/resource/tsf/maintenance/romain_14224/bad731c1e7",
                               label: "Failure",
-                              type: "http://standards.iso.org/iso/15926/part14/Event"
+                              type: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Event"
                       },
               {
                   id: "http://data.total.com/resource/tsf/maintenance/romain_14224/6fcb03c2dd",
                       label: "maintenance",
-                  type: "http://standards.iso.org/iso/15926/part14/Activity"
+                  type: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Activity"
               },
               {
                   id: "http://data.total.com/resource/tsf/maintenance/romain_14224/08e53090d3",
                       label: "O&G systems",
-                  type: "http://standards.iso.org/iso/15926/part14/PhysicalObject"
+                  type: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject"
               }]*/
             if (self.currentOntologyTreeNode.parents.indexOf("http://data.total.com/resource/tsf/maintenance/romain_14224/08e53090d3") > -1) {
                 TE_14224_browser.ontology.showAssetSystemData(self.currentOntologyTreeNode);

@@ -37,7 +37,7 @@
         {
             "subject": "typicalassemblypattern.PrimaryFunctionalClassID",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject"
         },
         {
             "subject": "typicalassemblypattern.PrimaryAttributeID",
@@ -48,7 +48,7 @@
         {
             "subject": "typicalassemblypattern.LinkFunctionalClassID",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject"
         },
         {
             "subject": "typicalassemblypattern.LinkAttributeID",

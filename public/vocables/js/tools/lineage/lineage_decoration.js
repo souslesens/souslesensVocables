@@ -42,7 +42,7 @@ var Lineage_decoration = (function () {
                     strFrom +
                     "  WHERE {\n";
                 if (part14TopTypes) {
-                    query += "  ?x rdfs:subClassOf|rdf:type ?type.\n" + '  filter (regex(str(?type),"part14") && ?type !=  <http://standards.iso.org/iso/15926/part14/Thing>)\n';
+                    query += "  ?x rdfs:subClassOf|rdf:type ?type.\n" + '  filter (regex(str(?type),"part14") && ?type !=  <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Thing>)\n';
                 } else {
                     query += "  ?x rdfs:subClassOf|rdf:type ?type.?type rdf:type ?typeType filter (?typeType not in (owl:Restriction)) "; // filter (?type not in ( <http://souslesens.org/resource/vocabulary/TopConcept>,<http://www.w3.org/2002/07/owl#Class>))"
                 }

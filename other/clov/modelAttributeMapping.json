@@ -2,7 +2,7 @@
     "mappings": [
         {
             "subject": "model_attribute.ModelID",
-            "predicate": "http://standards.iso.org/iso/15926/part14/hasQuality",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasQuality",
             "object": "model_attribute.AttributeID"
         }
     ]

@@ -787,9 +787,24 @@ var xx = result
               }
               let inSource = "ISO_15926-part-14_PCA";
 
-              self.getAuthorizedProperties(inSource, self.sourceNode.id, self.targetNode.id);
+              self.getAuthorizedProperties(inSource, self.sourceNode.id, self.targetNode.id,function(err, authorizedProps){
+                var jstreeData=[]
+                for( var prop in authorizedProps){
+                  var propObj=authorizedProps[prop]
+                  jstreeData.push({
+                    id:propObj.id,
+                    text:propObj.label,
+                    parent:"#",
+                    data:{
+                      id:propObj.id,
+                      text:propObj.label,
+                      source:inSource
+                    }
 
-              Lineage_properties.getPropertiesjsTreeData(inSource, null, null, {}, function(err, jstreeData) {
+                  })
+                }
+
+          /*    Lineage_properties.getPropertiesjsTreeData(inSource, null, null, {}, function(err, jstreeData) {
                 if (err) return callbackSeries(err);
                 jstreeData.forEach(function(item) {
                   item.data.inSource = inSource;
@@ -799,11 +814,13 @@ var xx = result
                   id: inSource,
                   text: inSource,
                   parent: "#"
-                });
+                });*/
 
                 common.jstree.loadJsTree("lineageAddEdgeDialog_part14PropertiesTreeDiv", jstreeData, options);
                 callbackSeries();
-              });
+              })
+
+
             },
             function(callbackSeries) {
               if (!Config.sources[Lineage_classes.mainSource].editable) {
@@ -871,71 +888,47 @@ var xx = result
     }
   };
 
-  self.getAuthorizedProperties = function(sourceLabel, domain, range) {
+  self.getAuthorizedProperties = function(sourceLabel, domain, range,callback) {
 
-    var fromStr = Sparql_common.getFromStr(sourceLabel);
-    var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-      "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-      "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-      "SELECT * from <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/> WHERE {\n" +
-      "   ?prop rdf:type owl:ObjectProperty.\n" +
-      "   optional { ?prop rdfs:label ?propLabel}" +
-      "   optional { ?prop owl:inverseOf ?inverseProp optional {?inverseProp rdfs:label ?inversePropLabel}}" +
-      "   optional { ?prop rdfs:domain ?propDomain. ?domain  rdfs:subClassOf* ?propDomain. Filter (?domain in (<" + domain + ">))}" +
-      "   optional { ?prop rdfs:range ?propRange. ?range  rdfs:subClassOf* ?propRange. Filter (?range in (<" + range + ">))}"
+    function filterProps() {
+      let props = {};
 
-    query += "} LIMIT 1000";
+      self.authorizedProperties[sourceLabel].forEach(function(item) {
+        if (!item.domain || item.domain.value == domain) {
+          if (!props[item.prop.value]) {
+            var matchRange = (item.range && item.range.value == range);
 
-    var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-    Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function(err, _result) {
-        var authorizeBindings = [];
-        var foma;
-        var distinctProps = {};
-        _result.results.bindings.forEach(function(item) {
-          if (!distinctProps[item.prop.value])
-            distinctProps[item.prop.value] = {
-              inverseProp: item.inverseProp ? item.inverseProp.value : null,
-              inversePropLabel: item.inversePropLabel ? item.inversePropLabel.value :(item.inverseProp?Sparql_common.getLabelFromURI(item.inverseProp):"")
-            };
-
-        });
-        let propObj = {};
-        _result.results.bindings.forEach(function(item) {
-
-            if ((item.domain && item.domain.value == domain))
-              if (!propObj[item.prop.value]) {
-                var matchRange = (item.range && item.range.value == range);
-                propObj[item.prop.value] = {
-                  prop: item.prop.value,
-                  matchRange: matchRange,
-                  label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.propLabel)
-                };
-              }
-
-
-
-            var inverseProp = distinctProps[item.prop.value].inverseProp;
-            if (inverseProp && !propObj[inverseProp]) {
-              var matchRange = (item.range && item.domain.range == domain);
-
-
-                propObj[inverseProp] = {
-                  prop: inverseProp,
-                  matchRange: matchRange,
-                  label:   inverseProp.inversePropLabel
-                };
-
+            if (matchRange) {
+              props[item.prop.value] = {
+                prop: item.prop.value,
+                label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.propLabel)
+              };
             }
-
           }
-        );
-        let xx = propObj;
-        return callback(err, triples.length);
-      }
-    )
-    ;
+        }
+      });
+      return props;
+
+    }
+
+
+    if (!self.authorizedProperties)
+      self.authorizedProperties = {};
+    if (!self.authorizedProperties[sourceLabel]) {
+      Sparql_OWL.getInferredPropertiesDomainsAndRanges(sourceLabel,{},function( err,_result){
+        self.authorizedProperties[sourceLabel] = _results;
+        var props = filterProps();
+        return callback(null, props);
+      });
+
+    } else {
+      var props = filterProps();
+      return callback(null, props);
+
+    }
   };
 
 
   return self;
-})();
+})
+();

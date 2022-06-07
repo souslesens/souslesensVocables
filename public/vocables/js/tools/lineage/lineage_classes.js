@@ -202,6 +202,17 @@ var Lineage_classes = (function () {
                 Lineage_classes.drawSimilarsNodes("sameLabel");
             },
         };
+
+        if (authentication.currentUser.groupes.indexOf("admin") > -1) {
+         /*   items.createNewGraph = {
+                label: "create new graph",
+                action: function ( _e) {
+                    Lineage_classes.drawSimilarsNodes("sameLabel");
+                },
+            };*/
+
+        }
+
         /*   items.addSameAs = {
        label: "add similars (sameAs)",
        action: function (e) {
@@ -929,7 +940,7 @@ var Lineage_classes = (function () {
         async.eachSeries(
             slices,
             function (/** @type {any} */ slice, /** @type {(arg0: undefined) => void} */ callbackEach) {
-                Sparql_generic.getNodeParents(source, null, slice, 2, { exactMatch: 1 }, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+                Sparql_generic.getNodeParents(source, null, slice, 2, { selectGraph:1 }, function (/** @type {any} */ err, /** @type {any[]} */ result) {
                     if (err) return callbackEach(err);
 
                     if (result.length == 0) {
@@ -940,8 +951,12 @@ var Lineage_classes = (function () {
                     var existingNodes = visjsGraph.getExistingIdsMap();
                     var visjsData = { nodes: [], edges: [] };
                     var shape = self.defaultShape;
+
                     result.forEach(function (/** @type {{ broader1: { value: string; }; broader1Label: { value: any; }; concept: { value: string; }; }} */ item) {
                         if (item.broader1) {
+                            let nodeSource=Sparql_common.getSourceFromGraphUri(item.broader1Graph.value)
+                            let nodeColor= self.getSourceColor( nodeSource)
+
                             if (!existingNodes[item.broader1.value]) {
                                 existingNodes[item.broader1.value] = 1;
                                 var node = {
@@ -949,7 +964,7 @@ var Lineage_classes = (function () {
                                     label: item.broader1Label.value,
                                     shadow: self.nodeShadow,
                                     shape: shape,
-                                    color: self.getSourceColor(source, item.broader1.value),
+                                    color:nodeColor,
                                     size: Lineage_classes.defaultShapeSize,
                                     data: {
                                         source: source,
@@ -1024,7 +1039,7 @@ var Lineage_classes = (function () {
         if (self.currentOwlType == "ObjectProperty") options.owlType = "ObjectProperty";
         var depth = 1;
         if (options.depth) depth = options.depth;
-        Sparql_generic.getNodeChildren(source, null, parentIds, depth, { skipRestrictions: 1 }, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+        Sparql_generic.getNodeChildren(source, null, parentIds, depth, { skipRestrictions: 1,selectGraph:1 }, function (/** @type {any} */ err, /** @type {any[]} */ result) {
             if (err) return MainController.UI.message(err);
             /**
              * @type {never[]}
@@ -1041,11 +1056,13 @@ var Lineage_classes = (function () {
             result.forEach(function (
                 /** @type {{ concept: { value: string | number; }; conceptLabel: { value: any; }; child1: { value: any; }; child1Label: { value: any; }; child2: { value: any; }; child2Label: { value: any; }; child3: { value: any; }; child3Label: { value: any; }; }} */ item
             ) {
+
                 if (!map[item.concept.value]) map[item.concept.value] = [];
                 map[item.concept.value].push({
                     concept: item.concept.value,
                     conceptLabel: item.conceptLabel.value,
                     child1: item.child1.value,
+                    child1Graph: item.child1Graph.value,
                     child1Label: item.child1Label.value,
                     child2: item.child2 ? item.child2.value : null,
                     child2Label: item.child2Label ? item.child2Label.value : null,
@@ -1117,7 +1134,9 @@ var Lineage_classes = (function () {
                     var existingIds = visjsGraph.getExistingIdsMap();
                     var visjsData2 = { nodes: [], edges: [] };
                     map[key].forEach(function (/** @type {{ [x: string]: any; id: any; concept: any; }} */ item) {
-                        var nodeSource = source;
+
+                        let nodeSource=Sparql_common.getSourceFromGraphUri(item.child1Graph.value)
+                        let nodeColor= self.getSourceColor( nodeSource)
                         var shape = Lineage_classes.defaultShape;
                         var shapeSize = Lineage_classes.defaultShapeSize;
 
@@ -1134,7 +1153,7 @@ var Lineage_classes = (function () {
                                         shape: shape,
                                         size: shapeSize,
                                         level: self.currentExpandLevel,
-                                        color: self.getSourceColor(nodeSource, item.id),
+                                        color: nodeColor,
 
                                         data: {
                                             id: item["child" + i],

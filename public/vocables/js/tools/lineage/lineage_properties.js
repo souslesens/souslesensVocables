@@ -526,8 +526,9 @@ if (!property) return alert("select a property first");*/
       if (visjsGraph.data && visjsGraph.data.nodes) existingNodes = visjsGraph.getExistingIdsMap();
       var color = Lineage_classes.getSourceColor(Lineage_common.currentSource);
 
-      var classShape="dot"
-      var propShape="box"
+      var classShape = "dot";
+      var propColor = "#ddd";
+      var propShape = "box";
 
 
       result.forEach(function(item) {
@@ -552,7 +553,7 @@ if (!property) return alert("select a property first");*/
               source: Lineage_common.currentSource
             },
             size: self.defaultShapeSize,
-            color: color,
+            color: propColor,
             shape: propShape,
             font: { color: "blue", size: 12 }
           });
@@ -560,43 +561,45 @@ if (!property) return alert("select a property first");*/
 
         if (item.subProperty) {
           var subProperty = item.subProperty.value;
+          let label = item.subPropertyLabel ? item.subPropertyLabel.value : Sparql_common.getLabelFromURI(item.subProperty.value);
           if (!existingNodes[subProperty]) {
             existingNodes[subProperty] = 1;
             visjsData.nodes.push({
               id: subProperty,
-              label: item.subPropertyLabel.value,
+              label: label,
               data: {
                 id: subProperty,
-                label: item.subPropertyLabel.value,
+                label: label,
                 subProperties: [],
                 source: Lineage_common.currentSource
               },
               font: { color: "blue", size: 12 },
               size: self.defaultShapeSize,
-              color: color,
+              color: propColor,
               shape: propShape
             });
-            var edgeId = item.property.value + "_" + subProperty;
-            if (!existingNodes[edgeId]) {
-              existingNodes[edgeId] = 1;
-              visjsData.edges.push({
-                id: edgeId,
-                from: item.property.value,
-                to: subProperty,
-                // label: "range"
-                color: "brown",
+          }
+          var edgeId = item.property.value + "_" + subProperty;
+          if (!existingNodes[edgeId]) {
+            existingNodes[edgeId] = 1;
+            visjsData.edges.push({
+              id: edgeId,
+              from: item.property.value,
+              to: subProperty,
+              // label: "range"
+              color: Lineage_classes.defaultEdgeColor,
               //  dashes: true,
-                arrows: {
-                  from: {
-                    enabled: true,
-                    type: Lineage_classes.defaultEdgeArrowType,
-                    scaleFactor: 0.5
-                  }
+              arrows: {
+                from: {
+                  enabled: true,
+                  type: Lineage_classes.defaultEdgeArrowType,
+                  scaleFactor: 0.5
                 }
-              });
-            }
+              }
+            });
           }
         }
+
         if (item.range) {
           if (!existingNodes[item.range.value]) {
 
@@ -605,7 +608,7 @@ if (!property) return alert("select a property first");*/
               if (item.rangeType.value.indexOf("property") > -1) shape = self.defaultShape;
             }
             existingNodes[item.range.value] = 1;
-            let rangeLabel = item.rangeLabel?item.rangeLabel.value : Sparql_common.getLabelFromURI(item.range.value);
+            let rangeLabel = item.rangeLabel ? item.rangeLabel.value : Sparql_common.getLabelFromURI(item.range.value);
             visjsData.nodes.push({
               id: item.range.value,
               label: rangeLabel,
@@ -628,7 +631,7 @@ if (!property) return alert("select a property first");*/
               to: item.range.value,
               // label: "range"
               color: "brown",
-             // dashes: true,
+              // dashes: true,
               arrows: {
                 to: {
                   enabled: true,
@@ -647,7 +650,7 @@ if (!property) return alert("select a property first");*/
               if (item.domainType.value.indexOf("Class") > -1) shape = Lineage_classes.defaultShape;
               if (item.domainType.value.indexOf("property") > -1) shape = self.defaultShape;
             }
-            let domainLabel = item.domainLabel?item.domainLabel.value : Sparql_common.getLabelFromURI(item.domain.value);
+            let domainLabel = item.domainLabel ? item.domainLabel.value : Sparql_common.getLabelFromURI(item.domain.value);
             visjsData.nodes.push({
               id: item.domain.value,
               label: domainLabel,
@@ -668,16 +671,15 @@ if (!property) return alert("select a property first");*/
               id: edgeId,
               from: item.property.value,
               to: item.domain.value,
-              // label: "domain",
               color: "green",
-            //  dashes: true
-              /*   arrows: {
-to: {
-enabled: true,
-type: Lineage_classes.defaultEdgeArrowType,
-scaleFactor: 0.5
-}
-}*/
+              //  dashes: true
+              arrows: {
+                from: {
+                  enabled: true,
+                  type: Lineage_classes.defaultEdgeArrowType,
+                  scaleFactor: 0.5
+                }
+              }
             });
           }
         }
@@ -711,7 +713,7 @@ scaleFactor: 0.5
               from: item.property.value,
               to: item.range.value,
               color: "brown",
-            //  dashes: true,
+              //  dashes: true,
               arrows: {
                 to: {
                   enabled: true,
@@ -722,17 +724,18 @@ scaleFactor: 0.5
             });
           }
         }
+
         if (item.inverseProperty) {
           if (!existingNodes[item.inverseProperty.value]) {
 
             existingNodes[item.inverseProperty.value] = 1;
-
+            var propLabel = item.inversePropertyLabel ? item.inversePropertyLabel.value : Sparql_common.getLabelFromURI(item.inverseProperty.value);
             visjsData.nodes.push({
               id: item.inverseProperty.value,
-              label: item.inversePropertyLabel.value,
+              label: propLabel,
               data: {
                 id: item.inverseProperty.value,
-                label: item.inversePropertyLabel.value,
+                label: propLabel,
                 source: Lineage_common.currentSource
               },
               color: Lineage_classes.getSourceColor[source],
@@ -747,16 +750,10 @@ scaleFactor: 0.5
               id: edgeId,
               from: item.property.value,
               to: item.inverseProperty.value,
-              color: "#ccc",
-              label: "inverseOf",
-            //  dashes: true,
-              arrows: {
-                to: {
-                  enabled: true,
-                  type: Lineage_classes.defaultEdgeArrowType,
-                  scaleFactor: 0.5
-                }
-              }
+              color: "blue",
+              //label: "inverseOf",
+              dashes: true
+
             });
           }
         }
@@ -795,6 +792,9 @@ scaleFactor: 0.5
           item.domainLabel = item.propDomainLabel;
           item.range = item.propRange;
           item.rangeLabel = item.propRangeLabel;
+          item.subProperty = item.subProp;
+          item.inverseProperty = item.inverseProp;
+
         });
         drawproperties(result);
       });

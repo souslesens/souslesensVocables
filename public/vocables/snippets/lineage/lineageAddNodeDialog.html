@@ -13,10 +13,6 @@
         font-style: 12px;
     }
 
-    button {
-        margin: 5px;
-        padding: 5px;
-    }
 
     .KGcreator_tripleInput {
         width: 200px;
@@ -28,12 +24,29 @@
     }
 
     #LineageBlend_creatingNodeTiplesDiv {
-        height: 200px;
+        height: 170px;
         overflow: auto;
 
     }
+
+     .lineageAddNodeDialog_mainSourceClass{
+         background-color: #0067bb;
+     }
+    .lineageAddNodeDialog_part14Class{
+        background-color: #00bb00;
+    }
+    .LineageBlend_creatingNodeClassParamsLine{
+        margin: 5px;
+        padding: 3px;
+    }
+
+
+
+
 </style>
-<div><b>Create Node :  </b>  <button onclick="Lineage_blend.graphModification.addClassStiples()" style="width:100px">Class</button></div>
+<div><b>Create Node : </b>
+  <button class='class="btn btn-sm my-1 py-0 btn-outline-primary' onclick='$("#LineageBlend_creatingNodeClassParamsDiv").dialog("open")' style='width:100px'>Class</button>
+</div>
 
 <div id="lineageAddEdgeDialog_mainDiv" style="background-color: white;display: flex;flex-direction: row">
 
@@ -49,16 +62,36 @@
             onchange="KGcreator.onTripleModelSelect('o',$(this).val());Lineage_blend.graphModification.addTripleToCreatingNode();"></select>
     <div>
       <input id="KGcreator_objectInput" class="KGcreator_tripleInput" />
-      <button onclick="Lineage_blend.graphModification.addTripleToCreatingNode()" style="width:50px">Add</button>
+      <button class='class="btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_blend.graphModification.addTripleToCreatingNode()" style="width:50px">Add</button>
     </div>
   </div>
 </div>
 <div style="">
   <div id="LineageBlend_creatingNodeTiplesDiv"></div>
 </div>
-<div>
-  <button onclick="Lineage_blend.graphModification.createNode()">Create node</button>
+
+
+
+<div id="LineageBlend_creatingNodeClassParamsDiv" style="display: flex;flex-direction: column">
+  <div class="LineageBlend_creatingNodeClassParamsLine">
+    rdfs:label&nbsp;<input id="LineageBlend_creatingNodeNewClassLabel"></input>
+  </div>
+  <div class="LineageBlend_creatingNodeClassParamsLine">
+    rdfs:subClassOf&nbsp;<select id="LineageBlend_creatingNodeSuperClasses"></select>
+  </div>
+  <div class="LineageBlend_creatingNodeClassParamsLine">
+    <button class='class="btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_blend.graphModification.addClassStiples()" style="width:100px">OK</button>
+  </div>
+
 </div>
+
+
+
+
+<div>
+  <button  class='class="btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_blend.graphModification.createNode()">Create node</button>
+</div>
+
 <!-- <button onclick='$("#mainDialog").dialog("close")'>Cancel</button>
 <button onclick="Lineage_blend.graphModification.execAddEdgeFromGraph()">OK</button>-->
 
@@ -67,5 +100,11 @@
     if (e.which == 13) {
       Lineage_blend.graphModification.addTripleToCreatingNode();
     }
+  });
+  $("#LineageBlend_creatingNodeClassParamsDiv").dialog({
+    autoOpen: false,
+    height: 400,
+    width:500,
+    modal: true
   });
 </script>

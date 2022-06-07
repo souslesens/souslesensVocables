@@ -179,22 +179,15 @@ var TE_14224_browser = (function () {
     };
 
     self.querySQLserver = function (sqlQuery, callback) {
-        var dataSource = {
+        const params = new URLSearchParams({
             type: "sql.sqlserver",
-            connection: "_default",
             dbName: "data14224",
-            table_schema: "dbo",
-        };
+            sqlQuery: sqlQuery,
+        });
 
         $.ajax({
-            type: "POST",
-            url: Config.serverUrl,
-            data: {
-                KGquery: 1,
-                getData: 1,
-                dataSource: JSON.stringify(dataSource),
-                sqlQuery: sqlQuery,
-            },
+            type: "GET",
+            url: Config.apiUrl + "/kg/data?" + params.toString(),
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {

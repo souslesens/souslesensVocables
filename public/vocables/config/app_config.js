@@ -11,8 +11,6 @@
  */
 var Config = (function () {
     var self = {};
-    self.serverUrl = "/slsv";
-    if (window.location.href.indexOf("localhost") < 0) self.serverUrl = "../slsv";
 
     self.apiUrl = "/api/v1";
 

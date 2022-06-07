@@ -651,11 +651,8 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                 $.ajax({
                     type: "POST",
-                    url: Config.serverUrl,
+                    url: Config.apiUrl, // XXX which route ?
                     data: "json",
-                    /* beforeSend: function(request) {
-                             request.setRequestHeader('Age', '10000');
-                         },*/
 
                     success: function (data, _textStatus, _jqXHR) {
                         $("#mainDialogDiv").dialog("open");

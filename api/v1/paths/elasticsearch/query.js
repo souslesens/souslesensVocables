@@ -10,8 +10,9 @@ module.exports = function () {
         elasticRestProxy.executePostQuery(req.body.url, req.body.query, req.body.indexes, function (err, result) {
             if (err) {
                 next(err);
+            } else {
+                return res.status(200).json(result);
             }
-            return res.status(200).json(result);
         });
     }
 

@@ -10,8 +10,9 @@ module.exports = function () {
         dataController.readFile(req.query.dir, req.query.name, function (err, result) {
             if (err) {
                 next(err);
+            } else {
+                return res.status(200).json(result);
             }
-            return res.status(200).json(result);
         });
     }
 
@@ -51,8 +52,9 @@ module.exports = function () {
         dataController.saveDataToFile(req.body.dir, req.body.fileName, req.body.data, function (err, result) {
             if (err) {
                 next(err);
+            } else {
+                return res.status(200).json(result);
             }
-            return res.status(200).json(result);
         });
     }
 

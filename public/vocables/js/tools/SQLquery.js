@@ -13,8 +13,8 @@ var SQLquery = (function () {
         for (var key in Config.sources) {
             var sourceObj = Config.sources[key];
             // eslint-disable-next-line no-console
-            if (!sourceObj.schemaType) console.log(key);
-            if (sourceObj.schemaType.indexOf("INDIVIDUAL") > -1 && sourceObj.dataSource && sourceObj.dataSource.dbName) {
+            if (!sourceObj.schemaType) console.log("SQLquery ignored source", key);
+            if (sourceObj.schemaType && sourceObj.schemaType.indexOf("INDIVIDUAL") > -1 && sourceObj.dataSource && sourceObj.dataSource.dbName) {
                 adls.push({ id: key, label: key });
             }
         }

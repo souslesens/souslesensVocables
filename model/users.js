@@ -50,6 +50,15 @@ class UserModel {
     };
 
     /**
+     * @param {string} login
+     */
+    findUserAccount = async (login) => {
+        const userAccounts = await this.getUserAccounts();
+        const findUserKey = Object.keys(userAccounts).find((key) => userAccounts[key].login == login);
+        return findUserKey ? userAccounts[findUserKey] : undefined;
+    };
+
+    /**
      * @param {UserAccount} newUserAccount
      */
     addUserAccount = async (newUserAccount) => {
@@ -75,8 +84,6 @@ class UserModel {
         try {
             const userAccounts = await this._read();
             if (!Object.keys(userAccounts).includes(modifiedUserAccount.id)) {
-                console.log("ID", modifiedUserAccount.id);
-                console.log("USERS", userAccounts);
                 throw Error("UserAccount does not exist, try adding it.");
             }
             userAccounts[modifiedUserAccount.id] = { ...userAccounts[modifiedUserAccount.id], ...modifiedUserAccount };

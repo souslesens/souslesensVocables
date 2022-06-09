@@ -45,7 +45,7 @@ module.exports = function () {
         try {
             const profiles = await read(profilesJSON);
             const parsedProfiles = JSON.parse(profiles);
-            const userInfo = userManager.getUser(req.user);
+            const userInfo = await userManager.getUser(req.user);
             const allowedSources = getAllowedSources(userInfo.user, parsedProfiles);
             const sources = await read(sourcesJSON);
             const parsedSources = JSON.parse(sources);
@@ -67,7 +67,7 @@ module.exports = function () {
         try {
             const updatedSource = req.body;
             const profiles = await read(profilesJSON).then((p) => JSON.parse(p));
-            const userInfo = userManager.getUser(req.user);
+            const userInfo = await userManager.getUser(req.user);
             const allowedSources = getAllowedSources(userInfo.user, profiles);
             const oldSources = await readResource(sourcesJSON, res);
             const updatedSources = { ...oldSources, ...updatedSource };

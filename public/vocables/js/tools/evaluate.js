@@ -195,8 +195,6 @@ var Evaluate = (function () {
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/annotator/corpus",
-            data: payload,
-            dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 common.fillSelectOptions("evaluate_corpusSelect", result, true);
             },

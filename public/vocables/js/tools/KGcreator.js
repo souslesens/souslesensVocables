@@ -79,11 +79,6 @@ var KGcreator = (function () {
             url: Config.apiUrl + "/data/files",
             dataType: "json",
             data: payload,
-
-            /*   type: "POST",
-      url: Config.serverUrl,
-      data: payload,
-      dataType: "json",*/
             success: function (result, _textStatus, _jqXHR) {
                 common.fillSelectOptions("KGcreator_csvDirsSelect", result, true);
             },
@@ -100,7 +95,7 @@ var KGcreator = (function () {
         };
         $.ajax({
             type: "GET",
-            url: `${Config.apiUrl}/data/files`,
+            url: Config.apiUrl + "/data/files",
             data: payload,
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {

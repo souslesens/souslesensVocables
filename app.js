@@ -86,8 +86,8 @@ openapi.initialize({
             }
             return Promise.resolve(true);
         },
-        restrictAdmin: function (req, _scopes, _definition) {
-            const currentUser = userManager.getUser(req.user);
+        restrictAdmin: async function (req, _scopes, _definition) {
+            const currentUser = await userManager.getUser(req.user);
 
             if (!currentUser.logged) {
                 throw {

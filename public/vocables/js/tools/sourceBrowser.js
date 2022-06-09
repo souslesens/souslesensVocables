@@ -1152,7 +1152,7 @@ defaultLang = 'en';*/
         if (confirm("delete node " + self.currentNodeId)) {
             Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, null, null, function (err, _result) {
                 if (err) return alert(err);
-                Sparql_generic.deleteTriples(self.currentSource,null, null, self.currentNodeId, function (err, _result) {
+                Sparql_generic.deleteTriples(self.currentSource, null, null, self.currentNodeId, function (err, _result) {
                     if (err) return alert(err);
 
                     $("#" + self.divId).dialog("close");

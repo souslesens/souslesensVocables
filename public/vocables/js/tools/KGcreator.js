@@ -34,7 +34,7 @@ var KGcreator = (function () {
         "",
     ];
 
-    self.usualObjectClasses = ["owl:Class","owl:Thing", "owl:Property", "owl:NamedIndividual", "owl:Restriction", "skos:Concept", "skos:Collection", "slsv:TopConcept", "_function", "_blankNode", ""];
+    self.usualObjectClasses = ["owl:Class", "owl:Thing", "owl:Property", "owl:NamedIndividual", "owl:Restriction", "skos:Concept", "skos:Collection", "slsv:TopConcept", "_function", "_blankNode", ""];
     self.usualSubjectTypes = ["_function", "_blankNode", ""];
 
     self.predefinedPart14Relations = [
@@ -379,7 +379,6 @@ var KGcreator = (function () {
         else if (role == "p") $("#KGcreator_predicateInput").val(value);
         else if (role == "o") {
             $("#KGcreator_objectInput").val(value);
-
         }
     };
 
@@ -595,10 +594,9 @@ var KGcreator = (function () {
                     } else {
                         $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
 
-                    /*    SearchUtil.generateElasticIndex(Lineage_common.currentSource,{ids:[self.graphModification.creatingNodeUri]},function(err, result) {
+                        /*    SearchUtil.generateElasticIndex(Lineage_common.currentSource,{ids:[self.graphModification.creatingNodeUri]},function(err, result) {
                         })*/
-
-                        }
+                    }
                 },
                 error(err) {
                     return alert(err.responseText);

@@ -364,14 +364,14 @@ var SearchUtil = (function () {
         });
     };
 
-    self.generateElasticIndex = function (sourceLabel,options, callback) {
+    self.generateElasticIndex = function (sourceLabel, options, callback) {
         var withImports = $("#admin_refreshIndexWithImportCBX").prop("checked");
         var sources = [sourceLabel];
         if (withImports) {
             sources = sources.concat(Config.sources[sourceLabel].imports || []);
         }
-        if(!options){
-            options={}
+        if (!options) {
+            options = {};
         }
 
         var totalLinesAllsources = 0;
@@ -379,7 +379,7 @@ var SearchUtil = (function () {
             sources,
             function (sourceLabel, callbackEachSource) {
                 var totalLines = 0;
-                 options.withoutImports= true ;
+                options.withoutImports = true;
 
                 //    if (Config.sources[sourceLabel].schemaType == "OWL") {
                 Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
@@ -396,8 +396,7 @@ var SearchUtil = (function () {
                         slices,
                         function (data, callbackEach) {
                             var replaceIndex = false;
-                            if (index++ == 0 && !options.ids)
-                                replaceIndex = true;
+                            if (index++ == 0 && !options.ids) replaceIndex = true;
                             self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
                                 if (err) return callbackEach(err);
                                 if (!result) return callbackEach();

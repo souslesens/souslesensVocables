@@ -752,7 +752,6 @@ var CsvTripleBuilder = {
     },
 };
 
-
 module.exports = CsvTripleBuilder;
 
 //if (true) {

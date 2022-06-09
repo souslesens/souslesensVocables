@@ -34,30 +34,30 @@ var Config = (function () {
     self.predicatesSource = "TSF-PREDICATES";
     self.dictionarySource = "TSF-DICTIONARY";
 
-    self.defaultSparqlPrefixes={
-        "xs": "<http://www.w3.org/2001/XMLSchema#>",
-          "rdf": "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
-          "rdfs": "<http://www.w3.org/2000/01/rdf-schema#>",
-          "owl": "<http://www.w3.org/2002/07/owl#>",
-          "skos": "<http://www.w3.org/2004/02/skos/core#>",
-          "iso14224": "<http://data.total.com/resource/tsf/iso_14224#>",
-          "req": "<https://w3id.org/requirement-ontology/rdl/>",
-          "part14": "<http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/>",
-          "iso81346":"<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
-          "slsv": "<http://souslesens.org/resource/vocabulary/>",
-          "dcterms": "<http://purl.org/dc/terms/>",
-    },
-    self.dictionaryMetaDataPropertiesMap = {
-        prop: "http://www.w3.org/2002/07/owl#onProperty",
-        range: "http://www.w3.org/2002/07/owl#someValuesFrom",
-        domain: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-        status: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
-        domainSourceLabel: "http://data.souslesens.org/property#domainSourceLabel",
-        rangeSourceLabel: "http://data.souslesens.org/property#rangeSourceLabel",
-        author: "http://purl.org/dc/terms/creator",
-        provenance: "http://purl.org/dc/terms/source",
-        creationDate: "http://purl.org/dc/terms/created",
-    };
+    (self.defaultSparqlPrefixes = {
+        xs: "<http://www.w3.org/2001/XMLSchema#>",
+        rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+        rdfs: "<http://www.w3.org/2000/01/rdf-schema#>",
+        owl: "<http://www.w3.org/2002/07/owl#>",
+        skos: "<http://www.w3.org/2004/02/skos/core#>",
+        iso14224: "<http://data.total.com/resource/tsf/iso_14224#>",
+        req: "<https://w3id.org/requirement-ontology/rdl/>",
+        part14: "<http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/>",
+        iso81346: "<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
+        slsv: "<http://souslesens.org/resource/vocabulary/>",
+        dcterms: "<http://purl.org/dc/terms/>",
+    }),
+        (self.dictionaryMetaDataPropertiesMap = {
+            prop: "http://www.w3.org/2002/07/owl#onProperty",
+            range: "http://www.w3.org/2002/07/owl#someValuesFrom",
+            domain: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            status: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
+            domainSourceLabel: "http://data.souslesens.org/property#domainSourceLabel",
+            rangeSourceLabel: "http://data.souslesens.org/property#rangeSourceLabel",
+            author: "http://purl.org/dc/terms/creator",
+            provenance: "http://purl.org/dc/terms/source",
+            creationDate: "http://purl.org/dc/terms/created",
+        });
     self.dictionaryStatusMap = {
         promote: "OK",
         unPromote: "Candidate",

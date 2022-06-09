@@ -606,7 +606,11 @@ var ontologiesMapper = {
         });
 
         for (var key in dimensionsMap) {
-            triples += "<http://w3id.org/readi/rdl/" + dimensionsMap[key] + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> " + " <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalQuantity>.\n";
+            triples +=
+                "<http://w3id.org/readi/rdl/" +
+                dimensionsMap[key] +
+                "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> " +
+                " <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalQuantity>.\n";
         }
 
         //   http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasPhysicalQuantity

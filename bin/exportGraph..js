@@ -75,8 +75,6 @@ var exportGraph = {
 module.exports = exportGraph;
 
 /*
-var serverUrl = "http://51.178.139.80:8890/sparql";
-
 var graphUri = "https://www2.usgs.gov/science/USGSThesaurus/";
 var filePath = "D:\\NLP\\rdfs\\USGSThesaurus.nt";
 

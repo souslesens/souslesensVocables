@@ -1,13 +1,10 @@
 const fs = require("fs");
 const path = require("path");
 const { configPath, config } = require("../model/config");
+const { userModel } = require("../model/users");
 
 const user = {
-    getUser: function (reqUser) {
-        //TODO: replace with model/users
-        const usersLocation = path.join(__dirname, "../" + configPath + "/users/users.json");
-        let users = JSON.parse("" + fs.readFileSync(usersLocation));
-
+    getUser: async (reqUser) => {
         let result = {};
         const logged = reqUser ? true : false;
         const auth =
@@ -27,23 +24,10 @@ const user = {
                 auth: {},
             };
         } else if (logged) {
-            const findUser = Object.keys(users)
-                .map(function (key, _index) {
-                    return {
-                        id: users[key].id,
-                        login: users[key].login,
-                        groups: users[key].groups,
-                        source: users[key].source,
-                    };
-                })
-                .find((user) => user.login == reqUser.login);
-
+            const findUser = await userModel.findUserAccount(reqUser.login);
             if (findUser === undefined) {
-                console.log("could not find logged user ", reqUser, typeof reqUser);
-                console.log("users are ", users);
-                throw "could not find logged user " + reqUser;
+                throw Error("could not find logged user " + reqUser);
             }
-
             result = {
                 logged: true,
                 user: { login: findUser.login, groups: findUser.groups },
@@ -61,8 +45,8 @@ const user = {
 
         return result;
     },
-    getProfiles: function (reqUser) {
-        const currentUser = user.getUser(reqUser);
+    getProfiles: async (reqUser) => {
+        const currentUser = await user.getUser(reqUser);
         return currentUser.user.groups !== undefined ? currentUser.user.groups : [];
     },
 };

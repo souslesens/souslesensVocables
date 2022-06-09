@@ -6,8 +6,8 @@ module.exports = function () {
         GET,
     };
 
-    function GET(req, res, _next) {
-        const currentUser = userManager.getUser(req.user);
+    async function GET(req, res, _next) {
+        const currentUser = await userManager.getUser(req.user);
         res.status(200).json(currentUser);
     }
 

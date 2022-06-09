@@ -171,6 +171,8 @@ var visjsGraph = (function () {
                 if (!self.data || !self.data.edges) return;
                 var edgeId = params.edge;
                 var edge = self.data.edges.get(edgeId);
+                if(!edge)
+                    return;
                 edge.fromNode = self.data.nodes.get(edge.from);
                 edge.toNode = self.data.nodes.get(edge.to);
                 //   sinequaResultVis.onEdgeHover(edge, point)

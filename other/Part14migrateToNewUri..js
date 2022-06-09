@@ -21,9 +21,10 @@ callbackSeries()
       },
 // query each source
       function(callbackSeries) {
+       var elt="sub"
         async.eachSeries(sources, function(source, callbackEach) {
           let query="SELECT * from <"+source.graphUri+"> WHERE {" +
-            "  ?sub ?pred ?obj .  filter(regex(str(?obj),'http://standards.iso.org/iso/15926/part14/'))" +
+            "  ?sub ?pred ?obj .  filter(regex(str(?"+elt+"),'http://standards.iso.org/iso/15926/part14/'))" +
             "  }LIMIT 10000"
           var params={query:query}
 
@@ -34,7 +35,7 @@ callbackSeries()
             if (err)
               return callbackEach(err);
 
-            _result.results.bindings.forEach(function(item){
+
               console.log(source.source+"\t"+item.sub.value+"\t"+item.pred.value+"\t"+item.obj.value+"\n")
             })
             return callbackEach(null);

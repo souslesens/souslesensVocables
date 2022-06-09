@@ -542,13 +542,14 @@ if (!property) return alert("select a property first");*/
         if (item.property.value.indexOf("#type") > -1 && item.property.value.indexOf("#label") > -1) return;
 
         if (!existingNodes[item.property.value]) {
+          let label = item.propertyLabel ? item.propertyLabel.value : Sparql_common.getLabelFromURI(item.property.value);
           existingNodes[item.property.value] = 1;
           visjsData.nodes.push({
             id: item.property.value,
-            label: item.propertyLabel.value,
+            label: label,
             data: {
               id: item.property.value,
-              label: item.propertyLabel.value,
+              label: label,
               subProperties: [],
               source: Lineage_common.currentSource
             },
@@ -738,7 +739,7 @@ if (!property) return alert("select a property first");*/
                 label: propLabel,
                 source: Lineage_common.currentSource
               },
-              color: Lineage_classes.getSourceColor[source],
+              color: propColor,
               size: self.defaultShapeSize,
               shape: propShape
             });
@@ -785,6 +786,9 @@ if (!property) return alert("select a property first");*/
       });
     } else if (Config.sources[source].schemaType == "OWL") {
       Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, {}, function(err, result) {
+        if (err)
+          return alert(err);
+
         result.forEach(function(item) {
           item.property = item.prop;
           item.propertyLabel = item.propLabel;
@@ -796,7 +800,19 @@ if (!property) return alert("select a property first");*/
           item.inverseProperty = item.inverseProp;
 
         });
-        drawproperties(result);
+        Sparql_OWL.getPropertiesWithoutDomainsAndRanges(source, {}, function(err, result2) {
+          if (err)
+            return alert(err);
+
+          result2.forEach(function(item) {
+            item.property = item.prop;
+            item.propertyLabel = item.propLabel;
+            item.subProperty = item.subProp;
+            item.inverseProperty = item.inverseProp;
+          });
+          result=result.concat(result2)
+          drawproperties(result);
+        });
       });
 
     } else if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH") {
@@ -814,6 +830,8 @@ if (!property) return alert("select a property first");*/
       });
     }
   };
+
+
   self.graphActions = {
     expandNode: function(node, _point, _event) {
       self.drawGraph(node);
@@ -897,5 +915,98 @@ if (!property) return alert("select a property first");*/
   };
 
 
+  self.drawPropsRangeAndDomainMatrix = function(source) {
+    var classes = [];
+    var matrixMap = {};
+    async.series([
+        //list classes and init matrixMap
+        function(callbackSeries) {
+          Sparql_OWL.getDictionary(source, null, null, function(err, result) {
+            if (err)
+              return callback(err);
+            result.forEach(function(item) {
+              classes.push(item.id.value);
+
+            });
+            classes.forEach(function(aClass1) {
+              matrixMap[aClass1] = {};
+
+              classes.forEach(function(aClass2) {
+                matrixMap[aClass1][aClass2] = "";
+              });
+            });
+            return callbackSeries();
+          });
+
+        },
+        //get props ranges and domains
+        function(callbackSeries) {
+          Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, {}, function(err, result) {
+            if (err)
+              return callback(err);
+            result.forEach(function(item) {
+              var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
+              if (item.domain && item.range)
+                matrixMap[item.domain.value][item.range.value] = propLabel;
+              else if (item.domain)
+                matrixMap[item.domain.value]["isDomain"] = propLabel;
+              else if (item.range)
+                matrixMap[item.range.value]["isRange"] = propLabel;
+            });
+            return callbackSeries();
+          });
+        },
+        //draw matrix
+        function(callbackSeries) {
+          var cols = [];
+          var dataSet = [];
+
+          var domainsRow = [""];
+          classes.forEach(function(aClass1, index1) {
+            let class1Label = Sparql_common.getLabelFromURI(aClass1);
+            cols.push({ title: class1Label, defaultContent: "" });
+
+            let row = [];
+            var cell = "";
+
+            if (matrixMap[aClass1]["isRange"])
+              cell += matrixMap[aClass1]["isRange"];
+            row.push(cell);
+
+            classes.forEach(function(aClass2) {
+              if (index1 == 0) {
+                var cell = "";
+                if (matrixMap[aClass2]["isDomain"])
+                  cell = matrixMap[aClass2]["isDomain"];
+                domainsRow.push(cell);
+              }
+              var cell = "";
+              if (matrixMap[aClass1][aClass2])
+                cell = matrixMap[aClass1][aClass2];
+
+
+              row.push(cell);
+
+            });
+            dataSet.push(row);
+
+          });
+          dataSet.splice(0, 0, domainsRow);
+          cols.splice(0, 0, { title: "any", defaultContent: "" });
+          let x = dataSet;
+          Export.showDataTable(null, cols, dataSet);
+          return callbackSeries();
+        }
+
+
+      ],
+
+      function(err) {
+
+      });
+
+
+  };
   return self;
-})();
+})
+();

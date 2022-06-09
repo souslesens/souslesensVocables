@@ -629,8 +629,8 @@ var xx = result
               else if (source == "ISO_15926-part-14_PCA")
                 cssClass = "lineageAddNodeDialog_part14Class";
 
-              label = source + ":" + item.label.value  ;
-               // label = "<span class='" + cssClass + "'>" + source + ":" + item.label.value + "</span>";
+              label = source + ":" + item.label.value;
+              // label = "<span class='" + cssClass + "'>" + source + ":" + item.label.value + "</span>";
               classes.push({ label: label, id: item.id.value });
             });
             classes.sort(function(a, b) {
@@ -639,7 +639,7 @@ var xx = result
               if (a.label.value < b.label.value) return -1;
               return 0;
             });
-            common.fillSelectOptions("LineageBlend_creatingNodeSuperClasses", classes, true,"label","id");
+            common.fillSelectOptions("LineageBlend_creatingNodeSuperClasses", classes, true, "label", "id");
           });
         });
 
@@ -681,7 +681,7 @@ var xx = result
 
 
     addClassStiples: function() {
-      $("#LineageBlend_creatingNodeClassParamsDiv").dialog("close")
+      $("#LineageBlend_creatingNodeClassParamsDiv").dialog("close");
       self.graphModification.addTripleToCreatingNode("rdf:type", "owl:Class");
 
       var label = $("#LineageBlend_creatingNodeNewClassLabel").val();
@@ -835,6 +835,10 @@ var xx = result
                 var targetNodeFirstPartAncestor = null;
                 result.forEach(function(item) {
                   if (item.concept.value == self.sourceNode.id) {
+                    if (item.concept.value.indexOf("/lis14/") > -1) {
+                      sourceNodeFirstPartAncestor = item.concept.value;
+                      return;
+                    }
                     for (var i = 1; i <= ancestorsDepth; i++) {
                       if (item["broader" + i]) {
                         if (item["broader" + i].value.indexOf("/lis14/") > -1) {
@@ -845,6 +849,11 @@ var xx = result
                       }
                     }
                   } else if (item.concept.value == self.targetNode.id) {
+
+                    if (item.concept.value.indexOf("/lis14/") > -1) {
+                      targetNodeFirstPartAncestor = item.concept.value;
+                      return;
+                    }
                     for (var i = 1; i <= ancestorsDepth; i++) {
                       if (item["broader" + i]) {
                         if (item["broader" + i].value.indexOf("/lis14/") > -1) {
@@ -868,11 +877,21 @@ var xx = result
                   for (var prop in authorizedProps) {
                     var propObj = authorizedProps[prop];
                     if (!distinctProps[propObj.prop]) {
-                      var label=Sparql_common.getLabelFromURI(sourceNodeFirstPartAncestor)+"-"+propObj.label+"->"+Sparql_common.getLabelFromURI(targetNodeFirstPartAncestor)
+                      var label;
+                      var cssClass = "lineageAddEdgeDialog_part14Prop";
+                      if (propObj.type != "")
+                        cssClass = "lineageAddEdgeDialog_part14SemiGenericProp";
+                      if (propObj.isGenericProperty) {
+                        cssClass = "lineageAddEdgeDialog_part14GenericProp";
+                        label = "any" + "-" + propObj.label + "->" + "any";
+                      } else
+                        label = Sparql_common.getLabelFromURI(propObj.type.indexOf("D")?sourceNodeFirstPartAncestor:"any") +
+                          "-" + propObj.label + "->" +
+                          Sparql_common.getLabelFromURI(propObj.type.indexOf("R")?targetNodeFirstPartAncestor:"any");
 
                       jstreeData.push({
                         id: propObj.prop,
-                        text: "<span class='lineageAddEdgeDialog_part14Prop'>" + label+ "</span>",
+                        text: "<span class='" + cssClass + "'>" + label + "</span>",
                         parent: "#",
                         data: {
                           id: propObj.prop,
@@ -904,6 +923,7 @@ var xx = result
 
             },
             function(callbackSeries) {
+            return callbackSeries()
               if (!Config.sources[Lineage_classes.mainSource].editable) {
                 $("#lineageAddEdgeDialog_currentSourcePropertiesTreeDiv").html("source " + Lineage_classes.mainSource + " is not editable");
                 return callbackSeries();
@@ -980,32 +1000,85 @@ var xx = result
     function filterProps() {
       let props = {};
       let allProps = self.authorizedProperties[sourceLabel];
+      var subProposMap = {};
+
       allProps.forEach(function(item) {
-        if (!item.domain || item.domain.value == domain) {
-          if (!props[item.prop.value]) {
+        /*  if (!item.domain || item.domain.value == domain) {
             var matchRange = (item.range && item.range.value == range);
+            if (!props[item.prop.value]) {
+              if (matchRange ) {
+                props[item.prop.value] = {
+                  prop: item.prop.value,
+                  label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
 
-            if (matchRange) {
-              props[item.prop.value] = {
-                prop: item.prop.value,
-                label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.propLabel)
-              };
+                };
+              }
             }
-          }
-        }
-      });
-      return props;
 
+
+          }*/
+        if ((!item.domain && item.range) || (item.domain && item.domain.value == domain && (!item.range || item.range == range))) {
+          let type = "";
+          if (item.domain)
+            type += "D";
+          if (item.range)
+            type += "R";
+
+
+          props[item.prop.value] = {
+            prop: item.prop.value,
+            label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+            type: type
+
+          };
+
+        }
+
+
+      });
+      if (Object.keys(props).length == 0) {
+        allProps.forEach(function(item) {
+          if (item.isGenericProperty) {
+            props[item.prop.value] = {
+              prop: item.prop.value,
+              label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+              isGenericProperty: item.isGenericProperty
+            };
+
+          }
+
+        });
+
+      }
+      return props;
     }
 
 
     if (!self.authorizedProperties)
       self.authorizedProperties = {};
     if (!self.authorizedProperties[sourceLabel]) {
+      var allProps;
       Sparql_OWL.getInferredPropertiesDomainsAndRanges(sourceLabel, {}, function(err, _result) {
-        self.authorizedProperties[sourceLabel] = _result;
-        var props = filterProps();
-        return callback(null, props);
+        if (err)
+          return callback(err);
+
+        allProps = _result;
+
+        Sparql_OWL.getPropertiesWithoutDomainsAndRanges(sourceLabel, {}, function(err, _result2) {
+          if (err)
+            return callback(err);
+          // allProps = allProps.concat(_result2)
+          _result2.forEach(function(item) {
+            item.isGenericProperty = true;
+            allProps.push(item);
+          });
+
+          self.authorizedProperties[sourceLabel] = allProps;
+          var props = filterProps();
+
+
+          return callback(null, props);
+        });
       });
 
     } else {

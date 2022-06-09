@@ -892,7 +892,7 @@ var Sparql_OWL = (function() {
       "   optional { ?prop rdfs:label ?propLabel} " +// filter(?prop in (<http://rds.posccaesar.org/ontology/lis14/rdl/hasResident>,<http://rds.posccaesar.org/ontology/lis14/rdl/residesIn>))\n" +
       " optional { ?prop rdfs:domain ?propDomain. ?domain  rdfs:subClassOf* ?propDomain} \n" +
       "    optional { ?prop rdfs:range ?propRange. ?range  rdfs:subClassOf* ?propRange.}\n" +
-      "      optional { ?prop owl:inverseOf ?inverseProp optional {?inverseProp rdfs:label ?inversePropLabel}  \n" +
+      "      optional { ?prop owl:inverseOf|^owl:inverseOf ?inverseProp optional {?inverseProp rdfs:label ?inversePropLabel}  \n" +
       "       optional { ?inverseProp rdfs:range ?propDomain. ?domain  rdfs:subClassOf* ?propDomain} \n" +
       "     optional{ ?inverseProp rdfs:domain ?propRange. ?range  rdfs:subClassOf* ?propRange.}\n" +
       "    }\n" +
@@ -907,6 +907,31 @@ var Sparql_OWL = (function() {
       return callback(null, _result.results.bindings);
     });
   };
+  self.getPropertiesWithoutDomainsAndRanges = function(sourceLabel, options, callback) {
+    var fromStr = Sparql_common.getFromStr(sourceLabel);
+    var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+      "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+      "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+      "SELECT distinct * " + fromStr + " WHERE {{\n" +
+      "  ?prop rdf:type owl:ObjectProperty.}\n" +
+      "    minus {\n" +
+      "    ?prop rdf:type owl:ObjectProperty.?prop rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  \n" +
+      "  }\n" +
+      "   minus {\n" +
+      "    ?prop rdf:type owl:ObjectProperty.?prop owl:inverseOf/rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  \n" +
+      "  }" +
+      "} LIMIT 1000";
+
+
+    var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+    Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function(err, _result) {
+      if (err)
+        return callback(err);
+      return callback(null, _result.results.bindings);
+    });
+  };
+
+
 
   /* self.getLabels = function (sourceLabel,ids, callback) {
            var from = Sparql_common.getFromStr(sourceLabel)

@@ -37,7 +37,7 @@ callbackSeries()
 
 
               console.log(source.source+"\t"+item.sub.value+"\t"+item.pred.value+"\t"+item.obj.value+"\n")
-            })
+
             return callbackEach(null);
           });
 

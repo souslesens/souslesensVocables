@@ -118,6 +118,9 @@ var Sparql_OWL = (function () {
         for (let i = 1; i < descendantsDepth; i++) {
             query += "} ";
         }
+
+
+
         query += "} ";
         (" }");
         if (options.selectGraph) query += " GRAPH ?conceptGraph {?concept ?p ?o}}";

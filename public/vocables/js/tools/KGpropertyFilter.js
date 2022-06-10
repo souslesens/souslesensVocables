@@ -203,15 +203,15 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         var selectedProperties = [];
         leftObjs.forEach(function (item) {
             if (item.data.type != "Property")
-                // filter selected Properties Only
+              // filter selected Properties Only
                 return;
             selectedProperties.push(item.data);
         });
         if (selectedProperties.length == 0) return alert("no property is selected");
 
         var aspectObjs = $("#" + self.aspectsMap[self.currentAspect].treeDiv)
-            .jstree()
-            .get_checked(true);
+          .jstree()
+          .get_checked(true);
         if (aspectObjs.length == 0) return alert("no aspect value  is selected");
 
         if (!confirm("Associate " + selectedProperties.length + "properties to  aspect selected  values of aspect" + self.currentAspect)) return;
@@ -373,14 +373,14 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         var filterStr = Sparql_common.setFilter("restriction", restrictionIds);
 
         var sparql =
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "SELECT * from <http://data.total.com/resource/tsf/property-filtering/> from <http://data.totalenergies.com/resource/ontology/cfihos_1.5/> WHERE {\n" +
-            "  ?class rdfs:subClassOf ?restriction .\n" +
-            "  ?restriction <http://www.w3.org/2002/07/owl#someValuesFrom> ?property.\n" +
-            "  ?property rdfs:label ?propertyLabel.\n" +
-            "  ?class rdfs:label ?classLabel.\n" +
-            "  ?restriction ?aspect ?filter. filter (regex(str(?aspect),'http://data.total.com/resource/tsf/property-filtering/'))\n";
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+          "SELECT * from <http://data.total.com/resource/tsf/property-filtering/> from <http://data.totalenergies.com/resource/ontology/cfihos_1.5/> WHERE {\n" +
+          "  ?class rdfs:subClassOf ?restriction .\n" +
+          "  ?restriction <http://www.w3.org/2002/07/owl#someValuesFrom> ?property.\n" +
+          "  ?property rdfs:label ?propertyLabel.\n" +
+          "  ?class rdfs:label ?classLabel.\n" +
+          "  ?restriction ?aspect ?filter. filter (regex(str(?aspect),'http://data.total.com/resource/tsf/property-filtering/'))\n";
         sparql += filterStr;
         sparql += "} LIMIT 10000";
         var url = Config.sources[self.propertyFilteringSource].sparql_server.url + "?format=json&query=";
@@ -400,32 +400,32 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
     self.initRightPanel = function () {
         async.series(
-            [
-                function (callbackSeries) {
-                    self.loadMDMentitiesTree(function (err, _result) {
-                        callbackSeries(err);
-                    });
-                },
-                function (callbackSeries) {
-                    self.loadLifeCycleTree(function (err, _result) {
-                        callbackSeries(err);
-                    });
-                },
-                function (callbackSeries) {
-                    self.loadDisciplinesTree(function (err, _result) {
-                        callbackSeries(err);
-                    });
-                },
-                function (callbackSeries) {
-                    self.loadOrganizationsTree(function (err, _result) {
-                        callbackSeries(err);
-                    });
-                },
-            ],
-            function (err) {
-                $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 0);
-                if (err) return alert(err.response.text);
-            }
+          [
+              function (callbackSeries) {
+                  self.loadMDMentitiesTree(function (err, _result) {
+                      callbackSeries(err);
+                  });
+              },
+              function (callbackSeries) {
+                  self.loadLifeCycleTree(function (err, _result) {
+                      callbackSeries(err);
+                  });
+              },
+              function (callbackSeries) {
+                  self.loadDisciplinesTree(function (err, _result) {
+                      callbackSeries(err);
+                  });
+              },
+              function (callbackSeries) {
+                  self.loadOrganizationsTree(function (err, _result) {
+                      callbackSeries(err);
+                  });
+              },
+          ],
+          function (err) {
+              $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 0);
+              if (err) return alert(err.response.text);
+          }
         );
 
         return;
@@ -438,11 +438,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         //  var classIds = ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/EquipmentClass/CFIHOS-30000521"];
         // classIds = null
 
-<<<<<<<<< Temporary merge branch 1
         var options = { filter: "  FILTER (?prop=<http://standards.iso.org/iso/15926/part14/hasQuality>)" };
-=========
-        var options = { filter: "  FILTER (?prop=<http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasQuality>)" };
->>>>>>>>> Temporary merge branch 2
         Sparql_OWL.getObjectRestrictions(self.currentSource, classIds, options, function (err, result) {
             if (err) {
                 return MainController.UI.message(err.responseText);
@@ -518,11 +514,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             common.array.sort(jstreeData, "text");
             var options = { openAll: false, withCheckboxes: true };
             common.jstree.loadJsTree("KGpropertyFilter_lifeCycleTree", jstreeData, options, function () {
-<<<<<<<<< Temporary merge branch 1
                 $("#KGpropertyFilter_lifeCycleTree").jstree().open_node("http://standards.iso.org/iso/15926/part14/Activity");
-=========
-                $("#KGpropertyFilter_lifeCycleTree").jstree().open_node("http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Activity");
->>>>>>>>> Temporary merge branch 2
             });
 
             callback();
@@ -721,21 +713,17 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
     self.execSparqlFilterQuery = function (classIds, callback) {
         var sparql =
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "SELECT * from <http://data.total.com/resource/tsf/property-filtering/> from <http://data.totalenergies.com/resource/ontology/cfihos_1.5/> WHERE {\n" +
-            "  ?class rdfs:subClassOf ?restriction .\n" +
-            "  ?class rdfs:label ?classLabel.\n" +
-            "  ?restriction rdf:type owl:Restriction.\n" +
-            "  ?restriction ?aspect ?filterId.\n" +
-<<<<<<<<< Temporary merge branch 1
-            " ?restriction owl:onProperty <http://standards.iso.org/iso/15926/part14/hasQuality>.\n" +
-=========
-            " ?restriction owl:onProperty <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasQuality>.\n" +
->>>>>>>>> Temporary merge branch 2
-            " ?restriction owl:someValuesFrom ?property.\n" +
-            "   ?property rdfs:label ?propertyLabel.\n";
+          "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+          "SELECT * from <http://data.total.com/resource/tsf/property-filtering/> from <http://data.totalenergies.com/resource/ontology/cfihos_1.5/> WHERE {\n" +
+          "  ?class rdfs:subClassOf ?restriction .\n" +
+          "  ?class rdfs:label ?classLabel.\n" +
+          "  ?restriction rdf:type owl:Restriction.\n" +
+          "  ?restriction ?aspect ?filterId.\n" +
+          " ?restriction owl:onProperty <http://standards.iso.org/iso/15926/part14/hasQuality>.\n" +
+          " ?restriction owl:someValuesFrom ?property.\n" +
+          "   ?property rdfs:label ?propertyLabel.\n";
 
         if (classIds) sparql += Sparql_common.setFilter("class", classIds);
 
@@ -812,7 +800,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             let html = "<div class='matrix'>";
 
             var propsMap = {};
-<<<<<<<<< Temporary merge branch 1
 
             self.matrixDivsMap = {};
 
@@ -830,32 +817,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     else propAspects.push(0);
                 });
 
-=========
-
-            self.matrixDivsMap = {};
-
-            var aspectsArray = [];
-
-            filters.sort(function (a, b) {
-                if (a.classLabel + a.propertyLabel > b.classLabel + b.propertyLabel) return 1;
-                if (a.classLabel + a.propertyLabel < b.classLabel + b.propertyLabel) return -1;
-                return 0;
-            });
-
-            filters.forEach(function (item) {
-                if (aspectsArray.indexOf(item.filterLabel) < 0) aspectsArray.push(item.filterLabel);
-            });
-
-            filters.forEach(function (filter) {
-                let propId = filter.class + "|" + filter.property;
-                if (!propsMap[propId]) propsMap[propId] = filter;
-                var propAspects = [];
-                aspectsArray.forEach(function (aspect) {
-                    if (filter.filterLabel == aspect) propAspects.push(1);
-                    else propAspects.push(0);
-                });
-
->>>>>>>>> Temporary merge branch 2
                 propsMap[propId].propAspects = propAspects;
             });
             {
@@ -868,32 +829,15 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                 html += rowHtml + "</div>";
             }
 
-<<<<<<<<< Temporary merge branch 1
-=========
-            var classesArray = [];
->>>>>>>>> Temporary merge branch 2
             for (var propId in propsMap) {
                 var prop = propsMap[propId];
                 let matrixFilterClass = "matrixFilterClass";
                 let rowDivId = "r" + common.getRandomHexaId(8);
                 self.matrixDivsMap[rowDivId] = prop;
-<<<<<<<<< Temporary merge branch 1
                 let rowHtml = "";
                 rowHtml += "<div id='" + rowDivId + "' class='matrixRow " + "" + "'>";
 
                 rowHtml += "<div class='matrixRowTitle'>" + prop.classLabel + "." + prop.propertyLabel + "</div>";
-=========
-                //changeOf classLabel
-                if (classesArray.indexOf(prop.classLabel) < 0) {
-                    classesArray.push(prop.classLabel);
-                    html += "<div id='" + rowDivId + "' class='matrixClassRowTitle " + "" + "'>" + prop.classLabel + "</div>";
-                }
-                let rowHtml = "";
-                rowHtml += "<div id='" + rowDivId + "' class='matrixRow " + "" + "'>";
-
-                // rowHtml+="<div class='matrixRowTitle'>"+ prop.classLabel + "." + prop.propertyLabel+"</div>";
-                rowHtml += "<div class='matrixRowTitle'>" + prop.propertyLabel + "</div>";
->>>>>>>>> Temporary merge branch 2
 
                 prop.propAspects.forEach(function (aspect) {
                     let cellDivId = "C" + common.getRandomHexaId(8);

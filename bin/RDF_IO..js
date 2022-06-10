@@ -45,7 +45,7 @@ var RDF_IO = {
                     rdfs: "http://www.w3.org/2000/01/rdf-schema#",
                     rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
                     owl: "http://www.w3.org/2002/07/owl#",
-                    part14: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",
+                    part14: "http://rds.posccaesar.org/ontology/lis14/",
                     one: "http://data.total.com/resource/one-model/ontology/",
                     readi: "http://w3id.org/readi/z018-rdl/",
                 },

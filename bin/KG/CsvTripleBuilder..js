@@ -38,7 +38,7 @@ var CsvTripleBuilder = {
         skos: "<http://www.w3.org/2004/02/skos/core#>",
         iso14224: "<http://data.total.com/resource/tsf/iso_14224#>",
         req: "<https://w3id.org/requirement-ontology/rdl/>",
-        part14: "<http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/>",
+        part14: "<http://rds.posccaesar.org/ontology/lis14/>",
         iso81346: "<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
         slsv: "<http://souslesens.org/resource/vocabulary/>",
         dcterms: "<http://purl.org/dc/terms/>",
@@ -511,7 +511,7 @@ var CsvTripleBuilder = {
                             if (item.sType.indexOf(rel[0]) > -1 && item.oType.indexOf(rel[1]) > -1) {
                                 var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
                                 var subjectStr = "<" + item.s + ">";
-                                var prop = "<http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/" + rel[2] + ">";
+                                var prop = "<http://rds.posccaesar.org/ontology/lis14/" + rel[2] + ">";
                                 var objectStr = "<" + item.o + ">";
                                 triples.push({
                                     s: blankNode,
@@ -608,7 +608,6 @@ var CsvTripleBuilder = {
             [
                 function (callbackSeries) {
                     if (sparqlServerUrl) {
-                        sparqlServerUrl = options.sparqlServerUrl;
                         return callbackSeries();
                     }
                     ConfigManager.getGeneralConfig(function (err, result) {

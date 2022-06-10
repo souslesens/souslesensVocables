@@ -34,7 +34,7 @@ var KGcreator = (function () {
         "",
     ];
 
-    self.usualObjectClasses = ["owl:Class", "owl:Thing", "owl:Property", "owl:NamedIndividual", "owl:Restriction", "skos:Concept", "skos:Collection", "slsv:TopConcept", "_function", "_blankNode", ""];
+    self.usualObjectClasses = ["owl:Class", "owl:Individual", "owl:Thing", "owl:Property", "owl:NamedIndividual", "owl:Restriction", "skos:Concept", "skos:Collection", "slsv:TopConcept", "_function", "_blankNode", ""];
     self.usualSubjectTypes = ["_function", "_blankNode", ""];
 
     self.predefinedPart14Relations = [

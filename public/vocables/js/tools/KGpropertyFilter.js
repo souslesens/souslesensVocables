@@ -203,15 +203,15 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         var selectedProperties = [];
         leftObjs.forEach(function (item) {
             if (item.data.type != "Property")
-              // filter selected Properties Only
+                // filter selected Properties Only
                 return;
             selectedProperties.push(item.data);
         });
         if (selectedProperties.length == 0) return alert("no property is selected");
 
         var aspectObjs = $("#" + self.aspectsMap[self.currentAspect].treeDiv)
-          .jstree()
-          .get_checked(true);
+            .jstree()
+            .get_checked(true);
         if (aspectObjs.length == 0) return alert("no aspect value  is selected");
 
         if (!confirm("Associate " + selectedProperties.length + "properties to  aspect selected  values of aspect" + self.currentAspect)) return;
@@ -373,14 +373,14 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         var filterStr = Sparql_common.setFilter("restriction", restrictionIds);
 
         var sparql =
-          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-          "SELECT * from <http://data.total.com/resource/tsf/property-filtering/> from <http://data.totalenergies.com/resource/ontology/cfihos_1.5/> WHERE {\n" +
-          "  ?class rdfs:subClassOf ?restriction .\n" +
-          "  ?restriction <http://www.w3.org/2002/07/owl#someValuesFrom> ?property.\n" +
-          "  ?property rdfs:label ?propertyLabel.\n" +
-          "  ?class rdfs:label ?classLabel.\n" +
-          "  ?restriction ?aspect ?filter. filter (regex(str(?aspect),'http://data.total.com/resource/tsf/property-filtering/'))\n";
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "SELECT * from <http://data.total.com/resource/tsf/property-filtering/> from <http://data.totalenergies.com/resource/ontology/cfihos_1.5/> WHERE {\n" +
+            "  ?class rdfs:subClassOf ?restriction .\n" +
+            "  ?restriction <http://www.w3.org/2002/07/owl#someValuesFrom> ?property.\n" +
+            "  ?property rdfs:label ?propertyLabel.\n" +
+            "  ?class rdfs:label ?classLabel.\n" +
+            "  ?restriction ?aspect ?filter. filter (regex(str(?aspect),'http://data.total.com/resource/tsf/property-filtering/'))\n";
         sparql += filterStr;
         sparql += "} LIMIT 10000";
         var url = Config.sources[self.propertyFilteringSource].sparql_server.url + "?format=json&query=";
@@ -400,32 +400,32 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
     self.initRightPanel = function () {
         async.series(
-          [
-              function (callbackSeries) {
-                  self.loadMDMentitiesTree(function (err, _result) {
-                      callbackSeries(err);
-                  });
-              },
-              function (callbackSeries) {
-                  self.loadLifeCycleTree(function (err, _result) {
-                      callbackSeries(err);
-                  });
-              },
-              function (callbackSeries) {
-                  self.loadDisciplinesTree(function (err, _result) {
-                      callbackSeries(err);
-                  });
-              },
-              function (callbackSeries) {
-                  self.loadOrganizationsTree(function (err, _result) {
-                      callbackSeries(err);
-                  });
-              },
-          ],
-          function (err) {
-              $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 0);
-              if (err) return alert(err.response.text);
-          }
+            [
+                function (callbackSeries) {
+                    self.loadMDMentitiesTree(function (err, _result) {
+                        callbackSeries(err);
+                    });
+                },
+                function (callbackSeries) {
+                    self.loadLifeCycleTree(function (err, _result) {
+                        callbackSeries(err);
+                    });
+                },
+                function (callbackSeries) {
+                    self.loadDisciplinesTree(function (err, _result) {
+                        callbackSeries(err);
+                    });
+                },
+                function (callbackSeries) {
+                    self.loadOrganizationsTree(function (err, _result) {
+                        callbackSeries(err);
+                    });
+                },
+            ],
+            function (err) {
+                $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 0);
+                if (err) return alert(err.response.text);
+            }
         );
 
         return;
@@ -713,17 +713,17 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
     self.execSparqlFilterQuery = function (classIds, callback) {
         var sparql =
-          "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-          "SELECT * from <http://data.total.com/resource/tsf/property-filtering/> from <http://data.totalenergies.com/resource/ontology/cfihos_1.5/> WHERE {\n" +
-          "  ?class rdfs:subClassOf ?restriction .\n" +
-          "  ?class rdfs:label ?classLabel.\n" +
-          "  ?restriction rdf:type owl:Restriction.\n" +
-          "  ?restriction ?aspect ?filterId.\n" +
-          " ?restriction owl:onProperty <http://standards.iso.org/iso/15926/part14/hasQuality>.\n" +
-          " ?restriction owl:someValuesFrom ?property.\n" +
-          "   ?property rdfs:label ?propertyLabel.\n";
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "SELECT * from <http://data.total.com/resource/tsf/property-filtering/> from <http://data.totalenergies.com/resource/ontology/cfihos_1.5/> WHERE {\n" +
+            "  ?class rdfs:subClassOf ?restriction .\n" +
+            "  ?class rdfs:label ?classLabel.\n" +
+            "  ?restriction rdf:type owl:Restriction.\n" +
+            "  ?restriction ?aspect ?filterId.\n" +
+            " ?restriction owl:onProperty <http://standards.iso.org/iso/15926/part14/hasQuality>.\n" +
+            " ?restriction owl:someValuesFrom ?property.\n" +
+            "   ?property rdfs:label ?propertyLabel.\n";
 
         if (classIds) sparql += Sparql_common.setFilter("class", classIds);
 

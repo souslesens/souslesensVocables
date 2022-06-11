@@ -124,7 +124,7 @@ var Lineage_classes = (function () {
             if (!Lineage_common.currentSource) {
                 Lineage_classes.drawTopConcepts(sourceLabel, function (/** @type {any} */ err) {
                     if (err) return MainController.UI.message(err);
-                    SourceBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineagejsTreeDiv" });
+                    //  SourceBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineagejsTreeDiv" });
                 });
             }
             $("#Lineage_sourceLabelDiv").html(sourceLabel);
@@ -191,7 +191,7 @@ var Lineage_classes = (function () {
                 $("#Lineage_topClassesRadio").prop("checked", true);
                 Lineage_classes.drawTopConcepts(null, function (/** @type {any} */ err, /** @type {any} */ _result) {
                     if (err) return MainController.UI.message(err);
-                    SourceBrowser.showThesaurusTopConcepts(Lineage_common.currentSource, { targetDiv: "LineagejsTreeDiv" });
+                    SourceBrowser.showThesaurusTopConcepts(Lineage_common.currentSource || Lineage_classes.mainSource, { targetDiv: "LineagejsTreeDiv" });
                     //   self.showThesaurusTopConcepts()
                 });
             },
@@ -352,7 +352,7 @@ var Lineage_classes = (function () {
             allSources,
             function (/** @type {string} */ source, /** @type {(arg0: undefined) => void} */ callbackEach) {
                 MainController.UI.message("loading source " + source);
-                var options = { withoutImports: Lineage_common.currentSource || false };
+                var options = { selectGraph: true, withoutImports: Lineage_common.currentSource || false };
                 Sparql_generic.getTopConcepts(source, options, function (/** @type {any} */ err, /** @type {any[]} */ result) {
                     if (err) return callbackEach(err);
                     if (result.length == 0) {
@@ -379,6 +379,8 @@ var Lineage_classes = (function () {
 
                     var shape = self.defaultShape;
                     result.forEach(function (/** @type {{ topConcept: { value: string; }; topConceptLabel: { value: any; }; }} */ item) {
+                        var nodeSource = Sparql_common.getSourceFromGraphUri(item.conceptGraph.value);
+                        var color = self.getSourceColor(nodeSource);
                         if (!existingNodes[item.topConcept.value]) {
                             existingNodes[item.topConcept.value] = 1;
                             var node = {
@@ -386,7 +388,7 @@ var Lineage_classes = (function () {
                                 label: item.topConceptLabel.value,
                                 shadow: self.nodeShadow,
                                 shape: shape,
-                                color: self.getSourceColor(source, item.topConcept.value),
+                                color: color,
                                 size: Lineage_classes.defaultShapeSize,
                                 level: self.currentExpandLevel,
                                 data: {
@@ -957,6 +959,9 @@ var Lineage_classes = (function () {
                             let nodeColor = self.getSourceColor(nodeSource);
 
                             if (!existingNodes[item.broader1.value]) {
+                                if (item.broader1 && (item.broader1.type == "bnode" || item.broader1.value.indexOf("_:") == 0))
+                                    //skip blank nodes
+                                    return;
                                 existingNodes[item.broader1.value] = 1;
                                 var node = {
                                     id: item.broader1.value,
@@ -1064,21 +1069,15 @@ var Lineage_classes = (function () {
                 result.forEach(function (
                     /** @type {{ concept: { value: string | number; }; conceptLabel: { value: any; }; child1: { value: any; }; child1Label: { value: any; }; child2: { value: any; }; child2Label: { value: any; }; child3: { value: any; }; child3Label: { value: any; }; }} */ item
                 ) {
+                    if (item.concept && (item.concept.type == "bnode" || item.concept.value.indexOf("_:") == 0))
+                        //skip blank nodes
+                        return;
                     if (!map[item.concept.value]) map[item.concept.value] = [];
                     var obj = {};
                     for (var key in item) {
                         obj[key] = item[key] ? item[key].value : null;
                     }
-                    /*   concept: item.concept.value,
-           conceptLabel: item.conceptLabel.value,
-           child1: item.child1.value,
-           child1Graph: item.child1Graph.value,
-           child1Label: item.child1Label.value,
-           child2: item.child2 ? item.child2.value : null,
-           child2Label: item.child2Label ? item.child2Label.value : null,
 
-           child3: item.child3 ? item.child3.value : null,
-           child3Label: item.child3Label ? item.child3Label.value : null,*/
                     map[item.concept.value].push(obj);
                     ids.push(item.child1.value);
                 });
@@ -1466,7 +1465,8 @@ var Lineage_classes = (function () {
         /** @type {string | null} */ classIds,
         /** @type {any} */ descendants,
         /** @type {any} */ withoutImports,
-        /** @type {{ processorFn?: any; }} */ options
+        /** @type {{ processorFn?: any; }} */ options,
+        callback
     ) {
         if (!options) options = {};
         if (!classIds) {
@@ -1595,6 +1595,7 @@ var Lineage_classes = (function () {
                 if (options.processorFn) {
                     options.processorFn(result);
                 }
+                if (callback) return callback(null, result);
             }
         );
     };

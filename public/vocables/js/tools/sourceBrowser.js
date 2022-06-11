@@ -78,7 +78,8 @@ var SourceBrowser = (function () {
     };
 
     self.showThesaurusTopConcepts = function (sourceLabel, options) {
-        if (!options) options = {};
+        if (!sourceLabel) sourceLabel = Lineage_common.currentSource || Lineage_classes.mainSource;
+        if (!options) options = { withoutImports: false, selectGraph: true };
 
         if (options.targetDiv) self.currentTargetDiv = options.targetDiv;
         else if (!self.currentTargetDiv) self.currentTargetDiv = "actionDiv";

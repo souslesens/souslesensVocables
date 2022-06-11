@@ -43,7 +43,8 @@ var Sparql_OWL = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-        fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports);
+        //fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports);
+        fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
 
         if (Config.sources[sourceLabel].topClass) self.topClass = Config.sources[sourceLabel].topClass;
 
@@ -51,9 +52,10 @@ var Sparql_OWL = (function () {
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "prefix owl: <http://www.w3.org/2002/07/owl#>" +
-            "select   distinct ?topConcept  ?topConceptLabel  " +
+            "select   distinct ?topConcept  ?topConceptLabel  ?conceptGraph  " +
             fromStr +
             "  where {";
+        if (options.selectGraph) query += " GRAPH ?conceptGraph {";
         if (Config.sources[sourceLabel].schemaType != "KNOWLEDGE_GRAPH") query += "?topConcept rdf:type owl:Class.";
         query += strFilterTopConcept + " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}";
         if (options.filterCollections)
@@ -63,8 +65,10 @@ var Sparql_OWL = (function () {
                 " ?topConcept." +
                 Sparql_common.setFilter("collection", options.filterCollections, null, options);
         query += Sparql_common.getLangFilter(sourceLabel, "topConceptLabel");
+        if (options.selectGraph) query += "}";
         query += "}order by ?topConceptLabel ";
         (" }");
+
         var limit = options.limit || Config.queryLimit;
         query += " limit " + limit;
         var url = self.sparql_url + "?format=json&query=";
@@ -225,7 +229,7 @@ var Sparql_OWL = (function () {
             strFilter = Sparql_common.setFilter("concept", ids, null, options);
         }
 
-        var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
+        var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
 
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +

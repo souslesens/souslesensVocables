@@ -42,6 +42,7 @@
         "async": "^3.2.3",
         "async-await-mutex-lock": "^1.0.9",
         "bcrypt": "^5.0.1",
+        "buffer-replace": "^1.0.0",
         "connect-ensure-login": "^0.1.1",
         "cookie-parser": "~1.4.6",
         "csv-parser": "^3.0.0",

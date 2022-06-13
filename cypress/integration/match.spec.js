@@ -17,7 +17,7 @@ describe("Match test suit", function () {
             cy.get("#BFO_anchor").click();
             cy.get("#GenericTools_searchTermInput").click();
             cy.get("#GenericTools_searchTermInput").type("quality");
-            cy.get(".btn:nth-child(7)").click();
+            cy.get("#GenericTools_searchTearm_button").click();
             cy.get('span[class="searched_concept"]').contains("quality");
         });
 
@@ -43,7 +43,7 @@ describe("Match test suit", function () {
             cy.get("#BFO_anchor").click();
             cy.get("#GenericTools_searchTermInput").click();
             cy.get("#GenericTools_searchTermInput").type("quality");
-            cy.get(".btn:nth-child(7)").click();
+            cy.get("#GenericTools_searchTearm_button").click();
             cy.get('span[class="searched_concept"]').contains("quality");
         });
 

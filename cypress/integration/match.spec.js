@@ -27,7 +27,7 @@ describe("Match test suit", function () {
             cy.get("#sourceMatcher_anchor").click();
             cy.get("#BFO_anchor").click();
             cy.get("#SourceMatcher_targetGraphUriSelect").select("BFO");
-            cy.get(".my-1:nth-child(3)").click();
+            cy.get("#SourceMatcher_compare_button").click();
             cy.get('div[class="vis-network"]');
         });
     });

@@ -13,8 +13,9 @@ module.exports = function () {
         dataController.readCsv(req.query.dir, req.query.name, options, function (err, result) {
             if (err) {
                 next(err);
+            } else {
+                return res.status(200).json(result);
             }
-            return res.status(200).json(result);
         });
     }
 

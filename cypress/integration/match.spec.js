@@ -17,7 +17,7 @@ describe("Match test suit", function () {
             cy.get("#BFO_anchor").click();
             cy.get("#GenericTools_searchTermInput").click();
             cy.get("#GenericTools_searchTermInput").type("quality");
-            cy.get(".btn:nth-child(7)").click();
+            cy.get("#GenericTools_searchTerm_button").click();
             cy.get('span[class="searched_concept"]').contains("quality");
         });
 
@@ -27,7 +27,7 @@ describe("Match test suit", function () {
             cy.get("#sourceMatcher_anchor").click();
             cy.get("#BFO_anchor").click();
             cy.get("#SourceMatcher_targetGraphUriSelect").select("BFO");
-            cy.get(".my-1:nth-child(3)").click();
+            cy.get("#SourceMatcher_compare_button").click();
             cy.get('div[class="vis-network"]');
         });
     });
@@ -43,7 +43,7 @@ describe("Match test suit", function () {
             cy.get("#BFO_anchor").click();
             cy.get("#GenericTools_searchTermInput").click();
             cy.get("#GenericTools_searchTermInput").type("quality");
-            cy.get(".btn:nth-child(7)").click();
+            cy.get("#GenericTools_searchTerm_button").click();
             cy.get('span[class="searched_concept"]').contains("quality");
         });
 
@@ -53,7 +53,7 @@ describe("Match test suit", function () {
             cy.get("#sourceMatcher_anchor").click();
             cy.get("#BFO_anchor").click();
             cy.get("#SourceMatcher_targetGraphUriSelect").select("BFO");
-            cy.get(".my-1:nth-child(3)").click();
+            cy.get("#SourceMatcher_compare_button").click();
             cy.get('div[class="vis-network"]');
         });
     });

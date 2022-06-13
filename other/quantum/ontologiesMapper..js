@@ -194,11 +194,11 @@ var ontologiesMapper = {
     writeMappings: function (sources, table, json, mappingSourceArray, filePath) {
         //    var json = JSON.parse(fs.readFileSync(filePath));
         var typesMap = {
-            tblPhysicalClass: "http://standards.iso.org/iso/15926/part14/PhysicalObject",
-            tblFunctionalClass: "http://standards.iso.org/iso/15926/part14/FunctionalObject",
-            tblAttribute: "http://standards.iso.org/iso/15926/part14/PhysicalQuantity",
-            tblAttributePickListValue: "http://standards.iso.org/iso/15926/part14/PhysicalQuantity",
-            tblPickListValueGrouping: "http://standards.iso.org/iso/15926/part14/PhysicalQuantity",
+            tblPhysicalClass: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
+            tblFunctionalClass: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject",
+            tblAttribute: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalQuantity",
+            tblAttributePickListValue: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalQuantity",
+            tblPickListValueGrouping: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalQuantity",
             // table: "tblDiscipline",
             // table: "tblTag",
         };
@@ -606,10 +606,14 @@ var ontologiesMapper = {
         });
 
         for (var key in dimensionsMap) {
-            triples += "<http://w3id.org/readi/rdl/" + dimensionsMap[key] + "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> " + " <http://standards.iso.org/iso/15926/part14/PhysicalQuantity>.\n";
+            triples +=
+                "<http://w3id.org/readi/rdl/" +
+                dimensionsMap[key] +
+                "> <http://www.w3.org/2000/01/rdf-schema#subClassOf> " +
+                " <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalQuantity>.\n";
         }
 
-        //   http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity
+        //   http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasPhysicalQuantity
 
         fs.writeFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\attributesSubClassOf.nt", triples);
     },
@@ -800,11 +804,11 @@ var ontologiesMapper = {
 
                 if (pickListMap[key] == "LOV") triples += "<http://data.total.com/resource/quantum/pickList#LOV>";
                 else triples += "<http://w3id.org/readi/rdl/" + pickListMap[key] + ">";
-                triples += " <http://www.w3.org/2000/01/rdf-schema#subClassOf> " + " <http://standards.iso.org/iso/15926/part14/PhysicalQuantity>.\n";
+                triples += " <http://www.w3.org/2000/01/rdf-schema#subClassOf> " + " <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalQuantity>.\n";
             }
         }
 
-        //   http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity
+        //   http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasPhysicalQuantity
 
         fs.writeFileSync("D:\\NLP\\ontologies\\quantum\\20210107_MDM_Rev04\\pickListSubClassOf.nt", triples);
     },
@@ -881,7 +885,7 @@ var ontologiesMapper = {
                 // Quantum attr sameAs
                 function (callbackSeries) {
                     var query =
-                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct *  FROM <http://data.total.com/resource/quantum/> from <http://standards.iso.org/iso/15926/part14/>   WHERE {" +
+                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> select distinct *  FROM <http://data.total.com/resource/quantum/> from <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/>   WHERE {" +
                         "  ?concept <http://data.total.com/resource/quantum/mappings/" +
                         sourceLabel +
                         "#sameAs> ?similar. " +
@@ -996,12 +1000,12 @@ var ontologiesMapper = {
 
                     var idUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(id, true) + ">";
                     triples += idUri + " rdfs:label '" + ontologiesMapper.formatLabel(id) + "'.\n";
-                    triples += idUri + " rdf:type <http://standards.iso.org/iso/15926/part14/FunctionalObject>.\n";
+                    triples += idUri + " rdf:type <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject>.\n";
                     if (i == 1) {
                         triples += idUri + " rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>.\n";
                     } else {
                         var parentUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(item["FunctionalClass" + (i - 1)], true) + ">";
-                        triples += parentUri + " <http://standards.iso.org/iso/15926/part14/hasArrangedPart> " + idUri + ".\n";
+                        triples += parentUri + " <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasArrangedPart> " + idUri + ".\n";
                         triples += idUri + " rdfs:subClassOf " + parentUri + ".\n";
                     }
 
@@ -1009,7 +1013,7 @@ var ontologiesMapper = {
                     if (tag) {
                         var tagUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(tag, true) + ">";
                         tripleTags += tagUri + " rdf:type <http://data.15926.org/rdl/RDS2222036>.\n";
-                        tripleTags += idUri + " <http://standards.iso.org/iso/15926/part14/installedAs> " + tagUri + ".\n";
+                        tripleTags += idUri + " <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/installedAs> " + tagUri + ".\n";
                     }
                 }
             }
@@ -1017,7 +1021,7 @@ var ontologiesMapper = {
                  if (tag) {
                      var tagUri = "<http://data.total.com/resource/one-model/assets/turbognerator/" + ontologiesMapper.formatLabel(tag, true) + ">";
                      tripleTags+=tagUri +" rdf:type <http://data.15926.org/cfihos/33330003>\n"
-                     tripleTags+=tagUri +" <http://standards.iso.org/iso/15926/part14/concretizes> "+ "<http://data.total.com/resource/one-model/assets/turbognerator/PIPoint"+".\n"
+                     tripleTags+=tagUri +" <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/concretizes> "+ "<http://data.total.com/resource/one-model/assets/turbognerator/PIPoint"+".\n"
 
 
                  }*/
@@ -1080,7 +1084,7 @@ var ontologiesMapper = {
 
     sources: {
         QUANTUM: {
-            graphUri: ["http://data.total.com/resource/quantum/> from <http://standards.iso.org/iso/15926/part14/"],
+            graphUri: ["http://data.total.com/resource/quantum/> from <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/"],
             sparql_server: {
                 url: "http://51.178.139.80:8890/sparql",
             },
@@ -1091,7 +1095,7 @@ var ontologiesMapper = {
             color: "#bcbd22",
         },
         "ISO_15926-part-14": {
-            graphUri: "http://standards.iso.org/iso/15926/part14/",
+            graphUri: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",
             sparql_server: {
                 url: "http://51.178.139.80:8890/sparql",
             },
@@ -1121,7 +1125,7 @@ var ontologiesMapper = {
                 url: "http://51.178.139.80:8890/sparql",
             },
             controller: "Sparql_OWL",
-            topClassFilter: " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+            topClassFilter: " ?topConcept rdfs:subClassOf <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject>",
             schemaType: "OWL",
             schema: null,
             color: "#bcbd22",
@@ -1146,7 +1150,7 @@ var ontologiesMapper = {
                 url: "http://51.178.139.80:8890/sparql",
             },
             controller: "Sparql_OWL",
-            topClassFilter: " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+            topClassFilter: " ?topConcept rdfs:subClassOf <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject>",
             schemaType: "OWL",
             schema: null,
             color: "#bcbd22",
@@ -1221,14 +1225,14 @@ if (false) {
                 url: "http://51.178.139.80:8890/sparql",
             },
             controller: "Sparql_OWL",
-            topClassFilter: " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+            topClassFilter: " ?topConcept rdfs:subClassOf <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject>",
             schemaType: "OWL",
             schema: null,
             color: "#bcbd22",
         },
         {
             name: "ISO_15926-part-14",
-            graphUri: "http://standards.iso.org/iso/15926/part14/",
+            graphUri: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",
             sparql_server: {
                 url: "http://51.178.139.80:8890/sparql",
             },
@@ -1272,7 +1276,7 @@ if (false) {
                 url: "http://51.178.139.80:8890/sparql",
             },
             controller: "Sparql_OWL",
-            topClassFilter: " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+            topClassFilter: " ?topConcept rdfs:subClassOf <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject>",
             schemaType: "OWL",
             schema: null,
             color: "#bcbd22",
@@ -1369,7 +1373,7 @@ if (false) {
                 nodeIds[item["Attribute Name"]] = 1;
                 str += attrPropUri + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#ObjectProperty>.\n";
                 str += attrPropUri + " <http://www.w3.org/2000/01/rdf-schema#label> 'has" + item.Definition.replace() + "'.\n";
-                str += attrPropUri + " <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://standards.iso.org/iso/15926/part14/hasPhysicalQuantity>.\n";
+                str += attrPropUri + " <http://www.w3.org/2000/01/rdf-schema#subPropertyOf> <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasPhysicalQuantity>.\n";
 
                 str += attrUri + " <http://www.w3.org/2000/01/rdf-schema#label> '" + item.Definition.replace(/_/g, " ") + "'.\n";
             }

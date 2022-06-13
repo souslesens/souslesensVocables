@@ -13,12 +13,12 @@
         {
             "subject": "model.OEMID",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/Organization"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Organization"
         },
         {
             "subject": "model.PhysicalClassID",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/PhysicalObject"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject"
         },
         {
             "subject": "model.ID",
@@ -27,7 +27,7 @@
         },
         {
             "subject": "model.ID",
-            "predicate": "http://standards.iso.org/iso/15926/part14/hasInstalled",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasInstalled",
             "object": "model.PhysicalClassID"
         }
     ]

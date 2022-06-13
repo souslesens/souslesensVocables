@@ -279,32 +279,32 @@ var KGbrowser = (function () {
             loadOneModel: function () {
                 var jstreeData = [
                     {
-                        id: "http://standards.iso.org/iso/15926/part14/Location",
+                        id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Location",
                         text: "<span class='aspect_Location'>Location</span>",
                         type: "Location",
                         parent: "#",
                     },
 
                     {
-                        id: "http://standards.iso.org/iso/15926/part14/FunctionalObject",
+                        id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject",
                         text: "<span class='aspect_Function'>Function</span>",
                         type: "Function",
                         parent: "#",
                     },
                     {
-                        id: "http://standards.iso.org/iso/15926/part14/Aspect",
+                        id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Aspect",
                         text: "<span class='aspect_Function'>Aspect</span>",
                         type: "Function",
-                        parent: "http://standards.iso.org/iso/15926/part14/FunctionalObject",
+                        parent: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject",
                     },
                     {
-                        id: "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                        id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
                         text: "<span class='aspect_Product'>Product</span>",
                         type: "Product",
                         parent: "#",
                     },
                     {
-                        id: "http://standards.iso.org/iso/15926/part14/Activity",
+                        id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Activity",
                         text: "<span class='aspect_LifeCycle'>LifeCycle</span>",
                         type: "LifeCycle",
                         parent: "#",
@@ -362,11 +362,11 @@ var KGbrowser = (function () {
                 var topObjects = {
                     "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801": {
                         label: "Functional Objects",
-                        type: "http://standards.iso.org/iso/15926/part14/FunctionalObject",
+                        type: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject",
                     },
                     "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-P0000001723": {
                         label: "Physical Objects",
-                        type: "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                        type: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject",
                     },
                     "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-B0000000000": {
                         label: "Disciplines",

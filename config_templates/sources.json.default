@@ -50,7 +50,7 @@
     "color": "#bcbd22"
   },
   "ISO_15926-part-14": {
-    "graphUri": "http://standards.iso.org/iso/15926/part14/",
+    "graphUri": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",
     "sparql_server": {
       "url": "_default"
     },
@@ -80,7 +80,7 @@
       "url": "_default"
     },
     "controller": "Sparql_OWL",
-    "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/Object>",
+    "topClassFilter": " ?topConcept rdfs:subClassOf <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Object>",
     "schemaType": "OWL",
     "schema": null,
     "color": "#bcbd22"
@@ -195,7 +195,7 @@
       "url": "_default"
     },
     "controller": "Sparql_OWL",
-    "topClassFilter": " ?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14/InanimatePhysicalObject>",
+    "topClassFilter": " ?topConcept rdfs:subClassOf <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject>",
     "schemaType": "OWL",
     "schema": null,
     "color": "#bcbd22"

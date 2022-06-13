@@ -3,47 +3,47 @@
         {
             "subject": "breakdown.uri1",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject"
         },
         {
             "subject": "breakdown.uri2",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject"
         },
         {
             "subject": "breakdown.uri3",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject"
         },
         {
             "subject": "breakdown.uri4",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject"
         },
         {
             "subject": "breakdown.uri5",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/FunctionalObject"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject"
         },
         {
             "subject": "breakdown.uri1",
-            "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasFunctionalPart",
             "object": "breakdown.uri2"
         },
         {
             "subject": "breakdown.uri2",
-            "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasFunctionalPart",
             "object": "breakdown.uri3"
         },
         {
             "subject": "breakdown.uri3",
-            "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasFunctionalPart",
             "object": "breakdown.uri4"
         },
 
         {
             "subject": "breakdown.uri4",
-            "predicate": "http://standards.iso.org/iso/15926/part14/hasFunctionalPart",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/hasFunctionalPart",
             "object": "breakdown.uri5"
         }
     ]

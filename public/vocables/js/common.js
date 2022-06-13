@@ -817,7 +817,7 @@ var common = (function () {
     ];
 
     self.quantumModelmappingSources = {
-        "http://standards.iso.org/iso/15926/part14/PhysicalQuantity": "ISO_15926-part-14",
+        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalQuantity": "ISO_15926-part-14",
         "http://data.posccaesar.org/dm/ClassOfQuantity": "ISO_15926-PCA",
         "http://w3id.org/readi/rdl/D101001516": "CFIHOS_READI",
         "http://data.posccaesar.org/rdl/RDS2216440288": "ISO_15926-PCA",
@@ -827,13 +827,13 @@ var common = (function () {
         "http://data.posccaesar.org/rdl/RDS1138994": "ISO_15926-PCA",
         "http://w3id.org/readi/rdl/D101001188": "CFIHOS_READI",
         "http://data.15926.org/rdl/RDS1138994": "CFIHOS-ISO",
-        "http://standards.iso.org/iso/15926/part14/FunctionalObject": "ISO_15926-part-14",
+        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject": "ISO_15926-part-14",
         "http://data.posccaesar.org/rdl/RDS11984375": "ISO_15926-PCA",
         "http://data.15926.org/rdl/RDS11984375": "CFIHOS-ISO",
-        "http://standards.iso.org/iso/15926/part14/PhysicalObject": "ISO_15926-part-14",
+        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalObject": "ISO_15926-part-14",
         "http://w3id.org/readi/rdl/CFIHOS-60001285": "CFIHOS_READI",
         "http://data.15926.org/cfihos/60001285": "CFIHOS-ISO",
-        "http://standards.iso.org/iso/15926/part14/UnitOfMeasure": "ISO_15926-part-14",
+        "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/UnitOfMeasure": "ISO_15926-part-14",
         "http://data.posccaesar.org/dm/PhysicalQuantity": "ISO_15926-PCA",
         "http://w3id.org/readi/rdl/CFIHOS-50000112": "CFIHOS_READI",
         "http://data.posccaesar.org/dm/DocumentType": "ISO_15926-PCA",

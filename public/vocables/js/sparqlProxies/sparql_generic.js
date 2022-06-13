@@ -92,9 +92,9 @@ var Sparql_generic = (function () {
     };
 
     /**
-         *
-         * request example with collection filtering
-         PREFIX  terms:<http://purl.org/dc/terms/> PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX  elements:<http://purl.org/dc/elements/1.1/>  select distinct ?child1,?child1Label, ?conceptLabel,?collLabel  FROM <http://souslesens/thesaurus/TEST/>   WHERE {?child1 skos:broader ?concept.
+   *
+   * request example with collection filtering
+   PREFIX  terms:<http://purl.org/dc/terms/> PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX  elements:<http://purl.org/dc/elements/1.1/>  select distinct ?child1,?child1Label, ?conceptLabel,?collLabel  FROM <http://souslesens/thesaurus/TEST/>   WHERE {?child1 skos:broader ?concept.
 
   ?concept skos:prefLabel ?conceptLabel.
 
@@ -106,20 +106,20 @@ var Sparql_generic = (function () {
 
 }ORDER BY ?child1Label limit 1000
 
-         *
-         * @param
-            sourceLabel
-         * @param
-            words
-         * @param
-            ids
-         * @param
-            descendantsDepth
-         * @param
-            options
-         * @param
-            callback
-         */
+   *
+   * @param
+    sourceLabel
+   * @param
+    words
+   * @param
+    ids
+   * @param
+    descendantsDepth
+   * @param
+    options
+   * @param
+    callback
+   */
 
     self.getNodeChildren = function (sourceLabel, words, ids, descendantsDepth, options, callback) {
         $("#waitImg").css("display", "block");
@@ -326,7 +326,7 @@ var Sparql_generic = (function () {
     };
 
     self.deleteTriples = function (sourceLabel, subjectUri, predicateUri, objectUri, callback) {
-        if (!subjectUri && !subjectUri && !subjectUri) return callback("no subject predicate and object filter : cannot delete");
+        if (!subjectUri && !predicateUri && !objectUri) return callback("no subject predicate or object filter : cannot delete");
 
         var filterStr = "";
         if (subjectUri) filterStr += Sparql_common.getUriFilter("s", subjectUri);
@@ -334,7 +334,8 @@ var Sparql_generic = (function () {
         if (objectUri) filterStr += Sparql_common.getUriFilter("o", objectUri);
         var graphUri = Config.sources[sourceLabel].graphUri;
         if (Array.isArray(graphUri)) graphUri = graphUri[0];
-        var query = "with <" + graphUri + "> " + " DELETE {?s ?p ?o} WHERE{ ?s ?p ?o " + filterStr + "}";
+        var query = self.getDefaultSparqlPrefixesStr();
+        query += "with <" + graphUri + "> " + " DELETE {?s ?p ?o} WHERE{ ?s ?p ?o " + filterStr + "}";
         var queryOptions = "";
         let url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, { source: sourceLabel }, function (err, result) {
@@ -346,28 +347,50 @@ var Sparql_generic = (function () {
     };
 
     self.triplesObjectToString = function (item) {
-        var subjectStr = "";
-        if (item.subject.indexOf("_:b") == 0) subjectStr = "<" + item.subject + ">";
-        else subjectStr = "<" + item.subject + ">";
+        var allowedPrefixes = Object.keys(Config.defaultSparqlPrefixes);
 
-        var objectStr = "";
-        var p;
-        if (item.object.indexOf("_:b") == 0) objectStr = "<" + item.object + ">";
-        else if (item.object.indexOf("http") == 0 || item.valueType == "uri") objectStr = "<" + item.object + ">";
-        else if ((p = item.object.indexOf("^")) > 0) {
-            //types
-            objectStr = "\"'" + item.object.substring(0, p) + "'" + item.object.substring(p) + '"';
-        } else {
-            var langStr = "";
-            if (item.lang) langStr = "@" + item.lang;
-            objectStr = "'" + item.object + "'" + langStr;
+        function setElementSyntax(elt) {
+            if (elt.indexOf("_:b") == 0) {
+                return "<" + elt + ">";
+            }
+            if (elt.indexOf("http") == 0 || item.valueType == "uri") {
+                return "<" + elt + ">";
+            }
+
+            if ((p = elt.indexOf("^^")) > 0)
+                //xsd type
+                return "'" + item.object.substring(0, p) + "'" + item.object.substring(p);
+
+            var array = elt.split(":");
+            if (array.length > 1 && allowedPrefixes.indexOf(array[0])) {
+                return elt;
+            }
+
+            return "'" + elt + "'";
         }
+
+        var subjectStr = setElementSyntax(item.subject);
+
+        var objectStr;
+
+        if (item.lang) {
+            langStr = "@" + item.lang;
+            objectStr = "'" + item.object + "'" + langStr;
+        } else objectStr = setElementSyntax(item.object);
 
         var p = item.predicate.indexOf("^");
         if (p == 0) {
             var predicate = item.predicate.substring(1);
-            return objectStr + " <" + predicate + "> <" + item.subject + ">. ";
-        } else return subjectStr + " <" + item.predicate + "> " + objectStr + ". ";
+            return objectStr + " " + setElementSyntax(predicate) + " <" + item.subject + ">. ";
+        } else return subjectStr + " " + setElementSyntax(item.predicate) + " " + objectStr + ". ";
+    };
+
+    self.getDefaultSparqlPrefixesStr = function () {
+        var str = "";
+        for (var key in Config.defaultSparqlPrefixes) {
+            str += "PREFIX " + key + ": " + Config.defaultSparqlPrefixes[key] + " ";
+        }
+        return str;
     };
 
     self.insertTriples = function (sourceLabel, triples, options, callback) {
@@ -378,8 +401,8 @@ var Sparql_generic = (function () {
         triples.forEach(function (item, _index) {
             insertTriplesStr += self.triplesObjectToString(item);
         });
-
-        var query = " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
+        var query = self.getDefaultSparqlPrefixesStr();
+        query += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
 
         if (options.getSparqlOnly) return callback(null, query);
         // console.log(query)
@@ -392,24 +415,24 @@ var Sparql_generic = (function () {
     self.update = function (_sourceLabel, _triples, _callback) {
         /*
 
-            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 with <http://data.total.com/resource/tsf/maintenance/romain_14224/>
 DELETE {
-   ?id rdfs:label ?oldLabel .
- }
+?id rdfs:label ?oldLabel .
+}
 INSERT {
-    ?id rdfs:label ?newLabel .
+?id rdfs:label ?newLabel .
 }
 WHERE {
-   ?id rdfs:label ?oldLabel .
-      filter (regex(?oldLabel,"Class.*"))
-      bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
-   }
+?id rdfs:label ?oldLabel .
+  filter (regex(?oldLabel,"Class.*"))
+  bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
+}
 
 
 
 
-             */
+         */
 
         return;
     };
@@ -778,6 +801,11 @@ WHERE {
         } else {
             return alert("no schema type");
         }
+        if (options.ids) {
+            var idFilter = Sparql_common.setFilter("concept", options.ids);
+            if (!options.filter) options.filter = "";
+            options.filter += " " + idFilter;
+        }
 
         var allClassesMap = {};
         var allLabels = {};
@@ -918,11 +946,11 @@ WHERE {
                         parentArray.push(sourceLabel);
                         parentArray = parentArray.reverse();
                         /*   var str = ""
-                           parentArray.forEach(function (parent, index) {
-                               if (index > 0)
-                                   str += "|"
-                               str += parent;
-                           })*/
+               parentArray.forEach(function (parent, index) {
+                   if (index > 0)
+                       str += "|"
+                   str += parent;
+               })*/
                         delete allClassesMap[key].parent;
                         allClassesMap[key].parents = parentArray;
                     }

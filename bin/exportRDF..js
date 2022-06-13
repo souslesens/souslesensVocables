@@ -104,7 +104,7 @@ var filePath = "D:\\NLP\\ontologies\\quantum\\export.nt";
 */
 /*
  * var map = {
-    "ISO_15926-part-14": "http://standards.iso.org/iso/15926/part14/",
+    "ISO_15926-part-14": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",
     "ONE-MODEL": "http://data.total.com/resource/one-model/ontology/0.2/",
     CFIHOS_READI: "http://w3id.org/readi/rdl/",
     "RDL-QUANTUM-MIN": "http://data.total.com/resource/one-model/quantum-rdl/",
@@ -160,7 +160,7 @@ if (false) {
 
 if (false) {
     for (var source in map) {
-        var str = "ld_dir ('/appli_RD/opt/souslesens/dumpsRDF/owl/', '" + map[source].substring(map[source].lastIndexOf("/")) + ".ttl000001.ttl.gz', 'http://standards.iso.org/iso/15926/part14/');\n";
+        var str = "ld_dir ('/appli_RD/opt/souslesens/dumpsRDF/owl/', '" + map[source].substring(map[source].lastIndexOf("/")) + ".ttl000001.ttl.gz', 'http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/');\n";
         console.log(str);
     }
 }*/

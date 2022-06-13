@@ -87,7 +87,7 @@ let mappingsMap = {
     },
     CLASSES_5: {
         type: "owl:Class",
-        topClass: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
+        topClass: "<http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject>",
         fileName: "D:\\NLP\\ontologies\\14224\\classes_5.txt",
         transform: {
             label2: function (value) {
@@ -204,7 +204,7 @@ var triples = [
     {
         s: "<http://w3id.org/readi/z018-rdl/prod_SYS>",
         p: "rdfs:subClassOf",
-        o: "<http://standards.iso.org/iso/15926/part14/System>",
+        o: "<http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/System>",
     },
     { s: "<http://w3id.org/readi/rdl/CFIHOS-30000311>", p: "rdfs:label", o: "'READI_ARTEFACT'" },
     { s: "<http://w3id.org/readi/rdl/CFIHOS-30000311>", p: "rdf:type", o: "owl:Class" },
@@ -215,15 +215,15 @@ var triples = [
     },
 
     {
-        s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
+        s: "<http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject>",
         p: "rdfs:label",
         o: "'PART_14_Functional_Object'",
     },
-    { s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>", p: "rdf:type", o: "owl:Class" },
+    { s: "<http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject>", p: "rdf:type", o: "owl:Class" },
     {
-        s: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
+        s: "<http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject>",
         p: "rdfs:subClassOf",
-        o: "<http://standards.iso.org/iso/15926/part14/FunctionalObject>",
+        o: "<http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/FunctionalObject>",
     },
 
     {

@@ -5,11 +5,11 @@ var KGcreator = (function () {
     self.usualProperties = [
         "rdf:type",
         "rdfs:subClassOf",
+        "rdfs:label",
         "rdfs:isDefinedBy",
         "rdfs:comment",
-        "rdfs:label",
-        "owl:equivalentClass",
         "owl:sameAs",
+        "owl:equivalentClass",
 
         "",
         "slsv:hasCode",
@@ -30,10 +30,24 @@ var KGcreator = (function () {
         "owl:someValuesFrom",
         "owl:allValuesFrom",
         "owl:hasValue",
+
         "",
     ];
 
-    self.usualObjectClasses = ["owl:Class", "owl:Property", "owl:NamedIndividual", "owl:Restriction", "skos:Concept", "skos:Collection", "slsv:TopConcept", "_function", "_blankNode", ""];
+    self.usualObjectClasses = [
+        "owl:Class",
+        "owl:Individual",
+        "owl:Thing",
+        "owl:Property",
+        "owl:NamedIndividual",
+        "owl:Restriction",
+        "skos:Concept",
+        "skos:Collection",
+        "slsv:TopConcept",
+        "_function",
+        "_blankNode",
+        "",
+    ];
     self.usualSubjectTypes = ["_function", "_blankNode", ""];
 
     self.predefinedPart14Relations = [
@@ -371,7 +385,9 @@ var KGcreator = (function () {
         }
         if (role == "s") $("#KGcreator_subjectInput").val(value);
         else if (role == "p") $("#KGcreator_predicateInput").val(value);
-        else if (role == "o") $("#KGcreator_objectInput").val(value);
+        else if (role == "o") {
+            $("#KGcreator_objectInput").val(value);
+        }
     };
 
     self.addLookup = function () {
@@ -585,6 +601,9 @@ var KGcreator = (function () {
                         $("#KGcreator_dataSampleDiv").val(str);
                     } else {
                         $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
+
+                        /*    SearchUtil.generateElasticIndex(Lineage_common.currentSource,{ids:[self.graphModification.creatingNodeUri]},function(err, result) {
+                        })*/
                     }
                 },
                 error(err) {

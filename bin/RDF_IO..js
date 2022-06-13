@@ -45,7 +45,7 @@ var RDF_IO = {
                     rdfs: "http://www.w3.org/2000/01/rdf-schema#",
                     rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
                     owl: "http://www.w3.org/2002/07/owl#",
-                    part14: "http://standards.iso.org/iso/15926/part14/",
+                    part14: "http://rds.posccaesar.org/ontology/lis14/",
                     one: "http://data.total.com/resource/one-model/ontology/",
                     readi: "http://w3id.org/readi/z018-rdl/",
                 },
@@ -183,7 +183,7 @@ module.exports = RDF_IO;
 //RDF_IO.uploadOntologyFromOwlFile("http://data.total.com/resource/one-model/ontology/0.2/","D:\\NLP\\ontologies\\ONE MODEL\\TOTAL_OneModel4.ttl2.owl")
 //RDF_IO.uploadOntologyFromOwlFile("http://data.total.com/resource/sil/ontology/0.1/","D:\\NLP\\ontologies\\OntoSIL\\SIL.owl-ttl.owl")
 
-//RDF_IO.getOntology("http://data.total.com/resource/one-model/ontology/0.2/> from <http://standards.iso.org/iso/15926/part14/",function(err, result){
+//RDF_IO.getOntology("http://data.total.com/resource/one-model/ontology/0.2/> from <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",function(err, result){
 /*RDF_IO.getOntology("http://data.total.com/resource/one-model/ontology/0.2/", function (err, result) {
 
 })*/

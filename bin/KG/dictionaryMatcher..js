@@ -223,15 +223,15 @@ if (false) {
             label: "Discipline",
         },
         "Quantum_attribute.txt": {
-            id: "http://standards.iso.org/iso/15926/part14/Quality",
+            id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Quality",
             label: "Quality",
         },
         "Quantum_attributePickListValue.txt": {
-            id: "http://standards.iso.org/iso/15926/part14/Quality",
+            id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Quality",
             label: "Quality",
         },
         "Quantum_attributePickListValueGrouping.txt": {
-            id: "http://standards.iso.org/iso/15926/part14/Quality",
+            id: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Quality",
             label: "Quality",
         },
         "Quantum_documentType.txt": {

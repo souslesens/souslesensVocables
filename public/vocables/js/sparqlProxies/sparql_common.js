@@ -50,13 +50,13 @@ var Sparql_common = (function () {
             }
             return self.formatStringForTriple(str);
             /*   var str = str.replace(/\\/g, "")
-         str = str.replace(/\(/gm, "")
-         str = str.replace(/\)/gm, "")
-         str = str.replace(/\[/gm, "")
-         str = str.replace(/\]/gm, "")
+   str = str.replace(/\(/gm, "")
+   str = str.replace(/\)/gm, "")
+   str = str.replace(/\[/gm, "")
+   str = str.replace(/\]/gm, "")
 
-      return str;
-      */
+return str;
+*/
         }
 
         if (!options) options = {};
@@ -191,6 +191,16 @@ var Sparql_common = (function () {
         str = str.replace(/%\d*/gm, "_");
 
         return str;
+    };
+
+    self.getSourceFromGraphUri = function (graphUri) {
+        if (!self.graphUrisMap) {
+            self.graphUrisMap = {};
+            for (var source in Config.sources) {
+                if (Config.sources[source].graphUri) self.graphUrisMap[Config.sources[source].graphUri] = source;
+            }
+        }
+        return self.graphUrisMap[graphUri];
     };
 
     self.getLabelFromURI = function (id) {

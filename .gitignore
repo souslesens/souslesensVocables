@@ -118,8 +118,11 @@ public/vocables/images/descriptionXX.png
 data/**/*.json
 data/**/*.pdf
 data/**/*.zip
+data/**/*.txt
+data/**/*.csv
 
 #React build output
 mainapp/static/mainapp.js
 mainapp/static/mainapp.js.map
 mainapp/lib
+/data/

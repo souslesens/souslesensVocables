@@ -3,6 +3,7 @@ var KGpropertyFilter = (function () {
 
     self.onLoaded = function () {
         self.currentSource = "CFIHOS_1_5_PLUS";
+        self.currentSource = "TSF_TEPDK_TEST";
         self.propertyFilteringSource = "TSF-PROPERTY-FILTERING";
 
         Config.sources[self.propertyFilteringSource] = {
@@ -39,7 +40,7 @@ var KGpropertyFilter = (function () {
         };
 
         $("#actionDivContolPanelDiv").load("snippets/KGpropertyFilter/leftPanel.html", function () {
-            self.loadClassesTree();
+            self.loadClassesTree(self.currentSource);
             //   self.loadClassesPropertiesTree();
         });
         MainController.UI.toogleRightPanel(true);
@@ -76,13 +77,8 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         $("#accordion").accordion("option", { active: 2 });
     };
 
-    self.loadClassesTree = function () {
-        var depth = 3;
-        Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/TagClass/CFIHOS-30000311"], depth, {}, function (err, result) {
-            if (err) {
-                return MainController.UI.message(err);
-            }
-
+    self.loadClassesTree = function (source) {
+        function drawTree(result) {
             var jstreeData = [];
             var existingNodes = {};
 
@@ -139,7 +135,25 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             common.jstree.loadJsTree("KGpropertyFilter_propertiesTreeDiv", jstreeData, options);
 
             $("#waitImg").css("display", "none");
-        });
+        }
+
+        if (source == "CFIHOS_1_5_PLUS") {
+            var depth = 3;
+            Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/TagClass/CFIHOS-30000311"], depth, {}, function (err, result) {
+                if (err) {
+                    return MainController.UI.message(err);
+                }
+                drawTree(result);
+            });
+        } else if (source == "TSF_TEPDK_TEST") {
+            var depth = 2;
+            Sparql_generic.getNodeChildren(self.currentSource, null, ["http://rds.posccaesar.org/ontology/lis14/FunctionalObject"], depth, {}, function (err, result) {
+                if (err) {
+                    return MainController.UI.message(err);
+                }
+                drawTree(result);
+            });
+        }
     };
 
     self.getJstreePropertiesContextMenu = function () {
@@ -168,13 +182,13 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     };
     self.showGraphPopupMenu = function () {};
     /*  self.showAssociateDialog = function () {
-    var selectedProperties = common.jstree.getjsTreeNodes("KGpropertyFilter_propertiesTreeDiv", true, "#");
+  var selectedProperties = common.jstree.getjsTreeNodes("KGpropertyFilter_propertiesTreeDiv", true, "#");
 
-    for (var key in self.aspectsMap)
-        var items = $("#" + selectId)
-            .jstree()
-            .get_checked(true);
-    items.forEach(function (item) {});
+  for (var key in self.aspectsMap)
+      var items = $("#" + selectId)
+          .jstree()
+          .get_checked(true);
+  items.forEach(function (item) {});
 };*/
 
     self.onOpenClassesOrPropertyNode = function (evt, obj) {
@@ -779,22 +793,22 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         },
     };
     /*
-   type: "filterClass",
-                      classLabel: classLabel,
-                      propertyLabel: propertyObj.propLabel,
-                      propertyId: propertyObj.propId,
-                      classId: propertyObj.classId,
-                      classLabel: propertyObj.classLabel,
-                      propertyRetrictionId: propertyObj.retrictionId,
-                      aspect: self.currentAspect,
-                      aspectId: self.currentAspect,
-                      aspectLabel: aspectObj.data.label,
-                      filterId: aspectObj.data.id,
-                      filterLabel: aspectObj.data.label,
+ type: "filterClass",
+                    classLabel: classLabel,
+                    propertyLabel: propertyObj.propLabel,
+                    propertyId: propertyObj.propId,
+                    classId: propertyObj.classId,
+                    classLabel: propertyObj.classLabel,
+                    propertyRetrictionId: propertyObj.retrictionId,
+                    aspect: self.currentAspect,
+                    aspectId: self.currentAspect,
+                    aspectLabel: aspectObj.data.label,
+                    filterId: aspectObj.data.id,
+                    filterLabel: aspectObj.data.label,
 
 
 
-   */
+ */
     self.matrix = {
         getMatrixHtml: function (filters, aspect) {
             let html = "<div class='matrix'>";

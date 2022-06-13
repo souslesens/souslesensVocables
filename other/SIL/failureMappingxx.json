@@ -34,13 +34,13 @@
         },
         {
             "subject": "failure.Functionnal_Location",
-            "predicate": "http://standards.iso.org/iso/15926/part14/locatedRelativeTo",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/locatedRelativeTo",
             "object": "failure.Unit"
         },
         {
             "subject": "failure.Unit",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/Site"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Site"
         },
         {
             "subject": "failure.Unit",
@@ -84,7 +84,7 @@
         {
             "subject": "failure.Manufacturer",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/Organization"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Organization"
         },
         {
             "subject": "failure.Concept_Niv2",
@@ -122,7 +122,7 @@
         {
             "subject": "failure.Valid_From",
             "predicate": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            "object": "http://standards.iso.org/iso/15926/part14/Event"
+            "object": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Event"
         },
         {
             "subject": "failure.Functionnal_Location",
@@ -131,7 +131,7 @@
         },
         {
             "subject": "failure.Functionnal_Location",
-            "predicate": "http://standards.iso.org/iso/15926/part14/functionalPartOf",
+            "predicate": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/functionalPartOf",
             "object": "failure.Tag_Number"
         }
     ]

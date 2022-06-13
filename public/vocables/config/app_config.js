@@ -32,17 +32,30 @@ var Config = (function () {
     self.predicatesSource = "TSF-PREDICATES";
     self.dictionarySource = "TSF-DICTIONARY";
 
-    self.dictionaryMetaDataPropertiesMap = {
-        prop: "http://www.w3.org/2002/07/owl#onProperty",
-        range: "http://www.w3.org/2002/07/owl#someValuesFrom",
-        domain: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-        status: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
-        domainSourceLabel: "http://data.souslesens.org/property#domainSourceLabel",
-        rangeSourceLabel: "http://data.souslesens.org/property#rangeSourceLabel",
-        author: "http://purl.org/dc/terms/creator",
-        provenance: "http://purl.org/dc/terms/source",
-        creationDate: "purl.org/dc/terms/created",
-    };
+    (self.defaultSparqlPrefixes = {
+        xs: "<http://www.w3.org/2001/XMLSchema#>",
+        rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+        rdfs: "<http://www.w3.org/2000/01/rdf-schema#>",
+        owl: "<http://www.w3.org/2002/07/owl#>",
+        skos: "<http://www.w3.org/2004/02/skos/core#>",
+        iso14224: "<http://data.total.com/resource/tsf/iso_14224#>",
+        req: "<https://w3id.org/requirement-ontology/rdl/>",
+        part14: "<http://rds.posccaesar.org/ontology/lis14/>",
+        iso81346: "<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
+        slsv: "<http://souslesens.org/resource/vocabulary/>",
+        dcterms: "<http://purl.org/dc/terms/>",
+    }),
+        (self.dictionaryMetaDataPropertiesMap = {
+            prop: "http://www.w3.org/2002/07/owl#onProperty",
+            range: "http://www.w3.org/2002/07/owl#someValuesFrom",
+            domain: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            status: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
+            domainSourceLabel: "http://data.souslesens.org/property#domainSourceLabel",
+            rangeSourceLabel: "http://data.souslesens.org/property#rangeSourceLabel",
+            author: "http://purl.org/dc/terms/creator",
+            provenance: "http://purl.org/dc/terms/source",
+            creationDate: "http://purl.org/dc/terms/created",
+        });
     self.dictionaryStatusMap = {
         promote: "OK",
         unPromote: "Candidate",
@@ -80,11 +93,11 @@ var Config = (function () {
         topRdlObjects: {
             "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801": {
                 label: "Functional Objects",
-                type: "http://standards.iso.org/iso/15926/part14/FunctionalObject",
+                type: "http://rds.posccaesar.org/ontology/lis14/FunctionalObject",
             },
             "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-P0000001723": {
                 label: "Physical Objects",
-                type: "http://standards.iso.org/iso/15926/part14/PhysicalObject",
+                type: "http://rds.posccaesar.org/ontology/lis14/PhysicalObject",
             },
             "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-B0000000000": {
                 label: "Disciplines",
@@ -111,9 +124,9 @@ var Config = (function () {
             { id: "http://www.w3.org/2000/01/rdf-schema#label", label: "rdfs:label", type: "dataTypeProperty" },
             { id: "http://www.w3.org/2000/01/rdf-schema#comment", label: "rdfs:comment", type: "dataTypeProperty" },
             { id: "http://www.w3.org/2000/01/rdf-schema#subClassOf", label: "rdfs:subClassOf", type: "ObjectProperty" },
-            { id: "http://standards.iso.org/iso/15926/part14/partOf", label: "part14:partOf", type: "ObjectProperty" },
+            { id: "http://rds.posccaesar.org/ontology/lis14/partOf", label: "part14:partOf", type: "ObjectProperty" },
             { id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type", type: "ObjectProperty" },
-            { id: "http://standards.iso.org/iso/15926/part14/representedBy", label: "part14:representedBy", type: "dataTypeProperty" },
+            { id: "http://rds.posccaesar.org/ontology/lis14/representedBy", label: "part14:representedBy", type: "dataTypeProperty" },
             { id: "http://www.w3.org/2004/02/skos/core#prefLabel", label: "skos:prefLabel", type: "dataTypeProperty" },
         ],
     };

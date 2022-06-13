@@ -78,7 +78,8 @@ var SourceBrowser = (function () {
     };
 
     self.showThesaurusTopConcepts = function (sourceLabel, options) {
-        if (!options) options = {};
+        if (!sourceLabel) sourceLabel = Lineage_common.currentSource || Lineage_classes.mainSource;
+        if (!options) options = { withoutImports: false, selectGraph: true };
 
         if (options.targetDiv) self.currentTargetDiv = options.targetDiv;
         else if (!self.currentTargetDiv) self.currentTargetDiv = "actionDiv";
@@ -1152,7 +1153,7 @@ defaultLang = 'en';*/
         if (confirm("delete node " + self.currentNodeId)) {
             Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, null, null, function (err, _result) {
                 if (err) return alert(err);
-                Sparql_generic.deleteTriples(null, null, self.currentNodeId, null, function (err, _result) {
+                Sparql_generic.deleteTriples(self.currentSource, null, null, self.currentNodeId, function (err, _result) {
                     if (err) return alert(err);
 
                     $("#" + self.divId).dialog("close");

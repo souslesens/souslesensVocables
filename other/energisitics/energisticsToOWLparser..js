@@ -194,7 +194,7 @@ var buildOwl = function (json, graphUri) {
                         if (typeArray[0] == prefix) {
                             triples.push({
                                 subject: elementUri,
-                                predicate: "http://standards.iso.org/iso/15926/part14/partOf",
+                                predicate: "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/partOf",
                                 object: uri,
                             });
                         } else {

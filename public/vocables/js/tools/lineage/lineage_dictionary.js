@@ -428,7 +428,7 @@ targets: [0]
             "?node owl:someValuesFrom ?range." +
             " OPTIONAL {?node <http://data.souslesens.org/property#domainSourceLabel> ?domainSourceLabel}\n" +
             "  OPTIONAL {?node <http://data.souslesens.org/property#rangeSourceLabel> ?rangeSourceLabel} \n" +
-            "  OPTIONAL {?node <purl.org/dc/terms/created> ?creationDate} \n" +
+            "  OPTIONAL {?node <http://purl.org/dc/terms/created> ?creationDate} \n" +
             "  OPTIONAL {?node <https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status> ?status} \n" +
             "  OPTIONAL {?node <http://purl.org/dc/terms/creator> ?author} \n" +
             "  OPTIONAL {?node  <http://purl.org/dc/terms/source> ?provenance }\n";

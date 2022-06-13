@@ -40,19 +40,19 @@ jobs:
                   start: npm start
                   wait-on: "http://localhost:3011"
                   wait-on-timeout: 120
-                  config-file: cypress.json
+                  config-file: cypress.config.ts
                   headless: true
                   browser: chrome
                   spec: |
-                      cypress/integration/browser.spec.js
-                      cypress/integration/genealogy.spec.js
-                      cypress/integration/kgmapping.spec.js
-                      cypress/integration/login.spec.js
-                      cypress/integration/sparql_endpoint.spec.js
-                      cypress/integration/standardizer.spec.js
-                      cypress/integration/ConfigEditor.spec.js
-                      cypress/integration/KGbrowser.spec.js
-                      cypress/integration/lineage.spec.js
-                      cypress/integration/match.spec.js
-                      cypress/integration/SQLquery.spec.js
+                      cypress/e2e/browser.cy.js
+                      cypress/e2e/genealogy.cy.js
+                      cypress/e2e/kgmapping.cy.js
+                      cypress/e2e/login.cy.js
+                      cypress/e2e/sparql_endpoint.cy.js
+                      cypress/e2e/standardizer.cy.js
+                      cypress/e2e/ConfigEditor.cy.js
+                      cypress/e2e/KGbrowser.cy.js
+                      cypress/e2e/lineage.cy.js
+                      cypress/e2e/match.cy.js
+                      cypress/e2e/SQLquery.cy.js
                   runTests: true

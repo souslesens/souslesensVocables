@@ -231,16 +231,19 @@ var common = (function () {
                 $("#" + jstreeDiv)
                     .jstree(true)
                     .create_node(parentNodeId, node, position, function () {
-                        // pass
+                        self.jstree.setTreeAppearance();
+                        $("#" + jstreeDiv)
+                          .jstree(true)
+                          .open_node(parentNodeId_, null, 500);
                     });
             });
-            setTimeout(function () {
+          /*  setTimeout(function () {
                 self.jstree.setTreeAppearance();
                 //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
                 $("#" + jstreeDiv)
                     .jstree(true)
                     .open_node(parentNodeId_, null, 500);
-            }, 500);
+            }, 500);*/
         },
 
         deleteNode: function (jstreeDiv, nodeId) {

@@ -112,7 +112,7 @@ var file="Mou_functional_locations_all_01052021.txt"
 return;*/
 
 
-if( true) {
+if( false) {
 
   var file="Mou_char_values_all_01052021.txt"
   var distinctMou_char_values = {}

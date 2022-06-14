@@ -1,47 +1,34 @@
 var KGpropertyFilter = (function() {
   var self = {};
 
+  self.currentNewFilters = [];
+  self.currentSavedFilters = [];
   self.onLoaded = function() {
-    self.currentSource = "CFIHOS_1_5_PLUS";
-    self.currentSource ="TSF_TEPDK_TEST";
-    self.propertyFilteringSource = "TSF-PROPERTY-FILTERING";
 
-    Config.sources[self.propertyFilteringSource] = {
-      isDictionary: true,
-      editable: true,
-      graphUri: "http://data.total.com/resource/tsf/property-filtering/",
-      imports: [],
-      sparql_server: {
-        url: "_default"
-      },
-      controller: "Sparql_OWL",
-      schemaType: "OWL"
-    };
 
-    self.loadedFilters = {};
-    var graphUri = Config.sources[self.propertyFilteringSource].graphUri;
+    var tsfPropertyFilterPrefix = Config.KGpropertyFilter.tsfPropertyFilterPrefix;
     self.aspectsMap = {
       MDMentities: {
-        predicate: graphUri + "appliesToMDMentityFilter",
+        predicate: tsfPropertyFilterPrefix + "appliesToMDMentityFilter",
         treeDiv: "KGpropertyFilter_MDMentitiesTree"
       },
       Disciplines: {
-        predicate: graphUri + "appliesToDiscipline",
+        predicate: tsfPropertyFilterPrefix + "appliesToDiscipline",
         treeDiv: "KGpropertyFilter_disciplinesTree"
       },
       LifeCycle: {
-        predicate: graphUri + "appliesToLifeCycleStatus",
+        predicate: tsfPropertyFilterPrefix + "appliesToLifeCycleStatus",
         treeDiv: "KGpropertyFilter_lifeCycleTree"
       },
       Organizations: {
-        predicate: graphUri + "appliesToOrganizationFilter",
+        predicate: tsfPropertyFilterPrefix + "appliesToOrganizationFilter",
         treeDiv: "KGpropertyFilter_organizationsTree"
       }
     };
 
     $("#actionDivContolPanelDiv").load("snippets/KGpropertyFilter/leftPanel.html", function() {
-      self.loadClassesTree(self.currentSource);
-      //   self.loadClassesPropertiesTree();
+      var sources = Config.KGpropertyFilter.sources;
+      common.fillSelectOptions("KGpropertyFilter_sourceSelect", sources, true);
     });
     MainController.UI.toogleRightPanel(true);
     $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function() {
@@ -77,10 +64,50 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     $("#accordion").accordion("option", { active: 2 });
   };
 
+
+  self.initFiltersSource = function(source) {
+    self.propertyFilteringSource = source + "_TSF-PROPERTY-FILTERING";
+    var filtersSourceGraphUri = Config.sources[source].graphUri + "property-filtering/";
+    Config.sources[self.propertyFilteringSource] = {
+      isDictionary: true,
+      editable: true,
+      graphUri: filtersSourceGraphUri,
+      imports: [],
+      sparql_server: {
+        url: "_default"
+      },
+      controller: "Sparql_OWL",
+      schemaType: "OWL"
+    };
+
+    self.loadedFilters = {};
+
+  };
+
+
+  self.onChangeSourceSelect = function(source) {
+    self.resetMatrixPropertiesFilters();
+    self.currentSource = source;
+    self.initFiltersSource(source);
+    self.loadClassesTree(source);
+
+  };
+
+  self.resetMatrixPropertiesFilters = function() {
+    if (self.currentNewFilters.length == 0)
+      return;
+    if (confirm("reset filters without saving them")) {
+      self.currentNewFilters = [];
+      $("#KGpropertyFilter_filteringResult").html("");
+    }
+  };
+
+
   self.loadClassesTree = function(source) {
     function drawTree(result) {
       var jstreeData = [];
       var existingNodes = {};
+
 
       result.forEach(function(item) {
         if (!existingNodes[item.child1.value]) {
@@ -131,7 +158,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         tie_selection: false,
         contextMenu: KGpropertyFilter.getJstreePropertiesContextMenu()
       };
-      self.currentFilters = {};
+      //self.currentNewFilters =[];
       common.jstree.loadJsTree("KGpropertyFilter_propertiesTreeDiv", jstreeData, options);
 
       $("#waitImg").css("display", "none");
@@ -144,23 +171,33 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         if (err) {
           return MainController.UI.message(err);
         }
-        drawTree((result))
+        drawTree((result));
 
       });
-    }
-    else if (source == "TSF_TEPDK_TEST") {
+    } else if (source == "TSF_TEPDK_TEST") {
 
-      var depth = 2;
+      var depth = 1;
       Sparql_generic.getNodeChildren(self.currentSource, null, ["http://rds.posccaesar.org/ontology/lis14/FunctionalObject"], depth, {}, function(err, result) {
         if (err) {
           return MainController.UI.message(err);
         }
-        drawTree((result))
+
+        result.sort(function(a, b) {
+          if (a.child1.value > b.child1.value)
+            return 1;
+          if (a.child1.value < b.child1.value)
+            return -1;
+          return 0;
+        });
+
+
+        drawTree((result));
 
       });
     }
 
-  }
+  };
+
 
   self.getJstreePropertiesContextMenu = function() {
     var items = {};
@@ -186,6 +223,24 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     };
     return items;
   };
+
+  self.getJstreeAspectsContextMenu= function() {
+    var items = {};
+
+    items.associate = {
+      label: "Associate",
+      action: function(_e) {
+        KGpropertyFilter.associateFiltersToPropertyRestriction();
+        // KGpropertyFilter.showAssociateDialog();
+      }
+    };
+    return items;
+  }
+
+
+
+
+
   self.showGraphPopupMenu = function() {
   };
   /*  self.showAssociateDialog = function () {
@@ -214,7 +269,14 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       $("#KGpropertyFilter_currentPropertySpan").html(obj.node.text);
       $("#KGpropertyFilter_currentPropertySpan2").html(obj.node.text);
 
-      self.client.filterProperties(self.currentClassId);
+      // self.client.filterProperties(self.currentClassId);
+
+
+      if (obj.node.children.length == 0) {
+        self.loadClassesPropertiesTree(obj.node.id);
+        //  self.addPropertiestoClassesTree(obj.node.id);
+      }
+
     } else {
     }
   };
@@ -235,17 +297,16 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       .get_checked(true);
     if (aspectObjs.length == 0) return alert("no aspect value  is selected");
 
-    if (!confirm("Associate " + selectedProperties.length + "properties to  aspect selected  values of aspect" + self.currentAspect)) return;
+    if (true) ;
+    // !confirm("Associate " + selectedProperties.length + "properties to  aspect selected  values of aspect" + self.currentAspect)) return;
 
-    var filters = [];
 
     var classId;
     var classObj;
     var classLabel;
-
+    self.currentNewFilters.currentAspect = self.currentAspect;
     selectedProperties.forEach(function(propertyObj) {
-      self.currentFilters = [];
-      self.currentFilters.aspect = self.currentAspect;
+
       aspectObjs.forEach(function(aspectObj) {
         // $("#" + selectId + " option:selected").each(function () {
         var filterId = propertyObj.retrictionId + "|" + aspectObj.data.id;
@@ -261,21 +322,36 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           aspectId: self.currentAspect,
           aspectLabel: aspectObj.data.label,
           filterId: aspectObj.data.id,
-          filterLabel: aspectObj.data.label
+          filterLabel: aspectObj.data.label,
+          status: "new"
         };
 
-        filters.push(newFilter);
+        self.currentNewFilters.push(newFilter);
       });
     });
+    $("#KGpropertyFilter_propertiesTreeDiv").jstree().uncheck_all();
+   for(var key in self.aspectsMap){
+     $("#"+self.aspectsMap[key].treeDiv).jstree().uncheck_all();
+   }
+    self.showFilters(self.currentNewFilters);
+    return;
 
-    self.showFiltersDataTable(filters);
-    self.saveNewRestrictionFilterTriples(filters);
+  };
+
+  self.showFilters = function() {
+    var filters = self.currentNewFilters.concat(self.currentSavedFilters);
+    var displayType = $("#KGpropertyFilter_filtersDisplayTypeSelect").val();
+    if (displayType == "matrix") {
+     self.matrix.showFiltersMatrix(filters);
+
+    } else {
+      self.showFiltersDataTable(filters);
+    }
   };
 
   self.showFiltersDataTable = function(filters) {
-    var matrixHtml = self.matrix.getMatrixHtml(filters);
-    $("#KGpropertyFilter_filteringResult").html(matrixHtml);
-    return;
+
+
     var cols = [
       {
         title: "Selection",
@@ -296,54 +372,56 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     $("#KGpropertyFilter_filteringResult").html("<table id='dataTableDivExport'></table>");
 
     setTimeout(function() {
-      self.dictionaryDataTable = $("#dataTableDivExport").DataTable({
-        data: dataset,
-        columns: cols,
-        pageLength: 200,
-        dom: "Bfrtip",
-        /* "columnDefs": [
-{ "width": "20px", "targets": 0 },
-{ "width": "50px", "targets": 1 },
-{ "width": "50px", "targets": 2 },
-{ "width": "50px", "targets": 3 },
-{ "width": "50px", "targets": 4 },
-],*/
-        // columnDefs: [{ className: "select-checkbox", targets: [0] }],
-        select: {
-          style: "multi",
-          selector: "td:first-child"
-        },
-        buttons: [
-          {
-            extend: "csvHtml5",
-            text: "Export CSV",
-            fieldBoundary: "",
-            fieldSeparator: ";"
+        self.dictionaryDataTable = $("#dataTableDivExport").DataTable({
+          data: dataset,
+          columns: cols,
+          pageLength: 200,
+          dom: "Bfrtip",
+          /* "columnDefs": [
+  { "width": "20px", "targets": 0 },
+  { "width": "50px", "targets": 1 },
+  { "width": "50px", "targets": 2 },
+  { "width": "50px", "targets": 3 },
+  { "width": "50px", "targets": 4 },
+  ],*/
+          // columnDefs: [{ className: "select-checkbox", targets: [0] }],
+          select: {
+            style: "multi",
+            selector: "td:first-child"
           },
-          {
-            text: "Select All",
-            action: function(e, dt, node, config) {
-              KGpropertyFilter.dictionaryDataTable.rows().select();
-            }
-          },
-          {
-            text: "UnSelect All",
-            action: function(e, dt, node, config) {
-              KGpropertyFilter.dictionaryDataTable.rows().deselect();
-            }
-          },
+          buttons: [
+            {
+              extend: "csvHtml5",
+              text: "Export CSV",
+              fieldBoundary: "",
+              fieldSeparator: ";"
+            },
+            {
+              text: "Select All",
+              action: function(e, dt, node, config) {
+                KGpropertyFilter.dictionaryDataTable.rows().select();
+              }
+            },
+            {
+              text: "UnSelect All",
+              action: function(e, dt, node, config) {
+                KGpropertyFilter.dictionaryDataTable.rows().deselect();
+              }
+            },
 
-          {
-            text: "Delete",
-            action: function(e, dt, node, config) {
-              return alert("in construction");
-              var data = KGpropertyFilter.dictionaryDataTable.rows({ selected: true }).data();
-              KGpropertyFilter.deleteFilters(data);
+            {
+              text: "Delete",
+              action: function(e, dt, node, config) {
+                return alert("in construction");
+                var data = KGpropertyFilter.dictionaryDataTable.rows({ selected: true }).data();
+                KGpropertyFilter.deleteFilters(data);
+              }
             }
-          }
-        ]
-      });
-    }, 1000);
+          ]
+        });
+      }
+      , 1000);
+
   };
 
   self.deleteFilters = function(dataTableData) {
@@ -367,12 +445,13 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     });
   };
 
-  self.saveNewRestrictionFilterTriples = function(filters) {
+  self.saveNewRestrictionFilterTriples = function() {
+    newFilters = self.currentNewFilters;
     var triples = [];
-    filters.forEach(function(filter) {
+    newFilters.forEach(function(filter) {
       triples.push({
         subject: filter.propertyRetrictionId,
-        predicate: self.aspectsMap[self.currentFilters.aspect].predicate,
+        predicate: self.aspectsMap[self.currentNewFilters.currentAspect].predicate,
         object: filter.filterId
       });
     });
@@ -392,15 +471,17 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     });
 
     var filterStr = Sparql_common.setFilter("restriction", restrictionIds);
+    var fromStr = "FROM <" + Config.sources[self.propertyFilteringSource].graphUri + ">";
+    fromStr += " FROM <" + Config.sources[self.currentSource].graphUri + ">";
 
     var sparql =
       "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
       "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-      "SELECT * from <http://data.total.com/resource/tsf/property-filtering/> from <http://data.totalenergies.com/resource/ontology/cfihos_1.5/> WHERE {\n" +
-      "  ?class rdfs:subClassOf ?restriction .\n" +
-      "  ?restriction <http://www.w3.org/2002/07/owl#someValuesFrom> ?property.\n" +
-      "  ?property rdfs:label ?propertyLabel.\n" +
-      "  ?class rdfs:label ?classLabel.\n" +
+      "SELECT * " + fromStr + " WHERE {\n" +
+      "  ?classId rdfs:subClassOf ?restriction .\n" +
+      "  ?restriction <http://www.w3.org/2002/07/owl#someValuesFrom> ?propertyId.\n" +
+      "  ?propertyId rdfs:label ?propertyLabel.\n" +
+      "  ?classId rdfs:label ?classLabel.\n" +
       "  ?restriction ?aspect ?filter. filter (regex(str(?aspect),'http://data.total.com/resource/tsf/property-filtering/'))\n";
     sparql += filterStr;
     sparql += "} LIMIT 10000";
@@ -414,8 +495,11 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       filters.forEach(function(item) {
         item.filterLabel = Sparql_common.getLabelFromURI(item.filter);
         item.aspectLabel = Sparql_common.getLabelFromURI(item.aspect);
+        item.status = "saved";
       });
-      self.showFiltersDataTable(filters);
+      self.currentSavedFilters = filters;
+
+      self.showFilters();
     });
   };
 
@@ -455,12 +539,12 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     // pass
   };
 
-  self.loadClassesPropertiesTree = function(classIds) {
+  self.loadClassesPropertiesTree = function(classId) {
     //  var classIds = ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/EquipmentClass/CFIHOS-30000521"];
     // classIds = null
 
-    var options = { filter: "  FILTER (?prop=<http://standards.iso.org/iso/15926/part14/hasQuality>)" };
-    Sparql_OWL.getObjectRestrictions(self.currentSource, classIds, options, function(err, result) {
+    var options = { filter: "  FILTER (?prop in(<http://rds.posccaesar.org/ontology/lis14/hasQuality> ,<http://standards.iso.org/iso/15926/part14/hasQuality>))" };
+    Sparql_OWL.getObjectRestrictions(self.currentSource, classId, options, function(err, result) {
       if (err) {
         return MainController.UI.message(err.responseText);
       }
@@ -480,7 +564,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             type: "Property",
             data: {
               type: "Property",
-              id: item.value.value,
+              propId: item.value.value,
               propLabel: item.valueLabel.value,
               retrictionId: item.node.value,
               classId: item.concept.value,
@@ -494,8 +578,10 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           return (self.currentClassNode = obj.node);
         }
       };
-      common.array.sort(jstreeData, "text");
-      common.jstree.addNodesToJstree("KGpropertyFilter_propertiesTreeDiv", null, jstreeData, options);
+      if (jstreeData.length > 0) {
+        common.array.sort(jstreeData, "text");
+        common.jstree.addNodesToJstree("KGpropertyFilter_propertiesTreeDiv", classId, jstreeData, options);
+      }
     });
   };
 
@@ -533,9 +619,12 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         }
       });
       common.array.sort(jstreeData, "text");
-      var options = { openAll: false, withCheckboxes: true };
+      var options = { openAll: false,
+        withCheckboxes: true,
+        contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu()
+      };
       common.jstree.loadJsTree("KGpropertyFilter_lifeCycleTree", jstreeData, options, function() {
-        $("#KGpropertyFilter_lifeCycleTree").jstree().open_node("http://standards.iso.org/iso/15926/part14/Activity");
+        $("#KGpropertyFilter_lifeCycleTree").jstree().open_node("http://rds.posccaesar.org/ontology/lis14/Activity");
       });
 
       callback();
@@ -575,7 +664,10 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           });
         }
       });
-      var options = { openAll: true, withCheckboxes: true };
+      var options = { openAll: true,
+        withCheckboxes: true,
+        contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu()
+      };
       common.array.sort(jstreeData, "text");
       common.jstree.loadJsTree("KGpropertyFilter_disciplinesTree", jstreeData, options);
       callback();
@@ -615,13 +707,16 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         }
       });
       common.array.sort(jstreeData, "text");
-      var options = { openAll: true, withCheckboxes: true };
+      var options = { openAll: true,
+        withCheckboxes: true,
+        contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu()
+      };
       common.jstree.loadJsTree("KGpropertyFilter_organizationsTree", jstreeData, options);
       callback();
     });
   };
 
-  self.loadDisciplinesTree = function(callback) {
+ /* self.loadDisciplinesTree = function(callback) {
     Sparql_OWL.getNodeChildren("ISO_15926-org", null, ["http://data.15926.org/cfihos/15926200"], 2, {}, function(err, result) {
       if (err) return callback(err.responseText);
       var jstreeData = [];
@@ -659,7 +754,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       common.jstree.loadJsTree("KGpropertyFilter_disciplinesTree", jstreeData, options);
       callback();
     });
-  };
+  };*/
   self.loadMDMentitiesTree = function(callback) {
     var jstreeData = [];
 
@@ -726,7 +821,10 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       }
     });
 
-    var options = { openAll: true, withCheckboxes: true };
+    var options = { openAll: true,
+      withCheckboxes: true,
+      contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu()
+    };
     common.array.sort(jstreeData, "text");
     common.jstree.loadJsTree("KGpropertyFilter_MDMentitiesTree", jstreeData, options);
     callback();
@@ -742,7 +840,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       "  ?class rdfs:label ?classLabel.\n" +
       "  ?restriction rdf:type owl:Restriction.\n" +
       "  ?restriction ?aspect ?filterId.\n" +
-      " ?restriction owl:onProperty <http://standards.iso.org/iso/15926/part14/hasQuality>.\n" +
+      " ?restriction owl:onProperty <http://rds.posccaesar.org/ontology/lis14/hasQuality>.\n" +
       " ?restriction owl:someValuesFrom ?property.\n" +
       "   ?property rdfs:label ?propertyLabel.\n";
 
@@ -777,102 +875,115 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     });
   };
 
-  self.client = {
-    filterProperties: function(_allClasses) {
-      return;
-      // var classId = null;
-      // if (!allClasses) classId = self.currentClassId;
+  self.client = {};
 
-      // self.execSparqlFilterQuery(classId, function (err, result) {
-      //     if (err) return MainController.UI.message(err.responseText);
-      //     var columns = [
-      //         { title: "Class", defaultContent: "" },
-      //         { title: "Property", defaultContent: "" },
-      //         { title: "ClassUri", defaultContent: "" },
-      //         { title: "PropertyUri", defaultContent: "" },
-      //     ];
-      //     var dataset = [];
-      //     result.forEach(function (item) {
-      //         dataset.push([item.classLabel, item.propertyLabel, item.class, item.property]);
-      //     });
-      //     Export.showDataTable("KGpropertyFilter_filteringResult", columns, dataset);
-      // });
-    }
-  };
-  /*
- type: "filterClass",
-                    classLabel: classLabel,
-                    propertyLabel: propertyObj.propLabel,
-                    propertyId: propertyObj.propId,
-                    classId: propertyObj.classId,
-                    classLabel: propertyObj.classLabel,
-                    propertyRetrictionId: propertyObj.retrictionId,
-                    aspect: self.currentAspect,
-                    aspectId: self.currentAspect,
-                    aspectLabel: aspectObj.data.label,
-                    filterId: aspectObj.data.id,
-                    filterLabel: aspectObj.data.label,
-
-
-
- */
   self.matrix = {
-    getMatrixHtml: function(filters, aspect) {
+    showFiltersMatrix: function(filters, aspect) {
       let html = "<div class='matrix'>";
 
-      var propsMap = {};
 
       self.matrixDivsMap = {};
+      var currentMatrixPropsMap = {};
+      var fitlersArray = [];
 
-      var aspectsArray = [];
       filters.forEach(function(item) {
-        if (aspectsArray.indexOf(item.filterLabel) < 0) aspectsArray.push(item.filterLabel);
+        if (fitlersArray.indexOf(item.filterLabel) < 0) fitlersArray.push(item.filterLabel);
       });
 
       filters.forEach(function(filter) {
-        let propId = filter.class + "|" + filter.property;
-        if (!propsMap[propId]) propsMap[propId] = filter;
-        var propAspects = [];
-        aspectsArray.forEach(function(aspect) {
-          if (filter.filterLabel == aspect) propAspects.push(1);
-          else propAspects.push(0);
+        let propId = filter.classId + "|" + filter.propertyId;
+        if (!currentMatrixPropsMap[propId])
+          currentMatrixPropsMap[propId] = filter;
+        if (!currentMatrixPropsMap[propId].propFilters)
+          currentMatrixPropsMap[propId].propFilters = {};
+        fitlersArray.forEach(function(filterLabel) {
+          var value = 0;
+          if (filter.filterLabel == filterLabel)
+            value = 1;
+          currentMatrixPropsMap[propId].propFilters[filterLabel] |= value;
         });
 
-        propsMap[propId].propAspects = propAspects;
+
       });
       {
         // draw first row with col titles
         let rowHtml = "<div  class='matrixRow " + "" + "'>";
         rowHtml += "<div class='matrixRowTitle' >" + "" + "</div>";
-        aspectsArray.forEach(function(aspect) {
+        fitlersArray.forEach(function(aspect) {
           rowHtml += "<div class='matrixColTitle'>" + aspect + "</div>";
         });
         html += rowHtml + "</div>";
       }
 
-      for (var propId in propsMap) {
-        var prop = propsMap[propId];
+      for (var propId in currentMatrixPropsMap) {
+        var prop = currentMatrixPropsMap[propId];
         let matrixFilterClass = "matrixFilterClass";
         let rowDivId = "r" + common.getRandomHexaId(8);
         self.matrixDivsMap[rowDivId] = prop;
         let rowHtml = "";
         rowHtml += "<div id='" + rowDivId + "' class='matrixRow " + "" + "'>";
+        var statusClass = "matrixPropTitle_" + prop.status;
+        let propDivId = "r" + common.getRandomHexaId(8);
+        self.matrixDivsMap[propDivId] = { rowDivId: rowDivId, propId: propId};
+        rowHtml += "<div id='"+propDivId+"' class='matrixRowTitle " + statusClass + "'>" + prop.classLabel + "." + prop.propertyLabel + "</div>";
 
-        rowHtml += "<div class='matrixRowTitle'>" + prop.classLabel + "." + prop.propertyLabel + "</div>";
-
-        prop.propAspects.forEach(function(aspect) {
+        fitlersArray.forEach(function(propFilter) {
           let cellDivId = "C" + common.getRandomHexaId(8);
           self.matrixDivsMap[cellDivId] = { rowDivId: rowDivId, propId: propId, filterLabel: prop.filterLabel };
           let cellHtml = "";
           var cellClass = "";
-          cellClass = aspect == 1 ? "matrixCellMatch" : "";
+          cellClass = (prop.propFilters[propFilter] == 1) ? "matrixCellMatch" : "";
           cellHtml = "<div id='" + cellDivId + "' class='matrixCell " + cellClass + "' >&nbsp;</div>";
           rowHtml += cellHtml;
         });
 
+
         html += rowHtml + "</div>";
       }
-      return html;
+
+      $("#KGpropertyFilter_filteringResult").html(html);
+      $("#KGpropertyFilter_filteringResult").animate({ 'zoom': 1.2 }, 400);
+      $(".matrixRowTitle ").bind("click",KGpropertyFilter.matrix.onClickPropTitleDiv)
+      $(".matrixCell ").bind("click",KGpropertyFilter.matrix.onClickPropCellDiv)
+    },
+
+    onClickPropTitleDiv:function(e){
+      var divId=$(this).attr("id")
+     var prop= self.matrixDivsMap[divId]
+      self.selectedMatrixProp=prop
+      var menuhtml='    <span  class="popupMenuItem" onclick="KGpropertyFilter.matrix.removePropAllfilters();">remove prop</span>'
+      $("#graphPopupDiv").html(menuhtml);
+      var point={x:e.clientX,y:e.clientY}
+      MainController.UI.showPopup(point,"graphPopupDiv",true)
+    },
+
+    onClickPropCellDiv:function(e){
+      var divId=$(this).attr("id")
+      var filter= self.matrixDivsMap[divId]
+      self.selectedMatrixFilter=filter
+      var menuhtml='    <span  class="popupMenuItem" onclick="KGpropertyFilter.matrix.removePropfilter();">remove prop</span>'
+      $("#graphPopupDiv").html(menuhtml);
+      var point={x:e.clientX,y:e.clientY}
+      MainController.UI.showPopup(point,"graphPopupDiv",true)
+    },
+    removePropAllfilters:function(){
+      var prop= self.selectedMatrixProp;
+      alert("coming soon")
+    },
+    removePropfilter:function(){
+      var filter= self.selectedMatrixFilter=filter;
+      alert("coming soon")
+    },
+
+
+
+    exportMatrix:function(){
+      return alert("coming soon")
+    },
+    copyMatrix:function(){
+      return alert("coming soon")
+      var html=$(".matrix").html()
+    common.copyTextToClipboard(html)
     }
   };
 

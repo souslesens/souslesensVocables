@@ -85,11 +85,11 @@
     / / vertical-align: middle;
         height: 15px;
     }
+    .matrixPropTitle_saved{
 
-    .matrixWordDictionaryMatch{
-        font-style: italic;
-        font-weight: bold;
-        color:#0000cc;
+    }
+    .matrixPropTitle_new{
+        background-color: #6ca6b8;
     }
 
     .matrixCellMatch {
@@ -103,8 +103,20 @@
         background-color: #6ca6b8;
     }
 </style>
-<div id="KGpropertyFilter_currentPropertyDiv" style="font-weight: bold; display: none; border: #0000cc solid 2px; background-color: #ddd">
-    <span id="KGpropertyFilter_currentPropertySpan"></span>
+<div id="KGpropertyFilter_currentPropertyDiv" >
+    <span id="KGpropertyFilter_currentPropertySpan" style="font-weight: bold; display: none;
+ border: #0000cc solid 2px; background-color: #ddd"></span>
+    <div>
+    display :<select id="KGpropertyFilter_filtersDisplayTypeSelect">
+
+        <option>matrix</option>
+        <option>table</option>
+    </select>
+        <button onclick="KGpropertyFilter.resetMatrixPropertiesFilters()"> Reset</button>
+        &nbsp;<button onclick="KGpropertyFilter.saveNewRestrictionFilterTriples()"> Save new</button>
+        &nbsp;<button onclick="KGpropertyFilter.matrix.exportMatrix()"> Export</button>
+        &nbsp;<button onclick="KGpropertyFilter.matrix.copyMatrix()"> Copy</button>
+    </div>
 </div>
 <div id="KGpropertyFilter_centralPanelTabs" style="width: 100%">
     <ul>
@@ -116,3 +128,8 @@
     </div>
 </div>
 <div id="KGpropertyFilter_dialogDiv"></div>
+<div
+  id="graphPopupDiv"
+  onclick="Genealogy.graphActions.hidePopup();"
+  style="z-index: 20; position: absolute; flex-direction: column; padding: 5px; border-radius: 5px; text-align: center; display: none; background-color: #ddd"></div>
+>

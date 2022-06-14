@@ -3,6 +3,7 @@ const async = require("async");
 const fs = require("fs");
 const csv = require("csv-parser");
 const util = require("../../bin/util.");
+const { Transform } = require("stream");
 
 var crawler = {
 
@@ -134,6 +135,41 @@ if( false) {
   })
 }
 
+
+if( false) {
+  function splitPhusionCodeLabel(filePath,targetPath){
+
+
+
+    var rs = fs.createReadStream(filePath);
+    var ws = fs.createWriteStream(targetPath,'UTF8');
+    var Transform = require('stream').Transform;
+    var transformer = new Transform();
+    const replace = require('buffer-replace');
+    transformer._transform = function(data, encoding, cb) {
+
+
+      var str=""+data
+      var   str2=str.replace(/ \| /g,",")
+      var data2=Buffer.from(str2)
+
+
+      cb(null,data2);
+    }
+
+    rs.pipe(transformer)
+      .pipe(ws);
+
+  }
+var dir="D:\\NLP\\ontologies\\TEPDK2\\OnePulse\\"
+  var file="TEPDK_ADL_tblTag.csv"
+  var file="TEPDK_ADL_tblTagAttribute.csv"
+ var filePath=dir+file
+  var targetPath=dir+file.replace(".","_x.")
+  splitPhusionCodeLabel(filePath,targetPath)
+
+
+}
 
 
 

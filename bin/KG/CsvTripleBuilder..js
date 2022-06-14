@@ -124,6 +124,10 @@ var CsvTripleBuilder = {
             _restriction: "uri",
         };
         var totalTriplesCount = 0;
+        var   missingLookups_s=0;
+        var   missingLookups_o=0;
+        var okLookups_o=0
+        var okLookups_s=0
         async.eachSeries(
             mappings,
             function (mapping, callbackEachMapping) {
@@ -251,9 +255,14 @@ var CsvTripleBuilder = {
                                         if (item.lookup_s) {
                                             var lookupValue = getLookupValue(item.lookup_s, subjectStr);
                                             if (!lookupValue) {
-                                                console.log("missing lookup_s: " + line[item.s]);
-                                            } else if (lookupValue == "badLookupName");
-                                            else subjectStr = lookupValue;
+                                                missingLookups_s+=1
+
+                                            }
+
+                                            else {
+                                                subjectStr = lookupValue;
+                                                okLookups_s+=1
+                                            }
                                         }
                                         if (!subjectStr) {
                                             return;
@@ -278,9 +287,13 @@ var CsvTripleBuilder = {
 
                                         if (item.lookup_o) {
                                             var lookupValue = getLookupValue(item.lookup_o, objectStr);
-                                            if (!lookupValue) console.log("missing lookup_o: " + line[item.o]);
-                                            else if (lookupValue == "badLookupName");
-                                            else objectStr = lookupValue;
+                                            if (!lookupValue) {
+                                                missingLookups_o += 1 // console.log("missing lookup_o: " + line[item.o]);
+                                            } else {
+                                                okLookups_o+=1
+                                                objectStr = lookupValue;
+
+                                            }
                                         }
                                     }
                                     if (!objectStr) {
@@ -538,6 +551,8 @@ var CsvTripleBuilder = {
                         });
                     });
 
+                    console.log("missingLookups_s "+missingLookups_s+" / "+okLookups_s)
+                    console.log("missingLookups_o "+missingLookups_o +" / "+okLookups_o)
                     var slices = util.sliceArray(triples, 200);
 
                     async.eachSeries(

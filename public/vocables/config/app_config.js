@@ -40,7 +40,7 @@ var Config = (function() {
     skos: "<http://www.w3.org/2004/02/skos/core#>",
     iso14224: "<http://data.total.com/resource/tsf/iso_14224#>",
     req: "<https://w3id.org/requirement-ontology/rdl/>",
-    part14: "<http://rds.posccaesar.org/ontology/lis14/>",
+    part14: "<http://rds.posccaesar.org/ontology/lis14/rdl/>",
     iso81346: "<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
     slsv: "<http://souslesens.org/resource/vocabulary/>",
     dcterms: "<http://purl.org/dc/terms/>"
@@ -73,7 +73,7 @@ var Config = (function() {
 
   self.KGpropertyFilter = {
     tsfPropertyFilterPrefix:"http://data.total.com/resource/tsf/property-filtering/",
-    sources: ["CFIHOS_1_5_PLUS", "TSF_TEPDK_TEST"]
+    sources: ["CFIHOS_1_5_PLUS", "TSF_TEPDK_TEST","TSF_TEPDK_PHUSION"]
   };
 
   self.KG = {

@@ -174,7 +174,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         drawTree((result));
 
       });
-    } else if (source == "TSF_TEPDK_TEST") {
+    } else if (true || source == "TSF_TEPDK_TEST") {
 
       var depth = 1;
       Sparql_generic.getNodeChildren(self.currentSource, null, ["http://rds.posccaesar.org/ontology/lis14/FunctionalObject"], depth, {}, function(err, result) {

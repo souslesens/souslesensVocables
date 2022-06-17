@@ -216,7 +216,7 @@ var Sparql_OWL = (function () {
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) {
             //limit at 4 ancestorsDepth when imports
-            ancestorsDepth = 4;
+            ancestorsDepth =Math.min(ancestorsDepth, 4);
         }
 
         self.graphUri = Config.sources[sourceLabel].graphUri;

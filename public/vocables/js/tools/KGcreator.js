@@ -122,6 +122,7 @@ var KGcreator = (function () {
                         id: file,
                         text: label,
                         parent: "#",
+                        data:{id:file}
                     });
                 });
 
@@ -144,10 +145,10 @@ var KGcreator = (function () {
         if (obj.node.parents.length == 0) return;
         if (obj.node.parents.length == 2) {
             $("#KGcreator_dataSampleDiv").val("");
-            var str = "Sample data for column " + obj.node.id + "\n";
+            var str = "Sample data for column " + obj.node.data.id + "\n";
             str += "";
             obj.node.data.sample.forEach(function (item) {
-                str += item[obj.node.id] + "\n";
+                str += item[obj.node.data.id] + "\n";
             });
 
             $("#KGcreator_dataSampleDiv").val(str);
@@ -155,7 +156,7 @@ var KGcreator = (function () {
         }
         if (obj.event.button != 2)
             //if popup menu dont load
-            self.loadMappings(obj.node.id);
+            self.loadMappings(obj.node.data.id);
 
         if (obj.node.children.length > 0) return;
 
@@ -176,10 +177,10 @@ var KGcreator = (function () {
 
                 result.headers.forEach(function (col) {
                     jstreeData.push({
-                        id: col,
+                        id: obj.node.id+"_"+col,
                         text: col,
                         parent: obj.node.id,
-                        data: { sample: result.data[0] },
+                        data: { id:col,sample: result.data[0] },
                     });
                 });
                 common.jstree.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData);
@@ -197,7 +198,7 @@ var KGcreator = (function () {
                 action: function (_e) {
                     // pb avec source
                     if (self.currentTreeNode.parents.length < 2) return;
-                    $("#KGcreator_subjectInput").val(self.currentTreeNode.id);
+                    $("#KGcreator_subjectInput").val(self.currentTreeNode.data.id);
                 },
             };
 
@@ -206,7 +207,7 @@ var KGcreator = (function () {
                 action: function (_e) {
                     // pb avec source
                     if (self.currentTreeNode.parents.length < 2) return;
-                    $("#KGcreator_objectInput").val(self.currentTreeNode.id);
+                    $("#KGcreator_objectInput").val(self.currentTreeNode.data.id);
                 },
             };
 
@@ -214,7 +215,7 @@ var KGcreator = (function () {
                 label: "Copy",
                 action: function (_e) {
                     // pb avec source
-                    navigator.clipboard.writeText(self.currentTreeNode.id);
+                    navigator.clipboard.writeText(self.currentTreeNode.data.id);
                 },
             };
 
@@ -224,7 +225,7 @@ var KGcreator = (function () {
                     // pb avec source
                     if (self.currentTreeNode.parents.length < 1) return;
                     $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupdialog.html", function () {
-                        $("#KGCreator_lookupFileName").val(self.currentTreeNode.id);
+                        $("#KGCreator_lookupFileName").val(self.currentTreeNode.data.id);
                     });
                     $("#KGcreator_dialogDiv").dialog("open");
                 },
@@ -235,7 +236,7 @@ var KGcreator = (function () {
                     // pb avec source
                     if (self.currentTreeNode.parents.length != 2) return;
                     $("#KGcreator_dialogDiv").load("snippets/KGcreator/transformDialog.html", function () {
-                        $("#KGcreator_transformColumn").val(self.currentTreeNode.id);
+                        $("#KGcreator_transformColumn").val(self.currentTreeNode.data.id);
                     });
                     $("#KGcreator_dialogDiv").dialog("open");
                 },

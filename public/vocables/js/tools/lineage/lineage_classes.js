@@ -589,7 +589,7 @@ var Lineage_classes = (function () {
 
     self.drawSimilarsNodes = function (/** @type {any} */ _similarType, /** @type {any} */ _node, /** @type {any} */ _sources, /** @type {any} */ _descendantsAlso) {
         var fromSource = null;
-        var toSources = [Lineage_common.currentSource];
+        var toSources = [Lineage_common.currentSource ||Lineage_classes.mainSource ];
         if (!visjsGraph.data || !visjsGraph.data.nodes) return;
         var nodes = visjsGraph.data.nodes.get();
         /**
@@ -708,7 +708,8 @@ var Lineage_classes = (function () {
     };
 
     self.graphNodeNeighborhoodRanges = function (/** @type {{ id: string; label: string; }} */ nodeData) {
-        Sparql_OWL.getObjectProperties(Lineage_common.currentSource, [nodeData.id], {}, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+        var fromSource=Lineage_common.currentSource || Lineage_classes.mainSource
+        Sparql_OWL.getObjectProperties(source, [nodeData.id], {}, function (/** @type {any} */ err, /** @type {any[]} */ result) {
             if (err) {
                 return MainController.UI.message(err);
             }
@@ -730,7 +731,7 @@ var Lineage_classes = (function () {
                 else rangeLabel = Sparql_common.getLabelFromURI(item.range.value);
                 labelStr += "<i>" + propLabel + " : </i>" + rangeLabel + "\n";
             });
-            var color = Lineage_classes.getSourceColor(Lineage_common.currentSource);
+            var color = Lineage_classes.getSourceColor(fromSource);
             if (!existingIds[nodeData.id]) {
                 existingIds[nodeData.id] = 1;
                 var node = {
@@ -739,10 +740,10 @@ var Lineage_classes = (function () {
                     shadow: self.nodeShadow,
                     shape: Lineage_classes.defaultShape,
                     size: Lineage_classes.defaultShapeSize,
-                    color: Lineage_classes.getSourceColor(Lineage_common.currentSource, nodeData.id),
+                    color: Lineage_classes.getSourceColor(fromSource, nodeData.id),
                     font: { multi: true, size: 10 },
                     data: {
-                        source: Lineage_common.currentSource,
+                        source: fromSource,
                         id: nodeData.id,
                         label: nodeData.label,
                     },
@@ -763,7 +764,7 @@ var Lineage_classes = (function () {
                     color: color,
                     font: { multi: true, size: 10 },
                     data: {
-                        source: Lineage_common.currentSource,
+                        source: fromSource,
                         id: nodeData.id,
                         label: nodeData.label,
                     },
@@ -782,6 +783,7 @@ var Lineage_classes = (function () {
         });
     };
     self.graphNodeNeighborhood = function (/** @type {{ id: string; label: string; }} */ nodeData, /** @type {string} */ propFilter) {
+        var fromSource=Lineage_common.currentSource || Lineage_classes.mainSource
         if (propFilter == "ranges") {
             return graphNodeNeighborhoodRanges(nodeData);
         }
@@ -790,8 +792,8 @@ var Lineage_classes = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                    var sparql_url = Config.sources[Lineage_common.currentSource].sparql_server.url;
-                    var fromStr = Sparql_common.getFromStr(Lineage_common.currentSource);
+                    var sparql_url = Config.sources[nodeData.source].sparql_server.url;
+                    var fromStr = Sparql_common.getFromStr(nodeData.source);
                     var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " + "select * " + fromStr + " where {";
 
                     if (propFilter == "outcoming" || propFilter == "all") query += "?ids ?prop ?value.  ";
@@ -807,7 +809,7 @@ var Lineage_classes = (function () {
                         url,
                         query,
                         "",
-                        { source: Lineage_common.currentSource },
+                        { source: nodeData.source },
                         function (/** @type {any} */ err, /** @type {{ results: { bindings: any; }; }} */ result) {
                             if (err) {
                                 return MainController.UI.message(err);
@@ -845,7 +847,7 @@ var Lineage_classes = (function () {
                             data.forEach(function (/** @type {{ prop: { value: string; }; value: { value: string; }; valueLabel: { value: any; }; propLabel: { value: any; }; }} */ item) {
                                 if (true) {
                                     if (!distinctProps[item.prop.value]) distinctProps[item.prop.value] = 1;
-                                    if (item.prop.value.type == "uri") {
+                                    if (item.value.type == "uri" && item.value.value.indexOf("Class")<0 && item.value.value.indexOf("_:b")<0) {
                                         // if (!item.prop.value.match(/rdf|owl|skos/) || item.prop.value.indexOf("sameAs") > -1 || item.prop.value.indexOf("partOf") > -1) {
                                         // if (item.prop.value.indexOf("rdf") < 0 && item.prop.value.indexOf("owl") < 0) {
                                         //  if(!graphPropertiesFilterRegex || item.prop.value.match(graphPropertiesFilterRegex)) {
@@ -875,7 +877,7 @@ var Lineage_classes = (function () {
                                         var edgeId = nodeData.id + "_" + item.value.value;
                                         var inverseEdgeId = item.value.value + "_" + nodeData.id;
                                         var arrows;
-                                        if (propFilter == "outcoming")
+                                        if (propFilter == "outcoming"  || propFilter =="all")
                                             arrows = {
                                                 to: {
                                                     enabled: true,
@@ -897,8 +899,9 @@ var Lineage_classes = (function () {
                                             visjsData.edges.push({
                                                 id: edgeId,
                                                 from: nodeData.id,
-                                                label: propLabel,
+                                                label: propLabel.indexOf("subClassOf")>-1?null:propLabel,
                                                 font: { multi: true, size: 8 },
+                                                color:Lineage_classes.defaultEdgeColor,
                                                 to: item.value.value,
                                                 arrows: arrows,
                                             });
@@ -941,7 +944,7 @@ var Lineage_classes = (function () {
         async.eachSeries(
             slices,
             function (/** @type {any} */ slice, /** @type {(arg0: undefined) => void} */ callbackEach) {
-                Sparql_generic.getNodeParents(source, null, slice, 2, { selectGraph: 1 }, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+                Sparql_generic.getNodeParents(source, null, slice, 1, { selectGraph: 1 }, function (/** @type {any} */ err, /** @type {any[]} */ result) {
                     if (err) return callbackEach(err);
 
                     if (result.length == 0) {
@@ -1795,7 +1798,11 @@ html += "    <span class=\"popupMenuItem\" onclick=\"KGquery.showNodeProperties(
             if (!nodeData.label && nodeData.text) nodeData.label = nodeData.text;
             var existingNodes = visjsGraph.getExistingIdsMap();
             result.forEach(function (/** @type {{ [x: string]: { value: any; }; concept: { value: string | number; }; conceptLabel: { value: any; }; }} */ item) {
+                if(item.broader1  && (item.broader1.value.indexOf("_:b")>-1 || item.broader1.value.indexOf("Class")>-1 ))
+                    return;
+
                 if (!existingNodes[item.concept.value]) {
+
                     existingNodes[item.concept.value] = 1;
                     visjsData.nodes.push({
                         id: item.concept.value,
@@ -1966,6 +1973,14 @@ upperNodeIds.push(id);
                 MainController.UI.hidePopup("graphPopupDiv");
                 Lineage_blend.clearAssociationNodes();
                 return;
+            }
+            if(node.data.bNodeId){//restriction
+
+                if(authentication.currentUser.groupes.indexOf("admin")>-1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable  ){
+                    if(confirm("delete selected relation ?")){
+                        Lineage_blend.clearAssociationNodes();
+                    }
+                }
             }
 
             self.currentGraphNode = node;

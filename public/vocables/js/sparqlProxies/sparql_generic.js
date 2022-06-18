@@ -791,7 +791,7 @@ WHERE {
             conceptType = "owl:Class";
         } else if (Config.sources[sourceLabel].schemaType == "KNOWLEDGE_GRAPH") {
             parentType = "rdf:type";
-            conceptType = "owl:Individual";
+            conceptType = "owl:NamedIndividual";
         } else if (Config.sources[sourceLabel].schemaType == "SKOS") {
             parentType = "skos:broader";
             conceptType = "skos:Concept";

@@ -764,9 +764,10 @@ return*/
             }
             str +=
               "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
-              "Property<select id='sourceBrowser_addPropertyPredicateSelect'></select>&nbsp;" +
-              "Value=&nbsp;<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
-              "<select id='sourceBrowser_addPropertyObjectSelect' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
+              "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
+              "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
+              "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
+
               "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
 
             str += "</div>";
@@ -1095,7 +1096,21 @@ defaultLang = 'en';*/
     var wikiUrl = Config.wiki.url + "Source " + sourceLabel;
     window.open(wikiUrl, "_slsvWiki");
   };
+self.addPropertyObjectSelect=function(){
+  var predicate=$("#sourceBrowser_addPropertyPredicateSelect").val()
+  var allObjects=self.SourcePossiblePredicatesAndObject
+  if(predicate=="rdf:type"){
+    common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.basicTypeClasses.concat(allObjects.sourceObjects), true, "label", "id");
+  }
+  else if(predicate=="rdfs:subClassOf") {
+    common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect",allObjects.part14Objects.concat(allObjects.sourceObjects), true, "label", "id");
+  }
+  else{
 
+    common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect",[], true, "label", "id");
+
+  }
+}
   self.addProperty = function(property, value, source, createNewNode) {
     if (!property) property = $("#sourceBrowser_addPropertyPredicateSelect").val();
     if (!value) value = $("#sourceBrowser_addPropertyValue").val().trim();
@@ -1152,7 +1167,8 @@ defaultLang = 'en';*/
       if (err)
         return alert(err.responseText);
       common.fillSelectOptions("sourceBrowser_addPropertyPredicateSelect", result.predicates, true, "label", "id");
-      common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", result.objects, true, "label", "id");
+      self.SourcePossiblePredicatesAndObject=result;
+
 
     });
   };

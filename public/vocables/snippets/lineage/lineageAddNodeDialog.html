@@ -40,7 +40,12 @@
 </style>
 <div>
     <b>Create Node : </b>
-    <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick='$("#LineageBlend_creatingNodeClassParamsDiv").dialog("open")' style="width: 150px">Class/Individual</button>
+    <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary"
+            onclick='Lineage_blend.graphModification.showCreatingNodeClassOrNamedIndividualDialog("Class")' style="width: 150px">
+        Class</button>
+    <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary"
+            onclick='Lineage_blend.graphModification.showCreatingNodeClassOrNamedIndividualDialog("NamedIndividual")' style="width: 150px">
+        namedIndividual</button>
 </div>
 
 <div id="lineageAddEdgeDialog_mainDiv" style="background-color: white; display: flex; flex-direction: row">
@@ -66,8 +71,8 @@
 
 <div id="LineageBlend_creatingNodeClassParamsDiv" style="display: flex; flex-direction: column">
     <div class="LineageBlend_creatingNodeClassParamsLine">rdfs:label&nbsp;<input id="LineageBlend_creatingNodeNewClassLabel" /></div>
-    <div class="LineageBlend_creatingNodeClassParamsLine">rdfs:subClassOf&nbsp;<select id="LineageBlend_creatingNodeObjectsSelect"></select></div>
-    <div class="LineageBlend_creatingNodeClassParamsLine">OR rdf:type&nbsp;<select id="LineageBlend_creatingNodePredicatesSelect"></select></div>
+    <div id="LineageBlend_creatingNodeClassDiv" class="LineageBlend_creatingNodeClassParamsLine">rdfs:subClassOf&nbsp;&nbsp;<select id="LineageBlend_creatingNodeObjectsSelect"></select></div>
+    <div  id="LineageBlend_creatingNodeNameIndividualDiv" class="LineageBlend_creatingNodeClassParamsLine">rdf:type&nbsp;<select id="LineageBlend_creatingNodeObjects2Select"></select></div>
     <div class="LineageBlend_creatingNodeClassParamsLine">
         <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_blend.graphModification.addClassStiples()" style="width: 100px">OK</button>
     </div>

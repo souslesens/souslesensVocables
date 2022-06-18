@@ -601,9 +601,11 @@ var xx = result
           return alert(err.responseText)
 
           common.fillSelectOptions("KGcreator_predicateSelect",result.predicates, true,"label","id");
-          common.fillSelectOptions("KGcreator_objectSelect",result.objects, true,"label","id");
-          common.fillSelectOptions("LineageBlend_creatingNodeObjectsSelect", result.objects, true, "label", "id");
+          common.fillSelectOptions("KGcreator_objectSelect",result.usualObjects.concat(result.part14Objects).concat(result.sourceObjects), true,"label","id");
           common.fillSelectOptions("LineageBlend_creatingNodePredicatesSelect", result.predicates, true, "label", "id");
+          common.fillSelectOptions("LineageBlend_creatingNodeObjectsSelect", result.sourceObjects.concat(result.part14Objects), true, "label", "id");
+          common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", result.sourceObjects, true, "label", "id");
+
 
         })
 
@@ -611,6 +613,22 @@ var xx = result
 
       });
     },
+    showCreatingNodeClassOrNamedIndividualDialog:function(type){
+      self.graphModification.currentCreatingNodeType=type
+      var showClassDiv=(type=="Class")
+        if( showClassDiv) {
+          $("#LineageBlend_creatingNodeClassDiv").css("display", "block")
+          $("#LineageBlend_creatingNodeNameIndividualDiv").css("display", "none")
+        }
+        else{
+          $("#LineageBlend_creatingNodeClassDiv").css("display", "none")
+          $("#LineageBlend_creatingNodeNameIndividualDiv").css("display", "block")
+        }
+
+      $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open")
+    },
+
+
     openCreatNodeDialogOpen: function(type) {
       if (type == "owl:Class") {
         $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open");
@@ -662,17 +680,24 @@ var xx = result
       var label = $("#LineageBlend_creatingNodeNewClassLabel").val();
       if (!label) return alert("rdfs:label is mandatory");
       self.graphModification.addTripleToCreatingNode("rdfs:label", label);
-      var superClass = $("#LineageBlend_creatingNodeObjectsSelect").val();
+
+
       var type = $("#LineageBlend_creatingNodePredicatesSelect").val();
-      if (!superClass && !type) return alert("rdfs:type or owl:Class is mandatory");
-      if (superClass && type) return alert("choose one of rdfs:type or owl:Class ");
-      if (type) {
-        self.graphModification.addTripleToCreatingNode("rdf:type", "owl:Individual");
-        self.graphModification.addTripleToCreatingNode("rdf:type", type);
-      } else if (superClass) {
+
+      if(self.graphModification.currentCreatingNodeType=="Class"){
+        var superClass = $("#LineageBlend_creatingNodeObjectsSelect").val();
+        if (!superClass  ) return alert("owl:Class is mandatory");
         self.graphModification.addTripleToCreatingNode("rdf:type", "owl:Class");
         self.graphModification.addTripleToCreatingNode("rdfs:subClassOf", superClass);
+
+      }else  if(self.graphModification.currentCreatingNodeType=="NamedIndividual"){
+        var individualtypeClass = $("#LineageBlend_creatingNodeObjects2Select").val();
+        if (!individualtypeClass  ) return alert("owl:Class is mandatory");
+        self.graphModification.addTripleToCreatingNode("rdf:type", "owl:NamedIndividual");
+        self.graphModification.addTripleToCreatingNode("rdfs:type", individualtypeClass);
       }
+
+
     },
 
     removeTriple: function(index) {
@@ -762,6 +787,7 @@ var xx = result
         async.series(
           [
             function(callbackSeries) {
+
               jstreeData.push({
                 id: "http://www.w3.org/2002/07/owl#sameAs",
                 text: "owl:sameAs",
@@ -781,7 +807,8 @@ var xx = result
                   inSource: Lineage_classes.mainSource
                 }
               });
-              if (Config.sources[Lineage_classes.mainSource].schemaType == "OWL") {
+
+              if (Config.sources[Lineage_classes.mainSource].schemaType == "OWL" && self.sourceNode.type!="NamedIndividual") {
                 jstreeData.push({
                   id: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
                   text: "rdfs:subClassOf",
@@ -874,17 +901,7 @@ var xx = result
                     }
                   }
 
-                  /*    Lineage_properties.getPropertiesjsTreeData(inSource, null, null, {}, function(err, jstreeData) {
-if (err) return callbackSeries(err);
-jstreeData.forEach(function(item) {
-item.data.inSource = inSource;
-});
 
-jstreeData.push({
-id: inSource,
-text: inSource,
-parent: "#"
-});*/
 
                   callbackSeries();
                 });
@@ -916,7 +933,7 @@ parent: "#"
               });
             },
             function(callbackSeries) {
-              common.jstree.loadJsTree("lineageAddEdgeDialog_generalPropertiesTab", jstreeData, options);
+              common.jstree.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options);
               callbackSeries();
             }
           ],
@@ -937,9 +954,20 @@ parent: "#"
     },
 
     createRelationFromGraph: function(inSource, sourceNode, targetNode, propId, options, callback) {
+
       if (!confirm("create Relation " + sourceNode.label + "-" + Sparql_common.getLabelFromURI(propId) + "->" + targetNode.label + " in Graph " + inSource)) return;
       $("#LineagePopup").dialog("close");
-      if (propId == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" || propId == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
+
+
+      var isRestriction=true;
+      if (propId == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" || propId == "http://www.w3.org/2000/01/rdf-schema#subClassOf")
+        isRestriction=false
+       if(sourceNode.type=="NamedIndividual")
+        isRestriction=false
+      if(propId== "http://www.w3.org/2002/07/owl#sameAs" && sourceNode.source==Lineage_classes.mainSource && targetNode.source==Lineage_classes.mainSource)
+        isRestriction=false
+
+    if(!isRestriction) {
         var triples = [];
         triples.push({
           subject: sourceNode.id,
@@ -1041,16 +1069,19 @@ parent: "#"
         callback(err);
 
 
-      var objects=[]
-
+      var sourceObjects=[]
+ var part14Objects=[]
       result.forEach(function(item) {
         if (item.id.type == "bnode") return;
         var prefix=""
-        if(item.g.value.indexOf("lis14")>-1)
+        if(item.g.value.indexOf("lis14")>-1){
           prefix=" part14:"
-        objects.push({label:prefix+item.label.value,id: item.label.value});
+          part14Objects.push({label:prefix+item.label.value,id: item.id.value});
+          }else{
+          sourceObjects.push({label:prefix+item.label.value,id: item.id.value});
+        }
       });
-      objects.sort(function(a, b) {
+      sourceObjects.sort(function(a, b) {
         if (!a.label || !b.label)
           return 0;
         if (a.label > b.label)
@@ -1061,12 +1092,20 @@ parent: "#"
       });
 
 
+
+
       var usualObjects=[]
       KGcreator.usualObjectClasses.forEach(function(item){
         usualObjects.push({label: item,id: item})
       })
-      objects=usualObjects.concat(objects);
-      return callback(null,{predicates:predicates,objects:objects})
+
+      var basicTypeClasses=[]
+      KGcreator.basicTypeClasses.forEach(function(item){
+        basicTypeClasses.push({label: item,id: item})
+      })
+
+     // var allObjects=usualObjects.concat(sourceObjects);
+      return callback(null,{predicates:predicates,usualObjects:usualObjects,sourceObjects:sourceObjects,part14Objects:part14Objects,basicTypeClasses:basicTypeClasses})
 
 
 

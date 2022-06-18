@@ -249,7 +249,9 @@ var visjsGraph = (function () {
                 "</select></div>";
 
             html +=
-                " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'><input style='width: 100px' id='visjsGraph_searchInput'>&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>";
+                " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>" +
+              "<input style='width: 100px' id='visjsGraph_searchInput'   onkeyup='if (event.keyCode == 13)visjsGraph.searchNode()>'" +
+              "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>";
 
             html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.showGraphConfig()'> Graph parameters</button>";
             html += "<div id='visjsConfigureDiv' style='overflow: auto'></div>";

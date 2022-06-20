@@ -175,8 +175,7 @@ var DictionariesManager = {
                         if (error) {
                             return callbackSeries(error);
                         }
-                        const elasticRestProxy = require("../elasticRestProxy..js");
-                        elasticRestProxy.checkBulkQueryResponse(body, function (err, _result) {
+                        ElasticRestProxy.checkBulkQueryResponse(body, function (err, _result) {
                             if (err) return callbackSeries(err);
                             callbackSeries();
                         });

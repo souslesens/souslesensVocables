@@ -529,7 +529,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       ],
       function(err) {
         $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 0);
-        if (err) return alert(err.response.text);
+        if (err) return alert(err.responseText);
       }
     );
 

@@ -56,7 +56,7 @@ var Lineage_decoration = (function () {
                         return callback(err);
                     }
                     data = data.concat(result.results.bindings);
-                    if (data.length > 100) console.error(query);
+                    if (data.length > 100);// console.error(query);
                     return callbackEach();
                 });
             },

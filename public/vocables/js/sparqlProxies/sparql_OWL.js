@@ -102,7 +102,8 @@ var Sparql_OWL = (function () {
         fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
         var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "select   distinct * " + fromStr + " where {";
-        if (options.selectGraph) query += " GRAPH ?child1Graph {";
+        if (options.selectGraph)
+            query += " GRAPH ?child1Graph {";
         query +=
             "?child1 " +
             Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) +
@@ -129,10 +130,12 @@ var Sparql_OWL = (function () {
             query += "} ";
         }
 
+        if (options.selectGraph){
+            query += "} ";// query += " GRAPH ?conceptGraph {?concept rdf:type ?o}";
+        }
         query += "} ";
-        (" }");
-        if (options.selectGraph);// query += " GRAPH ?conceptGraph {?concept rdf:type ?o}";
 
+       // query +=" }";
 
         if (options.filterCollections) {
             fromStr = Sparql_common.getFromStr(sourceLabel);

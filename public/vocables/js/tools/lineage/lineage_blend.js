@@ -596,36 +596,36 @@ var xx = result
       self.graphModification.creatingNodeUri = null;
       $("#LineagePopup").dialog("open");
       $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function() {
-        self.getSourcePossiblePredicatesAndObject(Lineage_classes.mainSource, function(err, result){
-          if(err)
-          return alert(err.responseText)
-
-          common.fillSelectOptions("KGcreator_predicateSelect",result.predicates, true,"label","id");
-          common.fillSelectOptions("KGcreator_objectSelect",result.usualObjects.concat(result.part14Objects).concat(result.sourceObjects), true,"label","id");
+        self.getSourcePossiblePredicatesAndObject(Lineage_classes.mainSource, function(err, result) {
+          if (err)
+            return alert(err.responseText);
+          if (!Config.sources[source].allowIndividuals) {
+            $("#LineageBlend_creatingNamedIndividualButton").css("display", "none");
+          }
+          common.fillSelectOptions("KGcreator_predicateSelect", result.predicates, true, "label", "id");
+          common.fillSelectOptions("KGcreator_objectSelect", result.usualObjects.concat(result.part14Objects).concat(result.sourceObjects), true, "label", "id");
           common.fillSelectOptions("LineageBlend_creatingNodePredicatesSelect", result.predicates, true, "label", "id");
           common.fillSelectOptions("LineageBlend_creatingNodeObjectsSelect", result.sourceObjects.concat(result.part14Objects), true, "label", "id");
           common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", result.sourceObjects, true, "label", "id");
 
 
-        })
-
+        });
 
 
       });
     },
-    showCreatingNodeClassOrNamedIndividualDialog:function(type){
-      self.graphModification.currentCreatingNodeType=type
-      var showClassDiv=(type=="Class")
-        if( showClassDiv) {
-          $("#LineageBlend_creatingNodeClassDiv").css("display", "block")
-          $("#LineageBlend_creatingNodeNameIndividualDiv").css("display", "none")
-        }
-        else{
-          $("#LineageBlend_creatingNodeClassDiv").css("display", "none")
-          $("#LineageBlend_creatingNodeNameIndividualDiv").css("display", "block")
-        }
+    showCreatingNodeClassOrNamedIndividualDialog: function(type) {
+      self.graphModification.currentCreatingNodeType = type;
+      var showClassDiv = (type == "Class");
+      if (showClassDiv) {
+        $("#LineageBlend_creatingNodeClassDiv").css("display", "block");
+        $("#LineageBlend_creatingNodeNameIndividualDiv").css("display", "none");
+      } else {
+        $("#LineageBlend_creatingNodeClassDiv").css("display", "none");
+        $("#LineageBlend_creatingNodeNameIndividualDiv").css("display", "block");
+      }
 
-      $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open")
+      $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open");
     },
 
 
@@ -684,15 +684,15 @@ var xx = result
 
       var type = $("#LineageBlend_creatingNodePredicatesSelect").val();
 
-      if(self.graphModification.currentCreatingNodeType=="Class"){
+      if (self.graphModification.currentCreatingNodeType == "Class") {
         var superClass = $("#LineageBlend_creatingNodeObjectsSelect").val();
-        if (!superClass  ) return alert("owl:Class is mandatory");
+        if (!superClass) return alert("owl:Class is mandatory");
         self.graphModification.addTripleToCreatingNode("rdf:type", "owl:Class");
         self.graphModification.addTripleToCreatingNode("rdfs:subClassOf", superClass);
 
-      }else  if(self.graphModification.currentCreatingNodeType=="NamedIndividual"){
+      } else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
         var individualtypeClass = $("#LineageBlend_creatingNodeObjects2Select").val();
-        if (!individualtypeClass  ) return alert("owl:Class is mandatory");
+        if (!individualtypeClass) return alert("owl:Class is mandatory");
         self.graphModification.addTripleToCreatingNode("rdf:type", "owl:NamedIndividual");
         self.graphModification.addTripleToCreatingNode("rdfs:type", individualtypeClass);
       }
@@ -808,7 +808,7 @@ var xx = result
                 }
               });
 
-              if (Config.sources[Lineage_classes.mainSource].schemaType == "OWL" && self.sourceNode.type!="NamedIndividual") {
+              if (Config.sources[Lineage_classes.mainSource].schemaType == "OWL" && self.sourceNode.type != "NamedIndividual") {
                 jstreeData.push({
                   id: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
                   text: "rdfs:subClassOf",
@@ -902,7 +902,6 @@ var xx = result
                   }
 
 
-
                   callbackSeries();
                 });
               });
@@ -959,15 +958,15 @@ var xx = result
       $("#LineagePopup").dialog("close");
 
 
-      var isRestriction=true;
+      var isRestriction = true;
       if (propId == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" || propId == "http://www.w3.org/2000/01/rdf-schema#subClassOf")
-        isRestriction=false
-       if(sourceNode.type=="NamedIndividual")
-        isRestriction=false
-      if(propId== "http://www.w3.org/2002/07/owl#sameAs" && sourceNode.source==Lineage_classes.mainSource && targetNode.source==Lineage_classes.mainSource)
-        isRestriction=false
+        isRestriction = false;
+      if (sourceNode.type == "NamedIndividual")
+        isRestriction = false;
+      if (propId == "http://www.w3.org/2002/07/owl#sameAs" && sourceNode.source == Lineage_classes.mainSource && targetNode.source == Lineage_classes.mainSource)
+        isRestriction = false;
 
-    if(!isRestriction) {
+      if (!isRestriction) {
         var triples = [];
         triples.push({
           subject: sourceNode.id,
@@ -1057,28 +1056,28 @@ var xx = result
     }
   };
 
-  self.getSourcePossiblePredicatesAndObject = function(source,callback) {
-   var predicates=[]
-    KGcreator.usualProperties.forEach(function(item){
-      predicates.push({label: item,id: item})
-    })
+  self.getSourcePossiblePredicatesAndObject = function(source, callback) {
+    var predicates = [];
+    KGcreator.usualProperties.forEach(function(item) {
+      predicates.push({ label: item, id: item });
+    });
 
 
-    Sparql_OWL.getDictionary(source, { selectGraph:true }, null, function(err, result) {
+    Sparql_OWL.getDictionary(source, { selectGraph: true }, null, function(err, result) {
       if (err)
         callback(err);
 
 
-      var sourceObjects=[]
- var part14Objects=[]
+      var sourceObjects = [];
+      var part14Objects = [];
       result.forEach(function(item) {
         if (item.id.type == "bnode") return;
-        var prefix=""
-        if(item.g.value.indexOf("lis14")>-1){
-          prefix=" part14:"
-          part14Objects.push({label:prefix+item.label.value,id: item.id.value});
-          }else{
-          sourceObjects.push({label:prefix+item.label.value,id: item.id.value});
+        var prefix = "";
+        if (item.g.value.indexOf("lis14") > -1) {
+          prefix = " part14:";
+          part14Objects.push({ label: prefix + item.label.value, id: item.id.value });
+        } else {
+          sourceObjects.push({ label: prefix + item.label.value, id: item.id.value });
         }
       });
       sourceObjects.sort(function(a, b) {
@@ -1092,21 +1091,24 @@ var xx = result
       });
 
 
+      var usualObjects = [];
+      KGcreator.usualObjectClasses.forEach(function(item) {
+        usualObjects.push({ label: item, id: item });
+      });
 
+      var basicTypeClasses = [];
+      KGcreator.basicTypeClasses.forEach(function(item) {
+        basicTypeClasses.push({ label: item, id: item });
+      });
 
-      var usualObjects=[]
-      KGcreator.usualObjectClasses.forEach(function(item){
-        usualObjects.push({label: item,id: item})
-      })
-
-      var basicTypeClasses=[]
-      KGcreator.basicTypeClasses.forEach(function(item){
-        basicTypeClasses.push({label: item,id: item})
-      })
-
-     // var allObjects=usualObjects.concat(sourceObjects);
-      return callback(null,{predicates:predicates,usualObjects:usualObjects,sourceObjects:sourceObjects,part14Objects:part14Objects,basicTypeClasses:basicTypeClasses})
-
+      // var allObjects=usualObjects.concat(sourceObjects);
+      return callback(null, {
+        predicates: predicates,
+        usualObjects: usualObjects,
+        sourceObjects: sourceObjects,
+        part14Objects: part14Objects,
+        basicTypeClasses: basicTypeClasses
+      });
 
 
     });

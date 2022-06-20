@@ -15,6 +15,9 @@ var Sparql_OWL = (function () {
 
     self.getSourceTaxonomyPredicates = function (source) {
         var defaultTaxonomyPredicates = " <http://www.w3.org/2000/01/rdf-schema#subClassOf> ";
+        if(Config.sources[source].allowIndividuals)
+            defaultTaxonomyPredicates +="|<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"
+
         if (!source) return defaultTaxonomyPredicates;
         var sourceConfig = Config.sources[source];
 
@@ -27,6 +30,8 @@ var Sparql_OWL = (function () {
             if (item.indexOf("http://") == 0) str += " <" + item + "> ";
             else str += " " + item + " ";
         });
+        if(Config.sources[source].allowIndividuals)
+            str +="|<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"
 
         return str;
     };

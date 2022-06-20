@@ -1153,13 +1153,6 @@ action: function (e) {
         var existingIds = visjsGraph.getExistingIdsMap();
         var visjsData2 = { nodes: [], edges: [] };
 
-
-
-
-
-
-
-
         for (var parentConcept in parentsMap) {
 
           if (clusters.indexOf(parentConcept) < 0) {
@@ -2041,7 +2034,7 @@ html += "    <span class=\"popupMenuItem\" onclick=\"KGquery.showNodeProperties(
         shape = node.data.initialParams.shape;
       }
       newNodes.push({ id: node.id, size: size, shadow: self.nodeShadow, font: font });
-      newNodes.push({ id: id, opacity: opacity });
+      newNodes.push({ id:  node.id, opacity: 1 });
     });
     visjsGraph.data.nodes.update(newNodes);
   };
@@ -2111,7 +2104,7 @@ html += "    <span class=\"popupMenuItem\" onclick=\"KGquery.showNodeProperties(
                   id: item["broader" + i].value
                 },
                 shadow: self.nodeShadow,
-                shape: Lineage_classes.defaultShapeshape,
+                shape: Lineage_classes.defaultShape,
                 color: color,
                 level: ancestorsDepth - i,
                 size: Lineage_classes.defaultShapeSize

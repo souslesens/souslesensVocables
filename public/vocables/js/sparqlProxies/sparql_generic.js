@@ -788,7 +788,8 @@ WHERE {
         var conceptType;
         if (Config.sources[sourceLabel].schemaType == "OWL") {
             parentType = Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel);
-            conceptType = "owl:Class";
+
+            conceptType = "owl:Class|owl:NamedIndividual";
         } else if (Config.sources[sourceLabel].schemaType == "KNOWLEDGE_GRAPH") {
             parentType = "rdf:type";
             conceptType = "owl:NamedIndividual";

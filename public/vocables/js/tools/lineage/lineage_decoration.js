@@ -37,14 +37,19 @@ var Lineage_decoration = (function () {
                     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                     "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
-                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                    "SELECT distinct ?x ?type  " +
-                    strFrom +
-                    "  WHERE {\n";
+                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>"
+
                 if (part14TopTypes) {
-                    query += "  ?x rdfs:subClassOf|rdf:type ?type.\n" + '  filter (regex(str(?type),"part14") && ?type !=  <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Thing>)\n';
-                } else {
-                    query += "  ?x rdfs:subClassOf|rdf:type ?type.?type rdf:type ?typeType filter (?typeType not in (owl:Restriction)) "; // filter (?type not in ( <http://souslesens.org/resource/vocabulary/TopConcept>,<http://www.w3.org/2002/07/owl#Class>))"
+                    query += "SELECT distinct ?x ?type  " +
+                    strFrom +
+                      "WHERE {\n" +
+                      "   ?x rdf:type ?o.\n" +
+                      "  ?x rdfs:subClassOf+|rdf:type+ ?type.\n" +
+                      "  filter (regex(str(?type),\"lis14\") && ?type !=  <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Thing>)"
+                     } else {
+                    query += "SELECT distinct ?x ?type  " +
+                    strFrom +
+                    "  WHERE { ?x rdfs:subClassOf|rdf:type ?type.?type rdf:type ?typeType filter (?typeType not in (owl:Restriction)) "; // filter (?type not in ( <http://souslesens.org/resource/vocabulary/TopConcept>,<http://www.w3.org/2002/07/owl#Class>))"
                 }
 
                 query += Sparql_common.setFilter("x", slice);
@@ -66,11 +71,11 @@ var Lineage_decoration = (function () {
         );
     };
     self.colorNodesByPart14TopType = function () {
-        self.colorGraphNodesByType(true);
+        self.colorGraphNodesByType(null,true);
     };
 
     self.colorGraphNodesByType = function (nodeIds, part14TopTypes) {
-        //   return;
+        part14TopTypes=true;
         if (!nodeIds) nodeIds = visjsGraph.data.nodes.getIds();
         // var existingNodes = visjsGraph.getExistingIdsMap(true);
         //  var ids = Object.keys(existingNodes);
@@ -114,6 +119,9 @@ var Lineage_decoration = (function () {
 
             var legendNodes = [];
             var str = "";
+
+
+
             for (var _type in colorsMap) {
                 str +=
                     "<div class='Lineage_legendTypeDiv' onclick='Lineage_decoration.onlegendTypeDivClick($(this),\"" +

@@ -1056,7 +1056,7 @@ action: function (e) {
     options.skipRestrictions = 1;
     options.selectGraph = 1;
 
-    Sparql_generic.getNodeChildren(source, null, parentIds, depth, options, function(err,result) {
+    Sparql_generic.getNodeChildren(source, null, parentIds, depth, options, function(err, result) {
 
         if (err)
           return MainController.UI.message(err);
@@ -1068,8 +1068,6 @@ action: function (e) {
           return MainController.UI.message("No data found");
         }
         var color = self.getSourceColor(source);
-
-
 
 
         //get Clusters
@@ -1166,8 +1164,7 @@ action: function (e) {
                   namedIndividualsMap[item["child" + i]] = 1;
                 }
               }
-            })
-
+            });
 
 
             parentsMap[parentConcept].forEach(function(item) {
@@ -1175,18 +1172,18 @@ action: function (e) {
               expandedLevel.push(item.id);
 
 
-              for (var i = 1; i < depth+1; i++) {
+              for (var i = 1; i < depth + 1; i++) {
                 if (item["child" + i]) {
                   let childNodeSource = Sparql_common.getSourceFromGraphUri(item["child" + i + "Graph"]);
 
 
                   if (!existingIds[item["child" + i]]) {
                     var attrs = self.getNodeVisjAttrs(item["child" + i + "Type"], item.concept, childNodeSource);
-                   var isIndividualId =namedIndividualsMap[item["child" + i]]
+                    var isIndividualId = namedIndividualsMap[item["child" + i]];
 
-                    var xxx= item["child" + i + "Label"]
-                    if(item["child" + i]=="http://data.total.com/resource/tsf/ontology/apps-categories/greg/Synergi_S_-_SYNERGI")
-                      var x=3
+                    var xxx = item["child" + i + "Label"];
+                    if (item["child" + i] == "http://data.total.com/resource/tsf/ontology/apps-categories/greg/Synergi_S_-_SYNERGI")
+                      var x = 3;
                     if (isIndividualId)
                       attrs.shape = self.namedIndividualShape;
 
@@ -1236,10 +1233,10 @@ action: function (e) {
             });
           }
         }
-       var visjsData={
-          nodes : visjsDataClusters.nodes.concat(visjsData2.nodes),
-           edges : visjsDataClusters.edges.concat(visjsData2.edges)
-       };
+        var visjsData = {
+          nodes: visjsDataClusters.nodes.concat(visjsData2.nodes),
+          edges: visjsDataClusters.edges.concat(visjsData2.edges)
+        };
 
         if (!expandedLevels[source]) expandedLevels[source] = [];
         expandedLevels[source].push(expandedLevel);
@@ -2034,7 +2031,7 @@ html += "    <span class=\"popupMenuItem\" onclick=\"KGquery.showNodeProperties(
         shape = node.data.initialParams.shape;
       }
       newNodes.push({ id: node.id, size: size, shadow: self.nodeShadow, font: font });
-      newNodes.push({ id:  node.id, opacity: 1 });
+      newNodes.push({ id: node.id, opacity: 1 });
     });
     visjsGraph.data.nodes.update(newNodes);
   };
@@ -2063,10 +2060,7 @@ html += "    <span class=\"popupMenuItem\" onclick=\"KGquery.showNodeProperties(
 
 
       result.forEach(function(/** @type {{ [x: string]: { value: any; }; concept: { value: string | number; }; conceptLabel: { value: any; }; }} */ item) {
-        if (item.broader1 && (item.broader1.value.indexOf("_:b") > -1
-          || item.broader1.value.indexOf("Class") > -1
-          || item.broader1.value.indexOf("NamedIndividual") > -1))
-          return;
+
 
         var shape = (conceptType == "NamedIndividual") ? self.namedIndividualShape : self.defaultShape;
         if (!existingNodes[item.concept.value]) {
@@ -2093,15 +2087,21 @@ html += "    <span class=\"popupMenuItem\" onclick=\"KGquery.showNodeProperties(
         var edgeId;
         for (var i = 1; i < ancestorsDepth; i++) {
           if (item["broader" + i]) {
-            if (!existingNodes[item["broader" + i].value]) {
+            var broader = item["broader" + i];
+            if (broader && (broader.value.indexOf("_:b") > -1
+              || broader.value.indexOf("#Class") > -1
+              || broader.value.indexOf("#NamedIndividual") > -1))
+              continue;
+
+            if (!existingNodes[broader.value]) {
               existingNodes[item["broader" + i].value] = 1;
               visjsData.nodes.push({
-                id: item["broader" + i].value,
+                id: broader.value,
                 label: item["broader" + i + "Label"].value,
                 data: {
                   source: nodeData.source,
                   label: item["broader" + i + "Label"].value,
-                  id: item["broader" + i].value
+                  id: broader.value
                 },
                 shadow: self.nodeShadow,
                 shape: Lineage_classes.defaultShape,
@@ -2109,18 +2109,18 @@ html += "    <span class=\"popupMenuItem\" onclick=\"KGquery.showNodeProperties(
                 level: ancestorsDepth - i,
                 size: Lineage_classes.defaultShapeSize
               });
-              newNodeIds.push(item["broader" + i].value);
+              newNodeIds.push(broader.value);
               var fromId;
               if (i == 1) fromId = item.concept.value;
               else fromId = item["broader" + (i - 1)].value;
 
-              edgeId = fromId + "_" + item["broader" + i].value;
+              edgeId = fromId + "_" + broader.value;
               if (!existingNodes[edgeId]) {
                 existingNodes[edgeId] = 1;
 
                 visjsData.edges.push({
                   id: edgeId,
-                  from: item["broader" + i].value,
+                  from: broader.value,
                   to: fromId,
                   data: { source: nodeData.source },
                   color: Lineage_classes.defaultEdgeColor,

@@ -145,6 +145,8 @@ var Lineage_decoration = (function () {
         MainController.UI.showPopup(point, "graphPopupDiv", true);
     };
 
+
+
     self.setGraphPopupMenus = function () {
         var html =
           '    <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(true);"> Hide Type</span>' +

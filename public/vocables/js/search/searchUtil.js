@@ -402,7 +402,7 @@ var SearchUtil = (function () {
                                 if (!result) return callbackEach();
                                 totalLines += result.length;
                                 totalLinesAllsources += totalLines;
-                                MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
+                                MainController.UI.message("indexed " + totalLines + "/" + classesArray.length + " in index " + sourceLabel.toLowerCase());
                                 callbackEach();
                             });
                         },

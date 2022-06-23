@@ -56,41 +56,41 @@ var Lineage_dictionary = (function () {
             });
 
             async.series(
-              [
-                  //get domain and range sources
-                  function (callbackSeries) {
-                      self.getDictionarySources(self.currentDictionary, self.currentDomainSource, null, function (err, result) {
-                          if (err) MainController.UI.message(err.responseText);
-                          var rangeSourceLabel = [];
-                          result.forEach(function (item) {
-                              if (!self.domainAndRangeSourcesmap[item.domainSourceLabel.value]) self.domainAndRangeSourcesmap[item.domainSourceLabel.value] = [];
-                              self.domainAndRangeSourcesmap[item.domainSourceLabel.value].push(item.rangeSourceLabel.value);
-                          });
-                          for (var key in self.domainAndRangeSourcesmap) {
-                              self.domainAndRangeSourcesmap[key].sort();
-                          }
-                          callbackSeries();
-                      });
-                  },
-                  //fill domainSource and rangeSource
-                  function (callbackSeries) {
-                      var domainSources = Object.keys(self.domainAndRangeSourcesmap).sort();
-                      common.fillSelectOptions(self.filterIdPrefix + "_domainSourceLabel_select", domainSources, true);
-                      if (self.currentDomainSource) {
-                          if (!self.domainAndRangeSourcesmap[self.currentDomainSource]) return alert(" source " + self.currentDomainSource + " is not presnt in dictionary");
-                          $("#" + self.filterIdPrefix + "_domainSourceLabel_select").val(self.currentDomainSource);
+                [
+                    //get domain and range sources
+                    function (callbackSeries) {
+                        self.getDictionarySources(self.currentDictionary, self.currentDomainSource, null, function (err, result) {
+                            if (err) MainController.UI.message(err.responseText);
+                            var rangeSourceLabel = [];
+                            result.forEach(function (item) {
+                                if (!self.domainAndRangeSourcesmap[item.domainSourceLabel.value]) self.domainAndRangeSourcesmap[item.domainSourceLabel.value] = [];
+                                self.domainAndRangeSourcesmap[item.domainSourceLabel.value].push(item.rangeSourceLabel.value);
+                            });
+                            for (var key in self.domainAndRangeSourcesmap) {
+                                self.domainAndRangeSourcesmap[key].sort();
+                            }
+                            callbackSeries();
+                        });
+                    },
+                    //fill domainSource and rangeSource
+                    function (callbackSeries) {
+                        var domainSources = Object.keys(self.domainAndRangeSourcesmap).sort();
+                        common.fillSelectOptions(self.filterIdPrefix + "_domainSourceLabel_select", domainSources, true);
+                        if (self.currentDomainSource) {
+                            if (!self.domainAndRangeSourcesmap[self.currentDomainSource]) return alert(" source " + self.currentDomainSource + " is not presnt in dictionary");
+                            $("#" + self.filterIdPrefix + "_domainSourceLabel_select").val(self.currentDomainSource);
 
-                          var rangeSources = self.domainAndRangeSourcesmap[self.currentDomainSource];
-                          common.fillSelectOptions(self.filterIdPrefix + "_rangeSourceLabel_select", rangeSources, true);
-                      }
+                            var rangeSources = self.domainAndRangeSourcesmap[self.currentDomainSource];
+                            common.fillSelectOptions(self.filterIdPrefix + "_rangeSourceLabel_select", rangeSources, true);
+                        }
 
-                      callbackSeries();
-                  },
-                  function (callbackSeries) {
-                      return callbackSeries();
-                  },
-              ],
-              function (err) {}
+                        callbackSeries();
+                    },
+                    function (callbackSeries) {
+                        return callbackSeries();
+                    },
+                ],
+                function (err) {}
             );
         });
     };
@@ -102,10 +102,10 @@ var Lineage_dictionary = (function () {
     self.getDictionarySources = function (dictionary, domainSource, rangeSource, callback) {
         var strFrom = Sparql_common.getFromStr(dictionary, false, false);
         var query =
-          "PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> select distinct  ?domainSourceLabel ?rangeSourceLabel " +
-          strFrom +
-          " where " +
-          "{?restriction <http://data.souslesens.org/property#domainSourceLabel> ?domainSourceLabel. ?restriction <http://data.souslesens.org/property#rangeSourceLabel> ?rangeSourceLabel ";
+            "PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> select distinct  ?domainSourceLabel ?rangeSourceLabel " +
+            strFrom +
+            " where " +
+            "{?restriction <http://data.souslesens.org/property#domainSourceLabel> ?domainSourceLabel. ?restriction <http://data.souslesens.org/property#rangeSourceLabel> ?rangeSourceLabel ";
         if (domainSource) query += " filter (?domainSourceLabel='" + domainSource + "') ";
         if (rangeSource) query += " filter (?rangeSourceLabel='" + rangeSource + "') ";
 
@@ -184,46 +184,46 @@ var Lineage_dictionary = (function () {
             }
         });
         async.eachSeries(
-          Object.keys(filtersMap),
-          function (filterId, callbackEach) {
-              var filterVar = filtersMap[filterId];
-              if (filterVar == "date") return callbackEach();
-              var prop = Config.dictionaryMetaDataPropertiesMap[filterVar];
-              if (!prop) {
-                  console.log("property not recognized " + prop);
-                  return callbackEach();
-              }
-              var query =
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                " SELECT distinct ?obj  from " +
-                " <" +
-                Config.sources[source].graphUri +
-                "> where {?restriction <" +
-                prop +
-                "> ?obj.";
-              query += self.getFilterPredicates("restriction");
-              query += "}";
-              var sparql_url = Config.sources[source].sparql_server.url;
-              var url = sparql_url + "?format=json&query=";
-              Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
-                  if (err) {
-                      return callbackEach(err);
-                  }
-                  var values = [];
-                  result.results.bindings.forEach(function (item) {
-                      values.push(item.obj.value);
-                  });
-                  values.sort();
-                  common.fillSelectOptions(filterId, values, true);
+            Object.keys(filtersMap),
+            function (filterId, callbackEach) {
+                var filterVar = filtersMap[filterId];
+                if (filterVar == "date") return callbackEach();
+                var prop = Config.dictionaryMetaDataPropertiesMap[filterVar];
+                if (!prop) {
+                    console.log("property not recognized " + prop);
+                    return callbackEach();
+                }
+                var query =
+                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                    " SELECT distinct ?obj  from " +
+                    " <" +
+                    Config.sources[source].graphUri +
+                    "> where {?restriction <" +
+                    prop +
+                    "> ?obj.";
+                query += self.getFilterPredicates("restriction");
+                query += "}";
+                var sparql_url = Config.sources[source].sparql_server.url;
+                var url = sparql_url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+                    if (err) {
+                        return callbackEach(err);
+                    }
+                    var values = [];
+                    result.results.bindings.forEach(function (item) {
+                        values.push(item.obj.value);
+                    });
+                    values.sort();
+                    common.fillSelectOptions(filterId, values, true);
 
-                  return callbackEach();
-              });
-          },
-          function (err) {
-              if (err) {
-                  return alert(err.responseText);
-              }
-          }
+                    return callbackEach();
+                });
+            },
+            function (err) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+            }
         );
     };
 
@@ -232,164 +232,164 @@ var Lineage_dictionary = (function () {
         var domainIds = {};
         var rangeIds = {};
         async.series(
-          [
-              function (callbackSeries) {
-                  var dictionarySource = self.currentDictionary;
-                  if (!filters) filters = "";
-                  filters = self.getDictionaryFilters();
-                  $("#LineageDictionary_Tabs").tabs("option", "active", 1);
-                  $("#LineageDictionary_dataTab").html("");
-                  self.queryTSFdictionary(dictionarySource, filters, function (err, result) {
-                      if (err) callbackSeries(err.responseText);
-                      SparqlqueryResult = result;
-                      callbackSeries();
-                  });
-              },
-              function (callbackSeries) {
-                  SparqlqueryResult.forEach(function (item, index) {
-                      rangeIds[item.range.value] = {};
-                      domainIds[item.domain.value] = {};
-                  });
-                  callbackSeries();
-              },
-              function (callbackSeries) {
-                  SearchUtil.getSourceLabels(null, Object.keys(domainIds), null, null, function (err, result) {
-                      if (err) callbackSeries(err.responseText);
-                      result.forEach(function (hit) {
-                          hit._source.index = hit._index;
-                          domainIds[hit._source.id] = hit._source;
-                      });
-                      callbackSeries();
-                  });
-              },
-              function (callbackSeries) {
-                  SearchUtil.getSourceLabels(null, Object.keys(rangeIds), null, null, function (err, result) {
-                      if (err) callbackSeries(err.responseText);
-                      result.forEach(function (hit) {
-                          hit._source.index = hit._index;
-                          rangeIds[hit._source.id] = hit._source;
-                      });
-                      callbackSeries();
-                  });
-              },
-              function (callbackSeries) {
-                  MainController.UI.message("Drawing table...");
-                  var dataset = [];
-                  var cols = [];
+            [
+                function (callbackSeries) {
+                    var dictionarySource = self.currentDictionary;
+                    if (!filters) filters = "";
+                    filters = self.getDictionaryFilters();
+                    $("#LineageDictionary_Tabs").tabs("option", "active", 1);
+                    $("#LineageDictionary_dataTab").html("");
+                    self.queryTSFdictionary(dictionarySource, filters, function (err, result) {
+                        if (err) callbackSeries(err.responseText);
+                        SparqlqueryResult = result;
+                        callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    SparqlqueryResult.forEach(function (item, index) {
+                        rangeIds[item.range.value] = {};
+                        domainIds[item.domain.value] = {};
+                    });
+                    callbackSeries();
+                },
+                function (callbackSeries) {
+                    SearchUtil.getSourceLabels(null, Object.keys(domainIds), null, null, function (err, result) {
+                        if (err) callbackSeries(err.responseText);
+                        result.forEach(function (hit) {
+                            hit._source.index = hit._index;
+                            domainIds[hit._source.id] = hit._source;
+                        });
+                        callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    SearchUtil.getSourceLabels(null, Object.keys(rangeIds), null, null, function (err, result) {
+                        if (err) callbackSeries(err.responseText);
+                        result.forEach(function (hit) {
+                            hit._source.index = hit._index;
+                            rangeIds[hit._source.id] = hit._source;
+                        });
+                        callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    MainController.UI.message("Drawing table...");
+                    var dataset = [];
+                    var cols = [];
 
-                  cols.push({
-                      title: "Selection",
-                      defaultContent: "",
-                      title: "Selection",
-                      className: "select-checkbox",
-                      render: function (datum, type, row) {
-                          return "";
-                      },
-                  }); // cols.push({ title: "", defaultContent: "" });
+                    cols.push({
+                        title: "Selection",
+                        defaultContent: "",
+                        title: "Selection",
+                        className: "select-checkbox",
+                        render: function (datum, type, row) {
+                            return "";
+                        },
+                    }); // cols.push({ title: "", defaultContent: "" });
 
-                  self.dataTablesOrderedColumns.forEach(function (item) {
-                      cols.push({ title: item, defaultContent: "" });
-                  });
-                  cols.push({ title: "creationDate", defaultContent: "" });
-                  for (var key in Config.dictionaryMetaDataPropertiesMap) {
-                      if (self.dataTablesOrderedColumns.indexOf(key) < 0)
-                          if (self.dataTablesHiddenColumns.indexOf(key) < 0)
-                              cols.push({
-                                  title: key,
-                                  defaultContent: "",
-                              });
-                  }
+                    self.dataTablesOrderedColumns.forEach(function (item) {
+                        cols.push({ title: item, defaultContent: "" });
+                    });
+                    cols.push({ title: "creationDate", defaultContent: "" });
+                    for (var key in Config.dictionaryMetaDataPropertiesMap) {
+                        if (self.dataTablesOrderedColumns.indexOf(key) < 0)
+                            if (self.dataTablesHiddenColumns.indexOf(key) < 0)
+                                cols.push({
+                                    title: key,
+                                    defaultContent: "",
+                                });
+                    }
 
-                  SparqlqueryResult.forEach(function (item, index) {
-                      var line = [];
-                      cols.forEach(function (col) {
-                          // ATTENTION cette colonne doit toujours etre la premiere
-                          if (col.title == "restrictionNode") {
-                              line.push(item.node.value);
-                          } else if (col.title == "domainLabel") {
-                              if (item.domain && domainIds[item.domain.value]) line.push(domainIds[item.domain.value].label);
-                              else line.push("");
-                          } else if (col.title == "rangeLabel") {
-                              if (item.range && rangeIds[item.range.value]) line.push(rangeIds[item.range.value].label);
-                              else line.push("");
-                          }
-                          // ATTENTION cette colonne doit toujours etre la deuxieme
-                          else if (col.title == "status") {
-                              var value = item[col.title].value;
-                              value = value ? value.substring(value.lastIndexOf("/") + 1) : "";
-                              line.push(value);
-                          } else if (item[col.title]) {
-                              line.push(item[col.title].value);
-                          } else {
-                              line.push("");
-                          }
-                      });
-                      dataset.push(line);
-                  });
+                    SparqlqueryResult.forEach(function (item, index) {
+                        var line = [];
+                        cols.forEach(function (col) {
+                            // ATTENTION cette colonne doit toujours etre la premiere
+                            if (col.title == "restrictionNode") {
+                                line.push(item.node.value);
+                            } else if (col.title == "domainLabel") {
+                                if (item.domain && domainIds[item.domain.value]) line.push(domainIds[item.domain.value].label);
+                                else line.push("");
+                            } else if (col.title == "rangeLabel") {
+                                if (item.range && rangeIds[item.range.value]) line.push(rangeIds[item.range.value].label);
+                                else line.push("");
+                            }
+                            // ATTENTION cette colonne doit toujours etre la deuxieme
+                            else if (col.title == "status") {
+                                var value = item[col.title].value;
+                                value = value ? value.substring(value.lastIndexOf("/") + 1) : "";
+                                line.push(value);
+                            } else if (item[col.title]) {
+                                line.push(item[col.title].value);
+                            } else {
+                                line.push("");
+                            }
+                        });
+                        dataset.push(line);
+                    });
 
-                  //  $("#mainDialogDiv").dialog("open");
-                  //  $("#mainDialogDiv").html("<table id='dataTableDivExport'></table>");
-                  $("#LineageDictionary_dataTab").html("<table id='dataTableDivExport'></table>");
+                    //  $("#mainDialogDiv").dialog("open");
+                    //  $("#mainDialogDiv").html("<table id='dataTableDivExport'></table>");
+                    $("#LineageDictionary_dataTab").html("<table id='dataTableDivExport'></table>");
 
-                  setTimeout(function () {
-                      self.dictionaryDataTable = $("#dataTableDivExport").DataTable({
-                          data: dataset,
-                          columns: cols,
-                          pageLength: 200,
-                          dom: "Bfrtip",
+                    setTimeout(function () {
+                        self.dictionaryDataTable = $("#dataTableDivExport").DataTable({
+                            data: dataset,
+                            columns: cols,
+                            pageLength: 200,
+                            dom: "Bfrtip",
 
-                          buttons: [
-                              {
-                                  extend: "csvHtml5",
-                                  text: "Export CSV",
-                                  fieldBoundary: "",
-                                  fieldSeparator: ";",
-                              },
-                              {
-                                  text: "Select All",
-                                  action: function (e, dt, node, config) {
-                                      Lineage_dictionary.dictionaryDataTable.rows().select();
-                                  },
-                              },
+                            buttons: [
+                                {
+                                    extend: "csvHtml5",
+                                    text: "Export CSV",
+                                    fieldBoundary: "",
+                                    fieldSeparator: ";",
+                                },
+                                {
+                                    text: "Select All",
+                                    action: function (e, dt, node, config) {
+                                        Lineage_dictionary.dictionaryDataTable.rows().select();
+                                    },
+                                },
 
-                              {
-                                  text: "UnSelect All",
-                                  action: function (e, dt, node, config) {
-                                      Lineage_dictionary.dictionaryDataTable.rows().deselect();
-                                  },
-                              },
-                              {
-                                  text: "Promote",
-                                  action: function (e, dt, node, config) {
-                                      var data = Lineage_dictionary.dictionaryDataTable.rows({ selected: true }).data();
-                                      Lineage_dictionary.validation.promote(data);
-                                  },
-                              },
-                              {
-                                  text: "UnPromote",
-                                  action: function (e, dt, node, config) {
-                                      var data = Lineage_dictionary.dictionaryDataTable.rows({ selected: true }).data();
-                                      Lineage_dictionary.validation.unPromote(data);
-                                  },
-                              },
-                              {
-                                  text: "trash",
-                                  action: function (e, dt, node, config) {
-                                      var data = Lineage_dictionary.dictionaryDataTable.rows({ selected: true }).data();
-                                      Lineage_dictionary.validation.trash(data);
-                                  },
-                              },
-                              {
-                                  text: "Delete",
-                                  action: function (e, dt, node, config) {
-                                      var data = Lineage_dictionary.dictionaryDataTable.rows({ selected: true }).data();
-                                      Lineage_dictionary.validation.remove(data);
-                                  },
-                              },
-                          ],
+                                {
+                                    text: "UnSelect All",
+                                    action: function (e, dt, node, config) {
+                                        Lineage_dictionary.dictionaryDataTable.rows().deselect();
+                                    },
+                                },
+                                {
+                                    text: "Promote",
+                                    action: function (e, dt, node, config) {
+                                        var data = Lineage_dictionary.dictionaryDataTable.rows({ selected: true }).data();
+                                        Lineage_dictionary.validation.promote(data);
+                                    },
+                                },
+                                {
+                                    text: "UnPromote",
+                                    action: function (e, dt, node, config) {
+                                        var data = Lineage_dictionary.dictionaryDataTable.rows({ selected: true }).data();
+                                        Lineage_dictionary.validation.unPromote(data);
+                                    },
+                                },
+                                {
+                                    text: "trash",
+                                    action: function (e, dt, node, config) {
+                                        var data = Lineage_dictionary.dictionaryDataTable.rows({ selected: true }).data();
+                                        Lineage_dictionary.validation.trash(data);
+                                    },
+                                },
+                                {
+                                    text: "Delete",
+                                    action: function (e, dt, node, config) {
+                                        var data = Lineage_dictionary.dictionaryDataTable.rows({ selected: true }).data();
+                                        Lineage_dictionary.validation.remove(data);
+                                    },
+                                },
+                            ],
 
-                          columnDefs: [
-                              /*{
+                            columnDefs: [
+                                /*{
 orderable: false,
 className: "select-checkbox",
 targets: [0]
@@ -398,40 +398,40 @@ targets: [0]
 "visible": false,
 "searchable": false
 }*/
-                          ],
-                          select: {
-                              style: "multi",
-                              selector: "td:first-child",
-                          },
+                            ],
+                            select: {
+                                style: "multi",
+                                selector: "td:first-child",
+                            },
 
-                          order: [],
-                      });
-                  }, 200);
+                            order: [],
+                        });
+                    }, 200);
 
-                  // Export.showDataTable(null, cols, dataset);
-              },
-          ],
-          function (err) {
-              if (err) return alert(err.responseText);
-          }
+                    // Export.showDataTable(null, cols, dataset);
+                },
+            ],
+            function (err) {
+                if (err) return alert(err.responseText);
+            }
         );
     };
 
     self.queryTSFdictionary = function (dictionarySource, filters, callback) {
         var query =
-          "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>SELECT * from" +
-          " <" +
-          Config.sources[Config.dictionarySource].graphUri +
-          ">" +
-          " WHERE {{ ?domain rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction. ?node owl:onProperty ?prop ." +
-          " OPTIONAL {?prop rdfs:label ?propLabel} " +
-          "?node owl:someValuesFrom ?range." +
-          " OPTIONAL {?node <http://data.souslesens.org/property#domainSourceLabel> ?domainSourceLabel}\n" +
-          "  OPTIONAL {?node <http://data.souslesens.org/property#rangeSourceLabel> ?rangeSourceLabel} \n" +
-          "  OPTIONAL {?node <http://purl.org/dc/terms/created> ?creationDate} \n" +
-          "  OPTIONAL {?node <https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status> ?status} \n" +
-          "  OPTIONAL {?node <http://purl.org/dc/terms/creator> ?author} \n" +
-          "  OPTIONAL {?node  <http://purl.org/dc/terms/source> ?provenance }\n";
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>SELECT * from" +
+            " <" +
+            Config.sources[Config.dictionarySource].graphUri +
+            ">" +
+            " WHERE {{ ?domain rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction. ?node owl:onProperty ?prop ." +
+            " OPTIONAL {?prop rdfs:label ?propLabel} " +
+            "?node owl:someValuesFrom ?range." +
+            " OPTIONAL {?node <http://data.souslesens.org/property#domainSourceLabel> ?domainSourceLabel}\n" +
+            "  OPTIONAL {?node <http://data.souslesens.org/property#rangeSourceLabel> ?rangeSourceLabel} \n" +
+            "  OPTIONAL {?node <http://purl.org/dc/terms/created> ?creationDate} \n" +
+            "  OPTIONAL {?node <https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status> ?status} \n" +
+            "  OPTIONAL {?node <http://purl.org/dc/terms/creator> ?author} \n" +
+            "  OPTIONAL {?node  <http://purl.org/dc/terms/source> ?provenance }\n";
         query += " filter (?prop=<http://www.w3.org/2002/07/owl#sameAs>) }";
         query += filters || "";
         query += "} limit 10000";
@@ -518,19 +518,19 @@ targets: [0]
             }
 
             async.eachSeries(
-              restrictions,
-              function (restrictionNode, callbackEach) {
-                  Lineage_blend.deleteRestriction(Config.dictionarySource, restrictionNode, function (err, result) {
-                      if (err) return callbackEach(err);
-                      callbackEach();
-                  });
-              },
-              function (err) {
-                  if (err) {
-                      return alert(err.responseText);
-                  }
-                  Lineage_dictionary.validation.updateDatatableCells("delete");
-              }
+                restrictions,
+                function (restrictionNode, callbackEach) {
+                    Lineage_blend.deleteRestriction(Config.dictionarySource, restrictionNode, function (err, result) {
+                        if (err) return callbackEach(err);
+                        callbackEach();
+                    });
+                },
+                function (err) {
+                    if (err) {
+                        return alert(err.responseText);
+                    }
+                    Lineage_dictionary.validation.updateDatatableCells("delete");
+                }
             );
         },
 
@@ -543,11 +543,11 @@ targets: [0]
             }
             var slices = common.array.slice(restrictionIds, 100);
             async.eachSeries(
-              slices,
-              function (restrictionIds, callbackEach) {
-                  var filter = Sparql_common.setFilter("node", restrictionIds);
-                  var query = "WITH <" + Config.sources[Config.dictionarySource].graphUri + "> ";
-                  /*  if (operation == "promote") {
+                slices,
+                function (restrictionIds, callbackEach) {
+                    var filter = Sparql_common.setFilter("node", restrictionIds);
+                    var query = "WITH <" + Config.sources[Config.dictionarySource].graphUri + "> ";
+                    /*  if (operation == "promote") {
 query += "delete{ ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] + "> ?status} ";
 query += " insert { ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] + "> '"+Config.dictionaryStatusMap[operation]+"'} ";
 query += " where { ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] + "> ?status " + filter + "} ";
@@ -556,38 +556,38 @@ query += "delete{ ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] + 
 query += " insert { ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] + "> '"+Config.dictionaryStatusMap[operation]+"'} ";
 query += " where { ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] + "> ?status " + filter + "} ";
 }*/
-                  if (operation == "remove") {
-                      query += "delete{ ?node ?p ?o} ";
-                      query += " where { ?node ?p ?o " + filter + "} ";
-                  } else {
-                      query += "delete{ ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] + "> ?status} ";
-                      query += " insert { ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] + "> '" + Config.dictionaryStatusMap[operation] + "'} ";
-                      query += " where { ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] + "> ?status " + filter + "} ";
-                  }
+                    if (operation == "remove") {
+                        query += "delete{ ?node ?p ?o} ";
+                        query += " where { ?node ?p ?o " + filter + "} ";
+                    } else {
+                        query += "delete{ ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] + "> ?status} ";
+                        query += " insert { ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] + "> '" + Config.dictionaryStatusMap[operation] + "'} ";
+                        query += " where { ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] + "> ?status " + filter + "} ";
+                    }
 
-                  var sparql_url = Config.sources[Config.dictionarySource].sparql_server.url;
-                  var url = sparql_url + "?format=json&query=";
-                  Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Config.dictionarySource }, function (err, result) {
-                      if (operation == "remove") {
-                          var query2 = "WITH <" + Config.sources[Config.dictionarySource].graphUri + "> ";
-                          query2 += "delete{ ?s  ?p ?node} ";
-                          query2 += " where { ?s ?p ?node. filter ?p=<http://www.w3.org/2000/01/rdf-schema#subClassOf> " + filter + "} ";
-                          Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Config.dictionarySource }, function (err, result) {
-                              callbackEach(err);
-                          });
-                      } else {
-                          callbackEach(err);
-                      }
-                  });
-              },
-              function (err) {
-                  if (err) {
-                      return alert("err");
-                      // Lineage_dictionary.showTSFdictionaryDialog("Lineage_dictionary");
-                  }
-                  MainController.UI.message(operation + " " + data.length + " dictionary entries DONE", true);
-                  callback(null);
-              }
+                    var sparql_url = Config.sources[Config.dictionarySource].sparql_server.url;
+                    var url = sparql_url + "?format=json&query=";
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Config.dictionarySource }, function (err, result) {
+                        if (operation == "remove") {
+                            var query2 = "WITH <" + Config.sources[Config.dictionarySource].graphUri + "> ";
+                            query2 += "delete{ ?s  ?p ?node} ";
+                            query2 += " where { ?s ?p ?node. filter ?p=<http://www.w3.org/2000/01/rdf-schema#subClassOf> " + filter + "} ";
+                            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Config.dictionarySource }, function (err, result) {
+                                callbackEach(err);
+                            });
+                        } else {
+                            callbackEach(err);
+                        }
+                    });
+                },
+                function (err) {
+                    if (err) {
+                        return alert("err");
+                        // Lineage_dictionary.showTSFdictionaryDialog("Lineage_dictionary");
+                    }
+                    MainController.UI.message(operation + " " + data.length + " dictionary entries DONE", true);
+                    callback(null);
+                }
             );
         },
         updateDatatableCells: function (operation) {

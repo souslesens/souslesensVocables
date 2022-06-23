@@ -31,51 +31,50 @@ var Lineage_decoration = (function () {
         var slices = common.array.slice(ids, 50);
         var data = [];
         async.eachSeries(
-          slices,
-          function (slice, callbackEach) {
-              var query =
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
-                "PREFIX owl: <http://www.w3.org/2002/07/owl#>"
+            slices,
+            function (slice, callbackEach) {
+                var query =
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                    "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
+                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>";
 
-              if (part14TopTypes) {
-                  query += "SELECT distinct ?x ?type ?g " +
-                    strFrom +
-                    "WHERE {GRAPH ?g{" +
-                    "   ?x rdf:type ?o.\n" +
-                    "  ?x rdfs:subClassOf+|rdf:type+ ?type.\n" +
-                    "  filter (regex(str(?type),\"lis14\") && ?type !=  <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Thing>)"
-              } else {
-                  query += "SELECT distinct ?x ?type ?g  " +
-                    strFrom +
-                    "  WHERE {GRAPH ?g{ ?x rdfs:subClassOf|rdf:type ?type.?type rdf:type ?typeType filter (?typeType not in (owl:Restriction)) "; // filter (?type not in ( <http://souslesens.org/resource/vocabulary/TopConcept>,<http://www.w3.org/2002/07/owl#Class>))"
-              }
+                if (part14TopTypes) {
+                    query +=
+                        "SELECT distinct ?x ?type ?g " +
+                        strFrom +
+                        "WHERE {GRAPH ?g{" +
+                        "   ?x rdf:type ?o.\n" +
+                        "  ?x rdfs:subClassOf+|rdf:type+ ?type.\n" +
+                        '  filter (regex(str(?type),"lis14") && ?type !=  <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Thing>)';
+                } else {
+                    query += "SELECT distinct ?x ?type ?g  " + strFrom + "  WHERE {GRAPH ?g{ ?x rdfs:subClassOf|rdf:type ?type.?type rdf:type ?typeType filter (?typeType not in (owl:Restriction)) "; // filter (?type not in ( <http://souslesens.org/resource/vocabulary/TopConcept>,<http://www.w3.org/2002/07/owl#Class>))"
+                }
 
-              query += Sparql_common.setFilter("x", slice);
+                query += Sparql_common.setFilter("x", slice);
 
-              query += "}}";
+                query += "}}";
 
-              Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
-                  if (err) {
-                      return callback(err);
-                  }
-                  data = data.concat(result.results.bindings);
-                  if (data.length > 100);// console.error(query);
-                  return callbackEach();
-              });
-          },
-          function (err) {
-              return callback(err, data);
-          }
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    data = data.concat(result.results.bindings);
+                    if (data.length > 100); // console.error(query);
+                    return callbackEach();
+                });
+            },
+            function (err) {
+                return callback(err, data);
+            }
         );
     };
     self.colorNodesByPart14TopType = function () {
-        self.colorGraphNodesByType(null,true);
+        self.colorGraphNodesByType(null, true);
     };
 
     self.colorGraphNodesByType = function (nodeIds, part14TopTypes) {
-        part14TopTypes=true;
+        part14TopTypes = true;
         if (!nodeIds) nodeIds = visjsGraph.data.nodes.getIds();
         // var existingNodes = visjsGraph.getExistingIdsMap(true);
         //  var ids = Object.keys(existingNodes);
@@ -120,17 +119,15 @@ var Lineage_decoration = (function () {
             var legendNodes = [];
             var str = "";
 
-
-
             for (var _type in colorsMap) {
                 str +=
-                  "<div class='Lineage_legendTypeDiv' onclick='Lineage_decoration.onlegendTypeDivClick($(this),\"" +
-                  _type +
-                  "\")' style='background-color:" +
-                  colorsMap[_type] +
-                  "'>" +
-                  Sparql_common.getLabelFromURI(_type) +
-                  "</div>";
+                    "<div class='Lineage_legendTypeDiv' onclick='Lineage_decoration.onlegendTypeDivClick($(this),\"" +
+                    _type +
+                    "\")' style='background-color:" +
+                    colorsMap[_type] +
+                    "'>" +
+                    Sparql_common.getLabelFromURI(_type) +
+                    "</div>";
             }
             $("#Lineage_classes_graphDecoration_legendDiv").html(str);
             //  visjsGraph.data.nodes.add(legendNodes)
@@ -145,13 +142,11 @@ var Lineage_decoration = (function () {
         MainController.UI.showPopup(point, "graphPopupDiv", true);
     };
 
-
-
     self.setGraphPopupMenus = function () {
         var html =
-          '    <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(true);"> Hide Type</span>' +
-          ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType();"> Show Type</span>' +
-          ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(null,true);"> Show Only</span>';
+            '    <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(true);"> Hide Type</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType();"> Show Type</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(null,true);"> Show Only</span>';
         $("#graphPopupDiv").html(html);
     };
     self.hideShowLegendType = function (hide, only) {

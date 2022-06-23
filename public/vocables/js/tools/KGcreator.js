@@ -34,26 +34,9 @@ var KGcreator = (function () {
         "",
     ];
 
-    self.usualObjectClasses = [
-        "owl:Class",
-        "owl:NamedIndividual",
-        "owl:Thing",
-        "owl:Property",
-        "owl:Restriction",
-        "skos:Concept",
-        "skos:Collection",
-        "slsv:TopConcept",
-        "_function",
-        "_blankNode",
-        "",
-    ];
+    self.usualObjectClasses = ["owl:Class", "owl:NamedIndividual", "owl:Thing", "owl:Property", "owl:Restriction", "skos:Concept", "skos:Collection", "slsv:TopConcept", "_function", "_blankNode", ""];
 
-    self.basicTypeClasses=[
-        "owl:Class",
-        "owl:NamedIndividual",
-        "owl:Thing",
-      "",
-    ]
+    self.basicTypeClasses = ["owl:Class", "owl:NamedIndividual", "owl:Thing", ""];
     self.usualSubjectTypes = ["_function", "_blankNode", ""];
 
     self.predefinedPart14Relations = [
@@ -128,7 +111,7 @@ var KGcreator = (function () {
                         id: file,
                         text: label,
                         parent: "#",
-                        data:{id:file}
+                        data: { id: file },
                     });
                 });
 
@@ -183,10 +166,10 @@ var KGcreator = (function () {
 
                 result.headers.forEach(function (col) {
                     jstreeData.push({
-                        id: obj.node.id+"_"+col,
+                        id: obj.node.id + "_" + col,
                         text: col,
                         parent: obj.node.id,
-                        data: { id:col,sample: result.data[0] },
+                        data: { id: col, sample: result.data[0] },
                     });
                 });
                 common.jstree.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData);

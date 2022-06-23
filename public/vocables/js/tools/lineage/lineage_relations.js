@@ -569,7 +569,7 @@ Lineage_relations = (function () {
     self.projectSameAsRestrictionsOnSource = function (orphans) {
         if (orphans) return alert("Coming soon...");
         if (!$("#LineageRelations_setExactMatchSameAsSourceInitUIcBX").prop("checked")) Lineage_classes.initUI();
-        var fromSource =Lineage_common.currentSource || Lineage_classes.mainSource;
+        var fromSource = Lineage_common.currentSource || Lineage_classes.mainSource;
         var toSource = $("#LineageRelations_setExactMatchSameAsSourceSelect").val();
         if (!fromSource) return alert("select a start source");
         if (!toSource || toSource == "") return alert("select a target source ");

@@ -233,11 +233,11 @@ var common = (function () {
                     .create_node(parentNodeId, node, position, function () {
                         self.jstree.setTreeAppearance();
                         $("#" + jstreeDiv)
-                          .jstree(true)
-                          .open_node(parentNodeId_, null, 500);
+                            .jstree(true)
+                            .open_node(parentNodeId_, null, 500);
                     });
             });
-          /*  setTimeout(function () {
+            /*  setTimeout(function () {
                 self.jstree.setTreeAppearance();
                 //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
                 $("#" + jstreeDiv)

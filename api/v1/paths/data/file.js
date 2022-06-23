@@ -35,7 +35,6 @@ module.exports = function () {
                 type: "string",
                 required: true,
             },
-
         ],
 
         responses: {

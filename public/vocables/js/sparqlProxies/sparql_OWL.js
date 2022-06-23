@@ -15,8 +15,7 @@ var Sparql_OWL = (function () {
 
     self.getSourceTaxonomyPredicates = function (source) {
         var defaultTaxonomyPredicates = " <http://www.w3.org/2000/01/rdf-schema#subClassOf> ";
-        if(Config.sources[source].allowIndividuals)
-            defaultTaxonomyPredicates +="|<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"
+        if (Config.sources[source].allowIndividuals) defaultTaxonomyPredicates += "|<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
 
         if (!source) return defaultTaxonomyPredicates;
         var sourceConfig = Config.sources[source];
@@ -30,8 +29,7 @@ var Sparql_OWL = (function () {
             if (item.indexOf("http://") == 0) str += " <" + item + "> ";
             else str += " " + item + " ";
         });
-        if(Config.sources[source].allowIndividuals)
-            str +="|<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"
+        if (Config.sources[source].allowIndividuals) str += "|<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
 
         return str;
     };
@@ -107,8 +105,7 @@ var Sparql_OWL = (function () {
         fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
         var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "select   distinct * " + fromStr + " where {";
-        if (options.selectGraph)
-            query += " GRAPH ?child1Graph {";
+        if (options.selectGraph) query += " GRAPH ?child1Graph {";
         query +=
             "?child1 " +
             Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) +
@@ -119,28 +116,24 @@ var Sparql_OWL = (function () {
             "}" +
             "OPTIONAL {?child1 rdfs:label ?child1Label." +
             Sparql_common.getLangFilter(sourceLabel, "child1Label") +
-            "}"+
-          "OPTIONAL {?child1 rdf:type ?child1Type.}"
-        ;
+            "}" +
+            "OPTIONAL {?child1 rdf:type ?child1Type.}";
 
         for (let i = 1; i < descendantsDepth; i++) {
             query +=
-                "OPTIONAL { ?child" + (i + 1) + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?child" + i + "." +
-              "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}";
-
-
+                "OPTIONAL { ?child" + (i + 1) + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?child" + i + "." + "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}";
         }
 
         for (let i = 1; i < descendantsDepth; i++) {
             query += "} ";
         }
 
-        if (options.selectGraph){
-            query += "} ";// query += " GRAPH ?conceptGraph {?concept rdf:type ?o}";
+        if (options.selectGraph) {
+            query += "} "; // query += " GRAPH ?conceptGraph {?concept rdf:type ?o}";
         }
         query += "} ";
 
-       // query +=" }";
+        // query +=" }";
 
         if (options.filterCollections) {
             fromStr = Sparql_common.getFromStr(sourceLabel);
@@ -231,7 +224,7 @@ var Sparql_OWL = (function () {
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
         if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) {
             //limit at 4 ancestorsDepth when imports
-            ancestorsDepth =Math.min(ancestorsDepth, 4);
+            ancestorsDepth = Math.min(ancestorsDepth, 4);
         }
 
         self.graphUri = Config.sources[sourceLabel].graphUri;

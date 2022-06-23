@@ -1,56 +1,46 @@
 function createStringFromTemplate(template, variables) {
-  return template.replace(new RegExp("\{([^\{]+)\}", "g"), function(_unused, varName) {
-    return variables[varName];
-  });
+    return template.replace(new RegExp("{([^{]+)}", "g"), function (_unused, varName) {
+        return variables[varName];
+    });
 }
 
 function renameIdCol(table, fromCol, toCol) {
-  var str = createStringFromTemplate(
-    "EXEC sp_rename '{field}', '{toCol}', 'COLUMN'; ",
-    {
-      field: table + "." + fromCol,
-      toCol: toCol
-    })
+    var str = createStringFromTemplate("EXEC sp_rename '{field}', '{toCol}', 'COLUMN'; ", {
+        field: table + "." + fromCol,
+        toCol: toCol,
+    });
 
-  return str;
+    return str;
 }
 
 function addFields(table, colName) {
-  var str = createStringFromTemplate(
-    "ALTER TABLE {table} ADD {colName} nvarchar(100)",
-    {
-      table: table,
-      colName: colName
-    })
+    var str = createStringFromTemplate("ALTER TABLE {table} ADD {colName} nvarchar(100)", {
+        table: table,
+        colName: colName,
+    });
 
-  return str;
+    return str;
 }
 
-function updateId(table,sourceCol,targetCol ) {
-  var str = createStringFromTemplate(
-    "update [dbo].{table} set {targetCol}= trim(LEFT({sourceCol}, CHARINDEX ( ' | ', {sourceCol}) ))",
-    {
-      table: table,
-      sourceCol: sourceCol,
-      targetCol:targetCol
-    })
+function updateId(table, sourceCol, targetCol) {
+    var str = createStringFromTemplate("update [dbo].{table} set {targetCol}= trim(LEFT({sourceCol}, CHARINDEX ( ' | ', {sourceCol}) ))", {
+        table: table,
+        sourceCol: sourceCol,
+        targetCol: targetCol,
+    });
 
-  return str;
+    return str;
 }
 
-function updateLabel(table,sourceCol,targetCol ) {
-  var str = createStringFromTemplate(
-    "update {table} set {targetCol}=" +
-    " trim(RIGHT({sourceCol},(LEN({sourceCol})- CHARINDEX ( ' | ',{sourceCol})-1 ) ))",
-    {
-      table: table,
-      sourceCol: sourceCol,
-      targetCol:targetCol
-    })
+function updateLabel(table, sourceCol, targetCol) {
+    var str = createStringFromTemplate("update {table} set {targetCol}=" + " trim(RIGHT({sourceCol},(LEN({sourceCol})- CHARINDEX ( ' | ',{sourceCol})-1 ) ))", {
+        table: table,
+        sourceCol: sourceCol,
+        targetCol: targetCol,
+    });
 
-  return str;
+    return str;
 }
-
 
 /*
 var str="EXEC sp_rename {field}, {TagID_number}, 'COLUMN;   ‘
@@ -67,31 +57,21 @@ update [dbo].[TEPDK_ADL_tblTagAttribute] set [TagID]= trim(LEFT([TagID_number], 
 update [TEPDK_ADL_tblTag] set FunctionalClassID= trim(LEFT([FunctionalClassID_label], CHARINDEX ( ' | ',[FunctionalClassID_label] ) ))
 */
 
-var table="TEPDK_RDL_tblFunctionalClassToAttribute"
-var table="TEPDK_RDL_tblFunctionalClass"
-var table="TEPDK_ADL_tblModelAttribute"
+var table = "TEPDK_RDL_tblFunctionalClassToAttribute";
+var table = "TEPDK_RDL_tblFunctionalClass";
+var table = "TEPDK_ADL_tblModelAttribute";
 
+var fromCol = "AttributeID";
 
+var mixedCol = fromCol + "_" + "label";
+var idCol = fromCol;
+var labelCol = fromCol.replace("ID", "Label");
 
-var fromCol="AttributeID"
+var str = renameIdCol(table, fromCol, mixedCol) + "\n\n";
+str += addFields(table, idCol) + ";\n\n";
 
-
-var mixedCol=fromCol+"_"+"label"
-var idCol=fromCol
-var labelCol=fromCol.replace("ID","Label")
-
-
-
-
-
-
-
-
-var str=renameIdCol(table,fromCol, mixedCol)+"\n\n"
-str+=addFields(table, idCol)+";\n\n"
-
-str+=addFields(table, labelCol)+";\n\n"
-str+=updateId(table,mixedCol,idCol )+";\n"
-str+=updateLabel(table,mixedCol,labelCol )+";\n"
+str += addFields(table, labelCol) + ";\n\n";
+str += updateId(table, mixedCol, idCol) + ";\n";
+str += updateLabel(table, mixedCol, labelCol) + ";\n";
 
 console.log(str);

@@ -9,233 +9,233 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-var Config = (function() {
-  var self = {};
+var Config = (function () {
+    var self = {};
 
-  self.apiUrl = "/api/v1";
+    self.apiUrl = "/api/v1";
 
-  self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/";
+    self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/";
 
-  self.defaultNewUriRoot = "http://souslesens.org/resource/";
-  self.loginMode = "json";
+    self.defaultNewUriRoot = "http://souslesens.org/resource/";
+    self.loginMode = "json";
 
-  self.loginMode = "none";
+    self.loginMode = "none";
 
-  self.appName = "VOCABLES";
-  self.debug = { query: 1 };
-  self.enableCollections = false;
-  self.showAssetQueyMenu = true;
-  self.preferredSchemaType = "OWL";
-  self.queryLimit = 10000;
-  self.searchLimit = 500;
-  self.searchDepth = 6;
-  self.predicatesSource = "TSF-PREDICATES";
-  self.dictionarySource = "TSF-DICTIONARY";
+    self.appName = "VOCABLES";
+    self.debug = { query: 1 };
+    self.enableCollections = false;
+    self.showAssetQueyMenu = true;
+    self.preferredSchemaType = "OWL";
+    self.queryLimit = 10000;
+    self.searchLimit = 500;
+    self.searchDepth = 6;
+    self.predicatesSource = "TSF-PREDICATES";
+    self.dictionarySource = "TSF-DICTIONARY";
 
-  (self.defaultSparqlPrefixes = {
-    xs: "<http://www.w3.org/2001/XMLSchema#>",
-    rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
-    rdfs: "<http://www.w3.org/2000/01/rdf-schema#>",
-    owl: "<http://www.w3.org/2002/07/owl#>",
-    skos: "<http://www.w3.org/2004/02/skos/core#>",
-    iso14224: "<http://data.total.com/resource/tsf/iso_14224#>",
-    req: "<https://w3id.org/requirement-ontology/rdl/>",
-    part14: "<http://rds.posccaesar.org/ontology/lis14/rdl/>",
-    iso81346: "<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
-    slsv: "<http://souslesens.org/resource/vocabulary/>",
-    dcterms: "<http://purl.org/dc/terms/>"
-  }),
-    (self.dictionaryMetaDataPropertiesMap = {
-      prop: "http://www.w3.org/2002/07/owl#onProperty",
-      range: "http://www.w3.org/2002/07/owl#someValuesFrom",
-      domain: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-      status: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
-      domainSourceLabel: "http://data.souslesens.org/property#domainSourceLabel",
-      rangeSourceLabel: "http://data.souslesens.org/property#rangeSourceLabel",
-      author: "http://purl.org/dc/terms/creator",
-      provenance: "http://purl.org/dc/terms/source",
-      creationDate: "http://purl.org/dc/terms/created"
-    });
-  self.dictionaryStatusMap = {
-    promote: "OK",
-    unPromote: "Candidate",
-    trash: "KO",
-    delete: "DELETED"
-  };
-  self.Blender = {
-    openTaxonomyTreeOnLoad: 3,
-    pasteDescendantsMaxDepth: 6,
-    prefLang: "en"
-  };
-  self.evaluate = {
-    maxZipFileSize: 30000000 //30MO
-  };
-
-  self.KGpropertyFilter = {
-    tsfPropertyFilterPrefix:"http://data.total.com/resource/tsf/property-filtering/",
-    sources: ["CFIHOS_1_5_PLUS", "TSF_TEPDK_TEST","TSF_TEPDK_PHUSION"]
-  };
-
-  self.KG = {
-    dictionaries: {
-      CFIHOS_READI: { fileName: "dictionary_READI.json" }
-    },
-
-    elasticIndexSourceMap: {
-      cfihos: "CFIHOS-ISO",
-      pca: "ISO_15926-PCA",
-      readi: "CFIHOS_READI"
-    },
-    palette: ["#1f77b4", "#9467bd", "#2ca02c", "#8c564b", "#aec7e8", "#98df8a"],
-    RDLsource: "RDL-QUANTUM-MIN",
-    OneModelSource: "ONE-MODEL",
-    mappingAlternativeSource: "CFIHOS_READI",
-    adlQueryMode: "SPARQL", //or SQL
-    queryLimit: 10000,
-    maxDistinctValuesForAdvancedMapping: 200000,
-    browserMaxClassesToDrawClassesGraph: 15,
-    oneModelDictionaryGraphURI: "http://data.total.com/resource/one-model/dictionary/",
-    topRdlObjects: {
-      "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801": {
-        label: "Functional Objects",
-        type: "http://rds.posccaesar.org/ontology/lis14/FunctionalObject"
-      },
-      "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-P0000001723": {
-        label: "Physical Objects",
-        type: "http://rds.posccaesar.org/ontology/lis14/PhysicalObject"
-      },
-      "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-B0000000000": {
-        label: "Disciplines",
-        type: "http://w3id.org/readi/z018-rdl/Discipline"
-      },
-      "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-A0000000000": {
-        label: "Attributes",
-        type: "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute"
-      }
-    }
-  },
-    self.Standardizer = {
-      elasticIndexesSourcesMap: {
-        readi: "CFIHOS_READI",
-        pca: "ISO_15926-PCA",
-        cfihos: "CFIHOS-ISO"
-      }
+    (self.defaultSparqlPrefixes = {
+        xs: "<http://www.w3.org/2001/XMLSchema#>",
+        rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+        rdfs: "<http://www.w3.org/2000/01/rdf-schema#>",
+        owl: "<http://www.w3.org/2002/07/owl#>",
+        skos: "<http://www.w3.org/2004/02/skos/core#>",
+        iso14224: "<http://data.total.com/resource/tsf/iso_14224#>",
+        req: "<https://w3id.org/requirement-ontology/rdl/>",
+        part14: "<http://rds.posccaesar.org/ontology/lis14/rdl/>",
+        iso81346: "<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
+        slsv: "<http://souslesens.org/resource/vocabulary/>",
+        dcterms: "<http://purl.org/dc/terms/>",
+    }),
+        (self.dictionaryMetaDataPropertiesMap = {
+            prop: "http://www.w3.org/2002/07/owl#onProperty",
+            range: "http://www.w3.org/2002/07/owl#someValuesFrom",
+            domain: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            status: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
+            domainSourceLabel: "http://data.souslesens.org/property#domainSourceLabel",
+            rangeSourceLabel: "http://data.souslesens.org/property#rangeSourceLabel",
+            author: "http://purl.org/dc/terms/creator",
+            provenance: "http://purl.org/dc/terms/source",
+            creationDate: "http://purl.org/dc/terms/created",
+        });
+    self.dictionaryStatusMap = {
+        promote: "OK",
+        unPromote: "Candidate",
+        trash: "KO",
+        delete: "DELETED",
+    };
+    self.Blender = {
+        openTaxonomyTreeOnLoad: 3,
+        pasteDescendantsMaxDepth: 6,
+        prefLang: "en",
+    };
+    self.evaluate = {
+        maxZipFileSize: 30000000, //30MO
     };
 
-  self.Lineage = {
-    showSourceNodesInGraph: false,
-    basicObjectProperties: [
-      { id: "http://www.w3.org/2002/07/owl#sameAs", label: "owl:sameAs", type: "ObjectProperty" },
-      { id: "http://www.w3.org/2000/01/rdf-schema#label", label: "rdfs:label", type: "dataTypeProperty" },
-      { id: "http://www.w3.org/2000/01/rdf-schema#comment", label: "rdfs:comment", type: "dataTypeProperty" },
-      { id: "http://www.w3.org/2000/01/rdf-schema#subClassOf", label: "rdfs:subClassOf", type: "ObjectProperty" },
-      { id: "http://rds.posccaesar.org/ontology/lis14/partOf", label: "part14:partOf", type: "ObjectProperty" },
-      { id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type", type: "ObjectProperty" },
-      {
-        id: "http://rds.posccaesar.org/ontology/lis14/representedBy",
-        label: "part14:representedBy",
-        type: "dataTypeProperty"
-      },
-      { id: "http://www.w3.org/2004/02/skos/core#prefLabel", label: "skos:prefLabel", type: "dataTypeProperty" }
-    ]
-  };
+    self.KGpropertyFilter = {
+        tsfPropertyFilterPrefix: "http://data.total.com/resource/tsf/property-filtering/",
+        sources: ["CFIHOS_1_5_PLUS", "TSF_TEPDK_TEST", "TSF_TEPDK_PHUSION"],
+    };
 
-  /*****************************************************************************/
-  self.sources = {};
-  self.tools = {};
+    (self.KG = {
+        dictionaries: {
+            CFIHOS_READI: { fileName: "dictionary_READI.json" },
+        },
 
-  self.tools["sourceBrowser"] = {
-    label: "Browse",
-    multiSources: 0,
-    controller: SourceBrowser,
-    toolDescriptionImg: null
-  }; //"images/browse.png"}
-  //  self.tools["sourceEditor"] = {label: "Edit", multiSources: 0, controller: SourceEditor,toolDescriptionImg:null},
-  self.tools["sourceMatcher"] = {
-    label: "Match",
-    multiSources: 0,
-    controller: SourceMatcher,
-    toolDescriptionImg: null
-  }; //"images/match.png"}
-  self.tools["evaluate"] = { label: "Evaluate", noSource: 1, controller: Evaluate, toolDescriptionImg: null }; //"images/evaluate.png"}
-  self.tools["ancestors"] = { label: "Genealogy", multiSources: 1, controller: Genealogy, toolDescriptionImg: null }; //"images/taxonomy.png"}
+        elasticIndexSourceMap: {
+            cfihos: "CFIHOS-ISO",
+            pca: "ISO_15926-PCA",
+            readi: "CFIHOS_READI",
+        },
+        palette: ["#1f77b4", "#9467bd", "#2ca02c", "#8c564b", "#aec7e8", "#98df8a"],
+        RDLsource: "RDL-QUANTUM-MIN",
+        OneModelSource: "ONE-MODEL",
+        mappingAlternativeSource: "CFIHOS_READI",
+        adlQueryMode: "SPARQL", //or SQL
+        queryLimit: 10000,
+        maxDistinctValuesForAdvancedMapping: 200000,
+        browserMaxClassesToDrawClassesGraph: 15,
+        oneModelDictionaryGraphURI: "http://data.total.com/resource/one-model/dictionary/",
+        topRdlObjects: {
+            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801": {
+                label: "Functional Objects",
+                type: "http://rds.posccaesar.org/ontology/lis14/FunctionalObject",
+            },
+            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-P0000001723": {
+                label: "Physical Objects",
+                type: "http://rds.posccaesar.org/ontology/lis14/PhysicalObject",
+            },
+            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-B0000000000": {
+                label: "Disciplines",
+                type: "http://w3id.org/readi/z018-rdl/Discipline",
+            },
+            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-A0000000000": {
+                label: "Attributes",
+                type: "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute",
+            },
+        },
+    }),
+        (self.Standardizer = {
+            elasticIndexesSourcesMap: {
+                readi: "CFIHOS_READI",
+                pca: "ISO_15926-PCA",
+                cfihos: "CFIHOS-ISO",
+            },
+        });
 
-  self.tools["lineage"] = { label: "Lineage", noSource: 0, controller: Lineage_classes, toolDescriptionImg: null }; //"images/taxonomy.png"}
+    self.Lineage = {
+        showSourceNodesInGraph: false,
+        basicObjectProperties: [
+            { id: "http://www.w3.org/2002/07/owl#sameAs", label: "owl:sameAs", type: "ObjectProperty" },
+            { id: "http://www.w3.org/2000/01/rdf-schema#label", label: "rdfs:label", type: "dataTypeProperty" },
+            { id: "http://www.w3.org/2000/01/rdf-schema#comment", label: "rdfs:comment", type: "dataTypeProperty" },
+            { id: "http://www.w3.org/2000/01/rdf-schema#subClassOf", label: "rdfs:subClassOf", type: "ObjectProperty" },
+            { id: "http://rds.posccaesar.org/ontology/lis14/partOf", label: "part14:partOf", type: "ObjectProperty" },
+            { id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type", type: "ObjectProperty" },
+            {
+                id: "http://rds.posccaesar.org/ontology/lis14/representedBy",
+                label: "part14:representedBy",
+                type: "dataTypeProperty",
+            },
+            { id: "http://www.w3.org/2004/02/skos/core#prefLabel", label: "skos:prefLabel", type: "dataTypeProperty" },
+        ],
+    };
 
-  /*  self.tools["KGmappings"] = {
+    /*****************************************************************************/
+    self.sources = {};
+    self.tools = {};
+
+    self.tools["sourceBrowser"] = {
+        label: "Browse",
+        multiSources: 0,
+        controller: SourceBrowser,
+        toolDescriptionImg: null,
+    }; //"images/browse.png"}
+    //  self.tools["sourceEditor"] = {label: "Edit", multiSources: 0, controller: SourceEditor,toolDescriptionImg:null},
+    self.tools["sourceMatcher"] = {
+        label: "Match",
+        multiSources: 0,
+        controller: SourceMatcher,
+        toolDescriptionImg: null,
+    }; //"images/match.png"}
+    self.tools["evaluate"] = { label: "Evaluate", noSource: 1, controller: Evaluate, toolDescriptionImg: null }; //"images/evaluate.png"}
+    self.tools["ancestors"] = { label: "Genealogy", multiSources: 1, controller: Genealogy, toolDescriptionImg: null }; //"images/taxonomy.png"}
+
+    self.tools["lineage"] = { label: "Lineage", noSource: 0, controller: Lineage_classes, toolDescriptionImg: null }; //"images/taxonomy.png"}
+
+    /*  self.tools["KGmappings"] = {
       label: "KGmappings",
       multiSources: 0,
       controller: KGmappings,
       toolDescriptionImg: null,
   };*/
 
-  self.tools["Standardizer"] = {
-    label: "Standardizer",
-    multiSources: 0,
-    controller: Standardizer,
-    toolDescriptionImg: null
-  }; //"images/taxonomy.png"}
+    self.tools["Standardizer"] = {
+        label: "Standardizer",
+        multiSources: 0,
+        controller: Standardizer,
+        toolDescriptionImg: null,
+    }; //"images/taxonomy.png"}
 
-  self.tools["TSF_Dictionary"] = {
-    label: "TSF_Dictionary",
-    noSource: 1,
-    controller: Lineage_dictionary,
-    toolDescriptionImg: null
-  };
+    self.tools["TSF_Dictionary"] = {
+        label: "TSF_Dictionary",
+        noSource: 1,
+        controller: Lineage_dictionary,
+        toolDescriptionImg: null,
+    };
 
-  self.tools["KGcreator"] = {
-    label: "KGcreator",
-    noSource: 1,
-    controller: KGcreator,
-    toolDescriptionImg: null
-  };
+    self.tools["KGcreator"] = {
+        label: "KGcreator",
+        noSource: 1,
+        controller: KGcreator,
+        toolDescriptionImg: null,
+    };
 
-  self.tools["KGbrowser"] = { label: "KGbrowser", multiSources: 0, controller: KGbrowser, toolDescriptionImg: null }; //"images/taxonomy.png"}
+    self.tools["KGbrowser"] = { label: "KGbrowser", multiSources: 0, controller: KGbrowser, toolDescriptionImg: null }; //"images/taxonomy.png"}
 
-  self.tools["KGpropertyFilter"] = {
-    label: "KGpropertyFilter",
-    noSource: 1,
-    controller: KGpropertyFilter,
-    toolDescriptionImg: null
-  };
+    self.tools["KGpropertyFilter"] = {
+        label: "KGpropertyFilter",
+        noSource: 1,
+        controller: KGpropertyFilter,
+        toolDescriptionImg: null,
+    };
 
-  self.tools["TE_14224_browser"] = {
-    label: "TE_14224_browser",
-    multiSources: 0,
-    noSource: true,
-    controller: TE_14224_browser,
-    toolDescriptionImg: null
-  };
+    self.tools["TE_14224_browser"] = {
+        label: "TE_14224_browser",
+        multiSources: 0,
+        noSource: true,
+        controller: TE_14224_browser,
+        toolDescriptionImg: null,
+    };
 
-  self.tools["TE_AssetConfigurator"] = {
-    label: "TE_AssetConfigurator",
-    multiSources: 0,
-    noSource: true,
-    controller: TE_AssetConfigurator,
-    toolDescriptionImg: null
-  };
-  self.tools["SQLquery"] = {
-    label: "SQLquery",
-    multiSources: 0,
-    controller: SQLquery,
-    toolDescriptionImg: null
-  }; //"images/taxonomy.png"}
+    self.tools["TE_AssetConfigurator"] = {
+        label: "TE_AssetConfigurator",
+        multiSources: 0,
+        noSource: true,
+        controller: TE_AssetConfigurator,
+        toolDescriptionImg: null,
+    };
+    self.tools["SQLquery"] = {
+        label: "SQLquery",
+        multiSources: 0,
+        controller: SQLquery,
+        toolDescriptionImg: null,
+    }; //"images/taxonomy.png"}
 
-  self.tools["SPARQL"] = {
-    label: "SPARQL endpoint",
-    multiSources: 0,
-    controller: SPARQL_endpoint,
-    toolDescriptionImg: null
-  };
+    self.tools["SPARQL"] = {
+        label: "SPARQL endpoint",
+        multiSources: 0,
+        controller: SPARQL_endpoint,
+        toolDescriptionImg: null,
+    };
 
-  self.tools["admin"] = { label: "Admin", multiSources: 1, controller: Admin, toolDescriptionImg: null }; //"images/taxonomy.png"}
+    self.tools["admin"] = { label: "Admin", multiSources: 1, controller: Admin, toolDescriptionImg: null }; //"images/taxonomy.png"}
 
-  self.tools["ConfigEditor"] = {
-    label: "ConfigEditor",
-    noSource: 1,
-    controller: ConfigEditor,
-    toolDescriptionImg: null
-  };
+    self.tools["ConfigEditor"] = {
+        label: "ConfigEditor",
+        noSource: 1,
+        controller: ConfigEditor,
+        toolDescriptionImg: null,
+    };
 
-  return self;
+    return self;
 })();

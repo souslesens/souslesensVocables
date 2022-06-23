@@ -709,7 +709,7 @@ var xx = result
       if (str.indexOf("rdf:type") < 0) return alert("a type must be declared");
       if (str.indexOf("owl:Class") > -1 && str.indexOf("rdfs:subClassOf") < 0) return alert("a class must be a rdfs:subClassOf anotherClass");
       if (str.indexOf("owl:Class") > -1 && str.indexOf("rdfs:label") < 0) return alert("a class must have a rdfs:label");
-      if (confirm("create node")) {
+      if (true || confirm("create node")) {
         Sparql_generic.insertTriples(Lineage_classes.mainSource, self.graphModification.creatingNodeTriples, {}, function(err, _result) {
           if (err) return alert(err);
           $("#LineagePopup").dialog("close");

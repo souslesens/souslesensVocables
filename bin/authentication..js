@@ -13,7 +13,7 @@ var jsonFileStorage = require("./jsonFileStorage.js");
 var path = require("path");
 var fs = require("fs");
 //var mySqlProxy = require("./mySQLproxy..js");
-//const bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt");
 
 var passport = require("passport");
 var Strategy = require("passport-local");

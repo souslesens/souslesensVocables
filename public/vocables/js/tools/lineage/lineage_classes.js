@@ -781,7 +781,13 @@ action: function (e) {
           id: nodeData.id + "_" + id,
           from: nodeData.id,
           to: id,
-          width: 5
+          width: 5,
+          data:{
+            from: nodeData.id,
+            to: id,
+            prop:prop,
+            type:"property"
+          }
         });
       }
       visjsGraph.data.nodes.add(visjsData.nodes);
@@ -909,7 +915,13 @@ action: function (e) {
                         font: { multi: true, size: 8 },
                         color: Lineage_classes.defaultEdgeColor,
                         to: item.value.value,
-                        arrows: arrows
+                        arrows: arrows,
+                        data:{
+                          from: nodeData.id,
+                          to: item.value.value,
+                          prop:item.prop.value,
+                          type:"property"
+                        }
                       });
                     }
                   }
@@ -929,7 +941,7 @@ action: function (e) {
 
         function(callbackSeries) {
           if (propFilter != "all") return callbackSeries();
-          self.drawRestrictions(Lineage_common.currentSource, ids, true);
+          self.drawRestrictions(nodeData.source, ids, true);
           callbackSeries();
         }
       ],
@@ -1725,12 +1737,12 @@ action: function (e) {
   ) {
     if (!options) options = {};
     if (!classIds) {
-      if (!source) source = Lineage_common.currentSource || Lineage_classes.mainSource;
-      if (!source) return alert("select a source");
+
       classIds = self.getGraphIdsFromSource(source);
     }
     if (classIds == "all") classIds = null;
-
+    if (!source) source = Lineage_common.currentSource || Lineage_classes.mainSource;
+    if (!source) return alert("select a source");
     MainController.UI.message("");
 
     Sparql_OWL.getObjectRestrictions(
@@ -1738,6 +1750,7 @@ action: function (e) {
       classIds,
       {
         withoutImports: Lineage_common.currentSource || false,
+
         addInverseRestrictions: 1
       },
       function(/** @type {any} */ err, /** @type {any[]} */ result) {
@@ -1750,6 +1763,10 @@ action: function (e) {
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = visjsGraph.getExistingIdsMap();
         self.currentExpandLevel += 1;
+
+        var restrictionSource= source
+        if (!Config.sources[source].editable)
+          restrictionSource = Config.predicatesSource;
 
         var shape = Lineage_classes.defaultShape;
         result.forEach(function(
@@ -1820,7 +1837,7 @@ action: function (e) {
               from: item.value.value,
               to: item.concept.value,
               label: "<i>" + item.propLabel.value + "</i>",
-              data: { propertyId: item.prop.value, bNodeId: item.node.value, source: source },
+              data: { propertyId: item.prop.value, bNodeId: item.node.value, source: restrictionSource },
               font: { multi: true, size: 10 },
               // font: {align: "middle", ital: {color:Lineage_classes.objectPropertyColor, mod: "italic", size: 10}},
               //   physics:false,

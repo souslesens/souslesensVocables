@@ -601,6 +601,7 @@ var xx = result
           if (!Config.sources[Lineage_classes.mainSource].allowIndividuals) {
             $("#LineageBlend_creatingNamedIndividualButton").css("display", "none");
           }
+          self.currentPossibleClassesAndPredicates = result;
           common.fillSelectOptions("KGcreator_predicateSelect", result.predicates, true, "label", "id");
           common.fillSelectOptions("KGcreator_objectSelect", result.usualObjects.concat(result.part14Objects).concat(result.sourceObjects), true, "label", "id");
           common.fillSelectOptions("LineageBlend_creatingNodePredicatesSelect", result.predicates, true, "label", "id");
@@ -621,6 +622,7 @@ var xx = result
       }
 
       $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open");
+      $("#LineageBlend_creatingNodeClassParamsDiv").tabs({});
     },
 
     openCreatNodeDialogOpen: function(type) {
@@ -682,12 +684,94 @@ var xx = result
         if (!superClass) return alert("owl:Class is mandatory");
         self.graphModification.addTripleToCreatingNode("rdf:type", "owl:Class");
         self.graphModification.addTripleToCreatingNode("rdfs:subClassOf", superClass);
-      }
-      else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
+      } else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
         var individualtypeClass = $("#LineageBlend_creatingNodeObjects2Select").val();
         if (!individualtypeClass) return alert("owl:Class is mandatory");
         self.graphModification.addTripleToCreatingNode("rdf:type", "owl:NamedIndividual");
         self.graphModification.addTripleToCreatingNode("rdf:type", individualtypeClass);
+      }
+    },
+    addClassListTiples: function() {
+      var str = $("#LineageBlend_creatingNode_nodeListTA").val();
+      if (!str)
+        return alert("no tbale data to process");
+      var lines = str.split("\n");
+
+      var possibleClasses = self.currentPossibleClassesAndPredicates.part14Objects.concat(self.currentPossibleClassesAndPredicates.sourceObjects);
+      if (self.graphModification.currentCreatingNodeType == "Class") {
+        possibleClasses = self.currentPossibleClassesAndPredicates.part14Objects.concat(self.currentPossibleClassesAndPredicates.sourceObjects);
+
+    } else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
+        possibleClasses =self.currentPossibleClassesAndPredicates.sourceObjects;
+      }
+
+      var possibleClassesLabels = [];
+      var classLabelUrisMap = {};
+      possibleClasses.forEach(function(obj) {
+        var classLabel = obj.label;
+        var array = classLabel.split(/[:\/\#]/);
+        if (array.length > 0)
+          classLabel = array[array.length - 1];
+        possibleClassesLabels.push(classLabel);
+        classLabelUrisMap[classLabel] = obj.id;
+      });
+      var wrongClasses = [];
+      var triples = [];
+      let graphUri = Config.sources[Lineage_classes.mainSource].graphUri;
+      let newUris=[]
+      lines.forEach(function(line, indexLine) {
+        line = line.trim();
+        var cells = line.split(/[,\t]/);
+        var label = cells[0];
+        var classLabel = cells[1];
+
+
+        var nodeUri = graphUri + common.getRandomHexaId(10);
+        newUris.push(nodeUri)
+        if (possibleClassesLabels.indexOf(classLabel) < 0) {
+          wrongClasses.push({ line: indexLine, classLabel: classLabel });
+        } else {
+
+          triples.push({subject:nodeUri, predicate: "rdfs:label", object: label });
+          if (self.graphModification.currentCreatingNodeType == "Class") {
+            triples.push({subject: nodeUri, predicate: "rdf:type", object: "owl:Class" });
+            triples.push({subject: nodeUri, predicate: "rdfs:subClassOf", object: classLabelUrisMap[classLabel] });
+          } else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
+            triples.push({ subject: nodeUri,predicate: "rdf:type", object: "owl:NamedIndividual" });
+            triples.push({subject: nodeUri, predicate: "rdf:type", object: classLabelUrisMap[classLabel] });
+
+          }
+        }
+      });
+
+      if (wrongClasses.length>0) {
+        var html = "<b>wrong lines</b><br><ul>";
+        wrongClasses.forEach(function(item){
+          html+="<li>line "+item.line+" unrecognized classLabel "+item.classLabel+"</li>"
+        })
+        $("#LineageBlend_creatingNodeListJournalDiv").html(html);
+        $("#LineageBlend_creatingNodeClassParamsDiv").tabs("option", "active",2)
+      }else{
+        if(confirm("create "+lines.length+" nodes")){
+          Sparql_generic.insertTriples(Lineage_classes.mainSource,triples, {}, function(err, _result) {
+            if (err) return alert(err);
+
+            MainController.UI.message(newUris.length+" triples created")
+            $("#LineagePopup").dialog("close");
+         /*   var nodeData = {
+              id: self.graphModification.creatingNodeUri,
+              source: Lineage_classes.mainSource
+            };
+            MainController.UI.message("node Created");
+            self.graphModification.creatingNodeTriples = [];
+            Lineage_classes.drawNodeAndParents(nodeData);*/
+            SearchUtil.generateElasticIndex(Lineage_classes.mainSource, { ids:newUris }, function(err, result) {
+              if (err) return alert(err.responseText);
+              MainController.UI.message(newUris.length+"nodes Created and Indexed");
+            });
+          });
+
+        }
       }
     },
 
@@ -733,7 +817,7 @@ var xx = result
         self.sourceNode = visjsGraph.data.nodes.get(edgeData.from).data;
         self.targetNode = visjsGraph.data.nodes.get(edgeData.to).data;
         $("#lineageAddEdgeDialog_Title").html(self.sourceNode.label + " -> " + self.targetNode.label);
-        $("#lineageAddEdgeDialog_Tabs").tabs({});
+
 
         let options = {
           openAll: true,

@@ -691,6 +691,7 @@ var xx = result
         self.graphModification.addTripleToCreatingNode("rdf:type", individualtypeClass);
       }
     },
+
     addClassListTiples: function() {
       var str = $("#LineageBlend_creatingNode_nodeListTA").val();
       if (!str)

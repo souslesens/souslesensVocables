@@ -67,6 +67,33 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
     }
   };
 
+  self.createSubProperty=function(source, superPropId, subPropertyLabel, callback) {
+
+    var subPropId = Config.sources[source].graphUri + common.getRandomHexaId(10);
+    var triples = [
+      {
+        subject: subPropId,
+        predicate: "rdf:type",
+        object: "owl:ObjectProperty"
+      }
+      , {
+        subject: subPropId,
+        predicate: "rdfs:label",
+        object: subPropertyLabel
+      }
+      , {
+        subject: subPropId,
+        predicate: "owl:subPropertyOf",
+        object: superPropId
+      }]
+
+    Sparql_generic.insertTriples(inSource, allTriples, null, function(err, _result) {
+      callback(err,{uri:subPropId});
+    });
+
+  }
+
+
   self.createRelationUI = function(type, addImportToCurrentSource, createInverseRelation) {
     var sourceNode = self.currentAssociation[0];
     var targetNode = self.currentAssociation[1];
@@ -593,7 +620,7 @@ var xx = result
   self.graphModification = {
     showAddNodeGraphDialog: function() {
       self.graphModification.creatingNodeTriples = [];
-      self.graphModification.creatingNodeUri = null;
+      self.graphModification.creatingsourceUri = null;
       $("#LineagePopup").dialog("open");
       $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function() {
         self.getSourcePossiblePredicatesAndObject(Lineage_classes.mainSource, function(err, result) {
@@ -631,9 +658,9 @@ var xx = result
       }
     },
     addTripleToCreatingNode: function(predicate, object) {
-      if (!self.graphModification.creatingNodeUri) {
+      if (!self.graphModification.creatingsourceUri) {
         let graphUri = Config.sources[Lineage_classes.mainSource].graphUri;
-        self.graphModification.creatingNodeUri = graphUri + common.getRandomHexaId(10);
+        self.graphModification.creatingsourceUri = graphUri + common.getRandomHexaId(10);
         // self.graphModification.creatingNodeTriples = [];
       }
       if (!predicate) predicate = $("#KGcreator_predicateInput").val();
@@ -648,7 +675,7 @@ var xx = result
       if (!object) return alert("no value for object");
 
       var triple = {
-        subject: self.graphModification.creatingNodeUri,
+        subject: self.graphModification.creatingsourceUri,
         predicate: predicate,
         object: object
       };
@@ -670,7 +697,7 @@ var xx = result
       );
     },
 
-    addClassStiples: function() {
+    addClassOrIndividualTriples: function() {
       $("#LineageBlend_creatingNodeClassParamsDiv").dialog("close");
 
       var label = $("#LineageBlend_creatingNodeNewClassLabel").val();
@@ -692,83 +719,98 @@ var xx = result
       }
     },
 
-    addClassListTiples: function() {
+    addClassesOrIndividualsTriples: function() {
       var str = $("#LineageBlend_creatingNode_nodeListTA").val();
-      if (!str)
-        return alert("no tbale data to process");
-      var lines = str.split("\n");
+      if (!str) return alert("no tbale data to process");
+      var lines = str.trim().split("\n");
 
       var possibleClasses = self.currentPossibleClassesAndPredicates.part14Objects.concat(self.currentPossibleClassesAndPredicates.sourceObjects);
       if (self.graphModification.currentCreatingNodeType == "Class") {
         possibleClasses = self.currentPossibleClassesAndPredicates.part14Objects.concat(self.currentPossibleClassesAndPredicates.sourceObjects);
-
-    } else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
-        possibleClasses =self.currentPossibleClassesAndPredicates.sourceObjects;
+      } else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
+        possibleClasses = self.currentPossibleClassesAndPredicates.sourceObjects;
       }
 
-      var possibleClassesLabels = [];
-      var classLabelUrisMap = {};
+
+      var targetUrisMap = {};
       possibleClasses.forEach(function(obj) {
         var classLabel = obj.label;
         var array = classLabel.split(/[:\/\#]/);
         if (array.length > 0)
           classLabel = array[array.length - 1];
-        possibleClassesLabels.push(classLabel);
-        classLabelUrisMap[classLabel] = obj.id;
+        targetUrisMap[classLabel] = obj.id;
       });
+
+
       var wrongClasses = [];
       var triples = [];
       let graphUri = Config.sources[Lineage_classes.mainSource].graphUri;
-      let newUris=[]
+      let sourceUrisMap = {};
+      var sourceUrisArray = [];
       lines.forEach(function(line, indexLine) {
         line = line.trim();
         var cells = line.split(/[,\t]/);
         var label = cells[0];
         var classLabel = cells[1];
 
+        if (targetUrisMap[label]) {
+          sourceUrisMap[label] = targetUrisMap[label];
+        } else {
+          var sourceUri = graphUri + common.getRandomHexaId(10);
+          sourceUrisMap[label] = sourceUri;
+          sourceUrisArray.push(sourceUri);
+        }
 
-        var nodeUri = graphUri + common.getRandomHexaId(10);
-        newUris.push(nodeUri)
-        if (possibleClassesLabels.indexOf(classLabel) < 0) {
+
+      });
+
+
+      lines.forEach(function(line, indexLine) {
+        line = line.trim();
+        var cells = line.split(/[,\t]/);
+        var label = cells[0];
+        var classLabel = cells[1];
+        var sourceUri = sourceUrisMap[label];
+        var targetUri = targetUrisMap[classLabel];
+        if (!targetUri)//targetUri  declared in the list as source node
+          targetUri = sourceUrisMap[classLabel];
+
+        if (!targetUri) {
           wrongClasses.push({ line: indexLine, classLabel: classLabel });
         } else {
 
-          triples.push({subject:nodeUri, predicate: "rdfs:label", object: label });
+          triples.push({ subject: sourceUri, predicate: "rdfs:label", object: label });
           if (self.graphModification.currentCreatingNodeType == "Class") {
-            triples.push({subject: nodeUri, predicate: "rdf:type", object: "owl:Class" });
-            triples.push({subject: nodeUri, predicate: "rdfs:subClassOf", object: classLabelUrisMap[classLabel] });
+            triples.push({ subject: sourceUri, predicate: "rdf:type", object: "owl:Class" });
+            triples.push({ subject: sourceUri, predicate: "rdfs:subClassOf", object: targetUri });
           } else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
-            triples.push({ subject: nodeUri,predicate: "rdf:type", object: "owl:NamedIndividual" });
-            triples.push({subject: nodeUri, predicate: "rdf:type", object: classLabelUrisMap[classLabel] });
-
+            triples.push({ subject: sourceUri, predicate: "rdf:type", object: "owl:NamedIndividual" });
+            triples.push({ subject: sourceUri, predicate: "rdf:type", object: targetUri });
           }
         }
       });
 
-      if (wrongClasses.length>0) {
+      if (wrongClasses.length > 0) {
         var html = "<b>wrong lines</b><br><ul>";
-        wrongClasses.forEach(function(item){
-          html+="<li>line "+item.line+" unrecognized classLabel "+item.classLabel+"</li>"
-        })
+        wrongClasses.forEach(function(item) {
+          html += "<li>line " + item.line + " unrecognized classLabel " + item.classLabel + "</li>";
+        });
         $("#LineageBlend_creatingNodeListJournalDiv").html(html);
-        $("#LineageBlend_creatingNodeClassParamsDiv").tabs("option", "active",2)
-      }else{
-        if(confirm("create "+lines.length+" nodes")){
-          Sparql_generic.insertTriples(Lineage_classes.mainSource,triples, {}, function(err, _result) {
+        $("#LineageBlend_creatingNodeClassParamsDiv").tabs("option", "active", 2);
+      } else {
+        if (confirm("create " + lines.length + " nodes")) {
+          Sparql_generic.insertTriples(Lineage_classes.mainSource, triples, {}, function(err, _result) {
             if (err) return alert(err);
-
-            MainController.UI.message(newUris.length+" triples created")
-            $("#LineagePopup").dialog("close");
-         /*   var nodeData = {
-              id: self.graphModification.creatingNodeUri,
-              source: Lineage_classes.mainSource
-            };
-            MainController.UI.message("node Created");
             self.graphModification.creatingNodeTriples = [];
-            Lineage_classes.drawNodeAndParents(nodeData);*/
-            SearchUtil.generateElasticIndex(Lineage_classes.mainSource, { ids:newUris }, function(err, result) {
+            MainController.UI.message(sourceUrisArray.length + " triples created, indexing...");
+
+            SearchUtil.generateElasticIndex(Lineage_classes.mainSource, { ids: sourceUrisArray }, function(err, result) {
               if (err) return alert(err.responseText);
-              MainController.UI.message(newUris.length+"nodes Created and Indexed");
+              Lineage_classes.addNodesAndParentsToGraph(Lineage_classes.mainSource, sourceUrisArray, {}, function(err) {
+                $("#LineageBlend_creatingNodeClassParamsDiv").dialog("close");
+                $("#LineagePopup").dialog("close");
+                MainController.UI.message(sourceUrisArray.length + "nodes Created and Indexed");
+              });
             });
           });
 
@@ -799,13 +841,13 @@ var xx = result
           if (err) return alert(err);
           $("#LineagePopup").dialog("close");
           var nodeData = {
-            id: self.graphModification.creatingNodeUri,
+            id: self.graphModification.creatingsourceUri,
             source: Lineage_classes.mainSource
           };
           MainController.UI.message("node Created");
           self.graphModification.creatingNodeTriples = [];
           Lineage_classes.drawNodeAndParents(nodeData);
-          SearchUtil.generateElasticIndex(Lineage_classes.mainSource, { ids: [self.graphModification.creatingNodeUri] }, function(err, result) {
+          SearchUtil.generateElasticIndex(Lineage_classes.mainSource, { ids: [self.graphModification.creatingsourceUri] }, function(err, result) {
             if (err) return alert(err.responseText);
             MainController.UI.message("node Created and Indexed");
           });
@@ -818,7 +860,6 @@ var xx = result
         self.sourceNode = visjsGraph.data.nodes.get(edgeData.from).data;
         self.targetNode = visjsGraph.data.nodes.get(edgeData.to).data;
         $("#lineageAddEdgeDialog_Title").html(self.sourceNode.label + " -> " + self.targetNode.label);
-
 
         let options = {
           openAll: true,

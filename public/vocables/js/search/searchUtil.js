@@ -364,6 +364,10 @@ var SearchUtil = (function () {
         });
     };
 
+
+
+
+
     self.generateElasticIndex = function (sourceLabel, options, callback) {
         var withImports = $("#admin_refreshIndexWithImportCBX").prop("checked");
         var sources = [sourceLabel];
@@ -533,6 +537,7 @@ var SearchUtil = (function () {
             }
         );
     };
+
 
     self.getSourceLabelFromIndexName = function (index) {
         for (var source in Config.sources) {

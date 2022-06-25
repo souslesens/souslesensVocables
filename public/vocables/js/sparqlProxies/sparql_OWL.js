@@ -258,7 +258,8 @@ var Sparql_OWL = (function () {
 
         for (var i = 1; i <= ancestorsDepth; i++) {
             if (i == 1) {
-                query += "  OPTIONAL{?concept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
+              //  query += "  OPTIONAL{?concept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
+                query += "  ?concept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
                 query += "  OPTIONAL{ ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} ";
                 query += " OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label.}";
             } else {
@@ -269,7 +270,7 @@ var Sparql_OWL = (function () {
             }
         }
 
-        for (let i = 0; i < ancestorsDepth; i++) {
+        for (let i = 1; i < ancestorsDepth; i++) {
             query += "} ";
         }
         query += " FILTER (!isBlank(?concept))" + strFilter;
@@ -787,6 +788,8 @@ var Sparql_OWL = (function () {
             }
         );
     };
+
+
 
     self.schema = {
         getOwlChildrenClasses: function (callback) {

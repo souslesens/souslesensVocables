@@ -23,7 +23,7 @@ broadcastChannel.onmessage = function (ev) {
             async.eachSeries(Object.keys(classUrisBySource), function (source, callbackEach) {
                 if (i++ == 0) MainController.currentSource = source;
                 MainController.UI.onSourceSelect();
-                Lineage_classes.addParentsToGraph(source, classUrisBySource[source], function (err) {
+                Lineage_classes.addNodesAndParentsToGraph(source, classUrisBySource[source],{}, function (err) {
                     if (err) return alert(err);
                     callbackEach();
                 });

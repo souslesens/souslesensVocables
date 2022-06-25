@@ -231,6 +231,7 @@ var elasticRestProxy = {
             callback(null, indexes);
         });
     },
+
 };
 
 module.exports = elasticRestProxy;

@@ -2387,6 +2387,7 @@ upperNodeIds.push(id);
 
         })
       }
+
       else{//simple predicate
         var sourceVisjsNode = visjsGraph.data.nodes.get(edge.from)
         var targetVisjsNode = visjsGraph.data.nodes.get(edge.to)

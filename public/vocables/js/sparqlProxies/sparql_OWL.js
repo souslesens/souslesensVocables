@@ -420,12 +420,12 @@ var Sparql_OWL = (function () {
             return callback(null, result.results.bindings);
         });
     };
-    self.getObjectProperties = function (sourceLabel, ids, options, callback) {
+    self.getObjectProperties = function (sourceLabel, domainIds, options, callback) {
         if (!options) {
             options = {};
         }
         var filterStr = "";
-        if (ids) filterStr = Sparql_common.setFilter("domain", ids, null, options);
+        if (domainIds) filterStr = Sparql_common.setFilter("domain", domainIds, null, options);
         if (options.inverseRestriction) filterStr = Sparql_common.setFilter("range", ids, null, options);
         if (options.propIds) filterStr = Sparql_common.setFilter("prop", options.propIds, null, options);
         if (options.subPropIds) filterStr = Sparql_common.setFilter("subProp", options.subPropIds, null, options);
@@ -492,6 +492,41 @@ var Sparql_OWL = (function () {
             return callback(null, result.results.bindings);
         });
     };
+
+
+    self.getObjectSubProperties = function (sourceLabel, propertyIds, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        var filterStr = "";
+
+        var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
+        var filterStr = Sparql_common.setFilter("property", propertyIds);
+        var query =
+          "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
+          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+          "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+          "select distinct ?property ?propertyLabel ?subProperty ?subPropertyLabel " +
+          fromStr +
+          " WHERE {?subProperty rdfs:subPropertyOf+ ?property . " +
+          " OPTIONAL{?subProperty rdfs:label ?subPropertyLabel.}  " +
+          " OPTIONAL{?property rdfs:label ?propertyLabel.}  " +
+          filterStr+
+          "} limit 10000"
+
+        self.graphUri = Config.sources[sourceLabel].graphUri;
+        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+        var url = self.sparql_url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
+            if (err) {
+                return callback(err);
+            }
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["property", "subProperty"]);
+            return callback(null, result.results.bindings)
+        })
+    }
+
     self.getObjectRestrictions = function (sourceLabel, ids, options, callback) {
         if (!options) {
             options = {};

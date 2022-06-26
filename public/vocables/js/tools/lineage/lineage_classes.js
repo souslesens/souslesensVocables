@@ -1990,7 +1990,7 @@ namedIndividualsMap[item.concept.value] = 1
       if (node.data.cluster.length <= Lineage_classes.showLimit) html = "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.openCluster();\"> Open cluster</span>";
       html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterContent();\"> list cluster content</span>";
       html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterToClipboard();\"> list to clipboard</span>";
-    } else if (node.from) {
+    } else if (node.from && node.data.bNodeId) {
       if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
         html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.deleteRestriction();\"> Delete relation</span>";
         html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.createSubPropertyAndreplaceRelation();\"> Refine relation</span>";
@@ -2371,13 +2371,13 @@ upperNodeIds.push(id);
             return alert(err)
 
           var subPropertyId = result.uri;
-          var sourceVisjsNode = visjsGraph.data.nodes.get(edge.from)
-          var targetVisjsNode = visjsGraph.data.nodes.get(edge.to)
+          var sourceVisjsNode = visjsGraph.data.nodes.get(edge.to)
+          var targetVisjsNode = visjsGraph.data.nodes.get(edge.from)
           var sourceNode = { id: sourceVisjsNode.data.id, source: sourceVisjsNode.data.source }
           var targetNode = { id: targetVisjsNode.data.id, source: targetVisjsNode.data.source }
           Lineage_blend.createRelation(Lineage_classes.mainSource, subPropertyId, sourceNode, targetNode, true, true, {}, function(err, _result) {
             if (err) alert(err)
-            Lineage_blend.deleteRestriction(Lineage_classes.mainSource, self.currentGraphEdge.data.bNodeId, function(err) {
+            Lineage_blend.deleteRestriction(Lineage_classes.mainSource, self.currentGraphEdge, function(err) {
               if (err) alert(err)
             })
             MainController.UI.message("relation replaced", true);

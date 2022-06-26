@@ -83,11 +83,11 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
       }
       , {
         subject: subPropId,
-        predicate: "owl:subPropertyOf",
+        predicate: "rdfs:subPropertyOf",
         object: superPropId
       }]
 
-    Sparql_generic.insertTriples(inSource, allTriples, null, function(err, _result) {
+    Sparql_generic.insertTriples(source,triples, null, function(err, _result) {
       callback(err,{uri:subPropId});
     });
 
@@ -896,13 +896,17 @@ var xx = result
                 });
               newEdge.dashes = true;
               newEdge.color = Lineage_classes.restrictionColor;
-              newEdge.data = { source: obj.node.data.inSource, bNode: bNodeId, label: propLabel };
+              newEdge.data = { source: inSource, bNode: bNodeId, label: propLabel };
               visjsGraph.data.edges.add([newEdge]);
             });
           }
         };
         var jstreeData = [];
         var distinctProps = {};
+        var authorizedProps={}
+        let inSource = Lineage_classes.mainSource;
+        let sourceNodeFirstPart14Ancestor = null;
+        let targetNodeFirstPart14Ancestor = null;
         async.series(
           [
             function(callbackSeries) {
@@ -952,45 +956,84 @@ var xx = result
               let ancestorsDepth = 5;
               Sparql_OWL.getNodeParents(Lineage_classes.mainSource, null, [self.sourceNode.id, self.targetNode.id], ancestorsDepth, {}, function(err, result) {
                 if (err) return callbackSeries(err);
-                var sourceNodeFirstPartAncestor = null;
-                var targetNodeFirstPartAncestor = null;
+
                 result.forEach(function(item) {
                   if (item.concept.value == self.sourceNode.id) {
                     if (item.concept.value.indexOf("/lis14/") > -1) {
-                      sourceNodeFirstPartAncestor = item.concept.value;
+                      sourceNodeFirstPart14Ancestor = item.concept.value;
                       return;
                     }
                     for (var i = 1; i <= ancestorsDepth; i++) {
                       if (item["broader" + i]) {
                         if (item["broader" + i].value.indexOf("/lis14/") > -1) {
-                          sourceNodeFirstPartAncestor = item["broader" + i].value;
+                          sourceNodeFirstPart14Ancestor = item["broader" + i].value;
                           break;
                         }
                       }
                     }
                   } else if (item.concept.value == self.targetNode.id) {
                     if (item.concept.value.indexOf("/lis14/") > -1) {
-                      targetNodeFirstPartAncestor = item.concept.value;
+                      targetNodeFirstPart14Ancestor = item.concept.value;
                       return;
                     }
                     for (var i = 1; i <= ancestorsDepth; i++) {
                       if (item["broader" + i]) {
                         if (item["broader" + i].value.indexOf("/lis14/") > -1) {
-                          targetNodeFirstPartAncestor = item["broader" + i].value;
+                          targetNodeFirstPart14Ancestor = item["broader" + i].value;
                           break;
                         }
                       }
                     }
                   }
                 });
-                if (!sourceNodeFirstPartAncestor || !targetNodeFirstPartAncestor) {
+                if (!sourceNodeFirstPart14Ancestor || !targetNodeFirstPart14Ancestor) {
                   alert("no matching Part14 superClass");
                   return callbackSeries();
                 }
 
-                self.getAuthorizedProperties(inSource, sourceNodeFirstPartAncestor, targetNodeFirstPartAncestor, function(err, authorizedProps) {
+                self.getAuthorizedProperties(inSource, sourceNodeFirstPart14Ancestor, targetNodeFirstPart14Ancestor, function(err, _authorizedProps) {
+                  authorizedProps=_authorizedProps;
+                  return callbackSeries()
+                })
+              })
+            },
+            function(callbackSeries){
+            var propertyIds=Object.keys(authorizedProps)
+              Sparql_OWL.getObjectSubProperties  (Lineage_classes.mainSource, propertyIds, options, function(err,result){
+                if(err)
+                  return callbackSeries(err);
+                result.forEach(function(item){
+                  if(!authorizedProps[item.property.value].children)
+                    authorizedProps[item.property.value].children=[]
+                  authorizedProps[item.property.value].children.push({id:item.subProperty.value,label:item.subPropertyLabel.value})
+
+                })
+                callbackSeries()
+              })
+            },
+        function(callbackSeries){
+
                   for (var prop in authorizedProps) {
                     var propObj = authorizedProps[prop];
+                    if(propObj.children) {
+                      propObj.children.forEach(function(child) {
+                        if (!distinctProps[child.id]) {
+                          jstreeData.push({
+                            id: child.id,
+                            text: "<span class='" + cssClass + "'>" + child.label + "</span>",
+                            parent: propObj.prop,
+                            data: {
+                              id: child.id,
+                              label: child.label,
+                              source: inSource
+                            }
+                          });
+                        }
+                      })
+                    }
+
+
+
                     if (!distinctProps[propObj.prop]) {
                       var label;
                       var cssClass = "lineageAddEdgeDialog_part14Prop";
@@ -1000,11 +1043,11 @@ var xx = result
                         label = "any" + "-" + propObj.label + "->" + "any";
                       } else
                         label =
-                          Sparql_common.getLabelFromURI(propObj.type.indexOf("R") ? sourceNodeFirstPartAncestor : "any") +
+                          Sparql_common.getLabelFromURI(propObj.type.indexOf("R") ? sourceNodeFirstPart14Ancestor : "any") +
                           "-" +
                           propObj.label +
                           "->" +
-                          Sparql_common.getLabelFromURI(propObj.type.indexOf("D") ? targetNodeFirstPartAncestor : "any");
+                          Sparql_common.getLabelFromURI(propObj.type.indexOf("D") ? targetNodeFirstPart14Ancestor : "any");
 
                       jstreeData.push({
                         id: propObj.prop,
@@ -1017,11 +1060,11 @@ var xx = result
                         }
                       });
                     }
+
                   }
 
                   callbackSeries();
-                });
-              });
+
             },
             function(callbackSeries) {
               return callbackSeries();
@@ -1029,7 +1072,7 @@ var xx = result
                 $("#lineageAddEdgeDialog_currentSourcePropertiesTreeDiv").html("source " + Lineage_classes.mainSource + " is not editable");
                 return callbackSeries();
               }
-              let inSource = Lineage_classes.mainSource;
+
               Lineage_properties.getPropertiesjsTreeData(inSource, null, null, {}, function(err, jstreeData3) {
                 if (err) return callbackSeries(err);
                 let jstreeDataX = [];

@@ -806,7 +806,7 @@ var Sparql_OWL = (function () {
                     if (err) return callbackWhilst(err);
                     result = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "domain", "range"]);
                     resultSize = result.length;
-                    offset += limit;
+                    offset += limitSize;
                     if (processor) {
                         processor(result, function (err, _result) {
                             if (err) return callbackWhilst(err);

@@ -266,12 +266,18 @@ Lineage_classes.drawSimilarsNodes("sameAs")
   self.clearLastAddedNodes = function() {
     var nodes = visjsGraph.lastAddedNodes;
     if (nodes && nodes.length > 0) {
-      nodes.forEach(function(node) {
-        // remove all ne fonctionne pas
-        visjsGraph.data.nodes.remove(node);
-      });
+      visjsGraph.data.nodes.remove(nodes);
     }
-  };
+
+    var xx = visjsGraph.network;
+    /*  if (nodes && nodes.length > 0) {
+        nodes.forEach(function(node) {
+          // remove all ne fonctionne pas
+          visjsGraph.data.nodes.remove(node);
+        });
+      }
+    };*/
+  }
 
   self.drawTopConcepts = function(/** @type {string} */ source, /** @type {(arg0: string | undefined) => any} */ callback) {
     self.currentExpandLevel = 1;
@@ -2054,7 +2060,7 @@ namedIndividualsMap[item.concept.value] = 1
   };
 
   self.drawNodeAndParents = function(
-    /** @type {{ source: string | number; label: any; text: any; id: string | number; }} */ nodeData,
+    /** @type {{ source: string | number; label: any; text: any; id: string | number; }} */ nodeData,ancestorsDepth,
     /** @type {(arg0: string | null, arg1: { nodes: never[]; edges: never[]; } | undefined) => any} */ callback
   ) {
     /**
@@ -2208,7 +2214,8 @@ upperNodeIds.push(id);
     MainController.UI.message("");
     var schemaType = Config.sources[nodeData.source].schemaType;
     if (schemaType == "OWL" || schemaType == "SKOS") {
-      var ancestorsDepth = 7;
+      if(ancestorsDepth !=0 )
+      ancestorsDepth = 7;
       Sparql_generic.getNodeParents(nodeData.source, null, nodeData.id, ancestorsDepth, { skipRestrictions: 1 }, function(/** @type {any} */ err, /** @type {string | any[]} */ result) {
         if (err) {
           if (callback) return callback(err);

@@ -144,7 +144,7 @@ $("#actionDiv").html(html);*/
         action: function(_e) {
           // pb avec source
 
-          Lineage_classes.drawNodeAndParents(self.currentTreeNode.data);
+          Lineage_classes.drawNodeAndParents(self.currentTreeNode.data,0);
         }
       };
       items.copyNodeToClipboard = {
@@ -1111,7 +1111,7 @@ defaultLang = 'en';*/
     if (!property || !value) return;
 
     if (source) self.currentSource = source;
-    if (createNewNode || confirm("add property")) {
+    if (createNewNode || true ){//confirm("add property")) {
       var triples = [];
       if (createNewNode) {
         self.currentNodeId = Config.sources[self.currentSource].graphUri + common.getRandomHexaId(10);

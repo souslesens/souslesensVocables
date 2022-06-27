@@ -20,7 +20,6 @@ var KGpropertyFilter = (function () {
             },
             Organizations: {
                 predicate: tsfPropertyFilterPrefix + "appliesToOrganizationFilter",
-
                 treeDiv: "KGpropertyFilter_organizationsTree",
             },
         };
@@ -150,9 +149,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                 tie_selection: false,
                 contextMenu: KGpropertyFilter.getJstreePropertiesContextMenu(),
             };
-
-            //self.currentNewFilters =[];
-
             common.jstree.loadJsTree("KGpropertyFilter_propertiesTreeDiv", jstreeData, options);
 
             $("#waitImg").css("display", "none");
@@ -168,7 +164,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             });
         } else if (true || source == "TSF_TEPDK_TEST") {
             var depth = 1;
-
             Sparql_generic.getNodeChildren(self.currentSource, null, ["http://rds.posccaesar.org/ontology/lis14/FunctionalObject"], depth, {}, function (err, result) {
                 if (err) {
                     return MainController.UI.message(err);
@@ -407,7 +402,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             var array = data[i][0].split("|");
             query += "<" + array[0] + "> ?p <" + array[1] + ">.\n";
         }
-
         query += "}";
         let url = Config.sources[self.propertyFilteringSource].sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, { source: self.propertyFilteringSource }, function (err, result) {
@@ -524,7 +518,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             if (err) {
                 return MainController.UI.message(err.responseText);
             }
-
             var jstreeData = [];
             var existingNodes = common.jstree.getjsTreeNodes("KGpropertyFilter_propertiesTreeDiv", true, "#");
             var restrictionIds = [];
@@ -541,9 +534,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                         type: "Property",
                         data: {
                             type: "Property",
-
                             propId: item.value.value,
-
                             propLabel: item.valueLabel.value,
                             retrictionId: item.node.value,
                             classId: item.concept.value,
@@ -557,7 +548,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     return (self.currentClassNode = obj.node);
                 },
             };
-
             if (jstreeData.length > 0) {
                 common.array.sort(jstreeData, "text");
                 common.jstree.addNodesToJstree("KGpropertyFilter_propertiesTreeDiv", classId, jstreeData, options);
@@ -599,7 +589,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                 }
             });
             common.array.sort(jstreeData, "text");
-
             var options = { openAll: false, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
             common.jstree.loadJsTree("KGpropertyFilter_lifeCycleTree", jstreeData, options, function () {
                 $("#KGpropertyFilter_lifeCycleTree").jstree().open_node("http://rds.posccaesar.org/ontology/lis14/Activity");
@@ -642,9 +631,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     });
                 }
             });
-
             var options = { openAll: true, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
-
             common.array.sort(jstreeData, "text");
             common.jstree.loadJsTree("KGpropertyFilter_disciplinesTree", jstreeData, options);
             callback();
@@ -684,9 +671,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                 }
             });
             common.array.sort(jstreeData, "text");
-
             var options = { openAll: true, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
-
             common.jstree.loadJsTree("KGpropertyFilter_organizationsTree", jstreeData, options);
             callback();
         });
@@ -703,20 +688,21 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           jstreeData.push({
             id: item.concept.value,
             text: item.conceptLabel.value,
-
             parent: "#",
             data: {
-                id: "http://data.total.com/resource/tsf/mdm/FunctionalClass",
-                label: "FunctionalClass",
-                source: "http://data.total.com/resource/tsf/mdm/",
-            },
-        });
-        jstreeData.push({
-            id: "http://data.total.com/resource/tsf/mdm/PhysicalClass",
-            text: "3-PhysicalClass",
-            parent: "#",
+              id: item.concept.value,
+              label: item.conceptLabel.value,
+              source: "ISO-15663"
+            }
+          });
+        }
+        if (!existingNodes[item.child1.value]) {
+          existingNodes[item.child1.value] = 1;
+          jstreeData.push({
+            id: item.child1.value,
+            text: item.child1Label.value,
+            parent: item.concept.value,
             data: {
-
               id: item.child1.value,
               label: item.child1Label.value,
               source: "ISO-15663"
@@ -740,7 +726,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             data: {
                 id: "http://data.total.com/resource/tsf/mdm/Tag",
                 label: "Tag",
-
                 source: "http://data.total.com/resource/tsf/mdm/",
             },
         });
@@ -752,7 +737,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             data: {
                 id: "http://data.total.com/resource/tsf/mdm/FunctionalClass",
                 label: "FunctionalClass",
-
                 source: "http://data.total.com/resource/tsf/mdm/",
             },
         });
@@ -799,7 +783,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         });
 
         var options = { openAll: true, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
-
         common.array.sort(jstreeData, "text");
         common.jstree.loadJsTree("KGpropertyFilter_MDMentitiesTree", jstreeData, options);
         callback();

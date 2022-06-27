@@ -205,17 +205,17 @@ var Lineage_classes = (function () {
 
         if (authentication.currentUser.groupes.indexOf("admin") > -1) {
             /*   items.createNewGraph = {
-       label: "create new graph",
-       action: function ( _e) {
-           Lineage_classes.drawSimilarsNodes("sameLabel");
-       },
-   };*/
+ label: "create new graph",
+ action: function ( _e) {
+     Lineage_classes.drawSimilarsNodes("sameLabel");
+ },
+};*/
         }
 
         /*   items.addSameAs = {
 label: "add similars (sameAs)",
 action: function (e) {
-   Lineage_classes.drawSimilarsNodes("sameAs")
+Lineage_classes.drawSimilarsNodes("sameAs")
 
 }
 }*/
@@ -808,14 +808,15 @@ action: function (e) {
                     var sparql_url = Config.sources[nodeData.source].sparql_server.url;
                     var fromStr = Sparql_common.getFromStr(nodeData.source);
                     var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " + "select * " + fromStr + " where {";
-
-                    if (propFilter == "outcoming" || propFilter == "all") query += "?ids ?prop ?value.  ";
-                    else if (propFilter == "incoming") query += " ?value ?prop ?ids.  ";
-
                     var filter = Sparql_common.setFilter("ids", ids);
-                    query += filter;
 
-                    query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} ";
+                    var queryOutcoming = "{?ids ?prop ?value.  " + filter + "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel}} ";
+                    var queryIncoming = " {?value ?prop ?ids.  " + filter + "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel}} ";
+
+                    if (propFilter == "outcoming") query += queryOutcoming;
+                    else if (propFilter == "incoming") query += queryIncoming;
+                    else if (propFilter == "all") query += queryOutcoming + " UNION " + queryIncoming;
+
                     query += "}";
                     var url = sparql_url + "?format=json&query=";
                     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: nodeData.source }, function (/** @type {any} */ err, /** @type {{ results: { bindings: any; }; }} */ result) {
@@ -1304,8 +1305,8 @@ action: function (e) {
                         obj[key] = item[key] ? item[key].value : null;
                     }
                     /*   if(item.conceptType && item.conceptType.value.indexOf("NamedIndividual">-1)) {
-                 namedIndividualsMap[item.concept.value] = 1
-             }*/
+       namedIndividualsMap[item.concept.value] = 1
+   }*/
 
                     parentsMap[item.concept.value].push(obj);
                     ids.push(item.child1.value);
@@ -1707,12 +1708,13 @@ action: function (e) {
         callback
     ) {
         if (!options) options = {};
+        if (!source) source = Lineage_common.currentSource || Lineage_classes.mainSource;
+        if (!source) return alert("select a source");
         if (!classIds) {
             classIds = self.getGraphIdsFromSource(source);
         }
         if (classIds == "all") classIds = null;
-        if (!source) source = Lineage_common.currentSource || Lineage_classes.mainSource;
-        if (!source) return alert("select a source");
+
         MainController.UI.message("");
 
         Sparql_OWL.getObjectRestrictions(
@@ -2230,7 +2232,10 @@ upperNodeIds.push(id);
 
                 if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
                     if (confirm("delete selected relation ?")) {
-                        Lineage_blend.clearAssociationNodes();
+                        Lineage_blend.deleteRestriction(node.data.source, node, function (err, result) {
+                            if (err) return alert(err.responseText);
+                            visjsGraph.data.edges.remove(node.id);
+                        });
                     }
                 }
             }
@@ -2361,8 +2366,8 @@ upperNodeIds.push(id);
             attrs.shape = self.namedIndividualShape;
         }
         /* if(superClassValue){
-         attrs.color=self.getSourceColor(superClassValue)
-     }else */
+     attrs.color=self.getSourceColor(superClassValue)
+ }else */
         if (sourceValue && sourceValue) {
             attrs.color = self.getSourceColor(sourceValue);
         }

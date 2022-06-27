@@ -82,6 +82,7 @@ var Lineage_decoration = (function () {
             if (err) return alert(err);
             var nodesTypesMap = {};
             var colorsMap = {};
+
             var excludedTypes = ["TopConcept", "Class", "Restriction"];
             result.forEach(function (item) {
                 var ok = true;
@@ -93,7 +94,7 @@ var Lineage_decoration = (function () {
                     if (!colorsMap[item.type.value]) {
                         colorsMap[item.type.value] = common.paletteIntense[Object.keys(colorsMap).length];
                     }
-                    nodesTypesMap[item.x.value] = { type: item.type.value, color: colorsMap[item.type.value] };
+                    nodesTypesMap[item.x.value] = { type: item.type.value, color: colorsMap[item.type.value], graphUri: item.g.value };
                 }
             });
             // console.log(JSON.stringify(nodesTypesMap, null, 2))
@@ -105,6 +106,7 @@ var Lineage_decoration = (function () {
                 else {
                     var color = neutralColor;
                     var type = null;
+
                     if (nodesTypesMap[nodeId]) {
                         color = nodesTypesMap[nodeId].color;
                         type = nodesTypesMap[nodeId].type;
@@ -112,9 +114,15 @@ var Lineage_decoration = (function () {
                     if (color) newNodes.push({ id: nodeId, color: color, legendType: type });
                 }
             });
-
-            //  visjsGraph.data.nodes.remove(legendNodes);
             if (visjsGraph.data && visjsGraph.data.nodes) visjsGraph.data.nodes.update(newNodes);
+
+            /// update node data source with the real source of the node
+            var nodes = visjsGraph.data.nodes.get(nodeIds);
+            nodes.forEach(function (node) {
+                if (nodesTypesMap[node.data.id] && nodesTypesMap[node.data.id].graphUri) {
+                    node.data.source = Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri);
+                }
+            });
 
             var legendNodes = [];
             var str = "";

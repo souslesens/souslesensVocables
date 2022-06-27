@@ -149,7 +149,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                 tie_selection: false,
                 contextMenu: KGpropertyFilter.getJstreePropertiesContextMenu(),
             };
-            //self.currentNewFilters =[];
             common.jstree.loadJsTree("KGpropertyFilter_propertiesTreeDiv", jstreeData, options);
 
             $("#waitImg").css("display", "none");

@@ -24,7 +24,7 @@ Lineage_relations = (function () {
         var provenances = ["manual", " auto_exactMatch"];
         common.fillSelectOptions("LineageRelations_provenanceSelect", provenances, true);
         Sparql_OWL.getObjectRestrictions(
-            Lineage_common.currentSource,
+            Lineage_common.currentSource || Lineage_classes.mainSource,
             null,
             {
                 withoutImports: 0,
@@ -53,13 +53,13 @@ Lineage_relations = (function () {
     };
 
     self.listAllRestrictions = function () {
-        Sparql_OWL.getObjectRestrictions(Lineage_common.currentSource, null, {}, function (err, _result) {
+        Sparql_OWL.getObjectRestrictions(Lineage_common.currentSource || Lineage_classes.mainSource, null, {}, function (err, _result) {
             if (err) return alert(err);
         });
     };
 
     self.graphAllRestrictions = function () {
-        Lineage_classes.drawRestrictions(Lineage_common.currentSource, "all");
+        Lineage_classes.drawRestrictions(Lineage_common.currentSource || Lineage_classes.mainSource, "all");
     };
 
     self.exportRestrictions = function () {
@@ -67,7 +67,7 @@ Lineage_relations = (function () {
     };
 
     self.getUriSource = function (uri) {
-        var source = Lineage_common.currentSource;
+        var source = Lineage_common.currentSource || Lineage_classes.mainSource;
         Object.keys(self.graphUriSourceMap).forEach(function (graphUri) {
             if (uri.indexOf(graphUri) == 0) {
                 source = self.graphUriSourceMap[graphUri];
@@ -90,7 +90,7 @@ Lineage_relations = (function () {
                 return callback(null, selectedNodes);
             }
             selectedNodes = [selectedNode.id];
-            Sparql_generic.getNodeChildren(Lineage_common.currentSource, null, selectedNode.id, 3, null, function (err, result) {
+            Sparql_generic.getNodeChildren(Lineage_common.currentSource || Lineage_classes.mainSource, null, selectedNode.id, 3, null, function (err, result) {
                 if (err) callback(err);
                 result.forEach(function (item) {
                     selectedNodes.push(item.child1.value);
@@ -221,7 +221,7 @@ Lineage_relations = (function () {
     };
 
     self.showRestrictions = function (output, relations, toLabelsMap) {
-        var currentSource = Lineage_common.currentSource;
+        var currentSource = Lineage_common.currentSource || Lineage_classes.mainSource;
 
         async.series(
             [
@@ -559,7 +559,7 @@ Lineage_relations = (function () {
     };
 
     self.graphAllProperties = function () {
-        Lineage_classes.drawObjectProperties(Lineage_common.currentSource, "all");
+        Lineage_classes.drawObjectProperties(Lineage_common.currentSource || Lineage_classes.mainSource, "all");
     };
 
     self.exportProperties = function () {
@@ -569,7 +569,7 @@ Lineage_relations = (function () {
     self.projectSameAsRestrictionsOnSource = function (orphans) {
         if (orphans) return alert("Coming soon...");
         if (!$("#LineageRelations_setExactMatchSameAsSourceInitUIcBX").prop("checked")) Lineage_classes.initUI();
-        var fromSource = Lineage_common.currentSource;
+        var fromSource = Lineage_common.currentSource || Lineage_classes.mainSource;
         var toSource = $("#LineageRelations_setExactMatchSameAsSourceSelect").val();
         if (!fromSource) return alert("select a start source");
         if (!toSource || toSource == "") return alert("select a target source ");

@@ -130,18 +130,22 @@ var csvCrawler = {
         });
     },
 
-    readCsv: function (connector, lines, callback) {
+    readCsv: function (connector, maxLines, callback) {
         if (!fs.existsSync(connector.filePath)) return callback("file does not exists :" + connector.filePath);
         util.getCsvFileSeparator(connector.filePath, function (separator) {
             // separator=";"
             var headers = [];
             var jsonData = [];
             var jsonDataFetch = [];
-            fs.createReadStream(connector.filePath).pipe(
-                csv({
-                    separator: separator,
-                    mapHeaders: ({ header }) => util.normalizeHeader(headers, header),
-                })
+            var fetchSize = 1000;
+            var stream = fs.createReadStream(connector.filePath);
+
+            var parser = csv({
+                separator: separator,
+                mapHeaders: ({ header }) => util.normalizeHeader(headers, header),
+            });
+            stream.pipe(
+                parser
                     .on("header", function (header) {
                         headers.push(header);
                     })
@@ -158,13 +162,23 @@ var csvCrawler = {
 
                         jsonDataFetch.push(data);
 
-                        if (lines && jsonDataFetch.length >= lines) {
+                        /* if (maxLines && jsonDataFetch.length >= maxLines) {
+              jsonData.push(jsonDataFetch);
+              stream.unpipe(parser);
+              parser.end();
+              stream.destroy();
+            }*/
+
+                        if (maxLines && jsonData.length > maxLines / fetchSize) {
+                            jsonDataFetch = [];
+                        } else if (fetchSize && jsonDataFetch.length >= fetchSize) {
                             jsonData.push(jsonDataFetch);
+
                             jsonDataFetch = [];
                         }
                     })
                     .on("end", function () {
-                        jsonData.push(jsonDataFetch);
+                        if (jsonDataFetch.length > 0) jsonData.push(jsonDataFetch);
                         return callback(null, { headers: headers, data: jsonData });
                     })
                     .on("error", function (error) {

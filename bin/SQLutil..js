@@ -155,3 +155,6 @@ var SQLutil = {
 module.exports = SQLutil;
 
 // SQLutil.createTableFromCsv(null, "", "testX", "C:\\Users\\claud\\Downloads\\TAG_PI&FL_CLV_2.csv", function (err, result) {});
+if (true) {
+    SQLutil.createTableFromCsv(null, "", "TEPDK_ADL_tblTag", "D:\\NLP\\ontologies\\TEPDK2\\OnePulse\\TEPDK_ADL_tblTag.csv", function (err, result) {});
+}

@@ -3,6 +3,7 @@ const async = require("async");
 const fs = require("fs");
 const csv = require("csv-parser");
 const util = require("../../bin/util.");
+const { Transform } = require("stream");
 
 var crawler = {
     readCsv: function (filePath, separator, lines, processor, callback) {
@@ -89,7 +90,7 @@ var file = "Mou_functional_locations_all_01052021.txt";
 /*convertSep(dir+file,'¤',",",dir+file+"_sep")
 return;*/
 
-if (true) {
+if (false) {
     var file = "Mou_char_values_all_01052021.txt";
     var distinctMou_char_values = {};
     var str = "OBJ_CLASS\tCHR_CHAR";
@@ -107,35 +108,27 @@ if (true) {
     });
 }
 
-/*
-Mou_functional_locations_all_01052021.txt
-	FL_CODE		FL_STATUS		FL_USER_STATUS		EQ_CODE		EQ_STATUS		EQ_USER_STATUS
-	HBDA-HTJB-1871-0002-L2-3	CRTE	APPR	400200795	CRTE
-	GOFC-HCV-50539A-D	CRTE	APPR NOPM	400160241	INST
-	GOFC-FO-50325	CRTE	APPR	400125434	INST
-	GOFC-HCV-34102	CRTE	APPR NOPM	400186513	INST
-	DB-HCV-54623	CRTE	APPR NOPM
+if (false) {
+    function splitPhusionCodeLabel(filePath, targetPath) {
+        var rs = fs.createReadStream(filePath);
+        var ws = fs.createWriteStream(targetPath, "UTF8");
+        var Transform = require("stream").Transform;
+        var transformer = new Transform();
+        const replace = require("buffer-replace");
+        transformer._transform = function (data, encoding, cb) {
+            var str = "" + data;
+            var str2 = str.replace(/ \| /g, ",");
+            var data2 = Buffer.from(str2);
 
-"Mou_char_values_all_01052021.txt"
-CHR_OBJCTOBJ_CLASSOBJ_STATUSOBJ_USR_STATUSCHR_CHARCHR_VALU
-400075019"�"ZMOG_	QUI_APU	"�"INST"�"�
-400075057"�"ZMOG_	QUI_A	XC"�"INST"�"�"MWF"�"6 KG CONTAIN	R VOLUM	 8.04 L
-400075040"�"ZMOG_	QUI_ASDT"�"INST"�"�"BODM"�"PLASTIC
-400075040"�"ZMOG_	QUI_ASDT"�"INST"�"�"SIOU"�"100 MICRO TO 100MA
-400075040"�"ZMOG_	QUI_ASDT"�"INST"�"�"DIM"�"112 X 136MM
-400075044"�"ZMOG_	QUI_APU	"�"INST"�"�"BABM"�"CS
-400075047"�"ZMOG_	QUI_APU	"�"INST"�"�"BABM"�"CS
-400075066"�"ZMOG_	QUI_A	XC"�"INST"�"�"MWF"�"6 KG CONTAIN	R VOLUM	 8.04 L
-400075075"�"ZMOG_	QUI_AILU"�"INST"�"�"RV"�"220 - 254 V +/- 10%
-400075075"�"ZMOG_	QUI_AILU"�"INST"�"�"TYP	"�"2X36 W BI PINS LAMPS WITH G13
-400075095"�"ZMOG_	QUI_A	XC"�"INST"�"�"MWF"�"6 KG CONTAIN	R VOLUM	 8.04 L
-400075092"�"ZMOG_	QUI_A	XC"�"INST"�"�"MWF"�"6 KG CONTAIN	R VOLUM	 8.04 L
-400075123"�"ZMOG_	QUI_ATIN"�"INST"�"�"BABM"�"304SST /
-400075123"�"ZMOG_	QUI_ATIN"�"INST"�"�
-400075131"�"ZMOG_	QUI_A	XC"�"INST"�"�"MWF"�"6 KG CONTAIN	R VOLUM	 8.04 L
-400075136"�"ZMOG_	QUI_A	XC"�"INST"�"�"MWF"�"6 KG CONTAIN	R VOLUM	 8.04 L
-400075147"�"ZMOG_	QUI_A	XC"�"INST"�"�"MWF"�"6 KG CONTAIN	R VOLUM	 8.04 L
-400075144"�"ZMOG_	QUI_A	XC"�"INST"�"�"MWF"�"6 KG CONTAIN	R VOLUM	 8.04 L
+            cb(null, data2);
+        };
 
-
- */
+        rs.pipe(transformer).pipe(ws);
+    }
+    var dir = "D:\\NLP\\ontologies\\TEPDK2\\OnePulse\\";
+    var file = "TEPDK_ADL_tblTag.csv";
+    var file = "TEPDK_ADL_tblTagAttribute.csv";
+    var filePath = dir + file;
+    var targetPath = dir + file.replace(".", "_x.");
+    splitPhusionCodeLabel(filePath, targetPath);
+}

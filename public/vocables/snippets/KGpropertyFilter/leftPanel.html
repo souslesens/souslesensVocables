@@ -12,6 +12,10 @@
 </style>
 
 <div style="margin-left: 10px">
+    <div>
+        Source:
+        <select id="KGpropertyFilter_sourceSelect" onchange="KGpropertyFilter.onChangeSourceSelect($(this).val())"></select>
+    </div>
     <!--button onclick="KGpropertyFilter.listFiles()">List</button-->
     <div class="KGpropertyFilter_tree_container">
         <div id="KGpropertyFilter_propertiesTreeDiv"></div>

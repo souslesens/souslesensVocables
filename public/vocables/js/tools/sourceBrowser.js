@@ -122,7 +122,7 @@ $("#actionDiv").html(html);*/
             $("#GenericTools_searchAllSourcesTermInput").val("");
             /* Collection.Sparql.getCollections(sourceLabel, options, function (err, result) {
 
- })*/
+})*/
         });
     };
 
@@ -228,13 +228,13 @@ $("#actionDiv").html(html);*/
             },
         };
         /*    items.toDataTable = {
-        label: "export to Table",
-        action: function (e) {// pb avec source
-            Export.exportTeeToDataTable()
+    label: "export to Table",
+    action: function (e) {// pb avec source
+        Export.exportTeeToDataTable()
 
-        }
+    }
 
-    }*/
+}*/
 
         items.exportAllDescendants = {
             label: "Export all descendants",
@@ -285,14 +285,14 @@ $("#actionDiv").html(html);*/
         SourceBrowser.showNodeInfos(sourceLabel, node.data.id, "graphDiv");
 
         /*  Sparql_generic.getNodeInfos(sourceLabel, node.data.id, null, function (err, result) {
-      if (err) {
-          return MainController.UI.message(err);
-      }
-      //    SkosConceptEditor.editConcept("graphDiv",result)
-      SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
+  if (err) {
+      return MainController.UI.message(err);
+  }
+  //    SkosConceptEditor.editConcept("graphDiv",result)
+  SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
 
-  })*/
+})*/
     };
 
     self.onNodeDetailsLangChange = function (property, lang) {
@@ -371,14 +371,22 @@ $("#actionDiv").html(html);*/
                         if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
                             if (selectedSources.length > 0 && selectedSources.indexOf(sourceLabel) > -1) searchedSources.push(sourceLabel);
                         /*     else
- searchedSources.push(sourceLabel)*/
+searchedSources.push(sourceLabel)*/
                     }
                 }
             }
         } else {
             if (!Lineage_common.currentSource && !MainController.currentSource) return alert("select a source or search in all source");
-            searchedSources.push(Lineage_common.currentSource || MainController.currentSource);
+            var source = Lineage_common.currentSource || MainController.currentSource;
+
+            searchedSources.push(source);
+            /*  if( Config.sources[source].imports){
+            Config.sources[source].imports.forEach(function(item){
+                searchedSources.push(item);
+            })
+        }*/
         }
+
         var jstreeData = [];
         var uniqueIds = {};
 
@@ -594,7 +602,7 @@ $("#actionDiv").html(html);*/
 
                 items.forEach(function (match) {
                     /*   if(match.label.toLowerCase().indexOf(term)<0 )
- return*/
+return*/
 
                     if (match.parents) {
                         //} && match.parents.split) {
@@ -756,8 +764,9 @@ $("#actionDiv").html(html);*/
                         }
                         str +=
                             "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
-                            "Property<select id='sourceBrowser_addPropertyName'></select>&nbsp;" +
-                            "Value=&nbsp;<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
+                            "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
+                            "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
+                            "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
                             "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
 
                         str += "</div>";
@@ -1084,9 +1093,19 @@ defaultLang = 'en';*/
         var wikiUrl = Config.wiki.url + "Source " + sourceLabel;
         window.open(wikiUrl, "_slsvWiki");
     };
-
+    self.addPropertyObjectSelect = function () {
+        var predicate = $("#sourceBrowser_addPropertyPredicateSelect").val();
+        var allObjects = self.SourcePossiblePredicatesAndObject;
+        if (predicate == "rdf:type") {
+            common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.basicTypeClasses.concat(allObjects.sourceObjects), true, "label", "id");
+        } else if (predicate == "rdfs:subClassOf") {
+            common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.part14Objects.concat(allObjects.sourceObjects), true, "label", "id");
+        } else {
+            common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "label", "id");
+        }
+    };
     self.addProperty = function (property, value, source, createNewNode) {
-        if (!property) property = $("#sourceBrowser_addPropertyName").val();
+        if (!property) property = $("#sourceBrowser_addPropertyPredicateSelect").val();
         if (!value) value = $("#sourceBrowser_addPropertyValue").val().trim();
 
         if (!property || !value) return;
@@ -1137,7 +1156,11 @@ defaultLang = 'en';*/
     self.showAddPropertyDiv = function () {
         $("#sourceBrowser_addPropertyDiv").css("display", "block");
         var properties = Config.Lineage.basicObjectProperties;
-        common.fillSelectOptions("sourceBrowser_addPropertyName", properties, true, "label", "id");
+        Lineage_blend.getSourcePossiblePredicatesAndObject(self.currentSource, function (err, result) {
+            if (err) return alert(err.responseText);
+            common.fillSelectOptions("sourceBrowser_addPropertyPredicateSelect", result.predicates, true, "label", "id");
+            self.SourcePossiblePredicatesAndObject = result;
+        });
     };
 
     self.deletePropertyValue = function (property, value) {

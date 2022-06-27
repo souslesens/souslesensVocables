@@ -59,7 +59,7 @@ var Lineage_dictionary = (function () {
                 [
                     //get domain and range sources
                     function (callbackSeries) {
-                        self.getDictionaryTargetSources(self.currentDictionary, self.currentDomainSource, null, function (err, result) {
+                        self.getDictionarySources(self.currentDictionary, self.currentDomainSource, null, function (err, result) {
                             if (err) MainController.UI.message(err.responseText);
                             var rangeSourceLabel = [];
                             result.forEach(function (item) {
@@ -99,7 +99,7 @@ var Lineage_dictionary = (function () {
         self.fillDictionaryFilters(self.filterClass, self.currentDictionary);
     };
 
-    self.getDictionaryTargetSources = function (dictionary, domainSource, rangeSource, callback) {
+    self.getDictionarySources = function (dictionary, domainSource, rangeSource, callback) {
         var strFrom = Sparql_common.getFromStr(dictionary, false, false);
         var query =
             "PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> select distinct  ?domainSourceLabel ?rangeSourceLabel " +

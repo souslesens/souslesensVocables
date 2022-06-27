@@ -40,7 +40,7 @@ var Config = (function () {
         skos: "<http://www.w3.org/2004/02/skos/core#>",
         iso14224: "<http://data.total.com/resource/tsf/iso_14224#>",
         req: "<https://w3id.org/requirement-ontology/rdl/>",
-        part14: "<http://rds.posccaesar.org/ontology/lis14/>",
+        part14: "<http://rds.posccaesar.org/ontology/lis14/rdl/>",
         iso81346: "<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
         slsv: "<http://souslesens.org/resource/vocabulary/>",
         dcterms: "<http://purl.org/dc/terms/>",
@@ -69,6 +69,11 @@ var Config = (function () {
     };
     self.evaluate = {
         maxZipFileSize: 30000000, //30MO
+    };
+
+    self.KGpropertyFilter = {
+        tsfPropertyFilterPrefix: "http://data.total.com/resource/tsf/property-filtering/",
+        sources: ["CFIHOS_1_5_PLUS", "TSF_TEPDK_TEST", "TSF_TEPDK_PHUSION"],
     };
 
     (self.KG = {
@@ -126,7 +131,11 @@ var Config = (function () {
             { id: "http://www.w3.org/2000/01/rdf-schema#subClassOf", label: "rdfs:subClassOf", type: "ObjectProperty" },
             { id: "http://rds.posccaesar.org/ontology/lis14/partOf", label: "part14:partOf", type: "ObjectProperty" },
             { id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type", label: "rdf:type", type: "ObjectProperty" },
-            { id: "http://rds.posccaesar.org/ontology/lis14/representedBy", label: "part14:representedBy", type: "dataTypeProperty" },
+            {
+                id: "http://rds.posccaesar.org/ontology/lis14/representedBy",
+                label: "part14:representedBy",
+                type: "dataTypeProperty",
+            },
             { id: "http://www.w3.org/2004/02/skos/core#prefLabel", label: "skos:prefLabel", type: "dataTypeProperty" },
         ],
     };
@@ -142,18 +151,23 @@ var Config = (function () {
         toolDescriptionImg: null,
     }; //"images/browse.png"}
     //  self.tools["sourceEditor"] = {label: "Edit", multiSources: 0, controller: SourceEditor,toolDescriptionImg:null},
-    self.tools["sourceMatcher"] = { label: "Match", multiSources: 0, controller: SourceMatcher, toolDescriptionImg: null }; //"images/match.png"}
+    self.tools["sourceMatcher"] = {
+        label: "Match",
+        multiSources: 0,
+        controller: SourceMatcher,
+        toolDescriptionImg: null,
+    }; //"images/match.png"}
     self.tools["evaluate"] = { label: "Evaluate", noSource: 1, controller: Evaluate, toolDescriptionImg: null }; //"images/evaluate.png"}
     self.tools["ancestors"] = { label: "Genealogy", multiSources: 1, controller: Genealogy, toolDescriptionImg: null }; //"images/taxonomy.png"}
 
     self.tools["lineage"] = { label: "Lineage", noSource: 0, controller: Lineage_classes, toolDescriptionImg: null }; //"images/taxonomy.png"}
 
     /*  self.tools["KGmappings"] = {
-        label: "KGmappings",
-        multiSources: 0,
-        controller: KGmappings,
-        toolDescriptionImg: null,
-    };*/
+      label: "KGmappings",
+      multiSources: 0,
+      controller: KGmappings,
+      toolDescriptionImg: null,
+  };*/
 
     self.tools["Standardizer"] = {
         label: "Standardizer",

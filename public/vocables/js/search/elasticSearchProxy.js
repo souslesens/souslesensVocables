@@ -56,17 +56,16 @@ var ElasticSearchProxy = (function () {
             },
         });
     };
-    self.deleteDocuments=function(ids,options,callback){
-        var payload={
-            "query" : {
-                "terms" : {
-                    "id" :ids
-                }
+    self.deleteDocuments = function (ids, options, callback) {
+        var payload = {
+            query: {
+                terms: {
+                    id: ids,
+                },
             },
             url: "_delete_by_query",
             indexes: ["_any"],
-
-        }
+        };
         $.ajax({
             type: "POST",
             url: Config.apiUrl + "/elasticsearch/query",
@@ -84,8 +83,7 @@ var ElasticSearchProxy = (function () {
                 return err;
             },
         });
-
-    }
+    };
 
     self.analyzeSentence = function (sentence, callback) {
         var payload = {

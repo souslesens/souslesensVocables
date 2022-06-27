@@ -74,31 +74,29 @@
 
 <div class="LineageBlend_creatingNodeClassParamsLine">specific subject uri&nbsp;<input id="LineageBlend_creatingNodeSubjectUri" /></div>
 
-<div id="LineageBlend_creatingNodeClassParamsDiv" >
+<div id="LineageBlend_creatingNodeClassParamsDiv">
     <ul>
         <li style="background-color: #d9bb73"><a href="#LineageBlend_creatingNodeSingleTab">SingleNode</a></li>
         <li style="background-color: beige"><a href="#LineageBlend_creatingNodeListTab">List</a></li>
         <li style="background-color: beige"><a href="#LineageBlend_creatingNodeListJournalTab">journal</a></li>
-
     </ul>
-<div id="LineageBlend_creatingNodeSingleTab"  style="display: flex; flex-direction: column">
-    <div class="LineageBlend_creatingNodeClassParamsLine">rdfs:label&nbsp;<input id="LineageBlend_creatingNodeNewClassLabel" /></div>
-    <div id="LineageBlend_creatingNodeClassDiv" class="LineageBlend_creatingNodeClassParamsLine">rdfs:subClassOf&nbsp;&nbsp;<select id="LineageBlend_creatingNodeObjectsSelect"></select></div>
-    <div id="LineageBlend_creatingNodeNameIndividualDiv" class="LineageBlend_creatingNodeClassParamsLine">rdf:type&nbsp;<select id="LineageBlend_creatingNodeObjects2Select"></select></div>
-    <div class="LineageBlend_creatingNodeClassParamsLine">
-        <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_blend.graphModification.addClassStiples()" style="width: 100px">OK</button>
+    <div id="LineageBlend_creatingNodeSingleTab" style="display: flex; flex-direction: column">
+        <div class="LineageBlend_creatingNodeClassParamsLine">rdfs:label&nbsp;<input id="LineageBlend_creatingNodeNewClassLabel" /></div>
+        <div id="LineageBlend_creatingNodeClassDiv" class="LineageBlend_creatingNodeClassParamsLine">rdfs:subClassOf&nbsp;&nbsp;<select id="LineageBlend_creatingNodeObjectsSelect"></select></div>
+        <div id="LineageBlend_creatingNodeNameIndividualDiv" class="LineageBlend_creatingNodeClassParamsLine">rdf:type&nbsp;<select id="LineageBlend_creatingNodeObjects2Select"></select></div>
+        <div class="LineageBlend_creatingNodeClassParamsLine">
+            <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_blend.graphModification.addClassStiples()" style="width: 100px">OK</button>
+        </div>
     </div>
-</div>
-    <div id="LineageBlend_creatingNodeListTab"  style="display: flex; flex-direction: column">
-        <span>Paste table data  column1 = Label, column2= Class Label; </span>
+    <div id="LineageBlend_creatingNodeListTab" style="display: flex; flex-direction: column">
+        <span>Paste table data column1 = Label, column2= Class Label; </span>
         <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_blend.graphModification.addClassListTiples()" style="width: 100px">OK</button>
 
         <textarea id="LineageBlend_creatingNode_nodeListTA" style="width: 400px; height: 300px"></textarea>
     </div>
-    <div id="LineageBlend_creatingNodeListJournalTab"  style="display: flex; flex-direction: column">
+    <div id="LineageBlend_creatingNodeListJournalTab" style="display: flex; flex-direction: column">
         <div id="LineageBlend_creatingNodeListJournalDiv"></div>
     </div>
-
 </div>
 
 <div>

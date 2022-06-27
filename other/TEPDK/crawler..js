@@ -69,13 +69,11 @@ function convertSep(filePath, fromsep, tosep, targetPath) {
         // data2=  replace(data, c, tosep)
         //  return    cb(null,data2);
 
-
         var str = "" + data;
 
         var str2 = str.replace(regex, "\t");
         var data2 = Buffer.from(str2);
         if (index++ == 0) fs.writeFileSync(filePath + "extract.txt", str2);
-
 
         cb(null, data2);
     };
@@ -92,9 +90,7 @@ var file = "Mou_functional_locations_all_01052021.txt";
 /*convertSep(dir+file,'¤',",",dir+file+"_sep")
 return;*/
 
-
 if (false) {
-
     var file = "Mou_char_values_all_01052021.txt";
     var distinctMou_char_values = {};
     var str = "OBJ_CLASS\tCHR_CHAR";
@@ -111,7 +107,6 @@ if (false) {
         fs.writeFileSync(outputFile, str);
     });
 }
-
 
 if (false) {
     function splitPhusionCodeLabel(filePath, targetPath) {
@@ -137,7 +132,6 @@ if (false) {
     var targetPath = dir + file.replace(".", "_x.");
     splitPhusionCodeLabel(filePath, targetPath);
 }
-
 
 /*
 Mou_functional_locations_all_01052021.txt

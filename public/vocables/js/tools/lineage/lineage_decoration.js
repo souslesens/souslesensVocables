@@ -94,8 +94,7 @@ var Lineage_decoration = (function () {
                     if (!colorsMap[item.type.value]) {
                         colorsMap[item.type.value] = common.paletteIntense[Object.keys(colorsMap).length];
                     }
-                    nodesTypesMap[item.x.value] = { type: item.type.value, color: colorsMap[item.type.value], graphUri:item.g.value };
-
+                    nodesTypesMap[item.x.value] = { type: item.type.value, color: colorsMap[item.type.value], graphUri: item.g.value };
                 }
             });
             // console.log(JSON.stringify(nodesTypesMap, null, 2))
@@ -111,24 +110,19 @@ var Lineage_decoration = (function () {
                     if (nodesTypesMap[nodeId]) {
                         color = nodesTypesMap[nodeId].color;
                         type = nodesTypesMap[nodeId].type;
-
-
                     }
                     if (color) newNodes.push({ id: nodeId, color: color, legendType: type });
                 }
             });
             if (visjsGraph.data && visjsGraph.data.nodes) visjsGraph.data.nodes.update(newNodes);
 
-
-
             /// update node data source with the real source of the node
-            var nodes=visjsGraph.data.nodes.get(nodeIds);
+            var nodes = visjsGraph.data.nodes.get(nodeIds);
             nodes.forEach(function (node) {
-                if(nodesTypesMap[node.data.id] && nodesTypesMap[node.data.id].graphUri){
-                   node.data.source=Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri)
+                if (nodesTypesMap[node.data.id] && nodesTypesMap[node.data.id].graphUri) {
+                    node.data.source = Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri);
                 }
-
-            })
+            });
 
             var legendNodes = [];
             var str = "";

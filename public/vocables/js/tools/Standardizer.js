@@ -1902,8 +1902,6 @@ $("#Standardizer_wordsTA").val(str)
         }, 500);
 
         return;
-
-
     };
 
     self.drawAncestors = function () {

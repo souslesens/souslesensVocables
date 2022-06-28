@@ -258,7 +258,7 @@ var Sparql_OWL = (function () {
 
         for (var i = 1; i <= ancestorsDepth; i++) {
             if (i == 1) {
-              //  query += "  OPTIONAL{?concept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
+                //  query += "  OPTIONAL{?concept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
                 query += "  ?concept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
                 query += "  OPTIONAL{ ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} ";
                 query += " OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label.}";
@@ -493,7 +493,6 @@ var Sparql_OWL = (function () {
         });
     };
 
-
     self.getObjectSubProperties = function (sourceLabel, propertyIds, options, callback) {
         if (!options) {
             options = {};
@@ -503,29 +502,29 @@ var Sparql_OWL = (function () {
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
         var filterStr = Sparql_common.setFilter("property", propertyIds);
         var query =
-          "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
-          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-          "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-          "select distinct ?property ?propertyLabel ?subProperty ?subPropertyLabel " +
-          fromStr +
-          " WHERE {?subProperty rdfs:subPropertyOf+ ?property . " +
-          " OPTIONAL{?subProperty rdfs:label ?subPropertyLabel.}  " +
-          " OPTIONAL{?property rdfs:label ?propertyLabel.}  " +
-          filterStr+
-          "} limit 10000"
+            "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            "select distinct ?property ?propertyLabel ?subProperty ?subPropertyLabel " +
+            fromStr +
+            " WHERE {?subProperty rdfs:subPropertyOf+ ?property . " +
+            " OPTIONAL{?subProperty rdfs:label ?subPropertyLabel.}  " +
+            " OPTIONAL{?property rdfs:label ?propertyLabel.}  " +
+            filterStr +
+            "} limit 10000";
 
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var url = self.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
             if (err) {
                 return callback(err);
             }
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["property", "subProperty"]);
-            return callback(null, result.results.bindings)
-        })
-    }
+            return callback(null, result.results.bindings);
+        });
+    };
 
     self.getObjectRestrictions = function (sourceLabel, ids, options, callback) {
         if (!options) {
@@ -823,8 +822,6 @@ var Sparql_OWL = (function () {
             }
         );
     };
-
-
 
     self.schema = {
         getOwlChildrenClasses: function (callback) {

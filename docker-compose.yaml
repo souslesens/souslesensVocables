@@ -18,7 +18,7 @@ services:
             - backend
 
     virtuoso:
-        image: askomics/virtuoso:7.2.5.1
+        image: askomics/virtuoso:7.2.7
         ports:
             - ${VIRTUOSO_LISTEN_PORT:-8890}:8890
         volumes:
@@ -39,7 +39,7 @@ services:
             - backend
 
     elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.4
         environment:
             ES_JAVA_OPTS: "-Xmx256m -Xms256m"
             discovery.type: single-node

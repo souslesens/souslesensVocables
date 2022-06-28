@@ -30,6 +30,7 @@ var KGcreator = (function () {
         "owl:someValuesFrom",
         "owl:allValuesFrom",
         "owl:hasValue",
+        "rdfs:subPropertyOf",
 
         "",
     ];

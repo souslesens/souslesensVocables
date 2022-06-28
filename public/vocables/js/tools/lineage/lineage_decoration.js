@@ -45,7 +45,10 @@ var Lineage_decoration = (function () {
                         strFrom +
                         "WHERE {GRAPH ?g{" +
                         "   ?x rdf:type ?o.\n" +
-                        "  ?x rdfs:subClassOf+|rdf:type+ ?type.\n" +
+                        "  ?x rdfs:subClassOf*|rdf:type* ?type0." +
+                        " ?type0 rdfs:subClassOf|rdf:type  ?type" +
+                        /* "  ?x rdfs:subClassOf+|rdf:type+ ?type.\n" +
+            " OPTIONAL {?type rdfs:subClassOf|rdf:type  ?parentType}" +*/
                         '  filter (regex(str(?type),"lis14") && ?type !=  <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Thing>)';
                 } else {
                     query += "SELECT distinct ?x ?type ?g  " + strFrom + "  WHERE {GRAPH ?g{ ?x rdfs:subClassOf|rdf:type ?type.?type rdf:type ?typeType filter (?typeType not in (owl:Restriction)) "; // filter (?type not in ( <http://souslesens.org/resource/vocabulary/TopConcept>,<http://www.w3.org/2002/07/owl#Class>))"
@@ -65,6 +68,24 @@ var Lineage_decoration = (function () {
                 });
             },
             function (err) {
+                // find firstpart14Parent
+                /*   var map = {};
+        data.forEach(function(item) {
+          map[item.x.value] = item;
+        });
+
+        function recurse(item) {
+          if (!item.type2) {
+            tree.push(item);
+          }
+        }
+
+        for (var key in map) {
+          if (map[key].parentType) {
+            map[map[key].parentType].hasChildren = true;
+          }
+        }*/
+
                 return callback(err, data);
             }
         );
@@ -94,7 +115,11 @@ var Lineage_decoration = (function () {
                     if (!colorsMap[item.type.value]) {
                         colorsMap[item.type.value] = common.paletteIntense[Object.keys(colorsMap).length];
                     }
-                    nodesTypesMap[item.x.value] = { type: item.type.value, color: colorsMap[item.type.value], graphUri: item.g.value };
+                    nodesTypesMap[item.x.value] = {
+                        type: item.type.value,
+                        color: colorsMap[item.type.value],
+                        graphUri: item.g.value,
+                    };
                 }
             });
             // console.log(JSON.stringify(nodesTypesMap, null, 2))
@@ -120,7 +145,8 @@ var Lineage_decoration = (function () {
             var nodes = visjsGraph.data.nodes.get(nodeIds);
             nodes.forEach(function (node) {
                 if (nodesTypesMap[node.data.id] && nodesTypesMap[node.data.id].graphUri) {
-                    node.data.source = Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri);
+                    var source2 = Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri);
+                    if (source2) node.data.source = source2;
                 }
             });
 

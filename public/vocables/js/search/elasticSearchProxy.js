@@ -56,6 +56,34 @@ var ElasticSearchProxy = (function () {
             },
         });
     };
+    self.deleteDocuments = function (ids, options, callback) {
+        var payload = {
+            query: {
+                terms: {
+                    id: ids,
+                },
+            },
+            url: "_delete_by_query",
+            indexes: ["_any"],
+        };
+        $.ajax({
+            type: "POST",
+            url: Config.apiUrl + "/elasticsearch/query",
+            data: JSON.stringify(payload),
+            contentType: "application/json",
+            dataType: "json",
+            success: function (data, _textStatus, _jqXHR) {
+                callback(null, data);
+            },
+            error: function (err) {
+                console.error("ElasticSearchProxy.queryElastic", err.responseText);
+                if (callback) {
+                    return callback(err);
+                }
+                return err;
+            },
+        });
+    };
 
     self.analyzeSentence = function (sentence, callback) {
         var payload = {

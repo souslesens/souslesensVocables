@@ -1902,19 +1902,6 @@ $("#Standardizer_wordsTA").val(str)
         }, 500);
 
         return;
-
-        // MainController.UI.initTool("lineage");
-        // setTimeout(function () {
-        //     var i = 0;
-        //     async.eachSeries(Object.keys(classUrisBySource), function (source, callbackEach) {
-        //         if (i++ == 0) MainController.currentSource = source;
-        //         MainController.UI.onSourceSelect();
-        //         Lineage_classes.addParentsToGraph(source, classUrisBySource[index], function (err) {
-        //             if (err) return alert(err);
-        //             callbackEach();
-        //         });
-        //     });
-        // }, 500);
     };
 
     self.drawAncestors = function () {

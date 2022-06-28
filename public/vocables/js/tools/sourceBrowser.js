@@ -144,7 +144,7 @@ $("#actionDiv").html(html);*/
                 action: function (_e) {
                     // pb avec source
 
-                    Lineage_classes.drawNodeAndParents(self.currentTreeNode.data);
+                    Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0);
                 },
             };
             items.copyNodeToClipboard = {
@@ -228,11 +228,11 @@ $("#actionDiv").html(html);*/
             },
         };
         /*    items.toDataTable = {
-    label: "export to Table",
-    action: function (e) {// pb avec source
-        Export.exportTeeToDataTable()
+label: "export to Table",
+action: function (e) {// pb avec source
+    Export.exportTeeToDataTable()
 
-    }
+}
 
 }*/
 
@@ -285,11 +285,11 @@ $("#actionDiv").html(html);*/
         SourceBrowser.showNodeInfos(sourceLabel, node.data.id, "graphDiv");
 
         /*  Sparql_generic.getNodeInfos(sourceLabel, node.data.id, null, function (err, result) {
-  if (err) {
-      return MainController.UI.message(err);
-  }
-  //    SkosConceptEditor.editConcept("graphDiv",result)
-  SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
+if (err) {
+  return MainController.UI.message(err);
+}
+//    SkosConceptEditor.editConcept("graphDiv",result)
+SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
 
 })*/
@@ -381,10 +381,10 @@ searchedSources.push(sourceLabel)*/
 
             searchedSources.push(source);
             /*  if( Config.sources[source].imports){
-            Config.sources[source].imports.forEach(function(item){
-                searchedSources.push(item);
-            })
-        }*/
+      Config.sources[source].imports.forEach(function(item){
+          searchedSources.push(item);
+      })
+  }*/
         }
 
         var jstreeData = [];
@@ -1111,7 +1111,8 @@ defaultLang = 'en';*/
         if (!property || !value) return;
 
         if (source) self.currentSource = source;
-        if (createNewNode || confirm("add property")) {
+        if (createNewNode || true) {
+            //confirm("add property")) {
             var triples = [];
             if (createNewNode) {
                 self.currentNodeId = Config.sources[self.currentSource].graphUri + common.getRandomHexaId(10);
@@ -1178,10 +1179,11 @@ defaultLang = 'en';*/
                 if (err) return alert(err);
                 Sparql_generic.deleteTriples(self.currentSource, null, null, self.currentNodeId, function (err, _result) {
                     if (err) return alert(err);
-
-                    $("#" + self.divId).dialog("close");
-                    visjsGraph.data.nodes.remove(self.currentNodeId);
-                    MainController.UI.message("node deleted");
+                    ElasticSearchProxy.deleteDocuments([self.currentNodeId], function (err, result) {
+                        $("#" + self.divId).dialog("close");
+                        visjsGraph.data.nodes.remove(self.currentNodeId);
+                        MainController.UI.message("node deleted");
+                    });
                 });
             });
         }

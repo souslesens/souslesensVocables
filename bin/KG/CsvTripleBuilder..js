@@ -462,9 +462,9 @@ var CsvTripleBuilder = {
                                                     var sampleTriples = triples.slice(0, options.sampleSize);
                                                     return callback(null, sampleTriples);
                                                 }
-
+                                                console.log("writing triples:" + triples.length);
                                                 var slices = util.sliceArray(triples, 200);
-
+                                                triples = [];
                                                 var sliceIndex = 0;
                                                 async.eachSeries(
                                                     slices,
@@ -481,6 +481,7 @@ var CsvTripleBuilder = {
                                                         });
                                                     },
                                                     function (_err) {
+                                                        console.log("total triples writen:" + totalTriples);
                                                         callbackSeries2();
                                                     }
                                                 );

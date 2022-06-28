@@ -1,7 +1,7 @@
 version: "3"
 services:
     virtuoso:
-        image: askomics/virtuoso:7.2.6.1a
+        image: askomics/virtuoso:7.2.7
         environment:
             VIRT_SPARQL_DefaultQuery: SELECT DISTINCT ?graph count(?s) as ?number_of_triples WHERE { GRAPH ?graph { ?s ?p ?o . }}
         ports:
@@ -28,7 +28,7 @@ services:
             - test-backend
 
     elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.17.4
         ports:
             - 9201:9200
         environment:

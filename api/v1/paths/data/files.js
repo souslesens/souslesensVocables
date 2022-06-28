@@ -10,8 +10,9 @@ module.exports = function () {
         dataController.getFilesList(req.query.dir, function (err, result) {
             if (err) {
                 next(err);
+            } else {
+                return res.status(200).json(result);
             }
-            return res.status(200).json(result);
         });
     }
 

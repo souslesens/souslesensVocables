@@ -599,8 +599,7 @@ var common = (function () {
     self.decapitalizeLabel = function (label) {
         if (!label.match(/[a-z]/)) return label;
         var altLabel = label.replace(/[A-Z]/g, function (maj) {
-            if(label.indexOf(" ")>-1)
-                return "" + maj;
+            if (label.indexOf(" ") > -1) return "" + maj;
             return " " + maj;
         });
         return altLabel.trim();

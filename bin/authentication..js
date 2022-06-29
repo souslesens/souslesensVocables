@@ -92,7 +92,7 @@ if (config.auth == "keycloak") {
         }
     );
     passport.use("provider", client);
-} else if (config.auth === "json") {
+} else if (config.auth === "local") {
     passport.use(
         new Strategy(function (username, password, cb) {
             var usersLocation = path.join(__dirname, "../" + configPath + "/users/users.json");

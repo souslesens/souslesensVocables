@@ -50,7 +50,7 @@ app.use(function (req, res, next) {
     next();
 });
 
-if (!config.disableAuth) {
+if (config.auth !== "disabled") {
     app.use(passport.initialize());
     app.use(passport.authenticate("session"));
 }
@@ -75,14 +75,16 @@ openapi.initialize({
     paths: "./api/v1/paths",
     securityHandlers: {
         loginScheme: function (req, _scopes, _definition) {
-            if (!config.disableAuth) {
-                config.auth == "keycloak" ? passport.authenticate("keycloak", { failureRedirect: "/login" }) : null;
-                if (!req.isAuthenticated || !req.isAuthenticated()) {
-                    throw {
-                        status: 401,
-                        message: "You must authenticate to access this resource.",
-                    };
-                }
+            if (config.auth == "keycloak") {
+                passport.authenticate("keycloak", { failureRedirect: "/login" });
+            } else if (config.auth == "local") {
+                // TODO: what ?
+            }
+            if (!req.isAuthenticated || !req.isAuthenticated()) {
+                throw {
+                    status: 401,
+                    message: "You must authenticate to access this resource.",
+                };
             }
             return Promise.resolve(true);
         },
@@ -127,7 +129,7 @@ app.get("/", function (req, res, _next) {
 });
 
 // Login routes
-if (!config.disableAuth) {
+if (config.auth !== "disabled") {
     if (config.auth == "keycloak") {
         app.get("/login", passport.authenticate("provider", { scope: ["openid", "email", "profile"] }));
         app.get("/login/callback", passport.authenticate("provider", { successRedirect: "/", failureRedirect: "/login" }));

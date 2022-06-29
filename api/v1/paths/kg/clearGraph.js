@@ -8,7 +8,7 @@ module.exports = function () {
 
     function POST(req, res, next) {
         try {
-            CsvTripleBuilder.clearGraph(req.body.graphUri, function (err, result) {
+            CsvTripleBuilder.clearGraph(req.body.graphUri, undefined, function (err, result) {
                 processResponse(res, err, result);
             });
         } catch (e) {

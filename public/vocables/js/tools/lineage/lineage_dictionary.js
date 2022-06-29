@@ -30,16 +30,17 @@ var Lineage_dictionary = (function () {
 }*/
                 },
             });
+            var lineageCurrentSource=Lineage_common.currentSource || Lineage_classes.mainSource
             if (context == "Lineage_similars") {
-                self.currentDomainSource = Lineage_common.currentSource;
+                self.currentDomainSource = lineageCurrentSource;
                 self.currentDictionary = Config.dictionarySource;
                 self.filterClass = "dictionary_filter";
                 self.filterIdPrefix = "LineageDictionary";
                 $("#LineageDictionary_nodesSelectionDiv").css("display", "block");
                 $("#LineageDictionary_drawSimilars").css("display", "block");
             } else if (context == "Lineage_relations") {
-                self.currentDomainSource = Lineage_common.currentSource;
-                self.currentDictionary = Lineage_common.currentSource;
+                self.currentDomainSource = lineageCurrentSource;
+                self.currentDictionary = lineageCurrentSource;
                 self.filterClass = "relation_filter";
                 self.filterIdPrefix = "LineageRelations";
             } else if (context == "Lineage_dictionary") {
@@ -237,6 +238,11 @@ var Lineage_dictionary = (function () {
                     var dictionarySource = self.currentDictionary;
                     if (!filters) filters = "";
                     filters = self.getDictionaryFilters();
+                    var mode = $("#LineageDictionary_nodesSelectionSelect").val();
+                    if (mode == "currentGraphNodes") {
+                        var nodes = visjsGraph.data.nodes.getIds();
+                        filters+=Sparql_common.setFilter("domain",nodes)
+                    }
                     $("#LineageDictionary_Tabs").tabs("option", "active", 1);
                     $("#LineageDictionary_dataTab").html("");
                     self.queryTSFdictionary(dictionarySource, filters, function (err, result) {
@@ -449,7 +455,7 @@ targets: [0]
     self.drawDictionarySameAs = function () {
         var filter = " FILTER (?prop = <http://www.w3.org/2002/07/owl#sameAs>) ";
         var rangeSourceLabel = $("#LineageDictionary_rangeSourceSelect").val();
-        filter += "  FILTER (?domainSourceLabel ='" + Lineage_common.currentSource + "')";
+        filter += "  FILTER (?domainSourceLabel ='" + Lineage_common.currentSource|| Lineage_classes.mainSource + "')";
         if (rangeSourceLabel) filter += "  FILTER (?rangeSourceLabel ='" + rangeSourceLabel + "')";
         var nodes = null;
         var mode = $("#LineageDictionary_nodesSelectionSelect").val();

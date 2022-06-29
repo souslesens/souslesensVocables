@@ -1805,6 +1805,11 @@ namedIndividualsMap[item.concept.value] = 1
                         item.valueLabel = { value: "" };
                         size = 3;
                     }
+
+                    if(item.propLabel.value=="sameAs"){
+                        shape="hexagon"
+                        color="#f5ef39"
+                    }
                     if (!existingNodes[item.value.value]) {
                         existingNodes[item.value.value] = 1;
                         visjsData.nodes.push({

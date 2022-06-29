@@ -1,7 +1,7 @@
 //@typescript-eslint/no-unused-vars
 var Lineage_decoration = (function () {
     var self = {};
-
+self.currentpart14ColorsMap={}
     self.init = function () {
         self.operationsMap = {
             colorNodesByType: self.colorGraphNodesByType,
@@ -44,12 +44,10 @@ var Lineage_decoration = (function () {
                         "SELECT distinct ?x ?type ?g " +
                         strFrom +
                         "WHERE {GRAPH ?g{" +
-                        "   ?x rdf:type ?o.\n" +
-                        "  ?x rdfs:subClassOf*|rdf:type* ?type0." +
-                        " ?type0 rdfs:subClassOf|rdf:type  ?type" +
+                      "    ?x (rdfs:subClassOf| rdfs:subClassOf*/rdfs:subClassOf) ?type.  filter(regex(str(?type),\"lis14\"))"
                         /* "  ?x rdfs:subClassOf+|rdf:type+ ?type.\n" +
             " OPTIONAL {?type rdfs:subClassOf|rdf:type  ?parentType}" +*/
-                        '  filter (regex(str(?type),"lis14") && ?type !=  <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Thing>)';
+                      //  '  filter (regex(str(?type),"lis14") && ?type !=  <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Thing>)';
                 } else {
                     query += "SELECT distinct ?x ?type ?g  " + strFrom + "  WHERE {GRAPH ?g{ ?x rdfs:subClassOf|rdf:type ?type.?type rdf:type ?typeType filter (?typeType not in (owl:Restriction)) "; // filter (?type not in ( <http://souslesens.org/resource/vocabulary/TopConcept>,<http://www.w3.org/2002/07/owl#Class>))"
                 }
@@ -112,12 +110,17 @@ var Lineage_decoration = (function () {
                 });
 
                 if (ok) {
-                    if (!colorsMap[item.type.value]) {
-                        colorsMap[item.type.value] = common.paletteIntense[Object.keys(colorsMap).length];
+                    var typeValue=item.type.value
+                    if(item.x.value.indexOf("lis14")>-1) {
+                        typeValue=item.x.value
+                    }
+                    if (!self.currentpart14ColorsMap[typeValue]) {
+
+                        self.currentpart14ColorsMap[typeValue] = common.paletteIntense[Object.keys( self.currentpart14ColorsMap).length];
                     }
                     nodesTypesMap[item.x.value] = {
                         type: item.type.value,
-                        color: colorsMap[item.type.value],
+                        color: self.currentpart14ColorsMap[typeValue],
                         graphUri: item.g.value,
                     };
                 }
@@ -153,12 +156,12 @@ var Lineage_decoration = (function () {
             var legendNodes = [];
             var str = "";
 
-            for (var _type in colorsMap) {
+            for (var _type in  self.currentpart14ColorsMap) {
                 str +=
                     "<div class='Lineage_legendTypeDiv' onclick='Lineage_decoration.onlegendTypeDivClick($(this),\"" +
                     _type +
                     "\")' style='background-color:" +
-                    colorsMap[_type] +
+                  self.currentpart14ColorsMap[_type] +
                     "'>" +
                     Sparql_common.getLabelFromURI(_type) +
                     "</div>";

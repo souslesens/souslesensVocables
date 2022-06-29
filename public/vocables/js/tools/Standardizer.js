@@ -336,7 +336,9 @@ setTimeout(function () {
                 selectTreeNodeFn: function (evt, obj) {
                     var node = obj.node;
                     SourceBrowser.openTreeNode("Standardizer_filterClassesTree", self.currentSource, node);
+
                 },
+                selectGraph:true
             };
             SourceBrowser.showThesaurusTopConcepts(self.currentSource, options);
         }

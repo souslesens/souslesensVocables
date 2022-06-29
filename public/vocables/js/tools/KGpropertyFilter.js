@@ -27,7 +27,10 @@ var KGpropertyFilter = (function () {
         $("#actionDivContolPanelDiv").load("snippets/KGpropertyFilter/leftPanel.html", function () {
             var sources = Config.KGpropertyFilter.sources;
             common.fillSelectOptions("KGpropertyFilter_sourceSelect", sources, true);
+            $("#KGpropertyFilter_searchInPropertiesTreeInput").bind("keyup",null,KGpropertyFilter.searchInPropertiesTree)
         });
+
+
         MainController.UI.toogleRightPanel(true);
         $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function () {
             $("#KGpropertyFilter_filteringResult").height($("#graphDiv").height() - 200);
@@ -101,25 +104,26 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             var existingNodes = {};
 
             result.forEach(function (item) {
-                if (!existingNodes[item.child1.value]) {
-                    existingNodes[item.child1.value] = 1;
+                if (!existingNodes[item.concept.value]) {
+                    existingNodes[item.concept.value] = 1;
                     jstreeData.push({
                         parent: "#",
-                        id: item.child1.value,
-                        text: item.child1Label.value,
+                        id: item.concept.value,
+                        text: item.conceptLabel.value,
                         type: "Class",
                         data: {
                             type: "Class",
                             source: self.currentSource,
-                            label: item.child1Label.value,
-                            id: item.child1.value,
+                            label: item.conceptLabel.value,
+                            id: item.concept.value,
                         },
                     });
                 }
 
-                for (var i = 2; i <= depth; i++) {
+                for (var i = 1; i <= 10; i++) {
                     if (!item["child" + i]) break;
-                    var parent = item["child" + (i - 1)].value;
+                    var parent = i==1?item.concept.value:item["child" + (i - 1)].value;
+
                     var id = item["child" + i].value;
                     var label = item["child" + i + "Label"].value;
                     if (!existingNodes[id]) {
@@ -148,6 +152,11 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                 onCheckNodeFn: null, //KGpropertyFilter.loadPropertiesFilters,
                 tie_selection: false,
                 contextMenu: KGpropertyFilter.getJstreePropertiesContextMenu(),
+                searchPlugin: {
+                    case_insensitive: true,
+                    fuzzy: false,
+                    show_only_matches: true,
+                },
             };
             common.jstree.loadJsTree("KGpropertyFilter_propertiesTreeDiv", jstreeData, options);
 
@@ -156,15 +165,17 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
         if (source == "CFIHOS_1_5_PLUS") {
             var depth = 3;
-            Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/TagClass/CFIHOS-30000311"], depth, {}, function (err, result) {
+            Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-P0000001723","http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-F0000000801"], 3, {}, function (err, result) {
+
+                //    Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/TagClass/CFIHOS-30000311"], depth, {}, function (err, result) {
                 if (err) {
                     return MainController.UI.message(err);
                 }
                 drawTree(result);
             });
-        } else if (true || source == "TSF_TEPDK_TEST") {
+        } else if ( source == "TSF_TEPDK_TEST") {
             var depth = 1;
-            Sparql_generic.getNodeChildren(self.currentSource, null, ["http://rds.posccaesar.org/ontology/lis14/FunctionalObject"], depth, {}, function (err, result) {
+            Sparql_generic.getNodeChildren(self.currentSource, null, ["http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject"], depth, {}, function (err, result) {
                 if (err) {
                     return MainController.UI.message(err);
                 }
@@ -178,6 +189,22 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                 drawTree(result);
             });
         }
+    else if ( source == "TSF_TEPDK_PHUSION") {
+        var depth = 1;
+        Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-P0000001723","http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-F0000000801"], 3, {}, function (err, result) {
+            if (err) {
+                return MainController.UI.message(err);
+            }
+
+            result.sort(function (a, b) {
+                if (a.child1.value > b.child1.value) return 1;
+                if (a.child1.value < b.child1.value) return -1;
+                return 0;
+            });
+
+            drawTree(result);
+        });
+    }
     };
 
     self.getJstreePropertiesContextMenu = function () {
@@ -247,7 +274,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
             // self.client.filterProperties(self.currentClassId);
 
-            if (obj.node.children.length == 0) {
+            if (true || obj.node.children.length == 0) {
                 self.loadClassesPropertiesTree(obj.node.id);
                 //  self.addPropertiestoClassesTree(obj.node.id);
             }
@@ -513,7 +540,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         //  var classIds = ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/EquipmentClass/CFIHOS-30000521"];
         // classIds = null
 
-        var options = { filter: "  FILTER (?prop in(<http://rds.posccaesar.org/ontology/lis14/hasQuality> ,<http://standards.iso.org/iso/15926/part14/hasQuality>))" };
+        var options = { filter: "  FILTER (?prop in(<http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality> ,<http://standards.iso.org/iso/15926/part14/rdl/hasQuality>))" };
         Sparql_OWL.getObjectRestrictions(self.currentSource, classId, options, function (err, result) {
             if (err) {
                 return MainController.UI.message(err.responseText);
@@ -591,7 +618,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             common.array.sort(jstreeData, "text");
             var options = { openAll: false, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
             common.jstree.loadJsTree("KGpropertyFilter_lifeCycleTree", jstreeData, options, function () {
-                $("#KGpropertyFilter_lifeCycleTree").jstree().open_node("http://rds.posccaesar.org/ontology/lis14/Activity");
+                $("#KGpropertyFilter_lifeCycleTree").jstree().open_node("http://rds.posccaesar.org/ontology/lis14/rdl/Activity");
             });
 
             callback();
@@ -798,7 +825,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             "  ?class rdfs:label ?classLabel.\n" +
             "  ?restriction rdf:type owl:Restriction.\n" +
             "  ?restriction ?aspect ?filterId.\n" +
-            " ?restriction owl:onProperty <http://rds.posccaesar.org/ontology/lis14/hasQuality>.\n" +
+            " ?restriction owl:onProperty <http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality>.\n" +
             " ?restriction owl:someValuesFrom ?property.\n" +
             "   ?property rdfs:label ?propertyLabel.\n";
 
@@ -935,6 +962,14 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             common.copyTextToClipboard(html);
         },
     };
+
+    self.searchInPropertiesTree=function(event) {
+        if(event.keyCode!=13)
+            return
+        var value=$("#KGpropertyFilter_searchInPropertiesTreeInput").val()
+        $('#KGpropertyFilter_propertiesTreeDiv').jstree(true).search(value);
+        $("#KGpropertyFilter_searchInPropertiesTreeInput").val("")
+    }
 
     return self;
 })();

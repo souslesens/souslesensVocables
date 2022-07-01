@@ -916,13 +916,26 @@ defaultLang = 'en';*/
                             var optionalStr = "";
                             if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1 && !_options.hideButtons) {
                                 var propUri = self.propertiesMap.properties[key].propUri;
-                                optionalStr =
+
+
+                                if(propUri=="http://www.w3.org/2000/01/rdf-schema#label"){
+                                    optionalStr +=
+                                      "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='font-size: 10px'" +
+                                      " onclick=\"SourceBrowser.modifylabelProperty('" +
+                                      propUri +
+                                      "','" +
+                                      value +
+                                      "')\">Rename</button>";
+                                }
+
+                                optionalStr +=
                                     "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='font-size: 10px'" +
                                     " onclick=\"SourceBrowser.deletePropertyValue('" +
                                     propUri +
                                     "','" +
                                     value +
                                     "')\">X</button>";
+
                             }
 
                             if (value.indexOf("http") == 0) {
@@ -1104,7 +1117,7 @@ defaultLang = 'en';*/
             common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "label", "id");
         }
     };
-    self.addProperty = function (property, value, source, createNewNode) {
+    self.addProperty = function (property, value, source, createNewNode,callback) {
         if (!property) property = $("#sourceBrowser_addPropertyPredicateSelect").val();
         if (!value) value = $("#sourceBrowser_addPropertyValue").val().trim();
 
@@ -1151,8 +1164,11 @@ defaultLang = 'en';*/
                         },
                     });
                 }
+                if(callback)
+                    return callback(null,self.currentNodeId)
             });
         }
+
     };
     self.showAddPropertyDiv = function () {
         $("#sourceBrowser_addPropertyDiv").css("display", "block");
@@ -1173,13 +1189,29 @@ defaultLang = 'en';*/
         }
     };
 
+    self.modifylabelProperty=function (property, oldLabel) {
+        var newLabel=prompt("new label ")
+        if (newLabel) {
+            newLabel=Sparql_common.formatStringForTriple(newLabel)
+            self.addProperty (property, newLabel, self.currentSource, false,function(err,result) {
+                if (err) return alert(err.responseText);
+                Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, oldLabel, function(err, _result) {
+                    if (err) return alert(err);
+                    self.showNodeInfos(self.currentSource, self.currentNodeId, "mainDialogDiv");
+                    visjsGraph.data.nodes.update({id:self.currentNodeId,label:newLabel})
+
+                });
+            })
+        }
+    };
+
     self.deleteNode = function () {
         if (confirm("delete node " + self.currentNodeId)) {
             Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, null, null, function (err, _result) {
                 if (err) return alert(err);
                 Sparql_generic.deleteTriples(self.currentSource, null, null, self.currentNodeId, function (err, _result) {
                     if (err) return alert(err);
-                    ElasticSearchProxy.deleteDocuments([self.currentNodeId], function (err, result) {
+                    ElasticSearchProxy.deleteDocuments([self.currentNodeId],{}, function (err, result) {
                         $("#" + self.divId).dialog("close");
                         visjsGraph.data.nodes.remove(self.currentNodeId);
                         MainController.UI.message("node deleted");

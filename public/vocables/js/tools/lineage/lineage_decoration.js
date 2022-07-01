@@ -146,12 +146,14 @@ self.currentpart14ColorsMap={}
 
             /// update node data source with the real source of the node
             var nodes = visjsGraph.data.nodes.get(nodeIds);
-            nodes.forEach(function (node) {
-                if (nodesTypesMap[node.data.id] && nodesTypesMap[node.data.id].graphUri) {
-                    var source2 = Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri);
-                    if (source2) node.data.source = source2;
-                }
-            });
+            if( false) {
+                nodes.forEach(function(node) {
+                    if (nodesTypesMap[node.data.id] && nodesTypesMap[node.data.id].graphUri) {
+                        var source2 = nodesTypesMap[node.data.id].graphUri ? Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri) : source;
+                        if (source2) node.data.source = source2;
+                    }
+                });
+            }
 
             var legendNodes = [];
             var str = "";

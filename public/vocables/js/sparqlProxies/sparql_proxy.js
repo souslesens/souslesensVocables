@@ -92,6 +92,14 @@ var Sparql_proxy = (function () {
      */
     self.querySPARQL_GET_proxy = function (url, query, queryOptions, options, callback) {
         if (url.indexOf("_default") == 0) url = Config.default_sparql_url;
+        var sourceParams;
+        if (options.source) sourceParams = Config.sources[options.source];
+        else sourceParams = Config.sources[MainController.currentSource];
+
+
+    /*    if(!sourceParams.graphUri){// cas des sources sans graphe
+            query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
+        }*/
 
         self.currentQuery = query;
         if (!options) options = {};
@@ -103,9 +111,6 @@ var Sparql_proxy = (function () {
         };
         if (!queryOptions) queryOptions = "";
 
-        var sourceParams;
-        if (options.source) sourceParams = Config.sources[options.source];
-        else sourceParams = Config.sources[MainController.currentSource];
 
         var useProxy = false;
         if (url.indexOf(Config.default_sparql_url) == 0) useProxy = true;

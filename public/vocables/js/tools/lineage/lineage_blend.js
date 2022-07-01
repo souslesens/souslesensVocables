@@ -377,7 +377,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
                 from: sourceNode.id,
                 to: targetNode.id,
                 label: "<i>" + propLabel + "</i>",
-                data: { propertyId: propUri, source: Lineage_classes.mainSource },
+                data: { propertyId: propUri, source: Lineage_classes.mainSource,  bNodeId:edgeId}, // used by Lineage},
                 font: { multi: true, size: 10 },
                 arrows: {
                     from: {
@@ -1109,6 +1109,7 @@ var xx = result
                     subject: sourceNode.id,
                     predicate: propId,
                     object: targetNode.id,
+
                 });
 
                 Sparql_generic.insertTriples(inSource, triples, {}, function (err, _result) {
@@ -1204,12 +1205,14 @@ var xx = result
             var sourceObjects = [];
             var part14Objects = [];
             result.forEach(function (item) {
+
                 if (item.id.type == "bnode") return;
                 var prefix = "";
                 if (item.g.value.indexOf("lis14") > -1) {
                     prefix = " part14:";
                     part14Objects.push({ label: prefix + item.label.value, id: item.id.value });
                 } else {
+                    if(!item.label )
                     sourceObjects.push({ label: prefix + item.label.value, id: item.id.value });
                 }
             });

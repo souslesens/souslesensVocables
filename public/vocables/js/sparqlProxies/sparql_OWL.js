@@ -46,6 +46,11 @@ var Sparql_OWL = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
+
+
+        if(!Config.sources[sourceLabel].graphUri)
+            options.selectGraph=false;
+
         //fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports);
         fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
 
@@ -101,6 +106,8 @@ var Sparql_OWL = (function () {
         } else if (ids) {
             strFilter = Sparql_common.setFilter("concept", ids, null, options);
         }
+        if(!Config.sources[sourceLabel].graphUri)
+            options.selectGraph=false;
 
         fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
@@ -186,6 +193,9 @@ var Sparql_OWL = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
+        if(!Config.sources[sourceLabel].graphUri)
+            options.selectGraph=false;
+
         fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " + "select * " + fromStr + " where {";
@@ -227,6 +237,9 @@ var Sparql_OWL = (function () {
             ancestorsDepth = Math.min(ancestorsDepth, 4);
         }
 
+        if(!Config.sources[sourceLabel].graphUri)
+            options.selectGraph=false;
+
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
         if (!options) options = {};
@@ -246,7 +259,7 @@ var Sparql_OWL = (function () {
             " select distinct *  " +
             fromStr +
             "  WHERE {";
-        if (options.selectGraph) query += " graph ?conceptGraph {";
+        if (options.selectGraph) query += " GRAPH ?conceptGraph {";
         query += "?concept rdf:type  ?conceptType. filter (?conceptType not in(owl:Restriction)) ";
         if (words) {
             query += " ?concept rdfs:label ?conceptLabel.";
@@ -393,7 +406,10 @@ var Sparql_OWL = (function () {
 
         query += " select distinct * " + fromStr + "  WHERE {";
 
-        if (options.selectGraph) query += " graph ?g ";
+        if(!Config.sources[sourceLabel].graphUri)
+            options.selectGraph=false;
+
+        if (options.selectGraph) query += " GRAPH ?g ";
         query += "{ ?concept ?p ?o.";
         if (!options.includeBlankNodes) query += "FILTER (!isBlank(?concept))";
         query += "OPTIONAL {?concept rdfs:label ?conceptLabel.}";
@@ -433,6 +449,9 @@ var Sparql_OWL = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
+        if(!Config.sources[sourceLabel].graphUri)
+            options.selectGraph=false;
+
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
         var query =
@@ -443,7 +462,9 @@ var Sparql_OWL = (function () {
             "select distinct ?domain ?prop ?range ?domainLabel ?propLabel ?rangeLabel ?subProp ?subPropLabel ?inverseProp ?inversePropLabel" +
             fromStr +
             " WHERE {";
-        if (options.selectGraph) query += " graph ?g ";
+
+
+        if (options.selectGraph) query += " GRAPH ?g ";
         if (options.inheritedProperties) query += "  { ?prop rdfs:subPropertyOf*/rdf:type owl:ObjectProperty ";
         else query += "   {?prop rdf:type owl:ObjectProperty. ";
 
@@ -498,6 +519,9 @@ var Sparql_OWL = (function () {
             options = {};
         }
         var filterStr = "";
+
+        if(!Config.sources[sourceLabel].graphUri)
+            options.selectGraph=false;
 
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
         var filterStr = Sparql_common.setFilter("property", propertyIds);
@@ -554,7 +578,7 @@ var Sparql_OWL = (function () {
         else if (options.withoutBlankNodes) query += " SELECT distinct ?concept  ?prop ?propLabel ?conceptLabel  ?value ?valueLabel ";
         else query += "SELECT * ";
         query += "" + fromStr + " WHERE {";
-        if (options.selectGraph) query += " graph ?g ";
+        if (options.selectGraph) query += " GRAPH ?g ";
         query +=
             "{ ?concept rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction." +
             filterStr +
@@ -627,6 +651,8 @@ var Sparql_OWL = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
+        if(!Config.sources[sourceLabel].graphUri)
+            options.selectGraph=false;
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
         var query =
@@ -636,7 +662,7 @@ var Sparql_OWL = (function () {
             "SELECT * " +
             fromStr +
             " WHERE ";
-        if (options.selectGraph) query += " graph ?g ";
+        if (options.selectGraph) query += " GRAPH ?g ";
         query += "{ ?concept rdf:type ?node. " + filterStr + " OPTIONAL {?concept rdfs:label ?conceptLabel}" + " OPTIONAL {?node rdfs:label ?nodeLabel}";
         if (options.typeNameIndividual) query += " ?concept rdf:type owl:NamedIndividual .";
         query += " }";
@@ -737,6 +763,9 @@ var Sparql_OWL = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
+        if(!Config.sources[sourceLabel].graphUri)
+            options.selectGraph=false;
+
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
         var query =
@@ -775,6 +804,8 @@ var Sparql_OWL = (function () {
 
     self.getDictionary = function (sourceLabel, options, processor, callback) {
         if (!options) options = {};
+        if(!Config.sources[sourceLabel].graphUri)
+            options.selectGraph=false;
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -783,7 +814,7 @@ var Sparql_OWL = (function () {
             "SELECT distinct * " +
             fromStr +
             " WHERE {";
-        if (options.selectGraph) query += " graph ?g ";
+        if (options.selectGraph) query += " GRAPH ?g ";
         query += "{ ?id rdf:type <http://www.w3.org/2002/07/owl#Class>. " + " OPTIONAL {?id rdfs:label ?label}" + " }}";
 
         var allData = [];

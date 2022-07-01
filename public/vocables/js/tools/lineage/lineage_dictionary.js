@@ -30,7 +30,7 @@ var Lineage_dictionary = (function () {
 }*/
                 },
             });
-            var lineageCurrentSource=Lineage_common.currentSource || Lineage_classes.mainSource
+            var lineageCurrentSource = Lineage_common.currentSource || Lineage_classes.mainSource;
             if (context == "Lineage_similars") {
                 self.currentDomainSource = lineageCurrentSource;
                 self.currentDictionary = Config.dictionarySource;
@@ -241,7 +241,7 @@ var Lineage_dictionary = (function () {
                     var mode = $("#LineageDictionary_nodesSelectionSelect").val();
                     if (mode == "currentGraphNodes") {
                         var nodes = visjsGraph.data.nodes.getIds();
-                        filters+=Sparql_common.setFilter("domain",nodes)
+                        filters += Sparql_common.setFilter("domain", nodes);
                     }
                     $("#LineageDictionary_Tabs").tabs("option", "active", 1);
                     $("#LineageDictionary_dataTab").html("");
@@ -455,7 +455,7 @@ targets: [0]
     self.drawDictionarySameAs = function () {
         var filter = " FILTER (?prop = <http://www.w3.org/2002/07/owl#sameAs>) ";
         var rangeSourceLabel = $("#LineageDictionary_rangeSourceSelect").val();
-        filter += "  FILTER (?domainSourceLabel ='" + Lineage_common.currentSource|| Lineage_classes.mainSource + "')";
+        filter += "  FILTER (?domainSourceLabel ='" + Lineage_common.currentSource || Lineage_classes.mainSource + "')";
         if (rangeSourceLabel) filter += "  FILTER (?rangeSourceLabel ='" + rangeSourceLabel + "')";
         var nodes = null;
         var mode = $("#LineageDictionary_nodesSelectionSelect").val();

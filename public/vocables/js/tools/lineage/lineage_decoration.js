@@ -1,7 +1,7 @@
 //@typescript-eslint/no-unused-vars
 var Lineage_decoration = (function () {
     var self = {};
-self.currentpart14ColorsMap={}
+    self.currentpart14ColorsMap = {};
     self.init = function () {
         self.operationsMap = {
             colorNodesByType: self.colorGraphNodesByType,
@@ -40,24 +40,14 @@ self.currentpart14ColorsMap={}
                     "PREFIX owl: <http://www.w3.org/2002/07/owl#>";
 
                 if (part14TopTypes) {
+                    query += "  SELECT distinct ?x ?type ?g " + strFrom + "WHERE {GRAPH ?g{" + "    ?x  rdf:type owl:Class." + " ?x   rdfs:subClassOf{,1} ?type.  filter(regex(str(?type),'lis14'))";
 
-                    query+="  SELECT distinct ?x ?type ?g " +strFrom+ "WHERE {GRAPH ?g{" +
-
-                      "    ?x  rdf:type owl:Class." +
-
-                      " ?x   rdfs:subClassOf{,1} ?type.  filter(regex(str(?type),'lis14'))"
-
-
-                    if( false) {
-                        query +=
-                          "SELECT distinct ?x ?type ?g " +
-                          strFrom +
-                          "WHERE {GRAPH ?g{" +
-                          "    ?x (rdfs:subClassOf| rdfs:subClassOf*/rdfs:subClassOf) ?type.  filter(regex(str(?type),\"lis14\"))"
+                    if (false) {
+                        query += "SELECT distinct ?x ?type ?g " + strFrom + "WHERE {GRAPH ?g{" + '    ?x (rdfs:subClassOf| rdfs:subClassOf*/rdfs:subClassOf) ?type.  filter(regex(str(?type),"lis14"))';
                     }
-                        /* "  ?x rdfs:subClassOf+|rdf:type+ ?type.\n" +
+                    /* "  ?x rdfs:subClassOf+|rdf:type+ ?type.\n" +
             " OPTIONAL {?type rdfs:subClassOf|rdf:type  ?parentType}" +*/
-                      //  '  filter (regex(str(?type),"lis14") && ?type !=  <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Thing>)';
+                    //  '  filter (regex(str(?type),"lis14") && ?type !=  <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Thing>)';
                 } else {
                     query += "SELECT distinct ?x ?type ?g  " + strFrom + "  WHERE {GRAPH ?g{ ?x rdfs:subClassOf|rdf:type ?type.?type rdf:type ?typeType filter (?typeType not in (owl:Restriction)) "; // filter (?type not in ( <http://souslesens.org/resource/vocabulary/TopConcept>,<http://www.w3.org/2002/07/owl#Class>))"
                 }
@@ -113,24 +103,22 @@ self.currentpart14ColorsMap={}
             var colorsMap = {};
 
             var excludedTypes = ["TopConcept", "Class", "Restriction"];
-            var distinctItems={}
+            var distinctItems = {};
             result.forEach(function (item) {
-                if(!distinctItems[item.x.value]){
-                    distinctItems[item.x.value]=1;
+                if (!distinctItems[item.x.value]) {
+                    distinctItems[item.x.value] = 1;
 
                     var ok = true;
-                    excludedTypes.forEach(function(type) {
+                    excludedTypes.forEach(function (type) {
                         if (item.type.value.indexOf(type) > -1) return (ok = false);
-
                     });
 
                     if (ok) {
-                        var typeValue = item.type.value
+                        var typeValue = item.type.value;
                         if (item.type.value.indexOf("lis14") < 0) {
                             return;
                         }
                         if (!self.currentpart14ColorsMap[typeValue]) {
-
                             self.currentpart14ColorsMap[typeValue] = common.paletteIntense[Object.keys(self.currentpart14ColorsMap).length];
                         }
                         nodesTypesMap[item.x.value] = {
@@ -162,8 +150,8 @@ self.currentpart14ColorsMap={}
 
             /// update node data source with the real source of the node
             var nodes = visjsGraph.data.nodes.get(nodeIds);
-            if( false) {
-                nodes.forEach(function(node) {
+            if (false) {
+                nodes.forEach(function (node) {
                     if (nodesTypesMap[node.data.id] && nodesTypesMap[node.data.id].graphUri) {
                         var source2 = nodesTypesMap[node.data.id].graphUri ? Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri) : source;
                         if (source2) node.data.source = source2;
@@ -174,12 +162,12 @@ self.currentpart14ColorsMap={}
             var legendNodes = [];
             var str = "";
 
-            for (var _type in  self.currentpart14ColorsMap) {
+            for (var _type in self.currentpart14ColorsMap) {
                 str +=
                     "<div class='Lineage_legendTypeDiv' onclick='Lineage_decoration.onlegendTypeDivClick($(this),\"" +
                     _type +
                     "\")' style='background-color:" +
-                  self.currentpart14ColorsMap[_type] +
+                    self.currentpart14ColorsMap[_type] +
                     "'>" +
                     Sparql_common.getLabelFromURI(_type) +
                     "</div>";
@@ -211,9 +199,8 @@ self.currentpart14ColorsMap={}
         var newNodes = [];
         var hidden = hide ? true : false;
         allNodes.forEach(function (node) {
-
-         if (only) {
-                if (only=="all" || node && node.legendType == self.currentLegendObject.type)
+            if (only) {
+                if (only == "all" || (node && node.legendType == self.currentLegendObject.type))
                     newNodes.push({
                         id: node.id,
                         hidden: false,

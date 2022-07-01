@@ -46,10 +46,7 @@ var Sparql_OWL = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-
-
-        if(!Config.sources[sourceLabel].graphUri)
-            options.selectGraph=false;
+        if (!Config.sources[sourceLabel].graphUri) options.selectGraph = false;
 
         //fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports);
         fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
@@ -106,8 +103,7 @@ var Sparql_OWL = (function () {
         } else if (ids) {
             strFilter = Sparql_common.setFilter("concept", ids, null, options);
         }
-        if(!Config.sources[sourceLabel].graphUri)
-            options.selectGraph=false;
+        if (!Config.sources[sourceLabel].graphUri) options.selectGraph = false;
 
         fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
@@ -193,8 +189,7 @@ var Sparql_OWL = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-        if(!Config.sources[sourceLabel].graphUri)
-            options.selectGraph=false;
+        if (!Config.sources[sourceLabel].graphUri) options.selectGraph = false;
 
         fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
@@ -237,8 +232,7 @@ var Sparql_OWL = (function () {
             ancestorsDepth = Math.min(ancestorsDepth, 4);
         }
 
-        if(!Config.sources[sourceLabel].graphUri)
-            options.selectGraph=false;
+        if (!Config.sources[sourceLabel].graphUri) options.selectGraph = false;
 
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -406,8 +400,7 @@ var Sparql_OWL = (function () {
 
         query += " select distinct * " + fromStr + "  WHERE {";
 
-        if(!Config.sources[sourceLabel].graphUri)
-            options.selectGraph=false;
+        if (!Config.sources[sourceLabel].graphUri) options.selectGraph = false;
 
         if (options.selectGraph) query += " GRAPH ?g ";
         query += "{ ?concept ?p ?o.";
@@ -449,8 +442,7 @@ var Sparql_OWL = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-        if(!Config.sources[sourceLabel].graphUri)
-            options.selectGraph=false;
+        if (!Config.sources[sourceLabel].graphUri) options.selectGraph = false;
 
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
@@ -462,7 +454,6 @@ var Sparql_OWL = (function () {
             "select distinct ?domain ?prop ?range ?domainLabel ?propLabel ?rangeLabel ?subProp ?subPropLabel ?inverseProp ?inversePropLabel" +
             fromStr +
             " WHERE {";
-
 
         if (options.selectGraph) query += " GRAPH ?g ";
         if (options.inheritedProperties) query += "  { ?prop rdfs:subPropertyOf*/rdf:type owl:ObjectProperty ";
@@ -520,8 +511,7 @@ var Sparql_OWL = (function () {
         }
         var filterStr = "";
 
-        if(!Config.sources[sourceLabel].graphUri)
-            options.selectGraph=false;
+        if (!Config.sources[sourceLabel].graphUri) options.selectGraph = false;
 
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
         var filterStr = Sparql_common.setFilter("property", propertyIds);
@@ -651,8 +641,7 @@ var Sparql_OWL = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-        if(!Config.sources[sourceLabel].graphUri)
-            options.selectGraph=false;
+        if (!Config.sources[sourceLabel].graphUri) options.selectGraph = false;
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
         var query =
@@ -763,8 +752,7 @@ var Sparql_OWL = (function () {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
-        if(!Config.sources[sourceLabel].graphUri)
-            options.selectGraph=false;
+        if (!Config.sources[sourceLabel].graphUri) options.selectGraph = false;
 
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
@@ -804,8 +792,7 @@ var Sparql_OWL = (function () {
 
     self.getDictionary = function (sourceLabel, options, processor, callback) {
         if (!options) options = {};
-        if(!Config.sources[sourceLabel].graphUri)
-            options.selectGraph=false;
+        if (!Config.sources[sourceLabel].graphUri) options.selectGraph = false;
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +

@@ -390,7 +390,7 @@ Lineage_classes.drawSimilarsNodes("sameAs")
 
                     var shape = self.defaultShape;
                     result.forEach(function (/** @type {{ topConcept: { value: string; }; topConceptLabel: { value: any; }; }} */ item) {
-                        var nodeSource = item.conceptGraph?Sparql_common.getSourceFromGraphUri(item.conceptGraph.value):source;
+                        var nodeSource = item.conceptGraph ? Sparql_common.getSourceFromGraphUri(item.conceptGraph.value) : source;
                         //  var color = self.getSourceColor(nodeSource);
                         var attrs = self.getNodeVisjAttrs(item.topConcept, null, nodeSource);
                         if (!existingNodes[item.topConcept.value]) {
@@ -978,7 +978,7 @@ Lineage_classes.drawSimilarsNodes("sameAs")
 
                     result.forEach(function (/** @type {{ broader1: { value: string; }; broader1Label: { value: any; }; concept: { value: string; }; }} */ item) {
                         if (item.broader1) {
-                            let nodeSource =  item.broader1Graph?Sparql_common.getSourceFromGraphUri(item.broader1Graph.value):source;
+                            let nodeSource = item.broader1Graph ? Sparql_common.getSourceFromGraphUri(item.broader1Graph.value) : source;
                             let nodeColor = self.getSourceColor(nodeSource);
 
                             if (!existingNodes[item.concept.value]) {
@@ -1195,7 +1195,7 @@ Lineage_classes.drawSimilarsNodes("sameAs")
 
                         for (var i = 1; i < depth + 1; i++) {
                             if (item["child" + i]) {
-                                let childNodeSource =  item["child" + i + "Graph"]?Sparql_common.getSourceFromGraphUri(item["child" + i + "Graph"]):source;
+                                let childNodeSource = item["child" + i + "Graph"] ? Sparql_common.getSourceFromGraphUri(item["child" + i + "Graph"]) : source;
 
                                 if (!existingIds[item["child" + i]]) {
                                     var attrs = self.getNodeVisjAttrs(item["child" + i + "Type"], item.concept, childNodeSource);
@@ -1410,7 +1410,7 @@ namedIndividualsMap[item.concept.value] = 1
 
                             for (var i = 1; i < 4; i++) {
                                 if (item["child" + i]) {
-                                    let childNodeSource =  item["child" + i + "Graph"]?Sparql_common.getSourceFromGraphUri(item["child" + i + "Graph"]):source;
+                                    let childNodeSource = item["child" + i + "Graph"] ? Sparql_common.getSourceFromGraphUri(item["child" + i + "Graph"]) : source;
 
                                     if (!existingIds[item["child" + i]]) {
                                         var attrs = self.getNodeVisjAttrs(item["child" + i + "Type"], item.concept, childNodeSource);
@@ -1806,9 +1806,9 @@ namedIndividualsMap[item.concept.value] = 1
                         size = 3;
                     }
 
-                    if(item.propLabel.value=="sameAs"){
-                        shape="hexagon"
-                        color="#f5ef39"
+                    if (item.propLabel.value == "sameAs") {
+                        shape = "hexagon";
+                        color = "#f5ef39";
                     }
                     if (!existingNodes[item.value.value]) {
                         existingNodes[item.value.value] = 1;

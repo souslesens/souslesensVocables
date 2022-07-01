@@ -27,9 +27,8 @@ var KGpropertyFilter = (function () {
         $("#actionDivContolPanelDiv").load("snippets/KGpropertyFilter/leftPanel.html", function () {
             var sources = Config.KGpropertyFilter.sources;
             common.fillSelectOptions("KGpropertyFilter_sourceSelect", sources, true);
-            $("#KGpropertyFilter_searchInPropertiesTreeInput").bind("keyup",null,KGpropertyFilter.searchInPropertiesTree)
+            $("#KGpropertyFilter_searchInPropertiesTreeInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
         });
-
 
         MainController.UI.toogleRightPanel(true);
         $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function () {
@@ -122,7 +121,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
                 for (var i = 1; i <= 10; i++) {
                     if (!item["child" + i]) break;
-                    var parent = i==1?item.concept.value:item["child" + (i - 1)].value;
+                    var parent = i == 1 ? item.concept.value : item["child" + (i - 1)].value;
 
                     var id = item["child" + i].value;
                     var label = item["child" + i + "Label"].value;
@@ -165,15 +164,21 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
         if (source == "CFIHOS_1_5_PLUS") {
             var depth = 3;
-            Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-P0000001723","http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-F0000000801"], 3, {}, function (err, result) {
-
-                //    Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/TagClass/CFIHOS-30000311"], depth, {}, function (err, result) {
-                if (err) {
-                    return MainController.UI.message(err);
+            Sparql_generic.getNodeChildren(
+                self.currentSource,
+                null,
+                ["http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-P0000001723", "http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-F0000000801"],
+                3,
+                {},
+                function (err, result) {
+                    //    Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/TagClass/CFIHOS-30000311"], depth, {}, function (err, result) {
+                    if (err) {
+                        return MainController.UI.message(err);
+                    }
+                    drawTree(result);
                 }
-                drawTree(result);
-            });
-        } else if ( source == "TSF_TEPDK_TEST") {
+            );
+        } else if (source == "TSF_TEPDK_TEST") {
             var depth = 1;
             Sparql_generic.getNodeChildren(self.currentSource, null, ["http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject"], depth, {}, function (err, result) {
                 if (err) {
@@ -188,23 +193,29 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
                 drawTree(result);
             });
+        } else if (source == "TSF_TEPDK_PHUSION") {
+            var depth = 1;
+            Sparql_generic.getNodeChildren(
+                self.currentSource,
+                null,
+                ["http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-P0000001723", "http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-F0000000801"],
+                3,
+                {},
+                function (err, result) {
+                    if (err) {
+                        return MainController.UI.message(err);
+                    }
+
+                    result.sort(function (a, b) {
+                        if (a.child1.value > b.child1.value) return 1;
+                        if (a.child1.value < b.child1.value) return -1;
+                        return 0;
+                    });
+
+                    drawTree(result);
+                }
+            );
         }
-    else if ( source == "TSF_TEPDK_PHUSION") {
-        var depth = 1;
-        Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-P0000001723","http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-F0000000801"], 3, {}, function (err, result) {
-            if (err) {
-                return MainController.UI.message(err);
-            }
-
-            result.sort(function (a, b) {
-                if (a.child1.value > b.child1.value) return 1;
-                if (a.child1.value < b.child1.value) return -1;
-                return 0;
-            });
-
-            drawTree(result);
-        });
-    }
     };
 
     self.getJstreePropertiesContextMenu = function () {
@@ -963,13 +974,12 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         },
     };
 
-    self.searchInPropertiesTree=function(event) {
-        if(event.keyCode!=13)
-            return
-        var value=$("#KGpropertyFilter_searchInPropertiesTreeInput").val()
-        $('#KGpropertyFilter_propertiesTreeDiv').jstree(true).search(value);
-        $("#KGpropertyFilter_searchInPropertiesTreeInput").val("")
-    }
+    self.searchInPropertiesTree = function (event) {
+        if (event.keyCode != 13) return;
+        var value = $("#KGpropertyFilter_searchInPropertiesTreeInput").val();
+        $("#KGpropertyFilter_propertiesTreeDiv").jstree(true).search(value);
+        $("#KGpropertyFilter_searchInPropertiesTreeInput").val("");
+    };
 
     return self;
 })();

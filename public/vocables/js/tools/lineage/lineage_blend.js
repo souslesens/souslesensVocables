@@ -377,7 +377,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
                 from: sourceNode.id,
                 to: targetNode.id,
                 label: "<i>" + propLabel + "</i>",
-                data: { propertyId: propUri, source: Lineage_classes.mainSource },
+                data: { propertyId: propUri, source: Lineage_classes.mainSource, bNodeId: edgeId }, // used by Lineage},
                 font: { multi: true, size: 10 },
                 arrows: {
                     from: {
@@ -1210,7 +1210,7 @@ var xx = result
                     prefix = " part14:";
                     part14Objects.push({ label: prefix + item.label.value, id: item.id.value });
                 } else {
-                    sourceObjects.push({ label: prefix + item.label.value, id: item.id.value });
+                    if (!item.label) sourceObjects.push({ label: prefix + item.label.value, id: item.id.value });
                 }
             });
             sourceObjects.sort(function (a, b) {

@@ -40,11 +40,21 @@ self.currentpart14ColorsMap={}
                     "PREFIX owl: <http://www.w3.org/2002/07/owl#>";
 
                 if (part14TopTypes) {
-                    query +=
-                        "SELECT distinct ?x ?type ?g " +
-                        strFrom +
-                        "WHERE {GRAPH ?g{" +
-                      "    ?x (rdfs:subClassOf| rdfs:subClassOf*/rdfs:subClassOf) ?type.  filter(regex(str(?type),\"lis14\"))"
+
+                    query+="  SELECT distinct ?x ?type ?g " +strFrom+ "WHERE {GRAPH ?g{" +
+
+                      "    ?x  rdf:type owl:Class." +
+
+                      " ?x   rdfs:subClassOf{,1} ?type.  filter(regex(str(?type),'lis14'))"
+
+
+                    if( false) {
+                        query +=
+                          "SELECT distinct ?x ?type ?g " +
+                          strFrom +
+                          "WHERE {GRAPH ?g{" +
+                          "    ?x (rdfs:subClassOf| rdfs:subClassOf*/rdfs:subClassOf) ?type.  filter(regex(str(?type),\"lis14\"))"
+                    }
                         /* "  ?x rdfs:subClassOf+|rdf:type+ ?type.\n" +
             " OPTIONAL {?type rdfs:subClassOf|rdf:type  ?parentType}" +*/
                       //  '  filter (regex(str(?type),"lis14") && ?type !=  <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Thing>)';
@@ -103,26 +113,32 @@ self.currentpart14ColorsMap={}
             var colorsMap = {};
 
             var excludedTypes = ["TopConcept", "Class", "Restriction"];
+            var distinctItems={}
             result.forEach(function (item) {
-                var ok = true;
-                excludedTypes.forEach(function (type) {
-                    if (item.type.value.indexOf(type) > -1) return (ok = false);
-                });
+                if(!distinctItems[item.x.value]){
+                    distinctItems[item.x.value]=1;
 
-                if (ok) {
-                    var typeValue=item.type.value
-                    if(item.x.value.indexOf("lis14")>-1) {
-                        typeValue=item.x.value
-                    }
-                    if (!self.currentpart14ColorsMap[typeValue]) {
+                    var ok = true;
+                    excludedTypes.forEach(function(type) {
+                        if (item.type.value.indexOf(type) > -1) return (ok = false);
 
-                        self.currentpart14ColorsMap[typeValue] = common.paletteIntense[Object.keys( self.currentpart14ColorsMap).length];
+                    });
+
+                    if (ok) {
+                        var typeValue = item.type.value
+                        if (item.type.value.indexOf("lis14") < 0) {
+                            return;
+                        }
+                        if (!self.currentpart14ColorsMap[typeValue]) {
+
+                            self.currentpart14ColorsMap[typeValue] = common.paletteIntense[Object.keys(self.currentpart14ColorsMap).length];
+                        }
+                        nodesTypesMap[item.x.value] = {
+                            type: item.type.value,
+                            color: self.currentpart14ColorsMap[typeValue],
+                            graphUri: item.g.value,
+                        };
                     }
-                    nodesTypesMap[item.x.value] = {
-                        type: item.type.value,
-                        color: self.currentpart14ColorsMap[typeValue],
-                        graphUri: item.g.value,
-                    };
                 }
             });
             // console.log(JSON.stringify(nodesTypesMap, null, 2))
@@ -195,8 +211,9 @@ self.currentpart14ColorsMap={}
         var newNodes = [];
         var hidden = hide ? true : false;
         allNodes.forEach(function (node) {
-            if (only) {
-                if (node && node.legendType == self.currentLegendObject.type)
+
+         if (only) {
+                if (only=="all" || node && node.legendType == self.currentLegendObject.type)
                     newNodes.push({
                         id: node.id,
                         hidden: false,

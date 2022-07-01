@@ -12,9 +12,9 @@
         "prettier": "prettier --check .",
         "ncu": "ncu",
         "ci": "npm run lint && npm run ncu",
-        "patch": " npm version patch",
-        "minor": " npm version minor",
-        "major": " npm version major",
+        "patch": " npm version --no-git-tag-version patch",
+        "minor": " npm version --no-git-tag-version minor",
+        "major": " npm version --no-git-tag-version major",
         "uitest": "CONFIG_PATH=tests/data/config npm start & cypress open",
         "test": "jest --rootDir tests"
     },

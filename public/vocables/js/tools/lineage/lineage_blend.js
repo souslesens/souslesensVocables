@@ -776,13 +776,11 @@ var xx = result
                         triples.push({ subject: sourceUri, predicate: "rdf:type", object: "owl:Class" });
                         triples.push({ subject: sourceUri, predicate: "rdfs:subClassOf", object: targetUri });
                     } else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
-
                         triples.push({ subject: sourceUri, predicate: "rdf:type", object: "owl:NamedIndividual" });
-                        if(targetUri.indexOf("lis14")>0) {
+                        if (targetUri.indexOf("lis14") > 0) {
                             triples.push({ subject: sourceUri, predicate: "rdf:type", object: targetUri });
-                        }else {
+                        } else {
                             triples.push({ subject: sourceUri, predicate: "part14:partOf", object: targetUri });
-
                         }
                     }
                 }

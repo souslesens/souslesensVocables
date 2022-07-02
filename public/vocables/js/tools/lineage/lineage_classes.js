@@ -95,13 +95,7 @@ var Lineage_classes = (function () {
                 }
                 $("#GenericTools_searchSchemaType").val("OWL");
 
-
-                $("#LineageIndividualsTab").load("snippets/lineage/lineageIndividualsSearchDialog.html",function(){
-
-
-
-                })
-
+                $("#LineageIndividualsTab").load("snippets/lineage/lineageIndividualsSearchDialog.html", function () {});
 
                 Lineage_decoration.init();
                 if (callback) callback();
@@ -2403,8 +2397,8 @@ upperNodeIds.push(id);
             }
         },
         showIndividuals: function () {
-          //  Lineage_individuals.showSearchDialog()
-         Lineage_classes.drawNamedIndividuals([self.currentGraphNode.id]);
+            //  Lineage_individuals.showSearchDialog()
+            Lineage_classes.drawNamedIndividuals([self.currentGraphNode.id]);
         },
     };
 

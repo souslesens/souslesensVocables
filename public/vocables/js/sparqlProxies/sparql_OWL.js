@@ -29,7 +29,7 @@ var Sparql_OWL = (function () {
             if (item.indexOf("http://") == 0) str += " <" + item + "> ";
             else str += " " + item + " ";
         });
-        if (Config.sources[source].allowIndividuals) str += "|<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
+        if (false && Config.sources[source].allowIndividuals) str += "|<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>";
 
         return str;
     };
@@ -435,7 +435,7 @@ var Sparql_OWL = (function () {
         }
         var filterStr = "";
         if (domainIds) filterStr = Sparql_common.setFilter("domain", domainIds, null, options);
-        if (options.inverseRestriction) filterStr = Sparql_common.setFilter("range", ids, null, options);
+        if (options.inverseRestriction) filterStr = Sparql_common.setFilter("range", domainIds, null, options);
         if (options.propIds) filterStr = Sparql_common.setFilter("prop", options.propIds, null, options);
         if (options.subPropIds) filterStr = Sparql_common.setFilter("subProp", options.subPropIds, null, options);
         if (options.filter) filterStr = options.filter;
@@ -493,7 +493,7 @@ var Sparql_OWL = (function () {
             if (options.addInverseRestrictions) {
                 delete options.addInverseRestrictions;
                 options.inverseRestriction = true;
-                self.getObjectProperties(sourceLabel, ids, options, function (err, resultInverse) {
+                self.getObjectProperties(sourceLabel, domainIds, options, function (err, resultInverse) {
                     result = result.results.bindings.concat(resultInverse);
                     return callback(null, result);
                 });

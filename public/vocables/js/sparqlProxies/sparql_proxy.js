@@ -126,7 +126,7 @@ var Sparql_proxy = (function () {
             payload.POST = true;
             var headers = {};
             if (sourceParams.sparql_server.headers) {
-                body = JSON.stringify({ headers: sourceParams.server.headers });
+                body = JSON.stringify({ headers: sourceParams.sparql_server.headers });
             }
             if (sourceParams.sparql_server.type == "fuseki") url = url.replace("&query=", "");
 

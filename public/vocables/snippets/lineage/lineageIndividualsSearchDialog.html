@@ -1,0 +1,48 @@
+
+<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.onQueryParamsDialogCancel()">show All</button>
+
+<div id="LineageIndividualsQueryParamsDialog" style=" display: block; padding: 5px; ">
+  <div>
+  <!--  <select id="LineageIndividualsQueryParams_typeSelect" onchange="LineageIndividuals.query.onSelectDialogField($(this).val())" style="display: none;"></select>-->
+    <select id="LineageIndividualsQueryParams_typeSelect" onchange="Lineage_individuals.query.onSelectDialogField($(this).val())" style="display: none;"></select>
+
+    <span style="font-weight: bold" id="LineageIndividualsQueryParams_type"></span>&nbsp;
+    <select id="LineageIndividualsQueryParams_property" style="width: 200px"><option value="http://www.w3.org/2000/01/rdf-schema#label" selected="selected">label</option></select>
+    <br>
+    <!--- -->
+    <span style="font-weight: normal; font-size: 12px" id="LineageIndividualsQueryParams_typeId"></span>&nbsp;
+    <br>
+    <div>
+      <select id="LineageIndividualsQueryParams_operator" onclick="Lineage_individuals.onSearchDialogOperatorSelect($(this).val())">
+        <option>=</option>
+        <option>contains</option>
+        <option>LIST</option>
+        <option>!=</option>
+        <option>&lt;</option>
+        <option selected="">&gt;</option>
+
+        <option>not contains</option>
+      </select>
+      <input id="LineageIndividualsQueryParams_value" size="20" value="100">
+    </div>
+
+    <div>
+
+      <select id="LineageIndividualsQueryParams_valuesSelect" onchange="Lineage_individuals.onQueryParamsListChange()" onclick="Lineage_individuals.onQueryParamsListClick()" style="width: 200px"><option value=""></option></select>
+    </div>
+    <div>predicate<select id="LineageIndividualsQueryParams_predicateSelect"></select></div>
+    <div>
+
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.onQueryParamsDialogValidate('union')">count</button>
+      <select id="LineageIndividualsQueryParams_booleanSelect">
+        <option>only</option>
+        <option>OR</option>
+        <option>AND</option>
+      </select>
+
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.onQueryParamsDialogCancel()">X</button>
+
+      <!-- <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="LineageIndividualsBI.drawClasses()">BI</button>-->
+    </div>
+  </div>
+</div>

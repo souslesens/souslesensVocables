@@ -156,9 +156,10 @@ $("#actionDiv").html(html);*/
                 },
             };
             items.graphNamedIndividuals = {
-                label: "graph namedIndividuals ",
+                label: "Individuals ",
                 action: function () {
-                    Lineage_classes.drawNamedIndividuals(self.currentTreeNode.data.id);
+                   // Lineage_individuals.showSearchDialog()
+                  Lineage_classes.drawNamedIndividuals(self.currentTreeNode.data.id);
                 },
             };
 

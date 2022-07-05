@@ -764,9 +764,10 @@ var xx = result
                 var classLabel = cells[1];
                 var sourceUri = sourceUrisMap[label];
                 var targetUri = targetUrisMap[classLabel];
-                var predicate="rdf:type"
-                if (!targetUri) { //targetUri  declared in the list as source node
-                    predicate="part14:partOf"
+                var predicate = "rdf:type";
+                if (!targetUri) {
+                    //targetUri  declared in the list as source node
+                    predicate = "part14:partOf";
                     targetUri = sourceUrisMap[classLabel];
                 }
                 if (!targetUri) {
@@ -781,7 +782,7 @@ var xx = result
                         if (targetUri.indexOf("lis14") > 0) {
                             triples.push({ subject: sourceUri, predicate: predicate, object: targetUri });
                         } else {
-                            triples.push({ subject: sourceUri, predicate:predicate , object: targetUri });
+                            triples.push({ subject: sourceUri, predicate: predicate, object: targetUri });
                         }
                     }
                 }
@@ -804,13 +805,12 @@ var xx = result
                         SearchUtil.generateElasticIndex(Lineage_classes.mainSource, { ids: sourceUrisArray }, function (err, result) {
                             if (err) return alert(err.responseText);
                             if (self.graphModification.currentCreatingNodeType == "Class") {
-                                Lineage_classes.addNodesAndParentsToGraph(Lineage_classes.mainSource, sourceUrisArray, {}, function(err) {
+                                Lineage_classes.addNodesAndParentsToGraph(Lineage_classes.mainSource, sourceUrisArray, {}, function (err) {
                                     $("#LineageBlend_creatingNodeClassParamsDiv").dialog("close");
                                     $("#LineagePopup").dialog("close");
                                     MainController.UI.message(sourceUrisArray.length + "nodes Created and Indexed");
                                 });
-                            }
-                            else{
+                            } else {
                                 $("#LineageBlend_creatingNodeClassParamsDiv").dialog("close");
                                 $("#LineagePopup").dialog("close");
                                 MainController.UI.message(sourceUrisArray.length + "nodes Created and Indexed");
@@ -899,7 +899,7 @@ var xx = result
                                 });
                             newEdge.dashes = true;
                             newEdge.color = Lineage_classes.restrictionColor;
-                            newEdge.data = { source: inSource, bNodeId: bNodeId, propertyLabel: propLabel, propertyId:obj.node.data.id  };
+                            newEdge.data = { source: inSource, bNodeId: bNodeId, propertyLabel: propLabel, propertyId: obj.node.data.id };
                             visjsGraph.data.edges.add([newEdge]);
                         });
                     },
@@ -1005,9 +1005,8 @@ var xx = result
                             Sparql_OWL.getObjectSubProperties(Lineage_classes.mainSource, propertyIds, options, function (err, result) {
                                 if (err) return callbackSeries(err);
                                 result.forEach(function (item) {
-                                    if(!authorizedProps[item.property.value] )
-                                        return;
-                                    if ( !authorizedProps[item.property.value].children) authorizedProps[item.property.value].children = [];
+                                    if (!authorizedProps[item.property.value]) return;
+                                    if (!authorizedProps[item.property.value].children) authorizedProps[item.property.value].children = [];
                                     authorizedProps[item.property.value].children.push({ id: item.subProperty.value, label: item.subPropertyLabel.value });
                                 });
                                 callbackSeries();
@@ -1222,9 +1221,9 @@ var xx = result
                 var prefix = "";
                 if (item.g.value.indexOf("lis14") > -1) {
                     prefix = " part14:";
-                    part14Objects.push({ label: prefix + item.label.value, id: item.id.value,type:"Class" });
+                    part14Objects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
                 } else {
-                    if (item.label) sourceObjects.push({ label: prefix + item.label.value, id: item.id.value,type:"Class"  });
+                    if (item.label) sourceObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
                 }
             });
             sourceObjects.sort(function (a, b) {

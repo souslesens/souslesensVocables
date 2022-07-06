@@ -243,7 +243,6 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
                     visjsGraph.data.edges.remove(restrictionNode.id);
                     visjsGraph.data.edges.remove(inverseRestriction);
                     MainController.UI.message("restriction removed", true);
-                    esle;
                 }
             );
         }

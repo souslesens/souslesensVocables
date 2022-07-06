@@ -106,7 +106,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
         if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as " + type + " " + targetNode.source + "." + targetNode.label + "?")) return;
         self.createRelation(Lineage_classes.mainSource, type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, {}, function (err, _result) {
             if (err) return alert(err);
-            self.addRelationToGraph(propId,blankNodeId);
+            self.addRelationToGraph(propId, blankNodeId);
             MainController.UI.message("relation added", true);
         });
     };
@@ -127,7 +127,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
                     var relations = { type: type, sourceNode: sourceNode, targetNode: targetNode };
                     var options = {};
                     self.createRelationTriples(relations, createInverseRelation, inSource, options, function (err, _result) {
-                        blankNodeId=_result
+                        blankNodeId = _result;
                         callbackSeries(err);
                     });
                 },
@@ -137,7 +137,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
                     if (callback) return callback(err);
                     return alert(err);
                 }
-                if (callback) return callback(null,blankNodeId);
+                if (callback) return callback(null, blankNodeId);
             }
         );
     };
@@ -145,7 +145,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
     self.createRelationTriples = function (relations, createInverseRelation, inSource, options, callback) {
         var allTriples = [];
         if (!Array.isArray(relations)) relations = [relations];
-        var normalBlankNode
+        var normalBlankNode;
         relations.forEach(function (relation) {
             var propId = relation.type;
 
@@ -193,7 +193,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
         });
 
         Sparql_generic.insertTriples(inSource, allTriples, null, function (err, _result) {
-            callback(err,normalBlankNode);
+            callback(err, normalBlankNode);
         });
     };
 
@@ -330,7 +330,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
         });
     };
 
-    self.addRelationToGraph = function (propUri,blankNodeId) {
+    self.addRelationToGraph = function (propUri, blankNodeId) {
         var sourceNode = self.currentAssociation[0];
         var targetNode = self.currentAssociation[1];
 

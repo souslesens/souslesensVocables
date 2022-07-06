@@ -95,6 +95,8 @@ var Lineage_classes = (function () {
                 }
                 $("#GenericTools_searchSchemaType").val("OWL");
 
+                $("#LineageIndividualsTab").load("snippets/lineage/lineageIndividualsSearchDialog.html", function () {});
+
                 Lineage_decoration.init();
                 if (callback) callback();
             });
@@ -271,12 +273,12 @@ Lineage_classes.drawSimilarsNodes("sameAs")
 
         var xx = visjsGraph.network;
         /*  if (nodes && nodes.length > 0) {
-        nodes.forEach(function(node) {
-          // remove all ne fonctionne pas
-          visjsGraph.data.nodes.remove(node);
-        });
-      }
-    };*/
+    nodes.forEach(function(node) {
+      // remove all ne fonctionne pas
+      visjsGraph.data.nodes.remove(node);
+    });
+  }
+};*/
     };
 
     self.drawTopConcepts = function (/** @type {string} */ source, /** @type {(arg0: string | undefined) => any} */ callback) {
@@ -969,7 +971,8 @@ Lineage_classes.drawSimilarsNodes("sameAs")
 
                     if (result.length == 0) {
                         $("#waitImg").css("display", "none");
-                        return MainController.UI.message("No data found");
+                        MainController.UI.message("No data found");
+                        return callbackEach(null);
                     }
 
                     var existingNodes = visjsGraph.getExistingIdsMap();
@@ -1838,7 +1841,12 @@ namedIndividualsMap[item.concept.value] = 1
                             from: item.value.value,
                             to: item.concept.value,
                             label: "<i>" + item.propLabel.value + "</i>",
-                            data: { propertyId: item.prop.value, bNodeId: item.node.value, source: restrictionSource, propertyLabel: item.propLabel.value },
+                            data: {
+                                propertyId: item.prop.value,
+                                bNodeId: item.node.value,
+                                source: restrictionSource,
+                                propertyLabel: item.propLabel.value,
+                            },
                             font: { multi: true, size: 10 },
                             // font: {align: "middle", ital: {color:Lineage_classes.objectPropertyColor, mod: "italic", size: 10}},
                             //   physics:false,
@@ -1945,6 +1953,7 @@ namedIndividualsMap[item.concept.value] = 1
                             id: item.concept.value,
                             label: item.conceptLabel.value,
                             varName: "value",
+                            type: "NamedIndividual",
                         },
                     });
                 }
@@ -2002,6 +2011,10 @@ namedIndividualsMap[item.concept.value] = 1
                 html += '    <span class="popupMenuItem" onclick="Lineage_classes.graphActions.deleteRestriction();"> Delete relation</span>';
                 html += '    <span class="popupMenuItem" onclick="Lineage_classes.graphActions.createSubPropertyAndreplaceRelation();"> Refine relation</span>';
             }
+        } else if (node.data && node.data.type == "NamedIndividual") {
+            html =
+                '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showNodeInfos();"> Node infos</span>' +
+                '<span  class="popupMenuItem" onclick="Lineage_classes.graphActions.expandIndividual();"> Expand individual</span>';
         } else {
             html =
                 '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showNodeInfos();"> Node infos</span>' +
@@ -2319,11 +2332,69 @@ upperNodeIds.push(id);
         showNodeInfos: function () {
             SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv");
         },
+        expandIndividual: function () {
+            var source = Lineage_common.currentSource || Lineage_classes.mainSource;
+            var filter = "?concept ?p2 <" + self.currentGraphNode.data.id + ">. ";
+            Sparql_OWL.getItems(self.currentGraphNode.data.source, { filter: filter }, function (err, result) {
+                if (err) {
+                    return MainController.UI.message(err.responseText);
+                }
+                var existingNodes = visjsGraph.getExistingIdsMap();
+                var visjsData = { nodes: [], edges: [] };
+                var color = self.getSourceColor(source);
+                result.forEach(function (item) {
+                    if (!existingNodes[item.concept.value]) {
+                        existingNodes[item.concept.value] = 1;
+                        var label = item.conceptLabel ? item.conceptLabel.value : Sparql_common.getLabelFromURI(item.concept.value);
 
+                        visjsData.nodes.push({
+                            id: item.concept.value,
+                            label: label,
+                            shadow: self.nodeShadow,
+                            shape: self.namedIndividualShape,
+                            size: self.defaultShapeSize,
+                            level: self.currentExpandLevel,
+                            color: color,
+
+                            data: {
+                                id: item.concept.value,
+                                label: label,
+                                source: source,
+                                type: "NamedIndividual",
+                            },
+                        });
+
+                        var edgeId = item.concept.value + "_" + self.currentGraphNode.id;
+                        visjsData.edges.push({
+                            id: edgeId,
+                            to: self.currentGraphNode.id,
+                            from: item.concept.value,
+                            color: color,
+                            arrows: {
+                                to: {
+                                    enabled: true,
+                                    type: Lineage_classes.defaultEdgeArrowType,
+                                    scaleFactor: 0.5,
+                                },
+                            },
+                            data: {
+                                id: edgeId,
+                                to: self.currentGraphNode.id,
+                                from: item.concept.value,
+                                type: "partOf",
+                                source: source,
+                            },
+                        });
+                    }
+                });
+
+                visjsGraph.data.nodes.add(visjsData.nodes);
+                visjsGraph.data.edges.add(visjsData.edges);
+            });
+        },
         graphNodeNeighborhood: function (/** @type {any} */ filter) {
             Lineage_classes.graphNodeNeighborhood(self.currentGraphNode.data, filter);
         },
-
         graphNodeNeighborhoodUI: function () {
             var html = ' <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.graphNodeNeighborhood(\'incoming\');">incoming</span>';
             html += ' <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.graphNodeNeighborhood(\'outcoming\');">outcoming</span>';
@@ -2337,12 +2408,10 @@ upperNodeIds.push(id);
         removeFromGraph: function () {
             visjsGraph.removeNodes("id", Lineage_classes.currentGraphNode.id, true);
         },
-
         removeOthersFromGraph: function () {
             if (!Lineage_classes.currentGraphNode.id) return;
             visjsGraph.removeOtherNodesFromGraph(Lineage_classes.currentGraphNode.id);
         },
-
         showObjectProperties: function () {
             var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey;
             Lineage_classes.drawObjectProperties(self.currentGraphNode.data.source, [self.currentGraphNode.id], descendantsAlso);
@@ -2351,7 +2420,6 @@ upperNodeIds.push(id);
             var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey;
             Lineage_classes.drawRestrictions(self.currentGraphNode.data.source, self.currentGraphNode.data.id, descendantsAlso);
         },
-
         deleteRestriction: function () {
             var edge = self.currentGraphEdge;
             if (edge.data.bNodeId) {
@@ -2395,6 +2463,7 @@ upperNodeIds.push(id);
             }
         },
         showIndividuals: function () {
+            //  Lineage_individuals.showSearchDialog()
             Lineage_classes.drawNamedIndividuals([self.currentGraphNode.id]);
         },
     };
@@ -2436,8 +2505,8 @@ upperNodeIds.push(id);
             attrs.shape = self.namedIndividualShape;
         }
         /* if(superClassValue){
- attrs.color=self.getSourceColor(superClassValue)
-}else */
+  attrs.color=self.getSourceColor(superClassValue)
+  }else */
         if (sourceValue && sourceValue) {
             attrs.color = self.getSourceColor(sourceValue);
         }

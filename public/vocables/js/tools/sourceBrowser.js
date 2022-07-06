@@ -156,8 +156,9 @@ $("#actionDiv").html(html);*/
                 },
             };
             items.graphNamedIndividuals = {
-                label: "graph namedIndividuals ",
+                label: "Individuals ",
                 action: function () {
+                    // Lineage_individuals.showSearchDialog()
                     Lineage_classes.drawNamedIndividuals(self.currentTreeNode.data.id);
                 },
             };
@@ -783,9 +784,9 @@ return*/
                     callbackSeries();
                 },
                 function (callbackSeries) {
-                    if (type != "http://www.w3.org/2002/07/owl#Class") {
+                    /*  if (type != "http://www.w3.org/2002/07/owl#Class") {
                         return callbackSeries();
-                    }
+                    }*/
                     self.showNamedIndividualProperties(sourceLabel, nodeId, function (err) {
                         callbackSeries(err);
                     });
@@ -1030,7 +1031,7 @@ defaultLang = 'en';*/
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " + "select distinct * " + fromStr + " where {";
 
-        query += "?value <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <" + nodeId + ">";
+        query += "?value ?type <" + nodeId + ">" + " FILTER (?type in (<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>,<http://rds.posccaesar.org/ontology/lis14/rdl/partOf>))";
         query += "  Optional {?value rdfs:label ?valueLabel}  ";
         query += "} order by ?valueLabel limit 1000 ";
         var url = sparql_url + "?format=json&query=";

@@ -106,14 +106,14 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
         if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as " + type + " " + targetNode.source + "." + targetNode.label + "?")) return;
         self.createRelation(Lineage_classes.mainSource, type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, {}, function (err, _result) {
             if (err) return alert(err);
-            self.addRelationToGraph(propId);
+            self.addRelationToGraph(propId, blankNodeId);
             MainController.UI.message("relation added", true);
         });
     };
 
     self.createRelation = function (inSource, type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, options, callback) {
         if (type != "http://www.w3.org/2002/07/owl#sameAs") createInverseRelation = false;
-
+        var blankNodeId;
         async.series(
             [
                 function (callbackSeries) {
@@ -127,6 +127,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
                     var relations = { type: type, sourceNode: sourceNode, targetNode: targetNode };
                     var options = {};
                     self.createRelationTriples(relations, createInverseRelation, inSource, options, function (err, _result) {
+                        blankNodeId = _result;
                         callbackSeries(err);
                     });
                 },
@@ -136,7 +137,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
                     if (callback) return callback(err);
                     return alert(err);
                 }
-                if (callback) return callback();
+                if (callback) return callback(null, blankNodeId);
             }
         );
     };
@@ -144,11 +145,13 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
     self.createRelationTriples = function (relations, createInverseRelation, inSource, options, callback) {
         var allTriples = [];
         if (!Array.isArray(relations)) relations = [relations];
+        var normalBlankNode;
         relations.forEach(function (relation) {
             var propId = relation.type;
 
             var restrictionTriples = self.getRestrictionTriples(relation.sourceNode.id, relation.targetNode.id, propId);
-            var normalBlankNode = restrictionTriples.blankNode;
+
+            normalBlankNode = restrictionTriples.blankNode;
             var metadataOptions = {
                 domainSourceLabel: relation.sourceNode.source,
                 rangeSourceLabel: relation.targetNode.source,
@@ -190,7 +193,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
         });
 
         Sparql_generic.insertTriples(inSource, allTriples, null, function (err, _result) {
-            callback(err);
+            callback(err, normalBlankNode);
         });
     };
 
@@ -326,7 +329,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
         });
     };
 
-    self.addRelationToGraph = function (propUri) {
+    self.addRelationToGraph = function (propUri, blankNodeId) {
         var sourceNode = self.currentAssociation[0];
         var targetNode = self.currentAssociation[1];
 
@@ -763,10 +766,12 @@ var xx = result
                 var classLabel = cells[1];
                 var sourceUri = sourceUrisMap[label];
                 var targetUri = targetUrisMap[classLabel];
-                if (!targetUri)
+                var predicate = "rdf:type";
+                if (!targetUri) {
                     //targetUri  declared in the list as source node
+                    predicate = "part14:partOf";
                     targetUri = sourceUrisMap[classLabel];
-
+                }
                 if (!targetUri) {
                     wrongClasses.push({ line: indexLine, classLabel: classLabel });
                 } else {
@@ -776,7 +781,11 @@ var xx = result
                         triples.push({ subject: sourceUri, predicate: "rdfs:subClassOf", object: targetUri });
                     } else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
                         triples.push({ subject: sourceUri, predicate: "rdf:type", object: "owl:NamedIndividual" });
-                        triples.push({ subject: sourceUri, predicate: "rdf:type", object: targetUri });
+                        if (targetUri.indexOf("lis14") > 0) {
+                            triples.push({ subject: sourceUri, predicate: predicate, object: targetUri });
+                        } else {
+                            triples.push({ subject: sourceUri, predicate: predicate, object: targetUri });
+                        }
                     }
                 }
             });
@@ -797,11 +806,17 @@ var xx = result
 
                         SearchUtil.generateElasticIndex(Lineage_classes.mainSource, { ids: sourceUrisArray }, function (err, result) {
                             if (err) return alert(err.responseText);
-                            Lineage_classes.addNodesAndParentsToGraph(Lineage_classes.mainSource, sourceUrisArray, {}, function (err) {
+                            if (self.graphModification.currentCreatingNodeType == "Class") {
+                                Lineage_classes.addNodesAndParentsToGraph(Lineage_classes.mainSource, sourceUrisArray, {}, function (err) {
+                                    $("#LineageBlend_creatingNodeClassParamsDiv").dialog("close");
+                                    $("#LineagePopup").dialog("close");
+                                    MainController.UI.message(sourceUrisArray.length + "nodes Created and Indexed");
+                                });
+                            } else {
                                 $("#LineageBlend_creatingNodeClassParamsDiv").dialog("close");
                                 $("#LineagePopup").dialog("close");
                                 MainController.UI.message(sourceUrisArray.length + "nodes Created and Indexed");
-                            });
+                            }
                         });
                     });
                 }
@@ -870,11 +885,11 @@ var xx = result
                             else inSource = Config.predicatesSource;
                         }
 
-                        Lineage_blend.graphModification.createRelationFromGraph(inSource, self.sourceNode, self.targetNode, obj.node.data.id, options, function (err, result) {
+                        Lineage_blend.graphModification.createRelationFromGraph(inSource, self.sourceNode, self.targetNode, obj.node.data.id, options, function (err, blankNodeId) {
                             if (err) return callback(err);
                             let newEdge = edgeData;
                             let propLabel = obj.node.data.label || Sparql_common.getLabelFromURI(obj.node.data.id);
-                            var bNodeId = "<_:b" + common.getRandomHexaId(10) + ">";
+                            var bNodeId = blankNodeId || "<_:b" + common.getRandomHexaId(10) + ">";
                             newEdge.label = "<i>" + propLabel + "</i>";
                             (newEdge.font = { multi: true, size: 10 }),
                                 (newEdge.arrows = {
@@ -886,7 +901,7 @@ var xx = result
                                 });
                             newEdge.dashes = true;
                             newEdge.color = Lineage_classes.restrictionColor;
-                            newEdge.data = { source: inSource, bNode: bNodeId, label: propLabel };
+                            newEdge.data = { source: inSource, bNodeId: bNodeId, propertyLabel: propLabel, propertyId: obj.node.data.id };
                             visjsGraph.data.edges.add([newEdge]);
                         });
                     },
@@ -992,6 +1007,7 @@ var xx = result
                             Sparql_OWL.getObjectSubProperties(Lineage_classes.mainSource, propertyIds, options, function (err, result) {
                                 if (err) return callbackSeries(err);
                                 result.forEach(function (item) {
+                                    if (!authorizedProps[item.property.value]) return;
                                     if (!authorizedProps[item.property.value].children) authorizedProps[item.property.value].children = [];
                                     authorizedProps[item.property.value].children.push({ id: item.subProperty.value, label: item.subPropertyLabel.value });
                                 });
@@ -1115,10 +1131,10 @@ var xx = result
                     return callback(null, _result);
                 });
             } else {
-                self.createRelation(inSource, propId, sourceNode, targetNode, true, true, {}, function (err, _result) {
+                self.createRelation(inSource, propId, sourceNode, targetNode, true, true, {}, function (err, blankNodeId) {
                     if (err) return callback(err);
                     MainController.UI.message("relation added", true);
-                    return callback(null, _result);
+                    return callback(null, blankNodeId);
                 });
             }
         },
@@ -1207,9 +1223,9 @@ var xx = result
                 var prefix = "";
                 if (item.g.value.indexOf("lis14") > -1) {
                     prefix = " part14:";
-                    part14Objects.push({ label: prefix + item.label.value, id: item.id.value });
+                    part14Objects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
                 } else {
-                    if (!item.label) sourceObjects.push({ label: prefix + item.label.value, id: item.id.value });
+                    if (item.label) sourceObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
                 }
             });
             sourceObjects.sort(function (a, b) {

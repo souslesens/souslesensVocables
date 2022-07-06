@@ -129,28 +129,26 @@ app.get("/", function (req, res, _next) {
 });
 
 // Login routes
-if (config.auth !== "disabled") {
-    if (config.auth == "keycloak") {
-        app.get("/login", passport.authenticate("provider", { scope: ["openid", "email", "profile"] }));
-        app.get("/login/callback", passport.authenticate("provider", { successRedirect: "/", failureRedirect: "/login" }));
-    } else {
-        app.get("/login", function (req, res, _next) {
-            res.render("login", { title: "souslesensVocables - Login" });
-        });
-        app.post(
-            "/auth/login",
-            passport.authenticate("local", {
-                successRedirect: "/vocables",
-                failureRedirect: "/login",
-                failureMessage: true,
-            })
-        );
-    }
-} else {
-    app.get("/login", function (req, res, _next) {
+app.get("/login", function (req, res, _next) {
+    if (config.auth === "disabled") {
         res.redirect("vocables");
-    });
-}
+    } else if (config.auth == "keycloak") {
+        passport.authenticate("provider", { scope: ["openid", "email", "profile"] });
+        // app.get("/login/callback", passport.authenticate("provider", { successRedirect: "/", failureRedirect: "/login" }));
+    } else {
+        // config.auth == "local" or any other value
+        res.render("login", { title: "souslesensVocables - Login" });
+        /*    app.post(
+        "/auth/login",
+        passport.authenticate("local", {
+            successRedirect: "/vocables",
+            failureRedirect: "/login",
+            failureMessage: true,
+        })
+        */
+    }
+});
+
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
     next(createError(404));

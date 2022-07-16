@@ -556,7 +556,8 @@ var KGadvancedMapping = (function () {
 
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "?" + params.toString(),
+          //  url: Config.apiUrl + "?" + params.toString(),
+            url: Config.apiUrl + "/kg/data?" + params.toString(),
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {

@@ -854,3 +854,13 @@ var common = (function () {
 })();
 
 common.dateToRDFString(new Date());
+
+var x= {
+    docId: "xx",
+    paragraphId: "gggg",
+    entities: {
+        Wells: { parents: ["ee", "dded"], individuals: ["31/05/001","31/05/012"] },
+        GeologicalAges: { parents: ["ee", "dded"], individuals: ["Coniacien", "Santonien"] },
+        Lithology: { parents: ["ee", "dded"], individuals: ["Sandstone", "limestone"] }
+    }
+}

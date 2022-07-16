@@ -31,6 +31,7 @@ var Config = (function () {
     self.searchDepth = 6;
     self.predicatesSource = "TSF-PREDICATES";
     self.dictionarySource = "TSF-DICTIONARY";
+    self.formalOntologySourceLabel="ISO_15926-part-14_PCA";
 
     (self.defaultSparqlPrefixes = {
         xs: "<http://www.w3.org/2001/XMLSchema#>",
@@ -162,12 +163,12 @@ var Config = (function () {
 
     self.tools["lineage"] = { label: "Lineage", noSource: 0, controller: Lineage_classes, toolDescriptionImg: null }; //"images/taxonomy.png"}
 
-    /*  self.tools["KGmappings"] = {
+    self.tools["KGmappings"] = {
       label: "KGmappings",
       multiSources: 0,
       controller: KGmappings,
       toolDescriptionImg: null,
-  };*/
+  };
 
     self.tools["Standardizer"] = {
         label: "Standardizer",

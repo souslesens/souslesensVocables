@@ -225,12 +225,7 @@
                     $("#leftPanelDiv").height(h - 50);
                     $("#rightPanelDiv").height(h - 50);
 
-                    // $(".max-height").height(h - 300)
-                    //  $(".ui-accordion-content-active").height(h-100)
-                    //  $('.ui-accordion-content-active').css('cssText', 'height:1167px !important;');;
 
-                    //  $('.jstree-default').css("max-height",h-200)
-                    // $(".jstree").height(w - 100);
 
                     $("#accordion").accordion({
                         heightStyle: "fill",
@@ -240,13 +235,8 @@
                         if (!KGmappings.checkMappingEditionSave()) return false;
                     });
                     $("#accordion").on("accordionactivate", function (event, ui) {
-                        /*
-                if (false && ui.newPanel[0].id == "blenderPanelDiv") {
-                    //Blender.initPanel();
-                    MainController.UI.showInCentralPanelDiv("blendDiv")
-                } else {
-                    MainController.UI.showInCentralPanelDiv("graphDiv")
-                }*/
+
+
                     });
                     $("#mainDialogDiv").dialog({
                         autoOpen: false,
@@ -494,15 +484,9 @@
                         <div id="actionDivContolPanelDiv"></div>
                         <div id="actionDiv" class="jstree"></div>
                     </div>
-                    <!--     <h3><span class="title" id="blenderPanelLabel">Blend</span></h3>
-        <div id="blenderPanelDiv" class='max-height'>
 
-        </div>-->
                 </div>
-                <!--  <div id="sparqlQueryDiv" style="height: 30px;">
-        <button onclick="MainController.UI.showCurrentQuery()">Q show</button>
-        <button onclick="MainController.UI.copyCurrentQuery()">copy Query</button>
-    </div>-->
+
             </div>
 
             <div id="centralPanelDiv" style="display: flex; flex-direction: row">

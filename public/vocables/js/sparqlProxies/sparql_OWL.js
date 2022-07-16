@@ -429,6 +429,32 @@ var Sparql_OWL = (function () {
             return callback(null, result.results.bindings);
         });
     };
+    self.listObjectProperties = function (sourceLabel,  options, callback) {
+
+        var fromStr = Sparql_common.getFromStr(sourceLabel,false,true);
+        var query =
+          "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
+          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+          "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+          "select distinct * " +
+          fromStr +
+          " WHERE   {?prop rdf:type owl:ObjectProperty. OPTIONAL{?prop rdfs:label ?propLabel.} " +
+          " OPTIONAL {?prop rdfs:subPropertyOf ?superProp. OPTIONAL{?superProp rdfs:label ?superPropLabel. }} " +
+          "}  limit " + Config.queryLimit;
+
+        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+        var url = self.sparql_url + "?format=json&query=";
+        self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
+        if (self.no_params) url = self.sparql_url;
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+            if (err)
+                return callback(err);
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop","superPropLabel"]);
+                return callback(null, result.results.bindings);
+            })
+    }
+
     self.getObjectProperties = function (sourceLabel, domainIds, options, callback) {
         if (!options) {
             options = {};
@@ -447,7 +473,6 @@ var Sparql_OWL = (function () {
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
         var query =
-            "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -472,7 +497,7 @@ var Sparql_OWL = (function () {
                 " OPTIONAL{?range rdfs:label ?rangeLabel.} } " +
                 "OPTIONAL { ?prop rdfs:domain ?domain.  ?domain rdf:type ?domainType. " +
                 "OPTIONAL{?domain rdfs:label ?domainLabel.}} " +
-                " OPTIONAL {?prop rdfs:subPropertyOf ?subProp. {?subProp rdfs:label ?subPropLabel. " +
+                " OPTIONAL {?prop rdfs:subPropertyOf ?subProp. OPTIONAL{?subProp rdfs:label ?subPropLabel. " +
                 Sparql_common.getLangFilter(sourceLabel, "subPropLabel") +
                 "}}";
         } else {
@@ -953,7 +978,7 @@ var Sparql_OWL = (function () {
             fromStr +
             " WHERE {{\n" +
             "   ?prop rdf:type owl:ObjectProperty. \n" +
-            "   optional { ?subProp rdfs:subPropertyOf ?prop} " +
+            "   optional { ?subProp rdfs:subPropertyOf ?prop } " +
             "   optional { ?prop rdfs:label ?propLabel} " + // filter(?prop in (<http://rds.posccaesar.org/ontology/lis14/rdl/hasResident>,<http://rds.posccaesar.org/ontology/lis14/rdl/residesIn>))\n" +
             " optional { ?prop rdfs:domain ?propDomain. ?domain  rdfs:subClassOf* ?propDomain} \n" +
             "    optional { ?prop rdfs:range ?propRange. ?range  rdfs:subClassOf* ?propRange.}\n" +

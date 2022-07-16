@@ -158,8 +158,8 @@ $("#actionDiv").html(html);*/
             items.graphNamedIndividuals = {
                 label: "Individuals ",
                 action: function () {
-                    // Lineage_individuals.showSearchDialog()
-                    Lineage_classes.drawNamedIndividuals(self.currentTreeNode.data.id);
+                     Lineage_individuals.setClass(self.currentTreeNode)
+                   // Lineage_classes.drawNamedIndividuals(self.currentTreeNode.data.id);
                 },
             };
 

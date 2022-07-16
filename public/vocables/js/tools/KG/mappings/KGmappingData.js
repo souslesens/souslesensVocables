@@ -42,6 +42,7 @@ var KGmappingData = (function () {
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/kg/data?" + params.toString(),
+            url: Config.apiUrl + "/kg/model?" + params.toString(),
             dataType: "json",
 
             success: function (tablesData, _textStatus, _jqXHR) {
@@ -308,7 +309,7 @@ var KGmappingData = (function () {
 
             $.ajax({
                 type: "GET",
-                url: Config.apiUrl + "?" + params.toString(),
+                url: Config.apiUrl + "/kg/data?" + params.toString(),
                 dataType: "json",
 
                 success: function (data, _textStatus, _jqXHR) {

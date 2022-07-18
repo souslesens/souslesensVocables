@@ -572,8 +572,10 @@ var Sparql_OWL = (function () {
 
         var filterStr;
 
-        if (options.inverseRestriction) filterStr = Sparql_common.setFilter("value", ids, null, options);
-        else filterStr = Sparql_common.setFilter("concept", ids, null, options);
+        if (options.inverseRestriction)
+            filterStr = Sparql_common.setFilter("value", ids, null, options);
+        else
+            filterStr = Sparql_common.setFilter("concept", ids, null, options);
 
         var fromStr = "";
         if (sourceLabel) {

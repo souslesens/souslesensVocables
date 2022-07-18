@@ -58,7 +58,7 @@ var Lineage_classes = (function() {
         $("#lineage_controlPanel1Div").css("display", "none");
         $("#GenericTools_onSearchCurrentSourceInput").css("display", "block");
 
-        Lineage_individuals.init()
+
 
         //   $("#sourcesTreeDivContainer").height(h2 - h1)
         var sourceLabels = [];
@@ -160,6 +160,7 @@ var Lineage_classes = (function() {
         }
 
         Lineage_relations.init(true);
+        Lineage_individuals.init()
       });
     }
   };
@@ -1774,18 +1775,33 @@ namedIndividualsMap[item.concept.value] = 1
     if (classIds == "all") classIds = null;
 
     MainController.UI.message("");
+var result=[]
+    async.series([
+      function(callbackSeries) {
+        var options = { withoutImports: Lineage_common.currentSource || false}
+        Sparql_OWL.getObjectRestrictions(source, classIds, options, function(err, _result) {
+          if (err)
+            callbackSeries(err);
+          result = result.concat(_result);
+          callbackSeries();
 
-    Sparql_OWL.getObjectRestrictions(
-      source,
-      classIds,
-      {
-        withoutImports: Lineage_common.currentSource || false,
-
-        addInverseRestrictions: 1
+        })
       },
-      function(/** @type {any} */ err, /** @type {any[]} */ result) {
-        if (err) return MainController.UI.message(err);
+        function(callbackSeries) {
+          var options = { withoutImports: Lineage_common.currentSource || false, inverseRestriction: 1 }
+          Sparql_OWL.getObjectRestrictions(source, classIds, options, function(err, _result) {
+            if (err)
+              callbackSeries(err);
+            result = result.concat(_result);
+            callbackSeries();
 
+          })
+        }
+
+      ]
+
+      ,function(err){
+        if (err) return MainController.UI.message(err);
         if (result.length == 0) {
           $("#waitImg").css("display", "none");
           return MainController.UI.message("No data found");
@@ -1906,9 +1922,13 @@ namedIndividualsMap[item.concept.value] = 1
         if (options.processorFn) {
           options.processorFn(result);
         }
+
         if (callback) return callback(null, result);
-      }
-    );
+      })
+
+
+
+
   };
 
   self.drawDictionarySameAs = function() {

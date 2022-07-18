@@ -7,7 +7,7 @@ module.exports = function () {
     };
 
     function POST(req, res, next) {
-        elasticRestProxy.executeGaiaQuery( req.body.query, req.body.indexes, function (err, result) {
+        elasticRestProxy.executeGaiaQuery( req.body.query, req.body.indexes, null,function (err, result) {
             if (err) {
                 next(err);
             } else {
@@ -18,9 +18,9 @@ module.exports = function () {
 
     POST.apiDoc = {
         security: [{ loginScheme: [] }],
-        summary: "Elasticsearch query",
-        description: "Elasticsearch query",
-        operationId: "Elasticsearch query",
+        summary: "Elasticsearch gaia query",
+        description: "Elasticsearch gaia query",
+        operationId: "Elasticsearch gaia query",
         parameters: [
             {
                 name: "body",

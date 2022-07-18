@@ -1,71 +1,105 @@
 <style>
-    .LineageIndividualsQueryParams_QueryElt{
+    .LineageIndividualsQueryParams_QueryElt {
         background-color: #ddd;
     }
 </style>
 
-<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.showAll()">show All</button>
 
 <div id="LineageIndividualsQueryParamsDialog" style="display: block; padding: 5px">
-    <div>
-        <!--  <select id="LineageIndividualsQueryParams_typeSelect" onchange="LineageIndividuals.query.onSelectDialogField($(this).val())" style="display: none;"></select>-->
-        <select id="LineageIndividualsQueryParams_typeSelect" onchange="Lineage_individuals.query.onSelectDialogField($(this).val())" style="display: none"></select>
+  <div>
+    <!--  <select id="LineageIndividualsQueryParams_typeSelect" onchange="LineageIndividuals.query.onSelectDialogField($(this).val())" style="display: none;"></select>-->
+    <select id="LineageIndividualsQueryParams_typeSelect"
+            onchange="Lineage_individuals.query.onSelectDialogField($(this).val())" style="display: none"></select>
 
-        <span style="font-weight: bold" id="LineageIndividualsQueryParams_className"></span>&nbsp;
+    <span style="font-weight: bold" id="LineageIndividualsQueryParams_className"></span>&nbsp;
 
-
-
-        <div id="LineageIndividualsQueryParams_panelSQL"  class="LineageIndividualsQueryParams_panel" style="display: block">
-          Table  <select id="LineageIndividualsQueryParams_SQL_tablesSelect" onchange="Lineage_individuals.sql.showColumns($(this).val())"></select>
-          Column  <select id="LineageIndividualsQueryParams_SQL_columnsSelect" ></select>
-        <br />
-        <div>
-            <select id="LineageIndividualsQueryParams_operator" onclick="Lineage_individuals.onSearchDialogOperatorSelect($(this).val())">
-                <option>=</option>
-                <option selected='selected'>contains</option>
-                <option>LIST</option>
-                <option>!=</option>
-                <option>&lt;</option>
-                <option >&gt;</option>
-
-                <option>not contains</option>
-            </select>
-            <input id="LineageIndividualsQueryParams_value" size="20" value="" />
-<button onclick="Lineage_individuals.sql.fillValuesSelect()">values</button>
-            <select
-                id="LineageIndividualsQueryParams_valuesSelect"
-                onchange="Lineage_individuals.sql.onValuesSelectChange()"
-
-                style="width: 200px"
-            >
-                <option value=""></option>
-            </select>
-        </div>
-        </div>
-
-     <!--
-
-        <div>predicate<select id="LineageIndividualsQueryParams_predicateSelect"></select></div>
-        <div>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.onQueryParamsDialogValidate('union')">count</button>
-            <select id="LineageIndividualsQueryParams_booleanSelect">
-                <option>only</option>
-                <option>OR</option>
-                <option>AND</option>
-            </select>
-
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.onQueryParamsDialogCancel()">X</button>
-            -->
-
-            <!-- <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="LineageIndividualsBI.drawClasses()">BI</button>-->
-        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_individuals.clearQuery()">ClearQuery</button>
-        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_individuals.addToQuery()">addToQuery</button>
-
-        <div id="LineageIndividualsQueryParams_QueryDiv" style="width: 100%;margin: 3px;display: flex;flex-direction: column;"></div>
+    DataSources <select id="LineageIndividualsQueryParams_dataSourcesSelect"
+                        onchange="Lineage_individuals.onDataSourcesSelect($(this).val())"></select>
 
 
-        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_individuals.executeQuery()">executeQuery</button>
+    <div id="LineageIndividualsQueryParams_SQLfilterPanel" class="LineageIndividualsQueryParams_panel"
+         style="display: none">
+      Table <select id="LineageIndividualsQueryParams_SQL_tablesSelect"
+                    onchange="Lineage_individuals.sql.showColumns($(this).val())"></select>
+      Column <select id="LineageIndividualsQueryParams_SQL_columnsSelect"></select>
+      <br />
+      <div>
+        <select id="LineageIndividualsQueryParams_operator"
+                onclick="Lineage_individuals.onSearchDialogOperatorSelect($(this).val())">
+          <option>=</option>
+          <option selected="selected">contains</option>
+          <option>LIST</option>
+          <option>!=</option>
+          <option>&lt;</option>
+          <option>&gt;</option>
 
-        </div>
+          <option>not contains</option>
+        </select>
+        <input id="LineageIndividualsQueryParams_value" size="20" value="" />
+        <button onclick="Lineage_individuals.sql.fillValuesSelect()">values</button>
+        <select
+          id="LineageIndividualsQueryParams_valuesSelect"
+          onchange="Lineage_individuals.sql.onValuesSelectChange()"
+
+          style="width: 200px"
+        >
+          <option value=""></option>
+        </select>
+      </div>
     </div>
+    <div id="LineageIndividualsQueryParams_searchIndexFilterPanel" class="LineageIndividualsQueryParams_panel"
+         style="display: none">
+      Entities <select id="LineageIndividualsQueryParams_SearchIndexEntitySelect"></select>
+      <br />
+      <div>
+        <select id="LineageIndividualsQueryParams_SearchIndexOperator"
+                onclick="Lineage_individuals.onSearchDialogOperatorSelect($(this).val())">
+
+          <option selected="selected">contains</option>
+          <option>=</option>
+
+        </select>
+        <input id="LineageIndividualsQueryParams_SearchIndexValue" size="20" value="" />
+        <button onclick="Lineage_individuals.sql.fillValuesSelect()">values</button>
+        <select
+          id="LineageIndividualsQueryParams_SearchIndexValuesSelect"
+          onchange="Lineage_individuals.sql.onValuesSelectChange()"
+
+          style="width: 200px"
+        >
+          <option value=""></option>
+        </select>
+
+
+
+
+
+           <div id="LineageIndividualsQueryParams_QueryDiv" style="width: 100%;margin: 3px;display: flex;flex-direction: column;"></div>
+
+        <div>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_individuals.clearQuery()">ClearQuery</button>
+        <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_individuals.addToQuery()">AddToQuery</button>
+        </div>
+
+        <div>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.searchIndex.drawIndividuals()">Draw individuals</button>
+          <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.listParagraphs()">List documents</button>
+        </div>
+
+        <div>Search : <input id="LineageIndividuals_individualsTreeSearchInput" value="" style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" /></div>
+        <div class="jstreeContainer" style="width: 340px; height: 750px;overflow: auto;margin-top: 5px;">
+          <div id="LineageIndividuals_individualsTree"></div>
+        </div>
+
+      </div>
+
+
+
+      <div id="LineageIndividualsQueryParams_showIndividualsTriples" class="LineageIndividualsQueryParams_panel">
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.showAll()">show All
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
+

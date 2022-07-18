@@ -238,12 +238,11 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
           }
         ],
         function(_err) {
-          if (callback) return callback(_err);
 
           visjsGraph.data.edges.remove(restrictionNode.id);
           visjsGraph.data.edges.remove(inverseRestriction);
           MainController.UI.message("restriction removed", true);
-          esle;
+          if (callback) return callback(_err);
         }
       );
     }
@@ -872,8 +871,8 @@ var xx = result
           selectTreeNodeFn: function(event, obj) {
 
             event.stopPropagation();
-self.currentPropertiesTreeNode=obj.node
-            if(obj.event.which==3)
+            self.currentPropertiesTreeNode = obj.node;
+            if (obj.event.which == 3)
               return;
             //dispatch of sources to write in depending on relation type and editable
             var inSource;
@@ -1012,21 +1011,21 @@ self.currentPropertiesTreeNode=obj.node
                 });
               });
             },
-         /*   function(callbackSeries) {
-              var propertyIds = Object.keys(authorizedProps);
-              Sparql_OWL.getObjectSubProperties(Lineage_classes.mainSource, propertyIds, options, function(err, result) {
-                if (err) return callbackSeries(err);
-                result.forEach(function(item) {
-                  if (!authorizedProps[item.property.value]) return;
-                  if (!authorizedProps[item.property.value].children) authorizedProps[item.property.value].children = [];
-                  authorizedProps[item.property.value].children.push({
-                    id: item.subProperty.value,
-                    label: item.subPropertyLabel.value
-                  });
-                });
-                callbackSeries();
-              });
-            },*/
+            /*   function(callbackSeries) {
+                 var propertyIds = Object.keys(authorizedProps);
+                 Sparql_OWL.getObjectSubProperties(Lineage_classes.mainSource, propertyIds, options, function(err, result) {
+                   if (err) return callbackSeries(err);
+                   result.forEach(function(item) {
+                     if (!authorizedProps[item.property.value]) return;
+                     if (!authorizedProps[item.property.value].children) authorizedProps[item.property.value].children = [];
+                     authorizedProps[item.property.value].children.push({
+                       id: item.subProperty.value,
+                       label: item.subPropertyLabel.value
+                     });
+                   });
+                   callbackSeries();
+                 });
+               },*/
 
 
             //create formal Ontology tree nodes
@@ -1080,31 +1079,31 @@ self.currentPropertiesTreeNode=obj.node
 
               callbackSeries();
             },
-         /*   function(callbackSeries) {
-              return callbackSeries();
-              if (!Config.sources[Lineage_classes.mainSource].editable) {
-                $("#lineageAddEdgeDialog_currentSourcePropertiesTreeDiv").html("source " + Lineage_classes.mainSource + " is not editable");
-                return callbackSeries();
-              }
+            /*   function(callbackSeries) {
+                 return callbackSeries();
+                 if (!Config.sources[Lineage_classes.mainSource].editable) {
+                   $("#lineageAddEdgeDialog_currentSourcePropertiesTreeDiv").html("source " + Lineage_classes.mainSource + " is not editable");
+                   return callbackSeries();
+                 }
 
-              Lineage_properties.getPropertiesjsTreeData(inSource, null, null, {}, function(err, jstreeData3) {
-                if (err) return callbackSeries(err);
-                let jstreeDataX = [];
-                jstreeDataX.forEach(function(item) {
-                  item.data.inSource = inSource;
-                });
+                 Lineage_properties.getPropertiesjsTreeData(inSource, null, null, {}, function(err, jstreeData3) {
+                   if (err) return callbackSeries(err);
+                   let jstreeDataX = [];
+                   jstreeDataX.forEach(function(item) {
+                     item.data.inSource = inSource;
+                   });
 
-                jstreeDataX.push({
-                  id: inSource,
-                  text: inSource,
-                  parent: "#"
-                });
-                jstreeData = jstreeData.concat(jstreeDataX);
-                //  common.jstree.loadJsTree("lineageAddEdgeDialog_currentSourcePropertiesTreeDiv", jstreeData3, options);
+                   jstreeDataX.push({
+                     id: inSource,
+                     text: inSource,
+                     parent: "#"
+                   });
+                   jstreeData = jstreeData.concat(jstreeDataX);
+                   //  common.jstree.loadJsTree("lineageAddEdgeDialog_currentSourcePropertiesTreeDiv", jstreeData3, options);
 
-                callbackSeries();
-              });
-            },*/
+                   callbackSeries();
+                 });
+               },*/
 
             //get specific(mainSource) source properties
             function(callbackSeries) {
@@ -1120,8 +1119,8 @@ self.currentPropertiesTreeNode=obj.node
                     if (!self.currentSpecificObjectPropertiesMap[item.superProp.value])
                       self.currentSpecificObjectPropertiesMap[item.superProp.value] = [];
                     self.currentSpecificObjectPropertiesMap[item.superProp.value].push({
-                      id:item.prop.value,
-                      label:item.propLabel.value
+                      id: item.prop.value,
+                      label: item.propLabel.value
                     });
                   }
                 });
@@ -1155,40 +1154,44 @@ self.currentPropertiesTreeNode=obj.node
               return callbackSeries();
             },
             function(callbackSeries) {
-           options.contextMenu = {
-             refineProperty: {
-               label: "Refine Property",
-               action: function(_e) {
-                 if (self.currentPropertiesTreeNode.data.source != Config.formalOntologySourceLabel)
-                   return alert("only properties form lis14 can be refined")
-                 var subPropertyLabel = prompt("enter label for subProperty of property " + self.currentPropertiesTreeNode.data.label);
-                 if (!subPropertyLabel) return;
-                 Lineage_blend.createSubProperty(Lineage_classes.mainSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, function(err, result) {
-                   if (err) return alert(err);
+              options.contextMenu = {
+                refineProperty: {
+                  label: "Refine Property",
+                  action: function(_e) {
+                    if (self.currentPropertiesTreeNode.data.source != Config.formalOntologySourceLabel)
+                      return alert("only properties form lis14 can be refined");
+                    var subPropertyLabel = prompt("enter label for subProperty of property " + self.currentPropertiesTreeNode.data.label);
+                    if (!subPropertyLabel) return;
+                    Lineage_blend.createSubProperty(Lineage_classes.mainSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, function(err, result) {
+                      if (err) return alert(err);
 
+                      if (self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id])
+                        self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id] = [];
+                      self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id].push(result.uri);
 
-                   var jstreeData = [{
-                     id: result.uri,
-                     text: subPropertyLabel,
-                     parent: self.currentPropertiesTreeNode.data.id,
-                     data: {
-                       id: result.uri,
-                       label: subPropertyLabel,
-                       source: Lineage_classes.mainSource
-                     }
-                   }]
-                   common.jstree.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
-                 })
-               }
-             }, nodeInfos: {
-               label: "Node infos",
-               action: function(_e) {
-                 // pb avec source
-                 SourceBrowser.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode.data.id, "mainDialogDiv");
-               },
+                      var jstreeData = [{
+                        id: result.uri,
+                        text: subPropertyLabel,
+                        parent: self.currentPropertiesTreeNode.data.id,
+                        data: {
+                          id: result.uri,
+                          label: subPropertyLabel,
+                          source: Lineage_classes.mainSource
+                        }
+                      }];
 
-             }
-           }
+                      common.jstree.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
+                    });
+                  }
+                }, nodeInfos: {
+                  label: "Node infos",
+                  action: function(_e) {
+                    // pb avec source
+                    SourceBrowser.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode.data.id, "mainDialogDiv");
+                  }
+
+                }
+              };
 
               common.jstree.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options);
               callbackSeries();
@@ -1209,8 +1212,33 @@ self.currentPropertiesTreeNode=obj.node
     },
     execAddEdgeFromGraph: function() {
     },
+    addGenericPredicatesToPredicatesTree: function() {
+      var jstreeData = [];
+        self.authorizedProperties[Config.formalOntologySourceLabel].forEach(function(item) {
+        if (item.isGenericProperty) {
+          var text= "<span class='lineageAddEdgeDialog_part14GenericProp'>" + (item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value)) + "</span>";
+
+            jstreeData.push({
+            id: item.prop.value,
+            text:text ,
+            parent: "#",
+            data: {
+              id: item.prop.value,
+              label: item.propLabel,
+              source: Config.formalOntologySourceLabel
+
+            }
+          });
+        }
+      });
+
+      common.jstree.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", "#", jstreeData, {positionLast:1});
+
+    },
 
     createRelationFromGraph: function(inSource, sourceNode, targetNode, propId, options, callback) {
+
+
       if (!confirm("create Relation " + sourceNode.label + "-" + Sparql_common.getLabelFromURI(propId) + "->" + targetNode.label + " in Graph " + inSource)) return;
       $("#LineagePopup").dialog("close");
 
@@ -1232,14 +1260,28 @@ self.currentPropertiesTreeNode=obj.node
           return callback(null, _result);
         });
       } else {
+        var oldRelations = visjsGraph.getNodeEdges(sourceNode.id, targetNode.id);
         self.createRelation(inSource, propId, sourceNode, targetNode, true, true, {}, function(err, blankNodeId) {
           if (err) return callback(err);
           MainController.UI.message("relation added", true);
+
+          if (oldRelations.length > 0) {
+            if (confirm("delete previous relation " + oldRelations[0].data.propertyLabel)) {
+              Lineage_blend.deleteRestriction(Lineage_classes.mainSource, oldRelations[0], function(err) {
+                if (err)
+                  alert(err);
+              });
+            }
+
+          }
+
+
           return callback(null, blankNodeId);
         });
       }
     }
   };
+
 
   self.getAuthorizedProperties = function(sourceLabel, domain, range, callback) {
     function filterProps() {
@@ -1248,12 +1290,14 @@ self.currentPropertiesTreeNode=obj.node
       var subProposMap = {};
 
       allProps.forEach(function(item) {
+        if(item.prop.value.indexOf("concret")>-1)
+          var x=3
         let type = "";
         let ok = false;
-        if (!item.range && item.domain && item.domain.value == domain) {
+        if (!item.range && item.domain && (item.domain.value == domain || item.domaintype=="bnode")) {
           type = "D";
           ok = true;
-        } else if (!item.domain && item.range && item.range.value == range) {
+        } else if (!item.domain && item.range && (item.range.value == range || item.domaintype=="bnode")) {
           type = "R";
           ok = true;
         } else if (item.domain && item.range && item.domain.value == domain && item.range.value == range) ok = true;
@@ -1266,7 +1310,7 @@ self.currentPropertiesTreeNode=obj.node
           };
         }
       });
-      if (Object.keys(props).length == 0) {
+      if (true || Object.keys(props).length == 0) {
         allProps.forEach(function(item) {
           if (item.isGenericProperty) {
             props[item.prop.value] = {

@@ -11,9 +11,22 @@
  */
 const request = require("request");
 
-const ConfigManager = require("./configManager.");
+//const ConfigManager = require("./configManager.");
 const async = require("async");
+
+
+const { Client } = require('@elastic/elasticsearch')
+
+
+
+
+
+
+
+
+
 // elasticdump       --input=cfihos_data_index.json --output=http://opeppa-updtlb03:9200/cfihos --type=data
+
 
 var elasticRestProxy = {
     elasticUrl: null,
@@ -23,6 +36,77 @@ var elasticRestProxy = {
             var mainConfig = ConfigManager.getGeneralConfig();
             if (mainConfig) elasticRestProxy.elasticUrl = mainConfig.ElasticSearch.url;
             return elasticRestProxy.elasticUrl;
+        }
+    },
+
+    executeGaiaQuery:function(query,indexes, callback){
+        const client = new Client({
+            cloud: { id: 'SSE_Sandbox:ZXVyb3BlLXdlc3QxLmdjcC5jbG91ZC5lcy5pbzo0NDMkNTNjOTRlY2NlMGRkNDcyNDg1ZmU3MjE5N2Y2YTRjNzQkYTViOGIyNGZlOTA0NDI1YmJjMTVlZTAxZTBkY2E1YjE=' },
+            auth: {
+                username: 'elastic',
+                password: 'iusGlDD0NMdfUsu0dLclh9hx'
+            }
+        })
+        const query_doc = async function(documentId, fieldsnames) {
+
+            console.log("query doc", documentId)
+
+            var searchResult = {}
+
+            try {
+
+                searchResult = await client.search({
+
+                    index: 'gaia_onto_v2',
+                    size : 2000,
+                    query : {
+                        match: {    "DocId": "DOC00000000000000001037" }
+                    }
+
+
+
+                })
+
+            } catch (e) {
+
+                console.log('Search error', e)
+
+            }
+
+            return searchResult
+
+        }
+        query_doc()
+
+        return;
+
+        client.search({
+            index: 'gaia_onto_v2',
+            query: {
+                match: {    "DocId": "DOC00000000000000001037" }
+            }
+        },function(err, result){
+            var x=err;
+        })
+
+
+
+
+        return;
+
+        async function run () {
+          ///  const indices = await client.cat.indices({format: 'json'})
+
+
+           const result = await client.search({
+                index: 'gaia_onto_v2',
+                query: {
+                    match: {    "DocId": "DOC00000000000000001037" }
+                }
+            })
+          //  var x=indices
+            var y=result;
+            console.log(y)
         }
     },
 
@@ -236,3 +320,4 @@ var elasticRestProxy = {
 module.exports = elasticRestProxy;
 
 //elasticRestProxy.listIndexes("http://164.132.194.227:2009/");
+elasticRestProxy.executeGaiaQuery()

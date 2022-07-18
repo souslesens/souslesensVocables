@@ -443,19 +443,33 @@ var MainController = (function () {
         },
 
         showPopup: function (point, popupDiv, absolutePosition) {
+            $("#" + popupDiv).css("display", "flex");
             var popupH = Math.min(300, $("#" + popupDiv).height());
             var popupW = Math.min(200, $("#" + popupDiv).width());
-            var divMaxY = $("#graphDiv").height() + 50;
-            var divMaxX = $("#graphDiv").width() + (absolutePosition ? 0 : leftPanelWidth);
-            var vertOverlap = point.y + popupH - divMaxY;
-            var horOverlap = point.x + popupW - divMaxX;
-            horOverlap = 0; // horOverlap > 0 ? 0 : horOverlap - 5;
-            vertOverlap = 0; // vertOverlap > 0 ? 0 : vertOverlap - 5;
+            var divHeight = $("#graphDiv").height();
+            var divMaxWidth = $("#graphDiv").width();
+            var popupBottom = point.y + popupH ;
+            var popupRight = point.x + popupW ;
+            var popupTop = point.y + popupH ;
+            var popupLeft = point.x + popupW ;
+
+            var horOverlap=0;
+            if(popupRight>divMaxWidth)
+                horOverlap=popupRight-divMaxWidth
+            else  if(popupLeft<0)
+                horOverlap=-popupLeft
+
+            var vertOverlap=0
+            if(popupBottom>divHeight)
+                vertOverlap=divHeight-popupBottom
+            else  if(popupTop<0)
+                vertOverlap=-popupTop
+
 
             if (!popupDiv) popupDiv = "popupDiv";
             $("#" + popupDiv).css("left", point.x + (absolutePosition ? 0 : leftPanelWidth) + horOverlap);
             $("#" + popupDiv).css("top", point.y + vertOverlap);
-            $("#" + popupDiv).css("display", "flex");
+
         },
         hidePopup: function (popupDiv) {
             if (self.UI.blockHidePopup) return (self.UI.blockHidePopup = false); //one shot

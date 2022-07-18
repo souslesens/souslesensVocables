@@ -1009,7 +1009,7 @@ var Sparql_OWL = (function () {
             "    ?prop rdf:type owl:ObjectProperty.?prop rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  \n" +
             "  }\n" +
             "   minus {\n" +
-            "    ?prop rdf:type owl:ObjectProperty.?prop owl:inverseOf/rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  \n" +
+            "    ?prop rdf:type owl:ObjectProperty.?prop (owl:inverseOf|^owl:inverseOf)/rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  \n" +
             "  }" +
             "} LIMIT 1000";
 

@@ -256,10 +256,15 @@ var visjsGraph = (function () {
             html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.showGraphConfig()'> Graph parameters</button>";
             html += "<div id='visjsConfigureDiv' style='overflow: auto'></div>";
 
-            var parent = $("#" + divId).parent();
 
-            $(parent).css("flex-direction", "column");
-            $(parent).prepend(html);
+            if(  true || $(".vis-manipulation").children().length == 0) {
+                var parent = $("#" + divId).parent();
+                $(parent).css("flex-direction", "column");
+                $(parent).prepend(html);
+            }
+            else {
+                $(".vis-manipulation").append(html);
+            }
         }
 
         html += "</div>";
@@ -561,6 +566,21 @@ var visjsGraph = (function () {
         var positions = self.network.getPositions();
         return positions;
     };
+
+
+    self.getNodeEdges=function(sourceNodeId,targetNodeId){
+        var connectedEdges=[]
+        var sourceNodeEdges=visjsGraph.network.getConnectedEdges(sourceNodeId)
+        sourceNodeEdges.forEach(function(edgeId) {
+            var edge = visjsGraph.data.edges.get(edgeId)
+            if (edge.to == targetNodeId || edge.from == targetNodeId)
+                connectedEdges.push(edge)
+        })
+        return connectedEdges;
+
+    }
+
+
 
     self.processClicks = function (
         /** @type {{ edges: string | any[]; nodes: string | any[]; event: { srcEvent: { ctrlKey: any; altKey: any; shiftKey: any; }; }; pointer: { DOM: any; }; }} */ params,

@@ -382,12 +382,12 @@ nodes.forEach(function(node) {
         Sparql_generic.getTopConcepts(source, options, function(/** @type {any} */ err, /** @type {any[]} */ result) {
           if (err) return callbackEach(err);
           if (result.length == 0) {
-            $("#waitImg").css("display", "none");
+            MainController.UI.message("No result ",true);
             return callbackEach();
           }
           if (result.length > self.showLimit) {
             //   $("#graphDiv").html("<div style='margin:10px'><span style='font-weight: bold;color:saddlebrown'> too may nodes (" + result.length + ")  .Cannot display the graph, </span><i>select and graph a node or a property to start graph exploration</i></div>")
-            MainController.UI.message("too may nodes (" + result.length + ")  .Cannot display the graph, select and graph a node or a property ");
+            MainController.UI.message("too may nodes (" + result.length + ")  .Cannot display the graph, select and graph a node or a property ",true);
 
             if (callback) return callback("too may nodes");
             return;
@@ -460,7 +460,8 @@ nodes.forEach(function(node) {
           visjsGraph.data.edges.add(visjsData.edges);
           visjsGraph.network.fit();
         }
-        $("#waitImg").css("display", "none");
+        MainController.UI.message("",true);
+
         if (callback) return callback();
       }
     );
@@ -475,7 +476,8 @@ nodes.forEach(function(node) {
       physics: {
         barnesHut: {
           springLength: 0,
-          damping: 0.15
+          damping: 0.15,
+          centralGravity:0.8
         },
         minVelocity: 0.75
       },
@@ -485,7 +487,8 @@ nodes.forEach(function(node) {
       // onHoverNodeFn:Lineage_classes.graphActions.onHoverNodeFn
       //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
     };
-    if (authentication.currentUser.groupes.indexOf("admin") > -1) {
+
+    if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_classes.mainSource].editable) {
       options.manipulation = {
         enabled: true,
         initiallyActive: true,
@@ -502,17 +505,26 @@ nodes.forEach(function(node) {
             return null;
           });
         },
+
+      };
+    }else{
+     /* options.manipulation = {
+        enabled: true,
+        initiallyActive: false,
         deleteNode: false,
         deleteEdge: false,
         editNode: false,
-        editEdge: false
-      };
+        editEdge: false,
+        addEdge:false,
+        addNode:false
+      }*/
     }
     visjsGraph.draw("graphDiv", visjsData, options, function() {
       Lineage_decoration.colorGraphNodesByType();
+     MainController.UI.message("",true)
     });
 
-    $("#waitImg").css("display", "none");
+
   };
 
   self.getGraphIdsFromSource = function(/** @type {any} */ source) {
@@ -2015,7 +2027,7 @@ namedIndividualsMap[item.concept.value] = 1
   };
 
   self.setGraphPopupMenus = function(/** @type {{ id: string | string[]; data: { cluster: string | any[]; }; }} */ node, /** @type {any} */ event) {
-    if (!node) return;
+    if (!node || !node.data) return;
     graphContext.clickOptions = event;
     var html = "";
 
@@ -2024,16 +2036,20 @@ namedIndividualsMap[item.concept.value] = 1
       if (node.data.cluster.length <= Lineage_classes.showLimit) html = "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.openCluster();\"> Open cluster</span>";
       html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterContent();\"> list cluster content</span>";
       html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterToClipboard();\"> list to clipboard</span>";
-    } else if (node.from && node.data.bNodeId) {
+    }
+    else if (node.from  && node.data.bNodeId) {//edge restrition
+      html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showPropertyInfos();\"> Relation Infos</span>";
       if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
         html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.deleteRestriction();\"> Delete relation</span>";
         //  html += '    <span class="popupMenuItem" onclick="Lineage_classes.graphActions.createSubPropertyAndreplaceRelation();"> Refine relation</span>';
       }
-    } else if (node.data && node.data.type == "NamedIndividual") {
+    }
+    else if (node.data && node.data.type == "NamedIndividual") {
       html =
         "    <span  class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showNodeInfos();\"> Node infos</span>" +
         "<span  class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.expandIndividual();\"> Expand individual</span>";
-    } else {
+    }
+    else {
       html =
         "    <span  class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showNodeInfos();\"> Node infos</span>" +
         "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.expand();\"> Expand</span>" +
@@ -2348,7 +2364,10 @@ upperNodeIds.push(id);
     },
 
     showNodeInfos: function() {
-      SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.id, "mainDialogDiv");
+      SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.data.id, "mainDialogDiv");
+    },
+    showPropertyInfos: function() {
+      SourceBrowser.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge.data.propertyId, "mainDialogDiv");
     },
     expandIndividual: function() {
       var source = Lineage_common.currentSource || Lineage_classes.mainSource;

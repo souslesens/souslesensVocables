@@ -11,7 +11,7 @@
  */
 const request = require("request");
 
-//const ConfigManager = require("./configManager.");
+const ConfigManager = require("./configManager.");
 const async = require("async");
 const { Client } = require("@elastic/elasticsearch");
 
@@ -309,89 +309,3 @@ module.exports = elasticRestProxy;
 
 //elasticRestProxy.listIndexes("http://164.132.194.227:2009/");
 
-if (true) {
-  var indexes = "gaia_onto_v2";
-  var query = {
-    match: { "DocId": "DOC00000000000000001037" }
-  };
-  var query =
-    {
-      "aggs": {
-        "Basin": {
-          "terms": { "field": "Concepts.Basin.instances.keyword", "size": 1000, "min_doc_count": 2 }
-
-        },
-
-        "Fluid": {
-          "terms": { "field": "Concepts.Fluid.instances.keyword", "size": 1000, "min_doc_count": 2 }
-
-        }
-
-
-      }
-    };
-  var query={
-    "query": {
-      "bool": {
-        "must": [
-          {
-            "terms": {
-              "Concepts.Basin.instances.keyword": [
-                "Amadeus Basin",
-                "Amadeus Basins"
-              ]
-            }
-          }
-          ],
-         "should":[ {
-            "terms": {
-              "Concepts.Fluid.instances.keyword": [
-                "Fluid Oil",
-                "Fluid Water"
-              ]
-            }
-          },
-
-        ],
-        "minimum_should_match": 1,
-        "boost": 1
-      }
-    }
-  }
-  var query={
-    "query": {
-      "bool": {
-        "must": [
-          {
-            "terms": {
-              "Concepts.Basin.instances.keyword": [
-                "Congo Basin",
-                "Congo Basins",
-                "Cooper Basin"
-              ]
-            }
-          }
-        ],
-        "boost": 1,
-        "must": [
-          {
-            "match": {
-              "Concepts.Fluid": "*"
-            }
-          }
-        ],
-
-      }
-    }
-  }
-
-
-  elasticRestProxy.executeGaiaQuery(query, indexes, {}, function(err, result) {
-    result.hits.hits.forEach(function(hit){
-      if(!hit._source.Concepts.Fluid)
-        var x=3
-    })
-    if (err)
-      console.log(err);
-  });
-}

@@ -96,7 +96,11 @@ var SQLserverConnector = {
         if (!connection) return callback("no connection object");
         connection.database = dbName;
         sql.connect(connection, (err) => {
-            if (err) return console.log(err); // ... error checks
+            if (err) {
+                console.log(err);
+                return callback(err);// ... error checks
+            }
+
 
             // Query
             //console.log(query)

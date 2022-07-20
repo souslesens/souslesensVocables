@@ -189,7 +189,7 @@ var Lineage_classes = (function() {
     } else if (nodeEvent.shiftKey && nodeEvent.altKey) {
       Lineage_blend.addNodeToAssociationNode(node, "target");
     } else if (nodeEvent.ctrlKey) {
-      SourceBrowser.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv", { resetVisited: 1 });
+      SourceBrowser.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
     } else if (nodeEvent.altKey && options.callee == "Tree") {
       SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, node.data.source, node, { reopen: true });
     } else return nodeEvent;
@@ -2384,10 +2384,10 @@ upperNodeIds.push(id);
     },
 
     showNodeInfos: function() {
-      SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode.data.id, "mainDialogDiv");
+      SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
     },
     showPropertyInfos: function() {
-      SourceBrowser.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge.data.propertyId, "mainDialogDiv");
+      SourceBrowser.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv");
     },
     expandIndividual: function() {
       var source = Lineage_common.currentSource || Lineage_classes.mainSource;

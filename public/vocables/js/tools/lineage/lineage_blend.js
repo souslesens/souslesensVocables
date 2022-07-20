@@ -1165,7 +1165,7 @@ var xx = result
                     Lineage_blend.createSubProperty(Lineage_classes.mainSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, function(err, result) {
                       if (err) return alert(err);
 
-                      if (self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id])
+                      if (!self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id])
                         self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id] = [];
                       self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id].push(result.uri);
 
@@ -1187,7 +1187,7 @@ var xx = result
                   label: "Node infos",
                   action: function(_e) {
                     // pb avec source
-                    SourceBrowser.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode.data.id, "mainDialogDiv");
+                    SourceBrowser.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv");
                   }
 
                 }

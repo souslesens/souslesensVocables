@@ -22,7 +22,14 @@ if(true){
       var indexName="gaia_onto_v2"
       var bulkStr=""
       json.forEach(function (item, _indexedLine) {
-        item.Concepts=JSON.parse(item.Concepts)
+       var concepts=JSON.parse(item.Concepts)
+        conceptsArray=[]
+        for( var key in concepts){
+          var obj=concepts[key]
+          obj.className=key;
+          conceptsArray.push(obj)
+        }
+        item.Concepts=conceptsArray;
         var id = "R" + util.getRandomHexaId(10);
         bulkStr += JSON.stringify({ index: { _index: indexName, _type: indexName, _id: id } }) + "\r\n";
         bulkStr += JSON.stringify(item) + "\r\n";

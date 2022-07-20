@@ -150,7 +150,7 @@ var Lineage_decoration = (function () {
 
             /// update node data source with the real source of the node
             var nodes = visjsGraph.data.nodes.get(nodeIds);
-            if (false) {
+            if (true) {
                 nodes.forEach(function (node) {
                     if (nodesTypesMap[node.data.id] && nodesTypesMap[node.data.id].graphUri) {
                         var source2 = nodesTypesMap[node.data.id].graphUri ? Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri) : source;

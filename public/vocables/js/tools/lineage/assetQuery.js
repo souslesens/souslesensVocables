@@ -385,7 +385,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
             }
         },
         showNodeInfo: function () {
-            SourceBrowser.showNodeInfos(MainController.currentSource, KGquery.currentProperty.id, "mainDialogDiv");
+            SourceBrowser.showNodeInfos(MainController.currentSource, KGquery.currentProperty, "mainDialogDiv");
         },
     };
     (self.getMatchingLabels = function (sourceData, targetSource, callback) {

@@ -294,6 +294,17 @@ var common = (function () {
                 .jstree(true)
                 .get_node(id);
         },
+        // get node from node.data field
+        getNodeByDataField:function (jstreeDiv, property,value) {
+
+            var jsonNodes = $("#" + jstreeDiv)
+              .jstree(true)
+              .get_json("#", { flat: true });
+            jsonNodes.forEach(function (node) {
+               if(node.data && node.data[property]==value)
+                   return node
+            });
+        },
 
         getNodeDescendants: function (jstreeDiv, nodeId, depth, onlyIds) {
             var nodes = [];

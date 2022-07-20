@@ -643,7 +643,7 @@ var KGmappings = (function () {
         if (Array.isArray(node.data)) {
             node.data = node.data[0];
         }
-        SourceBrowser.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv");
+        SourceBrowser.showNodeInfos(node.data.source, node, "mainDialogDiv");
     };
 
     self.literalValues = [

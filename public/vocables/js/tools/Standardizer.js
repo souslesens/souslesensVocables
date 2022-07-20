@@ -1589,7 +1589,7 @@ sortMethod: "hubsize",
             if ((node.data.type = "orphan") /* probably a problem with the single '=' here */) {
                 // orphans
                 $("#Standardizer_searchEntitiesInput").val(node.data.text);
-            } else SourceBrowser.showNodeInfos(source, node.data.id, "mainDialogDiv");
+            } else SourceBrowser.showNodeInfos(source, node, "mainDialogDiv");
         },
     };
 

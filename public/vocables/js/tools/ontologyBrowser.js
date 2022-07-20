@@ -372,7 +372,7 @@ var OntologyBrowser = (function () {
         },
 
         showNodeInfo: function () {
-            SourceBrowser.showNodeInfos(MainController.currentSource, OntologyBrowser.currentNode.id, "mainDialogDiv");
+            SourceBrowser.showNodeInfos(MainController.currentSource, OntologyBrowser.currentNode, "mainDialogDiv");
         },
     };
 

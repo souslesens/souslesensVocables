@@ -1,338 +1,336 @@
 var Lineage_individuals = (function() {
-  var self = {};
-  self.currentQuery = [];
-  self.dataSources = {};
+    var self = {};
+    self.currentFilters = [];
+    self.dataSources = {};
 
-  self.init = function() {
-    self.currentQuery = [];
-    $("#LineageIndividualsTab").load("snippets/lineage/lineageIndividualsSearchDialog.html", function() {
-      $("#LineageIndividualsQueryParams_dataSourcesSelect").children().remove().end();
+    self.init = function() {
+      self.currentFilters = [];
+      $("#LineageIndividualsTab").load("snippets/lineage/lineageIndividualsSearchDialog.html", function() {
+        $("#LineageIndividualsQueryParams_dataSourcesSelect").children().remove().end();
+        $("#LineageIndividualsQueryParams_filterPanel").css("display", "none");
+        self.dataSources = Config.sources[Lineage_classes.mainSource].dataSources;
+        if (!self.dataSources) {
+          $("#LineageIndividualsQueryParams_showIndividualsTriples").css("display", "block");
+        } else {
+          var dataSourcesArray = Object.keys(self.dataSources);
+          common.fillSelectOptions("LineageIndividualsQueryParams_dataSourcesSelect", dataSourcesArray, dataSourcesArray.length > 1);
+          if (dataSourcesArray.length == 1)
+            self.onDataSourcesSelect($("#LineageIndividualsQueryParams_dataSourcesSelect").val());
+        }
+      });
+
+    };
+
+    self.onDataSourcesSelect = function(dataSourceKey) {
       $("#LineageIndividualsQueryParams_filterPanel").css("display", "none");
-      self.dataSources = Config.sources[Lineage_classes.mainSource].dataSources;
-      if (!self.dataSources) {
-        $("#LineageIndividualsQueryParams_showIndividualsTriples").css("display", "block");
-      } else {
-        var dataSourcesArray = Object.keys(self.dataSources);
-        common.fillSelectOptions("LineageIndividualsQueryParams_dataSourcesSelect", dataSourcesArray, dataSourcesArray.length > 1);
-        if (dataSourcesArray.length == 1)
-          self.onDataSourcesSelect($("#LineageIndividualsQueryParams_dataSourcesSelect").val());
+      self.currentDataSource = self.dataSources[dataSourceKey];
+      if (!self.currentDataSource)
+        return;
+      if (self.currentDataSource.type.indexOf("sql") > -1) {
+        $("#LineageIndividualsQueryParams_SQLfilterPanel").css("display", "block");
+        self.sql.initModel(self.currentDataSource, function(err) {
+          if (err)
+            return alert(err);
+          self.sql.showTables(nodeSource.dataSource);
+        });
+
+      } else if (self.currentDataSource.type == "searchIndex") {
+        $("#LineageIndividualsQueryParams_searchIndexFilterPanel").css("display", "block");
+
+
       }
-    });
-
-  };
-
-  self.onDataSourcesSelect = function(dataSourceKey) {
-    $("#LineageIndividualsQueryParams_filterPanel").css("display", "none");
-    self.currentDataSource = self.dataSources[dataSourceKey];
-    if (!self.currentDataSource)
-      return;
-    if (self.currentDataSource.type.indexOf("sql") > -1) {
-      $("#LineageIndividualsQueryParams_SQLfilterPanel").css("display", "block");
-      self.sql.initModel(self.currentDataSource, function(err) {
-        if (err)
-          return alert(err);
-        self.sql.showTables(nodeSource.dataSource);
-      });
-
-    } else if (self.currentDataSource.type == "searchIndex") {
-      $("#LineageIndividualsQueryParams_searchIndexFilterPanel").css("display", "block");
+    };
 
 
-    }
-  };
+    self.setClass = function(node) {
+      $("#Lineage_Tabs").tabs("option", "active", 3);
+      self.currentClassNode = node;
+      $("#LineageIndividualsQueryParams_className").html(self.currentClassNode.data.label);
+      if (self.currentDataSource.type == "searchIndex")
+        self.searchIndex.showClassIndividualsTree();
+    };
 
 
-  self.setClass = function(node) {
-    $("#Lineage_Tabs").tabs("option", "active", 3);
-    self.currentClassNode = node;
-    $("#LineageIndividualsQueryParams_className").html(self.currentClassNode.data.label);
-    if (self.currentDataSource.type == "searchIndex")
-      self.searchIndex.showClassIndividualsTree();
-  };
-
-
-  self.executeQuery = function() {
-    if (self.currentDataSource.type.indexOf("sql") > -1) {
-      self.sql.executeQuery();
-    } else if (self.currentDataSource.type == "searchIndex") {
-      self.searchIndex.executeQuery();
-    }
-
-
-  };
-
-
-  self.onSearchDialogOperatorSelect = function(operator) {
-
-  };
-
-  self.showAll = function() {
-    Lineage_classes.drawNamedIndividuals([self.currentClassNode.id]);
-  };
-
-  self.clearQuery = function() {
-    self.currentQuery = [];
-    $("#LineageIndividualsQueryParams_QueryDiv").html(html);
-  };
-  self.addToQuery = function() {
-    if (self.currentDataSource.type.indexOf("sql") > -1) {
-
-      var classId = self.currentClassNode.data.id;
-      var classLabel = self.currentClassNode.data.label;
-      var operator = $("#LineageIndividualsQueryParams_operator").val();
-      var value = $("#LineageIndividualsQueryParams_value").val();
-      var html = "<div class='LineageIndividualsQueryParams_QueryElt' id='LineageIndividualsQueryParams_Elt_" + self.currentQuery.length + "'> ";
-      var obj = {
-        classId: classId,
-        classLabel: classLabel
-      };
-
-      html += classLabel + "&nbsp;";
-      if (value) {
-        obj.operator = operator;
-        obj.value = value;
-        html += operator + "&nbsp;" + value + "&nbsp;";
-      } else {
-        html += "ALL &nbsp;";
+    self.executeQuery = function() {
+      if (self.currentDataSource.type.indexOf("sql") > -1) {
+        self.sql.executeQuery();
+      } else if (self.currentDataSource.type == "searchIndex") {
+        self.searchIndex.executeQuery();
       }
-      html += "<button style='size: 10px' onclick='Lineage_individuals.removeQueryElement(" + self.currentQuery.length + ")'>X</button></div>";
-      self.currentQuery.push(obj);
-    } else if (self.currentDataSource.type == "searchIndex") {
-      var individuals = $("#LineageIndividuals_individualsTree").jstree().get_checked(true);
-      var obj = { classNode: self.currentClassNode, individuals: [] };
-      individuals.forEach(function(individual) {
-        obj.individuals.push(individual.data.id);
-      });
-      self.currentQuery.push(obj);
 
-      var html = "<div class='LineageIndividualsQueryParams_QueryElt' id='LineageIndividualsQueryParams_Elt_" + self.currentQuery.length + "'> ";
-      html += "<b>" + self.currentClassNode.data.label + "</b>";
-      if (individuals.length < 5) {
-        individuals.forEach(function(individual) {
-          html += " " + individual.data.label;
+
+    };
+
+
+    self.onSearchDialogOperatorSelect = function(operator) {
+
+    };
+
+    self.showAll = function() {
+      Lineage_classes.drawNamedIndividuals([self.currentClassNode.id]);
+    };
+
+    self.clearQuery = function() {
+      self.currentFilters = [];
+      $("#LineageIndividualsQueryParams_QueryDiv").html(html);
+    };
+    self.addToQuery = function() {
+      if (self.currentDataSource.type.indexOf("sql") > -1) {
+
+        var classId = self.currentClassNode.data.id;
+        var classLabel = self.currentClassNode.data.label;
+        var operator = $("#LineageIndividualsQueryParams_operator").val();
+        var value = $("#LineageIndividualsQueryParams_value").val();
+        var html = "<div class='LineageIndividualsQueryParams_QueryElt' id='LineageIndividualsQueryParams_Elt_" + self.currentFilters.length + "'> ";
+        var obj = {
+          classId: classId,
+          classLabel: classLabel
+        };
+
+        html += classLabel + "&nbsp;";
+        if (value) {
+          obj.operator = operator;
+          obj.value = value;
+          html += operator + "&nbsp;" + value + "&nbsp;";
+        } else {
+          html += "ALL &nbsp;";
+        }
+        html += "<button style='size: 10px' onclick='Lineage_individuals.removeQueryElement(" + self.currentFilters.length + ")'>X</button></div>";
+        self.currentFilters.push(obj);
+      } else if (self.currentDataSource.type == "searchIndex") {
+        var individuals = $("#LineageIndividuals_individualsTree").jstree().get_checked(true);
+        if (individuals.length == 0)
+          return alert("no indiviual selected");
+        var obj = { classNode: self.currentClassNode, individuals: [] };
+
+        var html = "<div class='LineageIndividualsQueryParams_QueryElt' id='LineageIndividualsQueryParams_Elt_" + self.currentFilters.length + "'> ";
+        html += "<b>" + self.currentClassNode.data.label + "</b>";
+        var queryIndex = self.currentFilters.length;
+        if (individuals[0].id == "_ALL") {
+          self.currentFilters.push(obj);
+
+          html += " ALL";
+        } else {
+          individuals.forEach(function(individual) {
+            obj.individuals.push(individual.data.id);
+          });
+          self.currentFilters.push(obj);
+
+
+          if (individuals.length < 5) {
+            individuals.forEach(function(individual) {
+              html += " " + individual.data.label;
+            });
+
+          }
+
+        }
+        html += "<button style='size: 10px' onclick='Lineage_individuals.removeQueryElement(" + queryIndex + ")'>X</button></div>";
+      }
+
+      $("#LineageIndividualsQueryParams_QueryDiv").append(html);
+    };
+
+    self.removeQueryElement = function(index) {
+      self.currentFilters.splice(index, 1);
+      $("#LineageIndividualsQueryParams_Elt_" + index).remove();
+    };
+
+
+    self.onQueryParamsDialogCancel = function() {
+      $("#LineagePopup").dialog("close");
+    };
+
+
+    self.sql = {
+      initModel: function(dataSource, callback) {
+        if (dataSource.model)
+          return callback();
+        const params = new URLSearchParams({
+          name: self.currentDataSource.dbName,
+          type: self.currentDataSource.type
+        });
+
+        $.ajax({
+          type: "GET",
+          url: Config.apiUrl + "/kg/model?" + params.toString(),
+          dataType: "json",
+
+          success: function(data, _textStatus, _jqXHR) {
+            self.currentDataSource.model = data;
+            callback();
+
+          },
+          error: function(_err) {
+            callback(err);
+
+          }
+        });
+
+      },
+      showTables: function(dataSource) {
+        if (!dataSource.mappings[self.currentClassNode.data.id])
+          return alert("node mappings for class " + self.currentClassNode.data.label);
+        var tables = Object.keys(dataSource.mappings[self.currentClassNode.data.id]);
+        common.fillSelectOptions("LineageIndividualsQueryParams_SQL_tablesSelect", tables, true);
+      },
+      showColumns: function(table) {
+        var tableColumns = self.currentDataSource.model[table];
+
+        common.fillSelectOptions("LineageIndividualsQueryParams_SQL_columnsSelect", tableColumns, true);
+
+
+      },
+      fillValuesSelect: function() {
+        var table = $("#LineageIndividualsQueryParams_SQL_tablesSelect").val();
+        var column = $("#LineageIndividualsQueryParams_SQL_columnsSelect").val();
+        if (!table || !column)
+          return alert("select a tbale and a column");
+        var SampleSizelimit = 1000;
+        var sqlQuery = " select distinct column from " + table + " limit " + SampleSizelimit;
+        if (self.currentDataSource.type == "sql.sqlserver") sqlQuery = " select distinct  " + column + " from " + table;
+
+
+        const params = new URLSearchParams({
+          type: self.currentDataSource.type,
+          dbName: self.currentDataSource.dbName,
+          sqlQuery: sqlQuery
+        });
+
+        $.ajax({
+          type: "GET",
+          url: Config.apiUrl + "/kg/data?" + params.toString(),
+          dataType: "json",
+
+          success: function(data, _textStatus, _jqXHR) {
+            if (data.size >= SampleSizelimit)
+              return alert("too many values");
+            common.fillSelectOptions("LineageIndividualsQueryParams_valuesSelect", data, true, column, column);
+          },
+          error(err) {
+            return alert(err.responseText);
+          }
         });
 
       }
-      html += "<button style='size: 10px' onclick='Lineage_individuals.removeQueryElement(" + self.currentQuery.length + ")'>X</button></div>";
-
-    }
-
-    $("#LineageIndividualsQueryParams_QueryDiv").append(html);
-  };
-
-  self.removeQueryElement = function(index) {
-    self.currentQuery.splice(index, 1);
-    $("#LineageIndividualsQueryParams_Elt_" + index).remove();
-  };
-
-
-  self.onQueryParamsDialogCancel = function() {
-    $("#LineagePopup").dialog("close");
-  };
-
-
-  self.sql = {
-    initModel: function(dataSource, callback) {
-      if (dataSource.model)
-        return callback();
-      const params = new URLSearchParams({
-        name: self.currentDataSource.dbName,
-        type: self.currentDataSource.type
-      });
-
-      $.ajax({
-        type: "GET",
-        url: Config.apiUrl + "/kg/model?" + params.toString(),
-        dataType: "json",
-
-        success: function(data, _textStatus, _jqXHR) {
-          self.currentDataSource.model = data;
-          callback();
-
-        },
-        error: function(_err) {
-          callback(err);
-
-        }
-      });
-
-    },
-    showTables: function(dataSource) {
-      if (!dataSource.mappings[self.currentClassNode.data.id])
-        return alert("node mappings for class " + self.currentClassNode.data.label);
-      var tables = Object.keys(dataSource.mappings[self.currentClassNode.data.id]);
-      common.fillSelectOptions("LineageIndividualsQueryParams_SQL_tablesSelect", tables, true);
-    },
-    showColumns: function(table) {
-      var tableColumns = self.currentDataSource.model[table];
-
-      common.fillSelectOptions("LineageIndividualsQueryParams_SQL_columnsSelect", tableColumns, true);
-
-
-    },
-    fillValuesSelect: function() {
-      var table = $("#LineageIndividualsQueryParams_SQL_tablesSelect").val();
-      var column = $("#LineageIndividualsQueryParams_SQL_columnsSelect").val();
-      if (!table || !column)
-        return alert("select a tbale and a column");
-      var SampleSizelimit = 1000;
-      var sqlQuery = " select distinct column from " + table + " limit " + SampleSizelimit;
-      if (self.currentDataSource.type == "sql.sqlserver") sqlQuery = " select distinct  " + column + " from " + table;
-
-
-      const params = new URLSearchParams({
-        type: self.currentDataSource.type,
-        dbName: self.currentDataSource.dbName,
-        sqlQuery: sqlQuery
-      });
-
-      $.ajax({
-        type: "GET",
-        url: Config.apiUrl + "/kg/data?" + params.toString(),
-        dataType: "json",
-
-        success: function(data, _textStatus, _jqXHR) {
-          if (data.size >= SampleSizelimit)
-            return alert("too many values");
-          common.fillSelectOptions("LineageIndividualsQueryParams_valuesSelect", data, true, column, column);
-        },
-        error(err) {
-          return alert(err.responseText);
-        }
-      });
-
-    }
-    , onValuesSelectChange: function() {
-      var value = $("#LineageIndividualsQueryParams_valuesSelect").val();
-      $("#LineageIndividualsQueryParams_value").val(value);
-    }
-    , executeQuery: function(output) {
-      var SampleSizelimit = 5000;
-      var table = $("#LineageIndividualsQueryParams_SQL_tablesSelect").val();
-      var column = $("#LineageIndividualsQueryParams_SQL_columnsSelect").val();
-      var operator = $("#LineageIndividualsQueryParams_operator").val();
-      var value = $("#LineageIndividualsQueryParams_value").val();
-
-      var sqlQuery = " select  * from " + table + " limit " + SampleSizelimit;
-      if (self.currentDataSource.type == "sql.sqlserver") sqlQuery = " select top  " + SampleSizelimit + " * from " + table;
-
-      if (value) {
-
-        var value2 = "";
-        if (operator == "contains")
-          value2 = " LIKE ('%" + value + "%')";
+      , onValuesSelectChange: function() {
+        var value = $("#LineageIndividualsQueryParams_valuesSelect").val();
+        $("#LineageIndividualsQueryParams_value").val(value);
       }
-      sqlQuery += " where " + column + value2;
+      , executeQuery: function(output) {
+        var SampleSizelimit = 5000;
+        var table = $("#LineageIndividualsQueryParams_SQL_tablesSelect").val();
+        var column = $("#LineageIndividualsQueryParams_SQL_columnsSelect").val();
+        var operator = $("#LineageIndividualsQueryParams_operator").val();
+        var value = $("#LineageIndividualsQueryParams_value").val();
 
+        var sqlQuery = " select  * from " + table + " limit " + SampleSizelimit;
+        if (self.currentDataSource.type == "sql.sqlserver") sqlQuery = " select top  " + SampleSizelimit + " * from " + table;
 
-      const params = new URLSearchParams({
-        type: self.currentDataSource.type,
-        dbName: self.currentDataSource.dbName,
-        sqlQuery: sqlQuery
-      });
+        if (value) {
 
-      $.ajax({
-        type: "GET",
-        url: Config.apiUrl + "/kg/data?" + params.toString(),
-        dataType: "json",
-
-        success: function(data, _textStatus, _jqXHR) {
-          if (data.size >= SampleSizelimit)
-            return alert("too many values");
-          if (output == "table") {
-
-          }
-        },
-        error(err) {
-          return alert(err.responseText);
+          var value2 = "";
+          if (operator == "contains")
+            value2 = " LIKE ('%" + value + "%')";
         }
-      });
-
-    }
+        sqlQuery += " where " + column + value2;
 
 
-  };
-  self.searchIndex = {
-    executeFilterQuery: function( callback) {
-      if (self.currentQuery.length == 0)
-        return alert("no query filter");
-      var mustFilters = [];
-      var shouldFilters = [];
-      self.currentQuery.forEach(function(filter, index) {
-        var individuals = [];
-        var terms;
-        if (filter.individuals.indexOf("_ALL") > -1) {
-          terms = {
-            "match": {
-              ["Concepts." + filter.classNode.data.label]: "*"
+        const params = new URLSearchParams({
+          type: self.currentDataSource.type,
+          dbName: self.currentDataSource.dbName,
+          sqlQuery: sqlQuery
+        });
+
+        $.ajax({
+          type: "GET",
+          url: Config.apiUrl + "/kg/data?" + params.toString(),
+          dataType: "json",
+
+          success: function(data, _textStatus, _jqXHR) {
+            if (data.size >= SampleSizelimit)
+              return alert("too many values");
+            if (output == "table") {
 
             }
-          };
-        } else {
-          filter.individuals.forEach(function(individual) {
-            individuals.push(individual);
-          });
-          var terms = { "terms": { ["Concepts." + filter.classNode.data.label + ".instances.keyword"]: individuals } };
-        }
-        if (index == 0)
-          mustFilters.push(terms);
-        else
-          shouldFilters.push(terms);
-
-      });
-
-      var query = {
-        "query": {
-          "bool": {
-            "must": mustFilters,
-           // "minimum_should_match": 1,
-            "boost": 1.0
+          },
+          error(err) {
+            return alert(err.responseText);
           }
-        }
-      };
-      if(shouldFilters.length>0)
-        query.query.bool.should=  shouldFilters;
+        });
+
+      }
 
 
-      var payload = {
-        query: query,
-        url: "_search",
-        indexes: self.currentDataSource.indexes
-      };
-      $.ajax({
-        type: "POST",
-        url: Config.apiUrl + "/elasticsearch/query_gaia",
-        data: JSON.stringify(payload),
-        contentType: "application/json",
-        dataType: "json",
+    };
+    self.searchIndex = {
+      executeFilterQuery: function(callback) {
+        if (self.currentFilters.length == 0)
+          return alert("no query filter");
+        var mustFilters = [];
+        var shouldFilters = [];
+        self.currentFilters.forEach(function(filter, index) {
 
-        success: function(result, _textStatus, _jqXHR) {
-          callback(null, result);
-        }, error: function(_err) {
-          callback(err);
+          var terms = [];
+          if (filter.individuals.length == 0) {
+            terms.push({ "term": { ["Concepts." + filter.classNode.data.label + ".name.keyword"]: filter.classNode.data.label } });
 
-        }
-      });
+          } else {
+            var individuals = [];
+            filter.individuals.forEach(function(individual) {
+              individuals.push(individual);
+            });
 
+            terms.push({ "terms": { ["Concepts." + filter.classNode.data.label + ".instances.keyword"]: individuals } });
+          }
+          if (index == 0)
+            mustFilters = terms;
+          else
+            shouldFilters = terms;
 
-    }
-    , showClassIndividualsTree: function(output) {
-      var query = {};
-      if (!self.currentClassNode) {
-        query = {
-          "aggs": {
-            "Basin": {
-              "terms": { "field": "Concepts.Basin.instances.keyword", "size": 1000, "min_doc_count": 2 }
+        });
 
-            },
+        var query = {
+          "query": {
+            "bool": {
+              "must": mustFilters,
 
-            "Fluid": {
-              "terms": { "field": "Concepts.Fluid.instances.keyword", "size": 1000, "min_doc_count": 2 }
-
+              //  "boost": 1.0
             }
           }
         };
-      } else {
+        if (shouldFilters.length > 0) {
+
+        query.query.bool.should = shouldFilters;
+          query.query.bool.minimum_should_match= 1
+      }
+
+
+        var payload = {
+          query: query,
+          url: "_search",
+          indexes: self.currentDataSource.indexes
+        };
+        $.ajax({
+          type: "POST",
+          url: Config.apiUrl + "/elasticsearch/query_gaia",
+          data: JSON.stringify(payload),
+          contentType: "application/json",
+          dataType: "json",
+
+          success: function(result, _textStatus, _jqXHR) {
+            callback(null, result);
+          }, error: function(_err) {
+            callback(err);
+
+          }
+        });
+
+
+      }
+      , showClassIndividualsTree: function(output) {
+        var query = {};
+
         query = {
           "aggs": {
             [self.currentClassNode.data.label]: {
@@ -345,115 +343,253 @@ var Lineage_individuals = (function() {
             }
           }
         };
-      }
-
-      if (!Array.isArray(self.currentDataSource.indexes))
-        self.currentDataSource.indexes = [self.currentDataSource.indexes];
 
 
-      var payload = {
-        query: query,
-        url: "_search",
-        indexes: self.currentDataSource.indexes
-      };
-      $.ajax({
-        type: "POST",
-        url: Config.apiUrl + "/elasticsearch/query_gaia",
-        data: JSON.stringify(payload),
-        contentType: "application/json",
-        dataType: "json",
+        if (!Array.isArray(self.currentDataSource.indexes))
+          self.currentDataSource.indexes = [self.currentDataSource.indexes];
 
-        success: function(result, _textStatus, _jqXHR) {
 
-          for (var key in result.aggregations) {
-            var buckets = result.aggregations[key].buckets;
-            var jstreeData = [];
+        var payload = {
+          query: query,
+          url: "_search",
+          indexes: self.currentDataSource.indexes
+        };
+        $.ajax({
+          type: "POST",
+          url: Config.apiUrl + "/elasticsearch/query_gaia",
+          data: JSON.stringify(payload),
+          contentType: "application/json",
+          dataType: "json",
 
-            jstreeData.push({
-              id: "_ALL",
-              text: "ALL",
-              parent: "#",
-              data: {
+          success: function(result, _textStatus, _jqXHR) {
+
+            if (Object.keys(result.aggregations).length == 0) {
+              return;
+            }
+            for (var key in result.aggregations) {
+              var buckets = result.aggregations[key].buckets;
+              var jstreeData = [];
+
+
+              jstreeData.push({
                 id: "_ALL",
                 text: "ALL",
-                class: self.currentClassNode
-              }
-            });
-            buckets.sort(function(a, b) {
-              if (a.key > b.key)
-                return 1;
-              if (a.key < b.key)
-                return -1;
-              return 0;
-
-            });
-            buckets.forEach(function(bucket) {
-              jstreeData.push({
-                id: bucket.key,
-                text: bucket.key + " " + bucket.doc_count,
                 parent: "#",
                 data: {
-                  id: bucket.key,
-                  label: bucket.key,
+                  id: "_ALL",
+                  text: "ALL",
                   class: self.currentClassNode
                 }
               });
+              buckets.sort(function(a, b) {
+                if (a.key > b.key)
+                  return 1;
+                if (a.key < b.key)
+                  return -1;
+                return 0;
+
+              });
+              buckets.forEach(function(bucket) {
+                jstreeData.push({
+                  id: bucket.key,
+                  text: bucket.key + " " + bucket.doc_count,
+                  parent: "#",
+                  data: {
+                    id: bucket.key,
+                    label: bucket.key,
+                    class: self.currentClassNode
+                  }
+                });
+
+              });
+              var options = {
+                openAll: false, withCheckboxes: true, contextMenu: function() {
+                },
+                searchPlugin: {
+                  case_insensitive: true,
+                  fuzzy: false,
+                  show_only_matches: true
+                }
+              };
+              $("#LineageIndividuals_individualsTreeSearchInput").bind("keyup", null, Lineage_individuals.searchIndex.searchInIndividualsTree);
+              common.jstree.loadJsTree("LineageIndividuals_individualsTree", jstreeData, options);
+
+            }
+
+          },
+          error: function(_err) {
+            callback(err);
+
+          }
+        });
+      },
+      searchInIndividualsTree: function(event) {
+        if (event.keyCode != 13) return;
+        var value = $("#LineageIndividuals_individualsTreeSearchInput").val();
+        $("#LineageIndividuals_individualsTree").jstree(true).search(value);
+        $("#LineageIndividuals_individualsTreeSearchInput").val("");
+      },
+
+      drawIndividuals: function() {
+        self.searchIndex.executeFilterQuery(function(err, result) {
+            if (err)
+              return alert(err.responseText);
+
+
+            var graphNodesMap = {};
+            var graphEdgesMap = {};
+
+
+
+
+
+          // aggregate individuals inside map of graph nodes map
+          self.currentFilters.forEach(function(filter) {
+            var filterClassName=filter.classNode.data.label
+            var fitlerIndividuals = filter.individuals;
+            if (!graphNodesMap[filter.classNode.id])
+              graphNodesMap[filter.classNode.id] = {};
+
+            result.hits.hits.forEach(function(hit) {
+              var hitConceptObj = hit._source.Concepts[filterClassName];
+                  var hitConceptIndividuals = hitConceptObj.instances;
+              hitConceptIndividuals.forEach(function(hitIndividual) {
+                    if (fitlerIndividuals.length == 0 || fitlerIndividuals.indexOf(hitIndividual) > -1) {
+                      if (!graphNodesMap[filter.classNode.id][hitIndividual])
+                        graphNodesMap[filter.classNode.id][hitIndividual] = 0;
+                      graphNodesMap[filter.classNode.id][hitIndividual] += 1;
+
+
+                      if (!graphEdgesMap[hit._source.ParagraphId])
+                        graphEdgesMap[hit._source.ParagraphId] = [];
+                      graphEdgesMap[hit._source.ParagraphId].push(hitIndividual);
+                    }
+                  });
+
+                })
 
             });
-            var options = {
-              openAll: false, withCheckboxes: true, contextMenu: function() {
-              },
-              searchPlugin: {
-                case_insensitive: true,
-                fuzzy: false,
-                show_only_matches: true
+
+
+
+            // aggregate individuals inside map of graph nodes map
+          result.hits.hits.forEach(function(hit) {
+
+            for (var hitConcept in hit._source.Concepts) {
+              var conceptObj = hit._source.Concepts[hitConcept];
+              self.currentFilters.forEach(function(filter) {
+                if (!graphNodesMap[filter.classNode.id])
+                  graphNodesMap[filter.classNode.id] = {filter:filter,individuals:{}};
+
+                if (hitConcept == filter.classNode.data.label) {
+                  var individualIds = conceptObj.instances;
+                  individualIds.forEach(function(hitIndividual) {
+                    if(filter.individuals.lengt==0 || filter.individuals.indexOf(hitIndividual)>-1) {
+                      if (!graphNodesMap[filter.classNode.id].individuals[hitIndividual])
+                        graphNodesMap[filter.classNode.id].individuals[hitIndividual] = 0;
+                      graphNodesMap[filter.classNode.id].individuals[hitIndividual] += 1;
+
+
+                      if (!graphEdgesMap[hit._source.ParagraphId])
+                        graphEdgesMap[hit._source.ParagraphId] = [];
+                      graphEdgesMap[hit._source.ParagraphId].push(hitIndividual);
+                    }
+                  });
+
+                }
+
+
+              });
+
+
+            }
+
+
+          });
+            var existingVisjsIds = visjsGraph.getExistingIdsMap();
+            visjsData = { nodes: [], edges: [] };
+            for (var graphNodeId in graphNodesMap) {
+              for (var hitIndividual in graphNodesMap[graphNodeId].individuals) {
+                var id = "searchIndex_" + hitIndividual;
+                if (!existingVisjsIds[id]) {
+                  existingVisjsIds[id] = 1;
+                  visjsData.nodes.push({
+                    id: id,
+                    label: hitIndividual,
+                    shape: Lineage_classes.namedIndividualShape,
+                    color: "grey",
+                    data: {
+                      id: hitIndividual,
+                      label: hitIndividual,
+                      source: "_searchIndex",
+                      filter:graphNodesMap[graphNodeId].filter
+                    }
+                  });
+                }
+                  var edgeId = id + "_" + graphNodeId;
+                  if (!existingVisjsIds[edgeId]){
+                    existingVisjsIds[edgeId] = 1;
+                  visjsData.edges.push({
+                    id: edgeId,
+                    from: id,
+                    to: graphNodeId
+                  });
+                }
               }
-            };
-            $("#LineageIndividuals_individualsTreeSearchInput").bind("keyup", null, Lineage_individuals.searchIndex.searchInIndividualsTree);
-            common.jstree.loadJsTree("LineageIndividuals_individualsTree", jstreeData, options);
+            }
+            // draw edges between indiviudals
+            var individualEdges = {};
+            for (var paragraphId in graphEdgesMap) {
+              var individuals = graphEdgesMap[paragraphId];
+              individuals.forEach(function(item1) {
+                individuals.forEach(function(item2) {
+                  if (item1 != item2) {
+                    var edgeId = item1 + "_" + item2;
+                    if (!individualEdges[edgeId])
+                      individualEdges[edgeId] = [];
+                    individualEdges[edgeId].push(paragraphId);
+                  }
+                });
+              });
+            }
+            for (var edgeId in individualEdges) {
+              var array = edgeId.split("_");
+              var inverseEdgeId=array[1]+"_"+array[0]
+              if (!existingVisjsIds[edgeId] && !existingVisjsIds[inverseEdgeId]) {
+                existingVisjsIds[edgeId] = 1;
 
+                visjsData.edges.push({
+                  id: edgeId,
+                  from: "searchIndex_" +array[0],
+                  to: "searchIndex_" +array[1],
+                  color: "red",
+                  data: {
+                    from: array[0],
+                    to: array[1],
+                    source: "_searchIndex_paragraph",
+                    paragraphs: individualEdges[edgeId]
+                  }
+                });
+              }
+            }
+
+
+            visjsGraph.data.nodes.add(visjsData.nodes);
+            visjsGraph.data.edges.add(visjsData.edges);
           }
-
-        },
-        error: function(_err) {
-          callback(err);
-
-        }
-      });
-    },
-    searchInIndividualsTree: function(event) {
-      if (event.keyCode != 13) return;
-      var value = $("#LineageIndividuals_individualsTreeSearchInput").val();
-      $("#LineageIndividuals_individualsTree").jstree(true).search(value);
-      $("#LineageIndividuals_individualsTreeSearchInput").val("");
-    },
-
-    drawIndividuals: function() {
-      self.searchIndex.executeFilterQuery(function(err, result) {
-        if (err)
-          return alert(err.responseText);
-        var visjsNodes = visjsGraph.getExistingIdsMap();
-
-        result.hits.hits.forEach(function(hit) {
-          for (var concept in hit.Concepts) {
-
-
-          }
-
-
+        )
+        ;
+      }, listParagraphs: function() {
+        self.searchIndex.executeFilterQuery(function(err, result) {
+          if (err)
+            return alert(err.responseText);
         });
-      });
 
-    },
-    listParagraphs: function() {
-      self.searchIndex.executeFilterQuery(function(err, result) {
-        if (err)
-          return alert(err.responseText);
-      });
+      }
+    };
 
-    }
 
-  };
-
-  return self;
-})();
+    return self;
+  }
+)
+();

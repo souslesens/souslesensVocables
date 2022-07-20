@@ -475,7 +475,7 @@ var KGadvancedMapping = (function () {
     self.showEntityInfos = function (id) {
         var obj = self.currentdictionaryEntryEntities[id];
         var source = Config.KG.elasticIndexSourceMap[obj.index];
-        SourceBrowser.showNodeInfos(source, obj.id, "mainDialogDiv");
+        SourceBrowser.showNodeInfos(source, obj, "mainDialogDiv");
     };
 
     self.beforeCloseDialog = function () {

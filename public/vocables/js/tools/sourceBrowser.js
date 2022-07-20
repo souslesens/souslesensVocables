@@ -134,7 +134,7 @@ $("#actionDiv").html(html);*/
             label: "Node infos",
             action: function (_e) {
                 // pb avec source
-                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv");
+                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
             },
         };
 
@@ -283,7 +283,7 @@ action: function (e) {// pb avec source
     };
 
     self.editThesaurusConceptInfos = function (sourceLabel, node, _callback) {
-        SourceBrowser.showNodeInfos(sourceLabel, node.data.id, "graphDiv");
+        SourceBrowser.showNodeInfos(sourceLabel, node, "graphDiv");
 
         /*  Sparql_generic.getNodeInfos(sourceLabel, node.data.id, null, function (err, result) {
 if (err) {
@@ -720,9 +720,26 @@ return*/
         Sparql_common.setFilter("id", self.currentFoundIds);
     };
 
-    self.showNodeInfos = function (sourceLabel, nodeId, divId, options, callback) {
+    self.showNodeInfos = function (sourceLabel, node, divId, options, callback) {
         self.newProperties = null;
-        self.currentNodeId = nodeId;
+        self.currentNodeId = null;
+        self.currentNode = null;
+        if(typeof node=="object"){
+            self.currentNode = node;
+            if(node.data){
+                if(node.data.propertyId)
+                    self.currentNodeId = node.data.propertyId;
+                if(node.data.id)
+                    self.currentNodeId = node.data.id;
+
+            }else{
+                if(node.id)
+                    self.currentNodeId = node;
+            }
+        }else
+        self.currentNodeId = node;
+        var nodeId=self.currentNodeId
+
         if (!sourceLabel) sourceLabel = self.currentSource;
         else self.currentSource = sourceLabel;
         self.divId = divId;
@@ -756,7 +773,8 @@ return*/
                     });
                 },
                 function (callbackSeries) {
-                    if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons) {
+                    if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons ) {
+                     if (!self.currentNode.data || !self.currentNode.data.source  || !Config.sources[self.currentNode.data.source].editable)
                         var str = "<div>";
                         str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
                         if (Config.sources[self.currentSource].editable) {
@@ -818,6 +836,7 @@ return*/
 
     self.drawCommonInfos = function (sourceLabel, nodeId, divId, _options, callback) {
         var valueLabelsMap = {};
+        $(".infosTable").html("")
         self.propertiesMap = { label: "", id: "", properties: {} };
         var blankNodes = [];
         Sparql_generic.getNodeInfos(
@@ -1021,7 +1040,7 @@ defaultLang = 'en';*/
 
             str += "</table> </div>" + "</div>";
 
-            $("#nodeInfos_restrictionsDiv").append(str);
+            $("#nodeInfos_restrictionsDiv").html(str);
             callback();
         });
     };
@@ -1052,7 +1071,7 @@ defaultLang = 'en';*/
                     str += "<tr><td>" + targetClassStr + "</td></tr>";
                 });
                 str += "</table>";
-                $("#nodeInfos_individualsDiv").append(str);
+                $("#nodeInfos_individualsDiv").html(str);
             }
             callback();
         });
@@ -1187,7 +1206,7 @@ defaultLang = 'en';*/
     };
 
     self.modifylabelProperty = function (property, oldLabel) {
-        var newLabel = prompt("new label ");
+        var newLabel = prompt("new label ",oldLabel);
         if (newLabel) {
             newLabel = Sparql_common.formatStringForTriple(newLabel);
             self.addProperty(property, newLabel, self.currentSource, false, function (err, result) {
@@ -1196,6 +1215,15 @@ defaultLang = 'en';*/
                     if (err) return alert(err);
                     self.showNodeInfos(self.currentSource, self.currentNodeId, "mainDialogDiv");
                     visjsGraph.data.nodes.update({ id: self.currentNodeId, label: newLabel });
+                    if( self.currentNodeId.from){
+                        var jstreeNode=common.jstree.getNodeByDataField("#Lineage_propertiesTree","id",self.currentNodeId)
+                        if(jstreeNode)
+                        $("#Lineage_propertiesTree").jstree().rename_node(jstreeNode,newLabel)
+                    }else{
+                        var jstreeNode=common.jstree.getNodeByDataField("LineagejsTreeDiv","id",self.currentNodeId)
+                        if(jstreeNode)
+                            $("#LineagejsTreeDiv").jstree().rename_node(jstreeNode,newLabel)
+                    }
                 });
             });
         }
@@ -1211,6 +1239,17 @@ defaultLang = 'en';*/
                         $("#" + self.divId).dialog("close");
                         visjsGraph.data.nodes.remove(self.currentNodeId);
                         MainController.UI.message("node deleted");
+
+                        if( self.currentNodeId.from){
+                            var jstreeNode=common.jstree.getNodeByDataField("#Lineage_propertiesTree","id",self.currentNodeId)
+                            if(jstreeNode)
+                                $("#Lineage_propertiesTree").jstree().delete_node(jstreeNode,newLabel)
+                        }else{
+                            var jstreeNode=common.jstree.getNodeByDataField("LineagejsTreeDiv","id",self.currentNodeId)
+                            if(jstreeNode)
+                                $("#LineagejsTreeDiv").jstree().delete_node(jstreeNode,newLabel)
+                        }
+
                     });
                 });
             });

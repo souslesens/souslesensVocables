@@ -566,7 +566,7 @@ var TE_14224_browser = (function () {
         items.nodeInfos = {
             label: "Node Infos",
             action: function (_e) {
-                SourceBrowser.showNodeInfos(self.referenceOntologySource, self.currentOntologyTreeNode.id, "mainDialogDiv");
+                SourceBrowser.showNodeInfos(self.referenceOntologySource, self.currentOntologyTreeNode, "mainDialogDiv");
             },
         };
 

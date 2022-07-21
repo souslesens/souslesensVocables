@@ -489,7 +489,7 @@ nodes.forEach(function(node) {
       //   layoutHierarchical: {direction: "LR", sortMethod: "directed"}
     };
 
-    if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_classes.mainSource].editable) {
+    if (authentication.currentUser.groupes.indexOf("admin") > -1 &&  Config.sources[Lineage_classes.mainSource] && Config.sources[Lineage_classes.mainSource].editable) {
       options.manipulation = {
         enabled: true,
         initiallyActive: true,

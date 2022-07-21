@@ -3,6 +3,7 @@ var Lineage_individuals = (function() {
     self.currentFilters = [];
     self.dataSources = {};
 
+
     self.init = function() {
       self.currentFilters = [];
       $("#LineageIndividualsTab").load("snippets/lineage/lineageIndividualsSearchDialog.html", function() {
@@ -26,6 +27,8 @@ var Lineage_individuals = (function() {
       self.currentDataSource = self.dataSources[dataSourceKey];
       if (!self.currentDataSource)
         return;
+
+
       if (self.currentDataSource.type.indexOf("sql") > -1) {
         $("#LineageIndividualsQueryParams_SQLfilterPanel").css("display", "block");
         self.sql.initModel(self.currentDataSource, function(err) {
@@ -74,11 +77,21 @@ var Lineage_individuals = (function() {
       self.currentFilters = [];
       $("#LineageIndividualsQueryParams_QueryDiv").html(html);
     };
+
+
     self.addToQuery = function() {
+      var existingVisjsIds = visjsGraph.getExistingIdsMap();
+
+      if (!self.currentClassNode.color)
+        self.currentClassNode.color = Lineage_classes.getSourceColor(self.currentClassNode.data.id);
+
+
       if (self.currentDataSource.type.indexOf("sql") > -1) {
 
         var classId = self.currentClassNode.data.id;
         var classLabel = self.currentClassNode.data.label;
+
+
         var operator = $("#LineageIndividualsQueryParams_operator").val();
         var value = $("#LineageIndividualsQueryParams_value").val();
         var html = "<div class='LineageIndividualsQueryParams_QueryElt' id='LineageIndividualsQueryParams_Elt_" + self.currentFilters.length + "'> ";
@@ -146,17 +159,16 @@ var Lineage_individuals = (function() {
       initModel: function(dataSource, callback) {
         if (dataSource.model)
           return callback();
-        const params = new URLSearchParams({
-          name: self.currentDataSource.dbName,
-          type: self.currentDataSource.type
-        });
 
         $.ajax({
           type: "GET",
-          url: Config.apiUrl + "/kg/model?" + params.toString(),
+          url: Config.apiUrl + "/kg/mappings?" + dataSource.dbName,
           dataType: "json",
-
           success: function(data, _textStatus, _jqXHR) {
+            if (!data.mappings) return;
+            if (!data.model) {
+              data.model = self.generateKGModel(data.mappings);
+            }
             self.currentDataSource.model = data;
             callback();
 
@@ -166,6 +178,28 @@ var Lineage_individuals = (function() {
 
           }
         });
+
+
+        /*
+           const params = new URLSearchParams({
+      name: self.currentDataSource.dbName,
+      type: self.currentDataSource.type
+    });
+    $.ajax({
+           type: "GET",
+           url: Config.apiUrl + "/kg/model?" + params.toString(),
+           dataType: "json",
+
+           success: function(data, _textStatus, _jqXHR) {
+             self.currentDataSource.model = data;
+             callback();
+
+           },
+           error: function(_err) {
+             callback(err);
+
+           }
+         });*/
 
       },
       showTables: function(dataSource) {
@@ -269,9 +303,10 @@ var Lineage_individuals = (function() {
           return alert("no query filter");
         var mustFilters = [];
         var shouldFilters = [];
+        var terms = [];
         self.currentFilters.forEach(function(filter, index) {
 
-          var terms = [];
+
           if (filter.individuals.length == 0) {
             terms.push({ "term": { ["Concepts." + filter.classNode.data.label + ".name.keyword"]: filter.classNode.data.label } });
 
@@ -283,17 +318,19 @@ var Lineage_individuals = (function() {
 
             terms.push({ "terms": { ["Concepts." + filter.classNode.data.label + ".instances.keyword"]: individuals } });
           }
-          if (index == 0)
+          if (index == 0) {
             mustFilters = terms;
-          else
-            shouldFilters = terms;
+            terms = [];
+          }
+        else
+          shouldFilters = terms;
 
         });
 
         var query = {
           "query": {
             "bool": {
-              "must": mustFilters,
+              "must": mustFilters
 
               //  "boost": 1.0
             }
@@ -301,9 +338,9 @@ var Lineage_individuals = (function() {
         };
         if (shouldFilters.length > 0) {
 
-        query.query.bool.should = shouldFilters;
-          query.query.bool.minimum_should_match= 1
-      }
+          query.query.bool.filter = shouldFilters;
+          //  query.query.bool.minimum_should_match = 1;
+        }
 
 
         var payload = {
@@ -431,104 +468,101 @@ var Lineage_individuals = (function() {
       },
 
       drawIndividuals: function() {
+        $("#LineageIndividualsQueryParams_message").html("searching...");
         self.searchIndex.executeFilterQuery(function(err, result) {
             if (err)
               return alert(err.responseText);
-
+            var message = "" + result.hits.hits.length + " hits found";
+            $("#LineageIndividualsQueryParams_message").html(message);
 
             var graphNodesMap = {};
             var graphEdgesMap = {};
 
 
+            // aggregate individuals inside map of graph nodes map
+            self.currentFilters.forEach(function(filter) {
+              var filterClassName = filter.classNode.data.label;
+              var fitlerIndividuals = filter.individuals;
+              if (!graphNodesMap[filter.classNode.data.id])
+                graphNodesMap[filter.classNode.data.id] = { filter: filter, individuals: {} };
+
+              result.hits.hits.forEach(function(hit) {
+                var hitConceptObj = hit._source.Concepts[filterClassName];
+                if (!hitConceptObj)
+                  return;
+                var hitConceptIndividuals = hitConceptObj.instances;
+                hitConceptIndividuals.forEach(function(hitIndividual) {
+                  if (fitlerIndividuals.length == 0 || fitlerIndividuals.indexOf(hitIndividual) > -1) {
+                    if (!graphNodesMap[filter.classNode.data.id].individuals[hitIndividual])
+                      graphNodesMap[filter.classNode.data.id].individuals[hitIndividual] = 0;
+                    graphNodesMap[filter.classNode.data.id].individuals[hitIndividual] += 1;
 
 
+                    if (!graphEdgesMap[hit._source.ParagraphId])
+                      graphEdgesMap[hit._source.ParagraphId] = [];
+                    graphEdgesMap[hit._source.ParagraphId].push({
+                      classId: filter.classNode.data.id,
+                      individual: hitIndividual
+                    });
+                  }
+                });
 
-          // aggregate individuals inside map of graph nodes map
-          self.currentFilters.forEach(function(filter) {
-            var filterClassName=filter.classNode.data.label
-            var fitlerIndividuals = filter.individuals;
-            if (!graphNodesMap[filter.classNode.id])
-              graphNodesMap[filter.classNode.id] = {};
-
-            result.hits.hits.forEach(function(hit) {
-              var hitConceptObj = hit._source.Concepts[filterClassName];
-                  var hitConceptIndividuals = hitConceptObj.instances;
-              hitConceptIndividuals.forEach(function(hitIndividual) {
-                    if (fitlerIndividuals.length == 0 || fitlerIndividuals.indexOf(hitIndividual) > -1) {
-                      if (!graphNodesMap[filter.classNode.id][hitIndividual])
-                        graphNodesMap[filter.classNode.id][hitIndividual] = 0;
-                      graphNodesMap[filter.classNode.id][hitIndividual] += 1;
-
-
-                      if (!graphEdgesMap[hit._source.ParagraphId])
-                        graphEdgesMap[hit._source.ParagraphId] = [];
-                      graphEdgesMap[hit._source.ParagraphId].push(hitIndividual);
-                    }
-                  });
-
-                })
+              });
 
             });
 
 
-
-            // aggregate individuals inside map of graph nodes map
-          result.hits.hits.forEach(function(hit) {
-
-            for (var hitConcept in hit._source.Concepts) {
-              var conceptObj = hit._source.Concepts[hitConcept];
-              self.currentFilters.forEach(function(filter) {
-                if (!graphNodesMap[filter.classNode.id])
-                  graphNodesMap[filter.classNode.id] = {filter:filter,individuals:{}};
-
-                if (hitConcept == filter.classNode.data.label) {
-                  var individualIds = conceptObj.instances;
-                  individualIds.forEach(function(hitIndividual) {
-                    if(filter.individuals.lengt==0 || filter.individuals.indexOf(hitIndividual)>-1) {
-                      if (!graphNodesMap[filter.classNode.id].individuals[hitIndividual])
-                        graphNodesMap[filter.classNode.id].individuals[hitIndividual] = 0;
-                      graphNodesMap[filter.classNode.id].individuals[hitIndividual] += 1;
-
-
-                      if (!graphEdgesMap[hit._source.ParagraphId])
-                        graphEdgesMap[hit._source.ParagraphId] = [];
-                      graphEdgesMap[hit._source.ParagraphId].push(hitIndividual);
-                    }
-                  });
-
-                }
-
-
-              });
-
-
-            }
-
-
-          });
-            var existingVisjsIds = visjsGraph.getExistingIdsMap();
             visjsData = { nodes: [], edges: [] };
+
+            var existingVisjsIds = visjsGraph.getExistingIdsMap();
             for (var graphNodeId in graphNodesMap) {
+              var classNode = graphNodesMap[graphNodeId].filter.classNode;
+              var color = classNode.color;
+
+
+              if (false && !existingVisjsIds[graphNodeId]) {
+                existingVisjsIds[graphNodeId] = 1;
+
+
+                visjsData.nodes.push({
+                  id: classNode.data.id,
+                  label: classNode.data.label,
+                  shape: Lineage_classes.defaultShape,
+                  size: Lineage_classes.defaultShapeSize,
+                  color: color,
+                  data: {
+                    id: classNode.data.id,
+                    label: classNode.data.label,
+                    source: classNode.data.source
+
+                  }
+                });
+              } else {
+
+              }
+
+
               for (var hitIndividual in graphNodesMap[graphNodeId].individuals) {
                 var id = "searchIndex_" + hitIndividual;
                 if (!existingVisjsIds[id]) {
                   existingVisjsIds[id] = 1;
+
                   visjsData.nodes.push({
                     id: id,
                     label: hitIndividual,
                     shape: Lineage_classes.namedIndividualShape,
-                    color: "grey",
+                    color: color,
                     data: {
                       id: hitIndividual,
                       label: hitIndividual,
                       source: "_searchIndex",
-                      filter:graphNodesMap[graphNodeId].filter
+                      filter: graphNodesMap[graphNodeId].filter
                     }
                   });
                 }
-                  var edgeId = id + "_" + graphNodeId;
-                  if (!existingVisjsIds[edgeId]){
-                    existingVisjsIds[edgeId] = 1;
+                var edgeId = id + "_" + graphNodeId;
+                if (!existingVisjsIds[edgeId]) {
+                  existingVisjsIds[edgeId] = 1;
                   visjsData.edges.push({
                     id: edgeId,
                     from: id,
@@ -543,8 +577,8 @@ var Lineage_individuals = (function() {
               var individuals = graphEdgesMap[paragraphId];
               individuals.forEach(function(item1) {
                 individuals.forEach(function(item2) {
-                  if (item1 != item2) {
-                    var edgeId = item1 + "_" + item2;
+                  if (item1.individual != item2.individual && item1.classId != item2.classId) {
+                    var edgeId = item1.individual + "_" + item2.individual;
                     if (!individualEdges[edgeId])
                       individualEdges[edgeId] = [];
                     individualEdges[edgeId].push(paragraphId);
@@ -554,15 +588,15 @@ var Lineage_individuals = (function() {
             }
             for (var edgeId in individualEdges) {
               var array = edgeId.split("_");
-              var inverseEdgeId=array[1]+"_"+array[0]
+              var inverseEdgeId = array[1] + "_" + array[0];
               if (!existingVisjsIds[edgeId] && !existingVisjsIds[inverseEdgeId]) {
                 existingVisjsIds[edgeId] = 1;
 
                 visjsData.edges.push({
                   id: edgeId,
-                  from: "searchIndex_" +array[0],
-                  to: "searchIndex_" +array[1],
-                  color: "red",
+                  from: "searchIndex_" + array[0],
+                  to: "searchIndex_" + array[1],
+                  color: "#0067bb",
                   data: {
                     from: array[0],
                     to: array[1],
@@ -572,10 +606,12 @@ var Lineage_individuals = (function() {
                 });
               }
             }
-
-
-            visjsGraph.data.nodes.add(visjsData.nodes);
-            visjsGraph.data.edges.add(visjsData.edges);
+            if (visjsGraph.isGraphNotEmpty()) {
+              visjsGraph.data.nodes.add(visjsData.nodes);
+              visjsGraph.data.edges.add(visjsData.edges);
+            } else {
+              Lineage_classes.drawNewGraph(visjsData);
+            }
           }
         )
         ;

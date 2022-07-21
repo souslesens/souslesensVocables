@@ -93,8 +93,11 @@ var Lineage_decoration = (function () {
     };
 
     self.colorGraphNodesByType = function (nodeIds, part14TopTypes) {
+       // $("#Lineage_classes_graphDecoration_legendDiv").html("");
         part14TopTypes = true;
         if (!nodeIds) nodeIds = visjsGraph.data.nodes.getIds();
+        if(!nodeIds)
+            return
         // var existingNodes = visjsGraph.getExistingIdsMap(true);
         //  var ids = Object.keys(existingNodes);
         self.listGraphNodeTypes(nodeIds, part14TopTypes, function (err, result) {

@@ -113,6 +113,32 @@ if (true) {
         }
       }
     }
+   query= {
+     "query": {
+       "bool": {
+         "must": [
+           {
+             "terms": {
+               "Concepts.Basin.instances.keyword": [
+                 "Abu Attifel basin",
+                 "Abu Dhabi Basin",
+                 "Abu Gharadig Basin"
+               ]
+             }
+           }
+         ],
+         "filter": [
+           {
+             "term": {
+               "Concepts.Geological age.name.keyword": "Geological age"
+             }
+           }
+         ],
+
+       }
+     }
+   }
+
 
   executeGaiaQuery(query, indexes, {}, function(err, result) {
     result.hits.hits.forEach(function(hit){

@@ -60,7 +60,7 @@ var KGcreator = (function() {
   ];
 
 
-  self.mappingFiles={}
+  self.mappingFiles = {};
   self.onLoaded = function() {
     $("#actionDivContolPanelDiv").load("snippets/KGcreator/leftPanel.html", function() {
       self.loadCsvDirs();
@@ -123,16 +123,17 @@ var KGcreator = (function() {
     });
   };
   self.listObjects = function() {
-    self.currentDataSourceModel=null
-    self.loadMappingsList()
+    self.currentDataSourceModel = null;
+    self.currentdabase = null;
+    self.loadMappingsList();
     if (self.currentSourceType == "CSV") {
       self.listFiles();
-    } else   if (self.currentSourceType == "DATABASE"){
+    } else if (self.currentSourceType == "DATABASE") {
       self.listTables();
     }
   };
 
-  self.loadMappingsList=function(){
+  self.loadMappingsList = function() {
     self.currentCsvDir = $("#KGcreator_csvDirsSelect").val();
     var payload = {
       dir: "CSV/" + self.currentCsvDir
@@ -143,12 +144,12 @@ var KGcreator = (function() {
       data: payload,
       dataType: "json",
       success: function(result, _textStatus, _jqXHR) {
-        self.mappingFiles={}
-        result.forEach(function(file){
+        self.mappingFiles = {};
+        result.forEach(function(file) {
           var p;
-          if( (p=file.indexOf(".json"))>-1)
-            self.mappingFiles[file.substring(0,p)+".csv"]=1
-        })
+          if ((p = file.indexOf(".json")) > -1)
+            self.mappingFiles[file.substring(0, p) + ".csv"] = 1;
+        });
 
       },
       error: function(err) {
@@ -156,7 +157,6 @@ var KGcreator = (function() {
       }
     });
   };
-
 
 
   self.listTables = function() {
@@ -175,9 +175,10 @@ var KGcreator = (function() {
 
       success: function(data, _textStatus, _jqXHR) {
         self.currentDataSourceModel = data;
-        var tables=[]
-        for(var key in data){
-          tables.push(key)
+        var tables = [];
+        self.currentdabase = { type: type, dbName: dbName };
+        for (var key in data) {
+          tables.push(key);
         }
         self.showTablesTree(tables);
 
@@ -213,13 +214,17 @@ var KGcreator = (function() {
   self.showTablesTree = function(data) {
 
     var jstreeData = [];
-
+    var options = {
+      openAll: true,
+      selectTreeNodeFn: KGcreator.onCsvtreeNodeClicked,
+      contextMenu: KGcreator.getSystemsTreeContextMenu()
+    };
     data.forEach(function(file) {
       if (file.indexOf(".json") > 0) return;
       var label = file;
 
-    //  if (data.indexOf(file + ".json") > -1)
-      if(self.mappingFiles[file])
+      //  if (data.indexOf(file + ".json") > -1)
+      if (self.mappingFiles[file])
         label = "<span class='KGcreator_fileWithMappings'>" + file + "</span>";
       jstreeData.push({
         id: file,
@@ -230,9 +235,10 @@ var KGcreator = (function() {
 
 
     });
-    if( self.currentDataSourceModel){
-      for(var key in  self.currentDataSourceModel){
-        var columns=self.currentDataSourceModel[key]
+    if (self.currentDataSourceModel) {
+      options.openAll = false;
+      for (var key in self.currentDataSourceModel) {
+        var columns = self.currentDataSourceModel[key];
         columns.forEach(function(column) {
           jstreeData.push({
             id: column,
@@ -240,67 +246,62 @@ var KGcreator = (function() {
             parent: key,
             data: { id: column }
           });
-        })
+        });
       }
     }
-    var options = {
-      openAll: true,
-      selectTreeNodeFn: KGcreator.onCsvtreeNodeClicked,
-      contextMenu: KGcreator.getSystemsTreeContextMenu()
-    };
+
 
     common.jstree.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
 
 
-  }
+  };
 
   self.onCsvtreeNodeClicked = function(event, obj) {
     $("#KGcreator_dataSampleDiv").val("");
 
 
-
     self.currentTreeNode = obj.node;
     if (obj.node.parents.length == 0) return;
     if (obj.node.parents.length == 2) {
-     if( obj.node.data.sample) {
-       $("#KGcreator_dataSampleDiv").val("");
-       var str = "Sample data for column " + obj.node.data.id + "\n";
-       str += "";
-       obj.node.data.sample.forEach(function(item) {
-         str += item[obj.node.data.id] + "\n";
-       });
+      if (obj.node.data.sample) {
+        $("#KGcreator_dataSampleDiv").val("");
+        var str = "Sample data for column " + obj.node.data.id + "\n";
+        str += "";
+        obj.node.data.sample.forEach(function(item) {
+          str += item[obj.node.data.id] + "\n";
+        });
 
-       $("#KGcreator_dataSampleDiv").val(str);
-     }
-     else if(self.currentSourceType=="DATABASE"){
-       var dbName=$("#KGcreator_csvDirsSelect").val();
-       var sqlQuery="select top 500 "+obj.node.data.id+" from "+obj.node.parent
-       const params = new URLSearchParams({
-         type: "sql.sqlserver",
-         dbName: dbName,
-         sqlQuery: sqlQuery,
-       });
+        $("#KGcreator_dataSampleDiv").val(str);
+      } else if (self.currentSourceType == "DATABASE") {
+        var dbName = $("#KGcreator_csvDirsSelect").val();
+        var sqlQuery = "select top 500 " + obj.node.data.id + " from " + obj.node.parent;
+        const params = new URLSearchParams({
+          type: "sql.sqlserver",
+          dbName: dbName,
+          sqlQuery: sqlQuery
+        });
 
-       $.ajax({
-         type: "GET",
-         url: Config.apiUrl + "/kg/data?" + params.toString(),
-         dataType: "json",
+        $.ajax({
+          type: "GET",
+          url: Config.apiUrl + "/kg/data?" + params.toString(),
+          dataType: "json",
 
-         success: function (data, _textStatus, _jqXHR) {
-           $("#KGcreator_dataSampleDiv").val("");
-           var str = "Sample data for column " + obj.node.data.id + "\n";
-           str += "";
-           data.forEach(function(item) {
-             str += item[obj.node.data.id] + "\n";
-           });
+          success: function(data, _textStatus, _jqXHR) {
+            $("#KGcreator_dataSampleDiv").val("");
+            var str = "Sample data for column " + obj.node.data.id + "\n";
+            str += "";
+            data.forEach(function(item) {
+              str += item[obj.node.data.id] + "\n";
+            });
 
-           $("#KGcreator_dataSampleDiv").val(str);
-         },
-         error(err) {
-           return alert(err,responseText);
-         },
-       });
-     };
+            $("#KGcreator_dataSampleDiv").val(str);
+          },
+          error(err) {
+            return alert(err, responseText);
+          }
+        });
+      }
+      ;
     }
 
     if (obj.event.button != 2)
@@ -308,7 +309,6 @@ var KGcreator = (function() {
       self.loadMappings(obj.node.data.id);
 
     if (obj.node.children.length > 0) return;
-
 
 
     // load csv columns
@@ -337,75 +337,75 @@ var KGcreator = (function() {
         common.jstree.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData);
       },
       error: function(err) {
-       ;// alert(err.responseText);
+        ;// alert(err.responseText);
       }
     });
 
 
-  }
-    self.getSystemsTreeContextMenu = function() {
-      var items = {};
+  };
+  self.getSystemsTreeContextMenu = function() {
+    var items = {};
 
-      items.setAsSubject = {
-        label: "Subject",
-        action: function(_e) {
-          // pb avec source
-          if (self.currentTreeNode.parents.length < 2) return;
-          $("#KGcreator_subjectInput").val(self.currentTreeNode.data.id);
-        }
-      };
-
-      items.setAsObject = {
-        label: "Object",
-        action: function(_e) {
-          // pb avec source
-          if (self.currentTreeNode.parents.length < 2) return;
-          $("#KGcreator_objectInput").val(self.currentTreeNode.data.id);
-        }
-      };
-
-      items.copy = {
-        label: "Copy",
-        action: function(_e) {
-          // pb avec source
-          navigator.clipboard.writeText(self.currentTreeNode.data.id);
-        }
-      };
-
-      items.showLookupDialog = {
-        label: "Add lookup",
-        action: function(_e) {
-          // pb avec source
-          if (self.currentTreeNode.parents.length < 1) return;
-          $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupdialog.html", function() {
-            $("#KGCreator_lookupFileName").val(self.currentTreeNode.data.id);
-          });
-          $("#KGcreator_dialogDiv").dialog("open");
-        }
-      };
-      items.showTransformDialog = {
-        label: "Add Transform",
-        action: function(_e) {
-          // pb avec source
-          if (self.currentTreeNode.parents.length != 2) return;
-          $("#KGcreator_dialogDiv").load("snippets/KGcreator/transformDialog.html", function() {
-            $("#KGcreator_transformColumn").val(self.currentTreeNode.data.id);
-          });
-          $("#KGcreator_dialogDiv").dialog("open");
-        }
-      };
-
-      items.loadMappings = {
-        label: "load",
-        action: function(_e) {
-          // pb avec source
-          if (self.currentTreeNode.parents.length != 1) return;
-          KGcreator.loadMappings();
-        }
-      };
-
-      return items;
+    items.setAsSubject = {
+      label: "Subject",
+      action: function(_e) {
+        // pb avec source
+        if (self.currentTreeNode.parents.length < 2) return;
+        $("#KGcreator_subjectInput").val(self.currentTreeNode.data.id);
+      }
     };
+
+    items.setAsObject = {
+      label: "Object",
+      action: function(_e) {
+        // pb avec source
+        if (self.currentTreeNode.parents.length < 2) return;
+        $("#KGcreator_objectInput").val(self.currentTreeNode.data.id);
+      }
+    };
+
+    items.copy = {
+      label: "Copy",
+      action: function(_e) {
+        // pb avec source
+        navigator.clipboard.writeText(self.currentTreeNode.data.id);
+      }
+    };
+
+    items.showLookupDialog = {
+      label: "Add lookup",
+      action: function(_e) {
+        // pb avec source
+        if (self.currentTreeNode.parents.length < 1) return;
+        $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupdialog.html", function() {
+          $("#KGCreator_lookupFileName").val(self.currentTreeNode.data.id);
+        });
+        $("#KGcreator_dialogDiv").dialog("open");
+      }
+    };
+    items.showTransformDialog = {
+      label: "Add Transform",
+      action: function(_e) {
+        // pb avec source
+        if (self.currentTreeNode.parents.length != 2) return;
+        $("#KGcreator_dialogDiv").load("snippets/KGcreator/transformDialog.html", function() {
+          $("#KGcreator_transformColumn").val(self.currentTreeNode.data.id);
+        });
+        $("#KGcreator_dialogDiv").dialog("open");
+      }
+    };
+
+    items.loadMappings = {
+      label: "load",
+      action: function(_e) {
+        // pb avec source
+        if (self.currentTreeNode.parents.length != 1) return;
+        KGcreator.loadMappings();
+      }
+    };
+
+    return items;
+  };
 
   self.initCentralPanel = function() {
     async.series(
@@ -616,6 +616,8 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
       alert(err.message);
     }
     self.currentJsonObject = data;
+    if (self.currentDataSourceModel)
+      self.currentJsonObject.databaseSource = self.currentdabase;
     var payload = {
       dir: "CSV/" + self.currentCsvDir,
       fileName: self.currentJsonObject.fileName + ".json",

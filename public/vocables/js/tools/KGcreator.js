@@ -615,14 +615,24 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
     } catch (err) {
       alert(err.message);
     }
+
     self.currentJsonObject = data;
-    if (self.currentDataSourceModel)
+    var payload={}
+    if (self.currentDataSourceModel) {//database SQL
       self.currentJsonObject.databaseSource = self.currentdabase;
-    var payload = {
-      dir: "CSV/" + self.currentCsvDir,
-      fileName: self.currentJsonObject.fileName + ".json",
-      data: JSON.stringify(self.currentJsonObject)
-    };
+      payload = {
+        dir: "SQL/"  ,
+        fileName: self.currentdabase.dbName+"_"+self.currentJsonObject.fileName + ".json",
+        data: JSON.stringify(self.currentJsonObject)
+      };
+    }else{
+       payload = {
+        dir: "CSV/" + self.currentCsvDir,
+        fileName: self.currentJsonObject.fileName + ".json",
+        data: JSON.stringify(self.currentJsonObject)
+      };
+    }
+
     $.ajax({
       type: "POST",
       url: `${Config.apiUrl}/data/file`,
@@ -666,9 +676,18 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
       self.currentJsonObject = {};
       self.mainJsonEditor.load(self.currentJsonObject);
 
-      var payload = {
-        dir: "CSV/" + self.currentCsvDir,
-        name: csvFileName + ".json"
+      var payload={}
+      if (self.currentDataSourceModel) {//database SQL
+        var dbName = $("#KGcreator_csvDirsSelect").val();
+        payload = {
+          dir: "SQL/",
+          name: dbName+"_"+csvFileName + ".json"
+        };
+      }else {
+         payload = {
+          dir: "CSV/" + self.currentCsvDir,
+          name: csvFileName + ".json"
+        }
       };
       $.ajax({
         type: "GET",

@@ -493,6 +493,10 @@ nodes.forEach(function(node) {
       options.manipulation = {
         enabled: true,
         initiallyActive: true,
+        deleteNode: false,
+        deleteEdge: false,
+        editNode: false,
+        editEdge: false,
 
         addEdge: function(edgeData, callback) {
           Lineage_blend.graphModification.showAddEdgeFromGraphDialog(edgeData, function(err, result) {
@@ -633,8 +637,9 @@ nodes.forEach(function(node) {
   };
 
   self.drawSimilarsNodes = function(/** @type {any} */ _similarType, /** @type {any} */ _node, /** @type {any} */ _sources, /** @type {any} */ _descendantsAlso) {
-    var fromSource = null;
-    var toSources = [Lineage_common.currentSource || Lineage_classes.mainSource];
+
+    var toSource = $("#sourcesTreeDiv").jstree().get_selected()[0];
+    var fromSource = [Lineage_common.currentSource || Lineage_classes.mainSource][0];
     if (!visjsGraph.data || !visjsGraph.data.nodes) return;
     var nodes = visjsGraph.data.nodes.get();
     /**
@@ -648,7 +653,7 @@ nodes.forEach(function(node) {
       labelsMap[node.data.label] = node;
     });
 
-    SearchUtil.getSimilarLabelsInSources(fromSource, toSources, labels, ids, "exactMatch", null, function(/** @type {any} */ err, /** @type {any[]} */ result) {
+    SearchUtil.getSimilarLabelsInSources(fromSource, [toSource], labels, ids, "exactMatch", null, function(/** @type {any} */ err, /** @type {any[]} */ result) {
       if (err) return alert(err);
 
       var existingNodes = visjsGraph.getExistingIdsMap();

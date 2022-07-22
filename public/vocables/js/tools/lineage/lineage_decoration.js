@@ -155,7 +155,7 @@ var Lineage_decoration = (function () {
             var nodes = visjsGraph.data.nodes.get(nodeIds);
             if (true) {
                 nodes.forEach(function (node) {
-                    if (nodesTypesMap[node.data.id] && nodesTypesMap[node.data.id].graphUri) {
+                    if (node.data && nodesTypesMap[node.data.id] && nodesTypesMap[node.data.id].graphUri) {
                         var source2 = nodesTypesMap[node.data.id].graphUri ? Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri) : source;
                         if (source2) node.data.source = source2;
                     }

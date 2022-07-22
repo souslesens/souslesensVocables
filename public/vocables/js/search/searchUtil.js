@@ -78,7 +78,7 @@ var SearchUtil = (function () {
                             });
                         },
                         function (callbackSeries) {
-                            if (fromSource) return callbackSeries;
+                            if (fromSource) return callbackSeries();
                             if (ids) {
                                 words = ids;
                             } else if (labels) words = labels;

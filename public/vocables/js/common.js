@@ -300,10 +300,12 @@ var common = (function () {
             var jsonNodes = $("#" + jstreeDiv)
               .jstree(true)
               .get_json("#", { flat: true });
+            var matchingNode=null;
             jsonNodes.forEach(function (node) {
                if(node.data && node.data[property]==value)
-                   return node
+                   return matchingNode=node
             });
+           return  matchingNode;
         },
 
         getNodeDescendants: function (jstreeDiv, nodeId, depth, onlyIds) {

@@ -160,9 +160,41 @@ var Lineage_individuals = (function() {
         if (dataSource.model)
           return callback();
 
-        $.ajax({
+
+      async.series([
+          //load Mappings
+        function(callbackSeries){
+          var payload = {
+            dir: "SQL/",
+            name:  dataSource.dbName+"_"+self.currentClassNode.data.label + ".json"
+          };
+          $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function(result, _textStatus, _jqXHR) {
+
+            },
+            error(_err) {
+
+
+            }
+          });
+      return callbackSeries()
+      }
+      ]
+      ,function(err){
+
+      })
+
+
+
+
+
+   /*     $.ajax({
           type: "GET",
-          url: Config.apiUrl + "/kg/mappings?" + dataSource.dbName,
+          url: Config.apiUrl + "/kg/mappings/" + dataSource.dbName,
           dataType: "json",
           success: function(data, _textStatus, _jqXHR) {
             if (!data.mappings) return;
@@ -177,7 +209,7 @@ var Lineage_individuals = (function() {
             callback(err);
 
           }
-        });
+        });*/
 
 
         /*

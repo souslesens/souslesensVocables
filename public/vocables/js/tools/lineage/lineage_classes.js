@@ -717,6 +717,9 @@ nodes.forEach(function(node) {
         $("#transformSameLabelsEdgesIntoSameAsRelationsButton").css("display", "block");
         visjsGraph.data.nodes.update(visjsData.nodes);
         visjsGraph.data.edges.update(visjsData.edges);
+        $("#accordion").accordion("option", { active: 2 });
+        self.registerSource(toSource)
+
       }
     });
     MainController.UI.message("", true);
@@ -728,9 +731,7 @@ nodes.forEach(function(node) {
       var preferredProperties = Config.sources[sourceLabel].preferredProperties;
       if (!preferredProperties) return alert("no preferredProperties in source configuration");
 
-      /**
-       * @type {{ id: any; text: any; parent: any; }[]}
-       */
+
       var jstreeData = [];
       var uriPrefixes = {};
       preferredProperties.forEach(function(/** @type {string} */ item) {

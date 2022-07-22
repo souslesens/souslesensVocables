@@ -14,8 +14,9 @@ var Lineage_individuals = (function() {
           $("#LineageIndividualsQueryParams_showIndividualsTriples").css("display", "block");
         } else {
           var dataSourcesArray = Object.keys(self.dataSources);
-          common.fillSelectOptions("LineageIndividualsQueryParams_dataSourcesSelect", dataSourcesArray, dataSourcesArray.length > 1);
-          if (dataSourcesArray.length == 1)
+          var emptyOption=false
+          common.fillSelectOptions("LineageIndividualsQueryParams_dataSourcesSelect", dataSourcesArray, emptyOption);
+          if (!emptyOption)
             self.onDataSourcesSelect($("#LineageIndividualsQueryParams_dataSourcesSelect").val());
         }
       });
@@ -31,11 +32,7 @@ var Lineage_individuals = (function() {
 
       if (self.currentDataSource.type.indexOf("sql") > -1) {
         $("#LineageIndividualsQueryParams_SQLfilterPanel").css("display", "block");
-        self.sql.initModel(self.currentDataSource, function(err) {
-          if (err)
-            return alert(err);
-          self.sql.showTables(nodeSource.dataSource);
-        });
+
 
       } else if (self.currentDataSource.type == "searchIndex") {
         $("#LineageIndividualsQueryParams_searchIndexFilterPanel").css("display", "block");
@@ -51,6 +48,18 @@ var Lineage_individuals = (function() {
       $("#LineageIndividualsQueryParams_className").html(self.currentClassNode.data.label);
       if (self.currentDataSource.type == "searchIndex")
         self.searchIndex.showClassIndividualsTree();
+      else if (self.currentDataSource.type.indexOf("sql") > -1){
+
+        self.sql.getModel(self.currentDataSource, function(err,model) {
+          if (err)
+            return alert(err);
+          self.sql.showTables(self.currentClassNode.data.id);
+
+        });
+
+
+
+      }
     };
 
 
@@ -154,66 +163,27 @@ var Lineage_individuals = (function() {
       $("#LineagePopup").dialog("close");
     };
 
+    self.drawIndividuals=function() {
+      if (self.currentDataSource.type.indexOf("sql") > -1) {
+        self.sql.drawSearchIndividuals()
+
+
+      } else if (self.currentDataSource.type == "searchIndex") {
+        self.searchIndex.drawIndividuals()
+
+
+      }
+    }
 
     self.sql = {
-      initModel: function(dataSource, callback) {
+      getModel: function(dataSource, callback) {
         if (dataSource.model)
-          return callback();
+          return callback(null,dataSource.model);
 
+        if( self.currentDataSource.model)
+         return self.currentDataSource.model
 
-      async.series([
-          //load Mappings
-        function(callbackSeries){
-          var payload = {
-            dir: "SQL/",
-            name:  dataSource.dbName+"_"+self.currentClassNode.data.label + ".json"
-          };
-          $.ajax({
-            type: "GET",
-            url: `${Config.apiUrl}/data/file`,
-            data: payload,
-            dataType: "json",
-            success: function(result, _textStatus, _jqXHR) {
-
-            },
-            error(_err) {
-
-
-            }
-          });
-      return callbackSeries()
-      }
-      ]
-      ,function(err){
-
-      })
-
-
-
-
-
-   /*     $.ajax({
-          type: "GET",
-          url: Config.apiUrl + "/kg/mappings/" + dataSource.dbName,
-          dataType: "json",
-          success: function(data, _textStatus, _jqXHR) {
-            if (!data.mappings) return;
-            if (!data.model) {
-              data.model = self.generateKGModel(data.mappings);
-            }
-            self.currentDataSource.model = data;
-            callback();
-
-          },
-          error: function(_err) {
-            callback(err);
-
-          }
-        });*/
-
-
-        /*
-           const params = new URLSearchParams({
+        const params = new URLSearchParams({
       name: self.currentDataSource.dbName,
       type: self.currentDataSource.type
     });
@@ -231,17 +201,18 @@ var Lineage_individuals = (function() {
              callback(err);
 
            }
-         });*/
+         });
 
       },
       showTables: function(dataSource) {
-        if (!dataSource.mappings[self.currentClassNode.data.id])
+        if (!self.currentDataSource.classMappings[self.currentClassNode.data.id])
           return alert("node mappings for class " + self.currentClassNode.data.label);
-        var tables = Object.keys(dataSource.mappings[self.currentClassNode.data.id]);
+        var tables = Object.keys(self.currentDataSource.classMappings[self.currentClassNode.data.id]);
         common.fillSelectOptions("LineageIndividualsQueryParams_SQL_tablesSelect", tables, true);
       },
       showColumns: function(table) {
-        var tableColumns = self.currentDataSource.model[table];
+        var schema=self.currentDataSource.table_schema
+        var tableColumns = self.currentDataSource.model[schema+"."+table];
 
         common.fillSelectOptions("LineageIndividualsQueryParams_SQL_columnsSelect", tableColumns, true);
 
@@ -258,6 +229,35 @@ var Lineage_individuals = (function() {
 
 
         const params = new URLSearchParams({
+          type: self.currentDataSource.type,
+          dbName: self.currentDataSource.dbName,
+          sqlQuery: sqlQuery
+        });
+
+        $.ajax({
+          type: "GET",
+          url: Config.apiUrl + "/kg/data?" + params.toString(),
+          dataType: "json",
+
+          success: function(data, _textStatus, _jqXHR) {
+            if (data.size >= SampleSizelimit)
+              return alert("too many values");
+            common.fillSelectOptions("LineageIndividualsQueryParams_valuesSelect", data, true, column, column);
+          },
+          error(err) {
+            return alert(err.responseText);
+          }
+        });
+
+      },
+      drawSearchIndividuals:function(){
+var sqlQuery=""
+        self.currentFilters.forEach(function(filter, index) {
+
+        })
+
+
+            const params = new URLSearchParams({
           type: self.currentDataSource.type,
           dbName: self.currentDataSource.dbName,
           sqlQuery: sqlQuery
@@ -499,6 +499,10 @@ var Lineage_individuals = (function() {
         $("#LineageIndividuals_individualsTreeSearchInput").val("");
       },
 
+   
+      
+      
+      
       drawIndividuals: function() {
         $("#LineageIndividualsQueryParams_message").html("searching...");
         self.searchIndex.executeFilterQuery(function(err, result) {

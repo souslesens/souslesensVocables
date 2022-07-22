@@ -609,14 +609,23 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
     $("#KGcreator_dialogDiv").dialog("close");
   };
 
-  self.saveMappings = function(callback) {
+ /* self.saveClassMapping=function() {
+    var classId=prompt("Class id for this Mapping")
+    if(classId)
+    self.saveMappings({classId:classId})
+  }*/
+
+  self.saveMappings = function(options,callback) {
     try {
       var data = self.mainJsonEditor.get();
     } catch (err) {
       alert(err.message);
     }
+if(!options)
+  options={}
 
     self.currentJsonObject = data;
+
     var payload={}
     if (self.currentDataSourceModel) {//database SQL
       self.currentJsonObject.databaseSource = self.currentdabase;
@@ -648,7 +657,7 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
       }
     });
   };
-  self.copyMappings = function() {
+/*  self.copyMappings = function() {
     try {
       var data = self.mainJsonEditor.get();
 
@@ -666,10 +675,12 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
     } catch (err) {
       alert(err.message);
     }
-  };
+  };*/
   self.clearMappings = function() {
-    self.mainJsonEditor.load({});
-    self.mainJsonEditorModified = false;
+    if(confirm("Clear mappings")) {
+      self.mainJsonEditor.load({});
+      self.mainJsonEditorModified = false;
+    }
   };
   self.loadMappings = function(csvFileName) {
     function execLoadMappings() {
@@ -720,7 +731,7 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
       if (!self.currentJsonObject.fileName) return execLoadMappings();
 
       if (confirm(" save current json before opening new file")) {
-        self.saveMappings(function(_err, _result) {
+        self.saveMappings(null,function(_err, _result) {
           execLoadMappings();
         });
       } else {
@@ -755,9 +766,9 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
       };
     }
 
-    options.addAllPredefinedPart14PredicatesTriples = $("#KGcreator_addAllPredefinedPart14PredicatesTriples").prop("checked");
+  //  options.addAllPredefinedPart14PredicatesTriples = $("#KGcreator_addAllPredefinedPart14PredicatesTriples").prop("checked");
 
-    self.saveMappings(function(_err, _result) {
+    self.saveMappings(null,function(_err, _result) {
       $("#KGcreator_dataSampleDiv").val("");
       var payload = {
         dir: "CSV/" + self.currentCsvDir,

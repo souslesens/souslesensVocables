@@ -61,5 +61,5 @@ jobs:
         needs: cypress-run
         if: always()
         steps:
-          - name: Cleanup
-            run: sudo docker-compose -f docker-compose.test.yaml down
+            - name: Cleanup
+              run: sudo docker-compose -f docker-compose.test.yaml down

@@ -1,5 +1,4 @@
 name: Cypress Tests
-runs-on: self-hosted
 
 on:
     push:
@@ -12,7 +11,7 @@ env:
 
 jobs:
     cypress-run:
-        runs-on: ubuntu-latest
+        runs-on: self-hosted
         timeout-minutes: 10
 
         steps:

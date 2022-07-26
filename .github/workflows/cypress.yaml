@@ -42,7 +42,7 @@ jobs:
                   wait-on-timeout: 120
                   config-file: cypress.config.ts
                   headless: true
-                  browser: chrome
+                  browser: chromium
                   spec: |
                       cypress/e2e/browser.cy.js
                       cypress/e2e/genealogy.cy.js

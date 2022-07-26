@@ -56,3 +56,10 @@ jobs:
                       cypress/e2e/match.cy.js
                       cypress/e2e/SQLquery.cy.js
                   runTests: true
+    cleanup:
+        runs-on: self-hosted
+        needs: cypress-run
+        if: always()
+        steps:
+          - name: Cleanup
+            run: sudo docker-compose -f docker-compose.test.yaml down

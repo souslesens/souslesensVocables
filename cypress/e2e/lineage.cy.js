@@ -10,8 +10,7 @@ describe("Lineage", function () {
         });
         it("When I log in as admin and when I click lineage and click BFO, a graph pops up", function () {
             cy.get("#lineage_anchor").click();
-            cy.get("#ui-id-2").as("tools-panel");
-            cy.get("@tools-panel").should("have.css", "display", "none");
+            cy.get("#tools-panel").should("have.css", "display", "none");
             cy.get("#BFO_anchor").click();
         });
     });
@@ -21,8 +20,7 @@ describe("Lineage", function () {
         });
         it("When I click lineage and click BFO, a graph pops up", function () {
             cy.get("#lineage_anchor").click();
-            cy.get("#ui-id-2").as("tools-panel");
-            cy.get("@tools-panel").should("have.css", "display", "none");
+            cy.get("#tools-panel").should("have.css", "display", "none");
             cy.get("#BFO_anchor").click();
         });
     });

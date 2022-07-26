@@ -1,4 +1,5 @@
 name: Cypress Tests
+runs-on: self-hosted
 
 on:
     push:

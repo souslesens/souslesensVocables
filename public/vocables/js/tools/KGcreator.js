@@ -808,7 +808,7 @@ if(!options)
     $.ajax({
       type: "POST",
       url: `${Config.apiUrl}/kg/clearGraph`,
-      payload: payload,
+      data: payload,
       dataType: "json",
       success: function(_result, _textStatus, _jqXHR) {
         return MainController.UI.message("graph deleted " + self.currentJsonObject.graphUri);

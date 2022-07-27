@@ -37,6 +37,23 @@ var MainController = (function () {
         });
     };
 
+    self.loadSourcesMappings = function (callback) {
+
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file?dir=mappings&name=sourcesLinkedMappings.json`,
+            dataType: "json",
+
+            success: function(data_, _textStatus, _jqXHR) {
+                var json=JSON.parse(data_);
+                callback(null,json)
+
+            }, error(err) {
+                callback(err);
+            }
+        })
+    }
+
     self.loadSources = function (callback) {
         var _payload = {
             getSources: 1,
@@ -148,6 +165,18 @@ var MainController = (function () {
 
                 async.series(
                     [
+                      function(callbackSeries){
+                          self.loadSourcesMappings(function(err, sourcesMappings){
+                              if(err)
+                                  return callbackSeries(err)
+                              for(var source in Config.sources){
+                                 if(sourcesMappings[source])
+                                     Config.sources[source].dataSources=sourcesMappings[source]
+                              }
+                              callbackSeries()
+
+                          });
+                      },
                         function (callbackSeries) {
                             if (!Config.currentProfile.customPlugins) return callbackSeries();
                             CustomPluginController.init(Config.currentProfile.customPlugins, function (_err, _result) {

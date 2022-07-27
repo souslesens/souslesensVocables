@@ -982,11 +982,11 @@ var Sparql_OWL = (function () {
             "   ?prop rdf:type owl:ObjectProperty. \n" +
             "   optional { ?subProp rdfs:subPropertyOf ?prop } " +
             "   optional { ?prop rdfs:label ?propLabel} " + // filter(?prop in (<http://rds.posccaesar.org/ontology/lis14/rdl/hasResident>,<http://rds.posccaesar.org/ontology/lis14/rdl/residesIn>))\n" +
-            " optional { ?prop rdfs:domain ?propDomain. ?domain  rdfs:subClassOf* ?propDomain} \n" +
-            "    optional { ?prop rdfs:range ?propRange. ?range  rdfs:subClassOf* ?propRange.}\n" +
+            " optional { ?prop rdfs:domain ?propDomain. ?domain  rdfs:subClassOf* ?propDomain  filter ( isIRI(?propDomain))} \n" +
+            "    optional { ?prop rdfs:range ?propRange. ?range  rdfs:subClassOf* ?propRange. filter ( isIRI(?propRange))}\n" +
             "      optional { ?prop owl:inverseOf|^owl:inverseOf ?inverseProp optional {?inverseProp rdfs:label ?inversePropLabel}  \n" +
-            "       optional { ?inverseProp rdfs:range ?propDomain. ?domain  rdfs:subClassOf* ?propDomain} \n" +
-            "     optional{ ?inverseProp rdfs:domain ?propRange. ?range  rdfs:subClassOf* ?propRange.}\n" +
+            "       optional { ?inverseProp rdfs:range ?propDomain. ?domain  rdfs:subClassOf* ?propDomain  filter (isIRI(?propDomain))} \n" +
+            "     optional{ ?inverseProp rdfs:domain ?propRange. ?range  rdfs:subClassOf* ?propRange. filter (isIRI(?propRange))}\n" +
             "    }\n" +
             "  }\n" +
             "} LIMIT 1000";
@@ -1008,10 +1008,10 @@ var Sparql_OWL = (function () {
             " WHERE {{\n" +
             "  ?prop rdf:type owl:ObjectProperty.}\n" +
             "    minus {\n" +
-            "    ?prop rdf:type owl:ObjectProperty.?prop rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  \n" +
+            "    ?prop rdf:type owl:ObjectProperty.?prop rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  filter ( isIRI(?x)) \n" +
             "  }\n" +
             "   minus {\n" +
-            "    ?prop rdf:type owl:ObjectProperty.?prop (owl:inverseOf|^owl:inverseOf)/rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  \n" +
+            "    ?prop rdf:type owl:ObjectProperty.?prop (owl:inverseOf|^owl:inverseOf)/rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x filter ( isIRI(?x))  \n" +
             "  }" +
             "} LIMIT 1000";
 

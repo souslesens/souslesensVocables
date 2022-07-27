@@ -2,6 +2,10 @@
     .LineageIndividualsQueryParams_QueryElt {
         background-color: #ddd;
     }
+    .LineageIndividualsQueryParams_section{
+        margin :5px;
+        padding:5px;
+    }
 </style>
 
 
@@ -13,18 +17,51 @@
 
     <span style="font-weight: bold" id="LineageIndividualsQueryParams_className"></span>&nbsp;
 
-    DataSources <select id="LineageIndividualsQueryParams_dataSourcesSelect"
-                        onchange="Lineage_individuals.onDataSourcesSelect($(this).val())"></select>
+
   </div>
-
-
+  <div class="LineageIndividualsQueryParams_section">
+  DataSources <select id="LineageIndividualsQueryParams_dataSourcesSelect"
+                      onchange="Lineage_individuals.onDataSourcesSelect($(this).val())"></select>
+  </div>
   <div id="LineageIndividualsQueryParams_SQLfilterPanel" class="LineageIndividualsQueryParams_panel"
        style="display: none">
-    Table <select id="LineageIndividualsQueryParams_SQL_tablesSelect"
-                  onchange="Lineage_individuals.sql.showColumns($(this).val())"></select>
-    Column <select id="LineageIndividualsQueryParams_SQL_columnsSelect"></select>
-    <br />
-    <div>
+    <div class="LineageIndividualsQueryParams_section">
+     <table>
+       <tr>
+         <td>
+           Table </td>
+         <td><select id="LineageIndividualsQueryParams_SQL_tablesSelect"
+                                    onchange="Lineage_individuals.sql.showColumns($(this).val())"></select></td>
+       </tr>
+       <tr>
+         <td>
+           Column
+         </td>
+         <td>
+           <select id="LineageIndividualsQueryParams_SQL_columnsSelect" onchange="Lineage_individuals.sql.onColumnChange($(this).val())"></select>
+         </td>
+       </tr>
+       <tr>
+         <td>
+           <button onclick="Lineage_individuals.sql.fillValuesSelect()">List </button>
+         </td>
+         <td>
+           <select id="LineageIndividualsQueryParams_valuesSelect" onchange="Lineage_individuals.sql.onValuesSelectChange()"
+                   style="width: 200px">
+             <option value="" size="3"></option> </select>
+         </td>
+       </tr>
+
+     </table>
+    </div>
+
+
+    <div class="LineageIndividualsQueryParams_section">
+
+
+
+
+
       <select id="LineageIndividualsQueryParams_operator"
               onclick="Lineage_individuals.onSearchDialogOperatorSelect($(this).val())">
         <option>=</option>
@@ -37,12 +74,8 @@
         <option>not contains</option>
       </select>
       <input id="LineageIndividualsQueryParams_value" size="20" value="" />
-      <button onclick="Lineage_individuals.sql.fillValuesSelect()">values</button>
-      <select id="LineageIndividualsQueryParams_valuesSelect" onchange="Lineage_individuals.sql.onValuesSelectChange()"
-              style="width: 200px">
-        <option value=""></option>
-      </select>
     </div>
+
   </div>
 
 
@@ -63,16 +96,19 @@
         <select id="LineageIndividualsQueryParams_SearchIndexValuesSelect" onchange="Lineage_individuals.sql.onValuesSelectChange()" style="width: 200px" >
           <option value=""></option>
         </select>-->
-  </div>
-
-  <div>
     <div>Search : <input id="LineageIndividuals_individualsTreeSearchInput" value=""
                          style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" /></div>
     <div class="jstreeContainer" style="width: 340px; height: 450px;overflow: auto;margin-top: 5px;">
       <div id="LineageIndividuals_individualsTree"></div>
 
     </div>
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.addToQuery()">AddToQuery
+  </div>
+
+  <div>
+
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.addFilter()">AddFilter
+    </button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.clearQuery()">ClearAllFilters
     </button>
   </div>
 
@@ -89,8 +125,7 @@
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.listParagraphs()">List
         documents
       </button>
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_individuals.clearQuery()">ClearQuery
-      </button>
+
     </div>
 
 

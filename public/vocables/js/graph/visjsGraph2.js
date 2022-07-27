@@ -363,8 +363,13 @@ var visjsGraph = (function () {
         // comment ca marche  bad doc???
 
         if (self.data && self.data.nodes) {
-            self.data.nodes.remove(self.data.nodes.getIds());
-            self.data.edges.remove(self.data.edges.getIds());
+            var edges=self.data.edges.getIds()
+            if(edges.lengt>0)
+            self.data.edges.remove(edges);
+            var nodes=self.data.nodes.getIds()
+            if(nodes.length>0)
+            self.data.nodes.remove(nodes);
+
         }
         self.data = null;
     };
@@ -457,7 +462,6 @@ var visjsGraph = (function () {
             }
             self.currentScale = scale;
         });
-
     self.getExistingIdsMap = function (/** @type {any} */ nodesOnly) {
         var existingVisjsIds = {};
         if (!visjsGraph.data || !visjsGraph.data.nodes) return {};
@@ -467,6 +471,22 @@ var visjsGraph = (function () {
             existingVisjsIds[id] = 1;
         });
         return existingVisjsIds;
+    };
+
+    self.getExistingIdsMapXX= function (/** @type {any} */ nodesOnly) {
+      // var existingVisjsIds = {};
+       // if (!visjsGraph.data || !visjsGraph.data.nodes) return {};
+       // var oldIds = visjsGraph.data.nodes.getIds();
+        if(! visjsGraph.data || !visjsGraph.network || !visjsGraph.network.canvas)
+            return {}
+        var oldIds=visjsGraph.network.canvas.body.nodes;
+        if (!nodesOnly) {
+            var edges= (visjsGraph.network.canvas.body.edges);
+            for( var id in edges)
+                oldIds[id] = 1;
+        }
+
+        return oldIds;
     };
 
     self.isGraphNotEmpty = function () {

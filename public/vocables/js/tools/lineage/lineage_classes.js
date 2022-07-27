@@ -160,6 +160,8 @@ var Lineage_classes = (function() {
         }
 
         Lineage_relations.init(true);
+
+
         Lineage_individuals.init()
       });
     }

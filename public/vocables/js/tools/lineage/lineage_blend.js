@@ -441,17 +441,18 @@ return;*/
       predicate: "http://purl.org/dc/terms/created",
       object: dateTime
     });
-
-    metaDataTriples.push({
-      subject: subjectUri,
-      predicate: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
-      object: status
-    });
-    metaDataTriples.push({
-      subject: subjectUri,
-      predicate: "http://purl.org/dc/terms/source",
-      object: source
-    });
+    if (status)
+      metaDataTriples.push({
+        subject: subjectUri,
+        predicate: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
+        object: status
+      });
+    if (source)
+      metaDataTriples.push({
+        subject: subjectUri,
+        predicate: "http://purl.org/dc/terms/source",
+        object: source
+      });
     if (options) {
       for (var key in options) {
         metaDataTriples.push({
@@ -658,9 +659,22 @@ var xx = result
       }
     },
     addTripleToCreatingNode: function(predicate, object) {
+      var uriType = $("#LineageBlend_creatingNodeUriType").val();
       if (!self.graphModification.creatingsourceUri) {
         let graphUri = Config.sources[Lineage_classes.mainSource].graphUri;
-        self.graphModification.creatingsourceUri = graphUri + common.getRandomHexaId(10);
+        if (uriType == "fromLabel")
+          self.graphModification.creatingsourceUri = graphUri + common.formatStringForTriple(object);
+        else if (uriType == "randomHexaNumber")
+          self.graphModification.creatingsourceUri = graphUri + common.getRandomHexaId(10);
+        else if (uriType == "specific") {
+          let subjectUri = $("#LineageBlend_creatingNodeSubjectUri").val();
+          if (subjectUri) {
+            self.graphModification.creatingsourceUri = graphUri + common.getRandomHexaId(10);
+
+          } else {
+            return alert("enter a specific URI");
+          }
+        }
         // self.graphModification.creatingNodeTriples = [];
       }
       if (!predicate) predicate = $("#KGcreator_predicateInput").val();
@@ -717,6 +731,14 @@ var xx = result
         self.graphModification.addTripleToCreatingNode("rdf:type", "owl:NamedIndividual");
         self.graphModification.addTripleToCreatingNode("rdf:type", individualtypeClass);
       }
+      var origin = "Lineage_addNode";
+      var status = "draft";
+      var metaDataTriples = self.getCommonMetaDataTriples(self.graphModification.creatingsourceUri, origin, status, null);
+      metaDataTriples.forEach(function(triple){
+        self.graphModification.addTripleToCreatingNode(triple.predicate, triple.object);
+      })
+
+
     },
 
     addClassesOrIndividualsTriples: function() {
@@ -831,12 +853,6 @@ var xx = result
       if (!self.graphModification.creatingNodeTriples) return alert("no predicates for node");
       var str = JSON.stringify(self.graphModification.creatingNodeTriples);
 
-      let subjectUri = $("#LineageBlend_creatingNodeSubjectUri").val();
-      if (subjectUri) {
-        self.graphModification.creatingNodeTriples.forEach(function(item) {
-          item.subject = subjectUri;
-        });
-      }
 
       if (str.indexOf("rdf:type") < 0) return alert("a type must be declared");
       if (str.indexOf("owl:Class") > -1 && str.indexOf("rdfs:subClassOf") < 0) return alert("a class must be a rdfs:subClassOf anotherClass");
@@ -1214,13 +1230,13 @@ var xx = result
     },
     addGenericPredicatesToPredicatesTree: function() {
       var jstreeData = [];
-        self.authorizedProperties[Config.formalOntologySourceLabel].forEach(function(item) {
+      self.authorizedProperties[Config.formalOntologySourceLabel].forEach(function(item) {
         if (item.isGenericProperty) {
-          var text= "<span class='lineageAddEdgeDialog_part14GenericProp'>" + (item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value)) + "</span>";
+          var text = "<span class='lineageAddEdgeDialog_part14GenericProp'>" + (item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value)) + "</span>";
 
-            jstreeData.push({
+          jstreeData.push({
             id: item.prop.value,
-            text:text ,
+            text: text,
             parent: "#",
             data: {
               id: item.prop.value,
@@ -1232,7 +1248,7 @@ var xx = result
         }
       });
 
-      common.jstree.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", "#", jstreeData, {positionLast:1});
+      common.jstree.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", "#", jstreeData, { positionLast: 1 });
 
     },
 
@@ -1290,14 +1306,14 @@ var xx = result
       var subProposMap = {};
 
       allProps.forEach(function(item) {
-        if(item.prop.value.indexOf("concret")>-1)
-          var x=3
+        if (item.prop.value.indexOf("concret") > -1)
+          var x = 3;
         let type = "";
         let ok = false;
-        if (!item.range && item.domain && (item.domain.value == domain || item.domaintype=="bnode")) {
+        if (!item.range && item.domain && (item.domain.value == domain || item.domaintype == "bnode")) {
           type = "D";
           ok = true;
-        } else if (!item.domain && item.range && (item.range.value == range || item.domaintype=="bnode")) {
+        } else if (!item.domain && item.range && (item.range.value == range || item.domaintype == "bnode")) {
           type = "R";
           ok = true;
         } else if (item.domain && item.range && item.domain.value == domain && item.range.value == range) ok = true;

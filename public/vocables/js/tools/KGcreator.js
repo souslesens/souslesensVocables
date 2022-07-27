@@ -91,6 +91,12 @@ var KGcreator = (function () {
         });
     };
 
+    self.displayUploadApp = function() {
+        $("#graphDiv").replaceWith("<div id='mount-kg-upload-app-here'></div>").then(
+            $.getScript("/kg_upload_app.js")
+        )
+    }
+
     self.listFiles = function () {
         self.currentCsvDir = $("#KGcreator_csvDirsSelect").val();
         var payload = {

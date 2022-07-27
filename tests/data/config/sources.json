@@ -23,5 +23,17 @@
         },
         "group": "",
         "imports": []
+    },
+    "ISO_15926-part-14_PCA": {
+        "color": "#bcbd22",
+        "controller": "Sparql_OWL",
+        "graphUri": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",
+        "group": "STANDARDS/ABSTRACT ONTOLOGIES",
+        "schema": null,
+        "schemaType": "OWL",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "topClassFilter": " ?topConcept rdf:type <http://www.w3.org/2002/07/owl#Class>  filter (NOT exists {?topConcept rdfs:subClassOf ?y} &&  (!isBlank(?topConcept))  )"
     }
 }

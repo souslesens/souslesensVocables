@@ -33,9 +33,8 @@ var KGmappings = (function () {
         self.init();
         var KGsources = [];
         for (var source in Config.sources) {
-          //  if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH")
-                if (Config.sources[source].dataSource  && Config.sources[source].schemaType != "NONE")
-                KGsources.push(source);
+            //  if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH")
+            if (Config.sources[source].dataSource && Config.sources[source].schemaType != "NONE") KGsources.push(source);
         }
         MainController.UI.showSources("sourcesTreeDiv", false, KGsources, null, function (err, _result) {
             if (err) alert(err);

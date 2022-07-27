@@ -295,17 +295,15 @@ var common = (function () {
                 .get_node(id);
         },
         // get node from node.data field
-        getNodeByDataField:function (jstreeDiv, property,value) {
-
+        getNodeByDataField: function (jstreeDiv, property, value) {
             var jsonNodes = $("#" + jstreeDiv)
-              .jstree(true)
-              .get_json("#", { flat: true });
-            var matchingNode=null;
+                .jstree(true)
+                .get_json("#", { flat: true });
+            var matchingNode = null;
             jsonNodes.forEach(function (node) {
-               if(node.data && node.data[property]==value)
-                   return matchingNode=node
+                if (node.data && node.data[property] == value) return (matchingNode = node);
             });
-           return  matchingNode;
+            return matchingNode;
         },
 
         getNodeDescendants: function (jstreeDiv, nodeId, depth, onlyIds) {
@@ -596,7 +594,7 @@ var common = (function () {
         });
         return cleanedArray;
     };
-    self.formatStringForTriple= function (str, forUri) {
+    (self.formatStringForTriple = function (str, forUri) {
         if (!str) return str;
         str = str.trim();
         if (str.indexOf("http://") == 0) return str;
@@ -630,12 +628,11 @@ var common = (function () {
         }
 
         return str;
-    },
-
-    self.formatUriToJqueryId = function (uri) {
-        var str = uri.toLowerCase().replace("http://", "_");
-        return str.replace(/\//g, "_").replace(/\./g, "_");
-    };
+    }),
+        (self.formatUriToJqueryId = function (uri) {
+            var str = uri.toLowerCase().replace("http://", "_");
+            return str.replace(/\//g, "_").replace(/\./g, "_");
+        });
     self.encodeToJqueryId = function (myId) {
         return myId.replace(/\./g, "__e__");
     };
@@ -903,12 +900,12 @@ var common = (function () {
 
 common.dateToRDFString(new Date());
 
-var x= {
+var x = {
     docId: "xx",
     paragraphId: "gggg",
     entities: {
-        Wells: { parents: ["ee", "dded"], individuals: ["31/05/001","31/05/012"] },
+        Wells: { parents: ["ee", "dded"], individuals: ["31/05/001", "31/05/012"] },
         GeologicalAges: { parents: ["ee", "dded"], individuals: ["Coniacien", "Santonien"] },
-        Lithology: { parents: ["ee", "dded"], individuals: ["Sandstone", "limestone"] }
-    }
-}
+        Lithology: { parents: ["ee", "dded"], individuals: ["Sandstone", "limestone"] },
+    },
+};

@@ -7,7 +7,7 @@ module.exports = function () {
     };
 
     function POST(req, res, next) {
-        elasticRestProxy.executeGaiaQuery( req.body.query, req.body.indexes, null,function (err, result) {
+        elasticRestProxy.executeGaiaQuery(req.body.query, req.body.indexes, null, function (err, result) {
             if (err) {
                 next(err);
             } else {

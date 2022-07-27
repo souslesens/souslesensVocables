@@ -256,13 +256,11 @@ var visjsGraph = (function () {
             html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.showGraphConfig()'> Graph parameters</button>";
             html += "<div id='visjsConfigureDiv' style='overflow: auto'></div>";
 
-
-            if(  true || $(".vis-manipulation").children().length == 0) {
+            if (true || $(".vis-manipulation").children().length == 0) {
                 var parent = $("#" + divId).parent();
                 $(parent).css("flex-direction", "column");
                 $(parent).prepend(html);
-            }
-            else {
+            } else {
                 $(".vis-manipulation").append(html);
             }
         }
@@ -363,13 +361,10 @@ var visjsGraph = (function () {
         // comment ca marche  bad doc???
 
         if (self.data && self.data.nodes) {
-            var edges=self.data.edges.getIds()
-            if(edges.lengt>0)
-            self.data.edges.remove(edges);
-            var nodes=self.data.nodes.getIds()
-            if(nodes.length>0)
-            self.data.nodes.remove(nodes);
-
+            var edges = self.data.edges.getIds();
+            if (edges.lengt > 0) self.data.edges.remove(edges);
+            var nodes = self.data.nodes.getIds();
+            if (nodes.length > 0) self.data.nodes.remove(nodes);
         }
         self.data = null;
     };
@@ -473,17 +468,15 @@ var visjsGraph = (function () {
         return existingVisjsIds;
     };
 
-    self.getExistingIdsMapXX= function (/** @type {any} */ nodesOnly) {
-      // var existingVisjsIds = {};
-       // if (!visjsGraph.data || !visjsGraph.data.nodes) return {};
-       // var oldIds = visjsGraph.data.nodes.getIds();
-        if(! visjsGraph.data || !visjsGraph.network || !visjsGraph.network.canvas)
-            return {}
-        var oldIds=visjsGraph.network.canvas.body.nodes;
+    self.getExistingIdsMapXX = function (/** @type {any} */ nodesOnly) {
+        // var existingVisjsIds = {};
+        // if (!visjsGraph.data || !visjsGraph.data.nodes) return {};
+        // var oldIds = visjsGraph.data.nodes.getIds();
+        if (!visjsGraph.data || !visjsGraph.network || !visjsGraph.network.canvas) return {};
+        var oldIds = visjsGraph.network.canvas.body.nodes;
         if (!nodesOnly) {
-            var edges= (visjsGraph.network.canvas.body.edges);
-            for( var id in edges)
-                oldIds[id] = 1;
+            var edges = visjsGraph.network.canvas.body.edges;
+            for (var id in edges) oldIds[id] = 1;
         }
 
         return oldIds;
@@ -587,20 +580,15 @@ var visjsGraph = (function () {
         return positions;
     };
 
-
-    self.getNodeEdges=function(sourceNodeId,targetNodeId){
-        var connectedEdges=[]
-        var sourceNodeEdges=visjsGraph.network.getConnectedEdges(sourceNodeId)
-        sourceNodeEdges.forEach(function(edgeId) {
-            var edge = visjsGraph.data.edges.get(edgeId)
-            if (edge.to == targetNodeId || edge.from == targetNodeId)
-                connectedEdges.push(edge)
-        })
+    self.getNodeEdges = function (sourceNodeId, targetNodeId) {
+        var connectedEdges = [];
+        var sourceNodeEdges = visjsGraph.network.getConnectedEdges(sourceNodeId);
+        sourceNodeEdges.forEach(function (edgeId) {
+            var edge = visjsGraph.data.edges.get(edgeId);
+            if (edge.to == targetNodeId || edge.from == targetNodeId) connectedEdges.push(edge);
+        });
         return connectedEdges;
-
-    }
-
-
+    };
 
     self.processClicks = function (
         /** @type {{ edges: string | any[]; nodes: string | any[]; event: { srcEvent: { ctrlKey: any; altKey: any; shiftKey: any; }; }; pointer: { DOM: any; }; }} */ params,

@@ -335,8 +335,8 @@
                     Config.sources[hit.source].controllerName = "" + Config.sources[hit.source].controller;
                     Config.sources[hit.source].controller = eval(Config.sources[hit.source].controller);
                 }
-                var node={data:{id:hit._source.id}}
-                SourceBrowser.showNodeInfos(hit.source,node, "Browse_nodeInfosDiv", { hideButtons: true });
+                var node = { data: { id: hit._source.id } };
+                SourceBrowser.showNodeInfos(hit.source, node, "Browse_nodeInfosDiv", { hideButtons: true });
 
                 $("#Browse_hitDetailsDiv").html(html);
             };

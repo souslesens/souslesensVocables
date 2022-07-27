@@ -98,9 +98,8 @@ var SQLserverConnector = {
         sql.connect(connection, (err) => {
             if (err) {
                 console.log(err);
-                return callback(err);// ... error checks
+                return callback(err); // ... error checks
             }
-
 
             // Query
             //console.log(query)

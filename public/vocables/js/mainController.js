@@ -38,21 +38,20 @@ var MainController = (function () {
     };
 
     self.loadSourcesMappings = function (callback) {
-
         $.ajax({
             type: "GET",
             url: `${Config.apiUrl}/data/file?dir=mappings&name=sourcesLinkedMappings.json`,
             dataType: "json",
 
-            success: function(data_, _textStatus, _jqXHR) {
-                var json=JSON.parse(data_);
-                callback(null,json)
-
-            }, error(err) {
+            success: function (data_, _textStatus, _jqXHR) {
+                var json = JSON.parse(data_);
+                callback(null, json);
+            },
+            error(err) {
                 callback(err);
-            }
-        })
-    }
+            },
+        });
+    };
 
     self.loadSources = function (callback) {
         var _payload = {
@@ -165,18 +164,15 @@ var MainController = (function () {
 
                 async.series(
                     [
-                      function(callbackSeries){
-                          self.loadSourcesMappings(function(err, sourcesMappings){
-                              if(err)
-                                  return callbackSeries(err)
-                              for(var source in Config.sources){
-                                 if(sourcesMappings[source])
-                                     Config.sources[source].dataSources=sourcesMappings[source]
-                              }
-                              callbackSeries()
-
-                          });
-                      },
+                        function (callbackSeries) {
+                            self.loadSourcesMappings(function (err, sourcesMappings) {
+                                if (err) return callbackSeries(err);
+                                for (var source in Config.sources) {
+                                    if (sourcesMappings[source]) Config.sources[source].dataSources = sourcesMappings[source];
+                                }
+                                callbackSeries();
+                            });
+                        },
                         function (callbackSeries) {
                             if (!Config.currentProfile.customPlugins) return callbackSeries();
                             CustomPluginController.init(Config.currentProfile.customPlugins, function (_err, _result) {
@@ -232,9 +228,7 @@ var MainController = (function () {
             var distinctGroups = {};
 
             Config.currentProfile.allowedSourceSchemas.forEach(function (item) {
-
-                if (!types || (types && types.indexOf(item) > -1))
-                    treeData.push({ id: item, text: item, parent: "#", type: item });
+                if (!types || (types && types.indexOf(item) > -1)) treeData.push({ id: item, text: item, parent: "#", type: item });
             });
             Object.keys(Config.sources)
                 .sort()
@@ -477,28 +471,22 @@ var MainController = (function () {
             var popupW = Math.min(200, $("#" + popupDiv).width());
             var divHeight = $("#graphDiv").height();
             var divMaxWidth = $("#graphDiv").width();
-            var popupBottom = point.y + popupH ;
-            var popupRight = point.x + popupW ;
-            var popupTop = point.y + popupH ;
-            var popupLeft = point.x + popupW ;
+            var popupBottom = point.y + popupH;
+            var popupRight = point.x + popupW;
+            var popupTop = point.y + popupH;
+            var popupLeft = point.x + popupW;
 
-            var horOverlap=0;
-            if(popupRight>divMaxWidth)
-                horOverlap=popupRight-divMaxWidth
-            else  if(popupLeft<0)
-                horOverlap=-popupLeft
+            var horOverlap = 0;
+            if (popupRight > divMaxWidth) horOverlap = popupRight - divMaxWidth;
+            else if (popupLeft < 0) horOverlap = -popupLeft;
 
-            var vertOverlap=0
-            if(popupBottom>divHeight)
-                vertOverlap=divHeight-popupBottom
-            else  if(popupTop<0)
-                vertOverlap=-popupTop
-
+            var vertOverlap = 0;
+            if (popupBottom > divHeight) vertOverlap = divHeight - popupBottom;
+            else if (popupTop < 0) vertOverlap = -popupTop;
 
             if (!popupDiv) popupDiv = "popupDiv";
             $("#" + popupDiv).css("left", point.x + (absolutePosition ? 0 : leftPanelWidth) + horOverlap);
             $("#" + popupDiv).css("top", point.y + vertOverlap);
-
         },
         hidePopup: function (popupDiv) {
             if (self.UI.blockHidePopup) return (self.UI.blockHidePopup = false); //one shot

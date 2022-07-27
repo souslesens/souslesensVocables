@@ -75,16 +75,16 @@ openapi.initialize({
     paths: "./api/v1/paths",
     securityHandlers: {
         loginScheme: function (req, _scopes, _definition) {
-            if (config.auth == "keycloak") {
-                passport.authenticate("keycloak", { failureRedirect: "/login" });
-            } else if (config.auth == "local") {
-                // TODO: what ?
-            }
-            if (!req.isAuthenticated || !req.isAuthenticated()) {
-                throw {
-                    status: 401,
-                    message: "You must authenticate to access this resource.",
-                };
+            if (config.auth != "disabled") {
+                if (config.auth == "keycloak") {
+                    passport.authenticate("keycloak", { failureRedirect: "/login" });
+                }
+                if (!req.isAuthenticated || !req.isAuthenticated()) {
+                    throw {
+                        status: 401,
+                        message: "You must authenticate to access this resource.",
+                    };
+                }
             }
             return Promise.resolve(true);
         },

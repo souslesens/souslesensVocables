@@ -32,7 +32,16 @@ var Lineage_individuals = (function () {
             $("#LineageIndividualsQueryParams_searchIndexFilterPanel").css("display", "block");
         }
     };
+self.getNodeLinkedData=function(node){
 
+    var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+      "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+      "SELECT * from <http://data.total.com/resource/tsf/ontology/data-domains/facility-design/phusion/> WHERE {\n" +
+      "  <http://data.total.com/resource/tsf/ontology/data-domains/facility-design/phusion/TOTAL-P0000000266> rdfs:subClassOf+ ?obj .?obj rdfs:label ?x\n" +
+      "} LIMIT 10"
+
+
+}
     self.setClass = function (node) {
         $("#Lineage_Tabs").tabs("option", "active", 3);
         self.currentClassNode = node;

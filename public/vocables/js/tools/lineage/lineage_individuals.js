@@ -32,6 +32,9 @@ var Lineage_individuals = (function () {
             $("#LineageIndividualsQueryParams_searchIndexFilterPanel").css("display", "block");
         }
     };
+
+
+
 self.getNodeLinkedData=function(node){
 
     var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +

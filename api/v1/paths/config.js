@@ -11,6 +11,7 @@ module.exports = function () {
             auth: config.auth,
             default_lang: config.default_lang,
             default_sparql_url: config.default_sparql_url,
+            formalOntologySourceLabel: config.formalOntologySourceLabel,
             wiki: config.wiki,
             version: process.env.npm_package_version,
             sentryDsnJsFront: config.sentryDsnJsFront,

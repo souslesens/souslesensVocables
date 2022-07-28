@@ -31,7 +31,7 @@ var Config = (function () {
     self.searchDepth = 6;
     self.predicatesSource = "TSF-PREDICATES";
     self.dictionarySource = "TSF-DICTIONARY";
-    self.formalOntologySourceLabel = "ISO_15926-part-14_PCA";
+
 
     (self.defaultSparqlPrefixes = {
         xs: "<http://www.w3.org/2001/XMLSchema#>",

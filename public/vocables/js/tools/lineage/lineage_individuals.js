@@ -21,7 +21,7 @@ var Lineage_individuals = (function() {
   };
 
   self.onDataSourcesSelect = function(dataSourceKey) {
-    $("#LineageIndividualsQueryParams_filterPanel").css("display", "none");
+    $(".LineageIndividualsQueryParams_panel").css("display", "none");
     self.currentDataSource = self.dataSources[dataSourceKey];
     self.currentDataSource.name = dataSourceKey;
     if (!self.currentDataSource) return;
@@ -30,6 +30,7 @@ var Lineage_individuals = (function() {
       $("#LineageIndividualsQueryParams_SQLfilterPanel").css("display", "block");
     } else if (self.currentDataSource.type == "searchIndex") {
       $("#LineageIndividualsQueryParams_searchIndexFilterPanel").css("display", "block");
+      self.setClass(self.currentClassNode)
     }
   };
 
@@ -44,7 +45,7 @@ var Lineage_individuals = (function() {
         var mapping=self.currentDataSource.classMappings[classId]
         if(mapping) {
           mapping.currentNode=node
-          currentClassNodeMappings.push(mapping)
+          currentNodeLinkedMappings.push(mapping)
         }
       })
      return callback(null,currentNodeLinkedMappings)
@@ -55,11 +56,13 @@ var Lineage_individuals = (function() {
 
 
   self.setClass = function(node) {
-    self.getNodeLinkedData(node)
+  //  self.getNodeLinkedData(node)
     $("#Lineage_Tabs").tabs("option", "active", 3);
     self.currentClassNode = node;
     $("#LineageIndividualsQueryParams_className").html(self.currentClassNode.data.label);
-    if (self.currentDataSource.type == "searchIndex") self.searchIndex.showClassIndividualsTree();
+    if (self.currentDataSource.type == "searchIndex") {
+      self.searchIndex.showClassIndividualsTree();
+    }
     else if (self.currentDataSource.type.indexOf("sql") > -1) {
       self.currentDataSource.currentClassNodeMapping = self.currentDataSource.classMappings[self.currentClassNode.data.id];
       if (!self.currentDataSource.currentClassNodeMapping) return alert("No mapping for Class " + self.currentClassNode.data.label + " in data source " + self.currentDataSource.name);

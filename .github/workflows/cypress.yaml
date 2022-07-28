@@ -11,7 +11,7 @@ env:
 
 jobs:
     cypress-run:
-        runs-on: ubuntu-latest
+        runs-on: self-hosted
         timeout-minutes: 10
 
         steps:
@@ -42,7 +42,7 @@ jobs:
                   wait-on-timeout: 120
                   config-file: cypress.config.ts
                   headless: true
-                  browser: chrome
+                  browser: chromium
                   spec: |
                       cypress/e2e/browser.cy.js
                       cypress/e2e/genealogy.cy.js
@@ -56,3 +56,10 @@ jobs:
                       cypress/e2e/match.cy.js
                       cypress/e2e/SQLquery.cy.js
                   runTests: true
+    cleanup:
+        runs-on: self-hosted
+        needs: cypress-run
+        if: always()
+        steps:
+            - name: Cleanup
+              run: sudo docker-compose -f docker-compose.test.yaml down

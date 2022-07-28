@@ -24,7 +24,6 @@ var ConfigManager = {
         var err = null;
         try {
             editableConfig.version = process.env.npm_package_version;
-            console.log(editableConfig, null, 2);
             if (!editableConfig.data_dir) editableConfig.data_dir = path.join(__dirname, "../data/");
 
             ConfigManager.config = editableConfig;

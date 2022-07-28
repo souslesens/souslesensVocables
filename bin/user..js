@@ -16,7 +16,7 @@ const user = {
                   }
                 : {};
 
-        if (config.disableAuth) {
+        if (config.auth === "disabled") {
             result = {
                 logged: true,
                 user: { login: "admin", groups: ["admin"] },

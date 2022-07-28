@@ -7,17 +7,20 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
-        if (!config.disableAuth)
+        const result = {};
+        if (config.auth === "disabled") {
             req.logout(function (err) {
                 if (err) {
                     return next(err);
                 }
             });
-        const result = {
-            redirect:
-                config.auth == "keycloak" ? config.keycloak.authServerURL + "/realms/" + config.keycloak.realm + "/protocol/openid-connect/logout?redirect_uri=" + config.souslesensUrl : "/login",
-        };
-
+        } else if (config.auth === "keycloak") {
+            result.redirect = config.keycloak.authServerURL + "/realms/" + config.keycloak.realm + "/protocol/openid-connect/logout?redirect_uri=" + config.souslesensUrl;
+        } else if (config.auth === "local") {
+            result.redirect = "/login";
+        } else {
+            throw new Error(`unkown config.auth ${config.auth}`);
+        }
         res.status(200).json(result);
     }
 

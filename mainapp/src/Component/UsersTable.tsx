@@ -187,7 +187,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
 
     return (
         <>
-            {create ? (config.auth == "json" ? createEditButton : null) : createEditButton}
+            {create ? (config.auth == "local" ? createEditButton : null) : createEditButton}
             <Modal onClose={handleClose} open={userModel.modal}>
                 <Box sx={style}>
                     <Stack spacing={4}>

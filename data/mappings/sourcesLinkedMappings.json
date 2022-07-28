@@ -1,0 +1,39 @@
+{
+    "TSF_GAIA_TEST": {
+        "gaia_fields_DB": {
+            "type": "sql.sqlserver",
+            "connection": "_default",
+            "dbName": "gaia",
+            "table_schema": "dbo",
+            "classMappings": {
+                "http://data.total.com/resource/tsf/ontology/gaia-test/cc7b582c0f": {
+                    "Countries_Basin_Field": "basin_name"
+                },
+                "http://data.total.com/resource/tsf/ontology/gaia-test/dc010a5210": {
+                    "Countries_Basin_Field": "country_name"
+                },
+                "http://data.total.com/resource/tsf/ontology/gaia-test/8dcbadccd2": {
+                    "Countries_Basin_Field": "field_name"
+                }
+            }
+        },
+        "gaia_onto_index": {
+            "type": "searchIndex",
+            "indexes": "gaia_onto_v2"
+        }
+    },
+
+    "TEPDK2_SQL": {
+        "type": "sql.sqlserver",
+        "connection": "_default",
+        "dbName": "TEPDK2",
+        "table_schema": "dbo",
+        "classMappings": {
+            "http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-F0000000801": {
+                "dbo.TEPDK_ADL_tblTag": "FunctionalClassID_ID",
+                "dbo.TEPDK_RDL_tblFunctionalClass": "ID",
+                "dbo.TEPDK_RDL_tblFunctionalClassToAttribute": "FunctionalClassID"
+            }
+        }
+    }
+}

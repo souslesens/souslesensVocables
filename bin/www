@@ -3,7 +3,6 @@
 /**
  * Module dependencies.
  */
-const debug = require("debug")("souslesensvocables:server");
 const http = require("http");
 const { config } = require("../model/config");
 
@@ -40,7 +39,8 @@ app.set("port", port);
 const server = http.createServer(app);
 server.listen(port);
 server.on("listening", () => {
-    debug(`Listening on ${server.address()}`);
+    const addr = server.address();
+    console.log('Listening on', addr);
 });
 server.on("error", (error) => {
     if (error.syscall !== "listen") {

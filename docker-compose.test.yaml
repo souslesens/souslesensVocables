@@ -5,7 +5,7 @@ services:
         environment:
             VIRT_SPARQL_DefaultQuery: SELECT DISTINCT ?graph count(?s) as ?number_of_triples WHERE { GRAPH ?graph { ?s ?p ?o . }}
         ports:
-            - 8891:8890
+            - 8899:8890
         volumes:
             - ./tests/data/rdf:/usr/local/virtuoso-opensource/var/lib/virtuoso/db/dumps
         command: |

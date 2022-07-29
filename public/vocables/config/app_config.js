@@ -32,7 +32,6 @@ var Config = (function () {
     self.predicatesSource = "TSF-PREDICATES";
     self.dictionarySource = "TSF-DICTIONARY";
 
-
     (self.defaultSparqlPrefixes = {
         xs: "<http://www.w3.org/2001/XMLSchema#>",
         rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",

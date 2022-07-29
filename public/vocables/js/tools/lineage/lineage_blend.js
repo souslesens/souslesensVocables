@@ -661,7 +661,7 @@ var xx = result
             var uriType = $("#LineageBlend_creatingNodeUriType").val();
             if (!self.graphModification.creatingsourceUri) {
                 let graphUri = Config.sources[Lineage_classes.mainSource].graphUri;
-                if (uriType == "fromLabel") self.graphModification.creatingsourceUri = graphUri + common.formatStringForTriple(object,true);
+                if (uriType == "fromLabel") self.graphModification.creatingsourceUri = graphUri + common.formatStringForTriple(object, true);
                 else if (uriType == "randomHexaNumber") self.graphModification.creatingsourceUri = graphUri + common.getRandomHexaId(10);
                 else if (uriType == "specific") {
                     let subjectUri = $("#LineageBlend_creatingNodeSubjectUri").val();

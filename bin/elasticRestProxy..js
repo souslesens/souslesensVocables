@@ -13,6 +13,8 @@ const request = require("request");
 
 const ConfigManager = require("./configManager.");
 const async = require("async");
+const { Client } = require("@elastic/elasticsearch");
+
 // elasticdump       --input=cfihos_data_index.json --output=http://opeppa-updtlb03:9200/cfihos --type=data
 
 var elasticRestProxy = {
@@ -24,6 +26,76 @@ var elasticRestProxy = {
             if (mainConfig) elasticRestProxy.elasticUrl = mainConfig.ElasticSearch.url;
             return elasticRestProxy.elasticUrl;
         }
+    },
+
+    executeGaiaQuery: function (query, indexes, options, callback) {
+        const client = new Client({
+            cloud: { id: "SSE_Sandbox:ZXVyb3BlLXdlc3QxLmdjcC5jbG91ZC5lcy5pbzo0NDMkNTNjOTRlY2NlMGRkNDcyNDg1ZmU3MjE5N2Y2YTRjNzQkYTViOGIyNGZlOTA0NDI1YmJjMTVlZTAxZTBkY2E1YjE=" },
+            auth: {
+                username: "elastic",
+                password: "iusGlDD0NMdfUsu0dLclh9hx",
+            },
+        });
+
+        /*  client.search({
+        size: 0,
+        index: "gaia_onto_v2",
+        body: {
+          "aggs": {
+            "Basin": {
+              "terms": { "field": "Concepts.Basin.instances.keyword", "size": 1000, "min_doc_count": 10 }
+
+            },
+
+            "Fluid": {
+              "terms": { "field": "Concepts.Fluid.instances.keyword", "size": 1000, "min_doc_count": 10 }
+
+            }
+
+
+          }
+        }
+      }).then(function(resp) {
+        console.log("Successful query!");
+        console.log(JSON.stringify(resp, null, 4));
+      }, function(err) {
+        console.trace(err.message);
+      });
+      return;*/
+
+        if (Array.isArray(indexes)) indexes = indexes.toString();
+        var size = 10000;
+        if (query.aggs) size = 0;
+        client
+            .search({
+                size: size,
+                index: indexes,
+                body: query,
+            })
+            .then(
+                function (res) {
+                    callback(null, res);
+                },
+                function (err) {
+                    callback(err);
+                }
+            );
+        return;
+
+        const query_doc = async function () {
+            var searchResult = {};
+            try {
+                searchResult = await client.search({
+                    index: indexes,
+                    size: 2000,
+                    query: query,
+                });
+            } catch (e) {
+                callback(e);
+            }
+            callback(null, searchResult);
+        };
+        query_doc();
     },
 
     executePostQuery: function (url, query, indexes, callback) {
@@ -88,11 +160,11 @@ var elasticRestProxy = {
             var responses = json.responses;
             /*  responses.forEach(function (response, responseIndex) {
 
-                  var hits = response.hits.hits;
-                  hits.forEach(function (hit) {
+            var hits = response.hits.hits;
+            hits.forEach(function (hit) {
 
-                  })
-              })*/
+            })
+        })*/
             return callback(null, responses);
         });
     },

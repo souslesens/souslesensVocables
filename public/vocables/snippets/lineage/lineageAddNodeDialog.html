@@ -23,7 +23,7 @@
     }
 
     #LineageBlend_creatingNodeTiplesDiv {
-        height: 170px;
+        height: 300px;
         overflow: auto;
     }
 
@@ -53,6 +53,20 @@
     </button>
 </div>
 
+<div style="">
+    <div id="LineageBlend_creatingNodeTiplesDiv"></div>
+</div>
+
+<div class="LineageBlend_creatingNodeClassParamsLine">
+    subject uri&nbsp;
+    <select id="LineageBlend_creatingNodeUriType">
+        <option>fromLabel</option>
+        <option>randomHexaNumber</option>
+        <option>specific</option>
+    </select>
+    specific <input id="LineageBlend_creatingNodeSubjectUri" />
+</div>
+
 <div id="lineageAddEdgeDialog_mainDiv" style="background-color: white; display: flex; flex-direction: row">
     <div class="blendCreateNode_lineDiv">
         Predicate
@@ -68,11 +82,6 @@
         </div>
     </div>
 </div>
-<div style="">
-    <div id="LineageBlend_creatingNodeTiplesDiv"></div>
-</div>
-
-<div class="LineageBlend_creatingNodeClassParamsLine">specific subject uri&nbsp;<input id="LineageBlend_creatingNodeSubjectUri" /></div>
 
 <div id="LineageBlend_creatingNodeClassParamsDiv">
     <ul>
@@ -115,7 +124,7 @@
     $("#LineageBlend_creatingNodeClassParamsDiv").dialog({
         autoOpen: false,
         height: 400,
-        width: 500,
+        width: 600,
         modal: true,
     });
 </script>

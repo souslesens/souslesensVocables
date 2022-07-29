@@ -25,6 +25,7 @@ var MainController = (function () {
                 Config.default_sparql_url = serverConfig.default_sparql_url;
                 Config.wiki = serverConfig.wiki;
                 Config.sentryDsnJsFront = serverConfig.sentryDsnJsFront;
+                Config.formalOntologySourceLabel = serverConfig.formalOntologySourceLabel;
 
                 // display version number
                 $("#souslesensversion").html(serverConfig.version);
@@ -33,6 +34,22 @@ var MainController = (function () {
             },
             error: function (err) {
                 return callback(err);
+            },
+        });
+    };
+
+    self.loadSourcesMappings = function (callback) {
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file?dir=mappings&name=sourcesLinkedMappings.json`,
+            dataType: "json",
+
+            success: function (data_, _textStatus, _jqXHR) {
+                var json = JSON.parse(data_);
+                callback(null, json);
+            },
+            error(err) {
+                callback(err);
             },
         });
     };
@@ -148,6 +165,18 @@ var MainController = (function () {
 
                 async.series(
                     [
+                        function (callbackSeries) {
+                            self.loadSourcesMappings(function (err, sourcesMappings) {
+                                if (err) {
+                                    console.warn("file sourcesLinkedMappings.json not found");
+                                    return callbackSeries();
+                                }
+                                for (var source in Config.sources) {
+                                    if (sourcesMappings[source]) Config.sources[source].dataSources = sourcesMappings[source];
+                                }
+                                callbackSeries();
+                            });
+                        },
                         function (callbackSeries) {
                             if (!Config.currentProfile.customPlugins) return callbackSeries();
                             CustomPluginController.init(Config.currentProfile.customPlugins, function (_err, _result) {
@@ -441,19 +470,27 @@ var MainController = (function () {
         },
 
         showPopup: function (point, popupDiv, absolutePosition) {
+            $("#" + popupDiv).css("display", "flex");
             var popupH = Math.min(300, $("#" + popupDiv).height());
             var popupW = Math.min(200, $("#" + popupDiv).width());
-            var divMaxY = $("#graphDiv").height() + 50;
-            var divMaxX = $("#graphDiv").width() + (absolutePosition ? 0 : leftPanelWidth);
-            var vertOverlap = point.y + popupH - divMaxY;
-            var horOverlap = point.x + popupW - divMaxX;
-            horOverlap = 0; // horOverlap > 0 ? 0 : horOverlap - 5;
-            vertOverlap = 0; // vertOverlap > 0 ? 0 : vertOverlap - 5;
+            var divHeight = $("#graphDiv").height();
+            var divMaxWidth = $("#graphDiv").width();
+            var popupBottom = point.y + popupH;
+            var popupRight = point.x + popupW;
+            var popupTop = point.y + popupH;
+            var popupLeft = point.x + popupW;
+
+            var horOverlap = 0;
+            if (popupRight > divMaxWidth) horOverlap = popupRight - divMaxWidth;
+            else if (popupLeft < 0) horOverlap = -popupLeft;
+
+            var vertOverlap = 0;
+            if (popupBottom > divHeight) vertOverlap = divHeight - popupBottom;
+            else if (popupTop < 0) vertOverlap = -popupTop;
 
             if (!popupDiv) popupDiv = "popupDiv";
             $("#" + popupDiv).css("left", point.x + (absolutePosition ? 0 : leftPanelWidth) + horOverlap);
             $("#" + popupDiv).css("top", point.y + vertOverlap);
-            $("#" + popupDiv).css("display", "flex");
         },
         hidePopup: function (popupDiv) {
             if (self.UI.blockHidePopup) return (self.UI.blockHidePopup = false); //one shot

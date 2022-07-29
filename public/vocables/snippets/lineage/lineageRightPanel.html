@@ -14,15 +14,15 @@
     .Lineage_ClassTabLi {
     }
 </style>
-<div><input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))" id="Lineage_classes_showImportsCBX" />Include imports in results</div>
+<!--div style="display:none;"><input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))" id="Lineage_classes_showImportsCBX" />Include imports in results</div-->
 <div>
-    <div id="Lineage_Tabs" style="width: 360px">
+    <div id="Lineage_Tabs" style="width: 390px">
         <ul>
             <li class="Lineage_ClassTabLi"><a href="#Lineage_ClassesTab">Classes</a></li>
 
             <li class="Lineage_ClassTabLi"><a href="#LineagePropertiesTab">Properties</a></li>
             <li class="Lineage_ClassTabLi"><a href="#LineageRelationsTab">Relations</a></li>
-            <!--li class="Lineage_ClassTabLi"><a href="#LineageIndividualsTab">Individuals</a></li-->
+            <li class="Lineage_ClassTabLi"><a href="#LineageIndividualsTab">Individuals</a></li>
         </ul>
 
         <div class="" id="Lineage_ClassesTab">
@@ -48,7 +48,7 @@
                 >&nbsp; <input type="checkbox" id="LineageProperties_allExactMatchSearchCBX" />Exact Match &nbsp; <input type="checkbox" id="LineageProperties_searchInAllSources" />All sources &nbsp;
             </div>
 
-            <div class="jstreeContainer" style="width: 90%; height: 75%; min-height: 400px; margin: 3px; padding: 3px">
+            <div class="jstreeContainer" style="width: 95%; height: 75%; min-height: 400px; margin: 3px; padding: 3px">
                 <div class="jstree" id="Lineage_propertiesTree"></div>
             </div>
             <div style="border: 1px solid brown">
@@ -148,10 +148,7 @@
             </div>
         </div>
 
-        <!--div id="LineageIndividualsTab" style="display: flex; flex-direction: column"
-
-
-        </div>-->
+        <div id="LineageIndividualsTab" style="display: flex; flex-direction: column"></div>
     </div>
 </div>
 

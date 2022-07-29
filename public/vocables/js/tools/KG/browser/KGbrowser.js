@@ -161,7 +161,7 @@ var KGbrowser = (function () {
     self.showNodeInfos = function (node) {
         if (!node) node = self.currentJstreeNode;
         source = self.currentSource;
-        SourceBrowser.showNodeInfos(source, node.data.id, "mainDialogDiv");
+        SourceBrowser.showNodeInfos(source, node, "mainDialogDiv");
     };
 
     self.getRdlJstreeData = function (parent, parentType, callback) {

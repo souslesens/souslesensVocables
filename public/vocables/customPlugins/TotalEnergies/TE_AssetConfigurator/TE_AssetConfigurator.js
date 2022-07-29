@@ -161,7 +161,7 @@ var TE_AssetConfigurator = (function () {
             label: "Node infos",
             action: function (_e) {
                 // pb avec source
-                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv");
+                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
             },
         };
 

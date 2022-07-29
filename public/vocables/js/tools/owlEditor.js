@@ -239,8 +239,8 @@ var OwlEditor = (function () {
         if (obj.node.data.type.indexOf("imported") == 0) {
             var html = "<div class='OwlEditorItemSubjectUri'> " + obj.node.data.label + " imported (not editable)" + "</div><div id='owlEditor_ImportedObjInfosDiv'></div>";
             $("#owlEditor_propertiesDiv").html(html);
-            Sparql_generic.getNodeInfos(self.currentSourceData.name, obj.node.data.id, {}, function (_err, result) {
-                SourceEditor.showNodeInfos("owlEditor_ImportedObjInfosDiv", null, obj.node.data.id, result);
+            Sparql_generic.getNodeInfos(self.currentSourceData.name, obj.node, {}, function (_err, result) {
+                SourceEditor.showNodeInfos("owlEditor_ImportedObjInfosDiv", null, obj.node, result);
             });
             return;
         }
@@ -321,7 +321,7 @@ var OwlEditor = (function () {
             });
 
             if (nodeData) {
-                Sparql_generic.getNodeInfos(self.currentSourceData.name, nodeData.id, {}, function (_err, result) {
+                Sparql_generic.getNodeInfos(self.currentSourceData.name, nodeData, {}, function (_err, result) {
                     var propsMap = {};
                     self.readOnlyPredicates = [];
                     result.forEach(function (item) {

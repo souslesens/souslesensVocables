@@ -134,7 +134,7 @@ $("#actionDiv").html(html);*/
             label: "Node infos",
             action: function (_e) {
                 // pb avec source
-                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv");
+                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
             },
         };
 
@@ -158,8 +158,8 @@ $("#actionDiv").html(html);*/
             items.graphNamedIndividuals = {
                 label: "Individuals ",
                 action: function () {
-                    // Lineage_individuals.showSearchDialog()
-                    Lineage_classes.drawNamedIndividuals(self.currentTreeNode.data.id);
+                    Lineage_individuals.setClass(self.currentTreeNode);
+                    // Lineage_classes.drawNamedIndividuals(self.currentTreeNode.data.id);
                 },
             };
 
@@ -231,7 +231,7 @@ $("#actionDiv").html(html);*/
         /*    items.toDataTable = {
 label: "export to Table",
 action: function (e) {// pb avec source
-    Export.exportTeeToDataTable()
+Export.exportTeeToDataTable()
 
 }
 
@@ -283,11 +283,11 @@ action: function (e) {// pb avec source
     };
 
     self.editThesaurusConceptInfos = function (sourceLabel, node, _callback) {
-        SourceBrowser.showNodeInfos(sourceLabel, node.data.id, "graphDiv");
+        SourceBrowser.showNodeInfos(sourceLabel, node, "graphDiv");
 
         /*  Sparql_generic.getNodeInfos(sourceLabel, node.data.id, null, function (err, result) {
 if (err) {
-  return MainController.UI.message(err);
+return MainController.UI.message(err);
 }
 //    SkosConceptEditor.editConcept("graphDiv",result)
 SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
@@ -382,10 +382,10 @@ searchedSources.push(sourceLabel)*/
 
             searchedSources.push(source);
             /*  if( Config.sources[source].imports){
-      Config.sources[source].imports.forEach(function(item){
-          searchedSources.push(item);
-      })
-  }*/
+Config.sources[source].imports.forEach(function(item){
+    searchedSources.push(item);
+})
+}*/
         }
 
         var jstreeData = [];
@@ -720,9 +720,21 @@ return*/
         Sparql_common.setFilter("id", self.currentFoundIds);
     };
 
-    self.showNodeInfos = function (sourceLabel, nodeId, divId, options, callback) {
+    self.showNodeInfos = function (sourceLabel, node, divId, options, callback) {
         self.newProperties = null;
-        self.currentNodeId = nodeId;
+        self.currentNodeId = null;
+        self.currentNode = null;
+        if (typeof node == "object") {
+            self.currentNode = node;
+            if (node.data) {
+                if (node.data.propertyId) self.currentNodeId = node.data.propertyId;
+                if (node.data.id) self.currentNodeId = node.data.id;
+            } else {
+                if (node.id) self.currentNodeId = node;
+            }
+        } else self.currentNodeId = node;
+        var nodeId = self.currentNodeId;
+
         if (!sourceLabel) sourceLabel = self.currentSource;
         else self.currentSource = sourceLabel;
         self.divId = divId;
@@ -757,7 +769,7 @@ return*/
                 },
                 function (callbackSeries) {
                     if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons) {
-                        var str = "<div>";
+                        if (!self.currentNode.data || !self.currentNode.data.source || !Config.sources[self.currentNode.data.source].editable) var str = "<div>";
                         str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
                         if (Config.sources[self.currentSource].editable) {
                             //} &&  self.propertiesMap.properties["type"]=="http://www.w3.org/2002/07/owl#Class") {
@@ -785,8 +797,8 @@ return*/
                 },
                 function (callbackSeries) {
                     /*  if (type != "http://www.w3.org/2002/07/owl#Class") {
-                        return callbackSeries();
-                    }*/
+              return callbackSeries();
+          }*/
                     self.showNamedIndividualProperties(sourceLabel, nodeId, function (err) {
                         callbackSeries(err);
                     });
@@ -817,7 +829,9 @@ return*/
     };
 
     self.drawCommonInfos = function (sourceLabel, nodeId, divId, _options, callback) {
+        if (!_options) _options = {};
         var valueLabelsMap = {};
+        $(".infosTable").html("");
         self.propertiesMap = { label: "", id: "", properties: {} };
         var blankNodes = [];
         Sparql_generic.getNodeInfos(
@@ -1021,7 +1035,7 @@ defaultLang = 'en';*/
 
             str += "</table> </div>" + "</div>";
 
-            $("#nodeInfos_restrictionsDiv").append(str);
+            $("#nodeInfos_restrictionsDiv").html(str);
             callback();
         });
     };
@@ -1052,7 +1066,7 @@ defaultLang = 'en';*/
                     str += "<tr><td>" + targetClassStr + "</td></tr>";
                 });
                 str += "</table>";
-                $("#nodeInfos_individualsDiv").append(str);
+                $("#nodeInfos_individualsDiv").html(str);
             }
             callback();
         });
@@ -1148,22 +1162,23 @@ defaultLang = 'en';*/
                 self.isModified = true;
                 if (!self.newProperties) self.newProperties = {};
                 self.newProperties[property] = value;
-                self.showNodeInfos(self.currentSource, self.currentNodeId, "mainDialogDiv");
-                if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
-                    visjsGraph.data.nodes.push({
-                        id: self.currentNodeId,
-                        label: value,
-                        shape: Lineage_classes.defaultShape,
-                        size: Lineage_classes.defaultShapeSize,
-                        color: Lineage_classes.getSourceColor(self.currentSource),
-                        data: {
+                self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "mainDialogDiv", {}, function (err, result) {
+                    if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
+                        visjsGraph.data.nodes.push({
                             id: self.currentNodeId,
                             label: value,
-                            source: self.currentSource,
-                        },
-                    });
-                }
-                if (callback) return callback(null, self.currentNodeId);
+                            shape: Lineage_classes.defaultShape,
+                            size: Lineage_classes.defaultShapeSize,
+                            color: Lineage_classes.getSourceColor(self.currentSource),
+                            data: {
+                                id: self.currentNodeId,
+                                label: value,
+                                source: self.currentSource,
+                            },
+                        });
+                    }
+                    if (callback) return callback(null, self.currentNodeId);
+                });
             });
         }
     };
@@ -1187,17 +1202,28 @@ defaultLang = 'en';*/
     };
 
     self.modifylabelProperty = function (property, oldLabel) {
-        var newLabel = prompt("new label ");
+        var newLabel = prompt("new label ", oldLabel);
         if (newLabel) {
             newLabel = Sparql_common.formatStringForTriple(newLabel);
-            self.addProperty(property, newLabel, self.currentSource, false, function (err, result) {
-                if (err) return alert(err.responseText);
-                Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, oldLabel, function (err, _result) {
-                    if (err) return alert(err);
-                    self.showNodeInfos(self.currentSource, self.currentNodeId, "mainDialogDiv");
+
+            Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, oldLabel, function (err, _result) {
+                if (err) return alert(err);
+                self.addProperty(property, newLabel, self.currentSource, false, function (err, result) {
+                    if (err) return alert(err.responseText);
+                    //   self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "mainDialogDiv", {}, function(err, result) {
+
+                    //  self.showNodeInfos(self.currentSource, self.currentNode, "mainDialogDiv");
                     visjsGraph.data.nodes.update({ id: self.currentNodeId, label: newLabel });
+                    if (self.currentNodeId.from) {
+                        var jstreeNode = common.jstree.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNode.data.id);
+                        if (jstreeNode) $("#Lineage_propertiesTree").jstree().rename_node(jstreeNode, newLabel);
+                    } else {
+                        var jstreeNode = common.jstree.getNodeByDataField("LineagejsTreeDiv", "id", self.currentNode.data.id);
+                        if (jstreeNode) $("#LineagejsTreeDiv").jstree().rename_node(jstreeNode, newLabel);
+                    }
                 });
             });
+            //  })
         }
     };
 
@@ -1211,6 +1237,14 @@ defaultLang = 'en';*/
                         $("#" + self.divId).dialog("close");
                         visjsGraph.data.nodes.remove(self.currentNodeId);
                         MainController.UI.message("node deleted");
+
+                        if (self.currentNodeId.from) {
+                            var jstreeNode = common.jstree.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNodeId);
+                            if (jstreeNode) $("#Lineage_propertiesTree").jstree().delete_node(jstreeNode, newLabel);
+                        } else {
+                            var jstreeNode = common.jstree.getNodeByDataField("LineagejsTreeDiv", "id", self.currentNodeId);
+                            if (jstreeNode) $("#LineagejsTreeDiv").jstree().delete_node(jstreeNode, newLabel);
+                        }
                     });
                 });
             });

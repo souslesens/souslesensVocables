@@ -292,7 +292,7 @@ var Blender = (function () {
             menuItems.nodeInfos = {
                 label: "Show Node infos",
                 action: function (/** @type {any} */ _obj, /** @type {any} */ _sss, /** @type {any} */ _cc) {
-                    SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.id, "mainDialogDiv");
+                    SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
                 },
             };
             return menuItems;

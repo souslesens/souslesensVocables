@@ -25,7 +25,7 @@ var MainController = (function () {
                 Config.default_sparql_url = serverConfig.default_sparql_url;
                 Config.wiki = serverConfig.wiki;
                 Config.sentryDsnJsFront = serverConfig.sentryDsnJsFront;
-                Config.formalOntologySourceLabel=serverConfig.formalOntologySourceLabel;
+                Config.formalOntologySourceLabel = serverConfig.formalOntologySourceLabel;
 
                 // display version number
                 $("#souslesensversion").html(serverConfig.version);
@@ -167,8 +167,8 @@ var MainController = (function () {
                     [
                         function (callbackSeries) {
                             self.loadSourcesMappings(function (err, sourcesMappings) {
-                                if (err){
-                                    console.warn("file sourcesLinkedMappings.json not found")
+                                if (err) {
+                                    console.warn("file sourcesLinkedMappings.json not found");
                                     return callbackSeries();
                                 }
                                 for (var source in Config.sources) {

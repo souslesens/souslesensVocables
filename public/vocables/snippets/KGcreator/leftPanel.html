@@ -7,7 +7,14 @@
 </style>
 
 <div style="margin-left: 10px">
-    <select id="KGcreator_csvDirsSelect" onchange="KGcreator.listFiles()"></select>
+    Source type :
+    <select id="KGpropertyFilter_sourceTypeSelect" onchange="KGcreator.onChangeSourceTypeSelect($(this).val())">
+        <option></option>
+        <option>CSV</option>
+        <option>DATABASE</option>
+    </select>
+
+    <select id="KGcreator_csvDirsSelect" onchange="KGcreator.listObjects()"></select>
     <!--button onclick="KGcreator.listFiles()">List</button-->
     <div class="KGcreator_tree_container">
         <div id="KGcreator_csvTreeDiv"></div>

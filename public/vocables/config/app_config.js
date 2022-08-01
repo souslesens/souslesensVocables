@@ -162,12 +162,12 @@ var Config = (function () {
 
     self.tools["lineage"] = { label: "Lineage", noSource: 0, controller: Lineage_classes, toolDescriptionImg: null }; //"images/taxonomy.png"}
 
-    /*  self.tools["KGmappings"] = {
-      label: "KGmappings",
-      multiSources: 0,
-      controller: KGmappings,
-      toolDescriptionImg: null,
-  };*/
+    self.tools["KGmappings"] = {
+        label: "KGmappings",
+        multiSources: 0,
+        controller: KGmappings,
+        toolDescriptionImg: null,
+    };
 
     self.tools["Standardizer"] = {
         label: "Standardizer",

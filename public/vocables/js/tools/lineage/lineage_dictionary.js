@@ -78,7 +78,7 @@ var Lineage_dictionary = (function () {
                         var domainSources = Object.keys(self.domainAndRangeSourcesmap).sort();
                         common.fillSelectOptions(self.filterIdPrefix + "_domainSourceLabel_select", domainSources, true);
                         if (self.currentDomainSource) {
-                            if (!self.domainAndRangeSourcesmap[self.currentDomainSource]) return alert(" source " + self.currentDomainSource + " is not presnt in dictionary");
+                            if (!self.domainAndRangeSourcesmap[self.currentDomainSource]) return alert(" source " + self.currentDomainSource + " is not present in dictionary");
                             $("#" + self.filterIdPrefix + "_domainSourceLabel_select").val(self.currentDomainSource);
 
                             var rangeSources = self.domainAndRangeSourcesmap[self.currentDomainSource];

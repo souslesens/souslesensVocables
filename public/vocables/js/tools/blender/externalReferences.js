@@ -43,7 +43,7 @@ var ExternalReferences = (function () {
     (self.openNarrowMatchNodes = function (sourceLabel, node) {
         if (node.children.length > 0) return;
 
-        Sparql_generic.getNodeInfos(sourceLabel, node.id, { propertyFilter: ["http://www.w3.org/2004/02/skos/core#narrowMatch"] }, function (err, result) {
+        Sparql_generic.getNodeInfos(sourceLabel, node, { propertyFilter: ["http://www.w3.org/2004/02/skos/core#narrowMatch"] }, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);
             }
@@ -119,7 +119,7 @@ var ExternalReferences = (function () {
             var params = self.parseExternalUrl(url);
 
             if (!params.sourceLabel) return MainController.UI.message("no sourceLabel found from node id url params");
-            SourceBrowser.showNodeInfos(params.sourceLabel, params.id, "mainDialogDiv");
+            SourceBrowser.showNodeInfos(params.sourceLabel, params, "mainDialogDiv");
         }),
         (self.parseExternalUrl = function (url) {
             var p = url.indexOf("?");

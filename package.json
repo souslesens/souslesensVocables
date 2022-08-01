@@ -1,6 +1,6 @@
 {
     "name": "souslesensvocables",
-    "version": "1.12.0",
+    "version": "1.13.0",
     "private": true,
     "scripts": {
         "start": "DEBUG=cypress:* node ./bin/www",
@@ -37,6 +37,7 @@
         "typescript": "^4.7.4"
     },
     "dependencies": {
+        "@elastic/elasticsearch": "^8.2.1",
         "@futpib/tika-server-client": "0.0.5",
         "@sentry/node": "^7.7.0",
         "async": "^3.2.4",

@@ -304,6 +304,37 @@ var Sparql_OWL = (function () {
         });
     };
 
+    self.getNodesAncestors = function (sourceLabel, classIds, options, callback) {
+        if (!options) options = {};
+        if (!Array.isArray(classIds)) classIds = [classIds];
+        var filterStr = Sparql_common.setFilter("class", classIds);
+        var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
+
+        var query =
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "SELECT * " +
+            fromStr +
+            " WHERE {" +
+            " ?class rdfs:subClassOf* ?superClass." +
+            "filter (isIRI(?superClass)) ";
+
+        if (options.withLabels) query += "OPTIONAL {?obj rdfs: label superClasslabel }";
+        query += filterStr;
+        query += "} LIMIT 100";
+
+        var url = self.sparql_url + "?format=json&query=";
+        self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
+        if (self.no_params) url = self.sparql_url;
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["superClass"]);
+            return callback(null, result.results.bindings);
+        });
+    };
+
     self.getIndividualProperties = function (sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
         if (!options) options = {};
 
@@ -429,6 +460,31 @@ var Sparql_OWL = (function () {
             return callback(null, result.results.bindings);
         });
     };
+    self.listObjectProperties = function (sourceLabel, options, callback) {
+        var fromStr = Sparql_common.getFromStr(sourceLabel, false, true);
+        var query =
+            "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            "select distinct * " +
+            fromStr +
+            " WHERE   {?prop rdf:type owl:ObjectProperty. OPTIONAL{?prop rdfs:label ?propLabel.} " +
+            " OPTIONAL {?prop rdfs:subPropertyOf ?superProp. OPTIONAL{?superProp rdfs:label ?superPropLabel. }} " +
+            "}  limit " +
+            Config.queryLimit;
+
+        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+        var url = self.sparql_url + "?format=json&query=";
+        self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
+        if (self.no_params) url = self.sparql_url;
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+            if (err) return callback(err);
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "superPropLabel"]);
+            return callback(null, result.results.bindings);
+        });
+    };
+
     self.getObjectProperties = function (sourceLabel, domainIds, options, callback) {
         if (!options) {
             options = {};
@@ -447,7 +503,6 @@ var Sparql_OWL = (function () {
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
         var query =
-            "PREFIX type: <http://info.deepcarbon.net/schema/type#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -472,7 +527,7 @@ var Sparql_OWL = (function () {
                 " OPTIONAL{?range rdfs:label ?rangeLabel.} } " +
                 "OPTIONAL { ?prop rdfs:domain ?domain.  ?domain rdf:type ?domainType. " +
                 "OPTIONAL{?domain rdfs:label ?domainLabel.}} " +
-                " OPTIONAL {?prop rdfs:subPropertyOf ?subProp. {?subProp rdfs:label ?subPropLabel. " +
+                " OPTIONAL {?prop rdfs:subPropertyOf ?subProp. OPTIONAL{?subProp rdfs:label ?subPropLabel. " +
                 Sparql_common.getLangFilter(sourceLabel, "subPropLabel") +
                 "}}";
         } else {
@@ -953,13 +1008,13 @@ var Sparql_OWL = (function () {
             fromStr +
             " WHERE {{\n" +
             "   ?prop rdf:type owl:ObjectProperty. \n" +
-            "   optional { ?subProp rdfs:subPropertyOf ?prop} " +
+            "   optional { ?subProp rdfs:subPropertyOf ?prop } " +
             "   optional { ?prop rdfs:label ?propLabel} " + // filter(?prop in (<http://rds.posccaesar.org/ontology/lis14/rdl/hasResident>,<http://rds.posccaesar.org/ontology/lis14/rdl/residesIn>))\n" +
-            " optional { ?prop rdfs:domain ?propDomain. ?domain  rdfs:subClassOf* ?propDomain} \n" +
-            "    optional { ?prop rdfs:range ?propRange. ?range  rdfs:subClassOf* ?propRange.}\n" +
+            " optional { ?prop rdfs:domain ?propDomain. ?domain  rdfs:subClassOf* ?propDomain  filter ( isIRI(?propDomain))} \n" +
+            "    optional { ?prop rdfs:range ?propRange. ?range  rdfs:subClassOf* ?propRange. filter ( isIRI(?propRange))}\n" +
             "      optional { ?prop owl:inverseOf|^owl:inverseOf ?inverseProp optional {?inverseProp rdfs:label ?inversePropLabel}  \n" +
-            "       optional { ?inverseProp rdfs:range ?propDomain. ?domain  rdfs:subClassOf* ?propDomain} \n" +
-            "     optional{ ?inverseProp rdfs:domain ?propRange. ?range  rdfs:subClassOf* ?propRange.}\n" +
+            "       optional { ?inverseProp rdfs:range ?propDomain. ?domain  rdfs:subClassOf* ?propDomain  filter (isIRI(?propDomain))} \n" +
+            "     optional{ ?inverseProp rdfs:domain ?propRange. ?range  rdfs:subClassOf* ?propRange. filter (isIRI(?propRange))}\n" +
             "    }\n" +
             "  }\n" +
             "} LIMIT 1000";
@@ -981,10 +1036,10 @@ var Sparql_OWL = (function () {
             " WHERE {{\n" +
             "  ?prop rdf:type owl:ObjectProperty.}\n" +
             "    minus {\n" +
-            "    ?prop rdf:type owl:ObjectProperty.?prop rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  \n" +
+            "    ?prop rdf:type owl:ObjectProperty.?prop rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  filter ( isIRI(?x)) \n" +
             "  }\n" +
             "   minus {\n" +
-            "    ?prop rdf:type owl:ObjectProperty.?prop owl:inverseOf/rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  \n" +
+            "    ?prop rdf:type owl:ObjectProperty.?prop (owl:inverseOf|^owl:inverseOf)/rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x filter ( isIRI(?x))  \n" +
             "  }" +
             "} LIMIT 1000";
 
@@ -996,20 +1051,20 @@ var Sparql_OWL = (function () {
     };
 
     /* self.getLabels = function (sourceLabel,ids, callback) {
-           var from = Sparql_common.getFromStr(sourceLabel)
-           var query =
-               "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-               "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-               "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-               "select distinct * " + from + " WHERE {   {?prop ?p ?x OPTIONAL{?prop rdfs:label ?propLabel.} \n" +
-               "    ?prop rdfs:range ?range. OPTIONAL{?range rdfs:label ?rangeLabel.} ?prop rdfs:domain ?domain.   OPTIONAL{?domain rdfs:label ?domainLabel.}   }}  limit 10000"
+         var from = Sparql_common.getFromStr(sourceLabel)
+         var query =
+             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+             "select distinct * " + from + " WHERE {   {?prop ?p ?x OPTIONAL{?prop rdfs:label ?propLabel.} \n" +
+             "    ?prop rdfs:range ?range. OPTIONAL{?range rdfs:label ?rangeLabel.} ?prop rdfs:domain ?domain.   OPTIONAL{?domain rdfs:label ?domainLabel.}   }}  limit 10000"
 
-           var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-           Sparql_proxy.querySPARQL_GET_proxy(url, query, {source:sourceLabel}, null,function (err, result) {
-               if (err)
-                   return alert(err)
-               return  callback(null,result)
-       })
-       }*/
+         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+         Sparql_proxy.querySPARQL_GET_proxy(url, query, {source:sourceLabel}, null,function (err, result) {
+             if (err)
+                 return alert(err)
+             return  callback(null,result)
+     })
+     }*/
     return self;
 })();

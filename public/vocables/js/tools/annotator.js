@@ -132,7 +132,7 @@ var Annotator = (function () {
         var source = array[1];
         id = array[2];
         SourceBrowser.showNodeInfos(source, id, "Annotator_EntityDetailsDiv");
-        Sparql_generic.getSingleNodeAllGenealogy(source, id, function (err, result) {
+        Sparql_generic.getSingleNodeAllGenealogy(source, e.target, function (err, result) {
             if (err) return MainController.UI.message(err);
 
             var html = "Genealogy : ";

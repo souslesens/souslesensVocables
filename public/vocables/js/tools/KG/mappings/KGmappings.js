@@ -33,9 +33,10 @@ var KGmappings = (function () {
         self.init();
         var KGsources = [];
         for (var source in Config.sources) {
-            if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH") KGsources.push(source);
+            //  if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH")
+            if (Config.sources[source].dataSource && Config.sources[source].schemaType != "NONE") KGsources.push(source);
         }
-        MainController.UI.showSources("sourcesTreeDiv", false, KGsources, ["KNOWLEDGE_GRAPH"], function (err, _result) {
+        MainController.UI.showSources("sourcesTreeDiv", false, KGsources, null, function (err, _result) {
             if (err) alert(err);
         });
         MainController.UI.openRightPanel();
@@ -641,7 +642,7 @@ var KGmappings = (function () {
         if (Array.isArray(node.data)) {
             node.data = node.data[0];
         }
-        SourceBrowser.showNodeInfos(node.data.source, node.data.id, "mainDialogDiv");
+        SourceBrowser.showNodeInfos(node.data.source, node, "mainDialogDiv");
     };
 
     self.literalValues = [

@@ -32,7 +32,7 @@ var Collection = (function () {
             menuItems.nodeInfos = {
                 label: "Show Node infos",
                 action: function (_obj, _sss, _cc) {
-                    SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.id, "mainDialogDiv");
+                    SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
                 },
             };
         } else {

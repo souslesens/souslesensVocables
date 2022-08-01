@@ -32,7 +32,7 @@ services:
         ports:
             - 9201:9200
         environment:
-            # ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+            ES_JAVA_OPTS: "-Xmx256m -Xms256m"
             discovery.type: single-node
         networks:
             - test-backend

@@ -133,7 +133,7 @@ var KGcreator = (function () {
     };
 
     self.displayUploadApp = function() {
-        $("#graphDiv").replaceWith("<div id='mount-kg-upload-app-here'></div>").then(
+        $("#graphDiv").replaceWith("<div id='mount-kg-upload-app-here'></div>").after(
             $.getScript("/kg_upload_app.js")
         )
     }

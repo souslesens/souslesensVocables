@@ -1,4 +1,3 @@
-
 module.exports = function () {
     let operations = {
         POST,
@@ -6,12 +5,14 @@ module.exports = function () {
 
     async function POST(req, res, next) {
         try {
-            const files = Object.assign([] ,req.files)
-            files.forEach(file => {
-                file.mv("data/CSV/" + file.name)
-            })
+            const files = Array.isArray(Object.assign([], req.files).files) ? Object.assign([], req.files).files : Array(Object.assign([], req.files).files);
+
+            files.forEach((file) => {
+                file.mv("data/CSV/" + req.body.path + "/" + file.name);
+            });
         } catch (err) {
             next(err);
+            return res.status(500).json({ done: false });
         }
         return res.status(200).json({ done: true });
     }

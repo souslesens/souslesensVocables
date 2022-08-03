@@ -1,6 +1,6 @@
 const path = require("path");
 const mode = process.env.NODE_ENV ? process.env.NODE_ENV : "production";
-const TerserPlugin = require('terser-webpack-plugin');
+const TerserPlugin = require("terser-webpack-plugin");
 
 // config editor
 module.exports = {
@@ -31,9 +31,11 @@ module.exports = {
     },
     // don't generate License file
     optimization: {
-        minimizer: [new TerserPlugin({
-            extractComments: false,
-        })],
+        minimizer: [
+            new TerserPlugin({
+                extractComments: false,
+            }),
+        ],
     },
     devServer: {
         inline: false,
@@ -74,9 +76,11 @@ module.exports = {
     },
     // don't generate License file
     optimization: {
-        minimizer: [new TerserPlugin({
-            extractComments: false,
-        })],
+        minimizer: [
+            new TerserPlugin({
+                extractComments: false,
+            }),
+        ],
     },
     devServer: {
         inline: false,
@@ -86,4 +90,4 @@ module.exports = {
             index: "index.html",
         },
     },
-}
+};

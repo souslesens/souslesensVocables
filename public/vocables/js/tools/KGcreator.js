@@ -132,11 +132,9 @@ var KGcreator = (function () {
         }
     };
 
-    self.displayUploadApp = function() {
-        $("#graphDiv").replaceWith("<div id='mount-kg-upload-app-here'></div>").after(
-            $.getScript("/kg_upload_app.js")
-        )
-    }
+    self.displayUploadApp = function () {
+        $("#graphDiv").replaceWith("<div id='mount-kg-upload-app-here'></div>").after($.getScript("/kg_upload_app.js"));
+    };
 
     self.loadMappingsList = function () {
         self.currentCsvDir = $("#KGcreator_csvDirsSelect").val();

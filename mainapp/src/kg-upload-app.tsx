@@ -13,6 +13,10 @@ import Table from "react-bootstrap/Table";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFile, faCheck } from "@fortawesome/free-solid-svg-icons";
 
+declare global {
+    interface Window { KGcreator: any; }
+}
+
 export default function App() {
     const [sourceType, setSourceType] = useState("");
     const [subDirs, setSubDirs] = useState(Array());
@@ -22,9 +26,14 @@ export default function App() {
     const [files, setFiles] = useState(Array());
     const [uploadSuccess, setUploadSuccess] = useState(false);
 
+    const [displayNewSubDirForm , setDisplayNewSubDirForm] = useState(false);
+    const [sources, setSources] = useState(Array())
+    const [selectedNewSource, setSelectedNewSource] = useState("")
+    const [createDirSuccess, setCreateDirSuccess] = useState(false)
+
     useEffect(() => {
         fetchSubDirs();
-    }, [uploadSuccess]);
+    }, [uploadSuccess, createDirSuccess]);
 
     useEffect(() => {
         if (subDir != "") {
@@ -32,13 +41,17 @@ export default function App() {
         }
     }, [subDir, uploadSuccess]);
 
+    useEffect(() => {
+        fetchSources()
+    }, [])
+
+
     const uploadFileHandler = (event: any) => {
         setUploadSuccess(false);
         const filesList = Array.from(event.target.files);
         const filesNameList = filesList.map((file: any) => {
             return file.name;
         });
-        setFilesName(filesNameList);
         setFiles(filesList);
     };
 
@@ -56,6 +69,17 @@ export default function App() {
         });
     };
 
+    const fetchSources = async () => {
+        const response = await fetch("/api/v1/sources")
+        const json = await response.json()
+        console.log(json.resources)
+        const fetchedSources = Object.keys(json.resources).map((key) => {
+            return key
+        })
+        console.log(fetchedSources)
+        setSources(fetchedSources)
+    }
+
     const fetchSubDirs = async () => {
         const response = await fetch("/api/v1/data/files?dir=CSV");
         const json = await response.json();
@@ -65,6 +89,8 @@ export default function App() {
     const fetchFilesInSubDir = async (subDir: string) => {
         const response = await fetch("/api/v1/data/files?dir=CSV/" + subDir);
         const json = await response.json();
+        // update js app
+        window.KGcreator.listFiles(subDir) || {}
         setFilesInSubDir(json);
     };
 
@@ -77,12 +103,40 @@ export default function App() {
     const handleSubDirChange = (event: any) => {
         setUploadSuccess(false);
         setFiles(Array());
-        setSubDir(event.target.value);
+        if (event.target.value === "_newsubdir") {
+            setFilesInSubDir(Array())
+            setSubDir("")
+            setDisplayNewSubDirForm(true)
+            setUploadSuccess(false)
+        } else {
+            setSubDir(event.target.value);
+            setDisplayNewSubDirForm(false)
+        }
     };
 
+    const handleNewSubDirChange = (event: any) => {
+        setSelectedNewSource(event.target.value)
+    }
+
+    const handleClickNewSubDir = (event: any) => {
+        console.log("Add " + selectedNewSource + " source")
+        // create subdir serverside
+        const formData = new FormData();
+        formData.append("dir", "CSV");
+        formData.append("newDirName", selectedNewSource);
+        fetch("/api/v1/data/dir", { method: "POST", body: formData }).then(async (response) => {
+            console.log(response);
+            setSelectedNewSource("")
+            setDisplayNewSubDirForm(false)
+            setSubDir(selectedNewSource)
+            setCreateDirSuccess(true)
+        });
+
+    }
+
     const selectDatabaseOrFiles = (
-        <Form.Select onChange={handleSourceTypeChange} aria-label="">
-            <option disabled={true} selected={true}>
+        <Form.Select defaultValue="_default" onChange={handleSourceTypeChange} aria-label="">
+            <option value="_default" disabled={true}>
                 Select source type
             </option>
             <option value="database">Database</option>
@@ -91,31 +145,30 @@ export default function App() {
     );
 
     const selectSubDir = (
-        <Form.Select onChange={handleSubDirChange} aria-label="Default select example">
-            <option disabled={true} selected={true}>
+        <Form.Select value={subDir === "" ? "_default" : subDir} defaultValue="_default" onChange={handleSubDirChange} aria-label="Default select example">
+            <option value="_default" disabled={true}>
                 Select source
             </option>
-            {subDirs.map((dir) => {
-                return <option value={dir}>{dir}</option>;
+            {subDirs.map((dir, index) => {
+                return <option key={"select-subdir-" + index} value={dir}>{dir}</option>;
             })}
+            <option value="_newsubdir">+ Add new source</option>
         </Form.Select>
     );
 
     const fileTable = (
-        <Container>
+        <Container className="mb-3 overflow-auto" style={{maxHeight: "500px"}}>
             <Table striped>
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Size</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {filesInSubDir.map((file) => {
+                    {filesInSubDir.map((file, index) => {
                         return (
-                            <tr>
+                            <tr key={"file-table-tr-" + index}>
                                 <td>{file}</td>
-                                <td>1MB</td>
                             </tr>
                         );
                     })}
@@ -150,17 +203,36 @@ export default function App() {
         </div>
     );
 
+    const newSubDirForm = (
+        <Form.Select defaultValue="_default" aria-label="select-new-source" onChange={handleNewSubDirChange}>
+            <option value="_default" disabled={true}>
+                Select source
+            </option>
+            {sources.map((source, index) => {
+                return <option key={"select-source-" + index} value={source}>{source}</option>;
+            })}
+        </Form.Select>
+    );
+
     return (
         <Container fluid>
             <Row>
-                <Col className="pe-1">{selectDatabaseOrFiles}</Col>
-                {sourceType === "files" ? <Col className="ps-1">{selectSubDir}</Col> : null}
+                <Col className="mb-3 pe-1">{selectDatabaseOrFiles}</Col>
+                {sourceType === "files" ? <Col className="mb-3 px-1">{selectSubDir}</Col> : null}
             </Row>
             <Row>
-                {filesInSubDir.length > 0 && sourceType === "files" ? fileTable : null}
                 {sourceType === "files" && subDir != "" ? browseForm : null}
                 {/*sourceType === "files" && subDir != "" && files.length > 0 ? progressBars : null*/}
                 {sourceType === "files" && subDir != "" && files.length > 0 ? uploadButton : null}
+                {/*filesInSubDir.length > 0 && sourceType === "files" ? fileTable : null*/}
+            </Row>
+            <Row>
+                <Col className="pe-1">
+                    {displayNewSubDirForm ? newSubDirForm : null}
+                </Col>
+                <Col className="ps-1">
+                    {displayNewSubDirForm ? <Button onClick={handleClickNewSubDir} variant="secondary">Add</Button> : null}
+                </Col>
             </Row>
         </Container>
     );

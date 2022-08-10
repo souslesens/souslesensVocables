@@ -7,19 +7,13 @@
 </style>
 
 <div style="margin-left: 10px">
-    Source type :
-    <select id="KGpropertyFilter_sourceTypeSelect" onchange="KGcreator.onChangeSourceTypeSelect($(this).val())">
-        <option></option>
-        <option>CSV</option>
-        <option>DATABASE</option>
-    </select>
-
-    <select id="KGcreator_csvDirsSelect" onchange="KGcreator.listObjects()"></select>
-    <!--button onclick="KGcreator.listFiles()">List</button-->
+    <div id='mount-kg-upload-app-here'></div>
     <div class="KGcreator_tree_container">
         <div id="KGcreator_csvTreeDiv"></div>
-        <div class="my-2">
-            <button onclick="KGcreator.displayUploadApp()" class="btn btn-sm py-0 btn-outline-primary">Import file</button>
-        </div>
     </div>
 </div>
+
+<script>
+    KGcreator.displayUploadApp()
+</script>
+

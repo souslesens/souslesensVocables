@@ -122,6 +122,7 @@ var KGcreator = (function () {
         });
     };
     self.listObjects = function () {
+        console.log("KGcreator.listObjects")
         self.currentDataSourceModel = null;
         self.currentdabase = null;
         self.loadMappingsList();
@@ -133,7 +134,7 @@ var KGcreator = (function () {
     };
 
     self.displayUploadApp = function () {
-        $("#graphDiv").replaceWith("<div id='mount-kg-upload-app-here'></div>").after($.getScript("/kg_upload_app.js"));
+        $.getScript("/kg_upload_app.js")
     };
 
     self.loadMappingsList = function () {
@@ -188,8 +189,8 @@ var KGcreator = (function () {
         });
     };
 
-    self.listFiles = function () {
-        self.currentCsvDir = $("#KGcreator_csvDirsSelect").val();
+    self.listFiles = function (currentCsvDir=null) {
+        self.currentCsvDir = currentCsvDir ? currentCsvDir : $("#KGcreator_csvDirsSelect").val();
         var payload = {
             dir: "CSV/" + self.currentCsvDir,
         };

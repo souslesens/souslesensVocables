@@ -50,6 +50,20 @@ var DataController = {
     },
 
     /**
+     * Create a directory in a sub-directory of `data`
+     * @param {string} dir - directory path under data
+     * @param {string} newDirName - name of the directory to create
+     * @param {(err: Error | string | null, data: "dir created" | null) => void} callback -
+     *   function to be called after dir creation
+     */
+    createDirectory: function (dir, newDirName, callback) {
+        const dirPath = path.join(__dirname, "../data/" + dir + "/" + newDirName)
+        fs.mkdir(dirPath, {recursive: false}, function (err) {
+            return callback(err, "dir created")
+        })
+    },
+
+    /**
      * @typedef {Object} ReadCsvOptions
      * @prop {number=} lines - only read the first `lines` lines of the file
      */

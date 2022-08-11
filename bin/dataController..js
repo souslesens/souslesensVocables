@@ -57,10 +57,10 @@ var DataController = {
      *   function to be called after dir creation
      */
     createDirectory: function (dir, newDirName, callback) {
-        const dirPath = path.join(__dirname, "../data/" + dir + "/" + newDirName)
-        fs.mkdir(dirPath, {recursive: false}, function (err) {
-            return callback(err, "dir created")
-        })
+        const dirPath = path.join(__dirname, "../data/" + dir + "/" + newDirName);
+        fs.mkdir(dirPath, { recursive: false }, function (err) {
+            return callback(err, "dir created");
+        });
     },
 
     /**

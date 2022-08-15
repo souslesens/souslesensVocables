@@ -1,3 +1,11 @@
+<div style="display: flex;flex-direction: row">
+<div>
+  <div class="jstreeContainer" style="width: 350px;height: 700px">
+    <div id="LineageMerge_nodesJsTreeDiv"></div>
+  </div>
+
+</div>
+
 <div>
 
   <table>
@@ -6,7 +14,7 @@
         target Graph
       </td>
       <td>
-        <select id="LineageAggregate_targetGraphSelect"></select>
+        <select id="LineageMerge_targetGraphSelect"></select>
       </td>
     </tr>
 
@@ -15,7 +23,7 @@
         aggregate mode
       </td>
       <td>
-        <select id="LineageAggregate_aggregateModeSelect">
+        <select id="LineageMerge_aggregateModeSelect">
 
           <option>newUri</option>
           <option>keepUri</option>
@@ -28,7 +36,7 @@
         Depth
       </td>
       <td>
-        <select id="LineageAggregate_aggregateDepthSelect">
+        <select id="LineageMerge_aggregateDepthSelect">
 
           <option>node only</option>
           <option>node descendants only</option>
@@ -42,21 +50,20 @@
         Relations
       </td>
       <td>
-        <select id="LineageAggregate_aggregateRelationsSelect">
+        <input id="LineageMerge_aggregateRelationsCBX" checked="checked">
 
-          <option>no relations</option>
-          <option>restrictions</option>
 
-        </select>
       </td>
     </tr>
 
 
   </table>
-
+  <div>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#mainDialogDiv').dialog('close')">Cancel</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.mergeNodes()" >OK</button>
+  </div>
 
 </div>
-<div>
-  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#mainDialogDiv').dialog('close')">Cancel</button>
-  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.aggregateNodes()" >OK</button>
+
+
 </div>

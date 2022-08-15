@@ -38,6 +38,7 @@ var Lineage_classes = (function() {
   self.mainSource = null;
   self.isLoaded = false;
   self.currentExpandLevel = 1;
+  self.nodesSelection=[]
 
   self.onLoaded = function(/** @type {() => void} */ callback) {
     if (self.isLoaded) ; // return;
@@ -116,12 +117,12 @@ var Lineage_classes = (function() {
 
     Lineage_common.currentSource = null;
     MainController.currentSource = sourceLabel;
-
+    self.nodesSelection=[]
     if (event.button == 0) {
       // except context menu
       self.mainSource = sourceLabel;
       self.initUI(true);
-      Lineage_combine.init()
+      Lineage_combine.init();
       if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[self.mainSource].editable > -1) {
         $("#lineage_blendButtonsDiv").css("display", "block");
       } else {
@@ -175,15 +176,21 @@ var Lineage_classes = (function() {
       if (options.callee == "Graph") Lineage_classes.graphActions.graphNodeNeighborhood("all");
       else if (options.callee == "Tree") Lineage_classes.drawNodeAndParents(node.data);
     } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
-      if (node.from) {
+        self.nodesSelection.push(node);
+      $("#Lineageclasses_selectedNodesCount").html(self.nodesSelection.length)
+        visjsGraph.data.nodes.update({id:node.data.id,borderWidth:6})
+      $("#Lineage_combine_mergeNodesDialogButton").css("display","block")
+
+    /*  if (node.from) {
         let inSource = Lineage_classes.mainSource;
         Lineage_blend.deleteRestriction(inSource, node);
       } else {
         Lineage_blend.addNodeToAssociationNode(node, "source", true);
-      }
+      }*/
     } else if (nodeEvent.shiftKey && nodeEvent.altKey) {
       Lineage_blend.addNodeToAssociationNode(node, "target");
     } else if (nodeEvent.ctrlKey) {
+
       SourceBrowser.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
     } else if (nodeEvent.altKey && options.callee == "Tree") {
       SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, node.data.source, node, { reopen: true });
@@ -191,6 +198,16 @@ var Lineage_classes = (function() {
 
     return null;
   };
+
+  self.clearNodesSelection=function(){
+    var newNodes=[]
+    Lineage_classes.nodesSelection.forEach(function(node){
+      newNodes.push({id:node.data.id,borderWidth:1})
+    })
+    visjsGraph.nodes.update(newNodes)
+    Lineage_classes.nodesSelection=[]
+    $("#Lineage_combine_mergeNodesDialogButton").css("display","none")
+  }
 
   self.jstreeContextMenu = function() {
     var items = {};
@@ -2593,18 +2610,18 @@ attrs.color=self.getSourceColor(superClassValue)
 
     $("#lineage_drawnSources").append(html);
     $("#" + id).mousedown(function(e) {
-    //  e.stopPropagation();
-      e.preventDefault()
+      //  e.stopPropagation();
+      e.preventDefault();
       if (e.which === 3) {
 
         Lineage_combine.setGraphPopupMenus();
-     var point={x:e.pageX,y:e.pageY}
+        var point = { x: e.pageX, y: e.pageY };
         MainController.UI.showPopup(point, "graphPopupDiv", true);
       } else {
         Lineage_classes.setCurrentSource(encodeURIComponent(source));
       }
     });
-     self.setCurrentSource(encodeURIComponent(source))
+    self.setCurrentSource(encodeURIComponent(source));
   };
 
   self.registerSourceImports = function(/** @type {string | number} */ sourceLabel) {
@@ -2623,10 +2640,10 @@ attrs.color=self.getSourceColor(superClassValue)
     $(".Lineage_sourceLabelDiv").removeClass("Lineage_selectedSourceDiv");
     $("#Lineage_source_" + sourceId).addClass("Lineage_selectedSourceDiv");
     Lineage_common.currentSource = encodeURIComponent(sourceId);
- /*   if (!self.soucesLevelMap[sourceId].topDone) {
-      self.soucesLevelMap[sourceId].topDone = 1;
-      self.drawTopConcepts(sourceId);
-    }*/
+    /*   if (!self.soucesLevelMap[sourceId].topDone) {
+         self.soucesLevelMap[sourceId].topDone = 1;
+         self.drawTopConcepts(sourceId);
+       }*/
   };
 
   self.showHideCurrentSourceNodes = function(/** @type {any} */ hide) {

@@ -10,6 +10,10 @@ var Lineage_combine = (function() {
 
   self.init = function() {
     self.currentSources = [];
+    $("#Lineage_combine_actiosDiv").css("display","none")
+    $("#Lineage_combine_mergeNodesDialogButton").css("display","none")
+
+
   };
 
   self.addSelectedSourcesToGraph = function() {
@@ -30,6 +34,7 @@ var Lineage_combine = (function() {
       self.currentSources.push(source);
       Lineage_classes.drawTopConcepts(source, function(err) {
         if (err) return callbackEach();
+        self.menuActions.groupSource(source)
 
         callbackEach();
 
@@ -37,7 +42,10 @@ var Lineage_combine = (function() {
       });
     }, function(err) {
       if (err) return MainController.UI.message(err);
-      $("#GenericTools_searchScope").val("graphSources")
+      if(self.currentSources.length>0) {
+        $("#GenericTools_searchScope").val("graphSources")
+        $("#Lineage_combine_actiosDiv").css("display", "block")
+      }
     });
 
 
@@ -62,10 +70,11 @@ var Lineage_combine = (function() {
       Lineage_classes.showHideCurrentSourceNodes(false);
     }
     ,
-    groupSource: function() {
+    groupSource: function(source) {
       MainController.UI.hidePopup("graphPopupDiv");
 
-      var source = Lineage_common.currentSource;
+     if(!source)
+       source=Lineage_common.currentSource;
       var color = Lineage_classes.getSourceColor(source);
       var visjsData = { nodes: [], edges: [] };
       var existingNodes = visjsGraph.getExistingIdsMap();
@@ -158,9 +167,39 @@ var Lineage_combine = (function() {
     }
   };
 
-  self.showAggregateNodesDialog=function(){
-    $("#mainDialogDiv").load("snippets/lineage/lineageAggregateNodesDialog.html",function(){
-      common.fillSelectOptions("LineageAggregate_targetGraphSelect",self.currentSources)
+  self.showmergeNodesDialog=function(){
+    if(Lineage_classes.nodesSelection.length==0)
+      return alert ("no nodes selected")
+    $("#mainDialogDiv").load("snippets/lineage/lineagemergeNodesDialog.html",function(){
+      common.fillSelectOptions("LineageMerge_targetGraphSelect",[Lineage_classes.mainSource])
+
+      var jstreeData=[];
+      var distinctNodes={}
+      Lineage_classes.nodesSelection.forEach(function(node){
+        if(!distinctNodes[node.data.id]) {
+          distinctNodes[node.data.id] = 1
+          jstreeData.push({
+            id: node.data.id,
+            text: node.data.label,
+            parent: node.data.source,
+            data: node.data
+          })
+          if (!distinctNodes[node.data.source]) {
+            distinctNodes[node.data.source] = 1
+            jstreeData.push({
+              id: node.data.source,
+              text: node.data.source,
+              parent: "#",
+            })
+          }
+        }
+      })
+      var options={
+        withCheckboxes:true,openAll:true,
+      }
+     common.jstree.loadJsTree("LineageMerge_nodesJsTreeDiv",jstreeData,options)
+
+
     });
 
 
@@ -169,7 +208,61 @@ var Lineage_combine = (function() {
 
   }
 
-  self.aggregateNodes=function(){
+  self.mergeNodes=function(){
+    var targetGraph=$("#LineageMerge_targetGraphSelect").val()
+    var mergeMode=$("#LineageMerge_aggregateModeSelect").val()
+    var mergeDepth=$("#LineageMerge_aggregateDepthSelect").val()
+    var mergeRestrictions=$("#LineageMerge_aggregateRelationsCBX").prop("checked")
+
+var jstreeNodes= $("#LineageMerge_nodesJsTreeDiv").jstree(true).get_checked(true)
+
+   var  nodesToMerges=[]
+    jstreeNodes.forEach(function(node){
+      if(node.parent!="#")
+        nodesToMerges.push(node)
+    })
+
+
+    var newTriples=[]
+
+
+
+
+
+
+
+
+
+
+      async.series([
+
+        //get node triple
+        function(callbackSeries) {
+        var objTriples=[];
+
+
+
+
+          return callbackSeries();
+        },
+        //set descendants triple
+        function(callbackSeries) {
+          return callbackSeries();
+        },
+
+        //set restrictions triple
+        function(callbackSeries) {
+          return callbackSeries();
+        }
+
+      ], function(err) {
+        callbackEach(err)
+      })
+
+    async.eachSeries(nodesToMerges,function(node,callbackEach) {
+    },function(err){
+
+    })
 
   }
 

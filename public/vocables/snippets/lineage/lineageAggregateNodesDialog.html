@@ -1,0 +1,62 @@
+<div>
+
+  <table>
+    <tr>
+      <td>
+        target Graph
+      </td>
+      <td>
+        <select id="LineageAggregate_targetGraphSelect"></select>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        aggregate mode
+      </td>
+      <td>
+        <select id="LineageAggregate_aggregateModeSelect">
+
+          <option>newUri</option>
+          <option>keepUri</option>
+        </select>
+      </td>
+    </tr>
+
+    <tr>
+      <td>
+        Depth
+      </td>
+      <td>
+        <select id="LineageAggregate_aggregateDepthSelect">
+
+          <option>node only</option>
+          <option>node descendants only</option>
+          <option>node and children</option>
+          <option>node and all descendants</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Relations
+      </td>
+      <td>
+        <select id="LineageAggregate_aggregateRelationsSelect">
+
+          <option>no relations</option>
+          <option>restrictions</option>
+
+        </select>
+      </td>
+    </tr>
+
+
+  </table>
+
+
+</div>
+<div>
+  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#mainDialogDiv').dialog('close')">Cancel</button>
+  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.aggregateNodes()" >OK</button>
+</div>

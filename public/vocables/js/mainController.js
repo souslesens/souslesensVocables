@@ -45,7 +45,12 @@ var MainController = (function() {
       dataType: "json",
 
       success: function(data_, _textStatus, _jqXHR) {
-        var json = JSON.parse(data_);
+        try {
+          var json = JSON.parse(data_);
+        }
+        catch(e){
+          callback(e);
+        }
         callback(null, json);
       },
       error(err) {
@@ -308,7 +313,7 @@ var MainController = (function() {
       if (!jstreeOptions.contextMenu) jstreeOptions.contextMenu = MainController.UI.getJstreeConceptsContextMenu();
       if (withCBX) jstreeOptions.withCheckboxes = withCBX;
 
-      if (!jstreeOptions.selectTreeNodeFn)
+      if (!withCBX && !jstreeOptions.selectTreeNodeFn)
         jstreeOptions.selectTreeNodeFn = function(evt, obj) {
           if (!Config.sources[obj.node.id]) return;
           $("#mainDialogDiv").dialog("close");

@@ -86,7 +86,7 @@
     .Lineage_objectDivContainer {
         display: flex;
         flex-wrap: wrap;
-        max-height: 200px;
+        max-height: 300px;
         overflow: auto;
         margin-left: 10px;
     }
@@ -120,110 +120,20 @@
         <div class="lineage_actionDiv">
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.initUI()">Clear all</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.clearLastAddedNodes()">Clear last</button>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showHideCurrentSourceNodes()">show/hide</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showLastAddedNodesOnly()">Last only</button>
+          <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showHideCurrentSourceNodes()">show/hide</button>
 
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showHideHelp()">help</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showHideHelp()">help</button>-->
         </div>
     </div>
 
-    <!--
-    <div class="lineage_actionDiv" style="display: flex; flex-direction: column; margin: 5px" id="lineage_blendDiv">
-        <div>
-            source node
-            <div id="lineage_sourceNodeDiv" style="background-color: #8792a2; font-weight: bold; text-align: center"></div>
-        </div>
-        <div>
-            target node
-            <div id="lineage_targetNodeDiv" style="background-color: #8792a2; font-weight: bold; text-align: center"></div>
-        </div>
-        <div id="lineage_blendButtonsDiv" style="margin: 5px; display: none">
-            <div style="display: flex; flex-direction: row">
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_blend.createNode()">Create Node</button>&nbsp;
-                <button id="lineage_blendCreateSubClassButton" class="btn btn-sm my-1 py-0 btn-outline-primary" style="display: none" class="lineage_button" onclick="Lineage_blend.createSubClass()">
-                    Create subClass
-                </button>
-            </div>
-            <div id="lineage_createRelationButtonsDiv" style="margin: 5px; display: none">
-                <div style="border: solid 1px brown; padding: 2px; margin: 2px">
-                    Property
-                    <select id="lineage_createRelationPropertySelect" style="width: 200px"></select
-                    ><br />
-                    <input type="checkbox" id="lineage_blendSameAsInverseCBX" checked="checked" /> +Inverse
-                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_blend.createRelationUI()">Create Relation</button>
-                </div>
-            </div>
-            <br />
-            <button
-                id="lineage_blendToGraphButton"
-                class="btn btn-sm my-1 py-0 btn-outline-primary"
-                class="lineage_button"
-                style="display: none"
-                onclick="Lineage_blend.importNodeInCurrentMainSource()"
-            >
-                Import Node in main source
-            </button>
+    <div class="lineage_actionDiv" style="margin: 5px; display: block">
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.showSourcesDialog()">Add sources...</button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.getSimilars('graph')">Draw all Similars</button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.showAggregateNodesDialog()">Aggregate Nodes</button>
 
-            <br />
-            <button
-                class="btn btn-sm my-1 py-0 btn-outline-primary"
-                class="lineage_button"
-                id="transformSameLabelsEdgesIntoSameAsRelationsButton"
-                style="display: none"
-                onclick="Lineage_blend.transformSameLabelsEdgesIntoSameAsRelations()"
-            >
-                transform SameLabelsEdges Into SameAsRelations
-            </button>
-        </div>
 
-        <div id="lineage_actionDiv_Keyslegend" style="display: none">
-            <table class="lineage_actionDiv_legend">
-                <tr>
-                    <td>object</td>
-                    <td>ctrl</td>
-                    <td>shift</td>
-                    <td>alt</td>
-                    <td>action</td>
-                </tr>
-                <tr>
-                    <td>node/edge</td>
-                    <td>X</td>
-                    <td></td>
-                    <td></td>
-                    <td>show infos</td>
-                </tr>
-                <tr>
-                    <td>node</td>
-                    <td>X</td>
-                    <td>X</td>
-                    <td></td>
-                    <td>burst</td>
-                </tr>
-                <tr>
-                    <td>node</td>
-                    <td>X</td>
-                    <td></td>
-                    <td>X</td>
-                    <td>select as source</td>
-                </tr>
-                <tr>
-                    <td>node</td>
-                    <td></td>
-                    <td>X</td>
-                    <td>X</td>
-                    <td>select as target</td>
-                </tr>
-                <tr>
-                    <td>edge</td>
-
-                    <td>X</td>
-                    <td></td>
-                    <td>X</td>
-                    <td>delete relation</td>
-                </tr>
-            </table>
-        </div>
     </div>
--->
     <div class="lineage_actionDiv" style="margin: 5px; display: block">
         <span id="lineage_sourceDescriptionDiv"></span>
     </div>

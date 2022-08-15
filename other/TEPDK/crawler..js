@@ -36,9 +36,12 @@ var crawler = {
                     if (lines && jsonDataFetch.length >= lines) {
                         if (processor) {
                             processor(jsonDataFetch, headers, filePath, function (err) {});
+
+                        }else{
+                            jsonData.push(jsonDataFetch);
                         }
 
-                        jsonData.push(jsonDataFetch);
+
                         jsonDataFetch = [];
                     }
                 })

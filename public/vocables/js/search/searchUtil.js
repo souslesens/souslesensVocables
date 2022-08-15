@@ -1,6 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var SearchUtil = (function () {
     var self = {};
+    self.existingIndexes=null
+
 
     /**
      * @param fromSource if null ids or labels are mandatory
@@ -11,6 +13,7 @@ var SearchUtil = (function () {
      * @param callback array of source objects containing each target sources object matches
      */
     self.getSimilarLabelsInSources = function (fromSource, toSources, labels, ids, mode, options, callback) {
+
         if (!options) options = {};
         var resultSize = 1;
         var size = 200;
@@ -35,11 +38,11 @@ var SearchUtil = (function () {
                                 if (err) return callbackSeries(err);
 
                                 indexes = [];
-                                if (toSources) {
+                              /*  if (toSources) {
                                     toSources.forEach(function (source) {
                                         indexes.push(source.toLowerCase());
                                     });
-                                }
+                                }*/
                                 indexedSources.forEach(function (source) {
                                     if (!toSources || toSources.length == 0 || toSources.indexOf(source) > -1) {
                                         indexes.push(source.toLowerCase());
@@ -243,6 +246,7 @@ var SearchUtil = (function () {
     };
 
     self.getElasticSearchMatches = function (words, indexes, mode, from, size, callback) {
+
         $("#waitImg").css("display", "block");
         //   MainController.UI.message("Searching exact matches ")
 
@@ -540,6 +544,42 @@ var SearchUtil = (function () {
         }
         return null;
     };
+
+
+    self.getExistingIndexes=function(indices,callback){
+        function filterIndices(){
+            if(!indices)
+                return   self.existingIndexes
+            var indices2=[]
+            indices.forEach(function(index){
+                if(  self.existingIndexes.indexOf(index)>-1)
+                    indices2.push(index)
+            })
+            return indices2;
+        }
+
+        if(self.existingIndexes) {
+            var filteredIndices=filterIndices(indices)
+            return filteredIndices;
+        }else{
+
+            $.ajax({
+                type: "GET",
+                url: Config.apiUrl + "/elasticsearch/indices",
+                dataType: "json",
+
+                success: function (data, _textStatus, _jqXHR) {
+                    self.existingIndexes=data
+                    var filteredIndices=filterIndices(indices)
+                    callback(null,filteredIndices)
+                },
+                error(err) {
+                    return callback(err.responseText);
+                },
+            });
+        }
+    }
+
 
     return self;
 })();

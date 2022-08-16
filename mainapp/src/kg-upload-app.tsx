@@ -8,84 +8,88 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import ProgressBar from "react-bootstrap/ProgressBar";
-import Table from "react-bootstrap/Table";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFile, faCheck } from "@fortawesome/free-solid-svg-icons";
 
 declare global {
     interface Window {
-        KGcreator: any;
+        KGcreator: {
+            listFiles: (subDir: string) => void;
+            listTables: (subDir: string) => void;
+            currentSourceType: string;
+        };
     }
 }
 
 export default function App() {
     const [sourceType, setSourceType] = useState("");
-    const [subDirs, setSubDirs] = useState(Array());
+    const [subDirs, setSubDirs] = useState<string[]>([]);
     const [subDir, setSubDir] = useState("");
-    const [filesInSubDir, setFilesInSubDir] = useState(Array());
-    const [databases, setDatabases] = useState(Array());
-    const [files, setFiles] = useState(Array());
+    const [databases, setDatabases] = useState<string[]>([]);
+    const [files, setFiles] = useState<File[]>([]);
     const [uploadSuccess, setUploadSuccess] = useState(false);
-    const [selectedDatabase, setSelectedDatabase] = useState("");
     const [displayNewSubDirForm, setDisplayNewSubDirForm] = useState(false);
-    const [sources, setSources] = useState(Array());
+    const [sources, setSources] = useState<string[]>([]);
     const [selectedNewSource, setSelectedNewSource] = useState("");
     const [createDirSuccess, setCreateDirSuccess] = useState(false);
+    const [selectedDatabase, setSelectedDatabase] = useState("_default");
 
     useEffect(() => {
-        fetchSubDirs();
+        void fetchSubDirs();
     }, [uploadSuccess, createDirSuccess]);
 
     useEffect(() => {
         if (subDir != "") {
-            fetchFilesInSubDir(subDir);
+            void fetchFilesInSubDir(subDir);
         }
     }, [subDir, uploadSuccess]);
 
     useEffect(() => {
-        fetchDatabases();
+        void fetchDatabases();
     }, []);
 
     useEffect(() => {
-        fetchSources();
+        void fetchSources();
     }, []);
 
-    const uploadFileHandler = (event: any) => {
+    const uploadFileHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         setUploadSuccess(false);
-        const filesList = Array.from(event.target.files);
-        const filesNameList = filesList.map((file: any) => {
-            return file.name;
-        });
+        if (event.currentTarget.files === null) {
+            return;
+        }
+        const filesList = Array.from(event.currentTarget.files);
         setFiles(filesList);
     };
 
-    const fileSubmitHandler = (event: any) => {
+    const fileSubmitHandler = async (event: React.FormEvent) => {
         event.preventDefault();
         const formData = new FormData();
         formData.append("path", subDir);
-        files.forEach((file: any) => {
-            formData.append("files", file);
+        files.forEach((file) => {
+            formData.append(file.name, file);
         });
 
-        fetch("/api/v1/upload", { method: "POST", body: formData }).then(async (response) => {
+        const response = await fetch("/api/v1/upload", { method: "POST", body: formData });
+        if (response.status === 201) {
             setUploadSuccess(true);
-        });
+        } else {
+            setUploadSuccess(false);
+            // todo: display error message
+        }
     };
 
     const fetchSources = async () => {
         const response = await fetch("/api/v1/sources");
-        const json = await response.json();
-        const fetchedSources = Object.keys(json.resources).map((key) => {
-            return key;
-        });
+        const json = (await response.json()) as { resources: Record<string, any> };
+        const fetchedSources = Object.keys(json.resources);
         setSources(fetchedSources);
     };
 
     const fetchDatabases = async () => {
         const response = await fetch("/api/v1/kg/data?type=sql.sqlserver&dbName=TEPDK2&sqlQuery=SELECT name FROM sys.databases");
-        const json = await response.json();
-        const dbs = json.map((db: any) => {
+        const json = (await response.json()) as { name: string }[];
+        const dbs = json.map((db) => {
             return db.name;
         });
         setDatabases(dbs);
@@ -93,60 +97,58 @@ export default function App() {
 
     const fetchSubDirs = async () => {
         const response = await fetch("/api/v1/data/files?dir=CSV");
-        const json = await response.json();
+        const json = (await response.json()) as string[];
         setSubDirs(json);
     };
 
     const fetchFilesInSubDir = async (subDir: string) => {
         const response = await fetch("/api/v1/data/files?dir=CSV/" + subDir);
-        const json = await response.json();
+        (await response.json()) as string[];
         // update js app
-        window.KGcreator.listFiles(subDir) || {};
-        setFilesInSubDir(json);
+        window.KGcreator.listFiles(subDir);
     };
 
-    const handleSourceTypeChange = (event: any) => {
+    const handleSourceTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setUploadSuccess(false);
-        setFiles(Array());
-        setSourceType(event.target.value);
+        setFiles([]);
+        setSourceType(event.currentTarget.value);
         // update js app
-        window.KGcreator.currentSourceType = event.target.value === "files" ? "CSV" : "DATABASE";
+        window.KGcreator.currentSourceType = event.currentTarget.value === "files" ? "CSV" : "DATABASE";
     };
 
-    const handleSubDirChange = (event: any) => {
+    const handleSubDirChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setUploadSuccess(false);
-        setFiles(Array());
-        if (event.target.value === "_newsubdir") {
-            setFilesInSubDir(Array());
+        setFiles([]);
+        if (event.currentTarget.value === "_newsubdir") {
             setSubDir("");
             setDisplayNewSubDirForm(true);
             setUploadSuccess(false);
         } else {
-            setSubDir(event.target.value);
+            setSubDir(event.currentTarget.value);
             setDisplayNewSubDirForm(false);
         }
     };
 
-    const handleNewSubDirChange = (event: any) => {
-        setSelectedNewSource(event.target.value);
+    const handleNewSubDirChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedNewSource(event.currentTarget.value);
     };
 
-    const handleDatabaseChange = (event: any) => {
-        setSelectedDatabase(event.target.value);
-        window.KGcreator.listTables(event.target.value) || {};
+    const handleDatabaseChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const db = event.currentTarget.value;
+        setSelectedDatabase(db);
+        window.KGcreator.listTables(db);
     };
 
-    const handleClickNewSubDir = (event: any) => {
+    const handleClickNewSubDir = async () => {
         // create subdir serverside
         const formData = new FormData();
         formData.append("dir", "CSV");
         formData.append("newDirName", selectedNewSource);
-        fetch("/api/v1/data/dir", { method: "POST", body: formData }).then(async (response) => {
-            setSelectedNewSource("");
-            setDisplayNewSubDirForm(false);
-            setSubDir(selectedNewSource);
-            setCreateDirSuccess(true);
-        });
+        await fetch("/api/v1/data/dir", { method: "POST", body: formData });
+        setSelectedNewSource("");
+        setDisplayNewSubDirForm(false);
+        setSubDir(selectedNewSource);
+        setCreateDirSuccess(true);
     };
 
     const selectDatabaseOrFiles = (
@@ -164,9 +166,9 @@ export default function App() {
             <option value="_default" disabled={true}>
                 Select source
             </option>
-            {subDirs.map((dir, index) => {
+            {subDirs.map((dir) => {
                 return (
-                    <option key={"select-subdir-" + index} value={dir}>
+                    <option key={dir} value={dir}>
                         {dir}
                     </option>
                 );
@@ -176,13 +178,13 @@ export default function App() {
     );
 
     const selectDatabase = (
-        <Form.Select defaultValue="_default" onChange={handleDatabaseChange} aria-label="Select database">
+        <Form.Select defaultValue="_default" value={selectedDatabase} onChange={handleDatabaseChange} aria-label="Select database">
             <option value="_default" disabled={true}>
                 Select database
             </option>
-            {databases.map((database, index) => {
+            {databases.map((database) => {
                 return (
-                    <option key={"select-database-" + index} value={database}>
+                    <option key={database} value={database}>
                         {database}
                     </option>
                 );
@@ -201,7 +203,7 @@ export default function App() {
 
     const progressBars = files.map((file) => {
         return (
-            <div className="mb-1">
+            <div key={file.name} className="mb-1">
                 <div className="text-center">{file.name}</div>
                 <ProgressBar now={uploadSuccess ? 100 : 0} label={`${uploadSuccess ? 100 : 0}%`} />
             </div>
@@ -221,13 +223,11 @@ export default function App() {
             <option value="_default" disabled={true}>
                 Select source
             </option>
-            {sources.map((source, index) => {
-                return (
-                    <option key={"select-source-" + index} value={source}>
-                        {source}
-                    </option>
-                );
-            })}
+            {sources.map((source) => (
+                <option key={source} value={source}>
+                    {source}
+                </option>
+            ))}
         </Form.Select>
     );
 

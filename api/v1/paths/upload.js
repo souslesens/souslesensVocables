@@ -1,3 +1,5 @@
+const path = require("path");
+
 module.exports = function () {
     let operations = {
         POST,
@@ -5,16 +7,19 @@ module.exports = function () {
 
     async function POST(req, res, next) {
         try {
-            const files = Array.isArray(Object.assign([], req.files).files) ? Object.assign([], req.files).files : Array(Object.assign([], req.files).files);
-
-            files.forEach((file) => {
-                file.mv("data/CSV/" + req.body.path + "/" + file.name);
-            });
+            const outputPath = path.join("data/CSV", req.body.path);
+            for (const file of Object.values(req.files)) {
+                const filePath = path.join(outputPath, file.name);
+                if (!filePath.startsWith("data/CSV/")) {
+                    return res.status(403).json({ done: false, message: "forbidden path" });
+                }
+                file.mv(filePath);
+            }
         } catch (err) {
             next(err);
             return res.status(500).json({ done: false });
         }
-        return res.status(200).json({ done: true });
+        return res.status(201).json({ done: true });
     }
     POST.apiDoc = {
         summary: "Upload files",

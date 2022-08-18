@@ -659,14 +659,16 @@ var xx = result
         },
         addTripleToCreatingNode: function (predicate, object) {
             var uriType = $("#LineageBlend_creatingNodeUriType").val();
+            var specificUri=$("#LineageBlend_creatingNodeSubjectUri").val()
+            if(specificUri)
+                uriType= "specific"
             if (!self.graphModification.creatingsourceUri) {
                 let graphUri = Config.sources[Lineage_classes.mainSource].graphUri;
                 if (uriType == "fromLabel") self.graphModification.creatingsourceUri = graphUri + common.formatStringForTriple(object, true);
                 else if (uriType == "randomHexaNumber") self.graphModification.creatingsourceUri = graphUri + common.getRandomHexaId(10);
                 else if (uriType == "specific") {
-                    let subjectUri = $("#LineageBlend_creatingNodeSubjectUri").val();
-                    if (subjectUri) {
-                        self.graphModification.creatingsourceUri = graphUri + common.getRandomHexaId(10);
+                    if (specificUri) {
+                        self.graphModification.creatingsourceUri = specificUri;
                     } else {
                         return alert("enter a specific URI");
                     }

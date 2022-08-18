@@ -244,7 +244,7 @@ var Export = (function() {
       });
       var cols = [];
       for (var i = 0; i <= maxParentsLength; i++) {
-        cols.push({ title: "Level" + i, defaultContent: "" });
+        cols.push({ title: "Label_level_" + i, defaultContent: "" });
       }
 
       matrixLabels.forEach(function(line, lineIndex) {
@@ -254,7 +254,12 @@ var Export = (function() {
         matrixLabels[lineIndex] = matrixLabels[lineIndex].concat(matrixIds[lineIndex]);
       });
       cols.push({ title: "-----", defaultContent: "" });
-      cols = cols.concat(cols);
+     // cols = cols.concat(cols);
+      for (var i = 0; i <= maxParentsLength; i++) {
+        cols.push({ title: "ID_level_" + i, defaultContent: "" });
+
+      }
+      cols.push({ title: "-----", defaultContent: "" });
 
       MainController.UI.message("", true);
       Export.showDataTable(null, cols, matrixLabels);

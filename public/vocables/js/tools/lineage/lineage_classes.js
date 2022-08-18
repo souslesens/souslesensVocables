@@ -155,10 +155,15 @@ var Lineage_classes = (function() {
         if (!self.mainSource) {
           self.initUI(true);
         }
-
+        self.setCurrentSource(self.mainSource)
         Lineage_relations.init(true);
 
         Lineage_individuals.init();
+
+        if(!visjsGraph.isGraphNotEmpty() && Config.sources[self.mainSource].editable){
+          var visjsData={nodes:[],edges:[]}
+        self.drawNewGraph(visjsData)
+        }
       });
     }
   };

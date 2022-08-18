@@ -216,10 +216,11 @@ var MainController = (function() {
 
   self.UI = {
     test: function() {
+      Lineage_combine.testMerge()
       //  Orchestrator.createTab()
       // broadcastChannel.postMessage("eeee")
-      broadcastChannel.postMessage({ from: MainController.currentTool, to: "Lineage" });
-      return;
+   /*   broadcastChannel.postMessage({ from: MainController.currentTool, to: "Lineage" });
+      return;*/
     },
 
     initialGraphDivWitdh: 0,
@@ -483,7 +484,9 @@ return*/
     },
 
     setCredits: function() {
-      var html = "<div>" + "  <img  src=\"images/souslesensVocables.png\" style='display: block; margin-left: auto; margin-right: auto width: 50%;margin: auto;'>" + "</div>";
+      var html = "<div>" + " " +
+        " <img  src=\"images/souslesensVocables.png\" style='display: block; margin-left: auto; margin-right: auto width: 50%;margin: auto;'>"
+           + "</div>";
       $("#graphDiv").html(html);
     },
 
@@ -559,6 +562,12 @@ return*/
   self.test = function() {
     //   bc.postMessage("bc")
   };
+
+  self.showPart14AxiomsImage=function(){
+    $("#mainDialogDiv").html(  "ISO-15926 part14 axioms<br><img  src=\"images/part14Axioms.png\" style='display: block; margin-left: auto; margin-right: auto width:400px;margin: auto;'>" )
+    $("#mainDialogDiv").dialog("open")
+
+  }
 
   return self;
 })();

@@ -1776,6 +1776,13 @@ namedIndividualsMap[item.concept.value] = 1
       });
     }
   };
+  self.drawDirectRestrictions = function(){
+    self.drawRestrictions(null,null,null,null,{inverse:false})
+  }
+  self.drawInverseRestrictions = function(){
+    self.drawRestrictions(null,null,null,null,{inverse:true})
+  }
+
 
   self.drawRestrictions = function(
     /** @type {any} */ source,
@@ -1798,16 +1805,21 @@ namedIndividualsMap[item.concept.value] = 1
     async.series(
       [
         function(callbackSeries) {
-          var options = { withoutImports: Lineage_common.currentSource || false };
-          Sparql_OWL.getObjectRestrictions(source, classIds, options, function(err, _result) {
+        if(options.inverse)
+          return callbackSeries();
+          var _options = { withoutImports: Lineage_common.currentSource || false };
+          Sparql_OWL.getObjectRestrictions(source, classIds, _options, function(err, _result) {
             if (err) callbackSeries(err);
             result = result.concat(_result);
             callbackSeries();
           });
         },
+
         function(callbackSeries) {
-          var options = { withoutImports: Lineage_common.currentSource || false, inverseRestriction: 1 };
-          Sparql_OWL.getObjectRestrictions(source, classIds, options, function(err, _result) {
+          if(!options.inverse)
+            return callbackSeries();
+          var _options = { withoutImports: Lineage_common.currentSource || false, inverseRestriction: 1 };
+          Sparql_OWL.getObjectRestrictions(source, classIds, _options, function(err, _result) {
             if (err) callbackSeries(err);
             result = result.concat(_result);
             callbackSeries();

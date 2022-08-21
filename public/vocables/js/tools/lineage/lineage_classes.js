@@ -38,7 +38,7 @@ var Lineage_classes = (function() {
   self.mainSource = null;
   self.isLoaded = false;
   self.currentExpandLevel = 1;
-  self.nodesSelection=[]
+  self.nodesSelection = [];
 
   self.onLoaded = function(/** @type {() => void} */ callback) {
     if (self.isLoaded) ; // return;
@@ -117,7 +117,7 @@ var Lineage_classes = (function() {
 
     Lineage_common.currentSource = null;
     MainController.currentSource = sourceLabel;
-    self.nodesSelection=[]
+    self.nodesSelection = [];
     if (event.button == 0) {
       // except context menu
       self.mainSource = sourceLabel;
@@ -132,10 +132,12 @@ var Lineage_classes = (function() {
 
       if (!Lineage_common.currentSource) {
         Lineage_classes.drawTopConcepts(sourceLabel, function(/** @type {any} */ err) {
+          self.setCurrentSource(self.mainSource);
           if (err) return MainController.UI.message(err);
           //  SourceBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineagejsTreeDiv" });
         });
       }
+      self.setCurrentSource(self.mainSource);
       $("#Lineage_sourceLabelDiv").html(sourceLabel);
 
       var schemaType = Config.sources[sourceLabel].schemaType;
@@ -155,14 +157,14 @@ var Lineage_classes = (function() {
         if (!self.mainSource) {
           self.initUI(true);
         }
-        self.setCurrentSource(self.mainSource)
+
         Lineage_relations.init(true);
 
         Lineage_individuals.init();
 
-        if(!visjsGraph.isGraphNotEmpty() && Config.sources[self.mainSource].editable){
-          var visjsData={nodes:[],edges:[]}
-        self.drawNewGraph(visjsData)
+        if (!visjsGraph.isGraphNotEmpty() && Config.sources[self.mainSource].editable) {
+          var visjsData = { nodes: [], edges: [] };
+          self.drawNewGraph(visjsData);
         }
       });
     }
@@ -181,17 +183,14 @@ var Lineage_classes = (function() {
       if (options.callee == "Graph") Lineage_classes.graphActions.graphNodeNeighborhood("all");
       else if (options.callee == "Tree") Lineage_classes.drawNodeAndParents(node.data);
     } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
-        self.nodesSelection.push(node);
-      $("#Lineageclasses_selectedNodesCount").html(self.nodesSelection.length)
-        visjsGraph.data.nodes.update({id:node.data.id,borderWidth:6})
-      $("#Lineage_combine_mergeNodesDialogButton").css("display","block")
+      self.selection.addNodeToSelection(node);
 
-    /*  if (node.from) {
-        let inSource = Lineage_classes.mainSource;
-        Lineage_blend.deleteRestriction(inSource, node);
-      } else {
-        Lineage_blend.addNodeToAssociationNode(node, "source", true);
-      }*/
+      /*  if (node.from) {
+          let inSource = Lineage_classes.mainSource;
+          Lineage_blend.deleteRestriction(inSource, node);
+        } else {
+          Lineage_blend.addNodeToAssociationNode(node, "source", true);
+        }*/
     } else if (nodeEvent.shiftKey && nodeEvent.altKey) {
       Lineage_blend.addNodeToAssociationNode(node, "target");
     } else if (nodeEvent.ctrlKey) {
@@ -204,15 +203,6 @@ var Lineage_classes = (function() {
     return null;
   };
 
-  self.clearNodesSelection=function(){
-    var newNodes=[]
-    Lineage_classes.nodesSelection.forEach(function(node){
-      newNodes.push({id:node.data.id,borderWidth:1})
-    })
-    visjsGraph.nodes.update(newNodes)
-    Lineage_classes.nodesSelection=[]
-    $("#Lineage_combine_mergeNodesDialogButton").css("display","none")
-  }
 
   self.jstreeContextMenu = function() {
     var items = {};
@@ -502,6 +492,7 @@ Lineage_classes.drawSimilarsNodes("sameAs")
       keepNodePositionOnDrag: true,
       onclickFn: Lineage_classes.graphActions.onNodeClick,
       onRightClickFn: Lineage_classes.graphActions.showGraphPopupMenu,
+      onHoverNodeFn: Lineage_classes.selection.selectNodesOnHover,
       physics: {
         barnesHut: {
           springLength: 0,
@@ -2550,7 +2541,9 @@ upperNodeIds.push(id);
       Lineage_individuals.setClass(self.currentGraphNode);
       //Lineage_classes.drawNamedIndividuals([self.currentGraphNode.id]);
     }
+
   };
+
 
   self.getSourceColor = function(/** @type {string | number} */ source, /** @type {string | string[]} */ nodeId, /** @type {string} */ palette) {
     if (!palette) palette = "paletteIntense";
@@ -2677,6 +2670,97 @@ attrs.color=self.getSourceColor(superClassValue)
     if (display == "none") display = "block";
     else display = "none";
     $("#lineage_actionDiv_Keyslegend").css("display", display);
+  };
+
+
+  self.selection = {
+    addNodeToSelection: function(node) {
+      self.nodesSelection.push(node);
+      $("#Lineageclasses_selectedNodesCount").html(self.nodesSelection.length);
+      visjsGraph.data.nodes.update({ id: node.data.id, borderWidth: 6 });
+      $("#Lineage_combine_mergeNodesDialogButton").css("display", "block");
+
+    },
+    clearNodesSelection: function(ids) {
+      if (ids && !Array.isArray(ids))
+        ids = [ids];
+      var newNodes = [];
+      var newSelection = [];
+      Lineage_classes.nodesSelection.forEach(function(node) {
+        if (!ids || ids.indexOf(node.data.id) > -1)
+          newNodes.push({ id: node.data.id, borderWidth: 1 });
+        if (ids && ids.indexOf(node.data.id) < 0)
+          newSelection.push(node);
+
+      });
+      visjsGraph.data.nodes.update(newNodes);
+      Lineage_classes.nodesSelection = newSelection;
+      $("#Lineageclasses_selectedNodesCount").html(self.nodesSelection.length);
+      $("#Lineage_combine_mergeNodesDialogButton").css("display", "none");
+    }
+    ,
+
+    getSelectedNodesTree: function() {
+      var jstreeData = [];
+      var distinctNodes = {};
+      Lineage_classes.nodesSelection.forEach(function(node) {
+        if (!distinctNodes[node.data.id]) {
+          distinctNodes[node.data.id] = 1;
+          jstreeData.push({
+            id: node.data.id,
+            text: node.data.label,
+            parent: node.data.source,
+            data: node.data
+          });
+          if (!distinctNodes[node.data.source]) {
+            distinctNodes[node.data.source] = 1;
+            jstreeData.push({
+              id: node.data.source,
+              text: node.data.source,
+              parent: "#"
+            });
+          }
+        }
+      });
+      return jstreeData;
+    },
+
+    listNodesSelection: function() {
+      if (Lineage_classes.nodesSelection.length == 0)
+        alert("no node selection");
+      var jstreeData = Lineage_classes.selection.getSelectedNodesTree();
+      var options = {
+        openAll: true,
+        selectTreeNodeFn:Lineage_classes.selection.onSelectedNodeTreeclick
+      };
+      $("#mainDialogDiv").html("<div style=\"display: flex;flex-direction: row\">" +
+        " <div>" +
+        "    Selected nodes  <div class=\"jstreeContainer\" style=\"width: 350px;height: 700px;overflow: auto\">" +
+        "      <div id=\"LineageClasses_selectdNodesTreeDiv\"></div>" +
+        "    </div>" +
+        " </div>" +
+        "<div id='LineageClasses_selectdNodesInfosDiv' style=\"width: 650px;height: 700px;overflow: auto\" ></div>" +
+        "</div>");
+      $("#mainDialogDiv").dialog("open");
+      common.jstree.loadJsTree("LineageClasses_selectdNodesTreeDiv", jstreeData, options, function(err, result) {
+
+      });
+
+    },
+
+    selectNodesOnHover: function(node, point, options) {
+      if (options.ctrlKey && options.altKey) {
+        self.selection.addNodeToSelection(node);
+      } else if (options.ctrlKey && options.shiftKey) {
+        self.selection.clearNodesSelection(node.data.id);
+      }
+    },
+    onSelectedNodeTreeclick:function(event, obj){
+      var node=obj.node
+      if(node.parent=="#")
+        return;
+      SourceBrowser.showNodeInfos  (node.data.source, node, "LineageClasses_selectdNodesInfosDiv")
+    }
   };
 
   return self;

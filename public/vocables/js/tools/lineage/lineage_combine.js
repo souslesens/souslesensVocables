@@ -169,33 +169,14 @@ var Lineage_combine = (function() {
       }
     };
 
-    self.showmergeNodesDialog = function() {
+
+    self.showMergeNodesDialog = function() {
       if (Lineage_classes.nodesSelection.length == 0)
         return alert("no nodes selected");
       $("#mainDialogDiv").load("snippets/lineage/lineageAggregateMergeNodesDialog.html", function() {
         common.fillSelectOptions("LineageMerge_targetSourceSelect", [Lineage_classes.mainSource]);
+        var jstreeData = Lineage_classes.selection.getSelectedNodesTree();
 
-        var jstreeData = [];
-        var distinctNodes = {};
-        Lineage_classes.nodesSelection.forEach(function(node) {
-          if (!distinctNodes[node.data.id]) {
-            distinctNodes[node.data.id] = 1;
-            jstreeData.push({
-              id: node.data.id,
-              text: node.data.label,
-              parent: node.data.source,
-              data: node.data
-            });
-            if (!distinctNodes[node.data.source]) {
-              distinctNodes[node.data.source] = 1;
-              jstreeData.push({
-                id: node.data.source,
-                text: node.data.source,
-                parent: "#"
-              });
-            }
-          }
-        });
         var options = {
           withCheckboxes: true, openAll: true
         };
@@ -205,11 +186,7 @@ var Lineage_combine = (function() {
 
 
       });
-
-
       $("#mainDialogDiv").dialog("open");
-
-
     };
 
     self.mergeNodes = function(testObj) {
@@ -309,37 +286,37 @@ var Lineage_combine = (function() {
             });
           },
           //get all node ids object triple includin descendants
-     /*     function(callbackSeries) {
-            Sparql_OWL.getAllTriples(source, "object", ids, {}, function(err, result) {
-              if (err)
-                return callbackSeries(err);
-              nodesToMerge[source].objectTriples = result;
-              callbackSeries();
-            });
-          },
-          //get restrictions triple including descendants
-          function(callbackSeries) {
-            if (!mergeRestrictions)
-              return callbackSeries();
+          /*     function(callbackSeries) {
+                 Sparql_OWL.getAllTriples(source, "object", ids, {}, function(err, result) {
+                   if (err)
+                     return callbackSeries(err);
+                   nodesToMerge[source].objectTriples = result;
+                   callbackSeries();
+                 });
+               },
+               //get restrictions triple including descendants
+               function(callbackSeries) {
+                 if (!mergeRestrictions)
+                   return callbackSeries();
 
-            Sparql_OWL.getObjectRestrictions(source, ids, {}, function(err, result) {
-              if (err)
-                return callbackSeries(err);
-              nodesToMerge[source].restrictions = result;
-              callbackSeries();
-            });
-          },
-          //get inverse restrictions triple including descendants
-          function(callbackSeries) {
-            if (!mergeRestrictions)
-              return callbackSeries();
-            Sparql_OWL.getObjectRestrictions(source, ids, { inverseRestriction: true }, function(err, result) {
-              if (err)
-                return callbackSeries(err);
-              nodesToMerge[source].inverseRestrictions = result;
-              callbackSeries();
-            });
-          },*/
+                 Sparql_OWL.getObjectRestrictions(source, ids, {}, function(err, result) {
+                   if (err)
+                     return callbackSeries(err);
+                   nodesToMerge[source].restrictions = result;
+                   callbackSeries();
+                 });
+               },
+               //get inverse restrictions triple including descendants
+               function(callbackSeries) {
+                 if (!mergeRestrictions)
+                   return callbackSeries();
+                 Sparql_OWL.getObjectRestrictions(source, ids, { inverseRestriction: true }, function(err, result) {
+                   if (err)
+                     return callbackSeries(err);
+                   nodesToMerge[source].inverseRestrictions = result;
+                   callbackSeries();
+                 });
+               },*/
 
           //create newTriples
           function(callbackSeries) {
@@ -348,20 +325,24 @@ var Lineage_combine = (function() {
 
               var newTriples = [];
               nodesToMerge[source].subjectTriples.forEach(function(item) {
+                var value = item.object.value;
+                if (item.object.datatype == "http://www.w3.org/2001/XMLSchema#dateTime")
+                  value += "^^xsd:dateTime";
+
                 newTriples.push({
                   subject: item.subject.value,
                   predicate: item.predicate.value,
-                  object: item.object.value
+                  object: value
                 });
               });
 
-            /*  nodesToMerge[source].objectTriples.forEach(function(item) {
-                newTriples.push({
-                  subject: item.subject.value,
-                  predicate: item.predicate.value,
-                  object: item.predicate.value
-                });
-              });*/
+              /*  nodesToMerge[source].objectTriples.forEach(function(item) {
+                  newTriples.push({
+                    subject: item.subject.value,
+                    predicate: item.predicate.value,
+                    object: item.predicate.value
+                  });
+                });*/
 
               /*     nodesToMerge[source].restrictions.forEach(function(item) {
                      newTriples.push({

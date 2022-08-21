@@ -231,8 +231,18 @@ var MainController = (function() {
     },
 
     showSources: function(treeDiv, withCBX, sources, types, options, callback) {
+
+
+
+
+     
       if (!options) options = {};
       var treeData = [];
+
+      if(self.currentSourcesTree) {
+        treeData=self.currentSourcesTree
+      }else{
+      
       var distinctNodes = {};
 
       var distinctGroups = {};
@@ -245,13 +255,14 @@ var MainController = (function() {
           type: item
         });
       });
-      Object.keys(Config.sources)
-        .sort()
-        .forEach(function(sourceLabel, index) {
+      Object.keys(Config.sources).sort().forEach(function(sourceLabel, index) {
           self.initControllers();
-          if (sources && sources.indexOf(sourceLabel) < 0) return;
-          if (Config.sources[sourceLabel].isDraft) return;
-          if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) return;
+          if (sources && sources.indexOf(sourceLabel) < 0)
+            return;
+          if (Config.sources[sourceLabel].isDraft)
+            return;
+          if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0)
+            return;
           if (
             (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||
             Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1
@@ -263,6 +274,7 @@ var MainController = (function() {
           var parent = Config.sources[sourceLabel].schemaType;
 
           var othersGroup = "OTHERS";
+
           if (!types && !distinctGroups[othersGroup]) {
             distinctGroups[othersGroup] = 1;
             treeData.push({
@@ -310,6 +322,8 @@ var MainController = (function() {
             }
           }
         });
+      self.currentSourcesTree=treeData
+      }
       var jstreeOptions = options;
       if (!jstreeOptions.contextMenu) jstreeOptions.contextMenu = MainController.UI.getJstreeConceptsContextMenu();
       if (withCBX) jstreeOptions.withCheckboxes = withCBX;
@@ -353,6 +367,10 @@ var MainController = (function() {
         fuzzy: false,
         show_only_matches: true
       };
+
+    
+    
+
       common.jstree.loadJsTree(treeDiv, treeData, options, function() {
         var openedTypes = Config.preferredSchemaType;
         if (types) openedTypes = types;
@@ -361,6 +379,7 @@ var MainController = (function() {
           .jstree(true)
           .open_node(openedTypes);
         if (callback) return callback();
+      
       });
     },
 

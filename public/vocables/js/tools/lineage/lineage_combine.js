@@ -170,6 +170,7 @@ var Lineage_combine = (function() {
     };
 
 
+
     self.showMergeNodesDialog = function() {
       if (Lineage_classes.nodesSelection.length == 0)
         return alert("no nodes selected");

@@ -86,7 +86,7 @@ var KGcreator = (function () {
         var sqlQuery = "SELECT name FROM sys.databases";
         const params = new URLSearchParams({
             type: "sql.sqlserver",
-            dbName: "TEPDK2",
+            dbName: "master",
             sqlQuery: sqlQuery,
         });
 

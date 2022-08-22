@@ -122,6 +122,7 @@ var KGcreator = (function () {
         });
     };
     self.listObjects = function () {
+        console.log("KGcreator.listObjects");
         self.currentDataSourceModel = null;
         self.currentdabase = null;
         self.loadMappingsList();
@@ -130,6 +131,10 @@ var KGcreator = (function () {
         } else if (self.currentSourceType == "DATABASE") {
             self.listTables();
         }
+    };
+
+    self.displayUploadApp = function () {
+        $.getScript("/kg_upload_app.js");
     };
 
     self.loadMappingsList = function () {
@@ -155,12 +160,12 @@ var KGcreator = (function () {
         });
     };
 
-    self.listTables = function () {
-        var dbName = $("#KGcreator_csvDirsSelect").val();
+    self.listTables = function (db = null) {
+        self.currentDbName = db ? db : $("#KGcreator_csvDirsSelect").val();
         var type = "sql.sqlserver";
 
         const params = new URLSearchParams({
-            name: dbName,
+            name: self.currentDbName,
             type: type,
         });
 
@@ -172,7 +177,7 @@ var KGcreator = (function () {
             success: function (data, _textStatus, _jqXHR) {
                 self.currentDataSourceModel = data;
                 var tables = [];
-                self.currentdabase = { type: type, dbName: dbName };
+                self.currentdabase = { type: type, dbName: self.currentDbName };
                 for (var key in data) {
                     tables.push(key);
                 }
@@ -184,8 +189,8 @@ var KGcreator = (function () {
         });
     };
 
-    self.listFiles = function () {
-        self.currentCsvDir = $("#KGcreator_csvDirsSelect").val();
+    self.listFiles = function (currentCsvDir = null) {
+        self.currentCsvDir = currentCsvDir ? currentCsvDir : $("#KGcreator_csvDirsSelect").val();
         var payload = {
             dir: "CSV/" + self.currentCsvDir,
         };
@@ -257,11 +262,10 @@ var KGcreator = (function () {
 
                 $("#KGcreator_dataSampleDiv").val(str);
             } else if (self.currentSourceType == "DATABASE") {
-                var dbName = $("#KGcreator_csvDirsSelect").val();
                 var sqlQuery = "select top 500 " + obj.node.data.id + " from " + obj.node.parent;
                 const params = new URLSearchParams({
                     type: "sql.sqlserver",
-                    dbName: dbName,
+                    dbName: self.currentDbName,
                     sqlQuery: sqlQuery,
                 });
 
@@ -670,7 +674,7 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
             var payload = {};
             if (self.currentDataSourceModel) {
                 //database SQL
-                var dbName = $("#KGcreator_csvDirsSelect").val();
+                var dbName = self.currentDbName;
                 payload = {
                     dir: "SQL/",
                     name: dbName + "_" + csvFileName + ".json",

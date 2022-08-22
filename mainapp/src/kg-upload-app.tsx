@@ -8,9 +8,10 @@ import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Button from "react-bootstrap/Button";
 import ProgressBar from "react-bootstrap/ProgressBar";
+import Alert from "react-bootstrap/Alert";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFile, faCheck } from "@fortawesome/free-solid-svg-icons";
+import { faFile, faCheck, faTimes } from "@fortawesome/free-solid-svg-icons";
 
 declare global {
     interface Window {
@@ -28,7 +29,7 @@ export default function App() {
     const [subDir, setSubDir] = useState("");
     const [databases, setDatabases] = useState<string[]>([]);
     const [files, setFiles] = useState<File[]>([]);
-    const [uploadSuccess, setUploadSuccess] = useState(false);
+    const [uploadStatus, setUploadStatus] = useState("");
     const [displayNewSubDirForm, setDisplayNewSubDirForm] = useState(false);
     const [sources, setSources] = useState<string[]>([]);
     const [selectedNewSource, setSelectedNewSource] = useState("");
@@ -37,13 +38,13 @@ export default function App() {
 
     useEffect(() => {
         void fetchSubDirs();
-    }, [uploadSuccess, createDirSuccess]);
+    }, [uploadStatus, createDirSuccess]);
 
     useEffect(() => {
         if (subDir != "") {
             void fetchFilesInSubDir(subDir);
         }
-    }, [subDir, uploadSuccess]);
+    }, [subDir, uploadStatus]);
 
     useEffect(() => {
         void fetchDatabases();
@@ -54,7 +55,7 @@ export default function App() {
     }, []);
 
     const uploadFileHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setUploadSuccess(false);
+        setUploadStatus("");
         if (event.currentTarget.files === null) {
             return;
         }
@@ -72,9 +73,9 @@ export default function App() {
 
         const response = await fetch("/api/v1/upload", { method: "POST", body: formData });
         if (response.status === 201) {
-            setUploadSuccess(true);
+            setUploadStatus("success");
         } else {
-            setUploadSuccess(false);
+            setUploadStatus("error");
             // todo: display error message
         }
     };
@@ -109,7 +110,7 @@ export default function App() {
     };
 
     const handleSourceTypeChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setUploadSuccess(false);
+        setUploadStatus("");
         setFiles([]);
         setSourceType(event.currentTarget.value);
         // update js app
@@ -117,12 +118,12 @@ export default function App() {
     };
 
     const handleSubDirChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setUploadSuccess(false);
+        setUploadStatus("");
         setFiles([]);
         if (event.currentTarget.value === "_newsubdir") {
             setSubDir("");
             setDisplayNewSubDirForm(true);
-            setUploadSuccess(false);
+            setUploadStatus("");
         } else {
             setSubDir(event.currentTarget.value);
             setDisplayNewSubDirForm(false);
@@ -196,16 +197,16 @@ export default function App() {
         <Form.Group controlId="formFileMultiple" className="mb-3">
             <Form.Control name="files" type="file" multiple accept=".csv,.tsv" onChange={uploadFileHandler} />
             <Form.Text color="muted">
-                <p>Supported files: CSV/TSV. Maximum file size is 4GB</p>
+                <p>Supported files: CSV</p>
             </Form.Text>
         </Form.Group>
     );
 
-    const progressBars = files.map((file) => {
+    const _u_progressBars = files.map((file) => {
         return (
             <div key={file.name} className="mb-1">
                 <div className="text-center">{file.name}</div>
-                <ProgressBar now={uploadSuccess ? 100 : 0} label={`${uploadSuccess ? 100 : 0}%`} />
+                <ProgressBar now={uploadStatus === "success" ? 100 : 0} label={`${uploadStatus === "success" ? 100 : 0}%`} />
             </div>
         );
     });
@@ -213,7 +214,7 @@ export default function App() {
     const uploadButton = (
         <div className="mb-3">
             <Button variant="primary" onClick={fileSubmitHandler}>
-                <FontAwesomeIcon icon={uploadSuccess ? faCheck : faFile} /> Upload {files.length} {files.length === 1 ? "file" : "files"}
+                <FontAwesomeIcon icon={uploadStatus === "success" ? faCheck : uploadStatus === "error" ? faTimes : faFile} /> Upload {files.length} {files.length === 1 ? "file" : "files"}
             </Button>
         </div>
     );
@@ -231,6 +232,8 @@ export default function App() {
         </Form.Select>
     );
 
+    const errorMessage = (message: string) => <Alert variant="danger">{message}</Alert>;
+
     return (
         <Container fluid>
             <Row>
@@ -242,6 +245,7 @@ export default function App() {
                 {sourceType === "files" && subDir != "" ? browseForm : null}
                 {/*sourceType === "files" && subDir != "" && files.length > 0 ? progressBars : null*/}
                 {sourceType === "files" && subDir != "" && files.length > 0 ? uploadButton : null}
+                {uploadStatus === "error" ? errorMessage("Error during upload") : null}
             </Row>
             <Row>
                 <Col className="pe-1">{displayNewSubDirForm ? newSubDirForm : null}</Col>

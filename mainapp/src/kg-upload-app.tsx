@@ -88,7 +88,7 @@ export default function App() {
     };
 
     const fetchDatabases = async () => {
-        const response = await fetch("/api/v1/kg/data?type=sql.sqlserver&dbName=TEPDK2&sqlQuery=SELECT name FROM sys.databases");
+        const response = await fetch("/api/v1/kg/data?type=sql.sqlserver&dbName=master&sqlQuery=SELECT name FROM sys.databases");
         const json = (await response.json()) as { name: string }[];
         const dbs = json.map((db) => {
             return db.name;

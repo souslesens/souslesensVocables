@@ -187,7 +187,7 @@ $("#actionDiv").html(html);*/
                     },
                 },
             };
-            if (Lineage_common.currentSource && Config.sources[Lineage_common.currentSource].editable) {
+            if (self.currentSource && Config.sources[self.currentSource].editable) {
                 items.pasteNodeFromClipboard = {
                     label: "paste from Clipboard",
                     action: function (_e) {
@@ -343,7 +343,7 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
             options = {};
         }
 
-        $("#searchAllDialogDiv").dialog("close");
+        $("#sourcesSelectionDialogdiv").dialog("close");
 
         var term = $("#GenericTools_searchAllSourcesTermInput").val();
         var selectedSources = [];
@@ -359,9 +359,36 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
         var searchedSources = [];
 
-        var schemaType = $("#GenericTools_searchSchemaType").val();
+        /*   var schemaType = $("#GenericTools_searchSchemaType").val();
 
-        if (searchAllSources || selectedSources.length > 0) {
+
+
+
+       if (searchAllSources || selectedSources.length > 0) {
+           for (var sourceLabel in Config.sources) {
+               if (
+                   (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||
+                   Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1
+               );
+               else {
+                   if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
+                       if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
+                           if (selectedSources.length > 0 && selectedSources.indexOf(sourceLabel) > -1) searchedSources.push(sourceLabel);
+
+                   }
+               }
+           }
+       } else {
+           if (!Lineage_common.currentSource && !MainController.currentSource)
+               return alert("select a source or search in all source");
+           var source = Lineage_common.currentSource || MainController.currentSource;
+
+           searchedSources.push(source);
+
+       }*/
+
+        function getUserSources(schemaType) {
+            var allowedSources = [];
             for (var sourceLabel in Config.sources) {
                 if (
                     (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||
@@ -369,23 +396,36 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
                 );
                 else {
                     if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                        if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
-                            if (selectedSources.length > 0 && selectedSources.indexOf(sourceLabel) > -1) searchedSources.push(sourceLabel);
-                        /*     else
-searchedSources.push(sourceLabel)*/
+                        if (!schemaType || Config.sources[sourceLabel].schemaType == schemaType)
+                            if (allowedSources.length > 0 && allowedSources.indexOf(sourceLabel) > -1) {
+                                allowedSources.push(sourceLabel);
+                            }
                     }
                 }
             }
-        } else {
-            if (!Lineage_common.currentSource && !MainController.currentSource) return alert("select a source or search in all source");
-            var source = Lineage_common.currentSource || MainController.currentSource;
+            return allowedSources;
+        }
 
-            searchedSources.push(source);
-            /*  if( Config.sources[source].imports){
-Config.sources[source].imports.forEach(function(item){
-    searchedSources.push(item);
-})
-}*/
+        var sourcesScope = $("#GenericTools_searchScope").val();
+        if (sourcesScope == "currentSource") {
+            if (!Lineage_common.currentSource && !MainController.currentSource) return alert("select a source or search in all source");
+            searchedSources.push(Lineage_common.currentSource || MainController.currentSource);
+        } else if (sourcesScope == "graphSources") {
+            /* var graphSources=[]
+       $(".Lineage_sourceLabelDiv").each(function(){
+           var source=$(this).attr("id")
+           source=source.replace("Lineage_source_","")
+           graphSources.push(source);
+       })*/
+            searchedSources = Lineage_combine.currentSources;
+        } else if (sourcesScope == "all_OWLsources") {
+            searchedSources = getUserSources("OWL");
+        } else if (sourcesScope == "all_SKOSsources") {
+            searchedSources = getUserSources("SKOS");
+        } else if (sourcesScope == "all_IndividualsSources") {
+            searchedSources = getUserSources("INDIVIDUALS");
+        } else if (sourcesScope == "all_Sources") {
+            searchedSources = getUserSources(null);
         }
 
         var jstreeData = [];
@@ -397,6 +437,7 @@ Config.sources[source].imports.forEach(function(item){
         options.parentlabels = true;
         // PROBLEM
         // eslint-disable-next-line no-constant-condition
+
         if (true || schemaType == "OWL") {
             SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
                 self.searchResultToJstree(self.currentTargetDiv, result, options, function (err, _result) {
@@ -797,8 +838,8 @@ return*/
                 },
                 function (callbackSeries) {
                     /*  if (type != "http://www.w3.org/2002/07/owl#Class") {
-              return callbackSeries();
-          }*/
+    return callbackSeries();
+}*/
                     self.showNamedIndividualProperties(sourceLabel, nodeId, function (err) {
                         callbackSeries(err);
                     });
@@ -1259,20 +1300,24 @@ defaultLang = 'en';*/
         }
     };
 
-    self.showSearchableSourcesTreeDialog = function () {
+    self.showSearchableSourcesTreeDialog = function (types, validateFn) {
         if (!self.searchableSourcesTreeIsInitialized) {
             Standardizer.initSourcesIndexesList(null, function (err, sources) {
                 if (err) return MainController.UI.message(err);
 
-                $("#searchAllDialogDiv").dialog("open");
+                $("#sourcesSelectionDialogdiv").dialog("open");
+                $("#searchAllValidateButton").bind("click", validateFn);
                 var options = {
                     selectTreeNodeFn: null,
                 };
                 self.searchableSourcesTreeIsInitialized = true;
-                MainController.UI.showSources("searchAll_sourcesTree", true, sources, ["OWL"], options);
+                if (!types) types = ["OWL"];
+                MainController.UI.showSources("searchAll_sourcesTree", true, sources, types, options);
             });
         } else {
-            $("#searchAllDialogDiv").dialog("open");
+            $("#sourcesSelectionDialogdiv").dialog("open");
+            /*  if ($("#searchAll_sourcesTree").jstree())
+        $("#searchAll_sourcesTree").jstree().uncheck_all();*/
         }
     };
 

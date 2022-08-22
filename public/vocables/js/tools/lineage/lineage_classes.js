@@ -38,6 +38,7 @@ var Lineage_classes = (function () {
     self.mainSource = null;
     self.isLoaded = false;
     self.currentExpandLevel = 1;
+    self.nodesSelection = [];
 
     self.onLoaded = function (/** @type {() => void} */ callback) {
         if (self.isLoaded); // return;
@@ -115,11 +116,12 @@ var Lineage_classes = (function () {
 
         Lineage_common.currentSource = null;
         MainController.currentSource = sourceLabel;
-
+        self.nodesSelection = [];
         if (event.button == 0) {
             // except context menu
             self.mainSource = sourceLabel;
             self.initUI(true);
+            Lineage_combine.init();
             if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[self.mainSource].editable > -1) {
                 $("#lineage_blendButtonsDiv").css("display", "block");
             } else {
@@ -129,10 +131,12 @@ var Lineage_classes = (function () {
 
             if (!Lineage_common.currentSource) {
                 Lineage_classes.drawTopConcepts(sourceLabel, function (/** @type {any} */ err) {
+                    self.setCurrentSource(self.mainSource);
                     if (err) return MainController.UI.message(err);
                     //  SourceBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineagejsTreeDiv" });
                 });
             }
+            self.setCurrentSource(self.mainSource);
             $("#Lineage_sourceLabelDiv").html(sourceLabel);
 
             var schemaType = Config.sources[sourceLabel].schemaType;
@@ -156,6 +160,11 @@ var Lineage_classes = (function () {
                 Lineage_relations.init(true);
 
                 Lineage_individuals.init();
+
+                if (!visjsGraph.isGraphNotEmpty() && Config.sources[self.mainSource].editable) {
+                    var visjsData = { nodes: [], edges: [] };
+                    self.drawNewGraph(visjsData);
+                }
             });
         }
     };
@@ -173,12 +182,14 @@ var Lineage_classes = (function () {
             if (options.callee == "Graph") Lineage_classes.graphActions.graphNodeNeighborhood("all");
             else if (options.callee == "Tree") Lineage_classes.drawNodeAndParents(node.data);
         } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
-            if (node.from) {
-                let inSource = Lineage_classes.mainSource;
-                Lineage_blend.deleteRestriction(inSource, node);
-            } else {
-                Lineage_blend.addNodeToAssociationNode(node, "source", true);
-            }
+            self.selection.addNodeToSelection(node);
+
+            /*  if (node.from) {
+          let inSource = Lineage_classes.mainSource;
+          Lineage_blend.deleteRestriction(inSource, node);
+        } else {
+          Lineage_blend.addNodeToAssociationNode(node, "source", true);
+        }*/
         } else if (nodeEvent.shiftKey && nodeEvent.altKey) {
             Lineage_blend.addNodeToAssociationNode(node, "target");
         } else if (nodeEvent.ctrlKey) {
@@ -279,13 +290,18 @@ Lineage_classes.drawSimilarsNodes("sameAs")
         }
 
         var xx = visjsGraph.network;
-        /*  if (nodes && nodes.length > 0) {
-nodes.forEach(function(node) {
-  // remove all ne fonctionne pas
-  visjsGraph.data.nodes.remove(node);
-});
-}
-};*/
+    };
+
+    self.showLastAddedNodesOnly = function () {
+        if (!visjsGraph.lastAddedNodes || visjsGraph.lastAddedNodes.length == 0) return;
+        var allNodes = visjsGraph.data.nodes.getIds();
+        var nodesToRemove = [];
+        allNodes.forEach(function (nodeId) {
+            if (visjsGraph.lastAddedNodes.indexOf(nodeId) < 0) nodesToRemove.push(nodeId);
+        });
+        if (nodesToRemove.length > 0) {
+            visjsGraph.data.nodes.remove(nodesToRemove);
+        }
     };
 
     self.drawTopConcepts = function (/** @type {string} */ source, /** @type {(arg0: string | undefined) => any} */ callback) {
@@ -467,6 +483,7 @@ nodes.forEach(function(node) {
             keepNodePositionOnDrag: true,
             onclickFn: Lineage_classes.graphActions.onNodeClick,
             onRightClickFn: Lineage_classes.graphActions.showGraphPopupMenu,
+            onHoverNodeFn: Lineage_classes.selection.selectNodesOnHover,
             physics: {
                 barnesHut: {
                     springLength: 0,
@@ -506,15 +523,15 @@ nodes.forEach(function(node) {
             };
         } else {
             /* options.manipulation = {
-        enabled: true,
-        initiallyActive: false,
-        deleteNode: false,
-        deleteEdge: false,
-        editNode: false,
-        editEdge: false,
-        addEdge:false,
-        addNode:false
-      }*/
+  enabled: true,
+  initiallyActive: false,
+  deleteNode: false,
+  deleteEdge: false,
+  editNode: false,
+  editEdge: false,
+  addEdge:false,
+  addNode:false
+}*/
         }
         visjsGraph.draw("graphDiv", visjsData, options, function () {
             Lineage_decoration.colorGraphNodesByType();
@@ -1749,6 +1766,12 @@ namedIndividualsMap[item.concept.value] = 1
             });
         }
     };
+    self.drawDirectRestrictions = function () {
+        self.drawRestrictions(null, null, null, null, { inverse: false });
+    };
+    self.drawInverseRestrictions = function () {
+        self.drawRestrictions(null, null, null, null, { inverse: true });
+    };
 
     self.drawRestrictions = function (
         /** @type {any} */ source,
@@ -1771,16 +1794,19 @@ namedIndividualsMap[item.concept.value] = 1
         async.series(
             [
                 function (callbackSeries) {
-                    var options = { withoutImports: Lineage_common.currentSource || false };
-                    Sparql_OWL.getObjectRestrictions(source, classIds, options, function (err, _result) {
+                    if (options.inverse) return callbackSeries();
+                    var _options = { withoutImports: Lineage_common.currentSource || false };
+                    Sparql_OWL.getObjectRestrictions(source, classIds, _options, function (err, _result) {
                         if (err) callbackSeries(err);
                         result = result.concat(_result);
                         callbackSeries();
                     });
                 },
+
                 function (callbackSeries) {
-                    var options = { withoutImports: Lineage_common.currentSource || false, inverseRestriction: 1 };
-                    Sparql_OWL.getObjectRestrictions(source, classIds, options, function (err, _result) {
+                    if (!options.inverse) return callbackSeries();
+                    var _options = { withoutImports: Lineage_common.currentSource || false, inverseRestriction: 1 };
+                    Sparql_OWL.getObjectRestrictions(source, classIds, _options, function (err, _result) {
                         if (err) callbackSeries(err);
                         result = result.concat(_result);
                         callbackSeries();
@@ -2567,21 +2593,21 @@ attrs.color=self.getSourceColor(superClassValue)
         if (document.getElementById(id) !== null) return;
         if (!self.soucesLevelMap[source]) self.soucesLevelMap[source] = {};
         expandedLevels[source] = [];
-        var html =
-            "<div  id='" +
-            id +
-            "' style='color: " +
-            self.getSourceColor(source) +
-            "'" +
-            " class='Lineage_sourceLabelDiv' " +
-            "onclick='Lineage_classes.setCurrentSource(\"" +
-            encodeURIComponent(source) +
-            "\")'>" +
-            source +
-            "</div>";
+        var html = "<div  id='" + id + "' style='color: " + self.getSourceColor(source) + "'" + " class='Lineage_sourceLabelDiv' " + ">" + source + "</div>";
 
         $("#lineage_drawnSources").append(html);
-        //  self.setCurrentSource(encodeURIComponent(source))
+        $("#" + id).mousedown(function (e) {
+            //  e.stopPropagation();
+            e.preventDefault();
+            if (e.which === 3) {
+                Lineage_combine.setGraphPopupMenus();
+                var point = { x: e.pageX, y: e.pageY };
+                MainController.UI.showPopup(point, "graphPopupDiv", true);
+            } else {
+                Lineage_classes.setCurrentSource(encodeURIComponent(source));
+            }
+        });
+        self.setCurrentSource(encodeURIComponent(source));
     };
 
     self.registerSourceImports = function (/** @type {string | number} */ sourceLabel) {
@@ -2598,44 +2624,28 @@ attrs.color=self.getSourceColor(superClassValue)
         $(".Lineage_sourceLabelDiv").removeClass("Lineage_selectedSourceDiv");
         $("#Lineage_source_" + sourceId).addClass("Lineage_selectedSourceDiv");
         Lineage_common.currentSource = encodeURIComponent(sourceId);
-        if (!self.soucesLevelMap[sourceId].topDone) {
-            self.soucesLevelMap[sourceId].topDone = 1;
-            self.drawTopConcepts(sourceId);
-        }
+        /*   if (!self.soucesLevelMap[sourceId].topDone) {
+         self.soucesLevelMap[sourceId].topDone = 1;
+         self.drawTopConcepts(sourceId);
+       }*/
     };
-    self.showHideCurrentSourceNodes = function (/** @type {any} */ show) {
+
+    self.showHideCurrentSourceNodes = function (/** @type {any} */ hide) {
         if (Lineage_common.currentSource == Lineage_classes.mainSource) return;
-        /**
-         * @type {boolean}
-         */
-        var visible;
-        if (show)
-            // force passage à visible
-            visible = false;
-        else visible = self.soucesLevelMap[Lineage_common.currentSource].visible;
-        if (visible) self.soucesLevelMap[Lineage_common.currentSource].visible = false;
-        else self.soucesLevelMap[Lineage_common.currentSource].visible = true;
 
         var allNodes = visjsGraph.data.nodes.get();
-        /**
-         * @type {{ id: any; hidden: any; }[]}
-         */
         var newNodes = [];
         allNodes.forEach(function (node) {
             if (node && node.data && node.data.source == Lineage_common.currentSource)
                 newNodes.push({
                     id: node.id,
-                    hidden: visible,
+                    hidden: hide,
                 });
         });
         visjsGraph.data.nodes.update(newNodes);
 
-        if (visible) $("#Lineage_source_" + Lineage_common.currentSource).addClass("lineage_hiddenSource");
+        if (hide) $("#Lineage_source_" + Lineage_common.currentSource).addClass("lineage_hiddenSource");
         else $("#Lineage_source_" + Lineage_common.currentSource).removeClass("lineage_hiddenSource");
-
-        if (!show)
-            //
-            Lineage_classes.setCurrentSource(Lineage_classes.mainSource);
     };
 
     self.showHideHelp = function () {
@@ -2643,6 +2653,86 @@ attrs.color=self.getSourceColor(superClassValue)
         if (display == "none") display = "block";
         else display = "none";
         $("#lineage_actionDiv_Keyslegend").css("display", display);
+    };
+
+    self.selection = {
+        addNodeToSelection: function (node) {
+            self.nodesSelection.push(node);
+            $("#Lineageclasses_selectedNodesCount").html(self.nodesSelection.length);
+            visjsGraph.data.nodes.update({ id: node.data.id, borderWidth: 6 });
+            $("#Lineage_combine_mergeNodesDialogButton").css("display", "block");
+        },
+        clearNodesSelection: function (ids) {
+            if (ids && !Array.isArray(ids)) ids = [ids];
+            var newNodes = [];
+            var newSelection = [];
+            Lineage_classes.nodesSelection.forEach(function (node) {
+                if (!ids || ids.indexOf(node.data.id) > -1) newNodes.push({ id: node.data.id, borderWidth: 1 });
+                if (ids && ids.indexOf(node.data.id) < 0) newSelection.push(node);
+            });
+            visjsGraph.data.nodes.update(newNodes);
+            Lineage_classes.nodesSelection = newSelection;
+            $("#Lineageclasses_selectedNodesCount").html(self.nodesSelection.length);
+            $("#Lineage_combine_mergeNodesDialogButton").css("display", "none");
+        },
+        getSelectedNodesTree: function () {
+            var jstreeData = [];
+            var distinctNodes = {};
+            Lineage_classes.nodesSelection.forEach(function (node) {
+                if (!distinctNodes[node.data.id]) {
+                    distinctNodes[node.data.id] = 1;
+                    jstreeData.push({
+                        id: node.data.id,
+                        text: node.data.label,
+                        parent: node.data.source,
+                        data: node.data,
+                    });
+                    if (!distinctNodes[node.data.source]) {
+                        distinctNodes[node.data.source] = 1;
+                        jstreeData.push({
+                            id: node.data.source,
+                            text: node.data.source,
+                            parent: "#",
+                        });
+                    }
+                }
+            });
+            return jstreeData;
+        },
+
+        listNodesSelection: function () {
+            if (Lineage_classes.nodesSelection.length == 0) alert("no node selection");
+            var jstreeData = Lineage_classes.selection.getSelectedNodesTree();
+            var options = {
+                openAll: true,
+                selectTreeNodeFn: Lineage_classes.selection.onSelectedNodeTreeclick,
+            };
+            $("#mainDialogDiv").html(
+                '<div style="display: flex;flex-direction: row">' +
+                    " <div>" +
+                    '    Selected nodes  <div class="jstreeContainer" style="width: 350px;height: 700px;overflow: auto">' +
+                    '      <div id="LineageClasses_selectdNodesTreeDiv"></div>' +
+                    "    </div>" +
+                    " </div>" +
+                    "<div id='LineageClasses_selectdNodesInfosDiv' style=\"width: 650px;height: 700px;overflow: auto\" ></div>" +
+                    "</div>"
+            );
+            $("#mainDialogDiv").dialog("open");
+            common.jstree.loadJsTree("LineageClasses_selectdNodesTreeDiv", jstreeData, options, function (err, result) {});
+        },
+
+        selectNodesOnHover: function (node, point, options) {
+            if (options.ctrlKey && options.altKey) {
+                self.selection.addNodeToSelection(node);
+            } else if (options.ctrlKey && options.shiftKey) {
+                self.selection.clearNodesSelection(node.data.id);
+            }
+        },
+        onSelectedNodeTreeclick: function (event, obj) {
+            var node = obj.node;
+            if (node.parent == "#") return;
+            SourceBrowser.showNodeInfos(node.data.source, node, "LineageClasses_selectdNodesInfosDiv");
+        },
     };
 
     return self;

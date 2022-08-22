@@ -118,8 +118,8 @@ Lineage_relations = (function () {
                 if (item.propLabel) propLabel = item.propLabel.value;
                 if (item.node) node = item.node.value;
                 /* if (item.g) {
-                     domainSourceLabel = Sparql_common.getLabelFromURI(item.g.value)
-                 }*/
+             domainSourceLabel = Sparql_common.getLabelFromURI(item.g.value)
+         }*/
                 if (item.domainSourceLabel) {
                     domainSourceLabel = item.domainSourceLabel.value;
                 }
@@ -236,7 +236,8 @@ Lineage_relations = (function () {
                 },
                 function (callbackSeries) {
                     if (!relations || relations.length == 0) return callbackSeries("no relations found");
-                    if (relations.length > self.maxRelationToDraw) return callbackSeries("Cannot draw : too many relations " + relations.length + " max " + self.maxRelationToDraw);
+                    if (relations.length > self.maxRelationToDraw && output == "visjs")
+                        return callbackSeries("Cannot draw : too many relations " + relations.length + " max " + self.maxRelationToDraw);
                     else return callbackSeries();
                 },
                 function (callbackSeries) {
@@ -449,7 +450,26 @@ Lineage_relations = (function () {
                             common.jstree.loadJsTree("LineageRelation_listRelationDiv", jstreeData, options);
                         });
                     } else if (output == "table") {
-                        Export.showDataTable(null, tableData.columns, tableData.data);
+                        if (relations.length <= self.maxRelationToDraw) {
+                            Export.showDataTable(null, tableData.columns, tableData.data);
+                        } else {
+                            // write csv to clipBoard
+                            var str = "";
+                            tableData.columns.forEach(function (item, index) {
+                                if (index > 0) str += "\t";
+                                str += item.title;
+                            });
+                            str += "\n";
+                            tableData.data.forEach(function (line) {
+                                line.forEach(function (item, index) {
+                                    if (index > 0) str += "\t";
+                                    str += item;
+                                });
+                                str += "\n";
+                            });
+
+                            common.copyTextToClipboard(str);
+                        }
                     } else if (output == "visjs") {
                         if (visjsGraph.isGraphNotEmpty()) {
                             visjsGraph.data.nodes.update(visjsData.nodes);

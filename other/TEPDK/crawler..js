@@ -36,9 +36,10 @@ var crawler = {
                     if (lines && jsonDataFetch.length >= lines) {
                         if (processor) {
                             processor(jsonDataFetch, headers, filePath, function (err) {});
+                        } else {
+                            jsonData.push(jsonDataFetch);
                         }
 
-                        jsonData.push(jsonDataFetch);
                         jsonDataFetch = [];
                     }
                 })
@@ -131,4 +132,39 @@ if (false) {
     var filePath = dir + file;
     var targetPath = dir + file.replace(".", "_x.");
     splitPhusionCodeLabel(filePath, targetPath);
+}
+
+if (false) {
+    if (true) {
+        var dir = "D:\\NLP\\ontologies\\TEPDK2\\OnePulse\\";
+        var file = "physicalClassesHierarchy.csv";
+        crawler.readCsv(dir + file, ";", 10000, null, function (err, result) {
+            var data = result.data[0];
+            var str = "";
+            data.forEach(function (item) {
+                for (var i = 1; i < 7; i++) {
+                    if (item["ID_level_" + i]) {
+                        if (i == 6) var cc = 3;
+                        var x = item["ID_level_" + i];
+                        if (item["ID_level_" + i].indexOf("727") > -1) var x = 3;
+                        str +=
+                            item["ID_level_" + i].replace("http://data.total.com/resource/tsf/ontology/data-domains/facility-design/phusion/", "") + "\t" + item["Label_level_" + i] + "\t" + i + "\n";
+                    }
+                }
+            });
+            fs.writeFileSync(dir + file.replace(".csv", "levels.csv"), str);
+        });
+    }
+}
+
+if (true) {
+    var dir = "D:\\NLP\\ontologies\\TEPDK2\\slsv\\";
+
+    var str = "";
+    var files = fs.readdirSync(dir);
+    files.forEach(function (file) {
+        var fileStr = "" + fs.readFileSync(dir + file);
+        str += fileStr + "\n";
+    });
+    fs.writeFileSync(dir + "allClassesAllAttrs", str);
 }

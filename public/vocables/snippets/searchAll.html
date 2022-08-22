@@ -1,30 +1,41 @@
 <div style="display: flex; flex-direction: column; height: 50px">
     <div>
+        <input type="checkbox" checked="checked" id="GenericTools_allExactMatchSearchCBX" />Exact Match
+
+        <!--     <select id="GenericTools_searchSchemaType" class="GenericTools_searchAllOptional">
+           <option></option>
+              <option>OWL</option>
+              <option>SKOS</option>
+              <option>INDIVIDUAL</option>
+          </select>
+          -->
+        <b>Scope </b>
+        <select id="GenericTools_searchScope" class="GenericTools_searchAllOptional">
+            <option value="currentSource">Current Source</option>
+            <option value="graphSources">Current graph sources</option>
+            <option value="all_OWLsources">All OWL sources</option>
+            <option value="all_SKOSsources">All SKOS sources</option>
+            <option value="all_IndividualsSources">All Individuals sources</option>
+            <option value="all_Sources">All Sources</option>
+        </select>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary GenericTools_searchAllOptional" onclick="SourceBrowser.showSearchableSourcesTreeDialog(['OWL'],SourceBrowser.searchAllSourcesTerm)">
+            +
+        </button>
+    </div>
+    <div>
         <input id="GenericTools_searchAllSourcesTermInput" style="width: 150px" value="" />
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="GenericTools_onSearchAllInput" onclick="SourceBrowser.searchAllSourcesTerm()">Search</button>
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="SourceBrowser.showThesaurusTopConcepts();">reset</button>
         <button class="btn btn-sm my-1 py-0 btn-outline-primary GenericTools_searchAllOptional" onclick="Export.exportTeeToDataTable(null,'#')">toTable</button>
         <!--   <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="SourceBrowser.exportSearchResult()">CSV</button>-->
     </div>
-    <div>
-        <input type="checkbox" checked="checked" id="GenericTools_allExactMatchSearchCBX" />Exact Match
-
-        <input type="checkbox" class="GenericTools_searchAllOptional" id="GenericTools_searchInAllSources" />All sources
-        <select id="GenericTools_searchSchemaType" class="GenericTools_searchAllOptional">
-            <option></option>
-            <option>OWL</option>
-            <option>SKOS</option>
-            <option>INDIVIDUAL</option>
-        </select>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary GenericTools_searchAllOptional" onclick="SourceBrowser.showSearchableSourcesTreeDialog()">+</button>
-    </div>
 </div>
-<div id="searchAllDialogDiv" style="margin-bottom: 10px">
-    <div class="jstreeContainer">
+<div id="sourcesSelectionDialogdiv" style="margin-bottom: 10px">
+    <div class="jstreeContainer" style="width: 300px; height: 600px">
         <div id="searchAll_sourcesTree"></div>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#searchAllDialogDiv').dialog('close')">Cancel</button>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="SourceBrowser.searchAllSourcesTerm()">Search</button>
     </div>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#sourcesSelectionDialogdiv').dialog('close')">Cancel</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="searchAllValidateButton">OK</button>
 </div>
 
 <script>
@@ -33,10 +44,10 @@
             SourceBrowser.searchAllSourcesTerm();
         }
     });
-    $("#searchAllDialogDiv").dialog({
+    $("#sourcesSelectionDialogdiv").dialog({
         autoOpen: false,
-        height: 600,
-        width: 300,
+        height: 750,
+        width: 400,
         modal: true,
     });
 </script>

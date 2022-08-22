@@ -841,6 +841,8 @@ WHERE {
 
                     if (options.filter) query += " " + options.filter + " ";
 
+                    query += "filter (?firstParent not in (owl:Restriction, owl:Class))";
+
                     query += " FILTER NOT EXISTS {?firstParent rdf:type owl:Restriction}";
 
                     query += "}";

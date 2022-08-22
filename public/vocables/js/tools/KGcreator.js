@@ -214,6 +214,7 @@ var KGcreator = (function () {
             openAll: true,
             selectTreeNodeFn: KGcreator.onCsvtreeNodeClicked,
             contextMenu: KGcreator.getSystemsTreeContextMenu(),
+            withCheckboxes: true,
         };
         data.forEach(function (file) {
             if (file.indexOf(".json") > 0) return;
@@ -289,11 +290,11 @@ var KGcreator = (function () {
                     },
                 });
             }
+        } else {
+            if (obj.event.button != 2)
+                //if popup menu dont load
+                self.loadMappings(obj.node.data.id);
         }
-
-        if (obj.event.button != 2)
-            //if popup menu dont load
-            self.loadMappings(obj.node.data.id);
 
         if (obj.node.children.length > 0) return;
 
@@ -727,6 +728,9 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         }
     };
     self.createTriples = function (test) {
+        var selectedFiles = $("#KGcreator_csvTreeDiv").jstree().get_checked(true);
+        if (selectedFiles.length > 0);
+
         $("#KGcreator_dataSampleDiv").val("creating triples...");
         if (!self.currentJsonObject) return;
         if (!self.currentJsonObject.graphUri) {
@@ -782,6 +786,20 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
                 },
             });
         });
+    };
+
+    self.indexGraph = function () {
+        var graphSource = null;
+        for (var source in Config.sources) {
+            if (Config.sources[source].graphUri == self.currentGraphUri) graphSource = source;
+        }
+        if (!source) return alert("no source associated to graph " + self.currentGraphUri);
+        if (confirm("index source " + graphSource)) {
+            SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
+                if (err) return alert(err);
+                $("#KGcreator_dataSampleDiv").val("indexed graph " + self.currentJsonObject.graphUri + " in index " + graphSource.toLowerCase());
+            });
+        }
     };
 
     self.clearGraph = function () {

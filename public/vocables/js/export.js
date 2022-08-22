@@ -9,14 +9,49 @@ var Export = (function () {
         var nodes = visjsGraph.data.nodes.get();
         var edges = visjsGraph.data.edges.get();
 
+        var nodesFromMap = {};
+
+        edges.forEach(function (edge) {
+            if (!nodesFromMap[edge.from]) nodesFromMap[edge.from] = [];
+            nodesFromMap[edge.from].push(edge);
+        });
+        var allNodesMap = {};
+        nodes.forEach(function (node) {
+            allNodesMap[node.id] = node;
+        });
+
+        //sort nodes by number of edges
+        var nodesFromArray = Object.keys(nodesFromMap);
+        nodesFromArray.sort(function (a, b) {
+            return nodesFromMap[a] - nodesFromMap[b];
+        });
+
+        var str = "fromLabel\tedgeLabel\ttoLabel\tfromId\tedgeId\ttoId\n";
+        nodesFromArray.forEach(function (nodeFromId, index) {
+            nodesFromMap[nodeFromId].forEach(function (edge) {
+                str += allNodesMap[nodeFromId].data.label + "\t";
+                str += (edge.label || "") + "\t";
+                str += allNodesMap[edge.to].data.label;
+                str += "\t" + nodeFromId + "\t" + edge.id + "\t" + edge.to;
+                str += "\n";
+            });
+        });
+
+        common.copyTextToClipboard(str);
+    };
+
+    self.exportGraphToDataTableOld = function () {
+        var nodes = visjsGraph.data.nodes.get();
+        var edges = visjsGraph.data.edges.get();
+
         var nodesToMap = {};
         edges.forEach(function (edge) {
             if (!nodesToMap[edge.to]) nodesToMap[edge.to] = [];
             nodesToMap[edge.to].push(edge);
 
             /*  if (!nodesFromMap[edge.from])
-                  nodesFromMap[edge.from] = []
-              nodesFromMap[edge.from].push(edge)*/
+            nodesFromMap[edge.from] = []
+        nodesFromMap[edge.from].push(edge)*/
         });
 
         var leafNodes = [];
@@ -43,7 +78,8 @@ var Export = (function () {
 
                         ancestors["_" + level].push(edge.to);
                         // eslint-disable-next-line no-console
-                        console.log(nodesMap[edge.to].label);
+
+                        // console.log(nodesMap[edge.to].label);
                         recurse(nodesMap[edge.to], ancestors, ++level);
                     }
                 }
@@ -112,8 +148,8 @@ var Export = (function () {
             cols.push({ title: "Label_" + i, defaultContent: "" });
         }
         /*   for (var i = 1; i <= colsCount; i++) {
-               cols.push({title: "Uri_" + i, defaultContent: ""})
-           }*/
+           cols.push({title: "Uri_" + i, defaultContent: ""})
+       }*/
         self.showDataTable(null, cols, dataSet);
     };
 
@@ -170,7 +206,7 @@ var Export = (function () {
             result.data.forEach(function (hit, _index) {
                 var parentIdsArray = [];
                 var parentLabelsArray = [];
-                if (hit.parents || hit.parents.forEach) return;
+                if (!hit.parents || !hit.parents.forEach) return;
                 hit.parents.forEach(function (parent, indexParent) {
                     if (indexParent > 0) {
                         parentLabelsArray.push(result.labelsMap[parent] || Sparql_common.getLabelFromURI(parent));
@@ -199,7 +235,7 @@ var Export = (function () {
             });
             var cols = [];
             for (var i = 0; i <= maxParentsLength; i++) {
-                cols.push({ title: "Level" + i, defaultContent: "" });
+                cols.push({ title: "Label_level_" + i, defaultContent: "" });
             }
 
             matrixLabels.forEach(function (line, lineIndex) {
@@ -209,7 +245,11 @@ var Export = (function () {
                 matrixLabels[lineIndex] = matrixLabels[lineIndex].concat(matrixIds[lineIndex]);
             });
             cols.push({ title: "-----", defaultContent: "" });
-            cols = cols.concat(cols);
+            // cols = cols.concat(cols);
+            for (var i = 0; i <= maxParentsLength; i++) {
+                cols.push({ title: "ID_level_" + i, defaultContent: "" });
+            }
+            cols.push({ title: "-----", defaultContent: "" });
 
             MainController.UI.message("", true);
             Export.showDataTable(null, cols, matrixLabels);
@@ -271,8 +311,8 @@ var Export = (function () {
                 pageLength: 15,
                 dom: buttons,
                 /*buttons: [
-                    'copy', 'csv', 'excel', 'pdf', 'print'
-                ]*/
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ]*/
                 buttons: [
                     {
                         extend: "csvHtml5",
@@ -283,8 +323,8 @@ var Export = (function () {
                     "copy",
                 ],
                 /* 'columnDefs': [
-                     {'max-width': '20%', 'targets': 0}
-                 ],*/
+             {'max-width': '20%', 'targets': 0}
+         ],*/
                 order: [],
             });
         }, 200);

@@ -103,8 +103,8 @@ var common = (function () {
             $("#" + jstreeDiv)
                 .jstree({
                     /* "checkbox": {
-                         "keep_selected_style": false
-                     },*/
+               "keep_selected_style": false
+           },*/
                     plugins: plugins,
                     core: {
                         data: jstreeData,
@@ -238,12 +238,12 @@ var common = (function () {
                     });
             });
             /*  setTimeout(function () {
-                self.jstree.setTreeAppearance();
-                //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
-                $("#" + jstreeDiv)
-                    .jstree(true)
-                    .open_node(parentNodeId_, null, 500);
-            }, 500);*/
+          self.jstree.setTreeAppearance();
+          //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
+          $("#" + jstreeDiv)
+              .jstree(true)
+              .open_node(parentNodeId_, null, 500);
+      }, 500);*/
         },
 
         deleteNode: function (jstreeDiv, nodeId) {
@@ -263,8 +263,8 @@ var common = (function () {
                 }
             }
             /* descendants.forEach(function(item){
-                     $("#" + jstreeDiv).jstree(true).delete_node(item)
-                 })*/
+               $("#" + jstreeDiv).jstree(true).delete_node(item)
+           })*/
             try {
                 $("#" + jstreeDiv)
                     .jstree(true)
@@ -624,7 +624,7 @@ var common = (function () {
 
             str = str.replace(/[^a-zA-Z0-9-_]/g, "");
             /*  str = encodeURIComponent(str);
-             str = str.replace(/%2F/gm, "/");*/
+       str = str.replace(/%2F/gm, "/");*/
         }
 
         return str;
@@ -691,11 +691,10 @@ var common = (function () {
         async function copy() {
             try {
                 await navigator.clipboard.writeText(text);
-                alert("graph copied in clipboard");
+
                 if (callback) {
                     return callback(null, "graph copied in clipboard");
-                }
-                return "graph copied in clipboard";
+                } else return alert("graph copied in clipboard");
             } catch (err) {
                 MainController.UI.message("graph copy failed");
                 if (callback) return callback(err);

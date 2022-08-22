@@ -209,7 +209,7 @@ var KGcreator = (function () {
             openAll: true,
             selectTreeNodeFn: KGcreator.onCsvtreeNodeClicked,
             contextMenu: KGcreator.getSystemsTreeContextMenu(),
-            withCheckboxes:true
+            withCheckboxes: true,
         };
         data.forEach(function (file) {
             if (file.indexOf(".json") > 0) return;
@@ -286,10 +286,9 @@ var KGcreator = (function () {
                     },
                 });
             }
-        }else {
-
+        } else {
             if (obj.event.button != 2)
-              //if popup menu dont load
+                //if popup menu dont load
                 self.loadMappings(obj.node.data.id);
         }
 
@@ -725,9 +724,8 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         }
     };
     self.createTriples = function (test) {
-        var selectedFiles=$("#KGcreator_csvTreeDiv").jstree().get_checked(true);
-        if( selectedFiles.length>0)
-            ;
+        var selectedFiles = $("#KGcreator_csvTreeDiv").jstree().get_checked(true);
+        if (selectedFiles.length > 0);
 
         $("#KGcreator_dataSampleDiv").val("creating triples...");
         if (!self.currentJsonObject) return;
@@ -775,10 +773,6 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
                     } else {
                         $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
 
-
-
-
-
                         /*    SearchUtil.generateElasticIndex(Lineage_common.currentSource,{ids:[self.graphModification.creatingNodeUri]},function(err, result) {
             })*/
                     }
@@ -790,24 +784,19 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         });
     };
 
-
-    self.indexGraph=function(){
-        var graphSource=null;
-        for (var source in Config.sources){
-            if(Config.sources[source].graphUri==self.currentGraphUri)
-                graphSource=source
+    self.indexGraph = function () {
+        var graphSource = null;
+        for (var source in Config.sources) {
+            if (Config.sources[source].graphUri == self.currentGraphUri) graphSource = source;
         }
-        if(!source)
-            return alert("no source associated to graph "+self.currentGraphUri)
-        if( confirm("index source "+graphSource)) {
-            SearchUtil.generateElasticIndex(graphSource, null, function(err, _result) {
-                if(err)
-                    return alert(err);
-                $("#KGcreator_dataSampleDiv").val("indexed graph "+ self.currentJsonObject.graphUri +" in index "+graphSource.toLowerCase());
-
+        if (!source) return alert("no source associated to graph " + self.currentGraphUri);
+        if (confirm("index source " + graphSource)) {
+            SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
+                if (err) return alert(err);
+                $("#KGcreator_dataSampleDiv").val("indexed graph " + self.currentJsonObject.graphUri + " in index " + graphSource.toLowerCase());
             });
         }
-    }
+    };
 
     self.clearGraph = function () {
         if (!self.currentJsonObject) return; //alert("no file mappings selected");

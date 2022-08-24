@@ -49,7 +49,7 @@ const ProfilesTable = () => {
             ),
             success: (gotProfiles: Profile[]) => {
                 const datas = gotProfiles.map((profile) => {
-                    const { allowedSourceSchemas, allowedSources, forbiddenTools, allowedTools, forbiddenSources, blender, ...restOfProperties } = profile;
+                    const { allowedSourceSchemas, allowedSources, forbiddenTools, allowedTools, forbiddenSources, sourcesAccessControl, blender, ...restOfProperties } = profile;
                     const processedData = {
                         ...restOfProperties,
                         forbiddenTools: joinWhenArray(forbiddenTools),
@@ -57,6 +57,7 @@ const ProfilesTable = () => {
                         allowedSources: joinWhenArray(allowedSources),
                         forbiddenSources: joinWhenArray(forbiddenSources),
                         allowedSourceSchemas: allowedSourceSchemas.join(";"),
+                        sourcesAccessControl: JSON.stringify(sourcesAccessControl),
                     };
                     return { ...processedData };
                 });

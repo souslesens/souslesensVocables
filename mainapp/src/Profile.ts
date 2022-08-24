@@ -62,6 +62,8 @@ type ProfileJson = {
     allowedSourceSchemas: string[];
     allowedSources: string;
     forbiddenSources: string[];
+    defaultSourceAccessControl: SourceAccessControl;
+    sourcesAccessControl: Record<string, SourceAccessControl>;
     allowedTools: string[];
     forbiddenTools: string[];
     blender: Blender;
@@ -79,6 +81,8 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
         allowedSourceSchemas: profile.allowedSourceSchemas,
         allowedSources: profile.allowedSources,
         forbiddenSources: profile.forbiddenSources,
+        defaultSourceAccessControl: profile.defaultSourceAccessControl,
+        sourcesAccessControl: profile.sourcesAccessControl,
         allowedTools: profile.allowedTools,
         forbiddenTools: profile.forbiddenTools,
         blender: { contextMenuActionStartLevel: profile.blender.contextMenuActionStartLevel },
@@ -92,10 +96,14 @@ type Profile = {
     allowedSourceSchemas: string[];
     allowedSources: string | string[];
     forbiddenSources: string | string[];
+    defaultSourceAccessControl: SourceAccessControl;
+    sourcesAccessControl: Record<string, SourceAccessControl>;
     allowedTools: string | string[];
     forbiddenTools: string[];
     blender: Blender;
 };
+
+type SourceAccessControl = "forbidden" | "read" | "readwrite";
 
 export const defaultProfile = (uuid: string): Profile => {
     return {
@@ -105,6 +113,8 @@ export const defaultProfile = (uuid: string): Profile => {
         allowedSourceSchemas: [],
         allowedSources: "ALL",
         forbiddenSources: [],
+        defaultSourceAccessControl: "forbidden",
+        sourcesAccessControl: {},
         allowedTools: "ALL",
         forbiddenTools: [],
         blender: { contextMenuActionStartLevel: 0 },

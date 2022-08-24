@@ -13,10 +13,29 @@ module.exports = function () {
         PUT,
     };
 
+    function parseAccessControl(accessControlJson) {
+        const accessControl = accessControlJson.toLowerCase();
+        if (!["forbidden", "read", "readwrite"].includes(accessControl)) {
+            throw new Error("Invalid SourcesAccessControl");
+        }
+        return accessControl;
+    }
+
     ///// GET api/v1/profiles
     async function GET(req, res, next) {
         try {
-            const profiles = await readResource(profilesJSON, res);
+            let profiles = await readResource(profilesJSON, res);
+            profiles = Object.fromEntries(
+                Object.entries(profiles).map(([profileId, profile]) => {
+                    profile.defaultSourceAccessControl = profile.defaultSourceAccessControl.toLowerCase();
+                    profile.sourcesAccessControl = Object.fromEntries(
+                        Object.entries(profile.sourcesAccessControl).map(([sourceId, accessControl]) => {
+                            return [sourceId, parseAccessControl(accessControl)];
+                        })
+                    );
+                    return [profileId, profile];
+                })
+            );
             const currentUser = await userManager.getUser(req.user);
             const groups = currentUser.user.groups;
             if (groups.includes("admin")) {

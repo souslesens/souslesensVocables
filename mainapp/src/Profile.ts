@@ -32,7 +32,6 @@ export async function saveProfile(body: Profile, mode: Mode, updateModel: React.
         if (response.status === 200) {
             updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(resources)) });
             updateLocal({ type: Type.UserClickedModal, payload: false });
-            updateLocal({ type: Type.ResetProfile, payload: mode });
         } else {
             updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`${response.status}, ${message}`) });
         }
@@ -120,4 +119,4 @@ export const defaultProfile = (uuid: string): Profile => {
         blender: { contextMenuActionStartLevel: 0 },
     };
 };
-export { getProfiles, deleteProfile, Profile };
+export { getProfiles, deleteProfile, Profile, SourceAccessControl };

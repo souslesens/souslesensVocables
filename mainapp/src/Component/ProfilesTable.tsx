@@ -5,6 +5,7 @@ import {
     FormControlLabel,
     FormGroup,
     InputLabel,
+    FormLabel,
     MenuItem,
     Modal,
     Select,
@@ -19,11 +20,13 @@ import {
     TableHead,
     TableRow,
     Stack,
+    RadioGroup,
+    Radio,
 } from "@mui/material";
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
-import { defaultProfile, saveProfile, Profile, deleteProfile } from "../Profile";
+import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl } from "../Profile";
 import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
@@ -123,6 +126,7 @@ type ProfileEditionState = { modal: boolean; profileForm: Profile };
 const enum Type {
     UserClickedModal,
     UserUpdatedField,
+    UserUpdatedSourceAccessControl,
     ResetProfile,
     UserClickedCheckAll,
     UserUpdatedBlenderLevel,
@@ -136,15 +140,12 @@ const enum Mode {
 type Msg_ =
     | { type: Type.UserClickedModal; payload: boolean }
     | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } }
-    | { type: Type.ResetProfile; payload: Mode }
+    | { type: Type.UserUpdatedSourceAccessControl; payload: { sourceId: string; newValue: SourceAccessControl | "default" } }
+    | { type: Type.ResetProfile; payload: Profile }
     | { type: Type.UserClickedCheckAll; payload: { fieldname: string; value: boolean } }
     | { type: Type.UserUpdatedBlenderLevel; payload: number };
 
 const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): ProfileEditionState => {
-    const { model } = useModel();
-    const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
-    const getUnmodifiedProfiles = unwrappedProfiles.reduce((acc, value) => (profileEditionState.profileForm.id === value.id ? value : acc), defaultProfile(ulid()));
-    const resetSourceForm = msg.payload ? profileEditionState.profileForm : getUnmodifiedProfiles;
     const fieldToUpdate: any = msg.type === Type.UserClickedCheckAll || msg.type === Type.UserUpdatedField ? msg.payload.fieldname : null;
     switch (msg.type) {
         case Type.UserClickedModal:
@@ -153,6 +154,29 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
         case Type.UserUpdatedField:
             return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [fieldToUpdate]: msg.payload.newValue } };
 
+        case Type.UserUpdatedSourceAccessControl: {
+            const { sourceId, newValue } = msg.payload;
+            const previousSourcesAccessControl = profileEditionState.profileForm.sourcesAccessControl;
+            let newSourcesAccessControls: Record<string, SourceAccessControl>;
+
+            if (newValue === "default") {
+                const { [sourceId]: value, ...otherSource } = previousSourcesAccessControl;
+                newSourcesAccessControls = otherSource;
+            } else {
+                newSourcesAccessControls = {
+                    ...profileEditionState.profileForm.sourcesAccessControl,
+                    [msg.payload.sourceId]: newValue,
+                };
+            }
+
+            return {
+                ...profileEditionState,
+                profileForm: {
+                    ...profileEditionState.profileForm,
+                    sourcesAccessControl: newSourcesAccessControls,
+                },
+            };
+        }
         case Type.UserClickedCheckAll:
             return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [fieldToUpdate]: msg.payload.value ? "ALL" : [] } };
 
@@ -160,12 +184,7 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
             return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, blender: { contextMenuActionStartLevel: msg.payload } } };
 
         case Type.ResetProfile:
-            switch (msg.payload) {
-                case Mode.Creation:
-                    return { ...profileEditionState, profileForm: defaultProfile(ulid()) };
-                case Mode.Edition:
-                    return { ...profileEditionState, profileForm: msg.payload ? profileEditionState.profileForm : resetSourceForm };
-            }
+            return { ...profileEditionState, profileForm: msg.payload };
     }
 };
 
@@ -177,15 +196,30 @@ type ProfileFormProps = {
 const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: ProfileFormProps) => {
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
-    const schemaTypes = [...new Set(unwrappedSources.map((source) => source.schemaType))];
+    const sources = React.useMemo(() => {
+        return unwrappedSources.sort((a, b) => a.name.localeCompare(b.name));
+    }, [unwrappedSources]);
+    const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
     const tools: string[] = ["ALL", "sourceBrowser", "sourceMatcher", "evaluate", "ancestors", "lineage", "SPARQL", "ADLmappings", "ADLbrowser", "Standardizer", "SQLquery"];
     const [profileModel, update] = React.useReducer(updateProfile, { modal: false, profileForm: profile });
-
+    React.useEffect(() => {
+        update({ type: Type.ResetProfile, payload: profile });
+    }, [profileModel.modal]);
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
-
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
+
+    const handleSourceAccessControlUpdate = React.useMemo(() => {
+        return Object.fromEntries(
+            sources.map((source) => [
+                source.id,
+                (event: React.ChangeEvent<HTMLInputElement>) =>
+                    update({ type: Type.UserUpdatedSourceAccessControl, payload: { sourceId: source.id, newValue: event.target.value as SourceAccessControl | "default" } }),
+            ])
+        );
+    }, [sources]);
+
     const handleCheckedAll = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckAll, payload: { fieldname: fieldname, value: event.target.checked } });
     const handleNewBlenderNumber = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserUpdatedBlenderLevel, payload: parseInt(event.target.value.replace(/\D/g, "")) });
@@ -238,11 +272,29 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 ))}
                             </Select>
                         </FormControl>
-                        <FormGroup>
-                            <FormControlLabel
-                                control={<Checkbox onChange={handleCheckedAll("allowedSources")} checked={profileModel.profileForm.allowedSources === "ALL"} />}
-                                label="Allow all sources"
+                        <FormControl>
+                            <FormLabel id="default-source-access-control-label">Default source access control</FormLabel>
+                            <SourceAccessControlInput
+                                name="default-source-access-control"
+                                value={profileModel.profileForm.defaultSourceAccessControl}
+                                onChange={handleFieldUpdate("defaultSourceAccessControl")}
+                                allowDefault={false}
                             />
+                        </FormControl>
+                        <Box style={{ overflow: "auto", maxHeight: "10em" }}>
+                            {sources.map((source) => (
+                                <FormControl key={source.id}>
+                                    <FormLabel id={source.id + "-source-access-control-label"}>{source.name}</FormLabel>
+                                    <SourceAccessControlInput
+                                        name={source.id + "-source-access-control"}
+                                        value={profileModel.profileForm.sourcesAccessControl[source.id] ?? "default"}
+                                        onChange={handleSourceAccessControlUpdate[source.id]}
+                                        allowDefault={true}
+                                    />
+                                </FormControl>
+                            ))}
+                        </Box>
+                        <FormGroup>
                             <FormControl style={{ display: profileModel.profileForm.allowedSources === "ALL" ? "none" : "" }} disabled={profileModel.profileForm.allowedSources === "ALL"}>
                                 <InputLabel id="allowedSources-label">Allowed Sources</InputLabel>
                                 <Select
@@ -255,7 +307,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                     renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                     onChange={handleFieldUpdate("allowedSources")}
                                 >
-                                    {unwrappedSources.map((source) => (
+                                    {sources.map((source) => (
                                         <MenuItem key={source.name} value={source.name}>
                                             {source.name}
                                         </MenuItem>
@@ -275,7 +327,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                 onChange={handleFieldUpdate("forbiddenSources")}
                             >
-                                {unwrappedSources.map((source) => (
+                                {sources.map((source) => (
                                     <MenuItem key={source.name} value={source.name}>
                                         {source.name}
                                     </MenuItem>
@@ -332,5 +384,23 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         </>
     );
 };
+
+interface SourceAccessControlInputProps {
+    name: string;
+    value: SourceAccessControl | "default";
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+    allowDefault: boolean;
+}
+
+const SourceAccessControlInput: React.FC<SourceAccessControlInputProps> = React.memo(function ({ name, value, onChange, allowDefault }) {
+    return (
+        <RadioGroup row aria-labelledby={name} value={value} onChange={onChange} name={name}>
+            {allowDefault ? <FormControlLabel value="default" control={<Radio />} label="Defaults" /> : null}
+            <FormControlLabel value="forbidden" control={<Radio />} label="Forbidden" />
+            <FormControlLabel value="read" control={<Radio />} label="Read" />
+            <FormControlLabel value="readwrite" control={<Radio />} label="Read & Write" />
+        </RadioGroup>
+    );
+});
 
 export { ProfilesTable, Mode, Msg_, Type };

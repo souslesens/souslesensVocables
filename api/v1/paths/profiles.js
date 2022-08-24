@@ -1,9 +1,10 @@
 const path = require("path");
 const ulid = require("ulid");
-const { configPath, config } = require("../../../model/config");
+const { configPath } = require("../../../model/config");
 const profilesJSON = path.resolve(configPath + "/profiles.json");
 exports.profilesJSON = profilesJSON;
 const { readResource, writeResource, resourceFetched, resourceUpdated, responseSchema, resourceCreated } = require("./utils");
+const userManager = require("../../../bin/user.");
 
 module.exports = function () {
     let operations = {
@@ -16,9 +17,18 @@ module.exports = function () {
     async function GET(req, res, next) {
         try {
             const profiles = await readResource(profilesJSON, res);
-            // I need to have the db indexed by a unique id.
-            //const sanitizedDB = await writeResource(profilesJSON, profiles, res)
-            resourceFetched(res, profiles);
+            const currentUser = await userManager.getUser(req.user);
+            const groups = currentUser.user.groups;
+            if (groups.includes("admin")) {
+                resourceFetched(res, profiles);
+            } else {
+                const userProfiles = Object.fromEntries(
+                    Object.entries(profiles).filter(([profileId, _profile]) => {
+                        return groups.includes(profileId);
+                    })
+                );
+                resourceFetched(res, userProfiles);
+            }
         } catch (error) {
             next(error);
         }

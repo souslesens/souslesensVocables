@@ -1,83 +1,58 @@
 <style>
     .LineageMerge_tr {
-
         margin: 10px;
         spacing: 5px;
-
     }
-
-
 </style>
 
-
-<div style="display: flex;flex-direction: row">
-  <div>
-    Nodes to merge
-    <div class="jstreeContainer" style="width: 350px;height: 700px">
-      <div id="LineageMerge_nodesJsTreeDiv"></div>
-    </div>
-
-  </div>
-
-  <div>
-
-    <table>
-      <tr class="LineageMerge_tr">
-        <td>
-          target graph source
-        </td>
-        <td>
-          <select id="LineageMerge_targetSourceSelect"></select>
-        </td>
-      </tr>
-
-      <tr class="LineageMerge_tr">
-        <td>
-          aggregate mode
-        </td>
-        <td>
-          <select id="LineageMerge_aggregateModeSelect">
-
-          <!--  <option value="newUri">newUri</option>-->
-            <option value="keepUri" >keepUri</option>
-          </select>
-        </td>
-      </tr>
-
-      <tr class="LineageMerge_tr">
-        <td>
-          Depth
-        </td>
-        <td>
-          <select id="LineageMerge_aggregateDepthSelect">
-
-            <option value="nodeOnly">node only</option>
-            <option value="nodeDescendantsOnly">node descendants only</option>
-            <option value="nodeAndDirectChildren">node and direct children</option>
-            <option value="nodeAndAllDescendants">node and all descendants</option>
-          </select>
-        </td>
-      </tr>
-      <tr class="LineageMerge_tr">
-        <td>
-          Relations
-        </td>
-        <td>
-          <input type="checkbox" id="LineageMerge_aggregateRelationsCBX" checked="checked">
-
-
-        </td>
-      </tr>
-
-
-    </table>
+<div style="display: flex; flex-direction: row">
     <div>
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#mainDialogDiv').dialog('close')">Cancel
-      </button>
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.mergeNodes()">OK</button>
+        Nodes to merge
+        <div class="jstreeContainer" style="width: 350px; height: 700px">
+            <div id="LineageMerge_nodesJsTreeDiv"></div>
+        </div>
     </div>
 
-  </div>
+    <div>
+        <table>
+            <tr class="LineageMerge_tr">
+                <td>target graph source</td>
+                <td>
+                    <select id="LineageMerge_targetSourceSelect"></select>
+                </td>
+            </tr>
 
+            <tr class="LineageMerge_tr">
+                <td>aggregate mode</td>
+                <td>
+                    <select id="LineageMerge_aggregateModeSelect">
+                        <!--  <option value="newUri">newUri</option>-->
+                        <option value="keepUri">keepUri</option>
+                    </select>
+                </td>
+            </tr>
 
+            <tr class="LineageMerge_tr">
+                <td>Depth</td>
+                <td>
+                    <select id="LineageMerge_aggregateDepthSelect">
+                        <option value="nodeOnly">node only</option>
+                        <option value="nodeDescendantsOnly">node descendants only</option>
+                        <option value="nodeAndDirectChildren">node and direct children</option>
+                        <option value="nodeAndAllDescendants">node and all descendants</option>
+                    </select>
+                </td>
+            </tr>
+            <tr class="LineageMerge_tr">
+                <td>Relations</td>
+                <td>
+                    <input type="checkbox" id="LineageMerge_aggregateRelationsCBX" checked="checked" />
+                </td>
+            </tr>
+        </table>
+        <div>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#mainDialogDiv').dialog('close')">Cancel</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.mergeNodes()">OK</button>
+        </div>
+    </div>
 </div>

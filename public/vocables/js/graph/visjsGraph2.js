@@ -153,13 +153,13 @@ var visjsGraph = (function () {
                 self.context.currentNode = node;
                 var options = {};
 
-                if(params.event){
-                 var options = {
-                     ctrlKey: (params.event.ctrlKey ? 1 : 0),
-                     altKey: (params.event.altKey ? 1 : 0),
-                     shiftKey: (params.event.shiftKey ? 1 : 0),
-                 }
-              }
+                if (params.event) {
+                    var options = {
+                        ctrlKey: params.event.ctrlKey ? 1 : 0,
+                        altKey: params.event.altKey ? 1 : 0,
+                        shiftKey: params.event.shiftKey ? 1 : 0,
+                    };
+                }
                 if (_options.onHoverNodeFn) _options.onHoverNodeFn(node, point, options);
             })
             .on("blurNode", function (/** @type {any} */ _params) {

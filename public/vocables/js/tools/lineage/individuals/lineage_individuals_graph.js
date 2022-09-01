@@ -1,12 +1,8 @@
 var Lineage_individuals_graph = (function () {
     var self = {};
 
-
-
     self.onDataSourcesSelect = function (dataSourceKey) {
-        self.currentDataSource=Lineage_individuals.currentDataSource
-
-
+        self.currentDataSource = Lineage_individuals.currentDataSource;
     };
 
     self.getNodeLinkedData = function (node, callback) {
@@ -26,8 +22,7 @@ var Lineage_individuals_graph = (function () {
     };
 
     self.initIndividualsPanel = function (node) {
-        self.currentClassNode=Lineage_individuals.currentClassNode
-
+        self.currentClassNode = Lineage_individuals.currentClassNode;
     };
 
     self.executeQuery = function () {
@@ -37,7 +32,6 @@ var Lineage_individuals_graph = (function () {
             self.searchIndex.executeQuery();
         }
     };
-
 
     self.addFilter = function () {
         var existingVisjsIds = visjsGraph.getExistingIdsMap();
@@ -52,7 +46,6 @@ var Lineage_individuals_graph = (function () {
         $("#LineageIndividualsQueryParams_value").val("");
     };
 
-
     self.drawIndividuals = function () {
         if (self.currentDataSource.type.indexOf("sql") > -1) {
             self.sql.drawSearchIndividuals();
@@ -60,7 +53,6 @@ var Lineage_individuals_graph = (function () {
             self.searchIndex.drawIndividuals();
         }
     };
-
 
     return self;
 })();

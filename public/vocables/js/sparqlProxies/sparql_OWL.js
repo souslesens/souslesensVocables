@@ -17,7 +17,7 @@ var Sparql_OWL = (function () {
         var defaultTaxonomyPredicates = " <http://www.w3.org/2000/01/rdf-schema#subClassOf> ";
 
         // problem for classes
-        if (false && Config.sources[source].allowIndividuals) defaultTaxonomyPredicates = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> | "+defaultTaxonomyPredicates;
+        if (false && Config.sources[source].allowIndividuals) defaultTaxonomyPredicates = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> | " + defaultTaxonomyPredicates;
 
         if (!source) return defaultTaxonomyPredicates;
         var sourceConfig = Config.sources[source];
@@ -31,7 +31,6 @@ var Sparql_OWL = (function () {
             if (item.indexOf("http://") == 0) str += " <" + item + "> ";
             else str += " " + item + " ";
         });
-
 
         return str;
     };
@@ -1052,40 +1051,38 @@ var Sparql_OWL = (function () {
         });
     };
 
-
-
-    self.getAllTriples=function(sourceLabel,role,ids,options,callback) {
-        if (!role)
-            return callback("no role sepecified")
-        if (!ids)
-            return callback("no uris sepecified")
-        if (!options)
-            options = {}
+    self.getAllTriples = function (sourceLabel, role, ids, options, callback) {
+        if (!role) return callback("no role sepecified");
+        if (!ids) return callback("no uris sepecified");
+        if (!options) options = {};
 
         var slices = common.array.slice(ids, Sparql_generic.slicesSize);
-        var allResults = []
-        async.eachSeries(slices, function(sliceIds, callbackEach) {
-            var query =
-              "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-              "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-              "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-              "SELECT  * " +
-              " WHERE { ?subject ?predicate ?object."
-            query += Sparql_common.setFilter(role, sliceIds)
+        var allResults = [];
+        async.eachSeries(
+            slices,
+            function (sliceIds, callbackEach) {
+                var query =
+                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                    "SELECT  * " +
+                    " WHERE { ?subject ?predicate ?object.";
+                query += Sparql_common.setFilter(role, sliceIds);
 
-            query += "}LIMIT 10000";
+                query += "}LIMIT 10000";
 
-            var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function(err, _result) {
-                if (err) return callbackEach(err);
-                allResults = allResults.concat(_result.results.bindings)
-                callbackEach()
-
-            });
-        }, function(err) {
-            return callback(null, allResults);
-        })
-    }
+                var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+                    if (err) return callbackEach(err);
+                    allResults = allResults.concat(_result.results.bindings);
+                    callbackEach();
+                });
+            },
+            function (err) {
+                return callback(null, allResults);
+            }
+        );
+    };
 
     /* self.getLabels = function (sourceLabel,ids, callback) {
          var from = Sparql_common.getFromStr(sourceLabel)

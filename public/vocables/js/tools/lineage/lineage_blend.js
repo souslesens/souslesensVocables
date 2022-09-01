@@ -659,9 +659,8 @@ var xx = result
         },
         addTripleToCreatingNode: function (predicate, object) {
             var uriType = $("#LineageBlend_creatingNodeUriType").val();
-            var specificUri=$("#LineageBlend_creatingNodeSubjectUri").val()
-            if(specificUri)
-                uriType= "specific"
+            var specificUri = $("#LineageBlend_creatingNodeSubjectUri").val();
+            if (specificUri) uriType = "specific";
             if (!self.graphModification.creatingsourceUri) {
                 let graphUri = Config.sources[Lineage_classes.mainSource].graphUri;
                 if (uriType == "fromLabel") self.graphModification.creatingsourceUri = graphUri + common.formatStringForTriple(object, true);
@@ -892,8 +891,7 @@ var xx = result
                         else {
                             //Lineage_classes.mainSource
                             var mainSource = Config.sources[Lineage_classes.mainSource];
-                            if (mainSource.editable && self.sourceNode.source == Lineage_classes.mainSource)
-                                inSource = Lineage_classes.mainSource;
+                            if (mainSource.editable && self.sourceNode.source == Lineage_classes.mainSource) inSource = Lineage_classes.mainSource;
                             //soit  dans predicateSource
                             else inSource = Config.predicatesSource;
                         }

@@ -158,7 +158,7 @@ $("#actionDiv").html(html);*/
       items.graphNamedIndividuals = {
         label: "Individuals ",
         action: function() {
-          Lineage_individuals.setClass(self.currentTreeNode);
+          Lineage_individuals.showIndividualsPanel(self.currentTreeNode);
           // Lineage_classes.drawNamedIndividuals(self.currentTreeNode.data.id);
         }
       };

@@ -9,6 +9,9 @@
     }
 </style>
 
+
+
+
 <div id="LineageIndividualsQueryParamsDialog" style="display: block; padding: 5px">
     <div>
         <!--  <select id="LineageIndividualsQueryParams_typeSelect" onchange="LineageIndividuals.query.onSelectDialogField($(this).val())" style="display: none;"></select>-->
@@ -25,20 +28,20 @@
             <table>
                 <tr>
                     <td>Table</td>
-                    <td><select id="LineageIndividualsQueryParams_SQL_tablesSelect" onchange="Lineage_individuals.sql.showColumns($(this).val())"></select></td>
+                    <td><select id="LineageIndividualsQueryParams_SQL_tablesSelect" onchange="Lineage_individuals_sql.showColumns($(this).val())"></select></td>
                 </tr>
                 <tr>
                     <td>Column</td>
                     <td>
-                        <select id="LineageIndividualsQueryParams_SQL_columnsSelect" onchange="Lineage_individuals.sql.onColumnChange($(this).val())"></select>
+                        <select id="LineageIndividualsQueryParams_SQL_columnsSelect" onchange="Lineage_individuals_sql.onColumnChange($(this).val())"></select>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                        <button onclick="Lineage_individuals.sql.fillValuesSelect()">List</button>
+                        <button onclick="Lineage_individuals_sql.fillValuesSelect()">List</button>
                     </td>
                     <td>
-                        <select id="LineageIndividualsQueryParams_valuesSelect" onchange="Lineage_individuals.sql.onValuesSelectChange()" style="width: 200px">
+                        <select id="LineageIndividualsQueryParams_valuesSelect" onchange="Lineage_individuals_sql.onValuesSelectChange()" style="width: 200px">
                             <option value="" size="3"></option>
                         </select>
                     </td>

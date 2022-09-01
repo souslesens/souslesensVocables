@@ -177,7 +177,7 @@ var Lineage_classes = (function() {
   ) {
     if (!Config.sources[node.data.source]) return;
     if (!options) options = {};
-    if (self.currentOwlType == "Individuals") return Lineage_individuals.setClass(self.currentGraphNode);
+    if (self.currentOwlType == "Individuals") return Lineage_individuals.showIndividualsPanel(self.currentGraphNode);
 
     if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
       if (options.callee == "Graph") Lineage_classes.graphActions.graphNodeNeighborhood("all");
@@ -2550,7 +2550,7 @@ upperNodeIds.push(id);
       }
     },
     showIndividuals: function() {
-      Lineage_individuals.setClass(self.currentGraphNode);
+      Lineage_individuals.showIndividualsPanel(self.currentGraphNode);
       //Lineage_classes.drawNamedIndividuals([self.currentGraphNode.id]);
     }
 

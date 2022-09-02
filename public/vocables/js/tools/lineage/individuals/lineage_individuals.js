@@ -38,8 +38,7 @@ var Lineage_individuals = (function () {
 
     /**
      *
-     * detects if node has some mappings
-     *
+     * check if there is a linkedMapping for any ancesstor of this class
      * @param node
      * @param callback
      */
@@ -53,16 +52,15 @@ var Lineage_individuals = (function () {
             },
             function (err, result) {
                 if (err) return err;
-                var currentNodeLinkedMappings = [];
+                var currentNodeLinkedMappingKeys = [];
                 result.forEach(function (item) {
                     var classId = item.superClass.value;
                     var mapping = self.currentDataSource.classMappings[classId];
                     if (mapping) {
-                        mapping.currentNode = node;
-                        currentNodeLinkedMappings.push(mapping);
+                        currentNodeLinkedMappingKeys.push(classId);
                     }
                 });
-                return callback(null, currentNodeLinkedMappings);
+                return callback(null, currentNodeLinkedMappingKeys);
             }
         );
     };
@@ -71,12 +69,11 @@ var Lineage_individuals = (function () {
         $("#Lineage_Tabs").tabs("option", "active", 3);
         self.currentClassNode = node;
         $("#LineageIndividualsQueryParams_className").html(self.currentClassNode.data.label);
-        self.currentDataSource.currentClassNodeMapping = self.currentDataSource.classMappings[self.currentClassNode.data.id];
-        if (!self.currentDataSource.currentClassNodeMapping) return alert("No mapping for Class " + self.currentClassNode.data.label + " in data source " + self.currentDataSource.name);
 
         if (self.currentDataSource.type == "searchIndex") {
             Lineage_individuals_search.initIndividualsPanel(node);
         } else if (self.currentDataSource.type.indexOf("sql") > -1) {
+
             Lineage_individuals_sql.initIndividualsPanel(node);
         } else if (self.currentDataSource.type == "graph") {
             Lineage_individuals_graph.initIndividualsPanel(node);

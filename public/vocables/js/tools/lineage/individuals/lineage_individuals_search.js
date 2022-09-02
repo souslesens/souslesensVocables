@@ -1,6 +1,6 @@
 var Lineage_individuals_search = (function () {
     var self = {};
-    self.currentFilters = [];
+    Lineage_individuals.currentFilters = [];
     self.dataSources = {};
 
     self.onDataSourcesSelect = function (dataSourceKey) {
@@ -10,21 +10,6 @@ var Lineage_individuals_search = (function () {
         self.initIndividualsPanel(self.currentClassNode);
     };
 
-    self.getNodeLinkedData = function (node, callback) {
-        Sparql_OWL.getNodesAncestors(node.data.source, node.data.id, { withoutImports: true, withlabels: true }, function (err, result) {
-            if (err) return err;
-            var currentNodeLinkedMappings = [];
-            result.forEach(function (item) {
-                var classId = item.superClass.value;
-                var mapping = self.currentDataSource.classMappings[classId];
-                if (mapping) {
-                    mapping.currentNode = node;
-                    currentNodeLinkedMappings.push(mapping);
-                }
-            });
-            return callback(null, currentNodeLinkedMappings);
-        });
-    };
 
     self.initIndividualsPanel = function (node) {
         self.currentClassNode = Lineage_individuals.currentClassNode;
@@ -47,7 +32,7 @@ var Lineage_individuals_search = (function () {
         var filterObj = null;
         if (self.currentDataSource.type.indexOf("sql") > -1) filterObj = self.sql.getFilter();
         else if (self.currentDataSource.type == "searchIndex") filterObj = self.getFilter();
-        self.currentFilters.push(filterObj);
+        Lineage_individuals.currentFilters.push(filterObj);
 
         $("#LineageIndividualsQueryParams_value").val("");
     };
@@ -65,18 +50,18 @@ var Lineage_individuals_search = (function () {
         if (individuals.length == 0) return alert("no indiviual selected");
         var obj = { classNode: self.currentClassNode, individuals: [] };
 
-        var html = "<div class='LineageIndividualsQueryParams_QueryElt' id='LineageIndividualsQueryParams_Elt_" + self.currentFilters.length + "'> ";
+        var html = "<div class='LineageIndividualsQueryParams_QueryElt' id='LineageIndividualsQueryParams_Elt_" + Lineage_individuals.currentFilters.length + "'> ";
         html += "<b>" + self.currentClassNode.data.label + "</b>";
-        var queryIndex = self.currentFilters.length;
+        var queryIndex = Lineage_individuals.currentFilters.length;
         if (individuals[0].id == "_ALL") {
-            self.currentFilters.push(obj);
+            Lineage_individuals.currentFilters.push(obj);
 
             html += " ALL";
         } else {
             individuals.forEach(function (individual) {
                 obj.individuals.push(individual.data.id);
             });
-            self.currentFilters.push(obj);
+            Lineage_individuals.currentFilters.push(obj);
 
             if (individuals.length < 5) {
                 individuals.forEach(function (individual) {
@@ -90,11 +75,11 @@ var Lineage_individuals_search = (function () {
     };
 
     self.executeFilterQuery = function (callback) {
-        if (self.currentFilters.length == 0) return alert("no query filter");
+        if (Lineage_individuals.currentFilters.length == 0) return alert("no query filter");
         var mustFilters = [];
         var shouldFilters = [];
         var terms = [];
-        self.currentFilters.forEach(function (filter, index) {
+        Lineage_individuals.currentFilters.forEach(function (filter, index) {
             if (filter.individuals.length == 0) {
                 terms.push({ term: { ["Concepts." + filter.classNode.data.label + ".name.keyword"]: filter.classNode.data.label } });
             } else {
@@ -246,7 +231,7 @@ var Lineage_individuals_search = (function () {
             var graphEdgesMap = {};
 
             // aggregate individuals inside map of graph nodes map
-            self.currentFilters.forEach(function (filter) {
+            Lineage_individuals.currentFilters.forEach(function (filter) {
                 var filterClassName = filter.classNode.data.label;
                 var fitlerIndividuals = filter.individuals;
                 if (!graphNodesMap[filter.classNode.data.id])

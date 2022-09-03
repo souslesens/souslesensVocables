@@ -364,5 +364,11 @@ var Lineage_individuals_search = (function () {
         });
     };
 
+    self.getIndividualInfos=function(dataSource,node,callback){
+
+
+        return callback(null,infos)
+    }
+
     return self;
 })();

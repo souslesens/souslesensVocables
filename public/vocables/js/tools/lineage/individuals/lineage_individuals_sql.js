@@ -9,13 +9,11 @@ var Lineage_individuals_sql = (function() {
   };
 
 
-
-
-
   self.initIndividualsPanel = function(node) {
     self.currentClassNode = Lineage_individuals.currentClassNode;
     self.getModel(self.currentDataSource, function(err, model) {
       if (err) return alert(err);
+
       Lineage_individuals.getNodeLinkedData(self.currentClassNode, function(err, result) {
         if (err)
           return callback(err);
@@ -84,14 +82,14 @@ var Lineage_individuals_sql = (function() {
     });
   };
   self.showTables = function(mappingKey) {
-     if (!self.currentDataSource.classMappings[mappingKey]) return alert("node mappings for class " + self.currentClassNode.data.label);
-  var tables = Object.keys(self.currentDataSource.classMappings[mappingKey]);
+    if (!self.currentDataSource.classMappings[mappingKey]) return alert("node mappings for class " + self.currentClassNode.data.label);
+    var tables = Object.keys(self.currentDataSource.classMappings[mappingKey].tables);
     common.fillSelectOptions("LineageIndividualsQueryParams_SQL_tablesSelect", tables, true);
   };
   self.showColumns = function(table) {
     var schema = self.currentDataSource.table_schema;
-    if(table.indexOf(schema)<0)
-      table=schema + "." + table
+    if (table.indexOf(schema) < 0)
+      table = schema + "." + table;
     var tableColumns = self.currentDataSource.model[table];
 
     common.fillSelectOptions("LineageIndividualsQueryParams_SQL_columnsSelect", tableColumns, true);
@@ -132,7 +130,7 @@ var Lineage_individuals_sql = (function() {
     });
   };
   self.getFilter = function() {
-    var classId = self.currentClassNode.data.id;
+    var classUri = self.currentClassNode.data.id;
     var classLabel = self.currentClassNode.data.label;
 
     var table = $("#LineageIndividualsQueryParams_SQL_tablesSelect").val();
@@ -141,7 +139,7 @@ var Lineage_individuals_sql = (function() {
     var value = $("#LineageIndividualsQueryParams_value").val();
     var html = "<div class='LineageIndividualsQueryParams_QueryElt' id='LineageIndividualsQueryParams_Elt_" + Lineage_individuals.currentFilters.length + "'> ";
     var obj = {
-      classId: classId,
+      classUri: classUri,
       classLabel: classLabel,
       table: table
     };
@@ -180,16 +178,17 @@ var Lineage_individuals_sql = (function() {
     var columnsStr = "";
     var columnToClassMap = {};
 
+    var currentMapping;
     Lineage_individuals.currentFilters.forEach(function(filter, index) {
-      if(columnsStr==""){
+      if (columnsStr == "") {
         var currentClassNodeMappingKey = self.currentDataSource.currentClassNodeMappingKey;
-        var searchedColumn=self.currentDataSource.classMappings[currentClassNodeMappingKey][filter.table]
-        columnToClassMap[searchedColumn] = self.currentClassNode.id;
-        columnsStr +=  filter.table + "." +searchedColumn;
+        currentMapping = self.currentDataSource.classMappings[currentClassNodeMappingKey].tables[filter.table];
+        currentMapping.table = filter.table;
+        currentMapping.classUri = currentClassNodeMappingKey;
+        columnsStr += filter.table + "." + currentMapping.idColumn + "," + filter.table + "." + currentMapping.labelColumn;
       }
-      if (columnsStr!="") columnsStr += ",";
-      columnsStr += filter.table + "." + filter.column;
-      columnToClassMap[filter.column] = filter.classId;
+
+
       if (filter.value) {
         var opValue = "";
         if (filter.operator == "contains") {
@@ -210,12 +209,6 @@ var Lineage_individuals_sql = (function() {
       whereStr += whereItem;
     });
 
-
-
-   /* for (var table in  self.currentDataSource.classMappings[currentClassNodeMappingKey]) {
-      if (tables.indexOf(table) > -1)
-      columnToClassMap[currentClassNodeMapping[table]] = self.currentClassNode.id;
-    }*/
 
     var sqlQuery = " select  " + columnsStr + " from " + fromStr + " limit " + SampleSizelimit;
     if (self.currentDataSource.type == "sql.sqlserver") sqlQuery = " select top  " + SampleSizelimit + " " + columnsStr + "  from " + fromStr;
@@ -239,48 +232,63 @@ var Lineage_individuals_sql = (function() {
         var existingVisjsIds = visjsGraph.getExistingIdsMap();
 
         data.forEach(function(item) {
-          for (var column in columnToClassMap) {
-            var classNodeId = columnToClassMap[column];
 
-            var individual = item[column];
+          currentMapping;
 
-            if (individual) {
-              if (visjsGraph.isGraphNotEmpty()) {
-                var classNodeObj = visjsGraph.data.nodes.get(classNodeId);
-                if (existingVisjsIds[classNodeId]) {
-                  var color = classNodeObj.color;
-                  var edgeId = individual + "_" + classNodeId;
-                  if (!existingVisjsIds[edgeId]) {
-                    existingVisjsIds[edgeId] = 1;
 
-                    visjsData.edges.push({
-                      id: edgeId,
-                      from: individual,
-                      to: classNodeId,
-                      color: color
-                    });
-                  }
+          var classUri = currentMapping.classUri;
+          var individualId = item[currentMapping.idColumn];
+          var individualLabel = individualId;
+          if (currentMapping.labelColumn)
+            individualLabel = item[currentMapping.labelColumn];
+
+
+          if (individualId) {
+            if (visjsGraph.isGraphNotEmpty()) {
+              var classNodeObj = visjsGraph.data.nodes.get(classUri);
+              if (existingVisjsIds[classUri]) {
+                var color = classNodeObj.color;
+                var edgeId = individual + "_" + classUri;
+                if (!existingVisjsIds[edgeId]) {
+                  existingVisjsIds[edgeId] = 1;
+
+                  visjsData.edges.push({
+                    id: edgeId,
+                    from: individualId,
+                    to: classUri,
+                    color: color
+                  });
                 }
               }
+            }
 
-              if (!existingVisjsIds[individual]) {
-                existingVisjsIds[individual] = 1;
+            if (!existingVisjsIds[individualId]) {
+              existingVisjsIds[individualId] = 1;
 
-                visjsData.nodes.push({
-                  id: individual,
-                  label: individual,
-                  shape: Lineage_classes.namedIndividualShape,
+              visjsData.nodes.push({
+                id: individualId,
+                label: individualLabel,
+                shape: Lineage_classes.namedIndividualShape,
+                size: Lineage_classes.defaultShapeSize,
+                color: color,
+                data: {
+                  id: individualId,
+                  label: individualLabel,
+                  source: "linked_" + self.currentDataSource.name,
+                  type: "NamedIndividual",
+                  dataSource: self.currentDataSource.name,
+                  classUri: currentMapping.classUri,
+                  idColumn: currentMapping.idColumn,
+                  table: currentMapping.table
 
-                  color: color,
-                  data: {
-                    id: individual,
-                    label: individual,
-                    source: "linked_" + self.currentDataSource.name
-                  }
-                });
-              }
+
+                }
+              });
+            } else {
+
             }
           }
+
           var array = Object.keys(columnToClassMap);
           for (var i = 0; i < array.length; i++) {
             for (var j = 0; j < array.length; j++) {
@@ -314,7 +322,7 @@ var Lineage_individuals_sql = (function() {
             var individuals = graphEdgesMap[paragraphId];
             individuals.forEach(function(item1) {
               individuals.forEach(function(item2) {
-                if (item1.individual != item2.individual && item1.classId != item2.classId) {
+                if (item1.individual != item2.individual && item1.classUri != item2.classUri) {
                   var edgeId = item1.individual + "_" + item2.individual;
                   if (!individualEdges[edgeId]) individualEdges[edgeId] = [];
                   individualEdges[edgeId].push(paragraphId);
@@ -396,6 +404,48 @@ var Lineage_individuals_sql = (function() {
         return alert(err.responseText);
       }
     });
+  };
+
+  self.getIndividualInfos = function(dataSource, node, callback) {
+    var idColumn = node.data.idColumn;
+    var table = node.data.table;
+
+    var individualId = node.data.id;
+    var sqlQuery = "select * from " + table + " where " + idColumn + "='" + individualId + "'";
+
+    const params = new URLSearchParams({
+      type: dataSource.type,
+      dbName: dataSource.dbName,
+      sqlQuery: sqlQuery
+    });
+
+    $.ajax({
+      type: "GET",
+      url: Config.apiUrl + "/kg/data?" + params.toString(),
+      dataType: "json",
+
+      success: function(data, _textStatus, _jqXHR) {
+        var str = "<div style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
+
+        str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
+
+        data.forEach(function(item) {
+          for (var key in item) {
+            str += "<tr class='infos_table'>";
+            str += "<td class='detailsCellName'>" + key + "</td>";
+            str += "<td class='detailsCellValue'>" + item[key] + "</td>";
+            str += "</tr>";
+          }
+        });
+        str += "</table>";
+        return callback(null, str);
+      }
+      ,
+      error(err) {
+        return callback(err.responseText);
+      }
+    });
+    return callback(null, infos);
   };
 
   return self;

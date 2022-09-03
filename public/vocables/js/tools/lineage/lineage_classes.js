@@ -2076,8 +2076,9 @@ namedIndividualsMap[item.concept.value] = 1
             }
         } else if (node.data && node.data.type == "NamedIndividual") {
             html =
-                '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showNodeInfos();"> Node infos</span>' +
-                '<span  class="popupMenuItem" onclick="Lineage_classes.graphActions.expandIndividual();"> Expand individual</span>';
+                '    <span  class="popupMenuItem" onclick="Lineage_individuals.graphActions.showIndividualInfos();"> Node infos</span>' +
+              '<span  class="popupMenuItem" onclick="Lineage_individuals.graphActions.expandIndividual();"> Expand individual</span>';
+               // '<span  class="popupMenuItem" onclick="Lineage_classes.graphActions.expandIndividual();"> Expand individual</span>';
         } else {
             html =
                 '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showNodeInfos();"> Node infos</span>' +

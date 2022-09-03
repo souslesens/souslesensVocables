@@ -39,6 +39,10 @@ var Lineage_individuals_graph = (function () {
             self.searchIndex.drawIndividuals();
         }
     };
+    self.getIndividualInfos=function(dataSource,node,callback){
 
+
+        return callback(null,infos)
+    }
     return self;
 })();

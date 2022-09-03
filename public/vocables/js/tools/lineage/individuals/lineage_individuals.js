@@ -138,5 +138,44 @@ var Lineage_individuals = (function () {
         }
     };
 
+
+
+    self.graphActions={
+        showIndividualInfos:function(){
+           var node= Lineage_classes.currentGraphNode;
+            var dataSourceLabel=node.data.dataSource;
+            var dataSource=Config.sources[Lineage_classes.mainSource].dataSources[dataSourceLabel]
+
+            if (dataSource.type.indexOf("sql") > -1) {
+                Lineage_individuals_sql.getIndividualInfos(dataSource,node,function(err,result){
+                    if(err)
+                        return alert(err)
+                    self.displayIndividualInfos(result)
+                });
+            } else if (dataSource.type == "searchIndex") {
+                Lineage_individuals_search.getIndividualInfos(dataSource,node,function(err,result){
+                    if(err)
+                        return alert(err)
+                    self.displayIndividualInfos(result)
+                });
+            } else if (dataSource.type == "graph") {
+                Lineage_individuals_graph.getIndividualInfos(dataSource,node,function(err,result){
+                    if(err)
+                        return alert(err)
+                    self.displayIndividualInfos(result)
+                });
+            }
+
+        },
+        expandIndividual:function(){
+            var data= Lineage_classes.currentGraphNode.data
+        }
+    }
+
+    self.displayIndividualInfos=function(html){
+        $("#mainDialogDiv").html(html);
+        $("#mainDialogDiv").dialog("open");
+    }
+
     return self;
 })();

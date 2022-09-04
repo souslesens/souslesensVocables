@@ -93,6 +93,7 @@ var Lineage_individuals_sql = (function() {
     var tableColumns = self.currentDataSource.model[table];
 
     common.fillSelectOptions("LineageIndividualsQueryParams_SQL_columnsSelect", tableColumns, true);
+   
   };
   self.onColumnChange = function(column) {
     $("#LineageIndividualsQueryParams_value").val("");
@@ -103,7 +104,7 @@ var Lineage_individuals_sql = (function() {
   self.fillValuesSelect = function() {
     var table = $("#LineageIndividualsQueryParams_SQL_tablesSelect").val();
     var column = $("#LineageIndividualsQueryParams_SQL_columnsSelect").val();
-    if (!table || !column) return alert("select a tbale and a column");
+    if (!table || !column) return alert("select a table and a column");
     var SampleSizelimit = 1000;
     var sqlQuery = " select distinct column from " + table + " limit " + SampleSizelimit;
     if (self.currentDataSource.type == "sql.sqlserver") sqlQuery = " select distinct  " + column + " from " + table;
@@ -185,7 +186,10 @@ var Lineage_individuals_sql = (function() {
         currentMapping = self.currentDataSource.classMappings[currentClassNodeMappingKey].tables[filter.table];
         currentMapping.table = filter.table;
         currentMapping.classUri = currentClassNodeMappingKey;
-        columnsStr += filter.table + "." + currentMapping.idColumn + "," + filter.table + "." + currentMapping.labelColumn;
+        columnsStr += filter.table + "." + currentMapping.individualIdColumn + "," + filter.table + "." + currentMapping.individualLabelColumn;
+
+       // columnsStr += filter.table + "." + currentMapping.classUriColumn + "," + filter.table + "." + currentMapping.classLabelColumn;
+
       }
 
 
@@ -236,11 +240,12 @@ var Lineage_individuals_sql = (function() {
           currentMapping;
 
 
-          var classUri = currentMapping.classUri;
-          var individualId = item[currentMapping.idColumn];
+         // var classUri = currentMapping.classUri;
+          var classUri= Lineage_individuals.currentNode.id
+          var individualId = item[currentMapping.individualIdColumn];
           var individualLabel = individualId;
-          if (currentMapping.labelColumn)
-            individualLabel = item[currentMapping.labelColumn];
+          if (currentMapping.classLabelColumn)
+            individualLabel = item[currentMapping.individualLabelColumn];
 
 
           if (individualId) {
@@ -278,7 +283,8 @@ var Lineage_individuals_sql = (function() {
                   type: "NamedIndividual",
                   dataSource: self.currentDataSource.name,
                   classUri: currentMapping.classUri,
-                  idColumn: currentMapping.idColumn,
+                  classUriColumn: currentMapping.classUriColumn,
+                  individualIdColumn:currentMapping.individualIdColumn,
                   table: currentMapping.table
 
 
@@ -407,11 +413,11 @@ var Lineage_individuals_sql = (function() {
   };
 
   self.getIndividualInfos = function(dataSource, node, callback) {
-    var idColumn = node.data.idColumn;
+    var individualIdColumn = node.data.individualIdColumn;
     var table = node.data.table;
 
     var individualId = node.data.id;
-    var sqlQuery = "select * from " + table + " where " + idColumn + "='" + individualId + "'";
+    var sqlQuery = "select * from " + table + " where " + individualIdColumn + "='" + individualId + "'";
 
     const params = new URLSearchParams({
       type: dataSource.type,
@@ -430,6 +436,7 @@ var Lineage_individuals_sql = (function() {
         str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
 
         data.forEach(function(item) {
+          str += "<tr class='infos_table'><td class='detailsCellName' style='font-weight: bold'>" + item[individualIdColumn] + "</td><td></td></tr>";
           for (var key in item) {
             str += "<tr class='infos_table'>";
             str += "<td class='detailsCellName'>" + key + "</td>";
@@ -445,7 +452,7 @@ var Lineage_individuals_sql = (function() {
         return callback(err.responseText);
       }
     });
-    return callback(null, infos);
+
   };
 
   return self;

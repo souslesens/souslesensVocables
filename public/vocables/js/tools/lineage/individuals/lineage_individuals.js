@@ -43,6 +43,9 @@ var Lineage_individuals = (function () {
      * @param callback
      */
     self.getNodeLinkedData = function (node, callback) {
+        if(!node)
+            return callback(null,[])
+        self.currentNode=node;
         Sparql_OWL.getNodesAncestors(
             node.data.source,
             node.data.id,
@@ -129,6 +132,9 @@ var Lineage_individuals = (function () {
     };
 
     self.drawIndividuals = function () {
+
+        if( Lineage_individuals.currentFilters.length==0)
+            return alert( "no filter specified")
         if (self.currentDataSource.type.indexOf("sql") > -1) {
             Lineage_individuals_sql.drawSearchIndividuals();
         } else if (self.currentDataSource.type == "searchIndex") {

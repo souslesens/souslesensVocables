@@ -2557,7 +2557,7 @@ upperNodeIds.push(id);
 
         if (source && !sourceColors[source]) {
             sourceColors[source] = common[palette][Object.keys(sourceColors).length];
-            self.registerSource(source);
+            //self.registerSource(source);
         }
         return sourceColors[source];
     };

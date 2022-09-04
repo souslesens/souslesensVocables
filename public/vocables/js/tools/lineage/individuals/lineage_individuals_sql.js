@@ -93,7 +93,7 @@ var Lineage_individuals_sql = (function() {
     var tableColumns = self.currentDataSource.model[table];
 
     common.fillSelectOptions("LineageIndividualsQueryParams_SQL_columnsSelect", tableColumns, true);
-   
+   self.setDefaultFilter()
   };
   self.onColumnChange = function(column) {
     $("#LineageIndividualsQueryParams_value").val("");
@@ -101,6 +101,31 @@ var Lineage_individuals_sql = (function() {
       self.fillValuesSelect();
     }
   };
+  /**
+   * initialize UI column,operator and value with the mapping filter if anay
+   *
+   *
+   *
+   */
+  self.setDefaultFilter=function(){
+    var mappingKey=self.currentDataSource.currentClassNodeMappingKey
+   var defaultFilter= self.currentDataSource.classMappings[mappingKey].defaultFilter;
+    if(!defaultFilter)
+      return;
+    var table = $("#LineageIndividualsQueryParams_SQL_tablesSelect").val();
+    var column=self.currentDataSource.classMappings[mappingKey].tables[table][defaultFilter.column]
+    $("#LineageIndividualsQueryParams_SQL_columnsSelect").val(column);
+    var operator = $("#LineageIndividualsQueryParams_operator").val(defaultFilter.operator);
+    var value =""
+    if(defaultFilter.value=="classLabel")
+       value =Lineage_individuals.currentClassNode.data.label
+    if(defaultFilter.value=="classId")
+      value =Lineage_individuals.currentClassNode.data.id
+     $("#LineageIndividualsQueryParams_value").val(value);
+
+
+
+  }
   self.fillValuesSelect = function() {
     var table = $("#LineageIndividualsQueryParams_SQL_tablesSelect").val();
     var column = $("#LineageIndividualsQueryParams_SQL_columnsSelect").val();
@@ -253,7 +278,7 @@ var Lineage_individuals_sql = (function() {
               var classNodeObj = visjsGraph.data.nodes.get(classUri);
               if (existingVisjsIds[classUri]) {
                 var color = classNodeObj.color;
-                var edgeId = individual + "_" + classUri;
+                var edgeId = individualId + "_" + classUri;
                 if (!existingVisjsIds[edgeId]) {
                   existingVisjsIds[edgeId] = 1;
 

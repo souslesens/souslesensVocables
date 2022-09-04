@@ -43,9 +43,10 @@ var Lineage_individuals = (function () {
      * @param callback
      */
     self.getNodeLinkedData = function (node, callback) {
+        self.currentNode= Lineage_classes.currentGraphNode ||  Lineage_classes.currentTreeNode
         if(!node)
             return callback(null,[])
-        self.currentNode=node;
+
         Sparql_OWL.getNodesAncestors(
             node.data.source,
             node.data.id,
@@ -148,7 +149,7 @@ var Lineage_individuals = (function () {
 
     self.graphActions={
         showIndividualInfos:function(){
-           var node= Lineage_classes.currentGraphNode;
+           var node= Lineage_classes.currentGraphNode ||  Lineage_classes.currentTreeNode
             var dataSourceLabel=node.data.dataSource;
             var dataSource=Config.sources[Lineage_classes.mainSource].dataSources[dataSourceLabel]
 

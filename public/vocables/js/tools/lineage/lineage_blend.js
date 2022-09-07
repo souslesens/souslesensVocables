@@ -13,7 +13,7 @@ var Lineage_blend = (function () {
             self.currentAssociation[1] = node.data;
             $("#lineage_targetNodeDiv").html("<span style='color:" + Lineage_classes.getSourceColor(node.data.source) + "'>" + node.data.source + "." + node.data.label + "</span>");
         }
-        if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_classes.mainSource].editable > -1) {
+        if (Lineage_classes.realAccessControl === "readwrite" && Config.sources[Lineage_classes.mainSource].editable > -1) {
             if (self.currentAssociation && self.currentAssociation.length == 2 && self.currentAssociation[1] !== "") {
                 $("#lineage_createRelationButtonsDiv").css("display", "block");
                 self.initAllowedPropertiesForRelation();

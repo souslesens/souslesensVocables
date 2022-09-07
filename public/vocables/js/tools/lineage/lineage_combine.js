@@ -261,7 +261,7 @@ var Lineage_combine = (function() {
               newTriples.push({
                 subject: item.subject.value,
                 predicate: item.predicate.value,
-                nodesToMerge[source].
+             //   nodesToMerge[source].
               })
             })
 

@@ -1,14 +1,14 @@
-var Lineage_individuals_graph = (function () {
+var Lineage_linkedData_graph = (function () {
     var self = {};
 
     self.onDataSourcesSelect = function (dataSourceKey) {
-        self.currentDataSource = Lineage_individuals.currentDataSource;
+        self.currentDataSource = Lineage_linkedData.currentDataSource;
     };
 
 
 
-    self.initIndividualsPanel = function (node) {
-        self.currentClassNode = Lineage_individuals.currentClassNode;
+    self.initLinkedDataPanel = function (node) {
+        self.currentClassNode = Lineage_linkedData.currentClassNode;
     };
 
     self.executeQuery = function () {
@@ -27,16 +27,16 @@ var Lineage_individuals_graph = (function () {
         var filterObj = null;
         if (self.currentDataSource.type.indexOf("sql") > -1) filterObj = self.sql.getFilter();
         else if (self.currentDataSource.type == "searchIndex") filterObj = self.searchIndex.getFilter();
-        Lineage_individuals.currentFilters.push(filterObj);
+        Lineage_linkedData.currentFilters.push(filterObj);
 
-        $("#LineageIndividualsQueryParams_value").val("");
+        $("#LineageLinkedDataQueryParams_value").val("");
     };
 
-    self.drawIndividuals = function () {
+    self.drawLinkedData = function () {
         if (self.currentDataSource.type.indexOf("sql") > -1) {
-            self.sql.drawSearchIndividuals();
+            self.sql.drawSearchLinkedData();
         } else if (self.currentDataSource.type == "searchIndex") {
-            self.searchIndex.drawIndividuals();
+            self.searchIndex.drawLinkedData();
         }
     };
     self.getIndividualInfos=function(dataSource,node,callback){

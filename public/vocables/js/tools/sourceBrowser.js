@@ -156,9 +156,9 @@ $("#actionDiv").html(html);*/
         }
       };
       items.graphNamedIndividuals = {
-        label: "Individuals ",
+        label: "LinkedData",
         action: function() {
-          Lineage_individuals.showIndividualsPanel(self.currentTreeNode);
+          Lineage_linkedData.showLinkedDataPanel(self.currentTreeNode);
           // Lineage_classes.drawNamedIndividuals(self.currentTreeNode.data.id);
         }
       };

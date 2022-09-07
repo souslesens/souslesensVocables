@@ -1,38 +1,38 @@
-var Lineage_individuals = (function () {
+var Lineage_linkedData = (function () {
     var self = {};
     self.currentFilters = [];
     self.dataSources = {};
 
     self.init = function () {
         self.currentFilters = [];
-        $("#LineageIndividualsTab").load("snippets/lineage/lineageIndividualsSearchDialog.html", function () {
-            $("#LineageIndividualsQueryParams_dataSourcesSelect").children().remove().end();
-            $("#LineageIndividualsQueryParams_filterPanel").css("display", "none");
+        $("#LineageLinkedDataTab").load("snippets/lineage/lineageLinkedDataSearchDialog.html", function () {
+            $("#LineageLinkedDataQueryParams_dataSourcesSelect").children().remove().end();
+            $("#LineageLinkedDataQueryParams_filterPanel").css("display", "none");
             self.dataSources = Config.sources[Lineage_classes.mainSource].dataSources;
             if (!self.dataSources) {
-                $("#LineageIndividualsQueryParams_showIndividualsTriples").css("display", "block");
+                $("#LineageLinkedDataQueryParams_showLinkedDataTriples").css("display", "block");
             } else {
                 var dataSourcesArray = Object.keys(self.dataSources);
                 var emptyOption = false;
-                common.fillSelectOptions("LineageIndividualsQueryParams_dataSourcesSelect", dataSourcesArray, emptyOption);
-                if (!emptyOption) self.onDataSourcesSelect($("#LineageIndividualsQueryParams_dataSourcesSelect").val());
+                common.fillSelectOptions("LineageLinkedDataQueryParams_dataSourcesSelect", dataSourcesArray, emptyOption);
+                if (!emptyOption) self.onDataSourcesSelect($("#LineageLinkedDataQueryParams_dataSourcesSelect").val());
             }
         });
     };
 
     self.onDataSourcesSelect = function (dataSourceKey) {
-        $(".LineageIndividualsQueryParams_panel").css("display", "none");
+        $(".LineageLinkedDataQueryParams_panel").css("display", "none");
         self.currentDataSource = self.dataSources[dataSourceKey];
         self.currentDataSource.name = dataSourceKey;
         if (!self.currentDataSource) return;
 
         if (self.currentDataSource.type.indexOf("sql") > -1) {
-            Lineage_individuals_sql.onDataSourcesSelect(dataSourceKey);
+            Lineage_linkedData_sql.onDataSourcesSelect(dataSourceKey);
         } else if (self.currentDataSource.type.indexOf("search") > -1) {
-            Lineage_individuals_search.onDataSourcesSelect(dataSourceKey);
+            Lineage_linkedData_search.onDataSourcesSelect(dataSourceKey);
         }
         if (self.currentDataSource.type.indexOf("graph") > -1) {
-            Lineage_individuals_graph.onDataSourcesSelect(dataSourceKey);
+            Lineage_linkedData_graph.onDataSourcesSelect(dataSourceKey);
         }
     };
 
@@ -69,40 +69,40 @@ var Lineage_individuals = (function () {
         );
     };
 
-    self.showIndividualsPanel = function (node) {
+    self.showLinkedDataPanel = function (node) {
         $("#Lineage_Tabs").tabs("option", "active", 3);
         self.currentClassNode = node;
-        $("#LineageIndividualsQueryParams_className").html(self.currentClassNode.data.label);
+        $("#LineageLinkedDataQueryParams_className").html(self.currentClassNode.data.label);
 
         if (self.currentDataSource.type == "searchIndex") {
-            Lineage_individuals_search.initIndividualsPanel(node);
+            Lineage_linkedData_search.initLinkedDataPanel(node);
         } else if (self.currentDataSource.type.indexOf("sql") > -1) {
 
-            Lineage_individuals_sql.initIndividualsPanel(node);
+            Lineage_linkedData_sql.initLinkedDataPanel(node);
         } else if (self.currentDataSource.type == "graph") {
-            Lineage_individuals_graph.initIndividualsPanel(node);
+            Lineage_linkedData_graph.initLinkedDataPanel(node);
         }
     };
 
     self.executeQuery = function () {
         if (self.currentDataSource.type.indexOf("sql") > -1) {
-            Lineage_individuals_sql.executeQuery();
+            Lineage_linkedData_sql.executeQuery();
         } else if (self.currentDataSource.type == "searchIndex") {
-            Lineage_individuals_search.executeQuery();
+            Lineage_linkedData_search.executeQuery();
         } else if (self.currentDataSource.type == "graph") {
-            Lineage_individuals_graph.executeQuery();
+            Lineage_linkedData_graph.executeQuery();
         }
     };
 
     self.onSearchDialogOperatorSelect = function (operator) {};
 
     self.showAll = function () {
-        Lineage_classes.drawNamedIndividuals([self.currentClassNode.id]);
+        Lineage_classes.drawNamedLinkedData([self.currentClassNode.id]);
     };
 
     self.clearQuery = function () {
         self.currentFilters = [];
-        $("#LineageIndividualsQueryParams_QueryDiv").html("");
+        $("#LineageLinkedDataQueryParams_QueryDiv").html("");
     };
 
     self.addFilter = function () {
@@ -112,36 +112,36 @@ var Lineage_individuals = (function () {
 
         var filterObj = null;
         if (self.currentDataSource.type.indexOf("sql") > -1) {
-            filterObj = Lineage_individuals_sql.getFilter();
+            filterObj = Lineage_linkedData_sql.getFilter();
         } else if (self.currentDataSource.type == "searchIndex") {
-            filterObj = Lineage_individuals_search.getFilter();
+            filterObj = Lineage_linkedData_search.getFilter();
         } else if (self.currentDataSource.type == "graph") {
-            filterObj = Lineage_individuals_graph.getFilter();
+            filterObj = Lineage_linkedData_graph.getFilter();
         }
         self.currentFilters.push(filterObj);
 
-        $("#LineageIndividualsQueryParams_value").val("");
+        $("#LineageLinkedDataQueryParams_value").val("");
     };
 
     self.removeQueryElement = function (index) {
         self.currentFilters.splice(index, 1);
-        $("#LineageIndividualsQueryParams_Elt_" + index).remove();
+        $("#LineageLinkedDataQueryParams_Elt_" + index).remove();
     };
 
     self.onQueryParamsDialogCancel = function () {
         $("#LineagePopup").dialog("close");
     };
 
-    self.drawIndividuals = function () {
+    self.drawLinkedData = function () {
 
-        if( Lineage_individuals.currentFilters.length==0)
+        if( Lineage_linkedData.currentFilters.length==0)
             return alert( "no filter specified")
         if (self.currentDataSource.type.indexOf("sql") > -1) {
-            Lineage_individuals_sql.drawSearchIndividuals();
+            Lineage_linkedData_sql.drawSearchLinkedData();
         } else if (self.currentDataSource.type == "searchIndex") {
-            Lineage_individuals_search.drawIndividuals();
+            Lineage_linkedData_search.drawLinkedData();
         } else if (self.currentDataSource.type == "graph") {
-            Lineage_individuals_graph.drawIndividuals();
+            Lineage_linkedData_graph.drawLinkedData();
         }
     };
 
@@ -154,19 +154,19 @@ var Lineage_individuals = (function () {
             var dataSource=Config.sources[Lineage_classes.mainSource].dataSources[dataSourceLabel]
 
             if (dataSource.type.indexOf("sql") > -1) {
-                Lineage_individuals_sql.getIndividualInfos(dataSource,node,function(err,result){
+                Lineage_linkedData_sql.getIndividualInfos(dataSource,node,function(err,result){
                     if(err)
                         return alert(err)
                     self.displayIndividualInfos(result)
                 });
             } else if (dataSource.type == "searchIndex") {
-                Lineage_individuals_search.getIndividualInfos(dataSource,node,function(err,result){
+                Lineage_linkedData_search.getIndividualInfos(dataSource,node,function(err,result){
                     if(err)
                         return alert(err)
                     self.displayIndividualInfos(result)
                 });
             } else if (dataSource.type == "graph") {
-                Lineage_individuals_graph.getIndividualInfos(dataSource,node,function(err,result){
+                Lineage_linkedData_graph.getIndividualInfos(dataSource,node,function(err,result){
                     if(err)
                         return alert(err)
                     self.displayIndividualInfos(result)

@@ -661,6 +661,8 @@ var common = (function () {
         return "0".repeat(length - str.length) + str;
     };
 
+
+
     self.getItemLabel = function (item, varName, _lang) {
         if (item[varName + "Label"]) return item[varName + "Label"].value;
         else {

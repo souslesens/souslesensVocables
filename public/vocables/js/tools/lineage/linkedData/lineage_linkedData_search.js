@@ -1,19 +1,19 @@
-var Lineage_individuals_search = (function () {
+var Lineage_linkedData_search = (function () {
     var self = {};
-    Lineage_individuals.currentFilters = [];
+    Lineage_linkedData.currentFilters = [];
     self.dataSources = {};
 
     self.onDataSourcesSelect = function (dataSourceKey) {
-        self.currentDataSource = Lineage_individuals.currentDataSource;
+        self.currentDataSource = Lineage_linkedData.currentDataSource;
 
-        $("#LineageIndividualsQueryParams_searchIndexFilterPanel").css("display", "block");
-        self.initIndividualsPanel(self.currentClassNode);
+        $("#LineageLineage_linkedDataQueryParams_searchIndexFilterPanel").css("display", "block");
+        self.initLineage_linkedDataPanel(self.currentClassNode);
     };
 
 
-    self.initIndividualsPanel = function (node) {
-        self.currentClassNode = Lineage_individuals.currentClassNode;
-        self.showClassIndividualsTree();
+    self.initLineage_linkedDataPanel = function (node) {
+        self.currentClassNode = Lineage_linkedData.currentClassNode;
+        self.showClassLineage_linkedDataTree();
     };
 
     self.executeQuery = function () {
@@ -32,63 +32,63 @@ var Lineage_individuals_search = (function () {
         var filterObj = null;
         if (self.currentDataSource.type.indexOf("sql") > -1) filterObj = self.sql.getFilter();
         else if (self.currentDataSource.type == "searchIndex") filterObj = self.getFilter();
-        Lineage_individuals.currentFilters.push(filterObj);
+        Lineage_linkedData.currentFilters.push(filterObj);
 
-        $("#LineageIndividualsQueryParams_value").val("");
+        $("#LineageLineage_linkedDataQueryParams_value").val("");
     };
 
-    self.drawIndividuals = function () {
+    self.drawLineage_linkedData = function () {
         if (self.currentDataSource.type.indexOf("sql") > -1) {
-            self.sql.drawSearchIndividuals();
+            self.sql.drawSearchLineage_linkedData();
         } else if (self.currentDataSource.type == "searchIndex") {
-            self.drawIndividuals();
+            self.drawLineage_linkedData();
         }
     };
 
     self.getFilter = function () {
-        var individuals = $("#LineageIndividuals_individualsTree").jstree().get_checked(true);
-        if (individuals.length == 0) return alert("no indiviual selected");
-        var obj = { classNode: self.currentClassNode, individuals: [] };
+        var Lineage_linkedData = $("#LineageLineage_linkedData_Lineage_linkedDataTree").jstree().get_checked(true);
+        if (Lineage_linkedData.length == 0) return alert("no indiviual selected");
+        var obj = { classNode: self.currentClassNode, Lineage_linkedData: [] };
 
-        var html = "<div class='LineageIndividualsQueryParams_QueryElt' id='LineageIndividualsQueryParams_Elt_" + Lineage_individuals.currentFilters.length + "'> ";
+        var html = "<div class='LineageLineage_linkedDataQueryParams_QueryElt' id='LineageLineage_linkedDataQueryParams_Elt_" + Lineage_linkedData.currentFilters.length + "'> ";
         html += "<b>" + self.currentClassNode.data.label + "</b>";
-        var queryIndex = Lineage_individuals.currentFilters.length;
-        if (individuals[0].id == "_ALL") {
-            Lineage_individuals.currentFilters.push(obj);
+        var queryIndex = Lineage_linkedData.currentFilters.length;
+        if (Lineage_linkedData[0].id == "_ALL") {
+            Lineage_linkedData.currentFilters.push(obj);
 
             html += " ALL";
         } else {
-            individuals.forEach(function (individual) {
-                obj.individuals.push(individual.data.id);
+            Lineage_linkedData.forEach(function (individual) {
+                obj.Lineage_linkedData.push(individual.data.id);
             });
-            Lineage_individuals.currentFilters.push(obj);
+            Lineage_linkedData.currentFilters.push(obj);
 
-            if (individuals.length < 5) {
-                individuals.forEach(function (individual) {
+            if (Lineage_linkedData.length < 5) {
+                Lineage_linkedData.forEach(function (individual) {
                     html += " " + individual.data.label;
                 });
             }
         }
-        html += "<button style='size: 10px' onclick='Lineage_individuals.removeQueryElement(" + queryIndex + ")'>X</button></div>";
-        $("#LineageIndividualsQueryParams_QueryDiv").append(html);
+        html += "<button style='size: 10px' onclick='Lineage_linkedData.removeQueryElement(" + queryIndex + ")'>X</button></div>";
+        $("#LineageLineage_linkedDataQueryParams_QueryDiv").append(html);
         return obj;
     };
 
     self.executeFilterQuery = function (callback) {
-        if (Lineage_individuals.currentFilters.length == 0) return alert("no query filter");
+        if (Lineage_linkedData.currentFilters.length == 0) return alert("no query filter");
         var mustFilters = [];
         var shouldFilters = [];
         var terms = [];
-        Lineage_individuals.currentFilters.forEach(function (filter, index) {
-            if (filter.individuals.length == 0) {
+        Lineage_linkedData.currentFilters.forEach(function (filter, index) {
+            if (filter.Lineage_linkedData.length == 0) {
                 terms.push({ term: { ["Concepts." + filter.classNode.data.label + ".name.keyword"]: filter.classNode.data.label } });
             } else {
-                var individuals = [];
-                filter.individuals.forEach(function (individual) {
-                    individuals.push(individual);
+                var Lineage_linkedData = [];
+                filter.Lineage_linkedData.forEach(function (individual) {
+                    Lineage_linkedData.push(individual);
                 });
 
-                terms.push({ terms: { ["Concepts." + filter.classNode.data.label + ".instances.keyword"]: individuals } });
+                terms.push({ terms: { ["Concepts." + filter.classNode.data.label + ".instances.keyword"]: Lineage_linkedData } });
             }
             if (index == 0) {
                 mustFilters = terms;
@@ -131,7 +131,7 @@ var Lineage_individuals_search = (function () {
         });
     };
 
-    self.showClassIndividualsTree = function (output) {
+    self.showClassLineage_linkedDataTree = function (output) {
         var query = {};
 
         query = {
@@ -205,8 +205,8 @@ var Lineage_individuals_search = (function () {
                             show_only_matches: true,
                         },
                     };
-                    $("#LineageIndividuals_individualsTreeSearchInput").bind("keyup", null, Lineage_individuals_search.searchInIndividualsTree);
-                    common.jstree.loadJsTree("LineageIndividuals_individualsTree", jstreeData, options);
+                    $("#LineageLineage_linkedData_Lineage_linkedDataTreeSearchInput").bind("keyup", null, Lineage_linkedData_search.searchInLineage_linkedDataTree);
+                    common.jstree.loadJsTree("LineageLineage_linkedData_Lineage_linkedDataTree", jstreeData, options);
                 }
             },
             error: function (_err) {
@@ -214,40 +214,40 @@ var Lineage_individuals_search = (function () {
             },
         });
     };
-    self.searchInIndividualsTree = function (event) {
-        if (event.keyCode != 13) return;
-        var value = $("#LineageIndividuals_individualsTreeSearchInput").val();
-        $("#LineageIndividuals_individualsTree").jstree(true).search(value);
-        $("#LineageIndividuals_individualsTreeSearchInput").val("");
+    self.searchInLineage_linkedDataTree = function (event) {
+        if (event.keyCode != 13 && event.keyCode != 9 ) return;
+        var value = $("#LineageLineage_linkedData_Lineage_linkedDataTreeSearchInput").val();
+        $("#LineageLineage_linkedData_Lineage_linkedDataTree").jstree(true).search(value);
+        $("#LineageLineage_linkedData_Lineage_linkedDataTreeSearchInput").val("");
     };
-    self.drawIndividuals = function () {
-        $("#LineageIndividualsQueryParams_message").html("searching...");
+    self.drawLineage_linkedData = function () {
+        $("#LineageLineage_linkedDataQueryParams_message").html("searching...");
         self.executeFilterQuery(function (err, result) {
             if (err) return alert(err.responseText);
             var message = "" + result.hits.hits.length + " hits found";
-            $("#LineageIndividualsQueryParams_message").html(message);
+            $("#LineageLineage_linkedDataQueryParams_message").html(message);
 
             var graphNodesMap = {};
             var graphEdgesMap = {};
 
-            // aggregate individuals inside map of graph nodes map
-            Lineage_individuals.currentFilters.forEach(function (filter) {
+            // aggregate Lineage_linkedData inside map of graph nodes map
+            Lineage_linkedData.currentFilters.forEach(function (filter) {
                 var filterClassName = filter.classNode.data.label;
-                var fitlerIndividuals = filter.individuals;
+                var fitlerLineage_linkedData = filter.Lineage_linkedData;
                 if (!graphNodesMap[filter.classNode.data.id])
                     graphNodesMap[filter.classNode.data.id] = {
                         filter: filter,
-                        individuals: {},
+                        Lineage_linkedData: {},
                     };
 
                 result.hits.hits.forEach(function (hit) {
                     var hitConceptObj = hit._source.Concepts[filterClassName];
                     if (!hitConceptObj) return;
-                    var hitConceptIndividuals = hitConceptObj.instances;
-                    hitConceptIndividuals.forEach(function (hitIndividual) {
-                        if (fitlerIndividuals.length == 0 || fitlerIndividuals.indexOf(hitIndividual) > -1) {
-                            if (!graphNodesMap[filter.classNode.data.id].individuals[hitIndividual]) graphNodesMap[filter.classNode.data.id].individuals[hitIndividual] = 0;
-                            graphNodesMap[filter.classNode.data.id].individuals[hitIndividual] += 1;
+                    var hitConceptLineage_linkedData = hitConceptObj.instances;
+                    hitConceptLineage_linkedData.forEach(function (hitIndividual) {
+                        if (fitlerLineage_linkedData.length == 0 || fitlerLineage_linkedData.indexOf(hitIndividual) > -1) {
+                            if (!graphNodesMap[filter.classNode.data.id].Lineage_linkedData[hitIndividual]) graphNodesMap[filter.classNode.data.id].Lineage_linkedData[hitIndividual] = 0;
+                            graphNodesMap[filter.classNode.data.id].Lineage_linkedData[hitIndividual] += 1;
 
                             if (!graphEdgesMap[hit._source.ParagraphId]) graphEdgesMap[hit._source.ParagraphId] = [];
                             graphEdgesMap[hit._source.ParagraphId].push({
@@ -284,7 +284,7 @@ var Lineage_individuals_search = (function () {
                 } else {
                 }
 
-                for (var hitIndividual in graphNodesMap[graphNodeId].individuals) {
+                for (var hitIndividual in graphNodesMap[graphNodeId].Lineage_linkedData) {
                     var id = "searchIndex_" + hitIndividual;
                     if (!existingVisjsIds[id]) {
                         existingVisjsIds[id] = 1;
@@ -292,7 +292,7 @@ var Lineage_individuals_search = (function () {
                         visjsData.nodes.push({
                             id: id,
                             label: hitIndividual,
-                            shape: Lineage_classes.namedIndividualShape,
+                            shape: Lineage_classes.namedLineage_linkedDatahape,
                             color: color,
                             data: {
                                 id: hitIndividual,
@@ -319,9 +319,9 @@ var Lineage_individuals_search = (function () {
             // draw edges between indiviudals
             var individualEdges = {};
             for (var paragraphId in graphEdgesMap) {
-                var individuals = graphEdgesMap[paragraphId];
-                individuals.forEach(function (item1) {
-                    individuals.forEach(function (item2) {
+                var Lineage_linkedData = graphEdgesMap[paragraphId];
+                Lineage_linkedData.forEach(function (item1) {
+                    Lineage_linkedData.forEach(function (item2) {
                         if (item1.individual != item2.individual && item1.classId != item2.classId) {
                             var edgeId = item1.individual + "_" + item2.individual;
                             if (!individualEdges[edgeId]) individualEdges[edgeId] = [];

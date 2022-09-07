@@ -14,7 +14,7 @@ var Lineage_classes = (function () {
     var propertyColors = {};
 
     /**
-     * @type {{ showLimit?: any; propertyColors?: any; defaultShape?: any; defaultShapeSize?: any; orphanShape?: any; nodeShadow?: any; objectPropertyColor?: any; defaultEdgeArrowType?: any; defaultEdgeColor?: any; restrictionColor?: any; namedIndividualShape?: any; namedIndividualColor?: any; sourcesGraphUriMap?: any; minChildrenForClusters?: any; soucesLevelMap?: any; mainSource?: any; isLoaded?: any; currentExpandLevel?: any; onLoaded?: any; currentOwlType?: any; onSourceSelect?: any; initUI?: any; registerSourceImports?: any; onGraphOrTreeNodeClick?: any; jstreeContextMenu?: any; selectTreeNodeFn?: any; currentTreeNode?: any; clearLastAddedNodes?: any; drawTopConcepts?: any; getSourceColor?: any; drawNewGraph?: any; getGraphIdsFromSource?: any; addSourceChildrenToGraph?: any; addChildrenToGraph?: any; listClusterToClipboard?: any; listClusterContent?: any; openCluster?: any; drawSimilarsNodes?: any; initIndividualsPropertiesSelect?: any; graphNodeNeighborhood?: any; drawRestrictions?: any; addNodesAndParentsToGraph?: any; showHideCurrentSourceNodes?: any; drawIndividualsProperties?: any; currentIndividualsProperties?: any; getPropertyColor?: any; drawObjectProperties?: any; withoutImports?: any; drawDictionarySameAs?: any; drawNamedIndividuals?: any; collapseNode?: any; setGraphPopupMenus?: any; zoomGraphOnNode?: any; drawNodeAndParents?: any; registerSource?: any; graphActions?: any; currentGraphEdge?: any; currentGraphNode?: any; setCurrentSource?: any; showHideHelp?: any; }}
+     * @type {{ showLimit?: any; propertyColors?: any; defaultShape?: any; defaultShapeSize?: any; orphanShape?: any; nodeShadow?: any; objectPropertyColor?: any; defaultEdgeArrowType?: any; defaultEdgeColor?: any; restrictionColor?: any; namedIndividualShape?: any; namedIndividualColor?: any; sourcesGraphUriMap?: any; minChildrenForClusters?: any; soucesLevelMap?: any; mainSource?: any; isLoaded?: any; currentExpandLevel?: any; onLoaded?: any; currentOwlType?: any; onSourceSelect?: any; initUI?: any; registerSourceImports?: any; onGraphOrTreeNodeClick?: any; jstreeContextMenu?: any; selectTreeNodeFn?: any; currentTreeNode?: any; clearLastAddedNodes?: any; drawTopConcepts?: any; getSourceColor?: any; drawNewGraph?: any; getGraphIdsFromSource?: any; addSourceChildrenToGraph?: any; addChildrenToGraph?: any; listClusterToClipboard?: any; listClusterContent?: any; openCluster?: any; drawSimilarsNodes?: any; initLinkedDataPropertiesSelect?: any; graphNodeNeighborhood?: any; drawRestrictions?: any; addNodesAndParentsToGraph?: any; showHideCurrentSourceNodes?: any; drawLinkedDataProperties?: any; currentLinkedDataProperties?: any; getPropertyColor?: any; drawObjectProperties?: any; withoutImports?: any; drawDictionarySameAs?: any; drawNamedLinkedData?: any; collapseNode?: any; setGraphPopupMenus?: any; zoomGraphOnNode?: any; drawNodeAndParents?: any; registerSource?: any; graphActions?: any; currentGraphEdge?: any; currentGraphNode?: any; setCurrentSource?: any; showHideHelp?: any; }}
      */
     var self = {};
     self.showLimit = 200;
@@ -88,8 +88,8 @@ var Lineage_classes = (function () {
                             Lineage_properties.init();
                         } else if (divId == "#LineageRelationsTab") {
                             self.currentOwlType = "Relations";
-                        } else if (divId == "#LineageIndividualsTab") {
-                            self.currentOwlType = "Individuals";
+                        } else if (divId == "#LineageLinkedDataTab") {
+                            self.currentOwlType = "LinkedData";
                         }
                     },
                 });
@@ -100,7 +100,7 @@ var Lineage_classes = (function () {
                 }
                 $("#GenericTools_searchSchemaType").val("OWL");
 
-                $("#LineageIndividualsTab").load("snippets/lineage/lineageIndividualsSearchDialog.html", function () {});
+                $("#LineageLinkedDataTab").load("snippets/lineage/lineageLinkedDataSearchDialog.html", function () {});
 
                 Lineage_decoration.init();
                 if (callback) callback();
@@ -159,7 +159,7 @@ var Lineage_classes = (function () {
 
                 Lineage_relations.init(true);
 
-                Lineage_individuals.init();
+                Lineage_linkedData.init();
 
                 if (!visjsGraph.isGraphNotEmpty() && Config.sources[self.mainSource].editable) {
                     var visjsData = { nodes: [], edges: [] };
@@ -176,7 +176,7 @@ var Lineage_classes = (function () {
     ) {
         if (!Config.sources[node.data.source]) return;
         if (!options) options = {};
-        if (self.currentOwlType == "Individuals") return Lineage_individuals.showIndividualsPanel(self.currentGraphNode);
+        if (self.currentOwlType == "LinkedData") return Lineage_linkedData.showLinkedDataPanel(self.currentGraphNode);
 
         if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
             if (options.callee == "Graph") Lineage_classes.graphActions.graphNodeNeighborhood("all");
@@ -730,7 +730,7 @@ Lineage_classes.drawSimilarsNodes("sameAs")
         MainController.UI.message("", true);
     };
 
-    self.initIndividualsPropertiesSelect = function (/** @type {string | number} */ sourceLabel) {
+    self.initLinkedDataPropertiesSelect = function (/** @type {string | number} */ sourceLabel) {
         var schemaType = Config.sources[sourceLabel].schemaType;
         if (schemaType == "INDIVIDUAL") {
             var preferredProperties = Config.sources[sourceLabel].preferredProperties;
@@ -758,7 +758,7 @@ Lineage_classes.drawSimilarsNodes("sameAs")
                     parent: graphPrefix,
                 });
             });
-            common.jstree.loadJsTree("lineage_individualsPropertiesTree", jstreeData, { openAll: true });
+            common.jstree.loadJsTree("lineage_linkedDataPropertiesTree", jstreeData, { openAll: true });
         }
     };
 
@@ -1223,12 +1223,12 @@ Lineage_classes.drawSimilarsNodes("sameAs")
                 if (clusters.indexOf(parentConcept) < 0) {
                     var shapeSize = Lineage_classes.defaultShapeSize;
 
-                    // identify namedIndividuals when several rdf:type
-                    var namedIndividualsMap = {};
+                    // identify namedLinkedData when several rdf:type
+                    var namedLinkedDataMap = {};
                     parentsMap[parentConcept].forEach(function (item) {
                         for (var i = 1; i < depth + 1; i++) {
                             if (item["child" + i + "Type"] && item["child" + i + "Type"].indexOf("NamedIndividual") > -1) {
-                                namedIndividualsMap[item["child" + i]] = 1;
+                                namedLinkedDataMap[item["child" + i]] = 1;
                             }
                         }
                     });
@@ -1242,7 +1242,7 @@ Lineage_classes.drawSimilarsNodes("sameAs")
 
                                 if (!existingIds[item["child" + i]]) {
                                     var attrs = self.getNodeVisjAttrs(item["child" + i + "Type"], item.concept, childNodeSource);
-                                    var isIndividualId = namedIndividualsMap[item["child" + i]];
+                                    var isIndividualId = namedLinkedDataMap[item["child" + i]];
 
                                     var xxx = item["child" + i + "Label"];
                                     if (item["child" + i] == "http://data.total.com/resource/tsf/ontology/apps-categories/greg/Synergi_S_-_SYNERGI") var x = 3;
@@ -1263,7 +1263,7 @@ Lineage_classes.drawSimilarsNodes("sameAs")
                                             id: item["child" + i],
                                             label: item["child" + i + "Label"],
                                             source: childNodeSource,
-                                            rdfType: namedIndividualsMap[item["child" + i]] ? "NamedIndividual" : "Class",
+                                            rdfType: namedLinkedDataMap[item["child" + i]] ? "NamedIndividual" : "Class",
                                         },
                                     });
                                 }
@@ -1359,7 +1359,7 @@ Lineage_classes.drawSimilarsNodes("sameAs")
                 }
                 var color = self.getSourceColor(source);
 
-                var namedIndividualsMap = {};
+                var namedLinkedDataMap = {};
 
                 result.forEach(function (
                     /** @type {{ concept: { value: string | number; }; conceptLabel: { value: any; }; child1: { value: any; }; child1Label: { value: any; }; child2: { value: any; }; child2Label: { value: any; }; child3: { value: any; }; child3Label: { value: any; }; }} */ item
@@ -1373,7 +1373,7 @@ Lineage_classes.drawSimilarsNodes("sameAs")
                         obj[key] = item[key] ? item[key].value : null;
                     }
                     /*   if(item.conceptType && item.conceptType.value.indexOf("NamedIndividual">-1)) {
-namedIndividualsMap[item.concept.value] = 1
+namedLinkedDataMap[item.concept.value] = 1
 }*/
 
                     parentsMap[item.concept.value].push(obj);
@@ -1447,7 +1447,7 @@ namedIndividualsMap[item.concept.value] = 1
                             expandedLevel.push(item.id);
                             for (var i = 1; i < 4; i++) {
                                 if (item["child" + i + "Type"] && item["child" + i + "Type"].indexOf("NamedIndividual") > -1) {
-                                    namedIndividualsMap[item["child" + i]] = 1;
+                                    namedLinkedDataMap[item["child" + i]] = 1;
                                 }
                             }
 
@@ -1457,7 +1457,7 @@ namedIndividualsMap[item.concept.value] = 1
 
                                     if (!existingIds[item["child" + i]]) {
                                         var attrs = self.getNodeVisjAttrs(item["child" + i + "Type"], item.concept, childNodeSource);
-                                        if (namedIndividualsMap[item["child" + i]]) attrs.shape = self.namedIndividualShape;
+                                        if (namedLinkedDataMap[item["child" + i]]) attrs.shape = self.namedIndividualShape;
 
                                         existingIds[item["child" + i]] = 1;
 
@@ -1474,7 +1474,7 @@ namedIndividualsMap[item.concept.value] = 1
                                                 id: item["child" + i],
                                                 label: item["child" + i + "Label"],
                                                 source: childNodeSource,
-                                                rdfType: namedIndividualsMap[item["child" + i]] ? "NamedIndividual" : "Class",
+                                                rdfType: namedLinkedDataMap[item["child" + i]] ? "NamedIndividual" : "Class",
                                             },
                                         });
                                     }
@@ -1519,21 +1519,21 @@ namedIndividualsMap[item.concept.value] = 1
             }
         );
     };
-    self.drawIndividualsProperties = function (/** @type {any} */ propertyId, /** @type {any} */ classIds, /** @type {{ inverse?: any; }} */ options) {
+    self.drawLinkedDataProperties = function (/** @type {any} */ propertyId, /** @type {any} */ classIds, /** @type {{ inverse?: any; }} */ options) {
         if (!options) {
             options = {};
         }
         self.currentExpandLevel += 1;
         if (!propertyId) {
-            //  propertyId = $("#lineage_individualsPropertiesSelect").val()
-            propertyId = $("#lineage_individualsPropertiesTree").jstree(true).get_selected();
+            //  propertyId = $("#lineage_linkedDataPropertiesSelect").val()
+            propertyId = $("#lineage_linkedDataPropertiesTree").jstree(true).get_selected();
         }
         var source = Lineage_common.currentSource || Lineage_classes.mainSource;
         if (!source) return alert("select a source");
         var subjects = null;
         var objects = null;
         if (!classIds) {
-            var filterType = $("#lineage_clearIndividualsPropertiesFilterSelect").val();
+            var filterType = $("#lineage_clearLinkedDataPropertiesFilterSelect").val();
             if (filterType == "graph nodes") classIds = self.getGraphIdsFromSource(source);
             else if (filterType == "filter value") {
                 return alert("to be developped");
@@ -1546,8 +1546,8 @@ namedIndividualsMap[item.concept.value] = 1
         }
         MainController.UI.message("");
         Sparql_OWL.getIndividualProperties(source, subjects, [propertyId], objects, null, function (/** @type {any} */ err, /** @type {any[]} */ result) {
-            if ($("#lineage_clearIndividualsPropertiesCBX").prop("checked")) {
-                var oldIds = Object.keys(self.currentIndividualsProperties);
+            if ($("#lineage_clearLinkedDataPropertiesCBX").prop("checked")) {
+                var oldIds = Object.keys(self.currentLinkedDataProperties);
                 visjsGraph.data.nodes.remove(oldIds);
                 visjsGraph.data.edges.remove(oldIds);
             }
@@ -1631,7 +1631,7 @@ namedIndividualsMap[item.concept.value] = 1
                     });
                 }
             });
-            self.currentIndividualsProperties = existingNodes;
+            self.currentLinkedDataProperties = existingNodes;
             if (!visjsGraph.data || !visjsGraph.data.nodes) {
                 self.drawNewGraph(visjsData);
             } else {
@@ -1641,7 +1641,7 @@ namedIndividualsMap[item.concept.value] = 1
             visjsGraph.network.fit();
             $("#waitImg").css("display", "none");
 
-            //   $("#lineage_clearIndividualsPropertiesCBX").prop("checked",true)
+            //   $("#lineage_clearLinkedDataPropertiesCBX").prop("checked",true)
         });
     };
 
@@ -1961,7 +1961,7 @@ namedIndividualsMap[item.concept.value] = 1
         self.drawRestrictions(Config.dictionarySource, existingNodes, false, false, options);
     };
 
-    self.drawNamedIndividuals = function (/** @type {any[]} */ classIds) {
+    self.drawNamedLinkedData = function (/** @type {any[]} */ classIds) {
         var source = Lineage_common.currentSource || Lineage_classes.mainSource;
         if (!source) return alert("select a source");
         if (!classIds) {
@@ -1969,7 +1969,7 @@ namedIndividualsMap[item.concept.value] = 1
         }
         MainController.UI.message("");
 
-        Sparql_OWL.getNamedIndividuals(source, classIds, null, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+        Sparql_OWL.getNamedLinkedData(source, classIds, null, function (/** @type {any} */ err, /** @type {any[]} */ result) {
             if (err) return MainController.UI.message(err);
             if (result.length == 0) {
                 $("#waitImg").css("display", "none");
@@ -2076,8 +2076,8 @@ namedIndividualsMap[item.concept.value] = 1
             }
         } else if (node.data && node.data.type == "NamedIndividual") {
             html =
-                '    <span  class="popupMenuItem" onclick="Lineage_individuals.graphActions.showIndividualInfos();"> Node infos</span>' +
-              '<span  class="popupMenuItem" onclick="Lineage_individuals.graphActions.expandIndividual();"> Expand individual</span>';
+                '    <span  class="popupMenuItem" onclick="Lineage_linkedData.graphActions.showIndividualInfos();"> Node infos</span>' +
+              '<span  class="popupMenuItem" onclick="Lineage_linkedData.graphActions.expandIndividual();"> Expand individual</span>';
                // '<span  class="popupMenuItem" onclick="Lineage_classes.graphActions.expandIndividual();"> Expand individual</span>';
         } else {
             html =
@@ -2088,7 +2088,7 @@ namedIndividualsMap[item.concept.value] = 1
                 '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.collapse();">Collapse</span>' +
                 '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showObjectProperties();">ObjectProperties</span>' +
                 '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showRestrictions();">Restrictions</span>' +
-                '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showIndividuals();">Individuals</span>' +
+                '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showLinkedData();">LinkedData</span>' +
                 '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.graphNodeNeighborhoodUI();">Neighborhood</span>' +
                 '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.removeFromGraph();">Remove from graph</span>' +
                 '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.removeOthersFromGraph();">Remove others</span>';
@@ -2537,9 +2537,9 @@ upperNodeIds.push(id);
                 var targetVisjsNode = visjsGraph.data.nodes.get(edge.to);
             }
         },
-        showIndividuals: function () {
-            Lineage_individuals.showIndividualsPanel(self.currentGraphNode);
-            //Lineage_classes.drawNamedIndividuals([self.currentGraphNode.id]);
+        showLinkedData: function () {
+            Lineage_linkedData.showLinkedDataPanel(self.currentGraphNode);
+            //Lineage_classes.drawNamedLinkedData([self.currentGraphNode.id]);
         },
     };
 

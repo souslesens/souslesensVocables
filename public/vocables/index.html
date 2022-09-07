@@ -60,10 +60,10 @@
         <script src="js/tools/lineage/lineage_combine.js"></script>
 
         <script src="js/tools/lineage/lineage_decoration.js"></script>
-        <script src="js/tools/lineage/individuals/lineage_individuals.js"></script>
-        <script src="js/tools/lineage/individuals/lineage_individuals_sql.js"></script>
-        <script src="js/tools/lineage/individuals/lineage_individuals_search.js"></script>
-        <script src="js/tools/lineage/individuals/lineage_individuals_graph.js"></script>
+        <script src="js/tools/lineage/linkedData/lineage_linkedData.js"></script>
+        <script src="js/tools/lineage/linkedData/lineage_linkedData_sql.js"></script>
+        <script src="js/tools/lineage/linkedData/lineage_linkedData_search.js"></script>
+        <script src="js/tools/lineage/linkedData/lineage_linkedData_graph.js"></script>
 
         <script src="js/tools/owlEditor.js"></script>
 
@@ -524,7 +524,7 @@
         </div>
         <div id="loginDiv" style="position: absolute; visibility: hidden; display: flex; justify-content: center; align-items: center">
             <div>
-                login<input id="loginInput" /> password<input type="password" id="passwordInput" onkeydown="if (event.keyCode == 13) document.getElementById('loginButton').click()" />
+                login<input id="loginInput" /> password<input type="password" id="passwordInput" onkeydown="if (event.keyCode == 13 || event.keyCode == 9) document.getElementById('loginButton').click()" />
                 <button id="loginButton" onclick="authentication.doLogin(MainController.onAfterLogin)">OK</button>
 
                 <div id="loginMessage" style="margin: 20px; font-size: 14px; color: saddlebrown"></div>

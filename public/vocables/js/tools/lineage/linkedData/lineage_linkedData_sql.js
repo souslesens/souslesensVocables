@@ -1,24 +1,24 @@
-var Lineage_individuals_sql = (function() {
+var Lineage_linkedData_sql = (function() {
   var self = {};
 
   self.onDataSourcesSelect = function(dataSourceKey) {
-    self.currentDataSource = Lineage_individuals.currentDataSource;
+    self.currentDataSource = Lineage_linkedData.currentDataSource;
 
-    $("#LineageIndividualsQueryParams_SQLfilterPanel").css("display", "block");
-    self.initIndividualsPanel();
+    $("#LineageLinkedDataQueryParams_SQLfilterPanel").css("display", "block");
+    self.initLinkedDataPanel();
   };
 
 
-  self.initIndividualsPanel = function(node) {
-    self.currentClassNode = Lineage_individuals.currentClassNode;
+  self.initLinkedDataPanel = function(node) {
+    self.currentClassNode = Lineage_linkedData.currentClassNode;
     self.getModel(self.currentDataSource, function(err, model) {
       if (err) return alert(err);
 
-      Lineage_individuals.getNodeLinkedData(self.currentClassNode, function(err, result) {
+      Lineage_linkedData.getNodeLinkedData(self.currentClassNode, function(err, result) {
         if (err)
           return callback(err);
         if (result.length == 0)
-          return alert("No mapping for Class " + self.currentClassNode.data.label + " in data source " + self.currentDataSource.name);
+        ;//  return alert("No mapping for Class " + self.currentClassNode.data.label + " in data source " + self.currentDataSource.name);
 
         self.currentDataSource.currentClassNodeMappingKey = result[0];
         self.showTables(result[0]);
@@ -45,16 +45,16 @@ var Lineage_individuals_sql = (function() {
     var filterObj = null;
     if (self.currentDataSource.type.indexOf("sql") > -1) filterObj = self.getFilter();
     else if (self.currentDataSource.type == "searchIndex") filterObj = self.searchIndex.getFilter();
-    Lineage_individuals.currentFilters.push(filterObj);
+    Lineage_linkedData.currentFilters.push(filterObj);
 
-    $("#LineageIndividualsQueryParams_value").val("");
+    $("#LineageLinkedDataQueryParams_value").val("");
   };
 
-  self.drawIndividuals = function() {
+  self.drawLinkedData = function() {
     if (self.currentDataSource.type.indexOf("sql") > -1) {
-      self.drawSearchIndividuals();
+      self.drawSearchLinkedData();
     } else if (self.currentDataSource.type == "searchIndex") {
-      self.searchIndex.drawIndividuals();
+      self.searchIndex.drawLinkedData();
     }
   };
 
@@ -84,19 +84,19 @@ var Lineage_individuals_sql = (function() {
   self.showTables = function(mappingKey) {
     if (!self.currentDataSource.classMappings[mappingKey]) return alert("node mappings for class " + self.currentClassNode.data.label);
     var tables = Object.keys(self.currentDataSource.classMappings[mappingKey].tables);
-    common.fillSelectOptions("LineageIndividualsQueryParams_SQL_tablesSelect", tables, true);
+    common.fillSelectOptions("LineageLinkedDataQueryParams_SQL_tablesSelect", tables, true);
   };
   self.showColumns = function(table) {
     var schema = self.currentDataSource.table_schema;
-    if (table.indexOf(schema) < 0)
+    if (table.indexOf(schema) < 0 && schema!="")
       table = schema + "." + table;
     var tableColumns = self.currentDataSource.model[table];
 
-    common.fillSelectOptions("LineageIndividualsQueryParams_SQL_columnsSelect", tableColumns, true);
+    common.fillSelectOptions("LineageLinkedDataQueryParams_SQL_columnsSelect", tableColumns, true);
    self.setDefaultFilter()
   };
   self.onColumnChange = function(column) {
-    $("#LineageIndividualsQueryParams_value").val("");
+    $("#LineageLinkedDataQueryParams_value").val("");
     if (true) {
       self.fillValuesSelect();
     }
@@ -112,23 +112,23 @@ var Lineage_individuals_sql = (function() {
    var defaultFilter= self.currentDataSource.classMappings[mappingKey].defaultFilter;
     if(!defaultFilter)
       return;
-    var table = $("#LineageIndividualsQueryParams_SQL_tablesSelect").val();
+    var table = $("#LineageLinkedDataQueryParams_SQL_tablesSelect").val();
     var column=self.currentDataSource.classMappings[mappingKey].tables[table][defaultFilter.column]
-    $("#LineageIndividualsQueryParams_SQL_columnsSelect").val(column);
-    var operator = $("#LineageIndividualsQueryParams_operator").val(defaultFilter.operator);
+    $("#LineageLinkedDataQueryParams_SQL_columnsSelect").val(column);
+    var operator = $("#LineageLinkedDataQueryParams_operator").val(defaultFilter.operator);
     var value =""
     if(defaultFilter.value=="classLabel")
-       value =Lineage_individuals.currentClassNode.data.label
+       value =Lineage_linkedData.currentClassNode.data.label
     if(defaultFilter.value=="classId")
-      value =Lineage_individuals.currentClassNode.data.id
-     $("#LineageIndividualsQueryParams_value").val(value);
+      value =Lineage_linkedData.currentClassNode.data.id
+     $("#LineageLinkedDataQueryParams_value").val(value);
 
 
 
   }
   self.fillValuesSelect = function() {
-    var table = $("#LineageIndividualsQueryParams_SQL_tablesSelect").val();
-    var column = $("#LineageIndividualsQueryParams_SQL_columnsSelect").val();
+    var table = $("#LineageLinkedDataQueryParams_SQL_tablesSelect").val();
+    var column = $("#LineageLinkedDataQueryParams_SQL_columnsSelect").val();
     if (!table || !column) return alert("select a table and a column");
     var SampleSizelimit = 1000;
     var sqlQuery = " select distinct column from " + table + " limit " + SampleSizelimit;
@@ -147,8 +147,8 @@ var Lineage_individuals_sql = (function() {
 
       success: function(data, _textStatus, _jqXHR) {
         if (data.size >= SampleSizelimit) return alert("too many values");
-        common.fillSelectOptions("LineageIndividualsQueryParams_valuesSelect", data, true, column, column);
-        $("#LineageIndividualsQueryParams_operator").val("=");
+        common.fillSelectOptions("LineageLinkedDataQueryParams_valuesSelect", data, true, column, column);
+        $("#LineageLinkedDataQueryParams_operator").val("=");
       },
       error(err) {
         return alert(err.responseText);
@@ -159,11 +159,11 @@ var Lineage_individuals_sql = (function() {
     var classUri = self.currentClassNode.data.id;
     var classLabel = self.currentClassNode.data.label;
 
-    var table = $("#LineageIndividualsQueryParams_SQL_tablesSelect").val();
-    var column = $("#LineageIndividualsQueryParams_SQL_columnsSelect").val();
-    var operator = $("#LineageIndividualsQueryParams_operator").val();
-    var value = $("#LineageIndividualsQueryParams_value").val();
-    var html = "<div class='LineageIndividualsQueryParams_QueryElt' id='LineageIndividualsQueryParams_Elt_" + Lineage_individuals.currentFilters.length + "'> ";
+    var table = $("#LineageLinkedDataQueryParams_SQL_tablesSelect").val();
+    var column = $("#LineageLinkedDataQueryParams_SQL_columnsSelect").val();
+    var operator = $("#LineageLinkedDataQueryParams_operator").val();
+    var value = $("#LineageLinkedDataQueryParams_value").val();
+    var html = "<div class='LineageLinkedDataQueryParams_QueryElt' id='LineageLinkedDataQueryParams_Elt_" + Lineage_linkedData.currentFilters.length + "'> ";
     var obj = {
       classUri: classUri,
       classLabel: classLabel,
@@ -180,15 +180,15 @@ var Lineage_individuals_sql = (function() {
       html += "ALL &nbsp;";
       obj.column = column;
     }
-    html += "<button style='size: 10px' onclick='Lineage_individuals.removeQueryElement(" + Lineage_individuals.currentFilters.length + ")'>X</button></div>";
-    $("#LineageIndividualsQueryParams_QueryDiv").append(html);
+    html += "<button style='size: 10px' onclick='Lineage_linkedData.removeQueryElement(" + Lineage_linkedData.currentFilters.length + ")'>X</button></div>";
+    $("#LineageLinkedDataQueryParams_QueryDiv").append(html);
     return obj;
   };
 
-  self.drawSearchIndividuals = function() {
+  self.drawSearchLinkedData = function() {
     var tables = [];
 
-    Lineage_individuals.currentFilters.forEach(function(filter) {
+    Lineage_linkedData.currentFilters.forEach(function(filter) {
       if (tables.indexOf(filter.table) < 0) tables.push(filter.table);
     });
     var from = "";
@@ -205,7 +205,7 @@ var Lineage_individuals_sql = (function() {
     var columnToClassMap = {};
 
     var currentMapping;
-    Lineage_individuals.currentFilters.forEach(function(filter, index) {
+    Lineage_linkedData.currentFilters.forEach(function(filter, index) {
       if (columnsStr == "") {
         var currentClassNodeMappingKey = self.currentDataSource.currentClassNodeMappingKey;
         currentMapping = self.currentDataSource.classMappings[currentClassNodeMappingKey].tables[filter.table];
@@ -266,7 +266,7 @@ var Lineage_individuals_sql = (function() {
 
 
          // var classUri = currentMapping.classUri;
-          var classUri= Lineage_individuals.currentNode.id
+          var classUri= Lineage_linkedData.currentNode.id
           var individualId = item[currentMapping.individualIdColumn];
           var individualLabel = individualId;
           if (currentMapping.classLabelColumn)
@@ -350,9 +350,9 @@ var Lineage_individuals_sql = (function() {
           // draw edges between indiviudals
           var individualEdges = {};
           for (var paragraphId in graphEdgesMap) {
-            var individuals = graphEdgesMap[paragraphId];
-            individuals.forEach(function(item1) {
-              individuals.forEach(function(item2) {
+            var linkedData = graphEdgesMap[paragraphId];
+            linkedData.forEach(function(item1) {
+              linkedData.forEach(function(item2) {
                 if (item1.individual != item2.individual && item1.classUri != item2.classUri) {
                   var edgeId = item1.individual + "_" + item2.individual;
                   if (!individualEdges[edgeId]) individualEdges[edgeId] = [];
@@ -395,16 +395,16 @@ var Lineage_individuals_sql = (function() {
     });
   };
   self.onValuesSelectChange = function() {
-    var value = $("#LineageIndividualsQueryParams_valuesSelect").val();
-    $("#LineageIndividualsQueryParams_value").val(value);
+    var value = $("#LineageLinkedDataQueryParams_valuesSelect").val();
+    $("#LineageLinkedDataQueryParams_value").val(value);
   };
 
   self.executeQuery = function(output) {
     var SampleSizelimit = 500;
-    var table = $("#LineageIndividualsQueryParams_SQL_tablesSelect").val();
-    var column = $("#LineageIndividualsQueryParams_SQL_columnsSelect").val();
-    var operator = $("#LineageIndividualsQueryParams_operator").val();
-    var value = $("#LineageIndividualsQueryParams_value").val();
+    var table = $("#LineageLinkedDataQueryParams_SQL_tablesSelect").val();
+    var column = $("#LineageLinkedDataQueryParams_SQL_columnsSelect").val();
+    var operator = $("#LineageLinkedDataQueryParams_operator").val();
+    var value = $("#LineageLinkedDataQueryParams_value").val();
 
     var sqlQuery = " select  * from " + table + " limit " + SampleSizelimit;
     if (self.currentDataSource.type == "sql.sqlserver") sqlQuery = " select top  " + SampleSizelimit + " * from " + table;

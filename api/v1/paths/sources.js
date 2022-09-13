@@ -1,6 +1,6 @@
 const path = require("path");
 const fs = require("fs");
-const { configPath, config } = require("../../../model/config");
+const { configPath, _config } = require("../../../model/config");
 const sourcesJSON = path.resolve(configPath + "/sources.json");
 const profilesJSON = path.resolve(configPath + "/profiles.json");
 exports.profilesJSON = sourcesJSON;
@@ -15,29 +15,35 @@ module.exports = function () {
         PUT,
     };
 
-    // const keepProfilesIncludedInUserGroups = (user) => (profile) => {
-    //     const [k, val] = profile;
-    //     return (user.groups.some(v => val.name === v))
-    // };
-
-    // const allAllowedSourcesSchemasCurried = (acc) => (profile) => {
-    //     const [k, val] = profile;
-    //     return (acc.concat(val.allowedSourceSchemas))
-    // };
-
-    const getAllowedSources = (user, profiles) => {
+    const getAllowedSources = (user, profiles, sources) => {
         const aProfiles = Object.entries(profiles);
-        let acc = [];
+        const aSources = Object.entries(sources);
 
-        for (let p of aProfiles) {
-            const [_k, val] = p;
-            const hasAny = user.groups.some((v) => v === val.name);
+        // for all profile
+        const allAccessControl = aProfiles.flatMap(([_k, profile]) => {
+            const defaultSourceAccessControl = profile.defaultSourceAccessControl;
+            const sourcesAccessControl = profile.sourcesAccessControl;
+            // browse all sources
+            return aSources.map(([sourceName, _v]) => {
+                if (sourceName in sourcesAccessControl) {
+                    return [sourceName, sourcesAccessControl[sourceName]];
+                } else {
+                    return [sourceName, defaultSourceAccessControl];
+                }
+            });
+        });
 
-            if (hasAny) {
-                acc = acc.concat(val.allowedSources);
-            }
-        }
-        return Array.from(new Set(acc));
+        // get all read or readwrite source
+        const allowedSources = allAccessControl
+            .filter(([sourceName, accessControl]) => {
+                if (["read", "readwrite"].includes(accessControl)) {
+                    return sourceName;
+                }
+            })
+            .map(([sourceName, _v]) => sourceName);
+
+        // uniq
+        return Array.from(new Set(allowedSources));
     };
 
     ///// GET api/v1/sources
@@ -46,9 +52,9 @@ module.exports = function () {
             const profiles = await read(profilesJSON);
             const parsedProfiles = JSON.parse(profiles);
             const userInfo = await userManager.getUser(req.user);
-            const allowedSources = getAllowedSources(userInfo.user, parsedProfiles);
             const sources = await read(sourcesJSON);
             const parsedSources = JSON.parse(sources);
+            const allowedSources = getAllowedSources(userInfo.user, parsedProfiles, parsedSources);
             const filteredSources = filterSources(allowedSources, parsedSources, allowedSources, req);
             resourceFetched(res, filteredSources);
         } catch (err) {
@@ -119,8 +125,5 @@ module.exports = function () {
 };
 
 function filterSources(allowedSources, sources) {
-    if (allowedSources.includes("ALL")) {
-        return sources;
-    }
     return Object.fromEntries(Object.entries(sources).filter(([sourceId, _source]) => allowedSources.includes(sourceId)));
 }

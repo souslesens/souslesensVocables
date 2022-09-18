@@ -31,6 +31,8 @@ var Lineage_classes = (function () {
     self.restrictionColor = "orange";
     self.namedIndividualShape = "triangle";
     self.namedIndividualColor = "blue";
+
+    self.linkedDataShape="square"
     self.sourcesGraphUriMap = {};
 
     self.minChildrenForClusters = 30;

@@ -64,6 +64,7 @@ var SourceBrowser = (function() {
     if (!node) node = self.currentGraphNode;
     if (!node) return;
     // Lineage_blend.addNodeToAssociationNode(node)
+    self.currentCopiedNode = node;
     Clipboard.copy(
       {
         type: "node",
@@ -75,6 +76,7 @@ var SourceBrowser = (function() {
       self.currentTreeNode.id + "_anchor",
       event
     );
+
   };
 
   self.showThesaurusTopConcepts = function(sourceLabel, options) {
@@ -129,7 +131,8 @@ $("#actionDiv").html(html);*/
   self.getJstreeConceptsContextMenu = function() {
     // return {}
     var items = {};
-
+    if (!self.currentSource && Lineage_classes.mainSource)
+      self.currentSource = Lineage_classes.mainSource;
     items.nodeInfos = {
       label: "Node infos",
       action: function(_e) {
@@ -147,14 +150,14 @@ $("#actionDiv").html(html);*/
           Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0);
         }
       };
-      items.copyNodeToClipboard = {
-        label: "copy toClipboard",
-        action: function(_e) {
-          // pb avec source
+      /*  items.copyNodeToClipboard = {
+          label: "copy toClipboard",
+          action: function(_e) {
+            // pb avec source
 
-          Lineage_common.copyNodeToClipboard(self.currentTreeNode.data);
-        }
-      };
+            Lineage_common.copyNodeToClipboard(self.currentTreeNode.data);
+          }
+        };*/
       items.graphNamedIndividuals = {
         label: "LinkedData",
         action: function() {
@@ -187,29 +190,54 @@ $("#actionDiv").html(html);*/
           }
         }
       };
+      items.copyNode = {
+        label: "Copy Node",
+        action: function(e) {
+          // pb avec source
+          SourceBrowser.copyNode(e);
+
+          Lineage_common.copyNodeToClipboard(self.currentTreeNode);
+        }
+      };
+
       if (self.currentSource && Config.sources[self.currentSource].editable) {
-        items.pasteNodeFromClipboard = {
-          label: "paste from Clipboard",
+        items.pasteNode = {
+          label: "paste Node",
           action: function(_e) {
-            // pb avec source
+            if (self.currentCopiedNode)
+              return Lineage_combine.showMergeNodesDialog(self.currentCopiedNode);
 
-            Lineage_common.pasteNodeFromClipboard(self.currentTreeNode);
-          }
-        };
-        items.editNode = {
-          label: "Edit node",
-          action: function(_obj, _sss, _cc) {
-            SourceEditor.editNode("DialogDiv", self.currentSource, self.currentTreeNode.data.id, "OWL", false);
-          }
-        };
-        items.deleteClass = {
-          label: "delete Class",
-          action: function(_e) {
-            // pb avec source
+              common.pasteTextFromClipboard(function(text) {
+                if (!text)
+                  return MainController.UI.message("no node copied");
+                try {
+                  var node = JSON.parse(text);
+                  Lineage_combine.showMergeNodesDialog(node,self.currentTreeNode);
+                } catch (e) {
+console.log("wrong clipboard content")
+                }
+                return;
 
-            Lineage_common.deleteNode(self.currentTreeNode, self.currentTargetDiv);
+              });
+
+
+
           }
         };
+        /*   items.editNode = {
+             label: "Edit node",
+             action: function(_obj, _sss, _cc) {
+               SourceEditor.editNode("DialogDiv", self.currentSource, self.currentTreeNode.data.id, "OWL", false);
+             }
+           };
+           items.deleteClass = {
+             label: "delete Class",
+             action: function(_e) {
+               // pb avec source
+
+               Lineage_common.deleteNode(self.currentTreeNode, self.currentTargetDiv);
+             }
+           };*/
       }
 
       if (MainController.currentSource && Config.sources[MainController.currentSource].protegeFilePath) {
@@ -221,13 +249,7 @@ $("#actionDiv").html(html);*/
         };
       }
     }
-    items.copyNode = {
-      label: "Copy Node",
-      action: function(e) {
-        // pb avec source
-        SourceBrowser.copyNode(e);
-      }
-    };
+
     /*    items.toDataTable = {
 label: "export to Table",
 action: function (e) {// pb avec source
@@ -417,7 +439,15 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
      source=source.replace("Lineage_source_","")
      graphSources.push(source);
  })*/
+      if( Lineage_combine.currentSources.length>0)
       searchedSources = Lineage_combine.currentSources;
+      else{
+       var mainSource=(Lineage_common.currentSource || MainController.currentSource);
+        searchedSources.push(mainSource)
+        var importedSources=Config.sources[mainSource].imports
+        searchedSources=searchedSources.concat(importedSources)
+
+      }
     } else if (sourcesScope == "all_OWLsources") {
       searchedSources = getUserSources("OWL");
     } else if (sourcesScope == "all_SKOSsources") {
@@ -630,6 +660,7 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
     var existingNodes = {};
     var jstreeData = [];
     var parentIdsLabelsMap = result.parentIdsLabelsMap;
+
 
     result.forEach(function(item) {
       var matches = item.matches;
@@ -1038,9 +1069,9 @@ defaultLang = 'en';*/
         str += "</table></div>";
 
         str +=
-          " <hr><div id='nodeInfos_listsDiv' style='display:flex;flex-direction: row;';>" +
-          "<div id='nodeInfos_restrictionsDiv'  style='display:flex;flex-direction: column;min-width: 300px'></div>" +
-          "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;min-width: 300px'></div>" +
+          " <hr><div id='nodeInfos_listsDiv' style='display:flex;flex-direction: row;justify-content: space-evenly';>" +
+          "<div id='nodeInfos_restrictionsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
+          "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
           "</div>";
 
         $("#" + divId).html(str);
@@ -1052,8 +1083,8 @@ defaultLang = 'en';*/
 
   self.showClassRestrictions = function(sourceLabel, nodeId, _options, callback) {
     // blankNodes.
-    var str =""
-      async.series([
+    var str = "";
+    async.series([
       //direct restrictions
       function(callbackSeries) {
 
@@ -1061,7 +1092,7 @@ defaultLang = 'en';*/
           if (err) {
             return callbackSeries(err);
           }
-           str += "<b>Restrictions </b> <div style='    background-color: beige;'> <table>";
+          str += "<b>Restrictions </b> <div style='    background-color: beige;'> <table>";
           result.forEach(function(item) {
             str += "<tr class='infos_table'>";
 
@@ -1094,7 +1125,7 @@ defaultLang = 'en';*/
           if (err) {
             return callbackSeries(err);
           }
-           str += "<br><b>Inverse Restrictions </b> <div style='    background-color: beige;'> <table>";
+          str += "<br><b>Inverse Restrictions </b> <div style='    background-color: beige;'> <table>";
           result.forEach(function(item) {
             str += "<tr class='infos_table'>";
 
@@ -1119,8 +1150,8 @@ defaultLang = 'en';*/
       }
 
     ], function(err) {
-        if(!err)
-          $("#nodeInfos_restrictionsDiv").html(str);
+      if (!err)
+        $("#nodeInfos_restrictionsDiv").html(str);
       return callback(err);
     });
 

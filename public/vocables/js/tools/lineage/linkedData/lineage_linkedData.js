@@ -73,7 +73,8 @@ var Lineage_linkedData = (function () {
         $("#Lineage_Tabs").tabs("option", "active", 3);
         self.currentClassNode = node;
         $("#LineageLinkedDataQueryParams_className").html(self.currentClassNode.data.label);
-
+if(!self.currentDataSource)
+  return;
         if (self.currentDataSource.type == "searchIndex") {
             Lineage_linkedData_search.initLinkedDataPanel(node);
         } else if (self.currentDataSource.type.indexOf("sql") > -1) {
@@ -151,6 +152,8 @@ var Lineage_linkedData = (function () {
         showIndividualInfos:function(){
            var node= Lineage_classes.currentGraphNode ||  Lineage_classes.currentTreeNode
             var dataSourceLabel=node.data.dataSource;
+           if(!dataSourceLabel)
+               return
             var dataSource=Config.sources[Lineage_classes.mainSource].dataSources[dataSourceLabel]
 
             if (dataSource.type.indexOf("sql") > -1) {

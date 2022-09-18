@@ -82,7 +82,11 @@ var Lineage_linkedData_sql = (function() {
     });
   };
   self.showTables = function(mappingKey) {
-    if (!self.currentDataSource.classMappings[mappingKey]) return alert("node mappings for class " + self.currentClassNode.data.label);
+    if (!self.currentDataSource.classMappings[mappingKey]) {
+      if(! self.currentClassNode)
+        return;
+      return alert("node mappings for class " + self.currentClassNode.data.label);
+    }
     var tables = Object.keys(self.currentDataSource.classMappings[mappingKey].tables);
     common.fillSelectOptions("LineageLinkedDataQueryParams_SQL_tablesSelect", tables, true);
   };
@@ -298,7 +302,7 @@ var Lineage_linkedData_sql = (function() {
               visjsData.nodes.push({
                 id: individualId,
                 label: individualLabel,
-                shape: Lineage_classes.namedIndividualShape,
+                shape: Lineage_classes.linkedDataShape,
                 size: Lineage_classes.defaultShapeSize,
                 color: color,
                 data: {

@@ -7,11 +7,11 @@ var Lineage_linkedData_search = (function () {
         self.currentDataSource = Lineage_linkedData.currentDataSource;
 
         $("#LineageLineage_linkedDataQueryParams_searchIndexFilterPanel").css("display", "block");
-        self.initLineage_linkedDataPanel(self.currentClassNode);
+        self.initLinkedDataPanel(self.currentClassNode);
     };
 
 
-    self.initLineage_linkedDataPanel = function (node) {
+    self.initLinkedDataPanel = function (node) {
         self.currentClassNode = Lineage_linkedData.currentClassNode;
         self.showClassLineage_linkedDataTree();
     };

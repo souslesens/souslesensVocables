@@ -151,10 +151,20 @@ var Lineage_combine = (function() {
     }
   };
 
-  self.showMergeNodesDialog = function() {
+  self.showMergeNodesDialog = function(fromNode, toNode) {
+    if (fromNode) {
+      Lineage_classes.selection.clearNodesSelection();
+      Lineage_classes.selection.addNodeToSelection(fromNode);
+
+    }
     if (Lineage_classes.nodesSelection.length == 0) return alert("no nodes selected");
     $("#mainDialogDiv").load("snippets/lineage/lineageAggregateMergeNodesDialog.html", function() {
       common.fillSelectOptions("LineageMerge_targetSourceSelect", [Lineage_classes.mainSource]);
+      if (toNode) {
+        $("#LineageMerge_targetNodeUriSelect").val(toNode.data.id);
+      }
+
+
       var jstreeData = Lineage_classes.selection.getSelectedNodesTree();
 
       var options = {
@@ -168,13 +178,16 @@ var Lineage_combine = (function() {
     $("#mainDialogDiv").dialog("open");
   };
 
+
   self.mergeNodes = function(testObj) {
     var maxDepth = 10;
-
+    var targetNode = null;
     var targetSource = $("#LineageMerge_targetSourceSelect").val();
     var mergeMode = $("#LineageMerge_aggregateModeSelect").val();
     var mergeDepth = $("#LineageMerge_aggregateDepthSelect").val();
     var mergeRestrictions = $("#LineageMerge_aggregateRelationsCBX").prop("checked");
+    var targetNode = $("#LineageMerge_targetNodeUriSelect").val();
+    var mergedNodesType = $("#LineageMerge_mergedNodesTypeSelect").val();
     var jstreeNodes;
     if ($("#LineageMerge_nodesJsTreeDiv").jstree(true)) jstreeNodes = $("#LineageMerge_nodesJsTreeDiv").jstree(true).get_checked(true);
 
@@ -184,468 +197,355 @@ var Lineage_combine = (function() {
       mergeDepth = testObj.mergeDepth;
       mergeRestrictions = testObj.mergeRestrictions;
       jstreeNodes = testObj.jstreeNodes;
+      targetNode = testObj.targetNode;
+      mergedNodesType = testObj.mergedNodesType;
     }
+    if (!mergedNodesType)
+      if (!confirm("confirm that no Type is added to merged nodes"))
+        return;
 
     var nodesToMerge = {};
+    var descendantsMap = {};
+    var newTriples = [];
+    var message = "";
     jstreeNodes.forEach(function(node) {
       if (node.parent == "#") return;
-      if (!nodesToMerge[node.parent]) nodesToMerge[node.parent] = { ids: [] };
-      nodesToMerge[node.parent].ids.push(node.data.id);
+      if (!nodesToMerge[node.parent]) nodesToMerge[node.parent] = {};
+      nodesToMerge[node.parent][node.data.id] = [];
     });
-    /* var oldTriples = [];
-   var newTriples = [];*/
-    var message = "";
+
 
     var sources = Object.keys(nodesToMerge);
+
+
     async.eachSeries(sources, function(source, callbackEachSource) {
-      var ids = nodesToMerge[source].ids;
-      var oldToNewUrisMap = {};
+      var selectedNodeIds = Object.keys(nodesToMerge[source]);
       var targetGraphUri = Config.sources[targetSource].graphUri;
       var editable = Config.sources[targetSource].editable;
-      if (!targetGraphUri || !editable) return alert("targetSource must have  graphUri and must be editable");
+      if (!targetGraphUri || !editable)
+        alert("targetSource must have  graphUri and must be editable");
+      callbackEachSource();
 
       var sourceMessage = "";
 
-      function getDescendantsMap(nodes) {
-        var descendants = {};
-        nodes.forEach(function(item, index) {
-          for (var i = 1; i <= maxDepth; i++) {
-            if (item["child" + i]) {
-              var parent;
-              if (i == 1)
-                item["child" + i].parent = item.concept.value;
-              else item["child" + i].parent = item["child" + (i - 1)].value;
 
-              descendants[item["child" + i].value] = item["child" + i];
-            }
-          }
-        });
-        return descendants;
-      }
-
-      async.series(
-        [
-          //getNodes descendants by depth and add them to ids
-          function(callbackSeries) {
-            if (mergeDepth == "nodeOnly") {
-              return callbackSeries();
-            } else {
-              var depth;
-              if (mergeDepth == "nodeAndDirectChildren") depth = 1;
-              else depth = maxDepth;
-              Sparql_generic.getNodeChildren(source, null, ids, depth, { selectGraph: false }, function(err, result) {
-                if (err) return callbackSeries(err);
-                var descendantsMap = getDescendantsMap(result);
-                var descendantIds = Object.keys(descendantsMap);
-                ids = ids.concat(descendantIds);
+      async.eachSeries(selectedNodeIds, function(selectedNodeId, callbackEachNodeToMerge) {
+        var nodesToCopy = [selectedNodeId];
+        async.series(
+          [
+            //getNodes descendants by depth and add them to ids
+            function(callbackSeries) {
+              if (mergeDepth == "nodeOnly") {
                 return callbackSeries();
-              });
-            }
-          },
+              } else {
+                var depth;
+                if (mergeDepth == "nodeAndDirectChildren") depth = 1;
+                else depth = maxDepth;
+                Sparql_generic.getNodeChildren(source, null, selectedNodeId, depth, { selectGraph: false }, function(err, result) {
+                  if (err) return callbackSeries(err);
 
-          //get all node ids subject triple including descendants
-          function(callbackSeries) {
-            Sparql_OWL.getAllTriples(source, "subject", ids, {}, function(err, result) {
-              if (err) return callbackSeries(err);
-              nodesToMerge[source].subjectTriples = result;
-              callbackSeries();
-            });
-          },
+                  result.forEach(function(item, index) {
+                    for (var i = 1; i <= maxDepth; i++) {
+                      if (item["child" + i]) {
+                        var parent;
+                        if (i == 1) {
+                          var parent = item.concept.value;
+                          if (mergeDepth == "nodeDescendantsOnly")
+                            parent = targetNode;
+                          item["child" + i].parent = parent;
+                        } else item["child" + i].parent = item["child" + (i - 1)].value;
 
-          //create hierarchy if needed
-          function(callbackSeries) {
-            nodesToMerge[source].subjectTriples.forEach(function(item) {
-              var value = item.object.value;
-              if (item.object.datatype == "http://www.w3.org/2001/XMLSchema#dateTime") value += "^^xsd:dateTime";
-
-              newTriples.push({
-                subject: item.subject.value,
-                predicate: item.predicate.value,
-             //   nodesToMerge[source].
-              })
-            })
+                        descendantsMap[item["child" + i].value] = item["child" + i];
+                      }
+                    }
+                  });
 
 
+                  var descendantIds = Object.keys(descendantsMap);
+                  nodesToCopy = nodesToCopy.concat(descendantIds);
+                  return callbackSeries();
+                });
+              }
+            },
 
-          },
+            //create hierarchy if needed (when targetNode  and mergedNodesType)
+            function(callbackSeries) {
+              if (!targetNode)
+                return callbackSeries();
 
-          //get all node ids object triple includin descendants
-          /*     function(callbackSeries) {
-       Sparql_OWL.getAllTriples(source, "object", ids, {}, function(err, result) {
-         if (err)
-           return callbackSeries(err);
-         nodesToMerge[source].objectTriples = result;
-         callbackSeries();
-       });
-     },
-     //get restrictions triple including descendants
-     function(callbackSeries) {
-       if (!mergeRestrictions)
-         return callbackSeries();
+              var mergedNodesParentProperty = null;
+              if (mergedNodesType == "owl:NamedIndividual")
+                mergedNodesParentProperty = "rdf:type";
+              else if (mergedNodesType == "owl:Class")
+                mergedNodesParentProperty = "rdfs:subClassOf";
+              else
+                return callbackSeries();
 
-       Sparql_OWL.getObjectRestrictions(source, ids, {}, function(err, result) {
-         if (err)
-           return callbackSeries(err);
-         nodesToMerge[source].restrictions = result;
-         callbackSeries();
-       });
-     },
-     //get inverse restrictions triple including descendants
-     function(callbackSeries) {
-       if (!mergeRestrictions)
-         return callbackSeries();
-       Sparql_OWL.getObjectRestrictions(source, ids, { inverseRestriction: true }, function(err, result) {
-         if (err)
-           return callbackSeries(err);
-         nodesToMerge[source].inverseRestrictions = result;
-         callbackSeries();
-       });
-     },*/
+              if (mergeDepth != "nodeDescendantsOnly") {
+                newTriples.push({
+                  subject: selectedNodeId,
+                  predicate: "rdf:type",
+                  object: mergedNodesType
 
-          //create newTriples
-          function(callbackSeries) {
-            if (mergeMode == "keepUri") {
-              var newTriples = [];
-              nodesToMerge[source].subjectTriples.forEach(function(item) {
-                var value = item.object.value;
-                if (item.object.datatype == "http://www.w3.org/2001/XMLSchema#dateTime") value += "^^xsd:dateTime";
+                });
 
                 newTriples.push({
-                  subject: item.subject.value,
-                  predicate: item.predicate.value,
-                  object: value
+                  subject: selectedNodeId,
+                  predicate: mergedNodesParentProperty,
+                  object: targetNode
+
                 });
+              }
+
+
+              var descendantIds = Object.keys(descendantsMap);
+              descendantIds.forEach(function(item) {
+                newTriples.push({
+                  subject: item,
+                  predicate: "rdf:type",
+                  object: mergedNodesType
+
+                });
+                newTriples.push({
+                  subject: item,
+                  predicate: mergedNodesParentProperty,
+                  object: descendantsMap[item].parent
+                });
+
               });
 
-              /*  nodesToMerge[source].objectTriples.forEach(function(item) {
-    newTriples.push({
-      subject: item.subject.value,
-      predicate: item.predicate.value,
-      object: item.predicate.value
-    });
-  });*/
+              callbackSeries();
 
-              /*     nodesToMerge[source].restrictions.forEach(function(item) {
-       newTriples.push({
-         subject: item.subject.value,
-         predicate: item.predicate.value,
-         object: item.predicate.value
-       });
-     });
+            },
 
-     nodesToMerge[source].inverseRestrictions.forEach(function(item) {
-       newTriples.push({
-         subject: item.subject.value,
-         predicate: item.predicate.value,
-         object: item.predicate.value
-       });
-     });*/
-              return callbackSeries();
-              Sparql_generic.insertTriples(targetSource, newTriples, {}, function(err, result) {
+            //get all node ids subject triple including descendants
+            function(callbackSeries) {
+
+              Sparql_OWL.getAllTriples(source, "subject", nodesToCopy, {}, function(err, result) {
                 if (err) return callbackSeries(err);
-                sourceMessage = result + " inserted from source " + source + "  to source " + targetSource;
+                result.forEach(function(item) {
+                  if (nodesToMerge[source][selectedNodeId])
+                    nodesToMerge[source][selectedNodeId].push(item);
 
-                message += sourceMessage + "\n";
-                return callbackSeries();
+                });
+                callbackSeries();
               });
-            }
-
-            /* /NOT IMPLEMENTED YET too much complexity
- else if(mergeMode=="newUri") {
-       // set new subjectUri
-       var newTriples = [];
 
 
-       nodesToMerge[source].subjectTriples.forEach(function(item) {
-         if (!oldToNewUrisMap[item.id.value]) {
-           var newUri = targetGraphUri + common.getRandomHexaId(10);
-           oldToNewUrisMap[item.id.value] = newUri;
-         }
-       })
+            },
 
-       for (var oldUri in oldToNewUrisMap[item.id.value]) {
+
+            /*     function(callbackSeries) {
+         Sparql_OWL.getAllTriples(source, "object", ids, {}, function(err, result) {
+           if (err)
+             return callbackSeries(err);
+           nodesToMerge[source].objectTriples = result;
+           callbackSeries();
+         });
+       },
+       //get restrictions triple including descendants
+       function(callbackSeries) {
+         if (!mergeRestrictions)
+           return callbackSeries();
+
+         Sparql_OWL.getObjectRestrictions(source, ids, {}, function(err, result) {
+           if (err)
+             return callbackSeries(err);
+           nodesToMerge[source].restrictions = result;
+           callbackSeries();
+         });
+       },
+       //get inverse restrictions triple including descendants
+       function(callbackSeries) {
+         if (!mergeRestrictions)
+           return callbackSeries();
+         Sparql_OWL.getObjectRestrictions(source, ids, { inverseRestriction: true }, function(err, result) {
+           if (err)
+             return callbackSeries(err);
+           nodesToMerge[source].inverseRestrictions = result;
+           callbackSeries();
+         });
+       },*/
+
+            //create newTriples
+            function(callbackSeries) {
+
+              if (true || mergeMode == "keepUri") {
+
+
+                nodesToMerge[source][selectedNodeId].forEach(function(item) {
+                  var value = item.object.value;
+                  if (item.object.datatype == "http://www.w3.org/2001/XMLSchema#dateTime") value += "^^xsd:dateTime";
+                  if (item.object.type == "literal")
+                    value = common.formatStringForTriple(value);
+                  newTriples.push({
+                    subject: item.subject.value,
+                    predicate: item.predicate.value,
+                    object: value
+                  });
+                });
+
+
+                /*  nodesToMerge[source].objectTriples.forEach(function(item) {
+      newTriples.push({
+        subject: item.subject.value,
+        predicate: item.predicate.value,
+        object: item.predicate.value
+      });
+    });*/
+
+                /*     nodesToMerge[source].restrictions.forEach(function(item) {
+         newTriples.push({
+           subject: item.subject.value,
+           predicate: item.predicate.value,
+           object: item.predicate.value
+         });
+       });
+
+       nodesToMerge[source].inverseRestrictions.forEach(function(item) {
+         newTriples.push({
+           subject: item.subject.value,
+           predicate: item.predicate.value,
+           object: item.predicate.value
+         });
+       });*/
+                return callbackSeries();
+                Sparql_generic.insertTriples(targetSource, newTriples, {}, function(err, result) {
+                  if (err) return callbackSeries(err);
+                  sourceMessage = result + " inserted from source " + source + "  to source " + targetSource;
+
+                  message += sourceMessage + "\n";
+                  return callbackSeries();
+                });
+              }
+
+              /* /NOT IMPLEMENTED YET too much complexity
+   else if(mergeMode=="newUri") {
+         // set new subjectUri
+         var newTriples = [];
+
+
          nodesToMerge[source].subjectTriples.forEach(function(item) {
-           if (item.id.value == oldUri) {
-
+           if (!oldToNewUrisMap[item.id.value]) {
+             var newUri = targetGraphUri + common.getRandomHexaId(10);
+             oldToNewUrisMap[item.id.value] = newUri;
            }
-           triples.push({})
          })
-       }
-     }*/
-          }
-        ],
-        function(err) {
-          if (err) return callbackEachSource(err);
-          MainController.UI.message(sourceMessage + " indexing data ...  ");
-          SearchUtil.generateElasticIndex(targetSource, null, function(err, _result) {
-            MainController.UI.message("DONE " + source, true);
-            callbackEachSource();
+
+         for (var oldUri in oldToNewUrisMap[item.id.value]) {
+           nodesToMerge[source].subjectTriples.forEach(function(item) {
+             if (item.id.value == oldUri) {
+
+             }
+             triples.push({})
+           })
+         }
+       }*/
+            }
+          ],
+          function(err) {
+            if (err) return callbackEachNodeToMerge(err);
+
+            MainController.UI.message(sourceMessage + " indexing data ...  ");
+            SearchUtil.generateElasticIndex(targetSource, { ids: nodesToCopy }, function(err, _result) {
+              MainController.UI.message("DONE " + source, true);
+              callbackEachNodeToMerge();
+            });
+          },
+          function(err) {
+            callbackEachSource(err);
           });
-        },
-        function(err) {
-          if (err) return alert(err.responseText);
-          alert(message);
-          return MainController.UI.message("ALL DONE", true);
-        }
-      );
+      }, function(err) {
+        if (err) return alert(err.responseText);
+        alert(message);
+        return MainController.UI.message("ALL DONE", true);
+      });
     });
   };
 
   self.testMerge = function() {
     var jstreeNodes = [
-      /*    {
-      "id": "HUMAN_RESOURCES",
-      "text": "HUMAN_RESOURCES",
-      "icon": "../icons/default.png",
-      "parent": "#",
-      "parents": [
-        "#"
-      ],
-      "children": [
-        "http://data.total.com/resource/tsf/ontology/data-domains/human-resources/87c1a9255a"
-      ],
-      "children_d": [
-        "http://data.total.com/resource/tsf/ontology/data-domains/human-resources/87c1a9255a"
-      ],
-      "state": {
-        "loaded": true,
-        "opened": true,
-        "selected": true,
-        "disabled": false
-      },
-      "li_attr": {
-        "id": "HUMAN_RESOURCES"
-      },
-      "a_attr": {
-        "href": "#",
-        "id": "HUMAN_RESOURCES_anchor"
-      },
-      "original": {
-        "id": "HUMAN_RESOURCES",
-        "text": "HUMAN_RESOURCES",
-        "parent": "#",
-        "state": {}
-      },
-      "type": "default"
-    },
-    {
-      "id": "http://data.total.com/resource/tsf/ontology/data-domains/human-resources/87c1a9255a",
-      "text": "HR Job description",
-      "icon": "../icons/default.png",
-      "parent": "HUMAN_RESOURCES",
-      "parents": [
-        "HUMAN_RESOURCES",
-        "#"
-      ],
-      "children": [],
-      "children_d": [],
-      "data": {
-        "source": "HUMAN_RESOURCES",
-        "label": "HR Job description",
-        "id": "http://data.total.com/resource/tsf/ontology/data-domains/human-resources/87c1a9255a"
-      },
-      "state": {
-        "loaded": true,
-        "opened": false,
-        "selected": true,
-        "disabled": false
-      },
-      "li_attr": {
-        "id": "http://data.total.com/resource/tsf/ontology/data-domains/human-resources/87c1a9255a"
-      },
-      "a_attr": {
-        "href": "#",
-        "id": "http://data.total.com/resource/tsf/ontology/data-domains/human-resources/87c1a9255a_anchor"
-      },
-      "original": {
-        "id": "http://data.total.com/resource/tsf/ontology/data-domains/human-resources/87c1a9255a",
-        "text": "HR Job description",
-        "parent": "HUMAN_RESOURCES",
-        "state": {}
-      },
-      "type": "default"
-    },
-  {
-      "id": "INDUSTRIAL_LOGISTICS",
-      "text": "INDUSTRIAL_LOGISTICS",
-      "icon": "../icons/default.png",
-      "parent": "#",
-      "parents": [
-        "#"
-      ],
-      "children": [
-        "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/52b2e5025c",
-        "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/c340778c87"
-      ],
-      "children_d": [
-        "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/52b2e5025c",
-        "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/c340778c87"
-      ],
-      "state": {
-        "loaded": true,
-        "opened": true,
-        "selected": true,
-        "disabled": false
-      },
-      "li_attr": {
-        "id": "INDUSTRIAL_LOGISTICS"
-      },
-      "a_attr": {
-        "href": "#",
-        "id": "INDUSTRIAL_LOGISTICS_anchor"
-      },
-      "original": {
-        "id": "INDUSTRIAL_LOGISTICS",
-        "text": "INDUSTRIAL_LOGISTICS",
-        "parent": "#",
-        "state": {}
-      },
-      "type": "default"
-    },
-    {
-      "id": "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/52b2e5025c",
-      "text": "Personnel On Board (POB)",
-      "icon": "../icons/default.png",
-      "parent": "INDUSTRIAL_LOGISTICS",
-      "parents": [
-        "INDUSTRIAL_LOGISTICS",
-        "#"
-      ],
-      "children": [],
-      "children_d": [],
-      "data": {
-        "source": "INDUSTRIAL_LOGISTICS",
-        "label": "Personnel On Board (POB)",
-        "id": "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/52b2e5025c"
-      },
-      "state": {
-        "loaded": true,
-        "opened": false,
-        "selected": true,
-        "disabled": false
-      },
-      "li_attr": {
-        "id": "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/52b2e5025c"
-      },
-      "a_attr": {
-        "href": "#",
-        "id": "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/52b2e5025c_anchor"
-      },
-      "original": {
-        "id": "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/52b2e5025c",
-        "text": "Personnel On Board (POB)",
-        "parent": "INDUSTRIAL_LOGISTICS",
-        "state": {}
-      },
-      "type": "default"
-    },
-    {
-      "id": "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/c340778c87",
-      "text": "Shipment",
-      "icon": "../icons/default.png",
-      "parent": "INDUSTRIAL_LOGISTICS",
-      "parents": [
-        "INDUSTRIAL_LOGISTICS",
-        "#"
-      ],
-      "children": [],
-      "children_d": [],
-      "data": {
-        "source": "INDUSTRIAL_LOGISTICS",
-        "label": "Shipment",
-        "id": "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/c340778c87"
-      },
-      "state": {
-        "loaded": true,
-        "opened": false,
-        "selected": true,
-        "disabled": false
-      },
-      "li_attr": {
-        "id": "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/c340778c87"
-      },
-      "a_attr": {
-        "href": "#",
-        "id": "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/c340778c87_anchor"
-      },
-      "original": {
-        "id": "http://data.total.com/resource/tsf/ontology/data-domains/industrial-logistics/c340778c87",
-        "text": "Shipment",
-        "parent": "INDUSTRIAL_LOGISTICS",
-        "state": {}
-      },
-      "type": "default"
-    },*/
       {
-        id: "TSF_GAIA_TEST",
-        text: "TSF_GAIA_TEST",
-        icon: "../icons/default.png",
-        parent: "#",
-        parents: ["#"],
-        children: ["http://data.total.com/resource/tsf/ontology/gaia-test/de62adbf1d"],
-        children_d: ["http://data.total.com/resource/tsf/ontology/gaia-test/de62adbf1d"],
-        state: {
-          loaded: true,
-          opened: true,
-          selected: true,
-          disabled: false
+        "id": "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology",
+        "text": "Simple Lithology",
+        "icon": "../icons/default.png",
+        "parent": "GEOSCMIL",
+        "parents": [
+          "GEOSCMIL",
+          "#"
+        ],
+        "children": [],
+        "children_d": [],
+        "data": {
+          "source": "GEOSCMIL",
+          "label": "Simple Lithology",
+          "id": "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology"
         },
-        li_attr: {
-          id: "TSF_GAIA_TEST"
+        "state": {
+          "loaded": true,
+          "opened": false,
+          "selected": true,
+          "disabled": false
         },
-        a_attr: {
-          href: "#",
-          id: "TSF_GAIA_TEST_anchor"
+        "li_attr": {
+          "id": "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology"
         },
-        original: {
-          id: "TSF_GAIA_TEST",
-          text: "TSF_GAIA_TEST",
-          parent: "#",
-          state: {}
+        "a_attr": {
+          "href": "#",
+          "id": "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology_anchor"
         },
-        type: "default"
+        "original": {
+          "id": "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology",
+          "text": "Simple Lithology",
+          "parent": "GEOSCMIL",
+          "state": {}
+        },
+        "type": "default"
       },
       {
-        id: "http://data.total.com/resource/tsf/ontology/gaia-test/de62adbf1d",
-        text: "Wellbore",
-        icon: "../icons/default.png",
-        parent: "TSF_GAIA_TEST",
-        parents: ["TSF_GAIA_TEST", "#"],
-        children: [],
-        children_d: [],
-        data: {
-          source: "TSF_GAIA_TEST",
-          label: "Wellbore",
-          id: "http://data.total.com/resource/tsf/ontology/gaia-test/de62adbf1d"
+        "id": "GEOSCMIL",
+        "text": "GEOSCMIL",
+        "icon": "../icons/default.png",
+        "parent": "#",
+        "parents": [
+          "#"
+        ],
+        "children": [
+          "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology"
+        ],
+        "children_d": [
+          "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology"
+        ],
+        "state": {
+          "loaded": true,
+          "opened": true,
+          "selected": true,
+          "disabled": false
         },
-        state: {
-          loaded: true,
-          opened: false,
-          selected: true,
-          disabled: false
+        "li_attr": {
+          "id": "GEOSCMIL"
         },
-        li_attr: {
-          id: "http://data.total.com/resource/tsf/ontology/gaia-test/de62adbf1d"
+        "a_attr": {
+          "href": "#",
+          "id": "GEOSCMIL_anchor"
         },
-        a_attr: {
-          href: "#",
-          id: "http://data.total.com/resource/tsf/ontology/gaia-test/de62adbf1d_anchor"
+        "original": {
+          "id": "GEOSCMIL",
+          "text": "GEOSCMIL",
+          "parent": "#",
+          "state": {}
         },
-        original: {
-          id: "http://data.total.com/resource/tsf/ontology/gaia-test/de62adbf1d",
-          text: "Wellbore",
-          parent: "TSF_GAIA_TEST",
-          state: {}
-        },
-        type: "default"
+        "type": "default"
       }
     ];
     var obj = {
-      mergeDepth: "nodeAndAllDescendants",
+      mergeDepth: "nodeDescendantsOnly",
       mergeMode: "keepUri",
       mergeRestrictions: true,
       jstreeNodes: jstreeNodes,
-      targetSource: "0_ALL_TE_DATA_DOMAINS"
+      targetNode: "http://data.total.com/resource/tsf/ontology/gaia-test/738e98d5f8",
+      mergedNodesType: "owl:NamedIndividual",
+      targetSource: "TSF_GAIA_TEST"
     };
 
     MainController.initControllers();

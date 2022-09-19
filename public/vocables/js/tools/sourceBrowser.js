@@ -359,51 +359,10 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
         var searchedSources = [];
 
-        /*   var schemaType = $("#GenericTools_searchSchemaType").val();
-
-
-
-
-       if (searchAllSources || selectedSources.length > 0) {
-           for (var sourceLabel in Config.sources) {
-               if (
-                   (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||
-                   Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1
-               );
-               else {
-                   if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                       if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
-                           if (selectedSources.length > 0 && selectedSources.indexOf(sourceLabel) > -1) searchedSources.push(sourceLabel);
-
-                   }
-               }
-           }
-       } else {
-           if (!Lineage_common.currentSource && !MainController.currentSource)
-               return alert("select a source or search in all source");
-           var source = Lineage_common.currentSource || MainController.currentSource;
-
-           searchedSources.push(source);
-
-       }*/
-
-        function getUserSources(schemaType) {
-            var allowedSources = [];
-            for (var sourceLabel in Config.sources) {
-                if (
-                    (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||
-                    Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1
-                );
-                else {
-                    if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                        if (!schemaType || Config.sources[sourceLabel].schemaType == schemaType)
-                            if (allowedSources.length > 0 && allowedSources.indexOf(sourceLabel) > -1) {
-                                allowedSources.push(sourceLabel);
-                            }
-                    }
-                }
-            }
-            return allowedSources;
+        function getSources() {
+            return Config.sources.map(([sourceName, source]) => {
+                return sourceName
+            })
         }
 
         var sourcesScope = $("#GenericTools_searchScope").val();
@@ -411,21 +370,9 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
             if (!Lineage_common.currentSource && !MainController.currentSource) return alert("select a source or search in all source");
             searchedSources.push(Lineage_common.currentSource || MainController.currentSource);
         } else if (sourcesScope == "graphSources") {
-            /* var graphSources=[]
-       $(".Lineage_sourceLabelDiv").each(function(){
-           var source=$(this).attr("id")
-           source=source.replace("Lineage_source_","")
-           graphSources.push(source);
-       })*/
             searchedSources = Lineage_combine.currentSources;
-        } else if (sourcesScope == "all_OWLsources") {
-            searchedSources = getUserSources("OWL");
-        } else if (sourcesScope == "all_SKOSsources") {
-            searchedSources = getUserSources("SKOS");
-        } else if (sourcesScope == "all_IndividualsSources") {
-            searchedSources = getUserSources("INDIVIDUALS");
-        } else if (sourcesScope == "all_Sources") {
-            searchedSources = getUserSources(null);
+        } else {
+            searchedSources = getSources()
         }
 
         var jstreeData = [];

@@ -255,12 +255,6 @@ var MainController = (function () {
                         self.initControllers();
                         if (sources && sources.indexOf(sourceLabel) < 0) return;
                         if (Config.sources[sourceLabel].isDraft) return;
-                        if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) return;
-                        if (
-                            (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||
-                            Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1
-                        )
-                            return;
 
                         Config.sources[sourceLabel].name = sourceLabel;
 

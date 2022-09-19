@@ -4,8 +4,10 @@
         "_type": "profile",
         "id": "admin",
         "allowedSourceSchemas": ["SKOS", "OWL", "INDIVIDUAL"],
-        "allowedSources": "ALL",
-        "forbiddenSources": ["Dbpedia"],
+        "defaultSourceAccessControl": "readwrite",
+        "sourcesAccessControl": {
+            "Dbpedia": "forbidden"
+        },
         "allowedTools": "ALL",
         "forbiddenTools": [],
         "blender": {
@@ -17,8 +19,10 @@
         "_type": "profile",
         "id": "owl_only",
         "allowedSourceSchemas": ["OWL"],
-        "allowedSources": "ALL",
-        "forbiddenSources": ["Dbpedia"],
+        "defaultSourceAccessControl": "readwrite",
+        "sourcesAccessControl": {
+            "Dbpedia": "forbidden"
+        },
         "allowedTools": "ALL",
         "forbiddenTools": [],
         "blender": {
@@ -30,8 +34,10 @@
         "_type": "profile",
         "id": "skos_only",
         "allowedSourceSchemas": ["SKOS"],
-        "allowedSources": "ALL",
-        "forbiddenSources": ["Dbpedia"],
+        "defaultSourceAccessControl": "readwrite",
+        "sourcesAccessControl": {
+            "Dbpedia": "forbidden"
+        },
         "allowedTools": "ALL",
         "forbiddenTools": [],
         "blender": {

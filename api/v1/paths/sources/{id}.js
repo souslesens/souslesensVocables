@@ -12,27 +12,6 @@ module.exports = function () {
         DELETE,
     };
 
-    // function parseProfile(profile) {
-
-    //     const mappedProfile = {
-    //         name: profile.name,
-    //         _type: 'profile',
-    //         id: ulid(),
-    //         allowedSourceSchemas: profile.allowedSourceSchemas,
-    //         allowedSources: profile.allowedSources,
-    //         forbiddenSources: profile.forbiddenSources,
-    //         allowedTools: profile.allowedTools,
-    //         forbiddenTools: profile.forbiddenTools,
-    //         blender: { contextMenuActionStartLevel: profile.blender.contextMenuActionStartLevel }
-    //     }
-    //     if (_.some(mappedProfile, _.isNil)) {
-    //         throw ('There is some null or undefined here. Check your data.')
-    //     }
-
-    //     return mappedProfile
-
-    // }
-
     function GET(req, res, _next) {
         fs.readFile(profilesJSON, "utf8", (err, data) => {
             if (err) {

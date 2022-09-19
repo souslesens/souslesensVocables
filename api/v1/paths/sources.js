@@ -23,14 +23,19 @@ module.exports = function () {
         const allAccessControl = aProfiles.flatMap(([_k, profile]) => {
             const defaultSourceAccessControl = profile.defaultSourceAccessControl;
             const sourcesAccessControl = profile.sourcesAccessControl;
-            // browse all sources
-            return aSources.map(([sourceName, _v]) => {
+            const allowedSourceSchemas = profile.allowedSourceSchemas;
+            // browse all sources, filter allowedSourceSchemas and get accessControl
+            return aSources.filter(([sourceName, source]) => {
+                if (allowedSourceSchemas.includes(source.schemaType)) {
+                    return [sourceName, source];
+                }
+            }).map(([sourceName, _v]) => {
                 if (sourceName in sourcesAccessControl) {
                     return [sourceName, sourcesAccessControl[sourceName]];
                 } else {
                     return [sourceName, defaultSourceAccessControl];
                 }
-            });
+            })
         });
 
         // get all read or readwrite source

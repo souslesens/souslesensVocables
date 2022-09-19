@@ -56,7 +56,12 @@ module.exports = function () {
             const parsedSources = JSON.parse(sources);
             const allowedSources = getAllowedSources(userInfo.user, parsedProfiles, parsedSources);
             const filteredSources = filterSources(allowedSources, parsedSources, allowedSources, req);
-            resourceFetched(res, filteredSources);
+            // return all sources if user is admin
+            if (userInfo.user.groups.includes("admin")) {
+                resourceFetched(res, parsedSources);
+            } else {
+                resourceFetched(res, filteredSources);
+            }
         } catch (err) {
             next(err);
         }

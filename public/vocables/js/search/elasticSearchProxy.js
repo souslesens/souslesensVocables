@@ -56,19 +56,21 @@ var ElasticSearchProxy = (function () {
             },
         });
     };
-    self.deleteDocuments = function (ids, options, callback) {
+    self.deleteDocuments = function (sourceLabel,ids, options, callback) {
         var payload = {
             query: {
-                terms: {
-                    id: ids,
-                },
+                query: {
+                    terms: {
+                        _id: ids,
+                    },
+                }
             },
             url: "_delete_by_query",
-            indexes: ["_any"],
+            indexes: [sourceLabel.toLowerCase()],
         };
         $.ajax({
             type: "POST",
-            url: Config.apiUrl + "/elasticsearch/query",
+            url: Config.apiUrl+"/elasticsearch/query",
             data: JSON.stringify(payload),
             contentType: "application/json",
             dataType: "json",

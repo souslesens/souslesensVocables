@@ -98,8 +98,8 @@ var elasticRestProxy = {
         query_doc();
     },
 
-    executePostQuery: function (url, query, indexes, callback) {
-        if (url.toLowerCase().trim().indexOf("http") < 0) var indexesStr = "";
+    executePostQuery: function (urlPath, query, indexes, callback) {
+        if (urlPath.toLowerCase().trim().indexOf("http") < 0) var indexesStr = "";
         if (Array.isArray(indexes)) {
             indexes.forEach(function (index, p) {
                 if (p > 0) indexesStr += ",";
@@ -108,10 +108,13 @@ var elasticRestProxy = {
         } else indexesStr = indexes;
         if (indexesStr != "") indexesStr += "/";
         var elasticUrl = ConfigManager.config.ElasticSearch.url;
-        url = elasticUrl + indexesStr + url;
+        var url = elasticUrl + indexesStr + urlPath;
+        var method="POST";
+       /* if(urlPath.indexOf("_delete_by_query")>-1)
+            method="DELETE"*/
 
         var options = {
-            method: "POST",
+            method: method,
             json: query,
             headers: {
                 "content-type": "application/json",

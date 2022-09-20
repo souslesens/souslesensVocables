@@ -115,8 +115,8 @@
 
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_classes.addNodesAndParentsToGraph()">parents</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_classes.drawObjectProperties()">Properties</button>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_classes.drawDirectRestrictions()">Restrictions</button>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_classes.drawInverseRestrictions()">Inv Restrictions</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_classes.drawRelations('direct')">Relations</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_classes.drawRelations('inverse')">Inv Relations</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_dictionary.showTSFdictionaryDialog('Lineage_similars')">Equiv Class</button>
             <!--  <button class='btn btn-sm my-1 py-0 btn-outline-primary' class="lineage_button" onclick="Lineage_classes.onPlusButton()">+</button>-->
         </div>
@@ -124,6 +124,7 @@
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.initUI()">Clear all</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.clearLastAddedNodes()">Clear last</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showLastAddedNodesOnly()">Last only</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showHideIndividuals()">Individuals</button>
             <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showHideCurrentSourceNodes()">show/hide</button>
 
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showHideHelp()">help</button>-->

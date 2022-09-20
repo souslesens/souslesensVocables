@@ -151,10 +151,16 @@ if(!self.currentDataSource)
     self.graphActions={
         showIndividualInfos:function(){
            var node= Lineage_classes.currentGraphNode ||  Lineage_classes.currentTreeNode
-            var dataSourceLabel=node.data.dataSource;
+            var dataSourceLabel=node.data.source;
            if(!dataSourceLabel)
                return
-            var dataSource=Config.sources[Lineage_classes.mainSource].dataSources[dataSourceLabel]
+
+          if(!Config.sources[Lineage_classes.mainSource].dataSources)
+           return  Lineage_classes.graphActions.showNodeInfos()
+
+          var dataSource=Config.sources[Lineage_classes.mainSource].dataSources[dataSourceLabel]
+          if( !dataSource)
+            return  Lineage_classes.graphActions.showNodeInfos()
 
             if (dataSource.type.indexOf("sql") > -1) {
                 Lineage_linkedData_sql.getIndividualInfos(dataSource,node,function(err,result){
@@ -173,7 +179,8 @@ if(!self.currentDataSource)
                     if(err)
                         return alert(err)
                     self.displayIndividualInfos(result)
-                });
+
+            })
             }
 
         },

@@ -207,19 +207,18 @@ $("#actionDiv").html(html);*/
             if (self.currentCopiedNode)
               return Lineage_combine.showMergeNodesDialog(self.currentCopiedNode);
 
-              common.pasteTextFromClipboard(function(text) {
-                if (!text)
-                  return MainController.UI.message("no node copied");
-                try {
-                  var node = JSON.parse(text);
-                  Lineage_combine.showMergeNodesDialog(node,self.currentTreeNode);
-                } catch (e) {
-console.log("wrong clipboard content")
-                }
-                return;
+            common.pasteTextFromClipboard(function(text) {
+              if (!text)
+                return MainController.UI.message("no node copied");
+              try {
+                var node = JSON.parse(text);
+                Lineage_combine.showMergeNodesDialog(node, self.currentTreeNode);
+              } catch (e) {
+                console.log("wrong clipboard content");
+              }
+              return;
 
-              });
-
+            });
 
 
           }
@@ -439,13 +438,13 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
      source=source.replace("Lineage_source_","")
      graphSources.push(source);
  })*/
-      if( Lineage_combine.currentSources.length>0)
-      searchedSources = Lineage_combine.currentSources;
-      else{
-       var mainSource=(Lineage_common.currentSource || MainController.currentSource);
-        searchedSources.push(mainSource)
-        var importedSources=Config.sources[mainSource].imports
-        searchedSources=searchedSources.concat(importedSources)
+      if (Lineage_combine.currentSources.length > 0)
+        searchedSources = Lineage_combine.currentSources;
+      else {
+        var mainSource = (Lineage_common.currentSource || MainController.currentSource);
+        searchedSources.push(mainSource);
+        var importedSources = Config.sources[mainSource].imports;
+        searchedSources = searchedSources.concat(importedSources);
 
       }
     } else if (sourcesScope == "all_OWLsources") {
@@ -799,7 +798,13 @@ return*/
     if (typeof node == "object") {
       self.currentNode = node;
       if (node.data) {
-        if (node.data.propertyId) self.currentNodeId = node.data.propertyId;
+        //  if (node.data.propertyId) self.currentNodeId = node.data.propertyId;
+        if (node.data.propertyId && !node.data.id)//when  a property in a restriction
+          node.data.id = node.data.propertyId;
+        if (node.data.from && !node.data.id)//when  a property in a restriction
+          node.data.id = node.data.from;
+
+
         if (node.data.id) self.currentNodeId = node.data.id;
       } else {
         if (node.id) self.currentNodeId = node;
@@ -841,7 +846,8 @@ return*/
         },
         function(callbackSeries) {
           if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons) {
-            if (!self.currentNode.data || !self.currentNode.data.source || !Config.sources[self.currentNode.data.source].editable) var str = "<div>";
+            if (!self.currentNode.data || !self.currentNode.data.source || !Config.sources[self.currentNode.data.source].editable)
+              var str = "<div>";
             str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
             if (Config.sources[self.currentSource].editable) {
               //} &&  self.propertiesMap.properties["type"]=="http://www.w3.org/2002/07/owl#Class") {
@@ -1323,6 +1329,7 @@ defaultLang = 'en';*/
     if (newLabel) {
       newLabel = Sparql_common.formatStringForTriple(newLabel);
 
+
       Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, oldLabel, function(err, _result) {
         if (err) return alert(err);
         self.addProperty(property, newLabel, self.currentSource, false, function(err, result) {
@@ -1346,56 +1353,84 @@ defaultLang = 'en';*/
 
   self.deleteNode = function() {
     if (confirm("delete node " + self.currentNodeId)) {
-      Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, null, null, function(err, _result) {
-        if (err) return alert(err);
-        Sparql_generic.deleteTriples(self.currentSource, null, null, self.currentNodeId, function(err, _result) {
-          if (err) return alert(err);
-          ElasticSearchProxy.deleteDocuments([self.currentNodeId], {}, function(err, result) {
-            $("#" + self.divId).dialog("close");
-            visjsGraph.data.nodes.remove(self.currentNodeId);
-            MainController.UI.message("node deleted");
-
-            if (self.currentNodeId.from) {
-              var jstreeNode = common.jstree.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNodeId);
-              if (jstreeNode) $("#Lineage_propertiesTree").jstree().delete_node(jstreeNode, newLabel);
-            } else {
-              var jstreeNode = common.jstree.getNodeByDataField("LineagejsTreeDiv", "id", self.currentNodeId);
-              if (jstreeNode) $("#LineagejsTreeDiv").jstree().delete_node(jstreeNode, newLabel);
-            }
+      async.series([
+        //delete triples where id is subject
+        function(callbackSeries) {
+          Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, null, null, function(err, _result) {
+            return callbackSeries(err);
           });
-        });
-      });
-    }
-  };
 
-  self.indexObjectIfNew = function() {
-    if (self.newProperties && self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"]) {
-      SearchUtil.addObjectsToIndex(self.currentSource, self.currentNodeId, function(err, _result) {
+        },
+        //delete triples where id is object
+        function(callbackSeries) {
+          Sparql_generic.deleteTriples(self.currentSource, null, null, self.currentNodeId, function(err, _result) {
+            return callbackSeries(err);
+          });
+        },
+        //delete index entry
+        function(callbackSeries) {
+          ElasticSearchProxy.deleteDocuments(self.currentNode.data.source,[self.currentNodeId], {}, function(err, result) {
+            return callbackSeries(err);
+          });
+        },
+        //update trees
+        function(callbackSeries) {
+          if (self.currentNodeId.from) {
+            var jstreeNode = common.jstree.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNodeId);
+            if (jstreeNode) $("#Lineage_propertiesTree").jstree().delete_node(jstreeNode, newLabel);
+          } else {
+            var jstreeNode = common.jstree.getNodeByDataField("LineagejsTreeDiv", "id", self.currentNodeId);
+            if (jstreeNode) $("#LineagejsTreeDiv").jstree().delete_node(jstreeNode, newLabel);
+
+            return callbackSeries();
+          }
+        },
+        //update graph
+        function(callbackSeries) {
+          visjsGraph.data.nodes.remove(self.currentNodeId);
+          return callbackSeries();
+        }
+
+      ], function(err) {
         if (err) return alert(err);
+        $("#" + self.divId).dialog("close");
+        MainController.UI.message("node deleted");
       });
+
+
     }
   };
 
-  self.showSearchableSourcesTreeDialog = function(types, validateFn) {
-    if (!self.searchableSourcesTreeIsInitialized) {
-      Standardizer.initSourcesIndexesList(null, function(err, sources) {
-        if (err) return MainController.UI.message(err);
 
+    self.indexObjectIfNew = function() {
+      if (self.newProperties && self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"]) {
+        SearchUtil.addObjectsToIndex(self.currentSource, self.currentNodeId, function(err, _result) {
+          if (err) return alert(err);
+        });
+      }
+    };
+
+    self.showSearchableSourcesTreeDialog = function(types, validateFn) {
+      if (!self.searchableSourcesTreeIsInitialized) {
+        Standardizer.initSourcesIndexesList(null, function(err, sources) {
+          if (err) return MainController.UI.message(err);
+
+          $("#sourcesSelectionDialogdiv").dialog("open");
+          $("#searchAllValidateButton").bind("click", validateFn);
+          var options = {
+            selectTreeNodeFn: null
+          };
+          self.searchableSourcesTreeIsInitialized = true;
+          if (!types) types = ["OWL"];
+          MainController.UI.showSources("searchAll_sourcesTree", true, sources, types, options);
+        });
+      } else {
         $("#sourcesSelectionDialogdiv").dialog("open");
-        $("#searchAllValidateButton").bind("click", validateFn);
-        var options = {
-          selectTreeNodeFn: null
-        };
-        self.searchableSourcesTreeIsInitialized = true;
-        if (!types) types = ["OWL"];
-        MainController.UI.showSources("searchAll_sourcesTree", true, sources, types, options);
-      });
-    } else {
-      $("#sourcesSelectionDialogdiv").dialog("open");
-      /*  if ($("#searchAll_sourcesTree").jstree())
-  $("#searchAll_sourcesTree").jstree().uncheck_all();*/
-    }
-  };
+        /*  if ($("#searchAll_sourcesTree").jstree())
+    $("#searchAll_sourcesTree").jstree().uncheck_all();*/
+      }
+    };
 
-  return self;
-})();
+    return self;
+  }
+)();

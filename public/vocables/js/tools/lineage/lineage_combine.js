@@ -321,7 +321,7 @@ var Lineage_combine = (function() {
             //get all node ids subject triple including descendants
             function(callbackSeries) {
 
-              Sparql_OWL.getAllTriples(source, "subject", nodesToCopy, {}, function(err, result) {
+              Sparql_OWL.getAllTriples(source, "subject", nodesToCopy, {removeBlankNodesObjects:true}, function(err, result) {
                 if (err) return callbackSeries(err);
                 result.forEach(function(item) {
                   if (nodesToMerge[source][selectedNodeId])
@@ -409,7 +409,7 @@ var Lineage_combine = (function() {
            object: item.predicate.value
          });
        });*/
-                return callbackSeries();
+               // return callbackSeries();
                 Sparql_generic.insertTriples(targetSource, newTriples, {}, function(err, result) {
                   if (err) return callbackSeries(err);
                   sourceMessage = result + " inserted from source " + source + "  to source " + targetSource;

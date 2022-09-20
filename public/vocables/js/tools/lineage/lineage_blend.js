@@ -980,9 +980,13 @@ var Lineage_blend = (function() {
                 // le sameAs sont tous dans le dictionaire
                 inSource = Config.dictionarySource;
               else {
-                //Lineage_classes.mainSource
                 var mainSource = Config.sources[Lineage_classes.mainSource];
-                if (mainSource.editable && self.sourceNode.source == Lineage_classes.mainSource) inSource = Lineage_classes.mainSource;
+                if(Config.sources[self.sourceNode.source].editable) {
+                  inSource = self.sourceNode.source;
+
+                }else if (mainSource.editable) {
+                  inSource = Lineage_classes.mainSource;
+                }
                 //soit  dans predicateSource
                 else inSource = Config.predicatesSource;
               }

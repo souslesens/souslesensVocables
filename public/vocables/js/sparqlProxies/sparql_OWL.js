@@ -1072,6 +1072,9 @@ var Sparql_OWL = (function () {
                     "SELECT  * " +
                     " WHERE { ?subject ?predicate ?object.";
                 query += Sparql_common.setFilter(role, sliceIds);
+                if(options.removeBlankNodesObjects){
+                    query += " FILTER (!isBlank(?object)) "
+                }
 
                 query += "}LIMIT 10000";
 

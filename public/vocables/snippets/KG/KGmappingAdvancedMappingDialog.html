@@ -85,7 +85,7 @@
                      id="KGmapping_columnValues"></select>-->
                 Sort
                 <select id="KGmapping_distinctColumnSortSelect" onchange="KGadvancedMapping.sortColumnValues()"></select>
-                Search <input id="KGadvancedMapping_searchColumnInput" onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchColumn($(this).val())" />>
+                Search <input id="KGadvancedMapping_searchColumnInput" onkeyup="if (event.keyCode == 13 || event.keyCode == 9)KGadvancedMapping.searchColumn($(this).val())" />>
                 <div id="KGmapping_matrixContainer" style="display: flex; flex-direction: column; max-height: 600px; overflow: auto"></div>
             </div>
             <div>
@@ -94,7 +94,7 @@
                 search<input
                     class="KGadvancedMapping_searchEntitiesInput"
                     id="KGadvancedMapping_searchEntitiesInput"
-                    onkeyup="if (event.keyCode == 13)KGadvancedMapping.searchEntities($(this).val())"
+                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9)KGadvancedMapping.searchEntities($(this).val())"
                 />
                 source
                 <select id="KGadvancedMapping_filterCandidateMappingsSelect" onchange="KGadvancedMapping.editCandidateValues()"></select>

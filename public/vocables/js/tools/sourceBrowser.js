@@ -64,6 +64,7 @@ var SourceBrowser = (function () {
         if (!node) node = self.currentGraphNode;
         if (!node) return;
         // Lineage_blend.addNodeToAssociationNode(node)
+        self.currentCopiedNode = node;
         Clipboard.copy(
             {
                 type: "node",
@@ -129,7 +130,7 @@ $("#actionDiv").html(html);*/
     self.getJstreeConceptsContextMenu = function () {
         // return {}
         var items = {};
-
+        if (!self.currentSource && Lineage_classes.mainSource) self.currentSource = Lineage_classes.mainSource;
         items.nodeInfos = {
             label: "Node infos",
             action: function (_e) {
@@ -147,18 +148,18 @@ $("#actionDiv").html(html);*/
                     Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0);
                 },
             };
-            items.copyNodeToClipboard = {
-                label: "copy toClipboard",
-                action: function (_e) {
-                    // pb avec source
+            /*  items.copyNodeToClipboard = {
+          label: "copy toClipboard",
+          action: function(_e) {
+            // pb avec source
 
-                    Lineage_common.copyNodeToClipboard(self.currentTreeNode.data);
-                },
-            };
+            Lineage_common.copyNodeToClipboard(self.currentTreeNode.data);
+          }
+        };*/
             items.graphNamedIndividuals = {
-                label: "Individuals ",
+                label: "LinkedData",
                 action: function () {
-                    Lineage_individuals.setClass(self.currentTreeNode);
+                    Lineage_linkedData.showLinkedDataPanel(self.currentTreeNode);
                     // Lineage_classes.drawNamedIndividuals(self.currentTreeNode.data.id);
                 },
             };
@@ -187,29 +188,48 @@ $("#actionDiv").html(html);*/
                     },
                 },
             };
+            items.copyNode = {
+                label: "Copy Node",
+                action: function (e) {
+                    // pb avec source
+                    SourceBrowser.copyNode(e);
+
+                    Lineage_common.copyNodeToClipboard(self.currentTreeNode);
+                },
+            };
+
             if (self.currentSource && Config.sources[self.currentSource].editable) {
-                items.pasteNodeFromClipboard = {
-                    label: "paste from Clipboard",
+                items.pasteNode = {
+                    label: "paste Node",
                     action: function (_e) {
-                        // pb avec source
+                        if (self.currentCopiedNode) return Lineage_combine.showMergeNodesDialog(self.currentCopiedNode);
 
-                        Lineage_common.pasteNodeFromClipboard(self.currentTreeNode);
+                        common.pasteTextFromClipboard(function (text) {
+                            if (!text) return MainController.UI.message("no node copied");
+                            try {
+                                var node = JSON.parse(text);
+                                Lineage_combine.showMergeNodesDialog(node, self.currentTreeNode);
+                            } catch (e) {
+                                console.log("wrong clipboard content");
+                            }
+                            return;
+                        });
                     },
                 };
-                items.editNode = {
-                    label: "Edit node",
-                    action: function (_obj, _sss, _cc) {
-                        SourceEditor.editNode("DialogDiv", self.currentSource, self.currentTreeNode.data.id, "OWL", false);
-                    },
-                };
-                items.deleteClass = {
-                    label: "delete Class",
-                    action: function (_e) {
-                        // pb avec source
+                /*   items.editNode = {
+             label: "Edit node",
+             action: function(_obj, _sss, _cc) {
+               SourceEditor.editNode("DialogDiv", self.currentSource, self.currentTreeNode.data.id, "OWL", false);
+             }
+           };
+           items.deleteClass = {
+             label: "delete Class",
+             action: function(_e) {
+               // pb avec source
 
-                        Lineage_common.deleteNode(self.currentTreeNode, self.currentTargetDiv);
-                    },
-                };
+               Lineage_common.deleteNode(self.currentTreeNode, self.currentTargetDiv);
+             }
+           };*/
             }
 
             if (MainController.currentSource && Config.sources[MainController.currentSource].protegeFilePath) {
@@ -221,13 +241,7 @@ $("#actionDiv").html(html);*/
                 };
             }
         }
-        items.copyNode = {
-            label: "Copy Node",
-            action: function (e) {
-                // pb avec source
-                SourceBrowser.copyNode(e);
-            },
-        };
+
         /*    items.toDataTable = {
 label: "export to Table",
 action: function (e) {// pb avec source
@@ -364,28 +378,28 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
 
 
-       if (searchAllSources || selectedSources.length > 0) {
-           for (var sourceLabel in Config.sources) {
-               if (
-                   (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||
-                   Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1
-               );
-               else {
-                   if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                       if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
-                           if (selectedSources.length > 0 && selectedSources.indexOf(sourceLabel) > -1) searchedSources.push(sourceLabel);
+   if (searchAllSources || selectedSources.length > 0) {
+       for (var sourceLabel in Config.sources) {
+           if (
+               (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||
+               Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1
+           );
+           else {
+               if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
+                   if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
+                       if (selectedSources.length > 0 && selectedSources.indexOf(sourceLabel) > -1) searchedSources.push(sourceLabel);
 
-                   }
                }
            }
-       } else {
-           if (!Lineage_common.currentSource && !MainController.currentSource)
-               return alert("select a source or search in all source");
-           var source = Lineage_common.currentSource || MainController.currentSource;
+       }
+   } else {
+       if (!Lineage_common.currentSource && !MainController.currentSource)
+           return alert("select a source or search in all source");
+       var source = Lineage_common.currentSource || MainController.currentSource;
 
-           searchedSources.push(source);
+       searchedSources.push(source);
 
-       }*/
+   }*/
 
         function getUserSources(schemaType) {
             var allowedSources = [];
@@ -412,12 +426,18 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
             searchedSources.push(Lineage_common.currentSource || MainController.currentSource);
         } else if (sourcesScope == "graphSources") {
             /* var graphSources=[]
-       $(".Lineage_sourceLabelDiv").each(function(){
-           var source=$(this).attr("id")
-           source=source.replace("Lineage_source_","")
-           graphSources.push(source);
-       })*/
-            searchedSources = Lineage_combine.currentSources;
+ $(".Lineage_sourceLabelDiv").each(function(){
+     var source=$(this).attr("id")
+     source=source.replace("Lineage_source_","")
+     graphSources.push(source);
+ })*/
+            if (Lineage_combine.currentSources.length > 0) searchedSources = Lineage_combine.currentSources;
+            else {
+                var mainSource = Lineage_common.currentSource || MainController.currentSource;
+                searchedSources.push(mainSource);
+                var importedSources = Config.sources[mainSource].imports;
+                searchedSources = searchedSources.concat(importedSources);
+            }
         } else if (sourcesScope == "all_OWLsources") {
             searchedSources = getUserSources("OWL");
         } else if (sourcesScope == "all_SKOSsources") {
@@ -768,7 +788,14 @@ return*/
         if (typeof node == "object") {
             self.currentNode = node;
             if (node.data) {
-                if (node.data.propertyId) self.currentNodeId = node.data.propertyId;
+                //  if (node.data.propertyId) self.currentNodeId = node.data.propertyId;
+                if (node.data.propertyId && !node.data.id)
+                    //when  a property in a restriction
+                    node.data.id = node.data.propertyId;
+                if (node.data.from && !node.data.id)
+                    //when  a property in a restriction
+                    node.data.id = node.data.from;
+
                 if (node.data.id) self.currentNodeId = node.data.id;
             } else {
                 if (node.id) self.currentNodeId = node;
@@ -778,6 +805,8 @@ return*/
 
         if (!sourceLabel) sourceLabel = self.currentSource;
         else self.currentSource = sourceLabel;
+
+        self.currentNodeRealSource = self.currentSource;
         self.divId = divId;
         if (!options) {
             options = {};
@@ -809,38 +838,41 @@ return*/
                     });
                 },
                 function (callbackSeries) {
+                    var source = self.currentNodeRealSource;
                     if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons) {
-                        if (!self.currentNode.data || !self.currentNode.data.source || !Config.sources[self.currentNode.data.source].editable) var str = "<div>";
-                        str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
-                        if (Config.sources[self.currentSource].editable) {
-                            //} &&  self.propertiesMap.properties["type"]=="http://www.w3.org/2002/07/owl#Class") {
-                            str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>";
-                        }
-                        str +=
-                            "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
-                            "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
-                            "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
-                            "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
-                            "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
-
-                        str += "</div>";
-
-                        if (self.visitedNodes.length > 1) {
+                        if (Config.sources[source].editable) {
+                            var str = "<div>";
+                            str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
+                            if (true || Config.sources[source].editable) {
+                                //} &&  self.propertiesMap.properties["type"]=="http://www.w3.org/2002/07/owl#Class") {
+                                str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>";
+                            }
                             str +=
-                                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(-1)'> previous </button>" +
-                                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>";
-                        }
+                                "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
+                                "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
+                                "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
+                                "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
+                                "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
 
-                        str += "</div>";
-                        $("#" + divId).prepend(str);
+                            str += "</div>";
+
+                            if (self.visitedNodes.length > 1) {
+                                str +=
+                                    "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(-1)'> previous </button>" +
+                                    "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>";
+                            }
+
+                            str += "</div>";
+                            $("#" + divId).prepend(str);
+                        }
                     }
                     callbackSeries();
                 },
                 function (callbackSeries) {
                     /*  if (type != "http://www.w3.org/2002/07/owl#Class") {
-    return callbackSeries();
+return callbackSeries();
 }*/
-                    self.showNamedIndividualProperties(sourceLabel, nodeId, function (err) {
+                    self.showNamedIndividualProperties(self.currentNodeRealSource, nodeId, function (err) {
                         callbackSeries(err);
                     });
                 },
@@ -848,7 +880,7 @@ return*/
                     // if (false && type != "http://www.w3.org/2002/07/owl#Class") {
                     //     return callbackSeries();
                     // }
-                    self.showClassRestrictions(sourceLabel, [nodeId], options, function (err) {
+                    self.showClassRestrictions(self.currentNodeRealSource, [nodeId], options, function (err) {
                         callbackSeries(err);
                     });
                 },
@@ -857,7 +889,7 @@ return*/
                     if (type != "http://www.w3.org/2002/07/owl#ObjectProperty") {
                         return callbackSeries();
                     }
-                    self.showPropertyRestrictions(sourceLabel, nodeId, divId, function (_err, _result) {
+                    self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, divId, function (_err, _result) {
                         callbackSeries();
                     });
                 },
@@ -896,7 +928,12 @@ return*/
                 var type = null;
                 var graphUri = "";
                 data.forEach(function (item) {
-                    if (item.g) graphUri = item.g.value;
+                    if (item.g) {
+                        graphUri = item.g.value;
+                        var realSource = Sparql_common.getSourceFromGraphUri(graphUri);
+                        if (realSource) self.currentNodeRealSource = realSource;
+                    }
+
                     if (item.value.type == "bnode") {
                         return blankNodes.push(item.value.value);
                     }
@@ -1038,9 +1075,9 @@ defaultLang = 'en';*/
                 str += "</table></div>";
 
                 str +=
-                    " <hr><div id='nodeInfos_listsDiv' style='display:flex;flex-direction: row;';>" +
-                    "<div id='nodeInfos_restrictionsDiv'  style='display:flex;flex-direction: column;min-width: 300px'></div>" +
-                    "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;min-width: 300px'></div>" +
+                    " <hr><div id='nodeInfos_listsDiv' style='display:flex;flex-direction: row;justify-content: space-evenly';>" +
+                    "<div id='nodeInfos_restrictionsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
+                    "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
                     "</div>";
 
                 $("#" + divId).html(str);
@@ -1052,33 +1089,79 @@ defaultLang = 'en';*/
 
     self.showClassRestrictions = function (sourceLabel, nodeId, _options, callback) {
         // blankNodes.
+        var str = "";
+        async.series(
+            [
+                //direct restrictions
+                function (callbackSeries) {
+                    Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, { withoutBlankNodes: 1 }, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        str += "<b>Restrictions </b> <div style='    background-color: beige;'> <table>";
+                        result.forEach(function (item) {
+                            str += "<tr class='infos_table'>";
 
-        Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, { withoutBlankNodes: 1 }, function (err, result) {
-            if (err) {
+                            var propStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
+
+                            str += "<td class='detailsCellName'>" + propStr + "</td>";
+
+                            var targetClassStr = "any";
+                            if (item.value) {
+                                targetClassStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
+                            }
+                            str += "<td class='detailsCellValue'>" + targetClassStr + "</td>";
+
+                            str += "</tr>";
+                        });
+
+                        str += "</table> </div>" + "</div>";
+
+                        callbackSeries();
+                    });
+                },
+                //inverse restrictions
+                function (callbackSeries) {
+                    Sparql_OWL.getObjectRestrictions(
+                        sourceLabel,
+                        nodeId,
+                        {
+                            withoutBlankNodes: 1,
+                            inverseRestriction: 1,
+                        },
+                        function (err, result) {
+                            if (err) {
+                                return callbackSeries(err);
+                            }
+                            str += "<br><b>Inverse Restrictions </b> <div style='    background-color: beige;'> <table>";
+                            result.forEach(function (item) {
+                                str += "<tr class='infos_table'>";
+
+                                var propStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
+
+                                str += "<td class='detailsCellName'>" + propStr + "</td>";
+
+                                var targetClassStr = "any";
+                                if (item.value) {
+                                    targetClassStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.concept.value + "\")'>" + item.conceptLabel.value + "</span>";
+                                }
+                                str += "<td class='detailsCellValue'>" + targetClassStr + "</td>";
+
+                                str += "</tr>";
+                            });
+
+                            str += "</table> </div>" + "</div>";
+
+                            callbackSeries();
+                        }
+                    );
+                },
+            ],
+            function (err) {
+                if (!err) $("#nodeInfos_restrictionsDiv").html(str);
                 return callback(err);
             }
-            var str = "<b>Restrictions </b> <div style='    background-color: beige;'> <table>";
-            result.forEach(function (item) {
-                str += "<tr class='infos_table'>";
-
-                var propStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</span>";
-
-                str += "<td class='detailsCellName'>" + propStr + "</td>";
-
-                var targetClassStr = "any";
-                if (item.value) {
-                    targetClassStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
-                }
-                str += "<td class='detailsCellValue'>" + targetClassStr + "</td>";
-
-                str += "</tr>";
-            });
-
-            str += "</table> </div>" + "</div>";
-
-            $("#nodeInfos_restrictionsDiv").html(str);
-            callback();
-        });
+        );
     };
 
     self.showNamedIndividualProperties = function (sourceLabel, nodeId, callback) {
@@ -1251,14 +1334,13 @@ defaultLang = 'en';*/
                 if (err) return alert(err);
                 self.addProperty(property, newLabel, self.currentSource, false, function (err, result) {
                     if (err) return alert(err.responseText);
-                    //   self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "mainDialogDiv", {}, function(err, result) {
 
-                    //  self.showNodeInfos(self.currentSource, self.currentNode, "mainDialogDiv");
-                    visjsGraph.data.nodes.update({ id: self.currentNodeId, label: newLabel });
                     if (self.currentNodeId.from) {
                         var jstreeNode = common.jstree.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNode.data.id);
                         if (jstreeNode) $("#Lineage_propertiesTree").jstree().rename_node(jstreeNode, newLabel);
+                        visjsGraph.data.edges.update({ id: self.currentNodeId, label: newLabel });
                     } else {
+                        visjsGraph.data.nodes.update({ id: self.currentNodeId, label: newLabel });
                         var jstreeNode = common.jstree.getNodeByDataField("LineagejsTreeDiv", "id", self.currentNode.data.id);
                         if (jstreeNode) $("#LineagejsTreeDiv").jstree().rename_node(jstreeNode, newLabel);
                     }
@@ -1270,25 +1352,50 @@ defaultLang = 'en';*/
 
     self.deleteNode = function () {
         if (confirm("delete node " + self.currentNodeId)) {
-            Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, null, null, function (err, _result) {
-                if (err) return alert(err);
-                Sparql_generic.deleteTriples(self.currentSource, null, null, self.currentNodeId, function (err, _result) {
-                    if (err) return alert(err);
-                    ElasticSearchProxy.deleteDocuments([self.currentNodeId], {}, function (err, result) {
-                        $("#" + self.divId).dialog("close");
-                        visjsGraph.data.nodes.remove(self.currentNodeId);
-                        MainController.UI.message("node deleted");
-
+            async.series(
+                [
+                    //delete triples where id is subject
+                    function (callbackSeries) {
+                        Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, null, null, function (err, _result) {
+                            return callbackSeries(err);
+                        });
+                    },
+                    //delete triples where id is object
+                    function (callbackSeries) {
+                        Sparql_generic.deleteTriples(self.currentSource, null, null, self.currentNodeId, function (err, _result) {
+                            return callbackSeries(err);
+                        });
+                    },
+                    //delete index entry
+                    function (callbackSeries) {
+                        ElasticSearchProxy.deleteDocuments(self.currentNode.data.source, [self.currentNodeId], {}, function (err, result) {
+                            return callbackSeries(err);
+                        });
+                    },
+                    //update trees
+                    function (callbackSeries) {
                         if (self.currentNodeId.from) {
                             var jstreeNode = common.jstree.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNodeId);
                             if (jstreeNode) $("#Lineage_propertiesTree").jstree().delete_node(jstreeNode, newLabel);
                         } else {
                             var jstreeNode = common.jstree.getNodeByDataField("LineagejsTreeDiv", "id", self.currentNodeId);
                             if (jstreeNode) $("#LineagejsTreeDiv").jstree().delete_node(jstreeNode, newLabel);
+
+                            return callbackSeries();
                         }
-                    });
-                });
-            });
+                    },
+                    //update graph
+                    function (callbackSeries) {
+                        visjsGraph.data.nodes.remove(self.currentNodeId);
+                        return callbackSeries();
+                    },
+                ],
+                function (err) {
+                    if (err) return alert(err);
+                    $("#" + self.divId).dialog("close");
+                    MainController.UI.message("node deleted");
+                }
+            );
         }
     };
 
@@ -1317,7 +1424,7 @@ defaultLang = 'en';*/
         } else {
             $("#sourcesSelectionDialogdiv").dialog("open");
             /*  if ($("#searchAll_sourcesTree").jstree())
-        $("#searchAll_sourcesTree").jstree().uncheck_all();*/
+    $("#searchAll_sourcesTree").jstree().uncheck_all();*/
         }
     };
 

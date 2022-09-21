@@ -44,14 +44,14 @@ Lineage_properties = (function () {
             /*  items.graphNode = {
 label: "graph Property",
 action: function (_e) {
-    // pb avec source
-    if (Config.sources[self.currentTreeNode.data.source].schemaType == "OWL"){
-      self.drawRangeAndDomainsGraph
-      //  self.drawIndividualsProperty(self.currentTreeNode.data);
-       // self.drawObjectProperty(self.currentTreeNode.data);
-    }
-    else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLEDGE_GRAPH") self.drawIndividualsProperty(self.currentTreeNode.data);
-    //   Lineage_classes.drawNodeAndParents(self.currentTreeNode.data)
+// pb avec source
+if (Config.sources[self.currentTreeNode.data.source].schemaType == "OWL"){
+self.drawRangeAndDomainsGraph
+//  self.drawIndividualsProperty(self.currentTreeNode.data);
+ // self.drawObjectProperty(self.currentTreeNode.data);
+}
+else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLEDGE_GRAPH") self.drawIndividualsProperty(self.currentTreeNode.data);
+//   Lineage_classes.drawNodeAndParents(self.currentTreeNode.data)
 },
 };*/
             items.drawRangesAndDomainsProperty = {
@@ -497,20 +497,52 @@ action: function (_e) {
         });
     };
 
+    self.exportRangeAndDomainsGraph = function (property) {
+        var targetnodes = null;
+        var nodesSelection = $("#LineagePropertie_nodesSelectionSelect").val();
+        nodesSelection = false;
+        if (visjsGraph.data && visjsGraph.data.nodes && nodesSelection == "currentGraphNodes") {
+            targetnodes = visjsGraph.data.nodes.getIds();
+        }
+        self.getRangeAndDomainsGraph(property, function (err, result) {
+            if (err) return alert(err.responseText);
+            var strAll = "domainLabel\tsubPropertyLabel\tpropertyLabel\trangeLabel\tinversePropertyURI\t--\tdomainURI\tsubPropertyURI\tpropertyURI\trangeURI\tinversePropertyURI\n";
+
+            var uniqueLines = {};
+
+            result.forEach(function (item) {
+                var ok = 0;
+                if (targetnodes) {
+                    if (item.range && targetnodes.indexOf(item.range.value) > -1) ok = 1;
+                    else if (item.domain && targetnodes.indexOf(item.domain.value) > -1) ok = 1;
+
+                    if (!ok) return;
+                }
+                var str = "";
+                str += (item.domainLabel ? item.domainLabel.value : "") + "\t";
+                str += (item.subPropertyLabel ? item.subPropertyLabel.value : "") + "\t";
+                str += (item.propertyLabel ? item.propertyLabel.value : "") + "\t";
+                str += (item.rangeLabel ? item.rangeLabel.value : "") + "\t";
+                str += (item.inversePropertyLabel ? item.inversePropertyLabel.value : "") + "\t";
+                str += "" + "\t";
+                str += (item.domain ? item.domain.value : "") + "\t";
+                str += (item.subProperty ? item.subProperty.value : "") + "\t";
+                str += (item.property ? item.property.value : "") + "\t";
+                str += (item.inverseProperty ? item.inverseProperty.value : "") + "\t";
+                str += item.range ? item.range.value : "";
+
+                // needs to remove duplicates why ??
+                if (!uniqueLines[str]) {
+                    uniqueLines[str] = 1;
+                    strAll += str + "\n";
+                }
+            });
+
+            common.copyTextToClipboard(strAll);
+        });
+    };
+
     self.drawRangeAndDomainsGraph = function (property) {
-        /*  if (!property) property = self.currentTreeNode;
-if (!property) return alert("select a property first");*/
-        var source = Lineage_common.currentSource;
-        var propId = null;
-        if (property) {
-            source = property.data.source;
-            propId = property.id;
-        }
-        //if search in multiple sources and choose a source : draw all the properties found for this source
-        if (property && property.parent == "#") {
-            Lineage_common.currentSource = property.data.source;
-            propId = property.children;
-        }
         var targetnodes = null;
         var nodesSelection = $("#LineagePropertie_nodesSelectionSelect").val();
         nodesSelection = false;
@@ -518,9 +550,8 @@ if (!property) return alert("select a property first");*/
             targetnodes = visjsGraph.data.nodes.getIds();
         }
 
-        // Sparql_OWL.getObjectProperties(Lineage_common.currentSource, null, {propIds:[propId]}, function (err, result) {
-
-        function drawproperties(result) {
+        self.getRangeAndDomainsGraph(property, function (err, result) {
+            if (err) return alert(err.responseText);
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = {};
             if (visjsGraph.data && visjsGraph.data.nodes) existingNodes = visjsGraph.getExistingIdsMap();
@@ -768,21 +799,37 @@ if (!property) return alert("select a property first");*/
             }
             visjsGraph.network.fit();
             self.graphInited = true;
+        });
+    };
+
+    self.getRangeAndDomainsGraph = function (property, callback) {
+        var source = Lineage_common.currentSource;
+        var propId = null;
+        if (property) {
+            source = property.data.source;
+            propId = property.id;
         }
+        //if search in multiple sources and choose a source : draw all the properties found for this source
+        if (property && property.parent == "#") {
+            Lineage_common.currentSource = property.data.source;
+            propId = property.children;
+        }
+
+        // Sparql_OWL.getObjectProperties(Lineage_common.currentSource, null, {propIds:[propId]}, function (err, result) {
 
         if (propId && Config.sources[source].schemaType == "OWL") {
             OwlSchema.initSourceSchema(source, function (err, schema) {
-                if (err) return MainController.UI.message(err);
+                if (err) return callback(err);
                 //  var options={filter:"Filter (NOT EXISTS{?property rdfs:subPropertyOf ?x})"}
 
                 Sparql_schema.getPropertiesRangeAndDomain(schema, propId, null, { mandatoryDomain: 0 }, function (err, result) {
-                    if (err) return MainController.UI.message(err);
-                    drawproperties(result);
+                    if (err) return callback(err);
+                    return callback(null, result);
                 });
             });
         } else if (Config.sources[source].schemaType == "OWL") {
             Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, {}, function (err, result) {
-                if (err) return alert(err);
+                if (err) return callback(err);
 
                 result.forEach(function (item) {
                     item.property = item.prop;
@@ -793,6 +840,8 @@ if (!property) return alert("select a property first");*/
                     item.rangeLabel = item.propRangeLabel;
                     item.subProperty = item.subProp;
                     item.inverseProperty = item.inverseProp;
+                    item.subPropertyLabel = item.subPropLabel;
+                    item.inversePropertyLabel = item.inversePropLabel;
                 });
                 Sparql_OWL.getPropertiesWithoutDomainsAndRanges(source, {}, function (err, result2) {
                     if (err) return alert(err);
@@ -802,9 +851,12 @@ if (!property) return alert("select a property first");*/
                         item.propertyLabel = item.propLabel;
                         item.subProperty = item.subProp;
                         item.inverseProperty = item.inverseProp;
+                        item.subPropertyLabel = item.subPropLabel;
+                        item.inversePropertyLabel = item.inversePropLabel;
                     });
                     result = result.concat(result2);
-                    drawproperties(result);
+
+                    return callback(null, result);
                 });
             });
         } else if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH") {
@@ -818,7 +870,7 @@ if (!property) return alert("select a property first");*/
                     item.domain = { value: item.subject.value };
                     item.domainLabel = { value: item.subjectLabel.value };
                 });
-                drawproperties(result);
+                return callback(null, result);
             });
         }
     };
@@ -881,7 +933,7 @@ if (!property) return alert("select a property first");*/
                         });
 
                         /*  jstreeData.forEach(function (item) {
-    if (!uniqueIds[item.parent]) item.parent = sourceLabel;
+if (!uniqueIds[item.parent]) item.parent = sourceLabel;
 });*/
                         if (result.length > 0) {
                             var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>";

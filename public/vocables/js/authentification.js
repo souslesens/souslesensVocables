@@ -16,6 +16,11 @@ var authentication = (function () {
     self.currentUser = {};
 
     self.init = function (_activate) {
+        if (false && Config.loginMode == "json") {
+            var login = prompt("enter login");
+            var pss = prompt("enter password");
+            if (login && pss);
+        }
         // Redirect to login if user is not logged
         $.ajax({
             type: "GET",

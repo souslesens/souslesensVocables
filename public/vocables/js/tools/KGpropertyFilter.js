@@ -975,7 +975,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     };
 
     self.searchInPropertiesTree = function (event) {
-        if (event.keyCode != 13) return;
+        if (event.keyCode != 13 && event.keyCode != 9) return;
         var value = $("#KGpropertyFilter_searchInPropertiesTreeInput").val();
         $("#KGpropertyFilter_propertiesTreeDiv").jstree(true).search(value);
         $("#KGpropertyFilter_searchInPropertiesTreeInput").val("");

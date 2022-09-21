@@ -226,28 +226,16 @@ var Lineage_classes = (function() {
       }
     };
 
+
     if (authentication.currentUser.groupes.indexOf("admin") > -1) {
-      /*   items.createNewGraph = {
-label: "create new graph",
-action: function ( _e) {
-Lineage_classes.drawSimilarsNodes("sameLabel");
-},
-};*/
+
+      items.wikiPage = {
+        label: "Wiki page",
+        action: function(/** @type {any} */ _e) {
+          SourceBrowser.showWikiPage(Lineage_common.currentSource || Lineage_classes.mainSource);
+        }
+      };
     }
-
-    /*   items.addSameAs = {
-label: "add similars (sameAs)",
-action: function (e) {
-Lineage_classes.drawSimilarsNodes("sameAs")
-
-}
-}*/
-    items.wikiPage = {
-      label: "Wiki page",
-      action: function(/** @type {any} */ _e) {
-        SourceBrowser.showWikiPage(Lineage_common.currentSource);
-      }
-    };
 
     return items;
   };
@@ -2855,5 +2843,4 @@ Lineage_classes.drawSimilarsNodes("sameAs")
   };
 
   return self;
-})
-();
+})();

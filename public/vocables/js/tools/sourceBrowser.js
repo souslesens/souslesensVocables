@@ -814,6 +814,9 @@ return*/
 
     if (!sourceLabel) sourceLabel = self.currentSource;
     else self.currentSource = sourceLabel;
+
+
+    self.currentNodeRealSource=self.currentSource
     self.divId = divId;
     if (!options) {
       options = {};
@@ -835,6 +838,7 @@ return*/
     self.currentNodeIdInfosSource = sourceLabel;
     self.currentNodeIdInfosDivId = divId;
 
+
     var type;
     async.series(
       [
@@ -845,31 +849,34 @@ return*/
           });
         },
         function(callbackSeries) {
+        var source=self.currentNodeRealSource
           if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons) {
-            if (!self.currentNode.data || !self.currentNode.data.source || !Config.sources[self.currentNode.data.source].editable)
+            if (Config.sources[source].editable) {
+
               var str = "<div>";
-            str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
-            if (Config.sources[self.currentSource].editable) {
-              //} &&  self.propertiesMap.properties["type"]=="http://www.w3.org/2002/07/owl#Class") {
-              str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>";
-            }
-            str +=
-              "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
-              "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
-              "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
-              "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
-              "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
-
-            str += "</div>";
-
-            if (self.visitedNodes.length > 1) {
+              str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
+              if (true || Config.sources[source].editable) {
+                //} &&  self.propertiesMap.properties["type"]=="http://www.w3.org/2002/07/owl#Class") {
+                str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>";
+              }
               str +=
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(-1)'> previous </button>" +
-                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>";
-            }
+                "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
+                "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
+                "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
+                "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
+                "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
 
-            str += "</div>";
-            $("#" + divId).prepend(str);
+              str += "</div>";
+
+              if (self.visitedNodes.length > 1) {
+                str +=
+                  "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(-1)'> previous </button>" +
+                  "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>";
+              }
+
+              str += "</div>";
+              $("#" + divId).prepend(str);
+            }
           }
           callbackSeries();
         },
@@ -877,7 +884,7 @@ return*/
           /*  if (type != "http://www.w3.org/2002/07/owl#Class") {
 return callbackSeries();
 }*/
-          self.showNamedIndividualProperties(sourceLabel, nodeId, function(err) {
+          self.showNamedIndividualProperties(self.currentNodeRealSource, nodeId, function(err) {
             callbackSeries(err);
           });
         },
@@ -885,7 +892,7 @@ return callbackSeries();
           // if (false && type != "http://www.w3.org/2002/07/owl#Class") {
           //     return callbackSeries();
           // }
-          self.showClassRestrictions(sourceLabel, [nodeId], options, function(err) {
+          self.showClassRestrictions(self.currentNodeRealSource, [nodeId], options, function(err) {
             callbackSeries(err);
           });
         },
@@ -894,7 +901,7 @@ return callbackSeries();
           if (type != "http://www.w3.org/2002/07/owl#ObjectProperty") {
             return callbackSeries();
           }
-          self.showPropertyRestrictions(sourceLabel, nodeId, divId, function(_err, _result) {
+          self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, divId, function(_err, _result) {
             callbackSeries();
           });
         }
@@ -933,7 +940,13 @@ return callbackSeries();
         var type = null;
         var graphUri = "";
         data.forEach(function(item) {
-          if (item.g) graphUri = item.g.value;
+          if (item.g) {
+            graphUri = item.g.value;
+            var realSource = Sparql_common.getSourceFromGraphUri(graphUri)
+            if(realSource)
+              self.currentNodeRealSource=realSource
+          }
+
           if (item.value.type == "bnode") {
             return blankNodes.push(item.value.value);
           }
@@ -1334,14 +1347,14 @@ defaultLang = 'en';*/
         if (err) return alert(err);
         self.addProperty(property, newLabel, self.currentSource, false, function(err, result) {
           if (err) return alert(err.responseText);
-          //   self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "mainDialogDiv", {}, function(err, result) {
 
-          //  self.showNodeInfos(self.currentSource, self.currentNode, "mainDialogDiv");
-          visjsGraph.data.nodes.update({ id: self.currentNodeId, label: newLabel });
+
           if (self.currentNodeId.from) {
             var jstreeNode = common.jstree.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNode.data.id);
             if (jstreeNode) $("#Lineage_propertiesTree").jstree().rename_node(jstreeNode, newLabel);
+            visjsGraph.data.edges.update({ id: self.currentNodeId, label: newLabel });
           } else {
+            visjsGraph.data.nodes.update({ id: self.currentNodeId, label: newLabel });
             var jstreeNode = common.jstree.getNodeByDataField("LineagejsTreeDiv", "id", self.currentNode.data.id);
             if (jstreeNode) $("#LineagejsTreeDiv").jstree().rename_node(jstreeNode, newLabel);
           }

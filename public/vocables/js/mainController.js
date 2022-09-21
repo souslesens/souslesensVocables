@@ -372,7 +372,7 @@ var MainController = (function () {
         },
 
         searchInSourcesTree: function () {
-            if (event.keyCode != 13 && event.keyCode != 9  ) return;
+            if (event.keyCode != 13 && event.keyCode != 9) return;
             var value = $("#Lineage_SearchSourceInput").val();
             $("#sourcesTreeDiv").jstree(true).search(value);
             //$("#Lineage_SearchSourceInput").val("");

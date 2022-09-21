@@ -43,9 +43,8 @@ var Lineage_linkedData = (function () {
      * @param callback
      */
     self.getNodeLinkedData = function (node, callback) {
-        self.currentNode= Lineage_classes.currentGraphNode ||  Lineage_classes.currentTreeNode
-        if(!node)
-            return callback(null,[])
+        self.currentNode = Lineage_classes.currentGraphNode || Lineage_classes.currentTreeNode;
+        if (!node) return callback(null, []);
 
         Sparql_OWL.getNodesAncestors(
             node.data.source,
@@ -73,12 +72,10 @@ var Lineage_linkedData = (function () {
         $("#Lineage_Tabs").tabs("option", "active", 3);
         self.currentClassNode = node;
         $("#LineageLinkedDataQueryParams_className").html(self.currentClassNode.data.label);
-if(!self.currentDataSource)
-  return;
+        if (!self.currentDataSource) return;
         if (self.currentDataSource.type == "searchIndex") {
             Lineage_linkedData_search.initLinkedDataPanel(node);
         } else if (self.currentDataSource.type.indexOf("sql") > -1) {
-
             Lineage_linkedData_sql.initLinkedDataPanel(node);
         } else if (self.currentDataSource.type == "graph") {
             Lineage_linkedData_graph.initLinkedDataPanel(node);
@@ -134,9 +131,7 @@ if(!self.currentDataSource)
     };
 
     self.drawLinkedData = function () {
-
-        if( Lineage_linkedData.currentFilters.length==0)
-            return alert( "no filter specified")
+        if (Lineage_linkedData.currentFilters.length == 0) return alert("no filter specified");
         if (self.currentDataSource.type.indexOf("sql") > -1) {
             Lineage_linkedData_sql.drawSearchLinkedData();
         } else if (self.currentDataSource.type == "searchIndex") {
@@ -146,53 +141,43 @@ if(!self.currentDataSource)
         }
     };
 
+    self.graphActions = {
+        showIndividualInfos: function () {
+            var node = Lineage_classes.currentGraphNode || Lineage_classes.currentTreeNode;
+            var dataSourceLabel = node.data.source;
+            if (!dataSourceLabel) return;
 
+            if (!Config.sources[Lineage_classes.mainSource].dataSources) return Lineage_classes.graphActions.showNodeInfos();
 
-    self.graphActions={
-        showIndividualInfos:function(){
-           var node= Lineage_classes.currentGraphNode ||  Lineage_classes.currentTreeNode
-            var dataSourceLabel=node.data.source;
-           if(!dataSourceLabel)
-               return
-
-          if(!Config.sources[Lineage_classes.mainSource].dataSources)
-           return  Lineage_classes.graphActions.showNodeInfos()
-
-          var dataSource=Config.sources[Lineage_classes.mainSource].dataSources[dataSourceLabel]
-          if( !dataSource)
-            return  Lineage_classes.graphActions.showNodeInfos()
+            var dataSource = Config.sources[Lineage_classes.mainSource].dataSources[dataSourceLabel];
+            if (!dataSource) return Lineage_classes.graphActions.showNodeInfos();
 
             if (dataSource.type.indexOf("sql") > -1) {
-                Lineage_linkedData_sql.getIndividualInfos(dataSource,node,function(err,result){
-                    if(err)
-                        return alert(err)
-                    self.displayIndividualInfos(result)
+                Lineage_linkedData_sql.getIndividualInfos(dataSource, node, function (err, result) {
+                    if (err) return alert(err);
+                    self.displayIndividualInfos(result);
                 });
             } else if (dataSource.type == "searchIndex") {
-                Lineage_linkedData_search.getIndividualInfos(dataSource,node,function(err,result){
-                    if(err)
-                        return alert(err)
-                    self.displayIndividualInfos(result)
+                Lineage_linkedData_search.getIndividualInfos(dataSource, node, function (err, result) {
+                    if (err) return alert(err);
+                    self.displayIndividualInfos(result);
                 });
             } else if (dataSource.type == "graph") {
-                Lineage_linkedData_graph.getIndividualInfos(dataSource,node,function(err,result){
-                    if(err)
-                        return alert(err)
-                    self.displayIndividualInfos(result)
-
-            })
+                Lineage_linkedData_graph.getIndividualInfos(dataSource, node, function (err, result) {
+                    if (err) return alert(err);
+                    self.displayIndividualInfos(result);
+                });
             }
-
         },
-        expandIndividual:function(){
-            var data= Lineage_classes.currentGraphNode.data
-        }
-    }
+        expandIndividual: function () {
+            var data = Lineage_classes.currentGraphNode.data;
+        },
+    };
 
-    self.displayIndividualInfos=function(html){
+    self.displayIndividualInfos = function (html) {
         $("#mainDialogDiv").html(html);
         $("#mainDialogDiv").dialog("open");
-    }
+    };
 
     return self;
 })();

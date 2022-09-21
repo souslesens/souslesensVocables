@@ -525,7 +525,11 @@
         </div>
         <div id="loginDiv" style="position: absolute; visibility: hidden; display: flex; justify-content: center; align-items: center">
             <div>
-                login<input id="loginInput" /> password<input type="password" id="passwordInput" onkeydown="if (event.keyCode == 13 || event.keyCode == 9) document.getElementById('loginButton').click()" />
+                login<input id="loginInput" /> password<input
+                    type="password"
+                    id="passwordInput"
+                    onkeydown="if (event.keyCode == 13 || event.keyCode == 9) document.getElementById('loginButton').click()"
+                />
                 <button id="loginButton" onclick="authentication.doLogin(MainController.onAfterLogin)">OK</button>
 
                 <div id="loginMessage" style="margin: 20px; font-size: 14px; color: saddlebrown"></div>

@@ -573,7 +573,5 @@ var SearchUtil = (function () {
         }
     };
 
-
-
     return self;
 })();

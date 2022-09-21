@@ -639,8 +639,8 @@ var Sparql_OWL = (function () {
         } else if (options.aValueFrom) {
             query += "?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}";
         } else {
-            query +="?node owl:allValuesFrom|owl:someValuesFrom|owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}"
-          /*  query +=
+            query += "?node owl:allValuesFrom|owl:someValuesFrom|owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}";
+            /*  query +=
                 "  OPTIONAL {?node owl:allValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
                 "   OPTIONAL {?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
                 "   OPTIONAL {?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}";*/
@@ -1024,7 +1024,7 @@ var Sparql_OWL = (function () {
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
             if (err) return callback(err);
-            _result.results.bindings = Sparql_generic.setBindingsOptionalProperties(_result.results.bindings, ["propDomain","propRange","domain", "range","subProp","inverseProp"]);
+            _result.results.bindings = Sparql_generic.setBindingsOptionalProperties(_result.results.bindings, ["propDomain", "propRange", "domain", "range", "subProp", "inverseProp"]);
             return callback(null, _result.results.bindings);
         });
     };
@@ -1049,7 +1049,7 @@ var Sparql_OWL = (function () {
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
             if (err) return callback(err);
-            _result.results.bindings = Sparql_generic.setBindingsOptionalProperties(_result.results.bindings, ["prop","subProp","inversProp"]);
+            _result.results.bindings = Sparql_generic.setBindingsOptionalProperties(_result.results.bindings, ["prop", "subProp", "inversProp"]);
 
             return callback(null, _result.results.bindings);
         });
@@ -1072,8 +1072,8 @@ var Sparql_OWL = (function () {
                     "SELECT  * " +
                     " WHERE { ?subject ?predicate ?object.";
                 query += Sparql_common.setFilter(role, sliceIds);
-                if(options.removeBlankNodesObjects){
-                    query += " FILTER (!isBlank(?object)) "
+                if (options.removeBlankNodesObjects) {
+                    query += " FILTER (!isBlank(?object)) ";
                 }
 
                 query += "}LIMIT 10000";

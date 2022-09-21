@@ -10,7 +10,6 @@ var Lineage_linkedData_search = (function () {
         self.initLinkedDataPanel(self.currentClassNode);
     };
 
-
     self.initLinkedDataPanel = function (node) {
         self.currentClassNode = Lineage_linkedData.currentClassNode;
         self.showClassLineage_linkedDataTree();
@@ -215,7 +214,7 @@ var Lineage_linkedData_search = (function () {
         });
     };
     self.searchInLineage_linkedDataTree = function (event) {
-        if (event.keyCode != 13 && event.keyCode != 9 ) return;
+        if (event.keyCode != 13 && event.keyCode != 9) return;
         var value = $("#LineageLineage_linkedData_Lineage_linkedDataTreeSearchInput").val();
         $("#LineageLineage_linkedData_Lineage_linkedDataTree").jstree(true).search(value);
         $("#LineageLineage_linkedData_Lineage_linkedDataTreeSearchInput").val("");
@@ -364,11 +363,9 @@ var Lineage_linkedData_search = (function () {
         });
     };
 
-    self.getIndividualInfos=function(dataSource,node,callback){
-
-
-        return callback(null,infos)
-    }
+    self.getIndividualInfos = function (dataSource, node, callback) {
+        return callback(null, infos);
+    };
 
     return self;
 })();

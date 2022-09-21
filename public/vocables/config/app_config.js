@@ -142,7 +142,7 @@ var Config = (function () {
 
     /*****************************************************************************/
     self.sources = {};
-  self.tools={}
+    self.tools = {};
 
     return self;
 })();

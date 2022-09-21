@@ -5,8 +5,6 @@ var Lineage_linkedData_graph = (function () {
         self.currentDataSource = Lineage_linkedData.currentDataSource;
     };
 
-
-
     self.initLinkedDataPanel = function (node) {
         self.currentClassNode = Lineage_linkedData.currentClassNode;
     };
@@ -39,10 +37,8 @@ var Lineage_linkedData_graph = (function () {
             self.searchIndex.drawLinkedData();
         }
     };
-    self.getIndividualInfos=function(dataSource,node,callback){
-
-
-        return callback(null,infos)
-    }
+    self.getIndividualInfos = function (dataSource, node, callback) {
+        return callback(null, infos);
+    };
     return self;
 })();

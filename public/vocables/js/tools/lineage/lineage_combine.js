@@ -1,341 +1,316 @@
-var Lineage_combine = (function() {
-  var self = {};
-  self.currentSources = [];
-  self.showSourcesDialog = function() {
-    SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], Lineage_combine.addSelectedSourcesToGraph);
-  };
-
-  self.init = function() {
+var Lineage_combine = (function () {
+    var self = {};
     self.currentSources = [];
-    $("#Lineage_combine_actiosDiv").css("display", "none");
-    $("#Lineage_combine_mergeNodesDialogButton").css("display", "none");
-  };
+    self.showSourcesDialog = function () {
+        SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], Lineage_combine.addSelectedSourcesToGraph);
+    };
 
-  self.addSelectedSourcesToGraph = function() {
-    $("#sourcesSelectionDialogdiv").dialog("close");
+    self.init = function () {
+        self.currentSources = [];
+        $("#Lineage_combine_actiosDiv").css("display", "none");
+        $("#Lineage_combine_mergeNodesDialogButton").css("display", "none");
+    };
 
-    var term = $("#GenericTools_searchAllSourcesTermInput").val();
-    var selectedSources = [];
-    if ($("#searchAll_sourcesTree").jstree(true)) {
-      selectedSources = $("#searchAll_sourcesTree").jstree(true).get_checked();
-    }
-    if (selectedSources.length == 0) return;
+    self.addSelectedSourcesToGraph = function () {
+        $("#sourcesSelectionDialogdiv").dialog("close");
 
-    async.eachSeries(
-      selectedSources,
-      function(source, callbackEach) {
-        if (!Config.sources[source]) callbackEach();
-        Lineage_classes.registerSource(source);
-        self.currentSources.push(source);
-        Lineage_classes.drawTopConcepts(source, function(err) {
-          if (err) return callbackEach();
-          self.menuActions.groupSource(source);
-
-          callbackEach();
-
-          //  SourceBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineagejsTreeDiv" });
-        });
-      },
-      function(err) {
-        if (err) return MainController.UI.message(err);
-        if (self.currentSources.length > 0) {
-          $("#GenericTools_searchScope").val("graphSources");
-          $("#Lineage_combine_actiosDiv").css("display", "block");
+        var term = $("#GenericTools_searchAllSourcesTermInput").val();
+        var selectedSources = [];
+        if ($("#searchAll_sourcesTree").jstree(true)) {
+            selectedSources = $("#searchAll_sourcesTree").jstree(true).get_checked();
         }
-        Lineage_classes.setCurrentSource(Lineage_classes.mainSource);
-      }
-    );
-  };
+        if (selectedSources.length == 0) return;
 
-  self.setGraphPopupMenus = function() {
-    var html =
-      "    <span  class=\"popupMenuItem\" onclick=\"Lineage_combine.menuActions.hideSource();\"> Hide Source</span>" +
-      " <span  class=\"popupMenuItem\" onclick=\"Lineage_combine.menuActions.showSource();\"> Show Source</span>" +
-      " <span  class=\"popupMenuItem\" onclick=\"Lineage_combine.menuActions.groupSource();\"> Group Source</span>" +
-      " <span  class=\"popupMenuItem\" onclick=\"Lineage_combine.menuActions.ungroupSource();\"> ungroup Source</span>";
-    $("#graphPopupDiv").html(html);
-  };
+        async.eachSeries(
+            selectedSources,
+            function (source, callbackEach) {
+                if (!Config.sources[source]) callbackEach();
+                Lineage_classes.registerSource(source);
+                self.currentSources.push(source);
+                Lineage_classes.drawTopConcepts(source, function (err) {
+                    if (err) return callbackEach();
+                    self.menuActions.groupSource(source);
 
-  self.menuActions = {
-    hideSource: function() {
-      MainController.UI.hidePopup("graphPopupDiv");
-      Lineage_classes.showHideCurrentSourceNodes(true);
-    },
-    showSource: function() {
-      MainController.UI.hidePopup("graphPopupDiv");
-      Lineage_classes.showHideCurrentSourceNodes(false);
-    },
-    groupSource: function(source) {
-      MainController.UI.hidePopup("graphPopupDiv");
+                    callbackEach();
 
-      if (!source) source = Lineage_common.currentSource;
-      var color = Lineage_classes.getSourceColor(source);
-      var visjsData = { nodes: [], edges: [] };
-      var existingNodes = visjsGraph.getExistingIdsMap();
+                    //  SourceBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineagejsTreeDiv" });
+                });
+            },
+            function (err) {
+                if (err) return MainController.UI.message(err);
+                if (self.currentSources.length > 0) {
+                    $("#GenericTools_searchScope").val("graphSources");
+                    $("#Lineage_combine_actiosDiv").css("display", "block");
+                }
+                Lineage_classes.setCurrentSource(Lineage_classes.mainSource);
+            }
+        );
+    };
 
-      for (var nodeId in existingNodes) {
-        var node = visjsGraph.data.nodes.get(nodeId);
-        if (node && node.id != source && node.data && node.data.source == source) {
-          var edgeId = nodeId + "_" + source;
-          if (!existingNodes[edgeId]) {
-            existingNodes[nodeId] = 1;
-            var edge = {
-              id: edgeId,
-              from: nodeId,
-              to: source,
-              arrows: " middle",
-              color: color,
-              width: 1
-            };
-            visjsData.edges.push(edge);
-          }
-        }
-      }
-      if (!existingNodes[source]) {
-        existingNodes[source] = 1;
-        var sourceNode = {
-          id: source,
-          label: source,
-          shadow: Lineage_classes.nodeShadow,
-          shape: "box",
-          level: 1,
-          size: Lineage_classes.defaultShapeSize,
-          data: { source: source },
-          color: color
-        };
-        visjsData.nodes.push(sourceNode);
-      }
-      visjsGraph.data.nodes.update(visjsData.nodes);
-      visjsGraph.data.edges.update(visjsData.edges);
-    },
-    ungroupSource: function() {
-      MainController.UI.hidePopup("graphPopupDiv");
-      var source = Lineage_common.currentSource;
-      visjsGraph.data.nodes.remove(source);
-    }
-  };
+    self.setGraphPopupMenus = function () {
+        var html =
+            '    <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.hideSource();"> Hide Source</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.showSource();"> Show Source</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.groupSource();"> Group Source</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.ungroupSource();"> ungroup Source</span>';
+        $("#graphPopupDiv").html(html);
+    };
 
-  self.getSimilars = function(output) {
-    /* var source = Lineage_common.currentSource;
+    self.menuActions = {
+        hideSource: function () {
+            MainController.UI.hidePopup("graphPopupDiv");
+            Lineage_classes.showHideCurrentSourceNodes(true);
+        },
+        showSource: function () {
+            MainController.UI.hidePopup("graphPopupDiv");
+            Lineage_classes.showHideCurrentSourceNodes(false);
+        },
+        groupSource: function (source) {
+            MainController.UI.hidePopup("graphPopupDiv");
+
+            if (!source) source = Lineage_common.currentSource;
+            var color = Lineage_classes.getSourceColor(source);
+            var visjsData = { nodes: [], edges: [] };
+            var existingNodes = visjsGraph.getExistingIdsMap();
+
+            for (var nodeId in existingNodes) {
+                var node = visjsGraph.data.nodes.get(nodeId);
+                if (node && node.id != source && node.data && node.data.source == source) {
+                    var edgeId = nodeId + "_" + source;
+                    if (!existingNodes[edgeId]) {
+                        existingNodes[nodeId] = 1;
+                        var edge = {
+                            id: edgeId,
+                            from: nodeId,
+                            to: source,
+                            arrows: " middle",
+                            color: color,
+                            width: 1,
+                        };
+                        visjsData.edges.push(edge);
+                    }
+                }
+            }
+            if (!existingNodes[source]) {
+                existingNodes[source] = 1;
+                var sourceNode = {
+                    id: source,
+                    label: source,
+                    shadow: Lineage_classes.nodeShadow,
+                    shape: "box",
+                    level: 1,
+                    size: Lineage_classes.defaultShapeSize,
+                    data: { source: source },
+                    color: color,
+                };
+                visjsData.nodes.push(sourceNode);
+            }
+            visjsGraph.data.nodes.update(visjsData.nodes);
+            visjsGraph.data.edges.update(visjsData.edges);
+        },
+        ungroupSource: function () {
+            MainController.UI.hidePopup("graphPopupDiv");
+            var source = Lineage_common.currentSource;
+            visjsGraph.data.nodes.remove(source);
+        },
+    };
+
+    self.getSimilars = function (output) {
+        /* var source = Lineage_common.currentSource;
    var color=Lineage_classes.getSourceColor(source)*/
 
-    var commonNodes = [];
-    var existingNodes = visjsGraph.getExistingIdsMap();
-    var nodes = visjsGraph.data.nodes.get();
-    nodes.forEach(function(node1) {
-      if (!node1.data) return;
-      nodes.forEach(function(node2) {
-        if (!node2.data) return;
-        if (node1.data.id == node2.data.id) return;
-        if (node1.data.label == node2.data.label) commonNodes.push({ fromNode: node1, toNode: node2 });
-      });
-    });
+        var commonNodes = [];
+        var existingNodes = visjsGraph.getExistingIdsMap();
+        var nodes = visjsGraph.data.nodes.get();
+        nodes.forEach(function (node1) {
+            if (!node1.data) return;
+            nodes.forEach(function (node2) {
+                if (!node2.data) return;
+                if (node1.data.id == node2.data.id) return;
+                if (node1.data.label == node2.data.label) commonNodes.push({ fromNode: node1, toNode: node2 });
+            });
+        });
 
-    if (output == "graph") {
-      var visjsData = { nodes: [], edges: [] };
-      commonNodes.forEach(function(item) {
-        var edgeId = item.fromNode.id + "_" + item.toNode.id;
-        if (!existingNodes[edgeId]) {
-          existingNodes[edgeId] = 1;
-          visjsData.edges.push({
-            id: edgeId,
-            from: item.fromNode.id,
-            to: item.toNode.id,
-            length: 50,
-            width: 3,
-            color: "#ccc"
-          });
+        if (output == "graph") {
+            var visjsData = { nodes: [], edges: [] };
+            commonNodes.forEach(function (item) {
+                var edgeId = item.fromNode.id + "_" + item.toNode.id;
+                if (!existingNodes[edgeId]) {
+                    existingNodes[edgeId] = 1;
+                    visjsData.edges.push({
+                        id: edgeId,
+                        from: item.fromNode.id,
+                        to: item.toNode.id,
+                        length: 50,
+                        width: 3,
+                        color: "#ccc",
+                    });
+                }
+            });
+            visjsGraph.data.edges.update(visjsData.edges);
         }
-      });
-      visjsGraph.data.edges.update(visjsData.edges);
-    }
-  };
+    };
 
-  self.showMergeNodesDialog = function(fromNode, toNode) {
-    if (fromNode) {
-      Lineage_classes.selection.clearNodesSelection();
-      Lineage_classes.selection.addNodeToSelection(fromNode);
+    self.showMergeNodesDialog = function (fromNode, toNode) {
+        if (fromNode) {
+            Lineage_classes.selection.clearNodesSelection();
+            Lineage_classes.selection.addNodeToSelection(fromNode);
+        }
+        if (Lineage_classes.nodesSelection.length == 0) return alert("no nodes selected");
+        $("#mainDialogDiv").load("snippets/lineage/lineageAggregateMergeNodesDialog.html", function () {
+            common.fillSelectOptions("LineageMerge_targetSourceSelect", [Lineage_classes.mainSource]);
+            if (toNode) {
+                $("#LineageMerge_targetNodeUriSelect").val(toNode.data.id);
+            }
 
-    }
-    if (Lineage_classes.nodesSelection.length == 0) return alert("no nodes selected");
-    $("#mainDialogDiv").load("snippets/lineage/lineageAggregateMergeNodesDialog.html", function() {
-      common.fillSelectOptions("LineageMerge_targetSourceSelect", [Lineage_classes.mainSource]);
-      if (toNode) {
-        $("#LineageMerge_targetNodeUriSelect").val(toNode.data.id);
-      }
+            var jstreeData = Lineage_classes.selection.getSelectedNodesTree();
 
+            var options = {
+                withCheckboxes: true,
+                openAll: true,
+            };
+            common.jstree.loadJsTree("LineageMerge_nodesJsTreeDiv", jstreeData, options, function (err, result) {
+                $("#LineageMerge_nodesJsTreeDiv").jstree().check_all();
+            });
+        });
+        $("#mainDialogDiv").dialog("open");
+    };
 
-      var jstreeData = Lineage_classes.selection.getSelectedNodesTree();
+    self.mergeNodes = function (testObj) {
+        var maxDepth = 10;
+        var targetNode = null;
+        var targetSource = $("#LineageMerge_targetSourceSelect").val();
+        var mergeMode = $("#LineageMerge_aggregateModeSelect").val();
+        var mergeDepth = $("#LineageMerge_aggregateDepthSelect").val();
+        var mergeRestrictions = $("#LineageMerge_aggregateRelationsCBX").prop("checked");
+        var targetNode = $("#LineageMerge_targetNodeUriSelect").val();
+        var mergedNodesType = $("#LineageMerge_mergedNodesTypeSelect").val();
+        var jstreeNodes;
+        if ($("#LineageMerge_nodesJsTreeDiv").jstree(true)) jstreeNodes = $("#LineageMerge_nodesJsTreeDiv").jstree(true).get_checked(true);
 
-      var options = {
-        withCheckboxes: true,
-        openAll: true
-      };
-      common.jstree.loadJsTree("LineageMerge_nodesJsTreeDiv", jstreeData, options, function(err, result) {
-        $("#LineageMerge_nodesJsTreeDiv").jstree().check_all();
-      });
-    });
-    $("#mainDialogDiv").dialog("open");
-  };
+        if (testObj) {
+            targetSource = testObj.targetSource;
+            mergeMode = testObj.mergeMode;
+            mergeDepth = testObj.mergeDepth;
+            mergeRestrictions = testObj.mergeRestrictions;
+            jstreeNodes = testObj.jstreeNodes;
+            targetNode = testObj.targetNode;
+            mergedNodesType = testObj.mergedNodesType;
+        }
+        if (!mergedNodesType) if (!confirm("confirm that no Type is added to merged nodes")) return;
 
+        var nodesToMerge = {};
+        var descendantsMap = {};
+        var newTriples = [];
+        var message = "";
+        jstreeNodes.forEach(function (node) {
+            if (node.parent == "#") return;
+            if (!nodesToMerge[node.parent]) nodesToMerge[node.parent] = {};
+            nodesToMerge[node.parent][node.data.id] = [];
+        });
 
-  self.mergeNodes = function(testObj) {
-    var maxDepth = 10;
-    var targetNode = null;
-    var targetSource = $("#LineageMerge_targetSourceSelect").val();
-    var mergeMode = $("#LineageMerge_aggregateModeSelect").val();
-    var mergeDepth = $("#LineageMerge_aggregateDepthSelect").val();
-    var mergeRestrictions = $("#LineageMerge_aggregateRelationsCBX").prop("checked");
-    var targetNode = $("#LineageMerge_targetNodeUriSelect").val();
-    var mergedNodesType = $("#LineageMerge_mergedNodesTypeSelect").val();
-    var jstreeNodes;
-    if ($("#LineageMerge_nodesJsTreeDiv").jstree(true)) jstreeNodes = $("#LineageMerge_nodesJsTreeDiv").jstree(true).get_checked(true);
+        var sources = Object.keys(nodesToMerge);
 
-    if (testObj) {
-      targetSource = testObj.targetSource;
-      mergeMode = testObj.mergeMode;
-      mergeDepth = testObj.mergeDepth;
-      mergeRestrictions = testObj.mergeRestrictions;
-      jstreeNodes = testObj.jstreeNodes;
-      targetNode = testObj.targetNode;
-      mergedNodesType = testObj.mergedNodesType;
-    }
-    if (!mergedNodesType)
-      if (!confirm("confirm that no Type is added to merged nodes"))
-        return;
+        async.eachSeries(sources, function (source, callbackEachSource) {
+            var selectedNodeIds = Object.keys(nodesToMerge[source]);
+            var targetGraphUri = Config.sources[targetSource].graphUri;
+            var editable = Config.sources[targetSource].editable;
+            if (!targetGraphUri || !editable) alert("targetSource must have  graphUri and must be editable");
+            callbackEachSource();
 
-    var nodesToMerge = {};
-    var descendantsMap = {};
-    var newTriples = [];
-    var message = "";
-    jstreeNodes.forEach(function(node) {
-      if (node.parent == "#") return;
-      if (!nodesToMerge[node.parent]) nodesToMerge[node.parent] = {};
-      nodesToMerge[node.parent][node.data.id] = [];
-    });
+            var sourceMessage = "";
 
+            async.eachSeries(
+                selectedNodeIds,
+                function (selectedNodeId, callbackEachNodeToMerge) {
+                    var nodesToCopy = [selectedNodeId];
+                    async.series(
+                        [
+                            //getNodes descendants by depth and add them to ids
+                            function (callbackSeries) {
+                                if (mergeDepth == "nodeOnly") {
+                                    return callbackSeries();
+                                } else {
+                                    var depth;
+                                    if (mergeDepth == "nodeAndDirectChildren") depth = 1;
+                                    else depth = maxDepth;
+                                    Sparql_generic.getNodeChildren(source, null, selectedNodeId, depth, { selectGraph: false }, function (err, result) {
+                                        if (err) return callbackSeries(err);
 
-    var sources = Object.keys(nodesToMerge);
+                                        result.forEach(function (item, index) {
+                                            for (var i = 1; i <= maxDepth; i++) {
+                                                if (item["child" + i]) {
+                                                    var parent;
+                                                    if (i == 1) {
+                                                        var parent = item.concept.value;
+                                                        if (mergeDepth == "nodeDescendantsOnly") parent = targetNode;
+                                                        item["child" + i].parent = parent;
+                                                    } else item["child" + i].parent = item["child" + (i - 1)].value;
 
+                                                    descendantsMap[item["child" + i].value] = item["child" + i];
+                                                }
+                                            }
+                                        });
 
-    async.eachSeries(sources, function(source, callbackEachSource) {
-      var selectedNodeIds = Object.keys(nodesToMerge[source]);
-      var targetGraphUri = Config.sources[targetSource].graphUri;
-      var editable = Config.sources[targetSource].editable;
-      if (!targetGraphUri || !editable)
-        alert("targetSource must have  graphUri and must be editable");
-      callbackEachSource();
+                                        var descendantIds = Object.keys(descendantsMap);
+                                        nodesToCopy = nodesToCopy.concat(descendantIds);
+                                        return callbackSeries();
+                                    });
+                                }
+                            },
 
-      var sourceMessage = "";
+                            //create hierarchy if needed (when targetNode  and mergedNodesType)
+                            function (callbackSeries) {
+                                if (!targetNode) return callbackSeries();
 
+                                var mergedNodesParentProperty = null;
+                                if (mergedNodesType == "owl:NamedIndividual") mergedNodesParentProperty = "rdf:type";
+                                else if (mergedNodesType == "owl:Class") mergedNodesParentProperty = "rdfs:subClassOf";
+                                else return callbackSeries();
 
-      async.eachSeries(selectedNodeIds, function(selectedNodeId, callbackEachNodeToMerge) {
-        var nodesToCopy = [selectedNodeId];
-        async.series(
-          [
-            //getNodes descendants by depth and add them to ids
-            function(callbackSeries) {
-              if (mergeDepth == "nodeOnly") {
-                return callbackSeries();
-              } else {
-                var depth;
-                if (mergeDepth == "nodeAndDirectChildren") depth = 1;
-                else depth = maxDepth;
-                Sparql_generic.getNodeChildren(source, null, selectedNodeId, depth, { selectGraph: false }, function(err, result) {
-                  if (err) return callbackSeries(err);
+                                if (mergeDepth != "nodeDescendantsOnly") {
+                                    newTriples.push({
+                                        subject: selectedNodeId,
+                                        predicate: "rdf:type",
+                                        object: mergedNodesType,
+                                    });
 
-                  result.forEach(function(item, index) {
-                    for (var i = 1; i <= maxDepth; i++) {
-                      if (item["child" + i]) {
-                        var parent;
-                        if (i == 1) {
-                          var parent = item.concept.value;
-                          if (mergeDepth == "nodeDescendantsOnly")
-                            parent = targetNode;
-                          item["child" + i].parent = parent;
-                        } else item["child" + i].parent = item["child" + (i - 1)].value;
+                                    newTriples.push({
+                                        subject: selectedNodeId,
+                                        predicate: mergedNodesParentProperty,
+                                        object: targetNode,
+                                    });
+                                }
 
-                        descendantsMap[item["child" + i].value] = item["child" + i];
-                      }
-                    }
-                  });
+                                var descendantIds = Object.keys(descendantsMap);
+                                descendantIds.forEach(function (item) {
+                                    newTriples.push({
+                                        subject: item,
+                                        predicate: "rdf:type",
+                                        object: mergedNodesType,
+                                    });
+                                    newTriples.push({
+                                        subject: item,
+                                        predicate: mergedNodesParentProperty,
+                                        object: descendantsMap[item].parent,
+                                    });
+                                });
 
+                                callbackSeries();
+                            },
 
-                  var descendantIds = Object.keys(descendantsMap);
-                  nodesToCopy = nodesToCopy.concat(descendantIds);
-                  return callbackSeries();
-                });
-              }
-            },
+                            //get all node ids subject triple including descendants
+                            function (callbackSeries) {
+                                Sparql_OWL.getAllTriples(source, "subject", nodesToCopy, { removeBlankNodesObjects: true }, function (err, result) {
+                                    if (err) return callbackSeries(err);
+                                    result.forEach(function (item) {
+                                        if (nodesToMerge[source][selectedNodeId]) nodesToMerge[source][selectedNodeId].push(item);
+                                    });
+                                    callbackSeries();
+                                });
+                            },
 
-            //create hierarchy if needed (when targetNode  and mergedNodesType)
-            function(callbackSeries) {
-              if (!targetNode)
-                return callbackSeries();
-
-              var mergedNodesParentProperty = null;
-              if (mergedNodesType == "owl:NamedIndividual")
-                mergedNodesParentProperty = "rdf:type";
-              else if (mergedNodesType == "owl:Class")
-                mergedNodesParentProperty = "rdfs:subClassOf";
-              else
-                return callbackSeries();
-
-              if (mergeDepth != "nodeDescendantsOnly") {
-                newTriples.push({
-                  subject: selectedNodeId,
-                  predicate: "rdf:type",
-                  object: mergedNodesType
-
-                });
-
-                newTriples.push({
-                  subject: selectedNodeId,
-                  predicate: mergedNodesParentProperty,
-                  object: targetNode
-
-                });
-              }
-
-
-              var descendantIds = Object.keys(descendantsMap);
-              descendantIds.forEach(function(item) {
-                newTriples.push({
-                  subject: item,
-                  predicate: "rdf:type",
-                  object: mergedNodesType
-
-                });
-                newTriples.push({
-                  subject: item,
-                  predicate: mergedNodesParentProperty,
-                  object: descendantsMap[item].parent
-                });
-
-              });
-
-              callbackSeries();
-
-            },
-
-            //get all node ids subject triple including descendants
-            function(callbackSeries) {
-
-              Sparql_OWL.getAllTriples(source, "subject", nodesToCopy, {removeBlankNodesObjects:true}, function(err, result) {
-                if (err) return callbackSeries(err);
-                result.forEach(function(item) {
-                  if (nodesToMerge[source][selectedNodeId])
-                    nodesToMerge[source][selectedNodeId].push(item);
-
-                });
-                callbackSeries();
-              });
-
-
-            },
-
-
-            /*     function(callbackSeries) {
+                            /*     function(callbackSeries) {
          Sparql_OWL.getAllTriples(source, "object", ids, {}, function(err, result) {
            if (err)
              return callbackSeries(err);
@@ -367,26 +342,21 @@ var Lineage_combine = (function() {
          });
        },*/
 
-            //create newTriples
-            function(callbackSeries) {
+                            //create newTriples
+                            function (callbackSeries) {
+                                if (true || mergeMode == "keepUri") {
+                                    nodesToMerge[source][selectedNodeId].forEach(function (item) {
+                                        var value = item.object.value;
+                                        if (item.object.datatype == "http://www.w3.org/2001/XMLSchema#dateTime") value += "^^xsd:dateTime";
+                                        if (item.object.type == "literal") value = common.formatStringForTriple(value);
+                                        newTriples.push({
+                                            subject: item.subject.value,
+                                            predicate: item.predicate.value,
+                                            object: value,
+                                        });
+                                    });
 
-              if (true || mergeMode == "keepUri") {
-
-
-                nodesToMerge[source][selectedNodeId].forEach(function(item) {
-                  var value = item.object.value;
-                  if (item.object.datatype == "http://www.w3.org/2001/XMLSchema#dateTime") value += "^^xsd:dateTime";
-                  if (item.object.type == "literal")
-                    value = common.formatStringForTriple(value);
-                  newTriples.push({
-                    subject: item.subject.value,
-                    predicate: item.predicate.value,
-                    object: value
-                  });
-                });
-
-
-                /*  nodesToMerge[source].objectTriples.forEach(function(item) {
+                                    /*  nodesToMerge[source].objectTriples.forEach(function(item) {
       newTriples.push({
         subject: item.subject.value,
         predicate: item.predicate.value,
@@ -394,7 +364,7 @@ var Lineage_combine = (function() {
       });
     });*/
 
-                /*     nodesToMerge[source].restrictions.forEach(function(item) {
+                                    /*     nodesToMerge[source].restrictions.forEach(function(item) {
          newTriples.push({
            subject: item.subject.value,
            predicate: item.predicate.value,
@@ -409,17 +379,17 @@ var Lineage_combine = (function() {
            object: item.predicate.value
          });
        });*/
-               // return callbackSeries();
-                Sparql_generic.insertTriples(targetSource, newTriples, {}, function(err, result) {
-                  if (err) return callbackSeries(err);
-                  sourceMessage = result + " inserted from source " + source + "  to source " + targetSource;
+                                    // return callbackSeries();
+                                    Sparql_generic.insertTriples(targetSource, newTriples, {}, function (err, result) {
+                                        if (err) return callbackSeries(err);
+                                        sourceMessage = result + " inserted from source " + source + "  to source " + targetSource;
 
-                  message += sourceMessage + "\n";
-                  return callbackSeries();
-                });
-              }
+                                        message += sourceMessage + "\n";
+                                        return callbackSeries();
+                                    });
+                                }
 
-              /* /NOT IMPLEMENTED YET too much complexity
+                                /* /NOT IMPLEMENTED YET too much complexity
    else if(mergeMode=="newUri") {
          // set new subjectUri
          var newTriples = [];
@@ -441,115 +411,109 @@ var Lineage_combine = (function() {
            })
          }
        }*/
-            }
-          ],
-          function(err) {
-            if (err) return callbackEachNodeToMerge(err);
+                            },
+                        ],
+                        function (err) {
+                            if (err) return callbackEachNodeToMerge(err);
 
-            MainController.UI.message(sourceMessage + " indexing data ...  ");
-            SearchUtil.generateElasticIndex(targetSource, { ids: nodesToCopy }, function(err, _result) {
-              MainController.UI.message("DONE " + source, true);
-              callbackEachNodeToMerge();
-            });
-          },
-          function(err) {
-            callbackEachSource(err);
-          });
-      }, function(err) {
-        if (err) return alert(err.responseText);
-        alert(message);
-        return MainController.UI.message("ALL DONE", true);
-      });
-    });
-  };
-
-  self.testMerge = function() {
-    var jstreeNodes = [
-      {
-        "id": "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology",
-        "text": "Simple Lithology",
-        "icon": "../icons/default.png",
-        "parent": "GEOSCMIL",
-        "parents": [
-          "GEOSCMIL",
-          "#"
-        ],
-        "children": [],
-        "children_d": [],
-        "data": {
-          "source": "GEOSCMIL",
-          "label": "Simple Lithology",
-          "id": "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology"
-        },
-        "state": {
-          "loaded": true,
-          "opened": false,
-          "selected": true,
-          "disabled": false
-        },
-        "li_attr": {
-          "id": "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology"
-        },
-        "a_attr": {
-          "href": "#",
-          "id": "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology_anchor"
-        },
-        "original": {
-          "id": "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology",
-          "text": "Simple Lithology",
-          "parent": "GEOSCMIL",
-          "state": {}
-        },
-        "type": "default"
-      },
-      {
-        "id": "GEOSCMIL",
-        "text": "GEOSCMIL",
-        "icon": "../icons/default.png",
-        "parent": "#",
-        "parents": [
-          "#"
-        ],
-        "children": [
-          "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology"
-        ],
-        "children_d": [
-          "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology"
-        ],
-        "state": {
-          "loaded": true,
-          "opened": true,
-          "selected": true,
-          "disabled": false
-        },
-        "li_attr": {
-          "id": "GEOSCMIL"
-        },
-        "a_attr": {
-          "href": "#",
-          "id": "GEOSCMIL_anchor"
-        },
-        "original": {
-          "id": "GEOSCMIL",
-          "text": "GEOSCMIL",
-          "parent": "#",
-          "state": {}
-        },
-        "type": "default"
-      }
-    ];
-    var obj = {
-      mergeDepth: "nodeDescendantsOnly",
-      mergeMode: "keepUri",
-      mergeRestrictions: true,
-      jstreeNodes: jstreeNodes,
-      targetNode: "http://data.total.com/resource/tsf/ontology/gaia-test/738e98d5f8",
-      mergedNodesType: "owl:NamedIndividual",
-      targetSource: "TSF_GAIA_TEST"
+                            MainController.UI.message(sourceMessage + " indexing data ...  ");
+                            SearchUtil.generateElasticIndex(targetSource, { ids: nodesToCopy }, function (err, _result) {
+                                MainController.UI.message("DONE " + source, true);
+                                callbackEachNodeToMerge();
+                            });
+                        },
+                        function (err) {
+                            callbackEachSource(err);
+                        }
+                    );
+                },
+                function (err) {
+                    if (err) return alert(err.responseText);
+                    alert(message);
+                    return MainController.UI.message("ALL DONE", true);
+                }
+            );
+        });
     };
 
-    MainController.initControllers();
-    self.mergeNodes(obj);
-  };
-  return self;
+    self.testMerge = function () {
+        var jstreeNodes = [
+            {
+                id: "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology",
+                text: "Simple Lithology",
+                icon: "../icons/default.png",
+                parent: "GEOSCMIL",
+                parents: ["GEOSCMIL", "#"],
+                children: [],
+                children_d: [],
+                data: {
+                    source: "GEOSCMIL",
+                    label: "Simple Lithology",
+                    id: "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology",
+                },
+                state: {
+                    loaded: true,
+                    opened: false,
+                    selected: true,
+                    disabled: false,
+                },
+                li_attr: {
+                    id: "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology",
+                },
+                a_attr: {
+                    href: "#",
+                    id: "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology_anchor",
+                },
+                original: {
+                    id: "http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology",
+                    text: "Simple Lithology",
+                    parent: "GEOSCMIL",
+                    state: {},
+                },
+                type: "default",
+            },
+            {
+                id: "GEOSCMIL",
+                text: "GEOSCMIL",
+                icon: "../icons/default.png",
+                parent: "#",
+                parents: ["#"],
+                children: ["http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology"],
+                children_d: ["http://resource.geosciml.org/classifierScheme/cgi/2016.01/simplelithology"],
+                state: {
+                    loaded: true,
+                    opened: true,
+                    selected: true,
+                    disabled: false,
+                },
+                li_attr: {
+                    id: "GEOSCMIL",
+                },
+                a_attr: {
+                    href: "#",
+                    id: "GEOSCMIL_anchor",
+                },
+                original: {
+                    id: "GEOSCMIL",
+                    text: "GEOSCMIL",
+                    parent: "#",
+                    state: {},
+                },
+                type: "default",
+            },
+        ];
+        var obj = {
+            mergeDepth: "nodeDescendantsOnly",
+            mergeMode: "keepUri",
+            mergeRestrictions: true,
+            jstreeNodes: jstreeNodes,
+            targetNode: "http://data.total.com/resource/tsf/ontology/gaia-test/738e98d5f8",
+            mergedNodesType: "owl:NamedIndividual",
+            targetSource: "TSF_GAIA_TEST",
+        };
+
+        MainController.initControllers();
+        self.mergeNodes(obj);
+    };
+    return self;
 })();

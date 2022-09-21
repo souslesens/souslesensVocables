@@ -1,6 +1,6 @@
 const path = require("path");
 const fs = require("fs");
-const { configPath, _config } = require("../../../model/config");
+const { configPath, config } = require("../../../model/config");
 const sourcesJSON = path.resolve(configPath + "/sources.json");
 const profilesJSON = path.resolve(configPath + "/profiles.json");
 exports.profilesJSON = sourcesJSON;
@@ -19,23 +19,29 @@ module.exports = function () {
         const aProfiles = Object.entries(profiles);
         const aSources = Object.entries(sources);
 
+        // get the formalOntologySourceLabel source
+        const formalOntologySourceLabel = config.formalOntologySourceLabel;
+        console.log(formalOntologySourceLabel);
+
         // for all profile
         const allAccessControl = aProfiles.flatMap(([_k, profile]) => {
             const defaultSourceAccessControl = profile.defaultSourceAccessControl;
             const sourcesAccessControl = profile.sourcesAccessControl;
             const allowedSourceSchemas = profile.allowedSourceSchemas;
             // browse all sources, filter allowedSourceSchemas and get accessControl
-            return aSources.filter(([sourceName, source]) => {
-                if (allowedSourceSchemas.includes(source.schemaType)) {
-                    return [sourceName, source];
-                }
-            }).map(([sourceName, _v]) => {
-                if (sourceName in sourcesAccessControl) {
-                    return [sourceName, sourcesAccessControl[sourceName]];
-                } else {
-                    return [sourceName, defaultSourceAccessControl];
-                }
-            })
+            return aSources
+                .filter(([sourceName, source]) => {
+                    if (allowedSourceSchemas.includes(source.schemaType)) {
+                        return [sourceName, source];
+                    }
+                })
+                .map(([sourceName, _v]) => {
+                    if (sourceName in sourcesAccessControl) {
+                        return [sourceName, sourcesAccessControl[sourceName]];
+                    } else {
+                        return [sourceName, defaultSourceAccessControl];
+                    }
+                });
         });
 
         // get all read or readwrite source
@@ -45,7 +51,8 @@ module.exports = function () {
                     return sourceName;
                 }
             })
-            .map(([sourceName, _v]) => sourceName);
+            .map(([sourceName, _v]) => sourceName)
+            .concat([formalOntologySourceLabel, "read"]);
 
         // uniq
         return Array.from(new Set(allowedSources));

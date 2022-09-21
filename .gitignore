@@ -122,8 +122,8 @@ data/**/*.txt
 data/**/*.csv
 
 #React build output
-mainapp/static/mainapp.js
-mainapp/static/mainapp.js.map
+mainapp/static/*.js
+mainapp/static/*.js.map
 mainapp/lib
 /data/
 /public/vocables/customPlugins/TotalEnergies/

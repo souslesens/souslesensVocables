@@ -1,10 +1,12 @@
 const path = require("path");
 const mode = process.env.NODE_ENV ? process.env.NODE_ENV : "production";
 
+// config editor
 module.exports = {
     mode: mode,
     entry: {
         mainapp: "./src/index.tsx",
+        kg_upload_app: "./src/kg-upload-app.tsx",
     },
     output: {
         path: path.resolve(__dirname, "static/"),

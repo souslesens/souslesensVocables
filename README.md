@@ -157,3 +157,17 @@ If your set a `TAG` in the `.env` file, change it. Then, pull images and restart
 docker-compose pull
 docker-compose up -d
 ```
+
+## Developpement
+
+### Create a new release
+
+On the master branch:
+
+```bash
+npm run patch|minor|major
+git commit
+git tag x.x.x
+git push
+```
+

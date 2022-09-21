@@ -11,7 +11,12 @@
     .Lineage_propertiesTree {
         width: inherit !important;
     }
+
     .Lineage_ClassTabLi {
+    }
+
+    .ui-tabs-anchor {
+        padding: 8px !important;
     }
 </style>
 <!--div style="display:none;"><input type="checkbox" checked="checked" onchange="Lineage_common.onshowImportsCBXChange($(this))" id="Lineage_classes_showImportsCBX" />Include imports in results</div-->
@@ -22,7 +27,7 @@
 
             <li class="Lineage_ClassTabLi"><a href="#LineagePropertiesTab">Properties</a></li>
             <li class="Lineage_ClassTabLi"><a href="#LineageRelationsTab">Relations</a></li>
-            <li class="Lineage_ClassTabLi"><a href="#LineageIndividualsTab">Individuals</a></li>
+            <li class="Lineage_ClassTabLi"><a href="#LineageLinkedDataTab">LinkedData</a></li>
         </ul>
 
         <div class="" id="Lineage_ClassesTab">
@@ -35,7 +40,12 @@
 
         <div id="LineagePropertiesTab">
             <div>
-                <input id="LineageProperties_searchAllSourcesTermInput" style="width: 200px" value="" onkeyup="if (event.keyCode == 13)Lineage_properties.searchAllSourcesTerm()" />
+                <input
+                    id="LineageProperties_searchAllSourcesTermInput"
+                    style="width: 200px"
+                    value=""
+                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9)Lineage_properties.searchAllSourcesTerm()"
+                />
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="LineageProperties_onSearchAllInput" onclick="Lineage_properties.searchAllSourcesTerm()">Search</button>
 
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Export.exportTeeToDataTable('Lineage_propertiesTree','#')">Export</button>
@@ -58,6 +68,7 @@
                 </select>
                 <!-- <div style="margin: 3px">Dictionary<select style="width: 300px" id="LineagePropertie_dictionarySelect" ></select></div>-->
                 <button onclick="Lineage_properties.drawRangeAndDomainsGraph(null);" style="margin: 3px">Graph All</button>
+                <button onclick="Lineage_properties.exportRangeAndDomainsGraph(null);" style="margin: 3px">Export All</button>
             </div>
         </div>
         <div id="LineageRelationsTab" style="display: flex; flex-direction: column">
@@ -75,10 +86,10 @@
                 <div class="lineage_actionDiv_title">Existing relations</div>
                 <div>
                     <!-- Properties
-           <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showAllProperties('jstree')">List all</button>
-           <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showAllProperties('visjs')">Graph all</button>
-           <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.exportProperties()">Export</button>
-           <br>-->
+ <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showAllProperties('jstree')">List all</button>
+ <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showAllProperties('visjs')">Graph all</button>
+ <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.exportProperties()">Export</button>
+ <br>-->
                     <div>
                         filters
                         <div>
@@ -120,16 +131,16 @@
             <div></div>
 
             <!--
-      <div class="lineage_actionDiv">
-          <div class="lineage_actionDiv_title">Projection</div>
-          on source<br><select id="LineageRelations_setExactMatchSameAsSourceSelect"></select>
-          add<input type="checkbox" id="LineageRelations_setExactMatchSameAsSourceInitUIcBX">
-          <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.projectSameAsRestrictionsOnSource()">Show Matches</button>
-          <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.projectSameAsRestrictionsOnSource('orphans')">Show Orphans</button>
-          <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.saveProjectedGraph()">Save projected Graph</button>
-          <!__ <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.removeExactMatchSameAs()">Remove</button>__>
+<div class="lineage_actionDiv">
+    <div class="lineage_actionDiv_title">Projection</div>
+    on source<br><select id="LineageRelations_setExactMatchSameAsSourceSelect"></select>
+    add<input type="checkbox" id="LineageRelations_setExactMatchSameAsSourceInitUIcBX">
+    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.projectSameAsRestrictionsOnSource()">Show Matches</button>
+    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.projectSameAsRestrictionsOnSource('orphans')">Show Orphans</button>
+    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.saveProjectedGraph()">Save projected Graph</button>
+    <!__ <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.removeExactMatchSameAs()">Remove</button>__>
 
-      </div>-->
+</div>-->
             <div></div>
             <div class="lineage_actionDiv">
                 <div class="lineage_actionDiv_title">ProjectedGraphs</div>
@@ -141,14 +152,14 @@
             </div>
 
             <!--  <div class="jstreeContainer" style="width:90%">
-            <table id="Lineage_relationsTable"  style="width:350px;height: 700px"></table>
-        </div>-->
+      <table id="Lineage_relationsTable"  style="width:350px;height: 700px"></table>
+  </div>-->
             <div class="jstreeContainer" style="width: 90%">
                 <div class="jstree" id="Lineage_relationsTree"></div>
             </div>
         </div>
 
-        <div id="LineageIndividualsTab" style="display: flex; flex-direction: column"></div>
+        <div id="LineageLinkedDataTab" style="display: flex; flex-direction: column"></div>
     </div>
 </div>
 

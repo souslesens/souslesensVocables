@@ -50,10 +50,10 @@ var Sparql_common = (function () {
             }
             return self.formatStringForTriple(str);
             /*   var str = str.replace(/\\/g, "")
-   str = str.replace(/\(/gm, "")
-   str = str.replace(/\)/gm, "")
-   str = str.replace(/\[/gm, "")
-   str = str.replace(/\]/gm, "")
+str = str.replace(/\(/gm, "")
+str = str.replace(/\)/gm, "")
+str = str.replace(/\[/gm, "")
+str = str.replace(/\]/gm, "")
 
 return str;
 */
@@ -260,6 +260,22 @@ return str;
         if (!date) date = new Date();
         var str = JSON.stringify(date);
         return str + "^^xsd:dateTime";
+    };
+
+    self.getSourceFromUriInDefaultServer = function (uri, callback) {
+        var query = "select ?g where  {graph ?g {<" + uri + "> ?p ?o}} limit 1";
+        var graph;
+        Sparql_proxy.querySPARQL_GET_proxy("_default", query, "", {}, function (err, result) {
+            if (err) return callback(err);
+            var data = result.results.bindings;
+            if (data.length == 0) return null;
+            var source;
+            var graphUri = data[0].g.value;
+            for (var _source in Config.sources) {
+                if (Config.sources[_source].graphUri == graphUri) source = _source;
+            }
+            return callback(null, source);
+        });
     };
     return self;
 })();

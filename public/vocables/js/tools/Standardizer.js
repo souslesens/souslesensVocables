@@ -567,7 +567,7 @@ setTimeout(function () {
     self.showFuzzyMatchSearch = function (word) {
         var html =
             'search<input class="KGadvancedMapping_searchEntitiesInput" id="Standardizer_searchEntitiesInput2" ' +
-            "onkeyup=\"if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,'Standardizer_searchResulDiv2')\">" +
+            "onkeyup=\"if (event.keyCode == 13 || event.keyCode == 9)Standardizer.searchFuzzyMatches($(this).val(),null,'Standardizer_searchResulDiv2')\">" +
             "<br><input type='checkbox'  id='Standardizer_fuzzySearchAllsourcesCBX'>All sources" +
             "<button onclick='Standardizer.clearFuzzyMatch()'>Clear fuzzyMatch</button>";
         //"<button onclick='SourceBrowser.showSearchableSourcesTreeDialog()'> filter Sources</button>"

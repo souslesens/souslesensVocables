@@ -393,29 +393,45 @@ var Sparql_generic = (function () {
         return str;
     };
 
-    self.insertTriples = function (sourceLabel, triples, options, callback) {
+    self.insertTriples = function (sourceLabel, _triples, options, callback) {
         if (!options) options = {};
         var graphUri = Config.sources[sourceLabel].graphUri;
         if (Array.isArray(graphUri)) graphUri = graphUri[0];
-        var insertTriplesStr = "";
-        triples.forEach(function (item, _index) {
-            insertTriplesStr += self.triplesObjectToString(item);
-        });
-        var query = self.getDefaultSparqlPrefixesStr();
-        query += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
 
-        if (options.getSparqlOnly) return callback(null, query);
-        // console.log(query)
-        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
-            return callback(err, triples.length);
-        });
+        var slices = common.array.slice(_triples, 200);
+        var uniqueTriples = {};
+        async.eachSeries(
+            slices,
+            function (triples, callbackEach) {
+                var insertTriplesStr = "";
+                triples.forEach(function (item, _index) {
+                    var tripleStr = self.triplesObjectToString(item);
+                    if (!uniqueTriples[tripleStr]) {
+                        // suppress duplicate if any
+                        uniqueTriples[tripleStr] = 1;
+                        insertTriplesStr += tripleStr;
+                    }
+                });
+                var query = self.getDefaultSparqlPrefixesStr();
+                query += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
+
+                if (options.getSparqlOnly) return callback(null, query);
+                // console.log(query)
+                var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+                    return callbackEach(err);
+                });
+            },
+            function (err) {
+                return callback(err, _triples.length);
+            }
+        );
     };
 
     self.update = function (_sourceLabel, _triples, _callback) {
         /*
 
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 with <http://data.total.com/resource/tsf/maintenance/romain_14224/>
 DELETE {
 ?id rdfs:label ?oldLabel .
@@ -425,14 +441,14 @@ INSERT {
 }
 WHERE {
 ?id rdfs:label ?oldLabel .
-  filter (regex(?oldLabel,"Class.*"))
-  bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
+filter (regex(?oldLabel,"Class.*"))
+bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 }
 
 
 
 
-         */
+     */
 
         return;
     };
@@ -949,11 +965,11 @@ WHERE {
                         parentArray.push(sourceLabel);
                         parentArray = parentArray.reverse();
                         /*   var str = ""
-               parentArray.forEach(function (parent, index) {
-                   if (index > 0)
-                       str += "|"
-                   str += parent;
-               })*/
+   parentArray.forEach(function (parent, index) {
+       if (index > 0)
+           str += "|"
+       str += parent;
+   })*/
                         delete allClassesMap[key].parent;
                         allClassesMap[key].parents = parentArray;
                     }
@@ -1005,6 +1021,8 @@ WHERE {
             );
         });
     };
+
+    self.exportOntology = function () {};
 
     return self;
 })();

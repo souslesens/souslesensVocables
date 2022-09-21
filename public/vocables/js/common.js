@@ -103,8 +103,8 @@ var common = (function () {
             $("#" + jstreeDiv)
                 .jstree({
                     /* "checkbox": {
-               "keep_selected_style": false
-           },*/
+     "keep_selected_style": false
+ },*/
                     plugins: plugins,
                     core: {
                         data: jstreeData,
@@ -238,12 +238,12 @@ var common = (function () {
                     });
             });
             /*  setTimeout(function () {
-          self.jstree.setTreeAppearance();
-          //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
-          $("#" + jstreeDiv)
-              .jstree(true)
-              .open_node(parentNodeId_, null, 500);
-      }, 500);*/
+    self.jstree.setTreeAppearance();
+    //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
+    $("#" + jstreeDiv)
+        .jstree(true)
+        .open_node(parentNodeId_, null, 500);
+}, 500);*/
         },
 
         deleteNode: function (jstreeDiv, nodeId) {
@@ -263,8 +263,8 @@ var common = (function () {
                 }
             }
             /* descendants.forEach(function(item){
-               $("#" + jstreeDiv).jstree(true).delete_node(item)
-           })*/
+         $("#" + jstreeDiv).jstree(true).delete_node(item)
+     })*/
             try {
                 $("#" + jstreeDiv)
                     .jstree(true)
@@ -594,7 +594,7 @@ var common = (function () {
         });
         return cleanedArray;
     };
-    (self.formatStringForTriple = function (str, forUri) {
+    self.formatStringForTriple = function (str, forUri) {
         if (!str) return str;
         str = str.trim();
         if (str.indexOf("http://") == 0) return str;
@@ -624,15 +624,38 @@ var common = (function () {
 
             str = str.replace(/[^a-zA-Z0-9-_]/g, "");
             /*  str = encodeURIComponent(str);
-       str = str.replace(/%2F/gm, "/");*/
+ str = str.replace(/%2F/gm, "/");*/
         }
 
         return str;
-    }),
-        (self.formatUriToJqueryId = function (uri) {
-            var str = uri.toLowerCase().replace("http://", "_");
-            return str.replace(/\//g, "_").replace(/\./g, "_");
-        });
+    };
+
+    self.escapeNonASCIIstring = function (string) {
+        function padWithLeadingZeros(string) {
+            return new Array(5 - string.length).join("0") + string;
+        }
+
+        function unicodeCharEscape(charCode) {
+            return "\\u" + padWithLeadingZeros(charCode.toString(16));
+        }
+
+        function unicodeEscape(string) {
+            return string
+                .split("")
+                .map(function (char) {
+                    var charCode = char.charCodeAt(0);
+                    return charCode > 127 ? unicodeCharEscape(charCode) : char;
+                })
+                .join("");
+        }
+
+        return unicodeEscape(string);
+    };
+
+    self.formatUriToJqueryId = function (uri) {
+        var str = uri.toLowerCase().replace("http://", "_");
+        return str.replace(/\//g, "_").replace(/\./g, "_");
+    };
     self.encodeToJqueryId = function (myId) {
         return myId.replace(/\./g, "__e__");
     };
@@ -689,16 +712,53 @@ var common = (function () {
 
     self.copyTextToClipboard = function (text, callback) {
         async function copy() {
-            try {
-                await navigator.clipboard.writeText(text);
-
-                if (callback) {
-                    return callback(null, "graph copied in clipboard");
-                } else return alert("graph copied in clipboard");
-            } catch (err) {
-                MainController.UI.message("graph copy failed");
-                if (callback) return callback(err);
+            if (navigator.clipboard && window.isSecureContext) {
+                // navigator clipboard api method'
+                try {
+                    navigator.clipboard.writeText(text);
+                    if (callback) {
+                        return callback(null, "graph copied in clipboard");
+                    } else return alert("graph copied in clipboard");
+                } catch (err) {
+                    MainController.UI.message("graph copy failed");
+                    if (callback) return callback(err);
+                }
+            } else {
+                // text area method
+                let textArea = document.createElement("textarea");
+                textArea.value = text;
+                // make the textarea out of viewport
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                return new Promise((res, rej) => {
+                    // here the magic happens
+                    var ok = document.execCommand("copy");
+                    if (ok) {
+                        if (callback) {
+                            return callback(null, "graph copied in clipboard");
+                        } else return alert("graph copied in clipboard");
+                    } else {
+                        MainController.UI.message("graph copy failed");
+                        if (callback) return callback(err);
+                    }
+                    textArea.remove();
+                });
             }
+
+            /*  try {
+            await navigator.clipboard.writeText(text);
+
+            if (callback) {
+                return callback(null, "graph copied in clipboard");
+            } else return alert("graph copied in clipboard");
+        } catch (err) {
+            MainController.UI.message("graph copy failed");
+            if (callback) return callback(err);
+        }*/
         }
 
         copy();
@@ -742,22 +802,40 @@ var common = (function () {
         // }
     };
 
+    self.pasteTextFromClipboard = function (callback) {
+        async function paste() {
+            if (navigator.clipboard) {
+                const text = await navigator.clipboard.readText();
+                callback(text);
+                //  alert('Pasted text: ', text);
+            } else {
+                let textArea = document.createElement("textarea");
+
+                textArea.style.position = "fixed";
+                textArea.style.left = "-999999px";
+                textArea.style.top = "-999999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                try {
+                    var successful = document.execCommand("paste");
+                    var text = textArea.value;
+                    callback(text);
+                } catch (e) {
+                    console.log(e);
+                    return callback(null);
+                }
+            }
+        }
+
+        paste();
+    };
+
     self.createBGColorCssClasses = function (classPrefix, values, palette) {
         values.forEach(function (item, index) {
             var html = classPrefix + item + " :  { background-color:" + palette[index] + "}";
 
             $("<style>").prop("type", "text/css").html(html).appendTo("head");
         });
-    };
-
-    self.pasteTextFromClipboard = function (callback) {
-        async function paste() {
-            const text = await navigator.clipboard.readText();
-            callback(text);
-            //  alert('Pasted text: ', text);
-        }
-
-        paste();
     };
 
     self.deconcatSQLTableColumn = function (str, removeSchema) {

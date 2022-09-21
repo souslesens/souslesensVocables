@@ -26,7 +26,7 @@ var Lineage_blend = (function () {
         }
 
         /* $("#GenericTools_searchAllSourcesTermInput").val(node.data.label)
-$("#GenericTools_searchInAllSources").prop("checked", true)*/
+  $("#GenericTools_searchInAllSources").prop("checked", true)*/
 
         if (allowAddToGraphButton) {
             $("#lineage_blendToGraphButton").css("display", "block");
@@ -403,7 +403,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
         var existingNodes = visjsGraph.getExistingIdsMap();
         if (existingNodes[node.id]) return alert("node " + node.label + " already exists in graph ");
         /* if(!confirm(" Import node "+node.label+" in source "+Lineage_classes.mainSource))
-return;*/
+  return;*/
         self.setNewImport(Lineage_classes.mainSource, node.source, function (err, _result) {
             if (err) return "";
             var toGraphUri = Config.sources[Lineage_classes.mainSource].graphUri;
@@ -557,14 +557,14 @@ return;*/
 
             common.fillSelectOptions("lineage_createRelationPropertySelect", properties, false, "label", "id");
             /*
-var words = [sourceNode.label, targetNode.label]
-var indexes = [sourceNode.source.toLowerCase(), targetNode.source.toLowerCase()]
-SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, 10, function (err, result) {
-if (err)
-return alert(err);
-var xx = result
+  var words = [sourceNode.label, targetNode.label]
+  var indexes = [sourceNode.source.toLowerCase(), targetNode.source.toLowerCase()]
+  SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, 10, function (err, result) {
+  if (err)
+  return alert(err);
+  var xx = result
 
-})*/
+  })*/
         });
     };
 
@@ -582,10 +582,10 @@ var xx = result
             Sparql_common.getFromStr(topOntology, null, false) +
             " " +
             /*   "WHERE {" +
-"?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel}" +
-" optional{?b owl:someValuesFrom ?toAncestor.filter   ?to rdfs:subClassOf* ?toAncestor}\n" +
-"  {SELECT ?fromAncestor   WHERE { ?from rdfs:subClassOf+ ?fromAncestor." +
-" filter (?from=<"+fromNode.id+"\> )     }"+*/
+  "?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel}" +
+  " optional{?b owl:someValuesFrom ?toAncestor.filter   ?to rdfs:subClassOf* ?toAncestor}\n" +
+  "  {SELECT ?fromAncestor   WHERE { ?from rdfs:subClassOf+ ?fromAncestor." +
+  " filter (?from=<"+fromNode.id+"\> )     }"+*/
 
             " WHERE {{?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel} \n" +
             "   optional{ ?b owl:someValuesFrom ?toAncestor.  ?to rdfs:subClassOf+ ?toAncestor   filter( ?toAncestor!=owl:Thing  && ?to=<" +
@@ -599,10 +599,10 @@ var xx = result
             "> )     }}}\n" +
             "  \n" +
             /*    "WHERE {?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel} optional{?b owl:someValuesFrom ?toAncestor} " + //filter (regex(str(?p),\"http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/\",\"i\"))" +
-" {SELECT ?fromAncestor ?toAncestor ?from ?to" +
-"    WHERE { ?from rdfs:subClassOf+ ?fromAncestor. filter (str(?from)=\"" + fromNode.id + "\" )" +
-"        optional  { ?to rdfs:subClassOf+ ?toAncestor. filter (str(?to)=\"" + toNode.id + "\" )}" +
-"  }" +*/
+  " {SELECT ?fromAncestor ?toAncestor ?from ?to" +
+  "    WHERE { ?from rdfs:subClassOf+ ?fromAncestor. filter (str(?from)=\"" + fromNode.id + "\" )" +
+  "        optional  { ?to rdfs:subClassOf+ ?toAncestor. filter (str(?to)=\"" + toNode.id + "\" )}" +
+  "  }" +*/
             "} limit 1000";
 
         var sparql_url = Config.sources[topOntology].sparql_server.url;
@@ -635,8 +635,21 @@ var xx = result
                     common.fillSelectOptions("LineageBlend_creatingNodeObjectsSelect", result.sourceObjects.concat(result.part14Objects), true, "label", "id");
                     common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", result.sourceObjects, true, "label", "id");
                 });
+                self.possibleNamedIndividuals = {};
             });
         },
+
+        getPossibleNamedIndividuals: function (callback) {
+            Sparql_OWL.getNamedIndividuals(Lineage_classes.mainSource, null, null, function (err, result) {
+                if (err) return callback(err);
+                var individuals = {};
+                result.forEach(function (item) {
+                    individuals[item.conceptLabel.value] = item.concept.value;
+                });
+                return callback(null, individuals);
+            });
+        },
+
         showCreatingNodeClassOrNamedIndividualDialog: function (type) {
             self.graphModification.currentCreatingNodeType = type;
             var showClassDiv = type == "Class";
@@ -650,6 +663,38 @@ var xx = result
 
             $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open");
             $("#LineageBlend_creatingNodeClassParamsDiv").tabs({});
+            if (type == "NamedIndividual") {
+                self.graphModification.getPossibleNamedIndividuals(function (err, result) {
+                    if (err) return alert(err.responseText);
+                    self.possibleNamedIndividuals = result;
+
+                    // add existing individuals as possible type object
+                    var existingIndividuals = [];
+                    for (var key in self.possibleNamedIndividuals) {
+                        existingIndividuals.push({
+                            id: self.possibleNamedIndividuals[key],
+                            label: "i_" + key,
+                            type: "NamedIndividual",
+                        });
+                    }
+                    existingIndividuals.sort(function (a, b) {
+                        if (a.label > b.label) return 1;
+                        if (a.labe < b.label) return -1;
+                        return 0;
+                    });
+                    var sourceObjects = self.currentPossibleClassesAndPredicates.sourceObjects.concat(existingIndividuals);
+                    common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", sourceObjects, true, "label", "id");
+                    if (Lineage_classes.currentGraphNode && Lineage_classes.currentGraphNode.data) {
+                        setTimeout(function () {
+                            $("#LineageBlend_creatingNodeObjects2Select").val(Lineage_classes.currentGraphNode.data.id);
+                        }, 200);
+                    }
+                });
+            } else {
+                if (Lineage_classes.currentGraphNode && Lineage_classes.currentGraphNode.data) {
+                    $("#LineageBlend_creatingNodeObjectsSelect").val(Lineage_classes.currentGraphNode.data.id);
+                }
+            }
         },
 
         openCreatNodeDialogOpen: function (type) {
@@ -657,22 +702,29 @@ var xx = result
                 $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open");
             }
         },
-        addTripleToCreatingNode: function (predicate, object) {
+        getURI: function (label) {
+            var uri = null;
             var uriType = $("#LineageBlend_creatingNodeUriType").val();
             var specificUri = $("#LineageBlend_creatingNodeSubjectUri").val();
             if (specificUri) uriType = "specific";
-            if (!self.graphModification.creatingsourceUri) {
-                let graphUri = Config.sources[Lineage_classes.mainSource].graphUri;
-                if (uriType == "fromLabel") self.graphModification.creatingsourceUri = graphUri + common.formatStringForTriple(object, true);
-                else if (uriType == "randomHexaNumber") self.graphModification.creatingsourceUri = graphUri + common.getRandomHexaId(10);
-                else if (uriType == "specific") {
-                    if (specificUri) {
-                        self.graphModification.creatingsourceUri = specificUri;
-                    } else {
-                        return alert("enter a specific URI");
-                    }
+
+            let graphUri = Config.sources[Lineage_classes.mainSource].graphUri;
+            if (uriType == "fromLabel") uri = graphUri + common.formatStringForTriple(label, true);
+            else if (uriType == "randomHexaNumber") uri = graphUri + common.getRandomHexaId(10);
+            else if (uriType == "specific") {
+                if (specificUri) {
+                    uri = specificUri;
+                } else {
                 }
+
                 // self.graphModification.creatingNodeTriples = [];
+            }
+            return uri;
+        },
+        addTripleToCreatingNode: function (predicate, object) {
+            if (!self.graphModification.creatingsourceUri) {
+                var uri = self.graphModification.getURI(object);
+                self.graphModification.creatingsourceUri = uri;
             }
             if (!predicate) predicate = $("#KGcreator_predicateInput").val();
             if (!object) object = $("#KGcreator_objectInput").val();
@@ -751,8 +803,8 @@ var xx = result
             var targetUrisMap = {};
             possibleClasses.forEach(function (obj) {
                 var classLabel = obj.label;
-                var array = classLabel.split(/[:\/\#]/);
-                if (array.length > 0) classLabel = array[array.length - 1];
+                /* var array = classLabel.split(/[:\/\#]/);
+           if (array.length > 0) classLabel = array[array.length - 1];*/
                 targetUrisMap[classLabel] = obj.id;
             });
 
@@ -761,29 +813,47 @@ var xx = result
             let graphUri = Config.sources[Lineage_classes.mainSource].graphUri;
             let sourceUrisMap = {};
             var sourceUrisArray = [];
+            var sep = null;
+
             lines.forEach(function (line, indexLine) {
                 line = line.trim();
-                var cells = line.split(/[,\t]/);
+                if (indexLine == 0) {
+                    var separators = ["\t", ";", ","];
+                    separators.forEach(function (_sep) {
+                        if (line.split(_sep).length != 2 || sep) return;
+                        sep = _sep;
+                    });
+                }
+
+                var cells = line.split(sep);
+
+                if (cells.length != 2) return;
                 var label = cells[0];
                 var classLabel = cells[1];
 
                 if (targetUrisMap[label]) {
                     sourceUrisMap[label] = targetUrisMap[label];
                 } else {
-                    var sourceUri = graphUri + common.getRandomHexaId(10);
+                    var sourceUri = self.graphModification.getURI(label);
                     sourceUrisMap[label] = sourceUri;
                     sourceUrisArray.push(sourceUri);
                 }
             });
 
+            if (!sep) return alert("no correct separator found : [\t,;]");
+
             lines.forEach(function (line, indexLine) {
                 line = line.trim();
-                var cells = line.split(/[,\t]/);
+                var cells = line.split(sep);
                 var label = cells[0];
                 var classLabel = cells[1];
                 var sourceUri = sourceUrisMap[label];
                 var targetUri = targetUrisMap[classLabel];
                 var predicate = "rdf:type";
+                if (self.graphModification.currentCreatingNodeType == "NamedIndividual" && !targetUri) {
+                    targetUri = self.possibleNamedIndividuals[classLabel];
+                }
+
                 if (!targetUri) {
                     //targetUri  declared in the list as source node
                     predicate = "part14:partOf";
@@ -844,6 +914,7 @@ var xx = result
             self.graphModification.creatingNodeTriples.splice(index, 1);
             $("#triple_" + index).remove();
         },
+
         createNode: function () {
             if (!self.graphModification.creatingNodeTriples) return alert("no predicates for node");
             var str = JSON.stringify(self.graphModification.creatingNodeTriples);
@@ -889,9 +960,12 @@ var xx = result
                             // le sameAs sont tous dans le dictionaire
                             inSource = Config.dictionarySource;
                         else {
-                            //Lineage_classes.mainSource
                             var mainSource = Config.sources[Lineage_classes.mainSource];
-                            if (mainSource.editable && self.sourceNode.source == Lineage_classes.mainSource) inSource = Lineage_classes.mainSource;
+                            if (Config.sources[self.sourceNode.source].editable) {
+                                inSource = self.sourceNode.source;
+                            } else if (mainSource.editable) {
+                                inSource = Lineage_classes.mainSource;
+                            }
                             //soit  dans predicateSource
                             else inSource = Config.predicatesSource;
                         }
@@ -1020,20 +1094,20 @@ var xx = result
                             });
                         },
                         /*   function(callbackSeries) {
-                 var propertyIds = Object.keys(authorizedProps);
-                 Sparql_OWL.getObjectSubProperties(Lineage_classes.mainSource, propertyIds, options, function(err, result) {
-                   if (err) return callbackSeries(err);
-                   result.forEach(function(item) {
-                     if (!authorizedProps[item.property.value]) return;
-                     if (!authorizedProps[item.property.value].children) authorizedProps[item.property.value].children = [];
-                     authorizedProps[item.property.value].children.push({
-                       id: item.subProperty.value,
-                       label: item.subPropertyLabel.value
-                     });
-                   });
-                   callbackSeries();
-                 });
-               },*/
+       var propertyIds = Object.keys(authorizedProps);
+       Sparql_OWL.getObjectSubProperties(Lineage_classes.mainSource, propertyIds, options, function(err, result) {
+         if (err) return callbackSeries(err);
+         result.forEach(function(item) {
+           if (!authorizedProps[item.property.value]) return;
+           if (!authorizedProps[item.property.value].children) authorizedProps[item.property.value].children = [];
+           authorizedProps[item.property.value].children.push({
+             id: item.subProperty.value,
+             label: item.subPropertyLabel.value
+           });
+         });
+         callbackSeries();
+       });
+     },*/
 
                         //create formal Ontology tree nodes
                         function (callbackSeries) {
@@ -1087,30 +1161,30 @@ var xx = result
                             callbackSeries();
                         },
                         /*   function(callbackSeries) {
-                 return callbackSeries();
-                 if (!Config.sources[Lineage_classes.mainSource].editable) {
-                   $("#lineageAddEdgeDialog_currentSourcePropertiesTreeDiv").html("source " + Lineage_classes.mainSource + " is not editable");
-                   return callbackSeries();
-                 }
+       return callbackSeries();
+       if (!Config.sources[Lineage_classes.mainSource].editable) {
+         $("#lineageAddEdgeDialog_currentSourcePropertiesTreeDiv").html("source " + Lineage_classes.mainSource + " is not editable");
+         return callbackSeries();
+       }
 
-                 Lineage_properties.getPropertiesjsTreeData(inSource, null, null, {}, function(err, jstreeData3) {
-                   if (err) return callbackSeries(err);
-                   let jstreeDataX = [];
-                   jstreeDataX.forEach(function(item) {
-                     item.data.inSource = inSource;
-                   });
+       Lineage_properties.getPropertiesjsTreeData(inSource, null, null, {}, function(err, jstreeData3) {
+         if (err) return callbackSeries(err);
+         let jstreeDataX = [];
+         jstreeDataX.forEach(function(item) {
+           item.data.inSource = inSource;
+         });
 
-                   jstreeDataX.push({
-                     id: inSource,
-                     text: inSource,
-                     parent: "#"
-                   });
-                   jstreeData = jstreeData.concat(jstreeDataX);
-                   //  common.jstree.loadJsTree("lineageAddEdgeDialog_currentSourcePropertiesTreeDiv", jstreeData3, options);
+         jstreeDataX.push({
+           id: inSource,
+           text: inSource,
+           parent: "#"
+         });
+         jstreeData = jstreeData.concat(jstreeDataX);
+         //  common.jstree.loadJsTree("lineageAddEdgeDialog_currentSourcePropertiesTreeDiv", jstreeData3, options);
 
-                   callbackSeries();
-                 });
-               },*/
+         callbackSeries();
+       });
+     },*/
 
                         //get specific(mainSource) source properties
                         function (callbackSeries) {
@@ -1168,7 +1242,7 @@ var xx = result
 
                                             if (!self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id])
                                                 self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id] = [];
-                                            self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id].push(result.uri);
+                                            self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id].push({ id: result.uri, label: subPropertyLabel });
 
                                             var jstreeData = [
                                                 {
@@ -1235,7 +1309,6 @@ var xx = result
 
             common.jstree.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", "#", jstreeData, { positionLast: 1 });
         },
-
         createRelationFromGraph: function (inSource, sourceNode, targetNode, propId, options, callback) {
             if (!confirm("create Relation " + sourceNode.label + "-" + Sparql_common.getLabelFromURI(propId) + "->" + targetNode.label + " in Graph " + inSource)) return;
             $("#LineagePopup").dialog("close");

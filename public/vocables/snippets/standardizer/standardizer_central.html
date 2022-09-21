@@ -250,7 +250,7 @@
             search<input
                 class="KGadvancedMapping_searchEntitiesInput"
                 id="Standardizer_searchEntitiesInput"
-                onkeyup="if (event.keyCode == 13)Standardizer.searchFuzzyMatches($(this).val(),null,'Standardizer_searchResulDiv')"
+                onkeyup="if (event.keyCode == 13 || event.keyCode == 9)Standardizer.searchFuzzyMatches($(this).val(),null,'Standardizer_searchResulDiv')"
             />
             <div id="Standardizer_searchResulDiv" style="display: flex; flex-direction: column; width: 500px; height: 500px; margin: 10px; background: beige; overflow: auto"></div>
         </div>

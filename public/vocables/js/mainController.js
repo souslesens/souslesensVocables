@@ -347,7 +347,7 @@ var MainController = (function () {
                     }
                 };
 
-            $("#Lineage_SearchSourceInput").bind("keyup", null, MainController.UI.searchInSourcesTree);
+            $("#Lineage_SearchSourceInput").bind("keydown", null, MainController.UI.searchInSourcesTree);
             options.searchPlugin = {
                 case_insensitive: true,
                 fuzzy: false,
@@ -366,7 +366,7 @@ var MainController = (function () {
         },
 
         searchInSourcesTree: function () {
-            if (event.keyCode != 13) return;
+            if (event.keyCode != 13 && event.keyCode != 9) return;
             var value = $("#Lineage_SearchSourceInput").val();
             $("#sourcesTreeDiv").jstree(true).search(value);
             //$("#Lineage_SearchSourceInput").val("");

@@ -130,7 +130,7 @@ var Lineage_decoration = (function () {
         visjsGraph.data.nodes.update(part14nodeIds);
 
         self.listGraphNodeTypes(nonPart14nodeIds, part14TopTypes, function (err, result) {
-            if (err) return alert(err);
+            if (err) return ;
             var nodesTypesMap = {};
             var colorsMap = {};
             var excludedTypes = ["TopConcept", "Class", "Restriction"];

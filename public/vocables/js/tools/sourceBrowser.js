@@ -460,6 +460,7 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
         if (true || schemaType == "OWL") {
             SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
+                if (_err) return alert(_err);
                 self.searchResultToJstree(self.currentTargetDiv, result, options, function (err, _result) {
                     if (err) return alert(err);
                 });

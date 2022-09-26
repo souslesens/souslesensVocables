@@ -7,7 +7,7 @@ var Admin = (function () {
             " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showTSFdictionary()'>TSF Dictionary</button>" +
             "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.refreshIndexes()'>refreshIndexes </button>&nbsp;<input type='checkbox'  id='admin_refreshIndexWithImportCBX' > Imports also<br>" +
             " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportTaxonomyToCsv()'>export Taxonomy To Csv </button>" +
-            " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportNT()'>export NT </button>" +
+            " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportTTL()'>export TTL </button>" +
             " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.getClassesLineage()'>getLineage </button>" +
             " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showUserSources()'>showUserSources </button>" +
             " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.generateInverseRestrictionsDialog()'>generateInverseRestrictions </button>" +
@@ -65,6 +65,16 @@ var Admin = (function () {
                 MainController.UI.message(sources[0] + " downloaded");
             },
         });
+    };
+    self.exportTTL = function () {
+        //   var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        if (sources.length != 1) return alert("select a single source");
+
+        $("#waitImg").css("display", "block");
+       // MainController.UI.message(sources[0] + " processing...");
+        Sparql_proxy.exportGraph(sources[0])
+
     };
     self.getClassesLineage = function () {
         //   var sources = $("#sourcesTreeDiv").jstree(true).get_checked();

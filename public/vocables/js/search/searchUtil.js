@@ -47,6 +47,8 @@ var SearchUtil = (function () {
                                         toSourcesIndexesMap[source.toLowerCase()] = source;
                                     }
                                 });
+                                if(toSources &&  toSources.length > 0  && Object.keys(toSourcesIndexesMap).length==0 )
+                                    return callbackSeries(toSources.toString()+ "Not in search index, see admin")
                                 callbackSeries();
                             });
                         },

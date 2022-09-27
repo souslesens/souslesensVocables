@@ -168,6 +168,6 @@ On the master branch:
 npm run patch|minor|major
 git commit
 git tag x.x.x
-git push
+git push --tags
 ```
 

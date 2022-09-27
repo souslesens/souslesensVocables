@@ -52,13 +52,11 @@ const ProfilesTable = () => {
             ),
             success: (gotProfiles: Profile[]) => {
                 const datas = gotProfiles.map((profile) => {
-                    const { allowedSourceSchemas, allowedSources, forbiddenTools, allowedTools, forbiddenSources, sourcesAccessControl, blender, ...restOfProperties } = profile;
+                    const { allowedSourceSchemas, forbiddenTools, allowedTools, sourcesAccessControl, blender, ...restOfProperties } = profile;
                     const processedData = {
                         ...restOfProperties,
                         forbiddenTools: joinWhenArray(forbiddenTools),
                         allowedTools: joinWhenArray(allowedTools),
-                        allowedSources: joinWhenArray(allowedSources),
-                        forbiddenSources: joinWhenArray(forbiddenSources),
                         allowedSourceSchemas: allowedSourceSchemas.join(";"),
                         sourcesAccessControl: JSON.stringify(sourcesAccessControl),
                     };
@@ -294,46 +292,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 </FormControl>
                             ))}
                         </Box>
-                        <FormGroup>
-                            <FormControl style={{ display: profileModel.profileForm.allowedSources === "ALL" ? "none" : "" }} disabled={profileModel.profileForm.allowedSources === "ALL"}>
-                                <InputLabel id="allowedSources-label">Allowed Sources</InputLabel>
-                                <Select
-                                    labelId="allowedSources-label"
-                                    id="allowedSources"
-                                    multiple
-                                    value={!Array.isArray(profileModel.profileForm.allowedSources) ? [] : profileModel.profileForm.allowedSources}
-                                    label="select-allowedSources-label"
-                                    fullWidth
-                                    renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
-                                    onChange={handleFieldUpdate("allowedSources")}
-                                >
-                                    {sources.map((source) => (
-                                        <MenuItem key={source.name} value={source.name}>
-                                            {source.name}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </FormGroup>
-                        <FormControl>
-                            <InputLabel id="forbidenSources-label">Forbiden Sources</InputLabel>
-                            <Select
-                                labelId="forbidenSources-label"
-                                id="forbidenSources"
-                                multiple
-                                value={profileModel.profileForm.forbiddenSources}
-                                label="select-forbiddenSources-label"
-                                fullWidth
-                                renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
-                                onChange={handleFieldUpdate("forbiddenSources")}
-                            >
-                                {sources.map((source) => (
-                                    <MenuItem key={source.name} value={source.name}>
-                                        {source.name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
                         <FormGroup>
                             <FormControlLabel control={<Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />} label="Allow all tools" />
 

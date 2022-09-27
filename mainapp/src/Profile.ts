@@ -59,8 +59,6 @@ type ProfileJson = {
     id?: string;
     name?: string;
     allowedSourceSchemas: string[];
-    allowedSources: string;
-    forbiddenSources: string[];
     defaultSourceAccessControl: SourceAccessControl;
     sourcesAccessControl: Record<string, SourceAccessControl>;
     allowedTools: string[];
@@ -78,8 +76,6 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
         _type: "profile",
         id: profile.id ? profile.id : ulid(),
         allowedSourceSchemas: profile.allowedSourceSchemas,
-        allowedSources: profile.allowedSources,
-        forbiddenSources: profile.forbiddenSources,
         defaultSourceAccessControl: profile.defaultSourceAccessControl,
         sourcesAccessControl: profile.sourcesAccessControl,
         allowedTools: profile.allowedTools,
@@ -93,8 +89,6 @@ type Profile = {
     _type: string;
     id: string;
     allowedSourceSchemas: string[];
-    allowedSources: string | string[];
-    forbiddenSources: string | string[];
     defaultSourceAccessControl: SourceAccessControl;
     sourcesAccessControl: Record<string, SourceAccessControl>;
     allowedTools: string | string[];
@@ -110,8 +104,6 @@ export const defaultProfile = (uuid: string): Profile => {
         _type: "profile",
         id: uuid,
         allowedSourceSchemas: [],
-        allowedSources: "ALL",
-        forbiddenSources: [],
         defaultSourceAccessControl: "forbidden",
         sourcesAccessControl: {},
         allowedTools: "ALL",

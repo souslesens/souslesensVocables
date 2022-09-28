@@ -8,7 +8,7 @@ const profileFilePath = argv.file;
 fs.readFile(profileFilePath, (_err, rawData) => {
     const data = JSON.parse(rawData);
     const aData = Object.entries(data);
-    const newData = aData.map(([_k, profile]) => {
+    const aNewData = aData.map(([key, profile]) => {
         if (!profile.allowedSources && profile.sourcesAccessControl) {
             console.log("File is allready migrated!");
             process.exit();
@@ -37,8 +37,10 @@ fs.readFile(profileFilePath, (_err, rawData) => {
         delete profile.allowedSources;
         delete profile.forbiddenSources;
 
-        return profile;
+        return [key, profile];
     });
+
+    const newData = Object.fromEntries(aNewData);
 
     if (argv.w) {
         fs.writeFileSync(profileFilePath, JSON.stringify(newData, null, 2));

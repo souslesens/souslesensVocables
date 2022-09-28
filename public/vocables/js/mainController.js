@@ -255,7 +255,7 @@ var MainController = (function () {
                         self.initControllers();
                         if (sources && sources.indexOf(sourceLabel) < 0) return;
                         if (Config.sources[sourceLabel].isDraft) return;
-
+                        if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) return;
                         Config.sources[sourceLabel].name = sourceLabel;
 
                         var parent = Config.sources[sourceLabel].schemaType;

@@ -543,11 +543,11 @@ var Lineage_blend = (function () {
 
         self.getAssociationAllowedProperties(fromNode, toNode, function (err, result) {
             if (err) return alert(err);
-
+var uriPattern=Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern
             result.forEach(function (item) {
                 if (!distinctProperties[item.id]) {
                     var prefix = "";
-                    if (item.p.value.indexOf("part14") > -1) prefix = "part14:";
+                    if (item.p.value.indexOf(uriPattern) > -1) prefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix+":";
                     properties.push({
                         id: item.p.value,
                         label: prefix + (item.pLabel ? item.pLabel.value : Sparql_common.getLabelFromURI(item.p.value)),
@@ -569,7 +569,7 @@ var Lineage_blend = (function () {
     };
 
     self.getAssociationAllowedProperties = function (fromNode, toNode, callback) {
-        var topOntology = "TSF_TOP_ONTOLOGY";
+        var topOntology = Config.currentTopLevelOntology
 
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -618,22 +618,57 @@ var Lineage_blend = (function () {
     };
 
     self.graphModification = {
+
+
+      /*  initTopLevelOntologySelect:function(selectId){
+
+            var topLevelOntologies=Object.keys(Config.topLevelOntologies)
+
+             common.fillSelectOptions(selectId,topLevelOntologies)
+            Config.currentTopLevelOntology= $("#"+selectId).val()
+        }*/
+
+
+        setTopLevelOntologyFromImports:function(sourceLabel) {
+            var imports=Config.sources[sourceLabel].imports
+            if(!imports)
+               return  Config.currentTopLevelOntology= Object.keys(Config.topLevelOntologies)[0]
+            if( !Array.isArray(imports))
+                imports=[imports]
+            var ok=false
+            imports.forEach(function(source){
+                if(!ok && Config.topLevelOntologies[source]) {
+                    ok=true;
+                    Config.currentTopLevelOntology = source
+                }
+            })
+            }
+
+        ,
+
+
+
         showAddNodeGraphDialog: function () {
             self.graphModification.creatingNodeTriples = [];
             self.graphModification.creatingsourceUri = null;
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
+             //   self.graphModification.initTopLevelOntologySelect("LineageBlend_currentTopLevelOntologyNodesSelect")
                 self.getSourcePossiblePredicatesAndObject(Lineage_classes.mainSource, function (err, result) {
                     if (err) return alert(err.responseText);
                     if (!Config.sources[Lineage_classes.mainSource].allowIndividuals) {
                         $("#LineageBlend_creatingNamedIndividualButton").css("display", "none");
                     }
+
+
                     self.currentPossibleClassesAndPredicates = result;
+                    var allObjects= result.usualObjects.concat(result.TopLevelOntologyObjects).concat([""]).concat(result.sourceObjects)
+
                     common.fillSelectOptions("KGcreator_predicateSelect", result.predicates, true, "label", "id");
-                    common.fillSelectOptions("KGcreator_objectSelect", result.usualObjects.concat(result.part14Objects).concat(result.sourceObjects), true, "label", "id");
+                    common.fillSelectOptions("KGcreator_objectSelect",allObjects, true, "label", "id");
                     common.fillSelectOptions("LineageBlend_creatingNodePredicatesSelect", result.predicates, true, "label", "id");
-                    common.fillSelectOptions("LineageBlend_creatingNodeObjectsSelect", result.sourceObjects.concat(result.part14Objects), true, "label", "id");
-                    common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", result.sourceObjects, true, "label", "id");
+                    common.fillSelectOptions("LineageBlend_creatingNodeObjectsSelect", allObjects, true, "label", "id");
+                    common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select",allObjects, true, "label", "id");
                 });
                 self.possibleNamedIndividuals = {};
             });
@@ -793,9 +828,9 @@ var Lineage_blend = (function () {
             if (!str) return alert("no tbale data to process");
             var lines = str.trim().split("\n");
 
-            var possibleClasses = self.currentPossibleClassesAndPredicates.part14Objects.concat(self.currentPossibleClassesAndPredicates.sourceObjects);
+            var possibleClasses = self.currentPossibleClassesAndPredicates.TopLevelOntologyObjects.concat(self.currentPossibleClassesAndPredicates.sourceObjects);
             if (self.graphModification.currentCreatingNodeType == "Class") {
-                possibleClasses = self.currentPossibleClassesAndPredicates.part14Objects.concat(self.currentPossibleClassesAndPredicates.sourceObjects);
+                possibleClasses = self.currentPossibleClassesAndPredicates.TopLevelOntologyObjects.concat(self.currentPossibleClassesAndPredicates.sourceObjects);
             } else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
                 possibleClasses = self.currentPossibleClassesAndPredicates.sourceObjects;
             }
@@ -855,6 +890,7 @@ var Lineage_blend = (function () {
                 }
 
                 if (!targetUri) {
+                    alert("xxxx")
                     //targetUri  declared in the list as source node
                     predicate = "part14:partOf";
                     targetUri = sourceUrisMap[classLabel];
@@ -868,7 +904,7 @@ var Lineage_blend = (function () {
                         triples.push({ subject: sourceUri, predicate: "rdfs:subClassOf", object: targetUri });
                     } else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
                         triples.push({ subject: sourceUri, predicate: "rdf:type", object: "owl:NamedIndividual" });
-                        if (targetUri.indexOf("lis14") > 0) {
+                        if (targetUri.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > 0) {
                             triples.push({ subject: sourceUri, predicate: predicate, object: targetUri });
                         } else {
                             triples.push({ subject: sourceUri, predicate: predicate, object: targetUri });
@@ -943,6 +979,7 @@ var Lineage_blend = (function () {
         showAddEdgeFromGraphDialog: function (edgeData, callback) {
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").load("snippets/lineage/lineageAddEdgeDialog.html", function () {
+                //self.graphModification.initTopLevelOntologySelect("LineageBlend_currentTopLevelOntologyNodesSelect")
                 self.sourceNode = visjsGraph.data.nodes.get(edgeData.from).data;
                 self.targetNode = visjsGraph.data.nodes.get(edgeData.to).data;
                 $("#lineageAddEdgeDialog_Title").html(self.sourceNode.label + " -> " + self.targetNode.label);
@@ -1000,8 +1037,8 @@ var Lineage_blend = (function () {
                 var distinctProps = {};
                 var authorizedProps = {};
                 let inSource = Lineage_classes.mainSource;
-                let sourceNodeFirstPart14Ancestor = null;
-                let targetNodeFirstPart14Ancestor = null;
+                let sourceNodeFirsttopLevelOntologyAncestor = null;
+                let targetNodeFirsttopLevelOntologyAncestor = null;
                 async.series(
                     [
                         function (callbackSeries) {
@@ -1045,49 +1082,50 @@ var Lineage_blend = (function () {
                         //filter formal ontology axioms to selected nodes
                         function (callbackSeries) {
                             if (!Config.sources[Lineage_classes.mainSource].editable) {
-                                $("#lineageAddEdgeDialog_part14PropertiesTreeDiv").html("source " + Lineage_classes.mainSource + " is not editable");
+                                $("#lineageAddEdgeDialog_TopLevelOntologyPropertiesTreeDiv").html("source " + Lineage_classes.mainSource + " is not editable");
                                 return callbackSeries();
                             }
-                            let inSource = Config.formalOntologySourceLabel;
+                            let inSource = Config.currentTopLevelOntology;
                             let ancestorsDepth = 5;
                             Sparql_OWL.getNodeParents(Lineage_classes.mainSource, null, [self.sourceNode.id, self.targetNode.id], ancestorsDepth, {}, function (err, result) {
                                 if (err) return callbackSeries(err);
-
+var topLevelOntologyPattern=Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern
                                 result.forEach(function (item) {
                                     if (item.concept.value == self.sourceNode.id) {
-                                        if (item.concept.value.indexOf("/lis14/") > -1) {
-                                            sourceNodeFirstPart14Ancestor = item.concept.value;
+                                        if (item.concept.value.indexOf(topLevelOntologyPattern) > -1) {
+                                            sourceNodeFirsttopLevelOntologyAncestor = item.concept.value;
                                             return;
                                         }
                                         for (var i = 1; i <= ancestorsDepth; i++) {
                                             if (item["broader" + i]) {
-                                                if (item["broader" + i].value.indexOf("/lis14/") > -1) {
-                                                    sourceNodeFirstPart14Ancestor = item["broader" + i].value;
+                                                if (item["broader" + i].value.indexOf(topLevelOntologyPattern) > -1) {
+                                                    sourceNodeFirsttopLevelOntologyAncestor = item["broader" + i].value;
                                                     break;
                                                 }
                                             }
                                         }
                                     } else if (item.concept.value == self.targetNode.id) {
-                                        if (item.concept.value.indexOf("/lis14/") > -1) {
-                                            targetNodeFirstPart14Ancestor = item.concept.value;
+                                        if (item.concept.value.indexOf(topLevelOntologyPattern) > -1) {
+                                            targetNodeFirsttopLevelOntologyAncestor = item.concept.value;
                                             return;
                                         }
                                         for (var i = 1; i <= ancestorsDepth; i++) {
                                             if (item["broader" + i]) {
-                                                if (item["broader" + i].value.indexOf("/lis14/") > -1) {
-                                                    targetNodeFirstPart14Ancestor = item["broader" + i].value;
+                                                if (item["broader" + i].value.indexOf(topLevelOntologyPattern) > -1) {
+                                                    targetNodeFirsttopLevelOntologyAncestor = item["broader" + i].value;
                                                     break;
                                                 }
                                             }
                                         }
                                     }
                                 });
-                                if (!sourceNodeFirstPart14Ancestor || !targetNodeFirstPart14Ancestor) {
-                                    alert("no matching Part14 superClass");
+                                if (!sourceNodeFirsttopLevelOntologyAncestor || !targetNodeFirsttopLevelOntologyAncestor) {
+                                   // alert("no matching topLevelOntology superClass");
+                                    MainController.UI.message("no matching superClass in "+Config.currentTopLevelOntology)
                                     return callbackSeries();
                                 }
 
-                                self.getAuthorizedProperties(Config.formalOntologySourceLabel, sourceNodeFirstPart14Ancestor, targetNodeFirstPart14Ancestor, function (err, _authorizedProps) {
+                                self.getAuthorizedProperties(Config.currentTopLevelOntology, sourceNodeFirsttopLevelOntologyAncestor, targetNodeFirsttopLevelOntologyAncestor, function (err, _authorizedProps) {
                                     authorizedProps = _authorizedProps;
                                     return callbackSeries();
                                 });
@@ -1123,7 +1161,7 @@ var Lineage_blend = (function () {
                                                 data: {
                                                     id: child.id,
                                                     label: child.label,
-                                                    source: Config.formalOntologySourceLabel,
+                                                    source: Config.currentTopLevelOntology,
                                                 },
                                             });
                                         }
@@ -1132,18 +1170,18 @@ var Lineage_blend = (function () {
 
                                 if (!distinctProps[propObj.prop]) {
                                     var label;
-                                    var cssClass = "lineageAddEdgeDialog_part14Prop";
-                                    if (propObj.type != "") cssClass = "lineageAddEdgeDialog_part14SemiGenericProp";
+                                    var cssClass = "lineageAddEdgeDialog_topLevelOntologyProp";
+                                    if (propObj.type != "") cssClass = "lineageAddEdgeDialog_topLevelOntologySemiGenericProp";
                                     if (propObj.isGenericProperty) {
-                                        cssClass = "lineageAddEdgeDialog_part14GenericProp";
+                                        cssClass = "lineageAddEdgeDialog_topLevelOntologyGenericProp";
                                         label = "any" + "-" + propObj.label + "->" + "any";
                                     } else
                                         label =
-                                            Sparql_common.getLabelFromURI(propObj.type.indexOf("R") ? sourceNodeFirstPart14Ancestor : "any") +
+                                            Sparql_common.getLabelFromURI(propObj.type.indexOf("R") ? sourceNodeFirsttopLevelOntologyAncestor : "any") +
                                             "-" +
                                             propObj.label +
                                             "->" +
-                                            Sparql_common.getLabelFromURI(propObj.type.indexOf("D") ? targetNodeFirstPart14Ancestor : "any");
+                                            Sparql_common.getLabelFromURI(propObj.type.indexOf("D") ? targetNodeFirsttopLevelOntologyAncestor : "any");
 
                                     jstreeData.push({
                                         id: propObj.prop,
@@ -1152,7 +1190,7 @@ var Lineage_blend = (function () {
                                         data: {
                                             id: propObj.prop,
                                             label: propObj.label,
-                                            source: Config.formalOntologySourceLabel,
+                                            source: Config.currentTopLevelOntology,
                                         },
                                     });
                                 }
@@ -1210,7 +1248,7 @@ var Lineage_blend = (function () {
                         //add specific(mainSource) source properties to jstree data
                         function (callbackSeries) {
                             var specificSourceLabel = Lineage_common.currentSource || Lineage_classes.mainSource;
-                            var cssClass = "lineageAddEdgeDialog_part14SpecificProp";
+                            var cssClass = "lineageAddEdgeDialog_topLevelOntologySpecificProp";
                             jstreeData.forEach(function (node) {
                                 if (self.currentSpecificObjectPropertiesMap[node.id]) {
                                     self.currentSpecificObjectPropertiesMap[node.id].forEach(function (item) {
@@ -1234,7 +1272,7 @@ var Lineage_blend = (function () {
                                 refineProperty: {
                                     label: "Refine Property",
                                     action: function (_e) {
-                                        if (self.currentPropertiesTreeNode.data.source != Config.formalOntologySourceLabel) return alert("only properties form lis14 can be refined");
+                                        if (self.currentPropertiesTreeNode.data.source != Config.currentTopLevelOntology) return alert("only properties from "+Config.currentTopLevelOntology+" can be refined");
                                         var subPropertyLabel = prompt("enter label for subProperty of property " + self.currentPropertiesTreeNode.data.label);
                                         if (!subPropertyLabel) return;
                                         Lineage_blend.createSubProperty(Lineage_classes.mainSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, function (err, result) {
@@ -1290,9 +1328,9 @@ var Lineage_blend = (function () {
         execAddEdgeFromGraph: function () {},
         addGenericPredicatesToPredicatesTree: function () {
             var jstreeData = [];
-            self.authorizedProperties[Config.formalOntologySourceLabel].forEach(function (item) {
+            self.authorizedProperties[Config.currentTopLevelOntology].forEach(function (item) {
                 if (item.isGenericProperty) {
-                    var text = "<span class='lineageAddEdgeDialog_part14GenericProp'>" + (item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value)) + "</span>";
+                    var text = "<span class='lineageAddEdgeDialog_topLevelOntologyGenericProp'>" + (item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value)) + "</span>";
 
                     jstreeData.push({
                         id: item.prop.value,
@@ -1301,7 +1339,7 @@ var Lineage_blend = (function () {
                         data: {
                             id: item.prop.value,
                             label: item.propLabel,
-                            source: Config.formalOntologySourceLabel,
+                            source: Config.currentTopLevelOntology,
                         },
                     });
                 }
@@ -1437,13 +1475,13 @@ var Lineage_blend = (function () {
             if (err) callback(err);
 
             var sourceObjects = [];
-            var part14Objects = [];
+            var TopLevelOntologyObjects = [];
             result.forEach(function (item) {
                 if (item.id.type == "bnode") return;
                 var prefix = "";
-                if (item.g.value.indexOf("lis14") > -1) {
-                    prefix = " part14:";
-                    part14Objects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
+                if (item.g.value.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > -1) {
+                    prefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix+":";
+                    TopLevelOntologyObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
                 } else {
                     if (item.label) sourceObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
                 }
@@ -1457,6 +1495,7 @@ var Lineage_blend = (function () {
 
             var usualObjects = [];
             KGcreator.usualObjectClasses.forEach(function (item) {
+                if(item.indexOf("_")<0)
                 usualObjects.push({ label: item, id: item });
             });
 
@@ -1470,7 +1509,7 @@ var Lineage_blend = (function () {
                 predicates: predicates,
                 usualObjects: usualObjects,
                 sourceObjects: sourceObjects,
-                part14Objects: part14Objects,
+                TopLevelOntologyObjects: TopLevelOntologyObjects,
                 basicTypeClasses: basicTypeClasses,
             });
         });

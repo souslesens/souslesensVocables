@@ -211,6 +211,7 @@ var Sparql_INDIVIDUALS = (function () {
             groupByStr = " GROUP BY  ?prop ?rangeType ?domainType  ";
         }
         fromStr = Sparql_common.getFromStr(sourceLabel);
+        var uriPattern=Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
             "select " +
@@ -219,7 +220,7 @@ var Sparql_INDIVIDUALS = (function () {
             fromStr +
             "  WHERE {{" +
             "   ?domain ?prop ?range. ?domain rdfs:label ?domainLabel.  ?range rdfs:label ?rangeLabel. " +
-            ' ?range rdf:type ?rangeType. ?domain rdf:type ?domainType. filter(regex(str(?prop),"part14")) ' +
+            ' ?range rdf:type ?rangeType. ?domain rdf:type ?domainType. filter(regex(str(?prop),'+uriPattern+')) ' +
             filterStr +
             "}";
         /*   +

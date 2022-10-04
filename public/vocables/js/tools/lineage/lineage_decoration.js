@@ -14,7 +14,7 @@ var Lineage_decoration = (function () {
 
     self.fillcolorsMap = function () {
         var ids = ["http://rds.posccaesar.org/ontology/lis14/rdl/Activity", "http://rds.posccaesar.org/ontology/lis14/rdl/Aspect", "http://rds.posccaesar.org/ontology/lis14/rdl/Object"];
-        Sparql_OWL.getNodeChildren(Config.formalOntologySourceLabel, null, ids, 5, null, function (err, result) {
+        Sparql_OWL.getNodeChildren(Config.currentTopLevelOntology, null, ids, 5, null, function (err, result) {
             result.forEach(function (item) {
                 for (var i = 1; i <= 5; i++) {
                     if (item["child" + i]) {
@@ -110,7 +110,7 @@ var Lineage_decoration = (function () {
         self.usePart14Classes = false;
         self.colorsMap = {};
         var imports = Config.sources[Lineage_classes.mainSource].imports;
-        if (imports && imports.indexOf(Config.formalOntologySourceLabel) > -1) {
+        if (imports && imports.indexOf(Config.currentTopLevelOntology) > -1) {
             part14TopTypes = true;
             self.usePart14Classes = true;
             self.colorsMap = self.part14ColorsMap;
@@ -145,14 +145,20 @@ var Lineage_decoration = (function () {
                         if (item.type.value.indexOf(type) > -1) return (ok = false);
                     });
 
+                    if(item.x.value=="http://data.total.com/resource/tsf/ontologies-use-cases/Restriction")
+                        var x=3
                     if (ok) {
                         var typeValue = item.type.value;
                         if (item.type.value.indexOf("lis14") < 0) {
                             return;
                         }
                         if (!self.colorsMap[typeValue]) {
-                            self.colorsMap[typeValue] = common.paletteIntense[Object.keys(self.colorsMap).length];
+                            self.colorsMap[typeValue] = common.paletteIntense[Object.keys(self.colorsMap).length%Object.keys(common.paletteIntense).length];
                         }
+                        //take only firstLis14Parent
+                        if( nodesTypesMap[item.x.value])
+                            return ;
+
                         nodesTypesMap[item.x.value] = {
                             type: item.type.value,
                             color: self.colorsMap[typeValue],

@@ -13,4 +13,4 @@ socket.on("hello", function (_data) {
 socket.on("connect", function (_data) {
     socket.emit("join", "Hello World from client");
 });
-socket.connect();
+//socket.connect();

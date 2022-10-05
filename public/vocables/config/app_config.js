@@ -32,11 +32,13 @@ var Config = (function() {
   self.dictionarySource = "TSF-DICTIONARY";
 
   self.topLevelOntologies = {
-    "ISO_15926-part-14_PCA": { uriPattern: "lis14",prefix:"part14" },
-    "BFO": { uriPattern: "obo",prefix:"bfo" },
-    "DOLCE": { uriPattern: "dul",prefix:"dul"}
+    "ISO_15926-part-14_PCA": { uriPattern: "lis14", prefix: "part14" },
+    "BFO": { uriPattern: "obo", prefix: "bfo" },
+    "DOLCE": { uriPattern: "dul", prefix: "dul" }
 
   };
+
+  self.namedSetsThesaurusGraphUri = "http://souslesens.org/resource/named-triple-sets/";
 
 
   self.defaultSparqlPrefixes = {

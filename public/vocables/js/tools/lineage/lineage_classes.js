@@ -122,7 +122,7 @@ var Lineage_classes = (function() {
         $("#LineageLinkedDataTab").load("snippets/lineage/lineageLinkedDataSearchDialog.html", function() {
         });
 
-        Lineage_decoration.init();
+        Lineage_sets.init();
         if (callback) callback();
       });
     });
@@ -138,6 +138,7 @@ var Lineage_classes = (function() {
     MainController.currentSource = sourceLabel;
 
     Lineage_blend.graphModification.setTopLevelOntologyFromImports(sourceLabel)
+    Lineage_decoration.init();
 
 
 
@@ -1555,7 +1556,7 @@ var Lineage_classes = (function() {
     }
     if (classIds == "all") classIds = null;
     var physics=true;
-    var graphSpatialisation=$("#graphSpatialisationSelect").val()
+    var graphSpatialisation=$("#Lineage_classes_graphSpatialisationSelect").val()
     if(graphSpatialisation="excludeRelations")
       physics=false;
 
@@ -1751,7 +1752,7 @@ var Lineage_classes = (function() {
     }
     if (classIds == "all") classIds = null;
     var physics=true;
-    var graphSpatialisation=$("#graphSpatialisationSelect").val()
+    var graphSpatialisation=$("#Lineage_classes_graphSpatialisationSelect").val()
     if(graphSpatialisation=="excludeRelations")
       physics=false;
     MainController.UI.message("");
@@ -2695,12 +2696,15 @@ var Lineage_classes = (function() {
       var jstreeData = Lineage_classes.selection.getSelectedNodesTree();
       var options = {
         openAll: true,
+        withCheckboxes:true,
         selectTreeNodeFn: Lineage_classes.selection.onSelectedNodeTreeclick
       };
       $("#mainDialogDiv").html(
         "<div style=\"display: flex;flex-direction: row\">" +
         " <div>" +
-        "    Selected nodes  <div class=\"jstreeContainer\" style=\"width: 350px;height: 700px;overflow: auto\">" +
+        "    Selected nodes " +
+        "<div><button onclick='Lineage_sets.createNewSet()'>create new Set</button></div> </div>" +
+        " <div class=\"jstreeContainer\" style=\"width: 350px;height: 700px;overflow: auto\">" +
         "      <div id=\"LineageClasses_selectdNodesTreeDiv\"></div>" +
         "    </div>" +
         " </div>" +

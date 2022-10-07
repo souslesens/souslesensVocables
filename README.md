@@ -99,8 +99,11 @@ App is available at [localhost:3010/vocables](http://localhost:3010/vocables)
 
 souslesensVocable is deployed with Docker and docker-compose. The following services are included in the docker-compose stack:
 
--   souslesensVocable
+-   SouslesensVocable
 -   Virtuoso
+-   ElasticSearch
+-   SQLserver
+-   SpacyServer
 
 Copy `docker-compose.yaml` and `env.template` to your production server and create a `.env` file.
 

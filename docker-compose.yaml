@@ -11,9 +11,11 @@ services:
         volumes:
             - "${DATA_ROOT_DIR:-/tmp}/vocables/app/config:\
               /app/config"
-        env_file:
-            - default.env
-            - .env
+        environment:
+          USER_USERNAME: admin
+          USER_PASSWORD: ${USER_PASSWORD}
+          DEFAULT_SPARQL_URL: http://virtuoso:8890/sparql
+          SQLSERVER_PASSWORD: ${SA_PASSWORD}
         networks:
             - backend
 
@@ -31,7 +33,7 @@ services:
         image: mcr.microsoft.com/mssql/server:2019-latest
         environment:
             ACCEPT_EULA: "Y"
-            SA_PASSWORD: ${SA_PASSWORD:-superSecretP4ssword!}
+            SA_PASSWORD: ${SA_PASSWORD}
         volumes:
             - "${DATA_ROOT_DIR:-/tmp}/vocables/sqlserver:\
               /var/opt/mssql"

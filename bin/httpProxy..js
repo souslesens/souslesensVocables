@@ -110,11 +110,12 @@ var httpProxy = {
 
             if (typeof body === "string") {
                 body = body.trim();
-                var p=body.toLowerCase().indexOf("bindings");
-                var q=body.toLowerCase().indexOf("results");
-                if(p<0 && q <0  )// error virtuoso
+                var p = body.toLowerCase().indexOf("bindings");
+                var q = body.toLowerCase().indexOf("results");
+                if (p < 0 && q < 0)
+                    // error virtuoso
                     return callback(body);
-               // if ((body.toLowerCase().indexOf("error") > -1 && body.indexOf("error") < 30) || body.indexOf("{") < 0) return callback(body); //error
+                // if ((body.toLowerCase().indexOf("error") > -1 && body.indexOf("error") < 30) || body.indexOf("{") < 0) return callback(body); //error
 
                 var err = null;
                 try {

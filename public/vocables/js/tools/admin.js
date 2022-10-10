@@ -72,9 +72,8 @@ var Admin = (function () {
         if (sources.length != 1) return alert("select a single source");
 
         $("#waitImg").css("display", "block");
-       // MainController.UI.message(sources[0] + " processing...");
-        Sparql_proxy.exportGraph(sources[0])
-
+        // MainController.UI.message(sources[0] + " processing...");
+        Sparql_proxy.exportGraph(sources[0]);
     };
     self.getClassesLineage = function () {
         //   var sources = $("#sourcesTreeDiv").jstree(true).get_checked();

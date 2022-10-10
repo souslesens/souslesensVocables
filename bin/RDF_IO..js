@@ -141,7 +141,8 @@ var RDF_IO = {
         const textStream = require("streamify-string")("" + fs.readFileSync(filePath));
         var triples = "";
 
-        rdfParser.parse(textStream, { contentType: "text/turtle", baseIRI: "" })
+        rdfParser
+            .parse(textStream, { contentType: "text/turtle", baseIRI: "" })
             .on("data", function (quad) {
                 var objectValue = "<" + quad.object.value + ">";
                 var subjectValue = quad.subject.value;

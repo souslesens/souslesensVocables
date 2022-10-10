@@ -543,11 +543,11 @@ var Lineage_blend = (function () {
 
         self.getAssociationAllowedProperties(fromNode, toNode, function (err, result) {
             if (err) return alert(err);
-var uriPattern=Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern
+            var uriPattern = Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern;
             result.forEach(function (item) {
                 if (!distinctProperties[item.id]) {
                     var prefix = "";
-                    if (item.p.value.indexOf(uriPattern) > -1) prefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix+":";
+                    if (item.p.value.indexOf(uriPattern) > -1) prefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix + ":";
                     properties.push({
                         id: item.p.value,
                         label: prefix + (item.pLabel ? item.pLabel.value : Sparql_common.getLabelFromURI(item.p.value)),
@@ -569,7 +569,7 @@ var uriPattern=Config.topLevelOntologies[Config.currentTopLevelOntology].uriPatt
     };
 
     self.getAssociationAllowedProperties = function (fromNode, toNode, callback) {
-        var topOntology = Config.currentTopLevelOntology
+        var topOntology = Config.currentTopLevelOntology;
 
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -618,9 +618,7 @@ var uriPattern=Config.topLevelOntologies[Config.currentTopLevelOntology].uriPatt
     };
 
     self.graphModification = {
-
-
-      /*  initTopLevelOntologySelect:function(selectId){
+        /*  initTopLevelOntologySelect:function(selectId){
 
             var topLevelOntologies=Object.keys(Config.topLevelOntologies)
 
@@ -628,47 +626,39 @@ var uriPattern=Config.topLevelOntologies[Config.currentTopLevelOntology].uriPatt
             Config.currentTopLevelOntology= $("#"+selectId).val()
         }*/
 
-
-        setTopLevelOntologyFromImports:function(sourceLabel) {
-            var imports=Config.sources[sourceLabel].imports
-            if(!imports)
-               return  Config.currentTopLevelOntology= Object.keys(Config.topLevelOntologies)[0]
-            if( !Array.isArray(imports))
-                imports=[imports]
-            var ok=false
-            imports.forEach(function(source){
-                if(!ok && Config.topLevelOntologies[source]) {
-                    ok=true;
-                    Config.currentTopLevelOntology = source
+        setTopLevelOntologyFromImports: function (sourceLabel) {
+            var imports = Config.sources[sourceLabel].imports;
+            if (!imports) return (Config.currentTopLevelOntology = Object.keys(Config.topLevelOntologies)[0]);
+            if (!Array.isArray(imports)) imports = [imports];
+            var ok = false;
+            imports.forEach(function (source) {
+                if (!ok && Config.topLevelOntologies[source]) {
+                    ok = true;
+                    Config.currentTopLevelOntology = source;
                 }
-            })
-            }
-
-        ,
-
-
+            });
+        },
 
         showAddNodeGraphDialog: function () {
             self.graphModification.creatingNodeTriples = [];
             self.graphModification.creatingsourceUri = null;
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
-             //   self.graphModification.initTopLevelOntologySelect("LineageBlend_currentTopLevelOntologyNodesSelect")
+                //   self.graphModification.initTopLevelOntologySelect("LineageBlend_currentTopLevelOntologyNodesSelect")
                 self.getSourcePossiblePredicatesAndObject(Lineage_classes.mainSource, function (err, result) {
                     if (err) return alert(err.responseText);
                     if (!Config.sources[Lineage_classes.mainSource].allowIndividuals) {
                         $("#LineageBlend_creatingNamedIndividualButton").css("display", "none");
                     }
 
-
                     self.currentPossibleClassesAndPredicates = result;
-                    var allObjects= result.usualObjects.concat(result.TopLevelOntologyObjects).concat([""]).concat(result.sourceObjects)
+                    var allObjects = result.usualObjects.concat(result.TopLevelOntologyObjects).concat([""]).concat(result.sourceObjects);
 
                     common.fillSelectOptions("KGcreator_predicateSelect", result.predicates, true, "label", "id");
-                    common.fillSelectOptions("KGcreator_objectSelect",allObjects, true, "label", "id");
+                    common.fillSelectOptions("KGcreator_objectSelect", allObjects, true, "label", "id");
                     common.fillSelectOptions("LineageBlend_creatingNodePredicatesSelect", result.predicates, true, "label", "id");
                     common.fillSelectOptions("LineageBlend_creatingNodeObjectsSelect", allObjects, true, "label", "id");
-                    common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select",allObjects, true, "label", "id");
+                    common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", allObjects, true, "label", "id");
                 });
                 self.possibleNamedIndividuals = {};
             });
@@ -890,7 +880,7 @@ var uriPattern=Config.topLevelOntologies[Config.currentTopLevelOntology].uriPatt
                 }
 
                 if (!targetUri) {
-                    alert("xxxx")
+                    alert("xxxx");
                     //targetUri  declared in the list as source node
                     predicate = "part14:partOf";
                     targetUri = sourceUrisMap[classLabel];
@@ -899,7 +889,7 @@ var uriPattern=Config.topLevelOntologies[Config.currentTopLevelOntology].uriPatt
                     wrongClasses.push({ line: indexLine, classLabel: classLabel });
                 } else {
                     triples.push({ subject: sourceUri, predicate: "rdfs:label", object: label });
-                    self.possibleNamedIndividuals[label]=sourceUri
+                    self.possibleNamedIndividuals[label] = sourceUri;
                     if (self.graphModification.currentCreatingNodeType == "Class") {
                         triples.push({ subject: sourceUri, predicate: "rdf:type", object: "owl:Class" });
                         triples.push({ subject: sourceUri, predicate: "rdfs:subClassOf", object: targetUri });
@@ -1090,7 +1080,7 @@ var uriPattern=Config.topLevelOntologies[Config.currentTopLevelOntology].uriPatt
                             let ancestorsDepth = 5;
                             Sparql_OWL.getNodeParents(Lineage_classes.mainSource, null, [self.sourceNode.id, self.targetNode.id], ancestorsDepth, {}, function (err, result) {
                                 if (err) return callbackSeries(err);
-var topLevelOntologyPattern=Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern
+                                var topLevelOntologyPattern = Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern;
                                 result.forEach(function (item) {
                                     if (item.concept.value == self.sourceNode.id) {
                                         if (item.concept.value.indexOf(topLevelOntologyPattern) > -1) {
@@ -1121,15 +1111,20 @@ var topLevelOntologyPattern=Config.topLevelOntologies[Config.currentTopLevelOnto
                                     }
                                 });
                                 if (!sourceNodeFirsttopLevelOntologyAncestor || !targetNodeFirsttopLevelOntologyAncestor) {
-                                   // alert("no matching topLevelOntology superClass");
-                                    MainController.UI.message("no matching superClass in "+Config.currentTopLevelOntology)
+                                    // alert("no matching topLevelOntology superClass");
+                                    MainController.UI.message("no matching superClass in " + Config.currentTopLevelOntology);
                                     return callbackSeries();
                                 }
 
-                                self.getAuthorizedProperties(Config.currentTopLevelOntology, sourceNodeFirsttopLevelOntologyAncestor, targetNodeFirsttopLevelOntologyAncestor, function (err, _authorizedProps) {
-                                    authorizedProps = _authorizedProps;
-                                    return callbackSeries();
-                                });
+                                self.getAuthorizedProperties(
+                                    Config.currentTopLevelOntology,
+                                    sourceNodeFirsttopLevelOntologyAncestor,
+                                    targetNodeFirsttopLevelOntologyAncestor,
+                                    function (err, _authorizedProps) {
+                                        authorizedProps = _authorizedProps;
+                                        return callbackSeries();
+                                    }
+                                );
                             });
                         },
                         /*   function(callbackSeries) {
@@ -1273,7 +1268,8 @@ var topLevelOntologyPattern=Config.topLevelOntologies[Config.currentTopLevelOnto
                                 refineProperty: {
                                     label: "Refine Property",
                                     action: function (_e) {
-                                        if (self.currentPropertiesTreeNode.data.source != Config.currentTopLevelOntology) return alert("only properties from "+Config.currentTopLevelOntology+" can be refined");
+                                        if (self.currentPropertiesTreeNode.data.source != Config.currentTopLevelOntology)
+                                            return alert("only properties from " + Config.currentTopLevelOntology + " can be refined");
                                         var subPropertyLabel = prompt("enter label for subProperty of property " + self.currentPropertiesTreeNode.data.label);
                                         if (!subPropertyLabel) return;
                                         Lineage_blend.createSubProperty(Lineage_classes.mainSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, function (err, result) {
@@ -1481,7 +1477,7 @@ var topLevelOntologyPattern=Config.topLevelOntologies[Config.currentTopLevelOnto
                 if (item.id.type == "bnode") return;
                 var prefix = "";
                 if (item.g.value.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > -1) {
-                    prefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix+":";
+                    prefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix + ":";
                     TopLevelOntologyObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
                 } else {
                     if (item.label) sourceObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
@@ -1496,8 +1492,7 @@ var topLevelOntologyPattern=Config.topLevelOntologies[Config.currentTopLevelOnto
 
             var usualObjects = [];
             KGcreator.usualObjectClasses.forEach(function (item) {
-                if(item.indexOf("_")<0)
-                usualObjects.push({ label: item, id: item });
+                if (item.indexOf("_") < 0) usualObjects.push({ label: item, id: item });
             });
 
             var basicTypeClasses = [];

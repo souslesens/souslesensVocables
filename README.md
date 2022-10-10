@@ -11,10 +11,10 @@
 
 It has functionalites to :
 
--   read : visualize, navigate and export
--   edit : create , modify, aggregate
+-   read : visualize, navigate and export SKOS or OWL resources
+-   edit : create , modify, aggregate OWL resources
 
-both on SKOS or OWL resources
+A key feature of SLSV is graph visualization and interaction performed using Visjs/vis-network open source solution
 
 Annotate tool allows annotate textual corpus with several registered lexical resources and identify missing terms
 

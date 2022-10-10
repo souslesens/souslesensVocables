@@ -99,11 +99,11 @@
             <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_blend.graphModification.addClassOrIndividualTriples()" style="width: 100px">OK</button>
         </div>
     </div>
-    <div id="LineageBlend_creatingNodeListTab" style="display: flex; flex-direction: column">
-        <span>Paste table data column1 = Label, column2= Class Label; </span>
+    <div id="LineageBlend_creatingNodeListTab" style="display: flex; flex-direction: column;height:400px">
+        <span><b>Paste table data here:</b>  column1 = Label, column2= Class Label;  separator tab or ,</span>
         <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_blend.graphModification.addClassesOrIndividualsTriples()" style="width: 100px">OK</button>
 
-        <textarea id="LineageBlend_creatingNode_nodeListTA" style="width: 600px; height: 250px"></textarea>
+        <textarea id="LineageBlend_creatingNode_nodeListTA" style="width: 540px; height: 350px"></textarea>
     </div>
     <div id="LineageBlend_creatingNodeListJournalTab" style="display: flex; flex-direction: column">
         <div id="LineageBlend_creatingNodeListJournalDiv"></div>
@@ -125,7 +125,7 @@
     });
     $("#LineageBlend_creatingNodeClassParamsDiv").dialog({
         autoOpen: false,
-        height: 400,
+        height: 600,
         width: 600,
         modal: true,
     });

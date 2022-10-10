@@ -899,6 +899,7 @@ var uriPattern=Config.topLevelOntologies[Config.currentTopLevelOntology].uriPatt
                     wrongClasses.push({ line: indexLine, classLabel: classLabel });
                 } else {
                     triples.push({ subject: sourceUri, predicate: "rdfs:label", object: label });
+                    self.possibleNamedIndividuals[label]=sourceUri
                     if (self.graphModification.currentCreatingNodeType == "Class") {
                         triples.push({ subject: sourceUri, predicate: "rdf:type", object: "owl:Class" });
                         triples.push({ subject: sourceUri, predicate: "rdfs:subClassOf", object: targetUri });

@@ -46,6 +46,8 @@ services:
         volumes:
             - "${DATA_ROOT_DIR:-/tmp}/vocables/elasticsearch/data:\
               /usr/share/elasticsearch/data"
+        ports:
+            - ${VIRTUOSO_LISTEN_PORT:-8890}:8890
         networks:
             - backend
 

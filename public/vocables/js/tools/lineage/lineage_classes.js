@@ -522,7 +522,8 @@ var Lineage_classes = (function() {
             var node=visjsGraph.data.nodes.get(_properties.items[0])
             Lineage_classes.mainSource =node.data.source
           }
-          Lineage_decoration.colorGraphNodesByType(_properties.items);
+          var nodes=visjsGraph.data.nodes.get(_properties.items);
+          Lineage_decoration.colorGraphNodesByType(nodes);
         }
       }
     };

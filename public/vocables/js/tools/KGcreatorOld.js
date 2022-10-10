@@ -35,7 +35,20 @@ var KGcreator = (function () {
         "",
     ];
 
-    self.usualObjectClasses = ["owl:Thing","owl:Class", "owl:NamedIndividual", "owl:Thing", "owl:Property", "owl:Restriction", "skos:Concept", "skos:Collection", "slsv:TopConcept", "_function", "_blankNode", ""];
+    self.usualObjectClasses = [
+        "owl:Thing",
+        "owl:Class",
+        "owl:NamedIndividual",
+        "owl:Thing",
+        "owl:Property",
+        "owl:Restriction",
+        "skos:Concept",
+        "skos:Collection",
+        "slsv:TopConcept",
+        "_function",
+        "_blankNode",
+        "",
+    ];
 
     self.basicTypeClasses = ["owl:Class", "owl:NamedIndividual", "owl:Thing", ""];
     self.usualSubjectTypes = ["_function", "_blankNode", ""];
@@ -292,7 +305,7 @@ var KGcreator = (function () {
             }
         } else {
             if (obj.event.button != 2)
-              //if popup menu dont load
+                //if popup menu dont load
                 self.loadMappings(obj.node.data.id);
         }
 
@@ -394,78 +407,78 @@ var KGcreator = (function () {
 
     self.initCentralPanel = function () {
         async.series(
-          [
-              function (callbackSeries) {
-                  Sparql_OWL.getDictionary("ISO_15926-part-14_PCA", null, null, function (err, result) {
-                      if (err) callbackSeries(err);
-                      result.sort(function (a, b) {
-                          if (!a.label || !b.label) return 0;
-                          if (a.label.value > b.label.value) return 1;
-                          if (a.label.value < b.label.value) return -1;
-                          return 0;
-                      });
-                      result.forEach(function (item) {
-                          if (item.id.type == "bnode") return;
-                          self.usualObjectClasses.push("part14:" + item.label.value);
-                      });
-                      callbackSeries();
-                  });
-              },
-              function (callbackSeries) {
-                  Sparql_OWL.getObjectProperties("ISO_15926-part-14_PCA", null, null, function (err, result) {
-                      if (err) callbackSeries(err);
-                      result.sort(function (a, b) {
-                          if (!a.propLabel || !b.propLabel) return 0;
-                          if (a.propLabel.value > b.propLabel.value) return 1;
-                          if (a.propLabel.value < b.propLabel.value) return -1;
-                          return 0;
-                      });
-                      self.propertiesMap = {};
-                      result.forEach(function (item) {
-                          self.propertiesMap["part14:" + item.propLabel.value] = {
-                              id: item.prop.value,
-                              label: item.propLabel.value,
-                              inverseProp: item.inverseProp ? item.inverseProp.value : null,
-                              inversePropLabel: item.inversePropLabel ? "part14:" + item.inversePropLabel.value : null,
-                          };
+            [
+                function (callbackSeries) {
+                    Sparql_OWL.getDictionary("ISO_15926-part-14_PCA", null, null, function (err, result) {
+                        if (err) callbackSeries(err);
+                        result.sort(function (a, b) {
+                            if (!a.label || !b.label) return 0;
+                            if (a.label.value > b.label.value) return 1;
+                            if (a.label.value < b.label.value) return -1;
+                            return 0;
+                        });
+                        result.forEach(function (item) {
+                            if (item.id.type == "bnode") return;
+                            self.usualObjectClasses.push("part14:" + item.label.value);
+                        });
+                        callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    Sparql_OWL.getObjectProperties("ISO_15926-part-14_PCA", null, null, function (err, result) {
+                        if (err) callbackSeries(err);
+                        result.sort(function (a, b) {
+                            if (!a.propLabel || !b.propLabel) return 0;
+                            if (a.propLabel.value > b.propLabel.value) return 1;
+                            if (a.propLabel.value < b.propLabel.value) return -1;
+                            return 0;
+                        });
+                        self.propertiesMap = {};
+                        result.forEach(function (item) {
+                            self.propertiesMap["part14:" + item.propLabel.value] = {
+                                id: item.prop.value,
+                                label: item.propLabel.value,
+                                inverseProp: item.inverseProp ? item.inverseProp.value : null,
+                                inversePropLabel: item.inversePropLabel ? "part14:" + item.inversePropLabel.value : null,
+                            };
 
-                          self.usualProperties.push("part14:" + item.propLabel.value);
-                      });
-                      // set missing inverse props
-                      for (var key in self.propertiesMap) {
-                          if (self.propertiesMap[key].inversePropLabel) {
-                              if (!self.propertiesMap[self.propertiesMap[key].inversePropLabel].inversePropLabel) self.propertiesMap[self.propertiesMap[key].inversePropLabel].inversePropLabel = key;
-                              self.propertiesMap[self.propertiesMap[key].inversePropLabel].inverseProp = self.propertiesMap[key];
-                          }
-                      }
+                            self.usualProperties.push("part14:" + item.propLabel.value);
+                        });
+                        // set missing inverse props
+                        for (var key in self.propertiesMap) {
+                            if (self.propertiesMap[key].inversePropLabel) {
+                                if (!self.propertiesMap[self.propertiesMap[key].inversePropLabel].inversePropLabel) self.propertiesMap[self.propertiesMap[key].inversePropLabel].inversePropLabel = key;
+                                self.propertiesMap[self.propertiesMap[key].inversePropLabel].inverseProp = self.propertiesMap[key];
+                            }
+                        }
 
-                      callbackSeries();
-                  });
-              },
-              function (callbackSeries) {
-                  common.fillSelectOptions("KGcreator_subjectSelect", self.usualSubjectTypes, true);
-                  common.fillSelectOptions("KGcreator_predicateSelect", self.usualProperties, true);
-                  common.fillSelectOptions("KGcreator_objectSelect", self.usualObjectClasses, true);
+                        callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    common.fillSelectOptions("KGcreator_subjectSelect", self.usualSubjectTypes, true);
+                    common.fillSelectOptions("KGcreator_predicateSelect", self.usualProperties, true);
+                    common.fillSelectOptions("KGcreator_objectSelect", self.usualObjectClasses, true);
 
-                  self.mainJsonEditor = new JsonEditor("#KGcreator_mainJsonDisplay", {});
-                  /*  const element = document.getElementById('KGcreator_mainJsonDisplay',{});
+                    self.mainJsonEditor = new JsonEditor("#KGcreator_mainJsonDisplay", {});
+                    /*  const element = document.getElementById('KGcreator_mainJsonDisplay',{});
 self.mainJsonEditor = new JSONEditor(element, {});*/
-                  $("#KGcreator_mainJsonDisplay").on("click", () => {
-                      self.mainJsonEditorModified = true;
-                  });
+                    $("#KGcreator_mainJsonDisplay").on("click", () => {
+                        self.mainJsonEditorModified = true;
+                    });
 
-                  $("#KGcreator_dialogDiv").dialog({
-                      autoOpen: false,
-                      height: 600,
-                      width: 600,
-                      modal: false,
-                  });
-                  callbackSeries();
-              },
-          ],
-          function (err) {
-              if (err) return alert(err.responseText);
-          }
+                    $("#KGcreator_dialogDiv").dialog({
+                        autoOpen: false,
+                        height: 600,
+                        width: 600,
+                        modal: false,
+                    });
+                    callbackSeries();
+                },
+            ],
+            function (err) {
+                if (err) return alert(err.responseText);
+            }
         );
     };
 

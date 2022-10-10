@@ -943,7 +943,6 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                     callbackSeries();
                 },
 
-
                 // set ancestors
                 function (callbackSeries) {
                     function recurse(nodeId, parents) {
@@ -960,12 +959,6 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                         recurse(key, allClassesMap[key].parents);
                     }
 
-
-
-
-
-
-
                     //format parents
                     for (var key in allClassesMap) {
                         var obj = allClassesMap[key];
@@ -973,7 +966,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                         parentArray.push(sourceLabel);
                         parentArray = parentArray.reverse();
 
-                     //   delete allClassesMap[key].parent;
+                        //   delete allClassesMap[key].parent;
                         allClassesMap[key].parents = parentArray;
                     }
                     callbackSeries();
@@ -982,7 +975,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                 // add orphan parents to all data
                 function (callbackSeries) {
                     //  return   callbackSeries()
-                    var topNodesToAdd=[]
+                    var topNodesToAdd = [];
                     for (var key in allClassesMap) {
                         var parent = allClassesMap[key].parent;
                         if (parent && parent != sourceLabel) {
@@ -997,13 +990,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                 };
                             }
                         }
-
-
                     }
-                    callbackSeries()
+                    callbackSeries();
                 },
-
-
             ],
             function (err) {
                 return callback(err, { classesMap: allClassesMap, labels: allLabels });

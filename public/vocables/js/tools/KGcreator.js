@@ -35,7 +35,20 @@ var KGcreator = (function () {
         "",
     ];
 
-    self.usualObjectClasses = ["owl:Thing","owl:Class", "owl:NamedIndividual", "owl:Thing", "owl:Property", "owl:Restriction", "skos:Concept", "skos:Collection", "slsv:TopConcept", "_function", "_blankNode", ""];
+    self.usualObjectClasses = [
+        "owl:Thing",
+        "owl:Class",
+        "owl:NamedIndividual",
+        "owl:Thing",
+        "owl:Property",
+        "owl:Restriction",
+        "skos:Concept",
+        "skos:Collection",
+        "slsv:TopConcept",
+        "_function",
+        "_blankNode",
+        "",
+    ];
 
     self.basicTypeClasses = ["owl:Class", "owl:NamedIndividual", "owl:Thing", ""];
     self.usualSubjectTypes = ["_function", "_blankNode", ""];
@@ -64,18 +77,15 @@ var KGcreator = (function () {
         $("#actionDivContolPanelDiv").load("snippets/KGcreator/leftPanel.html", function () {
             self.loadCsvDirs();
 
-            var topLevelOntologies=Object.keys(Config.topLevelOntologies)
-           common.fillSelectOptions("KGcreator_topLevelOntologiesSelect",topLevelOntologies)
+            var topLevelOntologies = Object.keys(Config.topLevelOntologies);
+            common.fillSelectOptions("KGcreator_topLevelOntologiesSelect", topLevelOntologies);
 
-
-
-        $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {
-            self.initCentralPanel();
-        });
-        $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function () {
-            // pass
-        });
-
+            $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {
+                self.initCentralPanel();
+            });
+            $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function () {
+                // pass
+            });
         });
         $("#accordion").accordion("option", { active: 2 });
     };
@@ -110,10 +120,10 @@ var KGcreator = (function () {
         });
     };
 
-    self.onTopLevelOntologyChange=function(topLevelOntology){
-        Config.currentTopLevelOntology=$("#KGcreator_topLevelOntologiesSelect").val()
-        self.initCentralPanel()
-    }
+    self.onTopLevelOntologyChange = function (topLevelOntology) {
+        Config.currentTopLevelOntology = $("#KGcreator_topLevelOntologiesSelect").val();
+        self.initCentralPanel();
+    };
 
     self.loadCsvDirs = function () {
         var payload = {
@@ -225,7 +235,7 @@ var KGcreator = (function () {
             openAll: true,
             selectTreeNodeFn: KGcreator.onCsvtreeNodeClicked,
             contextMenu: KGcreator.getSystemsTreeContextMenu(),
-          //  withCheckboxes: true,
+            //  withCheckboxes: true,
         };
         data.forEach(function (file) {
             if (file.indexOf(".json") > 0) return;
@@ -404,14 +414,14 @@ var KGcreator = (function () {
     };
 
     self.initCentralPanel = function () {
-        Config.currentTopLevelOntology=$("#KGcreator_topLevelOntologiesSelect").val()
-        var topLevelOntology=Config.currentTopLevelOntology
-        var topLevelOntologyPrefix=Config.topLevelOntologies[Config.currentTopLevelOntology].prefix
+        Config.currentTopLevelOntology = $("#KGcreator_topLevelOntologiesSelect").val();
+        var topLevelOntology = Config.currentTopLevelOntology;
+        var topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
 
-       var currentObjectClasses=[]
-        currentObjectClasses=currentObjectClasses.concat(self.usualObjectClasses)
-        var currentPredicates=[]
-        currentPredicates=currentObjectClasses.concat(self.usualProperties)
+        var currentObjectClasses = [];
+        currentObjectClasses = currentObjectClasses.concat(self.usualObjectClasses);
+        var currentPredicates = [];
+        currentPredicates = currentObjectClasses.concat(self.usualProperties);
         self.propertiesMap = {};
 
         async.series(
@@ -427,7 +437,7 @@ var KGcreator = (function () {
                         });
                         result.forEach(function (item) {
                             if (item.id.type == "bnode") return;
-                            currentObjectClasses.push(topLevelOntologyPrefix+":" + (item.label?item.label.value:Sparql_common.getLabelFromURI(item.id.value)));
+                            currentObjectClasses.push(topLevelOntologyPrefix + ":" + (item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value)));
                         });
                         callbackSeries();
                     });
@@ -443,16 +453,15 @@ var KGcreator = (function () {
                         });
 
                         result.forEach(function (item) {
-                            self.propertiesMap[topLevelOntologyPrefix+":" + item.propLabel.value] = {
+                            self.propertiesMap[topLevelOntologyPrefix + ":" + item.propLabel.value] = {
                                 id: item.prop.value,
                                 label: item.propLabel.value,
                                 inverseProp: item.inverseProp ? item.inverseProp.value : null,
-                                inversePropLabel: item.inversePropLabel ? (topLevelOntologyPrefix+":" + item.inversePropLabel.value) : null,
+                                inversePropLabel: item.inversePropLabel ? topLevelOntologyPrefix + ":" + item.inversePropLabel.value : null,
                             };
 
-                            var item2= topLevelOntologyPrefix+":" + item.propLabel.value;
-                            if(currentPredicates.indexOf(item2)<0)
-                                currentPredicates.push(item2);
+                            var item2 = topLevelOntologyPrefix + ":" + item.propLabel.value;
+                            if (currentPredicates.indexOf(item2) < 0) currentPredicates.push(item2);
                         });
                         // set missing inverse props
                         for (var key in self.propertiesMap) {
@@ -633,9 +642,8 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
 
         self.currentJsonObject = data;
 
-        var prefix=Config.topLevelOntologies[Config.currentTopLevelOntology];
-            self.currentJsonObject.topOntologyPrefix=prefix;
-
+        var prefix = Config.topLevelOntologies[Config.currentTopLevelOntology];
+        self.currentJsonObject.topOntologyPrefix = prefix;
 
         var payload = {};
         if (self.currentDataSourceModel) {
@@ -755,14 +763,13 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         }
     };
     self.createTriples = function (test) {
-      /*  var selectedFiles = $("#KGcreator_csvTreeDiv").jstree().get_checked(true);
+        /*  var selectedFiles = $("#KGcreator_csvTreeDiv").jstree().get_checked(true);
         if (selectedFiles.length > 0);*/
 
         $("#KGcreator_dataSampleDiv").val("creating triples...");
         if (!self.currentJsonObject) return;
 
-        if(self.currentJsonObject.fileName.indexOf(".csv")<0)
-            return alert ("only triples from csv sources can be generated : IN PROGRESS, COMING SOON")
+        if (self.currentJsonObject.fileName.indexOf(".csv") < 0) return alert("only triples from csv sources can be generated : IN PROGRESS, COMING SOON");
         if (!self.currentJsonObject.graphUri) {
             var graphUri = "";
             if (self.currentGraphUri) graphUri = self.currentGraphUri;
@@ -788,8 +795,7 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         //  options.addAllPredefinedPart14PredicatesTriples = $("#KGcreator_addAllPredefinedPart14PredicatesTriples").prop("checked");
 
         self.saveMappings(null, function (_err, _result) {
-            if(_err)
-                return alert (_err)
+            if (_err) return alert(_err);
             $("#KGcreator_dataSampleDiv").val("");
             var payload = {
                 dir: "CSV/" + self.currentCsvDir,
@@ -797,28 +803,27 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
                 options: JSON.stringify(options),
             };
 
-                $.ajax({
-                    type: "POST",
-                    url: `${Config.apiUrl}/kg/csv/triples`,
-                    data: payload,
-                    dataType: "json",
-                    success: function(result, _textStatus, _jqXHR) {
-                        if (test) {
-                            var str = JSON.stringify(result, null, 2);
+            $.ajax({
+                type: "POST",
+                url: `${Config.apiUrl}/kg/csv/triples`,
+                data: payload,
+                dataType: "json",
+                success: function (result, _textStatus, _jqXHR) {
+                    if (test) {
+                        var str = JSON.stringify(result, null, 2);
 
-                            $("#KGcreator_dataSampleDiv").val(str);
-                        } else {
-                            $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
+                        $("#KGcreator_dataSampleDiv").val(str);
+                    } else {
+                        $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
 
-                            /*    SearchUtil.generateElasticIndex(Lineage_common.currentSource,{ids:[self.graphModification.creatingNodeUri]},function(err, result) {
+                        /*    SearchUtil.generateElasticIndex(Lineage_common.currentSource,{ids:[self.graphModification.creatingNodeUri]},function(err, result) {
                 })*/
-                        }
-                    },
-                    error(err) {
-                        return alert(err.responseText);
-                    },
-                });
-
+                    }
+                },
+                error(err) {
+                    return alert(err.responseText);
+                },
+            });
         });
     };
 

@@ -60,17 +60,44 @@ Edit the `.env` file:
 |`DATA_ROOT_DIR`|Where the data will be written|
 |`USER_PASSWORD`|Password of the `admin` user automaticaly created at firt start|
 |`SA_PASSWORD`|Password of the sql server|
+|`DBA_PASSWORD`|Password of the virtuoso server|
+|`FORMAL_ONTOLOGY_SOURCE_LABEL`||
+
+
+### Advanced configuration
+
+#### SouslesensVocables
+
+All entries from SouslesensVocables `mainConfig.json` can be overwritten with env variables.
+For example `VOCABLES__SQLserver__user=toto` will be converted into `{"SQLserver": {"user": "toto"}}`.
+
+#### Virtuoso
+
+Refer to the [docker-virtuoso](https://github.com/askomics/docker-virtuoso#configuration)
+documentation.
+
+#### Elasticsearch
+
+Refer to the
+[Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html)
+documentation.
+
+#### SQLServer
+
+Refer to the
+[SQLServer](https://learn.microsoft.com/en-us/sql/linux/sql-server-linux-docker-container-deployment?view=sql-server-ver16&pivots=cs1-bash)
+documentation.
 
 
 ### Build docker image
 
-We do not provide a docker image. You have to build it yourself:
+We do not provide a docker image for SouslesensVocables. You have to build it yourself:
 
 ```bash
 docker-compose build vocables
 ```
 
-### Create the data dir
+### Create the data directories
 
 Elasticsearch needs a directory with specific right. Use the following commands to create
 a directory usable by ElasticSearch.
@@ -91,7 +118,6 @@ chmod -R  g+rwx ${DATA_ROOT_DIR}/souslesens/sqlserver
 sudo chown -R 10001:10001 ${DATA_ROOT_DIR}/souslesens/sqlserver
 ```
 
-
 ### Launch the docker stack
 
 ```bash
@@ -100,6 +126,9 @@ docker-compose up -d
 
 SouslesensVocables will be available at [localhost:3010](http://localhost:3010).
 
+### Data loading
+
+TODO:
 
 ## Install locally (development instance)
 

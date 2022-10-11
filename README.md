@@ -70,6 +70,28 @@ We do not provide a docker image. You have to build it yourself:
 docker-compose build vocables
 ```
 
+### Create the data dir
+
+Elasticsearch needs a directory with specific right. Use the following commands to create
+a directory usable by ElasticSearch.
+
+```bash
+source .env
+mkdir -p ${DATA_ROOT_DIR}/souslesens/elasticsearch/data
+chmod -R  g+rwx ${DATA_ROOT_DIR}/souslesens/elasticsearch
+sudo chown -R 0:0 ${DATA_ROOT_DIR}/souslesens/elasticsearch
+```
+
+Same for SqlServer
+
+```bash
+source .env
+mkdir -p ${DATA_ROOT_DIR}/souslesens/sqlserver
+chmod -R  g+rwx ${DATA_ROOT_DIR}/souslesens/sqlserver
+sudo chown -R 10001:10001 ${DATA_ROOT_DIR}/souslesens/sqlserver
+```
+
+
 ### Launch the docker stack
 
 ```bash

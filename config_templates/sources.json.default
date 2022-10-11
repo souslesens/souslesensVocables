@@ -282,23 +282,7 @@
         "color": "#bcbd22",
         "group": "TSF/DRAFTS"
     },
-    "GAIA_TEST_XDB": {
-        "editable": true,
-        "allowIndividuals": true,
-        "graphUri": "http://data.total.com/resource/tsf/ontology/gaia-test-xdb/",
-        "sparql_server": {
-            "url": "_default"
-        },
-        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"],
-        "imports": ["ISO_15926-part-14_PCA"],
-        "controller": "Sparql_OWL",
-        "topClassFilter": "  ?topConcept rdfs:subClassOf    ?x filter(regex(str(?x),\"lis14\") && ?conceptGraph =<http://data.total.com/resource/tsf/ontology/gaia-test-xdb/>)",
-        "schemaType": "OWL",
-        "schema": null,
-        "color": "#bcbd22",
-        "group": "TSF/GEO"
-    },
-    "ONTOLOGIES_WORLD": {
+    "ONTOLOGIES_USE_CASES": {
         "editable": true,
         "allowIndividuals": true,
         "graphUri": "http://data.total.com/resource/tsf/ontologies-use-cases/",
@@ -313,5 +297,49 @@
         "schema": null,
         "color": "#bcbd22",
         "group": "OTHERS_OWL"
+    },
+    "SLSV": {
+        "editable": true,
+        "allowIndividuals": true,
+        "graphUri": "http://souslesens.org/resources/ontologies/slsv",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"],
+        "imports": ["ISO_15926-part-14_PCA"],
+        "controller": "Sparql_OWL",
+        "topClassFilter": "  ?topConcept rdfs:subClassOf    ?x filter(regex(str(?x),\"lis14\") && ?conceptGraph =<http://souslesens.org/resources/ontologies/slsv>)",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "OTHERS_OWL"
+    },
+    "IOF_core": {
+        "editable": false,
+        "graphUri": "https://purl.industrialontologies.org/ontology/core/Core/",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "imports": ["BFO"],
+        "controller": "Sparql_OWL",
+        "topClassFilter": " ?topConcept rdfs:subClassOf ?superClass. filter(regex(str(?superClass),'BFO') && !regex(str(?topConcept),'BFO')  )",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "STANDARDS/ABSTRACT ONTOLOGIES"
+    },
+    "IOF_maintenance": {
+        "editable": false,
+        "graphUri": "https://www.industrialontologies.org/maintenance/",
+        "imports": ["IOF_core"],
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": " ?topConcept rdfs:subClassOf ?superClass. filter(regex(str(?superClass),'BFO') )",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "STANDARDS/MAINTENANCE"
     }
 }

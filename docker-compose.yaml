@@ -12,17 +12,17 @@ services:
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/config:\
               /app/config"
         environment:
-          USER_USERNAME: admin
-          USER_PASSWORD: ${USER_PASSWORD}
-          VOCABLES__default_sparql_url: http://virtuoso:8890/sparql
-          VOCABLES__formalOntologySourceLabel: ${FORMAL_ONTOLOGY_SOURCE_LABEL}
-          VOCABLES__SQLserver__user: SA
-          VOCABLES__SQLserver__password: ${SA_PASSWORD}
-          VOCABLES__SQLserver__server: sqlserver
-          VOCABLES__SQLserver__database: master
-          VOCABLES__ElasticSearch__url: http://elasticsearch:9200/
-          VOCABLES__annotator__spacyServerUrl: http://spacyserver:8000/pos
-          VOCABLES__wiki__url: ""
+            USER_USERNAME: admin
+            USER_PASSWORD: ${USER_PASSWORD}
+            VOCABLES__default_sparql_url: http://virtuoso:8890/sparql
+            VOCABLES__formalOntologySourceLabel: ${FORMAL_ONTOLOGY_SOURCE_LABEL}
+            VOCABLES__SQLserver__user: SA
+            VOCABLES__SQLserver__password: ${SA_PASSWORD}
+            VOCABLES__SQLserver__server: sqlserver
+            VOCABLES__SQLserver__database: master
+            VOCABLES__ElasticSearch__url: http://elasticsearch:9200/
+            VOCABLES__annotator__spacyServerUrl: http://spacyserver:8000/pos
+            VOCABLES__wiki__url: ""
         networks:
             - backend
 
@@ -31,7 +31,7 @@ services:
         ports:
             - ${VIRTUOSO_LISTEN_PORT:-8890}:8890
         environment:
-          DBA_PASSWORD: ${DBA_PASSWORD}
+            DBA_PASSWORD: ${DBA_PASSWORD}
         volumes:
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/virtuoso/data:\
               /data"

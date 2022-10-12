@@ -21,7 +21,6 @@ A key feature of SLSV is graph visualization and interaction performed using exc
 Annotate tool allows annotate textual corpus with several registered lexical resources
 and identify missing terms
 
-
 ## Deploy a production instance
 
 ### Prerequisites
@@ -52,17 +51,16 @@ cp env.template .env
 
 Edit the `.env` file:
 
-|variable|description|
-|---|---|
-|`TAG`|souslesensVocable version. Choose the latest [here](https://github.com/souslesens/souslesensVocables/releases)|
-|`VOCABLES_LISTEN_PORT`|Port of souslesensVocable that will be exposed outside|
-|`VIRTUOSO_LISTEN_PORT`|Port of virtuoso that will be exposed outside|
-|`DATA_ROOT_DIR`|Where the data will be written|
-|`USER_PASSWORD`|Password of the `admin` user automatically created at first start|
-|`SA_PASSWORD`|Password of the sql server|
-|`DBA_PASSWORD`|Password of the virtuoso server|
-|`FORMAL_ONTOLOGY_SOURCE_LABEL`||
-
+| variable                       | description                                                                                                    |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `TAG`                          | souslesensVocable version. Choose the latest [here](https://github.com/souslesens/souslesensVocables/releases) |
+| `VOCABLES_LISTEN_PORT`         | Port of souslesensVocable that will be exposed outside                                                         |
+| `VIRTUOSO_LISTEN_PORT`         | Port of virtuoso that will be exposed outside                                                                  |
+| `DATA_ROOT_DIR`                | Where the data will be written                                                                                 |
+| `USER_PASSWORD`                | Password of the `admin` user automatically created at first start                                              |
+| `SA_PASSWORD`                  | Password of the sql server                                                                                     |
+| `DBA_PASSWORD`                 | Password of the virtuoso server                                                                                |
+| `FORMAL_ONTOLOGY_SOURCE_LABEL` |                                                                                                                |
 
 ### Advanced configuration
 
@@ -87,7 +85,6 @@ documentation.
 Refer to the
 [SQLServer](https://learn.microsoft.com/en-us/sql/linux/sql-server-linux-docker-container-deployment?view=sql-server-ver16&pivots=cs1-bash)
 documentation.
-
 
 ### Build docker image
 
@@ -136,12 +133,11 @@ Then, install `docker-compose` with your package manager
 ```bash
 sudo apt install docker-compose
 ```
-#### Node
 
+#### Node
 
 Install nodejs from the nodesource package repository (detailed instruction
 [here](https://github.com/nodesource/distributions/blob/master/README.md#manual-installation)).
-
 
 ```bash
 # Add nodesource repository
@@ -190,7 +186,6 @@ npm run devserver
 
 SouslesensVocables will be available at [localhost:3010](http://localhost:3010).
 
-
 ## Contribute to souslesensVocable
 
 To contribute to souslesensVocable, fork the repo and submit Pull Requests.
@@ -222,4 +217,3 @@ git commit
 git tag x.x.x
 git push --tags
 ```
-

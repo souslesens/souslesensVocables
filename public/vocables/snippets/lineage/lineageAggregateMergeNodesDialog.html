@@ -6,6 +6,7 @@
 </style>
 
 <div style="display: flex; flex-direction: row">
+    <!--   Top Level Ontology<select id="LineageBlend_currentTopLevelOntologyEdgesSelect" onchange="Lineage_blend.graphModification.setTopLevelOntology($(this).val())"></select><br>-->
     <div>
         Nodes to merge
         <div class="jstreeContainer" style="width: 350px; height: 700px">
@@ -68,7 +69,7 @@
         </table>
         <div>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#mainDialogDiv').dialog('close')">Cancel</button>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.mergeNodes()">OK</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.mergeNodesUI()">OK</button>
         </div>
     </div>
 </div>

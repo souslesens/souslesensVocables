@@ -71,7 +71,7 @@ var Lineage_linkedData_sql = (function () {
                 callback();
             },
             error: function (_err) {
-                callback(err);
+                callback(_err);
             },
         });
     };

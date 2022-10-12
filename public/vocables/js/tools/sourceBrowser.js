@@ -149,13 +149,13 @@ $("#actionDiv").html(html);*/
                 },
             };
             /*  items.copyNodeToClipboard = {
-          label: "copy toClipboard",
-          action: function(_e) {
-            // pb avec source
+    label: "copy toClipboard",
+    action: function(_e) {
+      // pb avec source
 
-            Lineage_common.copyNodeToClipboard(self.currentTreeNode.data);
-          }
-        };*/
+      Lineage_common.copyNodeToClipboard(self.currentTreeNode.data);
+    }
+  };*/
             items.graphNamedIndividuals = {
                 label: "LinkedData",
                 action: function () {
@@ -217,19 +217,19 @@ $("#actionDiv").html(html);*/
                     },
                 };
                 /*   items.editNode = {
-             label: "Edit node",
-             action: function(_obj, _sss, _cc) {
-               SourceEditor.editNode("DialogDiv", self.currentSource, self.currentTreeNode.data.id, "OWL", false);
-             }
-           };
-           items.deleteClass = {
-             label: "delete Class",
-             action: function(_e) {
-               // pb avec source
+     label: "Edit node",
+     action: function(_obj, _sss, _cc) {
+       SourceEditor.editNode("DialogDiv", self.currentSource, self.currentTreeNode.data.id, "OWL", false);
+     }
+   };
+   items.deleteClass = {
+     label: "delete Class",
+     action: function(_e) {
+       // pb avec source
 
-               Lineage_common.deleteNode(self.currentTreeNode, self.currentTargetDiv);
-             }
-           };*/
+       Lineage_common.deleteNode(self.currentTreeNode, self.currentTargetDiv);
+     }
+   };*/
             }
 
             if (MainController.currentSource && Config.sources[MainController.currentSource].protegeFilePath) {
@@ -378,28 +378,28 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
 
 
-   if (searchAllSources || selectedSources.length > 0) {
-       for (var sourceLabel in Config.sources) {
-           if (
-               (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||
-               Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1
-           );
-           else {
-               if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                   if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
-                       if (selectedSources.length > 0 && selectedSources.indexOf(sourceLabel) > -1) searchedSources.push(sourceLabel);
+if (searchAllSources || selectedSources.length > 0) {
+   for (var sourceLabel in Config.sources) {
+       if (
+           (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||
+           Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1
+       );
+       else {
+           if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
+               if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
+                   if (selectedSources.length > 0 && selectedSources.indexOf(sourceLabel) > -1) searchedSources.push(sourceLabel);
 
-               }
            }
        }
-   } else {
-       if (!Lineage_common.currentSource && !MainController.currentSource)
-           return alert("select a source or search in all source");
-       var source = Lineage_common.currentSource || MainController.currentSource;
+   }
+} else {
+   if (!Lineage_common.currentSource && !MainController.currentSource)
+       return alert("select a source or search in all source");
+   var source = Lineage_common.currentSource || MainController.currentSource;
 
-       searchedSources.push(source);
+   searchedSources.push(source);
 
-   }*/
+}*/
 
         function getUserSources(schemaType) {
             var allowedSources = [];
@@ -426,11 +426,11 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
             searchedSources.push(Lineage_common.currentSource || MainController.currentSource);
         } else if (sourcesScope == "graphSources") {
             /* var graphSources=[]
- $(".Lineage_sourceLabelDiv").each(function(){
-     var source=$(this).attr("id")
-     source=source.replace("Lineage_source_","")
-     graphSources.push(source);
- })*/
+$(".Lineage_sourceLabelDiv").each(function(){
+var source=$(this).attr("id")
+source=source.replace("Lineage_source_","")
+graphSources.push(source);
+})*/
             if (Lineage_combine.currentSources.length > 0) searchedSources = Lineage_combine.currentSources;
             else {
                 var mainSource = Lineage_common.currentSource || MainController.currentSource;
@@ -460,6 +460,7 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
         if (true || schemaType == "OWL") {
             SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
+                if (_err) return alert(_err);
                 self.searchResultToJstree(self.currentTargetDiv, result, options, function (err, _result) {
                     if (err) return alert(err);
                 });
@@ -872,7 +873,7 @@ return*/
                     /*  if (type != "http://www.w3.org/2002/07/owl#Class") {
 return callbackSeries();
 }*/
-                    self.showNamedIndividualProperties(self.currentNodeRealSource, nodeId, function (err) {
+                    self.showTypeOfResources(self.currentNodeRealSource, nodeId, function (err) {
                         callbackSeries(err);
                     });
                 },
@@ -1164,7 +1165,7 @@ defaultLang = 'en';*/
         );
     };
 
-    self.showNamedIndividualProperties = function (sourceLabel, nodeId, callback) {
+    self.showTypeOfResources = function (sourceLabel, nodeId, callback) {
         var sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " + "select distinct * " + fromStr + " where {";
@@ -1183,7 +1184,7 @@ defaultLang = 'en';*/
             if (data.length == 0) {
                 return callback();
             } else {
-                var str = "<b>NamedIndividuals</b><br><table>";
+                var str = "<b>TypeOf </b><br><table>";
 
                 data.forEach(function (item) {
                     var targetClassStr = "<span class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
@@ -1249,7 +1250,7 @@ defaultLang = 'en';*/
         if (predicate == "rdf:type") {
             common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.basicTypeClasses.concat(allObjects.sourceObjects), true, "label", "id");
         } else if (predicate == "rdfs:subClassOf") {
-            common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.part14Objects.concat(allObjects.sourceObjects), true, "label", "id");
+            common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.TopLevelOntologyObjects.concat(allObjects.sourceObjects), true, "label", "id");
         } else {
             common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "label", "id");
         }
@@ -1303,6 +1304,9 @@ defaultLang = 'en';*/
                     }
                     if (callback) return callback(null, self.currentNodeId);
                 });
+                if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
+                    Lineage_classes.addEdge(self.currentSource, self.currentNodeId, value, property);
+                }
             });
         }
     };
@@ -1321,6 +1325,10 @@ defaultLang = 'en';*/
             Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, value, function (err, _result) {
                 if (err) return alert(err);
                 self.showNodeInfos(self.currentSource, self.currentNodeId, "mainDialogDiv");
+
+                if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
+                    Lineage_classes.deleteEdge(self.currentNodeId, value, property);
+                }
             });
         }
     };
@@ -1376,10 +1384,10 @@ defaultLang = 'en';*/
                     function (callbackSeries) {
                         if (self.currentNodeId.from) {
                             var jstreeNode = common.jstree.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNodeId);
-                            if (jstreeNode) $("#Lineage_propertiesTree").jstree().delete_node(jstreeNode, newLabel);
+                            if (jstreeNode) $("#Lineage_propertiesTree").jstree().delete_node(jstreeNode);
                         } else {
                             var jstreeNode = common.jstree.getNodeByDataField("LineagejsTreeDiv", "id", self.currentNodeId);
-                            if (jstreeNode) $("#LineagejsTreeDiv").jstree().delete_node(jstreeNode, newLabel);
+                            if (jstreeNode) $("#LineagejsTreeDiv").jstree().delete_node(jstreeNode);
 
                             return callbackSeries();
                         }
@@ -1424,7 +1432,7 @@ defaultLang = 'en';*/
         } else {
             $("#sourcesSelectionDialogdiv").dialog("open");
             /*  if ($("#searchAll_sourcesTree").jstree())
-    $("#searchAll_sourcesTree").jstree().uncheck_all();*/
+$("#searchAll_sourcesTree").jstree().uncheck_all();*/
         }
     };
 

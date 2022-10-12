@@ -19,8 +19,6 @@ var Config = (function () {
     self.defaultNewUriRoot = "http://souslesens.org/resource/";
     self.loginMode = "json";
 
-    self.loginMode = "json";
-
     self.appName = "VOCABLES";
     self.debug = { query: 1 };
     self.enableCollections = false;
@@ -32,6 +30,14 @@ var Config = (function () {
     self.predicatesSource = "TSF-PREDICATES";
     self.dictionarySource = "TSF-DICTIONARY";
 
+    self.topLevelOntologies = {
+        "ISO_15926-part-14_PCA": { uriPattern: "lis14", prefix: "part14" },
+        BFO: { uriPattern: "BFO", prefix: "bfo" },
+        DOLCE: { uriPattern: "dul", prefix: "dul" },
+    };
+
+    self.namedSetsThesaurusGraphUri = "http://souslesens.org/resource/named-triple-sets/";
+
     (self.defaultSparqlPrefixes = {
         xs: "<http://www.w3.org/2001/XMLSchema#>",
         rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
@@ -42,6 +48,8 @@ var Config = (function () {
         req: "<https://w3id.org/requirement-ontology/rdl/>",
         part14: "<http://rds.posccaesar.org/ontology/lis14/rdl/>",
         iso81346: "<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
+        bfo: "<http://purl.obolibrary.org/obo/bfo.owl>",
+        dul: "<http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#>",
         slsv: "<http://souslesens.org/resource/vocabulary/>",
         dcterms: "<http://purl.org/dc/terms/>",
     }),
@@ -62,65 +70,14 @@ var Config = (function () {
         trash: "KO",
         delete: "DELETED",
     };
-    self.Blender = {
-        openTaxonomyTreeOnLoad: 3,
-        pasteDescendantsMaxDepth: 6,
-        prefLang: "en",
-    };
-    self.evaluate = {
-        maxZipFileSize: 30000000, //30MO
-    };
 
-    self.KGpropertyFilter = {
-        tsfPropertyFilterPrefix: "http://data.total.com/resource/tsf/property-filtering/",
-        sources: ["CFIHOS_1_5_PLUS", "TSF_TEPDK_TEST", "TSF_TEPDK_PHUSION"],
-    };
-
-    (self.KG = {
-        dictionaries: {
-            CFIHOS_READI: { fileName: "dictionary_READI.json" },
-        },
-
-        elasticIndexSourceMap: {
-            cfihos: "CFIHOS-ISO",
-            pca: "ISO_15926-PCA",
+    self.Standardizer = {
+        elasticIndexesSourcesMap: {
             readi: "CFIHOS_READI",
+            pca: "ISO_15926-PCA",
+            cfihos: "CFIHOS-ISO",
         },
-        palette: ["#1f77b4", "#9467bd", "#2ca02c", "#8c564b", "#aec7e8", "#98df8a"],
-        RDLsource: "RDL-QUANTUM-MIN",
-        OneModelSource: "ONE-MODEL",
-        mappingAlternativeSource: "CFIHOS_READI",
-        adlQueryMode: "SPARQL", //or SQL
-        queryLimit: 10000,
-        maxDistinctValuesForAdvancedMapping: 200000,
-        browserMaxClassesToDrawClassesGraph: 15,
-        oneModelDictionaryGraphURI: "http://data.total.com/resource/one-model/dictionary/",
-        topRdlObjects: {
-            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-F0000000801": {
-                label: "Functional Objects",
-                type: "http://rds.posccaesar.org/ontology/lis14/FunctionalObject",
-            },
-            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-P0000001723": {
-                label: "Physical Objects",
-                type: "http://rds.posccaesar.org/ontology/lis14/PhysicalObject",
-            },
-            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-B0000000000": {
-                label: "Disciplines",
-                type: "http://w3id.org/readi/z018-rdl/Discipline",
-            },
-            "http://data.total.com/resource/one-model/quantum-rdl/TOTAL-A0000000000": {
-                label: "Attributes",
-                type: "http://data.total.com/resource/one-model/ontology#TOTAL-Attribute",
-            },
-        },
-    }),
-        (self.Standardizer = {
-            elasticIndexesSourcesMap: {
-                readi: "CFIHOS_READI",
-                pca: "ISO_15926-PCA",
-                cfihos: "CFIHOS-ISO",
-            },
-        });
+    };
 
     self.Lineage = {
         showSourceNodesInGraph: false,

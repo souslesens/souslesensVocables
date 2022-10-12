@@ -33,7 +33,7 @@ var Export = (function () {
                 edgeLabel = edgeLabel.replaceAll("<[^>]*>", "");
                 str += allNodesMap[nodeFromId].data.label + "\t";
                 str += edgeLabel + "\t";
-                str += allNodesMap[edge.to].data.label;
+                str += allNodesMap[edge.to].data ? allNodesMap[edge.to].data.label : "??";
                 str += "\t" + nodeFromId + "\t" + edge.id + "\t" + edge.to;
                 str += "\n";
             });

@@ -58,7 +58,7 @@ Edit the `.env` file:
 |`VOCABLES_LISTEN_PORT`|Port of souslesensVocable that will be exposed outside|
 |`VIRTUOSO_LISTEN_PORT`|Port of virtuoso that will be exposed outside|
 |`DATA_ROOT_DIR`|Where the data will be written|
-|`USER_PASSWORD`|Password of the `admin` user automaticaly created at firt start|
+|`USER_PASSWORD`|Password of the `admin` user automatically created at first start|
 |`SA_PASSWORD`|Password of the sql server|
 |`DBA_PASSWORD`|Password of the virtuoso server|
 |`FORMAL_ONTOLOGY_SOURCE_LABEL`||

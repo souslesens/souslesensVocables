@@ -355,7 +355,12 @@ var CsvTripleBuilder = {
                                                         if (item.isRestriction) {
                                                             var propStr = item.p;
                                                             if (typeof item.p === "function") {
-                                                                propStr = item.p(line, item);
+                                                                try {
+                                                                    propStr = item.p(line, item);
+                                                                }
+                                                                catch (e){
+                                                                    return callbackSeries2(e);
+                                                                }
                                                             }
 
                                                             var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
@@ -708,6 +713,7 @@ var CsvTripleBuilder = {
         var output = "";
         async.series(
             [
+              // set sparql server
                 function (callbackSeries) {
                     if (options.sparqlServerUrl) {
                         sparqlServerUrl = options.sparqlServerUrl;
@@ -719,7 +725,7 @@ var CsvTripleBuilder = {
                         callbackSeries();
                     });
                 },
-
+              // delete old graph (optional)
                 function (callbackSeries) {
                     if (!options.deleteOldGraph) {
                         return callbackSeries();
@@ -730,7 +736,7 @@ var CsvTripleBuilder = {
                         callbackSeries();
                     });
                 },
-
+                // read mapping file and prepare mappings
                 function (callbackSeries) {
                     var mappingsFilePath = path.join(__dirname, "../../data/" + dirName + "/" + mappingFileName);
                     var mappings = "" + fs.readFileSync(mappingsFilePath);
@@ -789,6 +795,12 @@ var CsvTripleBuilder = {
                             });
                         }
                     });
+
+                    // add prefixes (for upper ontology)
+                    if(mappings.prefixes){
+                        for( var prefix in mappings.prefixes)
+                        CsvTripleBuilder.sparqlPrefixes[prefix]=mappings.prefixes[prefix]
+                    }
 
                     var mappingsMap = { [mappings.fileName]: mappings };
 

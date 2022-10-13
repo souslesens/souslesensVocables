@@ -31,9 +31,9 @@ var Config = (function () {
     self.dictionarySource = "TSF-DICTIONARY";
 
     self.topLevelOntologies = {
-        "ISO_15926-part-14_PCA": { uriPattern: "lis14", prefix: "part14" },
-        BFO: { uriPattern: "BFO", prefix: "bfo" },
-        DOLCE: { uriPattern: "dul", prefix: "dul" },
+        "ISO_15926-part-14_PCA": { uriPattern: "lis14", prefix: "part14",prefixtarget:"https://rds.posccaesar.org/ontology/lis14/rdl/" },
+        BFO: { uriPattern: "BFO", prefix: "bfo",prefixtarget:"http://purl.obolibrary.org/obo/" },
+        DOLCE: { uriPattern: "dul", prefix: "dul",prefixtarget:"http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#"},
     };
 
     self.namedSetsThesaurusGraphUri = "http://souslesens.org/resource/named-triple-sets/";

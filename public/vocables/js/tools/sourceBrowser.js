@@ -840,33 +840,7 @@ return*/
                 },
                 function (callbackSeries) {
                     var source = self.currentNodeRealSource;
-                    if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons) {
-                        if (Config.sources[source].editable) {
-                            var str = "<div>";
-                            str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
-                            if (true || Config.sources[source].editable) {
-                                //} &&  self.propertiesMap.properties["type"]=="http://www.w3.org/2002/07/owl#Class") {
-                                str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>";
-                            }
-                            str +=
-                                "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
-                                "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
-                                "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
-                                "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
-                                "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
-
-                            str += "</div>";
-
-                            if (self.visitedNodes.length > 1) {
-                                str +=
-                                    "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(-1)'> previous </button>" +
-                                    "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>";
-                            }
-
-                            str += "</div>";
-                            $("#" + divId).prepend(str);
-                        }
-                    }
+                   self.showNodeInfosToolbar(options)
                     callbackSeries();
                 },
                 function (callbackSeries) {
@@ -901,6 +875,38 @@ return callbackSeries();
             }
         );
     };
+    self.showNodeInfosToolbar=function(options){
+        if(!options)
+            options={}
+        if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons) {
+            if (Config.sources[self.currentSource].editable) {
+                var str = "<div>";
+                str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
+                if (true || Config.sources[source].editable) {
+                    //} &&  self.propertiesMap.properties["type"]=="http://www.w3.org/2002/07/owl#Class") {
+                    str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>";
+                }
+                str +=
+                  "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
+                  "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
+                  "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
+                  "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
+                  "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
+
+                str += "</div>";
+            }
+
+                if (self.visitedNodes.length > 1) {
+                    str +=
+                      "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(-1)'> previous </button>" +
+                      "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>";
+                }
+
+                str += "</div>";
+                $("#" + self.currentNodeIdInfosDivId).prepend(str);
+
+        }
+    }
 
     self.drawCommonInfos = function (sourceLabel, nodeId, divId, _options, callback) {
         if (!_options) _options = {};
@@ -1287,7 +1293,10 @@ defaultLang = 'en';*/
                 self.isModified = true;
                 if (!self.newProperties) self.newProperties = {};
                 self.newProperties[property] = value;
-                self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "mainDialogDiv", {}, function (err, result) {
+
+               // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
+               self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "mainDialogDiv", {}, function (err, result) {
+                   self.showNodeInfosToolbar()
                     if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
                         visjsGraph.data.nodes.push({
                             id: self.currentNodeId,

@@ -983,7 +983,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                 allClassesMap[parent] = {
                                     id: parent,
                                     label: Sparql_common.getLabelFromURI(parent),
-                                    skoslabels: {},
+                                    skoslabels: [],
                                     parent: sourceLabel,
                                     parents: [sourceLabel],
                                     type: "owl:class",

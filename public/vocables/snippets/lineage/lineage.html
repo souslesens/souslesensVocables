@@ -144,23 +144,24 @@
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="Lineage_combine_mergeNodesDialogButton" onclick="Lineage_combine.showMergeNodesDialog()">Aggregate Nodes</button>
         </div>
     </div>
-    <div class="lineage_actionDiv" style="margin: 5px; display: block">
+  <!--  <div class="lineage_actionDiv" style="margin: 5px; display: block">
         <span id="lineage_sourceDescriptionDiv"></span>
-    </div>
+    </div>-->
 
     <div class="lineage_actionDiv" style="margin: 5px; display: block">
-        Graph calculation
+       Spatialization mode
         <select id="Lineage_classes_graphSpatialisationSelect" onchange="Lineage_classes.reSpatializeGraph($(this).val())">
-            <option value="all">all</option>
-            <option value="excludeRelations">no Relations</option>
-        </select>
-        <br />
-        Graph decoration
-        <select style="width: 100px" id="Lineage_classes_graphDecoration_operationSelect" onchange="Lineage_decoration.run($(this).val())"></select>
+            <option value="all">all adges</option>
+            <option value="excludeRelations">exclude Relations</option>
+        </select><br>
+        <div  class='Lineage_legendTypeTopLevelOntologyDiv' style='display: flex;flex-direction: column'>
+            <div id="Lineage_classes_graphDecoration_UpperOntologyDiv"></div>
+    <!--    Graph decoration
+        <select style="width: 100px" id="Lineage_classes_graphDecoration_operationSelect" onchange="Lineage_decoration.run($(this).val())"></select>-->
 
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick='Lineage_decoration.hideShowLegendType(null,"all")'>show All</button>
 
-        <div id="Lineage_classes_graphDecoration_legendDiv" style="flex-direction: column; flex-wrap: nowrap" class="Lineage_objectDivContainer"></div>
+
+        <div id="Lineage_classes_graphDecoration_legendDiv" style=" flex-wrap: nowrap" class="Lineage_objectDivContainer"></div>
     </div>
     <!--  <div class="lineage_actionDiv" style="margin: 5px; display: block">
     Individuals

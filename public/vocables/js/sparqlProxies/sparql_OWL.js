@@ -317,7 +317,7 @@ var Sparql_OWL = (function () {
             "SELECT * " +
             fromStr +
             " WHERE {" +
-            " ?class rdfs:subClassOf* ?superClass." +
+            "?class rdf:type ?type. ?class (rdf:type|rdfs:subClassOf)* ?superClass." +
             "filter (isIRI(?superClass)) ";
 
         if (options.withLabels) query += "OPTIONAL {?obj rdfs: label superClasslabel }";

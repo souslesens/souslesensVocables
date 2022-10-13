@@ -15,6 +15,7 @@ module.exports = function () {
             wiki: config.wiki,
             version: process.env.npm_package_version,
             sentryDsnJsFront: config.sentryDsnJsFront,
+            tools_available:config.tools_available
         };
 
         res.status(200).json(result);

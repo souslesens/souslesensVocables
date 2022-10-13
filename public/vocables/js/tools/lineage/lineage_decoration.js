@@ -1,6 +1,7 @@
 //@typescript-eslint/no-unused-vars
 var Lineage_decoration = (function () {
     var self = {};
+
     self.topOntologiesClassesMap = {};
     self.legendMap = {};
     self.currentVisjGraphNodesMap = {};

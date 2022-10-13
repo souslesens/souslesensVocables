@@ -7,28 +7,137 @@
 
 ![sousLeSensVocables large](https://user-images.githubusercontent.com/1880078/130787939-adf887d3-0054-4aa7-9867-0fbcd5bfc7a2.png)
 
-**SousLesensVocables is a set of tools developped to manage Thesaurus and Ontologies resources through SKOS , OWL and RDF standards and graph visualisation approaches.**
+**SousLesensVocables is a set of tools developed to manage Thesaurus and Ontologies
+resources through SKOS , OWL and RDF standards and graph visualisation approaches.**
 
-It has functionalites to :
+It has functionalities to :
 
--   read : visualize, navigate and export
--   edit : create , modify, aggregate
+-   read : visualize, navigate and export SKOS or OWL resources
+-   edit : create , modify, aggregate OWL resources
 
-both on SKOS or OWL resources
+A key feature of SLSV is graph visualization and interaction performed using excellent
+[visjs/vis-network](https://github.com/visjs/vis-network) open source solution
 
-Annotate tool allows annotate textual corpus with several registered lexical resources and identify missing terms
+Annotate tool allows annotate textual corpus with several registered lexical resources
+and identify missing terms
 
-## Prerequisites installation
+## Deploy a production instance
 
-souslesensVocable needs the following prerequisites:
+### Prerequisites
 
--   Nodejs
--   A sparql endpoint with public access
--   optional: elasticSearch, Spacy server
+In production, souslesensVocable is deployed using `docker` and `docker-compose`. Install docker
+following [this link](https://docs.docker.com/engine/install/).
 
-### Nodejs
+Then, install `docker-compose` with your package manager
 
-Install nodejs from the nodesource package repository (detailed instruction [here](https://github.com/nodesource/distributions/blob/master/README.md#manual-installation)).
+```bash
+sudo apt install docker-compose
+```
+
+### Configure the deployment
+
+Clone the souslesensVocables repository
+
+```bash
+git clone git@github.com:souslesens/souslesensVocables.git
+cd souslesensVocables
+```
+
+Create a `.env` file from the template
+
+```bash
+cp env.template .env
+```
+
+Edit the `.env` file:
+
+| variable                       | description                                                                                                    |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `TAG`                          | souslesensVocable version. Choose the latest [here](https://github.com/souslesens/souslesensVocables/releases) |
+| `VOCABLES_LISTEN_PORT`         | Port of souslesensVocable that will be exposed outside                                                         |
+| `VIRTUOSO_LISTEN_PORT`         | Port of virtuoso that will be exposed outside                                                                  |
+| `DATA_ROOT_DIR`                | Where the data will be written                                                                                 |
+| `USER_PASSWORD`                | Password of the `admin` user automatically created at first start                                              |
+| `SA_PASSWORD`                  | Password of the sql server                                                                                     |
+| `DBA_PASSWORD`                 | Password of the virtuoso server                                                                                |
+| `FORMAL_ONTOLOGY_SOURCE_LABEL` |                                                                                                                |
+
+### Advanced configuration
+
+#### SouslesensVocables
+
+All entries from SouslesensVocables `mainConfig.json` can be overwritten with env variables.
+For example `VOCABLES__SQLserver__user=toto` will be converted into `{"SQLserver": {"user": "toto"}}`.
+
+#### Virtuoso
+
+Refer to the [docker-virtuoso](https://github.com/askomics/docker-virtuoso#configuration)
+documentation.
+
+#### Elasticsearch
+
+Refer to the
+[Elasticsearch](https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html)
+documentation.
+
+#### SQLServer
+
+Refer to the
+[SQLServer](https://learn.microsoft.com/en-us/sql/linux/sql-server-linux-docker-container-deployment?view=sql-server-ver16&pivots=cs1-bash)
+documentation.
+
+### Build docker image
+
+We do not provide a docker image for SouslesensVocables. You have to build it yourself:
+
+```bash
+docker-compose build vocables
+```
+
+### Create the data directories
+
+Elasticsearch and SqlServer needs directories with specific right. Use the following commands
+to create directories usable by ElasticSearch and SqlServer.
+
+```bash
+bash scripts/init_directories.sh
+```
+
+### Launch the docker stack
+
+```bash
+docker-compose up -d
+```
+
+SouslesensVocables will be available at [localhost:3010](http://localhost:3010).
+
+### Data loading
+
+TODO:
+
+## Install locally (development instance)
+
+### Prerequisites
+
+In development, souslesensVocable needs a Virtuoso instance, an ElasticSearch instance and
+a Sql and a Spacy server. We provide a `docker-compose.test.yaml` to deploy this dependencies.
+
+SouslesensVocables is deployed locally using `node` and `npm`.
+
+#### Docker
+
+Install docker following [this link](https://docs.docker.com/engine/install/).
+
+Then, install `docker-compose` with your package manager
+
+```bash
+sudo apt install docker-compose
+```
+
+#### Node
+
+Install nodejs from the nodesource package repository (detailed instruction
+[here](https://github.com/nodesource/distributions/blob/master/README.md#manual-installation)).
 
 ```bash
 # Add nodesource repository
@@ -43,117 +152,68 @@ node --version
 npm --version
 ```
 
-## Local installation
+### Install
 
-### Install node dependencies
-
-Use `npm ci` to install the node environment along with react app dependancies.
+souslesensVocable is composed of a backend in node/express and a frontend in typescript/react.
 
 ```bash
-npm ci && cd mainapp && npm ci && cd ..
+# Install the server
+npm ci
+# Install the front
+cd mainapp
+npm ci
+# Go back to root
+cd ..
 ```
 
 ### Configure
 
-souslesensVocable use `.json` config files located in `config` directory. Templates are available in `config_templates` directory. Use the `scripts/init_config.js` to create the config files from templates.
+Run the config script to create a default configuration:
 
 ```bash
-node scripts/init_configs.js
+node scripts/init_config.js
 ```
 
-Then, edit `scripts/*.json` to your needs.
-
-```bash
-node scripts/sanitizeDB.js
-```
-
-Use this script if something is off when you launch the app.
+Then, edit the `config/*.json` to your needs.
 
 ### Run
 
-Start the app with `npm start`
-
-You may also want to start the app in dev mode with `npm run dev`.
-
-!Caveats! Dev mode use nodemon to restart node when there is a change in file, including files within `config/`.
-When you write those files from the Admin interface, nodemon will restart and, for a short moment, you won't have access to the routes allowing you to write those files.
-
-### Test
-
-If you want to add tests, you can add files to `cypress/integration/`
-
-To run uitest within a test bed:
-`docker-compose -f docker-compose.test.yaml up -d`
-`bash tests/load_data.sh`
-`npm run start`
-
-Run End-to-End testing with `npm run uitest`
+The following command will build and watch the react app and run and watch the node app.
 
 ```bash
-npm start
+npm run devserver
 ```
 
-App is available at [localhost:3010/vocables](http://localhost:3010/vocables)
+SouslesensVocables will be available at [localhost:3010](http://localhost:3010).
 
-## Deployment
+## Contribute to souslesensVocable
 
-souslesensVocable is deployed with Docker and docker-compose. The following services are included in the docker-compose stack:
+To contribute to souslesensVocable, fork the repo and submit Pull Requests.
 
--   souslesensVocable
--   Virtuoso
+### continuous integration
 
-Copy `docker-compose.yaml` and `env.template` to your production server and create a `.env` file.
+#### Style
 
-### Configuration
+We use [Prettier](https://prettier.io/) for Javascript code formatting. Please run
+`npm run format` before each commit to format your code.
 
-Configuration is done through environment variables. They can be overridden in the `.env` file.
+#### Tests
+
+We provide a `docker-compose.test.yaml` and a `tests/load_data.sh` script to build a testing
+environment.
 
 ```bash
-vim .env
+docker-compose -f docker-compose.test.yaml -d
+bash tests/load_data.sh
 ```
 
-Here is a list of the environment variable available:
+### Release
 
-| Variable                           | Description                     | Default               |
-| ---------------------------------- | ------------------------------- | --------------------- |
-| `TAG`                              | Docker tag of souslesensVocable | latest                |
-| `VOCABLES_LISTEN_PORT`             | souslesensVocable port          | 3010                  |
-| `VIRTUOSO_LISTEN_PORT`             | Virtuoso port                   | 8890                  |
-| `DATA_ROOT_DIR`                    | Persistent data directory       | `/tmp`                |
-| `USER_USERNAME`                    | Admin user                      | admin                 |
-| `USER_PASSWORD`                    | Admin password                  | admin                 |
-| `DEFAULT_SPARQL_URL`               | Url of sparql endpoint          | http://localhost:8890 |
-| `SQLSERVER_USER`                   |                                 |                       |
-| `SQLSERVER_PASSWORD`               |                                 |                       |
-| `SQLSERVER_SERVER`                 |                                 |                       |
-| `SQLSERVER_DATABASE`               |                                 |                       |
-| `ELASTICSEARCH_URL`                |                                 |                       |
-| `ANNOTATOR_TIKASERVERURL`          |                                 |                       |
-| `ANNOTATOR_SPACYSERVERURL`         |                                 |                       |
-| `ANNOTATOR_PARSEDDUCUMENTSHOMEDIR` |                                 |                       |
-| `ANNOTATOR_UPLOADDIRPATH`          |                                 |                       |
-
-### Build
-
-First, build `souslesensvocables` image.
+To create a new release:
 
 ```bash
-docker-compose build
-```
-
-### Run
-
-```bash
-docker-compose up -d
-```
-
-The first up will create the config files in `$DATA_ROOT_DIR/vocables/app/config` according to the environment. This files can be edited if a more precise configuration is needed.
-
-### Upgrade
-
-If your set a `TAG` in the `.env` file, change it. Then, pull images and restart the stack.
-
-```bash
-docker-compose pull
-docker-compose up -d
+npm run patch|minor|major
+git commit
+git tag x.x.x
+git push --tags
 ```

@@ -357,8 +357,7 @@ var CsvTripleBuilder = {
                                                             if (typeof item.p === "function") {
                                                                 try {
                                                                     propStr = item.p(line, item);
-                                                                }
-                                                                catch (e){
+                                                                } catch (e) {
                                                                     return callbackSeries2(e);
                                                                 }
                                                             }
@@ -713,7 +712,7 @@ var CsvTripleBuilder = {
         var output = "";
         async.series(
             [
-              // set sparql server
+                // set sparql server
                 function (callbackSeries) {
                     if (options.sparqlServerUrl) {
                         sparqlServerUrl = options.sparqlServerUrl;
@@ -725,7 +724,7 @@ var CsvTripleBuilder = {
                         callbackSeries();
                     });
                 },
-              // delete old graph (optional)
+                // delete old graph (optional)
                 function (callbackSeries) {
                     if (!options.deleteOldGraph) {
                         return callbackSeries();
@@ -797,9 +796,8 @@ var CsvTripleBuilder = {
                     });
 
                     // add prefixes (for upper ontology)
-                    if(mappings.prefixes){
-                        for( var prefix in mappings.prefixes)
-                        CsvTripleBuilder.sparqlPrefixes[prefix]=mappings.prefixes[prefix]
+                    if (mappings.prefixes) {
+                        for (var prefix in mappings.prefixes) CsvTripleBuilder.sparqlPrefixes[prefix] = mappings.prefixes[prefix];
                     }
 
                     var mappingsMap = { [mappings.fileName]: mappings };

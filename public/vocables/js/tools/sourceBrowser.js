@@ -840,7 +840,7 @@ return*/
                 },
                 function (callbackSeries) {
                     var source = self.currentNodeRealSource;
-                   self.showNodeInfosToolbar(options)
+                    self.showNodeInfosToolbar(options);
                     callbackSeries();
                 },
                 function (callbackSeries) {
@@ -875,9 +875,8 @@ return callbackSeries();
             }
         );
     };
-    self.showNodeInfosToolbar=function(options){
-        if(!options)
-            options={}
+    self.showNodeInfosToolbar = function (options) {
+        if (!options) options = {};
         if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons) {
             if (Config.sources[self.currentSource].editable) {
                 var str = "<div>";
@@ -887,26 +886,25 @@ return callbackSeries();
                     str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>";
                 }
                 str +=
-                  "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
-                  "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
-                  "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
-                  "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
-                  "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
+                    "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
+                    "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
+                    "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
+                    "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
+                    "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
 
                 str += "</div>";
             }
 
-                if (self.visitedNodes.length > 1) {
-                    str +=
-                      "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(-1)'> previous </button>" +
-                      "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>";
-                }
+            if (self.visitedNodes.length > 1) {
+                str +=
+                    "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(-1)'> previous </button>" +
+                    "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>";
+            }
 
-                str += "</div>";
-                $("#" + self.currentNodeIdInfosDivId).prepend(str);
-
+            str += "</div>";
+            $("#" + self.currentNodeIdInfosDivId).prepend(str);
         }
-    }
+    };
 
     self.drawCommonInfos = function (sourceLabel, nodeId, divId, _options, callback) {
         if (!_options) _options = {};
@@ -1294,9 +1292,9 @@ defaultLang = 'en';*/
                 if (!self.newProperties) self.newProperties = {};
                 self.newProperties[property] = value;
 
-               // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
-               self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "mainDialogDiv", {}, function (err, result) {
-                   self.showNodeInfosToolbar()
+                // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
+                self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "mainDialogDiv", {}, function (err, result) {
+                    self.showNodeInfosToolbar();
                     if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
                         visjsGraph.data.nodes.push({
                             id: self.currentNodeId,

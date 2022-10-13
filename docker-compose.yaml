@@ -9,11 +9,20 @@ services:
         ports:
             - "${VOCABLES_LISTEN_PORT:-3010}:3010"
         volumes:
-            - "${DATA_ROOT_DIR:-/tmp}/vocables/app/config:\
+            - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/config:\
               /app/config"
-        env_file:
-            - default.env
-            - .env
+        environment:
+            USER_USERNAME: admin
+            USER_PASSWORD: ${USER_PASSWORD}
+            VOCABLES__default_sparql_url: http://virtuoso:8890/sparql
+            VOCABLES__formalOntologySourceLabel: ${FORMAL_ONTOLOGY_SOURCE_LABEL}
+            VOCABLES__SQLserver__user: SA
+            VOCABLES__SQLserver__password: ${SA_PASSWORD}
+            VOCABLES__SQLserver__server: sqlserver
+            VOCABLES__SQLserver__database: master
+            VOCABLES__ElasticSearch__url: http://elasticsearch:9200/
+            VOCABLES__annotator__spacyServerUrl: http://spacyserver:8000/pos
+            VOCABLES__wiki__url: ""
         networks:
             - backend
 
@@ -21,8 +30,10 @@ services:
         image: askomics/virtuoso:7.2.7
         ports:
             - ${VIRTUOSO_LISTEN_PORT:-8890}:8890
+        environment:
+            DBA_PASSWORD: ${DBA_PASSWORD}
         volumes:
-            - "${DATA_ROOT_DIR:-/tmp}/vocables/virtuoso/data:\
+            - "${DATA_ROOT_DIR:-/tmp}/souslesens/virtuoso/data:\
               /data"
         networks:
             - backend
@@ -31,9 +42,9 @@ services:
         image: mcr.microsoft.com/mssql/server:2019-latest
         environment:
             ACCEPT_EULA: "Y"
-            SA_PASSWORD: ${SA_PASSWORD:-superSecretP4ssword!}
+            SA_PASSWORD: ${SA_PASSWORD}
         volumes:
-            - "${DATA_ROOT_DIR:-/tmp}/vocables/sqlserver:\
+            - "${DATA_ROOT_DIR:-/tmp}/souslesens/sqlserver:\
               /var/opt/mssql"
         networks:
             - backend
@@ -44,7 +55,7 @@ services:
             ES_JAVA_OPTS: "-Xmx256m -Xms256m"
             discovery.type: single-node
         volumes:
-            - "${DATA_ROOT_DIR:-/tmp}/vocables/elasticsearch/data:\
+            - "${DATA_ROOT_DIR:-/tmp}/souslesens/elasticsearch/data:\
               /usr/share/elasticsearch/data"
         ports:
             - ${VIRTUOSO_LISTEN_PORT:-8890}:8890

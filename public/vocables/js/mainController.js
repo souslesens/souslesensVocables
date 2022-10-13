@@ -26,7 +26,7 @@ var MainController = (function () {
                 Config.wiki = serverConfig.wiki;
                 Config.sentryDsnJsFront = serverConfig.sentryDsnJsFront;
                 Config.currentTopLevelOntology = serverConfig.currentTopLevelOntology;
-                Config.tools_available= serverConfig.tools_available;
+                Config.tools_available = serverConfig.tools_available;
 
                 // display version number
                 $("#souslesensversion").html(serverConfig.version);
@@ -383,8 +383,7 @@ var MainController = (function () {
             var treeData = [];
             for (var key in Config.tools) {
                 if (Config.tools_available.indexOf(key) > -1) {
-
-                    if ((Config.currentProfile.allowedTools != "ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) || Config.currentProfile.forbiddenTools.indexOf(key) > -1) ;
+                    if ((Config.currentProfile.allowedTools != "ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) || Config.currentProfile.forbiddenTools.indexOf(key) > -1);
                     else
                         treeData.push({
                             id: key,

@@ -281,10 +281,13 @@ Lineage_blend.addNodeToAssociationNode(node, "source", true);
 
     self.setTopLevelOntologyFromImports = function (sourceLabel) {
         Config.currentTopLevelOntology = null;
+        if(Config.topLevelOntologies[sourceLabel])
+           return  Config.currentTopLevelOntology=sourceLabel
         var imports = Config.sources[sourceLabel].imports;
         if (!imports) return (Config.currentTopLevelOntology = Object.keys(Config.topLevelOntologies)[0]);
         if (!Array.isArray(imports)) imports = [imports];
         var ok = false;
+
         imports.forEach(function (source) {
             if (!ok && Config.topLevelOntologies[source]) {
                 ok = true;

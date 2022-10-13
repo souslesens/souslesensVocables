@@ -382,15 +382,17 @@ var MainController = (function () {
             $(".max-height").height($(window).height() - 300);
             var treeData = [];
             for (var key in Config.tools) {
-                if ((Config.currentProfile.allowedTools != "ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) || Config.currentProfile.forbiddenTools.indexOf(key) > -1);
-                else
-                    treeData.push({
-                        id: key,
-                        text: Config.tools[key].label,
-                        type: "tool",
-                        parent: "#",
-                        data: Config.tools[key],
-                    });
+                if (Config.tools_available.indexOf(key) > -1) {
+                    if ((Config.currentProfile.allowedTools != "ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) || Config.currentProfile.forbiddenTools.indexOf(key) > -1) ;
+                    else
+                        treeData.push({
+                            id: key,
+                            text: Config.tools[key].label,
+                            type: "tool",
+                            parent: "#",
+                            data: Config.tools[key],
+                        });
+                }
             }
             //})
             common.jstree.loadJsTree(treeDiv, treeData, {

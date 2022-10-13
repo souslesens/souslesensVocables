@@ -133,7 +133,7 @@ var Lineage_decoration = (function () {
                     "WHERE {GRAPH ?g{" +
                     "    ?x  rdf:type owl:Class. " +
                     "OPTIONAL {?x rdfs:label ?label}" +
-                    " ?x   rdfs:subClassOf+ ?type.  filter(regex(str(?type),'" +
+                    " ?x   rdfs:subClassOf* ?type.  filter(regex(str(?type),'" +
                     uriPattern +
                     "'))";
 
@@ -220,7 +220,7 @@ strFrom +
 
         self.setTopLevelOntologyClassesMap(function (err, result) {
             if (Config.topLevelOntologies[Config.currentTopLevelOntology]) {
-                self.legendMap = {};
+               // self.legendMap = {};
                 self.uriPattern = Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern;
                 self.colorNodesByTopLevelOntologyTopType(visjsNodes);
             } else return;
@@ -247,7 +247,7 @@ strFrom +
                 function (callbackSeries) {
                     visjsNodes.forEach(function (node) {
                         if (node.data && node.data.rdfType == "NamedIndividual") individualNodes[node.id] = {};
-                        else if (node.id.indexOf(self.uriPattern) < 0) {
+                        else if (true || node.id.indexOf(self.uriPattern) < 0) {
                             nonTopLevelOntologynodeIds.push(node.id);
                         } else {
                             if (self.currentTopOntologyClassesMap[node.id])
@@ -291,7 +291,14 @@ strFrom +
                                     color: null,
                                 };
                             }
-                            if (self.currentTopOntologyClassesMap[item.type.value]) {
+                            if(self.currentTopOntologyClassesMap[item.x.value]){
+                                self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyClass = item.x.value;
+                                self.currentVisjGraphNodesMap[item.x.value].color = self.currentTopOntologyClassesMap[item.x.value].color;
+                                self.currentVisjGraphNodesMap[item.x.value].type = item.x.value;
+                                self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyNumberOfParents = self.currentTopOntologyClassesMap[item.type.value].parents.length;
+                            }
+                           else if (self.currentTopOntologyClassesMap[item.type.value]) {
+
                                 // select the deepest upper ontology class  among all retrieved
                                 if (self.currentTopOntologyClassesMap[item.type.value].parents.length > self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyNumberOfParents) {
                                     self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyClass = item.type.value;

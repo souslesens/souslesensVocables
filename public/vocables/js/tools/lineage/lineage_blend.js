@@ -582,10 +582,10 @@ var xx = result
             Sparql_common.getFromStr(topOntology, null, false) +
             " " +
             /*   "WHERE {" +
-"?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel}" +
-" optional{?b owl:someValuesFrom ?toAncestor.filter   ?to rdfs:subClassOf* ?toAncestor}\n" +
-"  {SELECT ?fromAncestor   WHERE { ?from rdfs:subClassOf+ ?fromAncestor." +
-" filter (?from=<"+fromNode.id+"\> )     }"+*/
+  "?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel}" +
+  " optional{?b owl:someValuesFrom ?toAncestor.filter   ?to rdfs:subClassOf* ?toAncestor}\n" +
+  "  {SELECT ?fromAncestor   WHERE { ?from rdfs:subClassOf+ ?fromAncestor." +
+  " filter (?from=<"+fromNode.id+"\> )     }"+*/
 
             " WHERE {{?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel} \n" +
             "   optional{ ?b owl:someValuesFrom ?toAncestor.  ?to rdfs:subClassOf+ ?toAncestor   filter( ?toAncestor!=owl:Thing  && ?to=<" +
@@ -618,26 +618,16 @@ var xx = result
     };
 
     self.graphModification = {
-        /*  initTopLevelOntologySelect:function(selectId){
-
-        var topLevelOntologies=Object.keys(Config.topLevelOntologies)
-
-         common.fillSelectOptions(selectId,topLevelOntologies)
-        Config.currentTopLevelOntology= $("#"+selectId).val()
-    }*/
-
         showAddNodeGraphDialog: function () {
             self.graphModification.creatingNodeTriples = [];
             self.graphModification.creatingsourceUri = null;
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
-                //   self.graphModification.initTopLevelOntologySelect("LineageBlend_currentTopLevelOntologyNodesSelect")
                 self.getSourcePossiblePredicatesAndObject(Lineage_classes.mainSource, function (err, result) {
                     if (err) return alert(err.responseText);
                     if (!Config.sources[Lineage_classes.mainSource].allowIndividuals) {
                         $("#LineageBlend_creatingNamedIndividualButton").css("display", "none");
                     }
-
                     self.currentPossibleClassesAndPredicates = result;
                     var allObjects = result.usualObjects.concat(result.TopLevelOntologyObjects).concat([""]).concat(result.sourceObjects);
 
@@ -957,7 +947,6 @@ var xx = result
         showAddEdgeFromGraphDialog: function (edgeData, callback) {
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").load("snippets/lineage/lineageAddEdgeDialog.html", function () {
-                //self.graphModification.initTopLevelOntologySelect("LineageBlend_currentTopLevelOntologyNodesSelect")
                 self.sourceNode = visjsGraph.data.nodes.get(edgeData.from).data;
                 self.targetNode = visjsGraph.data.nodes.get(edgeData.to).data;
                 $("#lineageAddEdgeDialog_Title").html(self.sourceNode.label + " -> " + self.targetNode.label);
@@ -1129,20 +1118,20 @@ var xx = result
                             });
                         },
                         /*   function(callbackSeries) {
-var propertyIds = Object.keys(authorizedProps);
-Sparql_OWL.getObjectSubProperties(Lineage_classes.mainSource, propertyIds, options, function(err, result) {
-if (err) return callbackSeries(err);
-result.forEach(function(item) {
-if (!authorizedProps[item.property.value]) return;
-if (!authorizedProps[item.property.value].children) authorizedProps[item.property.value].children = [];
-authorizedProps[item.property.value].children.push({
- id: item.subProperty.value,
- label: item.subPropertyLabel.value
-});
-});
-callbackSeries();
-});
-},*/
+       var propertyIds = Object.keys(authorizedProps);
+       Sparql_OWL.getObjectSubProperties(Lineage_classes.mainSource, propertyIds, options, function(err, result) {
+         if (err) return callbackSeries(err);
+         result.forEach(function(item) {
+           if (!authorizedProps[item.property.value]) return;
+           if (!authorizedProps[item.property.value].children) authorizedProps[item.property.value].children = [];
+           authorizedProps[item.property.value].children.push({
+             id: item.subProperty.value,
+             label: item.subPropertyLabel.value
+           });
+         });
+         callbackSeries();
+       });
+     },*/
 
                         //create formal Ontology tree nodes
                         function (callbackSeries) {

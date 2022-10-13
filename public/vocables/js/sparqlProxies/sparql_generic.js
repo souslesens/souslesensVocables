@@ -958,7 +958,6 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                     for (var key in allClassesMap) {
                         recurse(key, allClassesMap[key].parents);
                     }
-
                     //format parents
                     for (var key in allClassesMap) {
                         var obj = allClassesMap[key];

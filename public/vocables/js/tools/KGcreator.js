@@ -677,24 +677,24 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         });
     };
     /*  self.copyMappings = function() {
-  try {
-    var data = self.mainJsonEditor.get();
+    try {
+      var data = self.mainJsonEditor.get();
 
-    data.tripleModels.forEach(function(item) {
-      if (item.o["_function(line, mapping)_"]) {
-        var expression = item.o["_function(line, mapping)_"];
-        try {
-          var fn = new Function("line", "mapping", expression);
-        } catch (err) {
-          $("#KGcreator_dataSampleDiv").val(err);
+      data.tripleModels.forEach(function(item) {
+        if (item.o["_function(line, mapping)_"]) {
+          var expression = item.o["_function(line, mapping)_"];
+          try {
+            var fn = new Function("line", "mapping", expression);
+          } catch (err) {
+            $("#KGcreator_dataSampleDiv").val(err);
+          }
+          item.o = fn;
         }
-        item.o = fn;
-      }
-    });
-  } catch (err) {
-    alert(err.message);
-  }
-};*/
+      });
+    } catch (err) {
+      alert(err.message);
+    }
+  };*/
     self.clearMappings = function () {
         if (confirm("Clear mappings")) {
             self.mainJsonEditor.load({});
@@ -704,7 +704,6 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
     self.loadMappings = function (csvFileName) {
         function execLoadMappings() {
             self.currentJsonObject = {};
-
             self.mainJsonEditor.load(self.currentJsonObject);
 
             setUpperOntologyPrefix = function () {
@@ -745,8 +744,6 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
                     if (!self.currentJsonObject.graphUri) self.currentJsonObject.graphUri = self.currentGraphUri || "";
                     else self.currentGraphUri = self.currentJsonObject.graphUri;
 
-                    setUpperOntologyPrefix();
-
                     self.mainJsonEditor.load(self.currentJsonObject);
                     self.mainJsonEditorModified = false;
                 },
@@ -758,8 +755,6 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
                         lookups: [],
                         graphUri: "",
                     }; // return alert(err.responseText)
-                    setUpperOntologyPrefix();
-                    self.mainJsonEditor.load(self.currentJsonObject);
                 },
             });
         }

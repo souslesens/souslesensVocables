@@ -32,8 +32,8 @@ var TE_14224_browser = (function () {
         source = "TSF_GS_EP-EXP_207_11";
         source = "TSF_maintenance_ROMAIN_14224";
         self.referenceOntologySource = source;
-        Lineage_classes.mainSource = source;
-        Lineage_common.currentSource = source;
+        Lineage_sources.activeSource = source;
+      
     };
 
     self.loadAsset = function (asset) {

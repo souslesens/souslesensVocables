@@ -24,7 +24,7 @@ Lineage_relations = (function () {
         var provenances = ["manual", " auto_exactMatch"];
         common.fillSelectOptions("LineageRelations_provenanceSelect", provenances, true);
         Sparql_OWL.getObjectRestrictions(
-            Lineage_common.currentSource || Lineage_classes.mainSource,
+          Lineage_sources.activeSource,
             null,
             {
                 withoutImports: 0,
@@ -53,13 +53,13 @@ Lineage_relations = (function () {
     };
 
     self.listAllRestrictions = function () {
-        Sparql_OWL.getObjectRestrictions(Lineage_common.currentSource || Lineage_classes.mainSource, null, {}, function (err, _result) {
+        Sparql_OWL.getObjectRestrictions(Lineage_sources.activeSource, null, {}, function (err, _result) {
             if (err) return alert(err);
         });
     };
 
     self.graphAllRestrictions = function () {
-        Lineage_classes.drawRestrictions(Lineage_common.currentSource || Lineage_classes.mainSource, "all");
+        Lineage_classes.drawRestrictions(Lineage_sources.activeSource, "all");
     };
 
     self.exportRestrictions = function () {
@@ -67,7 +67,7 @@ Lineage_relations = (function () {
     };
 
     self.getUriSource = function (uri) {
-        var source = Lineage_common.currentSource || Lineage_classes.mainSource;
+        var source =Lineage_sources.activeSource;
         Object.keys(self.graphUriSourceMap).forEach(function (graphUri) {
             if (uri.indexOf(graphUri) == 0) {
                 source = self.graphUriSourceMap[graphUri];
@@ -85,12 +85,12 @@ Lineage_relations = (function () {
             if (!selectedNode) return callback("no node selected on graph");
             if (Config.sources[selectedNode.id]) {
                 // selection of source in graph
-                Lineage_classes.setCurrentSource(selectedNode.id);
+                Lineage_sources.setCurrentSource(selectedNode.id);
                 selectedNodes = null;
                 return callback(null, selectedNodes);
             }
             selectedNodes = [selectedNode.id];
-            Sparql_generic.getNodeChildren(Lineage_common.currentSource || Lineage_classes.mainSource, null, selectedNode.id, 3, null, function (err, result) {
+            Sparql_generic.getNodeChildren(Lineage_sources.activeSource, null, selectedNode.id, 3, null, function (err, result) {
                 if (err) callback(err);
                 result.forEach(function (item) {
                     selectedNodes.push(item.child1.value);
@@ -221,7 +221,7 @@ Lineage_relations = (function () {
     };
 
     self.showRestrictions = function (output, relations, toLabelsMap) {
-        var currentSource = Lineage_common.currentSource || Lineage_classes.mainSource;
+        var currentSource = Lineage_sources.activeSource;
 
         async.series(
             [
@@ -402,7 +402,7 @@ Lineage_relations = (function () {
                                     },
                                 });
                             }
-                            var propSource = Lineage_classes.mainSource;
+                            var propSource = Lineage_sources.activeSource;
                             var edgeId = item.domain + "_" + item.prop + "_" + item.range;
                             if (!existingNodes[edgeId]) {
                                 existingNodes[edgeId] = 1;
@@ -579,7 +579,7 @@ Lineage_relations = (function () {
     };
 
     self.graphAllProperties = function () {
-        Lineage_classes.drawObjectProperties(Lineage_common.currentSource || Lineage_classes.mainSource, "all");
+        Lineage_classes.drawObjectProperties(Lineage_sources.activeSource, "all");
     };
 
     self.exportProperties = function () {
@@ -589,7 +589,7 @@ Lineage_relations = (function () {
     self.projectSameAsRestrictionsOnSource = function (orphans) {
         if (orphans) return alert("Coming soon...");
         if (!$("#LineageRelations_setExactMatchSameAsSourceInitUIcBX").prop("checked")) Lineage_classes.initUI();
-        var fromSource = Lineage_common.currentSource || Lineage_classes.mainSource;
+        var fromSource = Lineage_sources.activeSource;
         var toSource = $("#LineageRelations_setExactMatchSameAsSourceSelect").val();
         if (!fromSource) return alert("select a start source");
         if (!toSource || toSource == "") return alert("select a target source ");
@@ -746,9 +746,9 @@ Lineage_relations = (function () {
         //            }
         //        });
         //
-        //        var graphUri = Config.sources[Lineage_classes.mainSource].graphUri + "projected/" + version + "/";
+        //        var graphUri = Config.sources[Lineage_sources.activeSource].graphUri + "projected/" + version + "/";
         //
-        //        var graphMetaDataOptions = { label: "" + Lineage_classes.mainSource + " projected " + version, comment: "" };
+        //        var graphMetaDataOptions = { label: "" + Lineage_sources.activeSource + " projected " + version, comment: "" };
         //
         //        var graphMetaData = Lineage_blend.getProjectedGraphMetaDataTriples(graphUri, imports, graphMetaDataOptions);
         //        triples = triples.concat(graphMetaData);
@@ -763,8 +763,8 @@ Lineage_relations = (function () {
         //        var query = " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
         //
         //        // console.log(query)
-        //        var url = Config.sources[Lineage_classes.mainSource].sparql_server.url + "?format=json&query=";
-        //        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: Lineage_classes.mainSource }, function (err, result) {
+        //        var url = Config.sources[Lineage_sources.activeSource].sparql_server.url + "?format=json&query=";
+        //        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: Lineage_sources.activeSource }, function (err, result) {
         //            return MainController.UI.message("Project Graph saved", true);
         //        });
     };
@@ -774,8 +774,8 @@ Lineage_relations = (function () {
         var query = " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
 
         // console.log(query)
-        var url = Config.sources[Lineage_classes.mainSource].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: Lineage_classes.mainSource }, function (_err, _result) {
+        var url = Config.sources[Lineage_sources.activeSource].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: Lineage_sources.activeSource }, function (_err, _result) {
             // pass
         });
     };

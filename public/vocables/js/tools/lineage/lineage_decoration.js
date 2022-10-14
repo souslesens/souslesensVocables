@@ -110,7 +110,7 @@ var Lineage_decoration = (function () {
     self.getVisjsClassNodesTopLevelOntologyClass = function (ids, callback) {
         if (!ids || ids.length == 0) return callback(null, []);
 
-        var sourceLabel = Lineage_classes.mainSource;
+        var sourceLabel = Lineage_sources.activeSource;
 
         var strFrom = Sparql_common.getFromStr(sourceLabel, null, true, true);
         var sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -166,7 +166,7 @@ strFrom +
     self.getVisjsNamedIndividualNodesClass = function (ids, callback) {
         if (!ids || ids.length == 0) return callback(null, []);
 
-        var sourceLabel = Lineage_classes.mainSource;
+        var sourceLabel = Lineage_sources.activeSource;
 
         var strFrom = Sparql_common.getFromStr(sourceLabel, null, true, true);
         var sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -211,7 +211,7 @@ strFrom +
     };
 
     self.colorGraphNodesByType = function (visjsNodes) {
-        Lineage_classes.setTopLevelOntologyFromImports(Lineage_classes.mainSource);
+        Lineage_sources.setTopLevelOntologyFromImports(Lineage_sources.activeSource);
 
         if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) return;
 

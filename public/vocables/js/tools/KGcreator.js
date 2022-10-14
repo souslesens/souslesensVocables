@@ -737,7 +737,7 @@ self.saveMappings({classId:classId})
             self.currentJsonObject.prefixes[currrentTopLevelOntology.prefix] = currrentTopLevelOntology.prefixtarget;
           }
         } else {
-          currrentTopLevelOntology = Lineage_classes.setTopLevelOntologyFromPrefix(Object.keys(self.currentJsonObject.prefixes)[0]);
+          currrentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromPrefix(Object.keys(self.currentJsonObject.prefixes)[0]);
           $("#KGcreator_topLevelOntologiesSelect").val(currrentTopLevelOntology);
         }
       };
@@ -854,9 +854,7 @@ if (selectedFiles.length > 0);*/
           } else {
             $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
 
-            /*    SearchUtil.generateElasticIndex(Lineage_common.currentSource,{ids:[self.graphModification.creatingNodeUri]},function(err, result) {
-})*/
-          }
+              }
         },
         error(err) {
           return alert(err.responseText);

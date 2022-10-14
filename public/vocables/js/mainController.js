@@ -402,6 +402,8 @@ var MainController = (function () {
             });
         },
         initTool: function (toolId, callback) {
+
+
             self.currentTool = toolId;
             var toolObj = Config.tools[toolId];
             self.currentSource = null;
@@ -415,6 +417,17 @@ var MainController = (function () {
             $("#sourceDivControlPanelDiv").html("");
             $("#actionDivContolPanelDiv").html("");
             $("#rightPanelDiv").html("");
+
+            if(toolId=="lineage"){
+                $("#accordion").accordion("option", { active: 2 });
+                MainController.currentSource = null;
+
+                    controller.onLoaded(function (err, result) {
+
+                        if (callback) callback(err, result);
+                    });
+                return;
+            }
 
             self.UI.updateActionDivLabel();
             SourceBrowser.targetDiv = "currentSourceTreeDiv";
@@ -462,7 +475,7 @@ var MainController = (function () {
 
         toogleRightPanel: function (open) {
             var display = $("#rightPanelDiv").css("display");
-            Lineage_common.currentSource = null;
+            Lineage_sources.activeSource = null;
             var currentCentralPanelWidth = $("#centralPanelDiv").width();
 
             if (!open && display == "flex") {

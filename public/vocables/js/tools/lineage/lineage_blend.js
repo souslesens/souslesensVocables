@@ -13,7 +13,7 @@ var Lineage_blend = (function () {
             self.currentAssociation[1] = node.data;
             $("#lineage_targetNodeDiv").html("<span style='color:" + Lineage_classes.getSourceColor(node.data.source) + "'>" + node.data.source + "." + node.data.label + "</span>");
         }
-        if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_classes.mainSource].editable > -1) {
+        if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource].editable > -1) {
             if (self.currentAssociation && self.currentAssociation.length == 2 && self.currentAssociation[1] !== "") {
                 $("#lineage_createRelationButtonsDiv").css("display", "block");
                 self.initAllowedPropertiesForRelation();
@@ -54,7 +54,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
         if (!confirm("add  source " + importedSourceLabel + " to imports of source " + mainSourceLabel)) return callback("stop");
 
         self.addImportToCurrentSource(mainSourceLabel, importedSourceLabel, function (_err, _result) {
-            Lineage_classes.registerSource(importedSourceLabel);
+            Lineage_sources.registerSource(importedSourceLabel);
             callback();
         });
     };
@@ -104,7 +104,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
         createInverseRelation = $("#lineage_blendSameAsInverseCBX").prop("checked");
 
         if (!confirm("paste " + sourceNode.source + "." + sourceNode.label + "  as " + type + " " + targetNode.source + "." + targetNode.label + "?")) return;
-        self.createRelation(Lineage_classes.mainSource, type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, {}, function (err, _result) {
+        self.createRelation(Lineage_sources.activeSource, type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, {}, function (err, _result) {
             if (err) return alert(err);
             self.addRelationToGraph(propId, blankNodeId);
             MainController.UI.message("relation added", true);
@@ -118,7 +118,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
             [
                 function (callbackSeries) {
                     if (!addImportToCurrentSource) return callbackSeries();
-                    self.setNewImport(Lineage_classes.mainSource, targetNode.source, function (err, _result) {
+                    self.setNewImport(Lineage_sources.activeSource, targetNode.source, function (err, _result) {
                         callbackSeries(err);
                     });
                 },
@@ -263,7 +263,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
 
         Sparql_generic.insertTriples(source, triples, null, function (err, _result) {
             self.addRelationToGraph(propId);
-            // Lineage_classes.drawObjectProperties(null,   [souceNodeId], Lineage_classes.mainSource)
+            // Lineage_classes.drawObjectProperties(null,   [souceNodeId], Lineage_sources.activeSource)
             callback(err, "DONE");
         });
     }),
@@ -378,7 +378,7 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
                 from: sourceNode.id,
                 to: targetNode.id,
                 label: "<i>" + propLabel + "</i>",
-                data: { propertyId: propUri, source: Lineage_classes.mainSource, bNodeId: edgeId }, // used by Lineage},
+                data: { propertyId: propUri, source: Lineage_sources.activeSource, bNodeId: edgeId }, // used by Lineage},
                 font: { multi: true, size: 10 },
                 arrows: {
                     from: {
@@ -402,11 +402,11 @@ $("#GenericTools_searchInAllSources").prop("checked", true)*/
         if (!node) return;
         var existingNodes = visjsGraph.getExistingIdsMap();
         if (existingNodes[node.id]) return alert("node " + node.label + " already exists in graph ");
-        /* if(!confirm(" Import node "+node.label+" in source "+Lineage_classes.mainSource))
+        /* if(!confirm(" Import node "+node.label+" in source "+Lineage_sources.activeSource))
 return;*/
-        self.setNewImport(Lineage_classes.mainSource, node.source, function (err, _result) {
+        self.setNewImport(Lineage_sources.activeSource, node.source, function (err, _result) {
             if (err) return "";
-            var toGraphUri = Config.sources[Lineage_classes.mainSource].graphUri;
+            var toGraphUri = Config.sources[Lineage_sources.activeSource].graphUri;
             Sparql_generic.copyNodes(node.source, toGraphUri, [node.id], null, function (err, _result) {
                 if (err) return alert(err);
                 visjsGraph.data.nodes.push({
@@ -513,7 +513,7 @@ return;*/
         });
         if (relations.length > 0) {
             var options = {};
-            self.createRelationTriples(relations, true, Lineage_classes.mainSource, options, function (err, _result) {
+            self.createRelationTriples(relations, true, Lineage_sources.activeSource, options, function (err, _result) {
                 if (err) return alert(err);
                 visjsGraph.data.edges.remove(sameLabelEdgeIds);
                 MainController.UI.message(relations.length + "  sameAs relations created", true);
@@ -522,7 +522,7 @@ return;*/
     };
 
     self.createNode = function () {
-        SourceBrowser.showNodeInfos(Lineage_classes.mainSource, null, "mainDialogDiv", null, function (_err, _result) {
+        SourceBrowser.showNodeInfos(Lineage_sources.activeSource, null, "mainDialogDiv", null, function (_err, _result) {
             // pass
         });
     };
@@ -623,9 +623,9 @@ var xx = result
             self.graphModification.creatingsourceUri = null;
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
-                self.getSourcePossiblePredicatesAndObject(Lineage_classes.mainSource, function (err, result) {
+                self.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, function (err, result) {
                     if (err) return alert(err.responseText);
-                    if (!Config.sources[Lineage_classes.mainSource].allowIndividuals) {
+                    if (!Config.sources[Lineage_sources.activeSource].allowIndividuals) {
                         $("#LineageBlend_creatingNamedIndividualButton").css("display", "none");
                     }
                     self.currentPossibleClassesAndPredicates = result;
@@ -642,7 +642,7 @@ var xx = result
         },
 
         getPossibleNamedIndividuals: function (callback) {
-            Sparql_OWL.getNamedIndividuals(Lineage_classes.mainSource, null, null, function (err, result) {
+            Sparql_OWL.getNamedIndividuals(Lineage_sources.activeSource, null, null, function (err, result) {
                 if (err) return callback(err);
                 var individuals = {};
                 result.forEach(function (item) {
@@ -710,7 +710,7 @@ var xx = result
             var specificUri = $("#LineageBlend_creatingNodeSubjectUri").val();
             if (specificUri) uriType = "specific";
 
-            let graphUri = Config.sources[Lineage_classes.mainSource].graphUri;
+            let graphUri = Config.sources[Lineage_sources.activeSource].graphUri;
             if (uriType == "fromLabel") uri = graphUri + common.formatStringForTriple(label, true);
             else if (uriType == "randomHexaNumber") uri = graphUri + common.getRandomHexaId(10);
             else if (uriType == "specific") {
@@ -812,7 +812,7 @@ var xx = result
 
             var wrongClasses = [];
             var triples = [];
-            let graphUri = Config.sources[Lineage_classes.mainSource].graphUri;
+            let graphUri = Config.sources[Lineage_sources.activeSource].graphUri;
             let sourceUrisMap = {};
             var sourceUrisArray = [];
             var sep = null;
@@ -890,15 +890,15 @@ var xx = result
                 $("#LineageBlend_creatingNodeClassParamsDiv").tabs("option", "active", 2);
             } else {
                 if (confirm("create " + lines.length + " nodes")) {
-                    Sparql_generic.insertTriples(Lineage_classes.mainSource, triples, {}, function (err, _result) {
+                    Sparql_generic.insertTriples(Lineage_sources.activeSource, triples, {}, function (err, _result) {
                         if (err) return alert(err);
                         self.graphModification.creatingNodeTriples = [];
                         MainController.UI.message(sourceUrisArray.length + " triples created, indexing...");
 
-                        SearchUtil.generateElasticIndex(Lineage_classes.mainSource, { ids: sourceUrisArray }, function (err, result) {
+                        SearchUtil.generateElasticIndex(Lineage_sources.activeSource, { ids: sourceUrisArray }, function (err, result) {
                             if (err) return alert(err.responseText);
                             if (self.graphModification.currentCreatingNodeType == "Class") {
-                                Lineage_classes.addNodesAndParentsToGraph(Lineage_classes.mainSource, sourceUrisArray, {}, function (err) {
+                                Lineage_classes.addNodesAndParentsToGraph(Lineage_sources.activeSource, sourceUrisArray, {}, function (err) {
                                     $("#LineageBlend_creatingNodeClassParamsDiv").dialog("close");
                                     $("#LineagePopup").dialog("close");
                                     MainController.UI.message(sourceUrisArray.length + "nodes Created and Indexed");
@@ -927,17 +927,17 @@ var xx = result
             if (str.indexOf("owl:Class") > -1 && str.indexOf("rdfs:subClassOf") < 0) return alert("a class must be a rdfs:subClassOf anotherClass");
             if (str.indexOf("owl:Class") > -1 && str.indexOf("rdfs:label") < 0) return alert("a class must have a rdfs:label");
             if (true || confirm("create node")) {
-                Sparql_generic.insertTriples(Lineage_classes.mainSource, self.graphModification.creatingNodeTriples, {}, function (err, _result) {
+                Sparql_generic.insertTriples(Lineage_sources.activeSource, self.graphModification.creatingNodeTriples, {}, function (err, _result) {
                     if (err) return alert(err);
                     $("#LineagePopup").dialog("close");
                     var nodeData = {
                         id: self.graphModification.creatingsourceUri,
-                        source: Lineage_classes.mainSource,
+                        source: Lineage_sources.activeSource,
                     };
                     MainController.UI.message("node Created");
                     self.graphModification.creatingNodeTriples = [];
                     Lineage_classes.drawNodeAndParents(nodeData);
-                    SearchUtil.generateElasticIndex(Lineage_classes.mainSource, { ids: [self.graphModification.creatingsourceUri] }, function (err, result) {
+                    SearchUtil.generateElasticIndex(Lineage_sources.activeSource, { ids: [self.graphModification.creatingsourceUri] }, function (err, result) {
                         if (err) return alert(err.responseText);
                         MainController.UI.message("node Created and Indexed");
                     });
@@ -964,11 +964,11 @@ var xx = result
                             // le sameAs sont tous dans le dictionaire
                             inSource = Config.dictionarySource;
                         else {
-                            var mainSource = Config.sources[Lineage_classes.mainSource];
+                            var mainSource = Config.sources[Lineage_sources.activeSource];
                             if (Config.sources[self.sourceNode.source].editable) {
                                 inSource = self.sourceNode.source;
                             } else if (mainSource.editable) {
-                                inSource = Lineage_classes.mainSource;
+                                inSource = Lineage_sources.activeSource;
                             }
                             //soit  dans predicateSource
                             else inSource = Config.predicatesSource;
@@ -1003,7 +1003,7 @@ var xx = result
                 var jstreeData = [];
                 var distinctProps = {};
                 var authorizedProps = {};
-                let inSource = Lineage_classes.mainSource;
+                let inSource = Lineage_sources.activeSource;
                 let sourceNodeFirsttopLevelOntologyAncestor = null;
                 let targetNodeFirsttopLevelOntologyAncestor = null;
                 async.series(
@@ -1025,18 +1025,18 @@ var xx = result
                                 parent: "#",
                                 data: {
                                     id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                                    inSource: Lineage_classes.mainSource,
+                                    inSource: Lineage_sources.activeSource,
                                 },
                             });
 
-                            if (Config.sources[Lineage_classes.mainSource].schemaType == "OWL" && self.sourceNode.type != "NamedIndividual") {
+                            if (Config.sources[Lineage_sources.activeSource].schemaType == "OWL" && self.sourceNode.type != "NamedIndividual") {
                                 jstreeData.push({
                                     id: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
                                     text: "rdfs:subClassOf",
                                     parent: "#",
                                     data: {
                                         id: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-                                        inSource: Lineage_classes.mainSource,
+                                        inSource: Lineage_sources.activeSource,
                                     },
                                 });
                             }
@@ -1048,14 +1048,14 @@ var xx = result
 
                         //filter formal ontology axioms to selected nodes
                         function (callbackSeries) {
-                            if (!Config.sources[Lineage_classes.mainSource].editable) {
-                                $("#lineageAddEdgeDialog_TopLevelOntologyPropertiesTreeDiv").html("source " + Lineage_classes.mainSource + " is not editable");
+                            if (!Config.sources[Lineage_sources.activeSource].editable) {
+                                $("#lineageAddEdgeDialog_TopLevelOntologyPropertiesTreeDiv").html("source " + Lineage_sources.activeSource + " is not editable");
                                 return callbackSeries();
                             }
                             let inSource = Config.currentTopLevelOntology;
                             let ancestorsDepth = 10;
-                            Sparql_OWL.getNodesAncestors(Lineage_classes.mainSource, [self.sourceNode.id, self.targetNode.id], {}, function (err, result) {
-                                //   Sparql_OWL.getNodeParents(Lineage_classes.mainSource, null, [self.sourceNode.id, self.targetNode.id], ancestorsDepth, {}, function (err, result) {
+                            Sparql_OWL.getNodesAncestors(Lineage_sources.activeSource, [self.sourceNode.id, self.targetNode.id], {}, function (err, result) {
+                                //   Sparql_OWL.getNodeParents(Lineage_sources.activeSource, null, [self.sourceNode.id, self.targetNode.id], ancestorsDepth, {}, function (err, result) {
                                 if (err) return callbackSeries(err);
                                 var topLevelOntologyPattern = Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern;
 
@@ -1119,7 +1119,7 @@ var xx = result
                         },
                         /*   function(callbackSeries) {
        var propertyIds = Object.keys(authorizedProps);
-       Sparql_OWL.getObjectSubProperties(Lineage_classes.mainSource, propertyIds, options, function(err, result) {
+       Sparql_OWL.getObjectSubProperties(Lineage_sources.activeSource, propertyIds, options, function(err, result) {
          if (err) return callbackSeries(err);
          result.forEach(function(item) {
            if (!authorizedProps[item.property.value]) return;
@@ -1186,8 +1186,8 @@ var xx = result
                         },
                         /*   function(callbackSeries) {
 return callbackSeries();
-if (!Config.sources[Lineage_classes.mainSource].editable) {
-$("#lineageAddEdgeDialog_currentSourcePropertiesTreeDiv").html("source " + Lineage_classes.mainSource + " is not editable");
+if (!Config.sources[Lineage_sources.activeSource].editable) {
+$("#lineageAddEdgeDialog_currentSourcePropertiesTreeDiv").html("source " + Lineage_sources.activeSource + " is not editable");
 return callbackSeries();
 }
 
@@ -1213,7 +1213,7 @@ callbackSeries();
                         //get specific(mainSource) source properties
                         function (callbackSeries) {
                             if (self.currentSpecificObjectPropertiesMap) return callbackSeries();
-                            var specificSourceLabel = Lineage_common.currentSource || Lineage_classes.mainSource;
+                            var specificSourceLabel =Lineage_sources.activeSource;
 
                             Sparql_OWL.listObjectProperties(specificSourceLabel, null, function (err, result) {
                                 if (err) return callbackSeries(err);
@@ -1233,7 +1233,7 @@ callbackSeries();
 
                         //add specific(mainSource) source properties to jstree data
                         function (callbackSeries) {
-                            var specificSourceLabel = Lineage_common.currentSource || Lineage_classes.mainSource;
+                            var specificSourceLabel = Lineage_sources.activeSource;
                             var cssClass = "lineageAddEdgeDialog_topLevelOntologySpecificProp";
                             jstreeData.forEach(function (node) {
                                 if (self.currentSpecificObjectPropertiesMap[node.id]) {
@@ -1262,7 +1262,7 @@ callbackSeries();
                                             return alert("only properties from " + Config.currentTopLevelOntology + " can be refined");
                                         var subPropertyLabel = prompt("enter label for subProperty of property " + self.currentPropertiesTreeNode.data.label);
                                         if (!subPropertyLabel) return;
-                                        Lineage_blend.createSubProperty(Lineage_classes.mainSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, function (err, result) {
+                                        Lineage_blend.createSubProperty(Lineage_sources.activeSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, function (err, result) {
                                             if (err) return alert(err);
 
                                             if (!self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id])
@@ -1280,7 +1280,7 @@ callbackSeries();
                                                     data: {
                                                         id: result.uri,
                                                         label: subPropertyLabel,
-                                                        source: Lineage_classes.mainSource,
+                                                        source: Lineage_sources.activeSource,
                                                     },
                                                 },
                                             ];
@@ -1344,7 +1344,7 @@ callbackSeries();
             var isRestriction = true;
             if (propId == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" || propId == "http://www.w3.org/2000/01/rdf-schema#subClassOf") isRestriction = false;
             if (sourceNode.type == "NamedIndividual") isRestriction = false;
-            if (propId == "http://www.w3.org/2002/07/owl#sameAs" && sourceNode.source == Lineage_classes.mainSource && targetNode.source == Lineage_classes.mainSource) isRestriction = false;
+            if (propId == "http://www.w3.org/2002/07/owl#sameAs" && sourceNode.source == Lineage_sources.activeSource && targetNode.source == Lineage_sources.activeSource) isRestriction = false;
 
             if (!isRestriction) {
                 var triples = [];
@@ -1366,7 +1366,7 @@ callbackSeries();
 
                     if (oldRelations.length > 0) {
                         if (confirm("delete previous relation " + oldRelations[0].data.propertyLabel)) {
-                            Lineage_blend.deleteRestriction(Lineage_classes.mainSource, oldRelations[0], function (err) {
+                            Lineage_blend.deleteRestriction(Lineage_sources.activeSource, oldRelations[0], function (err) {
                                 if (err) alert(err);
                             });
                         }

@@ -8,7 +8,7 @@ var Lineage_linkedData = (function () {
         $("#LineageLinkedDataTab").load("snippets/lineage/lineageLinkedDataSearchDialog.html", function () {
             $("#LineageLinkedDataQueryParams_dataSourcesSelect").children().remove().end();
             $("#LineageLinkedDataQueryParams_filterPanel").css("display", "none");
-            self.dataSources = Config.sources[Lineage_classes.mainSource].dataSources;
+            self.dataSources = Config.sources[Lineage_sources.activeSource].dataSources;
             if (!self.dataSources) {
                 $("#LineageLinkedDataQueryParams_showLinkedDataTriples").css("display", "block");
             } else {
@@ -147,9 +147,9 @@ var Lineage_linkedData = (function () {
             var dataSourceLabel = node.data.source;
             if (!dataSourceLabel) return;
 
-            if (!Config.sources[Lineage_classes.mainSource].dataSources) return Lineage_classes.graphActions.showNodeInfos();
+            if (!Config.sources[Lineage_sources.activeSource].dataSources) return Lineage_classes.graphActions.showNodeInfos();
 
-            var dataSource = Config.sources[Lineage_classes.mainSource].dataSources[dataSourceLabel];
+            var dataSource = Config.sources[Lineage_sources.activeSource].dataSources[dataSourceLabel];
             if (!dataSource) return Lineage_classes.graphActions.showNodeInfos();
 
             if (dataSource.type.indexOf("sql") > -1) {

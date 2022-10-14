@@ -97,7 +97,7 @@ var Lineage_sets = (function () {
             schemaType: "OWL",
             group: "",
         };
-        Lineage_classes.mainSource = self.currentSetSource;
+        Lineage_sources.activeSource = self.currentSetSource;
         Sparql_OWL.getItems(self.currentSetSource, {}, function (err, result) {
             return callback(err, result);
         });

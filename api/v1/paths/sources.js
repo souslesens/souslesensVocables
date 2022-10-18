@@ -61,17 +61,17 @@ module.exports = function () {
     ///// GET api/v1/sources
     async function GET(req, res, next) {
         try {
-            const profiles = await read(profilesJSON);
-            const parsedProfiles = JSON.parse(profiles);
             const userInfo = await userManager.getUser(req.user);
             const sources = await read(sourcesJSON);
             const parsedSources = JSON.parse(sources);
-            const allowedSources = getAllowedSources(userInfo.user, parsedProfiles, parsedSources);
-            const filteredSources = filterSources(allowedSources, parsedSources);
             // return all sources if user is admin
             if (userInfo.user.groups.includes("admin")) {
                 resourceFetched(res, parsedSources);
             } else {
+                const profiles = await read(profilesJSON);
+                const parsedProfiles = JSON.parse(profiles);
+                const allowedSources = getAllowedSources(userInfo.user, parsedProfiles, parsedSources);
+                const filteredSources = filterSources(allowedSources, parsedSources);
                 resourceFetched(res, filteredSources);
             }
         } catch (err) {

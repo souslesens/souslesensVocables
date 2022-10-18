@@ -76,7 +76,7 @@ const decodeSource = (key: string, source: SourceJson): Source => {
         dataSource: source.dataSource ? source.dataSource : null,
         schema: source.schema ? source.schema : null,
         isDraft: source.isDraft ? source.isDraft : false,
-        editable: source.editable ? source.editable : true,
+        editable: source.editable ? source.editable : false,
         color: source.color ? source.color : "default color",
         predicates: source.predicates ? source.predicates : defaultSource(ulid()).predicates,
         group: source.group ? source.group : "",

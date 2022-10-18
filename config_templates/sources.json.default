@@ -33,7 +33,8 @@
         "sparql_server": {
             "url": "_default"
         },
-        "graphUri": "http://resource.geosciml.org/vocabulary/timescale/isc2017/",
+        "graphUri":
+"http://resource.geosciml.org/vocabulary/timescale/isc2017/",
         "taxonomyPredicates": ["http://www.w3.org/2004/02/skos/core#broader"],
         "schemaType": "SKOS",
         "predicates": {
@@ -51,7 +52,7 @@
         "graphUri": "",
         "schemaType": "SKOS",
         "predicates": {
-            "topConceptFilterWW": "  ?topConcept skos:prefLabel ?topConceptLabel.filter (exists {?x <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSCollection> ?topConcept}",
+            "topConceptFilter": "  ?topConcept skos:prefLabel ?topConceptLabel.filter (exists {?x <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSCollection> ?topConcept}",
             "topConceptFilter": "  ?topConcept skos:prefLabel ?topConceptLabel.?topConcept <http:xxx> ?x.",
             "lang": "en"
         },
@@ -144,22 +145,26 @@
     },
     "ROMAIN": {
         "editable": false,
-        "graphUri": "http://www.semanticweb.org/hedi/ontologies/2018/11/ROMAIN/",
+        "graphUri":
+"http://www.semanticweb.org/hedi/ontologies/2018/11/ROMAIN/",
         "imports": [
             {
-                "graphUri": "http://www.ontologylibrary.mil/CommonCore/Mid/GeospatialOntology",
+                "graphUri":
+"http://www.ontologylibrary.mil/CommonCore/Mid/GeospatialOntology",
                 "sparql_server": {
                     "url": "_default"
                 }
             },
             {
-                "graphUri": "http://purl.obolibrary.org/obo/iao/2017-03-24/iao.owl",
+                "graphUri":
+"http://purl.obolibrary.org/obo/iao/2017-03-24/iao.owl",
                 "sparql_server": {
                     "url": "_default"
                 }
             },
             {
-                "graphUri": "http://www.ontologylibrary.mil/CommonCore/Upper/ExtendedRelationOntology",
+                "graphUri":
+"http://www.ontologylibrary.mil/CommonCore/Upper/ExtendedRelationOntology",
                 "sparql_server": {
                     "url": "_default"
                 }
@@ -177,19 +182,22 @@
                 }
             },
             {
-                "graphUri": "http://www.ontologylibrary.mil/CommonCore/Mid/UnitsOfMeasureOntology",
+                "graphUri":
+"http://www.ontologylibrary.mil/CommonCore/Mid/UnitsOfMeasureOntology",
                 "sparql_server": {
                     "url": "_default"
                 }
             },
             {
-                "graphUri": "http://www.ontologylibrary.mil/CommonCore/Mid/TimeOntology",
+                "graphUri":
+"http://www.ontologylibrary.mil/CommonCore/Mid/TimeOntology",
                 "sparql_server": {
                     "url": "_default"
                 }
             },
             {
-                "graphUri": "http://www.ontologylibrary.mil/CommonCore/Mid/ArtifactOntology",
+                "graphUri":
+"http://www.ontologylibrary.mil/CommonCore/Mid/ArtifactOntology",
                 "sparql_server": {
                     "url": "_default"
                 }
@@ -269,7 +277,8 @@
     "TSF_STANDARDS_LANDSCAPE": {
         "editable": true,
         "allowIndividuals": true,
-        "graphUri": "http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/",
+        "graphUri":
+"http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/",
         "sparql_server": {
             "url": "_default"
         },

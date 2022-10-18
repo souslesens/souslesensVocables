@@ -1,12 +1,15 @@
 {
   "souslesensUrl": "http://localhost:3010",
   "listenPort": "3010",
+  "serverUrl": "../slsv",
   "default_sparql_url": "http://xxxxxx:8890/sparql",
+  "datalab_sparql_url": "http://xxxxxx:8890/sparql",
   "auth": "local",
   "defaultGroups": [],
   "logDir": "logs",
   "sentryDsnNode": "",
   "sentryDsnJsFront": "",
+  "formalOntologySourceLabel": "",
   "keycloak": {
     "realm": "master",
     "publicClient": false,
@@ -17,7 +20,7 @@
   "SQLserver": {
     "user": "",
     "password": "",
-    "server": "51.178.39.209",
+    "server": "",
     "database": ""
   },
   "ElasticSearch": {
@@ -28,8 +31,11 @@
   },
   "annotator": {
     "tikaServerUrl": "127.0.0.1:41000",
-    "spacyServerUrl": "127.0.0.1:8000/pos",
+    "spacyServerUrl": "xxxxxx:8000/pos",
     "parsedDocumentsHomeDir": null,
     "uploadDirPath": null
+  },
+  "wiki": {
+    "url": "https://xxxxxxxx"
   }
 }

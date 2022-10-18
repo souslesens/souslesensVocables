@@ -148,15 +148,13 @@ var Lineage_classes = (function () {
 
             const currentSource = sourceLabel;
             const groups = authentication.currentUser.groupes;
-            const currentAccessControls = groups.map(group => {
+            const currentAccessControls = groups.map((group) => {
                 const defaultAccessControl = Config.profiles[group].defaultSourceAccessControl;
-                const sourcesAccessControl = Config.profiles[group].sourcesAccessControl
+                const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
                 return sourcesAccessControl.hasOwnProperty(currentSource) ? sourcesAccessControl[currentSource] : defaultAccessControl;
-            })
+            });
 
-            self.realAccessControl = currentAccessControls.includes("readwrite") ? "readwrite" :
-                                      currentAccessControls.includes("read") ? "read" : "forbidden";
-
+            self.realAccessControl = currentAccessControls.includes("readwrite") ? "readwrite" : currentAccessControls.includes("read") ? "read" : "forbidden";
 
             if (self.realAccessControl === "readwrite" && Config.sources[self.mainSource].editable > -1) {
                 $("#lineage_blendButtonsDiv").css("display", "block");

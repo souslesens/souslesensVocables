@@ -353,7 +353,7 @@ interface SourceAccessControlInputProps {
     editable: boolean;
 }
 
-const SourceAccessControlInput: React.FC<SourceAccessControlInputProps> = React.memo(function ({ name, value, onChange, allowDefault, editable}) {
+const SourceAccessControlInput: React.FC<SourceAccessControlInputProps> = React.memo(function ({ name, value, onChange, allowDefault, editable }) {
     return (
         <RadioGroup row aria-labelledby={name} value={value} onChange={onChange} name={name}>
             {allowDefault ? <FormControlLabel value="default" control={<Radio />} label="Defaults" /> : null}

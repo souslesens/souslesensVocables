@@ -25,7 +25,7 @@ export async function saveProfile(body: Profile, mode: Mode, updateModel: React.
     try {
         const response = await fetch(endpoint, {
             method: mode === Mode.Edition ? "put" : "post",
-            body: JSON.stringify({ [body.id]: body }, null, "\t"),
+            body: JSON.stringify({ [body.name]: body }, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
         const { message, resources } = (await response.json()) as Response;

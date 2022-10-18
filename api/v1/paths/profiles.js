@@ -65,8 +65,12 @@ module.exports = function () {
             const updatedProfile = req.body;
             const objectToUpdateKey = Object.keys(req.body)[0];
             const oldProfiles = await readResource(profilesJSON, res); //.catch(e => res.status((500).json({ message: 'I couldn\'t read the resource' })));
+            const oldProfilesNames = Object.entries(oldProfiles).map(([_id, profile]) => {
+                return profile.name;
+            });
+
             const updatedProfiles = { ...oldProfiles, ...updatedProfile };
-            if (objectToUpdateKey in oldProfiles) {
+            if (oldProfilesNames.indexOf(objectToUpdateKey) === 0) {
                 const savedProfiles = await writeResource(profilesJSON, updatedProfiles, res); //.catch(e => res.status((500).json({ message: "I couldn't write the resource" })));
                 resourceUpdated(res, savedProfiles);
             } else {

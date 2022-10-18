@@ -277,6 +277,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 value={profileModel.profileForm.defaultSourceAccessControl}
                                 onChange={handleFieldUpdate("defaultSourceAccessControl")}
                                 allowDefault={false}
+                                editable={true}
                             />
                         </FormControl>
                         <Box style={{ overflow: "auto", maxHeight: "10em" }}>
@@ -288,6 +289,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                         value={profileModel.profileForm.sourcesAccessControl[source.id] ?? "default"}
                                         onChange={handleSourceAccessControlUpdate[source.id]}
                                         allowDefault={true}
+                                        editable={source.editable}
                                     />
                                 </FormControl>
                             ))}
@@ -348,15 +350,16 @@ interface SourceAccessControlInputProps {
     value: SourceAccessControl | "default";
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
     allowDefault: boolean;
+    editable: boolean;
 }
 
-const SourceAccessControlInput: React.FC<SourceAccessControlInputProps> = React.memo(function ({ name, value, onChange, allowDefault }) {
+const SourceAccessControlInput: React.FC<SourceAccessControlInputProps> = React.memo(function ({ name, value, onChange, allowDefault, editable}) {
     return (
         <RadioGroup row aria-labelledby={name} value={value} onChange={onChange} name={name}>
             {allowDefault ? <FormControlLabel value="default" control={<Radio />} label="Defaults" /> : null}
             <FormControlLabel value="forbidden" control={<Radio />} label="Forbidden" />
             <FormControlLabel value="read" control={<Radio />} label="Read" />
-            <FormControlLabel value="readwrite" control={<Radio />} label="Read & Write" />
+            <FormControlLabel disabled={!editable} value="readwrite" control={<Radio />} label="Read & Write" />
         </RadioGroup>
     );
 });

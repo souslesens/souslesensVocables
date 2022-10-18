@@ -958,20 +958,38 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                     for (var key in allClassesMap) {
                         recurse(key, allClassesMap[key].parents);
                     }
+
                     //format parents
                     for (var key in allClassesMap) {
                         var obj = allClassesMap[key];
                         var parentArray = obj.parents;
                         parentArray.push(sourceLabel);
                         parentArray = parentArray.reverse();
-                        /*   var str = ""
-   parentArray.forEach(function (parent, index) {
-       if (index > 0)
-           str += "|"
-       str += parent;
-   })*/
-                        delete allClassesMap[key].parent;
+
+                        //   delete allClassesMap[key].parent;
                         allClassesMap[key].parents = parentArray;
+                    }
+                    callbackSeries();
+                },
+
+                // add orphan parents to all data
+                function (callbackSeries) {
+                    //  return   callbackSeries()
+                    var topNodesToAdd = [];
+                    for (var key in allClassesMap) {
+                        var parent = allClassesMap[key].parent;
+                        if (parent && parent != sourceLabel) {
+                            if (!allClassesMap[parent]) {
+                                allClassesMap[parent] = {
+                                    id: parent,
+                                    label: Sparql_common.getLabelFromURI(parent),
+                                    skoslabels: {},
+                                    parent: sourceLabel,
+                                    parents: [sourceLabel],
+                                    type: "owl:class",
+                                };
+                            }
+                        }
                     }
                     callbackSeries();
                 },

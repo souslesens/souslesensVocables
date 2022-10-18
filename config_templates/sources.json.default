@@ -1,239 +1,354 @@
 {
-  "GEOSCMIL": {
-    "controller": "Sparql_SKOS",
-    "sparql_server": {
-      "url": "_default"
+    "GEMET": {
+        "controller": "Sparql_SKOS",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "graphUri": "http://www.eionet.europa.eu/gemet/",
+        "schemaType": "SKOS",
+        "predicates": {
+            "lang": "en",
+            "prefLabel": "rdfs:label|skos:prefLabel",
+            "broaderPredicate": "^skos:member|skos:broader",
+            "topConceptFilter": "?topConcept rdf:type <http://www.eionet.europa.eu/gemet/2004/06/gemet-schema.rdf#SuperGroup>.",
+            "optionalDepth": 3
+        },
+        "color": "#c7c7c7"
     },
-    "graphUri": "http://resource.geosciml.org/",
-    "schemaType": "SKOS",
-    "predicates": {
-      "broaderPredicate": "^skos:hasTopConcept|skos:broader",
-      "lang": "en"
+    "GEOSCMIL": {
+        "controller": "Sparql_SKOS",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "graphUri": "http://resource.geosciml.org/",
+        "schemaType": "SKOS",
+        "predicates": {
+            "broaderPredicate": "^skos:hasTopConcept|skos:broader",
+            "lang": "en"
+        },
+        "color": "#c5b0d5"
     },
-    "color": "#c5b0d5"
-  },
-  "TermSciences": {
-    "controller": "Sparql_SKOS",
-    "sparql_server": {
-      "url": "_default"
+    "INT_CHRONOSTRATIGRAPHIC_CHART": {
+        "controller": "Sparql_SKOS",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "graphUri":
+"http://resource.geosciml.org/vocabulary/timescale/isc2017/",
+        "taxonomyPredicates": ["http://www.w3.org/2004/02/skos/core#broader"],
+        "schemaType": "SKOS",
+        "predicates": {
+            "topConceptFilter": "?topConcept skos:prefLabel ?topConceptLabel.filter(not exists  {?topConcept <http://www.w3.org/2004/02/skos/core#broader> ?x})",
+            "lang": "en"
+        },
+        "color": "#c5b0d5"
     },
-    "graphUri": "http://api.termsciences.fr/termsciences/",
-    "schemaType": "SKOS",
-    "predicates": {
-      "topConceptFilter": "?topConcept skos:prefLabel ?topConceptLabel.filter( ?topConcept in(<http://api.termsciences.fr/termsciences/TE-48512>,<http://api.termsciences.fr/termsciences/TE-60624>,<http://api.termsciences.fr/termsciences/TE-42031>,<http://api.termsciences.fr/termsciences/TE-27516>,<http://api.termsciences.fr/termsciences/TE-42056>,<http://api.termsciences.fr/termsciences/TE-15428>,<http://api.termsciences.fr/termsciences/TE-10236>) )",
-      "lang": "en"
+    "LOTERRE": {
+        "controller": "Sparql_SKOS",
+        "sparql_server": {
+            "url": "https://sparql.loterre.fr/LoterreVocabularies/sparql",
+            "method": "GET"
+        },
+        "graphUri": "",
+        "schemaType": "SKOS",
+        "predicates": {
+            "topConceptFilter": "  ?topConcept skos:prefLabel ?topConceptLabel.filter (exists {?x <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSCollection> ?topConcept}",
+            "topConceptFilter": "  ?topConcept skos:prefLabel ?topConceptLabel.?topConcept <http:xxx> ?x.",
+            "lang": "en"
+        },
+        "color": "#ffbb78"
     },
-    "color": "#c5b0d5"
-  },
-  "TEPDK_FL": {
-    "graphUri": [
-      "http://data.total.com/resource/one-model/assets/tepdk3/"
-    ],
-    "sparql_server": {
-      "url": "_default"
+    "ISO_15926-part-14_PCA": {
+        "graphUri": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": " ?topConcept rdf:type <http://www.w3.org/2002/07/owl#Class>  filter (NOT exists {?topConcept rdfs:subClassOf ?y} &&  (!isBlank(?topConcept))  )",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "STANDARDS/ABSTRACT ONTOLOGIES"
     },
-    "controller": "Sparql_INDIVIDUALS",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://w3id.org/readi/rdl/CFIHOS-30000168>",
-    "schemaType": "INDIVIDUAL",
-    "dataSource": {
-      "type": "sql.sqlserver",
-      "connection": "_default",
-      "dbName": "TEPDK",
-      "table_schema": "dbo",
-      "local_dictionary": {
-        "table": "tblAttributePickListValue",
-        "idColumn": "ID",
-        "labelColumn": "Name"
-      }
+    "BFO": {
+        "graphUri": "http://purl.obolibrary.org/obo/bfo.owl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000001>",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "STANDARDS/ABSTRACT ONTOLOGIES"
     },
-    "schema": null,
-    "color": "#bcbd22"
-  },
-  "ISO_15926-part-14": {
-    "graphUri": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",
-    "sparql_server": {
-      "url": "_default"
+    "DOLCE": {
+        "graphUri": "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept ?p ?o filter (?topConcept= <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#Entity>)",
+        "schemaType": "OWL",
+        "schema": null,
+        "pref_lang": "en",
+        "color": "#bcbd22",
+        "group": "STANDARDS/ABSTRACT ONTOLOGIES"
     },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
-  },
-  "ISO_15926-part-13": {
-    "graphUri": "http://standards.iso.org/iso/15926/part13/",
-    "imports": [
-      "ISO_15926-part-14"
-    ],
-    "sparql_server": {
-      "url": "_default"
+    "GUFO": {
+        "graphUri": "http://purl.org/nemo/gufo#",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdfs:subClassOf ?superClass filter( not exists {?superClass  rdfs:type <http://www.w3.org/2002/07/owl#Class>})",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "STANDARDS/ABSTRACT ONTOLOGIES"
     },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "?x rdfs:subClassOf ?topConcept . filter (NOT exists {?obj rdfs:subClassOf ?x})",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
-  },
-  "CFIHOS_READI": {
-    "graphUri": "http://w3id.org/readi/rdl/",
-    "sparql_server": {
-      "url": "_default"
+    "SUMO": {
+        "graphUri": "http://www.ontologyportal.org/SUMO.owl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdfs:subClassOf ?superClass filter( not exists {?superClass  rdfs:type <http://www.w3.org/2002/07/owl#Class>})",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "STANDARDS/ABSTRACT ONTOLOGIES"
     },
-    "controller": "Sparql_OWL",
-    "topClassFilter": " ?topConcept rdfs:subClassOf <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/Object>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
-  },
-  "QUANTUM": {
-    "graphUri": "http://data.total.com/resource/quantum/",
-    "imports": [
-      "ISO_15926-part-14"
-    ],
-    "sparql_server": {
-      "url": "_default"
+    "SEMANTIC-SCIENCE": {
+        "graphUri": "http://semanticscience.org/ontology/sio.owl",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdfs:subClassOf <http://semanticscience.org/resource/SIO_000000>",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "STANDARDS/ABSTRACT ONTOLOGIES"
     },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
-    "schemaType": "OWLXXXX",
-    "schema": null,
-    "color": "#bcbd22"
-  },
-  "ISO_14224": {
-    "graphUri": "http://standards.iso.org/iso/14224/",
-    "sparql_server": {
-      "url": "_default"
+    "DATA_KNOWLEDGE": {
+        "graphUri": "http://http://www.data-knowledge.org/dk/",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": "?topConcept rdfs:subClassOf ?superClass filter( not exists {?superClass  rdfs:type <http://www.w3.org/2002/07/owl#Class>})",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "STANDARDS/ABSTRACT ONTOLOGIES"
     },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
-  },
-  "IOGP_ISO_14224_merged": {
-    "graphUri": "http://data.total.com/resource/one-model/iogp_iso14224/",
-    "imports": [
-      "ISO_14224"
-    ],
-    "sparql_server": {
-      "url": "_default"
+    "ROMAIN": {
+        "editable": false,
+        "graphUri":
+"http://www.semanticweb.org/hedi/ontologies/2018/11/ROMAIN/",
+        "imports": [
+            {
+                "graphUri":
+"http://www.ontologylibrary.mil/CommonCore/Mid/GeospatialOntology",
+                "sparql_server": {
+                    "url": "_default"
+                }
+            },
+            {
+                "graphUri":
+"http://purl.obolibrary.org/obo/iao/2017-03-24/iao.owl",
+                "sparql_server": {
+                    "url": "_default"
+                }
+            },
+            {
+                "graphUri":
+"http://www.ontologylibrary.mil/CommonCore/Upper/ExtendedRelationOntology",
+                "sparql_server": {
+                    "url": "_default"
+                }
+            },
+            {
+                "graphUri": "http://purl.obolibrary.org/obo/bfo.owl",
+                "sparql_server": {
+                    "url": "_default"
+                }
+            },
+            {
+                "graphUri": "http://www.obofoundry.org/ro/ro.owl",
+                "sparql_server": {
+                    "url": "_default"
+                }
+            },
+            {
+                "graphUri":
+"http://www.ontologylibrary.mil/CommonCore/Mid/UnitsOfMeasureOntology",
+                "sparql_server": {
+                    "url": "_default"
+                }
+            },
+            {
+                "graphUri":
+"http://www.ontologylibrary.mil/CommonCore/Mid/TimeOntology",
+                "sparql_server": {
+                    "url": "_default"
+                }
+            },
+            {
+                "graphUri":
+"http://www.ontologylibrary.mil/CommonCore/Mid/ArtifactOntology",
+                "sparql_server": {
+                    "url": "_default"
+                }
+            }
+        ],
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilterXX": "?topConcept ?x ?y filter( REGEX(STR(?topConcept),'BFO','i'))",
+        "topClassFilter": "?topConcept rdfs:subClassOf ?r. ?r rdf:type owl:Restriction",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "STANDARDS/MAINTENANCE"
     },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
-  },
-  "IOGP_ISO_14224": {
-    "graphUri": [
-      "http://data.total.com/resource/one-model/iogp_iso14224/"
-    ],
-    "sparql_server": {
-      "url": "_default"
+    "QUDT": {
+        "editable": false,
+        "graphUri": "",
+        "imports": [],
+        "sparql_server": {
+            "url": "http://www.qudt.org/fuseki/qudt/sparql",
+            "method": "GET"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilterXX": "?topConcept ?x ?y filter( REGEX(STR(?topConcept),'BFO','i') )",
+        "topClassFilter": "?topConcept <http://www.w3.org/2000/01/rdf-schema#subClassOf> <http://qudt.org/schema/qudt/Datatype>",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "OTHERS_OWL"
     },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
-  },
-  "NPD": {
-    "graphUri": [
-      "http://sws.ifi.uio.no/vocab/npd-v2",
-      "http://sws.ifi.uio.no/data/npd-v2/"
-    ],
-    "sparql_server": {
-      "url": "_default"
+    "plant_ontology": {
+        "editable": false,
+        "graphUri": "http://purl.obolibrary.org/obo/po/",
+        "imports": ["BFO"],
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": " ?topConcept rdfs:subClassOf ?superClass. filter(regex(str(?superClass),'BFO') )",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "OTHERS_OWL"
     },
-    "controller": "Sparql_OWL",
-    "topClassFilter": " ?topConcept   rdfs:subClassOf ?class. filter (?class in(<http://www.ifomis.org/bfo/1.1/snap#Continuant> ,<http://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>,<thttp://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>))",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#e377c2"
-  },
-  "CIDOC": {
-    "graphUri": "http://erlangen-crm.org/current/",
-    "sparql_server": {
-      "url": "_default"
+    "cido_coronavirus": {
+        "editable": false,
+        "graphUri": "http://purl.obolibrary.org/obo/cido.owl#",
+        "imports": ["BFO"],
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": " ?topConcept rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000001>",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "OTHERS_OWL"
     },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "  ?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
-    "schemaType": "OWLXXX",
-    "schema": null,
-    "color": "#bcbd22"
-  },
-  "ISO_15926-PCA": {
-    "graphUri": "",
-    "sparql_server": {
-      "url": "http://staging.data.posccaesar.org/rdl/",
-      "method": "GET"
+    "TSF_GAIA_TEST": {
+        "editable": true,
+        "allowIndividuals": true,
+        "graphUri": "http://data.total.com/resource/tsf/ontology/gaia-test/",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"],
+        "imports": ["ISO_15926-part-14_PCA", "ISO_15926-PCA-2"],
+        "controller": "Sparql_OWL",
+        "topClassFilter": "  ?topConcept rdfs:subClassOf    ?x filter(regex(str(?x),\"lis14\") && ?conceptGraph =<http://data.total.com/resource/tsf/ontology/gaia-test/>)",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "TSF/DRAFTS"
     },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://data.posccaesar.org/dm/Thing>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22",
-    "options": {
-      "graphPropertiesFilterRegex": "http://data.posccaesar.org/dm/.*"
+    "TSF_STANDARDS_LANDSCAPE": {
+        "editable": true,
+        "allowIndividuals": true,
+        "graphUri":
+"http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"],
+        "imports": ["ISO_15926-part-14_PCA"],
+        "controller": "Sparql_OWL",
+        "topClassFilter": " ?topConcept rdfs:subClassOf    ?x filter(regex(str(?x),\"lis14\") && ?conceptGraph =<http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/>)",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "TSF/DRAFTS"
+    },
+    "ONTOLOGIES_USE_CASES": {
+        "editable": true,
+        "allowIndividuals": true,
+        "graphUri": "http://data.total.com/resource/tsf/ontologies-use-cases/",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"],
+        "imports": ["ISO_15926-part-14_PCA"],
+        "controller": "Sparql_OWL",
+        "topClassFilter": "  ?topConcept rdfs:subClassOf    ?x filter(regex(str(?x),\"lis14\") && ?conceptGraph =<http://data.total.com/resource/tsf/ontologies-use-cases/>)",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "OTHERS_OWL"
+    },
+    "SLSV": {
+        "editable": true,
+        "allowIndividuals": true,
+        "graphUri": "http://souslesens.org/resources/ontologies/slsv",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"],
+        "imports": ["ISO_15926-part-14_PCA"],
+        "controller": "Sparql_OWL",
+        "topClassFilter": "  ?topConcept rdfs:subClassOf    ?x filter(regex(str(?x),\"lis14\") && ?conceptGraph =<http://souslesens.org/resources/ontologies/slsv>)",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "OTHERS_OWL"
+    },
+    "IOF_core": {
+        "editable": false,
+        "graphUri": "https://purl.industrialontologies.org/ontology/core/Core/",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "imports": ["BFO"],
+        "controller": "Sparql_OWL",
+        "topClassFilter": " ?topConcept rdfs:subClassOf ?superClass. filter(regex(str(?superClass),'BFO') && !regex(str(?topConcept),'BFO')  )",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "STANDARDS/ABSTRACT ONTOLOGIES"
+    },
+    "IOF_maintenance": {
+        "editable": false,
+        "graphUri": "https://www.industrialontologies.org/maintenance/",
+        "imports": ["IOF_core"],
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": " ?topConcept rdfs:subClassOf ?superClass. filter(regex(str(?superClass),'BFO') )",
+        "schemaType": "OWL",
+        "schema": null,
+        "color": "#bcbd22",
+        "group": "STANDARDS/MAINTENANCE"
     }
-  },
-  "CFIHOS-ISO": {
-    "graphUri": "",
-    "sparql_server": {
-      "url": "http://192.236.179.169/sparql",
-      "method": "GET"
-    },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "  ?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
-  },
-  "CFIHOS_equipment": {
-    "graphUri": "http://w3id.org/readi/ontology/CFIHOS-equipment/0.1/",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "controller": "Sparql_OWL",
-    "topClassFilter": " ?topConcept rdfs:subClassOf <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/InanimatePhysicalObject>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
-  },
-  "ISO_15926-org": {
-    "graphUri": "",
-    "sparql_server": {
-      "url": "http://192.236.179.169/sparql",
-      "method": "GET"
-    },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
-  },
-  "ISO_15926-part-4": {
-    "editable": false,
-    "graphUri": "http://standards.iso.org/iso/15926/part4/",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>",
-    "controller": "Sparql_OWL",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
-  },
-  "ISO_15926-part-12": {
-    "editable": false,
-    "graphUri": "http://standards.iso.org/iso/15926/-12/tech/ontology/v-4/",
-    "sparql_server": {
-      "url": "_default"
-    },
-    "controller": "Sparql_OWL",
-    "topClassFilter": "?topConcept rdfs:subClassOf <http://www.w3.org/2002/07/owl#Thing>",
-    "schemaType": "OWL",
-    "schema": null,
-    "color": "#bcbd22"
-  }
 }

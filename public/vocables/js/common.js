@@ -296,6 +296,7 @@ var common = (function () {
         },
         // get node from node.data field
         getNodeByDataField: function (jstreeDiv, property, value) {
+            if (!$("#" + jstreeDiv).jstree(true)) return null;
             var jsonNodes = $("#" + jstreeDiv)
                 .jstree(true)
                 .get_json("#", { flat: true });

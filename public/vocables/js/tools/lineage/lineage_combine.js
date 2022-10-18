@@ -117,7 +117,7 @@ var Lineage_combine = (function () {
 
     self.getSimilars = function (output) {
         /* var source = Lineage_common.currentSource;
-   var color=Lineage_classes.getSourceColor(source)*/
+var color=Lineage_classes.getSourceColor(source)*/
 
         var commonNodes = [];
         var existingNodes = visjsGraph.getExistingIdsMap();
@@ -176,8 +176,7 @@ var Lineage_combine = (function () {
         $("#mainDialogDiv").dialog("open");
     };
 
-    self.mergeNodes = function (testObj) {
-        var maxDepth = 10;
+    self.mergeNodesUI = function (testObj) {
         var targetNode = null;
         var targetSource = $("#LineageMerge_targetSourceSelect").val();
         var mergeMode = $("#LineageMerge_aggregateModeSelect").val();
@@ -185,19 +184,15 @@ var Lineage_combine = (function () {
         var mergeRestrictions = $("#LineageMerge_aggregateRelationsCBX").prop("checked");
         var targetNode = $("#LineageMerge_targetNodeUriSelect").val();
         var mergedNodesType = $("#LineageMerge_mergedNodesTypeSelect").val();
-        var jstreeNodes;
-        if ($("#LineageMerge_nodesJsTreeDiv").jstree(true)) jstreeNodes = $("#LineageMerge_nodesJsTreeDiv").jstree(true).get_checked(true);
+        var jstreeNodes = $("#LineageMerge_nodesJsTreeDiv").jstree(true).get_checked(true);
 
-        if (testObj) {
-            targetSource = testObj.targetSource;
-            mergeMode = testObj.mergeMode;
-            mergeDepth = testObj.mergeDepth;
-            mergeRestrictions = testObj.mergeRestrictions;
-            jstreeNodes = testObj.jstreeNodes;
-            targetNode = testObj.targetNode;
-            mergedNodesType = testObj.mergedNodesType;
-        }
         if (!mergedNodesType) if (!confirm("confirm that no Type is added to merged nodes")) return;
+
+        self.mergeNodes(jstreeNodes, mergeMode, mergeDepth, mergeRestrictions, mergedNodesType, targetSource, targetNode);
+    };
+
+    self.mergeNodes = function (jstreeNodes, mergeMode, mergeDepth, mergeRestrictions, mergedNodesType, targetSource, targetNode, callback) {
+        var maxDepth = 10;
 
         var nodesToMerge = {};
         var descendantsMap = {};
@@ -213,6 +208,7 @@ var Lineage_combine = (function () {
 
         async.eachSeries(sources, function (source, callbackEachSource) {
             var selectedNodeIds = Object.keys(nodesToMerge[source]);
+            var sourceGraphUri = Config.sources[source].graphUri;
             var targetGraphUri = Config.sources[targetSource].graphUri;
             var editable = Config.sources[targetSource].editable;
             if (!targetGraphUri || !editable) alert("targetSource must have  graphUri and must be editable");
@@ -310,37 +306,43 @@ var Lineage_combine = (function () {
                                 });
                             },
 
-                            /*     function(callbackSeries) {
-         Sparql_OWL.getAllTriples(source, "object", ids, {}, function(err, result) {
-           if (err)
-             return callbackSeries(err);
-           nodesToMerge[source].objectTriples = result;
-           callbackSeries();
-         });
-       },
-       //get restrictions triple including descendants
-       function(callbackSeries) {
-         if (!mergeRestrictions)
-           return callbackSeries();
+                            //get restrictions triple including descendants
+                            function (callbackSeries) {
+                                if (!mergeRestrictions) return callbackSeries();
 
-         Sparql_OWL.getObjectRestrictions(source, ids, {}, function(err, result) {
-           if (err)
-             return callbackSeries(err);
-           nodesToMerge[source].restrictions = result;
-           callbackSeries();
-         });
-       },
-       //get inverse restrictions triple including descendants
-       function(callbackSeries) {
-         if (!mergeRestrictions)
-           return callbackSeries();
-         Sparql_OWL.getObjectRestrictions(source, ids, { inverseRestriction: true }, function(err, result) {
-           if (err)
-             return callbackSeries(err);
-           nodesToMerge[source].inverseRestrictions = result;
-           callbackSeries();
-         });
-       },*/
+                                var ids = Object.keys(nodesToMerge[source]);
+
+                                var fromStr = sourceGraphUri ? " FROM " + sourceGraphUri : "";
+                                var filterStr = Sparql_common.setFilter("class", ids);
+                                var query =
+                                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
+                                query +=
+                                    "SELECT   ?s ?p ?o from <http://data.total.com/resource/tsf/ontology/gaia-test/> WHERE {?s ?p ?o." +
+                                    "filter (exists {?class rdfs:subClassOf ?s.  ?s rdf:type owl:Restriction." +
+                                    filterStr +
+                                    "})} LIMIT 10000";
+                                var sparql_url = Config.sources[source].sparql_server.url;
+                                if ((sparql_url = "_default")) sparql_url = Config.default_sparql_url;
+                                var url = sparql_url + "?format=json&query=";
+                                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+                                    if (err) return callbackSeries(err);
+
+                                    result.results.bindings.forEach(function (item) {
+                                        var value = item.o.value;
+                                        if (item.o.datatype == "http://www.w3.org/2001/XMLSchema#dateTime") value += "^^xsd:dateTime";
+                                        if (item.o.type == "literal") value = common.formatStringForTriple(value);
+
+                                        newTriples.push({
+                                            subject: item.s.value,
+                                            predicate: item.p.value,
+                                            object: value,
+                                        });
+                                    });
+                                    return callbackSeries();
+                                });
+                            },
 
                             //create newTriples
                             function (callbackSeries) {
@@ -349,6 +351,7 @@ var Lineage_combine = (function () {
                                         var value = item.object.value;
                                         if (item.object.datatype == "http://www.w3.org/2001/XMLSchema#dateTime") value += "^^xsd:dateTime";
                                         if (item.object.type == "literal") value = common.formatStringForTriple(value);
+
                                         newTriples.push({
                                             subject: item.subject.value,
                                             predicate: item.predicate.value,
@@ -356,29 +359,6 @@ var Lineage_combine = (function () {
                                         });
                                     });
 
-                                    /*  nodesToMerge[source].objectTriples.forEach(function(item) {
-      newTriples.push({
-        subject: item.subject.value,
-        predicate: item.predicate.value,
-        object: item.predicate.value
-      });
-    });*/
-
-                                    /*     nodesToMerge[source].restrictions.forEach(function(item) {
-         newTriples.push({
-           subject: item.subject.value,
-           predicate: item.predicate.value,
-           object: item.predicate.value
-         });
-       });
-
-       nodesToMerge[source].inverseRestrictions.forEach(function(item) {
-         newTriples.push({
-           subject: item.subject.value,
-           predicate: item.predicate.value,
-           object: item.predicate.value
-         });
-       });*/
                                     // return callbackSeries();
                                     Sparql_generic.insertTriples(targetSource, newTriples, {}, function (err, result) {
                                         if (err) return callbackSeries(err);
@@ -390,27 +370,27 @@ var Lineage_combine = (function () {
                                 }
 
                                 /* /NOT IMPLEMENTED YET too much complexity
-   else if(mergeMode=="newUri") {
-         // set new subjectUri
-         var newTriples = [];
+else if(mergeMode=="newUri") {
+// set new subjectUri
+var newTriples = [];
 
 
-         nodesToMerge[source].subjectTriples.forEach(function(item) {
-           if (!oldToNewUrisMap[item.id.value]) {
-             var newUri = targetGraphUri + common.getRandomHexaId(10);
-             oldToNewUrisMap[item.id.value] = newUri;
-           }
-         })
+nodesToMerge[source].subjectTriples.forEach(function(item) {
+if (!oldToNewUrisMap[item.id.value]) {
+var newUri = targetGraphUri + common.getRandomHexaId(10);
+oldToNewUrisMap[item.id.value] = newUri;
+}
+})
 
-         for (var oldUri in oldToNewUrisMap[item.id.value]) {
-           nodesToMerge[source].subjectTriples.forEach(function(item) {
-             if (item.id.value == oldUri) {
+for (var oldUri in oldToNewUrisMap[item.id.value]) {
+nodesToMerge[source].subjectTriples.forEach(function(item) {
+if (item.id.value == oldUri) {
 
-             }
-             triples.push({})
-           })
-         }
-       }*/
+}
+triples.push({})
+})
+}
+}*/
                             },
                         ],
                         function (err) {
@@ -428,6 +408,7 @@ var Lineage_combine = (function () {
                     );
                 },
                 function (err) {
+                    if (callback) return callback(err, sourceMessage);
                     if (err) return alert(err.responseText);
                     alert(message);
                     return MainController.UI.message("ALL DONE", true);
@@ -513,6 +494,17 @@ var Lineage_combine = (function () {
         };
 
         MainController.initControllers();
+
+        if (testObj) {
+            targetSource = testObj.targetSource;
+            mergeMode = testObj.mergeMode;
+            mergeDepth = testObj.mergeDepth;
+            mergeRestrictions = testObj.mergeRestrictions;
+            jstreeNodes = testObj.jstreeNodes;
+            targetNode = testObj.targetNode;
+            mergedNodesType = testObj.mergedNodesType;
+        }
+        self.mergeNodes(obj.targetNode, obj.targetSource, obj.mergeMode, obj.mergeDepth, obj.mergeRestrictions, objtargetNode, obj.mergedNodesType, obj.jstreeNodes);
         self.mergeNodes(obj);
     };
     return self;

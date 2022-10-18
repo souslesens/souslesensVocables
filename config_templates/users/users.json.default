@@ -1,12 +1,13 @@
 {
-  "01FJKGRJ8WA97N07KWEJJHXKZT": {
-    "id": "01FJKGRJ8WA97N07KWEJJHXKZT",
+  "admin": {
+    "id": "admin",
     "login": "admin",
     "password": "admin",
     "groups": [
       "admin"
     ],
     "_type": "user",
-    "source": "jsonù"
+    "source": "json",
+    "name": "admin"
   }
 }

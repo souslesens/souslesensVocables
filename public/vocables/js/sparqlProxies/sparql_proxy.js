@@ -97,8 +97,8 @@ var Sparql_proxy = (function () {
         else sourceParams = Config.sources[MainController.currentSource];
 
         /*    if(!sourceParams.graphUri){// cas des sources sans graphe
-            query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
-        }*/
+        query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
+    }*/
 
         self.currentQuery = query;
         if (!options) options = {};
@@ -159,7 +159,10 @@ var Sparql_proxy = (function () {
                 if (err.responseText.indexOf("Virtuoso 42000") > -1) {
                     //Virtuoso 42000 The estimated execution time
                     alert(err.responseText.substring(0, err.responseText.indexOf(".")) + "\n select more detailed data");
-                } else MainController.UI.message(err.responseText);
+                } else {
+                    console.log(err.responseText);
+                    return MainController.UI.message("error in sparql query");
+                }
 
                 $("#waitImg").css("display", "none");
                 // eslint-disable-next-line no-console
@@ -171,6 +174,50 @@ var Sparql_proxy = (function () {
                     return callback(err);
                 }
                 return err;
+            },
+        });
+    };
+
+    self.exportGraph = function (source) {
+        var graphUri = Config.sources[source].graphUri;
+        var graphUriStr = "";
+        if (graphUri) graphUriStr = " from <" + graphUri + "> ";
+
+        //var query = "select ?s ?p ?o "+graphUriStr+"  where  {?s ?p ?o} limit 10000";
+
+        var query = "CONSTRUCT { ?s ?p ?o } WHERE { GRAPH <" + graphUri + "> { ?s ?p ?o } . }";
+
+        var headers = {};
+        headers["Accept"] = "application/x-nice-turtle";
+        //  headers["Content-Type"] = "application/x-nice-turtle; charset=UTF-8";
+
+        var serverUrl = Config.sources[source].sparql_server.url;
+        if (serverUrl.indexOf("_default") == 0) serverUrl = Config.default_sparql_url;
+
+        var body = {
+            params: { query: query, useProxy: false },
+            headers: headers,
+        };
+        var payload = {};
+        payload.body = JSON.stringify(body);
+
+        var query2 = encodeURIComponent(query);
+        query2 = query2.replace(/%2B/g, "+").trim();
+
+        payload.url = serverUrl + "?format=text/turtle";
+        payload.url += "&query=" + query2;
+
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/httpProxy`,
+            data: payload,
+            dataType: "json",
+            success: function (data, _textStatus, _jqXHR) {
+                var str = data.result;
+                common.copyTextToClipboard(str);
+            },
+            error(err) {
+                if (err) return alert(err.responseText);
             },
         });
     };

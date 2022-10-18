@@ -25,7 +25,7 @@ var MainController = (function () {
                 Config.default_sparql_url = serverConfig.default_sparql_url;
                 Config.wiki = serverConfig.wiki;
                 Config.sentryDsnJsFront = serverConfig.sentryDsnJsFront;
-                Config.formalOntologySourceLabel = serverConfig.formalOntologySourceLabel;
+                Config.currentTopLevelOntology = serverConfig.currentTopLevelOntology;
 
                 // display version number
                 $("#souslesensversion").html(serverConfig.version);

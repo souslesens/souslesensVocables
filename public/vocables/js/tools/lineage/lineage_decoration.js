@@ -220,7 +220,7 @@ strFrom +
 
         self.setTopLevelOntologyClassesMap(function (err, result) {
             if (Config.topLevelOntologies[Config.currentTopLevelOntology]) {
-               // self.legendMap = {};
+                // self.legendMap = {};
                 self.uriPattern = Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern;
                 self.colorNodesByTopLevelOntologyTopType(visjsNodes);
             } else return;
@@ -291,14 +291,12 @@ strFrom +
                                     color: null,
                                 };
                             }
-                            if(self.currentTopOntologyClassesMap[item.x.value]){
+                            if (self.currentTopOntologyClassesMap[item.x.value]) {
                                 self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyClass = item.x.value;
                                 self.currentVisjGraphNodesMap[item.x.value].color = self.currentTopOntologyClassesMap[item.x.value].color;
                                 self.currentVisjGraphNodesMap[item.x.value].type = item.x.value;
                                 self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyNumberOfParents = self.currentTopOntologyClassesMap[item.type.value].parents.length;
-                            }
-                           else if (self.currentTopOntologyClassesMap[item.type.value]) {
-
+                            } else if (self.currentTopOntologyClassesMap[item.type.value]) {
                                 // select the deepest upper ontology class  among all retrieved
                                 if (self.currentTopOntologyClassesMap[item.type.value].parents.length > self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyNumberOfParents) {
                                     self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyClass = item.type.value;

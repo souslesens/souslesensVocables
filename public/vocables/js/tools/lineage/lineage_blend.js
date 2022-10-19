@@ -1469,8 +1469,7 @@ callbackSeries();
             result.forEach(function (item) {
                 if (item.id.type == "bnode") return;
 
-                if(!item.label)
-                    item.label={value:Sparql_common.getLabelFromURI( item.id.value)}
+                if (!item.label) item.label = { value: Sparql_common.getLabelFromURI(item.id.value) };
                 var prefix = "";
                 if (item.g.value.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > -1) {
                     prefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix + ":";

@@ -797,7 +797,7 @@ var CsvTripleBuilder = {
 
                     // add prefixes (for upper ontology)
                     if (mappings.prefixes) {
-                        for (var prefix in mappings.prefixes) CsvTripleBuilder.sparqlPrefixes[prefix] = "<"+mappings.prefixes[prefix]+">";
+                        for (var prefix in mappings.prefixes) CsvTripleBuilder.sparqlPrefixes[prefix] = "<" + mappings.prefixes[prefix] + ">";
                     }
 
                     var mappingsMap = { [mappings.fileName]: mappings };

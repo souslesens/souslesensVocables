@@ -10,6 +10,13 @@
   "sentryDsnNode": "",
   "sentryDsnJsFront": "",
   "formalOntologySourceLabel": "",
+  "tools_available": [
+    "lineage",
+    "Standardizer",
+    "KGcreator",
+    "admin",
+    "ConfigEditor"
+  ],
   "keycloak": {
     "realm": "master",
     "publicClient": false,

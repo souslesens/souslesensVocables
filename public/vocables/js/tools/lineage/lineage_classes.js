@@ -136,9 +136,6 @@ var Lineage_classes = (function () {
         Lineage_common.currentSource = null;
         MainController.currentSource = sourceLabel;
 
-        Lineage_blend.graphModification.setTopLevelOntologyFromImports(sourceLabel);
-        Lineage_decoration.init();
-
         self.nodesSelection = [];
         if (event.button == 0) {
             // except context menu
@@ -181,7 +178,8 @@ var Lineage_classes = (function () {
                 }
 
                 Lineage_relations.init(true);
-
+                self.setTopLevelOntologyFromImports(self.mainSource);
+                Lineage_decoration.init();
                 Lineage_linkedData.init();
 
                 if (!visjsGraph.isGraphNotEmpty() && Config.sources[self.mainSource].editable) {
@@ -208,11 +206,11 @@ var Lineage_classes = (function () {
             self.selection.addNodeToSelection(node);
 
             /*  if (node.from) {
-    let inSource = Lineage_classes.mainSource;
-    Lineage_blend.deleteRestriction(inSource, node);
-  } else {
-    Lineage_blend.addNodeToAssociationNode(node, "source", true);
-  }*/
+let inSource = Lineage_classes.mainSource;
+Lineage_blend.deleteRestriction(inSource, node);
+} else {
+Lineage_blend.addNodeToAssociationNode(node, "source", true);
+}*/
         } else if (nodeEvent.shiftKey && nodeEvent.altKey) {
             Lineage_blend.addNodeToAssociationNode(node, "target");
         } else if (nodeEvent.ctrlKey) {
@@ -268,7 +266,7 @@ var Lineage_classes = (function () {
         visjsGraph.clearGraph();
         expandedLevels = {};
 
-        $("#Lineage_classes_graphDecoration_legendDiv").html("");
+        Lineage_decoration.clearLegend();
 
         if (clearTree) {
             $("#lineage_drawnSources").html("");
@@ -279,6 +277,30 @@ var Lineage_classes = (function () {
                 SourceBrowser.showThesaurusTopConcepts(self.mainSource);
             }
         }
+    };
+
+    self.setTopLevelOntologyFromImports = function (sourceLabel) {
+        Config.currentTopLevelOntology = null;
+        if (Config.topLevelOntologies[sourceLabel]) return (Config.currentTopLevelOntology = sourceLabel);
+        var imports = Config.sources[sourceLabel].imports;
+        if (!imports) return (Config.currentTopLevelOntology = Object.keys(Config.topLevelOntologies)[0]);
+        if (!Array.isArray(imports)) imports = [imports];
+        var ok = false;
+
+        imports.forEach(function (source) {
+            if (!ok && Config.topLevelOntologies[source]) {
+                ok = true;
+                Config.currentTopLevelOntology = source;
+            }
+        });
+        return Config.currentTopLevelOntology;
+    };
+    self.setTopLevelOntologyFromPrefix = function (prefix) {
+        Config.currentTopLevelOntology = null;
+        for (var key in Config.topLevelOntologies) {
+            if (Config.topLevelOntologies[key].prefix == prefix) Config.currentTopLevelOntology = key;
+        }
+        return Config.currentTopLevelOntology;
     };
 
     self.clearLastAddedNodes = function () {
@@ -543,15 +565,15 @@ var Lineage_classes = (function () {
             };
         } else {
             /* options.manipulation = {
-  enabled: true,
-  initiallyActive: false,
-  deleteNode: false,
-  deleteEdge: false,
-  editNode: false,
-  editEdge: false,
-  addEdge:false,
-  addNode:false
-  }*/
+enabled: true,
+initiallyActive: false,
+deleteNode: false,
+deleteEdge: false,
+editNode: false,
+editEdge: false,
+addEdge:false,
+addNode:false
+}*/
         }
         visjsGraph.draw("graphDiv", visjsData, options, function () {
             Lineage_decoration.colorGraphNodesByType();
@@ -2197,10 +2219,10 @@ var Lineage_classes = (function () {
                         }
                     } else {
                         /*    var id=item["broader" + (i-1)].value;
-  if(upperNodeIds.indexOf(id)<0) {
-  upperNodeIds.push(id);
+if(upperNodeIds.indexOf(id)<0) {
+upperNodeIds.push(id);
 
-  }*/
+}*/
                     }
                 }
             });
@@ -2535,8 +2557,8 @@ var Lineage_classes = (function () {
             attrs.shape = self.namedIndividualShape;
         }
         /* if(superClassValue){
-  attrs.color=self.getSourceColor(superClassValue)
-  }else */
+attrs.color=self.getSourceColor(superClassValue)
+}else */
         if (sourceValue && sourceValue) {
             attrs.color = self.getSourceColor(sourceValue);
         }
@@ -2581,9 +2603,9 @@ var Lineage_classes = (function () {
         $("#Lineage_source_" + sourceId).addClass("Lineage_selectedSourceDiv");
         Lineage_common.currentSource = encodeURIComponent(sourceId);
         /*   if (!self.soucesLevelMap[sourceId].topDone) {
-     self.soucesLevelMap[sourceId].topDone = 1;
-     self.drawTopConcepts(sourceId);
-   }*/
+ self.soucesLevelMap[sourceId].topDone = 1;
+ self.drawTopConcepts(sourceId);
+}*/
     };
 
     self.showHideCurrentSourceNodes = function (/** @type {any} */ hide) {
@@ -2668,12 +2690,12 @@ var Lineage_classes = (function () {
                 '<div style="display: flex;flex-direction: row">' +
                     " <div>" +
                     "    Selected nodes " +
-                    "<div><button onclick='Lineage_sets.createNewSet()'>create new Set</button></div> </div>" +
+                    /* "<div><button onclick='Lineage_sets.createNewSet()'>create new Set</button></div> </div>" +*/
                     ' <div class="jstreeContainer" style="width: 350px;height: 700px;overflow: auto">' +
                     '      <div id="LineageClasses_selectdNodesTreeDiv"></div>' +
                     "    </div>" +
                     " </div>" +
-                    '<div id=LineageClasses_selectdNodesInfosDiv style="width: 650px;height: 700px;overflow: auto" ></div>' +
+                    '<div id="LineageClasses_selectdNodesInfosDiv" style="width: 650px;height: 700px;overflow: auto" ></div>' +
                     "</div>"
             );
             $("#mainDialogDiv").dialog("open");

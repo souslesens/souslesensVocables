@@ -418,10 +418,23 @@ var KGcreator = (function () {
         var topLevelOntology = Config.currentTopLevelOntology;
         var topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
 
-        var currentObjectClasses = [];
-        currentObjectClasses = currentObjectClasses.concat(self.usualObjectClasses);
         var currentPredicates = [];
-        currentPredicates = currentObjectClasses.concat(self.usualProperties);
+
+        self.usualProperties.forEach(function (item) {
+            currentPredicates.push({
+                id: item,
+                label: item,
+            });
+        });
+
+        var currentObjectClasses = [];
+        self.usualObjectClasses.forEach(function (item) {
+            currentObjectClasses.push({
+                id: item,
+                label: item,
+            });
+        });
+
         self.propertiesMap = {};
 
         async.series(
@@ -437,7 +450,10 @@ var KGcreator = (function () {
                         });
                         result.forEach(function (item) {
                             if (item.id.type == "bnode") return;
-                            currentObjectClasses.push(topLevelOntologyPrefix + ":" + (item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value)));
+                            currentObjectClasses.push({
+                                id: item.id.value,
+                                label: topLevelOntologyPrefix + ":" + (item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value)),
+                            });
                         });
                         callbackSeries();
                     });
@@ -460,7 +476,7 @@ var KGcreator = (function () {
                                 inversePropLabel: item.inversePropLabel ? topLevelOntologyPrefix + ":" + item.inversePropLabel.value : null,
                             };
 
-                            var item2 = topLevelOntologyPrefix + ":" + item.propLabel.value;
+                            var item2 = { id: item.prop.value, label: topLevelOntologyPrefix + ":" + item.propLabel.value };
                             if (currentPredicates.indexOf(item2) < 0) currentPredicates.push(item2);
                         });
                         // set missing inverse props
@@ -476,8 +492,8 @@ var KGcreator = (function () {
                 },
                 function (callbackSeries) {
                     common.fillSelectOptions("KGcreator_subjectSelect", self.usualSubjectTypes, true);
-                    common.fillSelectOptions("KGcreator_predicateSelect", currentPredicates, true);
-                    common.fillSelectOptions("KGcreator_objectSelect", currentObjectClasses, true);
+                    common.fillSelectOptions("KGcreator_predicateSelect", currentPredicates, true, "label", "id");
+                    common.fillSelectOptions("KGcreator_objectSelect", currentObjectClasses, true, "label", "id");
 
                     self.mainJsonEditor = new JsonEditor("#KGcreator_mainJsonDisplay", {});
                     /*  const element = document.getElementById('KGcreator_mainJsonDisplay',{});
@@ -627,10 +643,10 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
     };
 
     /* self.saveClassMapping=function() {
-    var classId=prompt("Class id for this Mapping")
-    if(classId)
-    self.saveMappings({classId:classId})
-  }*/
+var classId=prompt("Class id for this Mapping")
+if(classId)
+self.saveMappings({classId:classId})
+}*/
 
     self.saveMappings = function (options, callback) {
         try {
@@ -642,12 +658,11 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
 
         self.currentJsonObject = data;
 
-        var prefix = Config.topLevelOntologies[Config.currentTopLevelOntology];
-        self.currentJsonObject.topOntologyPrefix = prefix;
-
         var payload = {};
         if (self.currentDataSourceModel) {
             //database SQL
+            self.currentCsvDir = self.currentdabase.dbName;
+
             self.currentJsonObject.databaseSource = self.currentdabase;
             payload = {
                 dir: "SQL/",
@@ -678,24 +693,24 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         });
     };
     /*  self.copyMappings = function() {
-    try {
-      var data = self.mainJsonEditor.get();
+  try {
+    var data = self.mainJsonEditor.get();
 
-      data.tripleModels.forEach(function(item) {
-        if (item.o["_function(line, mapping)_"]) {
-          var expression = item.o["_function(line, mapping)_"];
-          try {
-            var fn = new Function("line", "mapping", expression);
-          } catch (err) {
-            $("#KGcreator_dataSampleDiv").val(err);
-          }
-          item.o = fn;
+    data.tripleModels.forEach(function(item) {
+      if (item.o["_function(line, mapping)_"]) {
+        var expression = item.o["_function(line, mapping)_"];
+        try {
+          var fn = new Function("line", "mapping", expression);
+        } catch (err) {
+          $("#KGcreator_dataSampleDiv").val(err);
         }
-      });
-    } catch (err) {
-      alert(err.message);
-    }
-  };*/
+        item.o = fn;
+      }
+    });
+  } catch (err) {
+    alert(err.message);
+  }
+};*/
     self.clearMappings = function () {
         if (confirm("Clear mappings")) {
             self.mainJsonEditor.load({});
@@ -706,6 +721,19 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         function execLoadMappings() {
             self.currentJsonObject = {};
             self.mainJsonEditor.load(self.currentJsonObject);
+
+            setUpperOntologyPrefix = function () {
+                var currrentTopLevelOntology = Config.topLevelOntologies[Config.currentTopLevelOntology];
+                if (!self.currentJsonObject.prefixes) {
+                    self.currentJsonObject.prefixes = {};
+                    if (!self.currentJsonObject.prefixes[currrentTopLevelOntology.prefix]) {
+                        self.currentJsonObject.prefixes[currrentTopLevelOntology.prefix] = currrentTopLevelOntology.prefixtarget;
+                    }
+                } else {
+                    currrentTopLevelOntology = Lineage_classes.setTopLevelOntologyFromPrefix(Object.keys(self.currentJsonObject.prefixes)[0]);
+                    $("#KGcreator_topLevelOntologiesSelect").val(currrentTopLevelOntology);
+                }
+            };
 
             var payload = {};
             if (self.currentDataSourceModel) {
@@ -731,7 +759,7 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
 
                     if (!self.currentJsonObject.graphUri) self.currentJsonObject.graphUri = self.currentGraphUri || "";
                     else self.currentGraphUri = self.currentJsonObject.graphUri;
-
+                    setUpperOntologyPrefix();
                     self.mainJsonEditor.load(self.currentJsonObject);
                     self.mainJsonEditorModified = false;
                 },
@@ -742,7 +770,9 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
                         transform: {},
                         lookups: [],
                         graphUri: "",
-                    }; // return alert(err.responseText)
+                    };
+                    setUpperOntologyPrefix();
+                    self.mainJsonEditor.load(self.currentJsonObject);
                 },
             });
         }
@@ -764,12 +794,13 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
     };
     self.createTriples = function (test) {
         /*  var selectedFiles = $("#KGcreator_csvTreeDiv").jstree().get_checked(true);
-        if (selectedFiles.length > 0);*/
+if (selectedFiles.length > 0);*/
 
         $("#KGcreator_dataSampleDiv").val("creating triples...");
         if (!self.currentJsonObject) return;
 
         if (self.currentJsonObject.fileName.indexOf(".csv") < 0) return alert("only triples from csv sources can be generated : IN PROGRESS, COMING SOON");
+
         if (!self.currentJsonObject.graphUri) {
             var graphUri = "";
             if (self.currentGraphUri) graphUri = self.currentGraphUri;
@@ -817,7 +848,7 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
                         $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
 
                         /*    SearchUtil.generateElasticIndex(Lineage_common.currentSource,{ids:[self.graphModification.creatingNodeUri]},function(err, result) {
-                })*/
+})*/
                     }
                 },
                 error(err) {

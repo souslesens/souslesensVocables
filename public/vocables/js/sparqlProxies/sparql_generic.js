@@ -958,7 +958,6 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                     for (var key in allClassesMap) {
                         recurse(key, allClassesMap[key].parents);
                     }
-
                     //format parents
                     for (var key in allClassesMap) {
                         var obj = allClassesMap[key];
@@ -983,7 +982,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                 allClassesMap[parent] = {
                                     id: parent,
                                     label: Sparql_common.getLabelFromURI(parent),
-                                    skoslabels: {},
+                                    skoslabels: [],
                                     parent: sourceLabel,
                                     parents: [sourceLabel],
                                     type: "owl:class",

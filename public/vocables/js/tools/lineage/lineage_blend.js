@@ -26,7 +26,7 @@ var Lineage_blend = (function () {
         }
 
         /* $("#GenericTools_searchAllSourcesTermInput").val(node.data.label)
-  $("#GenericTools_searchInAllSources").prop("checked", true)*/
+$("#GenericTools_searchInAllSources").prop("checked", true)*/
 
         if (allowAddToGraphButton) {
             $("#lineage_blendToGraphButton").css("display", "block");
@@ -403,7 +403,7 @@ var Lineage_blend = (function () {
         var existingNodes = visjsGraph.getExistingIdsMap();
         if (existingNodes[node.id]) return alert("node " + node.label + " already exists in graph ");
         /* if(!confirm(" Import node "+node.label+" in source "+Lineage_classes.mainSource))
-  return;*/
+return;*/
         self.setNewImport(Lineage_classes.mainSource, node.source, function (err, _result) {
             if (err) return "";
             var toGraphUri = Config.sources[Lineage_classes.mainSource].graphUri;
@@ -557,14 +557,14 @@ var Lineage_blend = (function () {
 
             common.fillSelectOptions("lineage_createRelationPropertySelect", properties, false, "label", "id");
             /*
-  var words = [sourceNode.label, targetNode.label]
-  var indexes = [sourceNode.source.toLowerCase(), targetNode.source.toLowerCase()]
-  SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, 10, function (err, result) {
-  if (err)
-  return alert(err);
-  var xx = result
+var words = [sourceNode.label, targetNode.label]
+var indexes = [sourceNode.source.toLowerCase(), targetNode.source.toLowerCase()]
+SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, 10, function (err, result) {
+if (err)
+return alert(err);
+var xx = result
 
-  })*/
+})*/
         });
     };
 
@@ -599,10 +599,10 @@ var Lineage_blend = (function () {
             "> )     }}}\n" +
             "  \n" +
             /*    "WHERE {?fromAncestor rdfs:subClassOf ?b. ?b owl:onProperty ?p.optional{?p rdfs:label ?pLabel} optional{?b owl:someValuesFrom ?toAncestor} " + //filter (regex(str(?p),\"http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/\",\"i\"))" +
-  " {SELECT ?fromAncestor ?toAncestor ?from ?to" +
-  "    WHERE { ?from rdfs:subClassOf+ ?fromAncestor. filter (str(?from)=\"" + fromNode.id + "\" )" +
-  "        optional  { ?to rdfs:subClassOf+ ?toAncestor. filter (str(?to)=\"" + toNode.id + "\" )}" +
-  "  }" +*/
+" {SELECT ?fromAncestor ?toAncestor ?from ?to" +
+"    WHERE { ?from rdfs:subClassOf+ ?fromAncestor. filter (str(?from)=\"" + fromNode.id + "\" )" +
+"        optional  { ?to rdfs:subClassOf+ ?toAncestor. filter (str(?to)=\"" + toNode.id + "\" )}" +
+"  }" +*/
             "} limit 1000";
 
         var sparql_url = Config.sources[topOntology].sparql_server.url;
@@ -618,39 +618,16 @@ var Lineage_blend = (function () {
     };
 
     self.graphModification = {
-        /*  initTopLevelOntologySelect:function(selectId){
-
-            var topLevelOntologies=Object.keys(Config.topLevelOntologies)
-
-             common.fillSelectOptions(selectId,topLevelOntologies)
-            Config.currentTopLevelOntology= $("#"+selectId).val()
-        }*/
-
-        setTopLevelOntologyFromImports: function (sourceLabel) {
-            var imports = Config.sources[sourceLabel].imports;
-            if (!imports) return (Config.currentTopLevelOntology = Object.keys(Config.topLevelOntologies)[0]);
-            if (!Array.isArray(imports)) imports = [imports];
-            var ok = false;
-            imports.forEach(function (source) {
-                if (!ok && Config.topLevelOntologies[source]) {
-                    ok = true;
-                    Config.currentTopLevelOntology = source;
-                }
-            });
-        },
-
         showAddNodeGraphDialog: function () {
             self.graphModification.creatingNodeTriples = [];
             self.graphModification.creatingsourceUri = null;
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
-                //   self.graphModification.initTopLevelOntologySelect("LineageBlend_currentTopLevelOntologyNodesSelect")
                 self.getSourcePossiblePredicatesAndObject(Lineage_classes.mainSource, function (err, result) {
                     if (err) return alert(err.responseText);
                     if (!Config.sources[Lineage_classes.mainSource].allowIndividuals) {
                         $("#LineageBlend_creatingNamedIndividualButton").css("display", "none");
                     }
-
                     self.currentPossibleClassesAndPredicates = result;
                     var allObjects = result.usualObjects.concat(result.TopLevelOntologyObjects).concat([""]).concat(result.sourceObjects);
 
@@ -829,7 +806,7 @@ var Lineage_blend = (function () {
             possibleClasses.forEach(function (obj) {
                 var classLabel = obj.label;
                 /* var array = classLabel.split(/[:\/\#]/);
-           if (array.length > 0) classLabel = array[array.length - 1];*/
+   if (array.length > 0) classLabel = array[array.length - 1];*/
                 targetUrisMap[classLabel] = obj.id;
             });
 
@@ -880,7 +857,7 @@ var Lineage_blend = (function () {
                 }
 
                 if (!targetUri) {
-                    alert("xxxx");
+                    //  alert("xxxx");
                     //targetUri  declared in the list as source node
                     predicate = "part14:partOf";
                     targetUri = sourceUrisMap[classLabel];
@@ -970,7 +947,6 @@ var Lineage_blend = (function () {
         showAddEdgeFromGraphDialog: function (edgeData, callback) {
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").load("snippets/lineage/lineageAddEdgeDialog.html", function () {
-                //self.graphModification.initTopLevelOntologySelect("LineageBlend_currentTopLevelOntologyNodesSelect")
                 self.sourceNode = visjsGraph.data.nodes.get(edgeData.from).data;
                 self.targetNode = visjsGraph.data.nodes.get(edgeData.to).data;
                 $("#lineageAddEdgeDialog_Title").html(self.sourceNode.label + " -> " + self.targetNode.label);
@@ -1077,39 +1053,53 @@ var Lineage_blend = (function () {
                                 return callbackSeries();
                             }
                             let inSource = Config.currentTopLevelOntology;
-                            let ancestorsDepth = 5;
-                            Sparql_OWL.getNodeParents(Lineage_classes.mainSource, null, [self.sourceNode.id, self.targetNode.id], ancestorsDepth, {}, function (err, result) {
+                            let ancestorsDepth = 10;
+                            Sparql_OWL.getNodesAncestors(Lineage_classes.mainSource, [self.sourceNode.id, self.targetNode.id], {}, function (err, result) {
+                                //   Sparql_OWL.getNodeParents(Lineage_classes.mainSource, null, [self.sourceNode.id, self.targetNode.id], ancestorsDepth, {}, function (err, result) {
                                 if (err) return callbackSeries(err);
                                 var topLevelOntologyPattern = Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern;
+
                                 result.forEach(function (item) {
-                                    if (item.concept.value == self.sourceNode.id) {
-                                        if (item.concept.value.indexOf(topLevelOntologyPattern) > -1) {
-                                            sourceNodeFirsttopLevelOntologyAncestor = item.concept.value;
-                                            return;
+                                    if (!sourceNodeFirsttopLevelOntologyAncestor && item.class.value == self.sourceNode.id) {
+                                        if (item.superClass.value.indexOf(topLevelOntologyPattern) > -1) {
+                                            sourceNodeFirsttopLevelOntologyAncestor = item.superClass.value;
                                         }
-                                        for (var i = 1; i <= ancestorsDepth; i++) {
-                                            if (item["broader" + i]) {
-                                                if (item["broader" + i].value.indexOf(topLevelOntologyPattern) > -1) {
-                                                    sourceNodeFirsttopLevelOntologyAncestor = item["broader" + i].value;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    } else if (item.concept.value == self.targetNode.id) {
-                                        if (item.concept.value.indexOf(topLevelOntologyPattern) > -1) {
-                                            targetNodeFirsttopLevelOntologyAncestor = item.concept.value;
-                                            return;
-                                        }
-                                        for (var i = 1; i <= ancestorsDepth; i++) {
-                                            if (item["broader" + i]) {
-                                                if (item["broader" + i].value.indexOf(topLevelOntologyPattern) > -1) {
-                                                    targetNodeFirsttopLevelOntologyAncestor = item["broader" + i].value;
-                                                    break;
-                                                }
-                                            }
+                                    }
+                                    if (!sourceNodeFirsttopLevelOntologyAncestor && item.class.value == self.targetNode.id) {
+                                        if (item.superClass.value.indexOf(topLevelOntologyPattern) > -1) {
+                                            targetNodeFirsttopLevelOntologyAncestor = item.superClass.value;
                                         }
                                     }
                                 });
+                                /*  result.forEach(function (item) {
+                       if (item.concept.value == self.sourceNode.id) {
+                           if (item.concept.value.indexOf(topLevelOntologyPattern) > -1) {
+                               sourceNodeFirsttopLevelOntologyAncestor = item.concept.value;
+                               return;
+                           }
+                           for (var i = 1; i <= ancestorsDepth; i++) {
+                               if (item["broader" + i]) {
+                                   if (item["broader" + i].value.indexOf(topLevelOntologyPattern) > -1) {
+                                       sourceNodeFirsttopLevelOntologyAncestor = item["broader" + i].value;
+                                       break;
+                                   }
+                               }
+                           }
+                       } else if (item.concept.value == self.targetNode.id) {
+                           if (item.concept.value.indexOf(topLevelOntologyPattern) > -1) {
+                               targetNodeFirsttopLevelOntologyAncestor = item.concept.value;
+                               return;
+                           }
+                           for (var i = 1; i <= ancestorsDepth; i++) {
+                               if (item["broader" + i]) {
+                                   if (item["broader" + i].value.indexOf(topLevelOntologyPattern) > -1) {
+                                       targetNodeFirsttopLevelOntologyAncestor = item["broader" + i].value;
+                                       break;
+                                   }
+                               }
+                           }
+                       }
+                   });*/
                                 if (!sourceNodeFirsttopLevelOntologyAncestor || !targetNodeFirsttopLevelOntologyAncestor) {
                                     // alert("no matching topLevelOntology superClass");
                                     MainController.UI.message("no matching superClass in " + Config.currentTopLevelOntology);
@@ -1195,30 +1185,30 @@ var Lineage_blend = (function () {
                             callbackSeries();
                         },
                         /*   function(callbackSeries) {
-       return callbackSeries();
-       if (!Config.sources[Lineage_classes.mainSource].editable) {
-         $("#lineageAddEdgeDialog_currentSourcePropertiesTreeDiv").html("source " + Lineage_classes.mainSource + " is not editable");
-         return callbackSeries();
-       }
+return callbackSeries();
+if (!Config.sources[Lineage_classes.mainSource].editable) {
+$("#lineageAddEdgeDialog_currentSourcePropertiesTreeDiv").html("source " + Lineage_classes.mainSource + " is not editable");
+return callbackSeries();
+}
 
-       Lineage_properties.getPropertiesjsTreeData(inSource, null, null, {}, function(err, jstreeData3) {
-         if (err) return callbackSeries(err);
-         let jstreeDataX = [];
-         jstreeDataX.forEach(function(item) {
-           item.data.inSource = inSource;
-         });
+Lineage_properties.getPropertiesjsTreeData(inSource, null, null, {}, function(err, jstreeData3) {
+if (err) return callbackSeries(err);
+let jstreeDataX = [];
+jstreeDataX.forEach(function(item) {
+item.data.inSource = inSource;
+});
 
-         jstreeDataX.push({
-           id: inSource,
-           text: inSource,
-           parent: "#"
-         });
-         jstreeData = jstreeData.concat(jstreeDataX);
-         //  common.jstree.loadJsTree("lineageAddEdgeDialog_currentSourcePropertiesTreeDiv", jstreeData3, options);
+jstreeDataX.push({
+id: inSource,
+text: inSource,
+parent: "#"
+});
+jstreeData = jstreeData.concat(jstreeDataX);
+//  common.jstree.loadJsTree("lineageAddEdgeDialog_currentSourcePropertiesTreeDiv", jstreeData3, options);
 
-         callbackSeries();
-       });
-     },*/
+callbackSeries();
+});
+},*/
 
                         //get specific(mainSource) source properties
                         function (callbackSeries) {
@@ -1277,7 +1267,10 @@ var Lineage_blend = (function () {
 
                                             if (!self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id])
                                                 self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id] = [];
-                                            self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id].push({ id: result.uri, label: subPropertyLabel });
+                                            self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id].push({
+                                                id: result.uri,
+                                                label: subPropertyLabel,
+                                            });
 
                                             var jstreeData = [
                                                 {
@@ -1475,6 +1468,8 @@ var Lineage_blend = (function () {
             var TopLevelOntologyObjects = [];
             result.forEach(function (item) {
                 if (item.id.type == "bnode") return;
+
+                if (!item.label) item.label = { value: Sparql_common.getLabelFromURI(item.id.value) };
                 var prefix = "";
                 if (item.g.value.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > -1) {
                     prefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix + ":";

@@ -25,14 +25,13 @@ export async function saveProfile(body: Profile, mode: Mode, updateModel: React.
     try {
         const response = await fetch(endpoint, {
             method: mode === Mode.Edition ? "put" : "post",
-            body: JSON.stringify({ [body.id]: body }, null, "\t"),
+            body: JSON.stringify({ [body.name]: body }, null, "\t"),
             headers: { "Content-Type": "application/json" },
         });
         const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
             updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(resources)) });
             updateLocal({ type: Type.UserClickedModal, payload: false });
-            updateLocal({ type: Type.ResetProfile, payload: mode });
         } else {
             updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`${response.status}, ${message}`) });
         }
@@ -60,8 +59,8 @@ type ProfileJson = {
     id?: string;
     name?: string;
     allowedSourceSchemas: string[];
-    allowedSources: string;
-    forbiddenSources: string[];
+    defaultSourceAccessControl: SourceAccessControl;
+    sourcesAccessControl: Record<string, SourceAccessControl>;
     allowedTools: string[];
     forbiddenTools: string[];
     blender: Blender;
@@ -77,8 +76,8 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
         _type: "profile",
         id: profile.id ? profile.id : ulid(),
         allowedSourceSchemas: profile.allowedSourceSchemas,
-        allowedSources: profile.allowedSources,
-        forbiddenSources: profile.forbiddenSources,
+        defaultSourceAccessControl: profile.defaultSourceAccessControl,
+        sourcesAccessControl: profile.sourcesAccessControl,
         allowedTools: profile.allowedTools,
         forbiddenTools: profile.forbiddenTools,
         blender: { contextMenuActionStartLevel: profile.blender.contextMenuActionStartLevel },
@@ -90,12 +89,14 @@ type Profile = {
     _type: string;
     id: string;
     allowedSourceSchemas: string[];
-    allowedSources: string | string[];
-    forbiddenSources: string | string[];
+    defaultSourceAccessControl: SourceAccessControl;
+    sourcesAccessControl: Record<string, SourceAccessControl>;
     allowedTools: string | string[];
     forbiddenTools: string[];
     blender: Blender;
 };
+
+type SourceAccessControl = "forbidden" | "read" | "readwrite";
 
 export const defaultProfile = (uuid: string): Profile => {
     return {
@@ -103,11 +104,11 @@ export const defaultProfile = (uuid: string): Profile => {
         _type: "profile",
         id: uuid,
         allowedSourceSchemas: [],
-        allowedSources: "ALL",
-        forbiddenSources: [],
+        defaultSourceAccessControl: "forbidden",
+        sourcesAccessControl: {},
         allowedTools: "ALL",
         forbiddenTools: [],
         blender: { contextMenuActionStartLevel: 0 },
     };
 };
-export { getProfiles, deleteProfile, Profile };
+export { getProfiles, deleteProfile, Profile, SourceAccessControl };

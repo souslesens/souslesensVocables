@@ -1,9 +1,10 @@
 const path = require("path");
 const ulid = require("ulid");
-const { configPath, config } = require("../../../model/config");
+const { configPath } = require("../../../model/config");
 const profilesJSON = path.resolve(configPath + "/profiles.json");
 exports.profilesJSON = profilesJSON;
 const { readResource, writeResource, resourceFetched, resourceUpdated, responseSchema, resourceCreated } = require("./utils");
+const userManager = require("../../../bin/user.");
 
 module.exports = function () {
     let operations = {
@@ -12,13 +13,41 @@ module.exports = function () {
         PUT,
     };
 
+    function parseAccessControl(accessControlJson) {
+        const accessControl = accessControlJson.toLowerCase();
+        if (!["forbidden", "read", "readwrite"].includes(accessControl)) {
+            throw new Error("Invalid SourcesAccessControl");
+        }
+        return accessControl;
+    }
+
     ///// GET api/v1/profiles
     async function GET(req, res, next) {
         try {
-            const profiles = await readResource(profilesJSON, res);
-            // I need to have the db indexed by a unique id.
-            //const sanitizedDB = await writeResource(profilesJSON, profiles, res)
-            resourceFetched(res, profiles);
+            let profiles = await readResource(profilesJSON, res);
+            profiles = Object.fromEntries(
+                Object.entries(profiles).map(([profileId, profile]) => {
+                    profile.defaultSourceAccessControl = profile.defaultSourceAccessControl.toLowerCase();
+                    profile.sourcesAccessControl = Object.fromEntries(
+                        Object.entries(profile.sourcesAccessControl).map(([sourceId, accessControl]) => {
+                            return [sourceId, parseAccessControl(accessControl)];
+                        })
+                    );
+                    return [profileId, profile];
+                })
+            );
+            const currentUser = await userManager.getUser(req.user);
+            const groups = currentUser.user.groups;
+            if (groups.includes("admin")) {
+                resourceFetched(res, profiles);
+            } else {
+                const userProfiles = Object.fromEntries(
+                    Object.entries(profiles).filter(([profileId, _profile]) => {
+                        return groups.includes(profileId);
+                    })
+                );
+                resourceFetched(res, userProfiles);
+            }
         } catch (error) {
             next(error);
         }
@@ -36,8 +65,12 @@ module.exports = function () {
             const updatedProfile = req.body;
             const objectToUpdateKey = Object.keys(req.body)[0];
             const oldProfiles = await readResource(profilesJSON, res); //.catch(e => res.status((500).json({ message: 'I couldn\'t read the resource' })));
+            const oldProfilesNames = Object.entries(oldProfiles).map(([_id, profile]) => {
+                return profile.name;
+            });
+
             const updatedProfiles = { ...oldProfiles, ...updatedProfile };
-            if (objectToUpdateKey in oldProfiles) {
+            if (oldProfilesNames.indexOf(objectToUpdateKey) === 0) {
                 const savedProfiles = await writeResource(profilesJSON, updatedProfiles, res); //.catch(e => res.status((500).json({ message: "I couldn't write the resource" })));
                 resourceUpdated(res, savedProfiles);
             } else {

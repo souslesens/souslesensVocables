@@ -142,7 +142,18 @@ var Lineage_classes = (function () {
             self.mainSource = sourceLabel;
             self.initUI(true);
             Lineage_combine.init();
-            if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[self.mainSource].editable > -1) {
+
+            const currentSource = sourceLabel;
+            const groups = authentication.currentUser.groupes;
+            const currentAccessControls = groups.map((group) => {
+                const defaultAccessControl = Config.profiles[group].defaultSourceAccessControl;
+                const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
+                return sourcesAccessControl.hasOwnProperty(currentSource) ? sourcesAccessControl[currentSource] : defaultAccessControl;
+            });
+
+            self.realAccessControl = currentAccessControls.includes("readwrite") ? "readwrite" : currentAccessControls.includes("read") ? "read" : "forbidden";
+
+            if (self.realAccessControl === "readwrite" && Config.sources[self.mainSource].editable > -1) {
                 $("#lineage_blendButtonsDiv").css("display", "block");
             } else {
                 $("#lineage_blendButtonsDiv").css("display", "none");
@@ -541,7 +552,7 @@ Lineage_blend.addNodeToAssociationNode(node, "source", true);
             },
         };
 
-        if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_classes.mainSource] && Config.sources[Lineage_classes.mainSource].editable) {
+        if (self.realAccessControl === "readwrite" && Config.sources[Lineage_classes.mainSource] && Config.sources[Lineage_classes.mainSource].editable) {
             options.manipulation = {
                 enabled: true,
                 initiallyActive: true,
@@ -2031,7 +2042,7 @@ addNode:false
         } else if (node.from && node.data.bNodeId) {
             //edge restrition
             html += '    <span class="popupMenuItem" onclick="Lineage_classes.graphActions.showPropertyInfos();"> Relation Infos</span>';
-            if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
+            if (self.realAccessControl === "readwrite" && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
                 html += '    <span class="popupMenuItem" onclick="Lineage_classes.graphActions.deleteRestriction();"> Delete relation</span>';
             }
         } else if (node.from && node.data.type == "ObjectProperty") {

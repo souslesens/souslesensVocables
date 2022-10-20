@@ -2,6 +2,7 @@
 // !!!!!!!!  const util = require("../../../../../bin/util.");
 var Lineage_blend = (function () {
     var self = {};
+    self.authorizedProperties={}
 
     self.addNodeToAssociationNode = function (node, role, allowAddToGraphButton) {
         if (role == "source") {
@@ -1071,35 +1072,7 @@ var xx = result
                                         }
                                     }
                                 });
-                                /*  result.forEach(function (item) {
-                       if (item.concept.value == self.sourceNode.id) {
-                           if (item.concept.value.indexOf(topLevelOntologyPattern) > -1) {
-                               sourceNodeFirsttopLevelOntologyAncestor = item.concept.value;
-                               return;
-                           }
-                           for (var i = 1; i <= ancestorsDepth; i++) {
-                               if (item["broader" + i]) {
-                                   if (item["broader" + i].value.indexOf(topLevelOntologyPattern) > -1) {
-                                       sourceNodeFirsttopLevelOntologyAncestor = item["broader" + i].value;
-                                       break;
-                                   }
-                               }
-                           }
-                       } else if (item.concept.value == self.targetNode.id) {
-                           if (item.concept.value.indexOf(topLevelOntologyPattern) > -1) {
-                               targetNodeFirsttopLevelOntologyAncestor = item.concept.value;
-                               return;
-                           }
-                           for (var i = 1; i <= ancestorsDepth; i++) {
-                               if (item["broader" + i]) {
-                                   if (item["broader" + i].value.indexOf(topLevelOntologyPattern) > -1) {
-                                       targetNodeFirsttopLevelOntologyAncestor = item["broader" + i].value;
-                                       break;
-                                   }
-                               }
-                           }
-                       }
-                   });*/
+
                                 if (!sourceNodeFirsttopLevelOntologyAncestor || !targetNodeFirsttopLevelOntologyAncestor) {
                                     // alert("no matching topLevelOntology superClass");
                                     MainController.UI.message("no matching superClass in " + Config.currentTopLevelOntology);
@@ -1117,21 +1090,6 @@ var xx = result
                                 );
                             });
                         },
-                        /*   function(callbackSeries) {
-       var propertyIds = Object.keys(authorizedProps);
-       Sparql_OWL.getObjectSubProperties(Lineage_classes.mainSource, propertyIds, options, function(err, result) {
-         if (err) return callbackSeries(err);
-         result.forEach(function(item) {
-           if (!authorizedProps[item.property.value]) return;
-           if (!authorizedProps[item.property.value].children) authorizedProps[item.property.value].children = [];
-           authorizedProps[item.property.value].children.push({
-             id: item.subProperty.value,
-             label: item.subPropertyLabel.value
-           });
-         });
-         callbackSeries();
-       });
-     },*/
 
                         //create formal Ontology tree nodes
                         function (callbackSeries) {
@@ -1379,81 +1337,95 @@ callbackSeries();
     };
 
     self.getAuthorizedProperties = function (sourceLabel, domain, range, callback) {
-        function filterProps() {
-            let props = {};
-            let allProps = self.authorizedProperties[sourceLabel];
-            var subProposMap = {};
 
-            allProps.forEach(function (item) {
-                if (item.prop.value.indexOf("concret") > -1) var x = 3;
-                let type = "";
-                let ok = false;
-                if (!item.range && item.domain && (item.domain.value == domain || item.domaintype == "bnode")) {
-                    type = "D";
-                    ok = true;
-                } else if (!item.domain && item.range && (item.range.value == range || item.domaintype == "bnode")) {
-                    type = "R";
-                    ok = true;
-                } else if (item.domain && item.range && item.domain.value == domain && item.range.value == range) ok = true;
+        self.getSourcePossiblePredicates(sourceLabel,function(err,allProps) {
+            if(err)
+                return alert(err)
 
-                if (ok) {
-                    props[item.prop.value] = {
-                        prop: item.prop.value,
-                        label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
-                        type: type,
-                    };
-                }
-            });
-            if (true || Object.keys(props).length == 0) {
-                allProps.forEach(function (item) {
-                    if (item.isGenericProperty) {
+                let props = {};
+
+                var subProposMap = {};
+
+                allProps.forEach(function(item) {
+                    if (item.prop.value.indexOf("concret") > -1) var x = 3;
+                    let type = "";
+                    let ok = false;
+                    if (!item.range && item.domain && (item.domain.value == domain || item.domaintype == "bnode")) {
+                        type = "D";
+                        ok = true;
+                    } else if (!item.domain && item.range && (item.range.value == range || item.domaintype == "bnode")) {
+                        type = "R";
+                        ok = true;
+                    } else if (item.domain && item.range && item.domain.value == domain && item.range.value == range) ok = true;
+
+                    if (ok) {
                         props[item.prop.value] = {
                             prop: item.prop.value,
                             label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
-                            isGenericProperty: item.isGenericProperty,
+                            type: type,
                         };
                     }
                 });
-            }
-            return props;
-        }
+                if (true || Object.keys(props).length == 0) {
+                    allProps.forEach(function(item) {
+                        if (item.isGenericProperty) {
+                            props[item.prop.value] = {
+                                prop: item.prop.value,
+                                label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+                                isGenericProperty: item.isGenericProperty,
+                            };
+                        }
+                    });
+                }
+                return callback(null, props);
 
+        })
+
+
+    };
+
+
+
+
+
+    self.getSourcePossiblePredicates=function(sourceLabel,callback){
         if (!self.authorizedProperties) self.authorizedProperties = {};
-        if (!self.authorizedProperties[sourceLabel]) {
+
+        if(self.authorizedProperties[sourceLabel])
+            return callback(null,self.authorizedProperties[sourceLabel])
+
             var allProps;
             async.series(
-                [
-                    function (callbackSeries) {
-                        Sparql_OWL.getInferredPropertiesDomainsAndRanges(sourceLabel, {}, function (err, _result) {
-                            if (err) return callbackSeries(err);
+              [
+                  function (callbackSeries) {
+                      Sparql_OWL.getInferredPropertiesDomainsAndRanges(sourceLabel, {}, function (err, _result) {
+                          if (err) return callbackSeries(err);
 
-                            allProps = _result;
-                            return callbackSeries();
-                        });
-                    },
-                    function (callbackSeries) {
-                        Sparql_OWL.getPropertiesWithoutDomainsAndRanges(sourceLabel, {}, function (err, _result2) {
-                            if (err) return callbackSeries(err);
-                            // allProps = allProps.concat(_result2)
-                            _result2.forEach(function (item) {
-                                item.isGenericProperty = true;
-                                allProps.push(item);
-                            });
-                            return callbackSeries();
-                        });
-                    },
-                ],
-                function (err) {
-                    self.authorizedProperties[sourceLabel] = allProps;
-                    var props = filterProps();
-                    return callback(err, props);
-                }
+                          allProps = _result;
+                          return callbackSeries();
+                      });
+                  },
+                  function (callbackSeries) {
+                      Sparql_OWL.getPropertiesWithoutDomainsAndRanges(sourceLabel, {}, function (err, _result2) {
+                          if (err) return callbackSeries(err);
+                          // allProps = allProps.concat(_result2)
+                          _result2.forEach(function (item) {
+                              item.isGenericProperty = true;
+                              allProps.push(item);
+                          });
+                          return callbackSeries();
+                      });
+                  },
+              ],
+              function (err) {
+                  self.authorizedProperties[sourceLabel] = allProps;
+                  return callback(err, allProps);
+
+              }
             );
-        } else {
-            var props = filterProps();
-            return callback(null, props);
-        }
-    };
+    }
+
+
 
     self.getSourcePossiblePredicatesAndObject = function (source, callback) {
         var predicates = [];

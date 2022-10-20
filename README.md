@@ -190,7 +190,7 @@ npm --version
 
 ### Install
 
-souslesensVocable is composed of a backend in node/express and a frontend in typescript/react.
+souslesensVocable is composed of a backend in node/express and a frontend in pure javascript and typescript/react.
 
 ```bash
 # Install the server

@@ -192,6 +192,7 @@ var Lineage_classes = (function () {
                 self.setTopLevelOntologyFromImports(self.mainSource);
                 Lineage_decoration.init();
                 Lineage_linkedData.init();
+                Lineage_blend.getSourcePossiblePredicatesAndObject(slf.mainSource)
 
                 if (!visjsGraph.isGraphNotEmpty() && Config.sources[self.mainSource].editable) {
                     var visjsData = { nodes: [], edges: [] };

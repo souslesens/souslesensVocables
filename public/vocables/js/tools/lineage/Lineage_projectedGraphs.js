@@ -24,7 +24,7 @@ var Lineage_projectedGraphs = (function () {
     };
 
     self.initProjectedGraphs = function (_callback) {
-        Sparql_OWL.getGraphsByRegex(Config.sources[Lineage_classes.mainSource].graphUri, function (_err, result) {
+        Sparql_OWL.getGraphsByRegex(Config.sources[Lineage_sources.activeSource].graphUri, function (_err, result) {
             var projectedGraphs = {};
 
             result.forEach(function (item) {

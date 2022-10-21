@@ -19,7 +19,7 @@ Lineage_properties = (function () {
 
     self.init = function () {
         self.graphInited = false;
-        Lineage_common.currentSource = MainController.currentSource;
+
     };
     self.showPropInfos = function (_event, obj) {
         var id = obj.node.id;
@@ -72,7 +72,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
                 },
             };
 
-            if (!Lineage_common.currentSource || Config.sources[Lineage_common.currentSource].editable) {
+            if (!Lineage_sources.activeSource || Config.sources[Lineage_sources.activeSource].editable) {
                 items.pasteNodeFromClipboard = {
                     label: "paste from Clipboard",
                     action: function (_e) {
@@ -404,8 +404,8 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
     self.drawPredicateTriples = function (predicate) {
         if (!predicate) predicate = self.currentTreeNode;
         if (!predicate) return alert("select a property first");
-        var sparql_url = Config.sources[Lineage_common.currentSource].sparql_server.url;
-        var fromStr = Sparql_common.getFromStr(Lineage_common.currentSource);
+        var sparql_url = Config.sources[Lineage_sources.activeSource].sparql_server.url;
+        var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource);
 
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " + "select * " + fromStr + " where {";
 
@@ -414,7 +414,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
         query += "  Optional {?sub rdfs:label ?subLabel}  Optional {?obj rdfs:label ?objLabel} ";
         query += "} limit 1000";
         var url = sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Lineage_common.currentSource }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Lineage_sources.activeSource }, function (err, result) {
             if (err) return MainController.UI.message(err);
 
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["sub", "obj", "prop"]);
@@ -424,7 +424,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
                 MainController.UI.message("no dataFound");
                 return;
             }
-            var color = Lineage_classes.getSourceColor(Lineage_common.currentSource);
+            var color = Lineage_classes.getSourceColor(Lineage_sources.activeSource);
             var visjsData = { nodes: [], edges: [] };
             var existingIds = visjsGraph.getExistingIdsMap();
 
@@ -439,7 +439,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
                         color: color,
                         font: { multi: true, size: 10 },
                         data: {
-                            source: Lineage_common.currentSource,
+                            source: Lineage_sources.activeSource,
                             id: item.sub.value,
                             label: item.sub.value,
                         },
@@ -458,7 +458,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
                         color: color,
                         font: { multi: true, size: 10 },
                         data: {
-                            source: Lineage_common.currentSource,
+                            source: Lineage_sources.activeSource,
                             id: item.obj.value,
                             label: item.obj.value,
                         },
@@ -555,7 +555,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = {};
             if (visjsGraph.data && visjsGraph.data.nodes) existingNodes = visjsGraph.getExistingIdsMap();
-            var color = Lineage_classes.getSourceColor(Lineage_common.currentSource);
+            var color = Lineage_classes.getSourceColor(Lineage_sources.activeSource);
 
             var classShape = "dot";
             var propColor = "#ddd";
@@ -581,7 +581,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
                             id: item.property.value,
                             label: label,
                             subProperties: [],
-                            source: Lineage_common.currentSource,
+                            source:Lineage_sources.activeSource,
                         },
                         size: self.defaultShapeSize,
                         color: propColor,
@@ -602,7 +602,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
                                 id: subProperty,
                                 label: label,
                                 subProperties: [],
-                                source: Lineage_common.currentSource,
+                                source: Lineage_sources.activeSource,
                             },
                             font: { color: "blue", size: 12 },
                             size: self.defaultShapeSize,
@@ -645,7 +645,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
                             data: {
                                 id: item.range.value,
                                 label: rangeLabel,
-                                source: Lineage_common.currentSource,
+                                source:Lineage_sources.activeSource,
                             },
                             size: self.defaultShapeSize,
                             color: color,
@@ -687,7 +687,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
                             data: {
                                 id: item.domain.value,
                                 label: domainLabel,
-                                source: Lineage_common.currentSource,
+                                source:Lineage_sources.activeSource,
                             },
                             color: color,
                             size: self.defaultShapeSize,
@@ -728,7 +728,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
                             data: {
                                 id: item.range.value,
                                 label: item.rangeLabel.value,
-                                source: Lineage_common.currentSource,
+                                source: Lineage_sources.activeSource,
                             },
                             color: color,
                             size: self.defaultShapeSize,
@@ -765,7 +765,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
                             data: {
                                 id: item.inverseProperty.value,
                                 label: propLabel,
-                                source: Lineage_common.currentSource,
+                                source: Lineage_sources.activeSource,
                             },
                             color: propColor,
                             size: self.defaultShapeSize,
@@ -803,7 +803,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
     };
 
     self.getRangeAndDomainsGraph = function (property, callback) {
-        var source = Lineage_common.currentSource;
+        var source = Lineage_sources.activeSource;
         var propId = null;
         if (property) {
             source = property.data.source;
@@ -811,11 +811,10 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
         }
         //if search in multiple sources and choose a source : draw all the properties found for this source
         if (property && property.parent == "#") {
-            Lineage_common.currentSource = property.data.source;
+            Lineage_sources.activeSource= property.data.source;
             propId = property.children;
         }
 
-        // Sparql_OWL.getObjectProperties(Lineage_common.currentSource, null, {propIds:[propId]}, function (err, result) {
 
         if (propId && Config.sources[source].schemaType == "OWL") {
             OwlSchema.initSourceSchema(source, function (err, schema) {
@@ -898,8 +897,8 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
                 if (Config.sources[sourceLabel].schemaType == "OWL") searchedSources.push(sourceLabel);
             }
         } else {
-            if (!Lineage_common.currentSource) return alert("select a source or search in all source");
-            searchedSources.push(Lineage_common.currentSource);
+            if (!Lineage_sources.activeSource) return alert("select a source or search in all source");
+            searchedSources.push(Lineage_sources.activeSource);
         }
         var jstreeData = [];
         var uniqueIds = {};

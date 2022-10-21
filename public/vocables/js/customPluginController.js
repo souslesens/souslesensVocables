@@ -68,14 +68,14 @@ var CustomPluginController = (function () {
              })*/
 
         setTimeout(function () {
-            Sparql_OWL.getNodesTypes(Lineage_classes.mainSource, nodeIds, function (err, result) {
+            Sparql_OWL.getNodesTypes(Lineage_sources.activeSource, nodeIds, function (err, result) {
                 // eslint-disable-next-line no-console
                 if (err) return console.log(err);
                 result.forEach(function (item) {
                     var newNode = { id: item.concept.value };
                     if (Lineage_classes.sourcesGraphUriMap[item.g.value]) {
                         var source = Lineage_classes.sourcesGraphUriMap[item.g.value].name;
-                        if (Config.sources[Lineage_classes.mainSource] && Config.sources[Lineage_classes.mainSource].imports && Config.sources[Lineage_classes.mainSource].imports.indexOf(source) > -1)
+                        if (Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].imports && Config.sources[Lineage_sources.activeSource].imports.indexOf(source) > -1)
                             // only those in the imports of mainSource
                             var node = visjsGraph.data.nodes.get(item.concept.value);
                         if (node) node.data.source = source;

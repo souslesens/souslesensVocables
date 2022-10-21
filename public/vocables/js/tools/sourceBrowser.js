@@ -79,7 +79,7 @@ var SourceBrowser = (function () {
     };
 
     self.showThesaurusTopConcepts = function (sourceLabel, options) {
-        if (!sourceLabel) sourceLabel = Lineage_common.currentSource || Lineage_classes.mainSource;
+        if (!sourceLabel) sourceLabel = Lineage_sources.activeSource;
         if (!options) options = { withoutImports: false, selectGraph: true };
 
         if (options.targetDiv) self.currentTargetDiv = options.targetDiv;
@@ -130,7 +130,7 @@ $("#actionDiv").html(html);*/
     self.getJstreeConceptsContextMenu = function () {
         // return {}
         var items = {};
-        if (!self.currentSource && Lineage_classes.mainSource) self.currentSource = Lineage_classes.mainSource;
+        if (!self.currentSource && Lineage_sources.activeSource) self.currentSource = Lineage_sources.activeSource;
         items.nodeInfos = {
             label: "Node infos",
             action: function (_e) {
@@ -373,33 +373,6 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
         var searchedSources = [];
 
-        /*   var schemaType = $("#GenericTools_searchSchemaType").val();
-
-
-
-
-if (searchAllSources || selectedSources.length > 0) {
-   for (var sourceLabel in Config.sources) {
-       if (
-           (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||
-           Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1
-       );
-       else {
-           if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-               if (!Config.sources[sourceLabel].schemaType || Config.sources[sourceLabel].schemaType == schemaType)
-                   if (selectedSources.length > 0 && selectedSources.indexOf(sourceLabel) > -1) searchedSources.push(sourceLabel);
-
-           }
-       }
-   }
-} else {
-   if (!Lineage_common.currentSource && !MainController.currentSource)
-       return alert("select a source or search in all source");
-   var source = Lineage_common.currentSource || MainController.currentSource;
-
-   searchedSources.push(source);
-
-}*/
 
         function getUserSources(schemaType) {
             var allowedSources = [];
@@ -422,18 +395,25 @@ if (searchAllSources || selectedSources.length > 0) {
 
         var sourcesScope = $("#GenericTools_searchScope").val();
         if (sourcesScope == "currentSource") {
-            if (!Lineage_common.currentSource && !MainController.currentSource) return alert("select a source or search in all source");
-            searchedSources.push(Lineage_common.currentSource || MainController.currentSource);
+            if (!Lineage_sources.activeSource) return alert("select a source or search in all source");
+            searchedSources.push(Lineage_sources.activeSource);
         } else if (sourcesScope == "graphSources") {
-            searchedSources = Lineage_combine.currentSources;
-        } else {
+
             if (Lineage_combine.currentSources.length > 0) searchedSources = Lineage_combine.currentSources;
             else {
-                var mainSource = Lineage_common.currentSource || MainController.currentSource;
+                var mainSource = Lineage_sources.activeSource;
                 searchedSources.push(mainSource);
                 var importedSources = Config.sources[mainSource].imports;
                 searchedSources = searchedSources.concat(importedSources);
             }
+        } else if (sourcesScope == "all_OWLsources") {
+            searchedSources = getUserSources("OWL");
+        } else if (sourcesScope == "all_SKOSsources") {
+            searchedSources = getUserSources("SKOS");
+        } else if (sourcesScope == "all_IndividualsSources") {
+            searchedSources = getUserSources("INDIVIDUALS");
+        } else if (sourcesScope == "all_Sources") {
+            searchedSources = getUserSources(null);
         }
 
         var jstreeData = [];
@@ -744,11 +724,11 @@ return*/
 
     self.uploadOntologyFromOwlFile = function () {
         var graphUri;
-        if (Array.isArray(Config.sources[Lineage_common.currentSource].graphUri)) graphUri = Config.sources[Lineage_common.currentSource].graphUri[0];
-        else graphUri = Config.sources[Lineage_common.currentSource].graphUri;
+        if (Array.isArray(Config.sources[Lineage_sources.activeSource].graphUri)) graphUri = Config.sources[Lineage_sources.activeSource].graphUri[0];
+        else graphUri = Config.sources[Lineage_sources.activeSource].graphUri;
         var payload = {
             graphUri: graphUri,
-            filePath: Config.sources[Lineage_common.currentSource].protegeFilePath,
+            filePath: Config.sources[Lineage_sources.activeSource].protegeFilePath,
         };
         $.ajax({
             type: "POST",
@@ -1409,20 +1389,36 @@ defaultLang = 'en';*/
             });
         }
     };
+    self.searchInSourcesTree= function () {
+        if (event.keyCode != 13 && event.keyCode != 9) return;
+        var value = $("#Lineage_classes_SearchSourceInput").val();
+        $("#searchAll_sourcesTree").jstree(true).search(value);
 
-    self.showSearchableSourcesTreeDialog = function (types, validateFn) {
+    }
+    self.showSearchableSourcesTreeDialog = function (types,options, validateFn) {
         if (!self.searchableSourcesTreeIsInitialized) {
             Standardizer.initSourcesIndexesList(null, function (err, sources) {
                 if (err) return MainController.UI.message(err);
 
                 $("#sourcesSelectionDialogdiv").dialog("open");
+                if(validateFn)
                 $("#searchAllValidateButton").bind("click", validateFn);
+                else
+                    $("#searchAllValidateButton").css("display","none")
+
+                $("#Lineage_classes_SearchSourceInput").bind("keydown", null, SourceBrowser.searchInSourcesTree);
+
                 var options = {
-                    selectTreeNodeFn: null,
-                };
+                    selectTreeNodeFn: validateFn,
+                    searchPlugin: {
+                        case_insensitive: true,
+                        fuzzy: false,
+                        show_only_matches: true,
+                    }
+                }
                 self.searchableSourcesTreeIsInitialized = true;
                 if (!types) types = ["OWL"];
-                MainController.UI.showSources("searchAll_sourcesTree", true, sources, types, options);
+                MainController.UI.showSources("searchAll_sourcesTree", false, sources, types, options);
             });
         } else {
             $("#sourcesSelectionDialogdiv").dialog("open");

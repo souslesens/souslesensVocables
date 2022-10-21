@@ -30,7 +30,7 @@ var Lineage_dictionary = (function () {
 }*/
                 },
             });
-            var lineageCurrentSource = Lineage_common.currentSource || Lineage_classes.mainSource;
+            var lineageCurrentSource = Lineage_sources.activeSource;
             if (context == "Lineage_similars") {
                 self.currentDomainSource = lineageCurrentSource;
                 self.currentDictionary = Config.dictionarySource;
@@ -455,7 +455,7 @@ targets: [0]
     self.drawDictionarySameAs = function () {
         var filter = " FILTER (?prop = <http://www.w3.org/2002/07/owl#sameAs>) ";
         var rangeSourceLabel = $("#LineageDictionary_rangeSourceSelect").val();
-        filter += "  FILTER (?domainSourceLabel ='" + Lineage_common.currentSource || Lineage_classes.mainSource + "')";
+        filter += "  FILTER (?domainSourceLabel ='" + Lineage_sources.activeSource+ "')";
         if (rangeSourceLabel) filter += "  FILTER (?rangeSourceLabel ='" + rangeSourceLabel + "')";
         var nodes = null;
         var mode = $("#LineageDictionary_nodesSelectionSelect").val();
@@ -492,7 +492,7 @@ targets: [0]
                 visjsGraph.data.nodes.update(newNodes);
 
                 newSources.forEach(function (source) {
-                    Lineage_classes.registerSource(source);
+                    Lineage_sources.registerSource(source);
                 });
             });
         });

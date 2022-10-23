@@ -63,7 +63,7 @@ var SourceBrowser = (function () {
         if (!node) node = self.currentTreeNode;
         if (!node) node = self.currentGraphNode;
         if (!node) return;
-        // Lineage_blend.addNodeToAssociationNode(node)
+
         self.currentCopiedNode = node;
         Clipboard.copy(
             {
@@ -361,9 +361,12 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
         var term = $("#GenericTools_searchAllSourcesTermInput").val();
         var selectedSources = [];
-        if ($("#searchAll_sourcesTree").jstree(true)) {
+
+        if ($("#searchAll_sourcesTree").jstree().get_checked) {
             selectedSources = $("#searchAll_sourcesTree").jstree(true).get_checked();
         }
+        else
+            selectedSources=[Lineage_sources.currentSource]
 
         if (!term || term == "") return alert(" enter a word ");
         if (term.indexOf("*") > -1) $("#GenericTools_allExactMatchSearchCBX").removeProp("checked");
@@ -845,8 +848,9 @@ return callbackSeries();
     };
     self.showNodeInfosToolbar = function (options) {
         if (!options) options = {};
-        if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons) {
-            if (Config.sources[self.currentSource].editable) {
+        if (Lineage_sources.isSourceEditable(self.currentSource) && !options.hideButtons) {
+      //  if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons) {
+          //  if (Config.sources[self.currentSource].editable) {
                 var str = "<div>";
                 str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
                 if (true || Config.sources[source].editable) {
@@ -861,7 +865,7 @@ return callbackSeries();
                     "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
 
                 str += "</div>";
-            }
+
 
             if (self.visitedNodes.length > 1) {
                 str +=
@@ -980,7 +984,8 @@ defaultLang = 'en';*/
                         var valuesStr = "";
                         values.forEach(function (value, index) {
                             var optionalStr = "";
-                            if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1 && !_options.hideButtons) {
+                            if (Lineage_sources.isSourceEditable(sourceLabel) && !_options.hideButtons) {
+                          //  if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1 && !_options.hideButtons) {
                                 var propUri = self.propertiesMap.properties[key].propUri;
 
                                 if (propUri == "http://www.w3.org/2000/01/rdf-schema#label") {

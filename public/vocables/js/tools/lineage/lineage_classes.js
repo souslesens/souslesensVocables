@@ -25,12 +25,12 @@ var Lineage_classes = (function() {
   self.defaultShapeSize = 5;
   self.orphanShape = "square";
   self.nodeShadow = true;
-  self.objectPropertyColor = "red";
+  self.objectPropertyColor = "#f50707";
   self.defaultEdgeArrowType = "triangle";
   self.defaultEdgeColor = "#aaa";
-  self.restrictionColor = "orange";
+  self.restrictionColor = "#fdbf01";
   self.namedIndividualShape = "triangle";
-  self.namedIndividualColor = "blue";
+  self.namedIndividualColor = "#0067bb";
 
   self.arrowTypes = {
     subClassOf: {
@@ -142,6 +142,9 @@ var Lineage_classes = (function() {
     /** @type {{ ctrlKey: any; shiftKey: any; altKey: any; }} */ nodeEvent,
     /** @type {{ callee?: any; }} */ options
   ) {
+
+
+
     if (!Config.sources[node.data.source]) return;
     if (!options) options = {};
     if (self.currentOwlType == "LinkedData") return Lineage_linkedData.showLinkedDataPanel(self.currentGraphNode);
@@ -153,9 +156,7 @@ var Lineage_classes = (function() {
       self.selection.addNodeToSelection(node);
 
 
-    } else if (nodeEvent.shiftKey && nodeEvent.altKey) {
-      Lineage_blend.addNodeToAssociationNode(node, "target");
-    } else if (nodeEvent.ctrlKey) {
+    }else if (nodeEvent.ctrlKey) {
       SourceBrowser.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
     } else if (nodeEvent.altKey && options.callee == "Tree") {
       SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, node.data.source, node, { reopen: true });
@@ -268,6 +269,10 @@ var Lineage_classes = (function() {
     if (!source) return;
 
     if (!Config.sources[source]) return;
+
+    var topClassFilter=Config.sources[source].topClassFilter;
+    if( !topClassFilter)
+      return MainController.UI.message("no topConceptFilter defined for this source")
    
 
 
@@ -431,6 +436,11 @@ var Lineage_classes = (function() {
     );
   };
 
+  self.initWhiteBoard=function(force){
+    if(!visjsGraph.isGraphNotEmpty() || force)
+    self.drawNewGraph({nodes:[],edges:[]})
+  }
+
   self.drawNewGraph = function(/** @type {any} */ visjsData) {
     graphContext = {};
     var options = {
@@ -457,8 +467,8 @@ var Lineage_classes = (function() {
         }
       }
     };
-
-    if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
+    if (Lineage_sources.isSourceEditable( Lineage_sources.activeSource)) {
+   // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
       options.manipulation = {
         enabled: true,
         initiallyActive: true,
@@ -1296,7 +1306,7 @@ addNode:false
       visjsGraph.data.nodes.add(visjsData.nodes);
       visjsGraph.data.edges.add(visjsData.edges);
       visjsGraph.network.fit();
-      $("#Lineage_levelDepthSpan").html("level :" + expandedLevels[source].length);
+
 
       $("#waitImg").css("display", "none");
     });
@@ -1926,11 +1936,6 @@ addNode:false
     if (nodeId) {
       var children = visjsGraph.network.getConnectedNodes(nodeId, "from");
       visjsGraph.data.nodes.remove(children);
-    } else {
-      var source = Lineage_sources.activeSource;
-      if (expandedLevels[source].length > 0) visjsGraph.data.nodes.remove(expandedLevels[source][expandedLevels[source].length - 1]);
-      expandedLevels[source].splice(expandedLevels[source].length - 1, 1);
-      $("#Lineage_levelDepthSpan").html("level :" + expandedLevels[source].length);
     }
   };
 
@@ -1947,13 +1952,15 @@ addNode:false
     } else if (node.from && node.data.bNodeId) {
       //edge restrition
       html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showPropertyInfos();\"> Relation Infos</span>";
-      if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
+      if (Lineage_sources.isSourceEditable( node.data.source)) {
+   //   if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
         html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.deleteRestriction();\"> Delete relation</span>";
       }
     } else if (node.from && node.data.type == "ObjectProperty") {
       //ObjectProperty
       html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showPropertyInfos();\"> Relation Infos</span>";
-      if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
+      if (Lineage_sources.isSourceEditable(node.data.source)) {
+    //  if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
         html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.deleteObjectProperty();\"> Delete relation</span>";
       }
     } else if (node.data && node.data.type == "NamedIndividual") {
@@ -2152,7 +2159,7 @@ upperNodeIds.push(id);
       if (callback) return callback(null, visjsData);
 
       Lineage_sources.registerSource(nodeData.source);
-      /*  expandedLevels[nodeData.source][expandedLevels[nodeData.source].length ].push(newNodeIds);*/
+
 
       if (!visjsGraph.data || !visjsGraph.data.nodes) {
         self.drawNewGraph(visjsData);
@@ -2223,7 +2230,7 @@ upperNodeIds.push(id);
     onNodeClick: function(/** @type {{ data: { cluster: any; }; }} */ node, /** @type {any} */ point, /** @type {{ dbleClick: any; }} */ options) {
       if (!node) {
         MainController.UI.hidePopup("graphPopupDiv");
-        Lineage_blend.clearAssociationNodes();
+
         return;
       }
 

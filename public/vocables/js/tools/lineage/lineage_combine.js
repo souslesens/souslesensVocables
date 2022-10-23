@@ -56,64 +56,6 @@ var Lineage_combine = (function () {
         $("#graphPopupDiv").html(html);
     };
 
-    self.menuActions = {
-        hideSource: function () {
-            MainController.UI.hidePopup("graphPopupDiv");
-            Lineage_sources.showHideCurrentSourceNodes(true);
-        },
-        showSource: function () {
-            MainController.UI.hidePopup("graphPopupDiv");
-            Lineage_sources.showHideCurrentSourceNodes(false);
-        },
-        groupSource: function (source) {
-            MainController.UI.hidePopup("graphPopupDiv");
-
-            if (!source) source =Lineage_sources.activeSource;
-            var color = Lineage_classes.getSourceColor(source);
-            var visjsData = { nodes: [], edges: [] };
-            var existingNodes = visjsGraph.getExistingIdsMap();
-
-            for (var nodeId in existingNodes) {
-                var node = visjsGraph.data.nodes.get(nodeId);
-                if (node && node.id != source && node.data && node.data.source == source) {
-                    var edgeId = nodeId + "_" + source;
-                    if (!existingNodes[edgeId]) {
-                        existingNodes[nodeId] = 1;
-                        var edge = {
-                            id: edgeId,
-                            from: nodeId,
-                            to: source,
-                            arrows: " middle",
-                            color: color,
-                            width: 1,
-                        };
-                        visjsData.edges.push(edge);
-                    }
-                }
-            }
-            if (!existingNodes[source]) {
-                existingNodes[source] = 1;
-                var sourceNode = {
-                    id: source,
-                    label: source,
-                    shadow: Lineage_classes.nodeShadow,
-                    shape: "box",
-                    level: 1,
-                    size: Lineage_classes.defaultShapeSize,
-                    data: { source: source },
-                    color: color,
-                };
-                visjsData.nodes.push(sourceNode);
-            }
-            visjsGraph.data.nodes.update(visjsData.nodes);
-            visjsGraph.data.edges.update(visjsData.edges);
-        },
-        ungroupSource: function () {
-            MainController.UI.hidePopup("graphPopupDiv");
-            var source =Lineage_sources.activeSource;
-            visjsGraph.data.nodes.remove(source);
-        },
-    };
 
     self.getSimilars = function (output) {
 

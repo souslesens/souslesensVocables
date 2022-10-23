@@ -4,7 +4,8 @@ Lineage_sources = (function() {
   var self = {};
   self.activeSource = null;
   self.loadedSources = {};
-
+  self.sourceDivsMap = {};
+  Lineage_classes.nodesSelection = [];
 
   self.showSourcesDialog = function() {
     SourceBrowser.showSearchableSourcesTreeDialog(
@@ -24,7 +25,7 @@ Lineage_sources = (function() {
 
     function highlightSourceDiv(source){
       $(".Lineage_sourceLabelDiv").removeClass("Lineage_selectedSourceDiv");
-      $("#Lineage_source_" +    self.loadedSources[source].sourceDivId).addClass("Lineage_selectedSourceDiv");
+      $("#" +    self.loadedSources[source].sourceDivId).addClass("Lineage_selectedSourceDiv");
     }
     self.activeSource=source
     //new source to load
@@ -32,43 +33,93 @@ Lineage_sources = (function() {
       self.initSource(source,function(err, sourceDivId){
         if( err)
          return MainController.UI.message(err)
-        self.loadedSources[source]={sourceDivId:sourceDivId}
+
         highlightSourceDiv(source)
+
+       Lineage_classes.initWhiteBoard(false)
 
 
     });
     }else {
       self.activeSource = source;
       highlightSourceDiv(source)
+      self.whiteboard_ActivateSource(source)
     }
+
+    var isNodeEditable=Lineage_sources.isSourceEditable(source)
+    if(isNodeEditable) {
+      visjsGraph.network.enableEditMode()
+      $(".vis-edit-mode").css("display","block")
+    }
+    else {
+      visjsGraph.network.disableEditMode()
+      $(".vis-edit-mode").css("display","none")
+    }
+
+
+
 
 
   };
 
 
 
+self.whiteboard_ActivateSource=function(source){
+  var nodesMapSources={}
+  var nodes=visjsGraph.data.nodes.get()
+  var newNodes=[]
+  nodes.forEach(function(node){
+    nodesMapSources[node.id]=node.data.source
+    var fontColor='#343434'
+    var opacity=1.0
+    if(node.data.source!=source) {
+      opacity = 0.2
+      fontColor="#ddd"
+    }
+   // newNodes.push({id:node.id, "color":{"opacity":opacity}})
+    newNodes.push({id:node.id, "color":common.colorToRgba(node.color,opacity),font:{color:fontColor}})
 
+  })
+  visjsGraph.data.nodes.update(newNodes)
+
+  var edges=visjsGraph.data.edges.get()
+  var newEdges=[]
+  edges.forEach(function(edge){
+    var fontColor='#343434'
+    var opacity=1.0
+    if(nodesMapSources[edge.from]!=source) {
+      opacity = 0.2
+      fontColor="#ddd"
+    }
+    // newNodes.push({id:node.id, "color":{"opacity":opacity}})
+    newEdges.push({id:edge.id, "color":common.colorToRgba(edge.color,opacity),font:{color:fontColor}})
+
+  })
+  visjsGraph.data.edges.update(newEdges)
+
+}
 
 
 
 
   self.initSource = function(source,callback) {
     if (!source || !Config.sources[source]) return;
-    var sourceDivId="source_"+common.getRandomHexaId(5)
-    self.registerSource(sourceDivId,source);
+
+    self.registerSource(source);
     Lineage_sources.setTopLevelOntologyFromImports(source);
     Lineage_sources.registerSourceImports(source);
-    $("#Lineage_sourceLabelDiv").html(source);
+   // $("#Lineage_sourceLabelDiv").html(source);
 
 
 
 if( false) {
-  Lineage_classes.nodesSelection = [];
+
   Lineage_combine.init();
   Lineage_relations.init(true);
 
   Lineage_decoration.init();
   Lineage_linkedData.init();
+  Lineage_blend.getSourcePossiblePredicatesAndObject(self.activeSource)
 }
 
   /*    if (!visjsGraph.isGraphNotEmpty() && Config.sources[Lineage_sources.activeSource].editable) {
@@ -81,7 +132,7 @@ if( false) {
         if (err) return MainController.UI.message(err);
       });
     }
-    callback(null,sourceDivId)
+    callback(null,source)
 
   }
 
@@ -97,30 +148,48 @@ if( false) {
 
 
 
-  self.registerSource = function( sourceDivId,sourceLabel) {
-    var html = "<div  id='" + sourceDivId + "' style='color: " + Lineage_classes.getSourceColor(sourceLabel) + "'" + " class='Lineage_sourceLabelDiv' " + ">" + sourceLabel + "</div>";
+  self.registerSource = function( sourceLabel) {
+    if( self.loadedSources[sourceLabel])
+      return;
+    var sourceDivId="source_"+common.getRandomHexaId(5)
+    self.loadedSources[sourceLabel]={sourceDivId:sourceDivId}
+    self.sourceDivsMap[sourceDivId]=sourceLabel
+    var html = "<div  id='" + sourceDivId + "' style='color: " + Lineage_classes.getSourceColor(sourceLabel) + "'" + " class='Lineage_sourceLabelDiv' " + ">" +
+      sourceLabel  + "&nbsp;" +
+    "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\""+ sourceDivId + "\")'> ...</i>"
+   //  "<input type='image' src='./icons/caret-down.png' onclick='Lineage_sources.showSourceDivPopupMenu(\""+ sourceDivId + "\")'/> </div>";
     $("#lineage_drawnSources").append(html);
-    $("#" + sourceDivId).mousedown(function(e) {
-      //  e.stopPropagation();
-      e.preventDefault();
-      if (e.which === 3) {
-        var html =
-          '    <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.hideSource();"> Hide Source</span>' +
-          ' <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.showSource();"> Show Source</span>' +
-          ' <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.groupSource();"> Group Source</span>' +
-          ' <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.ungroupSource();"> ungroup Source</span>';
-        $("#graphPopupDiv").html(html);
-        var point = { x: e.pageX, y: e.pageY };
-        MainController.UI.showPopup(point, "graphPopupDiv", true);
-      } else {
 
-      }
-    });
+
+    $("#" + sourceDivId).bind("click",function(e) {
+     var sourceDivId=$(this).attr("id")
+        var source= self.sourceDivsMap[sourceDivId]
+        self.setCurrentSource( source)
+
+    })
+
+
 
   };
+  self.showSourceDivPopupMenu=function(sourceDivId){
+    var html=
+    '    <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.closeSource();"> Close</span>' +
+    '    <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.hideSource();"> Hide </span>' +
+    ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.showSource();"> Show </span>' +
+    ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.groupSource();"> Group </span>' +
+    ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource();"> ungroup </span>';
+    $("#graphPopupDiv").html(html);
+    var e = window.event;
+    var point = { x: e.pageX, y: e.pageY };
+  //  var point={x:100,y:100}
+    MainController.UI.showPopup(point, "graphPopupDiv", true);
+    $("#graphPopupDiv").on("mouseleave",function(){
+      MainController.UI.hidePopup("graphPopupDiv")
+    })
+  }
 
   self.registerSourceImports = function( sourceLabel) {
-    self.registerSource(sourceLabel);
+
     var imports = Config.sources[sourceLabel].imports;
     if (!imports) imports = [];
 
@@ -173,6 +242,99 @@ if( false) {
     }
     return Config.currentTopLevelOntology;
   };
+
+
+  self.menuActions = {
+    closeSource:function(){
+     var nodes= visjsGraph.data.nodes.get()
+      var nodesToRemove=[]
+      nodes.forEach(function(node){
+        if(node.data.source==self.activeSource)
+          nodesToRemove.push(node.id)
+      })
+      visjsGraph.data.nodes.remove(nodesToRemove)
+      var sourceDivId=self.loadedSources[self.activeSource].sourceDivId
+      self.loadedSources[self.activeSource]=null
+      $("#"+sourceDivId).remove()
+
+
+    },
+    hideSource: function () {
+
+      MainController.UI.hidePopup("graphPopupDiv");
+      Lineage_sources.showHideCurrentSourceNodes(true);
+    },
+    showSource: function () {
+      MainController.UI.hidePopup("graphPopupDiv");
+      Lineage_sources.showHideCurrentSourceNodes(false);
+    },
+    groupSource: function (source) {
+      MainController.UI.hidePopup("graphPopupDiv");
+
+      if (!source) source =Lineage_sources.activeSource;
+      var color = Lineage_classes.getSourceColor(source);
+      var visjsData = { nodes: [], edges: [] };
+      var existingNodes = visjsGraph.getExistingIdsMap();
+
+      for (var nodeId in existingNodes) {
+        var node = visjsGraph.data.nodes.get(nodeId);
+        if (node && node.id != source && node.data && node.data.source == source) {
+          var edgeId = nodeId + "_" + source;
+          if (!existingNodes[edgeId]) {
+            existingNodes[nodeId] = 1;
+            var edge = {
+              id: edgeId,
+              from: nodeId,
+              to: source,
+              arrows: " middle",
+              color: color,
+              width: 1,
+            };
+            visjsData.edges.push(edge);
+          }
+        }
+      }
+      if (!existingNodes[source]) {
+        existingNodes[source] = 1;
+        var sourceNode = {
+          id: source,
+          label: source,
+          shadow: Lineage_classes.nodeShadow,
+          shape: "box",
+          level: 1,
+          size: Lineage_classes.defaultShapeSize,
+          data: { source: source },
+          color: color,
+        };
+        visjsData.nodes.push(sourceNode);
+      }
+      visjsGraph.data.nodes.update(visjsData.nodes);
+      visjsGraph.data.edges.update(visjsData.edges);
+    },
+    ungroupSource: function () {
+      MainController.UI.hidePopup("graphPopupDiv");
+      var source =Lineage_sources.activeSource;
+      visjsGraph.data.nodes.remove(source);
+    },
+  };
+
+  self.isSourceEditable=function(source) {
+    const groups = authentication.currentUser.groupes;
+    const currentAccessControls = groups.map((group) => {
+      const defaultAccessControl = Config.profiles[group].defaultSourceAccessControl;
+      const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
+      return sourcesAccessControl.hasOwnProperty(source) ? sourcesAccessControl[source] : defaultAccessControl;
+    });
+
+    self.realAccessControl = currentAccessControls.includes("readwrite") ? "readwrite" : currentAccessControls.includes("read") ? "read" : "forbidden";
+
+    if (self.realAccessControl === "readwrite" && Config.sources[source].editable > -1) {
+      return true
+    }
+    else
+      return false;
+  }
+
 
 
   return self;

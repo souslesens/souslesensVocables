@@ -49,12 +49,13 @@ const SourcesTable = () => {
             ),
             success: (gotSources: Source[]) => {
                 const datas = gotSources.map((source) => {
-                    const { sparql_server, dataSource, predicates, imports, isDraft, editable, ...restOfProperties } = source;
+                    const { sparql_server, dataSource, predicates, imports, taxonomyPredicates, isDraft, editable, ...restOfProperties } = source;
                     const processedData = {
                         ...restOfProperties,
                         editable: editable ? "Editable" : "Not Editable",
-                        isDarft: isDraft ? "IsDraft" : "Not a draft",
+                        isDraft: isDraft ? "IsDraft" : "Not a draft",
                         imports: joinWhenArray(imports),
+                        taxonomyPredicates: joinWhenArray(taxonomyPredicates),
                     };
                     return { ...processedData };
                 });
@@ -224,6 +225,11 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } });
 
+
+    const knownTaxonomyPredicates = [...new Set(unwrappedSources.flatMap((source) => {
+        return source.taxonomyPredicates
+    }))]
+
     return (
         <>
             <Button color="primary" variant="contained" onClick={handleOpen}>
@@ -329,6 +335,28 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                     {unwrappedSources.map((source) => (
                                         <MenuItem key={source.name} value={source.name}>
                                             {source.name}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <FormControl>
+                                <InputLabel id="taxonomypredicates-label">Taxonomy Predicates</InputLabel>
+                                <Select
+                                    labelId="taxonomypredicates-label"
+                                    id="imports"
+                                    value={sourceModel.sourceForm.taxonomyPredicates}
+                                    label="taxonomypredicates-label"
+                                    fullWidth
+                                    multiple
+                                    style={{ width: "400px" }}
+                                    renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
+                                    onChange={handleFieldUpdate("taxonomyPredicates")}
+                                >
+                                    {knownTaxonomyPredicates.map((predicate) => (
+                                        <MenuItem key={predicate} value={predicate}>
+                                            {predicate}
                                         </MenuItem>
                                     ))}
                                 </Select>

@@ -95,6 +95,7 @@ const decodeSource = (key: string, source: SourceJson): Source => {
         predicates: source.predicates ? source.predicates : defaultSource(ulid()).predicates,
         group: source.group ? source.group : "",
         imports: source.imports ? source.imports : [],
+        taxonomyPredicates: source.taxonomyPredicates ? source.taxonomyPredicates : [],
     };
     return decodedSource;
 };
@@ -127,6 +128,7 @@ export type Source = {
     predicates: { broaderPredicate: string; lang: string };
     group: string;
     imports: string[];
+    taxonomyPredicates: string[];
 };
 
 export const defaultSource = (id: string): Source => {
@@ -148,6 +150,7 @@ export const defaultSource = (id: string): Source => {
         predicates: { broaderPredicate: "", lang: "" },
         group: "",
         imports: [],
+        taxonomyPredicates: [],
     };
 };
 
@@ -168,6 +171,7 @@ interface SourceJson {
     predicates?: { broaderPredicate: string; lang: string };
     group?: string;
     imports?: string[];
+    taxonomyPredicates?: string[];
 }
 
 interface CommonSource {

@@ -221,6 +221,8 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
             type: Type.UserUpdatedsparql_server,
             payload: { ...sourceModel.sourceForm.sparql_server, [fieldName]: fieldName === "headers" ? event.target.value.replace(/\s+/g, "").split(",") : event.target.value },
         });
+    const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
+        update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } });
 
     return (
         <>
@@ -230,6 +232,12 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
             <Modal onClose={handleClose} open={sourceModel.modal}>
                 <Box component="form" sx={style}>
                     <Grid container spacing={4}>
+                        <Grid item xs={3}>
+                            <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.editable} onChange={handleCheckbox("editable")} />} label="Is this source editable?" />
+                        </Grid>
+                        <Grid item xs={3}>
+                            <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.isDraft} onChange={handleCheckbox("isDraft")} />} label="Is it a draft?" />
+                        </Grid>
                         <Grid item xs={6}>
                             <TextField fullWidth onChange={handleFieldUpdate("name")} value={sourceModel.sourceForm.name} id={`name`} label={"Name"} variant="standard" />
                         </Grid>
@@ -360,8 +368,6 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
 };
 
 const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.Dispatch<Msg_> }) => {
-    const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
-        props.update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } });
     const handlePredicateUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) =>
         props.update({ type: Type.UserUpdatedPredicates, payload: { ...props.model.sourceForm.predicates, [fieldName]: event.target.value } });
     const handleDataSourceUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
@@ -379,12 +385,6 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
         case "SKOS":
             return (
                 <>
-                    <Grid item xs={3}>
-                        <FormControlLabel control={<Checkbox checked={props.model.sourceForm.editable} onChange={handleCheckbox("editable")} />} label="Is this source editable?" />
-                    </Grid>
-                    <Grid item xs={3}>
-                        <FormControlLabel control={<Checkbox checked={props.model.sourceForm.isDraft} onChange={handleCheckbox("isDraft")} />} label="Is it a draft?" />
-                    </Grid>
                     <Grid item xs={6}>
                         <TextField
                             fullWidth

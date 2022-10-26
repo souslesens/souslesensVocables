@@ -1,20 +1,20 @@
 {
-  "01FSCJ5H4W8TCVGFJDX1AGZ512": {
+  "admin": {
     "allowedSourceSchemas": [
       "SKOS",
       "OWL",
       "INDIVIDUALS"
     ],
     "id": "01FSCJ5H4W8TCVGFJDX1AGZ512",
-    "allowedSources": "ALL",
-    "forbiddenSources": [
-      "Dbpedia"
-    ],
     "allowedTools": "ALL",
     "forbiddenTools": [],
     "blender": {
       "contextMenuActionStartLevel": 0
     },
-    "name": "admin"
+    "name": "admin",
+    "defaultSourceAccessControl": "read",
+    "sourcesAccessControl": {
+      "Dbpedia": "forbidden"
+    }
   }
 }

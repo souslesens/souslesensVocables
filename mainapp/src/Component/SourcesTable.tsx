@@ -336,7 +336,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         </Grid>
                         <Grid item xs={6}>
                             <FormControl>
-                                <InputLabel id="schemaType-label">Schema&aposs Type</InputLabel>
+                                <InputLabel id="schemaType-label">Schema type</InputLabel>
                                 <Select
                                     labelId="schemaType-label"
                                     id="schemaType"

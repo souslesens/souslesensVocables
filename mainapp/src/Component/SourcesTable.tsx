@@ -226,10 +226,13 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } });
 
-
-    const knownTaxonomyPredicates = [...new Set(unwrappedSources.flatMap((source) => {
-        return source.taxonomyPredicates
-    }))]
+    const knownTaxonomyPredicates = [
+        ...new Set(
+            unwrappedSources.flatMap((source) => {
+                return source.taxonomyPredicates;
+            })
+        ),
+    ];
 
     return (
         <>

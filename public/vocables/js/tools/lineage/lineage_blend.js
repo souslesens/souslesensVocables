@@ -2,7 +2,7 @@
 // !!!!!!!!  const util = require("../../../../../bin/util.");
 var Lineage_blend = (function () {
     var self = {};
-    self.authorizedProperties={}
+    self.authorizedProperties = {};
 
     self.addNodeToAssociationNode = function (node, role, allowAddToGraphButton) {
         if (role == "source") {
@@ -1337,95 +1337,82 @@ callbackSeries();
     };
 
     self.getAuthorizedProperties = function (sourceLabel, domain, range, callback) {
+        self.getSourcePossiblePredicates(sourceLabel, function (err, allProps) {
+            if (err) return alert(err);
 
-        self.getSourcePossiblePredicates(sourceLabel,function(err,allProps) {
-            if(err)
-                return alert(err)
+            let props = {};
 
-                let props = {};
+            var subProposMap = {};
 
-                var subProposMap = {};
+            allProps.forEach(function (item) {
+                if (item.prop.value.indexOf("concret") > -1) var x = 3;
+                let type = "";
+                let ok = false;
+                if (!item.range && item.domain && (item.domain.value == domain || item.domaintype == "bnode")) {
+                    type = "D";
+                    ok = true;
+                } else if (!item.domain && item.range && (item.range.value == range || item.domaintype == "bnode")) {
+                    type = "R";
+                    ok = true;
+                } else if (item.domain && item.range && item.domain.value == domain && item.range.value == range) ok = true;
 
-                allProps.forEach(function(item) {
-                    if (item.prop.value.indexOf("concret") > -1) var x = 3;
-                    let type = "";
-                    let ok = false;
-                    if (!item.range && item.domain && (item.domain.value == domain || item.domaintype == "bnode")) {
-                        type = "D";
-                        ok = true;
-                    } else if (!item.domain && item.range && (item.range.value == range || item.domaintype == "bnode")) {
-                        type = "R";
-                        ok = true;
-                    } else if (item.domain && item.range && item.domain.value == domain && item.range.value == range) ok = true;
-
-                    if (ok) {
+                if (ok) {
+                    props[item.prop.value] = {
+                        prop: item.prop.value,
+                        label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
+                        type: type,
+                    };
+                }
+            });
+            if (true || Object.keys(props).length == 0) {
+                allProps.forEach(function (item) {
+                    if (item.isGenericProperty) {
                         props[item.prop.value] = {
                             prop: item.prop.value,
                             label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
-                            type: type,
+                            isGenericProperty: item.isGenericProperty,
                         };
                     }
                 });
-                if (true || Object.keys(props).length == 0) {
-                    allProps.forEach(function(item) {
-                        if (item.isGenericProperty) {
-                            props[item.prop.value] = {
-                                prop: item.prop.value,
-                                label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
-                                isGenericProperty: item.isGenericProperty,
-                            };
-                        }
-                    });
-                }
-                return callback(null, props);
-
-        })
-
-
+            }
+            return callback(null, props);
+        });
     };
 
-
-
-
-
-    self.getSourcePossiblePredicates=function(sourceLabel,callback){
+    self.getSourcePossiblePredicates = function (sourceLabel, callback) {
         if (!self.authorizedProperties) self.authorizedProperties = {};
 
-        if(self.authorizedProperties[sourceLabel])
-            return callback(null,self.authorizedProperties[sourceLabel])
+        if (self.authorizedProperties[sourceLabel]) return callback(null, self.authorizedProperties[sourceLabel]);
 
-            var allProps;
-            async.series(
-              [
-                  function (callbackSeries) {
-                      Sparql_OWL.getInferredPropertiesDomainsAndRanges(sourceLabel, {}, function (err, _result) {
-                          if (err) return callbackSeries(err);
+        var allProps;
+        async.series(
+            [
+                function (callbackSeries) {
+                    Sparql_OWL.getInferredPropertiesDomainsAndRanges(sourceLabel, {}, function (err, _result) {
+                        if (err) return callbackSeries(err);
 
-                          allProps = _result;
-                          return callbackSeries();
-                      });
-                  },
-                  function (callbackSeries) {
-                      Sparql_OWL.getPropertiesWithoutDomainsAndRanges(sourceLabel, {}, function (err, _result2) {
-                          if (err) return callbackSeries(err);
-                          // allProps = allProps.concat(_result2)
-                          _result2.forEach(function (item) {
-                              item.isGenericProperty = true;
-                              allProps.push(item);
-                          });
-                          return callbackSeries();
-                      });
-                  },
-              ],
-              function (err) {
-                  self.authorizedProperties[sourceLabel] = allProps;
-                  return callback(err, allProps);
-
-              }
-            );
-    }
-
-
+                        allProps = _result;
+                        return callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    Sparql_OWL.getPropertiesWithoutDomainsAndRanges(sourceLabel, {}, function (err, _result2) {
+                        if (err) return callbackSeries(err);
+                        // allProps = allProps.concat(_result2)
+                        _result2.forEach(function (item) {
+                            item.isGenericProperty = true;
+                            allProps.push(item);
+                        });
+                        return callbackSeries();
+                    });
+                },
+            ],
+            function (err) {
+                self.authorizedProperties[sourceLabel] = allProps;
+                return callback(err, allProps);
+            }
+        );
+    };
 
     self.getSourcePossiblePredicatesAndObject = function (source, callback) {
         var predicates = [];

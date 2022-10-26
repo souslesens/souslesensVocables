@@ -277,6 +277,8 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         <Grid item xs={6}>
                             <TextField
                                 fullWidth
+                                multiline
+                                rows={4}
                                 onChange={handleFieldUpdate("topClassFilter")}
                                 value={sourceModel.sourceForm.topClassFilter}
                                 id={`topClassFilter`}

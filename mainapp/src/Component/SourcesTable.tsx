@@ -49,11 +49,12 @@ const SourcesTable = () => {
             ),
             success: (gotSources: Source[]) => {
                 const datas = gotSources.map((source) => {
-                    const { sparql_server, dataSource, predicates, imports, taxonomyPredicates, isDraft, editable, ...restOfProperties } = source;
+                    const { sparql_server, dataSource, predicates, imports, taxonomyPredicates, isDraft, editable, allowIndividuals, ...restOfProperties } = source;
                     const processedData = {
                         ...restOfProperties,
                         editable: editable ? "Editable" : "Not Editable",
                         isDraft: isDraft ? "IsDraft" : "Not a draft",
+                        allowIndividuals: allowIndividuals ? "allowIndividuals" : "Not allowIndividuals",
                         imports: joinWhenArray(imports),
                         taxonomyPredicates: joinWhenArray(taxonomyPredicates),
                     };
@@ -243,6 +244,9 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         </Grid>
                         <Grid item xs={3}>
                             <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.isDraft} onChange={handleCheckbox("isDraft")} />} label="Is it a draft?" />
+                        </Grid>
+                        <Grid item xs={3}>
+                            <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.allowIndividuals} onChange={handleCheckbox("allowIndividuals")} />} label="Allow individuals?" />
                         </Grid>
                         <Grid item xs={6}>
                             <TextField fullWidth onChange={handleFieldUpdate("name")} value={sourceModel.sourceForm.name} id={`name`} label={"Name"} variant="standard" />

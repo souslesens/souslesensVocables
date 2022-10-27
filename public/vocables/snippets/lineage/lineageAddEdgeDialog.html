@@ -15,34 +15,12 @@
 </style>
 
 <div id="lineageAddEdgeDialog_mainDiv" style="background-color: white">
-    <b>Create relation : </b>
     <span id="lineageAddEdgeDialog_Title"></span>
-    <div id="lineageAddEdgeDialog_Tabs">
-        <ul>
-            <li><a href="#lineageAddEdgeDialog_authorizedPredicatesTreeDiv">General</a></li>
-            <!--  <li><a href="#lineageAddEdgeDialog_topLevelOntologyPropertiesTab">15926-topLevelOntology</a></li>
-            <li><a href="#lineageAddEdgeDialog_currentSourcePropertiesTab">current Source</a></li>-->
-        </ul>
-
-        <div class="lineage_actionDiv" id="lineageAddEdgeDialog_authorizedPredicatesTreeDiv">
-            <div style="width: 550px; height: 450px; overflow: auto">
-                <!--  <select id="lineageAddEdgeDialog_generalPropertiesTreeDiv"></select>-->
-                <div id="lineageAddEdgeDialog_generalPropertiesTreeDiv"></div>
+        <div class="jstreeContainer" style="width: 600px;height:450px;overflow: auto;margin-top: 5px;background: #ddd;">
+                <div id="lineageAddEdgeDialog_authorizedPredicatesTreeDiv"></div>
             </div>
         </div>
-        <!--   <button onclick="Lineage_blend.graphModification.addGenericPredicatesToPredicatesTree()">more predicates</button>-->
-        <!--     <div class="lineage_actionDiv" id="lineageAddEdgeDialog_topLevelOntologyPropertiesTab">
-            <div style="width: 400px; height: 450px; overflow: auto">
-                <div id="lineageAddEdgeDialog_TopLevelOntologyPropertiesTreeDiv"></div>
-            </div>
-        </div>
-        <div class="lineage_actionDiv" id="lineageAddEdgeDialog_currentSourcePropertiesTab">
-            <div style="width: 400px; height: 450px; overflow: auto">
-                <div id="lineageAddEdgeDialog_currentSourcePropertiesTreeDiv"></div>
-            </div>
-        </div>-->
 
-        <!-- <button onclick='$("#mainDialog").dialog("close")'>Cancel</button>
-    <button onclick="Lineage_blend.graphModification.execAddEdgeFromGraph()">OK</button>-->
-    </div>
+
+
 </div>

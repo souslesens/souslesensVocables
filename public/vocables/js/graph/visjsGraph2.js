@@ -228,50 +228,7 @@ var visjsGraph = (function () {
                 }
             });
 
-        /*   window.setTimeout(function () {
-              var ids=  self.data.nodes.getIds();
-              var newNodes=[]
-              ids.forEach(function(id) {
-                  newNodes.push({id:id, "label":""})
-              })
-                  self.data.nodes.update(newNodes);
 
-              }, 3000)*/
-
-        if (!$("#graphButtons").length) {
-            var html =
-                "<div  id='graphButtons' style='position: relative; top:0px;left:10px;display: flex;flex-direction: row;gap:10px'>" +
-                // " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
-                " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
-                "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select id='visjsGraph_layoutSelect' style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
-                "<option ></option>" +
-                "<option >standard</option>" +
-                "<option>hierarchical vertical</option>" +
-                "<option>hierarchical horizontal</option>" +
-                "</select></div>";
-
-            html +=
-                " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>" +
-                "<input style='width: 100px' id='visjsGraph_searchInput'   onkeyup='if (event.keyCode == 13 || event.keyCode == 9)visjsGraph.searchNode()>'" +
-                "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>";
-
-            html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.showGraphConfig()'> Graph parameters</button>";
-            html += "<div id='visjsConfigureDiv' style='overflow: auto'></div>";
-
-            if (true || $(".vis-manipulation").children().length == 0) {
-                var parent = $("#" + divId).parent();
-                $(parent).css("flex-direction", "column");
-                $(parent).prepend(html);
-            } else {
-                $(".vis-manipulation").append(html);
-            }
-        }
-
-        html += "</div>";
-        setTimeout(function () {
-            self.listSavedGraphs();
-            // CustomPluginController.setGraphNodesIcons()
-        }, 500);
 
         if (callback) {
             var intervalIncrement = 0;
@@ -470,19 +427,7 @@ var visjsGraph = (function () {
         return existingVisjsIds;
     };
 
-    self.getExistingIdsMapXX = function (/** @type {any} */ nodesOnly) {
-        // var existingVisjsIds = {};
-        // if (!visjsGraph.data || !visjsGraph.data.nodes) return {};
-        // var oldIds = visjsGraph.data.nodes.getIds();
-        if (!visjsGraph.data || !visjsGraph.network || !visjsGraph.network.canvas) return {};
-        var oldIds = visjsGraph.network.canvas.body.nodes;
-        if (!nodesOnly) {
-            var edges = visjsGraph.network.canvas.body.edges;
-            for (var id in edges) oldIds[id] = 1;
-        }
 
-        return oldIds;
-    };
 
     self.isGraphNotEmpty = function () {
         // if(visjsGraph.isGraphNotEmpty()){

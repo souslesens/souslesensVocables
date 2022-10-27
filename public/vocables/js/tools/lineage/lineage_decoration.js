@@ -73,7 +73,7 @@ var Lineage_decoration = (function () {
             return callback(null, self.currentTopOntologyClassesMap);
         }
         self.currentTopOntologyClassesMap = {};
-        Sparql_generic.getSourceTaxonomy(Config.currentTopLevelOntology, {}, function (err, result) {
+        Sparql_generic.getSourceTaxonomy(Config.currentTopLevelOntology, {lang:Config.default_lang}, function (err, result) {
             if (err) return callback(null, {});
 
             self.currentTopOntologyClassesMap = result.classesMap;
@@ -363,7 +363,12 @@ strFrom +
     };
 
     self.drawLegend = function () {
-        if (!Config.currentTopLevelOntology) return;
+        if (!Config.currentTopLevelOntology){
+            $("#lineage_legendWrapper").css("display","none")
+            return;
+        } else{
+            $("#lineage_legendWrapper").css("display","block")
+        }
 
         /*
    var  str = "<div>Upper ontology <b>" + Config.currentTopLevelOntology + "</b>" +
@@ -427,7 +432,7 @@ strFrom +
             tie_selection: false,
         };
 
-        $("#Lineage_classes_graphDecoration_legendDiv").html("<div  class='jstreeContainer' style='height: 300px;width:320px'<div id='Lineage_classes_graphDecoration_legendTreeDiv'></div></div>");
+        $("#Lineage_classes_graphDecoration_legendDiv").html("<div  class='jstreeContainer' style='height: 350px;width:90%'><div id='Lineage_classes_graphDecoration_legendTreeDiv'></div></div>");
         common.jstree.loadJsTree("Lineage_classes_graphDecoration_legendTreeDiv", jstreeData, options, function () {
             $("#Lineage_classes_graphDecoration_legendTreeDiv").jstree(true).check_all();
         });

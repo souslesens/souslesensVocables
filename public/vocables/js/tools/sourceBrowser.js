@@ -400,7 +400,7 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
         if (sourcesScope == "currentSource") {
             if (!Lineage_sources.activeSource) return alert("select a source or search in all source");
             searchedSources.push(Lineage_sources.activeSource);
-        } else if (sourcesScope == "graphSources") {
+        } else if (sourcesScope == "whiteboardSources") {
 
             if (Lineage_combine.currentSources.length > 0) searchedSources = Lineage_combine.currentSources;
             else {
@@ -899,6 +899,7 @@ return callbackSeries();
                     $("#" + divId).on("dialogbeforeclose", function (_event, _ui) {
                         SourceBrowser.indexObjectIfNew();
                     });
+                    $("#" + divId).dialog("option", "title", " Node infos : source "+sourceLabel)
                     $("#" + divId).dialog("open");
                 }
 
@@ -1293,7 +1294,7 @@ defaultLang = 'en';*/
     self.showAddPropertyDiv = function () {
         $("#sourceBrowser_addPropertyDiv").css("display", "block");
         var properties = Config.Lineage.basicObjectProperties;
-        Lineage_blend.getSourcePossiblePredicatesAndObject(self.currentSource, function (err, result) {
+        Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(self.currentSource, function (err, result) {
             if (err) return alert(err.responseText);
             common.fillSelectOptions("sourceBrowser_addPropertyPredicateSelect", result.predicates, true, "label", "id");
             self.SourcePossiblePredicatesAndObject = result;
@@ -1329,8 +1330,8 @@ defaultLang = 'en';*/
                         visjsGraph.data.edges.update({ id: self.currentNodeId, label: newLabel });
                     } else {
                         visjsGraph.data.nodes.update({ id: self.currentNodeId, label: newLabel });
-                        var jstreeNode = common.jstree.getNodeByDataField("LineagejsTreeDiv", "id", self.currentNode.data.id);
-                        if (jstreeNode) $("#LineagejsTreeDiv").jstree().rename_node(jstreeNode, newLabel);
+                        var jstreeNode = common.jstree.getNodeByDataField("LineageNodesJsTreeDiv", "id", self.currentNode.data.id);
+                        if (jstreeNode) $("#LineageNodesJsTreeDiv").jstree().rename_node(jstreeNode, newLabel);
                     }
                 });
             });
@@ -1366,8 +1367,8 @@ defaultLang = 'en';*/
                             var jstreeNode = common.jstree.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNodeId);
                             if (jstreeNode) $("#Lineage_propertiesTree").jstree().delete_node(jstreeNode);
                         } else {
-                            var jstreeNode = common.jstree.getNodeByDataField("LineagejsTreeDiv", "id", self.currentNodeId);
-                            if (jstreeNode) $("#LineagejsTreeDiv").jstree().delete_node(jstreeNode);
+                            var jstreeNode = common.jstree.getNodeByDataField("LineageNodesJsTreeDiv", "id", self.currentNodeId);
+                            if (jstreeNode) $("#LineageNodesJsTreeDiv").jstree().delete_node(jstreeNode);
 
                             return callbackSeries();
                         }
@@ -1402,10 +1403,11 @@ defaultLang = 'en';*/
     }
     self.showSearchableSourcesTreeDialog = function (types,options, validateFn) {
         if (!self.searchableSourcesTreeIsInitialized) {
-            Standardizer.initSourcesIndexesList(null, function (err, sources) {
+            SearchUtil.initSourcesIndexesList(null, function (err, sources) {
                 if (err) return MainController.UI.message(err);
 
                 $("#sourcesSelectionDialogdiv").dialog("open");
+                $("#Lineage_classes_SearchSourceInput").focus()
                 if(validateFn)
                 $("#searchAllValidateButton").bind("click", validateFn);
                 else
@@ -1427,6 +1429,7 @@ defaultLang = 'en';*/
             });
         } else {
             $("#sourcesSelectionDialogdiv").dialog("open");
+            $("#Lineage_classes_SearchSourceInput").focus()
             /*  if ($("#searchAll_sourcesTree").jstree())
 $("#searchAll_sourcesTree").jstree().uncheck_all();*/
         }

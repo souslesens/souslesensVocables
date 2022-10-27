@@ -241,7 +241,7 @@ var MainController = (function () {
 
                 var distinctGroups = {};
 
-                Config.currentProfile.allowedSourceSchemas.forEach(function (item) {
+                Config.currentProfile.allowedSourceSchemas.sort().forEach(function (item) {
                     if (!types || (types && types.indexOf(item) > -1))
                         treeData.push({
                             id: item,
@@ -357,7 +357,7 @@ var MainController = (function () {
 
             common.jstree.loadJsTree(treeDiv, treeData, options, function () {
                 var openedTypes = Config.preferredSchemaType;
-                if (types) openedTypes = types;
+            //    if (types) openedTypes = types;
                 //  $("#" + treeDiv).jstree(true).open_all(openedTypes);
                 $("#" + treeDiv)
                     .jstree(true)

@@ -4,7 +4,7 @@ var Standardizer = (function () {
     var maxCompareSource = 25;
     var maxWordsListLength = 2000;
     self.mode = "matrix";
-    self.indexSourcesMap = {};
+
     self.currentAction = null;
     self.fuzzyMatches = [];
 
@@ -31,7 +31,7 @@ var Standardizer = (function () {
 
         $("#accordion").accordion("option", { active: 2 });
 
-        self.initSourcesIndexesList(null, function (err, sources) {
+        SearchUtil.initSourcesIndexesList(null, function (err, sources) {
             if (err) return MainController.UI.message(err);
 
             var options = {
@@ -69,41 +69,7 @@ setTimeout(function () {
         }, 500);
     };
 
-    self.initSourcesIndexesList = function (options, callback) {
-        if (!options) options = {};
-        var payload = {
-            dictionaries_listIndexes: 1,
-        };
-        $.ajax({
-            type: "GET",
-            url: Config.apiUrl + "/elasticsearch/indices",
-            data: payload,
-            dataType: "json",
-            success: function (indexes, _textStatus, _jqXHR) {
-                var sources = [];
 
-                Admin.showUserSources(function (userSources) {
-                    userSources.forEach(function (source) {
-                        if (options.schemaType && Config.sources[source].schemaType != options.schemaType) {
-                            // pass
-                        } else {
-                            indexes.forEach(function (indexName) {
-                                if (indexName == source.toLowerCase()) {
-                                    sources.push(source);
-                                    self.indexSourcesMap[indexName] = source;
-                                }
-                            });
-                        }
-                    });
-                });
-
-                return callback(null, sources);
-            },
-            error: function (err) {
-                return callback(err);
-            },
-        });
-    };
 
     self.getClassesLabels = function (classUris, indexes, callback) {
         var slices = common.array.slice(classUris, 100);
@@ -1214,7 +1180,7 @@ setTimeout(function () {
                     if (indexes) {
                         return callbackSeries();
                     }
-                    Standardizer.initSourcesIndexesList({ schemaType: "OWL" }, function (err, result) {
+                    SearchUtil.initSourcesIndexesList({ schemaType: "OWL" }, function (err, result) {
                         if (err) return callbackSeries(err);
                         result.forEach(function (item) {
                             indexes.push(item.toLowerCase());
@@ -1585,7 +1551,7 @@ sortMethod: "hubsize",
 
         onTreeNodeClick: function (event, obj) {
             var node = obj.node;
-            var source = self.indexSourcesMap[node.data.index];
+            var source = SearchUtil.indexSourcesMap[node.data.index];
             if ((node.data.type = "orphan") /* probably a problem with the single '=' here */) {
                 // orphans
                 $("#Standardizer_searchEntitiesInput").val(node.data.text);
@@ -1676,7 +1642,7 @@ sortMethod: "hubsize",
                         entities.forEach(function (entity) {
                             var id = "entity" + common.getRandomHexaId(5);
                             self.currentSearchedResultsMap[id] = entity;
-                            var source = Standardizer.indexSourcesMap[entity.index];
+                            var source = SearchUtil.indexSourcesMap[entity.index];
                             if (source) dataSet.push([source, entity.label, entity.id]);
                         });
                     }
@@ -1829,7 +1795,7 @@ $("#Standardizer_wordsTA").val(str)
         async.eachSeries(
             indexes,
             function (index, callbackEach) {
-                var source = self.indexSourcesMap[index];
+                var source = SearchUtil.indexSourcesMap[index];
                 Sparql_OWL.getObjectRestrictions(source, ids, null, function (err, result) {
                     if (err) {
                         //  alert(err);
@@ -1893,7 +1859,7 @@ $("#Standardizer_wordsTA").val(str)
                 var hits = item.hits.hits;
                 if (hits.length == 0) return;
                 hits.forEach(function (hit) {
-                    var source = self.indexSourcesMap[hit._index];
+                    var source = SearchUtil.indexSourcesMap[hit._index];
                     if (!classUrisBySource[source]) classUrisBySource[source] = [];
                     classUrisBySource[source].push(hit._source.id);
                 });
@@ -1962,7 +1928,7 @@ $("#Standardizer_wordsTA").val(str)
             for (var key in self.matrixWordsMap.entities) {
                 self.matrixWordsMap.entities[key].forEach(function (obj) {
                     if (obj) {
-                        var targetSource = self.indexSourcesMap[obj.index];
+                        var targetSource = SearchUtil.indexSourcesMap[obj.index];
                         if (targetSources.indexOf(targetSource) < 0) targetSources.push(targetSource);
                         relations.push({
                             sourceNode: {

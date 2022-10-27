@@ -43,7 +43,7 @@ Lineage_common = (function () {
 
                 if (nodeData.id == parentNode.data.id) return alert("Cannot paste node inside its parent");
                 if (parentNode.data.type == "http://www.w3.org/2002/07/owl#Class" && nodeData.type == "http://www.w3.org/2002/07/owl#Class") {
-                    treeDiv = "LineagejsTreeDiv";
+                    treeDiv = "LineageNodesJsTreeDiv";
                     triples.push({
                         subject: nodeData.id,
                         predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",

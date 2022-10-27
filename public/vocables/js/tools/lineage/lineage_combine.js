@@ -33,13 +33,13 @@ var Lineage_combine = (function () {
 
                     callbackEach();
 
-                    //  SourceBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineagejsTreeDiv" });
+                    //  SourceBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineageNodesJsTreeDiv" });
                 });
             },
             function (err) {
                 if (err) return MainController.UI.message(err);
                 if (self.currentSources.length > 0) {
-                    $("#GenericTools_searchScope").val("graphSources");
+                    $("#GenericTools_searchScope").val("whiteboardSources");
                     $("#Lineage_combine_actiosDiv").css("display", "block");
                 }
                 Lineage_sources.setCurrentSource(Lineage_sources.activeSource);

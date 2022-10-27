@@ -2,61 +2,17 @@
 // !!!!!!!!  const util = require("../../../../../bin/util.");
 var Lineage_blend = (function () {
     var self = {};
-    self.authorizedProperties = {};
+     Lineage_upperOntologies.objectPropertiesMap
+ = {};
     self.currentSource=null
 
-
-
-  self.setNewImport = function (mainSourceLabel, importedSourceLabel, callback) {
-        if (mainSourceLabel == importedSourceLabel) return callback();
-        var mainSource = Config.sources[mainSourceLabel];
-        if (!mainSource) return alert("nos source with label " + mainSourceLabel);
-        if (!mainSource.imports) mainSource.imports = [];
-        var imports = mainSource.imports.concat(mainSource);
-        if (imports && imports.indexOf(importedSourceLabel) > -1) {
-            return callback();
-        }
-        if (!confirm("add  source " + importedSourceLabel + " to imports of source " + mainSourceLabel)) return callback("stop");
-
-        self.addImportToCurrentSource(mainSourceLabel, importedSourceLabel, function (_err, _result) {
-            Lineage_classes.registerSource(importedSourceLabel);
-            callback();
-        });
-    };
-
-*   self.createSubClass = function () {
+    self.createSubClass = function () {
         var sourceNode = self.currentAssociation[0];
 
         if (confirm("Create  for subclass of " + sourceNode.label)) {
             SourceBrowser.addProperty("http://www.w3.org/2000/01/rdf-schema#subClassOf", sourceNode.id, sourceNode.source, true);
         }
     };
-
-    self.createSubProperty = function (source, superPropId, subPropertyLabel, callback) {
-        var subPropId = Config.sources[source].graphUri + common.getRandomHexaId(10);
-        var triples = [
-            {
-                subject: subPropId,
-                predicate: "rdf:type",
-                object: "owl:ObjectProperty",
-            },
-            {
-                subject: subPropId,
-                predicate: "rdfs:label",
-                object: subPropertyLabel,
-            },
-            {
-                subject: subPropId,
-                predicate: "rdfs:subPropertyOf",
-                object: superPropId,
-            },
-        ];
-
-        Sparql_generic.insertTriples(source, triples, null, function (err, _result) {
-            callback(err, { uri: subPropId });
-        });
-    };
-
     self.createRelationUI = function (type, addImportToCurrentSource, createInverseRelation) {
         var sourceNode = self.currentAssociation[0];
         var targetNode = self.currentAssociation[1];
@@ -75,143 +31,6 @@ var Lineage_blend = (function () {
             MainController.UI.message("relation added", true);
         });
     };
-
-    self.createRelation = function (inSource, type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, options, callback) {
-        if (type != "http://www.w3.org/2002/07/owl#sameAs") createInverseRelation = false;
-        var blankNodeId;
-        async.series(
-          [
-              function (callbackSeries) {
-                  if (!addImportToCurrentSource) return callbackSeries();
-                  self.setNewImport(  self.currentSource=node.data.source, targetNode.source, function (err, _result) {
-                      callbackSeries(err);
-                  });
-              },
-
-              function (callbackSeries) {
-                  var relations = { type: type, sourceNode: sourceNode, targetNode: targetNode };
-                  var options = {};
-                  self.createRelationTriples(relations, createInverseRelation, inSource, options, function (err, _result) {
-                      blankNodeId = _result;
-                      callbackSeries(err);
-                  });
-              },
-          ],
-          function (err) {
-              if (err) {
-                  if (callback) return callback(err);
-                  return alert(err);
-              }
-              if (callback) return callback(null, blankNodeId);
-          }
-        );
-    };
-
-    self.createRelationTriples = function (relations, createInverseRelation, inSource, options, callback) {
-        var allTriples = [];
-        if (!Array.isArray(relations)) relations = [relations];
-        var normalBlankNode;
-        relations.forEach(function (relation) {
-            var propId = relation.type;
-
-            var restrictionTriples = self.getRestrictionTriples(relation.sourceNode.id, relation.targetNode.id, propId);
-
-            normalBlankNode = restrictionTriples.blankNode;
-            var metadataOptions = {
-                domainSourceLabel: relation.sourceNode.source,
-                rangeSourceLabel: relation.targetNode.source,
-            };
-            if (!options) options = {};
-            var origin = options.origin || "manual";
-            var status = options.status || "candidate";
-
-            var metaDataTriples = self.getCommonMetaDataTriples(normalBlankNode, origin, status, metadataOptions);
-            restrictionTriples = restrictionTriples.concat(metaDataTriples);
-
-            if (createInverseRelation) {
-                var restrictionTriplesInverse = self.getRestrictionTriples(relation.targetNode.id, relation.sourceNode.id, propId);
-                var inverseBlankNode = restrictionTriplesInverse.blankNode;
-                restrictionTriples = restrictionTriples.concat(restrictionTriplesInverse);
-                var inverseMetadataOptions = {
-                    domainSourceLabel: relation.targetNode.source,
-                    rangeSourceLabel: relation.sourceNode.source,
-                };
-                var inverseMetaDataTriples = self.getCommonMetaDataTriples(inverseBlankNode, origin, status, inverseMetadataOptions);
-                restrictionTriples = restrictionTriples.concat(inverseMetaDataTriples);
-
-                restrictionTriples.push({
-                    subject: normalBlankNode,
-                    predicate: "http://www.w3.org/2002/07/owl#inverseOf",
-                    object: inverseBlankNode,
-                });
-                restrictionTriples.push({
-                    subject: inverseBlankNode,
-                    predicate: "http://www.w3.org/2002/07/owl#inverseOf",
-                    object: normalBlankNode,
-                });
-            }
-
-            allTriples = allTriples.concat(restrictionTriples);
-            if (options.additionalTriples) {
-                allTriplesallTriples.concat(options.additionalTriples);
-            }
-        });
-
-        Sparql_generic.insertTriples(inSource, allTriples, null, function (err, _result) {
-            callback(err, normalBlankNode);
-        });
-    };
-
-    self.deleteRestriction = function (inSource, restrictionNode, callback) {
-        if (callback || confirm("delete selected restriction")) {
-            var inverseRestriction = null;
-
-            async.series(
-              [
-                  // delete restriction
-                  function (callbackSeries) {
-                      Sparql_generic.deleteTriples(inSource, restrictionNode.data.bNodeId, null, null, function (_err, _result) {
-                          callbackSeries();
-                      });
-                  },
-                  function (callbackSeries) {
-                      Sparql_generic.deleteTriples(inSource, null, null, restrictionNode.data.bNodeId, function (_err, _result) {
-                          callbackSeries();
-                      });
-                  },
-                  // search if inverse exists
-                  function (callbackSeries) {
-                      Sparql_OWL.getInverseRestriction(inSource, restrictionNode.data.bNodeId, function (err, result) {
-                          if (err) return callbackSeries(err);
-                          if (result.length == 0) return callbackSeries();
-                          inverseRestriction = result[0].subject.value;
-                          callbackSeries();
-                      });
-                  },
-                  // delete inverse restriction
-                  function (callbackSeries) {
-                      if (!inverseRestriction) return callbackSeries();
-                      Sparql_generic.deleteTriples(inSource, inverseRestriction, null, null, function (_err, _result) {
-                          callbackSeries();
-                      });
-                  },
-                  function (callbackSeries) {
-                      if (!inverseRestriction) return callbackSeries();
-                      Sparql_generic.deleteTriples(inSource, null, null, inverseRestriction, function (_err, _result) {
-                          callbackSeries();
-                      });
-                  },
-              ],
-              function (_err) {
-                  visjsGraph.data.edges.remove(restrictionNode.id);
-                  visjsGraph.data.edges.remove(inverseRestriction);
-                  MainController.UI.message("restriction removed", true);
-                  if (callback) return callback(_err);
-              }
-            );
-        }
-    };
-
     (self.createPropertyRangeAndDomain = function (source, souceNodeId, targetNodeId, propId, callback) {
         var triples = [];
 
@@ -232,134 +51,69 @@ var Lineage_blend = (function () {
             callback(err, "DONE");
         });
     }),
-      (self.getSubClassTriples = function (souceNodeId, targetNodeId) {
-          var triples = [];
-          triples.push({
-              subject: souceNodeId,
-              predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-              object: targetNodeId,
+      self.createRelationTriples = function (relations, createInverseRelation, inSource, options, callback) {
+          var allTriples = [];
+          if (!Array.isArray(relations)) relations = [relations];
+          var normalBlankNode;
+          relations.forEach(function (relation) {
+              var propId = relation.type;
+
+              var restrictionTriples = self.getRestrictionTriples(relation.sourceNode.id, relation.targetNode.id, propId);
+
+              normalBlankNode = restrictionTriples.blankNode;
+              var metadataOptions = {
+                  domainSourceLabel: relation.sourceNode.source,
+                  rangeSourceLabel: relation.targetNode.source,
+              };
+              if (!options) options = {};
+              var origin = options.origin || "manual";
+              var status = options.status || "candidate";
+
+              var metaDataTriples = self.getCommonMetaDataTriples(normalBlankNode, origin, status, metadataOptions);
+              restrictionTriples = restrictionTriples.concat(metaDataTriples);
+
+              if (createInverseRelation) {
+                  var restrictionTriplesInverse = self.getRestrictionTriples(relation.targetNode.id, relation.sourceNode.id, propId);
+                  var inverseBlankNode = restrictionTriplesInverse.blankNode;
+                  restrictionTriples = restrictionTriples.concat(restrictionTriplesInverse);
+                  var inverseMetadataOptions = {
+                      domainSourceLabel: relation.targetNode.source,
+                      rangeSourceLabel: relation.sourceNode.source,
+                  };
+                  var inverseMetaDataTriples = self.getCommonMetaDataTriples(inverseBlankNode, origin, status, inverseMetadataOptions);
+                  restrictionTriples = restrictionTriples.concat(inverseMetaDataTriples);
+
+                  restrictionTriples.push({
+                      subject: normalBlankNode,
+                      predicate: "http://www.w3.org/2002/07/owl#inverseOf",
+                      object: inverseBlankNode,
+                  });
+                  restrictionTriples.push({
+                      subject: inverseBlankNode,
+                      predicate: "http://www.w3.org/2002/07/owl#inverseOf",
+                      object: normalBlankNode,
+                  });
+              }
+
+              allTriples = allTriples.concat(restrictionTriples);
+              if (options.additionalTriples) {
+                  allTriplesallTriples.concat(options.additionalTriples);
+              }
           });
-          return triples;
-      });
 
-    self.getRestrictionTriples = function (sourceNodeId, targetNodeId, propId) {
-        var restrictionsTriples = [];
-        var blankNode = "_:b" + common.getRandomHexaId(10);
+          Sparql_generic.insertTriples(inSource, allTriples, null, function (err, _result) {
+              callback(err, normalBlankNode);
+          });
+      };
 
-        restrictionsTriples.push({
-            subject: sourceNodeId,
+    self.getSubClassTriples = function (souceNodeId, targetNodeId) {
+        var triples = [];
+        triples.push({
+            subject: souceNodeId,
             predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-            object: blankNode,
-        });
-        restrictionsTriples.push({
-            subject: blankNode,
-            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-            object: "http://www.w3.org/2002/07/owl#Restriction",
-        });
-        restrictionsTriples.push({
-            subject: blankNode,
-            predicate: "http://www.w3.org/2002/07/owl#onProperty",
-            object: propId,
-        });
-        restrictionsTriples.push({
-            subject: blankNode,
-            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
             object: targetNodeId,
         });
-
-        restrictionsTriples.blankNode = blankNode;
-        return restrictionsTriples;
-    };
-
-    self.addImportToCurrentSource = function (parentSourceLabel, importedSourceLabel, callback) {
-        var payload = {
-            importedSource: importedSourceLabel,
-        };
-        $.ajax({
-            type: "POST",
-            url: `${Config.apiUrl}/sources/${parentSourceLabel}/imports`,
-            data: payload,
-            dataType: "json",
-            success: function (_data, _textStatus, _jqXHR) {
-                if (!Config.sources[parentSourceLabel].imports)
-                  //synchro on client
-                    Config.sources[parentSourceLabel].imports = [];
-                Config.sources[parentSourceLabel].imports.push(importedSourceLabel);
-                return callback();
-            },
-            error: function (err) {
-                return callback(err);
-            },
-        });
-    };
-
-    self.addRelationToGraph = function (propUri, blankNodeId) {
-        var sourceNode = self.currentAssociation[0];
-        var targetNode = self.currentAssociation[1];
-
-        var existingNodes = visjsGraph.getExistingIdsMap();
-        var visjsData = { nodes: [], edges: [] };
-
-        if (!existingNodes[sourceNode.id]) {
-            existingNodes[sourceNode.id] = 1;
-            visjsData.nodes.push({
-                id: sourceNode.id,
-                label: sourceNode.label,
-                shape: Lineage_classes.defaultShape,
-                size: Lineage_classes.defaultShapeSize,
-                color: Lineage_classes.getSourceColor(sourceNode.source),
-                level: Lineage_classes.currentExpandLevel,
-                data: {
-                    id: sourceNode.id,
-                    label: sourceNode.label,
-                    source: sourceNode.source,
-                },
-            });
-        }
-
-        if (!existingNodes[targetNode.id]) {
-            existingNodes[targetNode.id] = 1;
-            visjsData.nodes.push({
-                id: targetNode.id,
-                label: targetNode.label,
-                shape: Lineage_classes.defaultShape,
-                size: Lineage_classes.defaultShapeSize,
-                color: Lineage_classes.getSourceColor(targetNode.source),
-                level: Lineage_classes.currentExpandLevel,
-                data: {
-                    id: targetNode.id,
-                    label: targetNode.label,
-                    source: targetNode.source,
-                },
-            });
-        }
-
-        var edgeId = sourceNode.id + "_" + propUri + "_" + targetNode.id;
-        if (!existingNodes[edgeId]) {
-            existingNodes[edgeId] = 1;
-            var propLabel = Sparql_common.getLabelFromURI(propUri);
-            visjsData.edges.push({
-                id: edgeId,
-                from: sourceNode.id,
-                to: targetNode.id,
-                label: "<i>" + propLabel + "</i>",
-                data: { propertyId: propUri, source: sourceNode.source, bNodeId: edgeId }, // used by Lineage},
-                font: { multi: true, size: 10 },
-                arrows: {
-                    from: {
-                        enabled: true,
-                        type: "bar",
-                        scaleFactor: 0.5,
-                    },
-                },
-                dashes: true,
-                color: Lineage_classes.objectPropertyColor,
-            });
-        }
-        visjsGraph.data.nodes.add(visjsData.nodes);
-        visjsGraph.data.edges.add(visjsData.edges);
-        visjsGraph.network.fit();
-        $("#waitImg").css("display", "none");
+        return triples;
     };
 
     self.importNodeInCurrentMainSource = function () {
@@ -386,81 +140,6 @@ var Lineage_blend = (function () {
         });
     };
 
-    self.getCommonMetaDataTriples = function (subjectUri, source, status, options) {
-        var metaDataTriples = [];
-        if (!options) options = {};
-        var login = authentication.currentUser.login;
-        //  var authorUri = Config.defaultNewUriRoot + "users/" + login;
-        var dateTime = common.dateToRDFString(new Date()) + "^^xsd:dateTime";
-
-        metaDataTriples.push({
-            subject: subjectUri,
-            predicate: "http://purl.org/dc/terms/creator",
-            object: login,
-        });
-
-        metaDataTriples.push({
-            subject: subjectUri,
-            predicate: "http://purl.org/dc/terms/created",
-            object: dateTime,
-        });
-        if (status)
-            metaDataTriples.push({
-                subject: subjectUri,
-                predicate: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
-                object: status,
-            });
-        if (source)
-            metaDataTriples.push({
-                subject: subjectUri,
-                predicate: "http://purl.org/dc/terms/source",
-                object: source,
-            });
-        if (options) {
-            for (var key in options) {
-                metaDataTriples.push({
-                    subject: subjectUri,
-                    predicate: (Config.sousLeSensVocablesGraphUri || "http://data.souslesens.org/") + "property#" + key,
-                    object: options[key],
-                });
-            }
-        }
-
-        return metaDataTriples;
-    };
-    self.getProjectedGraphMetaDataTriples = function (graphUri, imports, options) {
-        var triples = [];
-        if (!options) options = {};
-
-        imports.forEach(function (importedSource) {
-            triples.push({
-                subject: graphUri,
-                predicate: Config.sousLeSensVocablesGraphUri + "property#import",
-                object: importedSource,
-            });
-        });
-        triples.push({
-            subject: graphUri,
-            predicate: "http://www.w3.org/2002/07/owl#versionIRI",
-            object: graphUri,
-        });
-
-        triples.push({
-            subject: graphUri,
-            predicate: "http://www.w3.org/2002/07/owl#versionInfo",
-            object: "Revised " + common.dateToRDFString(new Date()),
-        });
-        if (options.label) {
-            triples.push({
-                subject: graphUri,
-                predicate: "http://www.w3.org/2000/01/rdf-schema#label",
-                object: options.label,
-            });
-        }
-
-        return triples;
-    };
-
     self.transformSameLabelsEdgesIntoSameAsRelations = function (_callback) {
         var edges = visjsGraph.data.edges.get();
         var relations = [];
@@ -484,12 +163,12 @@ var Lineage_blend = (function () {
             });
         }
     };
-
     self.createNode = function () {
         SourceBrowser.showNodeInfos(Lineage_sources.activeSource, null, "mainDialogDiv", null, function (_err, _result) {
             // pass
         });
     };
+
 
     self.initAllowedPropertiesForRelation = function () {
         var fromNode = self.currentAssociation[0];
@@ -1244,7 +923,8 @@ callbackSeries();
         execAddEdgeFromGraph: function () {},
         addGenericPredicatesToPredicatesTree: function () {
             var jstreeData = [];
-            self.authorizedProperties[Config.currentTopLevelOntology].forEach(function (item) {
+             Lineage_upperOntologies.objectPropertiesMap
+[Config.currentTopLevelOntology].forEach(function (item) {
                 if (item.isGenericProperty) {
                     var text = "<span class='lineageAddEdgeDialog_topLevelOntologyGenericProp'>" + (item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value)) + "</span>";
 
@@ -1304,8 +984,336 @@ callbackSeries();
         },
     };
 
+
+
+
+
+
+
+
+    self.setNewImport = function (mainSourceLabel, importedSourceLabel, callback) {
+        if (mainSourceLabel == importedSourceLabel) return callback();
+        var mainSource = Config.sources[mainSourceLabel];
+        if (!mainSource) return alert("nos source with label " + mainSourceLabel);
+        if (!mainSource.imports) mainSource.imports = [];
+        var imports = mainSource.imports.concat(mainSource);
+        if (imports && imports.indexOf(importedSourceLabel) > -1) {
+            return callback();
+        }
+        if (!confirm("add  source " + importedSourceLabel + " to imports of source " + mainSourceLabel)) return callback("stop");
+
+        self.addImportToCurrentSource(mainSourceLabel, importedSourceLabel, function (_err, _result) {
+            Lineage_classes.registerSource(importedSourceLabel);
+            callback();
+        });
+    };
+
+    self.createSubProperty = function (source, superPropId, subPropertyLabel, callback) {
+        var subPropId = Config.sources[source].graphUri + common.getRandomHexaId(10);
+        var triples = [
+            {
+                subject: subPropId,
+                predicate: "rdf:type",
+                object: "owl:ObjectProperty",
+            },
+            {
+                subject: subPropId,
+                predicate: "rdfs:label",
+                object: subPropertyLabel,
+            },
+            {
+                subject: subPropId,
+                predicate: "rdfs:subPropertyOf",
+                object: superPropId,
+            },
+        ];
+
+        Sparql_generic.insertTriples(source, triples, null, function (err, _result) {
+            callback(err, { uri: subPropId });
+        });
+    };
+
+    self.createRelation = function (inSource, type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, options, callback) {
+        if (type != "http://www.w3.org/2002/07/owl#sameAs") createInverseRelation = false;
+        var blankNodeId;
+        async.series(
+          [
+              function (callbackSeries) {
+                  if (!addImportToCurrentSource) return callbackSeries();
+                  self.setNewImport(  self.currentSource=node.data.source, targetNode.source, function (err, _result) {
+                      callbackSeries(err);
+                  });
+              },
+
+              function (callbackSeries) {
+                  var relations = { type: type, sourceNode: sourceNode, targetNode: targetNode };
+                  var options = {};
+                  self.createRelationTriples(relations, createInverseRelation, inSource, options, function (err, _result) {
+                      blankNodeId = _result;
+                      callbackSeries(err);
+                  });
+              },
+          ],
+          function (err) {
+              if (err) {
+                  if (callback) return callback(err);
+                  return alert(err);
+              }
+              if (callback) return callback(null, blankNodeId);
+          }
+        );
+    };
+
+    self.deleteRestriction = function (inSource, restrictionNode, callback) {
+        if (callback || confirm("delete selected restriction")) {
+            var inverseRestriction = null;
+
+            async.series(
+              [
+                  // delete restriction
+                  function (callbackSeries) {
+                      Sparql_generic.deleteTriples(inSource, restrictionNode.data.bNodeId, null, null, function (_err, _result) {
+                          callbackSeries();
+                      });
+                  },
+                  function (callbackSeries) {
+                      Sparql_generic.deleteTriples(inSource, null, null, restrictionNode.data.bNodeId, function (_err, _result) {
+                          callbackSeries();
+                      });
+                  },
+                  // search if inverse exists
+                  function (callbackSeries) {
+                      Sparql_OWL.getInverseRestriction(inSource, restrictionNode.data.bNodeId, function (err, result) {
+                          if (err) return callbackSeries(err);
+                          if (result.length == 0) return callbackSeries();
+                          inverseRestriction = result[0].subject.value;
+                          callbackSeries();
+                      });
+                  },
+                  // delete inverse restriction
+                  function (callbackSeries) {
+                      if (!inverseRestriction) return callbackSeries();
+                      Sparql_generic.deleteTriples(inSource, inverseRestriction, null, null, function (_err, _result) {
+                          callbackSeries();
+                      });
+                  },
+                  function (callbackSeries) {
+                      if (!inverseRestriction) return callbackSeries();
+                      Sparql_generic.deleteTriples(inSource, null, null, inverseRestriction, function (_err, _result) {
+                          callbackSeries();
+                      });
+                  },
+              ],
+              function (_err) {
+                  visjsGraph.data.edges.remove(restrictionNode.id);
+                  visjsGraph.data.edges.remove(inverseRestriction);
+                  MainController.UI.message("restriction removed", true);
+                  if (callback) return callback(_err);
+              }
+            );
+        }
+    };
+
+    self.getRestrictionTriples = function (sourceNodeId, targetNodeId, propId) {
+        var restrictionsTriples = [];
+        var blankNode = "_:b" + common.getRandomHexaId(10);
+
+        restrictionsTriples.push({
+            subject: sourceNodeId,
+            predicate: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+            object: blankNode,
+        });
+        restrictionsTriples.push({
+            subject: blankNode,
+            predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+            object: "http://www.w3.org/2002/07/owl#Restriction",
+        });
+        restrictionsTriples.push({
+            subject: blankNode,
+            predicate: "http://www.w3.org/2002/07/owl#onProperty",
+            object: propId,
+        });
+        restrictionsTriples.push({
+            subject: blankNode,
+            predicate: "http://www.w3.org/2002/07/owl#someValuesFrom",
+            object: targetNodeId,
+        });
+
+        restrictionsTriples.blankNode = blankNode;
+        return restrictionsTriples;
+    };
+
+    self.addImportToCurrentSource = function (parentSourceLabel, importedSourceLabel, callback) {
+        var payload = {
+            importedSource: importedSourceLabel,
+        };
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/sources/${parentSourceLabel}/imports`,
+            data: payload,
+            dataType: "json",
+            success: function (_data, _textStatus, _jqXHR) {
+                if (!Config.sources[parentSourceLabel].imports)
+                  //synchro on client
+                    Config.sources[parentSourceLabel].imports = [];
+                Config.sources[parentSourceLabel].imports.push(importedSourceLabel);
+                return callback();
+            },
+            error: function (err) {
+                return callback(err);
+            },
+        });
+    };
+
+    self.addRelationToGraph = function (propUri, blankNodeId) {
+        var sourceNode = self.currentAssociation[0];
+        var targetNode = self.currentAssociation[1];
+
+        var existingNodes = visjsGraph.getExistingIdsMap();
+        var visjsData = { nodes: [], edges: [] };
+
+        if (!existingNodes[sourceNode.id]) {
+            existingNodes[sourceNode.id] = 1;
+            visjsData.nodes.push({
+                id: sourceNode.id,
+                label: sourceNode.label,
+                shape: Lineage_classes.defaultShape,
+                size: Lineage_classes.defaultShapeSize,
+                color: Lineage_classes.getSourceColor(sourceNode.source),
+                level: Lineage_classes.currentExpandLevel,
+                data: {
+                    id: sourceNode.id,
+                    label: sourceNode.label,
+                    source: sourceNode.source,
+                },
+            });
+        }
+
+        if (!existingNodes[targetNode.id]) {
+            existingNodes[targetNode.id] = 1;
+            visjsData.nodes.push({
+                id: targetNode.id,
+                label: targetNode.label,
+                shape: Lineage_classes.defaultShape,
+                size: Lineage_classes.defaultShapeSize,
+                color: Lineage_classes.getSourceColor(targetNode.source),
+                level: Lineage_classes.currentExpandLevel,
+                data: {
+                    id: targetNode.id,
+                    label: targetNode.label,
+                    source: targetNode.source,
+                },
+            });
+        }
+
+        var edgeId = sourceNode.id + "_" + propUri + "_" + targetNode.id;
+        if (!existingNodes[edgeId]) {
+            existingNodes[edgeId] = 1;
+            var propLabel = Sparql_common.getLabelFromURI(propUri);
+            visjsData.edges.push({
+                id: edgeId,
+                from: sourceNode.id,
+                to: targetNode.id,
+                label: "<i>" + propLabel + "</i>",
+                data: { propertyId: propUri, source: sourceNode.source, bNodeId: edgeId }, // used by Lineage},
+                font: { multi: true, size: 10 },
+                arrows: {
+                    from: {
+                        enabled: true,
+                        type: "bar",
+                        scaleFactor: 0.5,
+                    },
+                },
+                dashes: true,
+                color: Lineage_classes.objectPropertyColor,
+            });
+        }
+        visjsGraph.data.nodes.add(visjsData.nodes);
+        visjsGraph.data.edges.add(visjsData.edges);
+        visjsGraph.network.fit();
+        $("#waitImg").css("display", "none");
+    };
+
+    self.getCommonMetaDataTriples = function (subjectUri, source, status, options) {
+        var metaDataTriples = [];
+        if (!options) options = {};
+        var login = authentication.currentUser.login;
+        //  var authorUri = Config.defaultNewUriRoot + "users/" + login;
+        var dateTime = common.dateToRDFString(new Date()) + "^^xsd:dateTime";
+
+        metaDataTriples.push({
+            subject: subjectUri,
+            predicate: "http://purl.org/dc/terms/creator",
+            object: login,
+        });
+
+        metaDataTriples.push({
+            subject: subjectUri,
+            predicate: "http://purl.org/dc/terms/created",
+            object: dateTime,
+        });
+        if (status)
+            metaDataTriples.push({
+                subject: subjectUri,
+                predicate: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
+                object: status,
+            });
+        if (source)
+            metaDataTriples.push({
+                subject: subjectUri,
+                predicate: "http://purl.org/dc/terms/source",
+                object: source,
+            });
+        if (options) {
+            for (var key in options) {
+                metaDataTriples.push({
+                    subject: subjectUri,
+                    predicate: (Config.sousLeSensVocablesGraphUri || "http://data.souslesens.org/") + "property#" + key,
+                    object: options[key],
+                });
+            }
+        }
+
+        return metaDataTriples;
+    };
+
+    self.getProjectedGraphMetaDataTriples = function (graphUri, imports, options) {
+        var triples = [];
+        if (!options) options = {};
+
+        imports.forEach(function (importedSource) {
+            triples.push({
+                subject: graphUri,
+                predicate: Config.sousLeSensVocablesGraphUri + "property#import",
+                object: importedSource,
+            });
+        });
+        triples.push({
+            subject: graphUri,
+            predicate: "http://www.w3.org/2002/07/owl#versionIRI",
+            object: graphUri,
+        });
+
+        triples.push({
+            subject: graphUri,
+            predicate: "http://www.w3.org/2002/07/owl#versionInfo",
+            object: "Revised " + common.dateToRDFString(new Date()),
+        });
+        if (options.label) {
+            triples.push({
+                subject: graphUri,
+                predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                object: options.label,
+            });
+        }
+
+        return triples;
+    };
+
     self.getAuthorizedProperties = function (sourceLabel, domain, range, callback) {
-        self.loadSourcePossiblePredicates(sourceLabel, false, function (err, allProps) {
+        self.  getUpperOntologyObjectPropertiesDescription
+
+(sourceLabel, false, function (err, allProps) {
             if (err) return alert(err);
 
             let props = {};
@@ -1347,10 +1355,16 @@ callbackSeries();
         });
     };
 
-    self.loadSourcePossiblePredicates = function (sourceLabel, reload, callback) {
-        if (!self.authorizedProperties) self.authorizedProperties = {};
+    self.  getUpperOntologyObjectPropertiesDescription
 
-        if (self.authorizedProperties[sourceLabel] && !reload && callback) return callback(null, self.authorizedProperties[sourceLabel]);
+ = function (sourceLabel, reload, callback) {
+        if (! Lineage_upperOntologies.objectPropertiesMap
+)  Lineage_upperOntologies.objectPropertiesMap
+ = {};
+
+        if ( Lineage_upperOntologies.objectPropertiesMap
+[sourceLabel] && !reload && callback) return callback(null,  Lineage_upperOntologies.objectPropertiesMap
+[sourceLabel]);
 
         var allProps;
         async.series(
@@ -1376,7 +1390,8 @@ callbackSeries();
               },
           ],
           function (err) {
-              self.authorizedProperties[sourceLabel] = allProps;
+               Lineage_upperOntologies.objectPropertiesMap
+[sourceLabel] = allProps;
               if (callback) return callback(err, allProps);
           }
         );

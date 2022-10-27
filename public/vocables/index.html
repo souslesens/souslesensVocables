@@ -65,6 +65,7 @@
         <script src="js/tools/lineage/linkedData/lineage_linkedData_sql.js"></script>
         <script src="js/tools/lineage/linkedData/lineage_linkedData_search.js"></script>
         <script src="js/tools/lineage/linkedData/lineage_linkedData_graph.js"></script>
+        <script src="js/tools/lineage/lineage_upperOntologies.js"></script>
 
         <script src="js/tools/lineage/lineage_sets.js"></script>
 
@@ -236,7 +237,7 @@
                     // $("#centralPanel").width(w)
                     $("#graphDiv").width(w);
                     MainController.UI.initialGraphDivWitdh = w;
-                    $("#graphDiv").height(h - 150);
+                    $("#graphDiv").height(h - 50);
                     /*  $("#leftPanelDiv").height(h - 50);
             $("#rightPanelDiv").height(h - 50);*/
 
@@ -452,7 +453,11 @@
             }
 
             .max-height {
-                height: 700px !important;
+                height: 750px !important;
+            }
+            .ui-dialog-title {
+
+                color: #337ab7;
             }
         </style>
     </head>

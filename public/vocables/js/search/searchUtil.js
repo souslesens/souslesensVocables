@@ -2,6 +2,45 @@
 var SearchUtil = (function () {
     var self = {};
     self.existingIndexes = null;
+    self.indexSourcesMap={}
+
+
+
+    self.initSourcesIndexesList = function (options, callback) {
+        if (!options) options = {};
+        var payload = {
+            dictionaries_listIndexes: 1,
+        };
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/elasticsearch/indices",
+            data: payload,
+            dataType: "json",
+            success: function (indexes, _textStatus, _jqXHR) {
+                var sources = [];
+
+                Admin.showUserSources(function (userSources) {
+                    userSources.forEach(function (source) {
+                        if (options.schemaType && Config.sources[source].schemaType != options.schemaType) {
+                            // pass
+                        } else {
+                            indexes.forEach(function (indexName) {
+                                if (indexName == source.toLowerCase()) {
+                                    sources.push(source);
+                                    self.indexSourcesMap[indexName] = source;
+                                }
+                            });
+                        }
+                    });
+                });
+
+                return callback(null, sources);
+            },
+            error: function (err) {
+                return callback(err);
+            },
+        });
+    };
 
     /**
      * @param fromSource if null ids or labels are mandatory
@@ -32,7 +71,7 @@ var SearchUtil = (function () {
                 async.series(
                     [
                         function (callbackSeries) {
-                            Standardizer.initSourcesIndexesList(null, function (err, indexedSources) {
+                            SearchUtil.initSourcesIndexesList(null, function (err, indexedSources) {
                                 if (err) return callbackSeries(err);
 
                                 indexes = [];

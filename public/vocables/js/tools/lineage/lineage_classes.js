@@ -70,24 +70,31 @@ var Lineage_classes = (function() {
 
     // @ts-ignore
     $("#actionDivContolPanelDiv").load("snippets/lineage/lineageLeftPanel.html", function() {
+      Lineage_sources.init()
+      Lineage_sources.showSourcesDialog()
       // @ts-ignore
       $("#rightPanelDiv").load("snippets/lineage/lineageRightPanel.html", function() {
         $("#GenericTools_searchSchemaType").val("OWL");
 
-        $("#lineage_controlPanel0Div").css("display", "block");
-        $("#lineage_controlPanel1Div").css("display", "none");
-        $("#GenericTools_onSearchCurrentSourceInput").css("display", "block");
+        if(Object.keys(Lineage_sources.loadedSources).length==0){
+          $("#lineage_allActions").css("visibility", "hidden");
 
-        //   $("#sourcesTreeDivContainer").height(h2 - h1)
-        var sourceLabels = [];
-        SourceBrowser.currentTargetDiv = "LineagejsTreeDiv";
+        }
+
+
+
+        SourceBrowser.currentTargetDiv = "LineageNodesJsTreeDiv";
+
+
+    /*    var sourceLabels = [];
+
         MainController.UI.showSources("sourcesTreeDiv", false);
 
         for (var key in Config.sources) {
           if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[key].schemaType) > -1) sourceLabels.push(key);
         }
         sourceLabels.sort();
-        //  common.fillSelectOptions("Lineage_toSource", sourceLabels, true)
+        //  common.fillSelectOptions("Lineage_toSource", sourceLabels, true)*/
 
         $("#LineagePopup").dialog({
           autoOpen: false,
@@ -213,7 +220,7 @@ var Lineage_classes = (function() {
 
     if (clearTree) {
       $("#lineage_drawnSources").html("");
-      $("#LineagejsTreeDiv").empty();
+      $("#LineageNodesJsTreeDiv").empty();
 
       if (Lineage_sources.activeSource) {
         Lineage_sources.registerSourceImports(Lineage_sources.activeSource);
@@ -467,7 +474,7 @@ var Lineage_classes = (function() {
         }
       }
     };
-    if (Lineage_sources.isSourceEditable( Lineage_sources.activeSource)) {
+    if (true) {
    // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
       options.manipulation = {
         enabled: true,
@@ -490,6 +497,8 @@ var Lineage_classes = (function() {
           });
         }
       };
+
+     Lineage_sources.showHideEditButtons(Lineage_sources.activeSource)
     } else {
       /* options.manipulation = {
 enabled: true,
@@ -935,7 +944,7 @@ addNode:false
                         };
                       if (propFilter == "incoming")
                         arrows = {
-                          to: {
+                          from: {
                             enabled: true,
                             type: Lineage_classes.defaultEdgeArrowType,
                             scaleFactor: 0.5
@@ -1963,7 +1972,7 @@ addNode:false
     //  if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
         html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.deleteObjectProperty();\"> Delete relation</span>";
       }
-    } else if (node.data && node.data.type == "NamedIndividual") {
+    } else if (false && node.data && node.data.type == "NamedIndividual") {
       html =
         "    <span  class=\"popupMenuItem\" onclick=\"Lineage_linkedData.graphActions.showIndividualInfos();\"> Node infos</span>" +
         "<span  class=\"popupMenuItem\" onclick=\"Lineage_linkedData.graphActions.expandIndividual();\"> Expand individual</span>";

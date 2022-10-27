@@ -357,7 +357,7 @@ $("#" + jstreeDiv)
       else w = 340;
       parentDiv.width(w);
 
-      if (jstreeDiv == "LineagejsTreeDiv")
+      if (jstreeDiv == "LineageNodesJsTreeDiv")
         // cannot do it generic !!!!!
         parentDiv.height(h);
       if (jstreeDiv == "Lineage_propertiesTree") parentDiv.height(h);

@@ -91,10 +91,12 @@ const decodeSource = (key: string, source: SourceJson): Source => {
         schema: source.schema ? source.schema : null,
         isDraft: source.isDraft ? source.isDraft : false,
         editable: source.editable ? source.editable : false,
+        allowIndividuals: source.allowIndividuals ? source.allowIndividuals : false,
         color: source.color ? source.color : "default color",
         predicates: source.predicates ? source.predicates : defaultSource(ulid()).predicates,
         group: source.group ? source.group : "",
         imports: source.imports ? source.imports : [],
+        taxonomyPredicates: source.taxonomyPredicates ? source.taxonomyPredicates : [],
     };
     return decodedSource;
 };
@@ -124,9 +126,11 @@ export type Source = {
     editable: boolean;
     color: string;
     isDraft: boolean;
+    allowIndividuals: boolean;
     predicates: { broaderPredicate: string; lang: string };
     group: string;
     imports: string[];
+    taxonomyPredicates: string[];
 };
 
 export const defaultSource = (id: string): Source => {
@@ -145,9 +149,11 @@ export const defaultSource = (id: string): Source => {
         schema: null,
         color: "",
         isDraft: false,
+        allowIndividuals: false,
         predicates: { broaderPredicate: "", lang: "" },
         group: "",
         imports: [],
+        taxonomyPredicates: [],
     };
 };
 
@@ -162,12 +168,14 @@ interface SourceJson {
     schemaType?: string;
     editable?: boolean;
     isDraft?: boolean;
+    allowIndividuals?: boolean;
     dataSource?: null | DataSource;
     schema?: null;
     color?: string;
     predicates?: { broaderPredicate: string; lang: string };
     group?: string;
     imports?: string[];
+    taxonomyPredicates?: string[];
 }
 
 interface CommonSource {

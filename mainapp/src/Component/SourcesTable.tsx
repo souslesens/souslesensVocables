@@ -49,12 +49,14 @@ const SourcesTable = () => {
             ),
             success: (gotSources: Source[]) => {
                 const datas = gotSources.map((source) => {
-                    const { sparql_server, dataSource, predicates, imports, isDraft, editable, ...restOfProperties } = source;
+                    const { sparql_server, dataSource, predicates, imports, taxonomyPredicates, isDraft, editable, allowIndividuals, ...restOfProperties } = source;
                     const processedData = {
                         ...restOfProperties,
                         editable: editable ? "Editable" : "Not Editable",
-                        isDarft: isDraft ? "IsDraft" : "Not a draft",
+                        isDraft: isDraft ? "IsDraft" : "Not a draft",
+                        allowIndividuals: allowIndividuals ? "allowIndividuals" : "Not allowIndividuals",
                         imports: joinWhenArray(imports),
+                        taxonomyPredicates: joinWhenArray(taxonomyPredicates),
                     };
                     return { ...processedData };
                 });
@@ -221,6 +223,16 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
             type: Type.UserUpdatedsparql_server,
             payload: { ...sourceModel.sourceForm.sparql_server, [fieldName]: fieldName === "headers" ? event.target.value.replace(/\s+/g, "").split(",") : event.target.value },
         });
+    const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
+        update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } });
+
+    const knownTaxonomyPredicates = [
+        ...new Set(
+            unwrappedSources.flatMap((source) => {
+                return source.taxonomyPredicates;
+            })
+        ),
+    ];
 
     return (
         <>
@@ -230,6 +242,15 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
             <Modal onClose={handleClose} open={sourceModel.modal}>
                 <Box component="form" sx={style}>
                     <Grid container spacing={4}>
+                        <Grid item xs={3}>
+                            <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.editable} onChange={handleCheckbox("editable")} />} label="Is this source editable?" />
+                        </Grid>
+                        <Grid item xs={3}>
+                            <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.isDraft} onChange={handleCheckbox("isDraft")} />} label="Is it a draft?" />
+                        </Grid>
+                        <Grid item xs={3}>
+                            <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.allowIndividuals} onChange={handleCheckbox("allowIndividuals")} />} label="Allow individuals?" />
+                        </Grid>
                         <Grid item xs={6}>
                             <TextField fullWidth onChange={handleFieldUpdate("name")} value={sourceModel.sourceForm.name} id={`name`} label={"Name"} variant="standard" />
                         </Grid>
@@ -269,6 +290,8 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         <Grid item xs={6}>
                             <TextField
                                 fullWidth
+                                multiline
+                                rows={4}
                                 onChange={handleFieldUpdate("topClassFilter")}
                                 value={sourceModel.sourceForm.topClassFilter}
                                 id={`topClassFilter`}
@@ -326,7 +349,29 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         </Grid>
                         <Grid item xs={6}>
                             <FormControl>
-                                <InputLabel id="schemaType-label">Schema&aposs Type</InputLabel>
+                                <InputLabel id="taxonomypredicates-label">Taxonomy Predicates</InputLabel>
+                                <Select
+                                    labelId="taxonomypredicates-label"
+                                    id="imports"
+                                    value={sourceModel.sourceForm.taxonomyPredicates}
+                                    label="taxonomypredicates-label"
+                                    fullWidth
+                                    multiple
+                                    style={{ width: "400px" }}
+                                    renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
+                                    onChange={handleFieldUpdate("taxonomyPredicates")}
+                                >
+                                    {knownTaxonomyPredicates.map((predicate) => (
+                                        <MenuItem key={predicate} value={predicate}>
+                                            {predicate}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <FormControl>
+                                <InputLabel id="schemaType-label">Schema type</InputLabel>
                                 <Select
                                     labelId="schemaType-label"
                                     id="schemaType"
@@ -360,8 +405,6 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
 };
 
 const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.Dispatch<Msg_> }) => {
-    const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
-        props.update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } });
     const handlePredicateUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) =>
         props.update({ type: Type.UserUpdatedPredicates, payload: { ...props.model.sourceForm.predicates, [fieldName]: event.target.value } });
     const handleDataSourceUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
@@ -379,12 +422,6 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
         case "SKOS":
             return (
                 <>
-                    <Grid item xs={3}>
-                        <FormControlLabel control={<Checkbox checked={props.model.sourceForm.editable} onChange={handleCheckbox("editable")} />} label="Is this source editable?" />
-                    </Grid>
-                    <Grid item xs={3}>
-                        <FormControlLabel control={<Checkbox checked={props.model.sourceForm.isDraft} onChange={handleCheckbox("isDraft")} />} label="Is it a draft?" />
-                    </Grid>
                     <Grid item xs={6}>
                         <TextField
                             fullWidth

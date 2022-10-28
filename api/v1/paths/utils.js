@@ -186,14 +186,13 @@ function getAllowedSources(user, profiles, sources, formalOntologySourceLabel) {
 }
 
 function sortObjectByKey(obj) {
-    const objList = Object.entries(obj)
+    const objList = Object.entries(obj);
     const sortedObjList = objList.sort((a, b) => {
-        return a[0].localeCompare(b[0])
-    })
-    const sortedObj = Object.fromEntries(sortedObjList)
-    return sortedObj
+        return a[0].localeCompare(b[0]);
+    });
+    const sortedObj = Object.fromEntries(sortedObjList);
+    return sortedObj;
 }
-
 
 module.exports = {
     writeResource,

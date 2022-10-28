@@ -36,7 +36,7 @@ module.exports = function () {
                     return [profileId, profile];
                 })
             );
-            const sortedProfiles = sortObjectByKey(profiles)
+            const sortedProfiles = sortObjectByKey(profiles);
             const currentUser = await userManager.getUser(req.user);
             const groups = currentUser.user.groups;
             if (groups.includes("admin")) {

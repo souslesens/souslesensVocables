@@ -525,7 +525,9 @@ var MainController = (function () {
 
 
             if(w-left<100) {
-                var lw = $("#rightPanelDiv").width()
+                var lw = $("#rightPanelDiv").width();
+                if(lw<100)
+                    return
                 var newLeft = "" + (w - lw) + "px"
                 $("#rightPanelDiv").css("position", "absolute")
                 $("#rightPanelDiv").css("left", newLeft)

@@ -155,7 +155,7 @@
   <div class="lineage_actionDiv">
 
 
-    <div id="lineage_drawnSources" class="Lineage_objectDivContainer" style="gap:5px 10px">
+    <div id="lineage_drawnSources" class="Lineage_objectDivContainer" style="gap:5px 5px">
       <div class="lineage_actionDiv_title"><span>Sources</span>
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.resetAll()">R</button>
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.showSourcesDialog()">+</button>
@@ -168,16 +168,20 @@
 
 
   <div id="lineage_allActions">
-    <div class="lineage_actionDiv_title">Active Source actions</div>
+    <div class="lineage_actionDiv_title">Active Source</div>
     <div id="lineage_actionsWrapper" class="lineage_actionDiv"
-         style="display: flex;flex-wrap: wrap; width: 100%;justify-content:space-evenly;gap:5px 10px">
+         style="display: flex;flex-wrap: wrap; width: 100%;justify-content:space-evenly;gap:5px 5px">
 
-
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.drawTopConcepts()">topClasses
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="MainController.UI.showHideRightPanel()">
+        Search
+      </button>
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.drawTopConcepts()">
+       TopClasses
       </button>
 
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-              onclick="Lineage_classes.addChildrenToGraph()">Expand
+              onclick="Lineage_classes.addChildrenToGraph()">
+        Expand
       </button>
 
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
@@ -201,10 +205,13 @@
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.getSimilars('graph')">
         Similars
       </button>
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.clearSource()">
+        Clear
+      </button>
     </div>
 
 
-    <div id="lineage_actionsWrapper3" style="display: none">Whiteboard Actions</div>
+    <div id="lineage_actionsWrapper3" style="display: none">Whiteboard</div>
     <div id="lineage_actionsWrapper2" class="lineage_actionDiv"
          style="display: flex;flex-direction: row;justify-content: space-between">
 
@@ -228,11 +235,11 @@
         <div class="lineage_button_group">
           <span> selection</span>
           <button title="ctrl+alt click or hover" class="btn btn-sm my-1 py-0 btn-outline-primary"
-                  onclick="Lineage_classes.selection.listNodesSelection()">Show
+                  onclick="Lineage_selection.listNodesSelection()">Show
           </button>
           <span style="font-weight: bold; color: blue" id="Lineageclasses_selectedNodesCount" value="0" />
           <button class="btn btn-sm my-1 py-0 btn-outline-primary"
-                  onclick="Lineage_classes.selection.clearNodesSelection()">
+                  onclick="Lineage_selection.clearNodesSelection()">
             Clear
           </button>
         </div>

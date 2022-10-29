@@ -93,17 +93,17 @@ var Lineage_combine = (function () {
 
     self.showMergeNodesDialog = function (fromNode, toNode) {
         if (fromNode) {
-            Lineage_classes.selection.clearNodesSelection();
-            Lineage_classes.selection.addNodeToSelection(fromNode);
+           Lineage_selection.clearNodesSelection();
+           Lineage_selection.addNodeToSelection(fromNode);
         }
-        if (Lineage_classes.nodesSelection.length == 0) return alert("no nodes selected");
+        if (Lineage_selection.selectedNodes.length == 0) return alert("no nodes selected");
         $("#mainDialogDiv").load("snippets/lineage/lineageAggregateMergeNodesDialog.html", function () {
             common.fillSelectOptions("LineageMerge_targetSourceSelect", [Lineage_sources.activeSource]);
             if (toNode) {
                 $("#LineageMerge_targetNodeUriSelect").val(toNode.data.id);
             }
 
-            var jstreeData = Lineage_classes.selection.getSelectedNodesTree();
+            var jstreeData =Lineage_selection.getSelectedNodesTree();
 
             var options = {
                 withCheckboxes: true,

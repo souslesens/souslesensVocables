@@ -296,11 +296,11 @@ var Lineage_blend = (function() {
             self.propertiesWithoutDomainsAndRanges[Config.currentTopLevelOntology].forEach(function(propObj) {
 
               var cssClass = propStatusCssClassMap["G"];
-              var label = "any<b>-" + propObj.propLabel.value + "-></b>"
+              var label = "any<b>-" + propObj.propLabel.value + "->any</b>"
 
                 jstreeData.push({
                   id: propObj.prop.value,
-                  text: "<span class='" + cssClass + "'>" + label + "</span>",
+                  text: "<span class='" + cssClass + "'->" + label + "</span>",
                   parent: "#",
                   data: {
                     id: propObj.prop.value,
@@ -359,16 +359,12 @@ var Lineage_blend = (function() {
               self.domainOntologyProperties.forEach(function(item) {
                 if(!upperOntologyTreeProps[item.superProp])
                   return
-                var label =
-                  (item.domainLabel || "any") +
-                  "<b>-" +
-                  item.label +
-                  "-></b>" +
-                  (item.rangeLabel || "any");
+                var label =item.label
+
 
                 jstreeData.push({
                   id: item.id,
-                  text: "<span class='" + cssClass + "'>" + label + "</span>",
+                  text: "<span class='" + cssClass + "' style='font-weight: bold'>" + label + "</span>",
                   parent: item.superProp,
                   data: {
                     id: item.id,

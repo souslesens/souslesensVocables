@@ -21,7 +21,7 @@ var SVGexport = (function () {
             var networkContainer = network.body.container;
             var ctx = new C2S({
                 width: networkContainer.clientWidth,
-                height: networkContainer.clientWidth,
+                height: networkContainer.clientHeight,
                 embedImages: true,
             });
 
@@ -72,6 +72,8 @@ var SVGexport = (function () {
 
         function showSvg(svg) {
             var svgBlob = new Blob([svg], { type: "image/svg+xml" });
+
+            common.copyTextToClipboard(svg)
             openBlob(svgBlob, "network.svg");
         }
 

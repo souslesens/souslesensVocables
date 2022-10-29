@@ -5,7 +5,7 @@ Lineage_sources = (function() {
   self.activeSource = null;
   self.loadedSources = {};
   self.sourceDivsMap = {};
-  Lineage_classes.nodesSelection = [];
+
 
 
   self.init = function() {
@@ -17,7 +17,7 @@ Lineage_sources = (function() {
     self.activeSource = null;
     self.loadedSources = {};
     self.sourceDivsMap = {};
-    Lineage_classes.nodesSelection = [];
+   Lineage_selection.selectedNodes = [];
     self.setTheme(Config.defaultGraphTheme)
   };
 
@@ -67,6 +67,7 @@ Lineage_sources = (function() {
       self.activeSource = source;
       highlightSourceDiv(source);
       self.whiteboard_ActivateSource(source);
+      Lineage_decoration.refreshLegend(source)
     }
 
 
@@ -159,7 +160,7 @@ Lineage_sources = (function() {
     Lineage_sources.setTopLevelOntologyFromImports(source);
     Lineage_sources.registerSourceImports(source);
 
-    var drawTopConcepts = true;
+    var drawTopConcepts = false;
     if (drawTopConcepts) {
       Lineage_classes.drawTopConcepts(source, function(err) {
         if (err) return MainController.UI.message(err);
@@ -418,8 +419,8 @@ Lineage_sources = (function() {
       "Show/Hide individuals": Lineage_classes.showHideIndividuals,
       "Draw similar label nodes": Lineage_combine.getSimilars,
       "Selection": "",
-      "  Show": Lineage_classes.selection.listNodesSelection,
-      "  Clear": Lineage_classes.selection.clearNodesSelection
+      "  Show":Lineage_selection.listNodesSelection,
+      "  Clear":Lineage_selection.clearNodesSelection
 
 
     };
@@ -440,6 +441,8 @@ Lineage_sources = (function() {
 
 
   self.isSourceEditable = function(source) {
+    if(!Config.sources[source])
+      return console.log("no source "+source)
     const groups = authentication.currentUser.groupes;
     const currentAccessControls = groups.map((group) => {
       const defaultAccessControl = Config.profiles[group].defaultSourceAccessControl;
@@ -454,6 +457,20 @@ Lineage_sources = (function() {
     } else
       return false;
   };
+
+  self.clearSource=function(source) {
+    if (!source)
+      source = self.activeSource
+    if (visjsGraph.isGraphNotEmpty && visjsGraph.data) {
+      var nodes = visjsGraph.data.nodes.get();
+      var newNodes = [];
+      nodes.forEach(function(node) {
+        if (node.data && node.data.source == source)
+          newNodes.push({ id: node.id });
+      });
+      visjsGraph.data.nodes.remove(newNodes);
+    }
+  }
 
 
   self.setTheme = function(theme) {

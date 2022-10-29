@@ -26,9 +26,11 @@
             <li class="Lineage_ClassTabLi"><a href="#Lineage_ClassesTab">Classes</a></li>
 
             <li class="Lineage_ClassTabLi"><a href="#LineagePropertiesTab">Properties</a></li>
-            <li class="Lineage_ClassTabLi"><a href="#LineageRelationsTab">Relations</a></li>
+
             <li class="Lineage_ClassTabLi"><a href="#LineageLinkedDataTab">LinkedData</a></li>
-            <!--    <li class="Lineage_ClassTabLi"><a href="#LineageSetsTab">Sets</a></li>-->
+            <!--  <li class="Lineage_ClassTabLi"><a href="#LineageRelationsTab">Relations</a></li>
+
+             <li class="Lineage_ClassTabLi"><a href="#LineageSetsTab">Sets</a></li>-->
         </ul>
 
         <div class="" id="Lineage_ClassesTab">
@@ -72,7 +74,10 @@
                 <button onclick="Lineage_properties.exportRangeAndDomainsGraph(null);" style="margin: 3px">Export All</button>
             </div>
         </div>
-        <div id="LineageRelationsTab" style="display: flex; flex-direction: column">
+
+        <!--
+
+       <div id="LineageRelationsTab" style="display: flex; flex-direction: column">
             <div class="lineage_actionDiv">
                 <div class="lineage_actionDiv_title">Selection</div>
                 Nodes Selection
@@ -86,17 +91,12 @@
             <div class="lineage_actionDiv">
                 <div class="lineage_actionDiv_title">Existing relations</div>
                 <div>
-                    <!-- Properties
- <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showAllProperties('jstree')">List all</button>
- <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.showAllProperties('visjs')">Graph all</button>
- <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.exportProperties()">Export</button>
- <br>-->
+
                     <div>
                         filters
                         <div>
                             Property
-                            <!--  <select style="width: 300px" class="relation_filter" id="LineageRelations_property_select" onchange="Lineage_dictionary.onSelectDomainSourceLabel($(this).val())"></select>-->
-                            <select style="width: 300px" class="relation_filter" id="LineageRelations_property_select"></select>
+                             <select style="width: 300px" class="relation_filter" id="LineageRelations_property_select"></select>
                         </div>
                         <div>
                             TargetSource
@@ -131,38 +131,28 @@
             </div>
             <div></div>
 
-            <!--
-<div class="lineage_actionDiv">
-    <div class="lineage_actionDiv_title">Projection</div>
-    on source<br><select id="LineageRelations_setExactMatchSameAsSourceSelect"></select>
-    add<input type="checkbox" id="LineageRelations_setExactMatchSameAsSourceInitUIcBX">
-    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.projectSameAsRestrictionsOnSource()">Show Matches</button>
-    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.projectSameAsRestrictionsOnSource('orphans')">Show Orphans</button>
-    <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.saveProjectedGraph()">Save projected Graph</button>
-    <!__ <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_relations.removeExactMatchSameAs()">Remove</button>__>
 
-</div>-->
+
             <div></div>
             <div class="lineage_actionDiv">
                 <div class="lineage_actionDiv_title">ProjectedGraphs</div>
 
-                <!--   <select id="LineageRelations_projectedGraphsSelect" onclick="Lineage_relations.loadProjectedGraph($(this).val())"></select>-->
+
                 <div class="jstreeContainer">
                     <div id="LineageRelations_projectedGraphsTree"></div>
                 </div>
             </div>
 
-            <!--  <div class="jstreeContainer" style="width:90%">
-      <table id="Lineage_relationsTable"  style="width:350px;height: 700px"></table>
-  </div>-->
+
             <div class="jstreeContainer" style="width: 90%">
                 <div class="jstree" id="Lineage_relationsTree"></div>
             </div>
         </div>
 
-        <!--   <div id="LineageLinkedDataTab" style="display: flex; flex-direction: column"></div>
+           <div id="LineageLinkedDataTab" style="display: flex; flex-direction: column"></div>
         <div id="LineageSetsTab" style="display: flex; flex-direction: column"></div>
-    </div>-->
+        -->
+    </div>
     </div>
 
     <script>

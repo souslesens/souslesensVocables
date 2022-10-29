@@ -27,6 +27,7 @@ var Config = (function () {
     self.queryLimit = 10000;
     self.searchLimit = 500;
     self.searchDepth = 6;
+    self.defaultGraphTheme="dark"
     self.predicatesSource = "TSF-PREDICATES";
     self.dictionarySource = "TSF-DICTIONARY";
 

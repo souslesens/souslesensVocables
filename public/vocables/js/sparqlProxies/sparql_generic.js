@@ -802,7 +802,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
     var langFilter = "";
     if (!options || !options.lang)
       return "";
-    return " FILTER (lang("+variable+")='" + options.lang + "' || !lang(?label))  ";
+    return " FILTER (lang("+variable+")='" + options.lang + "' || !lang("+variable+"))  ";
   }
 
   self.getSourceTaxonomy = function(sourceLabel, options, callback) {

@@ -839,7 +839,7 @@ callbackSeries();
                       //add specific(mainSource) source properties to jstree data
                       function (callbackSeries) {
                           var specificSourceLabel = Lineage_common.currentSource || Lineage_sources.activeSource;
-                          var cssClass = "lineageAddEdgeDialog_topLevelOntologySpecificProp";
+                          var cssClass = "lineageAddEdgeDialog_domainOntologyProp";
                           jstreeData.forEach(function (node) {
                               if (self.currentSpecificObjectPropertiesMap[node.id]) {
                                   self.currentSpecificObjectPropertiesMap[node.id].forEach(function (item) {

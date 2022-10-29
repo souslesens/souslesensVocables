@@ -27,7 +27,7 @@ var Blender = (function () {
     self.onLoaded = function (/** @type {() => void} */ callback) {
         MainController.UI.message("");
 
-        MainController.UI.openRightPanel();
+        MainController.UI.showHideRightPanel();
         if (!MainController.currentTool) $("#graphDiv").html("");
         $("#rightPanelDiv").load("snippets/blender/blender.html", function () {
             var displayCreateDeleteResourceDiv = "none";

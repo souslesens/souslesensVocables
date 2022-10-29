@@ -132,6 +132,12 @@
         align-items: center;
         margin: 2px;
     }
+
+    .vis-manipulation{
+        margin: 10px;
+        width: 300px !important;
+        border-radius: 10px;
+    }
 </style>
 
 <!--<div class="SourceMatcher_paramsDiv">
@@ -151,8 +157,9 @@
 
     <div id="lineage_drawnSources" class="Lineage_objectDivContainer" style="gap:5px 10px">
       <div class="lineage_actionDiv_title"><span>Sources</span>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.showSourcesDialog()">+
-        </button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.resetAll()">R</button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.showSourcesDialog()">+</button>
+
       </div>
     </div>
 
@@ -177,9 +184,9 @@
               onclick="Lineage_classes.addNodesAndParentsToGraph()">Parents
       </button>
 
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
+   <!--   <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
               onclick="Lineage_classes.drawObjectProperties()">Properties
-      </button>
+      </button>-->
 
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
               onclick="Lineage_classes.drawRelations('direct')">Relations

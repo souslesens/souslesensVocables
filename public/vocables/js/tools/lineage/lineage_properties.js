@@ -552,6 +552,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
     }
 
     self.getRangeAndDomainsGraph(property, function(err, result) {
+
       if (err) return alert(err.responseText);
       var visjsData = { nodes: [], edges: [] };
       var existingNodes = {};
@@ -564,6 +565,8 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
 
       result.forEach(function(item) {
         var ok = 0;
+        if (!item.property || !item.property.value)
+          return;
         if (targetnodes) {
           if (item.range && targetnodes.indexOf(item.range.value) > -1) ok = 1;
           else if (item.domain && targetnodes.indexOf(item.domain.value) > -1) ok = 1;
@@ -618,9 +621,8 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
                 id: edgeId,
                 from: item.property.value,
                 to: subProperty.id,
-                // label: "range"
+                data: { id: edgeId, source: Lineage_sources.activeSource },
                 color: Lineage_classes.defaultEdgeColor,
-                //  dashes: true,
                 arrows: {
                   from: {
                     enabled: true,
@@ -628,478 +630,482 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
                     scaleFactor: 0.5
                   }
                 }
-              })
-              };
-            })
-          }
+              });
+            }
+            ;
+          });
+        }
 
 
-
-
-      if (item.subProperty) {
-        var subProperty = item.subProperty.value;
-        let label = item.subPropertyLabel ? item.subPropertyLabel.value : Sparql_common.getLabelFromURI(item.subProperty.value);
-        if (!existingNodes[subProperty]) {
-          existingNodes[subProperty] = 1;
-          visjsData.nodes.push({
-            id: subProperty,
-            label: label,
-            data: {
+        if (item.subProperty) {
+          var subProperty = item.subProperty.value;
+          let label = item.subPropertyLabel ? item.subPropertyLabel.value : Sparql_common.getLabelFromURI(item.subProperty.value);
+          if (!existingNodes[subProperty]) {
+            existingNodes[subProperty] = 1;
+            visjsData.nodes.push({
               id: subProperty,
               label: label,
-              subProperties: [],
-              source: Lineage_sources.activeSource
-            },
-            font: { color: "blue", size: 12 },
-            size: self.defaultShapeSize,
-            color: propColor,
-            shape: propShape
-          });
-        }
-        var edgeId = item.property.value + "_" + subProperty;
-        if (!existingNodes[edgeId]) {
-          existingNodes[edgeId] = 1;
-          visjsData.edges.push({
-            id: edgeId,
-            from: item.property.value,
-            to: subProperty,
-            // label: "range"
-            color: Lineage_classes.defaultEdgeColor,
-            //  dashes: true,
-            arrows: {
-              from: {
-                enabled: true,
-                type: Lineage_classes.defaultEdgeArrowType,
-                scaleFactor: 0.5
-              }
-            }
-          });
-        }
-      }
-
-      if (item.range) {
-        if (!existingNodes[item.range.value]) {
-          if (item.rangeType) {
-            if (item.rangeType.value.indexOf("Class") > -1) shape = Lineage_classes.defaultShape;
-            if (item.rangeType.value.indexOf("property") > -1) shape = self.defaultShape;
+              data: {
+                id: subProperty,
+                label: label,
+                subProperties: [],
+                source: Lineage_sources.activeSource
+              },
+              font: { color: "blue", size: 12 },
+              size: self.defaultShapeSize,
+              color: propColor,
+              shape: propShape
+            });
           }
-          existingNodes[item.range.value] = 1;
-          let rangeLabel = item.rangeLabel ? item.rangeLabel.value : Sparql_common.getLabelFromURI(item.range.value);
-          visjsData.nodes.push({
-            id: item.range.value,
-            label: rangeLabel,
-            data: {
+          var edgeId = item.property.value + "_" + subProperty;
+          if (!existingNodes[edgeId]) {
+            existingNodes[edgeId] = 1;
+            visjsData.edges.push({
+              id: edgeId,
+              from: item.property.value,
+              to: subProperty,
+              color: Lineage_classes.defaultEdgeColor,
+              data: { id: edgeId, source: Lineage_sources.activeSource },
+              arrows: {
+                from: {
+                  enabled: true,
+                  type: Lineage_classes.defaultEdgeArrowType,
+                  scaleFactor: 0.5
+                }
+              }
+            });
+          }
+        }
+
+        if (item.range) {
+          if (!existingNodes[item.range.value]) {
+            if (item.rangeType) {
+              if (item.rangeType.value.indexOf("Class") > -1) shape = Lineage_classes.defaultShape;
+              if (item.rangeType.value.indexOf("property") > -1) shape = self.defaultShape;
+            }
+            existingNodes[item.range.value] = 1;
+            let rangeLabel = item.rangeLabel ? item.rangeLabel.value : Sparql_common.getLabelFromURI(item.range.value);
+            visjsData.nodes.push({
               id: item.range.value,
               label: rangeLabel,
-              source: Lineage_sources.activeSource
-            },
-            size: self.defaultShapeSize,
-            color: color,
-            shape: classShape
-          });
-        }
-        edgeId = item.property.value + "_" + item.range.value;
-        if (!existingNodes[edgeId]) {
-          existingNodes[edgeId] = 1;
-          visjsData.edges.push({
-            id: edgeId,
-            from: item.property.value,
-            to: item.range.value,
-            // label: "range"
-            color: "brown",
-            // dashes: true,
-            arrows: {
-              to: {
-                enabled: true,
-                type: Lineage_classes.defaultEdgeArrowType,
-                scaleFactor: 0.5
-              }
-            }
-          });
-        }
-      }
-      if (item.domain) {
-        if (!existingNodes[item.domain.value]) {
-          existingNodes[item.domain.value] = 1;
-          shape = "text";
-          if (item.domainType) {
-            if (item.domainType.value.indexOf("Class") > -1) shape = Lineage_classes.defaultShape;
-            if (item.domainType.value.indexOf("property") > -1) shape = self.defaultShape;
+              data: {
+                id: item.range.value,
+                label: rangeLabel,
+                source: Lineage_sources.activeSource
+              },
+              size: self.defaultShapeSize,
+              color: color,
+              shape: classShape
+            });
           }
-          let domainLabel = item.domainLabel ? item.domainLabel.value : Sparql_common.getLabelFromURI(item.domain.value);
-          visjsData.nodes.push({
-            id: item.domain.value,
-            label: domainLabel,
-            data: {
+          edgeId = item.property.value + "_" + item.range.value;
+          if (!existingNodes[edgeId]) {
+            existingNodes[edgeId] = 1;
+            visjsData.edges.push({
+              id: edgeId,
+              from: item.property.value,
+              to: item.range.value,
+              data: { id: edgeId, source: Lineage_sources.activeSource },
+              color: "#cb6601",
+              arrows: {
+                to: {
+                  enabled: true,
+                  type: Lineage_classes.defaultEdgeArrowType,
+                  scaleFactor: 0.5
+                }
+              }
+            });
+          }
+        }
+        if (item.domain) {
+          if (!existingNodes[item.domain.value]) {
+            existingNodes[item.domain.value] = 1;
+            shape = "text";
+            if (item.domainType) {
+              if (item.domainType.value.indexOf("Class") > -1) shape = Lineage_classes.defaultShape;
+              if (item.domainType.value.indexOf("property") > -1) shape = self.defaultShape;
+            }
+            let domainLabel = item.domainLabel ? item.domainLabel.value : Sparql_common.getLabelFromURI(item.domain.value);
+            visjsData.nodes.push({
               id: item.domain.value,
               label: domainLabel,
-              source: Lineage_sources.activeSource
-            },
-            color: color,
-            size: self.defaultShapeSize,
-            shape: classShape
-          });
-        }
-        edgeId = item.property.value + "_" + item.domain.value;
-        if (!existingNodes[edgeId]) {
-          existingNodes[edgeId] = 1;
-          visjsData.edges.push({
-            id: edgeId,
-            from: item.property.value,
-            to: item.domain.value,
-            color: "green",
-            //  dashes: true
-            arrows: {
-              from: {
-                enabled: true,
-                type: Lineage_classes.defaultEdgeArrowType,
-                scaleFactor: 0.5
-              }
-            }
-          });
-        }
-      }
-      if (item.range) {
-        if (!existingNodes[item.range.value]) {
-          shape = "text";
-          if (item.rangeType) {
-            if (item.rangeType.value.indexOf("Class") > -1) shape = Lineage_classes.defaultShape;
-            if (item.rangeType.value.indexOf("property") > -1) shape = self.propertiesLineage_classes.defaultShape;
+              data: {
+                id: item.domain.value,
+                label: domainLabel,
+                source: Lineage_sources.activeSource
+              },
+              color: color,
+              size: self.defaultShapeSize,
+              shape: classShape
+            });
           }
-          existingNodes[item.range.value] = 1;
+          edgeId = item.property.value + "_" + item.domain.value;
+          if (!existingNodes[edgeId]) {
+            existingNodes[edgeId] = 1;
+            visjsData.edges.push({
+              id: edgeId,
+              from: item.property.value,
+              to: item.domain.value,
+              color: "#008000",
+              data: { id: edgeId, source: Lineage_sources.activeSource },
+              arrows: {
+                from: {
+                  enabled: true,
+                  type: Lineage_classes.defaultEdgeArrowType,
+                  scaleFactor: 0.5
+                }
+              }
+            });
+          }
+        }
+        if (item.range) {
+          if (!existingNodes[item.range.value]) {
+            shape = "text";
+            if (item.rangeType) {
+              if (item.rangeType.value.indexOf("Class") > -1) shape = Lineage_classes.defaultShape;
+              if (item.rangeType.value.indexOf("property") > -1) shape = self.propertiesLineage_classes.defaultShape;
+            }
+            existingNodes[item.range.value] = 1;
 
-          visjsData.nodes.push({
-            id: item.range.value,
-            label: item.rangeLabel.value,
-            data: {
+            visjsData.nodes.push({
               id: item.range.value,
               label: item.rangeLabel.value,
-              source: Lineage_sources.activeSource
-            },
-            color: color,
-            size: self.defaultShapeSize,
-            shape: classShape
-          });
-        }
-        edgeId = item.property.value + "_" + item.range.value;
-        if (!existingNodes[edgeId]) {
-          existingNodes[edgeId] = 1;
-          visjsData.edges.push({
-            id: edgeId,
-            from: item.property.value,
-            to: item.range.value,
-            color: "brown",
-            //  dashes: true,
-            arrows: {
-              to: {
-                enabled: true,
-                type: Lineage_classes.defaultEdgeArrowType,
-                scaleFactor: 0.5
+              data: {
+                id: item.range.value,
+                label: item.rangeLabel.value,
+                source: Lineage_sources.activeSource
+              },
+              color: color,
+              size: self.defaultShapeSize,
+              shape: classShape
+            });
+          }
+          edgeId = item.property.value + "_" + item.range.value;
+          if (!existingNodes[edgeId]) {
+            existingNodes[edgeId] = 1;
+            visjsData.edges.push({
+              id: edgeId,
+              from: item.property.value,
+              to: item.range.value,
+              color: "#cb6601",
+              data: { id: edgeId, source: Lineage_sources.activeSource },
+              arrows: {
+                to: {
+                  enabled: true,
+                  type: Lineage_classes.defaultEdgeArrowType,
+                  scaleFactor: 0.5
+                }
               }
-            }
-          });
+            });
+          }
         }
-      }
 
-      if (item.inverseProperty) {
-        if (!existingNodes[item.inverseProperty.value]) {
-          existingNodes[item.inverseProperty.value] = 1;
-          var propLabel = item.inversePropertyLabel ? item.inversePropertyLabel.value : Sparql_common.getLabelFromURI(item.inverseProperty.value);
-          visjsData.nodes.push({
-            id: item.inverseProperty.value,
-            label: propLabel,
-            data: {
+        if (item.inverseProperty) {
+          if (!existingNodes[item.inverseProperty.value]) {
+            existingNodes[item.inverseProperty.value] = 1;
+            var propLabel = item.inversePropertyLabel ? item.inversePropertyLabel.value : Sparql_common.getLabelFromURI(item.inverseProperty.value);
+            visjsData.nodes.push({
               id: item.inverseProperty.value,
               label: propLabel,
-              source: Lineage_sources.activeSource
-            },
-            color: propColor,
-            size: self.defaultShapeSize,
-            shape: propShape
-          });
-        }
-        edgeId = item.inverseProperty.value + "_" + item.property.value;
-        if (!existingNodes[edgeId]) {
-          existingNodes[edgeId] = 1;
-          visjsData.edges.push({
-            id: edgeId,
-            from: item.property.value,
-            to: item.inverseProperty.value,
-            color: "blue",
-            //label: "inverseOf",
-            dashes: true
-          });
-        }
-      }
-    });
-
-    if (!visjsGraph.data || !visjsGraph.data.nodes) {
-      var options = {
-        onclickFn: Lineage_classes.graphActions.onNodeClick,
-        onRightClickFn: Lineage_classes.graphActions.showGraphPopupMenu
-      };
-      visjsGraph.draw("graphDiv", visjsData, options);
-    } else {
-      visjsGraph.data.nodes.add(visjsData.nodes);
-      visjsGraph.data.edges.add(visjsData.edges);
-    }
-    visjsGraph.network.fit();
-    self.graphInited = true;
-  })
-  ;
-};
-
-self.getRangeAndDomainsGraph = function(property, callback) {
-  var source = Lineage_sources.activeSource;
-  var propId = null;
-  if (property) {
-    source = property.data.source;
-    propId = property.id;
-  }
-  //if search in multiple sources and choose a source : draw all the properties found for this source
-  if (property && property.parent == "#") {
-    Lineage_sources.activeSource = property.data.source;
-    propId = property.children;
-  }
-
-
-  if (propId && Config.sources[source].schemaType == "OWL") {
-    OwlSchema.initSourceSchema(source, function(err, schema) {
-      if (err) return callback(err);
-      //  var options={filter:"Filter (NOT EXISTS{?property rdfs:subPropertyOf ?x})"}
-
-      Sparql_schema.getPropertiesRangeAndDomain(schema, propId, null, { mandatoryDomain: 0 }, function(err, result) {
-        if (err) return callback(err);
-        return callback(null, result);
-      });
-    });
-  } else if (Config.sources[source].schemaType == "OWL") {
-    var options = {};
-    var mode = $("#LineagePropertie_nodesSelectionSelect").val();
-    if (mode == "currentGraphNodes") {
-      if (!visjsGraph.isGraphNotEmpty)
-        return alert("graph is empty");
-      options.filter = Sparql_common.setFilter("propDomain", visjsGraph.data.nodes.getIds());
-
-    }
-
-    Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, options, function(err, result) {
-      if (err) return callback(err);
-      var allProps = [];
-
-      for (var propId in result) {
-        allProps.push(result[propId]);
-      }
-      allProps.forEach(function(item) {
-        item.property = { value: item.prop };
-        item.propertyLabel = { value: item.propLabel };
-        item.domain = { value: item.domain };
-        item.domainLabel = { value: item.domainLabel };
-        item.range = { value: item.range };
-        item.rangeLabel = { value: item.rangeLabel };
-        item.subProperty = { value: item.subProp };
-        item.subPropertyLabel = { value: item.subPropLabel };
-        item.inverseProperty = { value: item.inverseProp };
-        item.subProperties = [];
-        item.subProps.forEach(function(subPropId) {
-          if (result[subPropId]) {
-            item.subProperties.push({ id: subPropId, label: result[subPropId].propLabel });
+              data: {
+                id: item.inverseProperty.value,
+                label: propLabel,
+                source: Lineage_sources.activeSource
+              },
+              color: propColor,
+              size: self.defaultShapeSize,
+              shape: propShape
+            });
           }
-        });
-        item.inversePropertyLabel = { value: item.inversePropLabel };
+          edgeId = item.inverseProperty.value + "_" + item.property.value;
+          if (!existingNodes[edgeId]) {
+            existingNodes[edgeId] = 1;
+            visjsData.edges.push({
+              id: edgeId,
+              from: item.property.value,
+              to: item.inverseProperty.value,
+              color: "#0067bb",
+              data: { id: edgeId, source: Lineage_sources.activeSource },
+              dashes: true
+            });
+          }
+        }
       });
 
-      return callback(null, allProps);
-      Sparql_OWL.getPropertiesWithoutDomainsAndRanges(source, {}, function(err, result2) {
-        if (err) return alert(err);
+      if (!visjsGraph.data || !visjsGraph.data.nodes) {
+        var options = {
+          onclickFn: Lineage_classes.graphActions.onNodeClick,
+          onRightClickFn: Lineage_classes.graphActions.showGraphPopupMenu
+        };
+        visjsGraph.draw("graphDiv", visjsData, options);
+      } else {
+        visjsGraph.data.nodes.add(visjsData.nodes);
+        visjsGraph.data.edges.add(visjsData.edges);
+      }
+      visjsGraph.network.fit();
+      self.graphInited = true;
+    })
+    ;
+  };
 
-        result2.forEach(function(item) {
-          item.property = item.prop;
-          item.propertyLabel = item.propLabel;
-          item.subProperty = item.subProp;
-          item.inverseProperty = item.inverseProp;
-          item.subPropertyLabel = item.subPropLabel;
-          item.inversePropertyLabel = item.inversePropLabel;
+  self.getRangeAndDomainsGraph = function(property, callback) {
+    var source = Lineage_sources.activeSource;
+    var propId = null;
+    if (property) {
+      source = property.data.source;
+      propId = property.id;
+    }
+    //if search in multiple sources and choose a source : draw all the properties found for this source
+    if (property && property.parent == "#") {
+      Lineage_sources.activeSource = property.data.source;
+      propId = property.children;
+    }
+
+// when click on property in properties jstree
+    if (propId && Config.sources[source].schemaType == "OWL") {
+      OwlSchema.initSourceSchema(source, function(err, schema) {
+        if (err) return callback(err);
+
+
+        Sparql_schema.getPropertiesRangeAndDomain(schema, propId, null, { mandatoryDomain: 0 }, function(err, result) {
+          if (err) return callback(err);
+          return callback(null, result);
         });
-        allProps = allProps.concat(result2);
+      });
+    } else if (Config.sources[source].schemaType == "OWL") {
+      var options = {};
+      var mode = $("#LineagePropertie_nodesSelectionSelect").val();
+      var filterNodes = null;
+      if (mode == "currentGraphNodes") {
+        if (visjsGraph.isGraphNotEmpty) {
+          filterNodes = visjsGraph.data.nodes.getIds();
+        }
+
+
+      }
+
+      Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, options, function(err, result) {
+        if (err) return callback(err);
+        var allProps = [];
+
+        for (var propId in result) {
+          var item = result[propId];
+          if (!filterNodes || filterNodes.indexOf(item.domain) > -1 || filterNodes.indexOf(item.range) > -1)
+            allProps.push(item);
+        }
+
+
+        allProps.forEach(function(item) {
+
+          item.property = { value: item.prop };
+          item.propertyLabel = { value: item.propLabel };
+          item.domain = { value: item.domain };
+          item.domainLabel = { value: item.domainLabel };
+          item.range = { value: item.range };
+          item.rangeLabel = { value: item.rangeLabel };
+          item.subProperty = { value: item.subProp };
+          item.subPropertyLabel = { value: item.subPropLabel };
+          item.inverseProperty = { value: item.inverseProp };
+          item.subProperties = [];
+          item.subProps.forEach(function(subPropId) {
+            if (result[subPropId]) {
+              item.subProperties.push({ id: subPropId, label: result[subPropId].propLabel });
+            }
+          });
+          item.inversePropertyLabel = { value: item.inversePropLabel };
+        });
 
         return callback(null, allProps);
-      });
-    });
-  } else if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH") {
-    let options = {};
-    Sparql_OWL.getIndividualProperties(source, targetnodes, null, null, options, function(err, result) {
-      if (err) return callback(err);
+        Sparql_OWL.getPropertiesWithoutDomainsAndRanges(source, {}, function(err, result2) {
+          if (err) return alert(err);
 
-      result.forEach(function(item) {
-        item.range = { value: item.object.value };
-        item.rangeLabel = { value: item.objectLabel.value };
-        item.domain = { value: item.subject.value };
-        item.domainLabel = { value: item.subjectLabel.value };
-      });
-      return callback(null, result);
-    });
-  }
-};
-
-self.graphActions = {
-  expandNode: function(node, _point, _event) {
-    self.drawGraph(node);
-  },
-  showNodeInfos: function() {
-    SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
-  }
-};
-
-self.searchAllSourcesTerm = function() {
-  var term = $("#LineageProperties_searchAllSourcesTermInput").val();
-  if (!term || term == "") term == null; // return
-
-  var exactMatch = $("#LineageProperties_allExactMatchSearchCBX").prop("checked");
-  var searchAllSources = $("#LineageProperties_searchInAllSources").prop("checked");
-  var searchType = $("#LineageProperties_searchAllType").val();
-  //if (searchType)
-  var searchedSources = [];
-  if (searchAllSources) {
-    for (var sourceLabel in Config.sources) {
-      if (Config.sources[sourceLabel].schemaType == "OWL") searchedSources.push(sourceLabel);
-    }
-  } else {
-    if (!Lineage_sources.activeSource) return alert("select a source or search in all source");
-    searchedSources.push(Lineage_sources.activeSource);
-  }
-  var jstreeData = [];
-  var uniqueIds = {};
-
-  async.eachSeries(
-    searchedSources,
-    function(sourceLabel, callbackEach) {
-      //  setTimeout(function () {
-
-      MainController.UI.message("searching in " + sourceLabel);
-      //  }, 100)
-
-      self.getPropertiesjsTreeData(
-        sourceLabel,
-        null,
-        term,
-        {
-          exactMatch: exactMatch,
-          justPropertyAndLabel: 1,
-          searchType: searchType
-        },
-        function(err, result) {
-          if (err) return callbackEach(err);
-
-          result.forEach(function(item) {
-            if (!uniqueIds[item.id]) {
-              uniqueIds[item.id] = 1;
-              item.parent = sourceLabel;
-              jstreeData.push(item);
-            }
+          result2.forEach(function(item) {
+            item.property = item.prop;
+            item.propertyLabel = item.propLabel;
+            item.subProperty = item.subProp;
+            item.inverseProperty = item.inverseProp;
+            item.subPropertyLabel = item.subPropLabel;
+            item.inversePropertyLabel = item.inversePropLabel;
           });
+          allProps = allProps.concat(result2);
 
-          /*  jstreeData.forEach(function (item) {
-if (!uniqueIds[item.parent]) item.parent = sourceLabel;
-});*/
-          if (result.length > 0) {
-            var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>";
-            jstreeData.push({ id: sourceLabel, text: text, parent: "#", data: { source: sourceLabel } });
-          }
+          return callback(null, allProps);
+        });
+      });
+    } else if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH") {
+      let options = {};
+      Sparql_OWL.getIndividualProperties(source, targetnodes, null, null, options, function(err, result) {
+        if (err) return callback(err);
 
-          callbackEach();
-        }
-      );
+        result.forEach(function(item) {
+          item.range = { value: item.object.value };
+          item.rangeLabel = { value: item.objectLabel.value };
+          item.domain = { value: item.subject.value };
+          item.domainLabel = { value: item.subjectLabel.value };
+        });
+        return callback(null, result);
+      });
+    }
+  };
+
+  self.graphActions = {
+    expandNode: function(node, _point, _event) {
+      self.drawGraph(node);
     },
-    function(err) {
-      if (err) MainController.UI.message(err, true);
-
-      if (jstreeData.length == 0) $("#Lineage_propertiesTree").html("no properties found");
-
-      MainController.UI.message(jstreeData.length + " nodes found", true);
-      var options = { selectTreeNodeFn: Lineage_properties.onTreeNodeClick, openAll: true };
-      options.contextMenu = self.jstreeContextMenu();
-      common.jstree.loadJsTree("Lineage_propertiesTree", jstreeData, options);
+    showNodeInfos: function() {
+      SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
     }
-  );
-};
+  };
 
-self.drawPropsRangeAndDomainMatrix = function(source) {
-  var classes = [];
-  var matrixMap = {};
-  async.series(
-    [
-      //list classes and init matrixMap
-      function(callbackSeries) {
-        Sparql_OWL.getDictionary(source, null, null, function(err, result) {
-          if (err) return callback(err);
-          result.forEach(function(item) {
-            classes.push(item.id.value);
+  self.searchAllSourcesTerm = function() {
+    var term = $("#LineageProperties_searchAllSourcesTermInput").val();
+    if (!term || term == "") term == null; // return
+
+    var exactMatch = $("#LineageProperties_allExactMatchSearchCBX").prop("checked");
+    var searchAllSources = $("#LineageProperties_searchInAllSources").prop("checked");
+    var searchType = $("#LineageProperties_searchAllType").val();
+    //if (searchType)
+    var searchedSources = [];
+    if (searchAllSources) {
+      for (var sourceLabel in Config.sources) {
+        if (Config.sources[sourceLabel].schemaType == "OWL") searchedSources.push(sourceLabel);
+      }
+    } else {
+      if (!Lineage_sources.activeSource) return alert("select a source or search in all source");
+      searchedSources.push(Lineage_sources.activeSource);
+    }
+    var jstreeData = [];
+    var uniqueIds = {};
+
+    async.eachSeries(
+      searchedSources,
+      function(sourceLabel, callbackEach) {
+        //  setTimeout(function () {
+
+        MainController.UI.message("searching in " + sourceLabel);
+        //  }, 100)
+
+        self.getPropertiesjsTreeData(
+          sourceLabel,
+          null,
+          term,
+          {
+            exactMatch: exactMatch,
+            justPropertyAndLabel: 1,
+            searchType: searchType
+          },
+          function(err, result) {
+            if (err) return callbackEach(err);
+
+            result.forEach(function(item) {
+              if (!uniqueIds[item.id]) {
+                uniqueIds[item.id] = 1;
+                item.parent = sourceLabel;
+                jstreeData.push(item);
+              }
+            });
+
+            /*  jstreeData.forEach(function (item) {
+  if (!uniqueIds[item.parent]) item.parent = sourceLabel;
+  });*/
+            if (result.length > 0) {
+              var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>";
+              jstreeData.push({ id: sourceLabel, text: text, parent: "#", data: { source: sourceLabel } });
+            }
+
+            callbackEach();
+          }
+        );
+      },
+      function(err) {
+        if (err) MainController.UI.message(err, true);
+
+        if (jstreeData.length == 0) $("#Lineage_propertiesTree").html("no properties found");
+
+        MainController.UI.message(jstreeData.length + " nodes found", true);
+        var options = { selectTreeNodeFn: Lineage_properties.onTreeNodeClick, openAll: true };
+        options.contextMenu = self.jstreeContextMenu();
+        common.jstree.loadJsTree("Lineage_propertiesTree", jstreeData, options);
+      }
+    );
+  };
+
+  self.drawPropsRangeAndDomainMatrix = function(source) {
+    var classes = [];
+    var matrixMap = {};
+    async.series(
+      [
+        //list classes and init matrixMap
+        function(callbackSeries) {
+          Sparql_OWL.getDictionary(source, null, null, function(err, result) {
+            if (err) return callback(err);
+            result.forEach(function(item) {
+              classes.push(item.id.value);
+            });
+            classes.forEach(function(aClass1) {
+              matrixMap[aClass1] = {};
+
+              classes.forEach(function(aClass2) {
+                matrixMap[aClass1][aClass2] = "";
+              });
+            });
+            return callbackSeries();
           });
-          classes.forEach(function(aClass1) {
-            matrixMap[aClass1] = {};
+        },
+        //get props ranges and domains
+        function(callbackSeries) {
+          Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, {}, function(err, result) {
+            if (err) return callback(err);
+            result.forEach(function(item) {
+              var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
+              if (item.domain && item.range) matrixMap[item.domain.value][item.range.value] = propLabel;
+              else if (item.domain) matrixMap[item.domain.value]["isDomain"] = propLabel;
+              else if (item.range) matrixMap[item.range.value]["isRange"] = propLabel;
+            });
+            return callbackSeries();
+          });
+        },
+        //draw matrix
+        function(callbackSeries) {
+          var cols = [];
+          var dataSet = [];
+
+          var domainsRow = [""];
+          classes.forEach(function(aClass1, index1) {
+            let class1Label = Sparql_common.getLabelFromURI(aClass1);
+            cols.push({ title: class1Label, defaultContent: "" });
+
+            let row = [];
+            var cell = "";
+
+            if (matrixMap[aClass1]["isRange"]) cell += matrixMap[aClass1]["isRange"];
+            row.push(cell);
 
             classes.forEach(function(aClass2) {
-              matrixMap[aClass1][aClass2] = "";
-            });
-          });
-          return callbackSeries();
-        });
-      },
-      //get props ranges and domains
-      function(callbackSeries) {
-        Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, {}, function(err, result) {
-          if (err) return callback(err);
-          result.forEach(function(item) {
-            var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
-            if (item.domain && item.range) matrixMap[item.domain.value][item.range.value] = propLabel;
-            else if (item.domain) matrixMap[item.domain.value]["isDomain"] = propLabel;
-            else if (item.range) matrixMap[item.range.value]["isRange"] = propLabel;
-          });
-          return callbackSeries();
-        });
-      },
-      //draw matrix
-      function(callbackSeries) {
-        var cols = [];
-        var dataSet = [];
-
-        var domainsRow = [""];
-        classes.forEach(function(aClass1, index1) {
-          let class1Label = Sparql_common.getLabelFromURI(aClass1);
-          cols.push({ title: class1Label, defaultContent: "" });
-
-          let row = [];
-          var cell = "";
-
-          if (matrixMap[aClass1]["isRange"]) cell += matrixMap[aClass1]["isRange"];
-          row.push(cell);
-
-          classes.forEach(function(aClass2) {
-            if (index1 == 0) {
+              if (index1 == 0) {
+                var cell = "";
+                if (matrixMap[aClass2]["isDomain"]) cell = matrixMap[aClass2]["isDomain"];
+                domainsRow.push(cell);
+              }
               var cell = "";
-              if (matrixMap[aClass2]["isDomain"]) cell = matrixMap[aClass2]["isDomain"];
-              domainsRow.push(cell);
-            }
-            var cell = "";
-            if (matrixMap[aClass1][aClass2]) cell = matrixMap[aClass1][aClass2];
+              if (matrixMap[aClass1][aClass2]) cell = matrixMap[aClass1][aClass2];
 
-            row.push(cell);
+              row.push(cell);
+            });
+            dataSet.push(row);
           });
-          dataSet.push(row);
-        });
-        dataSet.splice(0, 0, domainsRow);
-        cols.splice(0, 0, { title: "any", defaultContent: "" });
-        let x = dataSet;
-        Export.showDataTable(null, cols, dataSet);
-        return callbackSeries();
-      }
-    ],
+          dataSet.splice(0, 0, domainsRow);
+          cols.splice(0, 0, { title: "any", defaultContent: "" });
+          let x = dataSet;
+          Export.showDataTable(null, cols, dataSet);
+          return callbackSeries();
+        }
+      ],
 
-    function(err) {
-    }
-  );
-};
-return self;
+      function(err) {
+      }
+    );
+  };
+  return self;
 })
 ();

@@ -474,6 +474,8 @@ var Sparql_OWL = (function() {
       fromStr +
       " WHERE   {?prop rdf:type owl:ObjectProperty. OPTIONAL{?prop rdfs:label ?propLabel.} " +
       " OPTIONAL {?prop rdfs:subPropertyOf ?superProp. OPTIONAL{?superProp rdfs:label ?superPropLabel. }} " +
+      " OPTIONAL {?prop rdfs:domain ?domain. OPTIONAL{?domain rdfs:label ?domainLabel. }} " +
+      " OPTIONAL {?prop rdfs:range ?range. OPTIONAL{?range rdfs:label ?rangeLabel. }} " +
       "}  limit " +
       Config.queryLimit;
 
@@ -1010,7 +1012,10 @@ var Sparql_OWL = (function() {
 
 
   self.getInferredPropertiesDomainsAndRanges = function(sourceLabel, options, callback) {
+    if(!options)
+      options={}
     var fromStr = Sparql_common.getFromStr(sourceLabel);
+
     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
       "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
       "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -1126,9 +1131,11 @@ var Sparql_OWL = (function() {
       "  ?prop rdf:type owl:ObjectProperty.}" +
       "    minus {" +
       "    ?prop rdf:type owl:ObjectProperty.?prop rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  filter ( isIRI(?x)) " +
+      " optional { ?prop rdfs:label|skos:prefLabel  ?propLabel}"+
       "  }" +
       "   minus {" +
       "    ?prop rdf:type owl:ObjectProperty.?prop (owl:inverseOf|^owl:inverseOf)/rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x filter ( isIRI(?x))  " +
+      " optional { ?prop rdfs:label|skos:prefLabel  ?propLabel}"+
       "  }" +
       "} LIMIT 20000";
 

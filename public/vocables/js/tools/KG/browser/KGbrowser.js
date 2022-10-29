@@ -28,7 +28,7 @@ var KGbrowser = (function () {
         KGbrowserCustom.initsuperClassesPalette();
 
         $("#accordion").accordion("option", { active: 1 });
-        MainController.UI.openRightPanel();
+        MainController.UI.showHideRightPanel();
         $("#rightPanelDiv").load("snippets/KG/KGbrowserRightPanel.html", function () {
             $("#KGbrowser_accordion").accordion();
             $("#KGbrowser_accordion").accordion("option", { active: 0 });

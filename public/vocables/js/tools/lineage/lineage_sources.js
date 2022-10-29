@@ -18,6 +18,12 @@ Lineage_sources = (function() {
     self.loadedSources = {};
     self.sourceDivsMap = {};
     Lineage_classes.nodesSelection = [];
+    self.setTheme(Config.defaultGraphTheme)
+  };
+
+  self.resetAll = function() {
+    self.init();
+    self.showSourcesDialog();
   };
 
   self.showSourcesDialog = function() {
@@ -108,14 +114,18 @@ Lineage_sources = (function() {
     var newNodes = [];
     nodes.forEach(function(node) {
       nodesMapSources[node.id] = node.data.source;
-      var fontColor = "#343434";
+      //  var fontColor = "#343434";
       var opacity = 1.0;
       if (node.data.source != source) {
         opacity = 0.2;
-        fontColor = "#ddd";
+        //fontColor = "#ddd";
       }
       // newNodes.push({id:node.id, "color":{"opacity":opacity}})
-      newNodes.push({ id: node.id, "color": common.colorToRgba(node.color, opacity), font: { color: fontColor } });
+      newNodes.push({
+        id: node.id,
+        "color": common.colorToRgba(node.color, opacity),
+        font: { color: common.colorToRgba(Lineage_classes.defaultNodeFontColor, opacity) }
+      });
 
     });
     visjsGraph.data.nodes.update(newNodes);
@@ -123,14 +133,18 @@ Lineage_sources = (function() {
     var edges = visjsGraph.data.edges.get();
     var newEdges = [];
     edges.forEach(function(edge) {
-      var fontColor = "#343434";
+      //  var fontColor = "#343434";
       var opacity = 1.0;
       if (nodesMapSources[edge.from] != source) {
         opacity = 0.2;
-        fontColor = "#ddd";
+        //  fontColor = "#ddd";
       }
       // newNodes.push({id:node.id, "color":{"opacity":opacity}})
-      newEdges.push({ id: edge.id, "color": common.colorToRgba(edge.color, opacity), font: { color: fontColor } });
+      newEdges.push({
+        id: edge.id,
+        "color": common.colorToRgba(edge.color, opacity),
+        font: { color: common.colorToRgba(Lineage_classes.defaultEdgeFontColor, opacity), multi: true, size: 10,strokeWidth:0,strokeColor:0,ital:true  }
+      });
 
     });
     visjsGraph.data.edges.update(newEdges);
@@ -144,23 +158,7 @@ Lineage_sources = (function() {
     self.registerSource(source);
     Lineage_sources.setTopLevelOntologyFromImports(source);
     Lineage_sources.registerSourceImports(source);
-    // $("#Lineage_sourceLabelDiv").html(source);
 
-
-    if (false) {
-
-      Lineage_combine.init();
-      Lineage_relations.init(true);
-
-      Lineage_decoration.init();
-      Lineage_linkedData.init();
-      Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(self.activeSource);
-    }
-
-    /*    if (!visjsGraph.isGraphNotEmpty() && Config.sources[Lineage_sources.activeSource].editable) {
-          var visjsData = { nodes: [], edges: [] };
-          self.drawNewGraph(visjsData);
-        }*/
     var drawTopConcepts = true;
     if (drawTopConcepts) {
       Lineage_classes.drawTopConcepts(source, function(err) {
@@ -195,12 +193,15 @@ Lineage_sources = (function() {
 
   };
   self.showSourceDivPopupMenu = function(sourceDivId) {
+    event.stopPropagation();
+    var source = Lineage_sources.sourceDivsMap[sourceDivId];
     var html =
-      "    <span  class=\"popupMenuItem\" onclick=\"Lineage_sources.menuActions.closeSource();\"> Close</span>" +
-      "    <span  class=\"popupMenuItem\" onclick=\"Lineage_sources.menuActions.hideSource();\"> Hide </span>" +
-      " <span  class=\"popupMenuItem\" onclick=\"Lineage_sources.menuActions.showSource();\"> Show </span>" +
-      " <span  class=\"popupMenuItem\" onclick=\"Lineage_sources.menuActions.groupSource();\"> Group </span>" +
-      " <span  class=\"popupMenuItem\" onclick=\"Lineage_sources.menuActions.ungroupSource();\"> ungroup </span>";
+      "    <span  class=\"popupMenuItem\" onclick=\"Lineage_sources.menuActions.setSourceOpacity('" + source + "');\"> Opacity</span>" +
+      "    <span  class=\"popupMenuItem\" onclick=\"Lineage_sources.menuActions.closeSource('" + source + "');\"> Close</span>" +
+      "    <span  class=\"popupMenuItem\" onclick=\"Lineage_sources.menuActions.hideSource('" + source + "');\"> Hide </span>" +
+      " <span  class=\"popupMenuItem\" onclick=\"Lineage_sources.menuActions.showSource('" + source + "');\"> Show </span>" +
+      " <span  class=\"popupMenuItem\" onclick=\"Lineage_sources.menuActions.groupSource('" + source + "');\"> Group </span>" +
+      " <span  class=\"popupMenuItem\" onclick=\"Lineage_sources.menuActions.ungroupSource('" + source + "');\"> ungroup </span>";
     $("#graphPopupDiv").html(html);
     var e = window.event;
     var point = { x: e.pageX, y: e.pageY };
@@ -222,13 +223,14 @@ Lineage_sources = (function() {
   };
 
 
-  self.showHideCurrentSourceNodes = function(/** @type {any} */ hide) {
-
+  self.showHideCurrentSourceNodes = function(source,/** @type {any} */ hide) {
+    if (!source)
+      source = Lineage_sources.activeSource;
 
     var allNodes = visjsGraph.data.nodes.get();
     var newNodes = [];
     allNodes.forEach(function(node) {
-      if (node && node.data && node.data.source == Lineage_sources.activeSource)
+      if (node && node.data && node.data.source == source)
         newNodes.push({
           id: node.id,
           hidden: hide
@@ -267,6 +269,42 @@ Lineage_sources = (function() {
 
 
   self.menuActions = {
+    setSourceOpacity: function(source) {
+
+      var opacity = prompt("opacity %", 100);
+      if (!opacity)
+        return;
+      if (opacity < 10)
+        opacity = 10;
+      opacity = opacity / 100;
+      var nodesMapSources = {};
+      var nodes = visjsGraph.data.nodes.get();
+      var newNodes = [];
+      nodes.forEach(function(node) {
+        nodesMapSources[node.id] = node.data.source;
+        if (node.data.source == source) {
+          newNodes.push({
+            id: node.id,
+            "color": common.colorToRgba(node.color, opacity),
+            font: { color: common.colorToRgba(Lineage_classes.defaultNodeFontColor, opacity) }
+          });
+        }
+      });
+      visjsGraph.data.nodes.update(newNodes);
+
+      var edges = visjsGraph.data.edges.get();
+      var newEdges = [];
+      edges.forEach(function(edge) {
+        if (nodesMapSources[edge.from] == source) {
+          newEdges.push({
+            id: edge.id,
+            "color": common.colorToRgba(edge.color, opacity),
+            font: { color: common.colorToRgba(Lineage_classes.defaultEdgeFontColor, opacity) , multi: true, size: 10,strokeWidth:0,strokeColor:0,ital:true }
+          });
+        }
+      });
+      visjsGraph.data.edges.update(newEdges);
+    },
     closeSource: function(source) {
       if (source)
         self.activeSource = source;
@@ -285,7 +323,7 @@ Lineage_sources = (function() {
 
 
     },
-    hideSource: function() {
+    hideSource: function(source) {
 
       MainController.UI.hidePopup("graphPopupDiv");
       Lineage_sources.showHideCurrentSourceNodes(true);
@@ -337,9 +375,10 @@ Lineage_sources = (function() {
       visjsGraph.data.nodes.update(visjsData.nodes);
       visjsGraph.data.edges.update(visjsData.edges);
     },
-    ungroupSource: function() {
+    ungroupSource: function(source) {
       MainController.UI.hidePopup("graphPopupDiv");
-      var source = Lineage_sources.activeSource;
+      if (!source)
+        source = Lineage_sources.activeSource;
       visjsGraph.data.nodes.remove(source);
     }
   };
@@ -414,6 +453,45 @@ Lineage_sources = (function() {
       return true;
     } else
       return false;
+  };
+
+
+  self.setTheme = function(theme) {
+    var backgroundColor;
+
+
+    if (theme == "white") {
+      backgroundColor = "white";
+      Lineage_classes.defaultNodeFontColor = "#343434";
+      Lineage_classes.defaultEdgeFontColor = "#343434";
+    } else if (theme == "dark") {
+      backgroundColor = "#414040FF";
+      Lineage_classes.defaultNodeFontColor = "#eee";
+      Lineage_classes.defaultEdgeFontColor = "#eee";
+    }
+
+
+    $("#graphDiv").css("background-color", backgroundColor);
+    if(visjsGraph.isGraphNotEmpty && visjsGraph.data) {
+
+
+      /* visjsGraph.network.options.nodes.font = { color: Lineage_classes.defaultNodeFontColor };
+       visjsGraph.network.options.edges.font = { color: self.defaultEdgeFontColor };*/
+
+      var nodes = visjsGraph.data.nodes.get();
+      var newNodes = [];
+      nodes.forEach(function(node) {
+        newNodes.push({ id: node.id, font: { color: Lineage_classes.defaultNodeFontColor } });
+      });
+      visjsGraph.data.nodes.update(newNodes);
+      var edges = visjsGraph.data.edges.get();
+      var newEdges = [];
+      edges.forEach(function(edge) {
+
+        newEdges.push({ id: edge.id, font: { color: Lineage_classes.defaultEdgeFontColor } });
+      });
+      visjsGraph.data.edges.update(newEdges);
+    }
   };
 
 

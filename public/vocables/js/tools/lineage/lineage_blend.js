@@ -45,6 +45,13 @@ var Lineage_blend = (function() {
         var authorizedProps = {};
 
         let inSource = Config.currentTopLevelOntology;
+        var propStatusCssClassMap = {
+          "G": "lineageAddEdgeDialog_topLevelOntologyGenericProp",
+          "DR": "lineageAddEdgeDialog_topLevelOntologyProp",
+          "D": "lineageAddEdgeDialog_topLevelOntologySemiGenericProp",
+          "R": "lineageAddEdgeDialog_topLevelOntologySemiGenericProp",
+          "S": "lineageAddEdgeDialog_domainOntologyProp"
+        };
 
 
         if (!Config.sources[Lineage_sources.activeSource].editable) {
@@ -206,8 +213,10 @@ var Lineage_blend = (function() {
             if ((propsToKeep.length > 0)) {
               var filteredProps = {};
               propsToKeep.forEach(function(prop) {
-                if(!filteredProps[prop])
-                filteredProps[prop] = authorizedProps[prop];
+                if (!filteredProps[prop]) {
+                  authorizedProps[prop].directHit = true;
+                  filteredProps[prop] = authorizedProps[prop];
+                }
               });
               authorizedProps = filteredProps;
             }
@@ -236,19 +245,19 @@ var Lineage_blend = (function() {
                 }
 
                 if (!distinctProps[propObj.prop]) {
-                  var label;
-                  var cssClass = "lineageAddEdgeDialog_topLevelOntologyProp";
-                  if (propObj.type != "") cssClass = "lineageAddEdgeDialog_topLevelOntologySemiGenericProp";
-                  if (propObj.isGenericProperty) {
-                    cssClass = "lineageAddEdgeDialog_topLevelOntologyGenericProp";
-                    label = "any" + "-" + propObj.label + "->" + "any";
-                  } else
-                    label =
-                      (propObj.upperDomainLabel || "any") +
-                      "-" +
-                      propObj.label +
-                      "->" +
-                      (propObj.upperRangeLabel || "any");
+                  distinctProps[propObj.prop] = 1;
+
+                  var cssClass = propStatusCssClassMap[propObj.type];
+
+
+                  var label =
+                    (propObj.upperDomainLabel || "any") +
+                    "<b>-" +
+                    propObj.label +
+                    "-></b>" +
+                    (propObj.upperRangeLabel || "any");
+                  if (false && propObj.directHit)
+                    label += "***";
 
                   jstreeData.push({
                     id: propObj.prop,
@@ -266,22 +275,70 @@ var Lineage_blend = (function() {
               callbackSeries();
             },
 
+            // get propertiesWithoutDomainsAndRanges[sourceLabel]
+             function(callbackSeries) {
+            if (self.propertiesWithoutDomainsAndRanges && self.propertiesWithoutDomainsAndRanges[Config.currentTopLevelOntology])
+              return callbackSeries();
+            Sparql_OWL.getPropertiesWithoutDomainsAndRanges(Config.currentTopLevelOntology, options, function(err, result) {
+              if (err)
+                return callback(err);
+              if (!self.propertiesWithoutDomainsAndRanges)
+                self.propertiesWithoutDomainsAndRanges = {};
+              self.propertiesWithoutDomainsAndRanges[Config.currentTopLevelOntology] = result;
+              return callbackSeries();
+            });
+          },
+            // add generic properties to tree
+            function(callbackSeries) {
+            if (Object.keys(self.propertiesWithoutDomainsAndRanges[Config.currentTopLevelOntology]).length == 0)
+              return callbackSeries();
 
+            self.propertiesWithoutDomainsAndRanges[Config.currentTopLevelOntology].forEach(function(propObj) {
+
+              var cssClass = propStatusCssClassMap["G"];
+              var label = "any<b>-" + propObj.propLabel.value + "-></b>"
+
+                jstreeData.push({
+                  id: propObj.prop.value,
+                  text: "<span class='" + cssClass + "'>" + label + "</span>",
+                  parent: "#",
+                  data: {
+                    id: propObj.prop.value,
+                    label: propObj.propLabel.value,
+                    source: Config.currentTopLevelOntology
+                  }
+                });
+            });
+            return callbackSeries();
+
+          },
             //get specific(mainSource) source properties
             function(callbackSeries) {
-              if (self.currentSpecificObjectPropertiesMap) return callbackSeries();
-              var specificSourceLabel = Lineage_sources.activeSource;
+               /* if (self.currentSpecificObjectPropertiesMap) return callbackSeries();
+                  var specificSourceLabel = Lineage_sources.activeSource;*/
 
-              Sparql_OWL.listObjectProperties(specificSourceLabel, null, function(err, result) {
+              Sparql_OWL.listObjectProperties(Lineage_sources.activeSource, null, function(err, result) {
                 if (err) return callbackSeries(err);
                 self.currentSpecificObjectPropertiesMap = {};
+                self.domainOntologyProperties = [];
                 result.forEach(function(item) {
                   if (item.superProp) {
-                    if (!self.currentSpecificObjectPropertiesMap[item.superProp.value]) self.currentSpecificObjectPropertiesMap[item.superProp.value] = [];
-                    self.currentSpecificObjectPropertiesMap[item.superProp.value].push({
+
+                    self.domainOntologyProperties.push({
                       id: item.prop.value,
-                      label: item.propLabel.value
+                      label: item.propLabel.value,
+                      superProp: item.superProp ? item.superProp.value : null,
+                      domain: item.domain ? item.domain.value : null,
+                      domainLabel: item.domainLabel ? item.domainLabel.value : null,
+                      range: item.range ? item.range.value : null,
+                      rangeLabel: item.rangeLabel ? item.rangeLabel.value : null
                     });
+                    /*   if (!self.currentSpecificObjectPropertiesMap[item.superProp.value]) self.currentSpecificObjectPropertiesMap[item.superProp.value] = [];
+                       self.currentSpecificObjectPropertiesMap[item.superProp.value].push({
+                         id: item.prop.value,
+                         label: item.propLabel.value,
+
+                       });*/
                   }
                 });
                 return callbackSeries();
@@ -290,37 +347,84 @@ var Lineage_blend = (function() {
 
             //add specific(mainSource) source properties to jstree data
             function(callbackSeries) {
-              var specificSourceLabel = Lineage_sources.activeSource;
-              var cssClass = "lineageAddEdgeDialog_topLevelOntologySpecificProp";
-              jstreeData.forEach(function(node) {
-                if (self.currentSpecificObjectPropertiesMap[node.id]) {
-                  self.currentSpecificObjectPropertiesMap[node.id].forEach(function(item) {
-                    jstreeData.push({
-                      id: item.id,
-                      text: "<span class='" + cssClass + "'>" + item.label + "</span>",
-                      parent: node.id,
-                      data: {
-                        id: item.id,
-                        label: item.label,
-                        source: specificSourceLabel
-                      }
-                    });
-                  });
-                }
+            //  var specificSourceLabel = Lineage_sources.activeSource;
+              var cssClass = propStatusCssClassMap["S"];
+
+              var upperOntologyTreeProps={}
+              jstreeData.forEach(function(node){
+                upperOntologyTreeProps[node.id]=node
+              })
+
+
+              self.domainOntologyProperties.forEach(function(item) {
+                if(!upperOntologyTreeProps[item.superProp])
+                  return
+                var label =
+                  (item.domainLabel || "any") +
+                  "<b>-" +
+                  item.label +
+                  "-></b>" +
+                  (item.rangeLabel || "any");
+
+                jstreeData.push({
+                  id: item.id,
+                  text: "<span class='" + cssClass + "'>" + label + "</span>",
+                  parent: item.superProp,
+                  data: {
+                    id: item.id,
+                    label: item.label,
+                    source: Lineage_sources.activeSource
+                  }
+                });
+
               });
+              /* jstreeData.forEach(function(node) {
+                 if (self.currentSpecificObjectPropertiesMap[node.id]) {
+                   self.currentSpecificObjectPropertiesMap[node.id].forEach(function(item) {
+                     jstreeData.push({
+                       id: item.id,
+                       text: "<span class='" + cssClass + "'>" + item.label + "</span>",
+                       parent: node.id,
+                       data: {
+                         id: item.id,
+                         label: item.label,
+                         source: specificSourceLabel
+                       }
+                     })
+                   });
+                 }
+               });*/
               return callbackSeries();
             },
+
+
+
+
+
             function(callbackSeries) {
               options.contextMenu = {
                 refineProperty: {
                   label: "Refine Property",
                   action: function(_e) {
-                    if (self.currentPropertiesTreeNode.data.source != Config.currentTopLevelOntology)
+                    if (false && self.currentPropertiesTreeNode.data.source != Config.currentTopLevelOntology)
                       return alert("only properties from " + Config.currentTopLevelOntology + " can be refined");
                     var subPropertyLabel = prompt("enter label for subProperty of property " + self.currentPropertiesTreeNode.data.label);
                     if (!subPropertyLabel) return;
                     Lineage_blend.createSubProperty(Lineage_sources.activeSource, self.currentPropertiesTreeNode.data.id, subPropertyLabel, function(err, result) {
                       if (err) return alert(err);
+
+
+                      if (!self.domainOntologyProperties)
+                        self.domainOntologyProperties = [];
+                      self.domainOntologyProperties.push(
+                        {
+                          id: result.uri,
+                          label: subPropertyLabel,
+                          superProp: self.currentPropertiesTreeNode.data.id
+
+
+                        });
+
 
                       if (!self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id])
                         self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id] = [];
@@ -355,7 +459,9 @@ var Lineage_blend = (function() {
                 }
               };
 
-              common.jstree.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options);
+              common.jstree.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options, function(err) {
+                $("#lineageAddEdgeDialog_authorizedPredicatesTreeDiv").css("width", "600px");
+              });
               callbackSeries();
             }
           ],

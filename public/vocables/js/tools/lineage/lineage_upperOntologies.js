@@ -28,7 +28,10 @@ self.objectPropertiesMap = {};
             type = "R";
             ok = true;
           } else if (item.domain && item.range && upperOntologyDomains[item.domain] && upperOntologyRanges[item.range]) {
+            type = "DR";
             ok = true;
+          }else{
+
           }
           if (ok) {
             props[item.prop] = {
@@ -59,6 +62,7 @@ self.objectPropertiesMap = {};
                 type = "R";
                 ok = true;
               } else if (inverseItem.domain && inverseItem.range && upperOntologyDomains[inverseItem.range] && upperOntologyRanges[inverseItem.domain]) {
+                type = "DR";
                 ok = true;
               }
               if (ok) {
@@ -88,41 +92,20 @@ self.objectPropertiesMap = {};
   };
 
   self.getUpperOntologyObjectPropertiesDescription = function(sourceLabel, reload, callback) {
-    if (! Lineage_upperOntologies.objectPropertiesMap
-    )  Lineage_upperOntologies.objectPropertiesMap
-      = {};
+    if (! Lineage_upperOntologies.objectPropertiesMap)
+      Lineage_upperOntologies.objectPropertiesMap = {};
 
-    if ( Lineage_upperOntologies.objectPropertiesMap
-      [sourceLabel] && !reload && callback) return callback(null,  Lineage_upperOntologies.objectPropertiesMap
-      [sourceLabel]);
+    if ( Lineage_upperOntologies.objectPropertiesMap [sourceLabel] && !reload && callback)
+      return callback(null,  Lineage_upperOntologies.objectPropertiesMap [sourceLabel]);
 
-    var allProps;
-    async.series(
-      [
-        function(callbackSeries) {
           Sparql_OWL.getInferredPropertiesDomainsAndRanges(sourceLabel, {}, function(err, _result) {
-            if (err) return callbackSeries(err);
+            if (err) return callback(err);
 
-            allProps = _result;
-            return callbackSeries();
-          });
-        }
-        /*   function(callbackSeries) {
-             Sparql_OWL.getPropertiesWithoutDomainsAndRanges(sourceLabel, {}, function(err, _result2) {
-               if (err) return callbackSeries(err);
-               // allProps = allProps.concat(_result2)
-               _result2.forEach(function(item) {
-                 item.isGenericProperty = true;
-                 allProps.push(item);
-               });
-               return callbackSeries();
-             });
-           }*/
-      ],
-      function(err) {
-        Lineage_upperOntologies.objectPropertiesMap
-          [sourceLabel] = allProps;
-        if (callback) return callback(err, allProps);
+
+
+        Lineage_upperOntologies.objectPropertiesMap[sourceLabel] =_result;
+        if (callback)
+          return callback(err, _result);
       }
     );
   };

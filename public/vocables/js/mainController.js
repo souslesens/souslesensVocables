@@ -410,7 +410,7 @@ var MainController = (function () {
             $("#currentSourceTreeDiv").html("");
             $("#sourceDivControlPanelDiv").html("");
             $("#actionDivContolPanelDiv").html("");
-            $("#rightPanelDiv").html("");
+            $("#rightPanelDivInner").html("");
 
             if(toolId=="lineage"){
                 $("#accordion").accordion("option", { active: 2 });
@@ -467,38 +467,7 @@ var MainController = (function () {
             if (stopWaitImg) $("#waitImg").css("display", "none");
         },
 
-        toogleRightPanel: function (open) {
-            var display = $("#rightPanelDiv").css("display");
-            Lineage_sources.activeSource = null;
-            var currentCentralPanelWidth = $("#centralPanelDiv").width();
-
-            if (!open && display == "flex") {
-                //open->close
-                $("#rightPanelDiv").css("display", "none");
-                $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh);
-                $("#graphDiv").animate({ width: self.UI.initialGraphDivWitdh });
-                setTimeout(function () {
-                    //  visjsGraph.redraw()
-                }, 200);
-            } else {
-                //close->open (if not allready opened)
-                if (currentCentralPanelWidth != self.UI.initialGraphDivWitdh) {
-                    /* $("#leftPanelDiv").css("width", "20VW")
-          $("#rightPanelDiv").css("width", "20VW")
-          $("#centralPanelDiv").css("width", "60VW")
-          $("#graphDiv").css("width", "60VW")
-return*/
-
-                    $("#rightPanelDiv").css("display", "flex");
-
-                    $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh - rightPanelWidth);
-                    $("#graphDiv").animate({ width: self.UI.initialGraphDivWitdh - rightPanelWidth });
-                    setTimeout(function () {
-                        //  visjsGraph.redraw()
-                    }, 200);
-                }
-            }
-        },
+ 
 
         setCredits: function () {
             var html = "<div>" + " " + " <img  src=\"images/souslesensVocables.png\" style='display: block; margin-left: auto; margin-right: auto width: 50%;margin: auto;'>" + "</div>";
@@ -549,17 +518,27 @@ return*/
             self.previousPanelLabel = panelLabel;
         },
 
-        openRightPanel: function () {
-            var w = $(window).width() - leftPanelWidth;
-            // $("#centralPanel").width(w)
-            $("#centralPanelDiv").width(w - rightPanelWidth);
-            $("#graphDiv").width(w - rightPanelWidth);
-            $("#rightPanelToogleButton").css("display", "block");
-            $("#rightPanelDiv").width(rightPanelWidth);
-            //   setTimeout(function () {
-            $("#graphDiv").hide().fadeIn("fast");
-            /*  }
-          , 500)*/
+        showHideRightPanel: function () {
+
+            var left=  $("#rightPanelDiv").position().left;
+            var w=$(window).width()
+
+
+            if(w-left<100) {
+                var lw = $("#rightPanelDiv").width()
+                var newLeft = "" + (w - lw) + "px"
+                $("#rightPanelDiv").css("position", "absolute")
+                $("#rightPanelDiv").css("left", newLeft)
+                $("#graphDiv").css("zIndex",19 )
+                $("#rightPanelDiv_searchIconInput").attr("src","./icons/slideRight.png")
+
+            }else{
+                var newLeft = "" + (w ) + "px"
+                $("#rightPanelDiv").css("left", newLeft)
+                $("#rightPanelDiv_searchIconInput").attr("src","./icons/search.png")
+
+            }
+            
         },
         showCurrentQuery: function () {
             $("#mainDialogDiv").html("<textarea style='width: 100%;height: 400px'>" + Sparql_proxy.currentQuery + "</textarea>");

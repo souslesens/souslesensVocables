@@ -234,12 +234,11 @@
                     h = $(document).height() - 30;
 
                     h = Math.min(h, 1000);
-                    // $("#centralPanel").width(w)
+
                     $("#graphDiv").width(w);
                     MainController.UI.initialGraphDivWitdh = w;
                     $("#graphDiv").height(h - 50);
-                    /*  $("#leftPanelDiv").height(h - 50);
-            $("#rightPanelDiv").height(h - 50);*/
+
 
                     $("#accordion").accordion({
                         heightStyle: "fill",
@@ -418,10 +417,10 @@
             .popupMenuItem {
                 border: #3b13ef 1px solid;
                 border-radius: 3px;
-            / / padding: 2 px;
-            / / margin: 2 px;
+             padding: 1 px;
+             margin: 1 px;
                 margin: 1px;
-                background-color: azure;
+                background-color: #ddd ;
             }
 
             .mainDialogDiv {
@@ -478,7 +477,7 @@
                     </table>
                 </div>
                 <!-- </div>-->
-                <div class="col text-end">
+                <div class="col text-end" style="z-index: 20">
                     <button onclick=" window.open( './browse.html','_blank');" type="button" class="btn btn-sm py-0 btn-outline-primary" style="font-weight: bold">Search</button>
 
 
@@ -530,8 +529,20 @@
 
                 <div id="centralPanelDiv" style="display: flex; flex-direction: row">
                     <div id="graphDiv"></div>
+
                 </div>
-                <div id="rightPanelDiv" style="display: flex; flex-direction: column"></div>
+                <div id="rightPanelDiv" style="display: flex; flex-direction: row;margin-top: 10px;z-index: 20">
+                    <div    onclick="MainController.UI.showHideRightPanel()" style="
+                      margin-top: 10px;
+                         margin-left: -40px;
+                         height: 45px;
+                         width: 60px;
+                         padding: 5px;
+                         background: #fcfcfc;
+                         border-radius: 10px;" >
+                        <input   id='rightPanelDiv_searchIconInput' type="image" src="./icons/search.png" /></div>
+                    <div id="rightPanelDivInner" style="display: flex; flex-direction: column">
+                </div>
             </div>
             <div id="graphPopupDiv" onclick="MainController.UI.hidePopup('graphPopupDiv');"></div>
         </div>

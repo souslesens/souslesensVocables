@@ -405,6 +405,7 @@ var Sparql_generic = (function() {
       function(triples, callbackEach) {
         var insertTriplesStr = "";
         triples.forEach(function(item, _index) {
+
           var tripleStr = self.triplesObjectToString(item);
           if (!uniqueTriples[tripleStr]) {
             // suppress duplicate if any
@@ -412,6 +413,13 @@ var Sparql_generic = (function() {
             insertTriplesStr += tripleStr;
           }
         });
+        if(options.prefixes){
+          for( var key in options.prefixes) {
+            if (item.predicate.indexOf(key) == 0)
+x=3
+              }
+        }
+
         var query = self.getDefaultSparqlPrefixesStr();
         query += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
 

@@ -2,6 +2,7 @@
 
 var KGcreator = (function() {
   var self = {};
+  self.mainJsonEditor=null;
   self.usualProperties = [
     "rdf:type",
     "rdfs:subClassOf",
@@ -125,7 +126,16 @@ var KGcreator = (function() {
     self.initCentralPanel();
   };
 
-  self.loadCsvDirs = function() {
+  self.loadCsvDirs = function(options) {
+    if(options.contextualMenuFn) {
+      self.currentContextMenu=options.contextualMenuFn
+    }
+     else{
+       self.currentContextMenu=self.getSystemsTreeContextMenu
+    }
+    self.mainJsonEditor= new JsonEditor("#KGcreator_mainJsonDisplay", {});
+
+
     var payload = {
       dir: "CSV"
     };
@@ -229,12 +239,16 @@ var KGcreator = (function() {
     });
   };
 
+  self.getContextMenu=function(){
+   return self.currentContextMenu();
+  }
+
   self.showTablesTree = function(data) {
     var jstreeData = [];
     var options = {
       openAll: true,
       selectTreeNodeFn: KGcreator.onCsvtreeNodeClicked,
-      contextMenu: KGcreator.getSystemsTreeContextMenu()
+      contextMenu: KGcreator.getContextMenu()
       //  withCheckboxes: true,
     };
     data.forEach(function(file) {
@@ -731,6 +745,8 @@ self.saveMappings({classId:classId})
 
       setUpperOntologyPrefix = function() {
         var currrentTopLevelOntology = Config.topLevelOntologies[Config.currentTopLevelOntology];
+        if(!currrentTopLevelOntology)
+          return;
         if (!self.currentJsonObject.prefixes) {
           self.currentJsonObject.prefixes = {};
           if (!self.currentJsonObject.prefixes[currrentTopLevelOntology.prefix]) {

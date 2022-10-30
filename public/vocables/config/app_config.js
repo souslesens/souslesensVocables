@@ -17,6 +17,7 @@ var Config = (function () {
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/";
 
     self.defaultNewUriRoot = "http://souslesens.org/resource/";
+    self.linkedData_mappings_graph= "http://souslesens.org/resource/linkedData_mappings/"
     self.loginMode = "json";
 
     self.appName = "VOCABLES";
@@ -27,7 +28,7 @@ var Config = (function () {
     self.queryLimit = 10000;
     self.searchLimit = 500;
     self.searchDepth = 6;
-    self.defaultGraphTheme="dark"
+    self.defaultGraphTheme="white"//dark
     self.predicatesSource = "TSF-PREDICATES";
     self.dictionarySource = "TSF-DICTIONARY";
 

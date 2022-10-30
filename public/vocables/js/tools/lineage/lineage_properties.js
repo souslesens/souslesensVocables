@@ -41,19 +41,7 @@ Lineage_properties = (function() {
       }
     };
     if (MainController.currentTool == "lineage") {
-      /*  items.graphNode = {
-label: "graph Property",
-action: function (_e) {
-// pb avec source
-if (Config.sources[self.currentTreeNode.data.source].schemaType == "OWL"){
-self.drawRangeAndDomainsGraph
-//  self.drawIndividualsProperty(self.currentTreeNode.data);
-// self.drawObjectProperty(self.currentTreeNode.data);
-}
-else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLEDGE_GRAPH") self.drawIndividualsProperty(self.currentTreeNode.data);
-//   Lineage_classes.drawNodeAndParents(self.currentTreeNode.data)
-},
-};*/
+
       items.drawRangesAndDomainsProperty = {
         label: "Draw ranges and domains",
         action: function(_e) {
@@ -506,7 +494,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
     if (visjsGraph.data && visjsGraph.data.nodes && nodesSelection == "currentGraphNodes") {
       targetnodes = visjsGraph.data.nodes.getIds();
     }
-    self.getRangeAndDomainsGraph(property, function(err, result) {
+    self.getRangeAndDomainsData(property, function(err, result) {
       if (err) return alert(err.responseText);
       var strAll = "domainLabel\tsubPropertyLabel\tpropertyLabel\trangeLabel\tinversePropertyURI\t--\tdomainURI\tsubPropertyURI\tpropertyURI\trangeURI\tinversePropertyURI\n";
 
@@ -543,7 +531,14 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
       common.copyTextToClipboard(strAll);
     });
   };
-
+  /**
+   *
+   * draws  graph of properties ranges and domains depending on
+   *    $("#LineagePropertie_nodesSelectionSelect").val()  to filter the drawned objects
+   *    the property to filter the query
+   *
+   * @param property : a specific property uri or null (all)
+   */
   self.drawRangeAndDomainsGraph = function(property) {
     var targetnodes = null;
     var nodesSelection = $("#LineagePropertie_nodesSelectionSelect").val();
@@ -552,7 +547,8 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
       targetnodes = visjsGraph.data.nodes.getIds();
     }
 
-    self.getRangeAndDomainsGraph(property, function(err, result) {
+
+    self.getRangeAndDomainsData(property, function(err, result) {
 
       if (err) return alert(err.responseText);
       var visjsData = { nodes: [], edges: [] };
@@ -849,7 +845,24 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
     ;
   };
 
-  self.getRangeAndDomainsGraph = function(property, callback) {
+  /**
+   *
+   *
+   * @param property  a specific property uri or null (all)
+   *
+   * @param callback returns an array of object witeh all characterisitcs of objectProperties
+   *            item.property
+   *           item.propertyLabel
+   *           item.domain
+   *           item.domainLabel
+   *           item.range
+   *           item.rangeLabel
+   *           item.subProperty
+   *           item.subPropertyLabel
+   *           item.inverseProperty
+   *           item.subProperties
+   */
+  self.getRangeAndDomainsData = function(property, callback) {
     var source = Lineage_sources.activeSource;
     var propId = null;
     if (property) {
@@ -1111,15 +1124,40 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
   };
 
 
-  self.graphPredicates = function() {
+  self.onPropertyActionClick = function(action, target) {
+    var properties= $("#Lineage_propertiesTree").jstree().get_checked();
+    if( properties.length==0)
+      properties=null
+
+    if (action == "predicates") {
+      if (target == "graph") {
+        self.drawRangeAndDomainsGraph(properties)
+      } else if (target == "list") {
+
+      }
+    } else if (action == "restrictions") {
+      if (target == "graph") {
+
+      } else if (target == "list") {
+
+      }
+    } else if (action == "rangesAndDomains") {
+      if (target == "graph") {
+
+      } else if (target == "list") {
+
+      }
+    }
+
 
   };
-  self.graphRestrictions = function() {
+  self.drawPredicatesGraph = function() {
 
   };
-  self.graphRangesAnDomains = function() {
+  self.drawRestrictionsGraph = function() {
 
   };
+
   return self;
 })
 ();

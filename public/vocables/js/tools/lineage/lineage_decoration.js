@@ -213,6 +213,8 @@ strFrom +
   };
 
   self.colorGraphNodesByType = function(visjsNodes) {
+    if(!Lineage_sources.activeSource)
+      return;
     Lineage_sources.setTopLevelOntologyFromImports(Lineage_sources.activeSource);
 
     if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) return;

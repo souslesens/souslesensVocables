@@ -379,7 +379,9 @@ var Sparql_OWL = (function() {
       return callback(null, result.results.bindings);
     });
   };
-
+/**
+ *
+ * */
   self.getIndividualProperties = function(sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
     if (!options) options = {};
 

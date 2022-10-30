@@ -172,10 +172,8 @@
     <div id="lineage_actionsWrapper" class="lineage_actionDiv"
          style="display: flex;flex-wrap: wrap; width: 100%;justify-content:space-evenly;gap:5px 5px">
 
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="MainController.UI.showHideRightPanel()">
-        Search
-      </button>
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.drawTopConcepts()">
+
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_classes.drawTopConcepts()">
        TopClasses
       </button>
 
@@ -191,6 +189,12 @@
    <!--   <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
               onclick="Lineage_classes.drawObjectProperties()">Properties
       </button>-->
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.clearSource()">
+        Clear
+      </button>
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="MainController.UI.showHideRightPanel()">
+        Search
+      </button>
 
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
               onclick="Lineage_classes.drawRelations('direct')">Relations
@@ -205,9 +209,7 @@
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.getSimilars('graph')">
         Similars
       </button>
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.clearSource()">
-        Clear
-      </button>
+
     </div>
 
 
@@ -233,11 +235,12 @@
         </button>
 
         <div class="lineage_button_group">
-          <span> selection</span>
+          <span >selection</span>
+          <span title="To add nodes selection : Ctrl+Alt and click/hover nodes " style="font-weight: bold; color: blue" id="Lineageclasses_selectedNodesCount">?</span>
           <button title="ctrl+alt click or hover" class="btn btn-sm my-1 py-0 btn-outline-primary"
                   onclick="Lineage_selection.listNodesSelection()">Show
           </button>
-          <span style="font-weight: bold; color: blue" id="Lineageclasses_selectedNodesCount" value="0" />
+
           <button class="btn btn-sm my-1 py-0 btn-outline-primary"
                   onclick="Lineage_selection.clearNodesSelection()">
             Clear

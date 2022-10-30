@@ -138,11 +138,12 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
   self.getPropertiesjsTreeData = function(source, ids, words, options, callback) {
     if (!options) options = {};
 
-    if (!options.searchType || options.searchType == "Property") options.filter = Sparql_common.setFilter("prop", null, words, options);
-    else if (options.searchType == "Domain") {
+    if (!options.searchType || options.searchType == "predicate")
+      options.filter = Sparql_common.setFilter("prop", null, words, options);
+    else if (options.searchType == "subject") {
       options.filter = Sparql_common.setFilter("domain", null, words, options);
       options.justPropertyAndLabel = false;
-    } else if (options.searchType == "Range") {
+    } else if (options.searchType == "object") {
       options.filter = Sparql_common.setFilter("range", null, words, options);
       options.justPropertyAndLabel = false;
     }
@@ -964,7 +965,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
     var exactMatch = $("#LineageProperties_allExactMatchSearchCBX").prop("checked");
     var searchAllSources = $("#LineageProperties_searchInAllSources").prop("checked");
     var searchType = $("#LineageProperties_searchAllType").val();
-    //if (searchType)
+
     var searchedSources = [];
     if (searchAllSources) {
       for (var sourceLabel in Config.sources) {
@@ -980,10 +981,9 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
     async.eachSeries(
       searchedSources,
       function(sourceLabel, callbackEach) {
-        //  setTimeout(function () {
-
+        $("waitImg").css("display", "block");
         MainController.UI.message("searching in " + sourceLabel);
-        //  }, 100)
+
 
         self.getPropertiesjsTreeData(
           sourceLabel,
@@ -1005,9 +1005,7 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
               }
             });
 
-            /*  jstreeData.forEach(function (item) {
-  if (!uniqueIds[item.parent]) item.parent = sourceLabel;
-  });*/
+
             if (result.length > 0) {
               var text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>";
               jstreeData.push({ id: sourceLabel, text: text, parent: "#", data: { source: sourceLabel } });
@@ -1023,8 +1021,13 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
         if (jstreeData.length == 0) $("#Lineage_propertiesTree").html("no properties found");
 
         MainController.UI.message(jstreeData.length + " nodes found", true);
-        var options = { selectTreeNodeFn: Lineage_properties.onTreeNodeClick, openAll: true };
+        var options = {
+          selectTreeNodeFn: Lineage_properties.onTreeNodeClick,
+          openAll: true,
+          withCheckboxes: true
+        };
         options.contextMenu = self.jstreeContextMenu();
+
         common.jstree.loadJsTree("Lineage_propertiesTree", jstreeData, options);
       }
     );
@@ -1105,6 +1108,17 @@ else if (Config.sources[self.currentTreeNode.data.source].schemaType == "KNOWLED
       function(err) {
       }
     );
+  };
+
+
+  self.graphPredicates = function() {
+
+  };
+  self.graphRestrictions = function() {
+
+  };
+  self.graphRangesAnDomains = function() {
+
   };
   return self;
 })

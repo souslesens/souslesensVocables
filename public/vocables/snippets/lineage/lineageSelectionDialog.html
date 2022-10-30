@@ -3,7 +3,7 @@
   <div>
  Selected nodes<br>
     <div class="jstreeContainer" style="width: 380px; height: 700px; overflow: auto; margin-top: 5px;">
-      <div id="LineageClasses_selectdNodesTreeDiv" ></div>
+      <div id="lineage_selection.selectedNodesTreeDiv" ></div>
     </div>
   </div>
 
@@ -11,23 +11,23 @@
     Selection Actions
     <div style="display: flex;flex-direction: column">
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-              onclick="Lineage_selection.onSelectionExecuteAction("copy")>Copy
+              onclick="Lineage_selection.onSelectionExecuteAction('copy')">Copy
       </button>
 
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-              onclick="Lineage_selection.onSelectionExecuteAction("decorate")>Decorate
+              onclick="Lineage_selection.onSelectionExecuteAction('decorate')">Decorate
       </button>
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-              onclick="Lineage_selection.onSelectionExecuteAction("collection")>collection
+              onclick="Lineage_selection.onSelectionExecuteAction('collection')">Collection
       </button>
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-              onclick="Lineage_selection.onSelectionExecuteAction("addToSet")>addToSet
+              onclick='Lineage_selection.onSelectionExecuteAction('addToSet')">AddToSet
       </button>
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-              onclick="Lineage_selection.onSelectionExecuteAction("import")>Import in source
+              onclick="Lineage_selection.onSelectionExecuteAction('import')">Import in source
       </button>
 
     </div>
   </div>
-  <div id="LineageClasses_selectedNodesInfosDiv" style="width: 650px;height: 700px;overflow: auto"></div>
+  <div id="lineage_selection.selectedNodesInfosDiv" style="width: 650px;height: 700px;overflow: auto"></div>
 </div>

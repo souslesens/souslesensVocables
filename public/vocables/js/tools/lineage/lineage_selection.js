@@ -25,7 +25,7 @@ var Lineage_selection = (function() {
       $("#Lineage_combine_mergeNodesDialogButton").css("display", "none");
     }
     ;
-    self.getSelectedNodesTre = function() {
+    self.getSelectedNodesTree = function() {
       var jstreeData = [];
       var distinctNodes = {};
      Lineage_selection.selectedNodes.forEach(function(node) {
@@ -58,24 +58,13 @@ var Lineage_selection = (function() {
         withCheckboxes: true,
         selectTreeNodeFn:Lineage_selection.onSelectedNodeTreeclick
       };
-      $("#mainDialogDiv").load("./snippets/lineageSelectionDialog.html", function(){
-
+      $("#mainDialogDiv").load("snippets/lineage/lineageSelectionDialog.html", function(){
+        $("#mainDialogDiv").dialog("open");
+        common.jstree.loadJsTree("lineage_selection.selectedNodesTreeDiv", jstreeData, options, function(err, result) {
+        });
       })
-    /*  $("#mainDialogDiv").html(
-        "<div style=\"display: flex;flex-direction: row\">" +
-        " <div>" +
-        "    Selected nodes " +
+ 
 
-        " <div class=\"jstreeContainer\" style=\"width: 350px;height: 700px;overflow: auto\">" +
-        "      <div id=\"LineageClasses_selectdNodesTreeDiv\"></div>" +
-        "    </div>" +
-        " </div>" +
-        "<div id=\"LineageClasses_selectdNodesInfosDiv\" style=\"width: 650px;height: 700px;overflow: auto\" ></div>" +
-        "</div>"
-      );*/
-      $("#mainDialogDiv").dialog("open");
-      common.jstree.loadJsTree("LineageClasses_selectdNodesTreeDiv", jstreeData, options, function(err, result) {
-      });
     };
 
     self.selectNodesOnHover = function(node, point, options) {

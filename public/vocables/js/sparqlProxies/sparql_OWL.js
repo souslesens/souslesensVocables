@@ -13,6 +13,11 @@ var Sparql_OWL = (function() {
 
   self.ancestorsDepth = 6;
 
+
+  /**
+   * @param source
+   * @returns sparql (composed) predicate defining chilhood relation for a source depending on its natrue (OWL ,SKOS) and sourceConfig.taxonomyPredicates
+   */
   self.getSourceTaxonomyPredicates = function(source) {
     var defaultTaxonomyPredicates = " <http://www.w3.org/2000/01/rdf-schema#subClassOf> ";
 
@@ -34,7 +39,15 @@ var Sparql_OWL = (function() {
 
     return str;
   };
-
+  /**
+   *
+   * @param sourceLabel
+   * @param options
+   *  .selectGraph -> includes the graph of each triple
+   *  .withoutImports -> excludes imports from query
+   * @param callback returns triples matching  source.topClassFilter field value or _default topClassFilter
+   *  variables : [?conceptGraph] ?topConcept  ?topConceptLabel  ?conceptGraph
+   */
   self.getTopConcepts = function(sourceLabel, options, callback) {
     if (!options) options = {};
     var fromStr = "";
@@ -91,6 +104,20 @@ var Sparql_OWL = (function() {
     });
   };
 
+
+  /**
+   *
+   * @param sourceLabel
+   * @param words word or array of words or letters( fuzzy match)
+   * @param ids uri or array of uris
+   * @param descendantsDepth depth  of recursivity
+   * @param options
+   *  .selectGraph -> includes the graph of each triple
+   *  .exactMatch -->if words param determine the the regex filter on word
+   * @param callback returns triples of matching nodes and descendants
+   *   variables [?conceptGraph] ?concept (parent) ?conceptLabel ?child[X] ?shild[X]label
+   *
+   */
   self.getNodeChildren = function(sourceLabel, words, ids, descendantsDepth, options, callback) {
     if (!options) options = {};
 
@@ -183,6 +210,20 @@ var Sparql_OWL = (function() {
     });
   };
 
+  /**
+   *
+   * @param sourceLabel
+   * @param conceptId uri subject of triples
+   * @param options
+   *    .selectGraph
+   *    .getValuesLabels  adds labels of objects in triples
+   *    .inverseProperties union with   triples where conceptId is object in triples
+   *    .limit  default limit if not set
+   *
+   *
+   * @param callback returns triples matching query
+   *   variables [?conceptGraph] ?prop ?value [?propLabel] [?valueLabel]
+   */
   self.getNodeInfos = function(sourceLabel, conceptId, options, callback) {
     if (!options) options = {};
     var fromStr = "";
@@ -221,11 +262,11 @@ var Sparql_OWL = (function() {
       return callback(null, result.results.bindings);
     });
   };
-  /**
-   *
-   * limit at 4 ancestorsDepth when imports
-   *
-   * */
+
+
+
+
+
 
   self.getNodeParents = function(sourceLabel, words, ids, ancestorsDepth, options, callback) {
     if (Config.sources[sourceLabel].imports && Config.sources[sourceLabel].imports.length > 0) {
@@ -304,6 +345,7 @@ var Sparql_OWL = (function() {
       return callback(null, result.results.bindings);
     });
   };
+
 
   self.getNodesAncestors = function(sourceLabel, classIds, options, callback) {
     if (!options) options = {};
@@ -802,6 +844,15 @@ var Sparql_OWL = (function() {
     );
   };
 
+
+  /**
+   *
+   * @return
+   * @param sourceLabel
+   * @param propIds
+   * @param options
+   * @param callback
+   */
   self.getPropertyClasses = function(sourceLabel, propIds, options, callback) {
     if (!options) {
       options = {};
@@ -850,6 +901,12 @@ var Sparql_OWL = (function() {
       return callback(null, result.results.bindings);
     });
   };
+
+  /**
+   * returns all URIs,labels and graph (option selectGraph) of a source
+   *
+   *
+ */
 
   self.getDictionary = function(sourceLabel, options, processor, callback) {
     if (!options) options = {};

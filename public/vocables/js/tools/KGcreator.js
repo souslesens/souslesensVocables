@@ -270,7 +270,7 @@ var KGcreator = (function() {
         var columns = self.currentDataSourceModel[key];
         columns.forEach(function(column) {
           jstreeData.push({
-            id: column,
+            id: key+"_"+column,
             text: column,
             parent: key,
             data: { id: column }

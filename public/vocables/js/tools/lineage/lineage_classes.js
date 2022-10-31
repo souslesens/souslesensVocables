@@ -75,7 +75,7 @@ var Lineage_classes = (function() {
     // @ts-ignore
     $("#actionDivContolPanelDiv").load("snippets/lineage/lineageLeftPanel.html", function() {
       Lineage_sources.init();
-    //  Lineage_sources.showSourcesDialog();
+
       // @ts-ignore
       $("#rightPanelDivInner").load("snippets/lineage/lineageRightPanel.html", function() {
         $("#GenericTools_searchSchemaType").val("OWL");
@@ -131,8 +131,9 @@ var Lineage_classes = (function() {
 
         $("#LineageLinkedDataTab").load("snippets/lineage/lineageLinkedDataSearchDialog.html", function() {
         });
-        $("#Lineage_tablesTab").load("snippets/KGcreator/leftPanel.html", function() {
-          KGcreator.loadCsvDirs({ contextualMenuFn:Lineage_linkedData_mappings.getTablesTreeContextMenu });
+        $("#Lineage_tablesTreeDiv").load("snippets/KGcreator/leftPanel.html", function() {
+          Lineage_linkedData_mappings.init();
+          KGcreator.loadCsvDirs({ contextualMenuFn: Lineage_linkedData_mappings.getTablesTreeContextMenu });
         });
 
 
@@ -457,7 +458,7 @@ var Lineage_classes = (function() {
       keepNodePositionOnDrag: true,
       onclickFn: Lineage_classes.graphActions.onNodeClick,
       onRightClickFn: Lineage_classes.graphActions.showGraphPopupMenu,
-      onHoverNodeFn:Lineage_selection.selectNodesOnHover,
+      onHoverNodeFn: Lineage_selection.selectNodesOnHover,
       physics: {
         barnesHut: {
           springLength: 0,
@@ -501,18 +502,18 @@ var Lineage_classes = (function() {
 
         addEdge: function(edgeData, callback) {
           var sourceNode = visjsGraph.data.nodes.get(edgeData.from);
-         var targetNode = visjsGraph.data.nodes.get(edgeData.to);
-          if( sourceNode.data.context== Lineage_linkedData_mappings.context || targetNode.data.context== Lineage_linkedData_mappings.context) {
+          var targetNode = visjsGraph.data.nodes.get(edgeData.to);
+          if (sourceNode.data.context == Lineage_linkedData_mappings.context || targetNode.data.context == Lineage_linkedData_mappings.context) {
             Lineage_linkedData_mappings.onAddEdgeDropped(edgeData, function(err, result) {
               if (err) return callback(err.responseText);
               return null;
-            })
-          }else {
-              Lineage_blend.graphModification.showAddEdgeFromGraphDialog(edgeData, function(err, result) {
-                if (err) return callback(err.responseText);
-                return null;
-              });
-            }
+            });
+          } else {
+            Lineage_blend.graphModification.showAddEdgeFromGraphDialog(edgeData, function(err, result) {
+              if (err) return callback(err.responseText);
+              return null;
+            });
+          }
         },
         addNode: function(nodeData, callback) {
           Lineage_blend.graphModification.showAddNodeGraphDialog(function(err, result) {
@@ -521,11 +522,11 @@ var Lineage_classes = (function() {
           });
         }
       };
-      if(false){
+      if (false) {
 
-        options.interaction={
-          navigationButtons:true
-        }
+        options.interaction = {
+          navigationButtons: true
+        };
       }
 
       Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
@@ -2024,15 +2025,10 @@ addNode:false
         "    <span  class=\"popupMenuItem\" onclick=\"Lineage_linkedData.graphActions.showIndividualInfos();\"> Node infos</span>" +
         "<span  class=\"popupMenuItem\" onclick=\"Lineage_linkedData.graphActions.expandIndividual();\"> Expand individual</span>";
       // '<span  class="popupMenuItem" onclick="Lineage_classes.graphActions.expandIndividual();"> Expand individual</span>';
-    }
-    else if ( node.data && node.data.context == Lineage_linkedData_mappings.context) {
+    } else if (node.data && node.data.context == Lineage_linkedData_mappings.context) {
       html = "...";
       // '<span  class="popupMenuItem" onclick="Lineage_classes.graphActions.expandIndividual();"> Expand individual</span>';
-    }
-
-
-
-    else {
+    } else {
       html =
         "    <span  class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showNodeInfos();\"> Node infos</span>" +
         "   <span  id='lineage_graphPopupMenuItem' class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.expand();\"> Expand</span>" +
@@ -2301,7 +2297,10 @@ upperNodeIds.push(id);
         return;
       }
 
-      self.currentGraphNode = node;
+      if (node.from)
+        self.currentGraphEdge = node;
+      else
+        self.currentGraphNode = node;
 
       self.onGraphOrTreeNodeClick(node, options, { callee: "Graph" });
 
@@ -2563,7 +2562,6 @@ attrs.color=self.getSourceColor(superClassValue)
     $("#lineage_actionDiv_Keyslegend").css("display", display);
   };
 
- 
 
   return self;
 })();

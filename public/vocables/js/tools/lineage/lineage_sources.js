@@ -19,6 +19,7 @@ Lineage_sources = (function() {
     self.sourceDivsMap = {};
    Lineage_selection.selectedNodes = [];
     self.setTheme(Config.defaultGraphTheme)
+    Lineage_sources.showSourcesDialog();
   };
 
   self.resetAll = function() {

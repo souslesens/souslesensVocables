@@ -277,5 +277,32 @@ return str;
             return callback(null, source);
         });
     };
+
+    self.replaceSparqlPrefixByUri=function(str,prefixes){
+        for( var key in prefixes) {
+            prefixes[key]=prefixes[key].replace("<","")
+            prefixes[key]=prefixes[key].replace(">","")
+            var regex = new RegExp(key + ":([\\S\\d]+)","gm")
+
+           str= str.replace(regex, function(match, capture, offset) {
+                return "<" + prefixes[key] + capture + ">"
+            })
+        }
+        return str
+    }
+
+
+
+
     return self;
 })();
+
+/*
+var str="?prop rdfs:label ?propLabel} ?prop rdf:type owl:ObjectProperty. ?value rdf:type ?valueType filter (?valueType in (owl:Class,owl:NamedIndividual))}}"
+var prefixes={
+    rdfs:"<http://www.w3.org/2000/01/rdf-schema#>",
+    rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+}
+Sparql_common.replaceSparqlPrefix(str,prefixes)
+
+ */

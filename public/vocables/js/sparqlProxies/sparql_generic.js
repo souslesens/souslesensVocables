@@ -407,18 +407,15 @@ var Sparql_generic = (function() {
         triples.forEach(function(item, _index) {
 
           var tripleStr = self.triplesObjectToString(item);
+          if (options.sparqlPrefixes)
+            tripleStr = Sparql_common.replaceSparqlPrefixByUri(tripleStr, options.sparqlPrefixes);
           if (!uniqueTriples[tripleStr]) {
             // suppress duplicate if any
             uniqueTriples[tripleStr] = 1;
             insertTriplesStr += tripleStr;
           }
         });
-        if(options.prefixes){
-          for( var key in options.prefixes) {
-            if (item.predicate.indexOf(key) == 0)
-x=3
-              }
-        }
+
 
         var query = self.getDefaultSparqlPrefixesStr();
         query += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
@@ -806,12 +803,12 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
     );
   };
 
-  self.getLangFilterStr=function(options, variable){
+  self.getLangFilterStr = function(options, variable) {
     var langFilter = "";
     if (!options || !options.lang)
       return "";
-    return " FILTER (lang("+variable+")='" + options.lang + "' || !lang("+variable+"))  ";
-  }
+    return " FILTER (lang(" + variable + ")='" + options.lang + "' || !lang(" + variable + "))  ";
+  };
 
   self.getSourceTaxonomy = function(sourceLabel, options, callback) {
     if (!options) options = {};
@@ -865,11 +862,11 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             fromStr +
             " WHERE {" +
             "  ?concept " +
-            parentType+ " ?firstParent." +
-            "OPTIONAL{?concept rdfs:label ?conceptLabel "+self.getLangFilterStr(options,'?conceptLabel')+"}." +
-          "OPTIONAL{?concept skos:prefLabel ?skosLabel "+self.getLangFilterStr(options,'?skosLabel')+"}. " +
-          "OPTIONAL{?concept skos:altLabel ?skosAltLabel "+self.getLangFilterStr(options,'?skosAltLabel')+"}. " +
-          "OPTIONAL{?concept <http://souslesens.org/resource/vocabulary/hasCode> ?code}. ";
+            parentType + " ?firstParent." +
+            "OPTIONAL{?concept rdfs:label ?conceptLabel " + self.getLangFilterStr(options, "?conceptLabel") + "}." +
+            "OPTIONAL{?concept skos:prefLabel ?skosLabel " + self.getLangFilterStr(options, "?skosLabel") + "}. " +
+            "OPTIONAL{?concept skos:altLabel ?skosAltLabel " + self.getLangFilterStr(options, "?skosAltLabel") + "}. " +
+            "OPTIONAL{?concept <http://souslesens.org/resource/vocabulary/hasCode> ?code}. ";
 
           if (options.filter) query += " " + options.filter + " ";
 

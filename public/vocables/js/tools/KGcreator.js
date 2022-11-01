@@ -480,7 +480,7 @@ var KGcreator = (function() {
           });
         },
         function(callbackSeries) {
-          Sparql_OWL.getObjectProperties(topLevelOntology, null, null, function(err, result) {
+         Sparql_OWL.getObjectPropertiesDomainAndRange(topLevelOntology, null, null, function(err, result) {
             if (err) callbackSeries(err);
             result.sort(function(a, b) {
               if (!a.propLabel || !b.propLabel) return 0;

@@ -58,7 +58,7 @@ Lineage_sources = (function() {
         highlightSourceDiv(source);
 
         Lineage_classes.initWhiteBoard(false);
-        self.initActiveSourceActions();
+
         self.initWhiteboardActions();
         self.showHideLineageLeftPanels();
 
@@ -386,31 +386,8 @@ Lineage_sources = (function() {
   };
 
 
-  self.initActiveSourceActions = function() {
-    self.activeSourcesActions = {
-      TopClasses: Lineage_classes.drawTopConcepts,
-      Expand: Lineage_classes.addChildrenToGraph,
-      Parents: Lineage_classes.addNodesAndParentsToGraph,
-      Properties: Lineage_classes.drawObjectProperties,
-      Relations: Lineage_classes.drawRelations,
-      "Inv Relations": Lineage_classes.drawRelations,
-      "Equiv Class": Lineage_dictionary.showTSFdictionaryDialog
-
-    };
 
 
-    var actions = Object.keys(self.activeSourcesActions);
-    common.fillSelectOptions("lineage_classes_activeSourceActionSelect", actions, true);
-
-  };
-
-  self.onSelectActiveSourceAction = function(action) {
-    var fn = self.activeSourcesActions[action];
-    if (fn)
-      fn();
-    $("#lineage_classes_activeSourceActionSelect").val("");
-
-  };
 
 
   self.initWhiteboardActions = function() {

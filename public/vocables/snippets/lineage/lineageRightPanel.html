@@ -52,9 +52,9 @@
         <div class="lineage_button_group">
           <span>Term type</span>
           <select id="LineageProperties_searchAllType">
-            <option value="Property">Predicate</option>
-            <option value="Domain">Subject</option>
-            <option value="Range">Object</option>
+            <option value="property">property</option>
+            <option value="domain">domain</option>
+            <option value="range">range</option>
           </select>
 
           <input type="checkbox" id="LineageProperties_allExactMatchSearchCBX" />Exact Match &nbsp;
@@ -76,162 +76,169 @@
         </button>
       </div>
 
-      <div class="jstreeContainer" style="width: 95%; height: 450px; min-height: 400px; margin: 3px; padding: 3px">
+      <div class="jstreeContainer" style="width: 95%; height: 450px;max-height: 500px; min-height: 400px; margin: 3px; padding: 3px">
         <div class="jstree" id="Lineage_propertiesTree"></div>
       </div>
 
-    <!--
-    <div style="border: 1px solid brown">
-        <select style="width: 300px" id="LineagePropertie_nodesSelectionSelect" style="margin: 3px">
-            <option value="currentGraphNodes">Current Graph Nodes</option>
-            <option value="allNodes">All Nodes</option>
-        </select>
+      <!--
+      <div style="border: 1px solid brown">
+          <select style="width: 300px" id="LineagePropertie_nodesSelectionSelect" style="margin: 3px">
+              <option value="currentGraphNodes">Current Graph Nodes</option>
+              <option value="allNodes">All Nodes</option>
+          </select>
 
-        <button onclick="Lineage_properties.drawRangeAndDomainsGraph(null);" style="margin: 3px">Graph All</button>
-        <button onclick="Lineage_properties.exportRangeAndDomainsGraph(null);" style="margin: 3px">Export All</button>
-    </div>
-    -->
-
-    <div style="display: flex;flex-direction: column">
-      <div class="lineage_actionDiv_title">Selection </div>
-      <div id="lineage_actionsWrapper" class="lineage_actionDiv">
-        <div class="lineage_button_group">
-          <div class="lineage_actionDiv_title">Graph </div>
-          <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-                  onclick="Lineage_properties.onPropertyActionClick('predicates','graph')">Predicates
-          </button>
-
-          <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-                  onclick="Lineage_properties.onPropertyActionClick('restrictions','graph')">Restrictions
-          </button>
-
-          <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-                  onclick="Lineage_properties.onPropertyActionClick('rangesAnDomains','graph')">RangesAndDomains
-          </button>
-
-
-        </div>
-        <div class="lineage_button_group">
-          <div class="lineage_actionDiv_title">List </div>
-          <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-                  onclick="Lineage_properties.onPropertyActionClick('predicates','list')">Predicates
-          </button>
-
-          <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-                  onclick="Lineage_properties.onPropertyActionClick('restrictions','list')">Restrictions
-          </button>
-
-          <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-                  onclick="Lineage_properties.onPropertyActionClick('rangesAnDomains','list')">RangesAndDomains
-          </button>
-
-
-        </div>
+          <button onclick="Lineage_properties.drawRangeAndDomainsGraph(null);" style="margin: 3px">Graph All</button>
+          <button onclick="Lineage_properties.exportRangeAndDomainsGraph(null);" style="margin: 3px">Export All</button>
       </div>
+      -->
 
-    </div>
+      <div style="display: flex;flex-direction: column">
+        <div class="lineage_actionDiv_title">Selection</div>
+        <div>
+          <select style="width: 300px" id="lineageProperties_nodesSelectionSelect">
+            <option value="currentGraphNodes">Current Graph Nodes</option>
+            <option value="all">All</option>
+          </select>
+
+        </div>
+        <div id="lineage_actionsWrapper" class="lineage_actionDiv">
+          <div class="lineage_button_group">
+            <div class="lineage_actionDiv_title">Graph</div>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
+                    onclick="Lineage_properties.onPropertyActionClick('predicates','visj')">Predicates
+            </button>
+
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
+                    onclick="Lineage_properties.onPropertyActionClick('restrictions','visj')">Restrictions
+            </button>
+
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
+                    onclick="Lineage_properties.onPropertyActionClick('rangesAndDomains','visj')">RangesAndDomains
+            </button>
+
+
+          </div>
+          <div class="lineage_button_group">
+            <div class="lineage_actionDiv_title">Table</div>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
+                    onclick="Lineage_properties.onPropertyActionClick('predicates','table')">Predicates
+            </button>
+
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
+                    onclick="Lineage_properties.onPropertyActionClick('restrictions','table')">Restrictions
+            </button>
+
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
+                    onclick="Lineage_properties.onPropertyActionClick('rangesAndDomains','table')">RangesAndDomains
+            </button>
+
+
+          </div>
+        </div>
+
+      </div>
     </div>
 
     <div class="" id="Lineage_tablesTab" style="display: flex; flex-direction: column;width:300px;height: 500px">
-    <div id="Lineage_tablesTreeDiv"></div>
+      <div id="Lineage_tablesTreeDiv"></div>
       <div id="Lineage_tablesActionsDiv">
+
+        <div class="lineage_actionDiv_title">Actions</div>
         <div class="lineage_button_group">
-          <div class="lineage_actionDiv_title">Actions </div>
-
           <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-                  onclick='Lineage_linkedData_mappings.graphSourceMappings();'>graph Source mappings
+                  onclick="Lineage_linkedData_mappings.graphSourceMappings();">graph mappings
           </button>
           <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-                  onclick='Lineage_linkedData_mappings.createGraphRelationJoin();'>createGraphRelationJoin
+                  onclick="Lineage_linkedData_mappings.createGraphRelationJoin();">create Join
           </button>
         </div>
       </div>
-
-      </div>
-    </div>
-      <!--   <div id="LineageLinkedDataTab" style="display: flex; flex-direction: column"></div>-->
-    <!--  <div id="LineageSetsTab" style="display: flex; flex-direction: column"></div>-->
-    <!--
-
-    <div id="LineageRelationsTab" style="display: flex; flex-direction: column">
-        <div class="lineage_actionDiv">
-            <div class="lineage_actionDiv_title">Selection</div>
-            Nodes Selection
-            <select style="width: 300px" id="LineageRelations_nodesSelectionSelect">
-                <option value="currentGraphNodes">Current Graph Nodes</option>
-                <option value="selectedNodeDescendants">Selected node descendants</option>
-                <option value="allNodes">All Nodes</option>
-            </select>
-        </div>
-        <div></div>
-        <div class="lineage_actionDiv">
-            <div class="lineage_actionDiv_title">Existing relations</div>
-            <div>
-
-                <div>
-                    filters
-                    <div>
-                        Property
-                         <select style="width: 300px" class="relation_filter" id="LineageRelations_property_select"></select>
-                    </div>
-                    <div>
-                        TargetSource
-                        <select style="width: 300px" class="relation_filter" id="LineageRelations_rangeSource_select" onchange="Lineage_dictionary.onChangeFilterSelect($(this).val())"></select>
-                    </div>
-                    <div>
-                        Status
-                        <select style="width: 300px" class="relation_filter" id="LineageRelations_status_select"></select>
-                    </div>
-                    <div>
-                        Provenance
-                        <select style="width: 300px" class="relation_filter" id="LineageRelations_provenance_select"></select>
-                    </div>
-                    <div>
-                        Creator
-                        <select style="width: 300px" class="relation_filter" id="LineageRelations_creator_select"></select>
-                    </div>
-                    <div>
-                        StartDate
-                        <input style="width: 300px" class="relation_filter" id="LineageRelations_startDate_input" />
-
-                        EndDate
-                        <input style="width: 300px" class="relation_filter" id="LineageRelations_endDate_input" />
-                    </div>
-                </div>
-
-                Restrictions
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.showRestrictions('table')">List</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.showRestrictions('visjs')">Graph</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.exportRestrictions()">Export</button>
-            </div>
-        </div>
-        <div></div>
-
-
-
-        <div></div>
-        <div class="lineage_actionDiv">
-            <div class="lineage_actionDiv_title">ProjectedGraphs</div>
-
-
-            <div class="jstreeContainer">
-                <div id="LineageRelations_projectedGraphsTree"></div>
-            </div>
-        </div>
-
-
-        <div class="jstreeContainer" style="width: 90%">
-            <div class="jstree" id="Lineage_relationsTree"></div>
-        </div>
-    </div>-->
 
     </div>
   </div>
+  <!--   <div id="LineageLinkedDataTab" style="display: flex; flex-direction: column"></div>-->
+  <!--  <div id="LineageSetsTab" style="display: flex; flex-direction: column"></div>-->
+  <!--
 
-  <script>
-    SourceBrowser.targetDiv = "LineageNodesJsTreeDiv";
-    $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html", function() {
-      $("#GenericTools_searchInAllSources").prop("checked", false);
-    });
-  </script>
+  <div id="LineageRelationsTab" style="display: flex; flex-direction: column">
+      <div class="lineage_actionDiv">
+          <div class="lineage_actionDiv_title">Selection</div>
+          Nodes Selection
+          <select style="width: 300px" id="LineageRelations_nodesSelectionSelect">
+              <option value="currentGraphNodes">Current Graph Nodes</option>
+              <option value="selectedNodeDescendants">Selected node descendants</option>
+              <option value="allNodes">All Nodes</option>
+          </select>
+      </div>
+      <div></div>
+      <div class="lineage_actionDiv">
+          <div class="lineage_actionDiv_title">Existing relations</div>
+          <div>
+
+              <div>
+                  filters
+                  <div>
+                      Property
+                       <select style="width: 300px" class="relation_filter" id="LineageRelations_property_select"></select>
+                  </div>
+                  <div>
+                      TargetSource
+                      <select style="width: 300px" class="relation_filter" id="LineageRelations_rangeSource_select" onchange="Lineage_dictionary.onChangeFilterSelect($(this).val())"></select>
+                  </div>
+                  <div>
+                      Status
+                      <select style="width: 300px" class="relation_filter" id="LineageRelations_status_select"></select>
+                  </div>
+                  <div>
+                      Provenance
+                      <select style="width: 300px" class="relation_filter" id="LineageRelations_provenance_select"></select>
+                  </div>
+                  <div>
+                      Creator
+                      <select style="width: 300px" class="relation_filter" id="LineageRelations_creator_select"></select>
+                  </div>
+                  <div>
+                      StartDate
+                      <input style="width: 300px" class="relation_filter" id="LineageRelations_startDate_input" />
+
+                      EndDate
+                      <input style="width: 300px" class="relation_filter" id="LineageRelations_endDate_input" />
+                  </div>
+              </div>
+
+              Restrictions
+              <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.showRestrictions('table')">List</button>
+              <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.showRestrictions('visjs')">Graph</button>
+              <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.exportRestrictions()">Export</button>
+          </div>
+      </div>
+      <div></div>
+
+
+
+      <div></div>
+      <div class="lineage_actionDiv">
+          <div class="lineage_actionDiv_title">ProjectedGraphs</div>
+
+
+          <div class="jstreeContainer">
+              <div id="LineageRelations_projectedGraphsTree"></div>
+          </div>
+      </div>
+
+
+      <div class="jstreeContainer" style="width: 90%">
+          <div class="jstree" id="Lineage_relationsTree"></div>
+      </div>
+  </div>-->
+
+</div>
+</div>
+
+<script>
+  SourceBrowser.targetDiv = "LineageNodesJsTreeDiv";
+  $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html", function() {
+    $("#GenericTools_searchInAllSources").prop("checked", false);
+  });
+</script>
 </div>

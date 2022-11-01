@@ -636,6 +636,26 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
     return bindings;
   };
 
+
+  self.setMissingLabels= function(bindings, _fields, options) {
+    if (!options) options = {};
+    if (!Array.isArray(_fields)) _fields = [_fields];
+    _fields.forEach(function(_field) {
+      bindings.forEach(function(item) {
+
+          if (item[_field] && !item[_field + "Label"]) {
+          item[_field + "Label"]={value:Sparql_common.getLabelFromURI(item[_field].value )}
+        }
+
+        //   item.child1Label={value:id.substring(id.lastIndexOf("#")+1)}
+      });
+    });
+    return bindings;
+  };
+
+
+
+
   self.setBindingsOptionalProperties = function(bindings, _fields, options) {
     if (!options) options = {};
     if (!Array.isArray(_fields)) _fields = [_fields];

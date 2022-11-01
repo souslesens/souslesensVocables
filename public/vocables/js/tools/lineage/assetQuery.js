@@ -115,7 +115,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
         async.series(
             [
                 function (callbackSeries) {
-                    Sparql_OWL.getObjectProperties(Lineage_sources.activeSource, [node.id], null, function (err, result) {
+                   Sparql_OWL.getObjectPropertiesDomainAndRange(Lineage_sources.activeSource, [node.id], null, function (err, result) {
                         if (err) return MainController.UI.message(err);
 
                         data = result;

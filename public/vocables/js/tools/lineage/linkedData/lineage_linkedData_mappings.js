@@ -417,7 +417,7 @@ var Lineage_linkedData_mappings = (function() {
           label: column,
 
           shadow: Lineage_classes.nodeShadow,
-          shape: Lineage_linkedData_mappings.tableShape,
+          shape: Lineage_linkedData_mappings.columnShape,
           level: 1,
           size: Lineage_classes.defaultShapeSize,
           color: color,

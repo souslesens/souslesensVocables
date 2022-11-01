@@ -1176,7 +1176,7 @@ defaultLang = 'en';*/
     };
 
     self.showPropertyRestrictions = function (sourceLabel, nodeId, divId, _callback) {
-        Sparql_OWL.getPropertyClasses(sourceLabel, nodeId, {}, function (err, result) {
+        Sparql_OWL.getPropertiesRestrictionsDescription(sourceLabel, nodeId, {}, function (err, result) {
             if (err) {
                 alert(err.responseText);
                 return MainController.UI.message(err.responseText, true);
@@ -1184,19 +1184,18 @@ defaultLang = 'en';*/
 
             var str = "<b>Property restrictions</b><table>";
             result.forEach(function (item) {
+                var sourceLabel=item.sourceClassLabel? item.sourceClassLabel.value: Sparql_common.getLabelFromURI(item.sourceClass.value)
+                var targetLabel=item.targetClassLabel ? item.targetClassLabel.value : Sparql_common.getLabelFromURI(item.targetClass.value)
+
                 str += "<tr class='infos_table'>";
 
                 str +=
-                    "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.sourceClass.value + "\")'>" + item.sourceClassLabel
-                        ? item.sourceClassLabel.value
-                        : Sparql_common.getLabelFromURI(item.sourceClass.value) + "</td>";
+                    "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.sourceClass.value + "\")'>" + sourceLabel + "</td>";
 
-                str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.prop.value + "\")'>" + item.propLabel.value + "</td>";
+                str += "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.restriction.value + "\")'>" + item.restriction.value + "</td>";
 
                 str +=
-                    "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.targetClass.value + "\")'>" + item.targetClassLabel
-                        ? item.targetClassLabel.value
-                        : Sparql_common.getLabelFromURI(item.targetClass.value) + "</td>";
+                    "<td class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.targetClass.value + "\")'>" + targetLabel+ "</td>";
 
                 str += "</tr>";
             });

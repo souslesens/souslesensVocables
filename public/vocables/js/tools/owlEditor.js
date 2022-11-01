@@ -73,7 +73,7 @@ var OwlEditor = (function () {
                 },
                 //load Object Properties
                 function (callbackSeries) {
-                    Sparql_OWL.getObjectProperties(source, null, { selectGraph: 1 }, function (err, result) {
+                   Sparql_OWL.getObjectPropertiesDomainAndRange(source, null, { selectGraph: 1 }, function (err, result) {
                         if (err) return callbackSeries(err);
                         self.currentSourceData["owl:ObjectProperty"] = common.array.sort(common.array.distinctValues(result, "prop"), "propLabel");
                         callbackSeries();

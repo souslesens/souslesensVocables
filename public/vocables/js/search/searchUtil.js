@@ -2,9 +2,7 @@
 var SearchUtil = (function () {
     var self = {};
     self.existingIndexes = null;
-    self.indexSourcesMap={}
-
-
+    self.indexSourcesMap = {};
 
     self.initSourcesIndexesList = function (options, callback) {
         if (!options) options = {};

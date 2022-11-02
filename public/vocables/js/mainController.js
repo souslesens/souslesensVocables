@@ -357,7 +357,7 @@ var MainController = (function () {
 
             common.jstree.loadJsTree(treeDiv, treeData, options, function () {
                 var openedTypes = Config.preferredSchemaType;
-            //    if (types) openedTypes = types;
+                //    if (types) openedTypes = types;
                 //  $("#" + treeDiv).jstree(true).open_all(openedTypes);
                 $("#" + treeDiv)
                     .jstree(true)
@@ -396,8 +396,6 @@ var MainController = (function () {
             });
         },
         initTool: function (toolId, callback) {
-
-
             self.currentTool = toolId;
             var toolObj = Config.tools[toolId];
             self.currentSource = null;
@@ -412,14 +410,13 @@ var MainController = (function () {
             $("#actionDivContolPanelDiv").html("");
             $("#rightPanelDivInner").html("");
 
-            if(toolId=="lineage"){
+            if (toolId == "lineage") {
                 $("#accordion").accordion("option", { active: 2 });
                 MainController.currentSource = null;
 
-                    controller.onLoaded(function (err, result) {
-
-                        if (callback) callback(err, result);
-                    });
+                controller.onLoaded(function (err, result) {
+                    if (callback) callback(err, result);
+                });
                 return;
             }
 
@@ -466,8 +463,6 @@ var MainController = (function () {
             $("#messageDiv").html(message);
             if (stopWaitImg) $("#waitImg").css("display", "none");
         },
-
- 
 
         setCredits: function () {
             var html = "<div>" + " " + " <img  src=\"images/souslesensVocables.png\" style='display: block; margin-left: auto; margin-right: auto width: 50%;margin: auto;'>" + "</div>";
@@ -519,28 +514,22 @@ var MainController = (function () {
         },
 
         showHideRightPanel: function () {
+            var left = $("#rightPanelDiv").position().left;
+            var w = $(window).width();
 
-            var left=  $("#rightPanelDiv").position().left;
-            var w=$(window).width()
-
-
-            if(w-left<100) {
+            if (w - left < 100) {
                 var lw = $("#rightPanelDiv").width();
-                if(lw<100)
-                    return
-                var newLeft = "" + (w - lw) + "px"
-                $("#rightPanelDiv").css("position", "absolute")
-                $("#rightPanelDiv").css("left", newLeft)
-                $("#graphDiv").css("zIndex",19 )
-                $("#rightPanelDiv_searchIconInput").attr("src","./icons/slideRight.png")
-
-            }else{
-                var newLeft = "" + (w ) + "px"
-                $("#rightPanelDiv").css("left", newLeft)
-                $("#rightPanelDiv_searchIconInput").attr("src","./icons/search.png")
-
+                if (lw < 100) return;
+                var newLeft = "" + (w - lw) + "px";
+                $("#rightPanelDiv").css("position", "absolute");
+                $("#rightPanelDiv").css("left", newLeft);
+                $("#graphDiv").css("zIndex", 19);
+                $("#rightPanelDiv_searchIconInput").attr("src", "./icons/slideRight.png");
+            } else {
+                var newLeft = "" + w + "px";
+                $("#rightPanelDiv").css("left", newLeft);
+                $("#rightPanelDiv_searchIconInput").attr("src", "./icons/search.png");
             }
-            
         },
         showCurrentQuery: function () {
             $("#mainDialogDiv").html("<textarea style='width: 100%;height: 400px'>" + Sparql_proxy.currentQuery + "</textarea>");

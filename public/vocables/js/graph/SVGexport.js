@@ -73,7 +73,7 @@ var SVGexport = (function () {
         function showSvg(svg) {
             var svgBlob = new Blob([svg], { type: "image/svg+xml" });
 
-            common.copyTextToClipboard(svg)
+            common.copyTextToClipboard(svg);
             openBlob(svgBlob, "network.svg");
         }
 

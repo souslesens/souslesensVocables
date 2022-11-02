@@ -347,19 +347,18 @@ var util = {
         return str + "^^xsd:dateTime ";
     },
 
+    replaceSparqlPrefixByUri: function (str, prefixes) {
+        for (var key in prefixes) {
+            prefixes[key] = prefixes[key].replace("<", "");
+            prefixes[key] = prefixes[key].replace(">", "");
+            var regex = new RegExp(key + ":([\\S\\d]+)", "gm");
 
-   replaceSparqlPrefixByUri:function(str,prefixes){
-        for( var key in prefixes) {
-            prefixes[key]=prefixes[key].replace("<","")
-            prefixes[key]=prefixes[key].replace(">","")
-            var regex = new RegExp(key + ":([\\S\\d]+)","gm")
-
-            str= str.replace(regex, function(match, capture, offset) {
-                return "<" + prefixes[key] + capture + ">"
-            })
+            str = str.replace(regex, function (match, capture, offset) {
+                return "<" + prefixes[key] + capture + ">";
+            });
         }
-        return str
-    }
+        return str;
+    },
 };
 
 module.exports = util;

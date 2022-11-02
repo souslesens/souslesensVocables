@@ -2,7 +2,7 @@ var Lineage_combine = (function () {
     var self = {};
     self.currentSources = [];
     self.showSourcesDialog = function () {
-        SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], null,Lineage_combine.addSelectedSourcesToGraph);
+        SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], null, Lineage_combine.addSelectedSourcesToGraph);
     };
 
     self.init = function () {
@@ -56,9 +56,7 @@ var Lineage_combine = (function () {
         $("#graphPopupDiv").html(html);
     };
 
-
     self.getSimilars = function (output) {
-
         var commonNodes = [];
         var existingNodes = visjsGraph.getExistingIdsMap();
         var nodes = visjsGraph.data.nodes.get();
@@ -93,8 +91,8 @@ var Lineage_combine = (function () {
 
     self.showMergeNodesDialog = function (fromNode, toNode) {
         if (fromNode) {
-           Lineage_selection.clearNodesSelection();
-           Lineage_selection.addNodeToSelection(fromNode);
+            Lineage_selection.clearNodesSelection();
+            Lineage_selection.addNodeToSelection(fromNode);
         }
         if (Lineage_selection.selectedNodes.length == 0) return alert("no nodes selected");
         $("#mainDialogDiv").load("snippets/lineage/lineageAggregateMergeNodesDialog.html", function () {
@@ -103,7 +101,7 @@ var Lineage_combine = (function () {
                 $("#LineageMerge_targetNodeUriSelect").val(toNode.data.id);
             }
 
-            var jstreeData =Lineage_selection.getSelectedNodesTree();
+            var jstreeData = Lineage_selection.getSelectedNodesTree();
 
             var options = {
                 withCheckboxes: true,

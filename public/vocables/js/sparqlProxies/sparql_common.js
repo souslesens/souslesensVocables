@@ -278,24 +278,20 @@ return str;
         });
     };
 
-    self.replaceSparqlPrefixByUri=function(str,prefixes){
-        for( var key in prefixes) {
-            prefixes[key]=prefixes[key].replace("<","")
-            prefixes[key]=prefixes[key].replace(">","")
-            var regex = new RegExp(key + ":([\\S\\d]+)","gm")
+    self.replaceSparqlPrefixByUri = function (str, prefixes) {
+        for (var key in prefixes) {
+            prefixes[key] = prefixes[key].replace("<", "");
+            prefixes[key] = prefixes[key].replace(">", "");
+            var regex = new RegExp(key + ":([\\S\\d]+)", "gm");
 
-           str= str.replace(regex, function(match, capture, offset) {
-               var p=capture.indexOf(".")
-               if(p==capture.length-1)
-                   return "<" + prefixes[key] + capture.substring(0,capture.length-1) + ">."
-                return "<" + prefixes[key] + capture + ">"
-            })
+            str = str.replace(regex, function (match, capture, offset) {
+                var p = capture.indexOf(".");
+                if (p == capture.length - 1) return "<" + prefixes[key] + capture.substring(0, capture.length - 1) + ">.";
+                return "<" + prefixes[key] + capture + ">";
+            });
         }
-        return str
-    }
-
-
-
+        return str;
+    };
 
     return self;
 })();
@@ -308,5 +304,3 @@ var prefixes={
 }
 Sparql_common.replaceSparqlPrefixByUri(str,prefixes)
 */
-
-

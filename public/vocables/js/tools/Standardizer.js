@@ -69,8 +69,6 @@ setTimeout(function () {
         }, 500);
     };
 
-
-
     self.getClassesLabels = function (classUris, indexes, callback) {
         var slices = common.array.slice(classUris, 100);
         var size = 200;

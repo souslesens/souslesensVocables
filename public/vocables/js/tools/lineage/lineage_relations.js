@@ -24,7 +24,7 @@ Lineage_relations = (function () {
         var provenances = ["manual", " auto_exactMatch"];
         common.fillSelectOptions("LineageRelations_provenanceSelect", provenances, true);
         Sparql_OWL.getObjectRestrictions(
-          Lineage_sources.activeSource,
+            Lineage_sources.activeSource,
             null,
             {
                 withoutImports: 0,
@@ -67,7 +67,7 @@ Lineage_relations = (function () {
     };
 
     self.getUriSource = function (uri) {
-        var source =Lineage_sources.activeSource;
+        var source = Lineage_sources.activeSource;
         Object.keys(self.graphUriSourceMap).forEach(function (graphUri) {
             if (uri.indexOf(graphUri) == 0) {
                 source = self.graphUriSourceMap[graphUri];

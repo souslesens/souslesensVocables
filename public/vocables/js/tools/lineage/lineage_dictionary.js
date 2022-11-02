@@ -455,7 +455,7 @@ targets: [0]
     self.drawDictionarySameAs = function () {
         var filter = " FILTER (?prop = <http://www.w3.org/2002/07/owl#sameAs>) ";
         var rangeSourceLabel = $("#LineageDictionary_rangeSourceSelect").val();
-        filter += "  FILTER (?domainSourceLabel ='" + Lineage_sources.activeSource+ "')";
+        filter += "  FILTER (?domainSourceLabel ='" + Lineage_sources.activeSource + "')";
         if (rangeSourceLabel) filter += "  FILTER (?rangeSourceLabel ='" + rangeSourceLabel + "')";
         var nodes = null;
         var mode = $("#LineageDictionary_nodesSelectionSelect").val();

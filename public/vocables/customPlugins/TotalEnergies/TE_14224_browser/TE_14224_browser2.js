@@ -33,7 +33,6 @@ var TE_14224_browser = (function () {
         source = "TSF_maintenance_ROMAIN_14224";
         self.referenceOntologySource = source;
         Lineage_sources.activeSource = source;
-      
     };
 
     self.loadAsset = function (asset) {

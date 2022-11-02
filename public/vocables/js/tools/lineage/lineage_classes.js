@@ -130,7 +130,11 @@ var Lineage_classes = (function() {
         });
         $("#Lineage_tablesTreeDiv").load("snippets/KGcreator/leftPanel.html", function() {
           Lineage_linkedData_mappings.init();
-          KGcreator.loadCsvDirs({ contextualMenuFn: Lineage_linkedData_mappings.getTablesTreeContextMenu });
+          KGcreator.loadCsvDirs({
+            contextualMenuFn: Lineage_linkedData_mappings.getTablesTreeContextMenu,
+            selectTreeNodeFn: Lineage_linkedData_mappings.onCsvtreeNodeClicked,
+
+          });
         });
 
 

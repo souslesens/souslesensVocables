@@ -2,10 +2,10 @@ var Lineage_linkedData_mappings = (function() {
   var self = {};
 
 
-  self.context = "linkeData_mappings";
+  self.context = "linkedData_mappings";
   self.tableShape = "square";
   self.columnShape = "diamond";
-  self.databaseShape = "database";
+  self.databaseShape = " database";
 
   self.mappingSourceLabel = "linkedData_mappings_graph";
 
@@ -34,10 +34,36 @@ var Lineage_linkedData_mappings = (function() {
         self.linkColumnToGraphNode(KGcreator.currentTreeNode);
       }
     };
+
+    items.showSampledata = {
+      label: "Show sample data",
+      action: function(_e) {
+        self.showSampledata(KGcreator.currentTreeNode);
+      }
+    };
+
     return items;
 
   };
 
+
+  self.showSampledata = function(node) {
+    KGcreator.showSampleData(node, true, 100, function(err, result) {
+      $("#mainDialogDiv").dialog("open");
+
+      result=result.replace(/\n/g,"</td><tr><td>")
+      result=result.replace(/\t/g,"</td><td>")
+      var html="<table><tr><td>"+result+"</tr></table>"
+
+      $("#mainDialogDiv").html(html);
+
+    });
+
+  };
+
+  self.onCsvtreeNodeClicked = function() {
+    return;
+  };
 
   self.onAddEdgeDropped = function(edgeData) {
     var sourceNode = visjsGraph.data.nodes.get(edgeData.from).data;
@@ -64,6 +90,7 @@ var Lineage_linkedData_mappings = (function() {
     }
 
   };
+
 
   self.linkColumnToGraphNode = function(jstreeNode) {
     if (jstreeNode.parents.length != 2)
@@ -145,28 +172,28 @@ var Lineage_linkedData_mappings = (function() {
     self.queryMappings(Lineage_sources.activeSource, { filter: filter }, function(err, columns) {
       if (err)
         return alert(err.responseText);
-     for(var  col in columns){
-       if(columns[col].concept==relation.from)
-         relation.fromColumn=columns[col]
-       if(columns[col].concept==relation.to)
-         relation.toColumn=columns[col]
-     }
-     if(!relation.fromColumn)
-       return alert("no column mapping for node "+edge.fromNode.label)
-      if(!relation.toColumn)
-        return alert("no column mapping for node "+edge.toNode.label)
+      for (var col in columns) {
+        if (columns[col].concept == relation.from)
+          relation.fromColumn = columns[col];
+        if (columns[col].concept == relation.to)
+          relation.toColumn = columns[col];
+      }
+      if (!relation.fromColumn)
+        return alert("no column mapping for node " + edge.fromNode.label);
+      if (!relation.toColumn)
+        return alert("no column mapping for node " + edge.toNode.label);
 
 
-      if(relation.fromColumn.database!=relation.toColumn.database)
-        return alert("linked column are not in the same database")
-      var str="where "+relation.fromColumn.table+".XXX="+relation.toColumn.table+".YYY"
-      var joinClause=prompt("enter join clause", str)
-      if(!joinClause)
-        return ;
-      var triples=[];
+      if (relation.fromColumn.database != relation.toColumn.database)
+        return alert("linked column are not in the same database");
+      var str = "where " + relation.fromColumn.table + ".XXX=" + relation.toColumn.table + ".YYY";
+      var joinClause = prompt("enter join clause", str);
+      if (!joinClause)
+        return;
+      var triples = [];
       var joinUri = Config.linkedData_mappings_graph + common.getRandomHexaId(10);
 
-      var sql="select * from "+relation.fromColumn.table+","+relation.toColumn.table+" "+joinClause
+      var sql = "select * from " + relation.fromColumn.table + "," + relation.toColumn.table + " " + joinClause;
       triples.push({
         subject: joinUri,
         predicate: "slsv:sql",
@@ -207,7 +234,7 @@ var Lineage_linkedData_mappings = (function() {
           predicate: "<" + Config.linkedData_mappings_graph + "hasSqlJoin>",
           object: joinUri
         }];
-        var graphNodeSource=Lineage_sources.activeSource
+        var graphNodeSource = Lineage_sources.activeSource;
         Sparql_generic.insertTriples(graphNodeSource, triples, null, function(err, result) {
           return callback(err, { columnUri: columnUri });
         });

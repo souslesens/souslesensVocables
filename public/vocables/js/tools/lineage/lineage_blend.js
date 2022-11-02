@@ -110,7 +110,8 @@ var Lineage_blend = (function() {
               Lineage_upperOntologies.getUpperOntologyObjectPropertiesDescription(Config.currentTopLevelOntology, false, function(err, result) {
                 if (err)
                   return callbackSeries(err);
-                Lineage_upperOntologies.objectPropertiesMap = result;
+                var flatPropertiesMap = Lineage_upperOntologies.flattenPropertiesMap(result)
+                Lineage_upperOntologies.objectPropertiesMap = flatPropertiesMap;
                 callbackSeries();
 
 

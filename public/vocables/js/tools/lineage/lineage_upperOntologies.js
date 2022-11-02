@@ -98,14 +98,19 @@ self.objectPropertiesMap = {};
     if ( Lineage_upperOntologies.objectPropertiesMap [sourceLabel] && !reload && callback)
       return callback(null,  Lineage_upperOntologies.objectPropertiesMap [sourceLabel]);
 
-          Sparql_OWL.getInferredPropertiesDomainsAndRanges(sourceLabel, {}, function(err, _result) {
+          Sparql_OWL.getInferredPropertiesDomainsAndRanges(sourceLabel, {}, function(err, result) {
             if (err) return callback(err);
 
 
 
-        Lineage_upperOntologies.objectPropertiesMap[sourceLabel] =_result;
+
+
+
+
+
+        Lineage_upperOntologies.objectPropertiesMap[sourceLabel] =result;
         if (callback)
-          return callback(err, _result);
+          return callback(err, result);
       }
     );
   };
@@ -160,8 +165,33 @@ self.objectPropertiesMap = {};
       });
     });
   };
-  
-  
+
+
+  self.flattenPropertiesMap = function(propsMap) {
+    var flatPropsMap = {};
+    for (var prop in propsMap) {
+      flatPropsMap[prop] = propsMap[prop];
+      var propObj = propsMap[prop];
+
+      if (propObj.inverseProp)
+        flatPropsMap[propObj.inverseProp] = {
+          "prop": propObj.inverseProp,
+          "propLabel": propObj.inversePropLabel,
+          "subProps": [],
+          "domain": propObj.range,
+          "domainLabel": propObj.rangeLabel,
+          "range": propObj.domain,
+          "rangeLabel": propObj.domainLabel,
+          "inverseProp": prop,
+          "inversePropLabel": propObj.propLabel
+        };
+
+
+    }
+    return flatPropsMap;
+
+
+  };
   
   return self;
 })()

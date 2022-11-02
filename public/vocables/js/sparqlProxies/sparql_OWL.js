@@ -348,14 +348,16 @@ var Sparql_OWL = (function() {
     if (!Array.isArray(classIds)) classIds = [classIds];
     var filterStr = Sparql_common.setFilter("class", classIds);
     var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
-
+    var modifier = "*";
+    if (options.excludeItself)
+      modifier = "+";
     var query =
       "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
       "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
       "SELECT * " +
       fromStr +
       " WHERE {" +
-      "?class rdf:type ?type. ?class (rdf:type|rdfs:subClassOf)* ?superClass." +
+      "?class rdf:type ?type. ?class (rdf:type|rdfs:subClassOf)" + modifier + " ?superClass." +
       "filter (isIRI(?superClass)) ";
 
     if (options.withLabels) query += "OPTIONAL {?class rdfs: label classLabel } OPTIONAL {?superClass rdfs: label superClassLabel }";
@@ -411,8 +413,8 @@ var Sparql_OWL = (function() {
         " WHERE {?subject ?property ?object. " +
         filterStr +
         " " +
-        "?subject rdf:type ?subjectType. filter (?subjectType in (owl:NamedIndividual, owl:Class))"+
-        "?object rdf:type ?objectType. filter (?objectType in (owl:NamedIndividual, owl:Class))"+
+        "?subject rdf:type ?subjectType. filter (?subjectType in (owl:NamedIndividual, owl:Class))" +
+        "?object rdf:type ?objectType. filter (?objectType in (owl:NamedIndividual, owl:Class))" +
         "OPTIONAL{?property rdfs:label ?propertyLabel.}  " +
         " OPTIONAL{?subject rdfs:label ?subjectLabel.}  " +
         " OPTIONAL{?object rdfs:label ?objectLabel.}  ";
@@ -574,7 +576,6 @@ var Sparql_OWL = (function() {
     }
 
 
-
     var filterStr = "";
     if (domainIds) filterStr = Sparql_common.setFilter("domain", domainIds, null, options);
     if (options.inverseRestriction) filterStr = Sparql_common.setFilter("range", domainIds, null, options);
@@ -598,17 +599,17 @@ var Sparql_OWL = (function() {
 
     if (options.selectGraph) query += " GRAPH ?g ";
     if (options.inheritedProperties) query += "  { ?prop rdfs:subPropertyOf*/rdf:type owl:ObjectProperty ";
-    else query += "   {?prop rdf:type owl:ObjectProperty. "+
-    "OPTIONAL{?prop rdfs:label ?propLabel.  " +
-    Sparql_common.getLangFilter(sourceLabel, "propLabel") +
-    "}" +
-    "OPTIONAL{?prop owl:inverseOf ?inverseProp. " +
-    "OPTIONAL{?inverseProp rdfs:label ?inversePropLabel.  " +
-    Sparql_common.getLangFilter(sourceLabel, "inversePropLabel") +
-    "}}"
+    else query += "   {?prop rdf:type owl:ObjectProperty. " +
+      "OPTIONAL{?prop rdfs:label ?propLabel.  " +
+      Sparql_common.getLangFilter(sourceLabel, "propLabel") +
+      "}" +
+      "OPTIONAL{?prop owl:inverseOf ?inverseProp. " +
+      "OPTIONAL{?inverseProp rdfs:label ?inversePropLabel.  " +
+      Sparql_common.getLangFilter(sourceLabel, "inversePropLabel") +
+      "}}";
 
 
-      if (!options.searchType) {
+    if (!options.searchType) {
       query +=
         "OPTIONAL {?prop rdfs:range ?range. ?range rdf:type ?rangeType." +
         " OPTIONAL{?range rdfs:label ?rangeLabel.} } " +
@@ -617,19 +618,16 @@ var Sparql_OWL = (function() {
         " OPTIONAL {?prop rdfs:subPropertyOf ?subProp. OPTIONAL{?subProp rdfs:label ?subPropLabel. " +
         Sparql_common.getLangFilter(sourceLabel, "subPropLabel") +
         "}}";
-    } else if( options.searchType == "property"){
+    } else if (options.searchType == "property") {
       query += "?prop rdfs:label ?propLabel." + Sparql_common.getLangFilter(sourceLabel, "propLabel");
-        query += Sparql_common.setFilter("prop", null, options.words, null);
+      query += Sparql_common.setFilter("prop", null, options.words, null);
     } else if (options.searchType == "domain") {
-        query +="?prop rdfs:domain ?domain.  ?domain rdf:type ?domainType. ?domain rdfs:label ?domainLabel."
-        query += Sparql_common.setFilter("domain", null, options.words, null);
-      }
-      else if (options.searchType == "range") {
-        query +="?prop rdfs:range ?range.  ?range rdf:type ?rangeType. ?range rdfs:label ?rangeLabel."
-        query += Sparql_common.setFilter("range", null,  options.words, null);
-      }
-
-
+      query += "?prop rdfs:domain ?domain.  ?domain rdf:type ?domainType. ?domain rdfs:label ?domainLabel.";
+      query += Sparql_common.setFilter("domain", null, options.words, null);
+    } else if (options.searchType == "range") {
+      query += "?prop rdfs:range ?range.  ?range rdf:type ?rangeType. ?range rdfs:label ?rangeLabel.";
+      query += Sparql_common.setFilter("range", null, options.words, null);
+    }
 
 
     query += filterStr + " }}";
@@ -961,7 +959,7 @@ var Sparql_OWL = (function() {
       if (err) {
         return callback(err);
       }
-    result.results.bindings = Sparql_generic.setMissingLabels(result.results.bindings, ["prop", "subProp", "sourceClass", "targetClass"]);
+      result.results.bindings = Sparql_generic.setMissingLabels(result.results.bindings, ["prop", "subProp", "sourceClass", "targetClass"]);
       return callback(null, result.results.bindings);
     });
   };
@@ -1130,6 +1128,26 @@ var Sparql_OWL = (function() {
   /**
    * calculates also ranges and domains for inverse properties
    *
+   *
+   * returns map of object, example :
+   *  "http://rds.posccaesar.org/ontology/lis14/rdl/hasArrangedPart": {
+   *         "prop": "http://rds.posccaesar.org/ontology/lis14/rdl/hasArrangedPart",
+   *         "propLabel": "hasArrangedPart",
+   *         "subProps": [
+   *             "http://rds.posccaesar.org/ontology/lis14/rdl/hasAssembledPart",
+   *             "http://rds.posccaesar.org/ontology/lis14/rdl/hasFeature"
+   *         ],
+   *         "domain": "http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject",
+   *         "domainLabel": "PhysicalObject",
+   *          "range": "http://rds.posccaesar.org/ontology/lis14/rdl/xx",
+   *         "rangeLabel": "xx",
+   *         "inverseProp": "http://rds.posccaesar.org/ontology/lis14/rdl/arrangedPartOf",
+   *         "inversePropLabel": "arrangedPartOf"
+   *     },
+   *
+   *
+   *
+   *
    */
 
 
@@ -1207,6 +1225,10 @@ var Sparql_OWL = (function() {
       return callback(null, propsMap);
     });
   };
+
+
+
+
   self.getInferredPropertiesDomainsAndRangesOld = function(sourceLabel, options, callback) {
     var fromStr = Sparql_common.getFromStr(sourceLabel);
     var query =

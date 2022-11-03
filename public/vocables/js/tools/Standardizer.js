@@ -16,16 +16,22 @@ var Standardizer = (function () {
         $("#graphDiv").html("");
         $("#graphDiv").load("snippets/standardizer/standardizer_central.html", function () {
             $("#standardizerCentral_tabs").tabs({});
+            $("#standardizerRightPanel").load("snippets/standardizer/standardizer_right.html", function () {
+                // pass
+            });
         });
 
         $("#actionDivContolPanelDiv").load("snippets/standardizer/standardizer_left.html", function () {
             $("#Standardizer_leftTab").tabs({});
         });
-        MainController.UI.toogleRightPanel(true);
-        $("#rightPanelDiv").html("");
+      //  MainController.UI.toogleRightPanel(true);
+
+
+
+      /*  $("#rightPanelDiv").html("");
         $("#rightPanelDiv").load("snippets/standardizer/standardizer_right.html", function () {
             // pass
-        });
+        });*/
 
         $("#graphDiv").html("");
 

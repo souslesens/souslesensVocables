@@ -401,7 +401,7 @@ Lineage_properties = (function () {
                     existingNodes[item.restriction.value] = 1;
                     visjsData.nodes.push({
                         id: item.restriction.value,
-                        label: item.sourceClassLabel.value + (item.targetClassLabel ? " -> " + item.targetClassLabel.value : "any"),
+                        label: item.sourceClassLabel.value + (item.targetClassLabel ? " -> " + item.targetClassLabel.value : " -> any"),
                         shape: "box",
                         font: { background: "#ddd" },
                         //  size: Lineage_classes.defaultShapeSize,
@@ -1057,7 +1057,7 @@ Lineage_properties = (function () {
             if (properties.length == 0) properties = null;
         }
         var nodeIds = null;
-        var nodesSelection = $("#LineagePropertie_nodesSelectionSelect").val();
+        var nodesSelection = $("#lineageProperties_nodesSelectionSelect").val();
         if (visjsGraph.data && visjsGraph.data.nodes && nodesSelection == "currentGraphNodes") {
             nodeIds = visjsGraph.data.nodes.getIds();
         }

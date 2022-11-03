@@ -1,583 +1,596 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8" />
-        <title>SouslesensVocables</title>
-        <link rel="icon" href="../icons/souslesensIcon.png" />
+<head>
+  <meta charset="utf-8" />
+  <title>SouslesensVocables</title>
+  <link rel="icon" href="../icons/souslesensIcon.png" />
 
-        <!--   <script src="./js/external/jquery/jquery.min.js"></script>
+  <!--   <script src="./js/external/jquery/jquery.min.js"></script>
 <script src="./js/external/jquery/jquery-ui.min.js"></script>
 <link href="./js/external/jquery/jquery-ui.min.css" rel="stylesheet" type="text/css"/>-->
 
-        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
-        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
-        <script src="./js/external/async.js" charset="utf-8"></script>
-
-        <script src="js/common.js" charset="utf-8"></script>
-
-        <script src="./js/external/jsTree/jstree.js" charset="utf-8"></script>
-        <!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>-->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
-
-        <script type="text/javascript" src="./js/external/visjs/vis-network.min.js"></script>
-        <link href="./js/external/visjs/vis-network.css" rel="stylesheet" type="text/css" />
-        <script src="./js/graph/visjsGraph2.js"></script>
-        <script src="./js/graph/canvas2svg.js"></script>
-        <script src="./js/graph/SVGexport.js"></script>
-        <script src="./js/graph/graphMLexport.js"></script>
-
-        <script src="js/mainController.js"></script>
-        <script src="js/graphController.js"></script>
-        <script src="js/treeController.js"></script>
-        <script src="js/clipboard.js"></script>
-
-        <script src="js/tools/sourceBrowser.js"></script>
-
-        <script src="js/tools/sourceMatcher.js"></script>
-        <!--script src="js/tools/evaluate.js"></script-->
-        <script src="js/tools/evaluate.js"></script>
-        <script src="js/tools/genealogy.js"></script>
-        <script src="js/tools/owlSchema.js"></script>
-        <script src="js/tools/annotator.js"></script>
-        <script src="js/tools/childHood.js"></script>
-        <script src="js/tools/importCSV.js"></script>
-
-        <script src="js/tools/blender/blender.js"></script>
-        <script src="js/tools/blender/collection.js"></script>
-        <script src="js/tools/blender/sourceEditor.js"></script>
-        <script src="js/tools/blender/import.js"></script>
-        <script src="js/tools/blender/externalReferences.js"></script>
-        <script src="js/tools/blender/transform.js"></script>
-        <script src="js/tools/SPARQL_endpoint.js"></script>
-        <script src="js/tools/lineage/lineage_classes.js"></script>
-        <script src="js/tools/lineage/lineage_sources.js"></script>
-        <script src="js/tools/lineage/lineage_properties.js"></script>
-        <script src="js/tools/lineage/lineage_common.js"></script>
-        <script src="js/tools/lineage/lineage_blend.js"></script>
-        <script src="js/tools/lineage/lineage_relations.js"></script>
-        <script src="js/tools/lineage/lineage_dictionary.js"></script>
-        <script src="js/tools/lineage/lineage_combine.js"></script>
-
-        <script src="js/tools/lineage/lineage_decoration.js"></script>
-        <script src="js/tools/lineage/linkedData/lineage_linkedData.js"></script>
-        <script src="js/tools/lineage/linkedData/lineage_linkedData_sql.js"></script>
-        <script src="js/tools/lineage/linkedData/lineage_linkedData_search.js"></script>
-        <script src="js/tools/lineage/linkedData/lineage_linkedData_graph.js"></script>
-        <script src="js/tools/lineage/linkedData/lineage_linkedData_mappings.js"></script>
-
-        <script src="js/tools/lineage/lineage_upperOntologies.js"></script>
-
-        <script src="js/tools/lineage/lineage_sets.js"></script>
-        <script src="js/tools/lineage/lineage_selection.js"></script>
-
-
-        <script src="js/tools/owlEditor.js"></script>
-
-        <!-- <script src="js/tools/lineage/KGquery.js"></script>-->
-
-        <script src="js/tools/KG/mappings/KGmappings.js"></script>
-        <script src="js/tools/KG/mappings/KGmappingGraph.js"></script>
-        <script src="js/tools/KG/mappings/KGmappingData.js"></script>
-        <script src="js/tools/KG/mappings/KGadvancedMapping.js"></script>
-        <script src="js/tools/KG/KGassetGraph.js"></script>
-        <script src="js/tools/KG/mappings/KGbuild.js"></script>
-
-        <script src="js/tools/KG/TextAnnotator.js"></script>
-
-        <script src="js/tools/KG/KGcommon.js"></script>
-        <script src="js/tools/KG/browser/KGbrowserGraph.js"></script>
-        <script src="js/tools/KG/browser/KGbrowserQuery.js"></script>
-        <!-- <script src="js/tools/KG/browser/KGbrowserQueryNew.js"></script>-->
-        <script src="js/tools/KG/browser/KGbrowser.js"></script>
-        <script src="js/tools/KG/browser/KGbrowser_2.js"></script>
-        <script src="js/tools/KG/browser/KGbrowserBI.js"></script>
-        <script src="js/tools/KG/browser/KGbrowserDataTable.js"></script>
-        <script src="js/tools/KG/browser/KGbrowserCustom.js"></script>
-
-        <script src="js/tools/Standardizer.js"></script>
-
-        <script src="js/tools/SQLquery.js"></script>
-
-        <script src="js/tools/admin.js"></script>
-        <script src="js/tools/ConfigEditor.js"></script>
-
-        <script src="js/tools/KGcreator.js"></script>
-        <script src="js/tools/KGpropertyFilter.js"></script>
-
-        <script src="js/tools/ontologiesStats.js"></script>
-
-        <!-----------private tools--------------->
-        <script src="js/customPluginController.js"></script>
-
-        <script src="customPlugins/TotalEnergies/TE_14224_browser/TE_14224_browser.js"></script>
-        <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_AssetConfigurator.js"></script>
-        <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_AssetDataManager.js"></script>
-        <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_SqlTojstreeConnectors.js"></script>
-
-        <script src="config/app_config.js"></script>
-        <script src="config/app_config_draft_tools.js"></script>
-
-        <script src="config/tools.js"></script>
-
-        <script src="js/authentification.js"></script>
-
-        <script src="js/sparqlProxies/sparql_proxy.js"></script>
-        <script src="js/sparqlProxies/sparql_generic.js"></script>
-        <script src="js/sparqlProxies/sparql_SKOS.js"></script>
-        <script src="js/sparqlProxies/sparql_OWL.js"></script>
-        <script src="js/sparqlProxies/sparql_INDIVIDUALS.js"></script>
-
-        <script src="js/sparqlProxies/sparql_common.js"></script>
-        <script src="js/sparqlProxies/sparql_schema.js"></script>
-
-        <!--specific-->
-        <script src="js/sparqlProxies/sparql_WORDNET.js"></script>
-        <script src="js/sparqlProxies/sparql_ISO_15926.js"></script>
-        <script src="js/sparqlProxies/sparql_ISO_15926_part4.js"></script>
-        <script src="js/sparqlProxies/sparql_NPD.js"></script>
-        <script src="js/tools/orchestrator.js"></script>
-        <script src="js/search/searchUtil.js"></script>
-        <!--
-        <script src="js/external/socket.io.js"></script>
-
-        <script src="/socket.io/socket.io.js"></script>
-
-
-        <script>
-            const socket = io();
-        </script>
-
-        <script src="js/socketProxy.js"></script>
-          -->
-        <script src="js/export.js"></script>
-        <script src="js/graphTraversal.js"></script>
-        <script src="js/external/graph.js"></script>
-        <script src="js/external/download.js"></script>
-
-        <script src="js/search/elasticSearchProxy.js"></script>
-
-        <script src="js/external/d3/d3.v3.min.js"></script>
-        <script src="js/sunburst.js"></script>
-
-        <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
-        <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
-
-        <!--  <script src="js/authentification.js"></script>-->
-
-        <link
-            rel="stylesheet"
-            type="text/css"
-            href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.css"
-        />
-
-        <script
-            type="text/javascript"
-            src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.js"
-        ></script>
-
-        <!-- Bootstrap -->
-        <link
-            rel="stylesheet"
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
-            integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
-            crossorigin="anonymous"
-        />
-        <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
-            integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
-            crossorigin="anonymous"
-        ></script>
-        <script
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-            integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-            crossorigin="anonymous"
-        ></script>
-        <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
-            integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
-            crossorigin="anonymous"
-            referrerpolicy="no-referrer"
-        />
-
-        <script src="https://browser.sentry-cdn.com/5.5.0/bundle.min.js" crossorigin="anonymous"></script>
-
-        <script>
-            var leftPanelWidth = 400;
-            var rightPanelWidth = 400;
-            var w;
-            var h;
-
-            // Redirect 401 to login page
-            $(document).ajaxError(function (e, xhr, settings) {
-                if (xhr.status == 401) {
-                    location.href = "/login";
-                }
-            });
-
-            $(function () {
-                MainController.initConfig(function (err) {
-                    // sentry/glitchtip
-                    if (Config.sentryDsnJsFront) {
-                        if (typeof Sentry == "object") {
-                            Sentry.init({ dsn: Config.sentryDsnJsFront });
-                        } else {
-                            console.warn("Sentry DSN found in config, but library could not be loaded and initialized.");
-                        }
-                    }
-
-                    authentication.init();
-
-                    //  SocketProxy.init()
-
-                    if (err) return console.error(err);
-
-                    w = $(document).width() - leftPanelWidth - 30;
-                    h = $(document).height() - 30;
-
-                    h = Math.min(h, 1000);
-
-                    $("#graphDiv").width(w);
-                    MainController.UI.initialGraphDivWitdh = w;
-                    $("#graphDiv").height(h - 50);
-
-
-                    $("#accordion").accordion({
-                        heightStyle: "fill",
-                    });
-                    $("#accordion").accordion("option", { active: 0 });
-                    $("#accordion").on("accordionbeforeactivate", function (event, ui) {
-                        if (!KGmappings.checkMappingEditionSave()) return false;
-                    });
-                    $("#accordion").on("accordionactivate", function (event, ui) {});
-                    $("#mainDialogDiv").dialog({
-                        autoOpen: false,
-                        height: 800,
-                        width: 1000,
-                        modal: false,
-                    });
-
-                    $(document).on("click", "a", function () {
-                        var target = $(this).attr("target");
-                        if (false && target == "_slsvCallback") {
-                            var id = $(this).attr("href");
-                            event.stopPropagation();
-                            //  SourceBrowser.showNodeInfos(null, id, "mainDialogDiv");
-                        }
-                        //   alert("You're trying to go to " + href);
-                    });
-
-                    MainController.UI.setCredits();
-                });
-            });
-        </script>
-        <style>
-            body {
-                font-size: 14px;
-                font-family: Arial;
-                overflow: hidden;
-            }
-
-            .jstreeContainer {
-                width: 100%;
-                height: 100%;
-                overflow: auto;
-            }
-
-            .jstreeXX {
-                margin: 2px;
-                max-height: 550px;
-
-                overflow: auto;
-                min-width: 300px;
-            }
-
-            .jstree-icon {
-                width: 15px !important;
-            }
-
-            .jstree-ocl {
-                width: 24px !important;
-            }
-
-            #actionDiv {
-                width: 385px;
-                max-height: 550px;
-            }
-
-            #accordion {
-                margin-left: 5px;
-            }
-
-            .ui-accordion .ui-accordion-content {
-                overflow: hidden !important;
-                min-height: 600px !important;
-            }
-
-            .ui-accordion-content-active {
-                margin-left: -5px !important;
-                overflow: hidden;
-            }
-
-            #graphDiv {
-                margin: 3px;
-                border: 2px solid #ddd;
-            }
-
-            #graphPopupDiv {
-                z-index: 20;
-                position: absolute;
-                flex-direction: column;
-                padding: 5px;
-                border-radius: 5px;
-                text-align: center;
-                display: flex;
-                background-color: rgb(221, 221, 221);
-
-            }
-
-            .jstree-default {
-                min-height: 300px !important;
-            / / height: 600 px;
-            / / overflow: auto;
-            }
-
-            .jstree-node {
-                font-weight: bold;
-            }
-
-            #currentSourceTreeDiv {
-                overflow: auto;
-                height: 600px;
-            }
-
-            .jstreeParent {
-                width: 350px;
-                height: 600px;
-                overflow: auto;
-                border: #6e2500 1px groove;
-            }
-
-            .infosTable {
-                background-color: #d9d9d9;
-                padding: 5px;
-                width: 100%;
-            }
-
-            .detailsCellName {
-                padding: 2px;
-                max-width: 400px;
-                text-align: right;
-                width: 250px;
-            }
-
-            .detailsCellValue {
-                padding: 2px;
-                border-radius: 3px;
-                border: 1px solid black;
-                background-color: white;
-                max-width: 400px;
-            }
-
-            .messageDiv {
-                font-weight: normal;
-                font-size: 12px;
-            / / color: #6e2500;
-                color: white;
-                background-color: #00a37f;
-                padding: 2px;
-                margin: 2px;
-
-            / / max-width: 1200 px;
-            }
-
-            .toolDescriptionImg {
-                padding: 5px;
-                margin: 50px;
-                width: 400px;
-            }
-
-            .clipboardSelected {
-                border: #3b13ef 1px solid !important;
-                animation: blinker 1s linear infinite;
-            }
-
-            @keyframes blinker {
-                50% {
-                    opacity: 0;
-                }
-            }
-
-            .searched_concept {
-                color: blue;
-            }
-
-            .searched_conceptSource {
-                color: blueviolet;
-            }
-
-            .popupMenuItem {
-                border: #3b13ef 1px solid;
-                border-radius: 3px;
-             padding: 1 px;
-             margin: 1 px;
-                margin: 1px;
-                background-color: #ddd ;
-            }
-
-            .mainDialogDiv {
-                background-color: #ddd;
-            }
-
-            .td_title {
-                padding: 3px;
-                font-weight: bold;
-            }
-
-            .td_value {
-                padding: 3px;
-            }
-
-            .jstree-contextmenu {
-                z-index: 300 !important;
-            / / margin-left: - 100 px !important;
-            }
-
-            .ui-dialog {
-                border-width: 5px !important;
-                border-style: solid !important;
-                border-color: #b8a587 !important;
-            }
-
-            .ui-widget-content {
-                padding: 5px !important;
-            }
-
-            .max-height {
-                height: 750px !important;
-            }
-            .ui-dialog-title {
-
-                color: #337ab7;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="rowXXX" style="display: flex; flex-direction: column">
-            <div style="display: flex; flex-direction: row; justify-content: space-evenly">
-                <!--</div> <div style="display: flex;flex-direction: row">-->
-                <!-- <div class="colXXX" style="min-height: 25px;"-->
-                <div>
-                    <table>
-                        <tr>
-                            <td>
-                                <!-- <button onclick="MainController.test()">T</button>-->
-                            </td>
-                            <td><img src="./images/waitAnimated.gif" id="waitImg" style="display: none; width: 15px; text-align: justify" /></td>
-                            <td><span class="messageDiv" id="messageDiv"></span></td>
-                        </tr>
-                    </table>
-                </div>
-                <!-- </div>-->
-                <div class="col text-end" style="z-index: 20">
-                    <button onclick=" window.open( './browse.html','_blank');" type="button" class="btn btn-sm py-0 btn-outline-primary" style="font-weight: bold">Search</button>
-
-
-                    <button onclick="MainController.showPart14AxiomsImage()" type="button" class="btn btn-sm py-0 btn-outline-primary">Axioms</button>
-                    <!--   <button onclick="OwlEditor.loadUI()" type="button" class="btn btn-sm py-0 btn-outline-primary">OntoEdit</button>-->
-                  <!--  <button onclick="MainController.UI.test()" type="button" class="btn btn-sm py-0 btn-outline-primary">test</button>-->
-
-                    <button onclick="MainController.UI.copyCurrentQuery()" type="button" class="btn btn-sm py-0 btn-outline-primary">cpQy</button>
-
-                 <!--   <a class="btn btn-sm py-0 btn-outline-primary" href="/api/v1/api-documentation" role="button">API</a>-->
-
-                    <a class="btn btn-sm py-0 btn-outline-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-user"></i><span id="user-username">...</span>
-                    </a>
-
-                    <ul id="user-account-dropdown" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-                        <li id="manage-account-li"><a id="manage-account" class="dropdown-item" href="#">Manage account</a></li>
-                        <li>
-                            <button id="logout-button" onclick="authentication.logout()" class="dropdown-item">Logout</button>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div style="display: flex; flex-direction: row; justify-content: left">
-                <div id="leftPanelDiv" style="max-width: 400px; height: 90vh">
-                    <div id="accordion">
-                        <h3><span id="toolsListPanelDiv" class="title">Tools </span></h3>
-                        <div id="tools-panel" style="margin: 5px" class="max-height">
-                            <div class="max-height" id="toolsTreeDiv" class="jstree"></div>
-                        </div>
-
-                        <h3><span class="title">Sources </span></h3>
-                        <div id="sourcesPanel" style="margin: 5px" class="max-height">
-                            <div id="sourceDivControlPanelDiv" style="min-height: 50px; margin-left: 10px"></div>
-                            <div>Search : <input id="Lineage_SearchSourceInput" value="" style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" /></div>
-                            <div id="sourcesTreeDivContainer" style="overflow: auto" class="jstreeContainer XXXmax-height">
-                                <div id="sourcesTreeDiv"></div>
-                            </div>
-                        </div>
-
-                        <h3><span class="title" id="toolPanelLabel"> </span></h3>
-                        <div id="toolPanelDiv" style="margin: 5px; height: 900px !important; overflow: auto" class="max-height">
-                            <div id="actionDivContolPanelDiv"></div>
-                            <div id="actionDiv" class="jstree"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="centralPanelDiv" style="display: flex; flex-direction: row">
-                    <div id="graphDiv"></div>
-
-                </div>
-                <div id="rightPanelDiv" style="display: flex; flex-direction: row;margin-top: 10px;z-index: 20">
-                    <div    onclick="MainController.UI.showHideRightPanel()" style="
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+  <script src="./js/external/async.js" charset="utf-8"></script>
+
+  <script src="js/common.js" charset="utf-8"></script>
+
+  <script src="./js/external/jsTree/jstree.js" charset="utf-8"></script>
+  <!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+
+  <script type="text/javascript" src="./js/external/visjs/vis-network.min.js"></script>
+  <link href="./js/external/visjs/vis-network.css" rel="stylesheet" type="text/css" />
+  <script src="./js/graph/visjsGraph2.js"></script>
+  <script src="./js/graph/canvas2svg.js"></script>
+  <script src="./js/graph/SVGexport.js"></script>
+  <script src="./js/graph/graphMLexport.js"></script>
+
+  <script src="js/mainController.js"></script>
+  <script src="js/graphController.js"></script>
+  <script src="js/treeController.js"></script>
+  <script src="js/clipboard.js"></script>
+
+  <script src="js/tools/sourceBrowser.js"></script>
+
+  <script src="js/tools/sourceMatcher.js"></script>
+  <!--script src="js/tools/evaluate.js"></script-->
+  <script src="js/tools/evaluate.js"></script>
+  <script src="js/tools/genealogy.js"></script>
+  <script src="js/tools/owlSchema.js"></script>
+  <script src="js/tools/annotator.js"></script>
+  <script src="js/tools/childHood.js"></script>
+  <script src="js/tools/importCSV.js"></script>
+
+  <script src="js/tools/blender/blender.js"></script>
+  <script src="js/tools/blender/collection.js"></script>
+  <script src="js/tools/blender/sourceEditor.js"></script>
+  <script src="js/tools/blender/import.js"></script>
+  <script src="js/tools/blender/externalReferences.js"></script>
+  <script src="js/tools/blender/transform.js"></script>
+  <script src="js/tools/SPARQL_endpoint.js"></script>
+  <script src="js/tools/lineage/lineage_classes.js"></script>
+  <script src="js/tools/lineage/lineage_sources.js"></script>
+  <script src="js/tools/lineage/lineage_properties.js"></script>
+  <script src="js/tools/lineage/lineage_common.js"></script>
+  <script src="js/tools/lineage/lineage_blend.js"></script>
+  <script src="js/tools/lineage/lineage_relations.js"></script>
+  <script src="js/tools/lineage/lineage_dictionary.js"></script>
+  <script src="js/tools/lineage/lineage_combine.js"></script>
+
+  <script src="js/tools/lineage/lineage_decoration.js"></script>
+  <script src="js/tools/lineage/linkedData/lineage_linkedData.js"></script>
+  <script src="js/tools/lineage/linkedData/lineage_linkedData_sql.js"></script>
+  <script src="js/tools/lineage/linkedData/lineage_linkedData_search.js"></script>
+  <script src="js/tools/lineage/linkedData/lineage_linkedData_graph.js"></script>
+  <script src="js/tools/lineage/linkedData/lineage_linkedData_mappings.js"></script>
+
+  <script src="js/tools/lineage/lineage_upperOntologies.js"></script>
+
+  <script src="js/tools/lineage/lineage_sets.js"></script>
+  <script src="js/tools/lineage/lineage_selection.js"></script>
+
+
+  <script src="js/tools/owlEditor.js"></script>
+
+  <!-- <script src="js/tools/lineage/KGquery.js"></script>-->
+
+  <script src="js/tools/KG/mappings/KGmappings.js"></script>
+  <script src="js/tools/KG/mappings/KGmappingGraph.js"></script>
+  <script src="js/tools/KG/mappings/KGmappingData.js"></script>
+  <script src="js/tools/KG/mappings/KGadvancedMapping.js"></script>
+  <script src="js/tools/KG/KGassetGraph.js"></script>
+  <script src="js/tools/KG/mappings/KGbuild.js"></script>
+
+  <script src="js/tools/KG/TextAnnotator.js"></script>
+
+  <script src="js/tools/KG/KGcommon.js"></script>
+  <script src="js/tools/KG/browser/KGbrowserGraph.js"></script>
+  <script src="js/tools/KG/browser/KGbrowserQuery.js"></script>
+  <!-- <script src="js/tools/KG/browser/KGbrowserQueryNew.js"></script>-->
+  <script src="js/tools/KG/browser/KGbrowser.js"></script>
+  <script src="js/tools/KG/browser/KGbrowser_2.js"></script>
+  <script src="js/tools/KG/browser/KGbrowserBI.js"></script>
+  <script src="js/tools/KG/browser/KGbrowserDataTable.js"></script>
+  <script src="js/tools/KG/browser/KGbrowserCustom.js"></script>
+
+  <script src="js/tools/Standardizer.js"></script>
+
+  <script src="js/tools/SQLquery.js"></script>
+
+  <script src="js/tools/admin.js"></script>
+  <script src="js/tools/ConfigEditor.js"></script>
+
+  <script src="js/tools/KGcreator.js"></script>
+  <script src="js/tools/KGpropertyFilter.js"></script>
+
+  <script src="js/tools/ontologiesStats.js"></script>
+
+  <!-----------private tools--------------->
+  <script src="js/customPluginController.js"></script>
+
+  <script src="customPlugins/TotalEnergies/TE_14224_browser/TE_14224_browser.js"></script>
+  <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_AssetConfigurator.js"></script>
+  <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_AssetDataManager.js"></script>
+  <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_SqlTojstreeConnectors.js"></script>
+
+  <script src="config/app_config.js"></script>
+  <script src="config/app_config_draft_tools.js"></script>
+
+  <script src="config/tools.js"></script>
+
+  <script src="js/authentification.js"></script>
+
+  <script src="js/sparqlProxies/sparql_proxy.js"></script>
+  <script src="js/sparqlProxies/sparql_generic.js"></script>
+  <script src="js/sparqlProxies/sparql_SKOS.js"></script>
+  <script src="js/sparqlProxies/sparql_OWL.js"></script>
+  <script src="js/sparqlProxies/sparql_INDIVIDUALS.js"></script>
+
+  <script src="js/sparqlProxies/sparql_common.js"></script>
+  <script src="js/sparqlProxies/sparql_schema.js"></script>
+
+  <!--specific-->
+  <script src="js/sparqlProxies/sparql_WORDNET.js"></script>
+  <script src="js/sparqlProxies/sparql_ISO_15926.js"></script>
+  <script src="js/sparqlProxies/sparql_ISO_15926_part4.js"></script>
+  <script src="js/sparqlProxies/sparql_NPD.js"></script>
+  <script src="js/tools/orchestrator.js"></script>
+  <script src="js/search/searchUtil.js"></script>
+  <!--
+  <script src="js/external/socket.io.js"></script>
+
+  <script src="/socket.io/socket.io.js"></script>
+
+
+  <script>
+      const socket = io();
+  </script>
+
+  <script src="js/socketProxy.js"></script>
+    -->
+  <script src="js/export.js"></script>
+  <script src="js/graphTraversal.js"></script>
+  <script src="js/external/graph.js"></script>
+  <script src="js/external/download.js"></script>
+
+  <script src="js/search/elasticSearchProxy.js"></script>
+
+  <script src="js/external/d3/d3.v3.min.js"></script>
+  <script src="js/sunburst.js"></script>
+
+  <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
+  <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
+
+  <!--  <script src="js/authentification.js"></script>-->
+
+  <link
+    rel="stylesheet"
+    type="text/css"
+    href="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.css"
+  />
+
+  <script
+    type="text/javascript"
+    src="https://cdn.datatables.net/v/dt/dt-1.10.18/b-1.5.4/b-colvis-1.5.4/b-html5-1.5.4/b-print-1.5.4/fc-3.2.5/fh-3.1.4/r-2.2.2/sc-1.5.0/sl-1.2.6/datatables.min.js"
+  ></script>
+
+  <!-- Bootstrap -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+    integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+    crossorigin="anonymous"
+  />
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
+    integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
+    crossorigin="anonymous"
+  ></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+    crossorigin="anonymous"
+  ></script>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+
+  <script src="https://browser.sentry-cdn.com/5.5.0/bundle.min.js" crossorigin="anonymous"></script>
+
+  <script>
+    var leftPanelWidth = 400;
+    var rightPanelWidth = 400;
+    var w;
+    var h;
+
+    // Redirect 401 to login page
+    $(document).ajaxError(function(e, xhr, settings) {
+      if (xhr.status == 401) {
+        location.href = "/login";
+      }
+    });
+
+    $(function() {
+      MainController.initConfig(function(err) {
+        // sentry/glitchtip
+        if (Config.sentryDsnJsFront) {
+          if (typeof Sentry == "object") {
+            Sentry.init({ dsn: Config.sentryDsnJsFront });
+          } else {
+            console.warn("Sentry DSN found in config, but library could not be loaded and initialized.");
+          }
+        }
+
+        authentication.init();
+
+        //  SocketProxy.init()
+
+        if (err) return console.error(err);
+
+        w = $(document).width() - leftPanelWidth - 30;
+        h = $(document).height() - 30;
+
+        h = Math.min(h, 1000);
+
+        $("#graphDiv").width(w);
+        MainController.UI.initialGraphDivWitdh = w;
+        $("#graphDiv").height(h - 50);
+
+
+        $("#accordion").accordion({
+          heightStyle: "fill",
+        });
+        $("#accordion").accordion("option", { active: 0 });
+        $("#accordion").on("accordionbeforeactivate", function(event, ui) {
+          if (!KGmappings.checkMappingEditionSave()) return false;
+        });
+        $("#accordion").on("accordionactivate", function(event, ui) {
+        });
+        $("#mainDialogDiv").dialog({
+          autoOpen: false,
+          height: 800,
+          width: 1000,
+          modal: false,
+        });
+
+        $(document).on("click", "a", function() {
+          var target = $(this).attr("target");
+          if (false && target == "_slsvCallback") {
+            var id = $(this).attr("href");
+            event.stopPropagation();
+            //  SourceBrowser.showNodeInfos(null, id, "mainDialogDiv");
+          }
+          //   alert("You're trying to go to " + href);
+        });
+
+        MainController.UI.setCredits();
+      });
+    });
+  </script>
+  <style>
+      body {
+          font-size: 14px;
+          font-family: Arial;
+          overflow: hidden;
+      }
+
+      .jstreeContainer {
+          width: 100%;
+          height: 100%;
+          overflow: auto;
+      }
+
+      .jstreeXX {
+          margin: 2px;
+          max-height: 550px;
+
+          overflow: auto;
+          min-width: 300px;
+      }
+
+      .jstree-icon {
+          width: 15px !important;
+      }
+
+      .jstree-ocl {
+          width: 24px !important;
+      }
+
+      #actionDiv {
+          width: 385px;
+          max-height: 550px;
+      }
+
+      #accordion {
+          margin-left: 5px;
+      }
+
+      .ui-accordion .ui-accordion-content {
+          overflow: hidden !important;
+          min-height: 600px !important;
+      }
+
+      .ui-accordion-content-active {
+          margin-left: -5px !important;
+          overflow: hidden;
+      }
+
+      #graphDiv {
+          margin: 3px;
+          border: 2px solid #ddd;
+      }
+
+      #graphPopupDiv {
+          z-index: 20;
+          position: absolute;
+          flex-direction: column;
+          padding: 5px;
+          border-radius: 5px;
+          text-align: center;
+          display: flex;
+          background-color: rgb(221, 221, 221);
+
+      }
+
+      .jstree-default {
+          min-height: 300px !important;
+      / / height: 600 px;
+      / / overflow: auto;
+      }
+
+      .jstree-node {
+          font-weight: bold;
+      }
+
+      #currentSourceTreeDiv {
+          overflow: auto;
+          height: 600px;
+      }
+
+      .jstreeParent {
+          width: 350px;
+          height: 600px;
+          overflow: auto;
+          border: #6e2500 1px groove;
+      }
+
+      .infosTable {
+          background-color: #d9d9d9;
+          padding: 5px;
+          width: 100%;
+      }
+
+      .detailsCellName {
+          padding: 2px;
+          max-width: 400px;
+          text-align: right;
+          width: 250px;
+      }
+
+      .detailsCellValue {
+          padding: 2px;
+          border-radius: 3px;
+          border: 1px solid black;
+          background-color: white;
+          max-width: 400px;
+      }
+
+      .messageDiv {
+          font-weight: normal;
+          font-size: 12px;
+      / / color: #6e2500;
+          color: white;
+          background-color: #00a37f;
+          padding: 2px;
+          margin: 2px;
+
+      / / max-width: 1200 px;
+      }
+
+      .toolDescriptionImg {
+          padding: 5px;
+          margin: 50px;
+          width: 400px;
+      }
+
+      .clipboardSelected {
+          border: #3b13ef 1px solid !important;
+          animation: blinker 1s linear infinite;
+      }
+
+      @keyframes blinker {
+          50% {
+              opacity: 0;
+          }
+      }
+
+      .searched_concept {
+          color: blue;
+      }
+
+      .searched_conceptSource {
+          color: blueviolet;
+      }
+
+      .popupMenuItem {
+          border: #3b13ef 1px solid;
+          border-radius: 3px;
+          padding: 1px;
+          margin: 1px;
+          margin: 1px;
+          background-color: #ddd;
+      }
+
+      .mainDialogDiv {
+          background-color: #ddd;
+      }
+
+      .td_title {
+          padding: 3px;
+          font-weight: bold;
+      }
+
+      .td_value {
+          padding: 3px;
+      }
+
+      .jstree-contextmenu {
+          z-index: 300 !important;
+      / / margin-left: - 100 px !important;
+      }
+
+      .ui-dialog {
+          border-width: 5px !important;
+          border-style: solid !important;
+          border-color: #b8a587 !important;
+      }
+
+      .ui-widget-content {
+          padding: 5px !important;
+      }
+
+      .max-height {
+          height: 750px !important;
+      }
+
+      .ui-dialog-title {
+
+          color: #337ab7;
+      }
+  </style>
+</head>
+<body>
+<div class="rowXXX" style="display: flex; flex-direction: column">
+  <div style="display: flex; flex-direction: row; justify-content: space-evenly">
+    <!--</div> <div style="display: flex;flex-direction: row">-->
+    <!-- <div class="colXXX" style="min-height: 25px;"-->
+    <div>
+      <table>
+        <tr>
+          <td>
+            <!-- <button onclick="MainController.test()">T</button>-->
+          </td>
+          <td><img src="./images/waitAnimated.gif" id="waitImg"
+                   style="display: none; width: 15px; text-align: justify" /></td>
+          <td><span class="messageDiv" id="messageDiv"></span></td>
+        </tr>
+      </table>
+    </div>
+    <!-- </div>-->
+    <div class="col text-end" style="z-index: 20">
+      <button onclick=" window.open( './browse.html','_blank');" type="button"
+              class="btn btn-sm py-0 btn-outline-primary" style="font-weight: bold">Search
+      </button>
+
+
+      <button onclick="MainController.showPart14AxiomsImage()" type="button"
+              class="btn btn-sm py-0 btn-outline-primary">Axioms
+      </button>
+      <!--   <button onclick="OwlEditor.loadUI()" type="button" class="btn btn-sm py-0 btn-outline-primary">OntoEdit</button>-->
+      <!--  <button onclick="MainController.UI.test()" type="button" class="btn btn-sm py-0 btn-outline-primary">test</button>-->
+
+      <button onclick="MainController.UI.copyCurrentQuery()" type="button" class="btn btn-sm py-0 btn-outline-primary">
+        cpQy
+      </button>
+
+      <!--   <a class="btn btn-sm py-0 btn-outline-primary" href="/api/v1/api-documentation" role="button">API</a>-->
+
+      <a class="btn btn-sm py-0 btn-outline-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+         data-bs-toggle="dropdown" aria-expanded="false">
+        <i class="fas fa-user"></i><span id="user-username">...</span>
+      </a>
+
+      <ul id="user-account-dropdown" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+        <li id="manage-account-li"><a id="manage-account" class="dropdown-item" href="#">Manage account</a></li>
+        <li>
+          <button id="logout-button" onclick="authentication.logout()" class="dropdown-item">Logout</button>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: row; justify-content: left">
+    <div id="leftPanelDiv" style="max-width: 400px; height: 90vh">
+      <div id="accordion">
+        <h3><span id="toolsListPanelDiv" class="title">Tools </span></h3>
+        <div id="tools-panel" style="margin: 5px" class="max-height">
+          <div class="max-height" id="toolsTreeDiv" class="jstree"></div>
+        </div>
+
+        <h3><span class="title">Sources </span></h3>
+        <div id="sourcesPanel" style="margin: 5px" class="max-height">
+          <div id="sourceDivControlPanelDiv" style="min-height: 50px; margin-left: 10px"></div>
+          <div>Search : <input id="Lineage_SearchSourceInput" value=""
+                               style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" /></div>
+          <div id="sourcesTreeDivContainer" style="overflow: auto" class="jstreeContainer XXXmax-height">
+            <div id="sourcesTreeDiv"></div>
+          </div>
+        </div>
+
+        <h3><span class="title" id="toolPanelLabel"> </span></h3>
+        <div id="toolPanelDiv" style="margin: 5px; height: 900px !important; overflow: auto" class="max-height">
+          <div id="actionDivContolPanelDiv"></div>
+          <div id="actionDiv" class="jstree"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="centralPanelDiv" style="display: flex; flex-direction: row">
+      <div id="graphDiv"></div>
+
+    </div>
+    <div id="rightPanelDiv" style="display: flex; flex-direction: row;margin-top: 10px;z-index: 20">
+      <div onclick="MainController.UI.showHideRightPanel()" style="
                       margin-top: 10px;
                          margin-left: -40px;
                          height: 45px;
                          width: 60px;
                          padding: 5px;
                          background: #fcfcfc;
-                         border-radius: 10px;" >
-                        <input   id='rightPanelDiv_searchIconInput' type="image" src="./icons/search.png" /></div>
-                    <div id="rightPanelDivInner" style="display: flex; flex-direction: column">
-                </div>
-            </div>
-            <div id="graphPopupDiv" onclick="MainController.UI.hidePopup('graphPopupDiv');"></div>
-        </div>
-        <div id="loginDiv" style="position: absolute; visibility: hidden; display: flex; justify-content: center; align-items: center">
-            <div>
-                login<input id="loginInput" /> password<input
-                    type="password"
-                    id="passwordInput"
-                    onkeydown="if (event.keyCode == 13 || event.keyCode == 9) document.getElementById('loginButton').click()"
-                />
-                <button id="loginButton" onclick="authentication.doLogin(MainController.onAfterLogin)">OK</button>
+                         border-radius: 10px;
+                         border: 1px solid #ccc;">
+        <input id="rightPanelDiv_searchIconInput" type="image" src="./icons/search.png" /></div>
+      <div id="rightPanelDivInner" style="display: flex; flex-direction: column">
+      </div>
+    </div>
+    <div id="graphPopupDiv" onclick="MainController.UI.hidePopup('graphPopupDiv');"></div>
+  </div>
+  <div id="loginDiv"
+       style="position: absolute; visibility: hidden; display: flex; justify-content: center; align-items: center">
+    <div>
+      login<input id="loginInput" /> password<input
+      type="password"
+      id="passwordInput"
+      onkeydown="if (event.keyCode == 13 || event.keyCode == 9) document.getElementById('loginButton').click()"
+    />
+      <button id="loginButton" onclick="authentication.doLogin(MainController.onAfterLogin)">OK</button>
 
-                <div id="loginMessage" style="margin: 20px; font-size: 14px; color: saddlebrown"></div>
-            </div>
-        </div>
+      <div id="loginMessage" style="margin: 20px; font-size: 14px; color: saddlebrown"></div>
+    </div>
+  </div>
 
-        <div id="mainDialogDiv"></div>
+  <div id="mainDialogDiv"></div>
 
-        <!-- Footer -->
-        <footer class="bg-white">
-            <div class="row px-2">
-                <div class="col">
-                    <a target="_blank noreferrer" href="https://github.com/souslesens/souslesensVocables"
-                        ><span style="color: Black"><i class="fa-lg fab fa-github"></i></span
-                    ></a>
-                    SouslesensVocables <span id="souslesensversion"></span>
-                </div>
-                <div class="col text-end">
-                    <!-- <a class="" target="_blank noreferrer" href="https://github.com/souslesens/souslesensVocables"><i class="fab fa-github"></i></a> -->
-                </div>
-            </div>
-        </footer>
-    </body>
+  <!-- Footer -->
+  <footer class="bg-white">
+    <div class="row px-2">
+      <div class="col">
+        <a target="_blank noreferrer" href="https://github.com/souslesens/souslesensVocables"
+        ><span style="color: Black"><i class="fa-lg fab fa-github"></i></span
+        ></a>
+        SouslesensVocables <span id="souslesensversion"></span>
+      </div>
+      <div class="col text-end">
+        <!-- <a class="" target="_blank noreferrer" href="https://github.com/souslesens/souslesensVocables"><i class="fab fa-github"></i></a> -->
+      </div>
+    </div>
+  </footer>
+</body>
 </html>

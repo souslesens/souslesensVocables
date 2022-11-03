@@ -1256,7 +1256,9 @@ var Sparql_OWL = (function () {
             "SELECT distinct * " +
             fromStr +
             " WHERE {{" +
-            "  ?prop rdf:type owl:ObjectProperty.}" +
+            "  ?prop rdf:type owl:ObjectProperty. " +
+          "     ?prop rdfs:label|skos:prefLabel ?propLabel .   filter( lang(?propLabel)= 'en' || !lang(?propLabel))" +
+          "}" +
             "    minus {" +
             "    ?prop rdf:type owl:ObjectProperty.?prop rdfs:subPropertyOf* ?superProp. ?superProp (rdfs:domain|rdfs:range) ?x  filter ( isIRI(?x)) " +
             " optional { ?prop rdfs:label|skos:prefLabel  ?propLabel}" +

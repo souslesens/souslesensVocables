@@ -13,6 +13,7 @@ Lineage_sources = (function () {
         self.activeSource = null;
         self.loadedSources = {};
         self.sourceDivsMap = {};
+        $("#graphDiv").html("");
         Lineage_selection.selectedNodes = [];
         self.setTheme(Config.defaultGraphTheme);
         Lineage_sources.showSourcesDialog();
@@ -24,9 +25,12 @@ Lineage_sources = (function () {
     };
 
     self.showSourcesDialog = function () {
-        SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], null, function () {
+
+
+
+        SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], { includeSourcesWithoutSearchIndex:true }, function () {
             var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
-            $("#sourcesSelectionDialogdiv").dialog("close");
+          $("#sourcesSelectionDialogdiv").dialog("close");
             self.setCurrentSource(source);
         });
     };
@@ -161,10 +165,10 @@ Lineage_sources = (function () {
             ">" +
             sourceLabel +
             "&nbsp;" +
-            "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+         /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
             sourceDivId +
-            "\")'>[-]</i>";
-        //  "<input type='image' src='./icons/caret-down.png' onclick='Lineage_sources.showSourceDivPopupMenu(\""+ sourceDivId + "\")'/> </div>";
+            "\")'>[-]</i>";*/
+        "<input type='image' src='./icons/caret-right.png'  style='opacity: 0.5; width: 15px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\""+ sourceDivId + "\")'/> </div>";
         $("#lineage_drawnSources").append(html);
 
         $("#" + sourceDivId).bind("click", function (e) {

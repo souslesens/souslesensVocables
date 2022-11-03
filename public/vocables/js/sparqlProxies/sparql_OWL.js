@@ -897,7 +897,7 @@ var Sparql_OWL = (function () {
      *  - filter
      *  - selectGraph
      *  - limit
-     * @param callback retutns tripesl with variables
+     * @param callback retutns triples with variables
      *  -?prop
      *  - ?restriction
      *  - ?sourceClass

@@ -142,6 +142,49 @@ function processResponse(response, error, result) {
     }
 }
 
+function filterSources(allowedSources, sources) {
+    return Object.fromEntries(Object.entries(sources).filter(([sourceId, _source]) => allowedSources.includes(sourceId)));
+}
+
+function getAllowedSources(user, profiles, sources, formalOntologySourceLabel) {
+    const aProfiles = Object.entries(profiles);
+    const aSources = Object.entries(sources);
+
+    // for all profile
+    const allAccessControl = aProfiles.flatMap(([_k, profile]) => {
+        const defaultSourceAccessControl = profile.defaultSourceAccessControl;
+        const sourcesAccessControl = profile.sourcesAccessControl;
+        const allowedSourceSchemas = profile.allowedSourceSchemas;
+        // browse all sources, filter allowedSourceSchemas and get accessControl
+        return aSources
+            .filter(([sourceName, source]) => {
+                if (allowedSourceSchemas.includes(source.schemaType)) {
+                    return [sourceName, source];
+                }
+            })
+            .map(([sourceName, _v]) => {
+                if (sourceName in sourcesAccessControl) {
+                    return [sourceName, sourcesAccessControl[sourceName]];
+                } else {
+                    return [sourceName, defaultSourceAccessControl];
+                }
+            });
+    });
+
+    // get all read or readwrite source
+    const allowedSources = allAccessControl
+        .filter(([sourceName, accessControl]) => {
+            if (["read", "readwrite"].includes(accessControl)) {
+                return sourceName;
+            }
+        })
+        .map(([sourceName, _v]) => sourceName)
+        .concat([formalOntologySourceLabel, "read"]);
+
+    // uniq
+    return Array.from(new Set(allowedSources));
+}
+
 module.exports = {
     writeResource,
     failure,
@@ -157,4 +200,6 @@ module.exports = {
     successfullyFetched,
     processResponse,
     sanitizePath,
+    getAllowedSources,
+    filterSources,
 };

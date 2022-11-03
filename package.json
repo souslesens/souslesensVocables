@@ -1,6 +1,6 @@
 {
     "name": "souslesensvocables",
-    "version": "1.15.0",
+    "version": "1.16.1",
     "private": true,
     "scripts": {
         "build:app": "cd mainapp && npm run build",
@@ -82,6 +82,7 @@
         "util": "^0.12.4",
         "winston": "^3.8.2",
         "xlsx": "^0.18.5",
-        "xmldom": "^0.6.0"
+        "xmldom": "^0.6.0",
+        "yargs": "^17.5.1"
     }
 }

@@ -4,12 +4,14 @@
         "_type": "profile",
         "id": "admin",
         "allowedSourceSchemas": ["SKOS", "OWL", "INDIVIDUAL"],
-        "allowedSources": "ALL",
-        "forbiddenSources": ["Dbpedia"],
         "allowedTools": "ALL",
         "forbiddenTools": [],
         "blender": {
             "contextMenuActionStartLevel": 0
+        },
+        "defaultSourceAccessControl": "read",
+        "sourcesAccessControl": {
+            "Dbpedia": "forbidden"
         }
     },
     "owl_only": {
@@ -17,12 +19,14 @@
         "_type": "profile",
         "id": "owl_only",
         "allowedSourceSchemas": ["OWL"],
-        "allowedSources": "ALL",
-        "forbiddenSources": ["Dbpedia"],
         "allowedTools": "ALL",
         "forbiddenTools": [],
         "blender": {
             "contextMenuActionStartLevel": 0
+        },
+        "defaultSourceAccessControl": "read",
+        "sourcesAccessControl": {
+            "Dbpedia": "forbidden"
         }
     },
     "skos_only": {
@@ -30,12 +34,14 @@
         "_type": "profile",
         "id": "skos_only",
         "allowedSourceSchemas": ["SKOS"],
-        "allowedSources": "ALL",
-        "forbiddenSources": ["Dbpedia"],
         "allowedTools": "ALL",
         "forbiddenTools": [],
         "blender": {
             "contextMenuActionStartLevel": 0
+        },
+        "defaultSourceAccessControl": "read",
+        "sourcesAccessControl": {
+            "Dbpedia": "forbidden"
         }
     }
 }

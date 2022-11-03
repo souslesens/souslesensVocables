@@ -28,14 +28,28 @@ function mapSources(resources: SourceJson[]) {
 
 export async function saveSource(body: Source, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
     try {
-        const response = await fetch(endpoint, {
-            method: mode === Mode.Edition ? "put" : "post",
-            body: JSON.stringify({ [body.id]: body }, null, "\t"),
-            headers: { "Content-Type": "application/json" },
-        });
+        let response = null;
+        if (mode === Mode.Edition) {
+            response = await fetch(endpoint + "/" + body.name, {
+                method: "put",
+                body: JSON.stringify(body, null, "\t"),
+                headers: { "Content-Type": "application/json" },
+            });
+        } else {
+            response = await fetch(endpoint, {
+                method: "post",
+                body: JSON.stringify({ [body.name]: body }, null, "\t"),
+                headers: { "Content-Type": "application/json" },
+            });
+        }
         const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(resources)) });
+            if (mode === Mode.Edition) {
+                const sources = await getSources();
+                updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(sources)) });
+            } else {
+                updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(resources)) });
+            }
             updateLocal({ type: Type.UserClickedModal, payload: false });
             updateLocal({ type: Type.ResetSource, payload: mode });
         } else {
@@ -76,11 +90,13 @@ const decodeSource = (key: string, source: SourceJson): Source => {
         dataSource: source.dataSource ? source.dataSource : null,
         schema: source.schema ? source.schema : null,
         isDraft: source.isDraft ? source.isDraft : false,
-        editable: source.editable ? source.editable : true,
+        editable: source.editable ? source.editable : false,
+        allowIndividuals: source.allowIndividuals ? source.allowIndividuals : false,
         color: source.color ? source.color : "default color",
         predicates: source.predicates ? source.predicates : defaultSource(ulid()).predicates,
         group: source.group ? source.group : "",
         imports: source.imports ? source.imports : [],
+        taxonomyPredicates: source.taxonomyPredicates ? source.taxonomyPredicates : [],
     };
     return decodedSource;
 };
@@ -110,9 +126,11 @@ export type Source = {
     editable: boolean;
     color: string;
     isDraft: boolean;
+    allowIndividuals: boolean;
     predicates: { broaderPredicate: string; lang: string };
     group: string;
     imports: string[];
+    taxonomyPredicates: string[];
 };
 
 export const defaultSource = (id: string): Source => {
@@ -131,9 +149,11 @@ export const defaultSource = (id: string): Source => {
         schema: null,
         color: "",
         isDraft: false,
+        allowIndividuals: false,
         predicates: { broaderPredicate: "", lang: "" },
         group: "",
         imports: [],
+        taxonomyPredicates: [],
     };
 };
 
@@ -148,12 +168,14 @@ interface SourceJson {
     schemaType?: string;
     editable?: boolean;
     isDraft?: boolean;
+    allowIndividuals?: boolean;
     dataSource?: null | DataSource;
     schema?: null;
     color?: string;
     predicates?: { broaderPredicate: string; lang: string };
     group?: string;
     imports?: string[];
+    taxonomyPredicates?: string[];
 }
 
 interface CommonSource {

@@ -34,7 +34,7 @@ module.exports = function () {
         const successfullyDeleted = JSON.stringify(remainingProfiles) !== JSON.stringify(oldProfiles);
 
         if (req.params.id && successfullyDeleted) {
-            await writeFile(profilesJSON, JSON.stringify(remainingProfiles)).catch((err) =>
+            await writeFile(profilesJSON, JSON.stringify(remainingProfiles, null, 2)).catch((err) =>
                 res.status(500).json({
                     message: "I couldn't write profiles.json",
                     error: err,

@@ -425,12 +425,8 @@ if (searchAllSources || selectedSources.length > 0) {
             if (!Lineage_common.currentSource && !MainController.currentSource) return alert("select a source or search in all source");
             searchedSources.push(Lineage_common.currentSource || MainController.currentSource);
         } else if (sourcesScope == "graphSources") {
-            /* var graphSources=[]
-$(".Lineage_sourceLabelDiv").each(function(){
-var source=$(this).attr("id")
-source=source.replace("Lineage_source_","")
-graphSources.push(source);
-})*/
+            searchedSources = Lineage_combine.currentSources;
+        } else {
             if (Lineage_combine.currentSources.length > 0) searchedSources = Lineage_combine.currentSources;
             else {
                 var mainSource = Lineage_common.currentSource || MainController.currentSource;
@@ -438,14 +434,6 @@ graphSources.push(source);
                 var importedSources = Config.sources[mainSource].imports;
                 searchedSources = searchedSources.concat(importedSources);
             }
-        } else if (sourcesScope == "all_OWLsources") {
-            searchedSources = getUserSources("OWL");
-        } else if (sourcesScope == "all_SKOSsources") {
-            searchedSources = getUserSources("SKOS");
-        } else if (sourcesScope == "all_IndividualsSources") {
-            searchedSources = getUserSources("INDIVIDUALS");
-        } else if (sourcesScope == "all_Sources") {
-            searchedSources = getUserSources(null);
         }
 
         var jstreeData = [];

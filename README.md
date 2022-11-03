@@ -39,8 +39,14 @@ sudo apt install docker-compose
 Clone the souslesensVocables repository
 
 ```bash
-git clone git@github.com:souslesens/souslesensVocables.git
+git clone https://github.com/souslesens/souslesensVocables.git
 cd souslesensVocables
+```
+
+Checkout the latest [release](https://github.com/souslesens/souslesensVocables/releases)
+
+```bash
+git checkout x.x.x  # replace with release number (e.g. 1.15.0)
 ```
 
 Create a `.env` file from the template
@@ -51,16 +57,18 @@ cp env.template .env
 
 Edit the `.env` file:
 
-| variable                       | description                                                                                                    |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------- |
-| `TAG`                          | souslesensVocable version. Choose the latest [here](https://github.com/souslesens/souslesensVocables/releases) |
-| `VOCABLES_LISTEN_PORT`         | Port of souslesensVocable that will be exposed outside                                                         |
-| `VIRTUOSO_LISTEN_PORT`         | Port of virtuoso that will be exposed outside                                                                  |
-| `DATA_ROOT_DIR`                | Where the data will be written                                                                                 |
-| `USER_PASSWORD`                | Password of the `admin` user automatically created at first start                                              |
-| `SA_PASSWORD`                  | Password of the sql server                                                                                     |
-| `DBA_PASSWORD`                 | Password of the virtuoso server                                                                                |
-| `FORMAL_ONTOLOGY_SOURCE_LABEL` |                                                                                                                |
+The `DATA_ROOT_DIR` is defined by default to `/tmp`, change it for data persistance.
+
+| variable                       | description                                                          |
+| ------------------------------ | -------------------------------------------------------------------- |
+| `TAG`                          | souslesensVocable release. Same as you checkout at the previous step |
+| `VOCABLES_LISTEN_PORT`         | Port of souslesensVocable that will be exposed outside               |
+| `VIRTUOSO_LISTEN_PORT`         | Port of virtuoso that will be exposed outside                        |
+| `DATA_ROOT_DIR`                | Where the data will be written                                       |
+| `USER_PASSWORD`                | Password of the `admin` user automatically created at first start    |
+| `SA_PASSWORD`                  | Password of the sql server                                           |
+| `DBA_PASSWORD`                 | Password of the virtuoso server                                      |
+| `FORMAL_ONTOLOGY_SOURCE_LABEL` |                                                                      |
 
 ### Advanced configuration
 
@@ -115,6 +123,34 @@ SouslesensVocables will be available at [localhost:3010](http://localhost:3010).
 
 TODO:
 
+### Upgrading souslesens
+
+First, fetch the latest changes
+
+```bash
+git fetch
+```
+
+Then, checkout the desired [release](https://github.com/souslesens/souslesensVocables/releases)
+
+```bash
+git checkout x.x.x  # replace with release number (e.g. 1.16.0)
+```
+
+Change the `TAG` number in the `.env` file
+
+Rebuild the image
+
+```bash
+docker-compose build vocables
+```
+
+Finally, restart the docker stack
+
+```bash
+docker-compose up -d
+```
+
 ## Install locally (development instance)
 
 ### Prerequisites
@@ -154,7 +190,7 @@ npm --version
 
 ### Install
 
-souslesensVocable is composed of a backend in node/express and a frontend in typescript/react.
+souslesensVocable is composed of a backend in node/express and a frontend in pure javascript and typescript/react.
 
 ```bash
 # Install the server

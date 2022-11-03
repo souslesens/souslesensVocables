@@ -14,6 +14,7 @@ var Standardizer = (function () {
     self.onLoaded = function (callback) {
         $("#actionDiv").html("");
         $("#graphDiv").html("");
+        SourceBrowser.searchableSourcesTreeIsInitialized=false
         $("#graphDiv").load("snippets/standardizer/standardizer_central.html", function () {
             $("#standardizerCentral_tabs").tabs({});
             $("#standardizerRightPanel").load("snippets/standardizer/standardizer_right.html", function () {
@@ -100,7 +101,10 @@ setTimeout(function () {
 
                 ElasticSearchProxy.queryElastic(query, indexes, function (err, result) {
                     if (err) return callbackEach(err);
-
+if(result.error) {
+    console.log(JSON.stringify(result.error))
+    return callback()
+}
                     var hits = result.hits.hits;
                     if (hits.length > queryResultsSize) if (!confirm("resut troncated > " + hits.length)) return callback("resut troncated");
                     hits.forEach(function (hit) {

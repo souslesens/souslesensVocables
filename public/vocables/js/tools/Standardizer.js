@@ -9,6 +9,8 @@ var Standardizer = (function () {
     self.fuzzyMatches = [];
 
     self.onSourceSelect = function () {
+
+
         // pass
     };
     self.onLoaded = function (callback) {

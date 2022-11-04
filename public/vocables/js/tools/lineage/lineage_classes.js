@@ -1714,13 +1714,17 @@ addNode:false
                 },
                 //get props labels
                 function (callbackSeries) {
-                    return callbackSeries();
-                    var propIds = [];
+
                     var propIds = [];
                     result.forEach(function (item) {
                         if (propIds.indexOf(item.prop.value) < 0) propIds.push(item.prop.value);
                     });
-                    Sparql_OWL.getDictionary();
+                    SearchUtil.getSourceLabels(null,propIds,null,null,function(err,result){
+                        result.forEach(function(hit){
+
+                        })
+                        return callbackSeries();
+                    })
                 },
             ],
 

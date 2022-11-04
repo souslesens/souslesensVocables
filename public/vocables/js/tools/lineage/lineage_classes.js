@@ -851,13 +851,14 @@ addNode:false
 
                             var queryOutcoming =
                                 "{?concept ?prop ?value.  " +
-                                filter +
-                                "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} " +
+                                filter +Sparql_common.getVariableLangLabel("value",true)
+                               // "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} " +
                                 "?prop rdf:type owl:ObjectProperty. ?value rdf:type ?valueType filter (?valueType in (owl:Class,owl:NamedIndividual))}";
                             var queryIncoming =
                                 " {?value ?prop ?concept.  " +
                                 filter +
-                                "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel}" +
+                              filter +Sparql_common.getVariableLangLabel("value",true)
+                               // "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel}" +
                                 "?prop rdf:type owl:ObjectProperty. ?value rdf:type ?valueType filter (?valueType in (owl:Class,owl:NamedIndividual))}";
 
                             if (propFilter == "outcoming") query += queryOutcoming;
@@ -1716,6 +1717,18 @@ addNode:false
                         callbackSeries();
                     });
                 },
+              //get props labels
+                function (callbackSeries) {
+                return callbackSeries()
+                    var propIds = []
+                    var propIds = []
+                    result.forEach(function(item) {
+                        if (propIds.indexOf(item.prop.value) < 0)
+                            propIds.push(item.prop.value)
+                    })
+                    Sparql_OWL.getDictionary()
+                }
+
             ],
 
             function (err) {

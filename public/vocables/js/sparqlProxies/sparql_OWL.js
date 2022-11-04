@@ -278,7 +278,7 @@ var Sparql_OWL = (function () {
         } else if (ids) {
             strFilter = Sparql_common.setFilter("concept", ids, null, options);
         }
-
+        options.selectGraph=false
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
 
         var query =
@@ -288,7 +288,7 @@ var Sparql_OWL = (function () {
             " select distinct *  " +
             fromStr +
             "  WHERE {";
-        if (options.selectGraph) query += " GRAPH ?conceptGraph {";
+        if (false && options.selectGraph) query += " GRAPH ?conceptGraph {";
         query += "?concept rdf:type  ?conceptType. filter (?conceptType not in(owl:Restriction)) ";
         if (words) {
             query += " ?concept rdfs:label ?conceptLabel.";
@@ -303,12 +303,16 @@ var Sparql_OWL = (function () {
                 //  query += "  OPTIONAL{?concept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
                 query += "  ?concept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
                 query += "  OPTIONAL{ ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} ";
-                query += " OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label.}";
+              query +=Sparql_common.getVariableLangLabel("broader" + i)
+              // query += " OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label.}";
             } else {
                 query += "OPTIONAL { ?broader" + (i - 1) + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?broader" + i + ".";
                 //   "?broader" + i + " rdf:type owl:Class."
                 query += " ?broader" + i + " rdf:type ?broaderType" + i + ". filter(?broaderType" + i + " !=owl:Restriction) ";
-                query += "OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label." + Sparql_common.getLangFilter(sourceLabel, "broader" + i + "Label") + "}";
+               // query += "OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label."
+               // + Sparql_common.getLangFilter(sourceLabel, "broader" + i + "Label") + "}";
+                query +=Sparql_common.getVariableLangLabel("broader" + i)
+
             }
         }
 
@@ -718,17 +722,19 @@ var Sparql_OWL = (function () {
             "{ ?concept rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction." +
             filterStr +
             " ?node owl:onProperty ?prop ." +
-            " OPTIONAL {?prop rdfs:label ?propLabel}" +
-            " OPTIONAL {?concept rdfs:label ?conceptLabel}";
+          //  " OPTIONAL {?prop rdfs:label ?propLabel}" +
+          //  " OPTIONAL {?concept rdfs:label ?conceptLabel}";
+        Sparql_common.getVariableLangLabel("prop",true)+
+        Sparql_common.getVariableLangLabel("concept",true)
 
         if (options.someValuesFrom) {
-            query += "?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}";
+            query += "?node owl:someValuesFrom ?value."+ Sparql_common.getVariableLangLabel("value",true) //OPTIONAL {?value rdfs:label ?valueLabel}";
         } else if (options.allValuesFrom) {
-            query += "?node owl:allValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}";
+            query += "?node owl:allValuesFrom ?value."+ Sparql_common.getVariableLangLabel("value",true) // OPTIONAL {?value rdfs:label ?valueLabel}";
         } else if (options.aValueFrom) {
-            query += "?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}";
+            query += "?node owl:aValueFrom ?value."+ Sparql_common.getVariableLangLabel("value",true) // OPTIONAL {?value rdfs:label ?valueLabel}";
         } else {
-            query += "?node owl:allValuesFrom|owl:someValuesFrom|owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}";
+            query += "?node owl:allValuesFrom|owl:someValuesFrom|owl:aValueFrom ?value."+ Sparql_common.getVariableLangLabel("value",true) // OPTIONAL {?value rdfs:label ?valueLabel}";
             /*  query +=
           "  OPTIONAL {?node owl:allValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
           "   OPTIONAL {?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
@@ -1153,7 +1159,7 @@ var Sparql_OWL = (function () {
             fromStr +
             "  WHERE {" +
             "   {" +
-            "     ?prop rdfs:label|skos:prefLabel ?propLabel .   filter( lang(?propLabel)= 'en' || !lang(?propLabel))" +
+            "     ?prop rdfs:label|skos:prefLabel ?propLabel .   filter( lang(?propLabel)= '"+Config.default_lang+"' || !lang(?propLabel))" +
             "    ?prop rdf:type owl:ObjectProperty. " +
             "  }" +
             " UNION " +

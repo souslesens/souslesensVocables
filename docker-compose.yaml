@@ -32,6 +32,7 @@ services:
             - ${VIRTUOSO_LISTEN_PORT:-8890}:8890
         environment:
             DBA_PASSWORD: ${DBA_PASSWORD}
+            SPARQL_UPDATE: "true"
         volumes:
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/virtuoso/data:\
               /data"

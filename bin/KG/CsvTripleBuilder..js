@@ -296,6 +296,8 @@ var CsvTripleBuilder = {
                               } else if (item.dataType) {
                                 item.p="owl:hasValue"
                                 var str= line[item.o]
+                                if(!str)
+                                  return;
                                 objectStr = "'"+ str+ "'^^" + item.dataType;
                               } else if (typeof item.o === "function") {
                                 try {
@@ -312,7 +314,11 @@ var CsvTripleBuilder = {
                                 } catch (e) {
                                   return callbackSeries2(e);
                                 }
-                              } else if (item.o.match(/.+:.+|http.+/)) {
+                              }
+                              else if (item.o.match(/http.+/)) {
+                                  objectStr = "<"+item.o+">";
+
+                              } else if (item.o.match(/.+:.+/)) {
                                 objectStr = item.o;
                               } else objectStr = line[item.o];
 

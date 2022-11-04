@@ -97,6 +97,8 @@ var KGcreator = (function() {
           $("#sourcesSelectionDialogdiv").dialog("close");
           self.currentSource = source;
           Config.currentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromImports(source);
+
+          self.currentGraphUri=Config.sources[source].graphUri
           if (!Config.currentTopLevelOntology)
             return alert("Source must have an upper ontology import");
           $("#KGcreator_owlSourceInput").html(source);

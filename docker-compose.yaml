@@ -58,7 +58,7 @@ services:
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/elasticsearch/data:\
               /usr/share/elasticsearch/data"
         ports:
-            - ${VIRTUOSO_LISTEN_PORT:-8890}:8890
+            - ${ELASTICSEARCH_LISTEN_PORT:-9200}:9200
         networks:
             - backend
 

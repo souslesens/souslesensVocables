@@ -34,7 +34,7 @@ var Config = (function () {
 
     self.topLevelOntologies = {
         "ISO_15926-part-14_PCA": { uriPattern: "lis14", prefix: "part14", prefixtarget: "https://rds.posccaesar.org/ontology/lis14/rdl/" },
-        BFO: { uriPattern: "obo",uriPatternXX: "BFO", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
+        BFO: { uriPattern: "obo", uriPatternXX: "BFO", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
         DOLCE: { uriPattern: "dul", prefix: "dul", prefixtarget: "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#" },
     };
 

@@ -849,17 +849,12 @@ addNode:false
                             var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " + "select * " + fromStr + " where {";
                             var filter = Sparql_common.setFilter("concept", _ids);
 
-                            var queryOutcoming =
-                                "{?concept ?prop ?value.  " +
-                                filter +Sparql_common.getVariableLangLabel("value",true)
-                               // "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} " +
-                                "?prop rdf:type owl:ObjectProperty. ?value rdf:type ?valueType filter (?valueType in (owl:Class,owl:NamedIndividual))}";
-                            var queryIncoming =
-                                " {?value ?prop ?concept.  " +
-                                filter +
-                              filter +Sparql_common.getVariableLangLabel("value",true)
-                               // "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel}" +
-                                "?prop rdf:type owl:ObjectProperty. ?value rdf:type ?valueType filter (?valueType in (owl:Class,owl:NamedIndividual))}";
+                            var queryOutcoming = "{?concept ?prop ?value.  " + filter + Sparql_common.getVariableLangLabel("value", true);
+                            // "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} " +
+                            ("?prop rdf:type owl:ObjectProperty. ?value rdf:type ?valueType filter (?valueType in (owl:Class,owl:NamedIndividual))}");
+                            var queryIncoming = " {?value ?prop ?concept.  " + filter + filter + Sparql_common.getVariableLangLabel("value", true);
+                            // "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel}" +
+                            ("?prop rdf:type owl:ObjectProperty. ?value rdf:type ?valueType filter (?valueType in (owl:Class,owl:NamedIndividual))}");
 
                             if (propFilter == "outcoming") query += queryOutcoming;
                             else if (propFilter == "incoming") query += queryIncoming;
@@ -1717,18 +1712,16 @@ addNode:false
                         callbackSeries();
                     });
                 },
-              //get props labels
+                //get props labels
                 function (callbackSeries) {
-                return callbackSeries()
-                    var propIds = []
-                    var propIds = []
-                    result.forEach(function(item) {
-                        if (propIds.indexOf(item.prop.value) < 0)
-                            propIds.push(item.prop.value)
-                    })
-                    Sparql_OWL.getDictionary()
-                }
-
+                    return callbackSeries();
+                    var propIds = [];
+                    var propIds = [];
+                    result.forEach(function (item) {
+                        if (propIds.indexOf(item.prop.value) < 0) propIds.push(item.prop.value);
+                    });
+                    Sparql_OWL.getDictionary();
+                },
             ],
 
             function (err) {

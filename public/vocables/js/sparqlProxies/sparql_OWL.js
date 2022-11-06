@@ -412,8 +412,8 @@ var Sparql_OWL = (function() {
         " WHERE {?subject ?property ?object. " +
         filterStr +
         " " +
-        "?subject rdf:type ?subjectType. filter (?subjectType in (owl:NamedIndividual, owl:Class))" +
-        "?object rdf:type ?objectType. filter (?objectType in (owl:NamedIndividual, owl:Class))" +
+        "?subject rdf:type ?subjectType. " +
+        "?object rdf:type ?objectType. " +
         Sparql_common.getVariableLangLabel("property", true) +
         Sparql_common.getVariableLangLabel("subject", true) +
         Sparql_common.getVariableLangLabel("object", true);
@@ -422,6 +422,10 @@ var Sparql_OWL = (function() {
        " OPTIONAL{?object rdfs:label ?objectLabel.}  ";*/
       if (options.onlyObjectProperties) " ?property rdf:type owl:ObjectProperty.";
       if (options.filter) query += " " + options.filter;
+      if(true || options.onlyObject){
+        query +=" filter (?subjectType in (owl:NamedIndividual, owl:Class))"
+        query +=" filter (?objectType in (owl:NamedIndividual, owl:Class))"
+      }
       query += " } order by ?propertyLabel ";
       var limit = options.limit || Config.queryLimit;
       query += " limit " + limit;

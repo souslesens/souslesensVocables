@@ -206,6 +206,10 @@ Lineage_properties = (function () {
      * @param nodeData
      */
     self.drawPredicatesGraph = function (source, nodeIds, properties) {
+        if(nodeIds && !Array.isArray(nodeIds))
+            nodeIds=[nodeIds]
+        if(properties && !Array.isArray(properties))
+            properties=[properties]
         var filter=" FILTER( ?property !=rdf:type)"
         Sparql_OWL.getFilteredTriples(source, nodeIds, properties, null, {filter:filter}, function (err, result) {
             if (err) return callback(err);

@@ -132,8 +132,8 @@ var CsvTripleBuilder = {
     async.eachSeries(
       mappings,
       function(mapping, callbackEachMapping) {
-        var fileName = mapping.fileName;
-        var filePath = fileName;
+
+
         var lookUpMap = {};
         var triples = [];
 
@@ -171,9 +171,9 @@ var CsvTripleBuilder = {
 
             //load csv
             function(callbackSeries) {
-              if (!filePath) return callbackSeries();
+              if (! mapping.csvDataFilePath) return callbackSeries();
 
-              CsvTripleBuilder.readCsv(filePath, options.sampleSize, function(err, result) {
+              CsvTripleBuilder.readCsv(mapping.csvDataFilePath, options.sampleSize, function(err, result) {
                 if (err) {
                   console.log(err);
                   return callbackSeries(err);
@@ -186,7 +186,7 @@ var CsvTripleBuilder = {
 
             //load SQL dataSource
             function(callbackSeries) {
-              if (!dataSource) return callbackSeries();
+              if (!mapping.dataSource) return callbackSeries();
               sqlServerProxy.getData(dataSource.dbName, dataSource.sql, function(err, result) {
                 if (err) return callbackSeries(err);
                 csvData = [result];
@@ -349,9 +349,20 @@ var CsvTripleBuilder = {
                             {
                               objectStr = objectStr.trim();
                               if (objectStr.indexOf && objectStr.indexOf("http") == 0) objectStr = "<" + objectStr + ">";
+                              else if(item.datatype){
+                                //pass
+                              }
                               else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
                                 // pass
-                              } else if (propertiesTypeMap[item.p] == "string" || item.isString) objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
+                              } else if (propertiesTypeMap[item.p] == "string" || item.isString){
+                                if(objectStr.indexOf("xsd:")<0)
+                                objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
+                              }
+                              else if(objectStr.indexOf("xsd:")>-1){
+                              ;//pass
+
+                              }
+
                               else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                             }
 
@@ -449,8 +460,9 @@ var CsvTripleBuilder = {
                               else if (typeof item.p === "function") {
                                 propertyStr = item.p(line, line);
                               }
-
+                              if (propertyStr.indexOf("http") == 0) propertyStr = "<" + propertyStr + ">";
                               if (subjectStr && objectStr) {
+                                if(true || !item.datatype){
                                 // return console.log("missing type " + item.p)
                                 if (!existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr]) {
                                   existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
@@ -459,6 +471,7 @@ var CsvTripleBuilder = {
                                     p: propertyStr,
                                     o: objectStr
                                   });
+                                }
                                 }
                               }
                             }
@@ -694,7 +707,10 @@ var CsvTripleBuilder = {
           var mappingsFilePath = path.join(__dirname, "../../data/" + dirName + "/" + mappingFileName);
           var mappings = "" + fs.readFileSync(mappingsFilePath);
           mappings = JSON.parse(mappings);
-          mappings.fileName = mappingsFilePath.replace(".json", "");
+          if(typeof options.dataLocation =="string")
+          mappings.csvDataFilePath = path.join(__dirname, "../../data/" + dirName + "/" +options.dataLocation)
+          else
+            mappings.datasource=options.dataLocation
 
           function getFunction(argsArray, fnStr, callback) {
             try {
@@ -739,7 +755,7 @@ var CsvTripleBuilder = {
 
           // format lookups
           mappings.lookups.forEach(function(item) {
-            var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
+            var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.csvDataFilePath);
             item.filePath = lookupFilePath;
             if (item.transformFn) {
               getFunction(["value", "role", "prop", "row"], item.transformFn, function(err, fn) {
@@ -754,7 +770,9 @@ var CsvTripleBuilder = {
             for (var prefix in mappings.prefixes) CsvTripleBuilder.sparqlPrefixes[prefix] = "<" + mappings.prefixes[prefix] + ">";
           }
 
-          var mappingsMap = { [mappings.fileName]: mappings };
+          var mappingsMap = { [mappings.csvDataFilePath]: mappings };
+
+
 
           CsvTripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function(err, result) {
             if (err) return callbackSeries(err);

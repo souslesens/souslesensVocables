@@ -522,7 +522,7 @@ var currentSubjectClasses=[]
             self.domainOntologyProperties = [];
             result.forEach(function (item) {
                 sourceSpecificPredicates.push({
-                  id: item.prop.value,
+                  id: "<"+item.prop.value+">",
                   label: item.propLabel.value
                 })
               })
@@ -547,7 +547,7 @@ var currentSubjectClasses=[]
             currentObjectClasses = objs;
 
             //  var allObjects = result.usualObjects.concat(result.TopLevelOntologyObjects).concat([""]).concat(result.sourceObjects);
-            currentPredicates = sourceSpecificPredicates.concat(result.predicates);
+            currentPredicates = sourceSpecificPredicates.concat([{id:"",label:"--------"}]).concat(result.predicates);
 
             callbackSeries();
           });
@@ -557,7 +557,7 @@ var currentSubjectClasses=[]
         function(callbackSeries) {
 
         currentSubjectClasses=["_selectedColumn","--------"].concat(self.usualSubjectTypes)
-          currentObjectClasses=[{id:"",label:"_selectedColumn"},{id:"",label:"--------"}].concat(currentObjectClasses)
+          currentObjectClasses=[{id:"_selectedColumn",label:"_selectedColumn"},{id:"",label:"--------"}].concat(currentObjectClasses)
           callbackSeries();
         },
         function(callbackSeries) {
@@ -649,18 +649,32 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
 
 
     if (role == "s") {
-      if(value=="_selectedColumn")
-        $("#KGcreator_subjectInput").val( self.currentTreeNode.text);
-      else
-      $("#KGcreator_subjectInput").val(value);
+      if (value == "_selectedColumn") {
+        $("#KGcreator_subjectInput").val(self.currentTreeNode.text);
+      } else
+        $("#KGcreator_subjectInput").val(value);
+      $("#KGcreator_subjectSelect").val("");
     }
-    else if (role == "p") $("#KGcreator_predicateInput").val(value);
+
+    else if (role == "p") {
+      $("#KGcreator_predicateInput").val(value);
+
+      $("#KGcreator_predicateSelect").val("");
+    }
+
+
     else if (role == "o") {
       if(value=="_selectedColumn")
       $("#KGcreator_objectInput").val(self.currentTreeNode.text);
     else
       $("#KGcreator_objectInput").val( value);
+
+      $("#KGcreator_objectSelect").val("");
+
     }
+
+
+
   };
 
   self.addLookup = function() {
@@ -886,7 +900,14 @@ if (selectedFiles.length > 0);*/
     $("#KGcreator_dataSampleDiv").val("creating triples...");
     if (!self.currentJsonObject) return;
 
-    if (self.currentSourceType != "CSV") return alert("only triples from csv sources can be generated : IN PROGRESS, COMING SOON");
+    var dataLocation=""
+    if (self.currentSourceType != "CSV") {
+      return alert("only triples from csv sources can be generated : IN PROGRESS, COMING SOON");
+      dataLocation = { xxx: "ee" }
+
+    } else{
+      dataLocation=self.currentJsonObject.fileName
+        }
 
     if (!self.currentJsonObject.graphUri) {
       var graphUri = "";
@@ -897,16 +918,20 @@ if (selectedFiles.length > 0);*/
       self.currentJsonObject = self.mainJsonEditor.get();
       self.currentJsonObject.graphUri = graphUri;
       self.mainJsonEditor.load(self.currentJsonObject);
+
+
     }
     var options = {};
     if (test) {
       options = {
         deleteOldGraph: false,
-        sampleSize: 500
+        sampleSize: 500,
+        dataLocation:dataLocation
       };
     } else {
       options = {
-        deleteOldGraph: false
+        deleteOldGraph: false,
+        dataLocation:dataLocation
       };
     }
 
@@ -916,7 +941,7 @@ if (selectedFiles.length > 0);*/
       $("#KGcreator_dataSampleDiv").val("");
       var payload = {
         dir: "CSV/" + self.currentCsvDir,
-        fileName: self.currentJsonObject.fileName + ".json",
+        fileName: self.currentSource+"_"+self.currentJsonObject.fileName + ".json",
         options: JSON.stringify(options)
       };
 

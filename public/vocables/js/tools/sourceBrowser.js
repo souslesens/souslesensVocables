@@ -1218,9 +1218,9 @@ defaultLang = 'en';*/
         var predicate = $("#sourceBrowser_addPropertyPredicateSelect").val();
         var allObjects = self.SourcePossiblePredicatesAndObject;
         if (predicate == "rdf:type") {
-            common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.basicTypeClasses.concat(allObjects.sourceObjects), true, "label", "id");
+            common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.basicTypeClasses.concat(["-----------"]).concat(allObjects.sourceObjects), true, "label", "id");
         } else if (predicate == "rdfs:subClassOf") {
-            common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.TopLevelOntologyObjects.concat(allObjects.sourceObjects), true, "label", "id");
+            common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.sourceObjects.concat(["-----------"]).concat(allObjects.TopLevelOntologyObjects), true, "label", "id");
         } else {
             common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "label", "id");
         }
@@ -1297,7 +1297,7 @@ defaultLang = 'en';*/
         if (confirm("delete property " + property)) {
             Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, value, function (err, _result) {
                 if (err) return alert(err);
-                self.showNodeInfos(self.currentSource, self.currentNodeId, "mainDialogDiv");
+                self.showNodeInfos(self.currentSource, self.currentNode, "mainDialogDiv");
 
                 if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
                     Lineage_classes.deleteEdge(self.currentNodeId, value, property);
@@ -1381,7 +1381,20 @@ defaultLang = 'en';*/
     };
 
     self.indexObjectIfNew = function () {
-        if (self.newProperties && self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"]) {
+        if (self.newProperties && (self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"]  || self.newProperties["rdfs:label"])) {
+
+            if(self.currentNode && self.currentNode.from){
+                var data=[]
+                for(var id in self.newProperties){
+                    data.push({id:id,label:self.newProperties[id],type:"property",owltype:"ObjectProperty"})
+                }
+
+                SearchUtil.addPropertiesToIndex(self.currentSource, data, function (err, _result) {
+                    if (err) return alert(err);
+                });
+            }
+
+
             SearchUtil.addObjectsToIndex(self.currentSource, self.currentNodeId, function (err, _result) {
                 if (err) return alert(err);
             });

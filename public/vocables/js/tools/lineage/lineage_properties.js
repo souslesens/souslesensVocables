@@ -40,7 +40,7 @@ Lineage_properties = (function () {
             },
         };
         if (MainController.currentTool == "lineage") {
-            items.drawRangesAndDomainsProperty = {
+           /* items.drawRangesAndDomainsProperty = {
                 label: "Draw ranges and domains",
                 action: function (_e) {
                     // pb avec source
@@ -48,7 +48,7 @@ Lineage_properties = (function () {
                         self.drawRangeAndDomainsGraph(self.currentTreeNode);
                     }, 200);
                 },
-            };
+            };*/
             items.copyNodeToClipboard = {
                 label: "copy to Clipboard",
                 action: function (_e) {
@@ -206,12 +206,15 @@ Lineage_properties = (function () {
      * @param nodeData
      */
     self.drawPredicatesGraph = function (source, nodeIds, properties) {
-        Sparql_OWL.getFilteredTriples(source, nodeIds, properties, null, {}, function (err, result) {
+        var filter=" FILTER( ?property !=rdf:type)"
+        Sparql_OWL.getFilteredTriples(source, nodeIds, properties, null, {filter:filter}, function (err, result) {
+            if (err) return callback(err);
+            Sparql_common.setSparqlResultPropertiesLabels(source, result, "property",function(err, result2) {
             if (err) return callback(err);
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = visjsGraph.getExistingIdsMap();
             var color = Lineage_classes.getSourceColor(source);
-            result.forEach(function (item) {
+            result2.forEach(function (item) {
                 if (!existingNodes[item.subject.value]) {
                     existingNodes[item.subject.value] = 1;
 
@@ -262,6 +265,7 @@ Lineage_properties = (function () {
                         to: item.object.value,
                         data: { propertyId: item.property.value, source: source },
                         label: item.propertyLabel.value,
+                        font:{color:Lineage_classes.defaultPredicateEdgeColor},
                         arrows: {
                             to: {
                                 enabled: true,
@@ -269,7 +273,8 @@ Lineage_properties = (function () {
                                 scaleFactor: 0.5,
                             },
                         },
-                        color: Lineage_classes.propertyColors,
+                       dashes:[3, 3],
+                        color: Lineage_classes.defaultPredicateEdgeColor,
                     });
                 }
             });
@@ -281,6 +286,7 @@ Lineage_properties = (function () {
             }
 
             $("#waitImg").css("display", "none");
+        });
         });
     };
 

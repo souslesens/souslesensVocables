@@ -832,9 +832,6 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         });
     };
 
-    self.addAllPredefinedPart14PredicatesTriples = function () {
-        // pass
-    };
 
     self.getPredefinedPart14PredicateFromClasses = function (subjectClass, objectClass) {
         var pred = null;

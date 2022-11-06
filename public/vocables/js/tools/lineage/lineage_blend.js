@@ -15,7 +15,7 @@ var Lineage_blend = (function () {
                         $("#LineageBlend_creatingNamedIndividualButton").css("display", "none");
                     }
                     self.currentPossibleClassesAndPredicates = result;
-                    var allObjects = result.usualObjects.concat(result.TopLevelOntologyObjects).concat([""]).concat(result.sourceObjects);
+                    var allObjects = result.sourceObjects.concat(["---------"]).concat(result.TopLevelOntologyObjects).concat(["---------"]).concat(result.usualObjects);
 
                     common.fillSelectOptions("KGcreator_predicateSelect", result.predicates, true, "label", "id");
                     common.fillSelectOptions("KGcreator_objectSelect", allObjects, true, "label", "id");

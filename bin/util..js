@@ -58,6 +58,24 @@ var util = {
          * signed int to an unsigned by doing an unsigned bitshift. */
         return hash >>> 0;
     },
+    dateToRDFString : function (date) {
+        var str = "";
+        if (date instanceof Date && isFinite(date)) {
+            var month = "" + (date.getMonth() + 1);
+            if (month.length == 1) month = "0" + month;
+            var day = "" + date.getDate();
+            if (day.length == 1) day = "0" + day;
+            var hour = "" + date.getHours();
+            if (day.hour == 1) hour = "0" + hour;
+            var min = "" + date.getMinutes();
+            if (min.length == 1) min = "0" + min;
+            var sec = "" + date.getSeconds();
+            if (sec.length == 1) sec = "0" + sec;
+            str = date.getFullYear() + "-" + month + "-" + day + "T" + hour + ":" + min + ":" + sec;
+        } else str = "";
+        return str;
+    },
+
 
     prepareJsonForsource: function (obj) {
         /*  if (!(typeof obj === "object"))

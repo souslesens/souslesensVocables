@@ -832,7 +832,6 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         });
     };
 
-
     self.getPredefinedPart14PredicateFromClasses = function (subjectClass, objectClass) {
         var pred = null;
         self.predefinedPart14Relations.forEach(function (item) {

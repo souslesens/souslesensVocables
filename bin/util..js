@@ -58,7 +58,7 @@ var util = {
          * signed int to an unsigned by doing an unsigned bitshift. */
         return hash >>> 0;
     },
-    dateToRDFString : function (date) {
+    dateToRDFString: function (date) {
         var str = "";
         if (date instanceof Date && isFinite(date)) {
             var month = "" + (date.getMonth() + 1);
@@ -75,7 +75,6 @@ var util = {
         } else str = "";
         return str;
     },
-
 
     prepareJsonForsource: function (obj) {
         /*  if (!(typeof obj === "object"))

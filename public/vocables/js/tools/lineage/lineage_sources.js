@@ -299,8 +299,7 @@ Lineage_sources = (function () {
                 var nodes = visjsGraph.data.nodes.get();
                 var nodesToRemove = [];
                 nodes.forEach(function (node) {
-                    if (node.data && node.data.source == self.activeSource)
-                        nodesToRemove.push(node.id);
+                    if (node.data && node.data.source == self.activeSource) nodesToRemove.push(node.id);
                 });
                 visjsGraph.data.nodes.remove(nodesToRemove);
             }

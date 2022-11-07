@@ -5,27 +5,28 @@ var Lineage_decoration = (function () {
     self.topOntologiesClassesMap = {};
     self.legendMap = {};
     self.currentVisjGraphNodesMap = {};
+    self.currentLegendDJstreedata = {};
     var topLevelOntologyFixedlegendMap = {
         "ISO_15926-part-14_PCA": {
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#F90EDDFF",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject": "#00AFEFFF",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject": "#FDBF01FF",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject": "#70AC47FF",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#F90EDD",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject": "#00AFEF",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject": "#FDBF01",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject": "#70AC47",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Activity": "#70309f",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Aspect": "#cb6601",
         },
         BFO: {
-            "http://purl.obolibrary.org/obo/BFO_0000030": "#00AFEFFF",
-            "http://purl.obolibrary.org/obo/BFO_0000024": "#00AFEFFF",
-            "http://purl.obolibrary.org/obo/BFO_0000027": "#00AFEFFF",
+            "http://purl.obolibrary.org/obo/BFO_0000030": "#00AFEF",
+            "http://purl.obolibrary.org/obo/BFO_0000024": "#00AFEF",
+            "http://purl.obolibrary.org/obo/BFO_0000027": "#00AFEF",
             "http://purl.obolibrary.org/obo/BFO_0000145": "#cb6601",
             "http://purl.obolibrary.org/obo/BFO_0000023": "#cb6601",
             "http://purl.obolibrary.org/obo/BFO_0000016": "#cb6601",
             "http://purl.obolibrary.org/obo/BFO_0000019": "#cb6601",
             "http://purl.obolibrary.org/obo/BFO_0000017": "#cb6601",
-            "http://purl.obolibrary.org/obo/BFO_0000006": "#F90EDDFF",
-            "http://purl.obolibrary.org/obo/BFO_0000029": "#F90EDDFF",
-            "http://purl.obolibrary.org/obo/BFO_0000140": "#F90EDDFF",
+            "http://purl.obolibrary.org/obo/BFO_0000006": "#F90EDD",
+            "http://purl.obolibrary.org/obo/BFO_0000029": "#F90EDD",
+            "http://purl.obolibrary.org/obo/BFO_0000140": "#F90EDD",
             "http://purl.obolibrary.org/obo/BFO_0000182": "#70309f",
             "http://purl.obolibrary.org/obo/BFO_0000144": "#70309f",
             "http://purl.obolibrary.org/obo/BFO_0000148": "#70309f",
@@ -48,6 +49,7 @@ var Lineage_decoration = (function () {
         common.fillSelectOptions("Lineage_classes_graphDecoration_operationSelect", operations, true);
         self.currentVisjGraphNodesMap = {};
         self.legendMap = {};
+        self.currentLegendDJstreedata = {};
     };
     self.run = function (operation) {
         $("#Lineage_classes_graphDecoration_operationSelect").val("");
@@ -73,7 +75,7 @@ var Lineage_decoration = (function () {
             return callback(null, self.currentTopOntologyClassesMap);
         }
         self.currentTopOntologyClassesMap = {};
-        Sparql_generic.getSourceTaxonomy(Config.currentTopLevelOntology, {}, function (err, result) {
+        Sparql_generic.getSourceTaxonomy(Config.currentTopLevelOntology, { lang: Config.default_lang }, function (err, result) {
             if (err) return callback(null, {});
 
             self.currentTopOntologyClassesMap = result.classesMap;
@@ -110,7 +112,7 @@ var Lineage_decoration = (function () {
     self.getVisjsClassNodesTopLevelOntologyClass = function (ids, callback) {
         if (!ids || ids.length == 0) return callback(null, []);
 
-        var sourceLabel = Lineage_classes.mainSource;
+        var sourceLabel = Lineage_sources.activeSource;
 
         var strFrom = Sparql_common.getFromStr(sourceLabel, null, true, true);
         var sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -166,7 +168,7 @@ strFrom +
     self.getVisjsNamedIndividualNodesClass = function (ids, callback) {
         if (!ids || ids.length == 0) return callback(null, []);
 
-        var sourceLabel = Lineage_classes.mainSource;
+        var sourceLabel = Lineage_sources.activeSource;
 
         var strFrom = Sparql_common.getFromStr(sourceLabel, null, true, true);
         var sparql_url = Config.sources[sourceLabel].sparql_server.url;
@@ -211,7 +213,8 @@ strFrom +
     };
 
     self.colorGraphNodesByType = function (visjsNodes) {
-        Lineage_classes.setTopLevelOntologyFromImports(Lineage_classes.mainSource);
+        if (!Lineage_sources.activeSource) return;
+        Lineage_sources.setTopLevelOntologyFromImports(Lineage_sources.activeSource);
 
         if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) return;
 
@@ -339,8 +342,8 @@ strFrom +
                         if (obj) newNodes.push({ id: nodeId, color: obj.color, legendType: obj.type });
 
                         /*
-  var source2 = nodesTypesMap[node.data.id].graphUri ? Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri) : source;
-  if (source2) node.data.source = source2;*/
+var source2 = nodesTypesMap[node.data.id].graphUri ? Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri) : source;
+if (source2) node.data.source = source2;*/
                     }
 
                     for (var individualId in individualNodes) {
@@ -362,63 +365,49 @@ strFrom +
         );
     };
 
-    self.drawLegend = function () {
-        if (!Config.currentTopLevelOntology) return;
-
-        /*
-   var  str = "<div>Upper ontology <b>" + Config.currentTopLevelOntology + "</b>" +
-      " <button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='Lineage_decoration.hideShowLegendType(null,\"all\")'>show All</button>" +
-      "</div>";
-    $("#Lineage_classes_graphDecoration_UpperOntologyDiv").html(str);
-    */
+    self.drawLegend = function (jstreeData) {
+        if (!Config.currentTopLevelOntology) {
+            $("#lineage_legendWrapper").css("display", "none");
+            return;
+        } else {
+            $("#lineage_legendWrapper").css("display", "block");
+        }
 
         var str = "<div  class='Lineage_legendTypeTopLevelOntologyDiv' style='display: flex;>";
 
-        // group topClasses
-        /*   var groups={"no-group":[]}
-    for (var topClassId in self.legendMap) {
-      var topClass=self.legendMap[topClassId]
-      topClass.parents.forEach(function(parent){
-        if( self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][parent] ){
-          if(!groups[parent])
-          groups[parent]=[]
-          groups[parent].push(topClassId)
-        }else{
-          groups["no-group"].push(topClassId)
-        }
-      })
-    }*/
-        var jstreeData = [];
-        var uniqueIds = {};
-        for (var topClassId in self.legendMap) {
-            var topClass = self.legendMap[topClassId];
-            topClass.parents.push(topClassId);
-            topClass.parents.forEach(function (id, index) {
-                var parent;
-                var color = null,
-                    label = "-";
-                if (index == 0) {
-                    label = topClass.parents[index];
-                    parent = "#";
-                } else {
-                    parent = topClass.parents[index - 1];
+        if (!jstreeData) {
+            var jstreeData = [];
+            var uniqueIds = {};
+            for (var topClassId in self.legendMap) {
+                var topClass = self.legendMap[topClassId];
+                topClass.parents.push(topClassId);
+                topClass.parents.forEach(function (id, index) {
+                    var parent;
+                    var color = null,
+                        label = "-";
+                    if (index == 0) {
+                        label = topClass.parents[index];
+                        parent = "#";
+                    } else {
+                        parent = topClass.parents[index - 1];
 
-                    if (self.currentTopOntologyClassesMap[id]) {
-                        color = self.currentTopOntologyClassesMap[id].color;
-                        label = self.currentTopOntologyClassesMap[id].label;
+                        if (self.currentTopOntologyClassesMap[id]) {
+                            color = self.currentTopOntologyClassesMap[id].color;
+                            label = self.currentTopOntologyClassesMap[id].label;
+                        }
                     }
-                }
-                if (!uniqueIds[id]) {
-                    uniqueIds[id] = 1;
-                    jstreeData.push({
-                        id: id,
-                        text: "<span  style='font-size:10px;background-color:" + color + "'>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;" + label,
-                        parent: parent,
-                    });
-                }
-            });
+                    if (!uniqueIds[id]) {
+                        uniqueIds[id] = 1;
+                        jstreeData.push({
+                            id: id,
+                            text: "<span  style='font-size:10px;background-color:" + color + "'>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;" + label,
+                            parent: parent,
+                        });
+                    }
+                });
+            }
         }
-
+        self.currentLegendDJstreedata[Lineage_sources.activeSource] = jstreeData;
         var options = {
             openAll: true,
             withCheckboxes: true,
@@ -426,45 +415,11 @@ strFrom +
             onUncheckNodeFn: Lineage_decoration.onLegendCheckBoxes,
             tie_selection: false,
         };
-
-        $("#Lineage_classes_graphDecoration_legendDiv").html("<div  class='jstreeContainer' style='height: 300px;width:320px'<div id='Lineage_classes_graphDecoration_legendTreeDiv'></div></div>");
+        $("#Lineage_classes_graphDecoration_legendDiv").jstree("destroy").empty();
+        $("#Lineage_classes_graphDecoration_legendDiv").html("<div  class='jstreeContainer' style='height: 350px;width:90%'><div id='Lineage_classes_graphDecoration_legendTreeDiv'></div></div>");
         common.jstree.loadJsTree("Lineage_classes_graphDecoration_legendTreeDiv", jstreeData, options, function () {
             $("#Lineage_classes_graphDecoration_legendTreeDiv").jstree(true).check_all();
         });
-
-        return;
-
-        if (false) {
-            for (var group in groups) {
-                var label = self.legendMap[topClassId].label;
-                var color = self.legendMap[topClassId].color;
-                str += "<div class='Lineage_legendTypeDiv'>";
-                groups[group].forEach(function (topClassId) {
-                    var label = self.legendMap[topClassId].label;
-                    var color = self.legendMap[topClassId].color;
-                    str +=
-                        "<div class='Lineage_legendTypeDiv' onclick='Lineage_decoration.onlegendTypeDivClick($(this),\"" +
-                        topClassId +
-                        "\")' style='background-color:" +
-                        color +
-                        "'>" +
-                        label +
-                        "</div>";
-                });
-                str += "</div>";
-            }
-
-            return;
-        }
-
-        for (var topClassId in self.legendMap) {
-            var label = self.legendMap[topClassId].label;
-            var color = self.legendMap[topClassId].color;
-            str += "<div class='Lineage_legendTypeDiv' onclick='Lineage_decoration.onlegendTypeDivClick($(this),\"" + topClassId + "\")' style='background-color:" + color + "'>" + label + "</div>";
-        }
-        str += "</div>";
-
-        $("#Lineage_classes_graphDecoration_legendDiv").html(str);
     };
 
     self.onLegendCheckBoxes = function () {
@@ -523,6 +478,19 @@ strFrom +
             }
         });
         visjsGraph.data.nodes.update(newNodes);
+    };
+
+    self.refreshLegend = function (source) {
+        var newJstreeData = [
+            {
+                id: source,
+                text: source,
+                parent: "#",
+            },
+        ];
+        if (self.currentLegendDJstreedata[source]) newJstreeData = self.currentLegendDJstreedata[source];
+
+        self.drawLegend(newJstreeData);
     };
 
     return self;

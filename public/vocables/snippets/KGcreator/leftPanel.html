@@ -6,14 +6,26 @@
     }
 </style>
 
-<div style="margin-left: 10px">
-    <div>topLevelOntologies<select id="KGcreator_topLevelOntologiesSelect" onchange="KGcreator.onTopLevelOntologyChange()"></select></div>
-    <div id="mount-kg-upload-app-here"></div>
-    <div class="KGcreator_tree_container">
-        <div id="KGcreator_csvTreeDiv"></div>
-    </div>
-</div>
+<script src="js/external/jquery/jquery.json-editor.min.js"></script>
 
-<script>
-    KGcreator.displayUploadApp();
-</script>
+<div style="margin-left: 10px">
+    <div class="lineage_actionDiv" style="display: flex; flex-direction: column">
+        <div>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.showSourcesDialog()">Source</button>
+            OWL Source&nbsp;<span style="font-weight: bold" id="KGcreator_owlSourceInput"></span>
+        </div>
+        <div class="lineage_actionDiv" style="display: flex; flex-direction: column">
+            <div>top LevelOntology&nbsp;<span style="font-weight: bold" id="KGcreator_topLevelOntologiesInput"></span></div>
+        </div>
+
+        <div id="mount-kg-upload-app-here"></div>
+
+        <div class="KGcreator_tree_container">
+            <div id="KGcreator_csvTreeDiv"></div>
+        </div>
+    </div>
+
+    <script>
+        KGcreator.displayUploadApp();
+    </script>
+</div>

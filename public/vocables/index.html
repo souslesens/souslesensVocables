@@ -52,6 +52,7 @@
         <script src="js/tools/blender/transform.js"></script>
         <script src="js/tools/SPARQL_endpoint.js"></script>
         <script src="js/tools/lineage/lineage_classes.js"></script>
+        <script src="js/tools/lineage/lineage_sources.js"></script>
         <script src="js/tools/lineage/lineage_properties.js"></script>
         <script src="js/tools/lineage/lineage_common.js"></script>
         <script src="js/tools/lineage/lineage_blend.js"></script>
@@ -64,8 +65,12 @@
         <script src="js/tools/lineage/linkedData/lineage_linkedData_sql.js"></script>
         <script src="js/tools/lineage/linkedData/lineage_linkedData_search.js"></script>
         <script src="js/tools/lineage/linkedData/lineage_linkedData_graph.js"></script>
+        <script src="js/tools/lineage/linkedData/lineage_linkedData_mappings.js"></script>
+
+        <script src="js/tools/lineage/lineage_upperOntologies.js"></script>
 
         <script src="js/tools/lineage/lineage_sets.js"></script>
+        <script src="js/tools/lineage/lineage_selection.js"></script>
 
         <script src="js/tools/owlEditor.js"></script>
 
@@ -134,17 +139,17 @@
         <script src="js/tools/orchestrator.js"></script>
         <script src="js/search/searchUtil.js"></script>
         <!--
-        <script src="js/external/socket.io.js"></script>
+  <script src="js/external/socket.io.js"></script>
 
-        <script src="/socket.io/socket.io.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
 
 
-        <script>
-            const socket = io();
-        </script>
+  <script>
+      const socket = io();
+  </script>
 
-        <script src="js/socketProxy.js"></script>
-          -->
+  <script src="js/socketProxy.js"></script>
+    -->
         <script src="js/export.js"></script>
         <script src="js/graphTraversal.js"></script>
         <script src="js/external/graph.js"></script>
@@ -232,12 +237,10 @@
                     h = $(document).height() - 30;
 
                     h = Math.min(h, 1000);
-                    // $("#centralPanel").width(w)
+
                     $("#graphDiv").width(w);
                     MainController.UI.initialGraphDivWitdh = w;
-                    $("#graphDiv").height(h - 150);
-                    /*  $("#leftPanelDiv").height(h - 50);
-            $("#rightPanelDiv").height(h - 50);*/
+                    $("#graphDiv").height(h - 50);
 
                     $("#accordion").accordion({
                         heightStyle: "fill",
@@ -416,10 +419,10 @@
             .popupMenuItem {
                 border: #3b13ef 1px solid;
                 border-radius: 3px;
-            / / padding: 2 px;
-            / / margin: 2 px;
+                padding: 1px;
                 margin: 1px;
-                background-color: azure;
+                margin: 1px;
+                background-color: #ddd;
             }
 
             .mainDialogDiv {
@@ -451,7 +454,12 @@
             }
 
             .max-height {
-                height: 700px !important;
+                height: 750px !important;
+            }
+
+            .ui-dialog-title {
+
+                color: #337ab7;
             }
         </style>
     </head>
@@ -472,19 +480,16 @@
                     </table>
                 </div>
                 <!-- </div>-->
-                <div class="col text-end">
+                <div class="col text-end" style="z-index: 20">
                     <button onclick=" window.open( './browse.html','_blank');" type="button" class="btn btn-sm py-0 btn-outline-primary" style="font-weight: bold">Search</button>
 
-                    <button onclick="Blender.onLoaded()" type="button" class="btn btn-sm py-0 btn-outline-primary">Blender</button>
-                    <!--
-<button onclick="MainController.UI.toogleRightPanel()" type="button" class="btn btn-sm py-0 btn-outline-primary">R</button> -->
                     <button onclick="MainController.showPart14AxiomsImage()" type="button" class="btn btn-sm py-0 btn-outline-primary">Axioms</button>
                     <!--   <button onclick="OwlEditor.loadUI()" type="button" class="btn btn-sm py-0 btn-outline-primary">OntoEdit</button>-->
-                    <button onclick="MainController.UI.test()" type="button" class="btn btn-sm py-0 btn-outline-primary">test</button>
+                    <!--  <button onclick="MainController.UI.test()" type="button" class="btn btn-sm py-0 btn-outline-primary">test</button>-->
 
                     <button onclick="MainController.UI.copyCurrentQuery()" type="button" class="btn btn-sm py-0 btn-outline-primary">cpQy</button>
 
-                    <a class="btn btn-sm py-0 btn-outline-primary" href="/api/v1/api-documentation" role="button">API</a>
+                    <!--   <a class="btn btn-sm py-0 btn-outline-primary" href="/api/v1/api-documentation" role="button">API</a>-->
 
                     <a class="btn btn-sm py-0 btn-outline-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-user"></i><span id="user-username">...</span>
@@ -527,9 +532,17 @@
                 <div id="centralPanelDiv" style="display: flex; flex-direction: row">
                     <div id="graphDiv"></div>
                 </div>
-                <div id="rightPanelDiv" style="display: flex; flex-direction: column"></div>
+                <div id="rightPanelDiv" style="display: flex; flex-direction: row; margin-top: 10px; z-index: 20">
+                    <div
+                        onclick="MainController.UI.showHideRightPanel()"
+                        style="margin-top: 10px; margin-left: -40px; height: 45px; width: 60px; padding: 5px; background: #fcfcfc; border-radius: 10px; border: 1px solid #ccc"
+                    >
+                        <input id="rightPanelDiv_searchIconInput" type="image" src="./icons/search.png" />
+                    </div>
+                    <div id="rightPanelDivInner" style="display: flex; flex-direction: column"></div>
+                </div>
+                <div id="graphPopupDiv" onclick="MainController.UI.hidePopup('graphPopupDiv');"></div>
             </div>
-            <div id="graphPopupDiv" onclick="MainController.UI.hidePopup('graphPopupDiv');"></div>
         </div>
         <div id="loginDiv" style="position: absolute; visibility: hidden; display: flex; justify-content: center; align-items: center">
             <div>

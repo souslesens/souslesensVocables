@@ -103,8 +103,8 @@ var common = (function () {
             $("#" + jstreeDiv)
                 .jstree({
                     /* "checkbox": {
-     "keep_selected_style": false
- },*/
+"keep_selected_style": false
+},*/
                     plugins: plugins,
                     core: {
                         data: jstreeData,
@@ -238,11 +238,11 @@ var common = (function () {
                     });
             });
             /*  setTimeout(function () {
-    self.jstree.setTreeAppearance();
-    //   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
-    $("#" + jstreeDiv)
-        .jstree(true)
-        .open_node(parentNodeId_, null, 500);
+self.jstree.setTreeAppearance();
+//   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
+$("#" + jstreeDiv)
+  .jstree(true)
+  .open_node(parentNodeId_, null, 500);
 }, 500);*/
         },
 
@@ -263,8 +263,8 @@ var common = (function () {
                 }
             }
             /* descendants.forEach(function(item){
-         $("#" + jstreeDiv).jstree(true).delete_node(item)
-     })*/
+   $("#" + jstreeDiv).jstree(true).delete_node(item)
+})*/
             try {
                 $("#" + jstreeDiv)
                     .jstree(true)
@@ -357,7 +357,7 @@ var common = (function () {
             else w = 340;
             parentDiv.width(w);
 
-            if (jstreeDiv == "LineagejsTreeDiv")
+            if (jstreeDiv == "LineageNodesJsTreeDiv")
                 // cannot do it generic !!!!!
                 parentDiv.height(h);
             if (jstreeDiv == "Lineage_propertiesTree") parentDiv.height(h);
@@ -625,7 +625,7 @@ var common = (function () {
 
             str = str.replace(/[^a-zA-Z0-9-_]/g, "");
             /*  str = encodeURIComponent(str);
- str = str.replace(/%2F/gm, "/");*/
+str = str.replace(/%2F/gm, "/");*/
         }
 
         return str;
@@ -751,15 +751,15 @@ var common = (function () {
             }
 
             /*  try {
-            await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(text);
 
-            if (callback) {
-                return callback(null, "graph copied in clipboard");
-            } else return alert("graph copied in clipboard");
-        } catch (err) {
-            MainController.UI.message("graph copy failed");
-            if (callback) return callback(err);
-        }*/
+      if (callback) {
+          return callback(null, "graph copied in clipboard");
+      } else return alert("graph copied in clipboard");
+  } catch (err) {
+      MainController.UI.message("graph copy failed");
+      if (callback) return callback(err);
+  }*/
         }
 
         copy();
@@ -973,17 +973,26 @@ var common = (function () {
         "http://data.15926.org/cfihos/Picklist": "CFIHOS-ISO",
     };
 
+    self.colorToRgba = function (hex, alpha) {
+        if (!alpha) alpha = 1;
+
+        if (alpha > 1) alpha = 1;
+        if (alpha < 0) alpha = 0;
+        var c;
+        if (!hex) return;
+        if (hex.indexOf("rgba") == 0) {
+            return hex.replace(/,\d(\.\d)*\)/, "," + alpha + ")");
+        }
+        if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
+            c = hex.substring(1).split("");
+            if (c.length == 3) {
+                c = [c[0], c[0], c[1], c[1], c[2], c[2]];
+            }
+            c = "0x" + c.join("");
+            return "rgba(" + [(c >> 16) & 255, (c >> 8) & 255, c & 255].join(",") + "," + alpha + ")";
+        }
+        return hex;
+    };
+
     return self;
 })();
-
-common.dateToRDFString(new Date());
-
-var x = {
-    docId: "xx",
-    paragraphId: "gggg",
-    entities: {
-        Wells: { parents: ["ee", "dded"], individuals: ["31/05/001", "31/05/012"] },
-        GeologicalAges: { parents: ["ee", "dded"], individuals: ["Coniacien", "Santonien"] },
-        Lithology: { parents: ["ee", "dded"], individuals: ["Sandstone", "limestone"] },
-    },
-};

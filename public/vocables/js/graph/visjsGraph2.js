@@ -188,7 +188,7 @@ var visjsGraph = (function () {
                 var newNodes = [];
                 var fixed = false;
                 /*  if (params.event.srcEvent.altKey)
-                      fixed = false;*/
+              fixed = false;*/
                 newNodes.push({ id: nodeId, fixed: fixed });
                 visjsGraph.data.nodes.update(newNodes);
             })
@@ -197,8 +197,8 @@ var visjsGraph = (function () {
             })
             .on("dragging", function (_params) {
                 /* if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
-                return false;
-                }*/
+        return false;
+        }*/
             })
             .on("dragEnd", function (/** @type {{ event: { srcEvent: { ctrlKey: any; altKey: any; }; }; pointer: { DOM: any; }; nodes: string | any[]; }} */ params) {
                 if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
@@ -212,7 +212,7 @@ var visjsGraph = (function () {
 
                 if (params.nodes.length == 1) {
                     /* if (true || (!params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag))
-                         return;*/
+               return;*/
 
                     var nodeId = params.nodes[0];
 
@@ -227,51 +227,6 @@ var visjsGraph = (function () {
                     visjsGraph.data.nodes.update(newNodes);
                 }
             });
-
-        /*   window.setTimeout(function () {
-              var ids=  self.data.nodes.getIds();
-              var newNodes=[]
-              ids.forEach(function(id) {
-                  newNodes.push({id:id, "label":""})
-              })
-                  self.data.nodes.update(newNodes);
-
-              }, 3000)*/
-
-        if (!$("#graphButtons").length) {
-            var html =
-                "<div  id='graphButtons' style='position: relative; top:0px;left:10px;display: flex;flex-direction: row;gap:10px'>" +
-                // " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.showExportDatDialog(null,\"GRAPH\")'>Export...</button></div>" +
-                " <div> <B>Graph</B> </div><div><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Export.exportGraphToDataTable(null,\"GRAPH\")'>Export...</button></div>" +
-                "<div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>Layout <select id='visjsGraph_layoutSelect' style='width: 100px' onchange='visjsGraph.setLayout($(this).val())' >" +
-                "<option ></option>" +
-                "<option >standard</option>" +
-                "<option>hierarchical vertical</option>" +
-                "<option>hierarchical horizontal</option>" +
-                "</select></div>";
-
-            html +=
-                " <div style='border:solid brown 0px;background-color:#ddd;padding: 1px'>" +
-                "<input style='width: 100px' id='visjsGraph_searchInput'   onkeyup='if (event.keyCode == 13 || event.keyCode == 9)visjsGraph.searchNode()>'" +
-                "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.searchNode()'>Search</button></div>";
-
-            html += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='visjsGraph.showGraphConfig()'> Graph parameters</button>";
-            html += "<div id='visjsConfigureDiv' style='overflow: auto'></div>";
-
-            if (true || $(".vis-manipulation").children().length == 0) {
-                var parent = $("#" + divId).parent();
-                $(parent).css("flex-direction", "column");
-                $(parent).prepend(html);
-            } else {
-                $(".vis-manipulation").append(html);
-            }
-        }
-
-        html += "</div>";
-        setTimeout(function () {
-            self.listSavedGraphs();
-            // CustomPluginController.setGraphNodesIcons()
-        }, 500);
 
         if (callback) {
             var intervalIncrement = 0;
@@ -470,20 +425,6 @@ var visjsGraph = (function () {
         return existingVisjsIds;
     };
 
-    self.getExistingIdsMapXX = function (/** @type {any} */ nodesOnly) {
-        // var existingVisjsIds = {};
-        // if (!visjsGraph.data || !visjsGraph.data.nodes) return {};
-        // var oldIds = visjsGraph.data.nodes.getIds();
-        if (!visjsGraph.data || !visjsGraph.network || !visjsGraph.network.canvas) return {};
-        var oldIds = visjsGraph.network.canvas.body.nodes;
-        if (!nodesOnly) {
-            var edges = visjsGraph.network.canvas.body.edges;
-            for (var id in edges) oldIds[id] = 1;
-        }
-
-        return oldIds;
-    };
-
     self.isGraphNotEmpty = function () {
         // if(visjsGraph.isGraphNotEmpty()){
         return Object.keys(visjsGraph.getExistingIdsMap()).length > 0;
@@ -560,9 +501,9 @@ var visjsGraph = (function () {
                     }
                 }
                 /* if(includeParents && edge.to == nodeId){
-                     nodes.push(edge.from)
-                     recurse(edge.from)
-                 }*/
+             nodes.push(edge.from)
+             recurse(edge.from)
+         }*/
             });
         }
 
@@ -747,7 +688,7 @@ var visjsGraph = (function () {
 
     self.searchNode = function (/** @type {any} */ id, /** @type {string | number | string[] | undefined} */ word) {
         /*   if (word === null && !id)
-            return;*/
+        return;*/
         if (!word || word == "") {
             word = $("#visjsGraph_searchInput").val();
             if (word == "") return;
@@ -963,6 +904,17 @@ var visjsGraph = (function () {
             };
 
             visjsGraph.network.setOptions(options);
+
+            setTimeout(function () {
+                $("#graphDisplay_theme").remove();
+                $("#visjsConfigureDiv").prepend(
+                    "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
+                        "<select onchange='Lineage_sources.setTheme($(this).val())' >" +
+                        "<option>white</option>" +
+                        "<option>dark</option>" +
+                        "</select></div>"
+                );
+            }, 500);
         }, 500);
     };
 

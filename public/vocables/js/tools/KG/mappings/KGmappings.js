@@ -39,7 +39,7 @@ var KGmappings = (function () {
         MainController.UI.showSources("sourcesTreeDiv", false, KGsources, null, function (err, _result) {
             if (err) alert(err);
         });
-        MainController.UI.openRightPanel();
+        MainController.UI.showHideRightPanel();
         $("#actionDivContolPanelDiv").html(
             "KG database &nbsp;<select onchange='KGmappingData.loadKG_SQLModel()' id=\"KGmappings_DatabaseSelect\"> </select>" +
                 //  "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='TextAnnotator.init()'>text annotation</button>  "+

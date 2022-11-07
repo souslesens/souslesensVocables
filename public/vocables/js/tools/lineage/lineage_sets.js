@@ -97,7 +97,7 @@ var Lineage_sets = (function () {
             schemaType: "OWL",
             group: "",
         };
-        Lineage_classes.mainSource = self.currentSetSource;
+        Lineage_sources.activeSource = self.currentSetSource;
         Sparql_OWL.getItems(self.currentSetSource, {}, function (err, result) {
             return callback(err, result);
         });
@@ -133,7 +133,7 @@ var Lineage_sets = (function () {
     };
 
     self.createNewSet = function () {
-        var jstreeNodes = $("#LineageClasses_selectdNodesTreeDiv").jstree(true).get_checked(true);
+        var jstreeNodes = $("#lineage_selection.selectedNodesTreeDiv").jstree(true).get_checked(true);
         var setName = prompt("new set name");
         if (jstreeNodes.length == 0) return;
         if (!setName) return;

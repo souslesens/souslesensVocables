@@ -1,5 +1,3 @@
-<script src="js/external/jquery/jquery.json-editor.min.js"></script>
-
 <style>
     .KGcreator_tripleInput {
         width: 200px;
@@ -26,18 +24,21 @@
 </style>
 <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
     <div class="KGcreator_tripleDiv">
-        Subject <input id="KGcreator_subjectInput" class="KGcreator_tripleInput" />
+        Subject
         <select id="KGcreator_subjectSelect" onchange="KGcreator.onTripleModelSelect('s',$(this).val())"></select>
+        <input id="KGcreator_subjectInput" class="KGcreator_tripleInput" />
         lookup name<input id="KGcreator_subjectLookupName" />
     </div>
     <div class="KGcreator_tripleDiv">
-        Predicate <input id="KGcreator_predicateInput" class="KGcreator_tripleInput" />
+        Predicate
         <select id="KGcreator_predicateSelect" onchange="KGcreator.onTripleModelSelect('p',$(this).val())"></select>
+        <input id="KGcreator_predicateInput" class="KGcreator_tripleInput" />
         is Restriction<input type="checkbox" id="KGcreator_isRestrictionCBX" /> isSpecificPredicate<input type="checkbox" id="KGcreator_isSpecificPredicateCBX" />
     </div>
     <div class="KGcreator_tripleDiv">
-        Object <input id="KGcreator_objectInput" class="KGcreator_tripleInput" />
+        Object
         <select id="KGcreator_objectSelect" onchange="KGcreator.onTripleModelSelect('o',$(this).val())"></select>
+        <input id="KGcreator_objectInput" class="KGcreator_tripleInput" />
         is String<input type="checkbox" id="KGcreator_isObjectStringCBX" /> lookup name<input id="KGcreator_objectLookupName" />
     </div>
 
@@ -52,18 +53,23 @@
 
         <pre id="KGcreator_mainJsonDisplay" style="width: 100%; height: 500px"></pre>
 
-        <div>
-            <button onclick="KGcreator.saveMappings()">Save mappings</button>
-            <!--   <button onclick="KGcreator.saveMappings(true)">SaveClassmapping</button>-->
+        <div class="lineage_actionDiv" style="display: flex; flex-direction: column; width: 55%">
+            <div class="lineage_button_group" style="width: 600px">
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.saveMappings()">Save mappings</button>
+                <!--   <button onclick="KGcreator.saveMappings(true)">SaveClassmapping</button>-->
 
-            <!--  <button onclick="KGcreator.copyMappings()">Copy</button>-->
-            <button onclick="KGcreator.clearMappings()">Clear mappings</button>
+                <!--  <button onclick="KGcreator.copyMappings()">Copy</button>-->
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearMappings()">Clear mappings</button>
 
-            <button onclick="KGcreator.createTriples(true)">View Sample triples</button>
-            <!--  <input type="checkbox" id="KGcreator_addAllPredefinedPart14PredicatesTriples" />addPredefinedPart14Triples-->
-            <button onclick="KGcreator.createTriples()">Create triples</button>
-            <button onclick="KGcreator.clearGraph()">Clear graph</button>
-            <button onclick="KGcreator.indexGraph()">Index graph</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.createTriples(true)">View Sample triples</button>
+                <!--  <input type="checkbox" id="KGcreator_addAllPredefinedPart14PredicatesTriples" />addPredefinedPart14Triples-->
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.createTriples()">Create triples</button>
+            </div>
+            <div class="lineage_button_group" style="width: 600px">
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.deleteKGcreatorTriples()">delete KGreator triples</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearGraph()">Clear entire graph</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.indexGraph()">Index graph</button>
+            </div>
         </div>
     </div>
     <textarea style="width: 50%; height: 600px; overflow: auto" id="KGcreator_dataSampleDiv"></textarea>

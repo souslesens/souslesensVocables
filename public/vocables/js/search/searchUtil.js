@@ -2,6 +2,43 @@
 var SearchUtil = (function () {
     var self = {};
     self.existingIndexes = null;
+    self.indexSourcesMap = {};
+
+    self.initSourcesIndexesList = function (options, callback) {
+        if (!options) options = {};
+        var payload = {
+            dictionaries_listIndexes: 1,
+        };
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/elasticsearch/indices",
+            data: payload,
+            dataType: "json",
+            success: function (indexes, _textStatus, _jqXHR) {
+                var sources = [];
+
+                Admin.showUserSources(function (userSources) {
+                    userSources.forEach(function (source) {
+                        if (options.schemaType && Config.sources[source].schemaType != options.schemaType) {
+                            // pass
+                        } else {
+                            indexes.forEach(function (indexName) {
+                                if (indexName == source.toLowerCase()) {
+                                    sources.push(source);
+                                    self.indexSourcesMap[indexName] = source;
+                                }
+                            });
+                        }
+                    });
+                });
+
+                return callback(null, sources);
+            },
+            error: function (err) {
+                return callback(err);
+            },
+        });
+    };
 
     /**
      * @param fromSource if null ids or labels are mandatory
@@ -32,15 +69,15 @@ var SearchUtil = (function () {
                 async.series(
                     [
                         function (callbackSeries) {
-                            Standardizer.initSourcesIndexesList(null, function (err, indexedSources) {
+                            SearchUtil.initSourcesIndexesList(null, function (err, indexedSources) {
                                 if (err) return callbackSeries(err);
 
                                 indexes = [];
                                 /*  if (toSources) {
-                                    toSources.forEach(function (source) {
-                                        indexes.push(source.toLowerCase());
-                                    });
-                                }*/
+                    toSources.forEach(function (source) {
+                        indexes.push(source.toLowerCase());
+                    });
+                }*/
                                 indexedSources.forEach(function (source) {
                                     if (!toSources || toSources.length == 0 || toSources.indexOf(source) > -1) {
                                         indexes.push(source.toLowerCase());
@@ -344,7 +381,7 @@ var SearchUtil = (function () {
 
     self.indexData = function (indexName, data, replaceIndex, callback) {
         if (data.length == 0) return callback();
-        var options = { replaceIndex: replaceIndex, owlType: "Class" };
+        var options = { replaceIndex: replaceIndex, owltype: "Class" };
         var payload = {
             indexName: indexName,
             data: data,
@@ -367,13 +404,15 @@ var SearchUtil = (function () {
     };
 
     self.generateElasticIndex = function (sourceLabel, options, callback) {
+        if (!options) {
+            options = {};
+        }
+
         var withImports = $("#admin_refreshIndexWithImportCBX").prop("checked");
+        options.withoutImports = true;
         var sources = [sourceLabel];
         if (withImports) {
             sources = sources.concat(Config.sources[sourceLabel].imports || []);
-        }
-        if (!options) {
-            options = {};
         }
 
         var totalLinesAllsources = 0;
@@ -381,39 +420,76 @@ var SearchUtil = (function () {
             sources,
             function (sourceLabel, callbackEachSource) {
                 var totalLines = 0;
-                options.withoutImports = true;
+                async.series(
+                    [
+                        // index nodes hierarchy
+                        function (callbackSeries) {
+                            Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
+                                if (err) {
+                                    return callbackEachSource(err);
+                                }
+                                var index = 0;
+                                var classesArray = [];
+                                for (var key in result.classesMap) {
+                                    classesArray.push(result.classesMap[key]);
+                                }
+                                var slices = common.array.slice(classesArray, 50);
+                                async.eachSeries(
+                                    slices,
+                                    function (data, callbackEach) {
+                                        var replaceIndex = false;
+                                        if (index++ == 0 && !options.ids) replaceIndex = true;
+                                        self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
+                                            if (err) return callbackEach(err);
+                                            if (!result) return callbackEach();
+                                            totalLines += result.length;
+                                            totalLinesAllsources += totalLines;
+                                            MainController.UI.message("indexed " + totalLines + "/" + classesArray.length + " in index " + sourceLabel.toLowerCase());
 
-                //    if (Config.sources[sourceLabel].schemaType == "OWL") {
-                Sparql_generic.getSourceTaxonomy(sourceLabel, options, function (err, result) {
-                    if (err) {
-                        return callbackEachSource(err);
-                    }
-                    var index = 0;
-                    var classesArray = [];
-                    for (var key in result.classesMap) {
-                        classesArray.push(result.classesMap[key]);
-                    }
-                    var slices = common.array.slice(classesArray, 50);
-                    async.eachSeries(
-                        slices,
-                        function (data, callbackEach) {
-                            var replaceIndex = false;
-                            if (index++ == 0 && !options.ids) replaceIndex = true;
-                            self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
-                                if (err) return callbackEach(err);
-                                if (!result) return callbackEach();
-                                totalLines += result.length;
-                                totalLinesAllsources += totalLines;
-                                MainController.UI.message("indexed " + totalLines + "/" + classesArray.length + " in index " + sourceLabel.toLowerCase());
-                                callbackEach();
+                                            callbackEach();
+                                        });
+                                    },
+                                    function (err) {
+                                        // MainController.UI.message("DONE " + sourceLabel + " total indexed : " + totalLinesAllsources, true);
+                                        return callbackSeries(err);
+                                    }
+                                );
                             });
                         },
-                        function (err) {
-                            // MainController.UI.message("DONE " + sourceLabel + " total indexed : " + totalLinesAllsources, true);
-                            return callbackEachSource(err);
-                        }
-                    );
-                });
+
+                        // index properties
+                        function (callbackSeries) {
+                            if (!options.indexProperties) return callbackSeries();
+                            MainController.UI.message("indexing properties");
+
+                            Sparql_OWL.getObjectProperties(sourceLabel, {}, function (err, result) {
+                                if (err) return callback(err);
+                                var data = [];
+                                result.forEach(function (item) {
+                                    data.push({
+                                        id: item.property.value,
+                                        label: item.propertyLabel.value,
+                                        type: "property",
+                                        owltype: "ObjectProperty",
+                                    });
+                                });
+                                self.indexData(sourceLabel.toLowerCase(), data, false, function (err, result) {
+                                    if (err) return callbackEach(err);
+                                    if (!result) return callbackEach();
+                                    totalLines += result.length;
+                                    totalLinesAllsources += totalLines;
+                                    MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
+                                    callbackSeries();
+                                });
+                            });
+                        },
+                    ],
+                    function (err) {
+                        // MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
+
+                        return callbackEachSource(err);
+                    }
+                );
 
                 // }
             },
@@ -423,6 +499,15 @@ var SearchUtil = (function () {
                 if (callback) return callback(err);
             }
         );
+    };
+
+    self.addPropertiesToIndex = function (sourceLabel, data, callback) {
+        if (!Array.isArray(data)) data = [data];
+
+        self.indexData(sourceLabel.toLowerCase(), data, false, function (err, _result) {
+            if (err) return callback(err);
+            callback();
+        });
     };
 
     self.addObjectsToIndex = function (sourceLabel, ids, callback) {

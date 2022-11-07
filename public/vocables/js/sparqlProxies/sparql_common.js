@@ -135,6 +135,42 @@ return str;
         return filter;
     };
 
+    self.setSparqlResultPropertiesLabels = function (sourceLabel, SparqlResults, propVariable, callback) {
+        if (SparqlResults.length == 0) return callback(null, SparqlResults);
+        var propIds = [];
+        SparqlResults.forEach(function (item) {
+            if (!item[propVariable + "Label"]) {
+                if (propIds.indexOf(item[propVariable].value) < 0) propIds.push(item[propVariable].value);
+            }
+        });
+
+        if (propIds.length == 0) return callback(null, SparqlResults);
+
+        //get props labels
+        var filter = Sparql_common.setFilter("property", propIds);
+        Sparql_OWL.getObjectProperties(sourceLabel, { filter: filter }, function (err, resultProps) {
+            if (err) return callback(err);
+            var labelsMap = {};
+            resultProps.forEach(function (item) {
+                labelsMap[item.property.value] = item.propertyLabel ? item.propertyLabel.value : Sparql_common.getLabelFromURI(item.property.value);
+            });
+
+            SparqlResults.forEach(function (item) {
+                if (labelsMap[item[propVariable].value]) item[propVariable + "Label"] = { type: "literal", value: labelsMap[item[propVariable].value] };
+            });
+
+            return callback(null, SparqlResults);
+        });
+    };
+
+    self.getVariableLangLabel = function (variable, optional, skosPrefLabel) {
+        var pred = "";
+        if (skosPrefLabel) pred = "|<http://www.w3.org/2004/02/skos/core#prefLabel>";
+        var str = "?" + variable + " rdfs:label" + pred + " ?" + variable + "Label. filter( lang(?" + variable + "Label)= '" + Config.default_lang + "' || !lang(?" + variable + "Label))";
+        if (optional) return " OPTIONAL {" + str + "} ";
+        return str;
+    };
+
     self.getUriFilter = function (varName, uri) {
         var filterStr = "";
 
@@ -277,5 +313,30 @@ return str;
             return callback(null, source);
         });
     };
+
+    self.replaceSparqlPrefixByUri = function (str, prefixes) {
+        for (var key in prefixes) {
+            prefixes[key] = prefixes[key].replace("<", "");
+            prefixes[key] = prefixes[key].replace(">", "");
+            var regex = new RegExp(key + ":([\\S\\d]+)", "gm");
+
+            str = str.replace(regex, function (match, capture, offset) {
+                var p = capture.indexOf(".");
+                if (p == capture.length - 1) return "<" + prefixes[key] + capture.substring(0, capture.length - 1) + ">.";
+                return "<" + prefixes[key] + capture + ">";
+            });
+        }
+        return str;
+    };
+
     return self;
 })();
+
+/*
+var str="?prop rdfs:label ?propLabel} ?prop rdf:type rdf:ObjectProperty. ?value rdf:type ?valueType filter (?valueType in (owl:Class,owl:NamedIndividual))}}"
+var prefixes={
+    rdfs:"<http://www.w3.org/2000/01/rdf-schema#>",
+    rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+}
+Sparql_common.replaceSparqlPrefixByUri(str,prefixes)
+*/

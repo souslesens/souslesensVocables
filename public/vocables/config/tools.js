@@ -1,5 +1,13 @@
 self.tools = {};
 
+self.tools["lineage"] = { label: "Lineage", noSource: 0, controller: Lineage_classes, toolDescriptionImg: null }; //"images/taxonomy.png"}
+self.tools["KGcreator"] = {
+    label: "KGcreator",
+    noSource: 1,
+    controller: KGcreator,
+    toolDescriptionImg: null,
+};
+
 self.tools["sourceBrowser"] = {
     label: "Browse",
     multiSources: 0,
@@ -15,8 +23,6 @@ self.tools["sourceMatcher"] = {
 }; //"images/match.png"}
 self.tools["evaluate"] = { label: "Evaluate", noSource: 1, controller: Evaluate, toolDescriptionImg: null }; //"images/evaluate.png"}
 self.tools["ancestors"] = { label: "Genealogy", multiSources: 1, controller: Genealogy, toolDescriptionImg: null }; //"images/taxonomy.png"}
-
-self.tools["lineage"] = { label: "Lineage", noSource: 0, controller: Lineage_classes, toolDescriptionImg: null }; //"images/taxonomy.png"}
 
 self.tools["KGmappings"] = {
     label: "KGmappings",
@@ -36,13 +42,6 @@ self.tools["TSF_Dictionary"] = {
     label: "TSF_Dictionary",
     noSource: 1,
     controller: Lineage_dictionary,
-    toolDescriptionImg: null,
-};
-
-self.tools["KGcreator"] = {
-    label: "KGcreator",
-    noSource: 1,
-    controller: KGcreator,
     toolDescriptionImg: null,
 };
 

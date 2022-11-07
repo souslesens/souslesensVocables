@@ -241,7 +241,7 @@ var MainController = (function () {
 
                 var distinctGroups = {};
 
-                Config.currentProfile.allowedSourceSchemas.forEach(function (item) {
+                Config.currentProfile.allowedSourceSchemas.sort().forEach(function (item) {
                     if (!types || (types && types.indexOf(item) > -1))
                         treeData.push({
                             id: item,
@@ -253,6 +253,7 @@ var MainController = (function () {
                 Object.keys(Config.sources)
                     .sort()
                     .forEach(function (sourceLabel, index) {
+                        if (sourceLabel == "TEST0211") var x = 3;
                         self.initControllers();
                         if (sources && sources.indexOf(sourceLabel) < 0) return;
                         if (Config.sources[sourceLabel].isDraft) return;
@@ -357,7 +358,7 @@ var MainController = (function () {
 
             common.jstree.loadJsTree(treeDiv, treeData, options, function () {
                 var openedTypes = Config.preferredSchemaType;
-                if (types) openedTypes = types;
+                //    if (types) openedTypes = types;
                 //  $("#" + treeDiv).jstree(true).open_all(openedTypes);
                 $("#" + treeDiv)
                     .jstree(true)
@@ -408,7 +409,17 @@ var MainController = (function () {
             $("#currentSourceTreeDiv").html("");
             $("#sourceDivControlPanelDiv").html("");
             $("#actionDivContolPanelDiv").html("");
-            $("#rightPanelDiv").html("");
+            $("#rightPanelDivInner").html("");
+
+            if (toolId == "lineage") {
+                $("#accordion").accordion("option", { active: 2 });
+                MainController.currentSource = null;
+
+                controller.onLoaded(function (err, result) {
+                    if (callback) callback(err, result);
+                });
+                return;
+            }
 
             self.UI.updateActionDivLabel();
             SourceBrowser.targetDiv = "currentSourceTreeDiv";
@@ -452,39 +463,6 @@ var MainController = (function () {
         message: function (message, stopWaitImg) {
             $("#messageDiv").html(message);
             if (stopWaitImg) $("#waitImg").css("display", "none");
-        },
-
-        toogleRightPanel: function (open) {
-            var display = $("#rightPanelDiv").css("display");
-            Lineage_common.currentSource = null;
-            var currentCentralPanelWidth = $("#centralPanelDiv").width();
-
-            if (!open && display == "flex") {
-                //open->close
-                $("#rightPanelDiv").css("display", "none");
-                $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh);
-                $("#graphDiv").animate({ width: self.UI.initialGraphDivWitdh });
-                setTimeout(function () {
-                    //  visjsGraph.redraw()
-                }, 200);
-            } else {
-                //close->open (if not allready opened)
-                if (currentCentralPanelWidth != self.UI.initialGraphDivWitdh) {
-                    /* $("#leftPanelDiv").css("width", "20VW")
-          $("#rightPanelDiv").css("width", "20VW")
-          $("#centralPanelDiv").css("width", "60VW")
-          $("#graphDiv").css("width", "60VW")
-return*/
-
-                    $("#rightPanelDiv").css("display", "flex");
-
-                    $("#centralPanelDiv").width(self.UI.initialGraphDivWitdh - rightPanelWidth);
-                    $("#graphDiv").animate({ width: self.UI.initialGraphDivWitdh - rightPanelWidth });
-                    setTimeout(function () {
-                        //  visjsGraph.redraw()
-                    }, 200);
-                }
-            }
         },
 
         setCredits: function () {
@@ -536,17 +514,23 @@ return*/
             self.previousPanelLabel = panelLabel;
         },
 
-        openRightPanel: function () {
-            var w = $(window).width() - leftPanelWidth;
-            // $("#centralPanel").width(w)
-            $("#centralPanelDiv").width(w - rightPanelWidth);
-            $("#graphDiv").width(w - rightPanelWidth);
-            $("#rightPanelToogleButton").css("display", "block");
-            $("#rightPanelDiv").width(rightPanelWidth);
-            //   setTimeout(function () {
-            $("#graphDiv").hide().fadeIn("fast");
-            /*  }
-          , 500)*/
+        showHideRightPanel: function () {
+            var left = $("#rightPanelDiv").position().left;
+            var w = $(window).width();
+
+            if (w - left < 100) {
+                var lw = $("#rightPanelDiv").width();
+                if (lw < 100) return;
+                var newLeft = "" + (w - lw) + "px";
+                $("#rightPanelDiv").css("position", "absolute");
+                $("#rightPanelDiv").css("left", newLeft);
+                $("#graphDiv").css("zIndex", 19);
+                $("#rightPanelDiv_searchIconInput").attr("src", "./icons/slideRight.png");
+            } else {
+                var newLeft = "" + w + "px";
+                $("#rightPanelDiv").css("left", newLeft);
+                $("#rightPanelDiv_searchIconInput").attr("src", "./icons/search.png");
+            }
         },
         showCurrentQuery: function () {
             $("#mainDialogDiv").html("<textarea style='width: 100%;height: 400px'>" + Sparql_proxy.currentQuery + "</textarea>");

@@ -17,6 +17,7 @@ var Config = (function () {
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/";
 
     self.defaultNewUriRoot = "http://souslesens.org/resource/";
+    self.linkedData_mappings_graph = "http://souslesens.org/resource/linkedData_mappings/";
     self.loginMode = "json";
 
     self.appName = "VOCABLES";
@@ -27,12 +28,13 @@ var Config = (function () {
     self.queryLimit = 10000;
     self.searchLimit = 500;
     self.searchDepth = 6;
+    self.defaultGraphTheme = "white"; //dark
     self.predicatesSource = "TSF-PREDICATES";
     self.dictionarySource = "TSF-DICTIONARY";
 
     self.topLevelOntologies = {
         "ISO_15926-part-14_PCA": { uriPattern: "lis14", prefix: "part14", prefixtarget: "https://rds.posccaesar.org/ontology/lis14/rdl/" },
-        BFO: { uriPattern: "BFO", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
+        BFO: { uriPattern: "obo", uriPatternXX: "BFO", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
         DOLCE: { uriPattern: "dul", prefix: "dul", prefixtarget: "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#" },
     };
 

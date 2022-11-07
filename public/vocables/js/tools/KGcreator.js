@@ -2,6 +2,8 @@
 
 var KGcreator = (function () {
     var self = {};
+    self.mainJsonEditor = null;
+    self.currentSource = null;
     self.usualProperties = [
         "rdf:type",
         "rdfs:subClassOf",
@@ -12,7 +14,15 @@ var KGcreator = (function () {
         "owl:equivalentClass",
 
         "",
-        "slsv:hasCode",
+        "xsd:string",
+        "xsd:dateTime",
+        "xsd:boolean",
+        "xsd:integer",
+        "xsd:float",
+        "xsd:double",
+        "xsd:decimal",
+        "rdf:XMLLiteral",
+
         "",
 
         "skos:altLabel",
@@ -24,7 +34,7 @@ var KGcreator = (function () {
         "",
         "_function",
         "_restriction",
-        "_part14Predefined",
+        // "_part14Predefined",
         "",
         "owl:onProperty",
         "owl:someValuesFrom",
@@ -76,18 +86,41 @@ var KGcreator = (function () {
     self.onLoaded = function () {
         $("#actionDivContolPanelDiv").load("snippets/KGcreator/leftPanel.html", function () {
             self.loadCsvDirs();
-
-            var topLevelOntologies = Object.keys(Config.topLevelOntologies);
-            common.fillSelectOptions("KGcreator_topLevelOntologiesSelect", topLevelOntologies);
-
-            $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {
-                self.initCentralPanel();
-            });
-            $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function () {
-                // pass
+            self.showSourcesDialog(function (err, result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+                $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {
+                    self.initCentralPanel();
+                });
+                $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function () {
+                    // pass
+                });
             });
         });
         $("#accordion").accordion("option", { active: 2 });
+    };
+
+    self.showSourcesDialog = function (callback) {
+        $("#KGcreator_csvTreeDiv").empty();
+        $("#KGcreator_csvDirsSelect").val("_default");
+
+        SourceBrowser.searchableSourcesTreeIsInitialized = null;
+        $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html", function () {
+            SourceBrowser.showSearchableSourcesTreeDialog(["OWL"], { includeSourcesWithoutSearchIndex: true }, function () {
+                var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
+                $("#sourcesSelectionDialogdiv").dialog("close");
+                self.currentSource = source;
+                Config.currentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromImports(source);
+
+                self.currentGraphUri = Config.sources[source].graphUri;
+                if (!Config.currentTopLevelOntology) return alert("Source must have an upper ontology import");
+                $("#KGcreator_owlSourceInput").html(source);
+                $("#KGcreator_topLevelOntologiesInput").html(Config.currentTopLevelOntology);
+                self.topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
+                if (callback) callback(null);
+            });
+        });
     };
     self.onChangeSourceTypeSelect = function (sourceType) {
         self.currentSourceType = sourceType;
@@ -121,11 +154,19 @@ var KGcreator = (function () {
     };
 
     self.onTopLevelOntologyChange = function (topLevelOntology) {
-        Config.currentTopLevelOntology = $("#KGcreator_topLevelOntologiesSelect").val();
+        // Config.currentTopLevelOntology = $("#KGcreator_topLevelOntologiesSelect").val();
         self.initCentralPanel();
     };
 
-    self.loadCsvDirs = function () {
+    self.loadCsvDirs = function (options) {
+        if (!options) options = {};
+        if (options.contextualMenuFn) {
+            self.currentContextMenu = options.contextualMenuFn;
+        } else {
+            self.currentContextMenu = self.getSystemsTreeContextMenu;
+        }
+        self.mainJsonEditor = new JsonEditor("#KGcreator_mainJsonDisplay", {});
+
         var payload = {
             dir: "CSV",
         };
@@ -160,6 +201,7 @@ var KGcreator = (function () {
 
     self.loadMappingsList = function () {
         self.currentCsvDir = $("#KGcreator_csvDirsSelect").val();
+        self.currentSource = self.currentCsvDir;
         var payload = {
             dir: "CSV/" + self.currentCsvDir,
         };
@@ -198,6 +240,7 @@ var KGcreator = (function () {
             success: function (data, _textStatus, _jqXHR) {
                 self.currentDataSourceModel = data;
                 var tables = [];
+                self.currentSource = self.currentDbName;
                 self.currentdabase = { type: type, dbName: self.currentDbName };
                 for (var key in data) {
                     tables.push(key);
@@ -229,12 +272,16 @@ var KGcreator = (function () {
         });
     };
 
+    self.getContextMenu = function () {
+        return self.currentContextMenu();
+    };
+
     self.showTablesTree = function (data) {
         var jstreeData = [];
         var options = {
             openAll: true,
             selectTreeNodeFn: KGcreator.onCsvtreeNodeClicked,
-            contextMenu: KGcreator.getSystemsTreeContextMenu(),
+            contextMenu: KGcreator.getContextMenu(),
             //  withCheckboxes: true,
         };
         data.forEach(function (file) {
@@ -256,7 +303,7 @@ var KGcreator = (function () {
                 var columns = self.currentDataSourceModel[key];
                 columns.forEach(function (column) {
                     jstreeData.push({
-                        id: column,
+                        id: key + "_" + column,
                         text: column,
                         parent: key,
                         data: { id: column },
@@ -268,86 +315,54 @@ var KGcreator = (function () {
         common.jstree.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
     };
 
-    self.onCsvtreeNodeClicked = function (event, obj) {
+    self.onCsvtreeNodeClicked = function (event, obj, callback) {
         $("#KGcreator_dataSampleDiv").val("");
 
         self.currentTreeNode = obj.node;
         if (obj.node.parents.length == 0) return;
+
+        //click column
         if (obj.node.parents.length == 2) {
-            if (obj.node.data.sample) {
-                $("#KGcreator_dataSampleDiv").val("");
-                var str = "Sample data for column " + obj.node.data.id + "\n";
-                str += "";
-                obj.node.data.sample.forEach(function (item) {
-                    str += item[obj.node.data.id] + "\n";
-                });
-
-                $("#KGcreator_dataSampleDiv").val(str);
-            } else if (self.currentSourceType == "DATABASE") {
-                var sqlQuery = "select top 500 " + obj.node.data.id + " from " + obj.node.parent;
-                const params = new URLSearchParams({
-                    type: "sql.sqlserver",
-                    dbName: self.currentDbName,
-                    sqlQuery: sqlQuery,
-                });
-
-                $.ajax({
-                    type: "GET",
-                    url: Config.apiUrl + "/kg/data?" + params.toString(),
-                    dataType: "json",
-
-                    success: function (data, _textStatus, _jqXHR) {
-                        $("#KGcreator_dataSampleDiv").val("");
-                        var str = "Sample data for column " + obj.node.data.id + "\n";
-                        str += "";
-                        data.forEach(function (item) {
-                            str += item[obj.node.data.id] + "\n";
-                        });
-
-                        $("#KGcreator_dataSampleDiv").val(str);
-                    },
-                    error(err) {
-                        return alert(err, responseText);
-                    },
-                });
-            }
+            self.showSampleData(obj.node);
         } else {
-            if (obj.event.button != 2)
+            if (obj.event && obj.event.button != 2)
                 //if popup menu dont load
                 self.loadMappings(obj.node.data.id);
         }
 
         if (obj.node.children.length > 0) return;
 
-        // load csv columns
-        const payload = {
-            dir: "CSV/" + self.currentCsvDir,
-            name: obj.node.id,
-            options: JSON.stringify({ lines: 100 }),
-        };
+        if (self.currentSourceType == "CSV") {
+            // load csv columns
+            const payload = {
+                dir: "CSV/" + self.currentCsvDir,
+                name: obj.node.id,
+                options: JSON.stringify({ lines: 100 }),
+            };
 
-        $.ajax({
-            type: "GET",
-            url: `${Config.apiUrl}/data/csv`,
-            dataType: "json",
-            data: payload,
-            success: function (result, _textStatus, _jqXHR) {
-                var jstreeData = [];
+            $.ajax({
+                type: "GET",
+                url: `${Config.apiUrl}/data/csv`,
+                dataType: "json",
+                data: payload,
+                success: function (result, _textStatus, _jqXHR) {
+                    var jstreeData = [];
 
-                result.headers.forEach(function (col) {
-                    jstreeData.push({
-                        id: obj.node.id + "_" + col,
-                        text: col,
-                        parent: obj.node.id,
-                        data: { id: col, sample: result.data[0] },
+                    result.headers.forEach(function (col) {
+                        jstreeData.push({
+                            id: obj.node.id + "_" + col,
+                            text: col,
+                            parent: obj.node.id,
+                            data: { id: col, sample: result.data[0] },
+                        });
                     });
-                });
-                common.jstree.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData);
-            },
-            error: function (err) {
-                // alert(err.responseText);
-            },
-        });
+                    common.jstree.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData);
+                },
+                error: function (err) {
+                    // alert(err.responseText);
+                },
+            });
+        }
     };
     self.getSystemsTreeContextMenu = function () {
         var items = {};
@@ -414,12 +429,11 @@ var KGcreator = (function () {
     };
 
     self.initCentralPanel = function () {
-        Config.currentTopLevelOntology = $("#KGcreator_topLevelOntologiesSelect").val();
+        // Config.currentTopLevelOntology = $("#KGcreator_topLevelOntologiesSelect").val();
         var topLevelOntology = Config.currentTopLevelOntology;
-        var topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
 
         var currentPredicates = [];
-
+        var sourceSpecificPredicates = [];
         self.usualProperties.forEach(function (item) {
             currentPredicates.push({
                 id: item,
@@ -427,6 +441,10 @@ var KGcreator = (function () {
             });
         });
 
+        /*   self.cur
+   Sparql_OWL.listObjectProperties(Lineage_sources.activeSource, null, function(err, result) {
+   })*/
+        var currentSubjectClasses = [];
         var currentObjectClasses = [];
         self.usualObjectClasses.forEach(function (item) {
             currentObjectClasses.push({
@@ -452,14 +470,14 @@ var KGcreator = (function () {
                             if (item.id.type == "bnode") return;
                             currentObjectClasses.push({
                                 id: item.id.value,
-                                label: topLevelOntologyPrefix + ":" + (item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value)),
+                                label: self.topLevelOntologyPrefix + ":" + (item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value)),
                             });
                         });
                         callbackSeries();
                     });
                 },
                 function (callbackSeries) {
-                    Sparql_OWL.getObjectProperties(topLevelOntology, null, null, function (err, result) {
+                    Sparql_OWL.getObjectPropertiesDomainAndRange(topLevelOntology, null, null, function (err, result) {
                         if (err) callbackSeries(err);
                         result.sort(function (a, b) {
                             if (!a.propLabel || !b.propLabel) return 0;
@@ -469,14 +487,14 @@ var KGcreator = (function () {
                         });
 
                         result.forEach(function (item) {
-                            self.propertiesMap[topLevelOntologyPrefix + ":" + item.propLabel.value] = {
+                            self.propertiesMap[self.topLevelOntologyPrefix + ":" + item.propLabel.value] = {
                                 id: item.prop.value,
                                 label: item.propLabel.value,
                                 inverseProp: item.inverseProp ? item.inverseProp.value : null,
-                                inversePropLabel: item.inversePropLabel ? topLevelOntologyPrefix + ":" + item.inversePropLabel.value : null,
+                                inversePropLabel: item.inversePropLabel ? self.topLevelOntologyPrefix + ":" + item.inversePropLabel.value : null,
                             };
 
-                            var item2 = { id: item.prop.value, label: topLevelOntologyPrefix + ":" + item.propLabel.value };
+                            var item2 = { id: item.prop.value, label: self.topLevelOntologyPrefix + ":" + item.propLabel.value };
                             if (currentPredicates.indexOf(item2) < 0) currentPredicates.push(item2);
                         });
                         // set missing inverse props
@@ -490,8 +508,54 @@ var KGcreator = (function () {
                         callbackSeries();
                     });
                 },
+
+                //get source specific properties and Classes
                 function (callbackSeries) {
-                    common.fillSelectOptions("KGcreator_subjectSelect", self.usualSubjectTypes, true);
+                    Sparql_OWL.listObjectProperties(self.currentSource, null, function (err, result) {
+                        if (err) return callbackSeries(err);
+                        self.currentSpecificObjectPropertiesMap = {};
+                        self.domainOntologyProperties = [];
+                        result.forEach(function (item) {
+                            sourceSpecificPredicates.push({
+                                id: "<" + item.prop.value + ">",
+                                label: item.propLabel.value,
+                            });
+                        });
+
+                        callbackSeries();
+                    });
+                },
+                //get  source properties and Classes
+                function (callbackSeries) {
+                    Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(self.currentSource, function (err, result) {
+                        if (err) return alert(err.responseText);
+
+                        self.currentPossibleClassesAndPredicates = result;
+                        result.predicates.forEach(function (item) {
+                            self.propertiesMap[item.label] = item.id;
+                        });
+
+                        var objs = result.sourceObjects;
+                        objs.push({ id: "", label: "------------" });
+                        objs = objs.concat(currentObjectClasses);
+                        currentObjectClasses = objs;
+
+                        //  var allObjects = result.usualObjects.concat(result.TopLevelOntologyObjects).concat([""]).concat(result.sourceObjects);
+                        currentPredicates = sourceSpecificPredicates.concat([{ id: "", label: "--------" }]).concat(result.predicates);
+
+                        callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    currentSubjectClasses = ["_selectedColumn", "--------"].concat(self.usualSubjectTypes);
+                    currentObjectClasses = [
+                        { id: "_selectedColumn", label: "_selectedColumn" },
+                        { id: "", label: "--------" },
+                    ].concat(currentObjectClasses);
+                    callbackSeries();
+                },
+                function (callbackSeries) {
+                    common.fillSelectOptions("KGcreator_subjectSelect", currentSubjectClasses, true);
                     common.fillSelectOptions("KGcreator_predicateSelect", currentPredicates, true, "label", "id");
                     common.fillSelectOptions("KGcreator_objectSelect", currentObjectClasses, true, "label", "id");
 
@@ -511,6 +575,7 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
                     callbackSeries();
                 },
             ],
+
             function (err) {
                 if (err) return alert(err.responseText);
             }
@@ -532,11 +597,15 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         if (!subject) return alert("missing subject");
         if (!predicate) return alert("missing predicate");
         if (!object) return alert("missing object");
-        if (predicate == "_part14Predefined") {
-            predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
-        }
+        /*  if (predicate == "_part14Predefined") {
+    predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
+  }*/
 
         var tripleObj = { s: subject, p: predicate, o: object };
+
+        if (predicate.indexOf("xsd:") == 0) {
+            tripleObj.dataType = predicate;
+        }
 
         if (isObjectString) tripleObj.isString = true;
         if (subjectLookupName) tripleObj.lookup_s = subjectLookupName;
@@ -570,10 +639,21 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         if (value == "_function") {
             return self.showFunctionDialog(role);
         }
-        if (role == "s") $("#KGcreator_subjectInput").val(value);
-        else if (role == "p") $("#KGcreator_predicateInput").val(value);
-        else if (role == "o") {
-            $("#KGcreator_objectInput").val(value);
+
+        if (role == "s") {
+            if (value == "_selectedColumn") {
+                $("#KGcreator_subjectInput").val(self.currentTreeNode.text);
+            } else $("#KGcreator_subjectInput").val(value);
+            $("#KGcreator_subjectSelect").val("");
+        } else if (role == "p") {
+            $("#KGcreator_predicateInput").val(value);
+
+            $("#KGcreator_predicateSelect").val("");
+        } else if (role == "o") {
+            if (value == "_selectedColumn") $("#KGcreator_objectInput").val(self.currentTreeNode.text);
+            else $("#KGcreator_objectInput").val(value);
+
+            $("#KGcreator_objectSelect").val("");
         }
     };
 
@@ -672,7 +752,7 @@ self.saveMappings({classId:classId})
         } else {
             payload = {
                 dir: "CSV/" + self.currentCsvDir,
-                fileName: self.currentJsonObject.fileName + ".json",
+                fileName: self.currentSource + "_" + self.currentJsonObject.fileName + ".json",
                 data: JSON.stringify(self.currentJsonObject),
             };
         }
@@ -693,23 +773,23 @@ self.saveMappings({classId:classId})
         });
     };
     /*  self.copyMappings = function() {
-  try {
-    var data = self.mainJsonEditor.get();
+try {
+var data = self.mainJsonEditor.get();
 
-    data.tripleModels.forEach(function(item) {
-      if (item.o["_function(line, mapping)_"]) {
-        var expression = item.o["_function(line, mapping)_"];
-        try {
-          var fn = new Function("line", "mapping", expression);
-        } catch (err) {
-          $("#KGcreator_dataSampleDiv").val(err);
-        }
-        item.o = fn;
-      }
-    });
-  } catch (err) {
-    alert(err.message);
+data.tripleModels.forEach(function(item) {
+  if (item.o["_function(line, mapping)_"]) {
+    var expression = item.o["_function(line, mapping)_"];
+    try {
+      var fn = new Function("line", "mapping", expression);
+    } catch (err) {
+      $("#KGcreator_dataSampleDiv").val(err);
+    }
+    item.o = fn;
   }
+});
+} catch (err) {
+alert(err.message);
+}
 };*/
     self.clearMappings = function () {
         if (confirm("Clear mappings")) {
@@ -724,13 +804,14 @@ self.saveMappings({classId:classId})
 
             setUpperOntologyPrefix = function () {
                 var currrentTopLevelOntology = Config.topLevelOntologies[Config.currentTopLevelOntology];
+                if (!currrentTopLevelOntology) return;
                 if (!self.currentJsonObject.prefixes) {
                     self.currentJsonObject.prefixes = {};
                     if (!self.currentJsonObject.prefixes[currrentTopLevelOntology.prefix]) {
                         self.currentJsonObject.prefixes[currrentTopLevelOntology.prefix] = currrentTopLevelOntology.prefixtarget;
                     }
                 } else {
-                    currrentTopLevelOntology = Lineage_classes.setTopLevelOntologyFromPrefix(Object.keys(self.currentJsonObject.prefixes)[0]);
+                    currrentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromPrefix(Object.keys(self.currentJsonObject.prefixes)[0]);
                     $("#KGcreator_topLevelOntologiesSelect").val(currrentTopLevelOntology);
                 }
             };
@@ -741,12 +822,12 @@ self.saveMappings({classId:classId})
                 var dbName = self.currentDbName;
                 payload = {
                     dir: "SQL/",
-                    name: dbName + "_" + csvFileName + ".json",
+                    name: dbName + "_" + +csvFileName + ".json",
                 };
             } else {
                 payload = {
                     dir: "CSV/" + self.currentCsvDir,
-                    name: csvFileName + ".json",
+                    name: self.currentSource + "_" + csvFileName + ".json",
                 };
             }
             $.ajax({
@@ -799,7 +880,13 @@ if (selectedFiles.length > 0);*/
         $("#KGcreator_dataSampleDiv").val("creating triples...");
         if (!self.currentJsonObject) return;
 
-        if (self.currentJsonObject.fileName.indexOf(".csv") < 0) return alert("only triples from csv sources can be generated : IN PROGRESS, COMING SOON");
+        var dataLocation = "";
+        if (self.currentSourceType != "CSV") {
+            return alert("only triples from csv sources can be generated : IN PROGRESS, COMING SOON");
+            dataLocation = { xxx: "ee" };
+        } else {
+            dataLocation = self.currentJsonObject.fileName;
+        }
 
         if (!self.currentJsonObject.graphUri) {
             var graphUri = "";
@@ -816,21 +903,21 @@ if (selectedFiles.length > 0);*/
             options = {
                 deleteOldGraph: false,
                 sampleSize: 500,
+                dataLocation: dataLocation,
             };
         } else {
             options = {
                 deleteOldGraph: false,
+                dataLocation: dataLocation,
             };
         }
-
-        //  options.addAllPredefinedPart14PredicatesTriples = $("#KGcreator_addAllPredefinedPart14PredicatesTriples").prop("checked");
 
         self.saveMappings(null, function (_err, _result) {
             if (_err) return alert(_err);
             $("#KGcreator_dataSampleDiv").val("");
             var payload = {
                 dir: "CSV/" + self.currentCsvDir,
-                fileName: self.currentJsonObject.fileName + ".json",
+                fileName: self.currentSource + "_" + self.currentJsonObject.fileName + ".json",
                 options: JSON.stringify(options),
             };
 
@@ -846,9 +933,6 @@ if (selectedFiles.length > 0);*/
                         $("#KGcreator_dataSampleDiv").val(str);
                     } else {
                         $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
-
-                        /*    SearchUtil.generateElasticIndex(Lineage_common.currentSource,{ids:[self.graphModification.creatingNodeUri]},function(err, result) {
-})*/
                     }
                 },
                 error(err) {
@@ -872,11 +956,11 @@ if (selectedFiles.length > 0);*/
         }
     };
 
-    self.clearGraph = function () {
+    self.clearGraph = function (deleteAllGraph) {
         if (!self.currentJsonObject) return; //alert("no file mappings selected");
         if (!self.currentJsonObject.graphUri) return alert("no graphUri");
 
-        if (!confirm("clear graph " + self.currentJsonObject.graphUri)) return;
+        if (!confirm("Do you really want to clear graph " + self.currentJsonObject.graphUri)) return;
         const payload = { graphUri: self.currentJsonObject.graphUri };
         $.ajax({
             type: "POST",
@@ -892,20 +976,101 @@ if (selectedFiles.length > 0);*/
         });
     };
 
-    self.addAllPredefinedPart14PredicatesTriples = function () {
-        // pass
+    self.deleteKGcreatorTriples = function (deleteAllGraph) {
+        if (!self.currentJsonObject) return; //alert("no file mappings selected");
+        if (!self.currentJsonObject.graphUri) return alert("no graphUri");
+        if (!confirm("Do you really want to delete  triples created with KGCreator in " + self.currentJsonObject.graphUri)) return;
+
+        var filter = "?p =<http://purl.org/dc/terms/creator> && ?o='KGcreator'";
+        Sparql_generic.deleteTriplesWithFilter(self.currentSource, filter, function (err, result) {
+            if (err) return alert(err.responseText);
+            alert("triples deleted");
+        });
     };
 
-    self.getPredefinedPart14PredicateFromClasses = function (subjectClass, objectClass) {
-        var pred = null;
-        self.predefinedPart14Relations.forEach(function (item) {
-            if (item[0] == subjectClass && item[1] == objectClass) {
-                pred = "part14:" + item[2];
-            }
-        });
-        if (!pred) return alert(" no Predicate between " + subjectClass + " and " + objectClass);
+    self.showSampleData = function (node, allColumns, size, callback) {
+        if (!size) size = 200;
+        if (node.data.sample) {
+            //csv
+            $("#KGcreator_dataSampleDiv").val("");
 
-        return pred;
+            var str = "";
+
+            if (allColumns) {
+                var headers = [];
+                node.data.sample.forEach(function (item) {
+                    for (var key in item)
+                        if (headers.indexOf(key) < 0) {
+                            headers.push(key);
+                            str += key + "\t";
+                        }
+                });
+                str += "\n";
+
+                node.data.sample.forEach(function (item) {
+                    headers.forEach(function (column) {
+                        str += (item[column] || "") + "\t";
+                    });
+                    str += "\n";
+                });
+            } else {
+                str = "Sample data for column " + node.data.id + "\n";
+
+                node.data.sample.forEach(function (item) {
+                    str += item[node.data.id] + "\n";
+                });
+            }
+            if (callback) return callback(null, str);
+            $("#KGcreator_dataSampleDiv").val(str);
+        } else if (self.currentSourceType == "DATABASE") {
+            var sqlQuery = "select top  " + size + " " + (allColumns ? "*" : node.data.id) + " from " + node.parent;
+            const params = new URLSearchParams({
+                type: "sql.sqlserver",
+                dbName: self.currentDbName,
+                sqlQuery: sqlQuery,
+            });
+
+            $.ajax({
+                type: "GET",
+                url: Config.apiUrl + "/kg/data?" + params.toString(),
+                dataType: "json",
+
+                success: function (data, _textStatus, _jqXHR) {
+                    $("#KGcreator_dataSampleDiv").val("");
+                    var str = "";
+                    if (allColumns) {
+                        var headers = [];
+                        data.forEach(function (item) {
+                            for (var key in item)
+                                if (headers.indexOf(key) < 0) {
+                                    headers.push(key);
+                                    str += key + "\t";
+                                }
+                        });
+                        str += "\n";
+
+                        data.forEach(function (item, index) {
+                            headers.forEach(function (column) {
+                                str += (item[column] || "") + "\t";
+                            });
+                            str += "\n";
+                        });
+                    } else {
+                        var str = "Sample data for column " + node.data.id + "\n";
+                        str += "";
+                        data.forEach(function (item) {
+                            str += item[node.data.id] + "\n";
+                        });
+                    }
+                    if (callback) return callback(null, str);
+                    $("#KGcreator_dataSampleDiv").val(str);
+                },
+                error(err) {
+                    if (callback) return callback(err);
+                    return alert(err, responseText);
+                },
+            });
+        }
     };
 
     return self;

@@ -143,7 +143,7 @@ export const defaultSource = (id: string): Source => {
         sparql_server: { url: "_default", method: "Post", headers: [] },
         editable: true,
         controller: "",
-        topClassFilter: "",
+        topClassFilter: "?topConcept rdf:type owl:Class .",
         schemaType: "",
         dataSource: null,
         schema: null,

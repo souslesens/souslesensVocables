@@ -21,7 +21,7 @@ Lineage_common = (function () {
     self.deleteNode = function (node, jstreeId) {
         if (node.children && node.children.length > 0) return alert("cannot delete node with children");
         if (confirm("delete node " + node.data.label)) {
-            Sparql_generic.deleteTriples(Lineage_common.currentSource, node.data.id, null, null, function (err, _result) {
+            Sparql_generic.deleteTriples(Lineage_sources.activeSource, node.data.id, null, null, function (err, _result) {
                 if (err) MainController.UI.message(err);
                 MainController.UI.message("node " + node.data.label + " deleted");
                 $("#" + jstreeId)
@@ -43,7 +43,7 @@ Lineage_common = (function () {
 
                 if (nodeData.id == parentNode.data.id) return alert("Cannot paste node inside its parent");
                 if (parentNode.data.type == "http://www.w3.org/2002/07/owl#Class" && nodeData.type == "http://www.w3.org/2002/07/owl#Class") {
-                    treeDiv = "LineagejsTreeDiv";
+                    treeDiv = "LineageNodesJsTreeDiv";
                     triples.push({
                         subject: nodeData.id,
                         predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",

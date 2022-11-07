@@ -406,12 +406,14 @@ var Sparql_generic = (function () {
                 var insertTriplesStr = "";
                 triples.forEach(function (item, _index) {
                     var tripleStr = self.triplesObjectToString(item);
+                    if (options.sparqlPrefixes) tripleStr = Sparql_common.replaceSparqlPrefixByUri(tripleStr, options.sparqlPrefixes);
                     if (!uniqueTriples[tripleStr]) {
                         // suppress duplicate if any
                         uniqueTriples[tripleStr] = 1;
                         insertTriplesStr += tripleStr;
                     }
                 });
+
                 var query = self.getDefaultSparqlPrefixesStr();
                 query += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
 
@@ -431,7 +433,7 @@ var Sparql_generic = (function () {
     self.update = function (_sourceLabel, _triples, _callback) {
         /*
 
-    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
 with <http://data.total.com/resource/tsf/maintenance/romain_14224/>
 DELETE {
 ?id rdfs:label ?oldLabel .
@@ -448,19 +450,22 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
 
 
-     */
+ */
 
         return;
     };
 
-    self.deleteGraph = function (sourceLabel, callback) {
+    self.deleteTriplesWithFilter = function (sourceLabel, filter, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
 
-        var query = " WITH <" + graphUri + "> DELETE {?s ?p ?o}";
+        var query = " WITH <" + graphUri + "> DELETE {?s ?x ?y} ";
 
+        if (filter) query += " WHERE {?s ?x ?y.?s ?p ?o. filter(" + filter + ")}";
+
+        if (!filter) if (!confirm("Do you really want to delete all triples of source " + sourceLabel)) return;
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
-            return callback(err);
+            return callback(err, _result);
         });
     };
 
@@ -627,6 +632,21 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             if (aValue > bValue) return 1;
             if (aValue < bValue) return -1;
             return 0;
+        });
+        return bindings;
+    };
+
+    self.setMissingLabels = function (bindings, _fields, options) {
+        if (!options) options = {};
+        if (!Array.isArray(_fields)) _fields = [_fields];
+        _fields.forEach(function (_field) {
+            bindings.forEach(function (item) {
+                if (item[_field] && !item[_field + "Label"]) {
+                    item[_field + "Label"] = { value: Sparql_common.getLabelFromURI(item[_field].value) };
+                }
+
+                //   item.child1Label={value:id.substring(id.lastIndexOf("#")+1)}
+            });
         });
         return bindings;
     };
@@ -798,6 +818,12 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
         );
     };
 
+    self.getLangFilterStr = function (options, variable) {
+        var langFilter = "";
+        if (!options || !options.lang) return "";
+        return " FILTER (lang(" + variable + ")='" + options.lang + "' || !lang(" + variable + "))  ";
+    };
+
     self.getSourceTaxonomy = function (sourceLabel, options, callback) {
         if (!options) options = {};
         var parentType;
@@ -850,9 +876,16 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                         " WHERE {" +
                         "  ?concept " +
                         parentType +
-                        " ?firstParent.OPTIONAL{?concept rdfs:label ?conceptLabel}." +
-                        "OPTIONAL{?concept skos:prefLabel ?skosLabel}. " +
-                        "OPTIONAL{?concept skos:altLabel ?skosAltLabel}. " +
+                        " ?firstParent." +
+                        "OPTIONAL{?concept rdfs:label ?conceptLabel " +
+                        self.getLangFilterStr(options, "?conceptLabel") +
+                        "}." +
+                        "OPTIONAL{?concept skos:prefLabel ?skosLabel " +
+                        self.getLangFilterStr(options, "?skosLabel") +
+                        "}. " +
+                        "OPTIONAL{?concept skos:altLabel ?skosAltLabel " +
+                        self.getLangFilterStr(options, "?skosAltLabel") +
+                        "}. " +
                         "OPTIONAL{?concept <http://souslesens.org/resource/vocabulary/hasCode> ?code}. ";
 
                     if (options.filter) query += " " + options.filter + " ";

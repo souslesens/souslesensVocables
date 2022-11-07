@@ -425,7 +425,7 @@ var KGcreator = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    Sparql_OWL.getObjectProperties("ISO_15926-part-14_PCA", null, null, function (err, result) {
+                    Sparql_OWL.getObjectPropertiesDomainAndRange("ISO_15926-part-14_PCA", null, null, function (err, result) {
                         if (err) callbackSeries(err);
                         result.sort(function (a, b) {
                             if (!a.propLabel || !b.propLabel) return 0;
@@ -789,9 +789,6 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
                         $("#KGcreator_dataSampleDiv").val(str);
                     } else {
                         $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
-
-                        /*    SearchUtil.generateElasticIndex(Lineage_common.currentSource,{ids:[self.graphModification.creatingNodeUri]},function(err, result) {
-            })*/
                     }
                 },
                 error(err) {
@@ -833,10 +830,6 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
                 return MainController.UI.message(err);
             },
         });
-    };
-
-    self.addAllPredefinedPart14PredicatesTriples = function () {
-        // pass
     };
 
     self.getPredefinedPart14PredicateFromClasses = function (subjectClass, objectClass) {

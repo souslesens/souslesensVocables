@@ -132,8 +132,6 @@ var CsvTripleBuilder = {
         async.eachSeries(
             mappings,
             function (mapping, callbackEachMapping) {
-                var fileName = mapping.fileName;
-                var filePath = fileName;
                 var lookUpMap = {};
                 var triples = [];
 
@@ -171,9 +169,9 @@ var CsvTripleBuilder = {
 
                         //load csv
                         function (callbackSeries) {
-                            if (!filePath) return callbackSeries();
+                            if (!mapping.csvDataFilePath) return callbackSeries();
 
-                            CsvTripleBuilder.readCsv(filePath, options.sampleSize, function (err, result) {
+                            CsvTripleBuilder.readCsv(mapping.csvDataFilePath, options.sampleSize, function (err, result) {
                                 if (err) {
                                     console.log(err);
                                     return callbackSeries(err);
@@ -186,7 +184,7 @@ var CsvTripleBuilder = {
 
                         //load SQL dataSource
                         function (callbackSeries) {
-                            if (!dataSource) return callbackSeries();
+                            if (!mapping.dataSource) return callbackSeries();
                             sqlServerProxy.getData(dataSource.dbName, dataSource.sql, function (err, result) {
                                 if (err) return callbackSeries(err);
                                 csvData = [result];
@@ -293,8 +291,12 @@ var CsvTripleBuilder = {
                                                         {
                                                             if (item.o_type == "fixed") {
                                                                 objectStr = item.o;
-                                                            }
-                                                            if (typeof item.o === "function") {
+                                                            } else if (item.dataType) {
+                                                                item.p = "owl:hasValue";
+                                                                var str = line[item.o];
+                                                                if (!str) return;
+                                                                objectStr = "'" + str + "'^^" + item.dataType;
+                                                            } else if (typeof item.o === "function") {
                                                                 try {
                                                                     objectStr = item.o(line, item);
                                                                 } catch (e) {
@@ -309,7 +311,9 @@ var CsvTripleBuilder = {
                                                                 } catch (e) {
                                                                     return callbackSeries2(e);
                                                                 }
-                                                            } else if (item.o.match(/.+:.+|http.+/)) {
+                                                            } else if (item.o.match(/http.+/)) {
+                                                                objectStr = "<" + item.o + ">";
+                                                            } else if (item.o.match(/.+:.+/)) {
                                                                 objectStr = item.o;
                                                             } else objectStr = line[item.o];
 
@@ -343,10 +347,15 @@ var CsvTripleBuilder = {
                                                         {
                                                             objectStr = objectStr.trim();
                                                             if (objectStr.indexOf && objectStr.indexOf("http") == 0) objectStr = "<" + objectStr + ">";
-                                                            else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
+                                                            else if (item.datatype) {
+                                                                //pass
+                                                            } else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
                                                                 // pass
-                                                            } else if (propertiesTypeMap[item.p] == "string" || item.isString) objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
-                                                            else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
+                                                            } else if (propertiesTypeMap[item.p] == "string" || item.isString) {
+                                                                if (objectStr.indexOf("xsd:") < 0) objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
+                                                            } else if (objectStr.indexOf("xsd:") > -1) {
+                                                                //pass
+                                                            } else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                                         }
 
                                                         if (!item.isSpecificPredicate && !item.p.match(/.+:.+|http.+/)) {
@@ -443,16 +452,18 @@ var CsvTripleBuilder = {
                                                             else if (typeof item.p === "function") {
                                                                 propertyStr = item.p(line, line);
                                                             }
-
+                                                            if (propertyStr.indexOf("http") == 0) propertyStr = "<" + propertyStr + ">";
                                                             if (subjectStr && objectStr) {
-                                                                // return console.log("missing type " + item.p)
-                                                                if (!existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr]) {
-                                                                    existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
-                                                                    triples.push({
-                                                                        s: subjectStr,
-                                                                        p: propertyStr,
-                                                                        o: objectStr,
-                                                                    });
+                                                                if (true || !item.datatype) {
+                                                                    // return console.log("missing type " + item.p)
+                                                                    if (!existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr]) {
+                                                                        existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
+                                                                        triples.push({
+                                                                            s: subjectStr,
+                                                                            p: propertyStr,
+                                                                            o: objectStr,
+                                                                        });
+                                                                    }
                                                                 }
                                                             }
                                                         }
@@ -466,6 +477,17 @@ var CsvTripleBuilder = {
                                                     var sampleTriples = triples.slice(0, options.sampleSize);
                                                     return callback(null, sampleTriples);
                                                 }
+
+                                                var uniqueSubjects = {};
+                                                var metaDataTriples = [];
+                                                triples.forEach(function (triple) {
+                                                    if (!uniqueSubjects[triple.s]) {
+                                                        uniqueSubjects[triple.s] = 1;
+                                                        metaDataTriples = metaDataTriples.concat(CsvTripleBuilder.getMetaDataTriples(triple.s, options));
+                                                    }
+                                                });
+                                                triples = triples.concat(metaDataTriples);
+
                                                 console.log("writing triples:" + triples.length);
                                                 var slices = util.sliceArray(triples, 200);
                                                 triples = [];
@@ -489,13 +511,6 @@ var CsvTripleBuilder = {
                                                         callbackSeries2();
                                                     }
                                                 );
-                                            },
-                                            function (callbackSeries2) {
-                                                return callbackSeries2();
-                                                if (!options.addAllPredefinedPart14PredicatesTriples) return callbackSeries2();
-                                                CsvTripleBuilder.addAllPredefinedPart14PredicatesTriples(graphUri, sparqlServerUrl, function (_err, _result) {
-                                                    callbackSeries2();
-                                                });
                                             },
                                         ],
                                         function (err) {
@@ -522,103 +537,6 @@ var CsvTripleBuilder = {
                     var message = "------------ created triples " + totalTriples;
                     return callback(errors ? +"    ERRORS" + errors : null, message);
                 }
-            }
-        );
-    },
-
-    /**
-     * Query <graphUri> at <sparqlServerUrl> to select all `?s part14:hasPart ?o` and
-     * generate owl#Restrictions that are added to the same graph.
-     *
-     * @param {string} graphUri - URI of the graph to query
-     * @param {string} sparqlServerUrl - URL of the sparql endpoint
-     * @param {Object} options - NOT USED XXX
-     * @param {Function} callback - Node-style async Function called to proccess result or handle error
-     */
-    addAllPredefinedPart14PredicatesTriples: function (graphUri, sparqlServerUrl, options, callback) {
-        var objIds = [];
-        async.series(
-            [
-                function (callbackSeries) {
-                    var queryGraph = CsvTripleBuilder.getSparqlPrefixesStr();
-
-                    queryGraph += " select * from <" + graphUri + "> where {";
-                    queryGraph +=
-                        " ?s part14:hasPart ?o." +
-                        " ?s rdfs:subClassOf ?sType." +
-                        " ?o rdfs:subClassOf ?oType." +
-                        "filter(regex(str(?oType),'part14','i') && regex(str(?sType),'part14','i'))" +
-                        "} limit 10000";
-                    var params = { query: queryGraph };
-
-                    httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-                        result.results.bindings.forEach(function (item) {
-                            objIds.push({
-                                s: item.s.value,
-                                sType: item.sType.value,
-                                o: item.o.value,
-                                oType: item.oType.value,
-                            });
-                        });
-                        callbackSeries();
-                    });
-                },
-                function (callbackSeries) {
-                    var triples = [];
-                    objIds.forEach(function (item) {
-                        CsvTripleBuilder.predefinedPart14Relations.forEach(function (rel) {
-                            if (item.sType.indexOf(rel[0]) > -1 && item.oType.indexOf(rel[1]) > -1) {
-                                var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
-                                var subjectStr = "<" + item.s + ">";
-                                var prop = "<http://rds.posccaesar.org/ontology/lis14/" + rel[2] + ">";
-                                var objectStr = "<" + item.o + ">";
-                                triples.push({
-                                    s: blankNode,
-                                    p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
-                                    o: "<http://www.w3.org/2002/07/owl#Restriction>",
-                                });
-                                triples.push({
-                                    s: blankNode,
-                                    p: "<http://www.w3.org/2002/07/owl#onProperty>",
-                                    o: prop,
-                                });
-
-                                triples.push({
-                                    s: blankNode,
-                                    p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
-                                    o: objectStr,
-                                });
-                                triples.push({
-                                    s: subjectStr,
-                                    p: "rdfs:subClassOf",
-                                    o: blankNode,
-                                });
-                            }
-                        });
-                    });
-
-                    console.log("missingLookups_s " + missingLookups_s + " / " + okLookups_s);
-                    console.log("missingLookups_o " + missingLookups_o + " / " + okLookups_o);
-                    var slices = util.sliceArray(triples, 200);
-
-                    async.eachSeries(
-                        slices,
-                        function (slice, callbackEach) {
-                            CsvTripleBuilder.writeTriples(slice, graphUri, sparqlServerUrl, function (err, _result) {
-                                callbackEach(err);
-                            });
-                        },
-                        function (_err) {
-                            callbackSeries();
-                        }
-                    );
-                },
-            ],
-            function (err) {
-                return callback(err);
             }
         );
     },
@@ -658,6 +576,37 @@ var CsvTripleBuilder = {
             //  console.log(totalTriples);
             return callback(null, totalTriples);
         });
+    },
+
+    getMetaDataTriples: function (subjectUri, options) {
+        var creator = "KGcreator";
+        var dateTime = "'" + util.dateToRDFString(new Date()) + "'^^xsd:dateTime";
+
+        if (!options) options = {};
+        var metaDataTriples = [];
+        metaDataTriples.push({
+            s: subjectUri,
+            p: "<http://purl.org/dc/terms/creator>",
+            o: "'" + creator + "'",
+        });
+
+        metaDataTriples.push({
+            s: subjectUri,
+            p: "<http://purl.org/dc/terms/created>",
+            o: dateTime,
+        });
+
+        if (options.customMetaData) {
+            for (var predicate in options.customMetaData) {
+                metaDataTriples.push({
+                    s: subjectUri,
+                    p: predicate,
+                    o: options.customMetaData[predicate],
+                });
+            }
+        }
+
+        return metaDataTriples;
     },
 
     /**
@@ -740,7 +689,8 @@ var CsvTripleBuilder = {
                     var mappingsFilePath = path.join(__dirname, "../../data/" + dirName + "/" + mappingFileName);
                     var mappings = "" + fs.readFileSync(mappingsFilePath);
                     mappings = JSON.parse(mappings);
-                    mappings.fileName = mappingsFilePath.replace(".json", "");
+                    if (typeof options.dataLocation == "string") mappings.csvDataFilePath = path.join(__dirname, "../../data/" + dirName + "/" + options.dataLocation);
+                    else mappings.datasource = options.dataLocation;
 
                     function getFunction(argsArray, fnStr, callback) {
                         try {
@@ -785,7 +735,7 @@ var CsvTripleBuilder = {
 
                     // format lookups
                     mappings.lookups.forEach(function (item) {
-                        var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
+                        var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.csvDataFilePath);
                         item.filePath = lookupFilePath;
                         if (item.transformFn) {
                             getFunction(["value", "role", "prop", "row"], item.transformFn, function (err, fn) {
@@ -800,7 +750,7 @@ var CsvTripleBuilder = {
                         for (var prefix in mappings.prefixes) CsvTripleBuilder.sparqlPrefixes[prefix] = "<" + mappings.prefixes[prefix] + ">";
                     }
 
-                    var mappingsMap = { [mappings.fileName]: mappings };
+                    var mappingsMap = { [mappings.csvDataFilePath]: mappings };
 
                     CsvTripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function (err, result) {
                         if (err) return callbackSeries(err);

@@ -2,7 +2,7 @@ var Lineage_combine = (function () {
     var self = {};
     self.currentSources = [];
     self.showSourcesDialog = function () {
-        SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], Lineage_combine.addSelectedSourcesToGraph);
+        SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], null, Lineage_combine.addSelectedSourcesToGraph);
     };
 
     self.init = function () {
@@ -25,7 +25,7 @@ var Lineage_combine = (function () {
             selectedSources,
             function (source, callbackEach) {
                 if (!Config.sources[source]) callbackEach();
-                Lineage_classes.registerSource(source);
+                Lineage_sources.registerSource(source);
                 self.currentSources.push(source);
                 Lineage_classes.drawTopConcepts(source, function (err) {
                     if (err) return callbackEach();
@@ -33,16 +33,16 @@ var Lineage_combine = (function () {
 
                     callbackEach();
 
-                    //  SourceBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineagejsTreeDiv" });
+                    //  SourceBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineageNodesJsTreeDiv" });
                 });
             },
             function (err) {
                 if (err) return MainController.UI.message(err);
                 if (self.currentSources.length > 0) {
-                    $("#GenericTools_searchScope").val("graphSources");
+                    $("#GenericTools_searchScope").val("whiteboardSources");
                     $("#Lineage_combine_actiosDiv").css("display", "block");
                 }
-                Lineage_classes.setCurrentSource(Lineage_classes.mainSource);
+                Lineage_sources.setCurrentSource(Lineage_sources.activeSource);
             }
         );
     };
@@ -56,69 +56,7 @@ var Lineage_combine = (function () {
         $("#graphPopupDiv").html(html);
     };
 
-    self.menuActions = {
-        hideSource: function () {
-            MainController.UI.hidePopup("graphPopupDiv");
-            Lineage_classes.showHideCurrentSourceNodes(true);
-        },
-        showSource: function () {
-            MainController.UI.hidePopup("graphPopupDiv");
-            Lineage_classes.showHideCurrentSourceNodes(false);
-        },
-        groupSource: function (source) {
-            MainController.UI.hidePopup("graphPopupDiv");
-
-            if (!source) source = Lineage_common.currentSource;
-            var color = Lineage_classes.getSourceColor(source);
-            var visjsData = { nodes: [], edges: [] };
-            var existingNodes = visjsGraph.getExistingIdsMap();
-
-            for (var nodeId in existingNodes) {
-                var node = visjsGraph.data.nodes.get(nodeId);
-                if (node && node.id != source && node.data && node.data.source == source) {
-                    var edgeId = nodeId + "_" + source;
-                    if (!existingNodes[edgeId]) {
-                        existingNodes[nodeId] = 1;
-                        var edge = {
-                            id: edgeId,
-                            from: nodeId,
-                            to: source,
-                            arrows: " middle",
-                            color: color,
-                            width: 1,
-                        };
-                        visjsData.edges.push(edge);
-                    }
-                }
-            }
-            if (!existingNodes[source]) {
-                existingNodes[source] = 1;
-                var sourceNode = {
-                    id: source,
-                    label: source,
-                    shadow: Lineage_classes.nodeShadow,
-                    shape: "box",
-                    level: 1,
-                    size: Lineage_classes.defaultShapeSize,
-                    data: { source: source },
-                    color: color,
-                };
-                visjsData.nodes.push(sourceNode);
-            }
-            visjsGraph.data.nodes.update(visjsData.nodes);
-            visjsGraph.data.edges.update(visjsData.edges);
-        },
-        ungroupSource: function () {
-            MainController.UI.hidePopup("graphPopupDiv");
-            var source = Lineage_common.currentSource;
-            visjsGraph.data.nodes.remove(source);
-        },
-    };
-
     self.getSimilars = function (output) {
-        /* var source = Lineage_common.currentSource;
-var color=Lineage_classes.getSourceColor(source)*/
-
         var commonNodes = [];
         var existingNodes = visjsGraph.getExistingIdsMap();
         var nodes = visjsGraph.data.nodes.get();
@@ -153,17 +91,17 @@ var color=Lineage_classes.getSourceColor(source)*/
 
     self.showMergeNodesDialog = function (fromNode, toNode) {
         if (fromNode) {
-            Lineage_classes.selection.clearNodesSelection();
-            Lineage_classes.selection.addNodeToSelection(fromNode);
+            Lineage_selection.clearNodesSelection();
+            Lineage_selection.addNodeToSelection(fromNode);
         }
-        if (Lineage_classes.nodesSelection.length == 0) return alert("no nodes selected");
+        if (Lineage_selection.selectedNodes.length == 0) return alert("no nodes selected");
         $("#mainDialogDiv").load("snippets/lineage/lineageAggregateMergeNodesDialog.html", function () {
-            common.fillSelectOptions("LineageMerge_targetSourceSelect", [Lineage_classes.mainSource]);
+            common.fillSelectOptions("LineageMerge_targetSourceSelect", [Lineage_sources.activeSource]);
             if (toNode) {
                 $("#LineageMerge_targetNodeUriSelect").val(toNode.data.id);
             }
 
-            var jstreeData = Lineage_classes.selection.getSelectedNodesTree();
+            var jstreeData = Lineage_selection.getSelectedNodesTree();
 
             var options = {
                 withCheckboxes: true,

@@ -124,9 +124,12 @@ var httpProxy = {
                 } catch (e) {
                     console.log(body);
                     console.log(e);
-                    err = e;
+                    err = e.message;
+                    if (e.message.indexOf("Unexpected token V in JSON ") > -1) {
+                        err = e.message;
+                    }
                 } finally {
-                    callback(err, body);
+                    return callback(err, body);
                 }
             } else {
                 return callback(null, body);

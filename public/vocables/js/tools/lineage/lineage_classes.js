@@ -119,7 +119,9 @@ var Lineage_classes = (function () {
                 }
                 $("#GenericTools_searchSchemaType").val("OWL");
 
-                $("#LineageLinkedDataTab").load("snippets/lineage/lineageLinkedDataSearchDialog.html", function () {});
+                $("#LineageLinkedDataRelationsDiv").load("snippets/lineage/lineage_linkedData_queryRelations.html", function () {
+                    Lineage_linkedData_query.init()
+                });
                 $("#Lineage_tablesTreeDiv").load("snippets/KGcreator/leftPanel.html", function () {
                     Lineage_linkedData_mappings.init();
                     KGcreator.loadCsvDirs({

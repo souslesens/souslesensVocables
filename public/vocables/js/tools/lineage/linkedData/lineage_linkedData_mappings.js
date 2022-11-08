@@ -376,8 +376,8 @@ https: var Lineage_linkedData_mappings = (function () {
         Sparql_OWL.getObjectRestrictions(source, null, { filter: filter }, function (err, result) {
             var joinsMap = {};
             result.forEach(function (item) {
-                joinsMap[item.node.id] = {
-                    bNode: item.node.id,
+                joinsMap[item.node.value] = {
+                    bNode: item.node.value,
                     from: item.concept.value,
                     fromLabel: item.conceptLabel.value,
                     prop: item.prop.value,

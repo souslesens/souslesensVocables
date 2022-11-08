@@ -1197,20 +1197,18 @@ defaultLang = 'en';*/
     };
 
     self.onClickLink = function (nodeId) {
-      /*  var filter=Sparql_common.setFilter("concept",[nodeId])
+        /*  var filter=Sparql_common.setFilter("concept",[nodeId])
         Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(err, result){
 
             }})*/
-        var node= {
+        var node = {
             data: {
                 id: nodeId,
-                source: self.currentNodeIdInfosSource
-            }
-        }
+                source: self.currentNodeIdInfosSource,
+            },
+        };
 
-
-    self.showNodeInfos(self.currentNodeIdInfosSource, node, self.currentNodeIdInfosDivId, { previousNode: true });
-
+        self.showNodeInfos(self.currentNodeIdInfosSource, node, self.currentNodeIdInfosDivId, { previousNode: true });
     };
 
     self.showVisitedNode = function (direction) {

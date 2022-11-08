@@ -1,45 +1,29 @@
 <style>
-  #lineage_linkedData_join_table tr,lineage_linkedData_join_table td {
-  "margin: 5px;padding: 5px
+    #lineage_linkedData_join_table tr,lineage_linkedData_join_table td {
+    "margin: 5px;padding: 5px
 
-  }
-
-
-
+    }
 </style>
 <div>
-Database <span id="lineage_linkedData_join_databaseId"></span>
-  <table id="lineage_linkedData_join_table">
-    <tr>
-      <td>
-        From Class<span id="lineage_linkedData_join_fromClassId"></span>
-      </td>
-      <td>
-        To Class<span id="lineage_linkedData_join_toClassId"></span>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        From Table<span id="lineage_linkedData_join_fromTableId"></span>
-      </td>
-      <td>
-        To Table<span id="lineage_linkedData_join_toTableId"></span>
-      </td>
-    </tr>
+    Database <span id="lineage_linkedData_join_databaseId"></span>
+    <table id="lineage_linkedData_join_table">
+        <tr>
+            <td>From Class<span id="lineage_linkedData_join_fromClassId"></span></td>
+            <td>To Class<span id="lineage_linkedData_join_toClassId"></span></td>
+        </tr>
+        <tr>
+            <td>From Table<span id="lineage_linkedData_join_fromTableId"></span></td>
+            <td>To Table<span id="lineage_linkedData_join_toTableId"></span></td>
+        </tr>
 
-    <tr>
-      <td>
-        <select id="lineage_linkedData_join_fromColumnSelect" size="10"></select>
-      </td>
-      <td>
-       <select id="lineage_linkedData_join_toColumnSelect"  size="10"></select>
-      </td>
-    </tr>
-
-  </table>
-  <button onclick="Lineage_linkedData_mappings.writeJoinMapping()">OK</button>
-
-
-
-
+        <tr>
+            <td>
+                <select id="lineage_linkedData_join_fromColumnSelect" size="10"></select>
+            </td>
+            <td>
+                <select id="lineage_linkedData_join_toColumnSelect" size="10"></select>
+            </td>
+        </tr>
+    </table>
+    <button onclick="Lineage_linkedData_mappings.writeJoinMapping()">OK</button>
 </div>

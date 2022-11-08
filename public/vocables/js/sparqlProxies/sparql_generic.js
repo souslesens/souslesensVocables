@@ -1072,9 +1072,5 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
         });
     };
 
-
-
-    ;
-
     return self;
 })();

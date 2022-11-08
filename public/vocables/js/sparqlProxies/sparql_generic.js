@@ -455,21 +455,17 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
         return;
     };
 
-    self.deleteTriplesWithFilter = function (sourceLabel,filter, callback) {
+    self.deleteTriplesWithFilter = function (sourceLabel, filter, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
 
         var query = " WITH <" + graphUri + "> DELETE {?s ?x ?y} ";
 
+        if (filter) query += " WHERE {?s ?x ?y.?s ?p ?o. filter(" + filter + ")}";
 
-        if(filter)
-            query+=" WHERE {?s ?x ?y.?s ?p ?o. filter("+filter+")}"
-
-        if(!filter)
-            if(!confirm("Do you really want to delete all triples of source "+sourceLabel))
-                return;
+        if (!filter) if (!confirm("Do you really want to delete all triples of source " + sourceLabel)) return;
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
-            return callback(err,_result);
+            return callback(err, _result);
         });
     };
 

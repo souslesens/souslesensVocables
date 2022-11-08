@@ -1394,19 +1394,17 @@ defaultLang = 'en';*/
     };
 
     self.indexObjectIfNew = function () {
-        if (self.newProperties && (self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"]  || self.newProperties["rdfs:label"])) {
-
-            if(self.currentNode && self.currentNode.from){
-                var data=[]
-                for(var id in self.newProperties){
-                    data.push({id:id,label:self.newProperties[id],type:"property",owltype:"ObjectProperty"})
+        if (self.newProperties && (self.newProperties["http://www.w3.org/2000/01/rdf-schema#label"] || self.newProperties["rdfs:label"])) {
+            if (self.currentNode && self.currentNode.from) {
+                var data = [];
+                for (var id in self.newProperties) {
+                    data.push({ id: id, label: self.newProperties[id], type: "property", owltype: "ObjectProperty" });
                 }
 
                 SearchUtil.addPropertiesToIndex(self.currentSource, data, function (err, _result) {
                     if (err) return alert(err);
                 });
             }
-
 
             SearchUtil.addObjectsToIndex(self.currentSource, self.currentNodeId, function (err, _result) {
                 if (err) return alert(err);

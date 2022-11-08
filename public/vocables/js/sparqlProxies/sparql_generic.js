@@ -1076,7 +1076,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
         });
     };
 
-    self.exportOntology = function () {};
+
+
+    ;
 
     return self;
 })();

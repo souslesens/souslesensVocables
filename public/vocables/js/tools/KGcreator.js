@@ -126,16 +126,16 @@ var KGcreator = (function() {
       });
     });
   };
-  self.onChangeSourceTypeSelect = function(sourceType) {
+  self.onChangeSourceTypeSelect = function(sourceType, callback) {
     self.currentSourceType = sourceType;
     if (sourceType == "CSV") {
       self.loadCsvDirs();
     } else if (sourceType == "DATABASE") {
-      self.loadDataBases();
+      self.loadDataBases(callback);
     }
   };
 
-  self.loadDataBases = function() {
+  self.loadDataBases = function(callback) {
     var sqlQuery = "SELECT name FROM sys.databases";
     const params = new URLSearchParams({
       type: "sql.sqlserver",
@@ -150,9 +150,13 @@ var KGcreator = (function() {
 
       success: function(data, _textStatus, _jqXHR) {
         common.fillSelectOptions("KGcreator_csvDirsSelect", data, true, "name", "name");
+        if(callback)
+          return callback();
       },
       error(err) {
         return alert(err.responseText);
+        if(callback)
+        return callback(err);
       }
     });
   };

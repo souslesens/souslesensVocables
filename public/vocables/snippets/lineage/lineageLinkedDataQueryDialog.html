@@ -1,0 +1,110 @@
+<style>
+
+    .LineageLinkedDataQueryParams_QueryElt {
+        border: solid 1px blue;
+        margin: 3px;
+        padding: 3px
+
+    }
+
+</style>
+
+
+<div id="LineageLinkedDataQuery_tabs" style="width: 100%; height: 800px">
+  <ul>
+    <li class="Lineage_ClassTabLi"><a href="#LineageLinkedDataQuery_buildQueryTab">Build Query</a></li>
+
+    <li class="Lineage_ClassTabLi"><a href="#LineageLinkedDataQuery_tableResultTab">Properties</a></li>
+
+
+  </ul>
+
+
+  <div id="LineageLinkedDataQuery_buildQueryTab">
+
+    <div style="display: flex;flex-direction: row">
+      <div class="LineageLinkedDataQueryParams_section">
+        <table>
+          <tr>
+            <td>DataBase</td>
+            <td><select id="LineageLinkedDataQueryParams_database" size="4"
+                        onchange="Lineage_linkedData_query.onDatabaseChange($(this).val())"> </select></td>
+          </tr>
+
+          <tr>
+            <td>Filter</td>
+            <td><select id="LineageLinkedDataQueryParams_classes" size="2"
+                        onchange="Lineage_linkedData_query.onClassChange($(this).val())"> </select></td>
+          </tr>
+
+          <tr>
+            <td>Filter table column <span style="font-weight: bold"
+                                          id="LineageLinkedDataQueryParams_currentTable"></span>
+            </td>
+            <td>
+              <div style="width:300px;height: 400px">
+                <div id="LineageLinkedDataQueryParams_SQL_columnsTree"></div>
+              </div>
+            </td>
+          </tr>
+
+        </table>
+      </div>
+
+
+      <div>
+        <table>
+          <tr>
+            <td>
+              <button onclick="Lineage_linkedData_query.fillColumnValuesSelect()">List</button>
+            </td>
+            <td>
+              <select id="LineageLinkedDataQueryParams_valuesSelect"
+                      onchange="Lineage_linkedData_sql.onValuesSelectChange()" style="width: 200px">
+                <option value="" size="3"></option>
+              </select>
+            </td>
+          </tr>
+        </table>
+
+
+        <select id="LineageLinkedDataQueryParams_operator"
+                onclick="Lineage_linkedData.onSearchDialogOperatorSelect($(this).val())">
+          <option>=</option>
+          <option selected="selected">contains</option>
+          <option>LIST</option>
+          <option>!=</option>
+          <option>&lt;</option>
+          <option>&gt;</option>
+
+          <option>not contains</option>
+        </select>
+        <input id="LineageLinkedDataQueryParams_value" size="20" value="" />
+
+        <button onclick="Lineage_linkedData_query.addFilter()">Add filter</button>
+
+        <div id="LineageLinkedDataQueryParams_Filters"
+             style="display: flex;margin: 5px; padding: 5px;background-color: #ddd">
+
+        </div>
+
+
+        <button onclick="Lineage_linkedData_query.executeQuery()">Execute Query</button>
+        SQL
+        <div id="LineageLinkedDataQueryParams_SqlDiv" style="width:300px"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="LineageLinkedDataQuery_tableResultTab">
+<div id="LineageLinkedDataQuery_tableResult" style="width: 800px;height: 600px;overflow: auto"></div>
+
+  </div>
+
+</div>
+
+<script>
+  $("#LineageLinkedDataQuery_tabs").tabs();
+</script>
+

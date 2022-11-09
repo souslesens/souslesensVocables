@@ -63,6 +63,10 @@ Lineage_sources = (function () {
         $("#LineageNodesJsTreeDiv").empty();
         $("#Lineage_propertiesTree").empty();
         self.showHideEditButtons(source);
+
+        $("#LineageLinkedDataRelationsDiv").load("snippets/lineage/lineage_linkedData_queryRelations.html", function () {
+            Lineage_linkedData_query.init()
+        });
     };
 
     self.showHideLineageLeftPanels = function () {

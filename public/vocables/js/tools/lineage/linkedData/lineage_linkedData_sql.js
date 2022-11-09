@@ -116,9 +116,15 @@ var Lineage_linkedData_sql = (function () {
         if (defaultFilter.value == "classId") value = Lineage_linkedData.currentClassNode.data.id;
         $("#LineageLinkedDataQueryParams_value").val(value);
     };
-    self.fillValuesSelect = function () {
-        var table = $("#LineageLinkedDataQueryParams_SQL_tablesSelect").val();
-        var column = $("#LineageLinkedDataQueryParams_SQL_columnsSelect").val();
+
+
+
+
+    self.fillValuesSelect = function (table,column,callback) {
+        if(!table)
+        table = $("#LineageLinkedDataQueryParams_SQL_tablesSelect").val();
+        if(!column)
+        column = $("#LineageLinkedDataQueryParams_SQL_columnsSelect").val();
         if (!table || !column) return alert("select a table and a column");
         var SampleSizelimit = 1000;
         var sqlQuery = " select distinct column from " + table + " limit " + SampleSizelimit;
@@ -136,11 +142,16 @@ var Lineage_linkedData_sql = (function () {
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {
+                if(callback)
+                    return callback(null,data)
+
                 if (data.size >= SampleSizelimit) return alert("too many values");
                 common.fillSelectOptions("LineageLinkedDataQueryParams_valuesSelect", data, true, column, column);
                 $("#LineageLinkedDataQueryParams_operator").val("=");
             },
             error(err) {
+                if(callback)
+                    return callback(null)
                 return alert(err.responseText);
             },
         });

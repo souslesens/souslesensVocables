@@ -423,8 +423,11 @@ var Sparql_OWL = (function () {
             if (options.onlyObjectProperties) " ?property rdf:type owl:ObjectProperty.";
             if (options.filter) query += " " + options.filter;
             if (true || options.onlyObject) {
-                query += " filter (?subjectType in (owl:NamedIndividual, owl:Class))";
-                query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";
+
+                query += " filter (!isLiteral(?object) )";
+
+             /*   query += " filter (?subjectType in (owl:NamedIndividual, owl:Class))";
+                query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
             }
             query += " } order by ?propertyLabel ";
             var limit = options.limit || Config.queryLimit;

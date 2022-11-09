@@ -225,7 +225,7 @@ var KGcreator = (function () {
         });
     };
 
-    self.listTables = function (db = null) {
+    self.listTables = function (db,callback) {
         self.currentDbName = db ? db : $("#KGcreator_csvDirsSelect").val();
         var type = "sql.sqlserver";
 
@@ -247,9 +247,13 @@ var KGcreator = (function () {
                 for (var key in data) {
                     tables.push(key);
                 }
+                if(callback)
+                    return callback(null,data)
                 self.showTablesTree(tables);
             },
             error: function (_err) {
+                if(callback)
+                    return callback(null)
                 alert(err.responseText);
             },
         });

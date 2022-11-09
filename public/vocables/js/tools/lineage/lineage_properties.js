@@ -137,7 +137,7 @@ Lineage_properties = (function () {
         if (words) options.words = words;
         options.whitoutImports = true;
 
-        if (Config.sources[source].schemaType == "OWL") {
+        if (false && Config.sources[source].schemaType == "OWL") {
             Sparql_OWL.getObjectPropertiesDomainAndRange(source, ids, options, function (err, result) {
                 if (err) return callback(err);
                 var data = common.array.sort(common.array.distinctValues(result, "prop"), "propLabel");
@@ -165,8 +165,8 @@ Lineage_properties = (function () {
                 });
                 callback(null, jstreeData);
             });
-        } else if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH") {
-            options = { distinct: "property" };
+        } else if (true || Config.sources[source].schemaType == "KNOWLEDGE_GRAPH") {
+            options = { distinct: "?property" };
             Sparql_OWL.getFilteredTriples(source, null, null, null, options, function (err, result) {
                 if (err) return callback(err);
                 var distinctIds = {};
@@ -208,7 +208,7 @@ Lineage_properties = (function () {
     self.drawPredicatesGraph = function (source, nodeIds, properties) {
         if (nodeIds && !Array.isArray(nodeIds)) nodeIds = [nodeIds];
         if (properties && !Array.isArray(properties)) properties = [properties];
-        var filter = " FILTER( ?property !=rdf:type)";
+        var filter = " FILTER( ?property not in(rdf:type, rdfs:subClassOf))";
         Sparql_OWL.getFilteredTriples(source, nodeIds, properties, null, { filter: filter }, function (err, result) {
             if (err) return callback(err);
             Sparql_common.setSparqlResultPropertiesLabels(source, result, "property", function (err, result2) {

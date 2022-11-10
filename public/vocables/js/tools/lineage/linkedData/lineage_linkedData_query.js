@@ -2,9 +2,10 @@ var Lineage_linkedData_query = (function() {
   var self = {};
   self.databasesMap = {};
   self.sqlContext = {};
+  self.sqlContexts=[];
 
   self.init = function() {
-    $("#LineageLinkedDataRelationsDiv").load("snippets/lineage/lineage_linkedData_queryRelations.html", function() {
+    $("#LineageLinkedDataRelationsDiv").load("snippets/lineage/linkedData/lineage_linkedData_relations.html", function() {
       Lineage_linkedData_mappings.getSourceJoinsMappings(Lineage_sources.activeSource, {}, function(err, joinsMap) {
         if (err) return alert(err.responseText);
         var joins = [];
@@ -24,7 +25,7 @@ var Lineage_linkedData_query = (function() {
 
   self.showRelationFilterDialog = function(relation) {
     $("#mainDialogDiv").dialog("open");
-    $("#mainDialogDiv").load("snippets/lineage/lineageLinkedDataQueryDialog.html", function() {
+    $("#mainDialogDiv").load("snippets/lineage/linkedData/lineage_linkedData_queryDialog.html", function() {
 
 
       var databases = {};
@@ -308,6 +309,10 @@ var allSelectColumns=[]
     });
 
   };
+
+  self.stackContext=function(){
+    self.sqlContexts.push(self.sqlContext)
+  }
 
   return self;
 })();

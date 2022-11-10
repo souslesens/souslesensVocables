@@ -185,7 +185,7 @@ https: var Lineage_linkedData_mappings = (function() {
         if (relation.fromColumn.database != relation.toColumn.database) return alert("linked column are not in the same database");
         var str = "where " + relation.fromColumn.table + ".XXX=" + relation.toColumn.table + ".YYY";
         $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").load("snippets/lineage/lineage_linkedData_joinTablesDialog.html", function() {
+        $("#mainDialogDiv").load("snippets/lineage/linkedData/lineage_linkedData_joinTablesDialog.html", function() {
           $("#lineage_linkedData_join_databaseId").html(relation.fromColumn.database);
           $("#lineage_linkedData_join_fromClassId").html(relation.fromColumn.conceptLabel);
           $("#lineage_linkedData_join_toClassId").html(relation.toColumn.conceptLabel);
@@ -403,6 +403,8 @@ https: var Lineage_linkedData_mappings = (function() {
       function(callbackSeries) {
       if(Object.keys(joinsIds).length==0)
         return callbackSeries()
+        if(options.withoutSqldescription)
+          return callbackSeries()
       var filterStr=Sparql_common.setFilter("join",joinsIds)
         var query = "" +
           "" +
@@ -449,8 +451,51 @@ https: var Lineage_linkedData_mappings = (function() {
   self.graphSourceMappings = function() {
     self.queryColumnsMappings(Lineage_sources.activeSource, {}, function(err, columns) {
       self.graphColumns(columns);
+      self.graphRelations()
+
+
+
     });
   };
+  self.graphRelations=function(){
+    self.getSourceJoinsMappings(Lineage_sources.activeSource,{withoutSqlDescription:true},function(err, joinsMap){
+      var edges=[]
+      var existingNodes=visjsGraph.getExistingIdsMap()
+      for( var joinId in joinsMap) {
+        var join = joinsMap[joinId]
+        var edgeId=join.bNode;
+        if (!existingNodes[edgeId]) {
+          existingNodes[edgeId] = 1;
+
+          edges.push({
+            id:edgeId ,
+            from: join.from.classId,
+            to: join.to.classId,
+            data: {
+              source: Lineage_sources.activeSource,
+              id: join.prop
+            },
+            arrows: {
+              to: {
+                enabled: true,
+                type: "solid",
+                scaleFactor: 0.5
+              }
+            },
+            label:join.propLabel,
+            font:{color:"green", size:12,background:"#eee"},
+            dashes: true,
+            color: "green",
+            width: 2
+
+          })
+
+        }
+      }
+      visjsGraph.data.edges.add(edges)
+
+    })
+  }
 
   self.graphColumns = function(columns) {
     var existingNodes = visjsGraph.getExistingIdsMap();

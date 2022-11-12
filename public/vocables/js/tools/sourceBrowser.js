@@ -1426,7 +1426,7 @@ defaultLang = 'en';*/
                         show_only_matches: true,
                     },
                 };
-                self.searchableSourcesTreeIsInitialized = true;
+                self.searchableSourcesTreeIsInitialized = false;
                 if (!types) types = ["OWL"];
                 $("#sourcesSelectionDialogdiv").on("dialogopen", function (event, ui) {
                     MainController.UI.showSources("searchAll_sourcesTree", false, sources, types, jstreeOptions);

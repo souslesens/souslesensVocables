@@ -357,7 +357,7 @@ var Sparql_OWL = (function () {
             " WHERE {" +
             "?class rdf:type ?type. ?class (rdf:type|rdfs:subClassOf)" +
             modifier +
-            " ?superClass." +
+            " ?superClass." +" optional {?superClass rdf:type ?superClassType}"
             "filter (isIRI(?superClass)) ";
 
         if (options.withLabels) query += "OPTIONAL {?class rdfs: label classLabel } OPTIONAL {?superClass rdfs: label superClassLabel }";
@@ -487,6 +487,18 @@ var Sparql_OWL = (function () {
         }
     };
 
+    /**
+     *
+     * @param sourceLabel
+     * @param options
+     *      -selectGraph
+     *      -filter
+     *      -lang
+     *      -limit
+     *
+     *
+     * @param callback return ?concept ?p ?o [?conceptLabel] [?conceptType] [?superClass]
+     */
     self.getItems = function (sourceLabel, options, callback) {
         if (!options) {
             options = {};
@@ -1037,43 +1049,7 @@ var Sparql_OWL = (function () {
         );
     };
 
-    self.schema = {
-        getOwlChildrenClasses: function (callback) {
-            var query =
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                "SELECT *  from <http://data.total.com/resource/one-model/rdfsOwlSimplified/> WHERE {\n" +
-                "  ?sub rdf:type rdfs:Class .\n" +
-                "} LIMIT 500";
 
-            var url = OwlSchema.currentSourceSchema.sparql_url;
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Blender.currentSource }, function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-
-                return callback(null, result.results.bindings);
-            });
-        },
-
-        getObjectProperties: function (classId, callback) {
-            var query =
-                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
-                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                "SELECT *  from <http://data.total.com/resource/one-model/rdfsOwlSimplified/> WHERE {\n" +
-                "  ?sub rdf:type rdf:Property .\n" +
-                "} LIMIT 500";
-
-            var url = OwlSchema.currentSourceSchema.sparql_url;
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Blender.currentSource }, function (err, result) {
-                if (err) {
-                    return callback(err);
-                }
-
-                return callback(null, result.results.bindings);
-            });
-        },
-    };
 
     (self.getObjectProperties = function (sourceLabel, options, callback) {
         if (!options) options = {};
@@ -1362,6 +1338,44 @@ var Sparql_OWL = (function () {
 
             callback(null, result.result);
         });
+    };
+
+    self.schema = {
+        getOwlChildrenClasses: function (callback) {
+            var query =
+              "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+              "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+              "SELECT *  from <http://data.total.com/resource/one-model/rdfsOwlSimplified/> WHERE {\n" +
+              "  ?sub rdf:type rdfs:Class .\n" +
+              "} LIMIT 500";
+
+            var url = OwlSchema.currentSourceSchema.sparql_url;
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Blender.currentSource }, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+
+                return callback(null, result.results.bindings);
+            });
+        },
+
+        getObjectProperties: function (classId, callback) {
+            var query =
+              "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+              "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+              "SELECT *  from <http://data.total.com/resource/one-model/rdfsOwlSimplified/> WHERE {\n" +
+              "  ?sub rdf:type rdf:Property .\n" +
+              "} LIMIT 500";
+
+            var url = OwlSchema.currentSourceSchema.sparql_url;
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Blender.currentSource }, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+
+                return callback(null, result.results.bindings);
+            });
+        },
     };
 
     return self;

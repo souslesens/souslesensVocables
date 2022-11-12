@@ -96,6 +96,7 @@ var Lineage_blend = (function () {
                                 });
                             }
 
+
                             callbackSeries();
                         },
 
@@ -120,6 +121,8 @@ var Lineage_blend = (function () {
                             }
                             Sparql_OWL.getNodesAncestors(Lineage_sources.activeSource, [self.sourceNode.id, self.targetNode.id], {}, function (err, result) {
                                 result.forEach(function (item) {
+                                  /*  if(item.superClassType && (item.superClassType.value=="http://www.w3.org/2002/07/owl#Class" || item.superClassType.value=="http://www.w3.org/2002/07/owl#Restriction"))
+                                        return;*/
                                     if (item.class.value == self.sourceNode.id && allDomains[item.superClass.value]) {
                                         sourceNodeTopLevelOntologyAncestors[item.superClass.value] = allDomains[item.superClass.value];
                                     }

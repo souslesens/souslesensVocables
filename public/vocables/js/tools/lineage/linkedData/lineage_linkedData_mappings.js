@@ -420,18 +420,28 @@ https: var Lineage_linkedData_mappings = (function() {
           if (err) {
             return callbackSeries(err);
           }
+
+          var joinDatabaseMap={}
           result.results.bindings.forEach(function(item){
             var joinId=item.join.value
-            if( item.p.value.indexOf("database")>-1)
-              joinsMap[joinId].database=item.o.value
+            if( item.p.value.indexOf("database")>-1) {
+              joinDatabaseMap[joinId] = item.o.value
+              joinsMap[joinId].databases={}
+              joinsMap[joinId].databases[item.o.value]={from:{},to:{}}
+            }
+          })
+
+          result.results.bindings.forEach(function(item){
+            var joinId=item.join.value
+
             if( item.p.value.indexOf("fromTable")>-1)
-              joinsMap[joinId].from.table=item.o.value
+              joinsMap[joinId].databases[joinDatabaseMap[joinId]].from.table=item.o.value
             if( item.p.value.indexOf("toTable")>-1)
-              joinsMap[joinId].to.table=item.o.value
+              joinsMap[joinId].databases[joinDatabaseMap[joinId]].to.table=item.o.value
             if( item.p.value.indexOf("fromColumn")>-1)
-              joinsMap[joinId].from.column=item.o.value
+              joinsMap[joinId].databases[joinDatabaseMap[joinId]].from.column=item.o.value
             if( item.p.value.indexOf("toColumn")>-1)
-              joinsMap[joinId].to.column=item.o.value
+              joinsMap[joinId].databases[joinDatabaseMap[joinId]].to.column=item.o.value
 
           })
 

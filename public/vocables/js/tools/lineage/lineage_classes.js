@@ -128,7 +128,7 @@ sourceLabels.sort();
           });
         });
 
-        Lineage_sets.init();
+    //    Lineage_sets.init();
         if (callback) callback();
       });
     });

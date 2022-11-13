@@ -27,6 +27,8 @@
 
       <li class="Lineage_ClassTabLi"><a href="#LineagePropertiesTab">Properties</a></li>
 
+      <li class="Lineage_ClassTabLi"><a href="#LineageContainersTab">Containers</a></li>
+
       <li class="Lineage_ClassTabLi"><a href="#LineageLinkedDataTab">LinkedData</a></li>
 
       <li class="Lineage_ClassTabLi"><a href="#Lineage_tablesTab">Tables</a></li>
@@ -138,6 +140,18 @@
         </div>
       </div>
     </div>
+    <div class="" id="LineageContainersTab" style="display: flex; flex-direction: column; width: 300px; height: 500px">
+
+      <input id="Lineage_containers_searchInput" onkeyup=""/><button onclick="Lineage_containers.search()">Search</button>
+      <div class="jstreecontainer">
+        <div id="lineage_containers_containersJstree"></div>
+
+
+      </div>
+
+
+    </div>
+
 
     <div class="" id="Lineage_tablesTab" style="display: flex; flex-direction: column; width: 300px; height: 500px">
       <div id="Lineage_tablesTreeDiv"></div>

@@ -95,8 +95,8 @@ var Lineage_selection = (function() {
 
     } else if (action == "decorate") {
       self.decorate.showDialog();
-    } else if (action == "collection") {
-      self.collection.showDialog();
+    } else if (action == "container") {
+      self.container.showDialog();
 
     } else if (action == "modifyPredicates") {
       self.modifyPredicates.showDialog();
@@ -115,7 +115,18 @@ var Lineage_selection = (function() {
   self.mergeNodes = {
     showDialog: function() {
 
-      $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_mergeNodesDialog.html");
+      $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_mergeNodesDialog.html",function(){
+        var sources=[]
+       for(var key in Config.sources){
+         if(Config.sources[key].editable)
+           sources.push(key)
+
+       }
+       sources.sort();
+        common.fillSelectOptions("LineageMerge_targetSourceSelect",sources,null)
+
+      });
+
 
     },
     mergeNodesUI: function() {
@@ -137,6 +148,11 @@ var Lineage_selection = (function() {
     mergeNodes: function(jstreeNodes, mergeMode, mergeDepth, mergeRestrictions, mergedNodesType, targetSource, targetNode, callback) {
       var maxDepth = 10;
 
+      var newUriPrefix = Config.sources[targetSource].graphUri;
+      if (!newUriPrefix)
+        newUriPrefix = prompt("enter new uri prefix");
+      if (!newUriPrefix)
+        return;
       var nodesToMerge = {};
       var descendantsMap = {};
       var newTriples = [];
@@ -150,6 +166,7 @@ var Lineage_selection = (function() {
       var sources = Object.keys(nodesToMerge);
 
       async.eachSeries(sources, function(source, callbackEachSource) {
+        var nodesToCopyMap = {};
         var selectedNodeIds = Object.keys(nodesToMerge[source]);
         var sourceGraphUri = Config.sources[source].graphUri;
         var targetGraphUri = Config.sources[targetSource].graphUri;
@@ -196,6 +213,16 @@ var Lineage_selection = (function() {
                       return callbackSeries();
                     });
                   }
+                },
+
+                //set nodesMap for change URI later
+                function(callbackSeries) {
+                  nodesToCopy.forEach(function(nodeId) {
+                    nodesToCopyMap[nodeId] = {};
+                  });
+
+
+                  return callbackSeries();
                 },
 
                 //create hierarchy if needed (when targetNode  and mergedNodesType)
@@ -247,7 +274,18 @@ var Lineage_selection = (function() {
                     });
                     callbackSeries();
                   });
-                },
+                }
+                ],function(err){
+                callbackEachNodeToMerge()
+              })
+
+            },
+          // end for each node to merge
+
+          function(err){
+
+            async.series(
+              [
 
                 //get restrictions triple including descendants
                 function(callbackSeries) {
@@ -287,9 +325,39 @@ var Lineage_selection = (function() {
                   });
                 },
 
+                //create news uris
+                function(callbackSeries) {
+                  if (mergeMode == "keepUri")
+                    return callbackSeries();
+
+                  function getNewUri(uri) {
+                    var p = Math.max(uri.lastIndexOf("/"), uri.lastIndexOf("#"));
+                    if (p < 0)
+                      return callbackSeries("cannot process  uri " + uri);
+                    var id = uri.substring(p + 1);
+                    return newUriPrefix + id;
+
+                  }
+
+                  newTriples.forEach(function(triple) {
+
+                    if (nodesToCopyMap[triple.subject]) {
+                      triple.subject = getNewUri(triple.subject);
+                    }
+                    if (nodesToCopyMap[triple.object]) {
+                      triple.subject = getNewUri(triple.object);
+                    }
+                  });
+                  callbackSeries();
+
+
+                },
+
+
                 //create newTriples
                 function(callbackSeries) {
-                  if (true || mergeMode == "keepUri") {
+                return callbackSeries();
+                  if (true) {
                     nodesToMerge[source][selectedNodeId].forEach(function(item) {
                       var value = item.object.value;
                       if (item.object.datatype == "http://www.w3.org/2001/XMLSchema#dateTime") value += "^^xsd:dateTime";
@@ -312,33 +380,12 @@ var Lineage_selection = (function() {
                     });
                   }
 
-                  /* /NOT IMPLEMENTED YET too much complexity
-else if(mergeMode=="newUri") {
-// set new subjectUri
-var newTriples = [];
 
-
-nodesToMerge[source].subjectTriples.forEach(function(item) {
-if (!oldToNewUrisMap[item.id.value]) {
-var newUri = targetGraphUri + common.getRandomHexaId(10);
-oldToNewUrisMap[item.id.value] = newUri;
-}
-})
-
-for (var oldUri in oldToNewUrisMap[item.id.value]) {
-nodesToMerge[source].subjectTriples.forEach(function(item) {
-if (item.id.value == oldUri) {
-
-}
-triples.push({})
-})
-}
-}*/
                 }
               ],
               function(err) {
                 if (err) return callbackEachNodeToMerge(err);
-
+                return callbackEachSource();
                 MainController.UI.message(sourceMessage + " indexing data ...  ");
                 SearchUtil.generateElasticIndex(targetSource, { ids: nodesToCopy }, function(err, _result) {
                   MainController.UI.message("DONE " + source, true);
@@ -396,7 +443,7 @@ triples.push({})
       var shape = $("#lineage_selection_decorate_shapeSelect").val();
       var size = $("#lineage_selection_decorate_sizeInput").val();
       jstreeNodes.forEach(function(node) {
-        if(!node.data)
+        if (!node.data)
           return;
         var obj = { id: node.id };
         if (color)
@@ -418,20 +465,23 @@ triples.push({})
 
   };
 
-  self.collection = {
+  self.container = {
 
     showDialog: function() {
 
-      $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_addToCollection.html", function() {
-        var filter = " ?concept rdf:type <http://www.w3.org/2004/02/skos/core#Collection>";
-        Sparql_generic.getItems(Lineage_sources.activeSource, { filter: filter }, function(err, result) {
+      $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_containerDialog.html", function() {
+        var filter = " ?concept rdf:type <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag>";
+        Sparql_generic.getItems(Lineage_sources.activeSource, {
+          filter: filter,
+          distinct: "?concept ?conceptLabel"
+        }, function(err, result) {
           if (err)
             return alert(err.responseText);
-          var collections = [];
+          var containers = [];
           result.forEach(function(item) {
-            collections.push(item.concept.value);
+            containers.push({ id: item.concept.value, label: item.conceptLabel.value });
           });
-          common.fillSelectOptions("lineage_selection_collection_collectionsSelect", collections, true);
+          common.fillSelectOptions("lineage_selection_container_containersSelect", containers, true, "label", "id");
 
         });
 
@@ -440,48 +490,48 @@ triples.push({})
     },
 
 
-    newCollection: function() {
+    newContainer: function() {
 
-      var collectionName = prompt("New collection name");
-      if (!collectionName)
+      var containerName = prompt("New container name");
+      if (!containerName)
         return;
-      self.collection.isNew = 1;
-      var collectionUri = Config.sources [Lineage_sources.activeSource].graphUri + common.formatStringForTriple(collectionName, true);
-      $("#lineage_selection_collection_collectionsSelect").append("<option selected='selected'  value='" + collectionUri + "'>" + collectionName + "</option>");
+      self.container.isNew = 1;
+      var containerUri = Config.sources [Lineage_sources.activeSource].graphUri + common.formatStringForTriple(containerName, true);
+      $("#lineage_selection_container_containersSelect").append("<option selected='selected'  value='" + containerUri + "'>" + containerName + "</option>");
 
     },
     apply: function() {
 
       var jstreeNodes = $("#lineage_selection_selectedNodesTreeDiv").jstree(true).get_checked(true);
-      var collectionUri = $("#lineage_selection_collection_collectionsSelect").val();
-      var collectionName = $("#lineage_selection_collection_collectionsSelect option:selected").text();
+      var containerUri = $("#lineage_selection_container_containersSelect").val();
+      var containerName = $("#lineage_selection_container_containersSelect option:selected").text();
 
-      var isNew = $(" #lineage_selection_collection_collectionsSelect option:selected").prop("isNew");
-      var isNew2 = $(" #lineage_selection_collection_collectionsSelect option:selected ").attr("isNew");
+      var isNew = $(" #lineage_selection_container_containersSelect option:selected").prop("isNew");
+      var isNew2 = $(" #lineage_selection_container_containersSelect option:selected ").attr("isNew");
       var triples = [];
 
-      if (self.collection.isNew) {
-        self.collection.isNew = false;
+      if (self.container.isNew) {
+        self.container.isNew = false;
         triples.push({
-          subject: "<" + collectionUri + ">",
+          subject: "<" + containerUri + ">",
           predicate: " rdf:type",
-          object: "<http://www.w3.org/2004/02/skos/core#Collection>"
+          object: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag>"
         });
         triples.push({
-          subject: collectionUri,
+          subject: containerUri,
           predicate: " rdfs:label",
-          object: collectionName
+          object: containerName
         });
       }
 
       var otherSourcesNodes = [];
       jstreeNodes.forEach(function(node) {
-        if(!node.data)
+        if (!node.data)
           return;
         if (node.data.source == Lineage_sources.activeSource) {
           triples.push({
-            subject: "<" + collectionUri + ">",
-            predicate: "<http://www.w3.org/2004/02/skos/core#member>",
+            subject: "<" + containerUri + ">",
+            predicate: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#member>",
             object: "<" + node.data.id + ">"
           });
         } else {
@@ -495,15 +545,15 @@ triples.push({})
       var str = "";
       if (otherSourcesNodes.length != 0)
         str = " ! otherSourcesNodes.length not belonging to active source will be ignored";
-      if (!confirm("Add selected nodes to collection " + collectionName + str))
-        return
+      if (!confirm("Add selected nodes to container " + containerName + str))
+        return;
 
-        Sparql_generic.insertTriples(Lineage_sources.activeSource, triples, null, function(err, result) {
-          if (err)
-            return alert(err.responseText);
-          MainController.UI.message("nodes added to collection " + collectionName);
+      Sparql_generic.insertTriples(Lineage_sources.activeSource, triples, null, function(err, result) {
+        if (err)
+          return alert(err.responseText);
+        MainController.UI.message("nodes added to container " + containerName);
 
-        });
+      });
 
 
     }
@@ -540,12 +590,12 @@ triples.push({})
       var triples = [];
       var otherSourcesNodes = [];
       jstreeNodes.forEach(function(node) {
-        if(!node.data)
+        if (!node.data)
           return;
         if (node.data.source == Lineage_sources.activeSource) {
           triples.push({
             subject: "<" + node.data.id + ">",
-            predicate: "<"+property+">",
+            predicate: "<" + property + ">",
             object: object
           });
         } else {
@@ -562,19 +612,19 @@ triples.push({})
       if (!confirm("create new predicate for selected nodes (" + jstreeNodes.length + ")" + str))
         return;
 
-        Sparql_generic.insertTriples(Lineage_sources.activeSource, triples, null, function(err, result) {
-          if (err)
-            return alert(err.responseText);
-          MainController.UI.message("predicate added to collection " + collectionName);
+      Sparql_generic.insertTriples(Lineage_sources.activeSource, triples, null, function(err, result) {
+        if (err)
+          return alert(err.responseText);
+        MainController.UI.message("predicate added to container " + containerName);
 
-        });
+      });
 
 
     },
     deletePredicate: function() {
       var property = $("#lineage_selection_modifyPredicate_propertySelect").val();
       var object = $("#lineage_selection_modifyPredicate_objectValue").val();
-      if (!property &&  !object)
+      if (!property && !object)
         return alert("enter predicate property and/or object");
 
       var nodeIds = $("#lineage_selection_selectedNodesTreeDiv").jstree(true).get_checked();
@@ -584,11 +634,10 @@ triples.push({})
 
       Sparql_generic.deleteTriples(Lineage_sources.activeSource, nodeIds, property, object, function(err, result) {
 
-              return alert(err.responseText);
-            MainController.UI.message(nodeIds.length + " nodes deleted  ");
-          });
+        return alert(err.responseText);
+        MainController.UI.message(nodeIds.length + " nodes deleted  ");
+      });
     },
-
 
 
     deleteSelection: function() {

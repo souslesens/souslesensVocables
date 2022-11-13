@@ -1,9 +1,4 @@
-<style>
-    .LineageMerge_tr {
-        margin: 10px;
-        spacing: 5px;
-    }
-</style>
+
 
 <div style="display: flex; flex-direction: column">
 
@@ -11,19 +6,19 @@ Merge node into source
     <div>
 
         <table>
-            <tr class="LineageMerge_tr">
+            <tr class="lineage_selection_tr">
                 <td>target graph source</td>
                 <td>
                     <select id="LineageMerge_targetSourceSelect"></select>
                 </td>
             </tr>
-            <tr class="LineageMerge_tr">
+            <tr class="lineage_selection_tr">
                 <td>target Node URI</td>
                 <td>
                     <input style="width: 400px" id="LineageMerge_targetNodeUriSelect" />
                 </td>
             </tr>
-            <tr class="LineageMerge_tr">
+            <tr class="lineage_selection_tr">
                 <td>merged Nodes Type</td>
                 <td>
                     <select id="LineageMerge_mergedNodesTypeSelect">
@@ -34,18 +29,19 @@ Merge node into source
                 </td>
             </tr>
 
-            <tr class="LineageMerge_tr">
-                <td>aggregate mode</td>
+            <tr class="lineage_selection_tr">
+                <td class="Lineage_selection_columnLabel">aggregate mode</td>
                 <td>
                     <select id="LineageMerge_aggregateModeSelect">
                         <!--  <option value="newUri">newUri</option>-->
+                        <option value="newUri">newUri</option>
                         <option value="keepUri">keepUri</option>
                     </select>
                 </td>
             </tr>
 
-            <tr class="LineageMerge_tr">
-                <td>Depth</td>
+            <tr class="lineage_selection_tr">
+                <td class="Lineage_selection_columnLabel">Depth</td>
                 <td>
                     <select id="LineageMerge_aggregateDepthSelect">
                         <option value="nodeOnly">node only</option>
@@ -55,7 +51,7 @@ Merge node into source
                     </select>
                 </td>
             </tr>
-            <tr class="LineageMerge_tr">
+            <tr class="lineage_selection_tr">
                 <td>Relations</td>
                 <td>
                     <input type="checkbox" id="LineageMerge_aggregateRelationsCBX" checked="checked" />

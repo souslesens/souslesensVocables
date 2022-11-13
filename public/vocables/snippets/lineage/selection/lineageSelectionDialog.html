@@ -1,22 +1,33 @@
+<style>
+    .lineage_selection_tr {
+        margin: 10px;
+        spacing: 5px;
+    }
+    .lineage_selection_tr td {
+        min-width: 150px;
+    }
+</style>
+
+
 <div style="display: flex; flex-direction: row">
     <div>
         Selected nodes<br />
-        <div class="jstreeContainer" style="width: 320px !important; height: 700px; overflow: auto; margin-top: 5px">
+        <div class="jstreeContainerX" style="width: 320px !important;  height: 700px; overflow: auto; margin-top: 5px">
             <div id="lineage_selection_selectedNodesTreeDiv"></div>
         </div>
     </div>
 
     <div style=" margin: 5px; padding: 5px;">
-       <div> Selection Actions></div>
+       <div> Selection Actions</div>
         <div style="display: flex; flex-direction: column">
            <!-- <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_selection.onSelectionExecuteAction('copy')">Copy</button>-->
 
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_selection.onSelectionExecuteAction('decorate')">Decorate</button>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_selection.onSelectionExecuteAction('collection')">Add to Collection</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_selection.onSelectionExecuteAction('container')">Add to Container</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_selection.onSelectionExecuteAction('exportCsv')">Export CSV</button>
 
 
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_selection.onSelectionExecuteAction('mergeInto')">merge into source</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_selection.onSelectionExecuteAction('mergeInto')">Merge into</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_selection.onSelectionExecuteAction('modifyPredicates')">modify predicates</button>
 
           <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_selection.onSelectionExecuteAction('deleteSelection')">Delete</button>

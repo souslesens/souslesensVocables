@@ -380,6 +380,9 @@ var MainController = (function () {
             var treeData = [];
             for (var key in Config.tools) {
                 if (Config.tools_available.indexOf(key) > -1) {
+                    if ((Config.tools[key].label == "ConfigEditor" || Config.tools[key].label == "Admin") && authentication.currentUser.groupes.indexOf("admin") === -1) {
+                        continue;
+                    }
                     if ((Config.currentProfile.allowedTools != "ALL" && Config.currentProfile.allowedTools.indexOf(key) < 0) || Config.currentProfile.forbiddenTools.indexOf(key) > -1);
                     else
                         treeData.push({

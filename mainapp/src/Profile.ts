@@ -23,14 +23,28 @@ function mapProfiles(resources: ProfileJson[]) {
 
 export async function saveProfile(body: Profile, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
     try {
-        const response = await fetch(endpoint, {
-            method: mode === Mode.Edition ? "put" : "post",
-            body: JSON.stringify({ [body.name]: body }, null, "\t"),
-            headers: { "Content-Type": "application/json" },
-        });
+        let response = null;
+        if (mode === Mode.Edition) {
+            response = await fetch(endpoint + "/" + body.name, {
+                method: "put",
+                body: JSON.stringify(body, null, "\t"),
+                headers: { "Content-Type": "application/json" },
+            });
+        } else {
+            response = await fetch(endpoint, {
+                method: "post",
+                body: JSON.stringify({ [body.name]: body }, null, "\t"),
+                headers: { "Content-Type": "application/json" },
+            });
+        }
         const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
-            updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(resources)) });
+            if (mode === Mode.Edition) {
+                const profiles = await getProfiles();
+                updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(profiles)) });
+            } else {
+                updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(resources)) });
+            }
             updateLocal({ type: Type.UserClickedModal, payload: false });
         } else {
             updateModel({ type: "ServerRespondedWithProfiles", payload: failure(`${response.status}, ${message}`) });
@@ -61,7 +75,7 @@ type ProfileJson = {
     allowedSourceSchemas: string[];
     defaultSourceAccessControl: SourceAccessControl;
     sourcesAccessControl: Record<string, SourceAccessControl>;
-    allowedTools: string[];
+    allowedTools: string[] | string;
     forbiddenTools: string[];
     blender: Blender;
 };

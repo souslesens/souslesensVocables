@@ -1,4 +1,5 @@
 const fs = require("fs");
+const bcrypt = require("bcrypt");
 const { configPath: defaultConfigPath } = require("./config");
 const { Lock } = require("async-await-mutex-lock");
 /**
@@ -66,10 +67,12 @@ class UserModel {
         try {
             const userAccounts = await this._read();
             if (newUserAccount.id === undefined) newUserAccount.id = newUserAccount.login;
+            // hash password
+            newUserAccount.password = bcrypt.hashSync(newUserAccount.password, 10);
             if (Object.keys(userAccounts).includes(newUserAccount.id)) {
                 throw Error("UserAccount exists already, try updating it.");
             }
-            userAccounts[newUserAccount.id] = newUserAccount;
+            userAccounts[newUserAccount.login] = newUserAccount;
             await this._write(userAccounts);
         } finally {
             lock.release("UsersThread");
@@ -82,11 +85,15 @@ class UserModel {
     updateUserAccount = async (modifiedUserAccount) => {
         await lock.acquire("UsersThread");
         try {
+            // hash password if exists
+            if (Object.keys(modifiedUserAccount).includes("password")) {
+                modifiedUserAccount.password = bcrypt.hashSync(modifiedUserAccount.password, 10);
+            }
             const userAccounts = await this._read();
-            if (!Object.keys(userAccounts).includes(modifiedUserAccount.id)) {
+            if (!Object.keys(userAccounts).includes(modifiedUserAccount.login)) {
                 throw Error("UserAccount does not exist, try adding it.");
             }
-            userAccounts[modifiedUserAccount.id] = { ...userAccounts[modifiedUserAccount.id], ...modifiedUserAccount };
+            userAccounts[modifiedUserAccount.login] = { ...userAccounts[modifiedUserAccount.login], ...modifiedUserAccount };
             await this._write(userAccounts);
         } finally {
             lock.release("UsersThread");

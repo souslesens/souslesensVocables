@@ -141,8 +141,11 @@
       </div>
     </div>
     <div class="" id="LineageContainersTab" style="display: flex; flex-direction: column; width: 300px; height: 500px">
-
-      <input id="Lineage_containers_searchInput" onkeyup=""/><button onclick="Lineage_containers.search()">Search</button>
+      <div class="lineage_button_group">
+        <input id="Lineage_containers_searchInput" onkeyup="" />
+        <button onclick="Lineage_containers.search()">Search</button>
+        <button onclick="Lineage_containers.addContainer()">+</button>
+      </div>
       <div class="jstreecontainer">
         <div id="lineage_containers_containersJstree"></div>
 

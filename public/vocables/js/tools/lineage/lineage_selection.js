@@ -531,7 +531,7 @@ var Lineage_selection = (function() {
         if (node.data.source == Lineage_sources.activeSource) {
           triples.push({
             subject: "<" + containerUri + ">",
-            predicate: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#member>",
+            predicate: "<http://www.w3.org/2000/01/rdf-schema#member>",
             object: "<" + node.data.id + ">"
           });
         } else {

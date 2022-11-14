@@ -41,8 +41,8 @@ var Lineage_linkedData_query = (function() {
     self.currentDatabase = database;
     self.sqlContext.currentDataSource = { type: "sql.sqlserver", dbName: self.currentDatabase };
     var classes = [
-      { label: self.relationObj.from.classLabel, id: "from" },
-      { label: self.relationObj.to.classLabel, id: "to" }
+      { label: self.relationObj.from.classLabel+"->"+self.databasesMap[self.currentDatabase].from.table, id: "from" },
+      { label: self.relationObj.to.classLabel+"->"+self.databasesMap[self.currentDatabase].to.table, id: "to" }
 
     ];
     $("#LineageLinkedDataQueryParams_createFilterDiv").css("display","none")
@@ -226,7 +226,7 @@ var Lineage_linkedData_query = (function() {
             allSelectColumns.push(column);
             if (selectStr != "")
               selectStr += ",";
-            selectStr += table + "." + column;
+            selectStr += "'"+table + "." + column+"'";
           }
 
 

@@ -120,7 +120,7 @@ var Lineage_containers = (function() {
 
     var triples = [];
 
-    if (self.currentContainer && self.currentContainer.id!=containerUri) {
+    if (self.currentContainer && self.currentContainer.id != containerUri) {
       triples.push({
         subject: "<" + self.currentContainer.data.id + ">",
         predicate: " rdfs:member",
@@ -170,28 +170,28 @@ var Lineage_containers = (function() {
         });
       }
 
-      self.currentContainer=null;
+      self.currentContainer = null;
     });
 
 
   };
 
   self.addResourcesToContainer = function(source, container, nodesData) {
-if(container.type!="container")
-  return alert ("can only add resources to containers")
-   // self.currentContainer=null;
+    if (container.type != "container")
+      return alert("can only add resources to containers");
+    // self.currentContainer=null;
     if (!Array.isArray(nodesData))
       nodesData = [nodesData];
 
     var otherSourcesNodes = [];
     var triples = [];
     nodesData.forEach(function(nodeData) {
-      if(container.id==nodeData.id)
-        return  alert ("a  node cannot be member of itself");
+      if (container.id == nodeData.id)
+        return alert("a  node cannot be member of itself");
 
       if (!nodeData.source)
         return console.log(" node without source");
-      if (nodeData.source ==source) {
+      if (nodeData.source == source) {
         triples.push({
           subject: "<" + container.id + ">",
           predicate: "<http://www.w3.org/2000/01/rdf-schema#member>",
@@ -208,23 +208,24 @@ if(container.type!="container")
       if (err)
         return alert(err.responseText);
       MainController.UI.message("nodes added to container " + container.label);
-      var jstreeData=[]
+      var jstreeData = [];
       nodesData.forEach(function(nodeData) {
-        jstreeData.push( {
+        jstreeData.push({
           id: nodeData.id,
           text: nodeData.label,
-          parent:container.id,
+          parent: container.id,
+          type: "class",
           data: {
             type: "resource",
             source: source,
             id: nodeData.id,
-            label: nodeData.label,
+            label: nodeData.label
           }
 
-        })
+        });
 
-      })
-      common.jstree.addNodesToJstree("lineage_containers_containersJstree", container.id, jstreeData,);
+      });
+      common.jstree.addNodesToJstree("lineage_containers_containersJstree", container.id, jstreeData);
 
     });
 
@@ -250,14 +251,13 @@ if(container.type!="container")
 
   self.getContainerResources = function(source, containerIds, options, callback) {
     var containers;
-    var firstContainer
+    var firstContainer;
     if (!Array.isArray(containerIds)) {
       containers = [containerIds];
-      firstContainer=containerIds
-    }
-    else {
+      firstContainer = containerIds;
+    } else {
       containers = containerIds;
-      firstContainer=containerIds[0]
+      firstContainer = containerIds[0];
     }
 
     if (options.allDescendants) {
@@ -270,8 +270,9 @@ if(container.type!="container")
       var containerObj = $("#lineage_containers_containersJstree").jstree().get_node(firstContainer);
       containers = containers.concat(descendantIds);
     }
-
-    var filter = "filter(?objectType !=rdf:Bag)";
+    var filter;
+    if (!options.allMemberTypes)
+      var filter = "filter(?objectType !=rdf:Bag)";
     Sparql_OWL.getFilteredTriples(source, containers, "http://www.w3.org/2000/01/rdf-schema#member", null, { filter: filter }, function(err, result) {
       return callback(err, result);
     });
@@ -290,7 +291,7 @@ if(container.type!="container")
             id: item.object.value,
             text: item.objectLabel.value,
             parent: item.subject.value,
-            type:"class",
+            type: "class",
             data: {
               type: "resource",
               source: source,
@@ -309,27 +310,35 @@ if(container.type!="container")
   self.graphResources = function(source, containerId, options) {
     if (!options)
       options = {};
+    if (options.allDescendants)
+      options.allMemberTypes = true;
     var existingChildren = common.jstree.getjsTreeNodes("lineage_containers_containersJstree", true, containerId);
-    var filter = "filter(?objectType !=rdf:Bag)";
+    // var filter = "filter(?objectType !=rdf:Bag)";
     self.getContainerResources(source, containerId, options, function(err, result) {
       if (err)
         return alert(err.responseText);
 
       var color = Lineage_classes.getSourceColor(source);
       var existingNodes = visjsGraph.getExistingIdsMap();
-      var visjsData={nodes:[],edges:[]}
+      var visjsData = { nodes: [], edges: [] };
       result.forEach(function(item) {
         if (!existingNodes[item.subject.value]) {
           existingNodes[item.subject.value] = 1;
+          var type;
+          if (item.subjectType && item.subjectType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag")
+            type = "bag";
+          else
+            type = "resource";
+
           visjsData.nodes.push({
             id: item.subject.value,
             label: item.subjectLabel.value,
             shadow: self.nodeShadow,
-            shape: "ellipse",
+            shape: (type == "bag" ? "ellipse" : "dot"),
             size: Lineage_classes.defaultShapeSize,
             color: color,
             data: {
-              type: "container",
+              type: type,
               source: source,
               id: item.subject.value,
               label: item.subjectLabel.value
@@ -340,7 +349,7 @@ if(container.type!="container")
         if (!existingNodes[item.object.value]) {
           existingNodes[item.object.value] = 1;
           var type;
-          if (item.objectType == "http://www.w3.org/2002/07/owl#Bag")
+          if (item.objectType && item.objectType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag")
             type = "bag";
           else
             type = "resource";

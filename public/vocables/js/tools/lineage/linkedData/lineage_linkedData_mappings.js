@@ -69,6 +69,8 @@ https: var Lineage_linkedData_mappings = (function() {
     return;
   };
 
+
+
   self.onAddEdgeDropped = function(edgeData) {
     var sourceNode = visjsGraph.data.nodes.get(edgeData.from).data;
     var targetNode = visjsGraph.data.nodes.get(edgeData.to).data;
@@ -198,6 +200,26 @@ https: var Lineage_linkedData_mappings = (function() {
 
           common.fillSelectOptions("lineage_linkedData_join_fromColumnSelect", fromColumns);
           common.fillSelectOptions("lineage_linkedData_join_toColumnSelect", toColumns);
+
+
+          KGcreator.showSampleData({data:{},parent:relation.fromColumn.table},true,20,function(err,result){
+            if(err)
+              return;
+            result = result.replace(/\n/g, "</td><tr><td>");
+            result = result.replace(/\t/g, "</td><td>");
+            var html = "<table><tr><td>" + result + "</tr></table>";
+           $("#lineage_linkedData_join_fromSampleDataDiv").html(html)
+            KGcreator.showSampleData({data:{},parent:relation.toColumn.table},true,20,function(err,result){
+              if(err)
+                return;
+              result = result.replace(/\n/g, "</td><tr><td>");
+              result = result.replace(/\t/g, "</td><td>");
+              var html = "<table><tr><td>" + result + "</tr></table>";
+              $("#lineage_linkedData_join_toSampleDataDiv").html(html)
+            })
+          })
+
+
         });
       }
     );

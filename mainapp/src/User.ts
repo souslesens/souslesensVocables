@@ -45,7 +45,7 @@ async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<M
 
 async function deleteUser(user: User, updateModel: React.Dispatch<Msg>) {
     try {
-        const response = await fetch(`${endpoint}/${user.id}`, { method: "delete" });
+        const response = await fetch(`${endpoint}/${user.login}`, { method: "delete" });
         const { message, resources } = (await response.json()) as { message: string; resources: User[] };
         if (response.status === 200) {
             updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(resources)) });

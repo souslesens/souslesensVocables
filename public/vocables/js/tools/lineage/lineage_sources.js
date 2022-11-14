@@ -65,7 +65,7 @@ Lineage_sources = (function () {
         self.showHideEditButtons(source);
 
         $("#LineageLinkedDataRelationsDiv").load("snippets/lineage/linkedData/lineage_linkedData_relations.html", function () {
-            Lineage_linkedData_query.init()
+            Lineage_linkedData_query.init();
         });
     };
 

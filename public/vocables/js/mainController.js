@@ -39,7 +39,7 @@ var MainController = (function () {
         });
     };
 
-   /* self.loadSourcesMappings = function (callback) {
+    /* self.loadSourcesMappings = function (callback) {
         $.ajax({
             type: "GET",
             url: `${Config.apiUrl}/data/file?dir=mappings&name=sourcesLinkedMappings.json`,
@@ -170,7 +170,7 @@ var MainController = (function () {
 
                 async.series(
                     [
-                       /* function (callbackSeries) {
+                        /* function (callbackSeries) {
                             self.loadSourcesMappings(function (err, sourcesMappings) {
                                 if (err) {
                                     console.warn("file sourcesLinkedMappings.json not found");
@@ -241,8 +241,7 @@ var MainController = (function () {
 
                 var distinctGroups = {};
 
-                if(Config.currentProfile.allowedSourceSchemas.length==0)
-                    return alert (Config.currentProfile.name +" has no schema type allowed. Contact administrator")
+                if (Config.currentProfile.allowedSourceSchemas.length == 0) return alert(Config.currentProfile.name + " has no schema type allowed. Contact administrator");
                 Config.currentProfile.allowedSourceSchemas.sort().forEach(function (item) {
                     if (!types || (types && types.indexOf(item) > -1))
                         treeData.push({

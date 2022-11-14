@@ -357,8 +357,9 @@ var Sparql_OWL = (function () {
             " WHERE {" +
             "?class rdf:type ?type. ?class (rdf:type|rdfs:subClassOf)" +
             modifier +
-            " ?superClass." +" optional {?superClass rdf:type ?superClassType}"
-            "filter (isIRI(?superClass)) ";
+            " ?superClass." +
+            " optional {?superClass rdf:type ?superClassType}";
+        ("filter (isIRI(?superClass)) ");
 
         if (options.withLabels) query += "OPTIONAL {?class rdfs: label classLabel } OPTIONAL {?superClass rdfs: label superClassLabel }";
         query += filterStr;
@@ -423,10 +424,9 @@ var Sparql_OWL = (function () {
             if (options.onlyObjectProperties) " ?property rdf:type owl:ObjectProperty.";
             if (options.filter) query += " " + options.filter;
             if (true || options.onlyObject) {
-
                 query += " filter (!isLiteral(?object) )";
 
-             /*   query += " filter (?subjectType in (owl:NamedIndividual, owl:Class))";
+                /*   query += " filter (?subjectType in (owl:NamedIndividual, owl:Class))";
                 query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
             }
             query += " } order by ?propertyLabel ";
@@ -511,11 +511,10 @@ var Sparql_OWL = (function () {
         var query = "";
         query += "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "PREFIX owl: <http://www.w3.org/2002/07/owl#>";
 
-        var selectStr="*"
-        if(options.distinct)
-            selectStr=options.distinct
+        var selectStr = "*";
+        if (options.distinct) selectStr = options.distinct;
 
-        query += " select distinct "+selectStr+" " + fromStr + "  WHERE {";
+        query += " select distinct " + selectStr + " " + fromStr + "  WHERE {";
 
         if (!Config.sources[sourceLabel].graphUri) options.selectGraph = false;
 
@@ -1053,8 +1052,6 @@ var Sparql_OWL = (function () {
         );
     };
 
-
-
     (self.getObjectProperties = function (sourceLabel, options, callback) {
         if (!options) options = {};
         var fromStr = Sparql_common.getFromStr(sourceLabel);
@@ -1347,11 +1344,11 @@ var Sparql_OWL = (function () {
     self.schema = {
         getOwlChildrenClasses: function (callback) {
             var query =
-              "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
-              "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-              "SELECT *  from <http://data.total.com/resource/one-model/rdfsOwlSimplified/> WHERE {\n" +
-              "  ?sub rdf:type rdfs:Class .\n" +
-              "} LIMIT 500";
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT *  from <http://data.total.com/resource/one-model/rdfsOwlSimplified/> WHERE {\n" +
+                "  ?sub rdf:type rdfs:Class .\n" +
+                "} LIMIT 500";
 
             var url = OwlSchema.currentSourceSchema.sparql_url;
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Blender.currentSource }, function (err, result) {
@@ -1365,11 +1362,11 @@ var Sparql_OWL = (function () {
 
         getObjectProperties: function (classId, callback) {
             var query =
-              "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
-              "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-              "SELECT *  from <http://data.total.com/resource/one-model/rdfsOwlSimplified/> WHERE {\n" +
-              "  ?sub rdf:type rdf:Property .\n" +
-              "} LIMIT 500";
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "SELECT *  from <http://data.total.com/resource/one-model/rdfsOwlSimplified/> WHERE {\n" +
+                "  ?sub rdf:type rdf:Property .\n" +
+                "} LIMIT 500";
 
             var url = OwlSchema.currentSourceSchema.sparql_url;
             Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Blender.currentSource }, function (err, result) {

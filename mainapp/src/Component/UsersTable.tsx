@@ -215,7 +215,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
                                 value={userModel.userForm.login}
                                 id={`login`}
                                 label={"Login"}
-                                disabled={user.source == "json" ? false : true}
+                                disabled={create ? false : user.source == "json" ? true : false}
                             />
                         </FormControl>
 

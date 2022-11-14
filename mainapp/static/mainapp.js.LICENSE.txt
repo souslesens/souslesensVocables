@@ -4,7 +4,6 @@ object-assign
 @license MIT
 */
 
-
 /**
  * @license React
  * react-is.production.min.js

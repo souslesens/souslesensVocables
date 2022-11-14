@@ -45,7 +45,7 @@ async function saveUserBis(body: User, mode: Mode, updateModel: React.Dispatch<M
 
 async function deleteUser(user: User, updateModel: React.Dispatch<Msg>) {
     try {
-        const response = await fetch(`${endpoint}/${user.id}`, { method: "delete" });
+        const response = await fetch(`${endpoint}/${user.login}`, { method: "delete" });
         const { message, resources } = (await response.json()) as { message: string; resources: User[] };
         if (response.status === 200) {
             updateModel({ type: "ServerRespondedWithUsers", payload: success(mapUsers(resources)) });
@@ -73,18 +73,19 @@ const decodeUser = (user: UserJSON): User => {
     return {
         id: user.id ? user.id : ulid(),
         login: user.login,
+        password: user.password,
         groups: user.groups,
         source: user.source ? user.source : "json",
         _type: "user",
     };
 };
 
-type UserJSON = { id?: string; login: string; groups: string[]; source?: string };
+type UserJSON = { id?: string; login: string; password: string; groups: string[]; source?: string };
 
-type User = { id: string; _type: string; login: string; groups: string[]; source: string };
+type User = { id: string; _type: string; login: string; password: string; groups: string[]; source: string };
 
 const newUser = (key: string): User => {
-    return { id: key, _type: "user", login: "", groups: [], source: "json" };
+    return { id: key, _type: "user", login: "", password: "", groups: [], source: "json" };
 };
 
 export { getUsers, newUser, saveUserBis as putUsersBis, restoreUsers, deleteUser, putUsers, User };

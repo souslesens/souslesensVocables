@@ -30,7 +30,6 @@ module.exports = function () {
         try {
             await Promise.all(
                 Object.entries(req.body).map(async function ([_key, value]) {
-                    delete value.password;
                     await userModel.updateUserAccount(value);
                 })
             );

@@ -42,6 +42,7 @@
         "@fortawesome/fontawesome-svg-core": "^6.1.2",
         "@fortawesome/free-solid-svg-icons": "^6.1.2",
         "@fortawesome/react-fontawesome": "^0.2.0",
+        "@mui/icons-material": "^5.10.9",
         "@mui/material": "^5.8.7",
         "@mui/x-data-grid": "^5.12.3",
         "@types/react": "^17.0.37",

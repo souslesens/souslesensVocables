@@ -16,7 +16,13 @@ import {
     TableHead,
     TableRow,
     Stack,
+    InputAdornment,
+    IconButton,
+    OutlinedInput,
 } from "@mui/material";
+
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
@@ -164,6 +170,15 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
     const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
 
     const [userModel, update] = React.useReducer(updateUser, { modal: false, userForm: user });
+    const [displayPassword, setDisplayPassword] = React.useState(false);
+
+    const handleClickShowPassword = () => {
+        setDisplayPassword(!displayPassword);
+    };
+
+    const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+    };
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
@@ -192,15 +207,37 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
                 <Box sx={style}>
                     <Stack spacing={4}>
                         <h2>{`Edit ${user.login}`}</h2>
-                        <TextField
-                            fullWidth
-                            onChange={handleFieldUpdate("login")}
-                            value={userModel.userForm.login}
-                            id={`login`}
-                            label={"Login"}
-                            variant="standard"
-                            disabled={user.source == "json" ? false : true}
-                        />
+                        <FormControl>
+                            <InputLabel id="login-label">Login</InputLabel>
+                            <OutlinedInput
+                                fullWidth
+                                onChange={handleFieldUpdate("login")}
+                                value={userModel.userForm.login}
+                                id={`login`}
+                                label={"Login"}
+                                disabled={user.source == "json" ? false : true}
+                            />
+                        </FormControl>
+
+                        <FormControl>
+                            <InputLabel id="password-label">Password</InputLabel>
+                            <OutlinedInput
+                                fullWidth
+                                onChange={handleFieldUpdate("password")}
+                                value={userModel.userForm.password}
+                                type={displayPassword ? "text" : "password"}
+                                id={`password`}
+                                label={"Password"}
+                                disabled={user.source == "json" ? false : true}
+                                endAdornment={
+                                    <InputAdornment position="end">
+                                        <IconButton aria-label="toggle password visibility" onClick={handleClickShowPassword} onMouseDown={handleMouseDownPassword} edge="end">
+                                            {displayPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                }
+                            />
+                        </FormControl>
                         <FormControl>
                             <InputLabel id="select-groups-label">Groups</InputLabel>
                             <Select

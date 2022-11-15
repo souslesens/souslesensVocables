@@ -1228,13 +1228,18 @@ defaultLang = 'en';*/
     self.addPropertyObjectSelect = function () {
         var predicate = $("#sourceBrowser_addPropertyPredicateSelect").val();
         var allObjects = self.SourcePossiblePredicatesAndObject;
-        if (predicate == "rdf:type") {
+        common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.objectClasses,true, "label", "id");
+
+        /*
+           if (predicate == "rdf:type") {
             common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.basicTypeClasses.concat(["-----------"]).concat(allObjects.sourceObjects), true, "label", "id");
         } else if (predicate == "rdfs:subClassOf") {
             common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.sourceObjects.concat(["-----------"]).concat(allObjects.TopLevelOntologyObjects), true, "label", "id");
         } else {
             common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "label", "id");
         }
+
+         */
     };
     self.addProperty = function (property, value, source, createNewNode, callback) {
         if (!property) property = $("#sourceBrowser_addPropertyPredicateSelect").val();

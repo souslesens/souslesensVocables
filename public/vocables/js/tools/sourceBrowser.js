@@ -1297,12 +1297,14 @@ defaultLang = 'en';*/
     self.showAddPropertyDiv = function () {
         $("#sourceBrowser_addPropertyDiv").css("display", "block");
         var properties = Config.Lineage.basicObjectProperties;
-        Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(self.currentSource, function (err, result) {
-            if (err) return alert(err.responseText);
-            common.fillSelectOptions("sourceBrowser_addPropertyPredicateSelect", result.predicates, true, "label", "id");
-            self.SourcePossiblePredicatesAndObject = result;
-        });
-    };
+        $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function() {
+            KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function(err, result) {
+                if (err) return alert(err.responseText);
+                common.fillSelectOptions("sourceBrowser_addPropertyPredicateSelect", result.predicates, true, "label", "id");
+                self.SourcePossiblePredicatesAndObject = result;
+            });
+        })
+    }
 
     self.deletePropertyValue = function (property, value) {
         if (confirm("delete property " + property)) {
@@ -1459,4 +1461,4 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     };
 
     return self;
-})();
+})()

@@ -108,7 +108,7 @@ var httpProxy = {
                 return callback(error);
             }
 
-            if (headers["Accept"].indexOf("text") == 0) return callback(null, body);
+            if (headers && headers["Accept"].indexOf("text") == 0) return callback(null, body);
             if (typeof body === "string") {
                 body = body.trim();
                 var p = body.toLowerCase().indexOf("bindings");

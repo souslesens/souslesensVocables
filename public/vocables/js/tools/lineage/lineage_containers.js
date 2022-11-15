@@ -284,7 +284,9 @@ var Lineage_containers = (function () {
                 if (!existingNodes[item.subject.value]) {
                     existingNodes[item.subject.value] = 1;
                     var type;
-                    if (item.subjectType && item.subjectType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") type = "bag";
+                    if (item.subjectType && item.subjectType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag"){
+                        type = "bag";
+                    }
                     else type = "resource";
 
                     visjsData.nodes.push({
@@ -306,7 +308,9 @@ var Lineage_containers = (function () {
                 if (!existingNodes[item.object.value]) {
                     existingNodes[item.object.value] = 1;
                     var type;
-                    if (item.objectType && item.objectType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") type = "bag";
+                    if (item.objectType && item.objectType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag"){
+                        type = "bag";
+                    }
                     else type = "resource";
                     visjsData.nodes.push({
                         id: item.object.value,

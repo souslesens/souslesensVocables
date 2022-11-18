@@ -191,8 +191,10 @@
 
                     <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showLastAddedNodesOnly()">Last</button>
                 </div>
+                <div class="lineage_button_group">
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showHideIndividuals()">Show/Hide Individuals</button>
-
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="GraphTraversal.initPathMode()">Draw Path</button>
+                </div>
                 <div class="lineage_button_group">
                     <span>selection</span>
                     <span title="To add nodes selection : Ctrl+Alt and click/hover nodes " style="font-weight: bold; color: blue" id="Lineageclasses_selectedNodesCount">0</span>
@@ -200,6 +202,7 @@
                     <button title="ctrl+alt click or hover" class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_selection.listNodesSelection()">Show</button>
 
                     <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_selection.clearNodesSelection()">Clear</button>
+
                 </div>
             </div>
             <div class="lineage_actionDiv" style="display: flex; flex-direction: column; width: 45%">

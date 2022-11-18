@@ -142,13 +142,41 @@ var Lineage_upperOntologies = (function () {
         });
     };
 
-    self.flattenPropertiesMap = function (propsMap) {
-        var flatPropsMap = {};
+    self.setPropertiesMapInverseProps = function (propsMap) {
+
+
+        for (var prop in propsMap) {
+
+            var propObj = propsMap[prop];
+
+            if ( propObj.inverseProp) {
+                var inversPropObj = propsMap[propObj.inverseProp]
+                if (inversPropObj) {
+                    if (!inversPropObj.domain && propObj.range) {
+                        propsMap[propObj.inverseProp].domain = propObj.range
+                        propsMap[propObj.inverseProp].domainLabel = propObj.rangeLabel
+
+                    }
+
+                    if (!inversPropObj.range && propObj.domain) {
+                        propsMap[propObj.inverseProp].range = propObj.domain
+                        propsMap[propObj.inverseProp].rangeLabel = propObj.domainLabel
+
+                    }
+
+                }
+            }
+        }
+
+
+
+      /*  var flatPropsMap = {};
         for (var prop in propsMap) {
             flatPropsMap[prop] = propsMap[prop];
             var propObj = propsMap[prop];
 
-            if (propObj.inverseProp)
+            if ( propObj.inverseProp) {
+
                 flatPropsMap[propObj.inverseProp] = {
                     prop: propObj.inverseProp,
                     propLabel: propObj.inversePropLabel,
@@ -160,8 +188,9 @@ var Lineage_upperOntologies = (function () {
                     inverseProp: prop,
                     inversePropLabel: propObj.propLabel,
                 };
-        }
-        return flatPropsMap;
+            }
+        }*/
+        return propsMap;
     };
 
     return self;

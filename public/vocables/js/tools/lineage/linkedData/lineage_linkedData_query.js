@@ -135,7 +135,10 @@ var Lineage_linkedData_query = (function () {
         var operator = $("#LineageLinkedDataQueryParams_operator").val();
         var value = $("#LineageLinkedDataQueryParams_value").val();
         $("#LineageLinkedDataQueryParams_value").val("");
-        var html = "<div class='LineageLinkedDataQueryParams_QueryElt' id='" + filterId + "'> ";
+
+      var html = "<div class='LineageLinkedDataQueryParams_QueryElt' id='" + filterId + "'> ";
+         html += "<button style='size: 10px' onclick='Lineage_linkedData_query.removeQueryElement(\"" + self.currentTable + '","' + filterId + "\")'>X</button>";
+
         var obj = {
             table: table,
         };
@@ -147,16 +150,16 @@ var Lineage_linkedData_query = (function () {
             obj.column = column;
             obj.operator = operator;
             obj.value = value;
-            html += table + "." + column + " " + operator + "&nbsp;" + value + "&nbsp;";
+            html += "&nbsp;"+table + "." + column + " " + operator + "&nbsp;" + value + "&nbsp;";
         } else {
             html += "ALL &nbsp;";
             obj.column = column;
         }
+        html+="</div>"
         if (!self.sqlContext.tables[self.currentTable]) self.sqlContext.tables[self.currentTable] = { filters: {} };
         self.sqlContext.tables[self.currentTable].filters[filterId] = obj;
 
-        html += "<button style='size: 10px' onclick='Lineage_linkedData_query.removeQueryElement(\"" + self.currentTable + '","' + filterId + "\")'>X</button></div>";
-        $("#LineageLinkedDataQueryParams_Filters").append(html);
+          $("#LineageLinkedDataQueryParams_Filters").append(html);
         $("#LineageLinkedDataQueryParams_createFilterDiv").css("display", "none");
         return obj;
     };
@@ -187,7 +190,7 @@ var Lineage_linkedData_query = (function () {
                     if (column != table && allSelectColumns.indexOf(column) < 0) {
                         allSelectColumns.push(column);
                         if (selectStr != "") selectStr += ",";
-                        selectStr += "'" + table + "." + column + "'";
+                        selectStr += "" + table + "." + column + "";
                     }
                 });
             }
@@ -262,6 +265,12 @@ var Lineage_linkedData_query = (function () {
         });
     };
 
+
+    self.copySqlToClipboard=function(){
+        var sql=$("#LineageLinkedDataQueryParams_SqlDiv").html()
+        common.copyTextToClipboard(sql)
+
+    }
     self.stackContext = function () {
         self.sqlContexts.push(self.sqlContext);
     };

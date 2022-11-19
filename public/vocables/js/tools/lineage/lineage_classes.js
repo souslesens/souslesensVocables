@@ -1658,12 +1658,12 @@ addNode:false
                     Lineage_properties.drawPredicatesGraph(Lineage_sources.activeSource, data, null, function (err, result) {});
 
                     return;
-                    if (type && type != "objectProperties") return callbackSeries();
+                 /*   if (type && type != "objectProperties") return callbackSeries();
                     else if (direction == "direct") {
                         Lineage_classes.graphNodeNeighborhood(data, "outcoming", callbackSeries);
                     } else {
                         Lineage_classes.graphNodeNeighborhood(data, "incoming", callbackSeries);
-                    }
+                    }*/
                 },
             ],
             function (err) {

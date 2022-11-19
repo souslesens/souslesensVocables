@@ -221,7 +221,7 @@ Lineage_properties = (function() {
     if (properties && !Array.isArray(properties)) properties = [properties];
     var filter = "";
     if (!properties || properties.length == 0)
-      filter = " FILTER( ?property not in(rdf:type, rdfs:subClassOf))";
+      filter = " FILTER( ?property not in(rdf:type, rdfs:subClassOf,rdfs:member))";
     Sparql_OWL.getFilteredTriples(source, nodeIds, properties, null, { filter: filter }, function(err, result) {
       if (err) return callback(err);
       Sparql_common.setSparqlResultPropertiesLabels(source, result, "property", function(err, result2) {

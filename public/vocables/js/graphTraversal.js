@@ -45,112 +45,205 @@ var GraphTraversal = (function() {
   self.drawShortestpath = function(source, fromNodeId, toNodeId) {
 
 
-    var path=[]
-  async.series([
+    var path = [];
+    var relations = {};
+   var labelsMap={}
 
-    //get shortestPath nodes array
-    function(callbackSeries) {
+    async.series([
 
-      self.getShortestpath(source, fromNodeId, toNodeId, function(err, result) {
-if(err)
-  return callbackSeries(err)
-        path=result;
-        callbackSeries()
-      })
-    }
-    ,
-    function(callbackSeries){
+      //get shortestPath nodes array
+      function(callbackSeries) {
 
-      path.forEach(function(nodeId, index) {
-        if (index == 0)
-          return;
-
-        var from = path[index - 1];
-
-      var options = {
-        onlyObjectProperties: true,
-        distinct: "?subject ?property ?object"
-      };
-      Sparql_OWL.getFilteredTriples(source, null, null, null, options, function(err, result) {
-        if (err)
-          return callback(err);
-        result.forEach(function(item) {
-          edgesArray.push([item.subject.value, item.object.value]);
-          properties[item.subject.value + "_" + item.object.value] = {
-            id: item.propertyLabel.value,
-            label: item.propertyLabel.value
-          };
+        self.getShortestpath(source, fromNodeId, toNodeId, function(err, result) {
+          if (err)
+            return callbackSeries(err);
+          path = result;
 
 
+        if(path.length==0)
+          return alert("no path found ")
+
+          callbackSeries();
         });
-        self.sourcesEdgeArrays[source] = { properties: properties, edges: edgesArray };
-        return callback(null, self.sourcesEdgeArrays[source]);
-      });
-    });
-  };
+      }
+      ,
 
-  }
-
-
-
-  ],function(err){
-
-  }
-
-
-    )
+      //get labels
+      function(callbackSeries) {
+        var ids = []
+        path.forEach(function(item) {
+            item.forEach(function(item2) {
+              ids.push(item2)
+            })
+        });
 
 
 
+       var fitlerStr=Sparql_common.setFilter("s", ids)
 
-      path.forEach(function(nodeId, index) {
-        if (index == 0)
-          return;
+        var fromStr=Sparql_common.getFromStr(source,true)
+        var query =
 
-        var from = path[index - 1];
-        var to = nodeId;
-        var edgeId = "Path_" + common.getRandomHexaId(6);
-        var label = null;
-        var arrow = null;
-        if (result.properties[from + "_" + to]) {
-          label = result.properties[from + "_" + to].label;
-          arrows = {
-            to: true
-          };
-        }
+          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+          "SELECT distinct * " +
+          fromStr +
+          " WHERE { GRAPH ?g {" +
+          "?s rdf:type ?type "+ Sparql_common.getVariableLangLabel("s", true)+"" +
+          fitlerStr +
+          "}" +
+          "} limit 10000" ;
 
-        if (result.properties[to + "_" + from]) {
-          label = result.properties[to + "_" + from].label;
-          arrows = {
-            from: true
-          };
-        }
+            var url = Config.sources[source].sparql_server.url; + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
 
-        self.currentpathEdges.push(edgeId);
-        newEdges.push({
-          id: edgeId,
-          from: from,
-          to: to,
-          label: label,
-          color: "red",
-          size: 3,
-          arrows: arrows,
-          type: "path",
-          data: {
-            source: source,
-            type: "path",
-            path: path
+          result.results.bindings.forEach(function(item) {
+            labelsMap[item.s.value] = item.sLabel?item.sLabel.value: Sparql_common.getLabelFromURI("s")
 
+
+          })
+          callbackSeries();
+        })
+      }
+      ,
+     // setRelations
+      function(callbackSeries) {
+
+          path.forEach(function(item) {
+
+            var relation = {
+              from: item[0],
+              fromLabel:labelsMap[item[0]],
+
+              prop: item[2],
+              propLabel: labelsMap[item[2]],
+
+              to: item[1],
+              toLabel: labelsMap[item[1]],
+
+            };
+            relations[item[0]] = relation;
+
+
+          });
+          return callbackSeries();
+
+      }
+
+      ,
+
+
+
+
+      //build visjsNodeData
+      function(callbackSeries) {
+
+        var visjsData = { nodes: [], edges: [] };
+        var existingIdsMap = visjsGraph.getExistingIdsMap();
+
+        var shape = Lineage_classes.defaultShape;
+        var color = Lineage_classes.getSourceColor(source);
+        path.forEach(function(pathNodeId, index) {
+
+          var item = relations[pathNodeId];
+
+          if (!item)
+            return;
+
+          if (!existingIdsMap[item.from]) {
+            existingIdsMap[item.from] = 1;
+            var node = {
+              id: item.from,
+              label: item.fromLabel,
+              shadow: Lineage_classes.nodeShadow,
+              shape: shape,
+              color: color,
+              size: Lineage_classes.defaultShapeSize,
+              data: {
+                source: source,
+                id: item.from,
+                label: item.fromLabel
+              }
+            };
+            visjsData.nodes.push(node);
+
+          }
+          if (!existingIdsMap[item.to]) {
+            existingIdsMap[item.to] = 1;
+            var node = {
+              id: item.to,
+              label: item.toLabel,
+              shadow: Lineage_classes.nodeShadow,
+              shape: shape,
+              color: color,
+              size: Lineage_classes.defaultShapeSize,
+              data: {
+                source: source,
+                id: item.to,
+                label: item.toLabel
+              }
+            };
+            visjsData.nodes.push(node);
+
+          }
+
+          var edgeId = "P_" + common.getRandomHexaId(6);
+          if (!existingIdsMap[edgeId]) {
+            existingIdsMap[edgeId] = 1;
+
+            visjsData.edges.push({
+              id: edgeId,
+              from: item.from,
+              to: item.to,
+              label: item.propLabel,
+              color: "red",
+              size: 3,
+              // arrows: arrows,
+              type: "path",
+              data: {
+                source: source,
+                type: "path",
+                path: path,
+                id: edgeId,
+                from: item.from,
+                to: item.to,
+                label: item.propLabel
+
+              }
+
+            });
           }
 
         });
 
-      });
+
+        var oldEdges = visjsGraph.data.edges.get();
+        var toDelete = [];
+        oldEdges.forEach(function(edge) {
+          if (edge.type == "path")
+            toDelete.push(edge.id);
+        });
+        visjsGraph.data.edges.remove(toDelete);
 
 
-      visjsGraph.data.edges.add(newEdges);
+        if (visjsGraph.isGraphNotEmpty()) {
+          visjsGraph.data.nodes.add(visjsData.nodes);
+          visjsGraph.data.edges.add(visjsData.edges);
+        } else {
+          Lineage_classes.drawNewGraph(visjsData);
+        }
 
 
+        return callbackSeries();
+      }
+
+    ], function(err) {
+      if (err)
+        return alert(err);
+
+
+    });
+
+  };
 
 
   self.initPathMode = function() {

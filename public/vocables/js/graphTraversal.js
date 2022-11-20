@@ -46,7 +46,7 @@ var GraphTraversal = (function() {
 
 
     var path = [];
-    var relations = {};
+    var relations = [];
    var labelsMap={}
 
     async.series([
@@ -88,7 +88,8 @@ var GraphTraversal = (function() {
           "SELECT distinct * " +
           fromStr +
           " WHERE { GRAPH ?g {" +
-          "?s rdf:type ?type "+ Sparql_common.getVariableLangLabel("s", true)+"" +
+         // "?s rdf:type ?type "+ Sparql_common.getVariableLangLabel("s", true)+"" +
+         Sparql_common.getVariableLangLabel("s", false)+"" +
           fitlerStr +
           "}" +
           "} limit 10000" ;
@@ -121,7 +122,7 @@ var GraphTraversal = (function() {
               toLabel: labelsMap[item[1]],
 
             };
-            relations[item[0]] = relation;
+            relations .push(relation);
 
 
           });
@@ -142,44 +143,40 @@ var GraphTraversal = (function() {
 
         var shape = Lineage_classes.defaultShape;
         var color = Lineage_classes.getSourceColor(source);
-        path.forEach(function(pathNodeId, index) {
+        relations.forEach(function(relation, index) {
 
-          var item = relations[pathNodeId];
 
-          if (!item)
-            return;
-
-          if (!existingIdsMap[item.from]) {
-            existingIdsMap[item.from] = 1;
+          if (!existingIdsMap[relation.from]) {
+            existingIdsMap[relation.from] = 1;
             var node = {
-              id: item.from,
-              label: item.fromLabel,
+              id: relation.from,
+              label: relation.fromLabel,
               shadow: Lineage_classes.nodeShadow,
               shape: shape,
               color: color,
               size: Lineage_classes.defaultShapeSize,
               data: {
                 source: source,
-                id: item.from,
-                label: item.fromLabel
+                id: relation.from,
+                label: relation.fromLabel
               }
             };
             visjsData.nodes.push(node);
 
           }
-          if (!existingIdsMap[item.to]) {
-            existingIdsMap[item.to] = 1;
+          if (!existingIdsMap[relation.to]) {
+            existingIdsMap[relation.to] = 1;
             var node = {
-              id: item.to,
-              label: item.toLabel,
+              id: relation.to,
+              label: relation.toLabel,
               shadow: Lineage_classes.nodeShadow,
               shape: shape,
               color: color,
               size: Lineage_classes.defaultShapeSize,
               data: {
                 source: source,
-                id: item.to,
-                label: item.toLabel
+                id: relation.to,
+                label: relation.toLabel
               }
             };
             visjsData.nodes.push(node);
@@ -192,9 +189,9 @@ var GraphTraversal = (function() {
 
             visjsData.edges.push({
               id: edgeId,
-              from: item.from,
-              to: item.to,
-              label: item.propLabel,
+              from: relation.from,
+              to: relation.to,
+              label: relation.propLabel,
               color: "red",
               size: 3,
               // arrows: arrows,
@@ -204,9 +201,9 @@ var GraphTraversal = (function() {
                 type: "path",
                 path: path,
                 id: edgeId,
-                from: item.from,
-                to: item.to,
-                label: item.propLabel
+                from: relation.from,
+                to: relation.to,
+                label: relation.propLabel
 
               }
 
@@ -238,7 +235,7 @@ var GraphTraversal = (function() {
 
     ], function(err) {
       if (err)
-        return alert(err);
+        return alert(err.responseText);
 
 
     });

@@ -2,9 +2,14 @@ var httpProxy = require("./httpProxy.");
 
 
 var GraphTraversal = {
+  graphViscinityArraysMap: {},
 
+  getViscinityArray: function(serverUrl, grahUri, options, callback) {
 
-  getViscinityArray: function(serverUrl, grahUri, callback) {
+    if (!options.reload && GraphTraversal.graphViscinityArraysMap[grahUri]) {
+
+      return callback(null,GraphTraversal.graphViscinityArraysMap[grahUri]);
+    }
 
 
     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -21,7 +26,7 @@ var GraphTraversal = {
       " } UNION " +
       "{?s ?p ?o." +
       " FILTER( ?p not in(rdf:type, rdfs:subClassOf,rdfs:member)) " +
-      "filter (!isLiteral(?o) ) " +
+      "filter (!isLiteral(?o)  && !isBlank(?s)) " +
       //  "  ?subject rdf:type ?subjectType. ?object rdf:type ?objectType. " +
       // "  FILTER ( ?subject in( <http://data.total.com/resource/tsf/ontology/gaia-test/b9bc0b6764>,<http://data.total.com/resource/tsf/ontology/gaia-test/cc7b582c0f>,<http://data.total.com/resource/tsf/ontology/gaia-test/928a5fd4a7>,<http://data.total.com/resource/tsf/ontology/gaia-test/045c8a28ac>,<http://data.total.com/resource/tsf/ontology/gaia-test/2580264383>,<http://data.total.com/resource/tsf/ontology/gaia-test/Company>,<http://data.total.com/resource/tsf/ontology/gaia-test/57521c5f20>,<http://data.total.com/resource/tsf/ontology/gaia-test/8de9d78c14>,<http://data.total.com/resource/tsf/ontology/gaia-test/dc010a5210>,<http://data.total.com/resource/tsf/ontology/gaia-test/194d634594>,<http://data.total.com/resource/tsf/ontology/gaia-test/Deformation_Style>,<http://data.total.com/resource/tsf/ontology/gaia-test/f8f4a29312>,<http://data.total.com/resource/tsf/ontology/gaia-test/2bf1d252d3>,<http://data.total.com/resource/tsf/ontology/gaia-test/19bbe45904>,<http://data.total.com/resource/tsf/ontology/gaia-test/8dcbadccd2>,<http://data.total.com/resource/tsf/ontology/gaia-test/4d3c6cc502>,<http://data.total.com/resource/tsf/ontology/gaia-test/5c1a97c410>,<http://data.total.com/resource/tsf/ontology/gaia-test/b8763fc1bd>,<http://data.total.com/resource/tsf/ontology/gaia-test/6a55df9075>,<http://data.total.com/resource/tsf/ontology/gaia-test/dea801d896>,<http://data.total.com/resource/tsf/ontology/gaia-test/240ba55799>,<http://data.total.com/resource/tsf/ontology/gaia-test/7d636c5bd6>,<http://data.total.com/resource/tsf/ontology/gaia-test/40f16fab15>,<http://data.total.com/resource/tsf/ontology/gaia-test/26601fc18e>,<http://data.total.com/resource/tsf/ontology/gaia-test/LithologicDescription>) )" +
       // " OPTIONAL {?property rdfs:label ?propertyLabel. filter( lang(?propertyLabel)= 'en' || !lang(?propertyLabel))} " +
@@ -49,9 +54,11 @@ var GraphTraversal = {
       if (err)
         return callback(err);
       result.results.bindings.forEach(function(item) {
-        viscinityArray.push([item.s.value, item.o.value,item.p.value]);
+        viscinityArray.push([item.s.value, item.o.value, item.p.value]);
 
       });
+      if (!options.reload)
+        GraphTraversal.graphViscinityArraysMap[grahUri] = viscinityArray;
       return callback(null, viscinityArray);
 
     });
@@ -129,7 +136,7 @@ var GraphTraversal = {
   }
   ,
   getShortestPath: function(sparqlServerUrl, graphUri, fromNodeId, toNodeId, callback) {
-    GraphTraversal.getViscinityArray(sparqlServerUrl, graphUri, function(err, viscinityArray) {
+    GraphTraversal.getViscinityArray(sparqlServerUrl, graphUri, {},function(err, viscinityArray) {
       if (err)
         return callback(err);
       var graph = new GraphTraversal.path.Graph();
@@ -138,23 +145,33 @@ var GraphTraversal = {
       });
       GraphTraversal.path.bfs(graph, fromNodeId);
       var path = GraphTraversal.path.shortestPath(graph, fromNodeId, toNodeId);
-      if(!path)
-        return callback(null,[]);
+      if (!path)
+        return callback(null, []);
 
-      var path2=[]
-      path.forEach(function(nodeId,index) {
+      var path2 = [];
+
+      path.forEach(function(nodeId, index) {
         if (index == 0)
           return;
-        viscinityArray.forEach(function(edge){
-          if(edge[0]==path[index-1] && edge[1]==nodeId)
-            path2.push(edge)
+        viscinityArray.forEach(function(edge) {
+          if (edge[0] == path[index - 1] && edge[1] == nodeId) {
+            path2.push(edge);
+          return;
+          }
+          if (edge[1] == path[index - 1] && edge[0] == nodeId) {
+            var inverseEdge=edge
+            inverseEdge.push(1)
+            path2.push(inverseEdge);
+            return;
+          }
 
-        })
 
-      })
+        });
+
+      });
 
 
-      return callback(null,path2);
+      return callback(null, path2);
     });
 
 

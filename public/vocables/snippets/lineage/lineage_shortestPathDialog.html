@@ -1,0 +1,50 @@
+Shortest Path between nodes
+<button onclick="GraphTraversal.initVisjsPathMode()">Select on Whiteboard</button>
+
+<div style="display: flex;flex-direction: row">
+  <div>
+    <input id="lineage_shorterstPath_searchInput" >
+    <div style="width:340px;height: 700px;overflow: auto">
+      <div id="lineage_shorterstPath_searchJsTreeDiv"></div>
+    </div>
+  </div>
+
+  <div>
+    <table>
+      <tr>
+        <td>
+          from
+        </td>
+        <td>
+          to
+        </td>
+
+      </tr>
+      <tr>
+        <td>
+          <span id="lineage_shorterstPathFromUri"></span>
+        </td>
+        <td>
+          <span id="lineage_shorterstPathtoUri"></span>
+        </td>
+
+      </tr>
+      <tr>
+      <td>
+        <button onclick="GraphTraversal.listPath()">List Path</button>
+      </td>
+        <td>
+
+        <button onclick="GraphTraversal.drawPath()">Draw Path</button>
+      </td>
+      <§tr>
+
+    </table>
+  </div>
+
+</div>
+
+  <div id="lineage_shorterstPathListDiv">
+
+  </div>
+</div>

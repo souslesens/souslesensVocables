@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-var GraphTraversal = (function() {
+var Lineage_graphTraversal = (function() {
 
 
   var self = {};
@@ -243,7 +243,21 @@ var GraphTraversal = (function() {
   };
 
 
-  self.initPathMode = function() {
+
+
+  self.showShortestPathDialog=function(){
+    $("#mainDialogDiv").dialog("open");
+    $("#mainDialogDiv").load("snippets/lineage/lineage_shortestPathDialog.html", function(){
+    $("#lineage_shorterstPath_searchInput").bind("keydown", null,Lineage_graphTraversal.onSearchKeyDown);
+
+
+
+
+    })
+  }
+
+
+  self.initVisjsPathMode = function() {
     self.inPathMode = true;
     visjsGraph.network.addEdgeMode();
 
@@ -259,6 +273,71 @@ var GraphTraversal = (function() {
 
 
   };
+
+  self.onSearchKeyDown=function(event){
+
+
+    if (event.keyCode != 13 && event.keyCode != 9) return;
+    var term=$("#lineage_shorterstPath_searchInput").val();
+    self.searchConcept(term)
+}
+
+  self.searchConcept=function(term){
+
+
+      /**
+       *
+       * show in jstree hierarchy of terms found in elestic search  from research UI or options if any
+       *
+       * @param options
+       *  -term searched term
+       *  -selectedSources array od sources to search
+       *  -exactMatch boolean
+       *  -searchAllSources
+       *  -jstreeDiv
+       *  -parentlabels searched in Elastic
+       *  -selectTreeNodeFn
+       *  -contextMenufn
+       *
+       */
+
+      var options = {
+        term: term,
+        selectedSources: [Lineage_sources.activeSource],
+        exactMatch: false,
+        jstreeDiv: "lineage_shorterstPath_searchJsTreeDiv",
+        selectTreeNodeFn: Lineage_graphTraversal.selectTreeNodeFn,
+        contextMenufn: Lineage_graphTraversal.contextMenufn
+      }
+
+      SourceBrowser.searchAllSourcesTerm(options)
+    }
+
+    self.contextMenufn=function(){
+     var items=[]
+      items.setFromNode = {
+        label: "from node",
+        action: function (_e, _xx) {
+        $("#lineage_shorterstPathFromUri").val(self.currentTreeNode.id)
+        },
+      };
+      items.seToNode = {
+        label: "to node",
+        action: function (_e, _xx) {
+          $("#lineage_shorterstPathToUri").val(self.currentTreeNode.id)
+        },
+      };
+
+
+      return items
+    }
+    self.selectTreeNodeFn=function(event, obj){
+self.currentTreeNode=obj.node
+    }
+
+
+
+
 
   return self;
 

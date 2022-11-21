@@ -148,7 +148,7 @@ sourceLabels.sort();
         if (!Config.sources[node.data.source]) return console.log( "no matching source for node");
         if (!options) options = {};
         if(node.data.type=="path")
-            return GraphTraversal.showPathNodesList(node.data.source,node.data.path);
+            return Lineage_graphTraversal.showPathNodesList(node.data.source,node.data.path);
         if (self.currentOwlType == "LinkedData") return Lineage_linkedData.showLinkedDataPanel(self.currentGraphNode);
 
         if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
@@ -480,9 +480,9 @@ sourceLabels.sort();
 
                 addEdge: function (edgeData, callback) {
 
-                    if(  GraphTraversal.inPathMode){
-                        GraphTraversal.inPathMode=false
-                      return  GraphTraversal.drawShortestpath(Lineage_sources.activeSource,edgeData.from,edgeData.to)
+                    if(  Lineage_graphTraversal.inPathMode){
+                        Lineage_graphTraversal.inPathMode=false
+                      return  Lineage_graphTraversal.drawShortestpath(Lineage_sources.activeSource,edgeData.from,edgeData.to)
                     }
                     var sourceNode = visjsGraph.data.nodes.get(edgeData.from);
                     var targetNode = visjsGraph.data.nodes.get(edgeData.to);

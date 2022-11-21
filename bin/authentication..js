@@ -67,7 +67,7 @@ if (config.auth == "keycloak") {
             if (!findUser) {
                 // write user with default group
                 const userUlid = ULID.ulid();
-                users[userUlid] = {
+                users[profile.username] = {
                     id: userUlid,
                     login: profile.username,
                     password: "",

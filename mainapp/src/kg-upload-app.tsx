@@ -165,7 +165,7 @@ export default function App() {
     const selectSubDir = (
         <Form.Select value={subDir === "" ? "_default" : subDir} defaultValue="_default" onChange={handleSubDirChange} aria-label="Default select example">
             <option value="_default" disabled={true}>
-                Select source
+                Select directory
             </option>
             {subDirs.map((dir) => {
                 return (
@@ -174,7 +174,7 @@ export default function App() {
                     </option>
                 );
             })}
-            <option value="_newsubdir">+ Add new source</option>
+            <option value="_newsubdir">+ Add new directory</option>
         </Form.Select>
     );
 

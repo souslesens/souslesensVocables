@@ -9,8 +9,10 @@ services:
         ports:
             - "${VOCABLES_LISTEN_PORT:-3010}:3010"
         volumes:
-            - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/config:\
-              /app/config"
+            - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/config:/app/config"
+            - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/logs:/app/logs"
+            - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/data/CSV:/app/data/CSV"
+            - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/data/mappings:/app/data/mappings"
         environment:
             USER_USERNAME: admin
             USER_PASSWORD: ${USER_PASSWORD}

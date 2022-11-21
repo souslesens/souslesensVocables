@@ -3,7 +3,7 @@ const ulid = require("ulid");
 const { configPath } = require("../../../model/config");
 const profilesJSON = path.resolve(configPath + "/profiles.json");
 exports.profilesJSON = profilesJSON;
-const { readResource, writeResource, resourceFetched, resourceUpdated, responseSchema, resourceCreated } = require("./utils");
+const { sortObjectByKey, readResource, writeResource, resourceFetched, resourceUpdated, responseSchema, resourceCreated } = require("./utils");
 const userManager = require("../../../bin/user.");
 
 module.exports = function () {
@@ -35,17 +35,18 @@ module.exports = function () {
                     return [profileId, profile];
                 })
             );
+            const sortedProfiles = sortObjectByKey(profiles);
             const currentUser = await userManager.getUser(req.user);
             const groups = currentUser.user.groups;
             if (groups.includes("admin")) {
-                resourceFetched(res, profiles);
+                resourceFetched(res, sortedProfiles);
             } else {
-                const userProfiles = Object.fromEntries(
-                    Object.entries(profiles).filter(([profileId, _profile]) => {
+                const sortedUserProfiles = Object.fromEntries(
+                    Object.entries(sortedProfiles).filter(([profileId, _profile]) => {
                         return groups.includes(profileId);
                     })
                 );
-                resourceFetched(res, userProfiles);
+                resourceFetched(res, sortedUserProfiles);
             }
         } catch (error) {
             next(error);

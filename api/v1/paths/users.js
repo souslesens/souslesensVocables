@@ -1,5 +1,5 @@
 const { userModel } = require("../../../model/users");
-const { responseSchema, successfullyUpdated, successfullyCreated, successfullyFetched } = require("./utils");
+const { sortObjectByKey, responseSchema, successfullyUpdated, successfullyCreated, successfullyFetched } = require("./utils");
 
 module.exports = function () {
     let operations = {
@@ -12,7 +12,7 @@ module.exports = function () {
     async function GET(req, res, next) {
         try {
             const users = await userModel.getUserAccounts();
-            res.status(200).json(successfullyFetched(users));
+            res.status(200).json(successfullyFetched(sortObjectByKey(users)));
         } catch (error) {
             next(error);
         }

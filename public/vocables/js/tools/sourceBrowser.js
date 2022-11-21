@@ -377,17 +377,11 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
         function getUserSources(schemaType) {
             var allowedSources = [];
             for (var sourceLabel in Config.sources) {
-                if (
-                    (Config.currentProfile.allowedSources != "ALL" && Config.currentProfile.allowedSources.indexOf(sourceLabel) < 0) ||
-                    Config.currentProfile.forbiddenSources.indexOf(sourceLabel) > -1
-                );
-                else {
-                    if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
-                        if (!schemaType || Config.sources[sourceLabel].schemaType == schemaType)
-                            if (allowedSources.length > 0 && allowedSources.indexOf(sourceLabel) > -1) {
-                                allowedSources.push(sourceLabel);
-                            }
-                    }
+                if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) > -1) {
+                    if (!schemaType || Config.sources[sourceLabel].schemaType == schemaType)
+                        if (allowedSources.length > 0 && allowedSources.indexOf(sourceLabel) > -1) {
+                            allowedSources.push(sourceLabel);
+                        }
                 }
             }
             return allowedSources;

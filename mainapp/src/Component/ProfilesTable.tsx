@@ -208,6 +208,12 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
 
+    const [filteringCharsSourcesAccessControl, setFilteringCharsSourcesAccessControl] = React.useState("");
+
+    const handleFilterSourcesAccessControl = () => (event: React.ChangeEvent<HTMLInputElement>) => {
+        setFilteringCharsSourcesAccessControl(event.target.value);
+    };
+
     const handleSourceAccessControlUpdate = React.useMemo(() => {
         return Object.fromEntries(
             sources.map((source) => [
@@ -223,6 +229,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const handleNewBlenderNumber = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserUpdatedBlenderLevel, payload: parseInt(event.target.value.replace(/\D/g, "")) });
 
     const saveProfiles = () => {
+        setFilteringCharsSourcesAccessControl("");
         // const updateProfiles = unwrappedProfiles.map(p => p.name === profile.name ? profileModel.profileForm : p)
         // const addProfile = [...unwrappedProfiles, profileModel.profileForm]
         // updateModel({ type: 'UserClickedSaveChanges', payload: {} });
@@ -280,19 +287,29 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 editable={true}
                             />
                         </FormControl>
-                        <Box style={{ overflow: "auto", maxHeight: "10em" }}>
-                            {sources.map((source) => (
-                                <FormControl key={source.id}>
-                                    <FormLabel id={source.id + "-source-access-control-label"}>{source.name}</FormLabel>
-                                    <SourceAccessControlInput
-                                        name={source.id + "-source-access-control"}
-                                        value={profileModel.profileForm.sourcesAccessControl[source.id] ?? "default"}
-                                        onChange={handleSourceAccessControlUpdate[source.id]}
-                                        allowDefault={true}
-                                        editable={source.editable}
-                                    />
-                                </FormControl>
-                            ))}
+                        <TextField
+                            size="small"
+                            label="Filter sources by name"
+                            id="filter-sourcesaccesscontrol"
+                            value={filteringCharsSourcesAccessControl}
+                            sx={{ width: 300 }}
+                            onChange={handleFilterSourcesAccessControl()}
+                        />
+                        <Box style={{ marginTop: "0px", overflow: "auto", maxHeight: "15em" }}>
+                            {sources
+                                .filter((source) => source.name.toLowerCase().includes(filteringCharsSourcesAccessControl.toLowerCase()))
+                                .map((source) => (
+                                    <FormControl size="small" key={source.id}>
+                                        <FormLabel id={source.id + "-source-access-control-label"}>{source.name}</FormLabel>
+                                        <SourceAccessControlInput
+                                            name={source.id + "-source-access-control"}
+                                            value={profileModel.profileForm.sourcesAccessControl[source.id] ?? "default"}
+                                            onChange={handleSourceAccessControlUpdate[source.id]}
+                                            allowDefault={true}
+                                            editable={source.editable}
+                                        />
+                                    </FormControl>
+                                ))}
                         </Box>
                         <FormGroup>
                             <FormControlLabel control={<Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />} label="Allow all tools" />
@@ -356,9 +373,9 @@ interface SourceAccessControlInputProps {
 const SourceAccessControlInput: React.FC<SourceAccessControlInputProps> = React.memo(function ({ name, value, onChange, allowDefault, editable }) {
     return (
         <RadioGroup row aria-labelledby={name} value={value} onChange={onChange} name={name}>
-            {allowDefault ? <FormControlLabel value="default" control={<Radio />} label="Defaults" /> : null}
-            <FormControlLabel value="forbidden" control={<Radio />} label="Forbidden" />
-            <FormControlLabel value="read" control={<Radio />} label="Read" />
+            {allowDefault ? <FormControlLabel value="default" control={<Radio size="small" />} label="Defaults" /> : null}
+            <FormControlLabel value="forbidden" control={<Radio size="small" />} label="Forbidden" />
+            <FormControlLabel value="read" control={<Radio size="small" />} label="Read" />
             <FormControlLabel disabled={!editable} value="readwrite" control={<Radio />} label="Read & Write" />
         </RadioGroup>
     );

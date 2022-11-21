@@ -12,9 +12,8 @@
       "contextMenuActionStartLevel": 0
     },
     "name": "admin",
-    "defaultSourceAccessControl": "read",
+    "defaultSourceAccessControl": "readwrite",
     "sourcesAccessControl": {
-      "Dbpedia": "forbidden"
     }
   }
 }

@@ -249,7 +249,8 @@ To create a new release:
 
 ```bash
 npm run patch|minor|major
-git commit
+git commit package* -m "release x.x.x"
 git tag x.x.x
+git push
 git push --tags
 ```

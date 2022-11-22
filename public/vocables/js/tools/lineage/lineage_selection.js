@@ -565,6 +565,8 @@ var Lineage_selection = (function() {
     },
 
     getPaths: function() {
+
+      return alert( " coming soon")
       var nodeIds = $("#lineage_selection_selectedNodesTreeDiv").jstree(true).get_checked();
       if (nodeIds.length < 2)
         return alert("select at least two nodes");

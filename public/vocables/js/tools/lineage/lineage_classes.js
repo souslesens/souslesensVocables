@@ -479,13 +479,19 @@ sourceLabels.sort();
                 editEdge: false,
 
                 addEdge: function (edgeData, callback) {
+                    var sourceNode = visjsGraph.data.nodes.get(edgeData.from);
+                    var targetNode = visjsGraph.data.nodes.get(edgeData.to);
+
+                    if(targetNode.data && targetNode.data.type=="container"){
+                        return Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource,targetNode.data,sourceNode.data, true)
+                    }
+
 
                     if(  Lineage_graphTraversal.inPathMode){
                         Lineage_graphTraversal.inPathMode=false
                       return  Lineage_graphTraversal.drawShortestpath(Lineage_sources.activeSource,edgeData.from,edgeData.to)
                     }
-                    var sourceNode = visjsGraph.data.nodes.get(edgeData.from);
-                    var targetNode = visjsGraph.data.nodes.get(edgeData.to);
+
                     if (sourceNode.data.context == Lineage_linkedData_mappings.context || targetNode.data.context == Lineage_linkedData_mappings.context) {
                         Lineage_linkedData_mappings.onAddEdgeDropped(edgeData, function (err, result) {
                             if (err) return callback(err.responseText);

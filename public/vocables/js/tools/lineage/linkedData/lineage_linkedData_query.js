@@ -10,7 +10,8 @@ var Lineage_linkedData_query = (function() {
     $("#mainDialogDiv").load("snippets/lineage/linkedData/lineage_linkedData_queryDialog.html", function() {
       Lineage_linkedData_mappings.getSourceJoinsMappings(Lineage_sources.activeSource, {}, function(err, joinsMap) {
         if (err) return alert(err.responseText);
-
+        if (Object.keys(joinsMap).length == 0)
+         return  $("#Lineage_linkedData_query_relations").html("No linked Data declared  for source " + Lineage_sources.activeSource);
 
         self.joinsMap = joinsMap;
         var html = "";
@@ -67,7 +68,7 @@ var Lineage_linkedData_query = (function() {
         filters: {},
         selectColumns: []
       };
-      if($("#LineageLinkedDataQueryParams_SQL_columnsTree").jstree) {
+      if ($("#LineageLinkedDataQueryParams_SQL_columnsTree").jstree) {
         var columns = $("#LineageLinkedDataQueryParams_SQL_columnsTree").jstree().get_checked();
         self.sqlContext.tables[self.currentTable].selectColumns = columns;
       }
@@ -174,7 +175,7 @@ var Lineage_linkedData_query = (function() {
     if (!self.sqlContext.tables[self.currentTable])
       self.sqlContext.tables[self.currentTable] = { filters: {} };
     if (!self.sqlContext.tables[self.currentTable].filters)
-      self.sqlContext.tables[self.currentTable].filters={}
+      self.sqlContext.tables[self.currentTable].filters = {};
     self.sqlContext.tables[self.currentTable].filters[filterId] = obj;
 
     $("#LineageLinkedDataQueryParams_Filters").append(html);
@@ -198,7 +199,7 @@ var Lineage_linkedData_query = (function() {
     var whereStr = "";
     var joinStr = "";
     var allSelectColumns = [];
-    var hasFilter=false;
+    var hasFilter = false;
 
     for (var table in self.sqlContext.tables) {
       if (fromStr != "") fromStr += ",";
@@ -215,7 +216,7 @@ var Lineage_linkedData_query = (function() {
       }
 
       for (var filterId in self.sqlContext.tables[table].filters) {
-        hasFilter=true;
+        hasFilter = true;
         var filter = self.sqlContext.tables[table].filters[filterId];
         var filterStr = "";
         if (filter.operator == "contains") {
@@ -246,8 +247,8 @@ var Lineage_linkedData_query = (function() {
     $("#LineageLinkedDataQueryParams_SqlDiv").html(sqlQuery);
 
 
-    if(!hasFilter)
-      return alert("You must set at least one filter  to avoid too many data")
+    if (!hasFilter)
+      return alert("You must set at least one filter  to avoid too many data");
     const params = new URLSearchParams({
       type: self.sqlContext.currentDataSource.type,
       dbName: self.sqlContext.currentDataSource.dbName,
@@ -298,9 +299,9 @@ var Lineage_linkedData_query = (function() {
     self.sqlContexts.push(self.sqlContext);
   };
 
-  self.viewSQL=function(){
-    $("#LineageLinkedDataQueryParams_SqlDivWrapper").css("display","block")
-  }
+  self.viewSQL = function() {
+    $("#LineageLinkedDataQueryParams_SqlDivWrapper").css("display", "block");
+  };
 
   return self;
 })();

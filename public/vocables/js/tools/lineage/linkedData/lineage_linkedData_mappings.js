@@ -20,6 +20,7 @@ https: var Lineage_linkedData_mappings = (function () {
     self.initKGcreatorDialogWithDatabase = function (database) {
         KGcreator.onChangeSourceTypeSelect("DATABASE", function (err, result) {
             $("#KGcreator_csvDirsSelect").val(database);
+
             KGcreator.listTables();
         });
     };
@@ -663,7 +664,12 @@ https: var Lineage_linkedData_mappings = (function () {
         }
     };
 
-    self.clearSourceMappings = function (source) {
+
+
+
+
+
+    self.clearSourceMappings = function (source, mappingId) {
         if (!source) source = Lineage_sources.activeSource;
         if (!confirm(" delete mappings in  source" + source)) return;
         var url = Config.sources[source].sparql_server.url + "?format=json&query=";

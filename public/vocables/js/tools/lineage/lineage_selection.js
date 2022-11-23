@@ -417,7 +417,7 @@ var Lineage_selection = (function () {
 
     self.container = {
         showDialog: function () {
-            return alert ("coming soon")
+            return alert("coming soon");
             $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_containerDialog.html", function () {
                 var filter = " ?concept rdf:type <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag>";
                 Sparql_generic.getItems(
@@ -450,15 +450,12 @@ var Lineage_selection = (function () {
             var containerUri = $("#lineage_selection_container_containersSelect").val();
             var containerName = $("#lineage_selection_container_containersSelect option:selected").text();
 
+            var container = { type: "container", label: containerName, id: containerUri };
 
-            var container= { type :"container",label:containerName, id:containerUri}
-
-            Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource,container,jstreeNodes,function(err, result){
+            Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, container, jstreeNodes, function (err, result) {
                 if (err) return alert(err.responseText);
-                MainController.UI.message("nodes added to container " + containerName,true);
-            })
-
-
+                MainController.UI.message("nodes added to container " + containerName, true);
+            });
         },
     };
 

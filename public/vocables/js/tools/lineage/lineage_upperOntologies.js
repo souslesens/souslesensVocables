@@ -143,34 +143,26 @@ var Lineage_upperOntologies = (function () {
     };
 
     self.setPropertiesMapInverseProps = function (propsMap) {
-
-
         for (var prop in propsMap) {
-
             var propObj = propsMap[prop];
 
-            if ( propObj.inverseProp) {
-                var inversPropObj = propsMap[propObj.inverseProp]
+            if (propObj.inverseProp) {
+                var inversPropObj = propsMap[propObj.inverseProp];
                 if (inversPropObj) {
                     if (!inversPropObj.domain && propObj.range) {
-                        propsMap[propObj.inverseProp].domain = propObj.range
-                        propsMap[propObj.inverseProp].domainLabel = propObj.rangeLabel
-
+                        propsMap[propObj.inverseProp].domain = propObj.range;
+                        propsMap[propObj.inverseProp].domainLabel = propObj.rangeLabel;
                     }
 
                     if (!inversPropObj.range && propObj.domain) {
-                        propsMap[propObj.inverseProp].range = propObj.domain
-                        propsMap[propObj.inverseProp].rangeLabel = propObj.domainLabel
-
+                        propsMap[propObj.inverseProp].range = propObj.domain;
+                        propsMap[propObj.inverseProp].rangeLabel = propObj.domainLabel;
                     }
-
                 }
             }
         }
 
-
-
-      /*  var flatPropsMap = {};
+        /*  var flatPropsMap = {};
         for (var prop in propsMap) {
             flatPropsMap[prop] = propsMap[prop];
             var propObj = propsMap[prop];

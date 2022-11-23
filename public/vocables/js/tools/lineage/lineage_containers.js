@@ -178,7 +178,7 @@ var Lineage_containers = (function() {
    * @param nodesData
    * @param drawMembershipEdge add the edge (and the node) on the vizGraph
    */
-  self.addResourcesToContainer = function(source, container, nodesData, drawMembershipEdge) {
+  self.addResourcesToContainer = function(source, container, nodesData, drawMembershipEdge, callback) {
     if (container.type != "container") return alert("can only add resources to containers");
     // self.currentContainer=null;
     if (!Array.isArray(nodesData)) nodesData = [nodesData];
@@ -201,7 +201,11 @@ var Lineage_containers = (function() {
     });
 
     Sparql_generic.insertTriples(source, triples, null, function(err, result) {
-      if (err) return alert(err.responseText);
+      if (err) {
+        if (callback)
+          return callback(err);
+        return alert(err.responseText);
+      }
       MainController.UI.message("nodes added to container " + container.label);
       var jstreeData = [];
       nodesData.forEach(function(nodeData) {
@@ -218,8 +222,8 @@ var Lineage_containers = (function() {
           }
         });
       });
-      common.jstree.addNodesToJstree("lineage_containers_containersJstree", container.id, jstreeData);
-
+      if ($("#lineage_containers_containersJstree").jstree)
+        common.jstree.addNodesToJstree("lineage_containers_containersJstree", container.id, jstreeData);
 
       if (drawMembershipEdge) {
         var existingNodes = visjsGraph.getExistingIdsMap();
@@ -243,7 +247,10 @@ var Lineage_containers = (function() {
         });
 
         visjsGraph.data.edges.add(edges);
+
       }
+      if (callback)
+        return callback(null);
     });
   };
 
@@ -337,7 +344,7 @@ var Lineage_containers = (function() {
             shadow: self.nodeShadow,
             shape: type == "container" ? "ellipse" : "dot",
             size: Lineage_classes.defaultShapeSize,
-            font: (type == "container" ? { color: "#eee" } : null),
+            font: type == "container" ? { color: "#eee" } : null,
             color: color,
             data: {
               type: type,
@@ -361,13 +368,13 @@ var Lineage_containers = (function() {
             shadow: self.nodeShadow,
             shape: type == "container" ? "ellipse" : "dot",
             size: Lineage_classes.defaultShapeSize,
-            font: (type == "container" ? { color: "#eee" } : null),
+            font: type == "container" ? { color: "#eee" } : null,
             color: color,
             data: {
               type: "container",
               source: source,
               id: item.object.value,
-              label: item.objectLabel.value,
+              label: item.objectLabel.value
             }
           });
         }

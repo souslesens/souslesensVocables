@@ -9,9 +9,9 @@ var Lineage_blend = (function () {
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").dialog("option", "title", "Create node in source " + Lineage_sources.activeSource);
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
-                  KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function (err, result) {
-                      if (err) return alert(err.responseText);
-                   /*   common.fillSelectOptions("lineage_selection_modifyPredicate_propertySelect", result.predicates, true, "label", "id");
+                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function (err, result) {
+                    if (err) return alert(err.responseText);
+                    /*   common.fillSelectOptions("lineage_selection_modifyPredicate_propertySelect", result.predicates, true, "label", "id");
 
                       Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, function (err, result) {
                     if (err) return alert(err.responseText);

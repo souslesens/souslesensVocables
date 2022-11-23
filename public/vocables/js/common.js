@@ -342,7 +342,6 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         },
 
         setTreeParentDivDimensions: function (jstreeDiv) {
-
             var parentDiv = $("#" + jstreeDiv).parent();
             if (!parentDiv)
                 // || parentDiv.width)
@@ -356,7 +355,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             var w;
             if (p.left < 600) w = 380;
             else w = 340;
-           // parentDiv.width(w);
+            // parentDiv.width(w);
 
             if (jstreeDiv == "LineageNodesJsTreeDiv")
                 // cannot do it generic !!!!!

@@ -37,7 +37,7 @@ var visjsGraph = (function () {
         var visjsData = { nodes: self.data.nodes.get(), edges: self.data.edges.get() };
         self.draw(self.currentContext.divId, visjsData, self.currentContext.options, self.currentContext.callback);
     };
-    self.currentKeyboardEventy=null
+    self.currentKeyboardEventy = null;
     self.draw = function (
         /** @type {string} */ divId,
         /** @type {{ labels: any; nodes: any; edges: any; }} */ visjsData,
@@ -48,10 +48,9 @@ var visjsGraph = (function () {
         self.currentContext = { divId: divId, options: _options, callback: callback };
         if (!_options) _options = {};
 
-        $('#'+divId).keydown(function(event) {
-               self.currentKeyboardEventy=event
+        $("#" + divId).keydown(function (event) {
+            self.currentKeyboardEventy = event;
         });
-
 
         self.legendLabels = self.legendLabels.concat(visjsData.labels);
         var container = document.getElementById(divId);

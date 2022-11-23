@@ -9,7 +9,7 @@ fs.readFile(usersFilePath, (_err, rawData) => {
     const data = JSON.parse(rawData);
     const lData = Object.entries(data);
     const lNewData = lData.map(([_key, user]) => {
-        return [user.login, user]
+        return [user.login, user];
     });
     const newData = Object.fromEntries(lNewData);
 

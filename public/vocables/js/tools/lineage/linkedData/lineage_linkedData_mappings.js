@@ -25,10 +25,10 @@ https: var Lineage_linkedData_mappings = (function () {
         });
     };
 
-    self.onSelectRelation=function(relationId){
+    self.onSelectRelation = function (relationId) {
         self.relationObj = self.joinsMap[relationId];
         self.databasesMap = self.joinsMap[relationId].databases;
-    }
+    };
 
     self.getTablesTreeContextMenu = function () {
         var items = {};
@@ -663,11 +663,6 @@ https: var Lineage_linkedData_mappings = (function () {
             Lineage_classes.drawNewGraph(visjsData);
         }
     };
-
-
-
-
-
 
     self.clearSourceMappings = function (source, mappingId) {
         if (!source) source = Lineage_sources.activeSource;

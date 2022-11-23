@@ -352,7 +352,6 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
         });
     };
 
-
     /**
      *
      * show in jstree hierarchy of terms found in elestic search  from research UI or options if any
@@ -375,40 +374,29 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
 
         $("#sourcesSelectionDialogdiv").dialog("close");
 
-        var term ;
-          if(options.term)
-              term=options.term;
-          else {
-              term = $("#GenericTools_searchAllSourcesTermInput").val();
-              if (term.indexOf("*") > -1) $("#GenericTools_exactMatchSearchCBX").removeProp("checked");
-          }
-
-
-
-        var selectedSources=[];
-        if(options.selectedSources){
-            selectedSources=options.selectedSources;
-        }
+        var term;
+        if (options.term) term = options.term;
         else {
+            term = $("#GenericTools_searchAllSourcesTermInput").val();
+            if (term.indexOf("*") > -1) $("#GenericTools_exactMatchSearchCBX").removeProp("checked");
+        }
+
+        var selectedSources = [];
+        if (options.selectedSources) {
+            selectedSources = options.selectedSources;
+        } else {
             if ($("#searchAll_sourcesTree").jstree().get_checked) {
                 selectedSources = $("#searchAll_sourcesTree").jstree(true).get_checked();
             } else selectedSources = [Lineage_sources.currentSource];
         }
 
+        var exactMatch;
+        if (options.exactMatch) exactMatch = options.exactMatch;
+        else exactMatch = $("#GenericTools_allExactMatchSearchCBX").prop("checked");
 
-
-        var exactMatch
-        if(options.exactMatch)
-            exactMatch=options.exactMatch
-        else
-            exactMatch=   $("#GenericTools_allExactMatchSearchCBX").prop("checked");
-
-
-        var searchAllSources
-        if(options.searchAllSources)
-            searchAllSources=options.searchAllSources
-        else
-         searchAllSources = $("#GenericTools_searchInAllSources").prop("checked");
+        var searchAllSources;
+        if (options.searchAllSources) searchAllSources = options.searchAllSources;
+        else searchAllSources = $("#GenericTools_searchInAllSources").prop("checked");
 
         var searchedSources = [];
         term = term.toLowerCase();
@@ -454,8 +442,7 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
         var mode = "fuzzyMatch";
         if (exactMatch) mode = "exactMatch";
 
-        if(term.indexOf("*")>1)
-            mode = "fuzzyMatch";
+        if (term.indexOf("*") > 1) mode = "fuzzyMatch";
 
         options.parentlabels = true;
         // PROBLEM
@@ -464,7 +451,7 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
         if (true || schemaType == "OWL") {
             SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
                 if (_err) return alert(_err);
-                self.searchResultToJstree((options.jstreeDiv || self.currentTargetDiv), result, options, function (err, _result) {
+                self.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
                     if (err) return alert(err);
                 });
             });
@@ -543,7 +530,7 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
                         },
                     };
 
-                    var jstreeDiv=options.jstreeDiv || self.currentTargetDiv
+                    var jstreeDiv = options.jstreeDiv || self.currentTargetDiv;
                     common.jstree.loadJsTree(jstreeDiv, jstreeData, jstreeOptions);
                     setTimeout(function () {
                         MainController.UI.updateActionDivLabel("Multi source search :" + term);
@@ -732,19 +719,16 @@ return*/
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {
                     SourceBrowser.currentTreeNode = obj.node;
-                    if(_options.selectTreeNodeFn)
-                        return _options.selectTreeNodeFn(event, obj)
+                    if (_options.selectTreeNodeFn) return _options.selectTreeNodeFn(event, obj);
 
                     if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
 
                     self.editThesaurusConceptInfos(obj.node.data.source, obj.node);
                 },
                 contextMenu: function () {
-                    var contextMenuFn=null
-                    if(_options.contextMenuFn)
-                        contextMenuFn=_options.contextMenuFn
-                    else if(Config.tools[MainController.currentTool].controller.contextMenuFn)
-                        contextMenuFn=Config.tools[MainController.currentTool].controller.contextMenuFn
+                    var contextMenuFn = null;
+                    if (_options.contextMenuFn) contextMenuFn = _options.contextMenuFn;
+                    else if (Config.tools[MainController.currentTool].controller.contextMenuFn) contextMenuFn = Config.tools[MainController.currentTool].controller.contextMenuFn;
 
                     if (contextMenuFn) return contextMenuFn();
                     else return self.getJstreeConceptsContextMenu();
@@ -1273,7 +1257,7 @@ defaultLang = 'en';*/
     self.addPropertyObjectSelect = function () {
         var predicate = $("#sourceBrowser_addPropertyPredicateSelect").val();
         var allObjects = self.SourcePossiblePredicatesAndObject;
-        common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.objectClasses,true, "label", "id");
+        common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.objectClasses, true, "label", "id");
 
         /*
            if (predicate == "rdf:type") {
@@ -1347,14 +1331,14 @@ defaultLang = 'en';*/
     self.showAddPropertyDiv = function () {
         $("#sourceBrowser_addPropertyDiv").css("display", "block");
         var properties = Config.Lineage.basicObjectProperties;
-        $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function() {
-            KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function(err, result) {
+        $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
+            KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function (err, result) {
                 if (err) return alert(err.responseText);
                 common.fillSelectOptions("sourceBrowser_addPropertyPredicateSelect", result.predicates, true, "label", "id");
                 self.SourcePossiblePredicatesAndObject = result;
             });
-        })
-    }
+        });
+    };
 
     self.deletePropertyValue = function (property, value) {
         if (confirm("delete property " + property)) {
@@ -1511,4 +1495,4 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     };
 
     return self;
-})()
+})();

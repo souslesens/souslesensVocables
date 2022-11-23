@@ -1,7 +1,6 @@
 const { processResponse } = require("./utils");
 const httpProxy = require("../../../bin/httpProxy.");
 
-
 module.exports = function () {
     let operations = {
         POST,
@@ -15,7 +14,7 @@ module.exports = function () {
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);
 
-                if(body.getShortestPath){
+                if (body.getShortestPath) {
                     const GraphTraversal = require("../../../bin/GraphTraversal.");
                     GraphTraversal.getShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, function (err, result) {
                         processResponse(res, err, result);

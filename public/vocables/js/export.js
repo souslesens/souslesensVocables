@@ -29,8 +29,7 @@ var Export = (function () {
         var str = "fromLabel\tedgeLabel\ttoLabel\tfromURI\tedgeURI\ttoURI\n";
         nodesFromArray.forEach(function (nodeFromId, index) {
             nodesFromMap[nodeFromId].forEach(function (edge) {
-                if(!allNodesMap[nodeFromId] || !allNodesMap[edge.to])
-                    return;
+                if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) return;
                 var edgeLabel = edge.label || "-";
                 edgeLabel = edgeLabel.replaceAll("<[^>]*>", "");
                 str += allNodesMap[nodeFromId].data.label + "\t";

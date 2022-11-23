@@ -13,6 +13,15 @@ module.exports = function () {
 
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);
+
+                if (body.getShortestPath) {
+                    const GraphTraversal = require("../../../bin/GraphTraversal.");
+                    GraphTraversal.getShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, function (err, result) {
+                        processResponse(res, err, result);
+                    });
+                    return;
+                }
+
                 httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
                     processResponse(res, err, result);
                 });

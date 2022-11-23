@@ -474,8 +474,8 @@ var SearchUtil = (function () {
                                     });
                                 });
                                 self.indexData(sourceLabel.toLowerCase(), data, false, function (err, result) {
-                                    if (err) return callbackEach(err);
-                                    if (!result) return callbackEach();
+                                    if (err) return callbackSeries(err);
+                                    if (!result) return callbackSeries();
                                     totalLines += result.length;
                                     totalLinesAllsources += totalLines;
                                     MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());

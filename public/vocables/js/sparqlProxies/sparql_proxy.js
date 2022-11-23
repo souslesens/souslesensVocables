@@ -97,8 +97,8 @@ var Sparql_proxy = (function () {
         else sourceParams = Config.sources[MainController.currentSource];
 
         /*    if(!sourceParams.graphUri){// cas des sources sans graphe
-        query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
-    }*/
+    query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
+}*/
 
         self.currentQuery = query;
         if (!options) options = {};
@@ -130,7 +130,8 @@ var Sparql_proxy = (function () {
             }
             if (sourceParams.sparql_server.type == "fuseki") url = url.replace("&query=", "");
 
-            headers["Accept"] = "application/sparql-results+json";
+            if (options.acceptHeader) headers["Accept"] = options.acceptHeader;
+            else headers["Accept"] = "application/sparql-results+json";
             headers["Content-Type"] = "application/x-www-form-urlencoded";
             var body = {
                 params: { query: query, useProxy: useProxy },
@@ -146,6 +147,7 @@ var Sparql_proxy = (function () {
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
+                if (headers["Accept"].indexOf("text") == 0) return callback(null, data);
                 if (data.result && typeof data.result != "object") data = JSON.parse(data.result.trim());
 
                 if (!data.results) return callback(null, { results: { bindings: [] } });

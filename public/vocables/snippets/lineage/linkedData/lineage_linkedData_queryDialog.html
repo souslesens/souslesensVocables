@@ -1,0 +1,165 @@
+<style>
+    .LineageLinkedDataQueryParams_QueryElt {
+        border: solid 1px blue;
+        margin: 3px;
+        padding: 3px;
+        background-color: #ccc;
+        border-radius: 5px;
+    }
+
+    #Lineage_linkedData_query_relations {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        align-content: stretch;
+        flex-wrap: nowrap;
+    }
+    .lineage_linkedDataQuery_relation {
+        display: flex;
+        flex-direction: row;
+        margin: 5px;
+        padding: 3px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        background-color: #ddd;
+    }
+    .lineage_linkedDataQuery_subject {
+        background-color: #ceeeb8;
+        border-radius: 4px;
+        margin: 3px;
+        padding: 3px;
+    }
+    .lineage_linkedDataQuery_predicate {
+        background-color: #eccbab;
+        border-radius: 4px;
+        margin: 3px;
+        padding: 3px;
+    }
+    .lineage_linkedDataQuery_object {
+        background-color: rgba(178, 198, 229, 0.5);
+        border-radius: 4px;
+        margin: 3px;
+        padding: 3px;
+    }
+
+    .lineage_linkedDataQuery_input {
+        padding: 5px;
+        overflow: hidden;
+        width: 300px;
+    }
+</style>
+
+<div id="LineageLinkedDataQuery_tabs" style="width: 100%; height: 800px">
+    <ul>
+        <li class="Lineage_ClassTabLi"><a href="#LineageLinkedDataQuery_dataLinksTab">Data links</a></li>
+        <li class="Lineage_ClassTabLi"><a href="#LineageLinkedDataQuery_buildQueryTab">Build Query</a></li>
+
+        <li class="Lineage_ClassTabLi"><a href="#LineageLinkedDataQuery_tableResultTab">Properties</a></li>
+    </ul>
+
+    <div id="LineageLinkedDataQuery_dataLinksTab">
+        <div style="">
+            <div id="Lineage_linkedData_query_relations" style="display: flex; flex-direction: column"></div>
+            <!--
+      <select onclick="Lineage_linkedData_query.onSelectRelation($(this).val())" id="lineage_linkedata_queryRelations_relationsSelect" size="20"></select>
+-->
+        </div>
+    </div>
+
+    <div id="LineageLinkedDataQuery_buildQueryTab">
+        <div style="display: flex; flex-direction: row">
+            <div class="LineageLinkedDataQueryParams_section">
+                <table>
+                    <tr>
+                        <td>DataBase</td>
+                        <td>
+                            <select
+                                class="lineage_linkedDataQuery_input"
+                                id="LineageLinkedDataQueryParams_database"
+                                size="4"
+                                onchange="Lineage_linkedData_query.onDatabaseChange($(this).val())"
+                            ></select>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>table</td>
+                        <td>
+                            <select class="lineage_linkedDataQuery_input" id="LineageLinkedDataQueryParams_classes" size="2" onchange="Lineage_linkedData_query.onClassChange($(this).val())"></select>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>columns <span style="font-weight: bold" id="LineageLinkedDataQueryParams_currentTable"></span></td>
+                        <td>
+                            <div style="width: 320px; height: 500px">
+                                <div id="LineageLinkedDataQueryParams_SQL_columnsTree"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div>
+                <div id="LineageLinkedDataQueryParams_createFilterDiv">
+                    <table>
+                        <tr>
+                            <td>
+                                create filter on column&nbsp;<span style="font-weight: bold" id="LineageLinkedDataQueryParams_filteringColumn"></span>
+
+                                &nbsp; <button onclick="Lineage_linkedData_query.fillColumnValuesSelect()">List</button>
+                                &nbsp;
+                                <select id="LineageLinkedDataQueryParams_valuesSelect" onchange="Lineage_linkedData_sql.onValuesSelectChange()" style="width: 200px">
+                                    <option value="" size="3"></option>
+                                </select>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <select id="LineageLinkedDataQueryParams_operator" onclick="Lineage_linkedData.onSearchDialogOperatorSelect($(this).val())">
+                        <option>=</option>
+                        <option selected="selected">contains</option>
+                        <option>LIST</option>
+                        <option>!=</option>
+                        <option>&lt;</option>
+                        <option>&gt;</option>
+
+                        <option>not contains</option>
+                    </select>
+                    <input id="LineageLinkedDataQueryParams_value" size="20" value="" />
+
+                    <button onclick="Lineage_linkedData_query.addFilter()">Add filter</button>
+                </div>
+
+                <div id="LineageLinkedDataQueryParams_ExecuteDiv" style="display: flex; flex-direction: column; margin: 5px; padding: 5px; background-color: #ddd">
+                    <div>
+                        Filters :
+                        <div id="LineageLinkedDataQueryParams_Filters" style="display: flex; flex-direction: column; margin: 5px; padding: 5px; background-color: #ddd"></div>
+                    </div>
+                    <div>
+                        <button onclick="Lineage_linkedData_query.executeQuery()">Execute Query</button>
+                        <!--  <button onclick="Lineage_linkedData_query.stackContext()">Stack Query</button>-->
+                        <button onclick="Lineage_linkedData_query.viewSQL()">view SQL</button>
+                    </div>
+                    <div id="LineageLinkedDataQueryParams_SqlDivWrapper" style="display: none">
+                        SQL
+                        <button onclick="Lineage_linkedData_query.copySqlToClipboard()">Copy</button>
+                        <div id="LineageLinkedDataQueryParams_SqlDiv" style="width: 500px; height: 400px; overflow: auto; background-color: #ccc; margin: 5px"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="LineageLinkedDataQuery_tableResultTab">
+        <div id="LineageLinkedDataQuery_tableResult" style="overflow: auto"></div>
+    </div>
+</div>
+
+<script>
+    $("#LineageLinkedDataQuery_tabs").tabs();
+</script>

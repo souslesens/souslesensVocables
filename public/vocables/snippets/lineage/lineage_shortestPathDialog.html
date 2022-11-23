@@ -1,0 +1,70 @@
+<style>
+    .lineage_shorterstPathUri {
+        font-weight: bold;
+        color: #0067bb;
+        min-width: 100px;
+    }
+
+    .lineage_shorterstPath_predicate {
+        display: flex;
+        flex-direction: row;
+        margin: 5px;
+        padding: 3px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        background-color: #ddd;
+    }
+    .lineage_shorterstPath_subject {
+        background-color: #ceeeb8;
+        border-radius: 4px;
+        margin: 3px;
+        padding: 3px;
+    }
+    .lineage_shorterstPath_property {
+        background-color: #eccbab;
+        border-radius: 4px;
+        margin: 3px;
+        padding: 3px;
+    }
+    .lineage_shorterstPath_object {
+        background-color: rgba(178, 198, 229, 0.5);
+        border-radius: 4px;
+        margin: 3px;
+        padding: 3px;
+    }
+</style>
+
+Shortest Path between nodes
+<button onclick="Lineage_graphTraversal.initVisjsPathMode()">Select on Whiteboard</button>
+
+<div style="display: flex; flex-direction: row; margin: 5px; margin-top: 15px">
+    <div>
+        search &nbsp;<input id="lineage_shorterstPath_searchInput" /> &nbsp;exactMatch&nbsp;<input type="checkbox" id="lineage_shorterstPath_exactMatchCBX" />
+        <div style="width: 400px; height: 700px; overflow: auto">
+            <div id="lineage_shorterstPath_searchJsTreeDiv"></div>
+        </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column">
+        <div>
+            <table>
+                <tr>
+                    <td>from &nbsp; <span class="lineage_shorterstPathUri" id="lineage_shorterstPathFromUri"></span></td>
+                    <td>to &nbsp; <span class="lineage_shorterstPathUri" id="lineage_shorterstPathToUri"></span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <button onclick="Lineage_graphTraversal.listShortestPath()">List Path</button>
+                    </td>
+                    <td>
+                        <button onclick="Lineage_graphTraversal.drawShortestPath()">Draw Path</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div id="lineage_shorterstPathListDiv"></div>
+    </div>
+</div>

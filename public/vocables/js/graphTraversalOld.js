@@ -36,6 +36,9 @@ var GraphTraversal = (function () {
             for (const predicate in predicates) {
                 if (predicate && predicate != "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
                     predicates[predicate].forEach(function (object) {
+                        if (!routeMap[object]) {
+                            routeMap[object] = [];
+                        }
                         routeMap[object].push([subject, 1]);
                     });
                 }

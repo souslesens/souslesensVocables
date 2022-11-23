@@ -133,7 +133,7 @@
         margin: 2px;
     }
 
-    .vis-manipulation{
+    .vis-manipulation {
         margin: 10px;
         width: 300px !important;
         border-radius: 10px;
@@ -170,8 +170,8 @@
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_classes.addNodesAndParentsToGraph()">Parents</button>
 
             <!--   <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-              onclick="Lineage_classes.drawObjectProperties()">Properties
-      </button>-->
+        onclick="Lineage_classes.drawObjectProperties()">Properties
+</button>-->
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.clearSource()">Clear</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="MainController.UI.showHideRightPanel()">Search</button>
 
@@ -180,6 +180,10 @@
 
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_dictionary.showTSFdictionaryDialog('Lineage_similars')">Equiv Class</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.getSimilars('graph')">Similars</button>
+            <div class="lineage_button_group">
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_graphTraversal.showShortestPathDialog()">Pathes</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_linkedData_query.showLinkedDataDialog()">Linked Data</button>
+            </div>
         </div>
 
         <div id="lineage_actionsWrapper3" style="display: none">Whiteboard</div>
@@ -191,11 +195,14 @@
 
                     <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showLastAddedNodesOnly()">Last</button>
                 </div>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showHideIndividuals()">Show/Hide Individuals</button>
+                <div class="lineage_button_group">
+                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showHideIndividuals()">Show/Hide Individuals</button>
+                </div>
 
                 <div class="lineage_button_group">
                     <span>selection</span>
-                    <span title="To add nodes selection : Ctrl+Alt and click/hover nodes " style="font-weight: bold; color: blue" id="Lineageclasses_selectedNodesCount">?</span>
+                    <span title="To add nodes selection : Ctrl+Alt and click/hover nodes " style="font-weight: bold; color: blue" id="Lineageclasses_selectedNodesCount">0</span>
+
                     <button title="ctrl+alt click or hover" class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_selection.listNodesSelection()">Show</button>
 
                     <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_selection.clearNodesSelection()">Clear</button>
@@ -226,7 +233,8 @@
                     </select>
                 </div>
                 <div class="lineage_button_group">
-                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="visjsGraph.showGraphConfig()">Display</button><span id="visjsConfigureDiv">&nbsp;</span>
+                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="visjsGraph.showGraphConfig()">Display</button>
+                    <span id="visjsConfigureDiv">&nbsp;</span>
 
                     <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Export.exportGraphToDataTable(null,'GRAPH')">CSV</button>
                     <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="visjsGraph.toSVG()">SVG</button>
@@ -236,8 +244,8 @@
 
         <!--
 
-          </div>
-          -->
+      </div>
+      -->
 
         <div id="lineage_legendWrapper" class="Lineage_legendTypeTopLevelOntologyDiv" style="display: flex; flex-direction: column">
             <div class="lineage_actionDiv_title">Upper Ontology Classes</div>

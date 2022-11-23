@@ -9,19 +9,23 @@ var Lineage_blend = (function () {
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").dialog("option", "title", "Create node in source " + Lineage_sources.activeSource);
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
-                Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, function (err, result) {
+                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function (err, result) {
+                    if (err) return alert(err.responseText);
+                    /*   common.fillSelectOptions("lineage_selection_modifyPredicate_propertySelect", result.predicates, true, "label", "id");
+
+                      Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, function (err, result) {
                     if (err) return alert(err.responseText);
                     if (!Config.sources[Lineage_sources.activeSource].allowIndividuals) {
                         $("#LineageBlend_creatingNamedIndividualButton").css("display", "none");
                     }
                     self.currentPossibleClassesAndPredicates = result;
                     var allObjects = result.sourceObjects.concat(["---------"]).concat(result.TopLevelOntologyObjects).concat(["---------"]).concat(result.usualObjects);
-
+*/
                     common.fillSelectOptions("KGcreator_predicateSelect", result.predicates, true, "label", "id");
-                    common.fillSelectOptions("KGcreator_objectSelect", allObjects, true, "label", "id");
+                    common.fillSelectOptions("KGcreator_objectSelect", result.objectClasses, true, "label", "id");
                     common.fillSelectOptions("LineageBlend_creatingNodePredicatesSelect", result.predicates, true, "label", "id");
-                    common.fillSelectOptions("LineageBlend_creatingNodeObjectsSelect", allObjects, true, "label", "id");
-                    common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", allObjects, true, "label", "id");
+                    common.fillSelectOptions("LineageBlend_creatingNodeObjectsSelect", result.objectClasses, true, "label", "id");
+                    common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", result.objectClasses, true, "label", "id");
                 });
                 self.possibleNamedIndividuals = {};
             });
@@ -102,7 +106,7 @@ var Lineage_blend = (function () {
                         function (callbackSeries) {
                             Lineage_upperOntologies.getUpperOntologyObjectPropertiesDescription(Config.currentTopLevelOntology, false, function (err, result) {
                                 if (err) return callbackSeries(err);
-                                var flatPropertiesMap = Lineage_upperOntologies.flattenPropertiesMap(result);
+                                var flatPropertiesMap = Lineage_upperOntologies.setPropertiesMapInverseProps(result);
                                 Lineage_upperOntologies.objectPropertiesMap = flatPropertiesMap;
                                 callbackSeries();
                             });
@@ -120,6 +124,8 @@ var Lineage_blend = (function () {
                             }
                             Sparql_OWL.getNodesAncestors(Lineage_sources.activeSource, [self.sourceNode.id, self.targetNode.id], {}, function (err, result) {
                                 result.forEach(function (item) {
+                                    /*  if(item.superClassType && (item.superClassType.value=="http://www.w3.org/2002/07/owl#Class" || item.superClassType.value=="http://www.w3.org/2002/07/owl#Restriction"))
+                                        return;*/
                                     if (item.class.value == self.sourceNode.id && allDomains[item.superClass.value]) {
                                         sourceNodeTopLevelOntologyAncestors[item.superClass.value] = allDomains[item.superClass.value];
                                     }

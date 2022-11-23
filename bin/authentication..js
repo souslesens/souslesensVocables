@@ -12,7 +12,7 @@
 var jsonFileStorage = require("./jsonFileStorage.js");
 var path = require("path");
 var fs = require("fs");
-//var mySqlProxy = require("./mySQLproxy..js");
+var mySqlProxy = require("./mySQLproxy..js");
 const bcrypt = require("bcrypt");
 
 var passport = require("passport");
@@ -115,7 +115,7 @@ if (config.auth == "keycloak") {
                 if (!findUser) {
                     return cb(null, false, { message: "Incorrect username or password." });
                 }
-
+                console.log(JSON.stringify(findUser));
                 // Compare hash is password is hased
                 if (findUser.password.startsWith("$2b$")) {
                     if (!bcrypt.compareSync(password, findUser.password)) {
@@ -129,6 +129,32 @@ if (config.auth == "keycloak") {
                 }
 
                 return cb(null, findUser);
+            });
+        })
+    );
+} else if (config.auth === "database") {
+    passport.use(
+        new Strategy(function (username, password, cb) {
+            var sql = "select * from users where login='" + username + "'";
+            var connection = config.authenticationDatabase;
+            mySqlProxy.exec(connection, sql, function (err, result) {
+                if (err) {
+                    return cb(err);
+                }
+
+                if (result.length == 0) {
+                    return cb(null, false, { message: "Incorrect username or password." });
+                }
+                if (password != result[0].password) {
+                    // bcrypt.compare(password, result[0].motDePasse, function (err, res) {
+                    return cb(null, false, { message: "Incorrect username or password." });
+                }
+
+                var user = result[0];
+                // delete user.password;
+                user.groups = user.groups.split(",");
+                console.log(JSON.stringify(user));
+                return cb(null, user);
             });
         })
     );

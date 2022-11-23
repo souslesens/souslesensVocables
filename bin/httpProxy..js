@@ -108,6 +108,7 @@ var httpProxy = {
                 return callback(error);
             }
 
+            if (headers && headers["Accept"].indexOf("text") == 0) return callback(null, body);
             if (typeof body === "string") {
                 body = body.trim();
                 var p = body.toLowerCase().indexOf("bindings");
@@ -122,7 +123,7 @@ var httpProxy = {
                     body = JSON.parse(body);
                     //  return callback(null, obj);
                 } catch (e) {
-                    console.log(body);
+                    //  console.log(body);
                     console.log(e);
                     err = e.message;
                     if (e.message.indexOf("Unexpected token V in JSON ") > -1) {

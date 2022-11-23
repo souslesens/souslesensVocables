@@ -237,13 +237,13 @@ var common = (function () {
                             .open_node(parentNodeId_, null, 500);
                     });
             });
-            /*  setTimeout(function () {
-self.jstree.setTreeAppearance();
-//   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);
-$("#" + jstreeDiv)
-  .jstree(true)
-  .open_node(parentNodeId_, null, 500);
-}, 500);*/
+            setTimeout(function () {
+                /*
+            self.jstree.setTreeAppearance();
+//   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);*/ $("#" + jstreeDiv)
+                    .jstree(true)
+                    .open_node(parentNodeId_, null, 500);
+            }, 500);
         },
 
         deleteNode: function (jstreeDiv, nodeId) {
@@ -263,7 +263,7 @@ $("#" + jstreeDiv)
                 }
             }
             /* descendants.forEach(function(item){
-   $("#" + jstreeDiv).jstree(true).delete_node(item)
+$("#" + jstreeDiv).jstree(true).delete_node(item)
 })*/
             try {
                 $("#" + jstreeDiv)
@@ -355,7 +355,7 @@ $("#" + jstreeDiv)
             var w;
             if (p.left < 600) w = 380;
             else w = 340;
-            parentDiv.width(w);
+            // parentDiv.width(w);
 
             if (jstreeDiv == "LineageNodesJsTreeDiv")
                 // cannot do it generic !!!!!
@@ -751,15 +751,15 @@ str = str.replace(/%2F/gm, "/");*/
             }
 
             /*  try {
-      await navigator.clipboard.writeText(text);
+await navigator.clipboard.writeText(text);
 
-      if (callback) {
-          return callback(null, "graph copied in clipboard");
-      } else return alert("graph copied in clipboard");
-  } catch (err) {
-      MainController.UI.message("graph copy failed");
-      if (callback) return callback(err);
-  }*/
+if (callback) {
+    return callback(null, "graph copied in clipboard");
+} else return alert("graph copied in clipboard");
+} catch (err) {
+MainController.UI.message("graph copy failed");
+if (callback) return callback(err);
+}*/
         }
 
         copy();

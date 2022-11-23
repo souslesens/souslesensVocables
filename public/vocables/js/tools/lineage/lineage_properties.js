@@ -41,14 +41,14 @@ Lineage_properties = (function () {
         };
         if (MainController.currentTool == "lineage") {
             /* items.drawRangesAndDomainsProperty = {
-                label: "Draw ranges and domains",
-                action: function (_e) {
-                    // pb avec source
-                    setTimeout(function () {
-                        self.drawRangeAndDomainsGraph(self.currentTreeNode);
-                    }, 200);
-                },
-            };*/
+          label: "Draw ranges and domains",
+          action: function (_e) {
+              // pb avec source
+              setTimeout(function () {
+                  self.drawRangeAndDomainsGraph(self.currentTreeNode);
+              }, 200);
+          },
+      };*/
             items.copyNodeToClipboard = {
                 label: "copy to Clipboard",
                 action: function (_e) {
@@ -136,63 +136,72 @@ Lineage_properties = (function () {
         if (!options) options = {};
         if (words) options.words = words;
         options.whitoutImports = true;
+        var distinctIds = {};
+        var jstreeData = [];
+        async.series(
+            [
+                function (callbackSeries) {
+                    Sparql_OWL.getObjectPropertiesDomainAndRange(source, ids, options, function (err, result) {
+                        if (err) return callbackSeries(err);
+                        var data = common.array.sort(common.array.distinctValues(result, "prop"), "propLabel");
 
-        if (Config.sources[source].schemaType == "OWL") {
-            Sparql_OWL.getObjectPropertiesDomainAndRange(source, ids, options, function (err, result) {
-                if (err) return callback(err);
-                var data = common.array.sort(common.array.distinctValues(result, "prop"), "propLabel");
-                var distinctIds = {};
-                var jstreeData = [];
-                data.forEach(function (item) {
-                    if (!distinctIds[item.prop.value]) {
-                        distinctIds[item.prop.value] = 1;
+                        data.forEach(function (item) {
+                            if (!distinctIds[item.prop.value]) {
+                                distinctIds[item.prop.value] = 1;
 
-                        var parent = source;
-                        if (item.subProp) parent = item.subProp.value;
-                        jstreeData.push({
-                            text: item.propLabel.value,
-                            id: item.prop.value,
-                            parent: parent,
-                            data: {
-                                label: item.propLabel.value,
-                                id: item.prop.value,
-                                parent: parent,
-                                type: "http://www.w3.org/2002/07/owl#ObjectProperty",
-                                source: source,
-                            },
+                                var parent = source;
+                                if (item.subProp) parent = item.subProp.value;
+                                jstreeData.push({
+                                    text: item.propLabel.value,
+                                    id: item.prop.value,
+                                    parent: parent,
+                                    data: {
+                                        label: item.propLabel.value,
+                                        id: item.prop.value,
+                                        parent: parent,
+                                        type: "http://www.w3.org/2002/07/owl#ObjectProperty",
+                                        source: source,
+                                    },
+                                });
+                            }
                         });
-                    }
-                });
-                callback(null, jstreeData);
-            });
-        } else if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH") {
-            options = { distinct: "property" };
-            Sparql_OWL.getFilteredTriples(source, null, null, null, options, function (err, result) {
-                if (err) return callback(err);
-                var distinctIds = {};
-                var jstreeData = [];
-                result.forEach(function (item) {
-                    if (!distinctIds[item.property.value]) {
-                        distinctIds[item.property.value] = 1;
+                        callbackSeries(null);
+                    });
+                },
 
-                        var parent = source;
-                        jstreeData.push({
-                            text: item.propertyLabel.value,
-                            id: item.property.value,
-                            parent: parent,
-                            data: {
-                                label: item.propertyLabel.value,
-                                id: item.property.value,
-                                parent: parent,
-                                type: "http://www.w3.org/2002/07/owl#Property",
-                                source: source,
-                            },
+                function (callbackSeries) {
+                    options = { distinct: "?property ?propertyLabel" };
+                    Sparql_OWL.getFilteredTriples(source, null, null, null, options, function (err, result) {
+                        if (err) return callback(err);
+                        var distinctIds = {};
+                        var jstreeData = [];
+                        result.forEach(function (item) {
+                            if (!distinctIds[item.property.value]) {
+                                distinctIds[item.property.value] = 1;
+
+                                var parent = source;
+                                jstreeData.push({
+                                    text: item.propertyLabel.value,
+                                    id: item.property.value,
+                                    parent: parent,
+                                    data: {
+                                        label: item.propertyLabel.value,
+                                        id: item.property.value,
+                                        parent: parent,
+                                        type: "http://www.w3.org/2002/07/owl#Property",
+                                        source: source,
+                                    },
+                                });
+                            }
                         });
-                    }
-                });
+                        callbackSeries(null);
+                    });
+                },
+            ],
+            function (err) {
                 callback(null, jstreeData);
-            });
-        }
+            }
+        );
     };
 
     /**
@@ -208,7 +217,8 @@ Lineage_properties = (function () {
     self.drawPredicatesGraph = function (source, nodeIds, properties) {
         if (nodeIds && !Array.isArray(nodeIds)) nodeIds = [nodeIds];
         if (properties && !Array.isArray(properties)) properties = [properties];
-        var filter = " FILTER( ?property !=rdf:type)";
+        var filter = "";
+        if (!properties || properties.length == 0) filter = " FILTER( ?property not in(rdf:type, rdfs:subClassOf,rdfs:member))";
         Sparql_OWL.getFilteredTriples(source, nodeIds, properties, null, { filter: filter }, function (err, result) {
             if (err) return callback(err);
             Sparql_common.setSparqlResultPropertiesLabels(source, result, "property", function (err, result2) {

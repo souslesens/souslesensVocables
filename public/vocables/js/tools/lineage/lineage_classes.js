@@ -81,13 +81,13 @@ var Lineage_classes = (function () {
 
                 /*    var sourceLabels = [];
 
-    MainController.UI.showSources("sourcesTreeDiv", false);
+MainController.UI.showSources("sourcesTreeDiv", false);
 
-    for (var key in Config.sources) {
-      if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[key].schemaType) > -1) sourceLabels.push(key);
-    }
-    sourceLabels.sort();
-    //  common.fillSelectOptions("Lineage_toSource", sourceLabels, true)*/
+for (var key in Config.sources) {
+if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[key].schemaType) > -1) sourceLabels.push(key);
+}
+sourceLabels.sort();
+//  common.fillSelectOptions("Lineage_toSource", sourceLabels, true)*/
 
                 $("#LineagePopup").dialog({
                     autoOpen: false,
@@ -119,7 +119,6 @@ var Lineage_classes = (function () {
                 }
                 $("#GenericTools_searchSchemaType").val("OWL");
 
-                $("#LineageLinkedDataTab").load("snippets/lineage/lineageLinkedDataSearchDialog.html", function () {});
                 $("#Lineage_tablesTreeDiv").load("snippets/KGcreator/leftPanel.html", function () {
                     Lineage_linkedData_mappings.init();
                     KGcreator.loadCsvDirs({
@@ -128,7 +127,7 @@ var Lineage_classes = (function () {
                     });
                 });
 
-                Lineage_sets.init();
+                //    Lineage_sets.init();
                 if (callback) callback();
             });
         });
@@ -144,8 +143,10 @@ var Lineage_classes = (function () {
         /** @type {{ ctrlKey: any; shiftKey: any; altKey: any; }} */ nodeEvent,
         /** @type {{ callee?: any; }} */ options
     ) {
-        if (!Config.sources[node.data.source]) return;
+        if (!node.data || node.data.source) return console.log("no data.source in node");
+        if (!Config.sources[node.data.source]) return console.log("no matching source for node");
         if (!options) options = {};
+        if (node.data.type == "path") return Lineage_graphTraversal.showPathNodesList(node.data.source, node.data.path);
         if (self.currentOwlType == "LinkedData") return Lineage_linkedData.showLinkedDataPanel(self.currentGraphNode);
 
         if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
@@ -478,6 +479,16 @@ var Lineage_classes = (function () {
                 addEdge: function (edgeData, callback) {
                     var sourceNode = visjsGraph.data.nodes.get(edgeData.from);
                     var targetNode = visjsGraph.data.nodes.get(edgeData.to);
+
+                    if (targetNode.data && targetNode.data.type == "container") {
+                        return Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, targetNode.data, sourceNode.data, true);
+                    }
+
+                    if (Lineage_graphTraversal.inPathMode) {
+                        Lineage_graphTraversal.inPathMode = false;
+                        return Lineage_graphTraversal.drawShortestpath(Lineage_sources.activeSource, edgeData.from, edgeData.to);
+                    }
+
                     if (sourceNode.data.context == Lineage_linkedData_mappings.context || targetNode.data.context == Lineage_linkedData_mappings.context) {
                         Lineage_linkedData_mappings.onAddEdgeDropped(edgeData, function (err, result) {
                             if (err) return callback(err.responseText);
@@ -1650,12 +1661,12 @@ addNode:false
                     Lineage_properties.drawPredicatesGraph(Lineage_sources.activeSource, data, null, function (err, result) {});
 
                     return;
-                    if (type && type != "objectProperties") return callbackSeries();
+                    /*   if (type && type != "objectProperties") return callbackSeries();
                     else if (direction == "direct") {
                         Lineage_classes.graphNodeNeighborhood(data, "outcoming", callbackSeries);
                     } else {
                         Lineage_classes.graphNodeNeighborhood(data, "incoming", callbackSeries);
-                    }
+                    }*/
                 },
             ],
             function (err) {
@@ -1805,32 +1816,57 @@ addNode:false
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
 
-                        visjsData.edges.push({
-                            id: edgeId,
-                            from: item.value.value,
-                            to: item.concept.value,
-                            //  label: "<i>" + item.propLabel.value + "</i>",
-                            label: item.propLabel.value,
-                            data: {
-                                propertyId: item.prop.value,
-                                bNodeId: item.node.value,
-                                source: restrictionSource,
-                                propertyLabel: item.propLabel.value,
-                            },
-                            //  font: { multi: true, size: 10,color:self.defaultEdgeColor,strokeWidth:0,strokeColor:0,ital:true },
-                            // font: {align: "middle", ital: {color:Lineage_classes.objectPropertyColor, mod: "italic", size: 10}},
-                            //   physics:false,
-                            arrows: {
-                                from: {
-                                    enabled: true,
-                                    type: "solid",
-                                    scaleFactor: 0.5,
+                        if (options.inverse) {
+                            visjsData.edges.push({
+                                id: edgeId,
+                                from: item.value.value,
+                                to: item.concept.value,
+                                //  label: "<i>" + item.propLabel.value + "</i>",
+                                label: item.propLabel.value,
+                                data: {
+                                    propertyId: item.prop.value,
+                                    bNodeId: item.node.value,
+                                    source: restrictionSource,
+                                    propertyLabel: item.propLabel.value,
                                 },
-                            },
-                            dashes: true,
-                            color: Lineage_classes.restrictionColor,
-                            physics: physics,
-                        });
+
+                                arrows: {
+                                    from: {
+                                        enabled: true,
+                                        type: "solid",
+                                        scaleFactor: 0.5,
+                                    },
+                                },
+                                dashes: true,
+                                color: Lineage_classes.restrictionColor,
+                                physics: physics,
+                            });
+                        } else if (!options.inverse) {
+                            visjsData.edges.push({
+                                id: edgeId,
+                                to: item.value.value,
+                                from: item.concept.value,
+                                //  label: "<i>" + item.propLabel.value + "</i>",
+                                label: item.propLabel.value,
+                                data: {
+                                    propertyId: item.prop.value,
+                                    bNodeId: item.node.value,
+                                    source: restrictionSource,
+                                    propertyLabel: item.propLabel.value,
+                                },
+
+                                arrows: {
+                                    to: {
+                                        enabled: true,
+                                        type: "solid",
+                                        scaleFactor: 0.5,
+                                    },
+                                },
+                                dashes: true,
+                                color: Lineage_classes.restrictionColor,
+                                physics: physics,
+                            });
+                        }
                     }
                 });
 

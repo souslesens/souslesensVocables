@@ -10,6 +10,12 @@ Lineage_sources = (function () {
                 self.menuActions.closeSource(source);
             }
         }
+        $("#LineagePopup").dialog({
+            autoOpen: false,
+            height: 800,
+            width: 1000,
+            modal: false,
+        });
         self.activeSource = null;
         self.loadedSources = {};
         self.sourceDivsMap = {};
@@ -63,13 +69,17 @@ Lineage_sources = (function () {
         $("#LineageNodesJsTreeDiv").empty();
         $("#Lineage_propertiesTree").empty();
         self.showHideEditButtons(source);
+
+        $("#LineageLinkedDataRelationsDiv").load("snippets/lineage/linkedData/lineage_linkedData_relations.html", function () {
+            Lineage_linkedData_query.init();
+        });
     };
 
     self.showHideLineageLeftPanels = function () {
         /*  $("#lineage_actionsWrapper").css("display","flex")
-     $("#lineage_actionsWrapper2").css("display","flex")
-      $("#lineage_actionsWrapper3").css("display","flex")
-      $("#lineage_actionDiv_title_hidden").css("display","flex")*/
+ $("#lineage_actionsWrapper2").css("display","flex")
+  $("#lineage_actionsWrapper3").css("display","flex")
+  $("#lineage_actionDiv_title_hidden").css("display","flex")*/
         $("#lineage_allActions").css("visibility", "visible");
         if (!Config.currentTopLevelOntology) {
             $("#lineage_legendWrapper").css("display", "block");
@@ -125,7 +135,14 @@ Lineage_sources = (function () {
             newEdges.push({
                 id: edge.id,
                 color: common.colorToRgba(edge.color, opacity),
-                font: { color: common.colorToRgba(Lineage_classes.defaultEdgeFontColor, opacity), multi: true, size: 10, strokeWidth: 0, strokeColor: 0, ital: true },
+                font: {
+                    color: common.colorToRgba(Lineage_classes.defaultEdgeFontColor, opacity),
+                    multi: true,
+                    size: 10,
+                    strokeWidth: 0,
+                    strokeColor: 0,
+                    ital: true,
+                },
             });
         });
         visjsGraph.data.edges.update(newEdges);
@@ -163,8 +180,8 @@ Lineage_sources = (function () {
             sourceLabel +
             "&nbsp;" +
             /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
-            sourceDivId +
-            "\")'>[-]</i>";*/
+      sourceDivId +
+      "\")'>[-]</i>";*/
             "<input type='image' src='./icons/caret-right.png'  style='opacity: 0.5; width: 15px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
             sourceDivId +
             "\")'/> </div>";
@@ -197,7 +214,10 @@ Lineage_sources = (function () {
             "');\"> Group </span>" +
             ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.ungroupSource(\'' +
             source +
-            "');\"> ungroup </span>";
+            "');\"> ungroup </span>" +
+            ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.exportOWL(\'' +
+            source +
+            "');\"> export OWL </span>";
         $("#graphPopupDiv").html(html);
         var e = window.event;
         var point = { x: e.pageX, y: e.pageY };
@@ -287,7 +307,14 @@ Lineage_sources = (function () {
                     newEdges.push({
                         id: edge.id,
                         color: common.colorToRgba(edge.color, opacity),
-                        font: { color: common.colorToRgba(Lineage_classes.defaultEdgeFontColor, opacity), multi: true, size: 10, strokeWidth: 0, strokeColor: 0, ital: true },
+                        font: {
+                            color: common.colorToRgba(Lineage_classes.defaultEdgeFontColor, opacity),
+                            multi: true,
+                            size: 10,
+                            strokeWidth: 0,
+                            strokeColor: 0,
+                            ital: true,
+                        },
                     });
                 }
             });
@@ -363,6 +390,13 @@ Lineage_sources = (function () {
             if (!source) source = Lineage_sources.activeSource;
             visjsGraph.data.nodes.remove(source);
         },
+        exportOWL: function (source) {
+            Sparql_OWL.generateOWL(source, {}, function (err, result) {
+                if (err) return console.log(err);
+
+                common.copyTextToClipboard(result);
+            });
+        },
     };
 
     self.initWhiteboardActions = function () {
@@ -430,7 +464,7 @@ Lineage_sources = (function () {
         $("#graphDiv").css("background-color", backgroundColor);
         if (visjsGraph.isGraphNotEmpty && visjsGraph.data) {
             /* visjsGraph.network.options.nodes.font = { color: Lineage_classes.defaultNodeFontColor };
-       visjsGraph.network.options.edges.font = { color: self.defaultEdgeFontColor };*/
+ visjsGraph.network.options.edges.font = { color: self.defaultEdgeFontColor };*/
 
             var nodes = visjsGraph.data.nodes.get();
             var newNodes = [];

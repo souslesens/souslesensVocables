@@ -64,17 +64,17 @@ if (config.auth == "keycloak") {
         });
       }
 
-      if (!findUser) {
-        // write user with default group
-        const userUlid = ULID.ulid();
-        users[userUlid] = {
-          id: userUlid,
-          login: profile.username,
-          password: "",
-          source: "keycloak",
-          _type: "user",
-          groups: config.defaultGroups ? config.defaultGroups : [],
-        };
+            if (!findUser) {
+                // write user with default group
+                const userUlid = ULID.ulid();
+                users[profile.username] = {
+                    id: userUlid,
+                    login: profile.username,
+                    password: "",
+                    source: "keycloak",
+                    _type: "user",
+                    groups: config.defaultGroups ? config.defaultGroups : [],
+                };
 
         findUser = {
           id: userUlid,

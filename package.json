@@ -1,6 +1,6 @@
 {
     "name": "souslesensvocables",
-    "version": "1.17.6",
+    "version": "1.18.0",
     "private": true,
     "scripts": {
         "build:app": "cd mainapp && npm run build",

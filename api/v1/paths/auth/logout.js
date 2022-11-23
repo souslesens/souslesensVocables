@@ -8,13 +8,16 @@ module.exports = function () {
 
     function GET(req, res, next) {
         const result = {};
-        if (config.auth === "disabled") {
+        // logout if aut is not disable
+        if (config.auth !== "disabled") {
             req.logout(function (err) {
                 if (err) {
                     return next(err);
                 }
             });
-        } else if (config.auth === "keycloak") {
+        }
+
+        if (config.auth === "keycloak") {
             result.redirect = config.keycloak.authServerURL + "/realms/" + config.keycloak.realm + "/protocol/openid-connect/logout?redirect_uri=" + config.souslesensUrl;
         } else if (config.auth === "local") {
             result.redirect = "/login";

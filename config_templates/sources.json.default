@@ -266,7 +266,7 @@
             "url": "_default"
         },
         "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"],
-        "imports": ["ISO_15926-part-14_PCA", "ISO_15926-PCA-2"],
+        "imports": ["ISO_15926-part-14_PCA"],
         "controller": "Sparql_OWL",
         "topClassFilter": "  ?topConcept rdfs:subClassOf    ?x filter(regex(str(?x),\"lis14\") && ?conceptGraph =<http://data.total.com/resource/tsf/ontology/gaia-test/>)",
         "schemaType": "OWL",

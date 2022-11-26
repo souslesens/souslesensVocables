@@ -480,7 +480,7 @@ sourceLabels.sort();
                     var sourceNode = visjsGraph.data.nodes.get(edgeData.from);
                     var targetNode = visjsGraph.data.nodes.get(edgeData.to);
 
-                    if (targetNode.data && targetNode.data.type == "container") {
+                    if (sourceNode.data && sourceNode.data.type != "container"  && targetNode.data && targetNode.data.type == "container") {
                         return Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, targetNode.data, sourceNode.data, true);
                     }
 
@@ -1026,10 +1026,21 @@ addNode:false
 
         var slices = common.array.slice(nodeIds, 100);
 
+        memberPredicate=false
+
+        if (nodeIds) {
+            parentIds = nodeIds;
+
+        }
+        if(!options)
+        options={}
+        options.selectGraph=1
+
+
         async.eachSeries(
             slices,
             function (/** @type {any} */ slice, /** @type {(arg0: undefined) => void} */ callbackEach) {
-                Sparql_generic.getNodeParents(source, null, slice, 1, { selectGraph: 1 }, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+                Sparql_generic.getNodeParents(source, null, slice, 1, options, function (/** @type {any} */ err, /** @type {any[]} */ result) {
                     if (err) return callbackEach(err);
 
                     if (result.length == 0) {
@@ -1140,8 +1151,11 @@ addNode:false
         }
         if (!source) return alert("select a source");
 
+
+
         if (nodeIds) {
-            parentIds = nodeIds; // visjsGraph.getNodeDescendantIds(nodeIds, true)
+            parentIds = nodeIds;
+
         } else {
             parentIds = [];
             var nodes = visjsGraph.data.nodes.get();
@@ -1160,6 +1174,7 @@ addNode:false
         if (options.depth) depth = options.depth;
         options.skipRestrictions = 1;
         options.selectGraph = 1;
+
 
         Sparql_generic.getNodeChildren(source, null, parentIds, depth, options, function (err, result) {
             if (err) return MainController.UI.message(err);
@@ -2246,7 +2261,10 @@ upperNodeIds.push(id);
         var schemaType = Config.sources[nodeData.source].schemaType;
         if (schemaType == "OWL" || schemaType == "SKOS") {
             if (ancestorsDepth != 0) ancestorsDepth = 7;
-            Sparql_generic.getNodeParents(nodeData.source, null, nodeData.id, ancestorsDepth, { skipRestrictions: 1 }, function (/** @type {any} */ err, /** @type {string | any[]} */ result) {
+            memberPredicate=false
+            if(nodeData.type=="container")
+                memberPredicate=true;
+            Sparql_generic.getNodeParents(nodeData.source, null, nodeData.id, ancestorsDepth, { skipRestrictions: 1,memberPredicate:memberPredicate }, function (/** @type {any} */ err, /** @type {string | any[]} */ result) {
                 if (err) {
                     if (callback) return callback(err);
                     return MainController.UI.message(err);
@@ -2322,15 +2340,19 @@ upperNodeIds.push(id);
                 dontClusterNodes = true;
             }
             if (graphContext.clickOptions.ctrlKey && graphContext.clickOptions.altKey) depth = 3;
+           var  memberPredicate=(self.currentGraphNode.data.type=="container")
+
 
             Lineage_classes.addChildrenToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id], {
                 depth: depth,
                 dontClusterNodes: dontClusterNodes,
+                memberPredicate:memberPredicate
             });
         },
         drawParents: function () {
             if (!self.currentGraphNode) return;
-            Lineage_classes.addNodesAndParentsToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id]);
+            var  memberPredicate=(self.currentGraphNode.data.type=="container")
+            Lineage_classes.addNodesAndParentsToGraph(self.currentGraphNode.data.source, [self.currentGraphNode.id],{memberPredicate:memberPredicate});
         },
 
         drawSimilars: function () {
@@ -2569,4 +2591,5 @@ attrs.color=self.getSourceColor(superClassValue)
     };
 
     return self;
-})();
+})
+    ()

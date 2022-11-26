@@ -1119,7 +1119,9 @@ if (selectedFiles.length > 0);*/
                             return 0;
                         });
                         result.forEach(function (item) {
-                            if (item.id.type == "bnode") return;
+                            if(!item.id)
+                                return;
+                            if ( item.id.type == "bnode") return;
                             currentObjectClasses.push({
                                 id: item.id.value,
                                 label: topLevelOntologyPrefix + ":" + (item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value)),

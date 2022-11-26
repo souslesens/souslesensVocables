@@ -83,7 +83,7 @@ self.tools["SPARQL"] = {
     toolDescriptionImg: null,
 };
 
-self.tools["admin"] = { label: "Admin", multiSources: 1, controller: Admin, toolDescriptionImg: null }; //"images/taxonomy.png"}
+self.tools["admin"] = { label: "Admin", multiSources: 0, controller: Admin, toolDescriptionImg: null }; //"images/taxonomy.png"}
 
 self.tools["ConfigEditor"] = {
     label: "ConfigEditor",

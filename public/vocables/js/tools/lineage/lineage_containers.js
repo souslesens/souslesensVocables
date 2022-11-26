@@ -27,22 +27,43 @@ var Lineage_containers = (function() {
     items["ListMembers"] = {
       label: "List members",
       action: function(_e) {
-        Lineage_containers.listContainerResources(Lineage_sources.activeSource, self.currentContainer.data.id);
+        Lineage_containers.listContainerResources(Lineage_sources.activeSource, self.currentContainer.data.id,{nodes:true});
       }
     };
 
+
+    items["GraphContainer"] = {
+      label: "Graph container",
+      action: function(_e) {
+        Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.data.id,{containers:true});
+      }
+    };
     items["GraphResources"] = {
-      label: "Graph resources",
+      label: "Graph container resources",
       action: function(_e) {
-        Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.data.id);
+        Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.data.id,{nodes:true});
       }
     };
-    items["GraphResourcesDescendants"] = {
-      label: "Graph resources descendants",
+
+    items["GraphContainerDescendants"] = {
+      label: "Graph container descendants",
       action: function(_e) {
-        Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.data.id, { allDescendants: true });
+        Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.data.id, {containers:true, descendants:true});
       }
     };
+  /*  items["GraphContainerAncestors"] = {
+      label: "Graph container ancestors",
+      action: function(_e) {
+        Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.data.id, { containers:true,ancestors: true });
+      }
+    };*/
+
+  /*  items["GraphResourcesDescendants"] = {
+      label: "Graph container and all resources",
+      action: function(_e) {
+        Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.data.id, { nodes:true,descendants:true});
+      }
+    };*/
 
     return items;
   };
@@ -287,20 +308,52 @@ var Lineage_containers = (function() {
       var containerObj = $("#lineage_containers_containersJstree").jstree().get_node(firstContainer);
       containers = containers.concat(descendantIds);
     }
-    var filter;
-    if (!options.allMemberTypes) var filter = "filter(?objectType !=rdf:Bag)";
-    Sparql_OWL.getFilteredTriples(source, containers, "http://www.w3.org/2000/01/rdf-schema#member", null, { filter: filter }, function(err, result) {
+
+
+    var subjects=containers;
+    var objects=null;
+    var propFilter=""
+    var objectTypeFilter;
+    if (options.nodes) {
+      objectTypeFilter = "filter(?objectType !=rdf:Bag)";
+    }
+    else if (options.containers) {
+      objectTypeFilter = "filter(?objectType =rdf:Bag)";
+    }
+    else{
+      objectTypeFilter =""
+    }
+
+
+    if(options.descendants){
+      propFilter="http://www.w3.org/2000/01/rdf-schema#member"
+    }
+    else if(options.ancestors){
+      var subjects=null;
+      var objects=containers;
+    }else{
+      propFilter="";
+    }
+
+    if(!propFilter && !objectTypeFilter)
+      return alert ("no filter set")
+
+
+
+
+    Sparql_OWL.getFilteredTriples(source, subjects, propFilter, objects, { filter: objectTypeFilter }, function(err, result) {
       return callback(err, result);
     });
   };
   self.listContainerResources = function(source, containerId) {
     var existingChildren = common.jstree.getjsTreeNodes("lineage_containers_containersJstree", true, containerId);
     var filter = "filter(?objectType !=rdf:Bag)";
-    self.getContainerResources(source, containerId, {}, function(err, result) {
+    self.getContainerResources(source, containerId, {nodes:true}, function(err, result) {
       if (err) return alert(err.responseText);
       var jstreeData = [];
       result.forEach(function(item) {
         if (existingChildren.indexOf(item.object.value) < 0) {
+          existingChildren.push(item.object.value)
           jstreeData.push({
             id: item.object.value,
             text: item.objectLabel.value,
@@ -321,7 +374,6 @@ var Lineage_containers = (function() {
 
   self.graphResources = function(source, containerId, options) {
     if (!options) options = {};
-    if (options.allDescendants) options.allMemberTypes = true;
     var existingChildren = common.jstree.getjsTreeNodes("lineage_containers_containersJstree", true, containerId);
     // var filter = "filter(?objectType !=rdf:Bag)";
     self.getContainerResources(source, containerId, options, function(err, result) {

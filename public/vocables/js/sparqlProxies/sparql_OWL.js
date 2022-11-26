@@ -13,6 +13,9 @@ var Sparql_OWL = (function() {
 
   self.ancestorsDepth = 6;
 
+
+
+
   /**
    * @param source
    * @returns sparql (composed) predicate defining chilhood relation for a source depending on its natrue (OWL ,SKOS) and sourceConfig.taxonomyPredicates

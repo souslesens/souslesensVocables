@@ -1827,7 +1827,7 @@ addNode:false
                             },
                         });
                     }
-                    var edgeId = item.value.value + "_" + item.concept.value + "_" + item.prop.value;
+                    var edgeId =  item.node.value;//item.value.value + "_" + item.concept.value + "_" + item.prop.value;
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
 

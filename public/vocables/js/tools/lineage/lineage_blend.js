@@ -62,6 +62,8 @@ var Lineage_blend = (function () {
                     $("#lineageAddEdgeDialog_Title").html("upper ontology : <b>" + Config.currentTopLevelOntology + "</b><br>" + self.sourceNode.label + " -> " + self.targetNode.label);
                 }
 
+
+
                 let sourceNodeTopLevelOntologyAncestors = {};
                 let targetNodeTopLevelOntologyAncestors = {};
 
@@ -134,7 +136,10 @@ var Lineage_blend = (function () {
                                     }
                                 });
 
+
                                 if (err) return callbackSeries(err);
+
+
 
                                 return callbackSeries();
                             });
@@ -180,15 +185,19 @@ var Lineage_blend = (function () {
                                 }
                                 if (domainRank2 > domainRank && rangeRank2 > rangeRank) {
                                     propsToKeep.push(prop);
-                                } else if (domainRank2 > domainRank && !propObj.upperRange) {
+                                } else if (domainRank2 > domainRank){// && !propObj.upperRange) {
                                     propsToKeep.push(prop);
-                                } else if (rangeRank2 > rangeRank && !propObj.upperDomain) {
+                                } else if (rangeRank2 > rangeRank ){// && !propObj.upperDomain) {
                                     propsToKeep.push(prop);
                                 } else if (!propObj.upperRange && !propObj.upperDomain) {
                                     propsToKeep.push(prop);
                                 }
                             }
 
+                            if(propObj)
+                            $("#lineageAddEdgeDialog_upperOntologyClassesDiv").html((propObj.upperDomainLabel|"any")+"->"+(propObj.upperRangeLabel|"any"))
+                            else
+                                $("#lineageAddEdgeDialog_upperOntologyClassesDiv").html("any"+"->"+"any")
                             if (propsToKeep.length > 0) {
                                 var filteredProps = {};
                                 propsToKeep.forEach(function (prop) {

@@ -351,8 +351,12 @@ var CsvTripleBuilder = {
                                                                 //pass
                                                             } else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
                                                                 // pass
-                                                            } else if (propertiesTypeMap[item.p] == "string" || item.isString) {
-                                                                if (objectStr.indexOf("xsd:") < 0) objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
+                                                            }else if(item.isString){
+                                                                objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
+
+                                                        } else if (propertiesTypeMap[item.p] == "string" ) {
+                                                                if (objectStr.indexOf("xsd:") < 0)
+                                                                    objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
                                                             } else if (objectStr.indexOf("xsd:") > -1) {
                                                                 //pass
                                                             } else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";

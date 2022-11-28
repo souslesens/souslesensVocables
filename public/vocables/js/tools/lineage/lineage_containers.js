@@ -27,7 +27,7 @@ var Lineage_containers = (function() {
     items["ListMembers"] = {
       label: "List members",
       action: function(_e) {
-        Lineage_containers.listContainerResources(Lineage_sources.activeSource, self.currentContainer.data.id,{nodes:true});
+        Lineage_containers.listContainerResources(Lineage_sources.activeSource, self.currentContainer.data.id);
       }
     };
 
@@ -48,7 +48,7 @@ var Lineage_containers = (function() {
     items["GraphContainerDescendants"] = {
       label: "Graph container descendants",
       action: function(_e) {
-        Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.data.id, {containers:true, descendants:true});
+        Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.data.id, {containers:true, descendants:true,allDescendants:true});
       }
     };
   /*  items["GraphContainerAncestors"] = {
@@ -93,23 +93,33 @@ var Lineage_containers = (function() {
       if (err) return alert(err.responseText);
 
       var jstreeData = [];
+      var nodesparentMap={}
       result.results.bindings.forEach(function(item) {
         var parent = "#";
         if (item.parentContainer) parent = item.parentContainer.value;
-        var node = {
-          id: item.container.value,
-          text: item.containerLabel.value,
-          parent: parent,
-          data: {
-            type: "container",
-            source: source,
+        if(item.container.value==parent)
+          return;
+        if(! nodesparentMap[item.container.value]) {
+          nodesparentMap[item.container.value] = parent
+          var node = {
             id: item.container.value,
-            label: item.containerLabel.value
-          }
-        };
-        jstreeData.push(node);
-        self.currentContainer = node;
+            text: item.containerLabel.value,
+            parent: parent,
+            data: {
+              type: "container",
+              source: source,
+              id: item.container.value,
+              label: item.containerLabel.value
+            }
+          };
+          jstreeData.push(node);
+          self.currentContainer = node;
+        }else{
+          var x=3
+        }
       });
+
+
       var options = {
         openAll: true,
         contextMenu: Lineage_containers.getContextJstreeMenu(),
@@ -348,7 +358,7 @@ var Lineage_containers = (function() {
   self.listContainerResources = function(source, containerId) {
     var existingChildren = common.jstree.getjsTreeNodes("lineage_containers_containersJstree", true, containerId);
     var filter = "filter(?objectType !=rdf:Bag)";
-    self.getContainerResources(source, containerId, {nodes:true}, function(err, result) {
+    self.getContainerResources(source, containerId, {nodes:true,descendants:true}, function(err, result) {
       if (err) return alert(err.responseText);
       var jstreeData = [];
       result.forEach(function(item) {
@@ -407,7 +417,7 @@ var Lineage_containers = (function() {
           });
         }
 
-        if (!existingNodes[item.object.value]) {
+        if (!existingNodes[item.object.value] &&(options.containers && item.objectType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag"  )) {
           existingNodes[item.object.value] = 1;
           var type;
           if (item.objectType && item.objectType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
@@ -461,6 +471,8 @@ var Lineage_containers = (function() {
 
   self.onSelectedNodeTreeclick = function(event, obj) {
     self.currentContainer = obj.node;
+    if(obj.event.button!=2)
+    self.listContainerResources(Lineage_sources.activeSource, self.currentContainer.data.id)
   };
 
   self.onMoveContainer = function(data, element, helper, event) {

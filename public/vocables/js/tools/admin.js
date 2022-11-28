@@ -3,10 +3,10 @@ var Admin = (function () {
     var self = {};
 
     self.onLoaded = function () {
-  $("#toolPanelDiv").load("snippets/admin.html",function(){
-      MainController.UI.showSources ("sourcesTreeDiv", true, null, null, { })
-  })
-     /*   var html =
+        $("#toolPanelDiv").load("snippets/admin.html", function () {
+            MainController.UI.showSources("sourcesTreeDiv", true, null, null, {});
+        });
+        /*   var html =
             " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showTSFdictionary()'>TSF Dictionary</button>" +
             "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.refreshIndexes()'>refreshIndexes </button>&nbsp;<input type='checkbox'  id='admin_refreshIndexWithImportCBX' > Imports also<br>" +
             " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportTaxonomyToCsv()'>export Taxonomy To Csv </button>" +
@@ -239,44 +239,40 @@ var Admin = (function () {
         Lineage_properties.drawPropsRangeAndDomainMatrix(sourceLabel);
     };
 
-self.copyGraphToEndPoint=function() {
-    var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
-    if (sources.length != 1) return alert("select a single source");
-    var source=sources[0]
+    self.copyGraphToEndPoint = function () {
+        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        if (sources.length != 1) return alert("select a single source");
+        var source = sources[0];
 
-var toEndPointUrl=prompt("enter toEndPointUrl")
-    if(!toEndPointUrl)
-        return
-    var toEndPointConfig={"sparql_server":
-          {"url": toEndPointUrl}
-        }
-    var clearEndpointGraph=true;
-    var body = {
-        copyGraphToEndPoint:1,
-        source: source,
-        toEndPointConfig: toEndPointConfig,
-        options: {clearEndpointGraph:clearEndpointGraph}
-    }
+        var toEndPointUrl = prompt("enter toEndPointUrl");
+        if (!toEndPointUrl) return;
+        var toEndPointConfig = { sparql_server: { url: toEndPointUrl } };
+        var clearEndpointGraph = true;
+        var body = {
+            copyGraphToEndPoint: 1,
+            source: source,
+            toEndPointConfig: toEndPointConfig,
+            options: { clearEndpointGraph: clearEndpointGraph },
+        };
 
-
-    var payload = {
-        url: Config.sources[source].sparql_server.url,
-        body: JSON.stringify(body),
-        POST: true,
+        var payload = {
+            url: Config.sources[source].sparql_server.url,
+            body: JSON.stringify(body),
+            POST: true,
+        };
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/httpProxy`,
+            data: payload,
+            dataType: "json",
+            success: function (data, _textStatus, _jqXHR) {
+                alert(data.result + "triples imported in sparqlEndpoint " + toEndPointUrl + "");
+            },
+            error: function (err) {
+                return alert(err.responseText);
+            },
+        });
     };
-    $.ajax({
-        type: "POST",
-        url: `${Config.apiUrl}/httpProxy`,
-        data: payload,
-        dataType: "json",
-        success: function (data, _textStatus, _jqXHR) {
-           alert(data.result +"triples imported in sparqlEndpoint "+toEndPointUrl+ "");
-        },
-        error: function (err) {
-            return alert(err.responseText);
-        },
-    });
-}
 
     return self;
 })();

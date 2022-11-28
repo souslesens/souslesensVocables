@@ -17,266 +17,240 @@ const path = require("path");
 //const { configPath } = require("../model/config");
 const jsonFileStorage = require("./jsonFileStorage");
 var ExportGraph = {
-  execute: function(sparqlUrl, graphUri, filePath, callback) {
-    var limit = 2000;
-    var resultSize = 100;
-    var offset = 0;
-    var str = "";
-    var query = "select * from <" + graphUri + "> where {?s ?p ?o} limit " + limit + " ";
-    async.whilst(
-      function(callbackTest) {
-        //test
-        var w = resultSize > 0;
-        callbackTest(null, w);
-      },
+    execute: function (sparqlUrl, graphUri, filePath, callback) {
+        var limit = 2000;
+        var resultSize = 100;
+        var offset = 0;
+        var str = "";
+        var query = "select * from <" + graphUri + "> where {?s ?p ?o} limit " + limit + " ";
+        async.whilst(
+            function (callbackTest) {
+                //test
+                var w = resultSize > 0;
+                callbackTest(null, w);
+            },
 
-      function(callbackWhilst) {
-        //iterate
+            function (callbackWhilst) {
+                //iterate
 
-        var query2 = query + " OFFSET " + offset;
-        var body = {
-          url: sparqlUrl,
-          params: { query: query2 },
-          headers: {
-            Accept: "application/sparql-results+json",
-            "Content-Type": "application/x-www-form-urlencoded"
-          }
-        };
-        httpProxy.post(body.url, body.headers, body.params, function(err, result) {
-          if (err) return callbackWhilst(err);
+                var query2 = query + " OFFSET " + offset;
+                var body = {
+                    url: sparqlUrl,
+                    params: { query: query2 },
+                    headers: {
+                        Accept: "application/sparql-results+json",
+                        "Content-Type": "application/x-www-form-urlencoded",
+                    },
+                };
+                httpProxy.post(body.url, body.headers, body.params, function (err, result) {
+                    if (err) return callbackWhilst(err);
 
-          if (typeof result === "string") result = JSON.parse(result);
+                    if (typeof result === "string") result = JSON.parse(result);
 
-          offset += result.results.bindings.length;
-          resultSize = result.results.bindings.length;
+                    offset += result.results.bindings.length;
+                    resultSize = result.results.bindings.length;
 
-          result.results.bindings.forEach(function(item) {
-            var value;
-            if (item.o.type == "uri") value = "<" + item.o.value + ">";
-            else {
-              value = "'" + util.formatStringForTriple(item.o.value) + "'";
-              if (item.o["xml:lang"]) value += "@" + item.o["xml:lang"];
+                    result.results.bindings.forEach(function (item) {
+                        var value;
+                        if (item.o.type == "uri") value = "<" + item.o.value + ">";
+                        else {
+                            value = "'" + util.formatStringForTriple(item.o.value) + "'";
+                            if (item.o["xml:lang"]) value += "@" + item.o["xml:lang"];
+                        }
+
+                        str += "<" + item.s.value + "> <" + item.p.value + "> " + value + " .\n";
+                    });
+                    callbackWhilst();
+                });
+            },
+
+            function (err) {
+                if (callback) {
+                    return callback(err, str);
+                }
+
+                if (err) return console.log(err);
+                fs.writeFileSync(filePath, str);
             }
+        );
+    },
 
-            str += "<" + item.s.value + "> <" + item.p.value + "> " + value + " .\n";
-          });
-          callbackWhilst();
-        });
-      },
-
-      function(err) {
-        if (callback) {
-          return callback(err, str);
+    copyGraphToEndPoint: function (_source, toEndPointConfig, options, callback) {
+        if (!options) {
+            options = {};
         }
 
-        if (err) return console.log(err);
-        fs.writeFileSync(filePath, str);
-      }
-    );
-  },
+        var Config;
+        var graphUri;
+        var source;
+        var totalResultSize = 0;
+        async.series(
+            [
+                function (callbackSeries0) {
+                    var sourcesPath = path.join(__dirname, "../" + "config" + "/sources.json");
+                    jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, _sources) {
+                        source = _sources[_source];
+                        graphUri = source.graphUri;
+                        configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
+                        jsonFileStorage.retrieve(path.resolve(configPath), function (err, _config) {
+                            Config = _config;
 
+                            return callbackSeries0();
+                        });
+                    });
+                },
 
-  copyGraphToEndPoint: function(_source, toEndPointConfig, options, callback) {
+                //clearEndpointGraph
+                function (callbackSeries0) {
+                    if (!options.clearEndpointGraph) return callbackSeries0();
 
+                    var query = "clear GRAPH <" + (toEndPointConfig.graphUri || graphUri) + "> ";
 
-    if (!options) {
-      options = {};
-    }
+                    var body = {
+                        url: toEndPointConfig.sparql_server.url + "?query=",
+                        params: { query: query },
+                        headers: {
+                            Accept: "application/sparql-results+json",
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        },
+                    };
 
-    var Config;
-    var graphUri;
-    var source
-    var totalResultSize = 0;
-    async.series([
-      function(callbackSeries0) {
-        var sourcesPath = path.join(__dirname, "../" + "config" + "/sources.json");
-        jsonFileStorage.retrieve(path.resolve(sourcesPath), function(err, _sources) {
-          source=_sources[_source]
-          graphUri = source.graphUri;
-          configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
-          jsonFileStorage.retrieve(path.resolve(configPath), function(err, _config) {
-            Config = _config;
+                    httpProxy.post(body.url, body.headers, body.params, function (err, result) {
+                        if (err) return callbackSeries0(err);
 
-            return callbackSeries0();
-          });
-        });
-      },
+                        return callbackSeries0(null);
+                    });
+                },
 
+                // iterate
+                function (callbackSeries0) {
+                    var filterStr = "";
+                    if (options.filter) filterStr = options.filter;
 
-      //clearEndpointGraph
-      function(callbackSeries0) {
-        if (!options.clearEndpointGraph)
-          return callbackSeries0();
+                    var resultSize = 17;
+                    var offset = 0;
+                    var size = 50;
 
-        var query="clear GRAPH <" + (toEndPointConfig.graphUri || graphUri) + "> ";
+                    var triplesStr = "";
+                    var prefixesStr = "";
 
+                    var stop = false;
+                    async.whilst(
+                        function (_test) {
+                            stop = resultSize < 16;
+                            return _test(null, !stop); //resultSize < 16;
+                        },
 
-        var body = {
-          url: toEndPointConfig.sparql_server.url + "?query=",
-          params: { query: query },
-          headers: {
-            Accept: "application/sparql-results+json",
-            "Content-Type": "application/x-www-form-urlencoded"
-          }
-        };
+                        function (callbackWhilst) {
+                            async.series(
+                                [
+                                    function (callbackSeries) {
+                                        var fromStr = " FROM <" + graphUri + ">  ";
+                                        var url = source.sparql_server.url;
+                                        if (url == "_default") {
+                                            url = Config.default_sparql_url;
+                                        }
 
-        httpProxy.post(body.url, body.headers, body.params, function(err, result) {
-          if (err) return callbackSeries0(err);
+                                        var query = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } offset " + offset + " limit " + size + "";
 
-          return callbackSeries0(null);
+                                        var body = {
+                                            url: url + "?query=",
+                                            params: { query: query },
+                                            headers: {
+                                                Accept: "text/turtle",
+                                                "Content-Type": "application/x-www-form-urlencoded",
+                                            },
+                                        };
 
-        });
-      },
+                                        httpProxy.post(body.url, body.headers, body.params, function (err, result) {
+                                            if (err) return callbackSeries(err);
 
+                                            if (result.indexOf(" Empty TURTLE") > -1) stop = true;
+                                            offset += size;
+                                            resultSize = result.length;
+                                            totalResultSize = offset + size;
+                                            console.log(totalResultSize);
 
-      // iterate
-      function(callbackSeries0) {
+                                            triplesStr = "";
+                                            prefixesStr = "";
 
-        var filterStr = "";
-        if (options.filter) filterStr = options.filter;
+                                            var lines = result.split("\n");
+                                            lines.forEach(function (line) {
+                                                if (line.indexOf("@prefix") == 0) {
+                                                    line = line.replace("/[\t\r]/g", "");
+                                                    //  line = line.replace(/\./g, "") + "\n";
+                                                    prefixesStr += line + "\n";
+                                                } else {
+                                                    triplesStr += line + "\n";
+                                                }
+                                            });
 
-        var resultSize = 17;
-        var offset = 0;
-        var size = 50;
+                                            callbackSeries(null);
+                                        });
+                                    },
+                                    // write triples
+                                    function (callbackSeries) {
+                                        if (stop) {
+                                            return callbackSeries();
+                                        }
+                                        prefixesStr = prefixesStr.replace(/@/g, "");
+                                        prefixesStr = prefixesStr.replace(/\t/g, " ");
+                                        prefixesStr = prefixesStr.replace(/\.\n/g, " ");
 
-        var triplesStr = "";
-        var prefixesStr = "";
+                                        triplesStr = triplesStr.replace(/\t/g, " ");
+                                        triplesStr = triplesStr.replace(/\n/g, " ");
+                                        //    triplesStr=triplesStr.replace(/\\/g,"")
 
-        var stop = false;
-        async.whilst(
-          function(_test) {
-            stop = resultSize < 16;
-            return _test(null, !stop);//resultSize < 16;
+                                        var query = prefixesStr + "\n";
+                                        query += "insert data { GRAPH <" + (toEndPointConfig.graphUri || graphUri) + ">  {";
+                                        query += triplesStr + "}}";
 
-          },
+                                        var body = {
+                                            url: toEndPointConfig.sparql_server.url + "?query=",
+                                            params: { query: query },
+                                            headers: {
+                                                Accept: "application/sparql-results+json",
+                                                "Content-Type": "application/x-www-form-urlencoded",
+                                            },
+                                        };
 
-          function(callbackWhilst) {
-            async.series([
-              function(callbackSeries) {
-                var fromStr = " FROM <" + graphUri + ">  ";
-                var url = source.sparql_server.url;
-                if (url == "_default") {
-                  url = Config.default_sparql_url;
-                }
+                                        httpProxy.post(body.url, body.headers, body.params, function (err, result) {
+                                            if (err) return callbackSeries(err);
 
-
-                var query = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } offset " + offset + " limit " + size + "";
-
-
-                var body = {
-                  url: url + "?query=",
-                  params: { query: query },
-                  headers: {
-
-                    Accept: "text/turtle",
-                    "Content-Type": "application/x-www-form-urlencoded"
-                  }
-                };
-
-                httpProxy.post(body.url, body.headers, body.params, function(err, result) {
-                  if (err) return callbackSeries(err);
-
-
-                  if (result.indexOf(" Empty TURTLE") > -1)
-                    stop = true;
-                  offset += size;
-                  resultSize = result.length;
-                  totalResultSize = offset + size;
-                  console.log(totalResultSize);
-
-
-                  triplesStr = "";
-                  prefixesStr = "";
-
-                  var lines = result.split("\n");
-                  lines.forEach(function(line) {
-                    if (line.indexOf("@prefix") == 0) {
-                      line = line.replace("/[\t\r]/g", "");
-                      //  line = line.replace(/\./g, "") + "\n";
-                      prefixesStr += line + "\n";
-                    } else {
-                      triplesStr += line + "\n";
-                    }
-
-                  });
-
-                  callbackSeries(null);
-                });
-
-              },
-              // write triples
-              function(callbackSeries) {
-                if (stop) {
-                  return callbackSeries();
-                }
-                prefixesStr = prefixesStr.replace(/@/g, "");
-                prefixesStr = prefixesStr.replace(/\t/g, " ");
-                prefixesStr = prefixesStr.replace(/\.\n/g, " ");
-
-                triplesStr = triplesStr.replace(/\t/g, " ");
-                triplesStr = triplesStr.replace(/\n/g, " ");
-                //    triplesStr=triplesStr.replace(/\\/g,"")
-
-
-                var query = prefixesStr + "\n";
-                query +=
-                  "insert data { GRAPH <" + (toEndPointConfig.graphUri || graphUri) + ">  {";
-                query += triplesStr + "}}";
-
-
-                var body = {
-                  url: toEndPointConfig.sparql_server.url + "?query=",
-                  params: { query: query },
-                  headers: {
-                    Accept: "application/sparql-results+json",
-                    "Content-Type": "application/x-www-form-urlencoded"
-                  }
-                };
-
-                httpProxy.post(body.url, body.headers, body.params, function(err, result) {
-                  if (err) return callbackSeries(err);
-
-                  return callbackSeries(null);
-
-                });
-
-              }
-            ], function(err) {
-              return callbackWhilst(err);
-
-
-            });
-          }, function(err) {
-            return callbackSeries0(err);
-          });
-      }], function(err) {
-        return callback(err, {result:totalResultSize});
-      })
-
-
-  }
-
-}
-;
-
+                                            return callbackSeries(null);
+                                        });
+                                    },
+                                ],
+                                function (err) {
+                                    return callbackWhilst(err);
+                                }
+                            );
+                        },
+                        function (err) {
+                            return callbackSeries0(err);
+                        }
+                    );
+                },
+            ],
+            function (err) {
+                return callback(err, { result: totalResultSize });
+            }
+        );
+    },
+};
 module.exports = ExportGraph;
-
 
 return;
 var toEndPointConfig = {
-  "sparql_server": {
-    "url": "https://virtuo.souslesens.enit.fr/sparql",
-    // "url":  "http://51.178.39.209:8888/",
-    //  "url":"http://51.178.139.80:8890//sparql",
-    "method": "Post",
-    "headers": []
-  }
-
-
+    sparql_server: {
+        url: "https://virtuo.souslesens.enit.fr/sparql",
+        // "url":  "http://51.178.39.209:8888/",
+        //  "url":"http://51.178.139.80:8890//sparql",
+        method: "Post",
+        headers: [],
+    },
 };
 
-
-ExportGraph.copyGraphToEndPoint("TSF_GAIA_TEST", toEndPointConfig, {}, function(er, result) {
-
-  console.log(result + " triples imported");
+ExportGraph.copyGraphToEndPoint("TSF_GAIA_TEST", toEndPointConfig, {}, function (er, result) {
+    console.log(result + " triples imported");
 });

@@ -108,9 +108,9 @@ var KGcreator = (function () {
         $("#KGcreator_csvDirsSelect").val("_default");
 
         SourceBrowser.searchableSourcesTreeIsInitialized = null;
-        $("#mainDialogDiv").dialog("open")
+        $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").load("./snippets/searchAll.html", function () {
-    //    $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html", function () {
+            //    $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html", function () {
             SourceBrowser.showSearchableSourcesTreeDialog(["OWL"], { includeSourcesWithoutSearchIndex: true }, function () {
                 var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
                 $("#sourcesSelectionDialogdiv").dialog("close");
@@ -124,7 +124,7 @@ var KGcreator = (function () {
                 self.topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
                 if (callback) callback(null);
             });
-      });
+        });
     };
     self.onChangeSourceTypeSelect = function (sourceType, callback) {
         self.currentSourceType = sourceType;
@@ -635,7 +635,7 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         }
 
         if (isObjectString) tripleObj.isString = true;
-        if( predicate.indexOf("label")>-1) tripleObj.isString = true;
+        if (predicate.indexOf("label") > -1) tripleObj.isString = true;
         if (subjectLookupName) tripleObj.lookup_s = subjectLookupName;
         if (objectLookupName) tripleObj.lookup_o = objectLookupName;
 
@@ -1122,9 +1122,8 @@ if (selectedFiles.length > 0);*/
                             return 0;
                         });
                         result.forEach(function (item) {
-                            if(!item.id)
-                                return;
-                            if ( item.id.type == "bnode") return;
+                            if (!item.id) return;
+                            if (item.id.type == "bnode") return;
                             currentObjectClasses.push({
                                 id: item.id.value,
                                 label: topLevelOntologyPrefix + ":" + (item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value)),

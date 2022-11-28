@@ -1,7 +1,7 @@
 const { processResponse } = require("./utils");
 const httpProxy = require("../../../bin/httpProxy.");
 const GraphTraversal = require("../../../bin/GraphTraversal.");
-const ExportGraph=require("../../../bin/ExportGraph.")
+const ExportGraph = require("../../../bin/ExportGraph.");
 
 module.exports = function () {
     let operations = {
@@ -18,7 +18,7 @@ module.exports = function () {
 
                 if (body.getShortestPath) {
                     const GraphTraversal = require("../../../bin/GraphTraversal.");
-                    GraphTraversal.getShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, body.options,function (err, result) {
+                    GraphTraversal.getShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, body.options, function (err, result) {
                         processResponse(res, err, result);
                     });
                     return;
@@ -26,7 +26,7 @@ module.exports = function () {
 
                 if (body.copyGraphToEndPoint) {
                     const GraphTraversal = require("../../../bin/GraphTraversal.");
-                    ExportGraph.copyGraphToEndPoint(body.source, body.toEndPointConfig,body.options,function (err, result) {
+                    ExportGraph.copyGraphToEndPoint(body.source, body.toEndPointConfig, body.options, function (err, result) {
                         processResponse(res, err, result);
                     });
                     return;

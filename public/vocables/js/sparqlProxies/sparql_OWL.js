@@ -17,7 +17,8 @@ var Sparql_OWL = (function () {
      * @param source
      * @returns sparql (composed) predicate defining chilhood relation for a source depending on its natrue (OWL ,SKOS) and sourceConfig.taxonomyPredicates
      */
-    self.getSourceTaxonomyPredicates = function (source) {
+    self.getSourceTaxonomyPredicates = function (source, options) {
+        if (!options) options = {};
         var defaultTaxonomyPredicates = " <http://www.w3.org/2000/01/rdf-schema#subClassOf> ";
 
         // problem for classes
@@ -35,6 +36,7 @@ var Sparql_OWL = (function () {
             if (item.indexOf("http://") == 0) str += " <" + item + "> ";
             else str += " " + item + " ";
         });
+        if (options.memberPredicate) str += "|^rdfs:member";
 
         return str;
     };
@@ -137,7 +139,7 @@ var Sparql_OWL = (function () {
         if (options.selectGraph) query += " GRAPH ?child1Graph {";
         query +=
             "?child1 " +
-            Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) +
+            Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel, options) +
             " ?concept.  FILTER (!isBlank(?concept)) " +
             strFilter +
             "OPTIONAL {?concept rdfs:label ?conceptLabel." +
@@ -301,12 +303,12 @@ var Sparql_OWL = (function () {
         for (var i = 1; i <= ancestorsDepth; i++) {
             if (i == 1) {
                 //  query += "  OPTIONAL{?concept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
-                query += "  ?concept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
+                query += "  ?concept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel, options) + "  ?broader" + i + ".";
                 query += "  OPTIONAL{ ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} ";
                 query += Sparql_common.getVariableLangLabel("broader" + i);
                 // query += " OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label.}";
             } else {
-                query += "OPTIONAL { ?broader" + (i - 1) + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?broader" + i + ".";
+                query += "OPTIONAL { ?broader" + (i - 1) + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel, options) + " ?broader" + i + ".";
                 //   "?broader" + i + " rdf:type owl:Class."
                 query += " ?broader" + i + " rdf:type ?broaderType" + i + ". filter(?broaderType" + i + " !=owl:Restriction) ";
                 // query += "OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label."
@@ -419,15 +421,15 @@ var Sparql_OWL = (function () {
                 Sparql_common.getVariableLangLabel("subject", true) +
                 Sparql_common.getVariableLangLabel("object", true);
             /* "OPTIONAL{?property rdfs:label ?propertyLabel.}  " +
- " OPTIONAL{?subject rdfs:label ?subjectLabel.}  " +
- " OPTIONAL{?object rdfs:label ?objectLabel.}  ";*/
+" OPTIONAL{?subject rdfs:label ?subjectLabel.}  " +
+" OPTIONAL{?object rdfs:label ?objectLabel.}  ";*/
             if (options.onlyObjectProperties) " ?property rdf:type owl:ObjectProperty.";
             if (options.filter) query += " " + options.filter;
             if (true || options.onlyObject) {
                 query += " filter (!isLiteral(?object) )";
 
                 /*   query += " filter (?subjectType in (owl:NamedIndividual, owl:Class))";
-        query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
+query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
             }
             query += " } order by ?propertyLabel ";
             var limit = options.limit || Config.queryLimit;
@@ -1062,7 +1064,7 @@ var Sparql_OWL = (function () {
                 var url = self.sparql_url + "?format=json&query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: sourceLabel }, function (err, result) {
                     if (err) return callbackWhilst(err);
-                    // result = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["label"]);
+                    result = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["label"]);
                     resultSize = result.length;
                     offset += limitSize;
                     if (processor) {
@@ -1086,6 +1088,7 @@ var Sparql_OWL = (function () {
         if (!options) options = {};
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         var query =
+            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> " +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -1349,33 +1352,60 @@ var Sparql_OWL = (function () {
     self.generateOWL = function (sourceLabel, options, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;
 
+        var fromStr = Sparql_common.getFromStr(sourceLabel, false, true);
         if (!options) {
             options = {};
         }
         var filterStr = "";
         if (options.filter) filterStr = options.filter;
-        var query =
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> " +
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#> " +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            " CONSTRUCT  {?s ?p ?o} where ";
 
-        if (graphUri) query += "{graph <" + graphUri + "> {?s ?p ?o." + filterStr + "}}";
-        else query += "{?s ?p ?o." + filterStr + "}";
-
+        var resultSize = 1;
+        var offset = 0;
+        var size = 1000;
         var url = Config.sources[sourceLabel].sparql_server.url + "?query=";
-        Sparql_proxy.querySPARQL_GET_proxy(
-            url,
-            query,
-            null,
-            {
-                source: sourceLabel,
-                acceptHeader: "text/turtle",
+        var str = "";
+        var prefixesStr = "";
+        async.whilst(
+            function (_test) {
+                return resultSize < 16;
             },
-            function (err, result) {
-                if (err) return callback(err);
 
-                callback(null, result.result);
+            function (callbackWhilst) {
+                var query = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } offset " + offset + " limit " + size + "";
+
+                Sparql_proxy.querySPARQL_GET_proxy(
+                    url,
+                    query,
+                    null,
+                    {
+                        source: sourceLabel,
+                        acceptHeader: "text/turtle",
+                        // acceptHeader: "application/rdf+xml",
+                    },
+
+                    function (err, result) {
+                        if (err) return callbackWhilst(err);
+                        offset += size;
+                        resultSize = result.result.length;
+
+                        var lines = result.result.split("\n");
+                        lines.forEach(function (line) {
+                            if (line.indexOf("@prefix") == 0) {
+                                line = line.replace("/[\t\r]/g", "");
+                                //  line = line.replace(/\./g, "") + "\n";
+                                prefixesStr += line + "\n";
+                            } else {
+                                str += line + "\n";
+                            }
+                        });
+
+                        callbackWhilst(null, result.result);
+                    }
+                );
+            },
+            function (err) {
+                if (err) return callback(err);
+                return callback(null, prefixesStr + str);
             }
         );
     };

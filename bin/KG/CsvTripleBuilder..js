@@ -351,7 +351,9 @@ var CsvTripleBuilder = {
                                                                 //pass
                                                             } else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
                                                                 // pass
-                                                            } else if (propertiesTypeMap[item.p] == "string" || item.isString) {
+                                                            } else if (item.isString) {
+                                                                objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
+                                                            } else if (propertiesTypeMap[item.p] == "string") {
                                                                 if (objectStr.indexOf("xsd:") < 0) objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
                                                             } else if (objectStr.indexOf("xsd:") > -1) {
                                                                 //pass
@@ -735,7 +737,7 @@ var CsvTripleBuilder = {
 
                     // format lookups
                     mappings.lookups.forEach(function (item) {
-                        var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.csvDataFilePath);
+                        var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
                         item.filePath = lookupFilePath;
                         if (item.transformFn) {
                             getFunction(["value", "role", "prop", "row"], item.transformFn, function (err, fn) {

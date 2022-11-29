@@ -108,10 +108,13 @@ var KGcreator = (function () {
         $("#KGcreator_csvDirsSelect").val("_default");
 
         SourceBrowser.searchableSourcesTreeIsInitialized = null;
-        $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html", function () {
+        $("#mainDialogDiv").dialog("open");
+        $("#mainDialogDiv").load("./snippets/searchAll.html", function () {
+            //    $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html", function () {
             SourceBrowser.showSearchableSourcesTreeDialog(["OWL"], { includeSourcesWithoutSearchIndex: true }, function () {
                 var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
                 $("#sourcesSelectionDialogdiv").dialog("close");
+                $("#mainDialogDiv").dialog("close");
                 self.currentSource = source;
                 Config.currentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromImports(source);
 
@@ -612,7 +615,7 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         var subject = $("#KGcreator_subjectInput").val();
         var predicate = $("#KGcreator_predicateInput").val();
         var object = $("#KGcreator_objectInput").val();
-        var isObjectString = $("#KGcreator_isStringCBX").prop("checked");
+        var isObjectString = $("#KGcreator_isObjectStringCBX").prop("checked");
 
         var subjectLookupName = $("#KGcreator_subjectLookupName").val();
         var objectLookupName = $("#KGcreator_objectLookupName").val();
@@ -633,6 +636,7 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         }
 
         if (isObjectString) tripleObj.isString = true;
+        if (predicate.indexOf("label") > -1) tripleObj.isString = true;
         if (subjectLookupName) tripleObj.lookup_s = subjectLookupName;
         if (objectLookupName) tripleObj.lookup_o = objectLookupName;
 
@@ -1119,6 +1123,7 @@ if (selectedFiles.length > 0);*/
                             return 0;
                         });
                         result.forEach(function (item) {
+                            if (!item.id) return;
                             if (item.id.type == "bnode") return;
                             currentObjectClasses.push({
                                 id: item.id.value,

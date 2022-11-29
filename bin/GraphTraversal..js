@@ -1,5 +1,5 @@
 var httpProxy = require("./httpProxy.");
-
+var async = require("async");
 var GraphTraversal = {
     graphViscinityArraysMap: {},
 
@@ -37,10 +37,10 @@ var GraphTraversal = {
 
         /*  var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
 
-        "SELECT ?s ?o FROM   <" + grahUri + ">  WHERE {\n" +
-        " ?s ?p ?o\n" +
-        "  filter(isUri(?o) && ?p not in (rdfs:member) && ?o not in (owl:Class, owl:NamedIndividual, owl:Restriction,owl:ObjectProperty ,<http://souslesens.org/resource/vocabulary/TopConcept> ))}";
-  */
+    "SELECT ?s ?o FROM   <" + grahUri + ">  WHERE {\n" +
+    " ?s ?p ?o\n" +
+    "  filter(isUri(?o) && ?p not in (rdfs:member) && ?o not in (owl:Class, owl:NamedIndividual, owl:Restriction,owl:ObjectProperty ,<http://souslesens.org/resource/vocabulary/TopConcept> ))}";
+*/
         var headers = {};
         headers["Accept"] = "application/sparql-results+json";
         headers["Content-Type"] = "application/x-www-form-urlencoded";
@@ -130,11 +130,14 @@ var GraphTraversal = {
             }
         },
     },
-    getShortestPath: function (sparqlServerUrl, graphUri, fromNodeId, toNodeId, callback) {
+    getShortestPath: function (sparqlServerUrl, graphUri, fromNodeId, toNodeId, options, callback) {
+        if (!options) options = {};
         GraphTraversal.getViscinityArray(sparqlServerUrl, graphUri, {}, function (err, viscinityArray) {
             if (err) return callback(err);
             var graph = new GraphTraversal.path.Graph();
+
             viscinityArray.forEach(function (edge) {
+                if (options.skipNode && edge.indexOf(options.skipNode)) return;
                 graph.addEdge(edge[0], edge[1]);
             });
             GraphTraversal.path.bfs(graph, fromNodeId);
@@ -162,8 +165,88 @@ var GraphTraversal = {
             return callback(null, path2);
         });
     },
+
+    getAllShortestPath: function (sparqlServerUrl, graphUri, fromNodeId, toNodeId, number, callback) {
+        var allpaths = [];
+        var lastPathSize = 1;
+        var iterations = 0;
+        var stop = false;
+        async.whilst(
+            function (_test) {
+                return !stop;
+            },
+            function (callbackWhilst) {
+                GraphTraversal.getShortestPath(sparqlServerUrl, graphUri, fromNodeId, toNodeId, { skipNode: skipNode }, function (err, path) {
+                    if (err) return callbackWhilst(err);
+                    allpaths.push(path);
+                    iterations += 1;
+                    if (lastPathSize <= 2 && iterations < number) stop = true;
+                });
+            },
+            function (err) {
+                return callback(null, path2);
+            }
+        );
+    },
+
+    //https://www.tutorialspoint.com/The-Floyd-Warshall-algorithm-in-Javascript
+    //https://mgechev.github.io/javascript-algorithms/graphs_shortest-path_floyd-warshall.js.html
+    AllPathGraph: function (nodes, edges) {
+        this.nodes = nodes;
+        this.edges = edges;
+        this.floydWarshallAlgorithm = function () {
+            let dist = {};
+            for (let i = 0; i < this.nodes.length; i++) {
+                dist[this.nodes[i]] = {};
+                // For existing edges assign the dist to be same as weight
+                this.edges[this.nodes[i]].forEach((e) => (dist[this.nodes[i]][e.node] = e.weight));
+                this.nodes.forEach((n) => {
+                    // For all other nodes assign it to infinity
+                    if (dist[this.nodes[i]][n] == undefined) dist[this.nodes[i]][n] = Infinity;
+                    // For self edge assign dist to be 0
+                    if (this.nodes[i] === n) dist[this.nodes[i]][n] = 0;
+                });
+            }
+            this.nodes.forEach((i) => {
+                this.nodes.forEach((j) => {
+                    this.nodes.forEach((k) => {
+                        // Check if going from i to k then from k to j is better
+                        // than directly going from i to j. If yes then update
+                        // i to j value to the new value
+                        if (dist[i][k] + dist[k][j] < dist[i][j]) dist[i][j] = dist[i][k] + dist[k][j];
+                    });
+                });
+            });
+            return dist;
+        };
+        return this;
+    },
 };
 module.exports = GraphTraversal;
+
+if (false) {
+    /*g.addNode("A");
+g.addNode("B");
+g.addNode("C");
+g.addNode("D");*/
+    /*
+g.addEdge("A", "C", 100);
+g.addEdge("A", "B", 3);
+g.addEdge("A", "D", 4);
+g.addEdge("D", "C", 3);*/
+
+    var nodes = ["A", "B", "C", "D"];
+
+    var edges = [
+        ["A", "C", 100],
+        ["A", "B", 3],
+        ["A", "D", 4],
+        ["D", "C", 3],
+    ];
+    let g = new GraphTraversal.AllPathGraph(nodes, edges);
+
+    console.log(g.floydWarshallAlgorithm());
+}
 return;
 
 GraphTraversal.getShortestPath(

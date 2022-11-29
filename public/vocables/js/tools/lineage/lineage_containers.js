@@ -24,7 +24,6 @@ var Lineage_containers = (function () {
             },
         };
 
-
         items["ListMembers"] = {
             label: "List members",
             action: function (_e) {

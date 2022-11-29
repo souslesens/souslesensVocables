@@ -108,8 +108,8 @@ var KGcreator = (function () {
         $("#KGcreator_csvDirsSelect").val("_default");
 
         SourceBrowser.searchableSourcesTreeIsInitialized = null;
-       $("#mainDialogDiv").dialog("open");
-       $("#mainDialogDiv").load("./snippets/searchAll.html", function () {
+        $("#mainDialogDiv").dialog("open");
+        $("#mainDialogDiv").load("./snippets/searchAll.html", function () {
             //    $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html", function () {
             SourceBrowser.showSearchableSourcesTreeDialog(["OWL"], { includeSourcesWithoutSearchIndex: true }, function () {
                 var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
@@ -125,9 +125,7 @@ var KGcreator = (function () {
                 self.topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
                 if (callback) callback(null);
             });
-       });
-
-
+        });
     };
     self.onChangeSourceTypeSelect = function (sourceType, callback) {
         self.currentSourceType = sourceType;

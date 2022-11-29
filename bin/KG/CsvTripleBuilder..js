@@ -737,7 +737,7 @@ var CsvTripleBuilder = {
 
                     // format lookups
                     mappings.lookups.forEach(function (item) {
-                        var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.csvDataFilePath);
+                        var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
                         item.filePath = lookupFilePath;
                         if (item.transformFn) {
                             getFunction(["value", "role", "prop", "row"], item.transformFn, function (err, fn) {

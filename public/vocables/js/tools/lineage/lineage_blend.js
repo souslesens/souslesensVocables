@@ -779,7 +779,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
 
                 Sparql_generic.insertTriples(inSource, triples, {}, function (err, _result) {
                     if (err) return callback(err);
-                    return callback(null,  sourceNode.id+"_"+propId+"_"+targetNode.id);
+                    return callback(null, sourceNode.id + "_" + propId + "_" + targetNode.id);
                 });
             } else {
                 var oldRelations = visjsGraph.getNodeEdges(sourceNode.id, targetNode.id);

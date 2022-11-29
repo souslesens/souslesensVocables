@@ -13,6 +13,7 @@ jobs:
     cypress-run:
         runs-on: self-hosted
         timeout-minutes: 10
+        if: ${{ false }}
 
         steps:
             - name: Checkout
@@ -59,7 +60,7 @@ jobs:
     cleanup:
         runs-on: self-hosted
         needs: cypress-run
-        if: always()
+        if: ${{ false }}
         steps:
             - name: Cleanup
               run: sudo docker-compose -f docker-compose.test.yaml down

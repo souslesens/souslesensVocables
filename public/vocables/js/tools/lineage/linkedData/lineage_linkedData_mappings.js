@@ -14,7 +14,8 @@ https: var Lineage_linkedData_mappings = (function() {
   self.init = function() {
     Config.sources[self.mappingSourceLabel] = {
       graphUri: Config.linkedData_mappings_graph,
-      sparql_server: { url: Config.default_sparql_url }
+      sparql_server: { url: Config.default_sparql_url },
+       controller:Sparql_OWL,
     };
     self.initSourceMappingsTree();
   };

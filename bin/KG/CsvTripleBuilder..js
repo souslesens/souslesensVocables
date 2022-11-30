@@ -233,13 +233,14 @@ var CsvTripleBuilder = {
                                     async.series(
                                         [
                                             function (callbackSeries2) {
-                                                lines.forEach(function (line, _indexLine) {
+                                                async.eachSeries(lines, function (line, callbackEachLines2) {
+                                             //   lines.forEach(function (line, _indexLine) {
                                                     //clean line content
 
                                                     var subjectStr = null;
                                                     var objectStr = null;
                                                     var currentBlankNode = null;
-
+                                                    var lineError=""
                                                     mapping.tripleModels.forEach(function (item) {
                                                         for (var key in line) {
                                                             if (line[key] && !CsvTripleBuilder.isUri(line[key])) line[key] = util.formatStringForTriple(line[key]);
@@ -248,6 +249,8 @@ var CsvTripleBuilder = {
                                                         subjectStr = null;
                                                         objectStr = null;
 
+
+
                                                         //get value for Subject
                                                         {
                                                             if (item.s_type == "fixed") subjectStr = item.s;
@@ -255,7 +258,7 @@ var CsvTripleBuilder = {
                                                                 try {
                                                                     subjectStr = item.s(line, item);
                                                                 } catch (e) {
-                                                                    return callbackSeries2(e);
+                                                                    return lineError=e;
                                                                 }
                                                             } else if (item.s === "_blankNode") {
                                                                 currentBlankNode = currentBlankNode || getNewBlankNodeId();
@@ -264,7 +267,7 @@ var CsvTripleBuilder = {
                                                                 try {
                                                                     subjectStr = mapping.transform[item.s](line[item.s], "s", item.p, line);
                                                                 } catch (e) {
-                                                                    return callbackSeries2(e);
+                                                                    return lineError=e+" "+item.s;
                                                                 }
                                                             } else if (item.s.match(/.+:.+|http.+/)) {
                                                                 subjectStr = item.s;
@@ -273,7 +276,8 @@ var CsvTripleBuilder = {
                                                             }
 
                                                             if (item.lookup_s) {
-                                                                if (!lookUpMap[item.lookup_s]) return callbackSeries2("no lookup named " + item.lookup_s);
+                                                                if (!lookUpMap[item.lookup_s])
+                                                                     return lineError="no lookup named " + item.lookup_s
                                                                 var lookupValue = getLookupValue(item.lookup_s, subjectStr);
                                                                 if (!lookupValue) {
                                                                     missingLookups_s += 1;
@@ -300,7 +304,7 @@ var CsvTripleBuilder = {
                                                                 try {
                                                                     objectStr = item.o(line, item);
                                                                 } catch (e) {
-                                                                    return callbackSeries2(e);
+                                                                      return lineError=e;
                                                                 }
                                                             } else if (item.o === "_blankNode") {
                                                                 currentBlankNode = currentBlankNode || getNewBlankNodeId();
@@ -309,7 +313,7 @@ var CsvTripleBuilder = {
                                                                 try {
                                                                     objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line);
                                                                 } catch (e) {
-                                                                    return callbackSeries2(e);
+                                                                    return lineError=e+" "+item.o;
                                                                 }
                                                             } else if (item.o.match(/http.+/)) {
                                                                 objectStr = "<" + item.o + ">";
@@ -318,7 +322,8 @@ var CsvTripleBuilder = {
                                                             } else objectStr = line[item.o];
 
                                                             if (item.lookup_o) {
-                                                                if (!lookUpMap[item.lookup_o]) return callbackSeries2("no lookup named " + item.lookup_o);
+                                                                if (!lookUpMap[item.lookup_o])
+                                                                    return lineError="no lookup named " + item.lookup_o;
                                                                 var lookupValue = getLookupValue(item.lookup_o, objectStr);
                                                                 if (!lookupValue) {
                                                                     missingLookups_o += 1; // console.log("missing lookup_o: " + line[item.o]);
@@ -369,7 +374,7 @@ var CsvTripleBuilder = {
                                                                 try {
                                                                     propStr = item.p(line, item);
                                                                 } catch (e) {
-                                                                    return callbackSeries2(e);
+                                                                    return lineError=e;
                                                                 }
                                                             }
 
@@ -441,7 +446,7 @@ var CsvTripleBuilder = {
                                                                 }
                                                             }
 
-                                                            return;
+                                                            return ;
                                                         }
 
                                                         //not restriction
@@ -469,14 +474,18 @@ var CsvTripleBuilder = {
                                                                 }
                                                             }
                                                         }
+
                                                     });
-                                                });
-                                                callbackSeries2();
+                                                    return callbackEachLines2( lineError)
+                                                },function(err) {
+                                                    callbackSeries2(err);
+                                                })
                                             },
                                             //write triples
                                             function (callbackSeries2) {
                                                 if (options.sampleSize) {
                                                     var sampleTriples = triples.slice(0, options.sampleSize);
+                                                   // return callbackSeries2("sample", sampleTriples);
                                                     return callback(null, sampleTriples);
                                                 }
 
@@ -530,14 +539,14 @@ var CsvTripleBuilder = {
                     function (_err) {
                         var message = "------------ created triples " + totalTriples;
                         console.log(message);
-                        callbackEachMapping();
+                        callbackEachMapping(_err);
                     }
                 );
             },
             function (_err) {
                 if (callback) {
                     var message = "------------ created triples " + totalTriples;
-                    return callback(errors ? +"    ERRORS" + errors : null, message);
+                    return callback(_err, message);
                 }
             }
         );
@@ -702,16 +711,17 @@ var CsvTripleBuilder = {
                                 return callbackSeries("cannot parse object function " + JSON.stringify(item) + " missing enclosing body into 'function{..}'");
                             }
                             var fnBody = array.groups["body"];
+                            fnBody="try{"+fnBody+"}catch(e){\rreturn console.log(e)\r}"
                             var fn = new Function(argsArray, fnBody);
                             return callback(null, fn);
                         } catch (err) {
-                            return callback("error in object function " + fnStr);
+                            return callback("error in object function " + fnStr+"\n"+ err);
                         }
                     }
 
                     // format functions
                     mappings.tripleModels.forEach(function (item) {
-                        if (item.s.indexOf("function") > -1) {
+                        if (item.s.indexOf("function{") > -1) {
                             getFunction(["row", "mapping"], item.s, function (err, fn) {
                                 if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
                                 item.s = fn;
@@ -755,18 +765,23 @@ var CsvTripleBuilder = {
                     var mappingsMap = { [mappings.csvDataFilePath]: mappings };
 
                     CsvTripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function (err, result) {
-                        if (err) return callbackSeries(err);
-                        if (options.sampleSize) output = result;
+                        if (err )
+                            return callbackSeries(err);
+                        if (options.sampleSize) {
+                            output = result;
+                            return callback(err, output);
+                        }
+
                         else output = { countCreatedTriples: result };
                         callbackSeries();
                     });
                 },
 
-                function (callbackSeries) {
-                    callbackSeries();
-                },
+
             ],
             function (err) {
+                if(err=="sample")
+                    err=null;
                 return callback(err, output);
             }
         );

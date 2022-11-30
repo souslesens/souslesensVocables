@@ -228,7 +228,8 @@ var Lineage_linkedData_query = (function () {
 
         var joinObj = self.databasesMap[self.currentDatabase];
 
-        joinStr = joinObj.from.column.replace("_", ".") + "=" + joinObj.to.column.replace("_", ".") + " ";
+        //joinStr = joinObj.from.column.replace("_", ".") + "=" + joinObj.to.column.replace("_", ".") + " ";
+        joinStr = joinObj.from.column + "=" + joinObj.to.column + " ";
         if (fromStr.indexOf(joinObj.from.table) < 0) fromStr += "," + joinObj.from.table;
         if (fromStr.indexOf(joinObj.to.table) < 0) fromStr += "," + joinObj.to.table;
 

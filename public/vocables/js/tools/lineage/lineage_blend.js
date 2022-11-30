@@ -9,8 +9,11 @@ var Lineage_blend = (function () {
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").dialog("option", "title", "Create node in source " + Lineage_sources.activeSource);
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
+                Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, function (err, result) {
+                    self.currentPossibleClassesAndPredicates = result;
                 KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function (err, result) {
                     if (err) return alert(err.responseText);
+                   // self.currentPossibleClassesAndPredicates = result;
                     /*   common.fillSelectOptions("lineage_selection_modifyPredicate_propertySelect", result.predicates, true, "label", "id");
 
                       Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, function (err, result) {
@@ -18,7 +21,7 @@ var Lineage_blend = (function () {
                     if (!Config.sources[Lineage_sources.activeSource].allowIndividuals) {
                         $("#LineageBlend_creatingNamedIndividualButton").css("display", "none");
                     }
-                    self.currentPossibleClassesAndPredicates = result;
+
                     var allObjects = result.sourceObjects.concat(["---------"]).concat(result.TopLevelOntologyObjects).concat(["---------"]).concat(result.usualObjects);
 */
                     common.fillSelectOptions("KGcreator_predicateSelect", result.predicates, true, "label", "id");
@@ -28,6 +31,7 @@ var Lineage_blend = (function () {
                     common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", result.objectClasses, true, "label", "id");
                 });
                 self.possibleNamedIndividuals = {};
+            });
             });
         },
 
@@ -585,7 +589,7 @@ var Lineage_blend = (function () {
 
         addClassesOrIndividualsTriples: function () {
             var str = $("#LineageBlend_creatingNode_nodeListTA").val();
-            if (!str) return alert("no tbale data to process");
+            if (!str) return alert("no tabular data to process");
             var lines = str.trim().split("\n");
 
             var possibleClasses = self.currentPossibleClassesAndPredicates.TopLevelOntologyObjects.concat(self.currentPossibleClassesAndPredicates.sourceObjects);
@@ -624,7 +628,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
 
                 if (cells.length != 2) return;
                 var label = cells[0];
-                var classLabel = cells[1];
+
 
                 if (targetUrisMap[label]) {
                     sourceUrisMap[label] = targetUrisMap[label];
@@ -642,6 +646,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                 var cells = line.split(sep);
                 var label = cells[0];
                 var classLabel = cells[1];
+
                 var sourceUri = sourceUrisMap[label];
                 var targetUri = targetUrisMap[classLabel];
                 var predicate = "rdf:type";

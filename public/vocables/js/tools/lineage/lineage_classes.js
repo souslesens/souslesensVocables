@@ -1149,7 +1149,7 @@ addNode:false
       }
     );
   };
-  self.addChildrenToGraph = function(/** @type {string | number} */ source, /** @type {any} */ nodeIds, /** @type {{ owlType?: any; depth?: any; dontClusterNodes?: any; }} */ options) {
+  self.addChildrenToGraph = function(/** @type {string | number} */ source, /** @type {any} */ nodeIds, /** @type {{ owlType?: any; depth?: any; dontClusterNodes?: any; }} */ options,callback) {
     var parentIds;
     if (!source) {
       source = Lineage_sources.activeSource;
@@ -1339,6 +1339,9 @@ addNode:false
             }
           });
         }
+      }
+      if(callback){
+        return callback(null,visjsData2)
       }
       var visjsData = {
         nodes: visjsDataClusters.nodes.concat(visjsData2.nodes),

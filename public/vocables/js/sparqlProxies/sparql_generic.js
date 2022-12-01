@@ -906,7 +906,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
                             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
                             var url = self.sparql_url + "?format=json&timeout=20000&debug=on&query=";
-                            Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: sourceLabel }, function (err, result) {
+                            Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: sourceLabel,skipCurrentQuery:true }, function (err, result) {
                                 if (err) return callbackWhilst(err);
                                 result = result.results.bindings;
                                 allData = allData.concat(result);

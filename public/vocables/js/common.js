@@ -995,5 +995,16 @@ if (callback) return callback(err);
         return hex;
     };
 
+    self.getInputSelection=function(){
+        var userSelection;
+        if (window.getSelection) {
+            userSelection = window.getSelection();
+        }
+        else if (document.selection) { // Opera
+            userSelection = document.selection.createRange();
+        }
+        return userSelection
+    }
+
     return self;
 })();

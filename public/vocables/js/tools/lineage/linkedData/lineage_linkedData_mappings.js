@@ -216,6 +216,10 @@ self.graphTable(KGcreator.currentTreeNode);
           common.fillSelectOptions("lineage_linkedData_join_fromColumnSelect", fromColumns);
           common.fillSelectOptions("lineage_linkedData_join_toColumnSelect", toColumns);
 
+          var joinTables= $("#KGcreator_csvTreeDiv").jstree().get_node("#").children;
+          common.fillSelectOptions("lineage_linkedData_join_joinTableSelect", joinTables,true);
+
+
           KGcreator.showSampleData({ data: {}, parent: relation.fromColumn.table }, true, 20, function(err, result) {
             if (err) return;
             result = result.replace(/\n/g, "</td><tr><td>");
@@ -234,6 +238,19 @@ self.graphTable(KGcreator.currentTreeNode);
       }
     );
   };
+
+
+  self.showJoinTableColumns=function(joinTable){
+    var joinTableColumns = $("#KGcreator_csvTreeDiv").jstree().get_node(joinTable).children;
+
+    common.fillSelectOptions("lineage_linkedData_join_joinColumnSelect", joinTableColumns);
+
+  }
+  self.joinTable=function(direction){
+
+  }
+
+
   self.writeJoinMapping = function() {
     var fromColumn = $("#lineage_linkedData_join_fromColumnSelect").val();
     var toColumn = $("#lineage_linkedData_join_toColumnSelect").val();

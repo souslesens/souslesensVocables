@@ -19,7 +19,11 @@ Lineage_sources = (function () {
         self.activeSource = null;
         self.loadedSources = {};
         self.sourceDivsMap = {};
-        $("#graphDiv").html("");
+
+       // self.clearSource()
+
+
+        self.resetVisjsGraph();
         Lineage_selection.selectedNodes = [];
         self.setTheme(Config.defaultGraphTheme);
         Lineage_sources.showSourcesDialog();
@@ -29,6 +33,13 @@ Lineage_sources = (function () {
         self.init();
         self.showSourcesDialog();
     };
+
+
+    self.resetVisjsGraph=function(){
+        $("#graphDiv").html("");
+        Lineage_classes.drawNewGraph({nodes:[],edges:[]})
+
+    }
 
     self.showSourcesDialog = function () {
         SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], { includeSourcesWithoutSearchIndex: true }, function () {

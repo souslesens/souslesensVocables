@@ -342,7 +342,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         },
 
         setTreeParentDivDimensions: function (jstreeDiv) {
-            return;
+
             var parentDiv = $("#" + jstreeDiv).parent();
             if (!parentDiv)
                 // || parentDiv.width)

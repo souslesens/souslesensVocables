@@ -9,10 +9,12 @@
     <table id="lineage_linkedData_join_table">
         <tr>
             <td>From Class<span id="lineage_linkedData_join_fromClassId"></span></td>
+            <td>Join table</td>
             <td>To Class<span id="lineage_linkedData_join_toClassId"></span></td>
         </tr>
         <tr>
             <td>From Table<span id="lineage_linkedData_join_fromTableId"></span></td>
+            <td><select onclick="Lineage_linkedData_mappings.showJoinTableColumns($(this).val())" id="lineage_linkedData_join_joinTableSelect"></select></span></td>
             <td>To Table<span id="lineage_linkedData_join_toTableId"></span></td>
         </tr>
 
@@ -21,13 +23,30 @@
                 <select id="lineage_linkedData_join_fromColumnSelect" size="10"></select>
             </td>
             <td>
+                <select id="lineage_linkedData_join_joinColumnSelect" size="10"></select>
+            </td>
+            <td>
                 <select id="lineage_linkedData_join_toColumnSelect" size="10"></select>
+            </td>
+        </tr>
+        <tr>
+            <td>
+
+            </td>
+            <td>
+                <div class="lineage_button_group">
+              <button onclick="Lineage_linkedData_mappings.joinTable('from')"><-join From</button>
+                <button onclick="Lineage_linkedData_mappings.joinTable('to')">join To-></button>
+                </div>
+            </td>
+            <td>
+
             </td>
         </tr>
     </table>
     <button onclick="Lineage_linkedData_mappings.writeJoinMapping()">OK</button>
 </div>
-
+<!--
 <div id="lineage_linkedData_join_fromSampleDataDiv" style="width: 700px; height: 200px; overflow: auto"></div>
 
-<div id="lineage_linkedData_join_toSampleDataDiv" style="width: 500px; height: 200px; overflow: auto"></div>
+<div id="lineage_linkedData_join_toSampleDataDiv" style="width: 500px; height: 200px; overflow: auto"></div>-->

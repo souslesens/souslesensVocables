@@ -416,47 +416,7 @@ var Lineage_selection = (function () {
     };
 
     self.container = {
-        showDialog: function () {
-            return alert("coming soon");
-            $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_containerDialog.html", function () {
-                var filter = " ?concept rdf:type <http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag>";
-                Sparql_generic.getItems(
-                    Lineage_sources.activeSource,
-                    {
-                        filter: filter,
-                        distinct: "?concept ?conceptLabel",
-                    },
-                    function (err, result) {
-                        if (err) return alert(err.responseText);
-                        var containers = [];
-                        result.forEach(function (item) {
-                            containers.push({ id: item.concept.value, label: item.conceptLabel.value });
-                        });
-                        common.fillSelectOptions("lineage_selection_container_containersSelect", containers, true, "label", "id");
-                    }
-                );
-            });
-        },
 
-        newContainer: function () {
-            var containerName = prompt("New container name");
-            if (!containerName) return;
-            self.container.isNew = 1;
-            var containerUri = Config.sources[Lineage_sources.activeSource].graphUri + common.formatStringForTriple(containerName, true);
-            $("#lineage_selection_container_containersSelect").append("<option selected='selected'  value='" + containerUri + "'>" + containerName + "</option>");
-        },
-        apply: function () {
-            var jstreeNodes = $("#lineage_selection_selectedNodesTreeDiv").jstree(true).get_checked(true);
-            var containerUri = $("#lineage_selection_container_containersSelect").val();
-            var containerName = $("#lineage_selection_container_containersSelect option:selected").text();
-
-            var container = { type: "container", label: containerName, id: containerUri };
-
-            Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, container, jstreeNodes, function (err, result) {
-                if (err) return alert(err.responseText);
-                MainController.UI.message("nodes added to container " + containerName, true);
-            });
-        },
     };
 
     self.modifyPredicates = {

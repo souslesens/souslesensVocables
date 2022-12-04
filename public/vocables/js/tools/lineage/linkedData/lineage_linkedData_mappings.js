@@ -7,16 +7,22 @@ https: var Lineage_linkedData_mappings = (function() {
   self.tableShape = "square";
   self.columnShape = "diamond";
   self.databaseShape = " database";
-
+self.isInitialized=false
 
   self.mappingSourceLabel = "linkedData_mappings_graph";
 
   self.init = function() {
-    Config.sources[self.mappingSourceLabel] = {
-      graphUri: Config.linkedData_mappings_graph,
-      sparql_server: { url: Config.default_sparql_url },
-       controller:Sparql_OWL,
-    };
+    if(!self.isInitialized) {
+      self.isInitialized =true
+        Config.sources[self.mappingSourceLabel] = {
+          graphUri: Config.linkedData_mappings_graph,
+          sparql_server: { url: Config.default_sparql_url },
+          controller: Sparql_OWL
+        };
+    }
+
+
+
     self.initSourceMappingsTree();
   };
 
@@ -55,22 +61,31 @@ self.graphTable(KGcreator.currentTreeNode);
     items.showSampledata = {
       label: "Show sample data",
       action: function(_e) {
-        self.showSampledata(KGcreator.currentTreeNode);
+        self.showSampledata(KGcreator.currentTreeNode, null, "mainDialogDiv");
       }
     };
 
     return items;
   };
 
-  self.showSampledata = function(node) {
-    KGcreator.showSampleData(node, true, 100, function(err, result) {
-      $("#mainDialogDiv").dialog("open");
+  self.showSampledata = function(table, column, targetDiv) {
+
+    var node = { parent: table, data: {} };
+    var allColumns = true;
+    if (column) {
+      allColumns = false;
+      column = column.substring(table.length + 1);
+      node.data = { id: column };
+    }
+    KGcreator.showSampleData(node, allColumns, 100, function(err, result) {
+      if (targetDiv == "mainDailogDiv")
+        $("#mainDialogDiv").dialog("open");
 
       result = result.replace(/\n/g, "</td><tr><td>");
       result = result.replace(/\t/g, "</td><td>");
       var html = "<table><tr><td>" + result + "</tr></table>";
 
-      $("#mainDialogDiv").html(html);
+      $("#" + targetDiv).html(html);
     });
   };
 
@@ -167,6 +182,7 @@ self.graphTable(KGcreator.currentTreeNode);
     if (!self.currentDatabase) return alert("select a database");
 
     var relation = edge.data;
+
     relation.from = edge.from;
     relation.to = edge.to;
     self.currentRelation = relation;
@@ -202,56 +218,108 @@ self.graphTable(KGcreator.currentTreeNode);
           $("#lineage_linkedData_join_fromTableId").html(relation.fromColumn.table);
           $("#lineage_linkedData_join_toTableId").html(relation.toColumn.table);
 
+
+          var fromColumnObjs=[]
           var fromColumns = $("#KGcreator_csvTreeDiv").jstree().get_node(relation.fromColumn.table).children;
-
           fromColumns.forEach(function(item, index) {
-            fromColumns[index] = relation.fromColumn.table + "." + item.substring(relation.fromColumn.table.length + 1);
+            var column= item.substring(relation.fromColumn.table.length + 1);
+            var id = relation.fromColumn.table + "." + column;
+            fromColumnObjs.push({id:id,label:column})
           });
+
+          var toColumnObjs=[];
           var toColumns = $("#KGcreator_csvTreeDiv").jstree().get_node(relation.toColumn.table).children;
-
           toColumns.forEach(function(item, index) {
-            toColumns[index] = relation.toColumn.table + "." + item.substring(relation.toColumn.table.length + 1);
+            var column= item.substring(relation.toColumn.table.length + 1);
+            var id = relation.toColumn.table + "." + column;
+            toColumnObjs.push({id:id,label:column})
           });
 
-          common.fillSelectOptions("lineage_linkedData_join_fromColumnSelect", fromColumns);
-          common.fillSelectOptions("lineage_linkedData_join_toColumnSelect", toColumns);
+          common.fillSelectOptions("lineage_linkedData_join_fromColumnSelect", fromColumnObjs,null,"label","id");
+          common.fillSelectOptions("lineage_linkedData_join_toColumnSelect",  toColumnObjs,null,"label","id");
 
-          var joinTables= $("#KGcreator_csvTreeDiv").jstree().get_node("#").children;
-          common.fillSelectOptions("lineage_linkedData_join_joinTableSelect", joinTables,true);
+          var joinTables = $("#KGcreator_csvTreeDiv").jstree().get_node("#").children;
+          common.fillSelectOptions("lineage_linkedData_join_joinTableSelect", joinTables, true);
 
 
-          KGcreator.showSampleData({ data: {}, parent: relation.fromColumn.table }, true, 20, function(err, result) {
-            if (err) return;
-            result = result.replace(/\n/g, "</td><tr><td>");
-            result = result.replace(/\t/g, "</td><td>");
-            var html = "<table><tr><td>" + result + "</tr></table>";
-            $("#lineage_linkedData_join_fromSampleDataDiv").html(html);
-            KGcreator.showSampleData({ data: {}, parent: relation.toColumn.table }, true, 20, function(err, result) {
-              if (err) return;
-              result = result.replace(/\n/g, "</td><tr><td>");
-              result = result.replace(/\t/g, "</td><td>");
-              var html = "<table><tr><td>" + result + "</tr></table>";
-              $("#lineage_linkedData_join_toSampleDataDiv").html(html);
-            });
-          });
+          /*    KGcreator.showSampleData({ data: {}, parent: relation.fromColumn.table }, true, 20, function(err, result) {
+                if (err) return;
+                result = result.replace(/\n/g, "</td><tr><td>");
+                result = result.replace(/\t/g, "</td><td>");
+                var html = "<table><tr><td>" + result + "</tr></table>";
+                $("#lineage_linkedData_join_fromSampleDataDiv").html(html);
+                KGcreator.showSampleData({ data: {}, parent: relation.toColumn.table }, true, 20, function(err, result) {
+                  if (err) return;
+                  result = result.replace(/\n/g, "</td><tr><td>");
+                  result = result.replace(/\t/g, "</td><td>");
+                  var html = "<table><tr><td>" + result + "</tr></table>";
+                  $("#lineage_linkedData_join_toSampleDataDiv").html(html);
+                });
+              });*/
         });
       }
     );
   };
 
 
-  self.showJoinTableColumns=function(joinTable){
+  /* self.showTableSample=function(table,div){
+     KGcreator.showSampleData({ data: {}, parent: table }, true, 20, function(err, result) {
+       if (err) return;
+       result = result.replace(/\n/g, "</td><tr><td>");
+       result = result.replace(/\t/g, "</td><td>");
+       var html = "<table><tr><td>" + result + "</tr></table>";
+       $("#"+div).html(html);
+     })
+   }*/
+
+  self.showJoinTableColumns = function(joinTable) {
+    $("#lineage_linkedData_join_sampleDataTableName").html(joinTable);
+    self.currentRelation.joinTable = { table: joinTable, fromColumn: "", toColumn: "" };
+
+    var joinColumnObjs=[]
     var joinTableColumns = $("#KGcreator_csvTreeDiv").jstree().get_node(joinTable).children;
+    joinTableColumns.forEach(function(item){
+      var column= item.substring(joinTable.length + 1);
+      var id =joinTable + "." + column;
+      joinColumnObjs.push({id:id,label:column})
+    })
 
-    common.fillSelectOptions("lineage_linkedData_join_joinColumnSelect", joinTableColumns);
+    common.fillSelectOptions("lineage_linkedData_join_joinColumnSelect", joinColumnObjs, null,"label","id");
+
+  };
+  self.joinTable = function(direction) {
+    if (direction == "from") {
+      var column = $("#lineage_linkedData_join_joinColumnSelect").val();
+     // column=self.currentRelation.joinTable.table+"."+column.substring(self.currentRelation.joinTable.table+1)
+      self.currentRelation.joinTable.fromColumn = column;
+      $("#lineage_linkedData_join_fromJoinSpan").html( self.currentRelation.fromColumn.column+" -> "+ column)
+    } else if (direction == "to") {
+      var column = $("#lineage_linkedData_join_joinColumnSelect").val();
+     // column=self.currentRelation.joinTable.table+"."+column.substring(self.currentRelation.joinTable.table+1)
+      self.currentRelation.joinTable.toColumn = column;
+      $("#lineage_linkedData_join_toJoinSpan").html(column+" -> "+  self.currentRelation.toColumn.column)
+
+    }
+
+  };
+  self.viewTableSample = function(direction) {
+    if (direction == "from") {
+      var column = $("#lineage_linkedData_join_fromColumnSelect").val();
+      self.showSampledata(self.currentRelation.fromColumn.table, column, "lineage_linkedData_join_fromSampleDataDiv");
+    }
+   else if (direction == "join") {
+    var column = $("#lineage_linkedData_join_joinColumnSelect").val();
+    self.showSampledata(self.currentRelation.joinTable.table, column, "lineage_linkedData_join_joinSampleDataDiv");
 
   }
-  self.joinTable=function(direction){
-
+    else if (direction == "to") {
+      var column = $("#lineage_linkedData_join_toColumnSelect").val();
+      self.showSampledata(self.currentRelation.toColumn.table, column, "lineage_linkedData_join_toSampleDataDiv");
+    }
   }
 
 
-  self.writeJoinMapping = function() {
+  self.buildJoin = function() {
     var fromColumn = $("#lineage_linkedData_join_fromColumnSelect").val();
     var toColumn = $("#lineage_linkedData_join_toColumnSelect").val();
     if (!fromColumn || !toColumn) return alert("enter fromColumn and toColumn ");
@@ -264,11 +332,58 @@ self.graphTable(KGcreator.currentTreeNode);
       toColumn: toColumn
     };
 
-    var triples = [];
+    if (self.currentRelation.joinTable) {
+      join.joinTable = self.currentRelation.joinTable.table;
+      join.joinWhere = fromColumn + " = " + self.currentRelation.joinTable.fromColumn + " and " + self.currentRelation.joinTable.toColumn + " = " + toColumn;
+
+    }
+
+    return join;
+  };
+
+
+  self.testJoin = function() {
+    var join = self.buildJoin();
+    var query = "select count(*) as count from " + join.fromTable + "," + join.toTable;
+    if (join.joinTable)
+      query += ","+join.joinTable;
+    query += " where ";
+    if (join.joinTable)
+      query += join.joinWhere;
+    else
+      query += join.fromColumn + "=" + join.toColumn;
+
+
+    const params = new URLSearchParams({
+      type: "sql.sqlserver",
+      dbName: KGcreator.currentDbName,
+      sqlQuery: query
+    });
+
+    $.ajax({
+      type: "GET",
+      url: Config.apiUrl + "/kg/data?" + params.toString(),
+      dataType: "json",
+
+      success: function(data, _textStatus, _jqXHR) {
+        var count=data[0].count
+        alert("Join OK, found joins : " +count);
+      },
+      error(err) {
+        return alert(err, responseText);
+      }
+    });
+
+
+  };
+
+
+  self.writeJoinMapping = function() {
+    var join = self.buildJoin();
+
     var joinUri = Config.linkedData_mappings_graph + common.getRandomHexaId(10);
 
-    //   var sql = "select * from " + relation.fromColumn.table + "," + relation.toColumn.table + " " + joinClause;
-
+    var triples = [];
     triples.push({
       subject: joinUri,
       predicate: "slsv:database",
@@ -295,17 +410,39 @@ self.graphTable(KGcreator.currentTreeNode);
       object: join.toColumn
     });
 
+
+    if (self.currentRelation.joinTable) {
+      triples.push({
+        subject: joinUri,
+        predicate: "slsv:joinTable",
+        object: join.joinTable
+      });
+
+      triples.push({
+        subject: joinUri,
+        predicate: "slsv:joinWhere",
+        object: join.joinWhere
+      });
+
+    }
+
+
     triples.push({
       subject: joinUri,
       predicate: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
       object: "slsv:sql-join"
     });
 
+
     triples.push({
       subject: joinUri,
       predicate: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
       object: "<http://www.w3.org/2002/07/owl#NamedIndividual>"
     });
+
+
+
+
     var sparqlPrefixes = {
       slsv: Config.linkedData_mappings_graph
     };
@@ -315,7 +452,7 @@ self.graphTable(KGcreator.currentTreeNode);
 
       var triples = [
         {
-          subject: self.currentRelation.bNodeId,
+          subject: "<"+self.currentRelation.bNodeId+">",
           predicate: "<" + Config.linkedData_mappings_graph + "hasSqlJoin>",
           object: joinUri
         }
@@ -327,6 +464,7 @@ self.graphTable(KGcreator.currentTreeNode);
       });
     });
   };
+
 
   self.writeColumnMapping = function(graphNodeSource, entityUri, columnDesc, callback) {
     var columnUri = Config.linkedData_mappings_graph + common.getRandomHexaId(10);
@@ -423,6 +561,7 @@ self.graphTable(KGcreator.currentTreeNode);
   self.getSourceJoinsMappings = function(source, options, callback) {
     var joinsMap = {};
     var joinsIds = [];
+    self.init()
     async.series(
       [
         function(callbackSeries) {
@@ -437,6 +576,8 @@ self.graphTable(KGcreator.currentTreeNode);
                 prop: item.prop.value,
                 propLabel: item.propLabel.value
               };
+
+
             });
 
             return callbackSeries();
@@ -472,6 +613,8 @@ self.graphTable(KGcreator.currentTreeNode);
               if (item.p.value.indexOf("toTable") > -1) joinsMap[joinId].databases[joinDatabaseMap[joinId]].to.table = item.o.value;
               if (item.p.value.indexOf("fromColumn") > -1) joinsMap[joinId].databases[joinDatabaseMap[joinId]].from.column = item.o.value;
               if (item.p.value.indexOf("toColumn") > -1) joinsMap[joinId].databases[joinDatabaseMap[joinId]].to.column = item.o.value;
+              if (item.p.value.indexOf("joinTable") > -1) joinsMap[joinId].databases[joinDatabaseMap[joinId]].joinTable = item.o.value;
+              if (item.p.value.indexOf("joinWhere") > -1) joinsMap[joinId].databases[joinDatabaseMap[joinId]].joinWhere = item.o.value;
             });
 
             return callbackSeries();
@@ -703,14 +846,14 @@ self.graphTable(KGcreator.currentTreeNode);
       [
         //get joins Uris in source
         function(callbackSeries) {
-        if(mappingIds){
-        return callbackSeries()
-        }
+          if (mappingIds) {
+            return callbackSeries();
+          }
           mappingIds = [];
-        var filterStr=""
-          if(mappingId)
+          var filterStr = "";
+          if (mappingId)
 
-          var query = "select * " + "where {?s ?p ?o filter( ?p in (<" + Config.linkedData_mappings_graph + "hasColumnMapping>,<" + Config.linkedData_mappings_graph + "hasSqlJoin>))}";
+            var query = "select * " + "where {?s ?p ?o filter( ?p in (<" + Config.linkedData_mappings_graph + "hasColumnMapping>,<" + Config.linkedData_mappings_graph + "hasSqlJoin>))}";
           Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
             if (err) {
               return callbackSeries(err);
@@ -743,7 +886,7 @@ self.graphTable(KGcreator.currentTreeNode);
             Config.linkedData_mappings_graph +
             "hasColumnMapping>,<" +
             Config.linkedData_mappings_graph +
-            "hasSqlJoin>))"+filterStr+"}";
+            "hasSqlJoin>))" + filterStr + "}";
 
           Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
             return callbackSeries(err);
@@ -753,8 +896,8 @@ self.graphTable(KGcreator.currentTreeNode);
       function(err) {
         if (err) return alert(err.responseText);
 
-        if(mappingIds.length==0)
-        $("#Lineage_mappingsTreeDiv").jstree().delete_node(mappingIds[0])
+        if (mappingIds.length == 0)
+          $("#Lineage_mappingsTreeDiv").jstree().delete_node(mappingIds[0]);
         return alert("mappings deleted");
       }
     );
@@ -769,57 +912,69 @@ self.graphTable(KGcreator.currentTreeNode);
         joinsMap = _joinsMap;
 
 
+        var jstreeData = [];
 
-        var jstreeData=[];
-        var existingNodes={}
-      for(var resourceId in columns){
-        var item= columns[resourceId]
-          if(!existingNodes[item.database]){
-            existingNodes[item.database]=1
+
+
+
+        var existingNodes = {};
+        for (var resourceId in columns) {
+          var item = columns[resourceId];
+          if (!existingNodes[item.database]) {
+            existingNodes[item.database] = 1;
 
             jstreeData.push({
-              id:item.database,
-              text:item.database,
-              parent:"#"
+              id: item.database,
+              text: item.database,
+              parent: "#"
+            });
+            jstreeData.push({
+              id:item.database+"column_mappings",
+              text:"Column mappings",
+              parent:item.database
             })
-          }
-          if(!existingNodes[resourceId]){
-            existingNodes[resourceId]=1
+            jstreeData.push({
+              id:item.database+"join_mappings",
+              text:"Join mappings",
+              parent:item.database
+            })
+
 
             jstreeData.push({
-              id:resourceId,
-              text:item.conceptLabel+"->"+item.table+"."+item.column,
+              id:item.database+"individual_mappings",
+              text:"Individual mappings",
               parent:item.database
             })
           }
+          if (!existingNodes[resourceId]) {
+            existingNodes[resourceId] = 1;
+
+            jstreeData.push({
+              id: resourceId,
+              text: item.conceptLabel + "->" + item.table + "." + item.column,
+              parent:  item.database+"column_mappings",
+            });
+          }
 
 
         }
 
-        for(var joinId in joinsMap) {
-          var relation = joinsMap[joinId]
+        for (var joinId in joinsMap) {
+          var relation = joinsMap[joinId];
           for (var database in relation.databases) {
 
-            if (!existingNodes[database]) {
-              existingNodes[database] = 1
-              jstreeData.push({
-                id:database,
-                text:database,
-                parent:"#"
-              })
 
-            }
 
-         //   var item = relation.databases[database]
+            //   var item = relation.databases[database]
 
-            if(!existingNodes[joinId]){
-              existingNodes[joinId]=1
+            if (!existingNodes[joinId]) {
+              existingNodes[joinId] = 1;
 
               jstreeData.push({
-                id:joinId,
-                text:relation.from.classLabel+"-"+relation.propLabel+"->"+relation.from.classLabel,
-                parent:database
-              })
+                id: joinId,
+                text: relation.from.classLabel + "-" + relation.propLabel + "->" + relation.to.classLabel,
+                parent:  database+"join_mappings",
+              });
             }
 
 
@@ -827,16 +982,15 @@ self.graphTable(KGcreator.currentTreeNode);
 
         }
 
-        var options={
-          openAll:true,
+        var options = {
+          openAll: true,
           contextMenu: Lineage_linkedData_mappings.getmappingsTreeContextMenu(),
-          selectTreeNodeFn: function(event,obj){
-            self.currentMappingNode=obj.node
+          selectTreeNodeFn: function(event, obj) {
+            self.currentMappingNode = obj.node;
           }
 
-        }
-        common.jstree.loadJsTree("Lineage_mappingsTreeDiv",jstreeData,options)
-
+        };
+        common.jstree.loadJsTree("Lineage_mappingsTreeDiv", jstreeData, options);
 
 
       });
@@ -846,24 +1000,24 @@ self.graphTable(KGcreator.currentTreeNode);
 
   };
 
-  self.getmappingsTreeContextMenu=function(){
+  self.getmappingsTreeContextMenu = function() {
     var items = {};
     items.nodeInfos = {
       label: "Node infos",
-      action: function (_e) {
+      action: function(_e) {
 
-       SourceBrowser.showNodeInfos(self.mappingSourceLabel,self.currentMappingNode.id, "mainDialogDiv");
-      },
+        SourceBrowser.showNodeInfos(self.mappingSourceLabel, self.currentMappingNode.id, "mainDialogDiv");
+      }
     };
     items.deleteNode = {
       label: "Delete",
-      action: function (_e) {
+      action: function(_e) {
 
-        Lineage_linkedData_mappings.clearSourceMappings(Lineage_sources.activeSource,[self.currentMappingNode.id])
-      },
+        Lineage_linkedData_mappings.clearSourceMappings(Lineage_sources.activeSource, [self.currentMappingNode.id]);
+      }
     };
     return items;
-  }
+  };
 
   return self;
-})();
+})()

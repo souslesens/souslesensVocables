@@ -3,9 +3,26 @@
     "margin: 5px;padding: 5px
 
     }
+    #lineage_linkedData_join_table td {
+        text-align: center
+    }
+    #lineage_linkedData_join_table td {
+        text-align: center
+    }
+    #lineage_linkedData_join_table select {
+        width:250px
+    }
+    #lineage_linkedData_join_sampleDataDiv tr{
+        height:10px
+    }
+    #lineage_linkedData_join_sampleDataDiv td{
+       width:50px
+    }
 </style>
-<div>
-    Database <span id="lineage_linkedData_join_databaseId"></span>
+Database <span id="lineage_linkedData_join_databaseId"></span>
+<div style="display:flex;flex-direction: row">
+   <div>
+
     <table id="lineage_linkedData_join_table">
         <tr>
             <td>From Class<span id="lineage_linkedData_join_fromClassId"></span></td>
@@ -14,39 +31,57 @@
         </tr>
         <tr>
             <td>From Table<span id="lineage_linkedData_join_fromTableId"></span></td>
-            <td><select onclick="Lineage_linkedData_mappings.showJoinTableColumns($(this).val())" id="lineage_linkedData_join_joinTableSelect"></select></span></td>
+            <td><select style="width:230px" onchange="Lineage_linkedData_mappings.showJoinTableColumns($(this).val())" id="lineage_linkedData_join_joinTableSelect"></select></span></td>
             <td>To Table<span id="lineage_linkedData_join_toTableId"></span></td>
         </tr>
 
         <tr>
             <td>
-                <select id="lineage_linkedData_join_fromColumnSelect" size="10"></select>
+                <select onchange="Lineage_linkedData_mappings.viewTableSample('from')" id="lineage_linkedData_join_fromColumnSelect" size="10"></select>
             </td>
             <td>
-                <select id="lineage_linkedData_join_joinColumnSelect" size="10"></select>
+                <select  onchange="Lineage_linkedData_mappings.viewTableSample('join')" id="lineage_linkedData_join_joinColumnSelect" size="10"></select>
             </td>
             <td>
-                <select id="lineage_linkedData_join_toColumnSelect" size="10"></select>
+                <select  onchange="Lineage_linkedData_mappings.viewTableSample('to')" id="lineage_linkedData_join_toColumnSelect" size="10"></select>
             </td>
         </tr>
         <tr>
             <td>
-
+                <span id="lineage_linkedData_join_fromJoinSpan"></span>
             </td>
             <td>
-                <div class="lineage_button_group">
+
               <button onclick="Lineage_linkedData_mappings.joinTable('from')"><-join From</button>
+
                 <button onclick="Lineage_linkedData_mappings.joinTable('to')">join To-></button>
-                </div>
+
             </td>
             <td>
-
+                <span id="lineage_linkedData_join_toJoinSpan"></span>
+            </td>
+        </tr>
+        <tr>
+        <tr>
+            <td>
+                <div id="lineage_linkedData_join_fromSampleDataDiv" style="width: 250px; height: 300px; overflow: auto"></div>
+            </td>
+            <td>
+                <div id="lineage_linkedData_join_joinSampleDataDiv" style="width: 250px; height: 300px; overflow: auto"></div>
+            </td>
+            <td>
+                <div id="lineage_linkedData_join_toSampleDataDiv" style="width: 250px; height: 300px; overflow: auto"></div>
             </td>
         </tr>
     </table>
-    <button onclick="Lineage_linkedData_mappings.writeJoinMapping()">OK</button>
+   </div>
+    <div>
+        <button onclick="Lineage_linkedData_mappings.testJoin()">Test join</button><br>
+        <button onclick="Lineage_linkedData_mappings.writeJoinMapping()">Save mapping</button>
 </div>
-<!--
-<div id="lineage_linkedData_join_fromSampleDataDiv" style="width: 700px; height: 200px; overflow: auto"></div>
 
+</div>
+
+
+<!--
 <div id="lineage_linkedData_join_toSampleDataDiv" style="width: 500px; height: 200px; overflow: auto"></div>-->

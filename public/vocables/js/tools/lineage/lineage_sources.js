@@ -84,6 +84,8 @@ Lineage_sources = (function () {
         $("#LineageLinkedDataRelationsDiv").load("snippets/lineage/linkedData/lineage_linkedData_relations.html", function () {
             Lineage_linkedData_query.init();
         });
+
+        MainController.UI.showHideRightPanel()
     };
 
     self.showHideLineageLeftPanels = function () {

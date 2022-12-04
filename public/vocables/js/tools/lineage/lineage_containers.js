@@ -124,25 +124,47 @@ var Lineage_containers = (function() {
     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
       if (err) return alert(err.responseText);
 
-      var nodesparentMap = {};
+      var nodesMap = {};
       result.results.bindings.forEach(function(item) {
-        item.parent=item.parentContainer?item.parentContainer.value:"#"
-      //  var nodeId=item.parent+"_"+item.member.value
-        var nodeId=item.member.value
 
-        nodesparentMap[nodeId]=item;
+      //  var nodeId=item.parent+"_"+item.member.value
+
+
+        nodesMap[item.member.value]=item;
       })
 
 
 
       var jstreeData = [];
 
-      for (var nodeId in nodesparentMap){
-        var item=nodesparentMap[nodeId]
+      for (var nodeId in nodesMap){
+        var item=nodesMap[nodeId]
+        var parent="#"
+        if(item.parentContainer){
+          parent=item.parentContainer.value
+          if(!nodesMap[item.parentContainer.value] ){
+            var parentNode = {
+            id: parent,
+              text: item.parentContainerLabel.value,
+              parent: "#",
+              data: {
+              type: "rdf:Bag",
+                source: source,
+                id: parent,
+                text: item.parentContainer.value,
+                currentParent: "#"
+            }
+          };
+          jstreeData.push(parentNode);
+          }
+        }
+
+
+
         var node = {
           id: nodeId,
           text: item.memberLabel.value,
-          parent: nodesparentMap[item.parentContainer]?nodesparentMap[item.parentContainer.value].parent:"#",
+          parent: parent,
           data: {
             type: memberType,
             source: source,

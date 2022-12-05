@@ -883,17 +883,6 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             Sparql_common.getVariableLangLabel("skosAlt", true) +
             "}."
 
-
-            /*    "OPTIONAL{?concept rdfs:label ?conceptLabel " +
-             Sparql_common.getVariableLangLabel("conceptLabel", true)
-                self.getLangFilterStr(options, "?conceptLabel") +
-                "}." +
-                "OPTIONAL{?concept skos:prefLabel ?skosLabel " +
-                self.getLangFilterStr(options, "?skosLabel") +
-                "}. " +
-                "OPTIONAL{?concept skos:altLabel ?skosAltLabel " +
-                self.getLangFilterStr(options, "?skosAltLabel") +
-                "}. " +*/
          //   "OPTIONAL{?concept <http://souslesens.org/resource/vocabulary/hasCode> ?code}. ";
 
           if (options.filter) query += " " + options.filter + " ";

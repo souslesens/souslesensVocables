@@ -195,7 +195,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
     const sources = React.useMemo(() => {
-        return unwrappedSources.sort((a, b) => a.name.localeCompare(b.name));
+        return unwrappedSources;
     }, [unwrappedSources]);
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
     const tools: string[] = ["ALL", "sourceBrowser", "sourceMatcher", "evaluate", "ancestors", "lineage", "SPARQL", "ADLmappings", "ADLbrowser", "Standardizer", "SQLquery"];

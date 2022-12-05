@@ -342,7 +342,6 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         },
 
         setTreeParentDivDimensions: function (jstreeDiv) {
-
             var parentDiv = $("#" + jstreeDiv).parent();
             if (!parentDiv)
                 // || parentDiv.width)
@@ -995,16 +994,16 @@ if (callback) return callback(err);
         return hex;
     };
 
-    self.getInputSelection=function(){
+    self.getInputSelection = function () {
         var userSelection;
         if (window.getSelection) {
             userSelection = window.getSelection();
-        }
-        else if (document.selection) { // Opera
+        } else if (document.selection) {
+            // Opera
             userSelection = document.selection.createRange();
         }
-        return userSelection
-    }
+        return userSelection;
+    };
 
     return self;
 })();

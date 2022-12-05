@@ -150,7 +150,7 @@ strFrom +
                 if (filter.indexOf("?x in( )") > -1) return callbackEach();
 
                 query += filter + "}}";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel,skipCurrentQuery:true }, function (err, result) {
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, skipCurrentQuery: true }, function (err, result) {
                     if (err) {
                         return callback(err);
                     }

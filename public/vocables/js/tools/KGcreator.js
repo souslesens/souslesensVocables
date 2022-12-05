@@ -902,7 +902,7 @@ alert(err.message);
             execLoadMappings();
         }
     };
-    self.createTriples = function (test) {
+    self.createTriples = function (test, _options) {
         /*  var selectedFiles = $("#KGcreator_csvTreeDiv").jstree().get_checked(true);
 if (selectedFiles.length > 0);*/
 
@@ -944,6 +944,7 @@ if (selectedFiles.length > 0);*/
                 dataLocation: dataLocation,
             };
         }
+        if (_options && _options.deleteTriples) options.deleteTriples = true;
 
         self.saveMappings(null, function (_err, _result) {
             if (_err) return alert(_err);
@@ -1012,13 +1013,19 @@ if (selectedFiles.length > 0);*/
     self.deleteKGcreatorTriples = function (deleteAllGraph) {
         if (!self.currentJsonObject) return; //alert("no file mappings selected");
         if (!self.currentJsonObject.graphUri) return alert("no graphUri");
-        if (!confirm("Do you really want to delete  triples created with KGCreator in " + self.currentJsonObject.graphUri)) return;
 
-        var filter = "?p =<http://purl.org/dc/terms/creator> && ?o='KGcreator'";
-        Sparql_generic.deleteTriplesWithFilter(self.currentSource, filter, function (err, result) {
-            if (err) return alert(err.responseText);
-            alert("triples deleted");
-        });
+        if (deleteAllGraph) {
+            if (!confirm("Do you really want to delete  triples created with KGCreator in " + self.currentJsonObject.graphUri)) return;
+
+            var filter = "?p =<http://purl.org/dc/terms/creator> && ?o='KGcreator'";
+            Sparql_generic.deleteTriplesWithFilter(self.currentSource, filter, function (err, result) {
+                if (err) return alert(err.responseText);
+                alert("triples deleted");
+            });
+        } else {
+            if (!confirm("Do you really want to delete  triples created with KGCreator in " + self.currentJsonObject.fileName)) return;
+            self.createTriples(false, { deleteTriples: true });
+        }
     };
 
     self.showSampleData = function (node, allColumns, size, callback) {

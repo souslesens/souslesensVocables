@@ -415,9 +415,7 @@ var Lineage_selection = (function () {
         },
     };
 
-    self.container = {
-
-    };
+    self.container = {};
 
     self.modifyPredicates = {
         showDialog: function () {

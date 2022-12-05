@@ -917,10 +917,8 @@ if (selectedFiles.length > 0);*/
             dataLocation = self.currentJsonObject.fileName;
         }
 
-        if($("#KGcreator_onlySelectionCBX").prop("checked")){
-            var selection=common.getInputSelection()
-
-
+        if ($("#KGcreator_onlySelectionCBX").prop("checked")) {
+            var selection = common.getInputSelection();
         }
 
         if (!self.currentJsonObject.graphUri) {

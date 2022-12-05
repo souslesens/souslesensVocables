@@ -136,9 +136,8 @@ if (config.auth == "keycloak") {
     passport.use(
         new Strategy(function (username, password, cb) {
             var connection = config.authenticationDatabase;
-            if(!config.authenticationDatabase)
-                return cb("No authenticationDatabase declared in mainConfig.json")
-            var sql = "select * from "+connection.table +" where login='" + username + "'";
+            if (!config.authenticationDatabase) return cb("No authenticationDatabase declared in mainConfig.json");
+            var sql = "select * from " + connection.table + " where login='" + username + "'";
 
             mySqlProxy.exec(connection, sql, function (err, result) {
                 if (err) {

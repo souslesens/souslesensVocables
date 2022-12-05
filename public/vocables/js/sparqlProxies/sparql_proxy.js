@@ -100,13 +100,11 @@ var Sparql_proxy = (function () {
     query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
 }*/
 
-
         if (!options) options = {};
 
         $("#waitImg").css("display", "block");
 
-       if(!options.skipCurrentQuery)
-        self.currentQuery = query;
+        if (!options.skipCurrentQuery) self.currentQuery = query;
 
         var payload = {
             options: {},

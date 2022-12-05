@@ -11,10 +11,10 @@ var Lineage_blend = (function () {
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
                 Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, function (err, result) {
                     self.currentPossibleClassesAndPredicates = result;
-                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function (err, result) {
-                    if (err) return alert(err.responseText);
-                   // self.currentPossibleClassesAndPredicates = result;
-                    /*   common.fillSelectOptions("lineage_selection_modifyPredicate_propertySelect", result.predicates, true, "label", "id");
+                    KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function (err, result) {
+                        if (err) return alert(err.responseText);
+                        // self.currentPossibleClassesAndPredicates = result;
+                        /*   common.fillSelectOptions("lineage_selection_modifyPredicate_propertySelect", result.predicates, true, "label", "id");
 
                       Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, function (err, result) {
                     if (err) return alert(err.responseText);
@@ -24,14 +24,14 @@ var Lineage_blend = (function () {
 
                     var allObjects = result.sourceObjects.concat(["---------"]).concat(result.TopLevelOntologyObjects).concat(["---------"]).concat(result.usualObjects);
 */
-                    common.fillSelectOptions("KGcreator_predicateSelect", result.predicates, true, "label", "id");
-                    common.fillSelectOptions("KGcreator_objectSelect", result.objectClasses, true, "label", "id");
-                    common.fillSelectOptions("LineageBlend_creatingNodePredicatesSelect", result.predicates, true, "label", "id");
-                    common.fillSelectOptions("LineageBlend_creatingNodeObjectsSelect", result.objectClasses, true, "label", "id");
-                    common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", result.objectClasses, true, "label", "id");
+                        common.fillSelectOptions("KGcreator_predicateSelect", result.predicates, true, "label", "id");
+                        common.fillSelectOptions("KGcreator_objectSelect", result.objectClasses, true, "label", "id");
+                        common.fillSelectOptions("LineageBlend_creatingNodePredicatesSelect", result.predicates, true, "label", "id");
+                        common.fillSelectOptions("LineageBlend_creatingNodeObjectsSelect", result.objectClasses, true, "label", "id");
+                        common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", result.objectClasses, true, "label", "id");
+                    });
+                    self.possibleNamedIndividuals = {};
                 });
-                self.possibleNamedIndividuals = {};
-            });
             });
         },
 
@@ -628,7 +628,6 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
 
                 if (cells.length != 2) return;
                 var label = cells[0];
-
 
                 if (targetUrisMap[label]) {
                     sourceUrisMap[label] = targetUrisMap[label];

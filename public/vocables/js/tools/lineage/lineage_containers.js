@@ -163,56 +163,9 @@ var Lineage_containers = (function () {
                 jstreeData.push(node);
             }
 
-            /*   result.results.bindings.forEach(function(item) {
-        var parent = "#";
-        var memberId
-        if (item.parentContainer){
-          parent = item.parentContainer.value;
-           memberId= parent+"_"+item.member.value
-        } else{
-          memberId=item.member.value
-        }
-
-        if (item.member.value == parent) return;
-
-        if (!nodesparentMap[memberId]) {
-          nodesparentMap[memberId] = parent;
-          var node = {
-            id: memberId,
-            text: item.memberLabel.value,
-            parent: parent,
-            data: {
-              type: memberType,
-              source: source,
-              id: item.member.value,
-              text: item.memberLabel.value,
-              currentParent: parent
-            }
-          };
-          jstreeData.push(node);*
-        }*/
-            /*   if (parent!="#" &&  !nodesparentMap[item.parentContainer.value]) {
-            nodesparentMap[item.parentContainer.value] = parent;
-            var node = {
-              id: item.parentContainer.value,
-              text: item.parentContainerLabel.value,
-              parent: "#",
-              data: {
-                type: "rdf:Bag",
-                source: source,
-                id: item.parentContainer.value,
-                text: item.parentContainerLabel.value,
-                currentParent: "#"
-              }
-            };
-          jstreeData.push(node);
-      }
-          self.currentContainer = node;
-
-      });*/
 
             var options = {
-                openAll: true,
+                openAll: false,
                 contextMenu: Lineage_containers.getContextJstreeMenu(),
                 selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
                 dnd: {

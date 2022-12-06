@@ -150,7 +150,7 @@ var Sparql_proxy = (function () {
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-                if (  headers["Accept"] &&  headers["Accept"].indexOf("json") < 0) return callback(null, data);
+                if (headers["Accept"] && headers["Accept"].indexOf("json") < 0) return callback(null, data);
                 if (data.result && typeof data.result != "object") data = JSON.parse(data.result.trim());
 
                 if (!data.results) return callback(null, { results: { bindings: [] } });

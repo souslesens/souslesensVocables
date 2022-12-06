@@ -167,7 +167,6 @@ var Lineage_containers = (function () {
                 jstreeData.push(node);
             }
 
-
             var options = {
                 openAll: false,
                 contextMenu: Lineage_containers.getContextJstreeMenu(),

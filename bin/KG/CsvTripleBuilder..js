@@ -548,7 +548,6 @@ var CsvTripleBuilder = {
                         },
                     ],
 
-
                     function (_err) {
                         var message = "------------ created triples " + totalTriples;
                         if (options.deleteTriples) message = "------------ deleted triples " + totalTriples;

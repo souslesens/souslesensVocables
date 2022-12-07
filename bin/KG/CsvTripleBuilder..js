@@ -574,12 +574,13 @@ var CsvTripleBuilder = {
             //   console.log(str)
             insertTriplesStr += str;
         });
-        var query = "DELETE DATA {  GRAPH <" + graphUri + "> {  " + insertTriplesStr + " }  } ";
+        var query = CsvTripleBuilder.getSparqlPrefixesStr();
+        query += "DELETE DATA {  GRAPH <" + graphUri + "> {  " + insertTriplesStr + " }  } ";
         var params = { query: query };
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
-                var x = queryGraph;
+                var x = query;
                 return callback(err);
             }
             totalTriples += triples.length;

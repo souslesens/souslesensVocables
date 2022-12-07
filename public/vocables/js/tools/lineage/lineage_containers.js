@@ -127,10 +127,12 @@ var Lineage_containers = (function () {
             var jstreeData = [];
 
             for (var nodeId in nodesMap) {
+                if (nodeId == "http://datalenergies.total.com/resource/tsf/iso-14224-bags/bag/ISO-142224") var x = 3;
                 var item = nodesMap[nodeId];
                 var parent = "#";
                 if (item.parentContainer) {
                     parent = item.parentContainer.value;
+                    if (item.parentContainer.value == nodeId) parent = "#";
                     if (!nodesMap[item.parentContainer.value]) {
                         var parentNode = {
                             id: parent,
@@ -178,7 +180,9 @@ var Lineage_containers = (function () {
                 },
             };
 
-            common.jstree.loadJsTree("lineage_containers_containersJstree", jstreeData, options);
+            common.jstree.loadJsTree("lineage_containers_containersJstree", jstreeData, options, function () {
+                $("#lineage_containers_containersJstree").jstree().open_node("#");
+            });
         });
     };
 

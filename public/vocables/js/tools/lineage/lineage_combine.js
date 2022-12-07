@@ -75,13 +75,26 @@ var Lineage_combine = (function () {
                 var edgeId = item.fromNode.id + "_" + item.toNode.id;
                 if (!existingNodes[edgeId]) {
                     existingNodes[edgeId] = 1;
+
                     visjsData.edges.push({
                         id: edgeId,
                         from: item.fromNode.id,
                         to: item.toNode.id,
-                        length: 50,
-                        width: 3,
-                        color: "#ccc",
+                        data: {
+                            source: Lineage_sources.activeSource,
+                        },
+                        arrows: {
+                            to: {
+                                enabled: true,
+                                type: "solid",
+                                scaleFactor: 0.5,
+                            },
+                        },
+                        // label: join.propLabel,
+                        // font: { color: "green", size: 12, background: "#eee" },
+                        dashes: true,
+                        color: "green",
+                        width: 2,
                     });
                 }
             });

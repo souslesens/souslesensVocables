@@ -357,6 +357,7 @@ Lineage_sources = (function () {
 
             if (!source) source = Lineage_sources.activeSource;
             var color = Lineage_classes.getSourceColor(source);
+            var color2 = common.colorToRgba(color, 0.1);
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = visjsGraph.getExistingIdsMap();
 
@@ -370,9 +371,11 @@ Lineage_sources = (function () {
                             id: edgeId,
                             from: nodeId,
                             to: source,
-                            arrows: " middle",
-                            color: color,
+                            //  arrows: " middle",
+                            color: color2,
+                            // physics:false,
                             width: 1,
+                            // dashes: true,
                         };
                         visjsData.edges.push(edge);
                     }
@@ -384,11 +387,11 @@ Lineage_sources = (function () {
                     id: source,
                     label: source,
                     shadow: Lineage_classes.nodeShadow,
-                    shape: "box",
+                    shape: "ellipse",
                     level: 1,
                     size: Lineage_classes.defaultShapeSize,
                     data: { source: source },
-                    color: color,
+                    color: common.colorToRgba(color, 0.3),
                 };
                 visjsData.nodes.push(sourceNode);
             }

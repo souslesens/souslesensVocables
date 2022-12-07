@@ -825,17 +825,18 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
     };
 
     self.getSourceTaxonomy = function (sourceLabel, options, callback) {
+        var schemaType = Config.sources[sourceLabel].schemaType;
         if (!options) options = {};
         var parentType;
         var conceptType;
-        if (Config.sources[sourceLabel].schemaType == "OWL") {
+        if (schemaType == "OWL") {
             parentType = Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel);
 
             conceptType = "owl:Class|owl:NamedIndividual";
-        } else if (Config.sources[sourceLabel].schemaType == "KNOWLEDGE_GRAPH") {
+        } else if (schemaType == "KNOWLEDGE_GRAPH") {
             parentType = "rdf:type";
             conceptType = "owl:NamedIndividual";
-        } else if (Config.sources[sourceLabel].schemaType == "SKOS") {
+        } else if (schemaType == "SKOS") {
             parentType = "skos:broader";
             conceptType = "skos:Concept";
         } else if (options.parentType) {
@@ -873,23 +874,20 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                         "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                         "SELECT distinct * " +
                         fromStr +
-                        " WHERE {" +
-                        "  ?concept " +
-                        parentType +
-                        " ?firstParent." +
-                        Sparql_common.getVariableLangLabel("concept", false, true) +
-                        "OPTIONAL{?concept skos:altLabel ?skosAltLabel " +
-                        Sparql_common.getVariableLangLabel("skosAlt", true) +
-                        "}.";
+                        " WHERE {";
+                    var where = "  ?concept " + parentType + " ?firstParent." + Sparql_common.getVariableLangLabel("concept", false, true) + "OPTIONAL{?concept skos:altLabel ?skosAltLabel }";
+                    if (options.filter) where += " " + options.filter + " ";
 
-                    //   "OPTIONAL{?concept <http://souslesens.org/resource/vocabulary/hasCode> ?code}. ";
+                    where += "filter (?firstParent not in (owl:Restriction, owl:Class))";
+                    where += " FILTER NOT EXISTS {?firstParent rdf:type owl:Restriction}";
 
-                    if (options.filter) query += " " + options.filter + " ";
-
-                    query += "filter (?firstParent not in (owl:Restriction, owl:Class))";
-
-                    query += " FILTER NOT EXISTS {?firstParent rdf:type owl:Restriction}";
-
+                    // make two queries and union them to solve timeout problem
+                    if (schemaType == "OWL") {
+                        var where1 = where.replace("|<http://www.w3.org/2004/02/skos/core#prefLabel>", "");
+                        var where2 = where.replace("?concept rdfs:label|", "?concept ");
+                        where = "{" + where1 + "}\n UNION \n{" + where2 + "}";
+                    }
+                    query += where;
                     query += "}";
 
                     async.whilst(

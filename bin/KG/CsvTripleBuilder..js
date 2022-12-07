@@ -505,8 +505,8 @@ var CsvTripleBuilder = {
                                                 async.eachSeries(
                                                     slices,
                                                     function (slice, callbackEach) {
-                                                        if(options.deleteTriples){
-                                                            CsvTripleBuilder.deleteTriples(slice, graphUri, sparqlServerUrl, function(err, result) {
+                                                        if (options.deleteTriples) {
+                                                            CsvTripleBuilder.deleteTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
                                                                 if (err) {
                                                                     errors += err + " slice " + sliceIndex + "\n";
                                                                     return callbackEach(err);
@@ -516,10 +516,8 @@ var CsvTripleBuilder = {
 
                                                                 callbackEach();
                                                             });
-
-                                                        }else {
-
-                                                            CsvTripleBuilder.writeUniqueTriples(slice, graphUri, sparqlServerUrl, function(err, result) {
+                                                        } else {
+                                                            CsvTripleBuilder.writeUniqueTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
                                                                 if (err) {
                                                                     errors += err + " slice " + sliceIndex + "\n";
                                                                     return callbackEach(err);
@@ -550,10 +548,10 @@ var CsvTripleBuilder = {
                         },
                     ],
 
+
                     function (_err) {
                         var message = "------------ created triples " + totalTriples;
-                        if(options.deleteTriples)
-                            message = "------------ deleted triples " + totalTriples;
+                        if (options.deleteTriples) message = "------------ deleted triples " + totalTriples;
                         console.log(message);
                         callbackEachMapping(_err);
                     }
@@ -562,16 +560,14 @@ var CsvTripleBuilder = {
             function (_err) {
                 if (callback) {
                     var message = "------------ created triples " + totalTriples;
-                    if(options.deleteTriples)
-                        message = "------------ deleted triples " + totalTriples;
+                    if (options.deleteTriples) message = "------------ deleted triples " + totalTriples;
                     return callback(_err, message);
                 }
             }
         );
     },
 
-
-    deleteTriples:function (triples, graphUri, sparqlServerUrl, callback) {
+    deleteTriples: function (triples, graphUri, sparqlServerUrl, callback) {
         var insertTriplesStr = "";
         var totalTriples = 0;
         triples.forEach(function (triple) {
@@ -580,7 +576,7 @@ var CsvTripleBuilder = {
             insertTriplesStr += str;
         });
         var query = CsvTripleBuilder.getSparqlPrefixesStr();
-         query+="DELETE DATA {  GRAPH <" + graphUri + "> {  "+insertTriplesStr+" }  } "
+        query += "DELETE DATA {  GRAPH <" + graphUri + "> {  " + insertTriplesStr + " }  } ";
         var params = { query: query };
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {

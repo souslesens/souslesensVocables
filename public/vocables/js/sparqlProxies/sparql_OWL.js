@@ -361,7 +361,7 @@ var Sparql_OWL = (function () {
             modifier +
             " ?superClass." +
             " optional {?superClass rdf:type ?superClassType}";
-        ("filter (isIRI(?superClass)) ");
+        ("filter (isIRI(?superClass) && ?superClassType!= <http://www.w3.org/2002/07/owl#Restriction>) ");
 
         if (options.withLabels) query += "OPTIONAL {?class rdfs: label classLabel } OPTIONAL {?superClass rdfs: label superClassLabel }";
         query += filterStr;
@@ -379,6 +379,7 @@ var Sparql_OWL = (function () {
             return callback(null, result.results.bindings);
         });
     };
+
     /**
      *
      *

@@ -47,6 +47,9 @@ var authentication = (function () {
                     if (typeof sparql_abstract !== "undefined") sparql_abstract.initSources();
                 }
             },
+            error: function (err) {
+                var x=err
+            }
         });
     };
 

@@ -115,25 +115,11 @@
                             RangesAndDomains
                         </button>
                     </div>
-                    <!--    <div class="lineage_button_group">
-<div class="lineage_actionDiv_title">Table</div>
-<button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-onclick="Lineage_properties.onPropertyActionClick('predicates','table')">Predicates
-</button>
 
-<button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-onclick="Lineage_properties.onPropertyActionClick('restrictions','table')">Restrictions
-</button>
-
-<button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
-onclick="Lineage_properties.onPropertyActionClick('rangesAndDomains','table')">RangesAndDomains
-</button>
-
-
-</div>-->
                 </div>
             </div>
         </div>
+
         <div class="" id="LineageContainersTab" style="display: flex; flex-direction: column">
             <div class="lineage_button_groupXX">
                 <input id="Lineage_containers_searchInput" onkeyup="" />
@@ -153,87 +139,11 @@ onclick="Lineage_properties.onPropertyActionClick('rangesAndDomains','table')">R
             </div>
         </div>
 
+
+
         <div class="" id="Lineage_mappingsTab" style="display: flex; flex-direction: column; width: 380px; height: 800px"></div>
 
-        <!--   <div id="LineageLinkedDataTab" style="display: flex; flex-direction: column">
-           <button onclick="Lineage_linkedData_query.init()">load</button>
-           <div id="LineageLinkedDataRelationsDiv"></div>
-       </div>
-   </div>-->
-        <!--  <div id="LineageSetsTab" style="display: flex; flex-direction: column"></div>-->
-        <!--
 
-<div id="LineageRelationsTab" style="display: flex; flex-direction: column">
-  <div class="lineage_actionDiv">
-      <div class="lineage_actionDiv_title">Selection</div>
-      Nodes Selection
-      <select style="width: 300px" id="LineageRelations_nodesSelectionSelect">
-          <option value="currentGraphNodes">Current Graph Nodes</option>
-          <option value="selectedNodeDescendants">Selected node descendants</option>
-          <option value="allNodes">All Nodes</option>
-      </select>
-  </div>
-  <div></div>
-  <div class="lineage_actionDiv">
-      <div class="lineage_actionDiv_title">Existing relations</div>
-      <div>
-
-          <div>
-              filters
-              <div>
-                  Property
-                   <select style="width: 300px" class="relation_filter" id="LineageRelations_property_select"></select>
-              </div>
-              <div>
-                  TargetSource
-                  <select style="width: 300px" class="relation_filter" id="LineageRelations_rangeSource_select" onchange="Lineage_dictionary.onChangeFilterSelect($(this).val())"></select>
-              </div>
-              <div>
-                  Status
-                  <select style="width: 300px" class="relation_filter" id="LineageRelations_status_select"></select>
-              </div>
-              <div>
-                  Provenance
-                  <select style="width: 300px" class="relation_filter" id="LineageRelations_provenance_select"></select>
-              </div>
-              <div>
-                  Creator
-                  <select style="width: 300px" class="relation_filter" id="LineageRelations_creator_select"></select>
-              </div>
-              <div>
-                  StartDate
-                  <input style="width: 300px" class="relation_filter" id="LineageRelations_startDate_input" />
-
-                  EndDate
-                  <input style="width: 300px" class="relation_filter" id="LineageRelations_endDate_input" />
-              </div>
-          </div>
-
-          Restrictions
-          <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.showRestrictions('table')">List</button>
-          <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.showRestrictions('visjs')">Graph</button>
-          <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.exportRestrictions()">Export</button>
-      </div>
-  </div>
-  <div></div>
-
-
-
-  <div></div>
-  <div class="lineage_actionDiv">
-      <div class="lineage_actionDiv_title">ProjectedGraphs</div>
-
-
-      <div class="jstreeContainer">
-          <div id="LineageRelations_projectedGraphsTree"></div>
-      </div>
-  </div>
-
-
-  <div class="jstreeContainer" style="width: 90%">
-      <div class="jstree" id="Lineage_relationsTree"></div>
-  </div>
-</div>-->
     </div>
 
     <script>

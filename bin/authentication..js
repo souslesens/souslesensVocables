@@ -137,24 +137,28 @@ if (config.auth == "keycloak") {
         new Strategy(function (username, password, cb) {
             var connection = config.authenticationDatabase;
             if (!config.authenticationDatabase) return cb("No authenticationDatabase declared in mainConfig.json");
-            var sql = "select * from " + connection.table + " where login='" + username + "'";
+            var sql = "select * from " + connection.table + " where "+connection.loginColumn+"='" + username + "'";
+
 
             mySqlProxy.exec(connection, sql, function (err, result) {
                 if (err) {
+                    console.log("connection To authentication database failed");
                     return cb(err);
                 }
-
+                console.log("connection To authentication database ok");
                 if (result.length == 0) {
+                    console.log("bad Login");
                     return cb(null, false, { message: "Incorrect username or password." });
                 }
-                if (password != result[0].password) {
+                if ( password!= result[0][connection.passwordColum]) {
+                    console.log("bad Password");
                     // bcrypt.compare(password, result[0].motDePasse, function (err, res) {
                     return cb(null, false, { message: "Incorrect username or password." });
                 }
 
                 var user = result[0];
                 // delete user.password;
-                user.groups = user.groups.split(",");
+                user.groups = user[connection.groupsColumn].split(",");
                 console.log(JSON.stringify(user));
                 return cb(null, user);
             });

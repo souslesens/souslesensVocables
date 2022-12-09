@@ -294,6 +294,9 @@ sourceLabels.sort();
         }
         if (imports) {
             imports.forEach(function (/** @type {string} */ importedSource) {
+                if(!Config.sources[importedSource]){
+                    return;
+                }
                 var graphUri = Config.sources[importedSource].graphUri;
                 var color = self.getSourceColor(importedSource);
                 if (!graphUri) return;
@@ -1659,25 +1662,25 @@ addNode:false
             [
                 // draw restrictions
                 function (callbackSeries) {
+
                     if (type && type != "restrictions") return callbackSeries();
                     else if (direction == "direct") {
                         self.drawRestrictions(null, data, null, null, { inverse: false }, callbackSeries);
-                    } else {
+                    } else if (direction == "inverse") {
                         self.drawRestrictions(null, data, null, null, { inverse: true }, callbackSeries);
-                    }
+                    }else if (type=="dictionary")
+                        self.drawRestrictions(Config.dictionarySource, data, null, null, { inverse: true }, callbackSeries);
                 },
                 // draw objectProperties
                 function (callbackSeries) {
                     if (!data) data = self.getGraphIdsFromSource(Lineage_sources.activeSource);
-                    Lineage_properties.drawPredicatesGraph(Lineage_sources.activeSource, data, null, function (err, result) {});
+                    var source=Lineage_sources.activeSource
+                    if (type=="dictionary")
+                        source=Config.dictionarySource;
+                    Lineage_properties.drawPredicatesGraph(source, data, null, function (err, result) {});
 
                     return;
-                    /*   if (type && type != "objectProperties") return callbackSeries();
-          else if (direction == "direct") {
-              Lineage_classes.graphNodeNeighborhood(data, "outcoming", callbackSeries);
-          } else {
-              Lineage_classes.graphNodeNeighborhood(data, "incoming", callbackSeries);
-          }*/
+
                 },
             ],
             function (err) {

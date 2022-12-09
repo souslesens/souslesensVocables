@@ -14,14 +14,17 @@ https: var Lineage_linkedData_mappings = (function () {
     self.init = function () {
         if (!self.isInitialized) {
             self.isInitialized = true;
+
             Config.sources[self.mappingSourceLabel] = {
                 graphUri: Config.linkedData_mappings_graph,
                 sparql_server: { url: Config.default_sparql_url },
                 controller: Sparql_OWL,
             };
+            self.initSourceMappingsTree();
+
         }
 
-        self.initSourceMappingsTree();
+      //
     };
 
     self.initKGcreatorDialogWithDatabase = function (database) {

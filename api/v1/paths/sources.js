@@ -1,7 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const { configPath, config } = require("../../../model/config");
-const sourcesJSON = path.resolve(configPath + "/sources.json");
+var sourcesJSON = path.resolve(configPath + "/sources.json");
 const profilesJSON = path.resolve(configPath + "/profiles.json");
 const util = require("util");
 const { readResource, writeResource, resourceCreated, responseSchema, resourceFetched } = require("./utils");
@@ -17,8 +17,12 @@ module.exports = function () {
     ///// GET api/v1/sources
     async function GET(req, res, next) {
         try {
+            var sourcesFileName=sourcesJSON
+            if(req.params.sourcesFileName)
+                sourcesFileName=sourcesFileName.replace("sources.json",sourcesFileName);
             const userInfo = await userManager.getUser(req.user);
-            const sources = await read(sourcesJSON);
+          //  const sources = await read(sourcesJSON);
+            const sources = await read(sourcesFileName);;
             const parsedSources = JSON.parse(sources);
             // return all sources if user is admin
             let filteredSources = parsedSources;
@@ -42,6 +46,15 @@ module.exports = function () {
         security: [{ loginScheme: [] }],
         operationId: "getSources",
         responses: responseSchema("Sources", "GET"),
+      /*  parameters: [
+            {
+                name: "sourcesFileName",
+                description: "name",
+                in: "path",
+                type: "string",
+                required: false,
+            },
+        ]*/
     };
 
     ///// POST api/v1/sources

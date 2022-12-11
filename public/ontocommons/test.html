@@ -14,7 +14,11 @@
 
 </head>
 <body>
-Ontologies<select id="ontocommons_ontologiesSelect"></select>
+Ontologies<select id="ontocommons_ontologiesSelect" onchange="Ontocommons.showOntologyInSLSV($(this).val())"></select>
+<iframe id="slsv_iframe" style="width:900px;height: 800px">
+
+
+</iframe>
 </body>
 
 

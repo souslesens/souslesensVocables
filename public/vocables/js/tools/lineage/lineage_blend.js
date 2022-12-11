@@ -72,6 +72,7 @@ var Lineage_blend = (function () {
                 async.series(
                     [
                         function (callbackSeries) {
+                        if(self.sourceNode.rdfType=="NamedIndividual" && self.targetNode.rdfType=="NamedIndividual" ) {
                             jstreeData.push({
                                 id: "http://www.w3.org/2002/07/owl#sameAs",
                                 text: "owl:sameAs",
@@ -81,18 +82,32 @@ var Lineage_blend = (function () {
                                     inSource: Config.dictionarySource,
                                 },
                             });
-
+                        }
+                        if(self.sourceNode.rdfType!="NamedIndividual" && self.targetNode.rdfType!="NamedIndividual" ) {
                             jstreeData.push({
-                                id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                                text: "rdf:type",
+                                id: "http://www.w3.org/2002/07/owl#equivalentClass",
+                                text: "owl:equivalentClass",
                                 parent: "#",
                                 data: {
-                                    id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                                    inSource: Lineage_sources.activeSource,
+                                    id: "http://www.w3.org/2002/07/owl#equivalentClass",
+                                    inSource: Config.dictionarySource,
                                 },
                             });
+                        }
 
-                            if (Config.sources[Lineage_sources.activeSource].schemaType == "OWL" && self.sourceNode.type != "NamedIndividual") {
+                            if(self.sourceNode.rdfType=="NamedIndividual") {
+                                jstreeData.push({
+                                    id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                    text: "rdf:type",
+                                    parent: "#",
+                                    data: {
+                                        id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+                                        inSource: Lineage_sources.activeSource,
+                                    },
+                                });
+                            }
+
+                            if (Config.sources[Lineage_sources.activeSource].schemaType == "OWL" && self.sourceNode.rdfType != "NamedIndividual") {
                                 jstreeData.push({
                                     id: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
                                     text: "rdfs:subClassOf",
@@ -771,7 +786,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
             var isRestriction = true;
             if (propId == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" || propId == "http://www.w3.org/2000/01/rdf-schema#subClassOf") isRestriction = false;
             if (sourceNode.type == "NamedIndividual") isRestriction = false;
-            if (propId == "http://www.w3.org/2002/07/owl#sameAs" && sourceNode.source == Lineage_sources.activeSource && targetNode.source == Lineage_sources.activeSource) isRestriction = false;
+            if ((propId == "http://www.w3.org/2002/07/owl#sameAs" || propId == "http://www.w3.org/2002/07/owl#equivalentClass" ) && sourceNode.source == Lineage_sources.activeSource && targetNode.source == Lineage_sources.activeSource) isRestriction = false;
 
             if (!isRestriction) {
                 var triples = [];
@@ -812,7 +827,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
         //dispatch of sources to write in depending on relation type and editable
         var inSource;
         var options = {};
-        if (obj.node.data.id == "http://www.w3.org/2002/07/owl#sameAs")
+        if (obj.node.data.id == "http://www.w3.org/2002/07/owl#sameAs" || obj.node.data.id == "http://www.w3.org/2002/07/owl#equivalentClass" )
             // le sameAs sont tous dans le dictionaire
             inSource = Config.dictionarySource;
         else {
@@ -927,7 +942,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
     };
 
     self.createRelation = function (inSource, type, sourceNode, targetNode, addImportToCurrentSource, createInverseRelation, options, callback) {
-        if (type != "http://www.w3.org/2002/07/owl#sameAs") createInverseRelation = false;
+        if (type != "http://www.w3.org/2002/07/owl#sameAs" && type!="http://www.w3.org/2002/07/owl#equivalentClass" ) createInverseRelation = false;
         var blankNodeId;
         async.series(
             [

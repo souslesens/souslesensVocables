@@ -63,7 +63,7 @@ var MainController = (function () {
         var _payload = {
             getSources: 1,
         };
-      //  Config.sourcesFileName="ontocommonsSources.json"
+     //  Config.sourcesFileName="ontocommonsSources.json"
         var sourcesFileName=""
         if(Config.sourcesFileName )
             sourcesFileName="?"+Config.sourcesFileName

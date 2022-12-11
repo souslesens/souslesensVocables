@@ -63,9 +63,13 @@ var MainController = (function () {
         var _payload = {
             getSources: 1,
         };
+      //  Config.sourcesFileName="ontocommonsSources.json"
+        var sourcesFileName=""
+        if(Config.sourcesFileName )
+            sourcesFileName="?"+Config.sourcesFileName
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "/sources",
+            url: Config.apiUrl + "/sources"+sourcesFileName,
             dataType: "json",
             success: function (data_, _textStatus, _jqXHR) {
                 const data = data_.resources;

@@ -835,7 +835,7 @@ var CsvTripleBuilder = {
                                 item.s = fn;
                             });
                         }
-                        if (item.o.indexOf("function") > -1) {
+                        if (item.o.indexOf("function{") > -1) {
                             getFunction(["row", "mapping"], item.o, function (err, fn) {
                                 if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
 
@@ -845,7 +845,7 @@ var CsvTripleBuilder = {
                     });
                     for (var key in mappings.transform) {
                         var fnStr = mappings.transform[key];
-                        if (fnStr.indexOf("function") > -1) {
+                        if (fnStr.indexOf("function{") > -1) {
                             getFunction(["value", "role", "prop", "row"], fnStr, function (err, fn) {
                                 if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
                                 mappings.transform[key] = fn;

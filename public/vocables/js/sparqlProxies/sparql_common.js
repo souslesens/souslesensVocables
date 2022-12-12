@@ -251,6 +251,9 @@ return str;
     };
 
     self.getFromStr = function (source, named, withoutImports, options) {
+
+
+
         if (!options) options = {};
         var from = " FROM ";
         if (named) from += " NAMED";
@@ -264,6 +267,8 @@ return str;
             fromStr += from + "  <" + graphUri + "> ";
         });
         if (withoutImports === undefined) withoutImports = self.withoutImports;
+        if(Lineage_sources.fromAllWhiteboardSources)
+            withoutImports=false
         if (!withoutImports || self.includeImports) {
             var imports = Config.sources[source].imports;
             if (imports) {

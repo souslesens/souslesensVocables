@@ -60,16 +60,18 @@ var SourceIntegrator = {
       writer.end((error, triples) => {
 
         var fechSize = 200;
+        var fetchCount=0;
         var triplesArray=triples.split("\n")
           var tripleSlices=[]
         var tripleSlice=""
         triplesArray.forEach(function(item,index){
 
-          if( fechSize % index ==0)
+          if((fetchCount++)<fechSize)
             tripleSlice+=item+"\n";
           else{
             tripleSlices.push(""+tripleSlice)
             tripleSlice=""
+            fetchCount=0;
           }
         })
         tripleSlices.push(""+tripleSlice)
@@ -167,7 +169,7 @@ var SourceIntegrator = {
 
         //register source if not exists
         function(callbackSeries) {
-          if (!sourceStatus.exists && sourceStatus.triplesCreated) {
+          if (!sourceStatus.exists ) {
             var id = Util.getRandomHexaId(10);
             var newSource = {
               "name": sourceName,
@@ -195,18 +197,17 @@ var SourceIntegrator = {
             };
 
 
+            sources[sourceName] = newSource;
+            var sourcesPath = path.join(__dirname, "../" + "config" + "/ontocommonsSources.json");
+            jsonFileStorage.store(path.resolve(sourcesPath), sources, function(err, result) {
+              if (err)
+                return callbackSeries(err);
+              sourceStatus.exists = true;
+              return callbackSeries();
+
+
+            });
           }
-
-          sources[sourceName] = newSource;
-          var sourcesPath = path.join(__dirname, "../" + "config" + "/sources.json");
-          jsonFileStorage.store(path.resolve(sourcesPath), sources, function(err, result) {
-            if (err)
-              return callbackSeries(err);
-            sourceStatus.exists = true;
-            return callbackSeries();
-
-
-          });
 
 
         }

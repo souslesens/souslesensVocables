@@ -1655,6 +1655,7 @@ var Lineage_classes = (function() {
 
     self.drawRelations = function(direction, type, caller) {
       var data = null;
+      var source=null;
       if (caller == "Graph") data = self.currentGraphNode;
       else if (caller == "Tree") data = self.currentTreeNode;
       if (data && data.data) data = data.data.id;
@@ -1663,11 +1664,14 @@ var Lineage_classes = (function() {
       async.series(
         [
 
-          // draw equivClasses
+          // draw equivClasses or sameLabel (coming from Config.dictionarySource)
           function(callbackSeries) {
             if (type != "dictionary")
               return callbackSeries();
+            source=Config.dictionarySource
             options.includeSources = Config.dictionarySource;
+            data=visjsGraph.data.nodes.getIds()
+            options.filter="FILTER (?prop in (owl:sameAs,owl:equivalentClass))"
             Lineage_sources.registerSource(Config.dictionarySource);
 
             type = null;
@@ -1683,7 +1687,7 @@ var Lineage_classes = (function() {
               return callbackSeries();
             if (!direction || direction == "direct") {
               options.inverse = false;
-              self.drawRestrictions(null, data, null, null, options, callbackSeries);
+              self.drawRestrictions(source, data, null, null, options, callbackSeries);
             } else
               return callbackSeries();
 
@@ -1695,7 +1699,7 @@ var Lineage_classes = (function() {
             if (type && type != "restrictions") return callbackSeries();
             if (!direction || direction == "inverse") {
               options.inverse = true;
-              self.drawRestrictions(null, data, null, null, options, callbackSeries);
+              self.drawRestrictions(source, data, null, null, options, callbackSeries);
             } else
               return callbackSeries();
           }
@@ -1704,11 +1708,10 @@ var Lineage_classes = (function() {
 
           // draw objectProperties
           function(callbackSeries) {
-            if (type == "dictionary")
-              callbackSeries();
+            if (type != "dictionary")
+              source= Lineage_sources.activeSource;
 
             if (!data) data = self.getGraphIdsFromSource(Lineage_sources.activeSource);
-            var source = Lineage_sources.activeSource;
             Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
               return callbackSeries(err);
             });
@@ -2065,14 +2068,14 @@ var Lineage_classes = (function() {
         html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.listClusterToClipboard();\"> list to clipboard</span>";
       } else if (node.from && node.data.bNodeId) {
         //edge restrition
-        html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showPropertyInfos();\"> Relation Infos</span>";
+     //   html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showPropertyInfos();\"> Relation Infos</span>";
         if (Lineage_sources.isSourceEditable(node.data.source)) {
           //   if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
           html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.deleteRestriction();\"> Delete relation</span>";
         }
       } else if (node.from && node.data.type == "ObjectProperty") {
         //ObjectProperty
-        html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showPropertyInfos();\"> Relation Infos</span>";
+      //  html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showPropertyInfos();\"> Relation Infos</span>";
         if (Lineage_sources.isSourceEditable(node.data.source)) {
           //  if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
           html += "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.deleteObjectProperty();\"> Delete relation</span>";
@@ -2532,10 +2535,10 @@ upperNodeIds.push(id);
       deleteObjectProperty: function() {
         var edge = self.currentGraphEdge;
 
-        if (confirm("delete selected relation ?")) {
-          Sparql_generic.deleteTriples(edge.data.source, edge.data.from, edge.data.prop, edge.data.to, function(err, _result) {
+        if (confirm("Delete object property "+edge.data.propLabel)) {
+          Sparql_generic.deleteTriples(edge.data.source, edge.data.from, edge.data.prop , edge.data.to, function(err, _result) {
             if (err) return alert(err.responseText);
-            visjsGraph.data.edges.update(edge.id);
+            visjsGraph.data.edges.remove(edge.id);
           });
         }
       },

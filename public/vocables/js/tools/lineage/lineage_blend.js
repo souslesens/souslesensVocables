@@ -798,7 +798,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
 
                 Sparql_generic.insertTriples(inSource, triples, {}, function (err, _result) {
                     if (err) return callback(err);
-                    return callback(null, sourceNode.id + "_" + propId + "_" + targetNode.id);
+                    return callback(null,{type:"ObjectProperty",id: sourceNode.id + "_" + propId + "_" + targetNode.id});
                 });
             } else {
                 var oldRelations = visjsGraph.getNodeEdges(sourceNode.id, targetNode.id);
@@ -814,7 +814,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                         }
                     }
 
-                    return callback(null, blankNodeId);
+                    return callback(null,{type:"Restriction",id: blankNodeId});
                 });
             }
         },
@@ -841,17 +841,17 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
             else inSource = Config.predicatesSource;
         }
 
-        Lineage_blend.graphModification.createRelationFromGraph(inSource, self.sourceNode, self.targetNode, obj.node.data.id, options, function (err, blankNodeId) {
+        Lineage_blend.graphModification.createRelationFromGraph(inSource, self.sourceNode, self.targetNode, obj.node.data.id, options, function (err, result) {
             if (err) return callback(err);
-
+            var relationId= result.id || "<_:b" + common.getRandomHexaId(10) + ">";
             let propLabel = obj.node.data.label || Sparql_common.getLabelFromURI(obj.node.data.id);
-            var bNodeId = blankNodeId || "<_:b" + common.getRandomHexaId(10) + ">";
+
+
             let newEdge = {
-                id: bNodeId,
+                id: relationId,
                 from: self.sourceNode.id,
                 to: self.targetNode.id,
             };
-
             newEdge.label = "<i>" + propLabel + "</i>";
             (newEdge.font = { multi: true, size: 10 }),
                 (newEdge.arrows = {
@@ -862,13 +862,33 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                     },
                 });
             newEdge.dashes = true;
-            newEdge.color = Lineage_classes.restrictionColor;
-            newEdge.data = {
-                source: inSource,
-                bNodeId: bNodeId,
-                propertyLabel: propLabel,
-                propertyId: obj.node.data.id,
-            };
+
+            if(result.type=="ObjectProperty"){
+                newEdge.color = Lineage_classes.defaultPredicateEdgeColor;
+                newEdge.font= { color: Lineage_classes.defaultPredicateEdgeColor };
+                newEdge.data= {
+                    id:relationId,
+                      type: "ObjectProperty",
+                      propLabel:propLabel,
+                      from: self.sourceNode.id,
+                      to: self.targetNode.id,
+                      prop: obj.node.data.id,
+                      source: inSource
+                }
+
+
+            }  else if(result.type=="Restriction"){
+                newEdge.color = Lineage_classes.restrictionColor;
+                newEdge.font= { color: Lineage_classes.restrictionColor };
+                newEdge.data = {
+                    source: inSource,
+                    bNodeId: relationId,
+                    propertyLabel: propLabel,
+                    propertyId: obj.node.data.id,
+                };
+            }
+
+
             visjsGraph.data.edges.add([newEdge]);
         });
     };

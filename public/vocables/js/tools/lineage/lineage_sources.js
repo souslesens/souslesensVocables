@@ -120,7 +120,7 @@ Lineage_sources = (function () {
             //  var fontColor = "#343434";
             var opacity = 1.0;
             if (node.data.source != source) {
-                opacity = 0.2;
+                opacity = Lineage_classes.defaultLowOpacity;
                 //fontColor = "#ddd";
             }
             // newNodes.push({id:node.id, "color":{"opacity":opacity}})
@@ -138,7 +138,7 @@ Lineage_sources = (function () {
             //  var fontColor = "#343434";
             var opacity = 1.0;
             if (nodesMapSources[edge.from] != source) {
-                opacity = 0.2;
+                opacity =  Lineage_classes.defaultLowOpacity;
                 //  fontColor = "#ddd";
             }
             // newNodes.push({id:node.id, "color":{"opacity":opacity}})
@@ -171,8 +171,23 @@ Lineage_sources = (function () {
                 if (err) return MainController.UI.message(err);
             });
         }
+        self.indexSourceIfNotIndexed(source);
         callback(null, source);
     };
+
+    self.indexSourceIfNotIndexed=function(source){
+
+        SearchUtil.initSourcesIndexesList(null,function(err, indexedSources){
+            if(indexedSources.indexOf(source<0)){
+                MainController.UI.message("indexing source "+source)
+                $("#waitImg").css("display", "block");
+                SearchUtil.generateElasticIndex(source, { indexProperties: 1 }, function (err, _result) {
+                if (err) return MainController.UI.message(err, true);
+                MainController.UI.message("ALL DONE", true);
+            })
+            }
+        })
+    }
 
     self.registerSource = function (sourceLabel) {
         if (self.loadedSources[sourceLabel]) return;
@@ -246,6 +261,10 @@ Lineage_sources = (function () {
             self.registerSource(source);
         });
     };
+
+    self.setAllWhiteBoardSources=function(checked){
+        Lineage_sources.fromAllWhiteboardSources=checked
+    }
 
     self.showHideCurrentSourceNodes = function (source, /** @type {any} */ hide) {
         if (!source) source = Lineage_sources.activeSource;

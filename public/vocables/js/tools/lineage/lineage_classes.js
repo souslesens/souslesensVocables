@@ -29,6 +29,7 @@ var Lineage_classes = (function() {
     self.namedIndividualColor = "#0067bb";
     self.defaultNodeFontColor = "#343434";
     self.defaultEdgeFontColor = "#343434";
+    self.defaultLowOpacity=0.35
 
     self.arrowTypes = {
       subClassOf: {
@@ -1658,7 +1659,8 @@ var Lineage_classes = (function() {
       var source=null;
       if (caller == "Graph") data = self.currentGraphNode;
       else if (caller == "Tree") data = self.currentTreeNode;
-      if (data && data.data) data = data.data.id;
+      else if (caller == "leftPanel" || type == "dictionary")   data=visjsGraph.data.nodes.getIds();
+   //   if (data && data.data) data = data.data.id;
       var options = {};
 
       async.series(

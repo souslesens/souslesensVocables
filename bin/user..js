@@ -27,7 +27,7 @@ const user = {
         else if (config.auth === "database") {
             result = {
                 logged: true,
-                user: { login: reqUser.user, groups: reqUser.groups },
+                user: { login: reqUser.login, groups: reqUser.groups },
                 authSource: "database",
                 auth: {},
             };

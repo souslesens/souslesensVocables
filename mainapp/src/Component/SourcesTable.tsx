@@ -140,7 +140,7 @@ const enum Mode {
 
 type Msg_ =
     | { type: Type.UserClickedModal; payload: boolean }
-    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } }
+    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string | string[] } }
     | { type: Type.ResetSource; payload: Mode }
     | { type: Type.UserAddedGraphUri; payload: string }
     | { type: Type.UserClickedCheckBox; payload: { checkboxName: string; value: boolean } }
@@ -214,8 +214,14 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
-    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
+    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
+    };
+
+    const handleTaxonomyPredicatesUpdate = (value: string[]) => {
+        update({ type: Type.UserUpdatedField, payload: { fieldname: "taxonomyPredicates", newValue: value } });
+    };
+
     const _handleFieldUpdate = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserAddedGraphUri, payload: event.target.value });
 
     const handleSparql_serverUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) =>
@@ -352,11 +358,12 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                             <FormControl>
                                 <Autocomplete
                                     multiple
-                                    id="imports"
+                                    limitTags={2}
+                                    id="taxonomy-predicates"
                                     options={knownTaxonomyPredicates}
-                                    defaultValue={sourceModel.sourceForm.taxonomyPredicates}
+                                    value={sourceModel.sourceForm.taxonomyPredicates}
                                     freeSolo
-                                    onChange={handleFieldUpdate("taxonomyPredicates")}
+                                    onChange={(e, value) => handleTaxonomyPredicatesUpdate(value)}
                                     style={{ width: "400px" }}
                                     renderInput={(params) => <TextField {...params} variant="filled" label="Taxonomy Predicates" />}
                                 />

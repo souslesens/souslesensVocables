@@ -158,6 +158,7 @@ if (config.auth == "keycloak") {
 
                 var user = result[0];
                 // delete user.password;
+                user.login=username;
                 user.groups = user[connection.groupsColumn].split(",");
                 console.log(JSON.stringify(user));
                 return cb(null, user);

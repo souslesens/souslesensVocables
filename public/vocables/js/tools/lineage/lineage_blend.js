@@ -63,7 +63,7 @@ var Lineage_blend = (function() {
           return;
         } else {
           $("#lineageAddEdgeDialog_Title").html("upper ontology : <b>" + Config.currentTopLevelOntology + "</b><br>" + self.sourceNode.label + " -> " + self.targetNode.label);
-          $("#lineageAddEdgeDialog_Title").html("<button onclick='Lineage_blend.reverseAddEdgesNodes()'>reverse</button>");
+        //  $("#lineageAddEdgeDialog_Title").append("<button onclick='Lineage_blend.reverseAddEdgesNodes()'>reverse</button>");
         }
 
         let sourceNodeTopLevelOntologyAncestors = {};

@@ -386,6 +386,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 >
                                     {schemaTypes.map((schemaType) => (
                                         <MenuItem key={schemaType} value={schemaType}>
+                                            <Checkbox checked={sourceModel.sourceForm.schemaType.indexOf(schemaType) > -1} />
                                             {schemaType}
                                         </MenuItem>
                                     ))}

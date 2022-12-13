@@ -4,6 +4,7 @@ Lineage_sources = (function () {
     self.loadedSources = {};
     self.sourceDivsMap = {};
 
+
     self.init = function () {
         if (self.loadedSources) {
             for (var source in self.loadedSources) {
@@ -42,6 +43,7 @@ Lineage_sources = (function () {
         SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], { includeSourcesWithoutSearchIndex: true }, function () {
             var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
             $("#sourcesSelectionDialogdiv").dialog("close");
+           MainController.UI.showHideRightPanel();
             self.setCurrentSource(source);
         });
     };
@@ -70,8 +72,9 @@ Lineage_sources = (function () {
         } else {
             self.activeSource = source;
             highlightSourceDiv(source);
-            self.whiteboard_ActivateSource(source);
+            self.whiteboard_setGraphOpacity(source);
             Lineage_decoration.refreshLegend(source);
+            self.setAllWhiteBoardSources(true)
         }
 
         $("#LineageNodesJsTreeDiv").empty();
@@ -82,7 +85,7 @@ Lineage_sources = (function () {
             Lineage_linkedData_query.init();
         });
 
-        MainController.UI.showHideRightPanel();
+
     };
 
     self.showHideLineageLeftPanels = function () {
@@ -111,23 +114,31 @@ Lineage_sources = (function () {
         }
     };
 
-    self.whiteboard_ActivateSource = function (source) {
+    self.whiteboard_setGraphOpacity = function (source) {
         var nodesMapSources = {};
+        if(!visjsGraph.data || !visjsGraph.data.nodes)
+            return;
         var nodes = visjsGraph.data.nodes.get();
         var newNodes = [];
+
         nodes.forEach(function (node) {
             nodesMapSources[node.id] = node.data.source;
-            //  var fontColor = "#343434";
-            var opacity = 1.0;
-            if (node.data.source != source) {
-                opacity = Lineage_classes.defaultLowOpacity;
-                //fontColor = "#ddd";
+           if( node.data && ! node.data.fullColor)
+               node.data.fullColor=node.color;
+
+            var color;
+            var fontColor;
+            if (source && node.data.source != source ) {
+                color =  common.colorToRgba(node.data.fullColor, Lineage_classes.defaultLowOpacity)
+                fontColor=common.colorToRgba(Lineage_classes.defaultNodeFontColor,  Lineage_classes.defaultLowOpacity)
+            }else{
+                color=node.data.fullColor;
+                fontColor=Lineage_classes.defaultNodeFontColor
             }
-            // newNodes.push({id:node.id, "color":{"opacity":opacity}})
             newNodes.push({
                 id: node.id,
-                color: common.colorToRgba(node.color, opacity),
-                font: { color: common.colorToRgba(Lineage_classes.defaultNodeFontColor, opacity) },
+                color: color,
+                font: { color:fontColor },
             });
         });
         visjsGraph.data.nodes.update(newNodes);
@@ -135,19 +146,29 @@ Lineage_sources = (function () {
         var edges = visjsGraph.data.edges.get();
         var newEdges = [];
         edges.forEach(function (edge) {
-            //  var fontColor = "#343434";
-            var opacity = 1.0;
-            if (nodesMapSources[edge.from] != source) {
-                opacity =  Lineage_classes.defaultLowOpacity;
-                //  fontColor = "#ddd";
+            if( edge.data && !edge.data.fullColor)
+                edge.data.fullColor=edge.color;
+
+            var color;
+            var width;
+           // var fontColor;
+            if (!source || nodesMapSources[edge.from] == source || nodesMapSources[edge.to] == source) {
+                color = edge.data.fullColor
+               // width=2
+
+            }else{
+                color=common.colorToRgba(edge.data.fullColor, Lineage_classes.defaultLowOpacity)
+               // width=1
+               // fontColor=common.colorToRgba(edge.data.fullColor, Lineage_classes.defaultLowOpacity)
             }
-            // newNodes.push({id:node.id, "color":{"opacity":opacity}})
+
             newEdges.push({
                 id: edge.id,
-                color: common.colorToRgba(edge.color, opacity),
+                color:color,
+               // width:width,
                 font: {
-                    color: common.colorToRgba(Lineage_classes.defaultEdgeFontColor, opacity),
-                    multi: true,
+                    color: color,
+                  //  multi: true,
                     size: 10,
                     strokeWidth: 0,
                     strokeColor: 0,
@@ -178,7 +199,7 @@ Lineage_sources = (function () {
     self.indexSourceIfNotIndexed=function(source){
 
         SearchUtil.initSourcesIndexesList(null,function(err, indexedSources){
-            if(indexedSources.indexOf(source<0)){
+            if(indexedSources.indexOf(source)<0){
                 MainController.UI.message("indexing source "+source)
                 $("#waitImg").css("display", "block");
                 SearchUtil.generateElasticIndex(source, { indexProperties: 1 }, function (err, _result) {
@@ -262,8 +283,31 @@ Lineage_sources = (function () {
         });
     };
 
-    self.setAllWhiteBoardSources=function(checked){
-        Lineage_sources.fromAllWhiteboardSources=checked
+    self.setAllWhiteBoardSources=function(remove){
+if(remove)
+    Lineage_sources.fromAllWhiteboardSources=true;
+
+        if(!Lineage_sources.fromAllWhiteboardSources ) {
+            Lineage_sources.fromAllWhiteboardSources = true;
+            if(Lineage_sources.activeSource) {
+            $(".Lineage_sourceLabelDiv").addClass("Lineage_allSelectedSourceDiv")
+            $(" #Lineage_sources.setAllWhiteBoardSources").addClass("Lineage_allSelectedSourceDiv")
+            $("#" + Lineage_sources.activeSource).addClass("Lineage_selectedSourceDiv");
+
+                self.whiteboard_setGraphOpacity(null)
+                $("#GenericTools_searchScope").val("whiteboardSources")
+            }
+        }
+        else {
+            Lineage_sources.fromAllWhiteboardSources = false;
+            if(Lineage_sources.activeSource) {
+                $(".Lineage_sourceLabelDiv").removeClass("Lineage_allSelectedSourceDiv")
+                $(" #Lineage_sources.setAllWhiteBoardSources").removeClass("Lineage_allSelectedSourceDiv")
+                self.whiteboard_setGraphOpacity(Lineage_sources.activeSource)
+                $("#GenericTools_searchScope").val("currentSource")
+            }
+
+        }
     }
 
     self.showHideCurrentSourceNodes = function (source, /** @type {any} */ hide) {
@@ -300,7 +344,7 @@ Lineage_sources = (function () {
         });
         return Config.currentTopLevelOntology;
     };
-    self.setTopLevelOntologyFromPrefix = function (prefix) {
+    self.setTopLevelOntologyFromPrefix = function () {
         Config.currentTopLevelOntology = null;
         for (var key in Config.topLevelOntologies) {
             if (Config.topLevelOntologies[key].prefix == prefix) Config.currentTopLevelOntology = key;

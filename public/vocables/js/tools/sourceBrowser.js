@@ -378,9 +378,14 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
         if (options.term) term = options.term;
         else {
             term = $("#GenericTools_searchAllSourcesTermInput").val();
-            if (term.indexOf("*") > -1) $("#GenericTools_exactMatchSearchCBX").removeProp("checked");
-        }
 
+        }
+        if (term.indexOf("*") > -1){
+            $("#GenericTools_allExactMatchSearchCBX").removeProp("checked");
+        }else{
+            if(! $("#GenericTools_allExactMatchSearchCBX").prop("checked"))
+                term+="*"
+        }
         var selectedSources = [];
         if (options.selectedSources) {
             selectedSources = options.selectedSources;

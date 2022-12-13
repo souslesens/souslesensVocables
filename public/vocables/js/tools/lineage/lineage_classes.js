@@ -1654,11 +1654,12 @@ var Lineage_classes = (function() {
       self.drawRestrictions(null, null, null, null, { inverse: true }, callback);
     };
 
-    self.drawRelations = function(direction, type, caller) {
+    self.drawRelations = function(direction, type, caller,options) {
       var data = null;
       var source=null;
       if (caller == "Graph") data = self.currentGraphNode;
       else if (caller == "Tree") data = self.currentTreeNode;
+      else if (caller == "Properties") data = null;
       else if (caller == "leftPanel" || type == "dictionary")   data=visjsGraph.data.nodes.getIds();
    //   if (data && data.data) data = data.data.id;
       var options = {};

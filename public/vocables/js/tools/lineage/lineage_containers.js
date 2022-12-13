@@ -9,6 +9,13 @@ var Lineage_containers = (function () {
                 SourceBrowser.showNodeInfos(Lineage_sources.activeSource, self.currentContainer, "mainDialogDiv");
             },
         };
+        items["GraphNode"] = {
+            label: "graphNode",
+            action: function (_e) {
+                if (self.currentContainer.data.type == "container") Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.id, { onlyChildren: true });
+                else Lineage_classes.drawNodeAndParents(self.currentContainer.data, 3);
+            },
+        };
 
         items["AddGraphNode"] = {
             label: "Add selected node to container",
@@ -24,13 +31,7 @@ var Lineage_containers = (function () {
                 Lineage_containers.deleteContainer(Lineage_sources.activeSource, self.currentContainer.data.id);
             },
         };
-        items["GraphNode"] = {
-            label: "graphNode",
-            action: function (_e) {
-                if (self.currentContainer.data.type == "container") Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.id, { onlyChildren: true });
-                else Lineage_classes.drawNodeAndParents(self.currentContainer.data, 3);
-            },
-        };
+
 
         items["GraphContainerDescendantContainers"] = {
             label: "Graph  descendants containers",
@@ -139,7 +140,7 @@ var Lineage_containers = (function () {
                             text: item.parentContainerLabel.value,
                             parent: "#",
                             data: {
-                                type: "rdf:Bag",
+                                type: "container",
                                 source: source,
                                 id: parent,
                                 text: item.parentContainer.value,
@@ -149,7 +150,9 @@ var Lineage_containers = (function () {
                         jstreeData.push(parentNode);
                     }
                 }
-
+                var memberType="resource"
+if( item.memberType  && item.memberType.value.indexOf("Bag")>-1)
+    memberType="container"
                 var node = {
                     id: nodeId,
                     text: item.memberLabel.value,
@@ -271,7 +274,7 @@ var Lineage_containers = (function () {
             if (container.id == nodeData.id) return alert("a  node cannot be member of itself");
 
             if (!nodeData.source) return console.log(" node without source");
-            if (nodeData.source == source) {
+            if (true || nodeData.source == source) {
                 triples.push({
                     subject: "<" + container.id + ">",
                     predicate: "<http://www.w3.org/2000/01/rdf-schema#member>",

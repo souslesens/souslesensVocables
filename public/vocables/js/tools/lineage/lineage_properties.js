@@ -1110,6 +1110,19 @@ Lineage_properties = (function() {
       source = firstProperty.parent;
     }
 
+    if (action == "relations") {
+      if (!nodeIds && !properties) return alert("You must select properties or nodes to show predicates");
+      if (target == "visj") {
+       var  options={
+          filter:Sparql_common.setFilter("prop",properties)
+        }
+        Lineage_classes.drawRelations(null,null,"Properties",options)
+       // Lineage_properties.drawPredicatesGraph(source, nodeIds, properties);
+      } else if (target == "table") {
+        //  Lineage_classes.graphNodeNeighborhood(data, "outcoming", function(err, result) {
+      }
+    }
+
     if (action == "predicates") {
       if (!nodeIds && !properties) return alert("You must select properties or nodes to show predicates");
       if (target == "visj") {

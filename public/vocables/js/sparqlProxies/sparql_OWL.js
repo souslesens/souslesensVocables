@@ -814,7 +814,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
                 if (err) {
                     return callback(err);
                 }
-                result2 = Sparql_generic.setBindingsOptionalProperties(result2, ["prop", "node", "concept"]);
+                result2 = Sparql_generic.setBindingsOptionalProperties(result2, ["prop", "node", "concept","value"]);
                 return callback(null, result2);
             });
         });
@@ -1047,7 +1047,14 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         }
         var filter = "";
         if (options.filter) filter = options.filter;
-        query += "{ ?id rdf:type <http://www.w3.org/2002/07/owl#Class>. " + " OPTIONAL {?id rdfs:label ?label " + langFilter + filter + "}" + " }}";
+
+       var typeFilterStr=""
+        if(options.type){
+            typeFilterStr="FILTER (?type ="+options.type+")"
+        }else{
+            typeFilterStr="FILTER (?type in(owl:Class, owl:NamedIndividual))"
+        }
+        query += "{ ?id rdf:type ?type. " +typeFilterStr+ " OPTIONAL {?id rdfs:label ?label " + langFilter + filter + "}" + " }}";
 
         var allData = [];
         var resultSize = 1;

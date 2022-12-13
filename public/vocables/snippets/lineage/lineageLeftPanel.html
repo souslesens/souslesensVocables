@@ -40,6 +40,10 @@
     .Lineage_selectedSourceDiv {
         border: solid 3px blue;
     }
+    .Lineage_allSelectedSourceDiv {
+        border: solid 3px #0d6efdb3;
+    }
+
 
     .lineage_button {
         margin: 2px;
@@ -156,6 +160,7 @@
                 <span>Sources</span>
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.resetAll()">R</button>
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.showSourcesDialog()">+</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="Lineage_sources.setAllWhiteBoardSources" onclick="Lineage_sources.setAllWhiteBoardSources()">A</button>
             </div>
         </div>
     </div>
@@ -168,7 +173,7 @@
 
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_classes.addChildrenToGraph()">Expand</button>
 
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_classes.addNodesAndParentsToGraph()">Parents</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary"  class="lineage_button" onclick="Lineage_classes.addNodesAndParentsToGraph()">Parents</button>
 
             <!--   <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button"
         onclick="Lineage_classes.drawObjectProperties()">Properties
@@ -185,8 +190,8 @@
             <div class="lineage_button_group">
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_graphTraversal.showShortestPathDialog()">Pathes</button>
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_linkedData_query.showLinkedDataDialog()">Linked Data</button>
-                <div>   <input type="checkbox" id="Lineage_classes_allWhiteBoardSourcesCBX" onchange="Lineage_sources.setAllWhiteBoardSources($(this).prop('checked'))">
-                All sources</div>
+               <!-- <div>   <input type="checkbox" id="Lineage_classes_allWhiteBoardSourcesCBX" onchange="Lineage_sources.setAllWhiteBoardSources($(this).prop('checked'))">-->
+               </div>
             </div>
         </div>
 

@@ -350,25 +350,16 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         </Grid>
                         <Grid item xs={6}>
                             <FormControl>
-                                <InputLabel id="taxonomypredicates-label">Taxonomy Predicates</InputLabel>
-                                <Select
-                                    labelId="taxonomypredicates-label"
-                                    id="imports"
-                                    value={sourceModel.sourceForm.taxonomyPredicates}
-                                    label="taxonomypredicates-label"
-                                    fullWidth
+                                <Autocomplete
                                     multiple
-                                    style={{ width: "400px" }}
-                                    renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
+                                    id="imports"
+                                    options={knownTaxonomyPredicates}
+                                    defaultValue={sourceModel.sourceForm.taxonomyPredicates}
+                                    freeSolo
                                     onChange={handleFieldUpdate("taxonomyPredicates")}
-                                >
-                                    {knownTaxonomyPredicates.map((predicate) => (
-                                        <MenuItem key={predicate} value={predicate}>
-                                            <Checkbox checked={sourceModel.sourceForm.taxonomyPredicates.indexOf(predicate) > -1} />
-                                            {predicate}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
+                                    style={{ width: "400px" }}
+                                    renderInput={(params) => <TextField {...params} variant="filled" label="Taxonomy Predicates" />}
+                                />
                             </FormControl>
                         </Grid>
                         <Grid item xs={6}>

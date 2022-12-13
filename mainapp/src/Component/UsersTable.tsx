@@ -1,5 +1,6 @@
 import {
     Button,
+    Checkbox,
     FormControl,
     InputLabel,
     MenuItem,
@@ -252,6 +253,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
                             >
                                 {unwrappedProfiles.map((profile) => (
                                     <MenuItem key={profile.name} value={profile.name}>
+                                        <Checkbox checked={userModel.userForm.groups.indexOf(profile.name) > -1} />
                                         {profile.name}
                                     </MenuItem>
                                 ))}

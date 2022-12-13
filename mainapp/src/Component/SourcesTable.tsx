@@ -341,6 +341,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 >
                                     {unwrappedSources.map((source) => (
                                         <MenuItem key={source.name} value={source.name}>
+                                            <Checkbox checked={sourceModel.sourceForm.imports.indexOf(source.name) > -1} />
                                             {source.name}
                                         </MenuItem>
                                     ))}
@@ -363,6 +364,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 >
                                     {knownTaxonomyPredicates.map((predicate) => (
                                         <MenuItem key={predicate} value={predicate}>
+                                            <Checkbox checked={sourceModel.sourceForm.taxonomyPredicates.indexOf(predicate) > -1} />
                                             {predicate}
                                         </MenuItem>
                                     ))}

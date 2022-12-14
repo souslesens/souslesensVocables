@@ -11,6 +11,7 @@ env:
 
 jobs:
     cypress-run:
+        runs-on: ubuntu:22:04
         timeout-minutes: 10
 
         steps:
@@ -55,8 +56,3 @@ jobs:
                       cypress/e2e/match.cy.js
                       cypress/e2e/SQLquery.cy.js
                   runTests: true
-    cleanup:
-        needs: cypress-run
-        steps:
-            - name: Cleanup
-              run: sudo docker-compose -f docker-compose.test.yaml down

@@ -2,6 +2,7 @@ const { processResponse } = require("./utils");
 const httpProxy = require("../../../bin/httpProxy.");
 const GraphTraversal = require("../../../bin/graphTraversal.");
 const ExportGraph = require("../../../bin/exportGraph.");
+const SourceIntegrator = require("../../../bin/sourceIntegrator.");
 
 module.exports = function () {
     let operations = {
@@ -32,6 +33,13 @@ module.exports = function () {
                     return;
                 }
                 if (body.importSourceFromUrl) {
+                    const SourceIntegrator= require("../../../bin/sourceIntegrator.");
+                    SourceIntegrator.importSourceFromTurtle(body.sourceUrl, body.sourceName,  body.options, function (err, result) {
+                        processResponse(res, err, result);
+                    });
+                    return;
+                }
+                if (body.openLineage) {
                     const SourceIntegrator= require("../../../bin/sourceIntegrator.");
                     SourceIntegrator.importSourceFromTurtle(body.sourceUrl, body.sourceName,  body.options, function (err, result) {
                         processResponse(res, err, result);

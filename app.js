@@ -122,8 +122,6 @@ app.use(
     })
 );
 
-// legacy routes
-
 // Home (redirect to /vocables)
 app.get("/", function (req, res, next) {
     const query = querystring.stringify(req.query);

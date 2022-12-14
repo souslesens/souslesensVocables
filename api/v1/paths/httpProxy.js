@@ -17,20 +17,6 @@ module.exports = function () {
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);
 
-                if (body.getShortestPath) {
-                    const GraphTraversal = require("../../../bin/graphTraversal.");
-                    if (body.numberOfPathes > 1) {
-                        GraphTraversal.getAllShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, body.numberOfPathes, body.options, function (err, result) {
-                            processResponse(res, err, result);
-                        });
-                    } else {
-                        GraphTraversal.getShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, body.options, function (err, result) {
-                            processResponse(res, err, result);
-                        });
-                    }
-                    return;
-                }
-
                 if (body.copyGraphToEndPoint) {
                     ExportGraph.copyGraphToEndPoint(body.source, body.toEndPointConfig, body.options, function (err, result) {
                         processResponse(res, err, result);

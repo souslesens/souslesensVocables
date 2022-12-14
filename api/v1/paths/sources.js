@@ -20,11 +20,11 @@ module.exports = function () {
 
 
             const userInfo = await userManager.getUser(req.user);
-            var sourcesFileName=sourcesJSON
-            if(req.params.sourcesFileName=="ontocommonsSources.json")
-                sourcesFileName=sourcesFileName.replace("sources.json",sourcesFileName);
+            var sourcesFile=sourcesJSON
+            if(req.query.sourcesFile)
+              sourcesFile=path.resolve(configPath +"/"+ req.query.sourcesFile);
           //  const sources = await read(sourcesJSON);
-            const sources = await read(sourcesFileName);;
+            const sources = await read(sourcesFile);
             const parsedSources = JSON.parse(sources);
             // return all sources if user is admin
             let filteredSources = parsedSources;
@@ -48,15 +48,15 @@ module.exports = function () {
         security: [{ loginScheme: [] }],
         operationId: "getSources",
         responses: responseSchema("Sources", "GET"),
-      /*  parameters: [
+        parameters: [
             {
-                name: "sourcesFileName",
+                name: "sourcesFile",
                 description: "name",
-                in: "path",
+                in: "query",
                 type: "string",
                 required: false,
             },
-        ]*/
+        ]
     };
 
     ///// POST api/v1/sources

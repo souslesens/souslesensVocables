@@ -63,10 +63,10 @@ var MainController = (function () {
         var _payload = {
             getSources: 1,
         };
-     //  Config.sourcesFileName="ontocommonsSources.json"
+
         var sourcesFileName=""
-        if(Config.sourcesFileName )
-            sourcesFileName="?"+Config.sourcesFileName
+        if(Config.currentProfile.sourcesFile )
+            sourcesFileName="?sourcesFile="+Config.currentProfile.sourcesFile;
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/sources"+sourcesFileName,
@@ -165,7 +165,7 @@ var MainController = (function () {
     self.onAfterLogin = function () {
         if (!authentication.currentUser) return alert(" no user identified");
         var groups = authentication.currentUser.groupes;
-        MainController.loadSources(function (_err, _result) {
+
             MainController.loadProfiles(function (_err, _result) {
                 //  Config.currentProfile=Config.profiles["reader_all"]
                 groups.forEach(function (group) {
@@ -174,18 +174,12 @@ var MainController = (function () {
 
                 async.series(
                     [
-                        /* function (callbackSeries) {
-                            self.loadSourcesMappings(function (err, sourcesMappings) {
-                                if (err) {
-                                    console.warn("file sourcesLinkedMappings.json not found");
-                                    return callbackSeries();
-                                }
-                                for (var source in Config.sources) {
-                                    if (sourcesMappings[source]) Config.sources[source].dataSources = sourcesMappings[source];
-                                }
-                                callbackSeries();
+                         function (callbackSeries) {
+                             MainController.loadSources(function (_err, _result) {
+
+                                callbackSeries(_err);
                             });
-                        },*/
+                        },
                         function (callbackSeries) {
                             if (!Config.currentProfile.customPlugins) return callbackSeries();
                             CustomPluginController.init(Config.currentProfile.customPlugins, function (_err, _result) {
@@ -202,7 +196,7 @@ var MainController = (function () {
                     }
                 );
             });
-        });
+
     };
 
     self.initControllers = function () {
@@ -382,6 +376,7 @@ var MainController = (function () {
             $(".max-height").height($(window).height() - 300);
             var treeData = [];
             for (var key in Config.tools) {
+
                 if (Config.tools_available.indexOf(key) > -1) {
                     if ((Config.tools[key].label == "ConfigEditor" || Config.tools[key].label == "Admin") && authentication.currentUser.groupes.indexOf("admin") === -1) {
                         continue;

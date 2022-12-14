@@ -1,6 +1,8 @@
 var Ontocommons = (function() {
 
   var self = {};
+
+  self.currentSource=null;
   self.init = function() {
     self.apiUrl = "/api/v1";
     var payload = {
@@ -29,6 +31,11 @@ var Ontocommons = (function() {
       , error(err) {
       }
     });
+    $('#slsv_iframe').on("load", function() {
+      setTimeout(function() {
+        self.loadSourceInSlsv(self.currentSource)
+      },2000)
+    });
 
   };
 
@@ -36,7 +43,7 @@ var Ontocommons = (function() {
   self.showOntologyInSLSV=function(ontologyId){
     var sourceUrl="http://data.industryportal.enit.fr/ontologies/"+ontologyId+"/submissions/1/download?apikey=019adb70-1d64-41b7-8f6e-8f7e5eb54942"
 
-    self.apiUrl = "/api/v1";
+    self.currentSource=ontologyId
 
     var body = {
       importSourceFromUrl:1,
@@ -58,23 +65,54 @@ var Ontocommons = (function() {
       data: payload,
       dataType: "json",
       success: function(data, _textStatus, _jqXHR) {
-        var x = data;
-        var jsonArray=JSON.parse(data.result)
-        self.ontologiesMap={}
+        $("#slsv_iframe").attr("src","http://localhost:3010/vocables/")
 
-        jsonArray.forEach(function(item){
-          self.ontologiesMap[item.acronym]=item
-        })
-
-        var acronyms=Object.keys(self.ontologiesMap);
-        acronyms.sort()
-        common.fillSelectOptions("ontocommons_ontologiesSelect",acronyms,true)
       }
       , error(err) {
+        alert(err)
       }
     });
 
   }
+
+  self.loadSourceInSlsv=function(source){
+
+    //source="VVO"
+    self.currentSource=source
+ //   $("#slsv_iframe").attr("src","http://localhost:3010/vocables/")
+var slsv= $("#slsv_iframe")[0].contentWindow;
+    slsv.MainController.currentTool="lineage"
+    slsv.MainController.UI.initTool("lineage", function(err, result){
+      slsv.Lineage_sources.showSourcesDialog(source);
+    });
+
+
+
+  }
+
+  self.callSlsv=function(){var body = {
+    openLineage:true,
+    source:"ddd"
+  };
+
+    var payload = {
+      url:"_default",
+      body: JSON.stringify(body),
+      POST: true,
+    };
+
+    $.ajax({
+      type: "POST",
+      url:  `${self.apiUrl}/httpProxy`,
+      data: payload,
+      dataType: "json",
+      success: function (data, _textStatus, _jqXHR) {
+        return callback(null, data);
+      },
+      error: function (err) {
+        return callback(err);
+      },
+    });}
 
   return self;
 })();

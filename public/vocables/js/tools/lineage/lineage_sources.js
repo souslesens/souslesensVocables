@@ -40,9 +40,12 @@ Lineage_sources = (function () {
     };
 
     self.showSourcesDialog = function () {
-      var calledSource= window.parent.Ontocommons.currentSource
-        if(calledSource)// call from outside (iframe)
-            return  self.setCurrentSource(calledSource);
+        if(window.parent && window.parent.Ontocommons) {// called from outside (iframe)
+            var calledSource = window.parent.Ontocommons.currentSource
+            if (calledSource)
+                return  self.setCurrentSource(calledSource);
+              }
+
         SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], { includeSourcesWithoutSearchIndex: true }, function () {
             var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
             $("#sourcesSelectionDialogdiv").dialog("close");

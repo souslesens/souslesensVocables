@@ -12,8 +12,8 @@ const Util = require("./util.");
 
 var SourceIntegrator = {
 
-  insertTriples:function(sparqlServerUrl,graphUri,triples,callback){
-     triples = triples.replace(/_:([^\s.]+)\s/g, function(a, b) {
+  insertTriples: function(sparqlServerUrl, graphUri, triples, callback) {
+    triples = triples.replace(/_:([^\s.]+)\s/g, function(a, b) {
       return "<" + b + ">";
     });
     triples = triples.replace(/\n/g, "");
@@ -34,25 +34,24 @@ var SourceIntegrator = {
     });
 
   },
-  ontologyUrl2tripleStore: function(url, sparqlServerUrl,graphUri, callback) {
+  ontologyUrl2tripleStore: function(url, sparqlServerUrl, graphUri, callback) {
 
     var writer = new N3.Writer({ format: "N-Triples", prefixes: {} });
 
-    var totalTriples=0;
+    var totalTriples = 0;
     var imports = [];
-
 
 
     const myParser = new RdfXmlParser();
     myParser.on("data", function(quad) {
-    /*  if (!graphUri && quad.object.value == "http://www.w3.org/2002/07/owl#Ontology")
-        graphUri = quad.subejct.value;*/
-    //  console.log(quad.subject.value+"_"+quad.predicate.value+"_"+quad.object.value)
+      /*  if (!graphUri && quad.object.value == "http://www.w3.org/2002/07/owl#Ontology")
+          graphUri = quad.subejct.value;*/
+      //  console.log(quad.subject.value+"_"+quad.predicate.value+"_"+quad.object.value)
       if (quad.predicate.value == "http://www.w3.org/2002/07/owl#imports")
         imports.push(quad.object.value);
 
-        totalTriples++;
-        writer.addQuad(quad.subject, quad.predicate, quad.object);
+      totalTriples++;
+      writer.addQuad(quad.subject, quad.predicate, quad.object);
 
 
     });
@@ -60,46 +59,45 @@ var SourceIntegrator = {
       writer.end((error, triples) => {
 
         var fechSize = 200;
-        var fetchCount=0;
-        var triplesArray=triples.split("\n")
-          var tripleSlices=[]
-        var tripleSlice=""
-        triplesArray.forEach(function(item,index){
+        var fetchCount = 0;
+        var triplesArray = triples.split("\n");
+        var tripleSlices = [];
+        var tripleSlice = "";
+        triplesArray.forEach(function(item, index) {
 
-          if((fetchCount++)<fechSize)
-            tripleSlice+=item+"\n";
-          else{
-            tripleSlices.push(""+tripleSlice)
-            tripleSlice=""
-            fetchCount=0;
+          if ((fetchCount++) < fechSize)
+            tripleSlice += item + "\n";
+          else {
+            tripleSlices.push("" + tripleSlice);
+            tripleSlice = "";
+            fetchCount = 0;
           }
-        })
-        tripleSlices.push(""+tripleSlice)
+        });
+        tripleSlices.push("" + tripleSlice);
 
 
-        async.eachSeries(tripleSlices,function(triples,callbackEach) {
+        async.eachSeries(tripleSlices, function(triples, callbackEach) {
           SourceIntegrator.insertTriples(sparqlServerUrl, graphUri, triples, function(err, result) {
 
-              return callbackEach(err)
+            return callbackEach(err);
 
-          })
-        },function(err){
-          return callback(null, { graphUri: graphUri, imports: imports,totalTriples:totalTriples});
-        })
-
-
+          });
+        }, function(err) {
+          return callback(null, { graphUri: graphUri, imports: imports, totalTriples: totalTriples });
+        });
 
 
       });
     });
 
-
-    request.get(url).pipe(myParser);
+    try {
+      request.get(url).pipe(myParser);
+    } catch (e) {
+      return callback(e);
+    }
 
 
   },
-
-
 
 
   importSourceFromTurtle: function(ontologyUrl, sourceName, options, callback) {
@@ -113,7 +111,6 @@ var SourceIntegrator = {
     var sparqlServerUrl = null;
     var imports = [];
     async.series([
-
 
 
         //getConfig
@@ -142,7 +139,14 @@ var SourceIntegrator = {
 
         //check if ontology already exist (with graphUri)
         function(callbackSeries) {
+      var sourcesArray=Object.keys(sources)
+          if(sourcesArray.indexOf(sourceName)>-1){
+            sourceStatus.exists = true;
+            return callbackSeries()
+          }
+
           for (var source in sources) {
+
             if (sources[source].graphUri == graphUri)
               sourceStatus.exists = source;
             else
@@ -151,11 +155,14 @@ var SourceIntegrator = {
           }
           return callbackSeries();
         },
+
+
+
         //parse and write triples
         function(callbackSeries) {
-      if(!graphUri)
-        graphUri="http://industryportal.enit.fr/ontologies/"+sourceName+"#"
-          SourceIntegrator.ontologyUrl2tripleStore(ontologyUrl,sparqlServerUrl, graphUri, function(err, result) {
+          if (!graphUri)
+            graphUri = "http://industryportal.enit.fr/ontologies/" + sourceName + "#";
+          SourceIntegrator.ontologyUrl2tripleStore(ontologyUrl, sparqlServerUrl, graphUri, function(err, result) {
             if (err)
               return callbackSeries(err);
             graphUri = result.graphUri;
@@ -169,7 +176,10 @@ var SourceIntegrator = {
 
         //register source if not exists
         function(callbackSeries) {
-          if (!sourceStatus.exists ) {
+          if (sourceStatus.exists) {
+            return callbackSeries();
+          }
+
             var id = Util.getRandomHexaId(10);
             var newSource = {
               "name": sourceName,
@@ -205,10 +215,7 @@ var SourceIntegrator = {
               sourceStatus.exists = true;
               return callbackSeries();
 
-
             });
-          }
-
 
         }
 
@@ -245,5 +252,5 @@ if (false) {
   };
 
   SourceIntegrator.importSourceFromTurtle(url, sourceName, options, function(err, result) {
-  })
+  });
 }

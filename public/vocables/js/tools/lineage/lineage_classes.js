@@ -352,11 +352,11 @@ var Lineage_classes = (function() {
               return callbackEach();
             }
             if (result.length > self.showLimit) {
-              //   $("#graphDiv").html("<div style='margin:10px'><span style='font-weight: bold;color:saddlebrown'> too may nodes (" + result.length + ")  .Cannot display the graph, </span><i>select and graph a node or a property to start graph exploration</i></div>")
-              MainController.UI.message("too may nodes (" + result.length + ")  .Cannot display the graph, select and graph a node or a property ", true);
+              alert("Too may nodes (" + result.length + ")  .Only will "+self.showLimit +"be displayed", true);
+              result=result.slice(0,self.showLimit)
 
-              if (callback) return callback("too may nodes");
-              return;
+             /* if (callback) return callback("too may nodes");
+              return;*/
             }
             /**
              * @type {any[]}

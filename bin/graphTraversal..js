@@ -94,9 +94,10 @@ var GraphTraversal = {
         },
 
         shortestPath: function (graph, source, target) {
+            var shortestPaths={}
             if (source == target) {
                 // Delete these four lines if
-                print(source); // you want to look for a cycle
+              //  print(source); // you want to look for a cycle
                 return; // when the source is equal to
             } // the target.
             var queue = [source],
@@ -122,6 +123,7 @@ var GraphTraversal = {
                         path.push(u);
                         path.reverse();
 
+
                         return path;
                     }
                     predecessor[v] = u;
@@ -137,7 +139,8 @@ var GraphTraversal = {
             var graph = new GraphTraversal.path.Graph();
 
             viscinityArray.forEach(function (edge) {
-                if (options.skipNode && edge.indexOf(options.skipNode)) return;
+               if(options.skipNode==edge[0])
+                   return;
                 graph.addEdge(edge[0], edge[1]);
             });
             GraphTraversal.path.bfs(graph, fromNodeId);
@@ -166,25 +169,31 @@ var GraphTraversal = {
         });
     },
 
-    getAllShortestPath: function (sparqlServerUrl, graphUri, fromNodeId, toNodeId, number, callback) {
+    getAllShortestPath: function (sparqlServerUrl, graphUri, fromNodeId, toNodeId, number,options, callback) {
         var allpaths = [];
         var lastPathSize = 1;
         var iterations = 0;
+        var skipNode=null;
         var stop = false;
         async.whilst(
-            function (_test) {
-                return !stop;
+            function (test) {
+                return test(null, !stop);
             },
             function (callbackWhilst) {
                 GraphTraversal.getShortestPath(sparqlServerUrl, graphUri, fromNodeId, toNodeId, { skipNode: skipNode }, function (err, path) {
                     if (err) return callbackWhilst(err);
+                    if(path.length<3)
+                        stop=true;
+
+                    skipNode=path[path.length-2][0]
                     allpaths.push(path);
                     iterations += 1;
-                    if (lastPathSize <= 2 && iterations < number) stop = true;
+                   if( iterations >= number) stop = true;
+                    callbackWhilst()
                 });
             },
             function (err) {
-                return callback(null, path2);
+                return callback(null, allpaths);
             }
         );
     },
@@ -247,13 +256,14 @@ g.addEdge("D", "C", 3);*/
 
     console.log(g.floydWarshallAlgorithm());
 }
-return;
 
-GraphTraversal.getShortestPath(
+//GraphTraversal.getShortestPath(
+  GraphTraversal.getAllShortestPath(
+
     "http://51.178.139.80:8890/sparql",
-    "http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/",
-    "http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/Richard_Mortimer",
-    "http://data.total.com/resource/tsf/ontology/tsf-standards_landscape/Reference_Standards",
+    "http://data.total.com/resource/tsf/ontology/gaia-test/",
+    "http://data.total.com/resource/tsf/ontology/gaia-test/abc685bd46",
+    "http://data.total.com/resource/tsf/ontology/gaia-test/cc7b582c0f",5,{},
     function (err, result) {
         var x = result;
     }

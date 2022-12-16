@@ -46,12 +46,45 @@ Lineage_sources = (function () {
                 return  self.setCurrentSource(calledSource);
               }
 
-        SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], { includeSourcesWithoutSearchIndex: true }, function () {
-            var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
+        SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], {
+            includeSourcesWithoutSearchIndex: true,
+             withCheckboxes:true,
+
+          }
+          , function () {
+              var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
+              if (sources.length > 0)
+                  return
+                var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
+                self.setCurrentSource(source);
             $("#sourcesSelectionDialogdiv").dialog("close");
+              $("#lineage_allActions").css("visibility", "visible");
            MainController.UI.showHideRightPanel();
-            self.setCurrentSource(source);
-        });
+
+        },function() {
+              //if checkbox
+              var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
+              if (sources.length > 0) {
+                  var firstSource=null;
+                  async.eachSeries(sources, function(source, callbackEach) {
+                      self.initSource(source, function(err, result) {
+                          if(!err)
+                              firstSource=source
+                          return callbackEach()
+                      });
+                  }, function(err) {
+                      if (err)
+                          alert(err);
+                      self.setCurrentSource(firstSource);
+                      $("#sourcesSelectionDialogdiv").dialog("close");
+                      MainController.UI.showHideRightPanel();
+                      $("#lineage_allActions").css("visibility", "visible");
+                  })
+              }
+          })
+
+
+
     };
 
     self.setCurrentSource = function (source) {
@@ -186,7 +219,7 @@ Lineage_sources = (function () {
     };
 
     self.initSource = function (source, callback) {
-        if (!source || !Config.sources[source]) return;
+        if (!source || !Config.sources[source]) return callback("not a source");
 
         self.registerSource(source);
         Lineage_sources.setTopLevelOntologyFromImports(source);

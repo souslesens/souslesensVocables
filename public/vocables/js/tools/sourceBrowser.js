@@ -1455,7 +1455,7 @@ defaultLang = 'en';*/
         var value = $("#Lineage_classes_SearchSourceInput").val();
         $("#searchAll_sourcesTree").jstree(true).search(value);
     };
-    self.showSearchableSourcesTreeDialog = function (types, options, validateFn) {
+    self.showSearchableSourcesTreeDialog = function (types, options, validateFn,okButtonValidateFn) {
         if (!options) options = {};
         if (!self.searchableSourcesTreeIsInitialized) {
             function doDialog(sources) {
@@ -1467,6 +1467,11 @@ defaultLang = 'en';*/
                         show_only_matches: true,
                     },
                 };
+                if(options.withCheckboxes){
+                    jstreeOptions.withCheckboxes=true;
+                 //   jstreeOptions.onCheckNodeFn=options.onCheckNodeFn
+
+                }
                 self.searchableSourcesTreeIsInitialized = false;
                 if (!types) types = ["OWL"];
                 $("#sourcesSelectionDialogdiv").on("dialogopen", function (event, ui) {
@@ -1476,8 +1481,10 @@ defaultLang = 'en';*/
                 var xx = $("#sourcesSelectionDialogdiv").length;
                 $("#sourcesSelectionDialogdiv").dialog("open");
                 $("#Lineage_classes_SearchSourceInput").focus();
-                if (validateFn) $("#searchAllValidateButton").bind("click", validateFn);
-                else $("#searchAllValidateButton").css("display", "none");
+                if (okButtonValidateFn) $("#searchAllValidateButton").bind("click", okButtonValidateFn);
+                else
+                    $("#searchAllValidateButton").css("display","none")
+
 
                 $("#Lineage_classes_SearchSourceInput").bind("keydown", null, SourceBrowser.searchInSourcesTree);
             }

@@ -41,6 +41,8 @@ var Ontocommons = (function() {
 
 
   self.showOntologyInSLSV=function(ontologyId){
+    if(!ontologyId)
+      return;
     var sourceUrl="http://data.industryportal.enit.fr/ontologies/"+ontologyId+"/submissions/1/download?apikey=019adb70-1d64-41b7-8f6e-8f7e5eb54942"
 
     self.currentSource=ontologyId

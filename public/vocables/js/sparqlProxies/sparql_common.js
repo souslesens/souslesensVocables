@@ -267,10 +267,20 @@ return str;
             fromStr += from + "  <" + graphUri + "> ";
         });
         if (withoutImports === undefined) withoutImports = self.withoutImports;
-        if(Lineage_sources.fromAllWhiteboardSources)
-            withoutImports=false
+        var imports = Config.sources[source].imports;
+        if(Lineage_sources.fromAllWhiteboardSources){
+            for (var source2 in Lineage_sources.loadedSources){
+                if(source2!=source){
+                    var graphUri = Config.sources[source2].graphUri;
+                    if(graphUri)
+                    if (graphUri && from.indexOf(graphUri) < 0) fromStr += from + "  <" + graphUri + "> ";
+                }
+
+            }
+        }
+
         if (!withoutImports || self.includeImports) {
-            var imports = Config.sources[source].imports;
+
             if (imports) {
                 imports.forEach(function (source2) {
                     if (!Config.sources[source2]) return console.error(source2 + "not found");

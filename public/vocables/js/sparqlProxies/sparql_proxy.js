@@ -161,6 +161,9 @@ var Sparql_proxy = (function () {
             },
             error: function (err) {
                 console.error(err);
+                console.error("------QUERY--------");
+                console.error(query)
+                console.error("------END QUERY--------");
                 if (err.responseText.indexOf("Virtuoso 42000") > -1) {
                     //Virtuoso 42000 The estimated execution time
                     alert(err.responseText.substring(0, err.responseText.indexOf(".")) + "\n select more detailed data");

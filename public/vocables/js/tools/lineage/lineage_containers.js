@@ -13,7 +13,7 @@ var Lineage_containers = (function () {
             label: "graphNode",
             action: function (_e) {
                 if (self.currentContainer.data.type == "container") Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.id, { onlyChildren: true });
-                else Lineage_classes.drawNodeAndParents(self.currentContainer.data, 3);
+                else Lineage_classes.drawNodeAndParents(self.currentContainer.data, 0);
             },
         };
 
@@ -675,7 +675,88 @@ if( item.memberType  && item.memberType.value.indexOf("Bag")>-1)
                 return callback(null, result);
             });
         },
-    };
+    }
+
+    self.graphWhiteboardNodesContainers=function() {
+        var source=Lineage_sources.activeSource
+        var fromStr = Sparql_common.getFromStr(source, false, true);
+
+        var ids = visjsGraph.data.nodes.getIds();
+        var filter=Sparql_common.setFilter("node",ids)
+        var query =
+          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+          "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+          "select distinct *     " +
+         fromStr +
+          " WHERE {?container rdfs:member ?node.  ?container rdf:type rdf:Bag.  ?container rdfs:label ?containerLabel "+
+          filter+"}"
+
+        var url = Config.sources[source].sparql_server.url + "?format=json&query=";
+
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
+            if (err) return alert(err);
+            var existingNodes = visjsGraph.getExistingIdsMap()
+            var visjsData = { nodes: [], edges: [] };
+            result.results.bindings.forEach(function(item) {
+
+
+                if (!existingNodes[item.container.value]) {
+                    existingNodes[item.container.value] = 1;
+
+                    var color2 = "#0067bb"
+                    visjsData.nodes.push({
+                        id: item.container.value,
+                        label: item.containerLabel.value,
+                        shadow: self.nodeShadow,
+                        shape: "box",
+                        size: Lineage_classes.defaultShapeSize,
+                        font: { color: "#eee" },
+                        color: color2,
+                        data: {
+                            type:  "container",
+                            source: Lineage_sources.activeSource,
+                            id: item.container.value,
+                            label: item.containerLabel.value,
+                        },
+                    });
+                }
+
+
+                var edgeId = item.container.value + "_" + "member" + "_" + item.node.value;
+                if ( !existingNodes[edgeId]) {
+                    existingNodes[edgeId] = 1;
+
+                    visjsData.edges.push({
+                        id: edgeId,
+                        from: item.container.value,
+                        to: item.node.value,
+
+                        data: { from: item.container.value, to: item.node.value, source: source },
+                        font: { multi: true, size: 10 },
+
+                        //  dashes: true,
+                        color: "#8528c9",
+                    });
+                }
+
+
+            })
+
+                visjsGraph.data.nodes.add(visjsData.nodes);
+                visjsGraph.data.edges.add(visjsData.edges);
+
+            visjsGraph.network.fit();
+            $("#waitImg").css("display", "none");
+
+        });
+
+    }
+
+
+
+
+
 
     return self;
 })();

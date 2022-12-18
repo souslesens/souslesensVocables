@@ -363,9 +363,7 @@ var CsvTripleBuilder = {
                                                                 } else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                                             }
 
-                                                            if (!item.isSpecificPredicate && !item.p.match(/.+:.+|http.+/)) {
-                                                                item.p = "<" + graphUri + util.formatStringForTriple(item.p, true) + ">";
-                                                            }
+
                                                             if (item.isRestriction) {
                                                                 var propStr = item.p;
                                                                 if (typeof item.p === "function") {
@@ -451,11 +449,23 @@ var CsvTripleBuilder = {
                                                             else {
                                                                 // get value for property
                                                                 var propertyStr = item.p;
-                                                                if (item.isSpecificPredicate) {
+
+                                                              /*  if (item.isSpecificPredicate) {
                                                                     propertyStr = line[item.p];
-                                                                } else if (item.p.indexOf("$") == 0) propertyStr = line[item.p.substring(1)];
-                                                                else if (typeof item.p === "function") {
-                                                                    propertyStr = item.p(line, line);
+                                                                } else*/
+                                                                if (typeof item.p === "function") {
+                                                                    try {
+                                                                        propertyStr = item.p(line, item);
+                                                                    } catch (e) {
+                                                                        return (lineError = e);
+                                                                    }
+                                                                }
+                                                                else  if (item.p.indexOf("$") == 0) {
+                                                                    propertyStr = line[item.p.substring(1)];
+                                                                }
+                                                                if(!propertyStr) {
+                                                                    var x = 3
+                                                                    return ;
                                                                 }
                                                                 if (propertyStr.indexOf("http") == 0) propertyStr = "<" + propertyStr + ">";
                                                                 if (subjectStr && objectStr) {
@@ -840,6 +850,14 @@ var CsvTripleBuilder = {
                                 if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
 
                                 item.o = fn;
+                            });
+                        }
+
+                        if (item.p.indexOf("function{") > -1) {
+                            getFunction(["row", "mapping"], item.p, function (err, fn) {
+                                if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
+
+                                item.p = fn;
                             });
                         }
                     });

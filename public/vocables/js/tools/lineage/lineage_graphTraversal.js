@@ -11,14 +11,17 @@ var Lineage_graphTraversal = (function () {
      * @param toNodeId
      * @param callback return shortestPath nodes array
      */
-    self.getShortestpathUris = function (source, fromNodeId, toNodeId, callback) {
+    self.getShortestpathUris = function (source, fromNodeId, toNodeId,options, callback) {
         var body = {
             getShortestPath: 1,
             sparqlServerUrl: Config.sources[source].sparql_server.url,
             graphUri: Config.sources[source].graphUri,
             fromNodeUri: fromNodeId,
             toNodeUri: toNodeId,
+            numberOfPathes:options.numberOfPathes||1
         };
+
+
         var payload = {
             url: Config.sources[source].sparql_server.url,
             body: JSON.stringify(body),
@@ -38,16 +41,19 @@ var Lineage_graphTraversal = (function () {
         });
     };
 
-    self.getShortestpathObjects = function (source, fromNodeId, toNodeId, callback) {
+    self.getShortestpathObjects = function (source, fromNodeId, toNodeId,options, callback) {
         var path = [];
         var relations = [];
         var labelsMap = {};
+        if(!options){
+            options={}
+        }
 
         async.series(
             [
                 //get shortestPath nodes array
                 function (callbackSeries) {
-                    self.getShortestpathUris(source, fromNodeId, toNodeId, function (err, result) {
+                    self.getShortestpathUris(source, fromNodeId, toNodeId, options,function (err, result) {
                         if (err) return callbackSeries(err);
                         path = result;
 
@@ -105,12 +111,8 @@ var Lineage_graphTraversal = (function () {
                         relations.push(relation);
                     });
                     return callbackSeries();
-                },
+                }
 
-                //build visjsNodeData
-                function (callbackSeries) {
-                    return callbackSeries();
-                },
             ],
             function (err) {
                 return callback(err, relations);
@@ -216,7 +218,7 @@ var Lineage_graphTraversal = (function () {
         if (!toUri) toUri = self.pathToUri;
         if (fromUri == toUri) return alert(" from node and to node must be different");
 
-        self.getShortestpathObjects(source, fromUri, toUri, function (err, relations) {
+        self.getShortestpathObjects(source, fromUri, toUri, {},function (err, relations) {
             if (err) return alert(err.responseText);
 
             var html = "";
@@ -244,95 +246,123 @@ var Lineage_graphTraversal = (function () {
         });
     };
 
-    self.drawShortestPath = function (source, fromUri, toUri) {
-        if (!source) source = Lineage_sources.activeSource;
-        if (!fromUri) fromUri = self.pathFromUri;
-        if (!toUri) toUri = self.pathToUri;
-        if (fromUri == toUri) return alert(" from node and to node must be different");
 
-        self.getShortestpathObjects(source, fromUri, toUri, function (err, relations) {
-            if (err) return alert(err.responseText);
 
-            var visjsData = { nodes: [], edges: [] };
-            var existingIdsMap = visjsGraph.getExistingIdsMap();
+    self.drawPathesOnWhiteboard= function draw (relations){
+        var visjsData = { nodes: [], edges: [] };
+        var existingIdsMap = visjsGraph.getExistingIdsMap();
 
-            var shape = Lineage_classes.defaultShape;
-            var color = Lineage_classes.getSourceColor(source);
-            relations.forEach(function (relation, index) {
-                if (!existingIdsMap[relation.from]) {
-                    existingIdsMap[relation.from] = 1;
-                    var node = {
+        var shape = Lineage_classes.defaultShape;
+        var color = Lineage_classes.getSourceColor(Lineage_sources.activeSource);
+        relations.forEach(function (relation, index) {
+            if (!existingIdsMap[relation.from]) {
+                existingIdsMap[relation.from] = 1;
+                var node = {
+                    id: relation.from,
+                    label: relation.fromLabel,
+                    shadow: Lineage_classes.nodeShadow,
+                    shape: shape,
+                    color: color,
+                    size: Lineage_classes.defaultShapeSize,
+                    data: {
+                        source: source,
                         id: relation.from,
                         label: relation.fromLabel,
-                        shadow: Lineage_classes.nodeShadow,
-                        shape: shape,
-                        color: color,
-                        size: Lineage_classes.defaultShapeSize,
-                        data: {
-                            source: source,
-                            id: relation.from,
-                            label: relation.fromLabel,
-                        },
-                    };
-                    visjsData.nodes.push(node);
-                }
-                if (!existingIdsMap[relation.to]) {
-                    existingIdsMap[relation.to] = 1;
-                    var node = {
+                    },
+                };
+                visjsData.nodes.push(node);
+            }
+            if (!existingIdsMap[relation.to]) {
+                existingIdsMap[relation.to] = 1;
+                var node = {
+                    id: relation.to,
+                    label: relation.toLabel,
+                    shadow: Lineage_classes.nodeShadow,
+                    shape: shape,
+                    color: color,
+                    size: Lineage_classes.defaultShapeSize,
+                    data: {
+                        source: source,
                         id: relation.to,
                         label: relation.toLabel,
-                        shadow: Lineage_classes.nodeShadow,
-                        shape: shape,
-                        color: color,
-                        size: Lineage_classes.defaultShapeSize,
-                        data: {
-                            source: source,
-                            id: relation.to,
-                            label: relation.toLabel,
-                        },
-                    };
-                    visjsData.nodes.push(node);
-                }
+                    },
+                };
+                visjsData.nodes.push(node);
+            }
 
-                var edgeId = "P_" + common.getRandomHexaId(6);
-                if (!existingIdsMap[edgeId]) {
-                    existingIdsMap[edgeId] = 1;
+            var edgeId = "P_" + common.getRandomHexaId(6);
+            if (!existingIdsMap[edgeId]) {
+                existingIdsMap[edgeId] = 1;
 
-                    visjsData.edges.push({
+                visjsData.edges.push({
+                    id: edgeId,
+                    from: relation.from,
+                    to: relation.to,
+                    label: relation.propLabel,
+                    color: "red",
+                    size: 3,
+                    // arrows: arrows,
+                    type: "path",
+                    data: {
+                        source: source,
+                        type: "path",
                         id: edgeId,
                         from: relation.from,
                         to: relation.to,
                         label: relation.propLabel,
-                        color: "red",
-                        size: 3,
-                        // arrows: arrows,
-                        type: "path",
-                        data: {
-                            source: source,
-                            type: "path",
-                            id: edgeId,
-                            from: relation.from,
-                            to: relation.to,
-                            label: relation.propLabel,
-                        },
-                    });
-                }
-            });
-
-            var oldEdges = visjsGraph.data.edges.get();
-            var toDelete = [];
-            oldEdges.forEach(function (edge) {
-                if (edge.type == "path") toDelete.push(edge.id);
-            });
-            visjsGraph.data.edges.remove(toDelete);
-
-            if (visjsGraph.isGraphNotEmpty()) {
-                visjsGraph.data.nodes.add(visjsData.nodes);
-                visjsGraph.data.edges.add(visjsData.edges);
-            } else {
-                Lineage_classes.drawNewGraph(visjsData);
+                    },
+                });
             }
+        });
 
+        var oldEdges = visjsGraph.data.edges.get();
+        var toDelete = [];
+        oldEdges.forEach(function (edge) {
+            if (edge.type == "path") toDelete.push(edge.id);
+        });
+        visjsGraph.data.edges.remove(toDelete);
+
+        if (visjsGraph.isGraphNotEmpty()) {
+            visjsGraph.data.nodes.add(visjsData.nodes);
+            visjsGraph.data.edges.add(visjsData.edges);
+        } else {
+            Lineage_classes.drawNewGraph(visjsData);
+        }
+    }
+
+
+
+self.drawAllShortestPathes=function(source, fromUri, toUri,numberOfPathes) {
+    if (!source) source = Lineage_sources.activeSource;
+    if (!fromUri) fromUri = self.pathFromUri;
+    if (!toUri) toUri = self.pathToUri;
+    if (!numberOfPathes)
+        numberOfPathes = parseInt($("#Lineage_graphTraversal_numberOfPathes").val())
+
+    self.getShortestpathObjects(source, fromUri, toUri, {numberOfPathes:numberOfPathes},function (err, relations) {
+        if (err) return alert(err.responseText);
+        self.drawPathesOnWhiteboard(relations)
+        $("#mainDialogDiv").dialog("close");
+    });
+
+}
+
+
+      self.drawShortestPath = function (source, fromUri, toUri) {
+        if (!source) source = Lineage_sources.activeSource;
+        if (!fromUri) fromUri = self.pathFromUri;
+        if (!toUri) toUri = self.pathToUri;
+
+        if (fromUri == toUri) return alert(" from node and to node must be different");
+
+
+
+
+
+
+        self.getShortestpathObjects(source, fromUri, toUri, {},function (err, relations) {
+            if (err) return alert(err.responseText);
+            self.drawPathesOnWhiteboard(relations)
             $("#mainDialogDiv").dialog("close");
         });
     };

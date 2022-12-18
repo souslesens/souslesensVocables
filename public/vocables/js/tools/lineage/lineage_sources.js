@@ -53,7 +53,7 @@ Lineage_sources = (function () {
           }
           , function () {
               var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
-              if (sources.length > 0)
+              if (sources.length > 1)
                   return
                 var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
                 self.setCurrentSource(source);

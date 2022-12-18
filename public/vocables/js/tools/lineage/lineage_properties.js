@@ -170,23 +170,23 @@ Lineage_properties = (function() {
         },
 
         function(callbackSeries) {
-          options = { distinct: "?property ?propertyLabel" };
+          options = { distinct: "?prop ?Label" };
           Sparql_OWL.getFilteredTriples(source, null, null, null, options, function(err, result) {
             if (err) return callback(err);
             var distinctIds = {};
             var jstreeData = [];
             result.forEach(function(item) {
-              if (!distinctIds[item.property.value]) {
-                distinctIds[item.property.value] = 1;
+              if (!distinctIds[item.prop.value]) {
+                distinctIds[item.prop.value] = 1;
 
                 var parent = source;
                 jstreeData.push({
-                  text: item.propertyLabel.value,
-                  id: item.property.value,
+                  text: item.propLabel.value,
+                  id: item.prop.value,
                   parent: parent,
                   data: {
-                    label: item.propertyLabel.value,
-                    id: item.property.value,
+                    label: item.propLabel.value,
+                    id: item.prop.value,
                     parent: parent,
                     type: "http://www.w3.org/2002/07/owl#Property",
                     source: source
@@ -214,18 +214,19 @@ Lineage_properties = (function() {
    * @param nodes
    * @param nodeData
    */
-  self.drawPredicatesGraph = function(source, nodeIds, properties, options) {
+  self.drawPredicatesGraph = function(source, nodeIds, properties, options,callback) {
     if (nodeIds && !Array.isArray(nodeIds)) nodeIds = [nodeIds];
     if (properties && !Array.isArray(properties)) properties = [properties];
     var filter = "";
-    if (!properties || properties.length == 0) filter = " FILTER( ?property not in(rdf:type, rdfs:subClassOf,rdfs:member))";
+    if (!properties || properties.length == 0) filter = " FILTER( ?prop not in(rdf:type, rdfs:subClassOf,rdfs:member))";
     if (!options)
       options = {};
-    options.filter = filter;
+
+    options.filter =(options.filter || "")+ " "+ filter;
 
     Sparql_OWL.getFilteredTriples(source, nodeIds, properties, null, options, function(err, result) {
       if (err) return callback(err);
-      Sparql_common.setSparqlResultPropertiesLabels(source, result, "property", function(err, result2) {
+      Sparql_common.setSparqlResultPropertiesLabels(source, result, "prop", function(err, result2) {
         if (err) return callback(err);
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = visjsGraph.getExistingIdsMap();
@@ -271,7 +272,7 @@ Lineage_properties = (function() {
               }
             });
           }
-          var edgeId = item.subject.value + "_" + item.property.value + "_" + item.object.value;
+          var edgeId = item.subject.value + "_" + item.prop.value + "_" + item.object.value;
           if (!existingNodes[edgeId]) {
             existingNodes[edgeId] = 1;
 
@@ -279,8 +280,8 @@ Lineage_properties = (function() {
             //specific case of equivalentClass and sameAs
             {
               var nodeSource = source;
-              var property = item.property.value;
-              if (property == "http://www.w3.org/2002/07/owl#sameAs" || property == "http://www.w3.org/2002/07/owl#equivalentClass")
+              var prop = item.prop.value;
+              if (prop == "http://www.w3.org/2002/07/owl#sameAs" || prop == "http://www.w3.org/2002/07/owl#equivalentClass")
                 nodeSource = options.includeSources[0];
             }
 
@@ -291,13 +292,13 @@ Lineage_properties = (function() {
               data: {
                 id:edgeId,
                 type: "ObjectProperty",
-                propLabel:item.propertyLabel.value,
+                propLabel:item.propLabel.value,
                 from: item.subject.value,
                 to: item.object.value,
-                prop: item.property.value,
+                prop: item.prop.value,
                 source: nodeSource
               },
-              label: item.propertyLabel.value,
+              label: item.propLabel.value,
               font: { color: Lineage_classes.defaultPredicateEdgeColor },
               arrows: {
                 to: {
@@ -319,6 +320,8 @@ Lineage_properties = (function() {
         }
 
         $("#waitImg").css("display", "none");
+        if(callback)
+          return callback();
       });
     });
   };
@@ -358,83 +361,7 @@ Lineage_properties = (function() {
             }
           });
         }
-        if (false && !existingNodes[item.sourceClass.value]) {
-          existingNodes[item.sourceClass.value] = 1;
-          visjsData.nodes.push({
-            id: item.sourceClass.value,
-            label: item.sourceClassLabel.value,
-            shape: Lineage_classes.defaultShape,
-            size: Lineage_classes.defaultShapeSize,
-            color: color,
-            data: {
-              source: source,
-              id: item.sourceClass.value,
-              label: item.sourceClassLabel.value,
-              varName: "value"
-            }
-          });
-          var edgeId = item.sourceClass.value + "_" + item.prop.value;
-          if (false && !existingNodes[edgeId]) {
-            existingNodes[edgeId] = 1;
 
-            visjsData.edges.push({
-              id: edgeId,
-              from: item.sourceClass.value,
-              to: item.prop.value,
-              data: { propertyId: item.prop.value, source: source },
-
-              arrows: {
-                to: {
-                  enabled: true,
-                  type: "solid",
-                  scaleFactor: 0.5
-                }
-              },
-              //dashes: true,
-              color: "#f50707",
-              hidden: true
-            });
-          }
-        }
-        if (false && item.targetClass && !existingNodes[item.targetClass.value]) {
-          existingNodes[item.targetClass.value] = 1;
-          visjsData.nodes.push({
-            id: item.targetClass.value,
-            label: item.targetClassLabel.value,
-            shape: Lineage_classes.defaultShape,
-            size: Lineage_classes.defaultShapeSize,
-            color: color,
-            data: {
-              source: source,
-              id: item.targetClass.value,
-              label: item.targetClassLabel.value,
-              varName: "value"
-            }
-          });
-          edgeId = item.prop.value + "_" + item.targetClass.value;
-          if (false && !existingNodes[edgeId]) {
-            existingNodes[edgeId] = 1;
-
-            visjsData.edges.push({
-              id: edgeId,
-
-              from: item.prop.value,
-              to: item.targetClass.value,
-              data: { propertyId: item.prop.value, source: source },
-
-              arrows: {
-                to: {
-                  enabled: true,
-                  type: "solid",
-                  scaleFactor: 0.5
-                }
-              },
-              // dashes: true,
-              color: "#3a773a",
-              hidden: true
-            });
-          }
-        }
 
         if (!existingNodes[item.restriction.value]) {
           existingNodes[item.restriction.value] = 1;
@@ -1116,6 +1043,8 @@ Lineage_properties = (function() {
        var  options={
           filter:Sparql_common.setFilter("prop",properties)
         }
+        if(!nodeIds)
+          options.allNodes=true
         Lineage_classes.drawRelations(null,null,"Properties",options)
        // Lineage_properties.drawPredicatesGraph(source, nodeIds, properties);
       } else if (target == "table") {

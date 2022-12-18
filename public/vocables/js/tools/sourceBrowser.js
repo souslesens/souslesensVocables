@@ -871,6 +871,7 @@ return callbackSeries();
                 },
             ],
             function (err) {
+              common.getStackTrace()
                 if (callback) callback(err);
                 if (err) return alert(err);
             }

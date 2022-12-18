@@ -391,9 +391,9 @@ var Sparql_OWL = (function () {
      * @param options
      *  - filter
      *  - onlyObjectProperties
-     *  - distinct : variables string ?property ?subject ?object
+     *  - distinct : variables string ?prop ?subject ?object
      *  - limit
-     * @param callback returns  triples with variables ?subject ?property ?object and associated labels
+     * @param callback returns  triples with variables ?subject ?prop ?object and associated labels
      */
     self.getFilteredTriples = function (sourceLabel, subjectIds, propertyIds, objectIds, options, callback) {
         if (!options) options = {};
@@ -402,7 +402,7 @@ var Sparql_OWL = (function () {
             var filterStr = "";
             if (subjectIds) filterStr += Sparql_common.setFilter("subject", subjectIds, null, options);
             if (objectIds) filterStr += Sparql_common.setFilter("object", objectIds, null, options);
-            if (propertyIds) filterStr += Sparql_common.setFilter("property", propertyIds, null, options);
+            if (propertyIds) filterStr += Sparql_common.setFilter("prop", propertyIds, null, options);
             self.graphUri = Config.sources[sourceLabel].graphUri;
             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
@@ -414,18 +414,18 @@ var Sparql_OWL = (function () {
             else query += "select distinct * ";
             query +=
                 fromStr +
-                " WHERE {?subject ?property ?object. " +
+                " WHERE {?subject ?prop ?object. " +
                 filterStr +
                 " " +
                 "?subject rdf:type ?subjectType. " +
                 "?object rdf:type ?objectType. " +
-                Sparql_common.getVariableLangLabel("property", true) +
+                Sparql_common.getVariableLangLabel("prop", true) +
                 Sparql_common.getVariableLangLabel("subject", true) +
                 Sparql_common.getVariableLangLabel("object", true);
-            /* "OPTIONAL{?property rdfs:label ?propertyLabel.}  " +
+            /* "OPTIONAL{?prop rdfs:label ?propertyLabel.}  " +
 " OPTIONAL{?subject rdfs:label ?subjectLabel.}  " +
 " OPTIONAL{?object rdfs:label ?objectLabel.}  ";*/
-            if (options.onlyObjectProperties) " ?property rdf:type owl:ObjectProperty.";
+            if (options.onlyObjectProperties) " ?prop rdf:type owl:ObjectProperty.";
             if (options.filter) query += " " + options.filter;
             if (true || options.onlyObject) {
                 query += " filter (!isLiteral(?object) )";
@@ -433,7 +433,7 @@ var Sparql_OWL = (function () {
                 /*   query += " filter (?subjectType in (owl:NamedIndividual, owl:Class))";
 query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
             }
-            query += " } order by ?propertyLabel ";
+            query += " } order by ?propLabel ";
             var limit = options.limit || Config.queryLimit;
             query += " limit " + limit;
 
@@ -444,7 +444,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
                 if (err) {
                     return callbackQuery(err);
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["object", "property", "subject"]);
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["object", "prop", "subject"]);
                 return callbackQuery(null, result.results.bindings);
             });
         }

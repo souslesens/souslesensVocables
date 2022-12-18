@@ -145,6 +145,8 @@ var Lineage_classes = (function() {
       /** @type {{ ctrlKey: any; shiftKey: any; altKey: any; }} */ nodeEvent,
       /** @type {{ callee?: any; }} */ options
     ) {
+
+      console.trace("onGraphOrTreeNodeClick");
       if (!node.data || node.data.source) return console.log("no data.source in node");
       if (!Config.sources[node.data.source]) return console.log("no matching source for node");
       if (!options) options = {};
@@ -1440,11 +1442,9 @@ var Lineage_classes = (function() {
         var existingNodes = visjsGraph.getExistingIdsMap();
         var color = self.getPropertyColor(propertyId);
 
-        result.forEach(function(
-          /** @type {{ subject: { value: any; }; property: { value: string; }; subjectLabel: { value: any; }; object: { value: any; }; objectLabel: { value: any; }; propertyLabel: { value: string; }; }} */ item
-        ) {
+        result.forEach(function(item ) {
           if (!item.subject) {
-            item.subject = { value: "?_" + item.property.value };
+            item.subject = { value: "?_" + item.prop.value };
           }
           if (!item.subjectLabel) {
             item.subjectLabel = { value: "?" };
@@ -1463,7 +1463,7 @@ var Lineage_classes = (function() {
             });
           }
           if (!item.object) {
-            item.object = { value: "?_" + item.property.value };
+            item.object = { value: "?_" + item.prop.value };
           }
           if (!item.objectLabel) {
             item.objectLabel = { value: "?" };
@@ -1482,7 +1482,7 @@ var Lineage_classes = (function() {
               data: { source: source }
             });
           }
-          var edgeId = item.subject.value + "_" + item.object.value + "_" + item.property.value;
+          var edgeId = item.subject.value + "_" + item.object.value + "_" + item.prop.value;
           if (!existingNodes[edgeId]) {
             existingNodes[edgeId] = 1;
 
@@ -1490,8 +1490,8 @@ var Lineage_classes = (function() {
               id: edgeId,
               from: item.subject.value,
               to: item.object.value,
-              label: "<i>" + item.propertyLabel.value + "</i>",
-              data: { propertyId: item.property.value, source: source },
+              label: "<i>" + item.propLabel.value + "</i>",
+              data: { propertyId: item.prop.value, source: source },
               font: { multi: true, size: 10 },
 
               // font: {align: "middle", ital: {color:Lineage_classes.objectPropertyColor, mod: "italic", size: 10}},
@@ -1640,8 +1640,8 @@ var Lineage_classes = (function() {
             item.rangeLabel = { value: item.objectLabel.value };
             item.domain = { value: item.subject.value };
             item.domainLabel = { value: item.subjectLabel.value };
-            item.prop = { value: item.property.value };
-            item.propLabel = { value: item.propertyLabel.value };
+            item.prop = { value: item.prop.value };
+            item.propLabel = { value: item.propLabel.value };
           });
           drawProperties(result);
         });
@@ -1662,7 +1662,9 @@ var Lineage_classes = (function() {
       else if (caller == "Properties") data = null;
       else if (caller == "leftPanel" || type == "dictionary")   data=visjsGraph.data.nodes.getIds();
    //   if (data && data.data) data = data.data.id;
-      var options = {};
+     if(!options){
+       options = {};
+     }
 
       async.series(
         [
@@ -1745,11 +1747,11 @@ var Lineage_classes = (function() {
     };
 
     self.drawRestrictions = function(
-      /** @type {any} */ source,
-      /** @type {string | null} */ classIds,
-      /** @type {any} */ descendants,
-      /** @type {any} */ withoutImports,
-      /** @type {{ processorFn?: any; }} */ options,
+      source,
+      classIds,
+     descendants,
+      withoutImports,
+     options,
       callback
     ) {
       if (!options) options = {};
@@ -1758,7 +1760,7 @@ var Lineage_classes = (function() {
       if (!classIds) {
         classIds = self.getGraphIdsFromSource(source);
       }
-      if (classIds == "all") classIds = null;
+      if (classIds == "all" || options.allNodes) classIds = null;
       var physics = true;
       var graphSpatialisation = $("#Lineage_classes_graphSpatialisationSelect").val();
       if (graphSpatialisation == "excludeRelations") physics = false;

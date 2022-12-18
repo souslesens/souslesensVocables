@@ -33,7 +33,8 @@
         Predicate
         <select id="KGcreator_predicateSelect" onchange="KGcreator.onTripleModelSelect('p',$(this).val())"></select>
         <input id="KGcreator_predicateInput" class="KGcreator_tripleInput" />
-        is Restriction<input type="checkbox" id="KGcreator_isRestrictionCBX" /> isSpecificPredicate<input type="checkbox" id="KGcreator_isSpecificPredicateCBX" />
+        is Restriction<input type="checkbox" id="KGcreator_isRestrictionCBX" />
+        <!--isSpecificPredicate<input type="checkbox" id="KGcreator_isSpecificPredicateCBX" /-->
     </div>
     <div class="KGcreator_tripleDiv">
         Object
@@ -68,9 +69,9 @@
             </div>
             <div class="lineage_button_group" style="width: 600px">
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.deleteKGcreatorTriples('all')">delete ALL KGreator triples</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.deleteKGcreatorTriples()">delete KGreator triples</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearGraph()">Clear entire graph</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.indexGraph()">Index graph</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.deleteKGcreatorTriples()">delete current file triples</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearGraph()" style="background-color: #fbcb09 !important">Clear entire graph</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.indexGraph()" >Index graph</button>
             </div>
         </div>
     </div>

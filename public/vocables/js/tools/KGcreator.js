@@ -51,7 +51,8 @@ var KGcreator = (function () {
         "owl:Class",
         "owl:NamedIndividual",
         "owl:Thing",
-        "owl:Property",
+        "owl:ObjectProperty",
+        "owl:DatatypeProperty",
         "owl:Restriction",
         "rdf:Bag",
         "skos:Concept",
@@ -742,6 +743,7 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         } catch (err) {
             return alert("error in function code " + err.message);
         }
+        fnBody="function{"+fnBody+"}";
         self.currentJsonObject = self.mainJsonEditor.get();
         if (!self.currentJsonObject.transform) self.currentJsonObject.transform = {};
         self.currentJsonObject.transform[column] = fnBody;

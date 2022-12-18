@@ -19,9 +19,15 @@ module.exports = function () {
 
                 if (body.getShortestPath) {
                     const GraphTraversal = require("../../../bin/graphTraversal.");
-                    GraphTraversal.getShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, body.options, function (err, result) {
-                        processResponse(res, err, result);
-                    });
+                    if(  body.numberOfPathes >1){
+                        GraphTraversal.getAllShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri,body.numberOfPathes, body.options, function (err, result) {
+                            processResponse(res, err, result);
+                        });
+                    }else {
+                        GraphTraversal.getShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, body.options, function(err, result) {
+                            processResponse(res, err, result);
+                        });
+                    }
                     return;
                 }
 

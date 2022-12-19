@@ -426,17 +426,79 @@ var KGcreator = (function () {
             },
         };
 
-        items.loadMappings = {
-            label: "load",
+
+            items.loadMappings = {
+                label: "load",
+                action: function(_e) {
+                    // pb avec source
+                    if (self.currentTreeNode.parents.length != 1) return;
+                    KGcreator.loadMappings();
+                },
+
+        };
+    if(!self.currentDataSourceModel) {
+        items.editFile = {
+            label: "editFile",
             action: function (_e) {
                 // pb avec source
                 if (self.currentTreeNode.parents.length != 1) return;
-                KGcreator.loadMappings();
+                KGcreator.editFile();
             },
         };
+    }
 
         return items;
     };
+
+
+
+    self.editFile=function(){
+
+        const params = new URLSearchParams({
+            dir: "CSV/" + self.currentCsvDir,
+            name: self.currentJsonObject.id
+
+        });
+
+
+    $.ajax({
+        type: "GET",
+        url: `${Config.apiUrl}/data/file?`+params.toString(),
+        dataType: "json",
+        success: function (_result, _textStatus, _jqXHR) {
+           var x=_result;
+        },
+        error(err) {
+            if (callback) return callback(err);
+            return alert(err.responseText);
+        },
+    });
+    }
+
+self.saveFile=function(){
+   var data="str"
+    payload = {
+        dir: "CSV/" + self.currentCsvDir,
+        fileName: self.currentJsonObject.fileName ,
+        data: JSON.stringify(self.currentJsonObject),
+    };
+
+
+$.ajax({
+    type: "POST",
+    url: `${Config.apiUrl}/data/file`,
+    data: payload,
+    dataType: "json",
+    success: function (_result, _textStatus, _jqXHR) {
+        MainController.UI.message("json saved");
+        if (callback) return callback();
+    },
+    error(err) {
+        if (callback) return callback(err);
+        return alert(err.responseText);
+    },
+});
+}
 
     self.initCentralPanel = function () {
         // Config.currentTopLevelOntology = $("#KGcreator_topLevelOntologiesSelect").val();
@@ -472,109 +534,7 @@ var KGcreator = (function () {
                     });
                 },
 
-                /*               // get objects Classes
-                       function (callbackSeries) {
-                           return callbackSeries();
-                           Sparql_OWL.getDictionary(topLevelOntology, null, null, function (err, result) {
-                               if (err) callbackSeries(err);
-                               result.sort(function (a, b) {
-                                   if (!a.label || !b.label) return 0;
-                                   if (a.label.value > b.label.value) return 1;
-                                   if (a.label.value < b.label.value) return -1;
-                                   return 0;
-                               });
-                               result.forEach(function (item) {
-                                   if (item.id.type == "bnode") return;
-                                   currentObjectClasses.push({
-                                       id: item.id.value,
-                                       label: self.topLevelOntologyPrefix + ":" + (item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value)),
-                                   });
-                               });
-                               callbackSeries();
-                           });
-                       },
 
-                       //get predicates
-                       function (callbackSeries) {
-                           return callbackSeries();
-                           Sparql_OWL.getObjectPropertiesDomainAndRange(topLevelOntology, null, null, function (err, result) {
-                               if (err) callbackSeries(err);
-                               result.sort(function (a, b) {
-                                   if (!a.propLabel || !b.propLabel) return 0;
-                                   if (a.propLabel.value > b.propLabel.value) return 1;
-                                   if (a.propLabel.value < b.propLabel.value) return -1;
-                                   return 0;
-                               });
-
-                               result.forEach(function (item) {
-                                   self.propertiesMap[self.topLevelOntologyPrefix + ":" + item.propLabel.value] = {
-                                       id: item.prop.value,
-                                       label: item.propLabel.value,
-                                       inverseProp: item.inverseProp ? item.inverseProp.value : null,
-                                       inversePropLabel: item.inversePropLabel ? self.topLevelOntologyPrefix + ":" + item.inversePropLabel.value : null,
-                                   };
-
-                                   var item2 = { id: item.prop.value, label: self.topLevelOntologyPrefix + ":" + item.propLabel.value };
-                                   if (currentPredicates.indexOf(item2) < 0) currentPredicates.push(item2);
-                               });
-                               // set missing inverse props
-                               for (var key in self.propertiesMap) {
-                                   if (self.propertiesMap[key].inversePropLabel) {
-                                       if (!self.propertiesMap[self.propertiesMap[key].inversePropLabel].inversePropLabel) self.propertiesMap[self.propertiesMap[key].inversePropLabel].inversePropLabel = key;
-                                       self.propertiesMap[self.propertiesMap[key].inversePropLabel].inverseProp = self.propertiesMap[key];
-                                   }
-                               }
-
-                               callbackSeries();
-                           });
-                       },
-
-                       //get source specific properties and Classes
-                       function (callbackSeries) {
-                           return callbackSeries();
-                           Sparql_OWL.listObjectProperties(self.currentSource, null, function (err, result) {
-                               if (err) return callbackSeries(err);
-                               self.currentSpecificObjectPropertiesMap = {};
-                               self.domainOntologyProperties = [];
-                               result.forEach(function (item) {
-                                   sourceSpecificPredicates.push({
-                                       id: "<" + item.prop.value + ">",
-                                       label: item.propLabel.value,
-                                   });
-                               });
-
-                               callbackSeries();
-                           });
-                       },
-                       //get  source properties and Classes
-                       function (callbackSeries) {
-                          // return callbackSeries();
-                           Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(self.currentSource, function (err, result) {
-                               if (err) return alert(err.responseText);
-
-                               self.currentPossibleClassesAndPredicates = result;
-                               result.predicates.forEach(function (item) {
-                                   self.propertiesMap[item.label] = item.id;
-                               });
-
-                               var objs = result.sourceObjects;
-                               objs.push({ id: "", label: "------------" });
-                               objs = objs.concat(currentObjectClasses);
-                               currentObjectClasses = objs;
-
-                               //  var allObjects = result.usualObjects.concat(result.TopLevelOntologyObjects).concat([""]).concat(result.sourceObjects);
-                               currentPredicates = sourceSpecificPredicates
-                                   .concat([
-                                       {
-                                           id: "",
-                                           label: "--------",
-                                       },
-                                   ]).concat(currentPredicates)
-                                   .concat(result.predicates);
-
-                               callbackSeries();
-                           });
-                       },*/
                 function (callbackSeries) {
                     currentSubjectClasses = ["_selectedColumn", "--------"].concat(self.usualSubjectTypes);
                     currentObjectClasses = [
@@ -637,7 +597,12 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         }
 
         if (isObjectString) tripleObj.isString = true;
-        if (predicate.indexOf("label") > -1) tripleObj.isString = true;
+        else if (predicate.toLowerCase().indexOf("label") > -1) tripleObj.isString = true;
+        else if (predicate.toLowerCase().indexOf("definedBy") > -1) tripleObj.isString = true;
+        else if (predicate.toLowerCase().indexOf("comment") > -1) tripleObj.isString = true;
+        else if (predicate.toLowerCase().indexOf("example") > -1) tripleObj.isString = true;
+
+
         if (subjectLookupName) tripleObj.lookup_s = subjectLookupName;
         if (objectLookupName) tripleObj.lookup_o = objectLookupName;
 

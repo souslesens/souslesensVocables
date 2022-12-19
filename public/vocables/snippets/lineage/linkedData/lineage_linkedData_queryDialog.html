@@ -113,14 +113,14 @@
 
                                 &nbsp; <button onclick="Lineage_linkedData_query.fillColumnValuesSelect()">List</button>
                                 &nbsp;
-                                <select id="LineageLinkedDataQueryParams_valuesSelect" onchange="Lineage_linkedData_sql.onValuesSelectChange()" style="width: 200px">
+                                <select id="LineageLinkedDataQueryParams_valuesSelect" style="width: 200px">
                                     <option value="" size="3"></option>
                                 </select>
                             </td>
                         </tr>
                     </table>
 
-                    <select id="LineageLinkedDataQueryParams_operator" onclick="Lineage_linkedData.onSearchDialogOperatorSelect($(this).val())">
+                    <select id="LineageLinkedDataQueryParams_operator">
                         <option>=</option>
                         <option selected="selected">contains</option>
                         <option>LIST</option>

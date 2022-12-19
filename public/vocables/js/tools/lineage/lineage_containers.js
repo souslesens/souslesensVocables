@@ -52,6 +52,13 @@ var Lineage_containers = (function() {
         Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.data.id, { nodes: true });
       }
     };
+
+    items["GraphContainerSetStyle"] = {
+      label: "Set Style",
+      action: function(_e) {
+        Lineage_styles.showDialog(self.currentContainer.data);
+      }
+    };
     /*  items["GraphContainerAncestors"] = {
 label: "Graph container ancestors",
 action: function(_e) {
@@ -433,6 +440,7 @@ return;*/
 
     var data = [];
     var descendants = [];
+    var stylesMap={}
 
     async.series(
       [
@@ -459,25 +467,76 @@ return;*/
             return callbackSeries();
           });
         },
+      //get containersStyles
+        function(callbackSeries) {
+          data.forEach(function(item) {
+            if (item.containerStyle)
+              if(!stylesMap[item.container.value])
+                stylesMap[item.container.value]={styleId:item.containerStyle.value}
+
+              })
+          var ids=Object.keys(stylesMap)
+          if(ids.length==0)
+            return callbackSeries();
+          Lineage_styles.init()
+        Lineage_styles.listStyles(ids,function(err, styles){
+          if(err)
+            return alert(err);
+          for(var containerId in stylesMap){
+            var styleId=stylesMap[containerId]
+            var styleObj=styles[ styleId]
+            if(styleObj)
+              styleObj.id=styleId
+            stylesMap[containerId]=styleObj
+          }
+            return callbackSeries();
+          })
+
+        },
+
         function(callbackSeries) {
           var color = Lineage_classes.getSourceColor(source);
           var opacity = 1.0;
           var existingNodes = visjsGraph.getExistingIdsMap();
           var visjsData = { nodes: [], edges: [] };
-          var objectProperties=[]
+          var objectProperties = [];
+
+
+
+
           data.forEach(function(item) {
+
+            var shape="dot";
+            var color2 = common.colorToRgba(color, opacity * 1);
+            var size=Lineage_classes.defaultShapeSize
+
+            var containerStyle= stylesMap[item.container0.value]
+            if(containerStyle){
+              shape=containerStyle.shape || shape;
+              color2=containerStyle.color || color2;
+              size=containerStyle.size || colorsize2;
+
+
+            }
+
             if (item.containerType.value == "http://www.w3.org/2002/07/owl#ObjectProperty")
               return objectProperties.push(item.container.value);
             if (!existingNodes[item.container0.value]) {
               existingNodes[item.container0.value] = 1;
+
+
+
+
+
+
+
               var type = "container";
-              var color2 = common.colorToRgba(color, opacity * 1);
               visjsData.nodes.push({
                 id: item.container0.value,
                 label: item.container0Label.value,
                 shadow: self.nodeShadow,
-                shape: type == "container" ? "box" : "dot",
-                size: Lineage_classes.defaultShapeSize,
+                shape: type == "container" ? "box" :shape,
+                size: size,
                 font: type == "container" ? { color: "#eee" } : null,
                 color: color2,
                 data: {
@@ -503,8 +562,8 @@ return;*/
                 id: item.container.value,
                 label: item.containerLabel.value,
                 shadow: self.nodeShadow,
-                shape: type == "container" ? "box" : "dot",
-                size: Lineage_classes.defaultShapeSize,
+                shape: type == "container" ? "box" : shape,
+                size: size,
                 font: type == "container" ? { color: "#fff", size: 12 } : null,
                 color: color2,
                 data: {
@@ -537,7 +596,7 @@ return;*/
             if (item.member && !existingNodes[item.member.value]) {
               existingNodes[item.member.value] = 1;
               var type;
-              var color2 = color;
+
               if (item.memberType && item.memberType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
                 type = "container";
                 color2 = common.colorToRgba(color, opacity * 0.6);
@@ -547,8 +606,8 @@ return;*/
                 label: item.memberLabel.value,
 
                 shadow: self.nodeShadow,
-                shape: type == "container" ? "box" : "dot",
-                size: Lineage_classes.defaultShapeSize,
+                shape: type == "container" ? "box" : shape,
+                size: size,
                 font: type == "container" ? { color: "#fff", size: 10 } : null,
                 color: color2,
                 data: {
@@ -590,13 +649,13 @@ return;*/
           }
           visjsGraph.network.fit();
           $("#waitImg").css("display", "none");
-          if(objectProperties.length>0){
-            source = Lineage_sources.activeSource
-            var  options={
-              filter:Sparql_common.setFilter("prop",objectProperties)
-            }
-            options.allNodes=false
-            Lineage_classes.drawRelations(null,null,"Properties",options)
+          if (objectProperties.length > 0) {
+            source = Lineage_sources.activeSource;
+            var options = {
+              filter: Sparql_common.setFilter("prop", objectProperties)
+            };
+            options.allNodes = false;
+            Lineage_classes.drawRelations(null, null, "Properties", options);
           }
           return callbackSeries();
         }
@@ -654,7 +713,8 @@ return;*/
         fromStr +
         " WHERE { ?container0  rdf:type rdf:Bag. ?container0 <http://www.w3.org/2000/01/rdf-schema#member> ?container. " +
         " OPTIONAL {?container0 rdfs:label ?container0Label.}" +
-        " OPTIONAL {?container rdfs:label ?containerLabel.}";
+        " OPTIONAL {?container rdfs:label ?containerLabel.}" +
+        " OPTIONAL {?container <http://souslesens.org/resource/styles/hasStyle> ?containerStyle.}";
 
       query += " ?container rdf:type ?containerType. ";
       if (options.bags) query += " filter( ?containerType = rdf:Bag)\n";
@@ -689,6 +749,13 @@ return;*/
     }
   };
 
+
+  self.applyContainerstyle = function(containerUrl) {
+
+
+  };
+
+
   self.graphWhiteboardNodesContainers = function() {
     var source = Lineage_sources.activeSource;
     var fromStr = Sparql_common.getFromStr(source, false, true);
@@ -712,7 +779,6 @@ return;*/
       var visjsData = { nodes: [], edges: [] };
 
       result.results.bindings.forEach(function(item) {
-
 
 
         if (!existingNodes[item.container.value]) {

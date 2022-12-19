@@ -1323,21 +1323,31 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
     };
 
     self.getAllTriples = function (sourceLabel, role, ids, options, callback) {
-        if (!role) return callback("no role sepecified");
-        if (!ids) return callback("no uris sepecified");
+     //   if (!role) return callback("no role sepecified");
+     //   if (!ids) return callback("no uris sepecified");
         if (!options) options = {};
 
-        var slices = common.array.slice(ids, Sparql_generic.slicesSize);
+        var fromStr=""
+        if (options.source) {
+            fromStr =Sparql_common.getFromStr(options.source)
+        }
+
+        var slices = [[]]
+        if(role && ids)
+            slices= common.array.slice(ids, Sparql_generic.slicesSize);
         var allResults = [];
         async.eachSeries(
             slices,
             function (sliceIds, callbackEach) {
+
+
                 var query =
                     "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                    "SELECT  * " +
+                    "SELECT  * " +fromStr+
                     " WHERE { ?subject ?predicate ?object.";
+                if(role && ids)
                 query += Sparql_common.setFilter(role, sliceIds);
                 if (options.removeBlankNodesObjects) {
                     query += " FILTER (!isBlank(?object)) ";

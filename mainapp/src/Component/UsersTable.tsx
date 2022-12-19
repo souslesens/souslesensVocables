@@ -53,8 +53,13 @@ const UsersTable = () => {
             ),
             success: (gotUsers: User[]) => {
                 const datas = gotUsers.map((user) => {
-                    const { groups, ...restOfProperties } = user;
-                    return { ...restOfProperties };
+                    const { groups, _type, password, ...restOfProperties } = user;
+                    const data = {
+                        ...restOfProperties,
+                        groups: groups.join(";"),
+                    };
+
+                    return data;
                 });
                 return (
                     <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>

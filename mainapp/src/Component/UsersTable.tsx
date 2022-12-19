@@ -64,7 +64,7 @@ const UsersTable = () => {
                 return (
                     <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                         <Stack spacing={2}>
-                            <CsvDownloader filename="users.csv" datas={datas} />
+                            <CsvDownloader separator="&#9;" filename="users.tsv" datas={datas} />
                             <Autocomplete
                                 disablePortal
                                 id="search-users"

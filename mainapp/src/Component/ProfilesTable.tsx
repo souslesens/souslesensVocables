@@ -65,7 +65,7 @@ const ProfilesTable = () => {
                 return (
                     <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                         <Stack>
-                            <CsvDownloader filename="profiles.csv" datas={datas} />
+                            <CsvDownloader separator="&#9;" filename="profiles.tsv" datas={datas} />
                             <Autocomplete
                                 disablePortal
                                 id="filter profiles"

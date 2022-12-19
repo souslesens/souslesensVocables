@@ -63,7 +63,7 @@ const SourcesTable = () => {
                 return (
                     <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                         <Stack>
-                            <CsvDownloader filename="sources.csv" datas={datas} />
+                            <CsvDownloader separator="&#9;" filename="sources.tsv" datas={datas} />
                             <Autocomplete
                                 disablePortal
                                 id="search-sources"

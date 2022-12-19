@@ -44,15 +44,8 @@ jobs:
                   headless: true
                   browser: chromium
                   spec: |
-                      cypress/e2e/browser.cy.js
-                      cypress/e2e/genealogy.cy.js
-                      cypress/e2e/kgmapping.cy.js
                       cypress/e2e/login.cy.js
-                      cypress/e2e/sparql_endpoint.cy.js
                       cypress/e2e/standardizer.cy.js
                       cypress/e2e/ConfigEditor.cy.js
-                      cypress/e2e/KGbrowser.cy.js
                       cypress/e2e/lineage.cy.js
-                      cypress/e2e/match.cy.js
-                      cypress/e2e/SQLquery.cy.js
                   runTests: true

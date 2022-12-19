@@ -11,7 +11,7 @@ env:
 
 jobs:
     cypress-run:
-        runs-on: ubuntu:22:04
+        runs-on: self-hosted
         timeout-minutes: 10
 
         steps:
@@ -49,3 +49,10 @@ jobs:
                       cypress/e2e/ConfigEditor.cy.js
                       cypress/e2e/lineage.cy.js
                   runTests: true
+
+    cleanup:
+        runs-on: self-hosted
+        needs: cypress-run
+        steps:
+            - name: Cleanup
+              run: sudo docker-compose -f docker-compose.test.yaml down

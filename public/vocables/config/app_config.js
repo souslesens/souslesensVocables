@@ -17,7 +17,8 @@ var Config = (function () {
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/";
 
     self.defaultNewUriRoot = "http://souslesens.org/resource/";
-    self.linkedData_mappings_graph = "http://souslesens.org/resource/linkedData_mappings/";
+    self.linkedData_mappings_graphUri = "http://souslesens.org/resource/linkedData_mappings/";
+    self.styles_graphUri = "http://souslesens.org/resource/styles/";
     self.loginMode = "json";
 
     self.appName = "VOCABLES";

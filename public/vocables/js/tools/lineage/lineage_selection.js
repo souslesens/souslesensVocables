@@ -79,10 +79,20 @@ var Lineage_selection = (function () {
     };
 
     self.onSelectionExecuteAction = function (action) {
+        if (action == "filterBy") {
+            self.filterBy.showDialog();
+        }
         var jstreeNodes = $("#lineage_selection_selectedNodesTreeDiv").jstree(true).get_checked(true);
         if (jstreeNodes.length == 0) return alert("check nodes to process");
 
-        if (action == "mergeInto") {
+
+        if (action == "filterNodes") {
+            self.mergeNodes.showDialog();
+        }
+        if (action == "filterEdges") {
+            self.mergeNodes.showDialog();
+        }
+       else if (action == "mergeInto") {
             self.mergeNodes.showDialog();
         } else if (action == "decorate") {
             self.decorate.showDialog();
@@ -93,10 +103,24 @@ var Lineage_selection = (function () {
         } else if (action == "deleteSelection") {
             self.modifyPredicates.deleteSelection();
         } else if (action == "exportCsv") {
-        } else if (action == "getPaths") {
-            self.modifyPredicates.getPaths();
+            alert ("on construction")
         }
+
     };
+
+    self.filterBy= {
+        showDialog: function() {
+            $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_filterBy.html", function() {
+                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function (err, result) {
+                    if (err) return alert(err.responseText);
+                    common.fillSelectOptions("Lineage_filterBy_propertySelect", result.predicates, true, "label", "id");
+
+                })
+            });
+
+
+        }
+    }
 
     self.mergeNodes = {
         showDialog: function () {
@@ -224,6 +248,7 @@ var Lineage_selection = (function () {
                                         });
                                     }
 
+
                                     var descendantIds = Object.keys(descendantsMap);
                                     descendantIds.forEach(function (item) {
                                         newTriples.push({
@@ -300,46 +325,57 @@ var Lineage_selection = (function () {
                                     });
                                 },
 
-                                //create news uris
-                                function (callbackSeries) {
-                                    if (mergeMode == "keepUri") return callbackSeries();
-
-                                    function getNewUri(uri) {
-                                        var p = Math.max(uri.lastIndexOf("/"), uri.lastIndexOf("#"));
-                                        if (p < 0) return callbackSeries("cannot process  uri " + uri);
-                                        var id = uri.substring(p + 1);
-                                        return newUriPrefix + id;
-                                    }
-
-                                    newTriples.forEach(function (triple) {
-                                        if (nodesToCopyMap[triple.subject]) {
-                                            triple.subject = getNewUri(triple.subject);
-                                        }
-                                        if (nodesToCopyMap[triple.object]) {
-                                            triple.subject = getNewUri(triple.object);
-                                        }
-                                    });
-                                    callbackSeries();
-                                },
 
                                 //create newTriples
                                 function (callbackSeries) {
-                                    return callbackSeries();
+
                                     if (true) {
-                                        nodesToMerge[source][selectedNodeId].forEach(function (item) {
-                                            var value = item.object.value;
-                                            if (item.object.datatype == "http://www.w3.org/2001/XMLSchema#dateTime") value += "^^xsd:dateTime";
-                                            if (item.object.type == "literal") value = common.formatStringForTriple(value);
+                                        function getTripleNewUris(triple) {
+                                            if (mergeMode == "keepUri")
+                                                return triple;
 
-                                            newTriples.push({
-                                                subject: item.subject.value,
-                                                predicate: item.predicate.value,
-                                                object: value,
+                                            var p = Math.max(triple.subject.value.lastIndexOf("/"), triple.subject.value.lastIndexOf("#"));
+                                            var subjectPrefix = null;
+                                            if (p > 0) {
+                                                subjectPrefix = triple.subject.value.substring(0, p)
+                                                var subjectSuffix = triple.subject.value.substring(p + 1)
+                                                triple.subject.value = newUriPrefix + subjectSuffix;
+                                            }
+                                            if (triple.object.type == "uri") {
+                                                p = Math.max(triple.object.value.lastIndexOf("/"), triple.object.value.lastIndexOf("#"));
+                                                var objectPrefix = null;
+                                                if (p > 0) {
+                                                    objectPrefix = triple.object.value.substring(0, p)
+                                                    var objectSuffix = triple.object.value.substring(p + 1)
+                                                    if (objectPrefix == subjectPrefix)
+                                                        triple.subject.value = newUriPrefix + objectSuffix;
+                                                }
+                                            }
+
+                                            return triple
+                                        }
+
+
+                                        for (var selectedNodeId in nodesToMerge[source]) {
+                                            nodesToMerge[source][selectedNodeId].forEach(function(item) {
+                                                var value = item.object.value;
+                                                if (item.object.datatype == "http://www.w3.org/2001/XMLSchema#dateTime") value += "^^xsd:dateTime";
+                                                if (item.object.type == "literal") value = common.formatStringForTriple(value);
+                                                if (item.object.type == "literal") value = common.formatStringForTriple(value);
+
+
+                                                item = getTripleNewUris(item)
+
+
+                                                newTriples.push({
+                                                    subject: item.subject.value,
+                                                    predicate: item.predicate.value,
+                                                    object: value,
+                                                });
+
                                             });
-                                        });
-
-                                        // return callbackSeries();
-                                        Sparql_generic.insertTriples(targetSource, newTriples, {}, function (err, result) {
+                                        }
+                                        Sparql_generic.insertTriples(targetSource, newTriples, {}, function(err, result) {
                                             if (err) return callbackSeries(err);
                                             sourceMessage = result + " inserted from source " + source + "  to source " + targetSource;
 
@@ -348,21 +384,33 @@ var Lineage_selection = (function () {
                                         });
                                     }
                                 },
+
+                                    //create newTriples
+                                    function (callbackSeries) {
+                                        MainController.UI.message(sourceMessage + " indexing data ...  ");
+                                        SearchUtil.generateElasticIndex(targetSource, { ids: nodesToCopy }, function (err, _result) {
+
+                                            return callbackSeries(err);
+                                        })
+
+
+                                }
                             ],
                             function (err) {
                                 if (err) return callbackEachNodeToMerge(err);
-                                return callbackEachSource();
-                                MainController.UI.message(sourceMessage + " indexing data ...  ");
-                                SearchUtil.generateElasticIndex(targetSource, { ids: nodesToCopy }, function (err, _result) {
-                                    MainController.UI.message("DONE " + source, true);
+
+
                                     callbackEachNodeToMerge();
-                                });
+
                             },
                             function (err) {
                                 callbackEachSource(err);
+
                             }
                         );
                     },
+
+                  //end eachSource
                     function (err) {
                         if (callback) return callback(err, sourceMessage);
                         if (err) return alert(err.responseText);
@@ -486,14 +534,7 @@ var Lineage_selection = (function () {
             });
         },
 
-        getPaths: function () {
-            return alert(" coming soon");
-            var nodeIds = $("#lineage_selection_selectedNodesTreeDiv").jstree(true).get_checked();
-            if (nodeIds.length < 2) return alert("select at least two nodes");
-            var fromNodeId = nodeIds[0];
-            var toNodeId = nodeIds[nodeIds.length - 1];
-            GraphTraversal.drawShortestpath(Lineage_sources.activeSource, fromNodeId, toNodeId);
-        },
+
     };
 
     return self;

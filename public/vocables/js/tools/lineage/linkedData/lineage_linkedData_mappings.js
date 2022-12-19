@@ -9,14 +9,14 @@ https: var Lineage_linkedData_mappings = (function () {
     self.databaseShape = " database";
     self.isInitialized = false;
 
-    self.mappingSourceLabel = "linkedData_mappings_graph";
+    self.mappingSourceLabel = "linkedData_mappings_graphUri";
 
     self.init = function () {
         if (!self.isInitialized) {
             self.isInitialized = true;
 
             Config.sources[self.mappingSourceLabel] = {
-                graphUri: Config.linkedData_mappings_graph,
+                graphUri: Config.linkedData_mappings_graphUri,
                 sparql_server: { url: Config.default_sparql_url },
                 controller: Sparql_OWL,
             };
@@ -357,7 +357,7 @@ self.graphTable(KGcreator.currentTreeNode);
     self.writeJoinMapping = function () {
         var join = self.buildJoin();
 
-        var joinUri = Config.linkedData_mappings_graph + common.getRandomHexaId(10);
+        var joinUri = Config.linkedData_mappings_graphUri + common.getRandomHexaId(10);
 
         var triples = [];
         triples.push({
@@ -413,7 +413,7 @@ self.graphTable(KGcreator.currentTreeNode);
         });
 
         var sparqlPrefixes = {
-            slsv: Config.linkedData_mappings_graph,
+            slsv: Config.linkedData_mappings_graphUri,
         };
 
         Sparql_generic.insertTriples(self.mappingSourceLabel, triples, { sparqlPrefixes: sparqlPrefixes }, function (err, result) {
@@ -422,7 +422,7 @@ self.graphTable(KGcreator.currentTreeNode);
             var triples = [
                 {
                     subject: "<" + self.currentRelation.bNodeId + ">",
-                    predicate: "<" + Config.linkedData_mappings_graph + "hasSqlJoin>",
+                    predicate: "<" + Config.linkedData_mappings_graphUri + "hasSqlJoin>",
                     object: joinUri,
                 },
             ];
@@ -435,7 +435,7 @@ self.graphTable(KGcreator.currentTreeNode);
     };
 
     self.writeColumnMapping = function (graphNodeSource, entityUri, columnDesc, callback) {
-        var columnUri = Config.linkedData_mappings_graph + common.getRandomHexaId(10);
+        var columnUri = Config.linkedData_mappings_graphUri + common.getRandomHexaId(10);
         var triples = [];
         triples.push({
             subject: columnUri,
@@ -466,7 +466,7 @@ self.graphTable(KGcreator.currentTreeNode);
         });
 
         var sparqlPrefixes = {
-            slsv: Config.linkedData_mappings_graph,
+            slsv: Config.linkedData_mappings_graphUri,
         };
 
         Sparql_generic.insertTriples(self.mappingSourceLabel, triples, { sparqlPrefixes: sparqlPrefixes }, function (err, result) {
@@ -475,7 +475,7 @@ self.graphTable(KGcreator.currentTreeNode);
             var triples = [
                 {
                     subject: entityUri,
-                    predicate: "<" + Config.linkedData_mappings_graph + "hasColumnMapping>",
+                    predicate: "<" + Config.linkedData_mappings_graphUri + "hasColumnMapping>",
                     object: columnUri,
                 },
             ];
@@ -533,7 +533,7 @@ self.graphTable(KGcreator.currentTreeNode);
         async.series(
             [
                 function (callbackSeries) {
-                    var filter = "?node <" + Config.linkedData_mappings_graph + "hasSqlJoin> ?join. ";
+                    var filter = "?node <" + Config.linkedData_mappings_graphUri + "hasSqlJoin> ?join. ";
                     Sparql_OWL.getObjectRestrictions(source, null, { filter: filter }, function (err, result) {
                         result.forEach(function (item) {
                             if (joinsIds.indexOf(item.join.value) < 0) joinsIds.push(item.join.value);
@@ -553,7 +553,7 @@ self.graphTable(KGcreator.currentTreeNode);
                     if (Object.keys(joinsIds).length == 0) return callbackSeries();
                     if (options.withoutSqldescription) return callbackSeries();
                     var filterStr = Sparql_common.setFilter("join", joinsIds);
-                    var query = "" + "" + "select * FROM  <" + Config.linkedData_mappings_graph + "> where {" + "?join ?p ?o. " + filterStr + "} ";
+                    var query = "" + "" + "select * FROM  <" + Config.linkedData_mappings_graphUri + "> where {" + "?join ?p ?o. " + filterStr + "} ";
 
                     var url = Config.sources[self.mappingSourceLabel].sparql_server.url + "?format=json&query=";
 
@@ -817,7 +817,7 @@ self.graphTable(KGcreator.currentTreeNode);
                     mappingIds = [];
                     var filterStr = "";
                     if (mappingId)
-                        var query = "select * " + "where {?s ?p ?o filter( ?p in (<" + Config.linkedData_mappings_graph + "hasColumnMapping>,<" + Config.linkedData_mappings_graph + "hasSqlJoin>))}";
+                        var query = "select * " + "where {?s ?p ?o filter( ?p in (<" + Config.linkedData_mappings_graphUri + "hasColumnMapping>,<" + Config.linkedData_mappings_graphUri + "hasSqlJoin>))}";
                     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
@@ -831,7 +831,7 @@ self.graphTable(KGcreator.currentTreeNode);
                 //delete mappings in mappings graph for this source
                 function (callbackSeries) {
                     var filterStr = Sparql_common.setFilter("s", mappingIds);
-                    var query = "with <" + Config.linkedData_mappings_graph + ">\n" + "delete {?s ?p ?o}\n" + "where {?s ?p ?o " + filterStr + "}";
+                    var query = "with <" + Config.linkedData_mappings_graphUri + ">\n" + "delete {?s ?p ?o}\n" + "where {?s ?p ?o " + filterStr + "}";
                     var urlM = Config.sources[self.mappingSourceLabel].sparql_server.url + "?format=json&query=";
                     Sparql_proxy.querySPARQL_GET_proxy(urlM, query, "", { source: self.mappingSourceLabel }, function (err, result) {
                         return callbackSeries(err);
@@ -847,9 +847,9 @@ self.graphTable(KGcreator.currentTreeNode);
                         ">\n" +
                         "delete {?s ?p ?o}\n" +
                         "where {?s ?p ?o filter( ?p in (<" +
-                        Config.linkedData_mappings_graph +
+                        Config.linkedData_mappings_graphUri +
                         "hasColumnMapping>,<" +
-                        Config.linkedData_mappings_graph +
+                        Config.linkedData_mappings_graphUri +
                         "hasSqlJoin>))" +
                         filterStr +
                         "}";

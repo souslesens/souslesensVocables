@@ -45,37 +45,31 @@
         <select id="KGcreator_objectSelect" onchange="KGcreator.onTripleModelSelect('o',$(this).val())"></select>
         <input id="KGcreator_objectInput" class="KGcreator_tripleInput" />
         <div>is String<input type="checkbox" id="KGcreator_isObjectStringCBX" /> <br>lookup name<input
-            id="KGcreator_objectLookupName" /> </div>
-          </div>
-
-          <div>
-            <button onclick="KGcreator.addTripleToTA()">Add</button>
-          </div>
-        </div>
+          id="KGcreator_objectLookupName" /></div>
       </div>
+
+      <div>
+        <button onclick="KGcreator.addTripleToTA()">Add</button>
+      </div>
+    </div>
 
 
     <div
       style="width: 100%; display: flex; flex-direction: column; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
       <!--textarea id="KGcreator_tripleTA" style="width: 100%;height:100px;"></textarea>-->
-
       <pre id="KGcreator_mainJsonDisplay" style="width: 100%; height: 640px"></pre>
-
-
     </div>
   </div>
 
 
   <div class="lineage_actionDiv" style="display: flex; flex-direction: column;">
 
-    <div
-      style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
 
-      <textarea style="width: 100%; height: 740px; overflow: auto" id="KGcreator_dataSampleDiv"></textarea>
-    </div>
 
 
     <div class="lineage_button_group" style="min-width: 300px">
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="display: none" id="KGcreator_saveFileButton" onclick="KGcreator.saveFile()">Save file</button>
+
       <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.saveMappings()">Save mappings
       </button>
       <!--   <button onclick="KGcreator.saveMappings(true)">SaveClassmapping</button>-->
@@ -107,9 +101,14 @@
     </div>
 
 
+    <div
+      style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
+
+      <textarea style="width: 100%; height: 740px; overflow: auto" id="KGcreator_dataSampleDiv"></textarea>
+    </div>
+
   </div>
 </div>
-
 
 
 <div id="KGcreator_dialogDiv"></div>

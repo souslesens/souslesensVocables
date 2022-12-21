@@ -17,13 +17,10 @@ module.exports = function () {
     ///// GET api/v1/sources
     async function GET(req, res, next) {
         try {
-
-
             const userInfo = await userManager.getUser(req.user);
-            var sourcesFile=sourcesJSON
-            if(req.query.sourcesFile)
-              sourcesFile=path.resolve(configPath +"/"+ req.query.sourcesFile);
-          //  const sources = await read(sourcesJSON);
+            var sourcesFile = sourcesJSON;
+            if (req.query.sourcesFile) sourcesFile = path.resolve(configPath + "/" + req.query.sourcesFile);
+            //  const sources = await read(sourcesJSON);
             const sources = await read(sourcesFile);
             const parsedSources = JSON.parse(sources);
             // return all sources if user is admin
@@ -56,7 +53,7 @@ module.exports = function () {
                 type: "string",
                 required: false,
             },
-        ]
+        ],
     };
 
     ///// POST api/v1/sources

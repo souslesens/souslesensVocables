@@ -493,19 +493,5 @@ if (source2) node.data.source = source2;*/
         self.drawLegend(newJstreeData);
     };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     return self;
 })();

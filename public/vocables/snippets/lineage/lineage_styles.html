@@ -4,55 +4,39 @@
     Styles
     <select id="lineage_styles_listSelect" onchange="Lineage_styles.displayStyle($(this).val())"></select>
     <button onclick="Lineage_styles.newStyle()">+</button>
-
 </div>
 
 <div style="display: block" id="lineage_styles_descriptionDiv">
-
     <table>
         <tr>
+            <td>Label</td>
             <td>
-                Label
-            </td>
-            <td>
-                <input id="lineage_styles_labelInput"  value=""/>
+                <input id="lineage_styles_labelInput" value="" />
             </td>
         </tr>
 
         <tr>
+            <td>Shape</td>
             <td>
-                Shape
-            </td>
-            <td>
-                <select id="lineage_styles_shapeSelect">
-
-                </select>
+                <select id="lineage_styles_shapeSelect"></select>
             </td>
         </tr>
         <tr>
+            <td>Color</td>
             <td>
-                Color
-            </td>
-            <td>
-                <select id="lineage_styles_colorSelect">
-
-                </select>
+                <select id="lineage_styles_colorSelect"></select>
             </td>
         </tr>
         <tr>
+            <td>Size</td>
             <td>
-                Size
-            </td>
-            <td>
-                <input style="width:50px" id="lineage_styles_sizeInput"  value=""/>
+                <input style="width: 50px" id="lineage_styles_sizeInput" value="" />
             </td>
         </tr>
         <tr>
+            <td>Icon Url</td>
             <td>
-                Icon Url
-            </td>
-            <td>
-                <input   style="width:250px" id="lineage_styles_iconInput"  value=""/>
+                <input style="width: 250px" id="lineage_styles_iconInput" value="" />
             </td>
         </tr>
     </table>
@@ -62,9 +46,4 @@
             <button onclick="Lineage_styles.linkStyle()">Link Style</button>
         </td>
     </tr>
-
 </div>
-
-
-
-

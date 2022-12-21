@@ -23,8 +23,7 @@ const user = {
                 authSource: "json",
                 auth: {},
             };
-        }
-        else if (config.auth === "database") {
+        } else if (config.auth === "database") {
             result = {
                 logged: true,
                 user: { login: reqUser.login, groups: reqUser.groups },

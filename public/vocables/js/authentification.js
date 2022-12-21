@@ -48,8 +48,8 @@ var authentication = (function () {
                 }
             },
             error: function (err) {
-                var x=err
-            }
+                var x = err;
+            },
         });
     };
 

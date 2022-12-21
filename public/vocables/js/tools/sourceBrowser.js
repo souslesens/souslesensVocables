@@ -378,13 +378,11 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
         if (options.term) term = options.term;
         else {
             term = $("#GenericTools_searchAllSourcesTermInput").val();
-
         }
-        if (term.indexOf("*") > -1){
+        if (term.indexOf("*") > -1) {
             $("#GenericTools_allExactMatchSearchCBX").removeProp("checked");
-        }else{
-            if(! $("#GenericTools_allExactMatchSearchCBX").prop("checked"))
-                term+="*"
+        } else {
+            if (!$("#GenericTools_allExactMatchSearchCBX").prop("checked")) term += "*";
         }
         var selectedSources = [];
         if (options.selectedSources) {
@@ -871,7 +869,7 @@ return callbackSeries();
                 },
             ],
             function (err) {
-              common.getStackTrace()
+                common.getStackTrace();
                 if (callback) callback(err);
                 if (err) return alert(err);
             }
@@ -1456,7 +1454,7 @@ defaultLang = 'en';*/
         var value = $("#Lineage_classes_SearchSourceInput").val();
         $("#searchAll_sourcesTree").jstree(true).search(value);
     };
-    self.showSearchableSourcesTreeDialog = function (types, options, validateFn,okButtonValidateFn) {
+    self.showSearchableSourcesTreeDialog = function (types, options, validateFn, okButtonValidateFn) {
         if (!options) options = {};
         if (!self.searchableSourcesTreeIsInitialized) {
             function doDialog(sources) {
@@ -1468,10 +1466,9 @@ defaultLang = 'en';*/
                         show_only_matches: true,
                     },
                 };
-                if(options.withCheckboxes){
-                    jstreeOptions.withCheckboxes=true;
-                 //   jstreeOptions.onCheckNodeFn=options.onCheckNodeFn
-
+                if (options.withCheckboxes) {
+                    jstreeOptions.withCheckboxes = true;
+                    //   jstreeOptions.onCheckNodeFn=options.onCheckNodeFn
                 }
                 self.searchableSourcesTreeIsInitialized = false;
                 if (!types) types = ["OWL"];
@@ -1483,9 +1480,7 @@ defaultLang = 'en';*/
                 $("#sourcesSelectionDialogdiv").dialog("open");
                 $("#Lineage_classes_SearchSourceInput").focus();
                 if (okButtonValidateFn) $("#searchAllValidateButton").bind("click", okButtonValidateFn);
-                else
-                    $("#searchAllValidateButton").css("display","none")
-
+                else $("#searchAllValidateButton").css("display", "none");
 
                 $("#Lineage_classes_SearchSourceInput").bind("keydown", null, SourceBrowser.searchInSourcesTree);
             }

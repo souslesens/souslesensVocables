@@ -251,9 +251,6 @@ return str;
     };
 
     self.getFromStr = function (source, named, withoutImports, options) {
-
-
-
         if (!options) options = {};
         var from = " FROM ";
         if (named) from += " NAMED";
@@ -268,19 +265,16 @@ return str;
         });
         if (withoutImports === undefined) withoutImports = self.withoutImports;
         var imports = Config.sources[source].imports;
-        if(Lineage_sources.fromAllWhiteboardSources){
-            for (var source2 in Lineage_sources.loadedSources){
-                if(source2!=source){
+        if (Lineage_sources.fromAllWhiteboardSources) {
+            for (var source2 in Lineage_sources.loadedSources) {
+                if (source2 != source) {
                     var graphUri = Config.sources[source2].graphUri;
-                    if(graphUri)
-                    if (graphUri && from.indexOf(graphUri) < 0) fromStr += from + "  <" + graphUri + "> ";
+                    if (graphUri) if (graphUri && from.indexOf(graphUri) < 0) fromStr += from + "  <" + graphUri + "> ";
                 }
-
             }
         }
 
         if (!withoutImports || self.includeImports) {
-
             if (imports) {
                 imports.forEach(function (source2) {
                     if (!Config.sources[source2]) return console.error(source2 + "not found");

@@ -11,16 +11,15 @@ var Lineage_graphTraversal = (function () {
      * @param toNodeId
      * @param callback return shortestPath nodes array
      */
-    self.getShortestpathUris = function (source, fromNodeId, toNodeId,options, callback) {
+    self.getShortestpathUris = function (source, fromNodeId, toNodeId, options, callback) {
         var body = {
             getShortestPath: 1,
             sparqlServerUrl: Config.sources[source].sparql_server.url,
             graphUri: Config.sources[source].graphUri,
             fromNodeUri: fromNodeId,
             toNodeUri: toNodeId,
-            numberOfPathes:options.numberOfPathes||1
+            numberOfPathes: options.numberOfPathes || 1,
         };
-
 
         var payload = {
             url: Config.sources[source].sparql_server.url,
@@ -41,19 +40,19 @@ var Lineage_graphTraversal = (function () {
         });
     };
 
-    self.getShortestpathObjects = function (source, fromNodeId, toNodeId,options, callback) {
+    self.getShortestpathObjects = function (source, fromNodeId, toNodeId, options, callback) {
         var path = [];
         var relations = [];
         var labelsMap = {};
-        if(!options){
-            options={}
+        if (!options) {
+            options = {};
         }
 
         async.series(
             [
                 //get shortestPath nodes array
                 function (callbackSeries) {
-                    self.getShortestpathUris(source, fromNodeId, toNodeId, options,function (err, result) {
+                    self.getShortestpathUris(source, fromNodeId, toNodeId, options, function (err, result) {
                         if (err) return callbackSeries(err);
                         path = result;
 
@@ -111,8 +110,7 @@ var Lineage_graphTraversal = (function () {
                         relations.push(relation);
                     });
                     return callbackSeries();
-                }
-
+                },
             ],
             function (err) {
                 return callback(err, relations);
@@ -218,7 +216,7 @@ var Lineage_graphTraversal = (function () {
         if (!toUri) toUri = self.pathToUri;
         if (fromUri == toUri) return alert(" from node and to node must be different");
 
-        self.getShortestpathObjects(source, fromUri, toUri, {},function (err, relations) {
+        self.getShortestpathObjects(source, fromUri, toUri, {}, function (err, relations) {
             if (err) return alert(err.responseText);
 
             var html = "";
@@ -246,9 +244,7 @@ var Lineage_graphTraversal = (function () {
         });
     };
 
-
-
-    self.drawPathesOnWhiteboard= function draw (relations){
+    self.drawPathesOnWhiteboard = function draw(relations) {
         var visjsData = { nodes: [], edges: [] };
         var existingIdsMap = visjsGraph.getExistingIdsMap();
 
@@ -328,41 +324,31 @@ var Lineage_graphTraversal = (function () {
         } else {
             Lineage_classes.drawNewGraph(visjsData);
         }
-    }
+    };
 
+    self.drawAllShortestPathes = function (source, fromUri, toUri, numberOfPathes) {
+        if (!source) source = Lineage_sources.activeSource;
+        if (!fromUri) fromUri = self.pathFromUri;
+        if (!toUri) toUri = self.pathToUri;
+        if (!numberOfPathes) numberOfPathes = parseInt($("#Lineage_graphTraversal_numberOfPathes").val());
 
+        self.getShortestpathObjects(source, fromUri, toUri, { numberOfPathes: numberOfPathes }, function (err, relations) {
+            if (err) return alert(err.responseText);
+            self.drawPathesOnWhiteboard(relations);
+            $("#mainDialogDiv").dialog("close");
+        });
+    };
 
-self.drawAllShortestPathes=function(source, fromUri, toUri,numberOfPathes) {
-    if (!source) source = Lineage_sources.activeSource;
-    if (!fromUri) fromUri = self.pathFromUri;
-    if (!toUri) toUri = self.pathToUri;
-    if (!numberOfPathes)
-        numberOfPathes = parseInt($("#Lineage_graphTraversal_numberOfPathes").val())
-
-    self.getShortestpathObjects(source, fromUri, toUri, {numberOfPathes:numberOfPathes},function (err, relations) {
-        if (err) return alert(err.responseText);
-        self.drawPathesOnWhiteboard(relations)
-        $("#mainDialogDiv").dialog("close");
-    });
-
-}
-
-
-      self.drawShortestPath = function (source, fromUri, toUri) {
+    self.drawShortestPath = function (source, fromUri, toUri) {
         if (!source) source = Lineage_sources.activeSource;
         if (!fromUri) fromUri = self.pathFromUri;
         if (!toUri) toUri = self.pathToUri;
 
         if (fromUri == toUri) return alert(" from node and to node must be different");
 
-
-
-
-
-
-        self.getShortestpathObjects(source, fromUri, toUri, {},function (err, relations) {
+        self.getShortestpathObjects(source, fromUri, toUri, {}, function (err, relations) {
             if (err) return alert(err.responseText);
-            self.drawPathesOnWhiteboard(relations)
+            self.drawPathesOnWhiteboard(relations);
             $("#mainDialogDiv").dialog("close");
         });
     };

@@ -1005,24 +1005,25 @@ if (callback) return callback(err);
         return userSelection;
     };
 
-    self.getStackTrace = function(title) {
-        var callback = function(stackframes) {
-            var stringifiedStack = stackframes.map(function(sf) {
-                return sf.toString();
-            }).join('\n');
+    self.getStackTrace = function (title) {
+        var callback = function (stackframes) {
+            var stringifiedStack = stackframes
+                .map(function (sf) {
+                    return sf.toString();
+                })
+                .join("\n");
             console.log(stringifiedStack);
         };
 
-        var errback = function(err) { console.log(err.message); };
+        var errback = function (err) {
+            console.log(err.message);
+        };
 
         StackTrace.get().then(callback).catch(errback);
         return;
-        console.debug()
-        var xx=console.trace()
-      var stack=new Error().stack;
-
-
-
+        console.debug();
+        var xx = console.trace();
+        var stack = new Error().stack;
     };
 
     return self;

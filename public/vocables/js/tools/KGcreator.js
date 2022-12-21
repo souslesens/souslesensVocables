@@ -11,6 +11,7 @@ var KGcreator = (function() {
     "rdfs:isDefinedBy",
     "rdfs:comment",
     "rdfs:member",
+    "slsv:next",
     "owl:sameAs",
     "owl:equivalentClass",
 
@@ -55,6 +56,7 @@ var KGcreator = (function() {
     "owl:DatatypeProperty",
     "owl:Restriction",
     "rdf:Bag",
+    "rdf:List",
     "skos:Concept",
     "skos:Collection",
     "slsv:TopConcept",
@@ -1218,6 +1220,14 @@ if (selectedFiles.length > 0);*/
       }
     );
   };
+
+  self.createPrefixTransformFn=function(){
+    var prefix=prompt ("Enter Prefix")
+   if(!prefix)
+     return;
+   var str="return '"+prefix+"_'+value;"
+    $("#KGcreator_fnBody").val(str)
+  }
 
   return self;
 })();

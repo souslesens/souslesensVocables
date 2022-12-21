@@ -100,7 +100,7 @@ return;*/
     var filter = "";
     if (term) filter = Sparql_common.setFilter("member", null, term);
     var memberType;
-    if (searchWhat == "bags") memberType = "=rdf:Bag";
+    if (searchWhat == "bags") memberType = " in (rdf:Bag,rdf:List)";
     if (searchWhat == "classes") memberType = "=owl:Class";
     if (searchWhat == "individuals") memberType = "=owl:NamedIndividual";
     else if (searchWhat == "nodes") memberType = " in (owl:Class,owl:NamedIndividual)";
@@ -116,7 +116,7 @@ return;*/
       "where {?member rdfs:label ?memberLabel.?member rdf:type ?memberType  filter(?memberType" +
       memberType +
       ")" +
-      " OPTIONAL {?member ^rdfs:member ?parentContainer.?parentContainer rdf:type rdf:Bag.?parentContainer rdfs:label ?parentContainerLabel}" +
+      " OPTIONAL {?member ^rdfs:member ?parentContainer.?parentContainer rdf:type ?type.filter (?type in (rdf:Bag,rdf:List)).?parentContainer rdfs:label ?parentContainerLabel}" +
       filter +
       "}";
     var sparql_url = Config.sources[source].sparql_server.url;
@@ -383,9 +383,9 @@ return;*/
     var propFilter = "";
     var objectTypeFilter;
     if (options.nodes) {
-      objectTypeFilter = "filter(?objectType !=rdf:Bag)";
+      objectTypeFilter = "filter(?objectType not in (rdf:Bag,rdf:List))";
     } else if (options.containers) {
-      objectTypeFilter = "filter(?objectType =rdf:Bag)";
+      objectTypeFilter = "filter(?objectType in (rdf:Bag,rdf:List))";
     } else {
       objectTypeFilter = "";
     }
@@ -407,7 +407,7 @@ return;*/
   };
   self.listContainerResources = function(source, containerId) {
     var existingChildren = common.jstree.getjsTreeNodes("lineage_containers_containersJstree", true, containerId);
-    var filter = "filter(?objectType !=rdf:Bag)";
+    var filter = "filter(?objectType not in (rdf:Bag,redf:List))";
     self.getContainerResources(source, containerId, { nodes: true, descendants: true }, function(err, result) {
       if (err) return alert(err.responseText);
       var jstreeData = [];
@@ -436,7 +436,7 @@ return;*/
   self.graphResources = function(source, containerId, options) {
     if (!options) options = {};
     var existingChildren = common.jstree.getjsTreeNodes("lineage_containers_containersJstree", true, containerId);
-    // var filter = "filter(?objectType !=rdf:Bag)";
+
 
     var data = [];
     var descendants = [];
@@ -711,23 +711,26 @@ return;*/
         "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
         "select distinct *     " +
         fromStr +
-        " WHERE { ?container0  rdf:type rdf:Bag. ?container0 <http://www.w3.org/2000/01/rdf-schema#member> ?container. " +
+        " WHERE { ?container0  rdf:type ?type.filter(?type in (rdf:Bag,rdf:List)) ?container0 <http://www.w3.org/2000/01/rdf-schema#member> ?container. " +
         " OPTIONAL {?container0 rdfs:label ?container0Label.}" +
         " OPTIONAL {?container rdfs:label ?containerLabel.}" +
-        " OPTIONAL {?container <http://souslesens.org/resource/styles/hasStyle> ?containerStyle.}";
+        " OPTIONAL {?container rdfs:label ?container0Label.}" +
+        " OPTIONAL {?container <http://souslesens.org/resource/vocabulary/next> ?containerNext.}";
 
       query += " ?container rdf:type ?containerType. ";
-      if (options.bags) query += " filter( ?containerType = rdf:Bag)\n";
+      if (options.bags) query += " filter( ?containerType in -rdf:Bag|rdf:List))\n";
       if (options.classes) query += "filter( ?containerType =owl:Class)\n";
       if (options.individuals) query += "   filter( ?containerType = owl:NamedIndividual)\n";
-      if (options.nodes) query += " filter( ?containerType not in (rdf:Bag)) \n";
+      if (options.nodes) query += " filter( ?containerType not in (rdf:Bag,rdf:List)) \n";
 
       if (!options.onlyChildren) {
         query += " OPTIONAL { ?container <http://www.w3.org/2000/01/rdf-schema#member>+ ?member. optional{?member rdfs:label ?memberLabel.}";
-        if (options.bags) query += "   ?member rdf:type ?memberType. filter(?memberType=rdf:Bag)\n";
+        query +=  " OPTIONAL {?member <http://souslesens.org/resource/vocabulary/next> ?memberNext.}";
+
+        if (options.bags) query += "   ?member rdf:type ?memberType. filter(?memberType in rdf:Bag|rdf:List))\n";
         if (options.classes) query += "  ?member rdf:type?memberType. filter(?memberType=owl:Class).\n";
         if (options.individuals) query += " ?member rdf:type ?memberType. filter(?memberType=owl:NamedIndividual).\n";
-        if (options.nodes) query += "  ?member rdf:type ?memberType. filter( ?memberType  not in (rdf:Bag)) \n";
+        if (options.nodes) query += "  ?member rdf:type ?memberType. filter( ?memberType  not in (rdf:Bag,rdf:List)) \n";
         query += "}";
       }
       if (options.filter) query += " " + options.filter;
@@ -768,7 +771,7 @@ return;*/
       "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
       "select distinct *     " +
       fromStr +
-      " WHERE {?container rdfs:member ?node.  ?container rdf:type rdf:Bag.  ?container rdfs:label ?containerLabel " +
+      " WHERE {?container rdfs:member ?node.  ?container rdf:type ?type. filter (?type in(rdf:Bag,rdf:List)).  ?container rdfs:label ?containerLabel " +
       filter + "}";
 
     var url = Config.sources[source].sparql_server.url + "?format=json&query=";

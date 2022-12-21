@@ -490,8 +490,12 @@ return;*/
                     var existingNodes = visjsGraph.getExistingIdsMap();
                     var visjsData = { nodes: [], edges: [] };
                     var objectProperties = [];
+                    var container0Type=null;
 
                     data.forEach(function (item) {
+
+                        container0Type=item.container0Type.value
+
                         var shape = "dot";
                         var color2 = common.colorToRgba(color, opacity * 1);
                         var size = Lineage_classes.defaultShapeSize;
@@ -507,7 +511,11 @@ return;*/
                         if (!existingNodes[item.container0.value]) {
                             existingNodes[item.container0.value] = 1;
 
+
+
                             var type = "container";
+
+
                             visjsData.nodes.push({
                                 id: item.container0.value,
                                 label: item.container0Label.value,
@@ -518,6 +526,7 @@ return;*/
                                 color: color2,
                                 data: {
                                     type: type,
+                                    containerType:item.container0Type.value,
                                     source: source,
                                     id: item.container0.value,
                                     label: item.container0Label.value,
@@ -529,8 +538,10 @@ return;*/
                             existingNodes[item.container.value] = 1;
                             var type;
                             var color2 = color;
+
                             if (item.containerType && item.containerType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
                                 type = "container";
+
                                 color2 = common.colorToRgba(color, opacity * 0.75);
                             } else type = "resource";
 
@@ -545,6 +556,7 @@ return;*/
                                 color: color2,
                                 data: {
                                     type: type,
+                                    containerType:item.containerType.value,
                                     source: source,
                                     id: item.container.value,
                                     label: item.containerLabel.value,
@@ -552,23 +564,57 @@ return;*/
                             });
                         }
                         if (item.container) {
-                            var edgeId = item.container0.value + "_" + "member" + "_" + item.container.value;
-                            if (item.container && !existingNodes[edgeId]) {
-                                existingNodes[edgeId] = 1;
 
-                                visjsData.edges.push({
-                                    id: edgeId,
-                                    from: item.container0.value,
-                                    to: item.container.value,
-                                    //label: "<i>" + item.propertyLabel.value + "</i>",
-                                    data: { from: item.container0.value, to: item.container.value, source: source },
-                                    font: { multi: true, size: 10 },
+                            if ( item.container0Type == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag" )
 
-                                    //  dashes: true,
-                                    color: "#8528c9",
-                                });
+
+
+                                var edgeId = item.container0.value + "_" + "member" + "_" + item.container.value;
+                                if (item.container && !existingNodes[edgeId]) {
+                                    existingNodes[edgeId] = 1;
+
+                                    visjsData.edges.push({
+                                        id: edgeId,
+                                        from: item.container0.value,
+                                        to: item.container.value,
+                                        //label: "<i>" + item.propertyLabel.value + "</i>",
+                                        data: { from: item.container0.value, to: item.container.value, source: source },
+                                        font: { multi: true, size: 10 },
+
+                                        //  dashes: true,
+                                        color: "#8528c9",
+                                    });
+                                }
                             }
-                        }
+
+
+
+                        if(item.containerNext){
+                                var edgeId = item.container.value + "_" + "next" + "_" + item.containerNext.value;
+                                if (item.container && !existingNodes[edgeId]) {
+                                    existingNodes[edgeId] = 1;
+
+                                    visjsData.edges.push({
+                                        id: edgeId,
+                                        from: item.container.value,
+                                        to: item.containerNext.value,
+                                        data: { from: item.container.value, to: item.containerNext.value, source: source },
+
+                                        arrows: {
+                                            to: {
+                                                enabled: true,
+                                                type: "solid",
+                                                scaleFactor: 0.5,
+                                            },
+                                        },
+                                        color: "#f90edd",
+                                    });
+                                }
+
+
+                            }
+
+
 
                         if (item.member && !existingNodes[item.member.value]) {
                             existingNodes[item.member.value] = 1;
@@ -589,6 +635,7 @@ return;*/
                                 color: color2,
                                 data: {
                                     type: "container",
+                                    containerType:item.memberType.value,
                                     source: source,
                                     id: item.member.value,
                                     label: item.memberLabel.value,
@@ -604,20 +651,76 @@ return;*/
                                     id: edgeId,
                                     from: item.container.value,
                                     to: item.member.value,
-                                    //label: "<i>" + item.propertyLabel.value + "</i>",
                                     data: {
                                         from: item.container.value,
                                         to: item.member.value,
                                         source: source,
                                     },
                                     font: { multi: true, size: 10 },
-
-                                    //  dashes: true,
                                     color: "#8528c9",
                                 });
                             }
                         }
-                    });
+                        if(item.memberNext) {
+                            var edgeId = item.member.value + "_" + "next" + "_" + item.memberNext.value;
+                            if (!existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1;
+
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: item.member.value,
+                                    to: item.memberNext.value,
+                                    data: { from: item.member.value, to: item.memberNext.value, source: source , previous:item.member.value},
+                                    arrows: {
+                                        to: {
+                                            enabled: true,
+                                            type: "solid",
+                                            scaleFactor: 0.5,
+                                        },
+                                    },
+                                    color: "#f90edd",
+                                });
+                            }
+                        }
+
+                        });
+
+
+
+                    // link container0 to first list element
+                    if (container0Type == "http://www.w3.org/1999/02/22-rdf-syntax-ns#List"){
+
+                        visjsData.nodes.forEach(function(node,index){
+                            if(!node.data.previous){
+                                visjsData.nodes[index].data.first=true
+                                var edgeId = containerId + "_" + "next" + "_" + node.from;
+                                if (!existingNodes[edgeId]) {
+                                    existingNodes[edgeId] = 1;
+
+                                    visjsData.edges.push({
+                                        id: edgeId,
+                                        from: containerId,
+                                        to:node.id,
+                                        data: { from: containerId, to: node.from, source: source , previous:node.id},
+                                        arrows: {
+                                            to: {
+                                                enabled: true,
+                                                type: "solid",
+                                                scaleFactor: 0.5,
+                                            },
+                                        },
+                                        color: "#f90edd",
+                                    });
+                                }
+                            }
+
+                        })
+
+
+                    }
+
+
+
                     if (!visjsGraph.data || !visjsGraph.data.nodes) {
                         Lineage_classes.drawNewGraph(visjsData);
                     } else {
@@ -688,10 +791,11 @@ return;*/
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "select distinct *     " +
                 fromStr +
-                " WHERE { ?container0  rdf:type ?type.filter(?type in (rdf:Bag,rdf:List)) ?container0 <http://www.w3.org/2000/01/rdf-schema#member> ?container. " +
+                " WHERE { ?container0  rdf:type ?container0Type.filter(?container0Type in (rdf:Bag,rdf:List)) ?container0 <http://www.w3.org/2000/01/rdf-schema#member> ?container. " +
                 " OPTIONAL {?container0 rdfs:label ?container0Label.}" +
                 " OPTIONAL {?container rdfs:label ?containerLabel.}" +
                 " OPTIONAL {?container rdfs:label ?container0Label.}" +
+              " OPTIONAL {?container <http://souslesens.org/resource/styles/hasStyle> ?containerStyle.}"+
                 " OPTIONAL {?container <http://souslesens.org/resource/vocabulary/next> ?containerNext.}";
 
             query += " ?container rdf:type ?containerType. ";
@@ -801,6 +905,54 @@ return;*/
             $("#waitImg").css("display", "none");
         });
     };
+
+
+
+    self.alignListMembers=function(){
+        var nodes=visjsGraph.data.nodes.get()
+
+        var listMembersMap=[]
+        var listMembersArray=[]
+        var point0;
+        var xStep=0;
+        var yStep=50
+        nodes.forEach(function(node,index){
+            if(node.data.first){
+                listMembersMap[node.id]={previous:null, x:node.x, y:node.y};
+                point0={x:node.x, y:node.y}
+            }
+            else  if(node.data.previous){
+                listMembersMap[node.id]={previous:node.data.previous }
+            }
+        })
+
+        var visited=Object.keys(listMembersMap)
+        var newNodes=[]
+     while(visited.length>0){
+           visited.forEach(function(nodeId,index){
+               var node=listMembersMap[nodeId];
+              if(!nodeId.previous){
+                  visited.splice(index,1)
+                  return;
+              }
+               if( listMembersMap[node.previous].x){
+                   visited.splice(index,1)
+                   newNodes.push({
+                       id: nodeId,
+                       x:listMembersMap[node.data.previous].x,
+                       y:listMembersMap[node.data.previous].y+yStep,
+                       shape:"box"
+                   })
+               }
+
+           })
+       }
+
+        visjsGraph.data.nodes.update(newNodes);
+        
+        
+        
+    }
 
     return self;
 })();

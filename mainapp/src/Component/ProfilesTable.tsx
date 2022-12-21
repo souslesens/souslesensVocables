@@ -65,7 +65,7 @@ const ProfilesTable = () => {
                 return (
                     <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                         <Stack>
-                            <CsvDownloader filename="profiles.csv" datas={datas} />
+                            <CsvDownloader separator="&#9;" filename="profiles.tsv" datas={datas} />
                             <Autocomplete
                                 disablePortal
                                 id="filter profiles"
@@ -272,6 +272,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                             >
                                 {schemaTypes.map((schemaType) => (
                                     <MenuItem key={schemaType} value={schemaType}>
+                                        <Checkbox checked={profileModel.profileForm.allowedSourceSchemas.indexOf(schemaType) > -1} />
                                         {schemaType}
                                     </MenuItem>
                                 ))}
@@ -347,6 +348,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                             >
                                 {tools.map((tool) => (
                                     <MenuItem key={tool} value={tool}>
+                                        <Checkbox checked={profileModel.profileForm.forbiddenTools.indexOf(tool) > -1} />
                                         {tool}
                                     </MenuItem>
                                 ))}

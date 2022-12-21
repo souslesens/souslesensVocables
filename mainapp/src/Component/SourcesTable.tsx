@@ -63,7 +63,7 @@ const SourcesTable = () => {
                 return (
                     <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                         <Stack>
-                            <CsvDownloader filename="sources.csv" datas={datas} />
+                            <CsvDownloader separator="&#9;" filename="sources.tsv" datas={datas} />
                             <Autocomplete
                                 disablePortal
                                 id="search-sources"
@@ -140,7 +140,7 @@ const enum Mode {
 
 type Msg_ =
     | { type: Type.UserClickedModal; payload: boolean }
-    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } }
+    | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string | string[] } }
     | { type: Type.ResetSource; payload: Mode }
     | { type: Type.UserAddedGraphUri; payload: string }
     | { type: Type.UserClickedCheckBox; payload: { checkboxName: string; value: boolean } }
@@ -214,8 +214,14 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
 
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
-    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
+    const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
+    };
+
+    const handleTaxonomyPredicatesUpdate = (value: string[]) => {
+        update({ type: Type.UserUpdatedField, payload: { fieldname: "taxonomyPredicates", newValue: value } });
+    };
+
     const _handleFieldUpdate = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserAddedGraphUri, payload: event.target.value });
 
     const handleSparql_serverUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) =>
@@ -341,6 +347,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 >
                                     {unwrappedSources.map((source) => (
                                         <MenuItem key={source.name} value={source.name}>
+                                            <Checkbox checked={sourceModel.sourceForm.imports.indexOf(source.name) > -1} />
                                             {source.name}
                                         </MenuItem>
                                     ))}
@@ -349,24 +356,17 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         </Grid>
                         <Grid item xs={6}>
                             <FormControl>
-                                <InputLabel id="taxonomypredicates-label">Taxonomy Predicates</InputLabel>
-                                <Select
-                                    labelId="taxonomypredicates-label"
-                                    id="imports"
-                                    value={sourceModel.sourceForm.taxonomyPredicates}
-                                    label="taxonomypredicates-label"
-                                    fullWidth
+                                <Autocomplete
                                     multiple
+                                    limitTags={2}
+                                    id="taxonomy-predicates"
+                                    options={knownTaxonomyPredicates}
+                                    value={sourceModel.sourceForm.taxonomyPredicates}
+                                    freeSolo
+                                    onChange={(e, value) => handleTaxonomyPredicatesUpdate(value)}
                                     style={{ width: "400px" }}
-                                    renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
-                                    onChange={handleFieldUpdate("taxonomyPredicates")}
-                                >
-                                    {knownTaxonomyPredicates.map((predicate) => (
-                                        <MenuItem key={predicate} value={predicate}>
-                                            {predicate}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
+                                    renderInput={(params) => <TextField {...params} variant="filled" label="Taxonomy Predicates" />}
+                                />
                             </FormControl>
                         </Grid>
                         <Grid item xs={6}>
@@ -384,6 +384,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 >
                                     {schemaTypes.map((schemaType) => (
                                         <MenuItem key={schemaType} value={schemaType}>
+                                            <Checkbox checked={sourceModel.sourceForm.schemaType.indexOf(schemaType) > -1} />
                                             {schemaType}
                                         </MenuItem>
                                     ))}

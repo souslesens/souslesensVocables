@@ -1,5 +1,6 @@
 import {
     Button,
+    Checkbox,
     FormControl,
     InputLabel,
     MenuItem,
@@ -52,13 +53,18 @@ const UsersTable = () => {
             ),
             success: (gotUsers: User[]) => {
                 const datas = gotUsers.map((user) => {
-                    const { groups, ...restOfProperties } = user;
-                    return { ...restOfProperties };
+                    const { groups, _type, password, ...restOfProperties } = user;
+                    const data = {
+                        ...restOfProperties,
+                        groups: groups.join(";"),
+                    };
+
+                    return data;
                 });
                 return (
                     <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                         <Stack spacing={2}>
-                            <CsvDownloader filename="users.csv" datas={datas} />
+                            <CsvDownloader separator="&#9;" filename="users.tsv" datas={datas} />
                             <Autocomplete
                                 disablePortal
                                 id="search-users"
@@ -252,6 +258,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
                             >
                                 {unwrappedProfiles.map((profile) => (
                                     <MenuItem key={profile.name} value={profile.name}>
+                                        <Checkbox checked={userModel.userForm.groups.indexOf(profile.name) > -1} />
                                         {profile.name}
                                     </MenuItem>
                                 ))}

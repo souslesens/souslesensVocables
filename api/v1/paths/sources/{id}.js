@@ -36,7 +36,7 @@ module.exports = function () {
         const successfullyDeleted = JSON.stringify(remainingSources) !== JSON.stringify(oldSources);
 
         if (req.params.id && successfullyDeleted) {
-            await writeFile(sourcesJSON, JSON.stringify(remainingSources)).catch((err) =>
+            await writeFile(sourcesJSON, JSON.stringify(remainingSources, null, 2)).catch((err) =>
                 res.status(500).json({
                     message: "I couldn't write sources.json",
                     error: err,

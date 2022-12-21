@@ -63,7 +63,7 @@ export async function saveSource(body: Source, mode: Mode, updateModel: React.Di
 
 export async function deleteSource(source: Source, updateModel: React.Dispatch<Msg>) {
     try {
-        const response = await fetch(`${endpoint}/${source.id}`, { method: "delete" });
+        const response = await fetch(`${endpoint}/${source.name}`, { method: "delete" });
         const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
             updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(resources)) });

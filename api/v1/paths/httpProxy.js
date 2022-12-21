@@ -19,12 +19,12 @@ module.exports = function () {
 
                 if (body.getShortestPath) {
                     const GraphTraversal = require("../../../bin/graphTraversal.");
-                    if(  body.numberOfPathes >1){
-                        GraphTraversal.getAllShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri,body.numberOfPathes, body.options, function (err, result) {
+                    if (body.numberOfPathes > 1) {
+                        GraphTraversal.getAllShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, body.numberOfPathes, body.options, function (err, result) {
                             processResponse(res, err, result);
                         });
-                    }else {
-                        GraphTraversal.getShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, body.options, function(err, result) {
+                    } else {
+                        GraphTraversal.getShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, body.options, function (err, result) {
                             processResponse(res, err, result);
                         });
                     }
@@ -39,15 +39,15 @@ module.exports = function () {
                     return;
                 }
                 if (body.importSourceFromUrl) {
-                    const SourceIntegrator= require("../../../bin/sourceIntegrator.");
-                    SourceIntegrator.importSourceFromTurtle(body.sourceUrl, body.sourceName,  body.options, function (err, result) {
+                    const SourceIntegrator = require("../../../bin/sourceIntegrator.");
+                    SourceIntegrator.importSourceFromTurtle(body.sourceUrl, body.sourceName, body.options, function (err, result) {
                         processResponse(res, err, result);
                     });
                     return;
                 }
                 if (body.openLineage) {
-                    const SourceIntegrator= require("../../../bin/sourceIntegrator.");
-                    SourceIntegrator.importSourceFromTurtle(body.sourceUrl, body.sourceName,  body.options, function (err, result) {
+                    const SourceIntegrator = require("../../../bin/sourceIntegrator.");
+                    SourceIntegrator.importSourceFromTurtle(body.sourceUrl, body.sourceName, body.options, function (err, result) {
                         processResponse(res, err, result);
                     });
                     return;

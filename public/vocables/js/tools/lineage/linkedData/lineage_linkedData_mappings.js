@@ -21,10 +21,9 @@ https: var Lineage_linkedData_mappings = (function () {
                 controller: Sparql_OWL,
             };
             self.initSourceMappingsTree();
-
         }
 
-      //
+        //
     };
 
     self.initKGcreatorDialogWithDatabase = function (database) {
@@ -817,7 +816,8 @@ self.graphTable(KGcreator.currentTreeNode);
                     mappingIds = [];
                     var filterStr = "";
                     if (mappingId)
-                        var query = "select * " + "where {?s ?p ?o filter( ?p in (<" + Config.linkedData_mappings_graphUri + "hasColumnMapping>,<" + Config.linkedData_mappings_graphUri + "hasSqlJoin>))}";
+                        var query =
+                            "select * " + "where {?s ?p ?o filter( ?p in (<" + Config.linkedData_mappings_graphUri + "hasColumnMapping>,<" + Config.linkedData_mappings_graphUri + "hasSqlJoin>))}";
                     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);

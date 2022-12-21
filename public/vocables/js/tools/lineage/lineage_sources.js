@@ -4,7 +4,6 @@ Lineage_sources = (function () {
     self.loadedSources = {};
     self.sourceDivsMap = {};
 
-
     self.init = function () {
         if (self.loadedSources) {
             for (var source in self.loadedSources) {
@@ -40,51 +39,51 @@ Lineage_sources = (function () {
     };
 
     self.showSourcesDialog = function () {
-        if(window.parent && window.parent.Ontocommons) {// called from outside (iframe)
-            var calledSource = window.parent.Ontocommons.currentSource
-            if (calledSource)
-                return  self.setCurrentSource(calledSource);
-              }
+        if (window.parent && window.parent.Ontocommons) {
+            // called from outside (iframe)
+            var calledSource = window.parent.Ontocommons.currentSource;
+            if (calledSource) return self.setCurrentSource(calledSource);
+        }
 
-        SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], {
-            includeSourcesWithoutSearchIndex: true,
-             withCheckboxes:true,
-
-          }
-          , function () {
-              var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
-              if (sources.length > 1)
-                  return
+        SourceBrowser.showSearchableSourcesTreeDialog(
+            ["OWL", "SKOS"],
+            {
+                includeSourcesWithoutSearchIndex: true,
+                withCheckboxes: true,
+            },
+            function () {
+                var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
+                if (sources.length > 1) return;
                 var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
                 self.setCurrentSource(source);
-            $("#sourcesSelectionDialogdiv").dialog("close");
-              $("#lineage_allActions").css("visibility", "visible");
-           MainController.UI.showHideRightPanel();
-
-        },function() {
-              //if checkbox
-              var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
-              if (sources.length > 0) {
-                  var firstSource=null;
-                  async.eachSeries(sources, function(source, callbackEach) {
-                      self.initSource(source, function(err, result) {
-                          if(!err)
-                              firstSource=source
-                          return callbackEach()
-                      });
-                  }, function(err) {
-                      if (err)
-                          alert(err);
-                      self.setCurrentSource(firstSource);
-                      $("#sourcesSelectionDialogdiv").dialog("close");
-                      MainController.UI.showHideRightPanel();
-                      $("#lineage_allActions").css("visibility", "visible");
-                  })
-              }
-          })
-
-
-
+                $("#sourcesSelectionDialogdiv").dialog("close");
+                $("#lineage_allActions").css("visibility", "visible");
+                MainController.UI.showHideRightPanel();
+            },
+            function () {
+                //if checkbox
+                var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
+                if (sources.length > 0) {
+                    var firstSource = null;
+                    async.eachSeries(
+                        sources,
+                        function (source, callbackEach) {
+                            self.initSource(source, function (err, result) {
+                                if (!err) firstSource = source;
+                                return callbackEach();
+                            });
+                        },
+                        function (err) {
+                            if (err) alert(err);
+                            self.setCurrentSource(firstSource);
+                            $("#sourcesSelectionDialogdiv").dialog("close");
+                            MainController.UI.showHideRightPanel();
+                            $("#lineage_allActions").css("visibility", "visible");
+                        }
+                    );
+                }
+            }
+        );
     };
 
     self.setCurrentSource = function (source) {
@@ -113,7 +112,7 @@ Lineage_sources = (function () {
             highlightSourceDiv(source);
             self.whiteboard_setGraphOpacity(source);
             Lineage_decoration.refreshLegend(source);
-            self.setAllWhiteBoardSources(true)
+            self.setAllWhiteBoardSources(true);
         }
 
         $("#LineageNodesJsTreeDiv").empty();
@@ -123,8 +122,6 @@ Lineage_sources = (function () {
         $("#LineageLinkedDataRelationsDiv").load("snippets/lineage/linkedData/lineage_linkedData_relations.html", function () {
             Lineage_linkedData_query.init();
         });
-
-
     };
 
     self.showHideLineageLeftPanels = function () {
@@ -155,29 +152,27 @@ Lineage_sources = (function () {
 
     self.whiteboard_setGraphOpacity = function (source) {
         var nodesMapSources = {};
-        if(!visjsGraph.data || !visjsGraph.data.nodes)
-            return;
+        if (!visjsGraph.data || !visjsGraph.data.nodes) return;
         var nodes = visjsGraph.data.nodes.get();
         var newNodes = [];
 
         nodes.forEach(function (node) {
             nodesMapSources[node.id] = node.data.source;
-           if( node.data && ! node.data.fullColor)
-               node.data.fullColor=node.color;
+            if (node.data && !node.data.fullColor) node.data.fullColor = node.color;
 
             var color;
             var fontColor;
-            if (source && node.data.source != source ) {
-                color =  common.colorToRgba(node.data.fullColor, Lineage_classes.defaultLowOpacity)
-                fontColor=common.colorToRgba(Lineage_classes.defaultNodeFontColor,  Lineage_classes.defaultLowOpacity)
-            }else{
-                color=node.data.fullColor;
-                fontColor=Lineage_classes.defaultNodeFontColor
+            if (source && node.data.source != source) {
+                color = common.colorToRgba(node.data.fullColor, Lineage_classes.defaultLowOpacity);
+                fontColor = common.colorToRgba(Lineage_classes.defaultNodeFontColor, Lineage_classes.defaultLowOpacity);
+            } else {
+                color = node.data.fullColor;
+                fontColor = Lineage_classes.defaultNodeFontColor;
             }
             newNodes.push({
                 id: node.id,
                 color: color,
-                font: { color:fontColor },
+                font: { color: fontColor },
             });
         });
         visjsGraph.data.nodes.update(newNodes);
@@ -185,29 +180,27 @@ Lineage_sources = (function () {
         var edges = visjsGraph.data.edges.get();
         var newEdges = [];
         edges.forEach(function (edge) {
-            if( edge.data && !edge.data.fullColor)
-                edge.data.fullColor=edge.color;
+            if (edge.data && !edge.data.fullColor) edge.data.fullColor = edge.color;
 
             var color;
             var width;
-           // var fontColor;
+            // var fontColor;
             if (!source || nodesMapSources[edge.from] == source || nodesMapSources[edge.to] == source) {
-                color = edge.data.fullColor
-               // width=2
-
-            }else{
-                color=common.colorToRgba(edge.data.fullColor, Lineage_classes.defaultLowOpacity)
-               // width=1
-               // fontColor=common.colorToRgba(edge.data.fullColor, Lineage_classes.defaultLowOpacity)
+                color = edge.data.fullColor;
+                // width=2
+            } else {
+                color = common.colorToRgba(edge.data.fullColor, Lineage_classes.defaultLowOpacity);
+                // width=1
+                // fontColor=common.colorToRgba(edge.data.fullColor, Lineage_classes.defaultLowOpacity)
             }
 
             newEdges.push({
                 id: edge.id,
-                color:color,
-               // width:width,
+                color: color,
+                // width:width,
                 font: {
                     color: color,
-                  //  multi: true,
+                    //  multi: true,
                     size: 10,
                     strokeWidth: 0,
                     strokeColor: 0,
@@ -235,19 +228,18 @@ Lineage_sources = (function () {
         callback(null, source);
     };
 
-    self.indexSourceIfNotIndexed=function(source){
-
-        SearchUtil.initSourcesIndexesList(null,function(err, indexedSources){
-            if(indexedSources.indexOf(source)<0){
-                MainController.UI.message("indexing source "+source)
+    self.indexSourceIfNotIndexed = function (source) {
+        SearchUtil.initSourcesIndexesList(null, function (err, indexedSources) {
+            if (indexedSources.indexOf(source) < 0) {
+                MainController.UI.message("indexing source " + source);
                 $("#waitImg").css("display", "block");
                 SearchUtil.generateElasticIndex(source, { indexProperties: 1 }, function (err, _result) {
-                if (err) return MainController.UI.message(err, true);
-                MainController.UI.message("ALL DONE", true);
-            })
+                    if (err) return MainController.UI.message(err, true);
+                    MainController.UI.message("ALL DONE", true);
+                });
             }
-        })
-    }
+        });
+    };
 
     self.registerSource = function (sourceLabel) {
         if (self.loadedSources[sourceLabel]) return;
@@ -322,32 +314,29 @@ Lineage_sources = (function () {
         });
     };
 
-    self.setAllWhiteBoardSources=function(remove){
-if(remove)
-    Lineage_sources.fromAllWhiteboardSources=true;
+    self.setAllWhiteBoardSources = function (remove) {
+        if (remove) Lineage_sources.fromAllWhiteboardSources = true;
 
-        if(!Lineage_sources.fromAllWhiteboardSources ) {
+        if (!Lineage_sources.fromAllWhiteboardSources) {
             Lineage_sources.fromAllWhiteboardSources = true;
-            if(Lineage_sources.activeSource) {
-            $(".Lineage_sourceLabelDiv").addClass("Lineage_allSelectedSourceDiv")
-            $(" #Lineage_sources.setAllWhiteBoardSources").addClass("Lineage_allSelectedSourceDiv")
-            $("#" + Lineage_sources.activeSource).addClass("Lineage_selectedSourceDiv");
+            if (Lineage_sources.activeSource) {
+                $(".Lineage_sourceLabelDiv").addClass("Lineage_allSelectedSourceDiv");
+                $(" #Lineage_sources.setAllWhiteBoardSources").addClass("Lineage_allSelectedSourceDiv");
+                $("#" + Lineage_sources.activeSource).addClass("Lineage_selectedSourceDiv");
 
-                self.whiteboard_setGraphOpacity(null)
-                $("#GenericTools_searchScope").val("whiteboardSources")
+                self.whiteboard_setGraphOpacity(null);
+                $("#GenericTools_searchScope").val("whiteboardSources");
             }
-        }
-        else {
+        } else {
             Lineage_sources.fromAllWhiteboardSources = false;
-            if(Lineage_sources.activeSource) {
-                $(".Lineage_sourceLabelDiv").removeClass("Lineage_allSelectedSourceDiv")
-                $(" #Lineage_sources.setAllWhiteBoardSources").removeClass("Lineage_allSelectedSourceDiv")
-                self.whiteboard_setGraphOpacity(Lineage_sources.activeSource)
-                $("#GenericTools_searchScope").val("currentSource")
+            if (Lineage_sources.activeSource) {
+                $(".Lineage_sourceLabelDiv").removeClass("Lineage_allSelectedSourceDiv");
+                $(" #Lineage_sources.setAllWhiteBoardSources").removeClass("Lineage_allSelectedSourceDiv");
+                self.whiteboard_setGraphOpacity(Lineage_sources.activeSource);
+                $("#GenericTools_searchScope").val("currentSource");
             }
-
         }
-    }
+    };
 
     self.showHideCurrentSourceNodes = function (source, /** @type {any} */ hide) {
         if (!source) source = Lineage_sources.activeSource;

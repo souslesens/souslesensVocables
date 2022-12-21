@@ -363,7 +363,6 @@ var CsvTripleBuilder = {
                                                                 } else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                                             }
 
-
                                                             if (item.isRestriction) {
                                                                 var propStr = item.p;
                                                                 if (typeof item.p === "function") {
@@ -450,7 +449,7 @@ var CsvTripleBuilder = {
                                                                 // get value for property
                                                                 var propertyStr = item.p;
 
-                                                              /*  if (item.isSpecificPredicate) {
+                                                                /*  if (item.isSpecificPredicate) {
                                                                     propertyStr = line[item.p];
                                                                 } else*/
                                                                 if (typeof item.p === "function") {
@@ -459,13 +458,12 @@ var CsvTripleBuilder = {
                                                                     } catch (e) {
                                                                         return (lineError = e);
                                                                     }
-                                                                }
-                                                                else  if (item.p.indexOf("$") == 0) {
+                                                                } else if (item.p.indexOf("$") == 0) {
                                                                     propertyStr = line[item.p.substring(1)];
                                                                 }
-                                                                if(!propertyStr) {
-                                                                    var x = 3
-                                                                    return ;
+                                                                if (!propertyStr) {
+                                                                    var x = 3;
+                                                                    return;
                                                                 }
                                                                 if (propertyStr.indexOf("http") == 0) propertyStr = "<" + propertyStr + ">";
                                                                 if (subjectStr && objectStr) {

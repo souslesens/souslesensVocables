@@ -64,12 +64,11 @@ var MainController = (function () {
             getSources: 1,
         };
 
-        var sourcesFileName=""
-        if(Config.currentProfile.sourcesFile )
-            sourcesFileName="?sourcesFile="+Config.currentProfile.sourcesFile;
+        var sourcesFileName = "";
+        if (Config.currentProfile.sourcesFile) sourcesFileName = "?sourcesFile=" + Config.currentProfile.sourcesFile;
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "/sources"+sourcesFileName,
+            url: Config.apiUrl + "/sources" + sourcesFileName,
             dataType: "json",
             success: function (data_, _textStatus, _jqXHR) {
                 const data = data_.resources;
@@ -166,37 +165,35 @@ var MainController = (function () {
         if (!authentication.currentUser) return alert(" no user identified");
         var groups = authentication.currentUser.groupes;
 
-            MainController.loadProfiles(function (_err, _result) {
-                //  Config.currentProfile=Config.profiles["reader_all"]
-                groups.forEach(function (group) {
-                    if (groupWithinCurrentProfile(group).length) return (Config.currentProfile = groupWithinCurrentProfile(group)[0][1]);
-                });
-
-                async.series(
-                    [
-                         function (callbackSeries) {
-                             MainController.loadSources(function (_err, _result) {
-
-                                callbackSeries(_err);
-                            });
-                        },
-                        function (callbackSeries) {
-                            if (!Config.currentProfile.customPlugins) return callbackSeries();
-                            CustomPluginController.init(Config.currentProfile.customPlugins, function (_err, _result) {
-                                callbackSeries();
-                            });
-                        },
-                        function (callbackSeries) {
-                            MainController.UI.showToolsList("toolsTreeDiv");
-                            callbackSeries();
-                        },
-                    ],
-                    function (_err) {
-                        MainController.UI.configureUI();
-                    }
-                );
+        MainController.loadProfiles(function (_err, _result) {
+            //  Config.currentProfile=Config.profiles["reader_all"]
+            groups.forEach(function (group) {
+                if (groupWithinCurrentProfile(group).length) return (Config.currentProfile = groupWithinCurrentProfile(group)[0][1]);
             });
 
+            async.series(
+                [
+                    function (callbackSeries) {
+                        MainController.loadSources(function (_err, _result) {
+                            callbackSeries(_err);
+                        });
+                    },
+                    function (callbackSeries) {
+                        if (!Config.currentProfile.customPlugins) return callbackSeries();
+                        CustomPluginController.init(Config.currentProfile.customPlugins, function (_err, _result) {
+                            callbackSeries();
+                        });
+                    },
+                    function (callbackSeries) {
+                        MainController.UI.showToolsList("toolsTreeDiv");
+                        callbackSeries();
+                    },
+                ],
+                function (_err) {
+                    MainController.UI.configureUI();
+                }
+            );
+        });
     };
 
     self.initControllers = function () {
@@ -376,7 +373,6 @@ var MainController = (function () {
             $(".max-height").height($(window).height() - 300);
             var treeData = [];
             for (var key in Config.tools) {
-
                 if (Config.tools_available.indexOf(key) > -1) {
                     if ((Config.tools[key].label == "ConfigEditor" || Config.tools[key].label == "Admin") && authentication.currentUser.groupes.indexOf("admin") === -1) {
                         continue;
@@ -414,7 +410,7 @@ var MainController = (function () {
             $("#actionDivContolPanelDiv").html("");
             $("#rightPanelDivInner").html("");
 
-            Lineage_sources.setAllWhiteBoardSources(true)
+            Lineage_sources.setAllWhiteBoardSources(true);
 
             if (toolId == "lineage") {
                 $("#accordion").accordion("option", { active: 2 });

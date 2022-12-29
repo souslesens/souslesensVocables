@@ -644,7 +644,7 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
             tripleObj.isString = true;
         } else if (predicate.toLowerCase().indexOf("label") > -1) {
             tripleObj.isString = true;
-        } else if (predicate.toLowerCase().indexOf("definedBy") > -1) {
+        } else if (predicate.toLowerCase().indexOf("definedby") > -1) {
             tripleObj.isString = true;
         } else if (predicate.toLowerCase().indexOf("comment") > -1) {
             tripleObj.isString = true;

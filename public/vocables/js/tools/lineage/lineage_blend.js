@@ -1060,7 +1060,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
     };
 
     self.createSubProperty = function (source, superPropId, subPropertyLabel, callback) {
-        var subPropId = self.graphModification.getURI();
+        var subPropId = self.graphModification.getURI(subPropertyLabel,source,"fromLabel");
         //  var subPropId = Config.sources[source].graphUri + common.getRandomHexaId(10);
         var triples = [
             {

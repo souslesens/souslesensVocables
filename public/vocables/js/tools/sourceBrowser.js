@@ -109,8 +109,6 @@ var SourceBrowser = (function () {
                 return MainController.UI.message(err);
             }
 
-
-
             var jsTreeOptions = options;
             if (!options.contextMenu) jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
             if (!options.selectTreeNodeFn) jsTreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.selectTreeNodeFn;
@@ -127,7 +125,6 @@ var SourceBrowser = (function () {
     };
 
     self.getJstreeConceptsContextMenu = function () {
-
         var items = {};
         if (!self.currentSource && Lineage_sources.activeSource) self.currentSource = Lineage_sources.activeSource;
         items.nodeInfos = {
@@ -364,8 +361,7 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
             options = {};
         }
 
-        var classFilter=$("#GenericTools_searchAllClassSelect").val()
-
+        var classFilter = $("#GenericTools_searchAllClassSelect").val();
 
         $("#sourcesSelectionDialogdiv").dialog("close");
 
@@ -374,15 +370,10 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
         else {
             term = $("#GenericTools_searchAllSourcesTermInput").val();
         }
-        if(!term){
-            if(!classFilter)
-                return alert ("nothing to search")
-            term="*"
+        if (!term) {
+            if (!classFilter) return alert("nothing to search");
+            term = "*";
         }
-
-
-
-
 
         if (term.indexOf("*") > -1) {
             $("#GenericTools_allExactMatchSearchCBX").removeProp("checked");
@@ -456,9 +447,7 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
         // PROBLEM
         // eslint-disable-next-line no-constant-condition
 
-
-        if(classFilter)
-            options.classFilter=classFilter
+        if (classFilter) options.classFilter = classFilter;
 
         if (true || schemaType == "OWL") {
             SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
@@ -852,13 +841,11 @@ return*/
                     callbackSeries();
                 },
                 function (callbackSeries) {
-
                     self.showTypeOfResources(self.currentNodeRealSource, nodeId, function (err) {
                         callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
-
                     self.showClassRestrictions(self.currentNodeRealSource, [nodeId], options, function (err) {
                         callbackSeries(err);
                     });
@@ -884,31 +871,28 @@ return*/
         if (!options) options = {};
         var str = "<div>";
         if (Lineage_sources.isSourceEditable(self.currentSource) && !options.hideModifyButtons) {
-         
-
             str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
             if (true || Config.sources[source].editable) {
                 str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>";
             }
         }
+        str +=
+            "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
+            "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
+            "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
+            "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
+            "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
+
+        str += "</div>";
+
+        if (self.visitedNodes.length > 1) {
             str +=
-                "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
-                "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
-                "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
-                "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
-                "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
+                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(-1)'> previous </button>" +
+                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>";
+        }
 
-            str += "</div>";
-
-            if (self.visitedNodes.length > 1) {
-                str +=
-                    "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(-1)'> previous </button>" +
-                    "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showVisitedNode(+1)'>  next </button>";
-            }
-
-            str += "</div>";
-            $("#" + self.currentNodeIdInfosDivId).prepend(str);
-      
+        str += "</div>";
+        $("#" + self.currentNodeIdInfosDivId).prepend(str);
     };
 
     self.drawCommonInfos = function (sourceLabel, nodeId, divId, _options, callback) {

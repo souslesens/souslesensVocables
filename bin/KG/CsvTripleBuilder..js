@@ -265,7 +265,7 @@ var CsvTripleBuilder = {
                                                                     subjectStr = currentBlankNode;
                                                                 } else if (mapping.transform && line[item.s] && mapping.transform[item.s]) {
                                                                     try {
-                                                                        subjectStr = mapping.transform[item.s](line[item.s], "s", item.p, line,item);
+                                                                        subjectStr = mapping.transform[item.s](line[item.s], "s", item.p, line, item);
                                                                     } catch (e) {
                                                                         return (lineError = e + " " + item.s);
                                                                     }
@@ -310,7 +310,7 @@ var CsvTripleBuilder = {
                                                                     objectStr = currentBlankNode;
                                                                 } else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
                                                                     try {
-                                                                        objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line,item);
+                                                                        objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line, item);
                                                                     } catch (e) {
                                                                         return (lineError = e + " " + item.o);
                                                                     }
@@ -862,7 +862,7 @@ var CsvTripleBuilder = {
                     for (var key in mappings.transform) {
                         var fnStr = mappings.transform[key];
                         if (fnStr.indexOf("function{") > -1) {
-                            getFunction(["value", "role", "prop", "row","mapping"], fnStr, function (err, fn) {
+                            getFunction(["value", "role", "prop", "row", "mapping"], fnStr, function (err, fn) {
                                 if (err) return callbackSeries(err + " in mapping" + JSON.stringify(fnStr));
                                 mappings.transform[key] = fn;
                             });
@@ -874,7 +874,7 @@ var CsvTripleBuilder = {
                         var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
                         item.filePath = lookupFilePath;
                         if (item.transformFn) {
-                            getFunction(["value", "role", "prop", "row","mapping"], item.transformFn, function (err, fn) {
+                            getFunction(["value", "role", "prop", "row", "mapping"], item.transformFn, function (err, fn) {
                                 if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
                                 item.transformFn = fn;
                             });

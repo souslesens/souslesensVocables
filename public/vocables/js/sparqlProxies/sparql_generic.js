@@ -934,7 +934,6 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                     var skosLabelsMap = {};
                     var conceptLabel = null;
                     function getConceptLabel(item) {
-
                         if (item.conceptLabel) conceptLabel = item.conceptLabel.value;
                         else if (item.skosLabel) conceptLabel = item.skosLabel.value;
                         else if (item.skosAltLabel) conceptLabel = item.skosAltLabel.value;
@@ -944,7 +943,6 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
                     allData.forEach(function (item) {
                         if (!skosLabelsMap[item.concept.value]) skosLabelsMap[item.concept.value] = [];
-
 
                         if (!conceptLabel) return;
                         var decapitalizedLabel = common.decapitalizeLabel(conceptLabel);

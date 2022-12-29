@@ -134,7 +134,7 @@ var SearchUtil = (function () {
                             callbackSeries();
                         },
                         function (callbackSeries) {
-                            self.getElasticSearchMatches(words, indexes, mode, 0, 1000, function (err, result) {
+                            self.getElasticSearchMatches(words, indexes, mode, 0, 1000,options, function (err, result) {
                                 if (err) return callbackSeries(err);
                                 allWords = allWords.concat(words);
 
@@ -281,7 +281,7 @@ var SearchUtil = (function () {
         }
     };
 
-    self.getElasticSearchMatches = function (words, indexes, mode, from, size, callback) {
+    self.getElasticSearchMatches = function (words, indexes, mode, from, size,options, callback) {
         $("#waitImg").css("display", "block");
         //   MainController.UI.message("Searching exact matches ")
 
@@ -307,21 +307,59 @@ var SearchUtil = (function () {
                     },
                 };
             } else if (word.indexOf("*") > -1) {
-                queryObj = {
-                    bool: {
-                        should: [
-                            {
-                                wildcard: {
-                                    label: {
-                                        value: word,
-                                        boost: 1.0,
-                                        rewrite: "constant_score",
+                queryObj={
+
+                        "bool": {
+                            "must": {
+                                "query_string": {
+                                    "query": word,
+                                    "fields": [
+                                        "label",
+                                        "skoslabel"
+                                    ]
+                                }
+                            }
+                           // ,
+                          // "filter":  {"term":{"parents.keyword":"http://rds.posccaesar.org/ontology/lis14/rdl/Quality"}}
+                        }
+
+
+                }
+                if(options.classFilter)
+
+                    queryObj.bool.filter= {"term":{"parents.keyword":options.classFilter}}
+
+
+
+
+
+                if( false) {
+
+                    queryObj = {
+                        bool: {
+                            should: [
+                                {
+                                    wildcard: {
+                                        label: {
+                                            value: word,
+                                            boost: 1.0,
+                                            rewrite: "constant_score",
+                                        },
                                     },
                                 },
-                            },
-                        ],
-                    },
-                };
+                                {
+                                    wildcard: {
+                                        skoslabels: {
+                                            value: word,
+                                            boost: 1.0,
+                                            rewrite: "constant_score",
+                                        },
+                                    },
+                                },
+                            ],
+                        },
+                    };
+                }
             } else {
                 queryObj = {
                     bool: {

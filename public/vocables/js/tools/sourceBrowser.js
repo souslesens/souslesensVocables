@@ -109,8 +109,7 @@ var SourceBrowser = (function () {
                 return MainController.UI.message(err);
             }
 
-            /*  var html = "<div id='"+self.currentTargetDiv+"'></div>"
-$("#actionDiv").html(html);*/
+
 
             var jsTreeOptions = options;
             if (!options.contextMenu) jsTreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
@@ -128,7 +127,7 @@ $("#actionDiv").html(html);*/
     };
 
     self.getJstreeConceptsContextMenu = function () {
-        // return {}
+
         var items = {};
         if (!self.currentSource && Lineage_sources.activeSource) self.currentSource = Lineage_sources.activeSource;
         items.nodeInfos = {
@@ -148,14 +147,7 @@ $("#actionDiv").html(html);*/
                     Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0);
                 },
             };
-            /*  items.copyNodeToClipboard = {
-label: "copy toClipboard",
-action: function(_e) {
-// pb avec source
 
-Lineage_common.copyNodeToClipboard(self.currentTreeNode.data);
-}
-};*/
             items.graphNamedIndividuals = {
                 label: "LinkedData",
                 action: function () {
@@ -372,6 +364,9 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
             options = {};
         }
 
+        var classFilter=$("#GenericTools_searchAllClassSelect").val()
+
+
         $("#sourcesSelectionDialogdiv").dialog("close");
 
         var term;
@@ -379,6 +374,16 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
         else {
             term = $("#GenericTools_searchAllSourcesTermInput").val();
         }
+        if(!term){
+            if(!classFilter)
+                return alert ("nothing to search")
+            term="*"
+        }
+
+
+
+
+
         if (term.indexOf("*") > -1) {
             $("#GenericTools_allExactMatchSearchCBX").removeProp("checked");
         } else {
@@ -450,6 +455,10 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
         options.parentlabels = true;
         // PROBLEM
         // eslint-disable-next-line no-constant-condition
+
+
+        if(classFilter)
+            options.classFilter=classFilter
 
         if (true || schemaType == "OWL") {
             SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
@@ -843,17 +852,13 @@ return*/
                     callbackSeries();
                 },
                 function (callbackSeries) {
-                    /*  if (type != "http://www.w3.org/2002/07/owl#Class") {
-return callbackSeries();
-}*/
+
                     self.showTypeOfResources(self.currentNodeRealSource, nodeId, function (err) {
                         callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
-                    // if (false && type != "http://www.w3.org/2002/07/owl#Class") {
-                    //     return callbackSeries();
-                    // }
+
                     self.showClassRestrictions(self.currentNodeRealSource, [nodeId], options, function (err) {
                         callbackSeries(err);
                     });
@@ -877,15 +882,15 @@ return callbackSeries();
     };
     self.showNodeInfosToolbar = function (options) {
         if (!options) options = {};
-        if (Lineage_sources.isSourceEditable(self.currentSource) && !options.hideButtons) {
-            //  if (authentication.currentUser.groupes.indexOf("admin") > -1 && !options.hideButtons) {
-            //  if (Config.sources[self.currentSource].editable) {
-            var str = "<div>";
+        var str = "<div>";
+        if (Lineage_sources.isSourceEditable(self.currentSource) && !options.hideModifyButtons) {
+         
+
             str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPropertyDiv()'>  add Property </button>";
             if (true || Config.sources[source].editable) {
-                //} &&  self.propertiesMap.properties["type"]=="http://www.w3.org/2002/07/owl#Class") {
                 str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>";
             }
+        }
             str +=
                 "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
                 "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
@@ -903,7 +908,7 @@ return callbackSeries();
 
             str += "</div>";
             $("#" + self.currentNodeIdInfosDivId).prepend(str);
-        }
+      
     };
 
     self.drawCommonInfos = function (sourceLabel, nodeId, divId, _options, callback) {
@@ -1013,8 +1018,8 @@ defaultLang = 'en';*/
                         var valuesStr = "";
                         values.forEach(function (value, index) {
                             var optionalStr = "";
-                            if (Lineage_sources.isSourceEditable(sourceLabel) && !_options.hideButtons) {
-                                //  if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1 && !_options.hideButtons) {
+                            if (Lineage_sources.isSourceEditable(sourceLabel) && !_options.hideModifyButtons) {
+                                //  if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1 && !_options.hideModifyButtons) {
                                 var propUri = self.propertiesMap.properties[key].propUri;
 
                                 if (propUri == "http://www.w3.org/2000/01/rdf-schema#label") {

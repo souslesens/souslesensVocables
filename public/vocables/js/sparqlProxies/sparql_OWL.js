@@ -469,7 +469,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
                 }
             );
         } else if (objectIds) {
-            slicedObjectIds = common.array.slice(slicedObjectIds, Sparql_generic.slicesSize);
+            slicedObjectIds = common.array.slice(objectIds, Sparql_generic.slicesSize);
 
             async.eachSeries(
                 slicedObjectIds,

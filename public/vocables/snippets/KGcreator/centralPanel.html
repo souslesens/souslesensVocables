@@ -58,8 +58,8 @@
 
     <div class="lineage_actionDiv" style="display: flex; flex-direction: column">
         <div class="lineage_button_group" style="min-width: 300px">
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="display: none" id="KGcreator_saveFileButton" onclick="KGcreator.saveFile()">Save file</button>
 
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.graphMappings()">Graph mappings</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.saveMappings()">Save mappings</button>
             <!--   <button onclick="KGcreator.saveMappings(true)">SaveClassmapping</button>-->
 
@@ -76,6 +76,8 @@
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.deleteKGcreatorTriples()">delete current file triples</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearGraph()" style="background-color: #fbcb09 !important">Clear entire graph</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.indexGraph()">Index graph</button>
+
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="display: none" id="KGcreator_saveFileButton" onclick="KGcreator.saveFile()">Save file</button>
         </div>
 
         <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">

@@ -1006,6 +1006,7 @@ if (callback) return callback(err);
     };
 
     self.getStackTrace = function (title) {
+        return;
         var callback = function (stackframes) {
             var stringifiedStack = stackframes
                 .map(function (sf) {

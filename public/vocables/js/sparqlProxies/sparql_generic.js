@@ -932,9 +932,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                 //format result
                 function (callbackSeries) {
                     var skosLabelsMap = {};
-
+                    var conceptLabel = null;
                     function getConceptLabel(item) {
-                        var conceptLabel = null;
+
                         if (item.conceptLabel) conceptLabel = item.conceptLabel.value;
                         else if (item.skosLabel) conceptLabel = item.skosLabel.value;
                         else if (item.skosAltLabel) conceptLabel = item.skosAltLabel.value;
@@ -944,8 +944,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
                     allData.forEach(function (item) {
                         if (!skosLabelsMap[item.concept.value]) skosLabelsMap[item.concept.value] = [];
-                        if (item.concept.value == "http://www.eionet.europa.eu/gemet/concept/4254") var x = 3;
-                        var conceptLabel = getConceptLabel(item);
+
 
                         if (!conceptLabel) return;
                         var decapitalizedLabel = common.decapitalizeLabel(conceptLabel);

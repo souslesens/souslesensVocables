@@ -639,7 +639,7 @@ Lineage_relations = (function () {
                                         };
                                 });
 
-                                SearchUtil.getElasticSearchMatches(Object.keys(wordsMap), toIndex, "exactMatch", 0, size, function (err, result) {
+                                SearchUtil.getElasticSearchMatches(Object.keys(wordsMap), toIndex, "exactMatch", 0, size, {},function (err, result) {
                                     if (err) return alert(err);
                                     Object.keys(wordsMap).forEach(function (word, index) {
                                         if (!result[index] || !result[index].hits) return;

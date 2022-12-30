@@ -1731,6 +1731,7 @@ defaultLang = 'en';*/
           types = ["OWL"];
         }
         $("#sourcesSelectionDialogdiv").on("dialogopen", function(event, ui) {
+          $("#Lineage_classes_SearchSourceInput").val("")
           MainController.UI.showSources("searchAll_sourcesTree", false, sources, types, jstreeOptions);
         });
 

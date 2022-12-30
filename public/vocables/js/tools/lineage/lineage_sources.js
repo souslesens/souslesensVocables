@@ -52,14 +52,14 @@ Lineage_sources = (function() {
       {
         includeSourcesWithoutSearchIndex: true,
         withCheckboxes: true,
-        dontTie_selection: false,
+       // dontTie_selection: false,
         onOpenNodeFn: function() {
           $("#Lineage_classes_SearchSourceInput").blur();
         }
       },
       function() {
-        var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
-        if (sources.length > 0) {
+        var searchSource=$("#Lineage_classes_SearchSourceInput").val()
+        if (!searchSource) {
           return;
         }
         var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
@@ -70,8 +70,10 @@ Lineage_sources = (function() {
       },
       function() {
         //if checkbox
+
         var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
-        if (sources.length > 0) {
+        if (sources.length>0) {
+
           var firstSource = null;
           async.eachSeries(
             sources,
@@ -96,6 +98,7 @@ Lineage_sources = (function() {
         }
       }
     );
+
   };
 
   self.setCurrentSource = function(source) {

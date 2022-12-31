@@ -45,13 +45,13 @@ module.exports = function () {
                     });
                     return;
                 }
-                if (body.openLineage) {
+              /*  if (body.openLineage) {
                     const SourceIntegrator = require("../../../bin/sourceIntegrator.");
                     SourceIntegrator.importSourceFromTurtle(body.sourceUrl, body.sourceName, body.options, function (err, result) {
                         processResponse(res, err, result);
                     });
                     return;
-                }
+                }*/
 
                 httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
                     processResponse(res, err, result);

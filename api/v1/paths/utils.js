@@ -126,7 +126,7 @@ function processResponse(response, error, result) {
                 else error = JSON.stringify(error, null, 2);
             }
             console.log("ERROR !!" + error);
-            response.status(404).send({ ERROR: error });
+            response.status(500).send({ ERROR: error });
         } else if (!result) {
             response.send({ done: true });
         } else if (typeof result == "string") {

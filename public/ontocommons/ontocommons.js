@@ -1,11 +1,23 @@
 var Ontocommons = (function () {
     var self = {};
-
+var apiKey="019adb70-1d64-41b7-8f6e-8f7e5eb54942"
+    var sourcesJsonFile="ontocommonsSources.json"
     self.currentSource = null;
     self.init = function () {
+        self.listPortalOntologies();
+
+        $("#slsv_iframe").on("load", function () {
+            setTimeout(function () {
+                self.loadSourceInSlsv(self.currentSource);
+            }, 2000);
+        });
+    };
+
+
+    self.listPortalOntologies=function(){
         self.apiUrl = "/api/v1";
         var payload = {
-            url: "http://data.industryportal.enit.fr/ontologies?apikey=521da659-7f0a-4961-b0d8-5e15b52fd185",
+            url: "http://data.industryportal.enit.fr/ontologies?apikey="+apiKey,
             GET: true,
         };
         $.ajax({
@@ -28,24 +40,25 @@ var Ontocommons = (function () {
             },
             error(err) {},
         });
-        $("#slsv_iframe").on("load", function () {
-            setTimeout(function () {
-                self.loadSourceInSlsv(self.currentSource);
-            }, 2000);
-        });
-    };
+    }
 
     self.showOntologyInSLSV = function (ontologyId) {
         if (!ontologyId) return;
-        var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=019adb70-1d64-41b7-8f6e-8f7e5eb54942";
+        var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey="+apiKey;
 
         self.currentSource = ontologyId;
+var reload=$("#reloadOntologyCBX").prop("checked")
+        var editable=$("#editableCBX").prop("checked")
 
         var body = {
             importSourceFromUrl: 1,
             sourceUrl: sourceUrl,
             sourceName: ontologyId,
-            options: {},
+            options: {
+                sourcesJsonFile:sourcesJsonFile,
+                reload:reload,
+                editable:editable
+            },
         };
 
         var payload = {
@@ -63,23 +76,28 @@ var Ontocommons = (function () {
                 $("#slsv_iframe").attr("src", "http://localhost:3010/vocables/");
             },
             error(err) {
-                alert(err);
+                alert(err.responseText);
             },
         });
     };
 
     self.loadSourceInSlsv = function (source) {
-        //source="VVO"
+
         self.currentSource = source;
-        //   $("#slsv_iframe").attr("src","http://localhost:3010/vocables/")
         var slsv = $("#slsv_iframe")[0].contentWindow;
         slsv.MainController.currentTool = "lineage";
+        slsv.MainController.loadSources(sourcesJsonFile,function(err, result){
+            if(err)
+                return callback(err);
         slsv.MainController.UI.initTool("lineage", function (err, result) {
+            if(err)
+                return callback(err);
             slsv.Lineage_sources.showSourcesDialog(source);
         });
+        })
     };
 
-    self.callSlsv = function () {
+   /* self.callSlsv = function () {
         var body = {
             openLineage: true,
             source: "ddd",
@@ -103,7 +121,7 @@ var Ontocommons = (function () {
                 return callback(err);
             },
         });
-    };
+    };*/
 
     return self;
 })();

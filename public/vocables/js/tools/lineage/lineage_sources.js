@@ -704,7 +704,7 @@ visjsGraph.network.options.edges.font = { color: self.defaultEdgeFontColor };*/
       result.forEach(function(item) {
         if (item.label) {
           var prefix = "";
-          if (item.g.value.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > -1) {
+          if (Config.currentTopLevelOntology && item.g.value.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > -1) {
             prefix = "_" + Config.topLevelOntologies[Config.currentTopLevelOntology].prefix + ":";
           }
           sourceObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });

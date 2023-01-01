@@ -73,7 +73,8 @@ var reload=$("#reloadOntologyCBX").prop("checked")
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-                $("#slsv_iframe").attr("src", "http://localhost:3010/vocables/");
+
+                $("#slsv_iframe").attr("src", window.location.origin+"/vocables/");
             },
             error(err) {
                 alert(err.responseText);

@@ -19,7 +19,7 @@ var Lineage_containers = (function () {
         items["openAll"] = {
             label: "Open all",
             action: function (_e) {
-                $("#lineage_containers_containersJstree").jstree().open_all(self.currentContainer.id)
+                $("#lineage_containers_containersJstree").jstree().open_all(self.currentContainer.id);
             },
         };
 
@@ -87,7 +87,6 @@ Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentCont
         var term = $("#Lineage_containers_searchInput").val();
         var searchWhat = $("#Lineage_containers_searchWhatInput").val();
         var source = Lineage_sources.activeSource;
-
 
         var filter = "";
         if (term) filter = Sparql_common.setFilter("member", null, term);
@@ -432,206 +431,206 @@ Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentCont
         var stylesMap = {};
 
         async.series(
-          [
-              //getContainers descendants type container
-              function (callbackSeries) {
-                  if (options.nodes) return callbackSeries();
-                  options.nodes = false;
-                  options.bags = true;
-                  self.sparql_queries.getContainerDescendants(Lineage_sources.activeSource, containerId, options, function (err, result) {
-                      if (err) return callbackSeries(err);
-                      data = data.concat(result.results.bindings);
-                      return callbackSeries();
-                  });
-              },
-              //getContainers descendants type node
-              function (callbackSeries) {
-                  if (options.bags) return callbackSeries();
-                  options.nodes = true;
-                  options.bags = false;
+            [
+                //getContainers descendants type container
+                function (callbackSeries) {
+                    if (options.nodes) return callbackSeries();
+                    options.nodes = false;
+                    options.bags = true;
+                    self.sparql_queries.getContainerDescendants(Lineage_sources.activeSource, containerId, options, function (err, result) {
+                        if (err) return callbackSeries(err);
+                        data = data.concat(result.results.bindings);
+                        return callbackSeries();
+                    });
+                },
+                //getContainers descendants type node
+                function (callbackSeries) {
+                    if (options.bags) return callbackSeries();
+                    options.nodes = true;
+                    options.bags = false;
 
-                  self.sparql_queries.getContainerDescendants(Lineage_sources.activeSource, containerId, options, function (err, result) {
-                      if (err) return callbackSeries(err);
-                      data = data.concat(result.results.bindings);
-                      return callbackSeries();
-                  });
-              },
-              //get containersStyles
-              function (callbackSeries) {
-                  data.forEach(function (item) {
-                      if (item.containerStyle) if (!stylesMap[item.container.value]) stylesMap[item.container.value] = { styleId: item.containerStyle.value };
-                  });
-                  var ids = Object.keys(stylesMap);
-                  if (ids.length == 0) return callbackSeries();
-                  Lineage_styles.init();
-                  Lineage_styles.listStyles(ids, function (err, styles) {
-                      if (err) return alert(err);
-                      for (var containerId in stylesMap) {
-                          var styleId = stylesMap[containerId];
-                          var styleObj = styles[styleId];
-                          if (styleObj) styleObj.id = styleId;
-                          stylesMap[containerId] = styleObj;
-                      }
-                      return callbackSeries();
-                  });
-              },
+                    self.sparql_queries.getContainerDescendants(Lineage_sources.activeSource, containerId, options, function (err, result) {
+                        if (err) return callbackSeries(err);
+                        data = data.concat(result.results.bindings);
+                        return callbackSeries();
+                    });
+                },
+                //get containersStyles
+                function (callbackSeries) {
+                    data.forEach(function (item) {
+                        if (item.containerStyle) if (!stylesMap[item.container.value]) stylesMap[item.container.value] = { styleId: item.containerStyle.value };
+                    });
+                    var ids = Object.keys(stylesMap);
+                    if (ids.length == 0) return callbackSeries();
+                    Lineage_styles.init();
+                    Lineage_styles.listStyles(ids, function (err, styles) {
+                        if (err) return alert(err);
+                        for (var containerId in stylesMap) {
+                            var styleId = stylesMap[containerId];
+                            var styleObj = styles[styleId];
+                            if (styleObj) styleObj.id = styleId;
+                            stylesMap[containerId] = styleObj;
+                        }
+                        return callbackSeries();
+                    });
+                },
 
-              function (callbackSeries) {
-                  var color = Lineage_classes.getSourceColor(source);
-                  var opacity = 1.0;
-                  var existingNodes = visjsGraph.getExistingIdsMap();
-                  var visjsData = { nodes: [], edges: [] };
-                  var objectProperties = [];
+                function (callbackSeries) {
+                    var color = Lineage_classes.getSourceColor(source);
+                    var opacity = 1.0;
+                    var existingNodes = visjsGraph.getExistingIdsMap();
+                    var visjsData = { nodes: [], edges: [] };
+                    var objectProperties = [];
 
-                  data.forEach(function (item) {
-                      var shape = "dot";
-                      var color2 = common.colorToRgba(color, opacity * 1);
-                      var size = Lineage_classes.defaultShapeSize;
+                    data.forEach(function (item) {
+                        var shape = "dot";
+                        var color2 = common.colorToRgba(color, opacity * 1);
+                        var size = Lineage_classes.defaultShapeSize;
 
-                      var containerStyle = stylesMap[item.container0.value];
-                      if (containerStyle) {
-                          shape = containerStyle.shape || shape;
-                          color2 = containerStyle.color || color2;
-                          size = containerStyle.size || colorsize2;
-                      }
+                        var containerStyle = stylesMap[item.container0.value];
+                        if (containerStyle) {
+                            shape = containerStyle.shape || shape;
+                            color2 = containerStyle.color || color2;
+                            size = containerStyle.size || colorsize2;
+                        }
 
-                      if (item.containerType.value == "http://www.w3.org/2002/07/owl#ObjectProperty") return objectProperties.push(item.container.value);
-                      if (!existingNodes[item.container0.value]) {
-                          existingNodes[item.container0.value] = 1;
+                        if (item.containerType.value == "http://www.w3.org/2002/07/owl#ObjectProperty") return objectProperties.push(item.container.value);
+                        if (!existingNodes[item.container0.value]) {
+                            existingNodes[item.container0.value] = 1;
 
-                          var type = "container";
-                          visjsData.nodes.push({
-                              id: item.container0.value,
-                              label: item.container0Label.value,
-                              shadow: self.nodeShadow,
-                              shape: type == "container" ? "box" : shape,
-                              size: size,
-                              font: type == "container" ? { color: "#eee" } : null,
-                              color: color2,
-                              data: {
-                                  type: type,
-                                  source: source,
-                                  id: item.container0.value,
-                                  label: item.container0Label.value,
-                              },
-                          });
-                      }
+                            var type = "container";
+                            visjsData.nodes.push({
+                                id: item.container0.value,
+                                label: item.container0Label.value,
+                                shadow: self.nodeShadow,
+                                shape: type == "container" ? "box" : shape,
+                                size: size,
+                                font: type == "container" ? { color: "#eee" } : null,
+                                color: color2,
+                                data: {
+                                    type: type,
+                                    source: source,
+                                    id: item.container0.value,
+                                    label: item.container0Label.value,
+                                },
+                            });
+                        }
 
-                      if (item.container && !existingNodes[item.container.value]) {
-                          existingNodes[item.container.value] = 1;
-                          var type;
-                          var color2 = color;
-                          if (item.containerType && item.containerType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
-                              type = "container";
-                              color2 = common.colorToRgba(color, opacity * 0.75);
-                          } else type = "resource";
+                        if (item.container && !existingNodes[item.container.value]) {
+                            existingNodes[item.container.value] = 1;
+                            var type;
+                            var color2 = color;
+                            if (item.containerType && item.containerType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
+                                type = "container";
+                                color2 = common.colorToRgba(color, opacity * 0.75);
+                            } else type = "resource";
 
-                          if (!item.containerLabel) var x = 3;
-                          visjsData.nodes.push({
-                              id: item.container.value,
-                              label: item.containerLabel.value,
-                              shadow: self.nodeShadow,
-                              shape: type == "container" ? "box" : shape,
-                              size: size,
-                              font: type == "container" ? { color: "#fff", size: 12 } : null,
-                              color: color2,
-                              data: {
-                                  type: type,
-                                  source: source,
-                                  id: item.container.value,
-                                  label: item.containerLabel.value,
-                              },
-                          });
-                      }
-                      if (item.container) {
-                          var edgeId = item.container0.value + "_" + "member" + "_" + item.container.value;
-                          if (item.container && !existingNodes[edgeId]) {
-                              existingNodes[edgeId] = 1;
+                            if (!item.containerLabel) var x = 3;
+                            visjsData.nodes.push({
+                                id: item.container.value,
+                                label: item.containerLabel.value,
+                                shadow: self.nodeShadow,
+                                shape: type == "container" ? "box" : shape,
+                                size: size,
+                                font: type == "container" ? { color: "#fff", size: 12 } : null,
+                                color: color2,
+                                data: {
+                                    type: type,
+                                    source: source,
+                                    id: item.container.value,
+                                    label: item.containerLabel.value,
+                                },
+                            });
+                        }
+                        if (item.container) {
+                            var edgeId = item.container0.value + "_" + "member" + "_" + item.container.value;
+                            if (item.container && !existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1;
 
-                              visjsData.edges.push({
-                                  id: edgeId,
-                                  from: item.container0.value,
-                                  to: item.container.value,
-                                  //label: "<i>" + item.propertyLabel.value + "</i>",
-                                  data: { from: item.container0.value, to: item.container.value, source: source },
-                                  font: { multi: true, size: 10 },
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: item.container0.value,
+                                    to: item.container.value,
+                                    //label: "<i>" + item.propertyLabel.value + "</i>",
+                                    data: { from: item.container0.value, to: item.container.value, source: source },
+                                    font: { multi: true, size: 10 },
 
-                                  //  dashes: true,
-                                  color: "#8528c9",
-                              });
-                          }
-                      }
+                                    //  dashes: true,
+                                    color: "#8528c9",
+                                });
+                            }
+                        }
 
-                      if (item.member && !existingNodes[item.member.value]) {
-                          existingNodes[item.member.value] = 1;
-                          var type;
+                        if (item.member && !existingNodes[item.member.value]) {
+                            existingNodes[item.member.value] = 1;
+                            var type;
 
-                          if (item.memberType && item.memberType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
-                              type = "container";
-                              color2 = common.colorToRgba(color, opacity * 0.6);
-                          } else type = "resource";
-                          visjsData.nodes.push({
-                              id: item.member.value,
-                              label: item.memberLabel.value,
+                            if (item.memberType && item.memberType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
+                                type = "container";
+                                color2 = common.colorToRgba(color, opacity * 0.6);
+                            } else type = "resource";
+                            visjsData.nodes.push({
+                                id: item.member.value,
+                                label: item.memberLabel.value,
 
-                              shadow: self.nodeShadow,
-                              shape: type == "container" ? "box" : shape,
-                              size: size,
-                              font: type == "container" ? { color: "#fff", size: 10 } : null,
-                              color: color2,
-                              data: {
-                                  type: "container",
-                                  source: source,
-                                  id: item.member.value,
-                                  label: item.memberLabel.value,
-                              },
-                          });
-                      }
-                      if (item.member) {
-                          var edgeId = item.container.value + "_" + "member" + "_" + item.member.value;
-                          if (item.member && !existingNodes[edgeId]) {
-                              existingNodes[edgeId] = 1;
+                                shadow: self.nodeShadow,
+                                shape: type == "container" ? "box" : shape,
+                                size: size,
+                                font: type == "container" ? { color: "#fff", size: 10 } : null,
+                                color: color2,
+                                data: {
+                                    type: "container",
+                                    source: source,
+                                    id: item.member.value,
+                                    label: item.memberLabel.value,
+                                },
+                            });
+                        }
+                        if (item.member) {
+                            var edgeId = item.container.value + "_" + "member" + "_" + item.member.value;
+                            if (item.member && !existingNodes[edgeId]) {
+                                existingNodes[edgeId] = 1;
 
-                              visjsData.edges.push({
-                                  id: edgeId,
-                                  from: item.container.value,
-                                  to: item.member.value,
-                                  //label: "<i>" + item.propertyLabel.value + "</i>",
-                                  data: {
-                                      from: item.container.value,
-                                      to: item.member.value,
-                                      source: source,
-                                  },
-                                  font: { multi: true, size: 10 },
+                                visjsData.edges.push({
+                                    id: edgeId,
+                                    from: item.container.value,
+                                    to: item.member.value,
+                                    //label: "<i>" + item.propertyLabel.value + "</i>",
+                                    data: {
+                                        from: item.container.value,
+                                        to: item.member.value,
+                                        source: source,
+                                    },
+                                    font: { multi: true, size: 10 },
 
-                                  //  dashes: true,
-                                  color: "#8528c9",
-                              });
-                          }
-                      }
-                  });
-                  if (!visjsGraph.data || !visjsGraph.data.nodes) {
-                      Lineage_classes.drawNewGraph(visjsData);
-                  } else {
-                      visjsGraph.data.nodes.add(visjsData.nodes);
-                      visjsGraph.data.edges.add(visjsData.edges);
-                  }
-                  visjsGraph.network.fit();
-                  $("#waitImg").css("display", "none");
-                  if (objectProperties.length > 0) {
-                      source = Lineage_sources.activeSource;
-                      var options = {
-                          filter: Sparql_common.setFilter("prop", objectProperties),
-                      };
-                      options.allNodes = false;
-                      Lineage_classes.drawRelations(null, null, "Properties", options);
-                  }
-                  return callbackSeries();
-              },
-          ],
-          function (err) {
-              return;
-          }
+                                    //  dashes: true,
+                                    color: "#8528c9",
+                                });
+                            }
+                        }
+                    });
+                    if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                        Lineage_classes.drawNewGraph(visjsData);
+                    } else {
+                        visjsGraph.data.nodes.add(visjsData.nodes);
+                        visjsGraph.data.edges.add(visjsData.edges);
+                    }
+                    visjsGraph.network.fit();
+                    $("#waitImg").css("display", "none");
+                    if (objectProperties.length > 0) {
+                        source = Lineage_sources.activeSource;
+                        var options = {
+                            filter: Sparql_common.setFilter("prop", objectProperties),
+                        };
+                        options.allNodes = false;
+                        Lineage_classes.drawRelations(null, null, "Properties", options);
+                    }
+                    return callbackSeries();
+                },
+            ],
+            function (err) {
+                return;
+            }
         );
     };
     self.graphResourcesXX = function (source, containerId, options) {
@@ -972,16 +971,16 @@ Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentCont
         getContainerDescendants: function (source, containerId, options, callback) {
             var fromStr = Sparql_common.getFromStr(source, false, true);
             var query =
-              "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-              "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-              "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-              "select distinct *     " +
-              fromStr +
-              " WHERE { ?container0  rdf:type ?type.filter(?type in (rdf:Bag,rdf:List)) ?container0 <http://www.w3.org/2000/01/rdf-schema#member> ?container. " +
-              " OPTIONAL {?container0 rdfs:label ?container0Label.}" +
-              " OPTIONAL {?container rdfs:label ?containerLabel.}" +
-              " OPTIONAL {?container rdfs:label ?container0Label.}" +
-              " OPTIONAL {?container <http://souslesens.org/resource/vocabulary/next> ?containerNext.}";
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                "select distinct *     " +
+                fromStr +
+                " WHERE { ?container0  rdf:type ?type.filter(?type in (rdf:Bag,rdf:List)) ?container0 <http://www.w3.org/2000/01/rdf-schema#member> ?container. " +
+                " OPTIONAL {?container0 rdfs:label ?container0Label.}" +
+                " OPTIONAL {?container rdfs:label ?containerLabel.}" +
+                " OPTIONAL {?container rdfs:label ?container0Label.}" +
+                " OPTIONAL {?container <http://souslesens.org/resource/vocabulary/next> ?containerNext.}";
 
             query += " ?container rdf:type ?containerType. ";
             if (options.bags) query += " filter( ?containerType in (rdf:Bag,rdf:List))\n";
@@ -998,7 +997,6 @@ Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentCont
                 if (options.individuals) query += " ?member rdf:type ?memberType. filter(?memberType=owl:NamedIndividual).\n";
                 if (options.nodes) query += "  ?member rdf:type ?memberType. filter( ?memberType  not in (rdf:Bag,rdf:List)) \n";
                 query += "}";
-
             }
             if (options.filter) query += " " + options.filter;
 
@@ -1141,8 +1139,6 @@ Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentCont
             $("#waitImg").css("display", "none");
         });
     };
-
-
 
     return self;
 })();

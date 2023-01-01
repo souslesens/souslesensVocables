@@ -144,7 +144,6 @@ var Lineage_decoration = (function () {
                     "  SELECT distinct ?x ?type ?g ?label" +
                     strFrom;
 
-
                 var whereClass =
                     " {GRAPH ?g{" +
                     "    ?x  rdf:type owl:Class. " +

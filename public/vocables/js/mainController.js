@@ -59,16 +59,14 @@ var MainController = (function () {
         });
     };*/
 
-    self.loadSources = function (sourcesFile,callback) {
+    self.loadSources = function (sourcesFile, callback) {
         var _payload = {
             getSources: 1,
         };
 
         var sourcesFileParam = "";
-        if(sourcesFile )
-            sourcesFileParam = "?sourcesFile=" + sourcesFile;
-        else if (Config.currentProfile.sourcesFile)
-            sourcesFileParam = "?sourcesFile=" + Config.currentProfile.sourcesFile
+        if (sourcesFile) sourcesFileParam = "?sourcesFile=" + sourcesFile;
+        else if (Config.currentProfile.sourcesFile) sourcesFileParam = "?sourcesFile=" + Config.currentProfile.sourcesFile;
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/sources" + sourcesFileParam,
@@ -177,7 +175,7 @@ var MainController = (function () {
             async.series(
                 [
                     function (callbackSeries) {
-                        MainController.loadSources(null,function (_err, _result) {
+                        MainController.loadSources(null, function (_err, _result) {
                             callbackSeries(_err);
                         });
                     },

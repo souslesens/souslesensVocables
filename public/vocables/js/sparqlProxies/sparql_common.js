@@ -102,11 +102,10 @@ return str;
                     var conceptIdsStr = "";
                     ids.forEach(function (id, _index) {
                         if (conceptIdsStr != "") conceptIdsStr += ",";
-                      /* if (!id.match || !id.match(/.+:.+|http.+|_:+/)) {
+                        /* if (!id.match || !id.match(/.+:.+|http.+|_:+/)) {
                             return  (conceptIdsStr += "<" + id + ">");
                         }*/
                         if (id != "") {
-
                             if (true || (id.match && !id.match(/.+:.+|http.+|_:+/)) || id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1 || id.indexOf("_:") > -1) {
                                 conceptIdsStr += "<" + id + ">";
                             } else {
@@ -270,7 +269,7 @@ return str;
             for (var source2 in Lineage_sources.loadedSources) {
                 if (source2 != source) {
                     var graphUri = Config.sources[source2].graphUri;
-                    if (graphUri) if (graphUri && fromStr.indexOf(graphUri)<0) fromStr += from + "  <" + graphUri + "> ";
+                    if (graphUri) if (graphUri && fromStr.indexOf(graphUri) < 0) fromStr += from + "  <" + graphUri + "> ";
                 }
             }
         }
@@ -295,8 +294,7 @@ return str;
             if (!Array.isArray(options.includeSources)) options.includeSources = [options.includeSources];
             options.includeSources.forEach(function (source) {
                 var importGraphUri = Config.sources[source].graphUri;
-                if(fromStr.indexOf(importGraphUri) < 0)
-                fromStr += from + "  <" + importGraphUri + "> ";
+                if (fromStr.indexOf(importGraphUri) < 0) fromStr += from + "  <" + importGraphUri + "> ";
             });
         }
 

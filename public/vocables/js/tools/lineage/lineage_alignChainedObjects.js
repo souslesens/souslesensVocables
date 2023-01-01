@@ -1,24 +1,22 @@
 // tentative , not working now
 
+var Lineage_alignChainedObjects = (function () {
+    self.alignListMembers = function (containerId) {
+        if (!containerId) containerId = self.currentContainer.id;
 
-var Lineage_alignChainedObjects=(function(){
+        var containerPosition = visjsGraph.network.getPositions()[containerId];
+        containerPosition.index = 0;
+        var edges = visjsGraph.data.edges.get();
+        var nodes = visjsGraph.data.nodes.get();
 
-  self.alignListMembers = function (containerId) {
-    if (!containerId) containerId = self.currentContainer.id;
+        var listMembersFromMap = [];
+        var listMembersToMap = [];
 
-    var containerPosition = visjsGraph.network.getPositions()[containerId];
-    containerPosition.index = 0;
-    var edges = visjsGraph.data.edges.get();
-    var nodes = visjsGraph.data.nodes.get();
+        var xOffset = 15;
+        var yOffset = 70;
+        var nodesMap = {};
 
-    var listMembersFromMap = [];
-    var listMembersToMap = [];
-
-    var xOffset = 15;
-    var yOffset = 70;
-    var nodesMap = {};
-
-    /*
+        /*
 //position of firstNode
 var firstNodeId = null;
 nodes.forEach(function(node) {
@@ -117,194 +115,194 @@ visjsGraph.data.nodes.update(newNodes);
 
 **/
 
-    if (false) {
-      var sortedNodes = [];
-      visjsGraph.data.nodes.forEach(function (node) {
-        if (node.data.next || node.data.previous) {
-          sortedNodes.push(node);
+        if (false) {
+            var sortedNodes = [];
+            visjsGraph.data.nodes.forEach(function (node) {
+                if (node.data.next || node.data.previous) {
+                    sortedNodes.push(node);
+                }
+            });
+            sortedNodes.sort(function (a, b) {
+                if (!b.data.previous) return -1;
+                if (!a.data.previous) return 1;
+                if (!b.data.next) return 1;
+                if (!a.data.next) return -1;
+                else if (b.data.next === a.id) return -1;
+                else return 0;
+            });
+
+            sortedNodes.reverse();
+            var existingEdges = {};
+            var newNodes = [];
+            var newEdges = [];
+            sortedNodes.forEach(function (node, index) {
+                newNodes.push({
+                    id: node.id,
+                    x: containerPosition.x + xOffset * index,
+                    y: containerPosition.y + yOffset * index,
+                    fixed: { x: true, y: true },
+                    shape: "box",
+                    // label:node.data.position.index,
+                    color: "#00afef",
+                });
+
+                var from, to;
+                if (node.data.next) {
+                    from = node.id;
+                    to = node.data.next;
+                } else if (node.data.previous) {
+                    from = node.data.previous;
+                    to = node.id;
+                }
+                var edgeId = from + "_next_" + to;
+                if (!existingEdges[edgeId]) {
+                    existingEdges[edgeId] = 1;
+
+                    newEdges.push({
+                        id: edgeId,
+                        from: from,
+                        to: to,
+                        label: "" + index,
+                        font: { size: 14 },
+                        arrows: {
+                            to: {
+                                enabled: true,
+                                type: "solid",
+                                scaleFactor: 0.5,
+                            },
+                        },
+                    });
+                }
+            });
+
+            visjsGraph.data.nodes.update(newNodes);
+            visjsGraph.data.edges.add(newEdges);
         }
-      });
-      sortedNodes.sort(function (a, b) {
-        if (!b.data.previous) return -1;
-        if (!a.data.previous) return 1;
-        if (!b.data.next) return 1;
-        if (!a.data.next) return -1;
-        else if (b.data.next === a.id) return -1;
-        else return 0;
-      });
 
-      sortedNodes.reverse();
-      var existingEdges = {};
-      var newNodes = [];
-      var newEdges = [];
-      sortedNodes.forEach(function (node, index) {
-        newNodes.push({
-          id: node.id,
-          x: containerPosition.x + xOffset * index,
-          y: containerPosition.y + yOffset * index,
-          fixed: { x: true, y: true },
-          shape: "box",
-          // label:node.data.position.index,
-          color: "#00afef",
+        var nextEdges = [];
+        var nodesMap = {};
+        visjsGraph.data.nodes.forEach(function (node) {
+            nodesMap[node.id] = node;
+        });
+        visjsGraph.data.edges.forEach(function (edge) {
+            if (edge.data.type == "next") nextEdges.push(edge);
         });
 
-        var from, to;
-        if (node.data.next) {
-          from = node.id;
-          to = node.data.next;
-        } else if (node.data.previous) {
-          from = node.data.previous;
-          to = node.id;
-        }
-        var edgeId = from + "_next_" + to;
-        if (!existingEdges[edgeId]) {
-          existingEdges[edgeId] = 1;
-
-          newEdges.push({
-            id: edgeId,
-            from: from,
-            to: to,
-            label: "" + index,
-            font: { size: 14 },
-            arrows: {
-              to: {
-                enabled: true,
-                type: "solid",
-                scaleFactor: 0.5,
-              },
-            },
-          });
-        }
-      });
-
-      visjsGraph.data.nodes.update(newNodes);
-      visjsGraph.data.edges.add(newEdges);
-    }
-
-    var nextEdges = [];
-    var nodesMap = {};
-    visjsGraph.data.nodes.forEach(function (node) {
-      nodesMap[node.id] = node;
-    });
-    visjsGraph.data.edges.forEach(function (edge) {
-      if (edge.data.type == "next") nextEdges.push(edge);
-    });
-
-    nextEdges.sort(function (a, b) {
-      if (a.from == b.to) return 1;
-      if (a.from == b.from) return 0;
-      if (a.to == b.to) return 0;
-      return -1;
-    });
-
-    /**********************************/
-
-    var nextEdges = [];
-    var nodesMap = {};
-    visjsGraph.data.nodes.forEach(function (node) {
-      if (node.data.next) {
-        if (!nodesMap[node.id]) nodesMap[node.id] = node;
-
-        nextEdges.push({
-          id: node.id + "_" + node.data.next,
-          from: node.id,
-          to: node.data.next,
-          font: { size: 14 },
-          arrows: {
-            to: {
-              enabled: true,
-              type: "solid",
-              scaleFactor: 0.5,
-            },
-          },
+        nextEdges.sort(function (a, b) {
+            if (a.from == b.to) return 1;
+            if (a.from == b.from) return 0;
+            if (a.to == b.to) return 0;
+            return -1;
         });
-      }
-    });
 
-    nextEdges.sort(function (a, b) {
-      if (a.from == b.to) return 1;
-      if (a.from == b.from) return 0;
-      if (a.to == b.to) return 0;
-      return -1;
-    });
+        /**********************************/
 
-    var newNodes = [];
-    nextEdges.forEach(function (edge, edgeIndex) {
-      nextEdges[edgeIndex].label = "" + (edgeIndex + 1);
-      if (edgeIndex == 0) {
-        newNodes.push({
-          id: edge.from,
-          x: containerPosition.x + xOffset,
-          y: containerPosition.y,
-          fixed: { x: true, y: true },
-          shape: "box",
-          color: "#00afef",
+        var nextEdges = [];
+        var nodesMap = {};
+        visjsGraph.data.nodes.forEach(function (node) {
+            if (node.data.next) {
+                if (!nodesMap[node.id]) nodesMap[node.id] = node;
+
+                nextEdges.push({
+                    id: node.id + "_" + node.data.next,
+                    from: node.id,
+                    to: node.data.next,
+                    font: { size: 14 },
+                    arrows: {
+                        to: {
+                            enabled: true,
+                            type: "solid",
+                            scaleFactor: 0.5,
+                        },
+                    },
+                });
+            }
         });
-      }
-      newNodes.push({
-        id: edge.to,
-        x: containerPosition.x + xOffset,
-        y: containerPosition.y + (yOffset * edgeIndex + 1),
-        fixed: { x: true, y: true },
-        shape: "box",
-        color: "#00afef",
-      });
-    });
 
-    visjsGraph.data.nodes.update(newNodes);
-    visjsGraph.data.edges.update(nextEdges);
-
-    return;
-    /*******************************************/
-
-    var newNodes = [];
-
-    nextEdges.forEach(function (edge, edgeIndex) {
-      nextEdges[edgeIndex].label = "" + (edgeIndex + 1);
-      if (edgeIndex == 0) {
-        newNodes.push({
-          id: edge.from,
-          x: containerPosition.x + xOffset,
-          y: containerPosition.y,
-          fixed: { x: true, y: true },
-          shape: "box",
-          color: "#00afef",
+        nextEdges.sort(function (a, b) {
+            if (a.from == b.to) return 1;
+            if (a.from == b.from) return 0;
+            if (a.to == b.to) return 0;
+            return -1;
         });
-      }
-      newNodes.push({
-        id: edge.to,
-        x: containerPosition.x + xOffset,
-        y: containerPosition.y + (yOffset * edgeIndex + 1),
-        fixed: { x: true, y: true },
-        shape: "box",
-        color: "#00afef",
-      });
-    });
 
-    visjsGraph.data.nodes.update(newNodes);
-    visjsGraph.data.edges.add(nextEdges);
+        var newNodes = [];
+        nextEdges.forEach(function (edge, edgeIndex) {
+            nextEdges[edgeIndex].label = "" + (edgeIndex + 1);
+            if (edgeIndex == 0) {
+                newNodes.push({
+                    id: edge.from,
+                    x: containerPosition.x + xOffset,
+                    y: containerPosition.y,
+                    fixed: { x: true, y: true },
+                    shape: "box",
+                    color: "#00afef",
+                });
+            }
+            newNodes.push({
+                id: edge.to,
+                x: containerPosition.x + xOffset,
+                y: containerPosition.y + (yOffset * edgeIndex + 1),
+                fixed: { x: true, y: true },
+                shape: "box",
+                color: "#00afef",
+            });
+        });
 
-    return;
+        visjsGraph.data.nodes.update(newNodes);
+        visjsGraph.data.edges.update(nextEdges);
 
-    var edgesFrom = [];
-    visjsGraph.data.edges.forEach(function (edge) {
-      var p = edgesFrom.indexOf(edge.from);
-      if (p < 0) {
-        edgesFrom.splice(0, 0, edge.from);
-      }
-    });
+        return;
+        /*******************************************/
 
-    var x = nextEdges;
+        var newNodes = [];
 
-    var newEdges = [];
-    var newNodesMap = {};
-    var existingPositions = {};
-    nextEdges.forEach(function (edge, edgeIndex) {
-      newEdges.push({
-        id: edge.id,
-        label: "" + edgeIndex,
-      });
-      /*   if (!newNodesMap[edge.from]) {
+        nextEdges.forEach(function (edge, edgeIndex) {
+            nextEdges[edgeIndex].label = "" + (edgeIndex + 1);
+            if (edgeIndex == 0) {
+                newNodes.push({
+                    id: edge.from,
+                    x: containerPosition.x + xOffset,
+                    y: containerPosition.y,
+                    fixed: { x: true, y: true },
+                    shape: "box",
+                    color: "#00afef",
+                });
+            }
+            newNodes.push({
+                id: edge.to,
+                x: containerPosition.x + xOffset,
+                y: containerPosition.y + (yOffset * edgeIndex + 1),
+                fixed: { x: true, y: true },
+                shape: "box",
+                color: "#00afef",
+            });
+        });
+
+        visjsGraph.data.nodes.update(newNodes);
+        visjsGraph.data.edges.add(nextEdges);
+
+        return;
+
+        var edgesFrom = [];
+        visjsGraph.data.edges.forEach(function (edge) {
+            var p = edgesFrom.indexOf(edge.from);
+            if (p < 0) {
+                edgesFrom.splice(0, 0, edge.from);
+            }
+        });
+
+        var x = nextEdges;
+
+        var newEdges = [];
+        var newNodesMap = {};
+        var existingPositions = {};
+        nextEdges.forEach(function (edge, edgeIndex) {
+            newEdges.push({
+                id: edge.id,
+                label: "" + edgeIndex,
+            });
+            /*   if (!newNodesMap[edge.from]) {
      newNodesMap[edge.from] = {
        id: edge.from,
        x: containerPosition.x,
@@ -332,18 +330,16 @@ visjsGraph.data.nodes.update(newNodes);
      // newNodes[edge.from].x+=xO
    }
 */
-    });
+        });
 
-    var newNodes = [];
-    for (var id in newNodesMap) {
-      newNodes = newNodesMap[id];
-    }
+        var newNodes = [];
+        for (var id in newNodesMap) {
+            newNodes = newNodesMap[id];
+        }
 
-    visjsGraph.data.nodes.update(newNodes);
-    visjsGraph.data.edges.update(newEdges);
+        visjsGraph.data.nodes.update(newNodes);
+        visjsGraph.data.edges.update(newEdges);
 
-    return;
-  };
-
-
-})()
+        return;
+    };
+})();

@@ -1,7 +1,7 @@
 var Ontocommons = (function () {
     var self = {};
-var apiKey="019adb70-1d64-41b7-8f6e-8f7e5eb54942"
-    var sourcesJsonFile="ontocommonsSources.json"
+    var apiKey = "019adb70-1d64-41b7-8f6e-8f7e5eb54942";
+    var sourcesJsonFile = "ontocommonsSources.json";
     self.currentSource = null;
     self.init = function () {
         self.listPortalOntologies();
@@ -13,11 +13,10 @@ var apiKey="019adb70-1d64-41b7-8f6e-8f7e5eb54942"
         });
     };
 
-
-    self.listPortalOntologies=function(){
+    self.listPortalOntologies = function () {
         self.apiUrl = "/api/v1";
         var payload = {
-            url: "http://data.industryportal.enit.fr/ontologies?apikey="+apiKey,
+            url: "http://data.industryportal.enit.fr/ontologies?apikey=" + apiKey,
             GET: true,
         };
         $.ajax({
@@ -40,24 +39,24 @@ var apiKey="019adb70-1d64-41b7-8f6e-8f7e5eb54942"
             },
             error(err) {},
         });
-    }
+    };
 
     self.showOntologyInSLSV = function (ontologyId) {
         if (!ontologyId) return;
-        var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey="+apiKey;
+        var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
 
         self.currentSource = ontologyId;
-var reload=$("#reloadOntologyCBX").prop("checked")
-        var editable=$("#editableCBX").prop("checked")
+        var reload = $("#reloadOntologyCBX").prop("checked");
+        var editable = $("#editableCBX").prop("checked");
 
         var body = {
             importSourceFromUrl: 1,
             sourceUrl: sourceUrl,
             sourceName: ontologyId,
             options: {
-                sourcesJsonFile:sourcesJsonFile,
-                reload:reload,
-                editable:editable
+                sourcesJsonFile: sourcesJsonFile,
+                reload: reload,
+                editable: editable,
             },
         };
 
@@ -73,8 +72,7 @@ var reload=$("#reloadOntologyCBX").prop("checked")
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-
-                $("#slsv_iframe").attr("src", window.location.origin+"/vocables/");
+                $("#slsv_iframe").attr("src", window.location.origin + "/vocables/");
             },
             error(err) {
                 alert(err.responseText);
@@ -83,22 +81,19 @@ var reload=$("#reloadOntologyCBX").prop("checked")
     };
 
     self.loadSourceInSlsv = function (source) {
-
         self.currentSource = source;
         var slsv = $("#slsv_iframe")[0].contentWindow;
         slsv.MainController.currentTool = "lineage";
-        slsv.MainController.loadSources(sourcesJsonFile,function(err, result){
-            if(err)
-                return callback(err);
-        slsv.MainController.UI.initTool("lineage", function (err, result) {
-            if(err)
-                return callback(err);
-            slsv.Lineage_sources.showSourcesDialog(source);
+        slsv.MainController.loadSources(sourcesJsonFile, function (err, result) {
+            if (err) return callback(err);
+            slsv.MainController.UI.initTool("lineage", function (err, result) {
+                if (err) return callback(err);
+                slsv.Lineage_sources.showSourcesDialog(source);
+            });
         });
-        })
     };
 
-   /* self.callSlsv = function () {
+    /* self.callSlsv = function () {
         var body = {
             openLineage: true,
             source: "ddd",

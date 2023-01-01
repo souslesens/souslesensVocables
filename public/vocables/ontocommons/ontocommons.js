@@ -80,6 +80,7 @@ var Ontocommons = (function () {
         });
     };
 
+
     self.loadSourceInSlsv = function (source) {
         self.currentSource = source;
         var slsv = $("#slsv_iframe")[0].contentWindow;

@@ -239,7 +239,7 @@ action: function (_e) {
             properties = [properties];
         }
         var filter = "";
-        if (!properties || properties.length == 0) {
+        if ((!properties || properties.length == 0) && !options.filter) {
             filter = " FILTER( ?prop not in(rdf:type, rdfs:subClassOf,rdfs:member))";
         }
         if (!options) {

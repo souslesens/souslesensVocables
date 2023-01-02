@@ -724,6 +724,7 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         self.mainJsonEditorModified = true;
         $("#KGcreator_dialogDiv").dialog("close");
     };
+
     self.showFunctionDialog = function (_role) {
         $("#KGcreator_dialogDiv").load("snippets/KGcreator/functionDialog.html");
         $("#KGcreator_dialogDiv").dialog("open");

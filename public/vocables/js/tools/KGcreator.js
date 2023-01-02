@@ -441,7 +441,7 @@ var KGcreator = (function () {
                 if (self.currentTreeNode.parents.length < 1) {
                     return;
                 }
-                $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupdialog.html", function () {
+                $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupDialog.html", function () {
                     $("#KGCreator_lookupFileName").val(self.currentTreeNode.data.id);
                 });
                 $("#KGcreator_dialogDiv").dialog("open");

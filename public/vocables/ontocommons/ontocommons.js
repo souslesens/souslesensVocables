@@ -80,7 +80,6 @@ var Ontocommons = (function () {
         });
     };
 
-
     self.loadSourceInSlsv = function (source) {
         self.currentSource = source;
         var slsv = $("#slsv_iframe")[0].contentWindow;
@@ -93,32 +92,6 @@ var Ontocommons = (function () {
             });
         });
     };
-
-    /* self.callSlsv = function () {
-        var body = {
-            openLineage: true,
-            source: "ddd",
-        };
-
-        var payload = {
-            url: "_default",
-            body: JSON.stringify(body),
-            POST: true,
-        };
-
-        $.ajax({
-            type: "POST",
-            url: `${self.apiUrl}/httpProxy`,
-            data: payload,
-            dataType: "json",
-            success: function (data, _textStatus, _jqXHR) {
-                return callback(null, data);
-            },
-            error: function (err) {
-                return callback(err);
-            },
-        });
-    };*/
 
     return self;
 })();

@@ -156,7 +156,7 @@ docker-compose up -d
 ### Prerequisites
 
 In development, souslesensVocable needs a Virtuoso instance, an ElasticSearch instance and
-a Sql and a Spacy server. We provide a `docker-compose.test.yaml` to deploy this dependencies.
+a Sql and a Spacy server. We provide a `docker-compose.dev.yaml` to deploy this dependencies.
 
 SouslesensVocables is deployed locally using `node` and `npm`.
 

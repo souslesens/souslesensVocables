@@ -42,7 +42,9 @@ Lineage_sources = (function () {
         if (window.parent && window.parent.Ontocommons) {
             // called from outside (iframe)
             var calledSource = window.parent.Ontocommons.currentSource;
-            if (calledSource) return self.setCurrentSource(calledSource);
+            if (calledSource) {
+                return self.setCurrentSource(calledSource);
+            }
         }
 
         SourceBrowser.showSearchableSourcesTreeDialog(
@@ -50,10 +52,16 @@ Lineage_sources = (function () {
             {
                 includeSourcesWithoutSearchIndex: true,
                 withCheckboxes: true,
+                // dontTie_selection: false,
+                onOpenNodeFn: function () {
+                    $("#Lineage_classes_SearchSourceInput").blur();
+                },
             },
             function () {
-                var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
-                if (sources.length > 1) return;
+                var searchSource = $("#Lineage_classes_SearchSourceInput").val();
+                if (!searchSource) {
+                    return;
+                }
                 var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
                 self.setCurrentSource(source);
                 $("#sourcesSelectionDialogdiv").dialog("close");
@@ -62,6 +70,7 @@ Lineage_sources = (function () {
             },
             function () {
                 //if checkbox
+
                 var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
                 if (sources.length > 0) {
                     var firstSource = null;
@@ -69,12 +78,16 @@ Lineage_sources = (function () {
                         sources,
                         function (source, callbackEach) {
                             self.initSource(source, function (err, result) {
-                                if (!err) firstSource = source;
+                                if (!err) {
+                                    firstSource = source;
+                                }
                                 return callbackEach();
                             });
                         },
                         function (err) {
-                            if (err) alert(err);
+                            if (err) {
+                                alert(err);
+                            }
                             self.setCurrentSource(firstSource);
                             $("#sourcesSelectionDialogdiv").dialog("close");
                             MainController.UI.showHideRightPanel();
@@ -87,7 +100,9 @@ Lineage_sources = (function () {
     };
 
     self.setCurrentSource = function (source) {
-        if (!source) return;
+        if (!source) {
+            return;
+        }
 
         function highlightSourceDiv(source) {
             $(".Lineage_sourceLabelDiv").removeClass("Lineage_selectedSourceDiv");
@@ -98,7 +113,9 @@ Lineage_sources = (function () {
         //new source to load
         if (!self.loadedSources[source]) {
             self.initSource(source, function (err, sourceDivId) {
-                if (err) return MainController.UI.message(err);
+                if (err) {
+                    return MainController.UI.message(err);
+                }
 
                 highlightSourceDiv(source);
 
@@ -122,13 +139,33 @@ Lineage_sources = (function () {
         $("#LineageLinkedDataRelationsDiv").load("snippets/lineage/linkedData/lineage_linkedData_relations.html", function () {
             Lineage_linkedData_query.init();
         });
+
+        self.initSourcesSearchSelect();
+    };
+
+    self.initSourcesSearchSelect = function () {
+        var scope = $("#GenericTools_searchScope").val();
+        if (scope == "currentSource") {
+            self.fromAllWhiteboardSources = false;
+        } else if (scope == "whiteboardSources") {
+            self.fromAllWhiteboardSources = false;
+        } else {
+            common.fillSelectOptions("GenericTools_searchAllClassSelect", [], true);
+        }
+
+        self.getSourcesClasses(self.activeSource, function (err, result) {
+            if (err) {
+                return alert(err);
+            }
+            common.fillSelectOptions("GenericTools_searchAllClassSelect", result, true, "label", "id");
+        });
     };
 
     self.showHideLineageLeftPanels = function () {
         /*  $("#lineage_actionsWrapper").css("display","flex")
- $("#lineage_actionsWrapper2").css("display","flex")
-  $("#lineage_actionsWrapper3").css("display","flex")
-  $("#lineage_actionDiv_title_hidden").css("display","flex")*/
+$("#lineage_actionsWrapper2").css("display","flex")
+$("#lineage_actionsWrapper3").css("display","flex")
+$("#lineage_actionDiv_title_hidden").css("display","flex")*/
         $("#lineage_allActions").css("visibility", "visible");
         if (!Config.currentTopLevelOntology) {
             $("#lineage_legendWrapper").css("display", "block");
@@ -139,7 +176,9 @@ Lineage_sources = (function () {
     };
 
     self.showHideEditButtons = function (source) {
-        if (!visjsGraph.isGraphNotEmpty()) return;
+        if (!visjsGraph.isGraphNotEmpty()) {
+            return;
+        }
         var isNodeEditable = Lineage_sources.isSourceEditable(source);
         if (isNodeEditable) {
             visjsGraph.network.enableEditMode();
@@ -152,13 +191,17 @@ Lineage_sources = (function () {
 
     self.whiteboard_setGraphOpacity = function (source) {
         var nodesMapSources = {};
-        if (!visjsGraph.data || !visjsGraph.data.nodes) return;
+        if (!visjsGraph.data || !visjsGraph.data.nodes) {
+            return;
+        }
         var nodes = visjsGraph.data.nodes.get();
         var newNodes = [];
 
         nodes.forEach(function (node) {
             nodesMapSources[node.id] = node.data.source;
-            if (node.data && !node.data.fullColor) node.data.fullColor = node.color;
+            if (node.data && !node.data.fullColor) {
+                node.data.fullColor = node.color;
+            }
 
             var color;
             var fontColor;
@@ -180,7 +223,9 @@ Lineage_sources = (function () {
         var edges = visjsGraph.data.edges.get();
         var newEdges = [];
         edges.forEach(function (edge) {
-            if (edge.data && !edge.data.fullColor) edge.data.fullColor = edge.color;
+            if (edge.data && !edge.data.fullColor) {
+                edge.data.fullColor = edge.color;
+            }
 
             var color;
             var width;
@@ -212,7 +257,9 @@ Lineage_sources = (function () {
     };
 
     self.initSource = function (source, callback) {
-        if (!source || !Config.sources[source]) return callback("not a source");
+        if (!source || !Config.sources[source]) {
+            return callback("not a source");
+        }
 
         self.registerSource(source);
         Lineage_sources.setTopLevelOntologyFromImports(source);
@@ -221,7 +268,9 @@ Lineage_sources = (function () {
         var drawTopConcepts = false;
         if (drawTopConcepts) {
             Lineage_classes.drawTopConcepts(source, function (err) {
-                if (err) return MainController.UI.message(err);
+                if (err) {
+                    return MainController.UI.message(err);
+                }
             });
         }
         self.indexSourceIfNotIndexed(source);
@@ -234,7 +283,9 @@ Lineage_sources = (function () {
                 MainController.UI.message("indexing source " + source);
                 $("#waitImg").css("display", "block");
                 SearchUtil.generateElasticIndex(source, { indexProperties: 1 }, function (err, _result) {
-                    if (err) return MainController.UI.message(err, true);
+                    if (err) {
+                        return MainController.UI.message(err, true);
+                    }
                     MainController.UI.message("ALL DONE", true);
                 });
             }
@@ -242,7 +293,9 @@ Lineage_sources = (function () {
     };
 
     self.registerSource = function (sourceLabel) {
-        if (self.loadedSources[sourceLabel]) return;
+        if (self.loadedSources[sourceLabel]) {
+            return;
+        }
         var sourceDivId = "source_" + common.getRandomHexaId(5);
         self.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
         self.sourceDivsMap[sourceDivId] = sourceLabel;
@@ -257,8 +310,8 @@ Lineage_sources = (function () {
             sourceLabel +
             "&nbsp;" +
             /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
-      sourceDivId +
-      "\")'>[-]</i>";*/
+sourceDivId +
+"\")'>[-]</i>";*/
             "<input type='image' src='./icons/caret-right.png'  style='opacity: 0.5; width: 15px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
             sourceDivId +
             "\")'/> </div>";
@@ -307,7 +360,9 @@ Lineage_sources = (function () {
 
     self.registerSourceImports = function (sourceLabel) {
         var imports = Config.sources[sourceLabel].imports;
-        if (!imports) imports = [];
+        if (!imports) {
+            imports = [];
+        }
 
         imports.forEach(function (/** @type {any} */ source) {
             self.registerSource(source);
@@ -315,7 +370,9 @@ Lineage_sources = (function () {
     };
 
     self.setAllWhiteBoardSources = function (remove) {
-        if (remove) Lineage_sources.fromAllWhiteboardSources = true;
+        if (remove) {
+            Lineage_sources.fromAllWhiteboardSources = true;
+        }
 
         if (!Lineage_sources.fromAllWhiteboardSources) {
             Lineage_sources.fromAllWhiteboardSources = true;
@@ -339,29 +396,41 @@ Lineage_sources = (function () {
     };
 
     self.showHideCurrentSourceNodes = function (source, /** @type {any} */ hide) {
-        if (!source) source = Lineage_sources.activeSource;
+        if (!source) {
+            source = Lineage_sources.activeSource;
+        }
 
         var allNodes = visjsGraph.data.nodes.get();
         var newNodes = [];
         allNodes.forEach(function (node) {
-            if (node && node.data && node.data.source == source)
+            if (node && node.data && node.data.source == source) {
                 newNodes.push({
                     id: node.id,
                     hidden: hide,
                 });
+            }
         });
         visjsGraph.data.nodes.update(newNodes);
 
-        if (hide) $("#Lineage_source_" + Lineage_sources.activeSource).addClass("lineage_hiddenSource");
-        else $("#Lineage_source_" + Lineage_sources.activeSource).removeClass("lineage_hiddenSource");
+        if (hide) {
+            $("#Lineage_source_" + Lineage_sources.activeSource).addClass("lineage_hiddenSource");
+        } else {
+            $("#Lineage_source_" + Lineage_sources.activeSource).removeClass("lineage_hiddenSource");
+        }
     };
 
     self.setTopLevelOntologyFromImports = function (sourceLabel) {
         Config.currentTopLevelOntology = null;
-        if (Config.topLevelOntologies[sourceLabel]) return (Config.currentTopLevelOntology = sourceLabel);
+        if (Config.topLevelOntologies[sourceLabel]) {
+            return (Config.currentTopLevelOntology = sourceLabel);
+        }
         var imports = Config.sources[sourceLabel].imports;
-        if (!imports) return (Config.currentTopLevelOntology = Object.keys(Config.topLevelOntologies)[0]);
-        if (!Array.isArray(imports)) imports = [imports];
+        if (!imports) {
+            return (Config.currentTopLevelOntology = Object.keys(Config.topLevelOntologies)[0]);
+        }
+        if (!Array.isArray(imports)) {
+            imports = [imports];
+        }
         var ok = false;
 
         imports.forEach(function (source) {
@@ -375,7 +444,9 @@ Lineage_sources = (function () {
     self.setTopLevelOntologyFromPrefix = function () {
         Config.currentTopLevelOntology = null;
         for (var key in Config.topLevelOntologies) {
-            if (Config.topLevelOntologies[key].prefix == prefix) Config.currentTopLevelOntology = key;
+            if (Config.topLevelOntologies[key].prefix == prefix) {
+                Config.currentTopLevelOntology = key;
+            }
         }
         return Config.currentTopLevelOntology;
     };
@@ -383,8 +454,12 @@ Lineage_sources = (function () {
     self.menuActions = {
         setSourceOpacity: function (source) {
             var opacity = prompt("opacity %", 100);
-            if (!opacity) return;
-            if (opacity < 10) opacity = 10;
+            if (!opacity) {
+                return;
+            }
+            if (opacity < 10) {
+                opacity = 10;
+            }
             opacity = opacity / 100;
             var nodesMapSources = {};
             var nodes = visjsGraph.data.nodes.get();
@@ -422,12 +497,16 @@ Lineage_sources = (function () {
             visjsGraph.data.edges.update(newEdges);
         },
         closeSource: function (source) {
-            if (source) self.activeSource = source;
+            if (source) {
+                self.activeSource = source;
+            }
             if (visjsGraph.isGraphNotEmpty) {
                 var nodes = visjsGraph.data.nodes.get();
                 var nodesToRemove = [];
                 nodes.forEach(function (node) {
-                    if (node.data && node.data.source == self.activeSource) nodesToRemove.push(node.id);
+                    if (node.data && node.data.source == self.activeSource) {
+                        nodesToRemove.push(node.id);
+                    }
                 });
                 visjsGraph.data.nodes.remove(nodesToRemove);
             }
@@ -446,7 +525,9 @@ Lineage_sources = (function () {
         groupSource: function (source) {
             MainController.UI.hidePopup("graphPopupDiv");
 
-            if (!source) source = Lineage_sources.activeSource;
+            if (!source) {
+                source = Lineage_sources.activeSource;
+            }
             var color = Lineage_classes.getSourceColor(source);
             var color2 = common.colorToRgba(color, 0.1);
             var visjsData = { nodes: [], edges: [] };
@@ -491,12 +572,16 @@ Lineage_sources = (function () {
         },
         ungroupSource: function (source) {
             MainController.UI.hidePopup("graphPopupDiv");
-            if (!source) source = Lineage_sources.activeSource;
+            if (!source) {
+                source = Lineage_sources.activeSource;
+            }
             visjsGraph.data.nodes.remove(source);
         },
         exportOWL: function (source) {
             Sparql_OWL.generateOWL(source, {}, function (err, result) {
-                if (err) return console.log(err);
+                if (err) {
+                    return console.log(err);
+                }
 
                 common.copyTextToClipboard(result);
             });
@@ -520,12 +605,16 @@ Lineage_sources = (function () {
 
     self.onSelectWhiteboardAction = function (action) {
         var fn = self.whiteboardActions[action];
-        if (fn) fn();
+        if (fn) {
+            fn();
+        }
         $("#lineage_classes_whiteboardSelect").val("");
     };
 
     self.isSourceEditable = function (source) {
-        if (!Config.sources[source]) return console.log("no source " + source);
+        if (!Config.sources[source]) {
+            return console.log("no source " + source);
+        }
         const groups = authentication.currentUser.groupes;
         const currentAccessControls = groups.map((group) => {
             const defaultAccessControl = Config.profiles[group].defaultSourceAccessControl;
@@ -537,16 +626,22 @@ Lineage_sources = (function () {
 
         if (self.realAccessControl === "readwrite" && Config.sources[source].editable > -1) {
             return true;
-        } else return false;
+        } else {
+            return false;
+        }
     };
 
     self.clearSource = function (source) {
-        if (!source) source = self.activeSource;
+        if (!source) {
+            source = self.activeSource;
+        }
         if (visjsGraph.isGraphNotEmpty && visjsGraph.data) {
             var nodes = visjsGraph.data.nodes.get();
             var newNodes = [];
             nodes.forEach(function (node) {
-                if (node.data && node.data.source == source) newNodes.push({ id: node.id });
+                if (node.data && node.data.source == source) {
+                    newNodes.push({ id: node.id });
+                }
             });
             visjsGraph.data.nodes.remove(newNodes);
         }
@@ -568,7 +663,7 @@ Lineage_sources = (function () {
         $("#graphDiv").css("background-color", backgroundColor);
         if (visjsGraph.isGraphNotEmpty && visjsGraph.data) {
             /* visjsGraph.network.options.nodes.font = { color: Lineage_classes.defaultNodeFontColor };
- visjsGraph.network.options.edges.font = { color: self.defaultEdgeFontColor };*/
+visjsGraph.network.options.edges.font = { color: self.defaultEdgeFontColor };*/
 
             var nodes = visjsGraph.data.nodes.get();
             var newNodes = [];
@@ -583,6 +678,38 @@ Lineage_sources = (function () {
             });
             visjsGraph.data.edges.update(newEdges);
         }
+    };
+    self.getSourcesClasses = function (source, callback) {
+        Sparql_OWL.getDictionary(self.activeSource, { selectGraph: true, lang: Config.default_lang, type: "owl:Class" }, null, function (err, result) {
+            if (err) {
+                callback(err);
+            }
+
+            var sourceObjects = [];
+            var TopLevelOntologyObjects = [];
+            result.forEach(function (item) {
+                if (item.label) {
+                    var prefix = "";
+                    if (Config.currentTopLevelOntology && item.g.value.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > -1) {
+                        prefix = "_" + Config.topLevelOntologies[Config.currentTopLevelOntology].prefix + ":";
+                    }
+                    sourceObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
+                }
+            });
+            sourceObjects.sort(function (a, b) {
+                if (!a.label || !b.label) {
+                    return 0;
+                }
+                if (a.label > b.label) {
+                    return 1;
+                }
+                if (a.label < b.label) {
+                    return -1;
+                }
+                return 0;
+            });
+            callback(null, sourceObjects);
+        });
     };
 
     return self;

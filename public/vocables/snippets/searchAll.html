@@ -3,7 +3,7 @@
         <input type="checkbox" checked="checked" id="GenericTools_allExactMatchSearchCBX" />Exact Match
 
         <b>Scope </b>
-        <select id="GenericTools_searchScope" class="GenericTools_searchAllOptional">
+        <select id="GenericTools_searchScope" class="GenericTools_searchAllOptional" onchange="Lineage_sources.initSourcesSearchSelect()">
             <option value="currentSource">Current Source</option>
             <option value="whiteboardSources">Current whiteboard sources</option>
             <!--   <option value="all_OWLsources">All OWL sources</option>
@@ -14,6 +14,10 @@
         <button class="btn btn-sm my-1 py-0 btn-outline-primary GenericTools_searchAllOptional" onclick="SourceBrowser.showSearchableSourcesTreeDialog(['OWL'],SourceBrowser.searchAllSourcesTerm)">
             +
         </button>
+    </div>
+    <div>
+        Class
+        <select id="GenericTools_searchAllClassSelect"></select>
     </div>
     <div>
         <input id="GenericTools_searchAllSourcesTermInput" style="width: 150px" value="" />

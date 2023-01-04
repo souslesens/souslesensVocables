@@ -41,13 +41,13 @@ Lineage_properties = (function () {
         };
         if (MainController.currentTool == "lineage") {
             /* items.drawRangesAndDomainsProperty = {
-    label: "Draw ranges and domains",
-    action: function (_e) {
-        // pb avec source
-        setTimeout(function () {
-            self.drawRangeAndDomainsGraph(self.currentTreeNode);
-        }, 200);
-    },
+label: "Draw ranges and domains",
+action: function (_e) {
+  // pb avec source
+  setTimeout(function () {
+      self.drawRangeAndDomainsGraph(self.currentTreeNode);
+  }, 200);
+},
 };*/
             items.copyNodeToClipboard = {
                 label: "copy to Clipboard",
@@ -81,9 +81,13 @@ Lineage_properties = (function () {
         return items;
     };
     self.onTreeNodeClick = function (_event, obj) {
-        if (!obj || !obj.node) return;
+        if (!obj || !obj.node) {
+            return;
+        }
         self.currentTreeNode = obj.node;
-        if (obj.node.children && obj.node.children.length > 0) return;
+        if (obj.node.children && obj.node.children.length > 0) {
+            return;
+        }
         self.openNode(obj.node);
     };
 
@@ -92,7 +96,9 @@ Lineage_properties = (function () {
         MainController.UI.message("searching in " + node.data.source);
         // @ts-ignore
         Sparql_OWL.getObjectPropertiesDomainAndRange(node.data.source, null, options, function (err, result) {
-            if (err) return MainController.UI.message(err);
+            if (err) {
+                return MainController.UI.message(err);
+            }
             var data = common.array.sort(common.array.distinctValues(result, "prop"), "propLabel");
             var distinctIds = {};
             var jstreeData = [];
@@ -101,7 +107,9 @@ Lineage_properties = (function () {
                     distinctIds[item.prop.value] = 1;
 
                     var parent = node.data.source;
-                    if (item.subProp) parent = item.subProp.value;
+                    if (item.subProp) {
+                        parent = item.subProp.value;
+                    }
                     jstreeData.push({
                         text: item.propLabel.value,
                         id: item.prop.value,
@@ -133,8 +141,12 @@ Lineage_properties = (function () {
      * @param callback
      */
     self.getPropertiesjsTreeData = function (source, ids, words, options, callback) {
-        if (!options) options = {};
-        if (words) options.words = words;
+        if (!options) {
+            options = {};
+        }
+        if (words) {
+            options.words = words;
+        }
         options.whitoutImports = true;
         var distinctIds = {};
         var jstreeData = [];
@@ -142,7 +154,9 @@ Lineage_properties = (function () {
             [
                 function (callbackSeries) {
                     Sparql_OWL.getObjectPropertiesDomainAndRange(source, ids, options, function (err, result) {
-                        if (err) return callbackSeries(err);
+                        if (err) {
+                            return callbackSeries(err);
+                        }
                         var data = common.array.sort(common.array.distinctValues(result, "prop"), "propLabel");
 
                         data.forEach(function (item) {
@@ -150,7 +164,9 @@ Lineage_properties = (function () {
                                 distinctIds[item.prop.value] = 1;
 
                                 var parent = source;
-                                if (item.subProp) parent = item.subProp.value;
+                                if (item.subProp) {
+                                    parent = item.subProp.value;
+                                }
                                 jstreeData.push({
                                     text: item.propLabel.value,
                                     id: item.prop.value,
@@ -172,9 +188,10 @@ Lineage_properties = (function () {
                 function (callbackSeries) {
                     options = { distinct: "?prop ?Label" };
                     Sparql_OWL.getFilteredTriples(source, null, null, null, options, function (err, result) {
-                        if (err) return callback(err);
-                        var distinctIds = {};
-                        var jstreeData = [];
+                        if (err) {
+                            return callback(err);
+                        }
+
                         result.forEach(function (item) {
                             if (!distinctIds[item.prop.value]) {
                                 distinctIds[item.prop.value] = 1;
@@ -215,18 +232,39 @@ Lineage_properties = (function () {
      * @param nodeData
      */
     self.drawPredicatesGraph = function (source, nodeIds, properties, options, callback) {
-        if (nodeIds && !Array.isArray(nodeIds)) nodeIds = [nodeIds];
-        if (properties && !Array.isArray(properties)) properties = [properties];
+        if (nodeIds && !Array.isArray(nodeIds)) {
+            nodeIds = [nodeIds];
+        }
+        if (properties && !Array.isArray(properties)) {
+            properties = [properties];
+        }
         var filter = "";
-        if (!properties || properties.length == 0) filter = " FILTER( ?prop not in(rdf:type, rdfs:subClassOf,rdfs:member))";
-        if (!options) options = {};
+        if ((!properties || properties.length == 0) && !options.filter) {
+            filter = " FILTER( ?prop not in(rdf:type, rdfs:subClassOf,rdfs:member))";
+        }
+        if (!options) {
+            options = {};
+        }
+        var subjectIds, objectIds;
+
+        if (options.inversePredicate) {
+            subjectIds = null;
+            objectIds = nodeIds;
+        } else {
+            subjectIds = nodeIds;
+            objectIds = null;
+        }
 
         options.filter = (options.filter || "") + " " + filter;
 
-        Sparql_OWL.getFilteredTriples(source, nodeIds, properties, null, options, function (err, result) {
-            if (err) return callback(err);
+        Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
             Sparql_common.setSparqlResultPropertiesLabels(source, result, "prop", function (err, result2) {
-                if (err) return callback(err);
+                if (err) {
+                    return callback(err);
+                }
                 var visjsData = { nodes: [], edges: [] };
                 var existingNodes = visjsGraph.getExistingIdsMap();
                 var color = Lineage_classes.getSourceColor(source);
@@ -236,7 +274,9 @@ Lineage_properties = (function () {
 
                         var shape = Lineage_classes.defaultShape;
                         var type = item.subjectType.value;
-                        if (type.indexOf("NamedIndividual") > -1) shape = Lineage_classes.namedIndividualShape;
+                        if (type.indexOf("NamedIndividual") > -1) {
+                            shape = Lineage_classes.namedIndividualShape;
+                        }
 
                         visjsData.nodes.push({
                             id: item.subject.value,
@@ -255,8 +295,12 @@ Lineage_properties = (function () {
                         existingNodes[item.object.value] = 1;
 
                         var shape = Lineage_classes.defaultShape;
+
                         var type = item.objectType.value;
-                        if (type.indexOf("NamedIndividual") > -1) shape = Lineage_classes.namedIndividualShape;
+
+                        if (type.indexOf("NamedIndividual") > -1) {
+                            shape = Lineage_classes.namedIndividualShape;
+                        }
 
                         visjsData.nodes.push({
                             id: item.object.value,
@@ -279,7 +323,12 @@ Lineage_properties = (function () {
                         {
                             var nodeSource = source;
                             var prop = item.prop.value;
-                            if (prop == "http://www.w3.org/2002/07/owl#sameAs" || prop == "http://www.w3.org/2002/07/owl#equivalentClass") nodeSource = options.includeSources[0];
+                            if (
+                                (options.includeSources && options.includeSources.length > 0 && prop == "http://www.w3.org/2002/07/owl#sameAs") ||
+                                prop == "http://www.w3.org/2002/07/owl#equivalentClass"
+                            ) {
+                                nodeSource = options.includeSources[0];
+                            }
                         }
 
                         visjsData.edges.push({
@@ -317,7 +366,9 @@ Lineage_properties = (function () {
                 }
 
                 $("#waitImg").css("display", "none");
-                if (callback) return callback();
+                if (callback) {
+                    return callback();
+                }
             });
         });
     };
@@ -325,7 +376,9 @@ Lineage_properties = (function () {
     self.drawObjectPropertiesRestrictions = function (source, nodeIds, properties) {
         var options = {};
 
-        if (nodeIds && nodeIds.length > 0) options.filter = Sparql_common.setFilter("sourceClass", nodeIds);
+        if (nodeIds && nodeIds.length > 0) {
+            options.filter = Sparql_common.setFilter("sourceClass", nodeIds);
+        }
 
         Sparql_OWL.getPropertiesRestrictionsDescription(source, properties, options, function (err, result) {
             if (err) {
@@ -336,7 +389,9 @@ Lineage_properties = (function () {
 
             var existingNodes = visjsGraph.getExistingIdsMap();
             var isNewGraph = true;
-            if (Object.keys(existingNodes).length > 0) isNewGraph = false;
+            if (Object.keys(existingNodes).length > 0) {
+                isNewGraph = false;
+            }
 
             var color = Lineage_classes.getSourceColor(source);
             //  console.log(JSON.stringify(result, null, 2))
@@ -441,7 +496,9 @@ Lineage_properties = (function () {
             targetnodes = visjsGraph.data.nodes.getIds();
         }
         self.getPropertiesRangeAndDomain(source, property, function (err, result) {
-            if (err) return alert(err.responseText);
+            if (err) {
+                return alert(err.responseText);
+            }
             var strAll = "domainLabel\tsubPropertyLabel\tpropertyLabel\trangeLabel\tinversePropertyURI\t--\tdomainURI\tsubPropertyURI\tpropertyURI\trangeURI\tinversePropertyURI\n";
 
             var uniqueLines = {};
@@ -449,10 +506,15 @@ Lineage_properties = (function () {
             result.forEach(function (item) {
                 var ok = 0;
                 if (targetnodes) {
-                    if (item.range && targetnodes.indexOf(item.range.value) > -1) ok = 1;
-                    else if (item.domain && targetnodes.indexOf(item.domain.value) > -1) ok = 1;
+                    if (item.range && targetnodes.indexOf(item.range.value) > -1) {
+                        ok = 1;
+                    } else if (item.domain && targetnodes.indexOf(item.domain.value) > -1) {
+                        ok = 1;
+                    }
 
-                    if (!ok) return;
+                    if (!ok) {
+                        return;
+                    }
                 }
                 var str = "";
                 str += (item.domainLabel ? item.domainLabel.value : "") + "\t";
@@ -487,10 +549,14 @@ Lineage_properties = (function () {
      */
     self.drawRangeAndDomainsGraph = function (source, targetnodes, property) {
         self.getPropertiesRangeAndDomain(source, property, function (err, result) {
-            if (err) return alert(err.responseText);
+            if (err) {
+                return alert(err.responseText);
+            }
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = {};
-            if (visjsGraph.data && visjsGraph.data.nodes) existingNodes = visjsGraph.getExistingIdsMap();
+            if (visjsGraph.data && visjsGraph.data.nodes) {
+                existingNodes = visjsGraph.getExistingIdsMap();
+            }
             var color = Lineage_classes.getSourceColor(Lineage_sources.activeSource);
 
             var classShape = "dot";
@@ -499,14 +565,23 @@ Lineage_properties = (function () {
 
             result.forEach(function (item) {
                 var ok = 0;
-                if (!item.property || !item.property.value) return;
-                if (targetnodes) {
-                    if (item.range && targetnodes.indexOf(item.range.value) > -1) ok = 1;
-                    else if (item.domain && targetnodes.indexOf(item.domain.value) > -1) ok = 1;
-
-                    if (!ok) return;
+                if (!item.property || !item.property.value) {
+                    return;
                 }
-                if (item.property.value.indexOf("#type") > -1 && item.property.value.indexOf("#label") > -1) return;
+                if (targetnodes) {
+                    if (item.range && targetnodes.indexOf(item.range.value) > -1) {
+                        ok = 1;
+                    } else if (item.domain && targetnodes.indexOf(item.domain.value) > -1) {
+                        ok = 1;
+                    }
+
+                    if (!ok) {
+                        return;
+                    }
+                }
+                if (item.property.value.indexOf("#type") > -1 && item.property.value.indexOf("#label") > -1) {
+                    return;
+                }
 
                 if (!existingNodes[item.property.value]) {
                     let label = item.propertyLabel ? item.propertyLabel.value : Sparql_common.getLabelFromURI(item.property.value);
@@ -609,8 +684,12 @@ Lineage_properties = (function () {
                 if (item.range) {
                     if (!existingNodes[item.range.value]) {
                         if (item.rangeType) {
-                            if (item.rangeType.value.indexOf("Class") > -1) shape = Lineage_classes.defaultShape;
-                            if (item.rangeType.value.indexOf("property") > -1) shape = self.defaultShape;
+                            if (item.rangeType.value.indexOf("Class") > -1) {
+                                shape = Lineage_classes.defaultShape;
+                            }
+                            if (item.rangeType.value.indexOf("property") > -1) {
+                                shape = self.defaultShape;
+                            }
                         }
                         existingNodes[item.range.value] = 1;
                         let rangeLabel = item.rangeLabel ? item.rangeLabel.value : Sparql_common.getLabelFromURI(item.range.value);
@@ -651,8 +730,12 @@ Lineage_properties = (function () {
                         existingNodes[item.domain.value] = 1;
                         shape = "text";
                         if (item.domainType) {
-                            if (item.domainType.value.indexOf("Class") > -1) shape = Lineage_classes.defaultShape;
-                            if (item.domainType.value.indexOf("property") > -1) shape = self.defaultShape;
+                            if (item.domainType.value.indexOf("Class") > -1) {
+                                shape = Lineage_classes.defaultShape;
+                            }
+                            if (item.domainType.value.indexOf("property") > -1) {
+                                shape = self.defaultShape;
+                            }
                         }
                         let domainLabel = item.domainLabel ? item.domainLabel.value : Sparql_common.getLabelFromURI(item.domain.value);
                         visjsData.nodes.push({
@@ -691,8 +774,12 @@ Lineage_properties = (function () {
                     if (!existingNodes[item.range.value]) {
                         shape = "text";
                         if (item.rangeType) {
-                            if (item.rangeType.value.indexOf("Class") > -1) shape = Lineage_classes.defaultShape;
-                            if (item.rangeType.value.indexOf("property") > -1) shape = self.propertiesLineage_classes.defaultShape;
+                            if (item.rangeType.value.indexOf("Class") > -1) {
+                                shape = Lineage_classes.defaultShape;
+                            }
+                            if (item.rangeType.value.indexOf("property") > -1) {
+                                shape = self.propertiesLineage_classes.defaultShape;
+                            }
                         }
                         existingNodes[item.range.value] = 1;
 
@@ -805,13 +892,17 @@ Lineage_properties = (function () {
             }
 
             Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, options, function (err, result) {
-                if (err) return callback(err);
+                if (err) {
+                    return callback(err);
+                }
                 var allProps = [];
 
                 for (var propId in result) {
                     var item = result[propId];
                     if (!filterNodes || filterNodes.indexOf(item.domain) > -1 || filterNodes.indexOf(item.range) > -1) {
-                        if (!properties || properties.indexOf(item.prop) > -1) allProps.push(item);
+                        if (!properties || properties.indexOf(item.prop) > -1) {
+                            allProps.push(item);
+                        }
                     }
                 }
 
@@ -839,7 +930,9 @@ Lineage_properties = (function () {
         } else if (Config.sources[source].schemaType == "KNOWLEDGE_GRAPH") {
             let options = {};
             Sparql_OWL.getFilteredTriples(source, targetnodes, null, null, options, function (err, result) {
-                if (err) return callback(err);
+                if (err) {
+                    return callback(err);
+                }
 
                 result.forEach(function (item) {
                     item.range = { value: item.object.value };
@@ -867,16 +960,23 @@ Lineage_properties = (function () {
         var searchAllSources = $("#LineageProperties_searchInAllSources").prop("checked");
         var searchType = $("#LineageProperties_searchAllType").val();
 
-        if (!term || term == "") term == null;
-        else if (!exactMatch && term.indexOf("*") < 0) term += "*";
+        if (!term || term == "") {
+            term == null;
+        } else if (!exactMatch && term.indexOf("*") < 0) {
+            term += "*";
+        }
 
         var searchedSources = [];
         if (searchAllSources) {
             for (var sourceLabel in Config.sources) {
-                if (Config.sources[sourceLabel].schemaType == "OWL") searchedSources.push(sourceLabel);
+                if (Config.sources[sourceLabel].schemaType == "OWL") {
+                    searchedSources.push(sourceLabel);
+                }
             }
         } else {
-            if (!Lineage_sources.activeSource) return alert("select a source or search in all source");
+            if (!Lineage_sources.activeSource) {
+                return alert("select a source or search in all source");
+            }
             searchedSources.push(Lineage_sources.activeSource);
         }
         var jstreeData = [];
@@ -898,7 +998,9 @@ Lineage_properties = (function () {
                         searchType: searchType,
                     },
                     function (err, result) {
-                        if (err) return callbackEach(err);
+                        if (err) {
+                            return callbackEach(err);
+                        }
 
                         result.forEach(function (item) {
                             if (!uniqueIds[item.id]) {
@@ -918,9 +1020,13 @@ Lineage_properties = (function () {
                 );
             },
             function (err) {
-                if (err) MainController.UI.message(err, true);
+                if (err) {
+                    MainController.UI.message(err, true);
+                }
 
-                if (jstreeData.length == 0) $("#Lineage_propertiesTree").html("no properties found");
+                if (jstreeData.length == 0) {
+                    $("#Lineage_propertiesTree").html("no properties found");
+                }
 
                 MainController.UI.message(jstreeData.length + " nodes found", true);
                 var options = {
@@ -943,7 +1049,9 @@ Lineage_properties = (function () {
                 //list classes and init matrixMap
                 function (callbackSeries) {
                     Sparql_OWL.getDictionary(source, null, null, function (err, result) {
-                        if (err) return callback(err);
+                        if (err) {
+                            return callback(err);
+                        }
                         result.forEach(function (item) {
                             classes.push(item.id.value);
                         });
@@ -960,12 +1068,18 @@ Lineage_properties = (function () {
                 //get props ranges and domains
                 function (callbackSeries) {
                     Sparql_OWL.getInferredPropertiesDomainsAndRanges(source, {}, function (err, result) {
-                        if (err) return callback(err);
+                        if (err) {
+                            return callback(err);
+                        }
                         result.forEach(function (item) {
                             var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
-                            if (item.domain && item.range) matrixMap[item.domain.value][item.range.value] = propLabel;
-                            else if (item.domain) matrixMap[item.domain.value]["isDomain"] = propLabel;
-                            else if (item.range) matrixMap[item.range.value]["isRange"] = propLabel;
+                            if (item.domain && item.range) {
+                                matrixMap[item.domain.value][item.range.value] = propLabel;
+                            } else if (item.domain) {
+                                matrixMap[item.domain.value]["isDomain"] = propLabel;
+                            } else if (item.range) {
+                                matrixMap[item.range.value]["isRange"] = propLabel;
+                            }
                         });
                         return callbackSeries();
                     });
@@ -983,17 +1097,23 @@ Lineage_properties = (function () {
                         let row = [];
                         var cell = "";
 
-                        if (matrixMap[aClass1]["isRange"]) cell += matrixMap[aClass1]["isRange"];
+                        if (matrixMap[aClass1]["isRange"]) {
+                            cell += matrixMap[aClass1]["isRange"];
+                        }
                         row.push(cell);
 
                         classes.forEach(function (aClass2) {
                             if (index1 == 0) {
                                 var cell = "";
-                                if (matrixMap[aClass2]["isDomain"]) cell = matrixMap[aClass2]["isDomain"];
+                                if (matrixMap[aClass2]["isDomain"]) {
+                                    cell = matrixMap[aClass2]["isDomain"];
+                                }
                                 domainsRow.push(cell);
                             }
                             var cell = "";
-                            if (matrixMap[aClass1][aClass2]) cell = matrixMap[aClass1][aClass2];
+                            if (matrixMap[aClass1][aClass2]) {
+                                cell = matrixMap[aClass1][aClass2];
+                            }
 
                             row.push(cell);
                         });
@@ -1015,7 +1135,9 @@ Lineage_properties = (function () {
         var properties = null;
         if ($("#Lineage_propertiesTree").jstree().get_checked) {
             properties = $("#Lineage_propertiesTree").jstree().get_checked();
-            if (properties.length == 0) properties = null;
+            if (properties.length == 0) {
+                properties = null;
+            }
         }
         var nodeIds = null;
         var nodesSelection = $("#lineageProperties_nodesSelectionSelect").val();
@@ -1032,12 +1154,16 @@ Lineage_properties = (function () {
         }
 
         if (action == "relations") {
-            if (!nodeIds && !properties) return alert("You must select properties or nodes to show predicates");
+            if (!nodeIds && !properties) {
+                return alert("You must select properties or nodes to show predicates");
+            }
             if (target == "visj") {
                 var options = {
                     filter: Sparql_common.setFilter("prop", properties),
                 };
-                if (!nodeIds) options.allNodes = true;
+                if (!nodeIds) {
+                    options.allNodes = true;
+                }
                 Lineage_classes.drawRelations(null, null, "Properties", options);
                 // Lineage_properties.drawPredicatesGraph(source, nodeIds, properties);
             } else if (target == "table") {
@@ -1046,7 +1172,9 @@ Lineage_properties = (function () {
         }
 
         if (action == "predicates") {
-            if (!nodeIds && !properties) return alert("You must select properties or nodes to show predicates");
+            if (!nodeIds && !properties) {
+                return alert("You must select properties or nodes to show predicates");
+            }
             if (target == "visj") {
                 Lineage_properties.drawPredicatesGraph(source, nodeIds, properties);
             } else if (target == "table") {

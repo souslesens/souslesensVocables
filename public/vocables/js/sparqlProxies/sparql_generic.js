@@ -30,7 +30,9 @@ var Sparql_generic = (function () {
             var source = Config.sources[sourceLabel];
             obj.graphUri = source.graphUri;
             predicates = defaultPredicates;
-            if (source.predicates) predicates = source.predicates;
+            if (source.predicates) {
+                predicates = source.predicates;
+            }
 
             var prefixes = predicates.prefixes || defaultPredicates.prefixes;
             obj.prefixesStr = "";
@@ -66,7 +68,9 @@ var Sparql_generic = (function () {
 
     self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
         $("#waitImg").css("display", "block");
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
         Config.sources[sourceLabel].controller.getNodeInfos(sourceLabel, conceptId, options, function (err, result) {
             callback(err, result);
         });
@@ -130,7 +134,9 @@ var Sparql_generic = (function () {
         var fitlerType;
         var slices;
         if (ids) {
-            if (!Array.isArray(ids)) ids = [ids];
+            if (!Array.isArray(ids)) {
+                ids = [ids];
+            }
             fitlerType = "ids";
             slices = common.array.slice(ids, self.slicesSize);
         }
@@ -146,10 +152,15 @@ var Sparql_generic = (function () {
             function (slice, callbackEach) {
                 var words = null;
                 var ids = null;
-                if (fitlerType == "ids") ids = slice;
-                else if (fitlerType == "words") words = slice;
+                if (fitlerType == "ids") {
+                    ids = slice;
+                } else if (fitlerType == "words") {
+                    words = slice;
+                }
                 Config.sources[sourceLabel].controller.getNodeChildren(sourceLabel, words, ids, descendantsDepth, options, function (err, result) {
-                    if (err) return callbackEach(err);
+                    if (err) {
+                        return callbackEach(err);
+                    }
                     bulkResult = bulkResult.concat(result);
                     callbackEach(null, result);
                 });
@@ -161,7 +172,9 @@ var Sparql_generic = (function () {
     };
 
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
-        if (!Config.sources[sourceLabel] || !Config.sources[sourceLabel].controller) return callback(null, []);
+        if (!Config.sources[sourceLabel] || !Config.sources[sourceLabel].controller) {
+            return callback(null, []);
+        }
         $("#waitImg").css("display", "block");
         if (!options) {
             options = { depth: 0 };
@@ -171,12 +184,16 @@ var Sparql_generic = (function () {
         var fitlerType;
         var slices;
         if (ids) {
-            if (!Array.isArray(ids)) ids = [ids];
+            if (!Array.isArray(ids)) {
+                ids = [ids];
+            }
             fitlerType = "ids";
             slices = common.array.slice(ids, self.slicesSize);
         }
         if (words) {
-            if (!Array.isArray(words)) words = [words];
+            if (!Array.isArray(words)) {
+                words = [words];
+            }
             fitlerType = "words";
             slices = common.array.slice(words, self.slicesSize);
         }
@@ -187,10 +204,15 @@ var Sparql_generic = (function () {
             function (slice, callbackEach) {
                 var words = null;
                 var ids = null;
-                if (fitlerType == "ids") ids = slice;
-                else if (fitlerType == "words") words = slice;
+                if (fitlerType == "ids") {
+                    ids = slice;
+                } else if (fitlerType == "words") {
+                    words = slice;
+                }
                 Config.sources[sourceLabel].controller.getNodeParents(sourceLabel, words, ids, ancestorsDepth, options, function (err, result) {
-                    if (err) return callbackEach(err);
+                    if (err) {
+                        return callbackEach(err);
+                    }
                     bulkResult = bulkResult.concat(result);
                     callbackEach(null, result);
                 });
@@ -282,7 +304,9 @@ var Sparql_generic = (function () {
             "filter (?concept=<" +
             id +
             ">) ";
-        if (lang) query += 'filter( lang(?conceptLabel)="' + lang + '")';
+        if (lang) {
+            query += 'filter( lang(?conceptLabel)="' + lang + '")';
+        }
 
         query += "}limit " + sourceVariables.limit + " ";
 
@@ -304,7 +328,9 @@ var Sparql_generic = (function () {
             function (slice, callbackEach) {
                 var filterStr = "(";
                 slice.forEach(function (item, index) {
-                    if (index > 0) filterStr += ",";
+                    if (index > 0) {
+                        filterStr += ",";
+                    }
                     filterStr += "<" + item + ">";
                 });
                 filterStr += ")";
@@ -326,14 +352,24 @@ var Sparql_generic = (function () {
     };
 
     self.deleteTriples = function (sourceLabel, subjectUri, predicateUri, objectUri, callback) {
-        if (!subjectUri && !predicateUri && !objectUri) return callback("no subject predicate or object filter : cannot delete");
+        if (!subjectUri && !predicateUri && !objectUri) {
+            return callback("no subject predicate or object filter : cannot delete");
+        }
 
         var filterStr = "";
-        if (subjectUri) filterStr += Sparql_common.getUriFilter("s", subjectUri);
-        if (predicateUri) filterStr += Sparql_common.getUriFilter("p", predicateUri);
-        if (objectUri) filterStr += Sparql_common.getUriFilter("o", objectUri);
+        if (subjectUri) {
+            filterStr += Sparql_common.getUriFilter("s", subjectUri);
+        }
+        if (predicateUri) {
+            filterStr += Sparql_common.getUriFilter("p", predicateUri);
+        }
+        if (objectUri) {
+            filterStr += Sparql_common.getUriFilter("o", objectUri);
+        }
         var graphUri = Config.sources[sourceLabel].graphUri;
-        if (Array.isArray(graphUri)) graphUri = graphUri[0];
+        if (Array.isArray(graphUri)) {
+            graphUri = graphUri[0];
+        }
         var query = self.getDefaultSparqlPrefixesStr();
         query += "with <" + graphUri + "> " + " DELETE {?s ?p ?o} WHERE{ ?s ?p ?o " + filterStr + "}";
         var queryOptions = "";
@@ -357,9 +393,10 @@ var Sparql_generic = (function () {
                 return "<" + elt + ">";
             }
 
-            if ((p = elt.indexOf("^^")) > 0)
+            if ((p = elt.indexOf("^^")) > 0) {
                 //xsd type
                 return "'" + item.object.substring(0, p) + "'" + item.object.substring(p);
+            }
 
             var array = elt.split(":");
             if (array.length > 1 && allowedPrefixes.indexOf(array[0])) {
@@ -376,13 +413,17 @@ var Sparql_generic = (function () {
         if (item.lang) {
             langStr = "@" + item.lang;
             objectStr = "'" + item.object + "'" + langStr;
-        } else objectStr = setElementSyntax(item.object);
+        } else {
+            objectStr = setElementSyntax(item.object);
+        }
 
         var p = item.predicate.indexOf("^");
         if (p == 0) {
             var predicate = item.predicate.substring(1);
             return objectStr + " " + setElementSyntax(predicate) + " <" + item.subject + ">. ";
-        } else return subjectStr + " " + setElementSyntax(item.predicate) + " " + objectStr + ". ";
+        } else {
+            return subjectStr + " " + setElementSyntax(item.predicate) + " " + objectStr + ". ";
+        }
     };
 
     self.getDefaultSparqlPrefixesStr = function () {
@@ -394,9 +435,13 @@ var Sparql_generic = (function () {
     };
 
     self.insertTriples = function (sourceLabel, _triples, options, callback) {
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
         var graphUri = Config.sources[sourceLabel].graphUri;
-        if (Array.isArray(graphUri)) graphUri = graphUri[0];
+        if (Array.isArray(graphUri)) {
+            graphUri = graphUri[0];
+        }
 
         var slices = common.array.slice(_triples, 200);
         var uniqueTriples = {};
@@ -406,7 +451,9 @@ var Sparql_generic = (function () {
                 var insertTriplesStr = "";
                 triples.forEach(function (item, _index) {
                     var tripleStr = self.triplesObjectToString(item);
-                    if (options.sparqlPrefixes) tripleStr = Sparql_common.replaceSparqlPrefixByUri(tripleStr, options.sparqlPrefixes);
+                    if (options.sparqlPrefixes) {
+                        tripleStr = Sparql_common.replaceSparqlPrefixByUri(tripleStr, options.sparqlPrefixes);
+                    }
                     if (!uniqueTriples[tripleStr]) {
                         // suppress duplicate if any
                         uniqueTriples[tripleStr] = 1;
@@ -417,7 +464,9 @@ var Sparql_generic = (function () {
                 var query = self.getDefaultSparqlPrefixesStr();
                 query += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
 
-                if (options.getSparqlOnly) return callback(null, query);
+                if (options.getSparqlOnly) {
+                    return callback(null, query);
+                }
                 // console.log(query)
                 var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
@@ -460,9 +509,15 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
         var query = " WITH <" + graphUri + "> DELETE {?s ?x ?y} ";
 
-        if (filter) query += " WHERE {?s ?x ?y.?s ?p ?o. filter(" + filter + ")}";
+        if (filter) {
+            query += " WHERE {?s ?x ?y.?s ?p ?o. filter(" + filter + ")}";
+        }
 
-        if (!filter) if (!confirm("Do you really want to delete all triples of source " + sourceLabel)) return;
+        if (!filter) {
+            if (!confirm("Do you really want to delete all triples of source " + sourceLabel)) {
+                return;
+            }
+        }
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
             return callback(err, _result);
@@ -506,7 +561,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
         var setSize = 100;
 
-        if (toGraphUri.charAt(toGraphUri.length - 1) != "/") toGraphUri += "/";
+        if (toGraphUri.charAt(toGraphUri.length - 1) != "/") {
+            toGraphUri += "/";
+        }
         var targetSchemaType = Config.sources[fromSourceLabel].schemaType;
         var urisMap = {};
 
@@ -518,15 +575,21 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                     urisMap[sourceUri] = targetUri;
                     if (options.addExactMatchPredicate) {
                         var exactMatchPredicate;
-                        if (targetSchemaType == "SKOS") exactMatchPredicate = "http://www.w3.org/2004/02/skos/core#exactMatch";
-                        else exactMatchPredicate = "http://www.w3.org/2000/01/rdf-schema#sameAs";
+                        if (targetSchemaType == "SKOS") {
+                            exactMatchPredicate = "http://www.w3.org/2004/02/skos/core#exactMatch";
+                        } else {
+                            exactMatchPredicate = "http://www.w3.org/2000/01/rdf-schema#sameAs";
+                        }
                         var triple = targetUri + " <" + exactMatchPredicate + "> <" + sourceUri + "> .";
                         newTriples.push(triple);
                     }
                     if (options.setParentNode && options.setParentNode.sourceUri == sourceUri) {
                         var parentPredicate;
-                        if (targetSchemaType == "SKOS") parentPredicate = "http://www.w3.org/2004/02/skos/core#broader";
-                        else parentPredicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+                        if (targetSchemaType == "SKOS") {
+                            parentPredicate = "http://www.w3.org/2004/02/skos/core#broader";
+                        } else {
+                            parentPredicate = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+                        }
                         triple = targetUri + " <" + parentPredicate + "> <" + options.setParentNode.targetUri + "> .";
                         newTriples.push(triple);
                     }
@@ -552,17 +615,27 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                 // get sources nodes properties
                 function (callbackSeries) {
                     self.getNodeInfos(fromSourceLabel, sourceIds, null, function (err, result) {
-                        if (err) return callbackSeries(err);
+                        if (err) {
+                            return callbackSeries(err);
+                        }
 
                         result.forEach(function (item) {
-                            if (options.setSubjectFn) options.setSubjectFn(item);
-                            if (options.setPredicateFn) options.setPredicateFn(item);
+                            if (options.setSubjectFn) {
+                                options.setSubjectFn(item);
+                            }
+                            if (options.setPredicateFn) {
+                                options.setPredicateFn(item);
+                            }
 
-                            if (options.setObjectFn) options.setObjectFn(item);
+                            if (options.setObjectFn) {
+                                options.setObjectFn(item);
+                            }
 
                             subject = getTargetUri(item.id.value, item);
                             prop = item.prop.value;
-                            if (options.excludedProperties && options.excludedProperties.indexOf(prop) > -1) return;
+                            if (options.excludedProperties && options.excludedProperties.indexOf(prop) > -1) {
+                                return;
+                            }
                             if (!options.properties || options.properties.indexOf(item.prop.value) > -1) {
                                 var valueStr = null;
                                 if (item.prop.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
@@ -571,7 +644,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                     valueStr = getTargetUri(item.value.value, item);
                                 } else {
                                     var langStr = "";
-                                    if (item.value["xml:lang"]) langStr = "@" + item.value["xml:lang"];
+                                    if (item.value["xml:lang"]) {
+                                        langStr = "@" + item.value["xml:lang"];
+                                    }
                                     valueStr = "'" + Sparql_common.formatStringForTriple(item.value.value) + "'" + langStr;
                                 }
 
@@ -592,7 +667,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                 function (callbackSeries) {
                     if (options.additionalTriplesNt) {
                         options.additionalTriplesNt.forEach(function (triple) {
-                            if (newTriples.indexOf(triple) < 0) newTriples.push(triple);
+                            if (newTriples.indexOf(triple) < 0) {
+                                newTriples.push(triple);
+                            }
                         });
                     }
                     return callbackSeries();
@@ -629,16 +706,24 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
         bindings.sort(function (a, b) {
             var aValue = a[field] ? a[field].value : "";
             var bValue = b[field] ? b[field].value : "";
-            if (aValue > bValue) return 1;
-            if (aValue < bValue) return -1;
+            if (aValue > bValue) {
+                return 1;
+            }
+            if (aValue < bValue) {
+                return -1;
+            }
             return 0;
         });
         return bindings;
     };
 
     self.setMissingLabels = function (bindings, _fields, options) {
-        if (!options) options = {};
-        if (!Array.isArray(_fields)) _fields = [_fields];
+        if (!options) {
+            options = {};
+        }
+        if (!Array.isArray(_fields)) {
+            _fields = [_fields];
+        }
         _fields.forEach(function (_field) {
             bindings.forEach(function (item) {
                 if (item[_field] && !item[_field + "Label"]) {
@@ -652,27 +737,37 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
     };
 
     self.setBindingsOptionalProperties = function (bindings, _fields, options) {
-        if (!options) options = {};
-        if (!Array.isArray(_fields)) _fields = [_fields];
+        if (!options) {
+            options = {};
+        }
+        if (!Array.isArray(_fields)) {
+            _fields = [_fields];
+        }
         _fields.forEach(function (_field) {
             bindings.forEach(function (item) {
                 for (var i = 0; i < 20; i++) {
                     var iStr = "" + i;
-                    if (i == 0) iStr = "";
+                    if (i == 0) {
+                        iStr = "";
+                    }
                     var field = _field + "" + iStr;
                     if (!item[field]) {
                         continue;
                     }
                     if (!options.noType && !item[field + "Type"]) {
-                        if (options.type) item[field + "Type"] = { value: options.type };
-                        else item[field + "Type"] = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
+                        if (options.type) {
+                            item[field + "Type"] = { value: options.type };
+                        } else {
+                            item[field + "Type"] = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
+                        }
                     }
                     var id = item[field].value;
 
                     if (!item[field + "Label"]) {
                         var p = id.lastIndexOf("#");
-                        if (p > -1) item[field + "Label"] = { value: id.substring(p + 1) };
-                        else {
+                        if (p > -1) {
+                            item[field + "Label"] = { value: id.substring(p + 1) };
+                        } else {
                             p = id.lastIndexOf("/");
                             item[field + "Label"] = { value: id.substring(p + 1) };
                         }
@@ -705,8 +800,12 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                 function (callbackSeries) {
                     //get topClasse
                     Sparql_OWL.getTopConcepts(sourceLabel, {}, function (err, result) {
-                        if (err) return callbackSeries(err);
-                        if (result.length == 0) return callbackSeries("no top classes found  in source" + sourceLabel + ". cannot organize classes lineage");
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        if (result.length == 0) {
+                            return callbackSeries("no top classes found  in source" + sourceLabel + ". cannot organize classes lineage");
+                        }
                         topClasses = result;
                         callbackSeries();
                     });
@@ -714,7 +813,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
                 function (callbackSeries) {
                     //get raw data subclasses
-                    if (!options) options = {};
+                    if (!options) {
+                        options = {};
+                    }
                     var totalCount = 0;
                     var resultSize = 1;
                     var limitSize = 2000;
@@ -744,7 +845,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                             self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
                             var url = self.sparql_url + "?format=json&query=";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query2, "", { source: sourceLabel }, function (err, result) {
-                                if (err) return callbackWhilst(err);
+                                if (err) {
+                                    return callbackWhilst(err);
+                                }
                                 result = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "domain", "range"]);
                                 rawData = rawData.concat(result);
                                 resultSize = result.length;
@@ -775,7 +878,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                 parents: "",
                             };
                         }
-                        if (!parentChildrenMap[item.obj.value]) parentChildrenMap[item.obj.value] = [];
+                        if (!parentChildrenMap[item.obj.value]) {
+                            parentChildrenMap[item.obj.value] = [];
+                        }
                         parentChildrenMap[item.obj.value].push(item.sub.value);
                     });
 
@@ -820,13 +925,17 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
     self.getLangFilterStr = function (options, variable) {
         var langFilter = "";
-        if (!options || !options.lang) return "";
+        if (!options || !options.lang) {
+            return "";
+        }
         return " FILTER (lang(" + variable + ")='" + options.lang + "' || !lang(" + variable + "))  ";
     };
 
     self.getSourceTaxonomy = function (sourceLabel, options, callback) {
         var schemaType = Config.sources[sourceLabel].schemaType;
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
         var parentType;
         var conceptType;
         if (schemaType == "OWL") {
@@ -841,13 +950,17 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             conceptType = "skos:Concept";
         } else if (options.parentType) {
             parentType = options.parentType;
-            if (parentType == "rdfs:subPropertyOf") conceptType: "owl:ObjectProperty";
+            if (parentType == "rdfs:subPropertyOf") {
+                conceptType: "owl:ObjectProperty";
+            }
         } else {
             return alert("no schema type");
         }
         if (options.ids) {
             var idFilter = Sparql_common.setFilter("concept", options.ids);
-            if (!options.filter) options.filter = "";
+            if (!options.filter) {
+                options.filter = "";
+            }
             options.filter += " " + idFilter;
         }
 
@@ -859,7 +972,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             [
                 function (callbackSeries) {
                     //get raw data subclasses
-                    if (!options) options = {};
+                    if (!options) {
+                        options = {};
+                    }
                     var totalCount = 0;
                     var resultSize = 1;
                     var limitSize = 500;
@@ -876,11 +991,13 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                         fromStr +
                         " WHERE {";
                     var where = "  ?concept " + parentType + " ?firstParent." + Sparql_common.getVariableLangLabel("concept", false, true) + "OPTIONAL{?concept skos:altLabel ?skosAltLabel }";
-                    if (options.filter) where += " " + options.filter + " ";
+                    if (options.filter) {
+                        where += " " + options.filter + " ";
+                    }
 
-                    where += "filter (?firstParent not in (owl:Restriction, owl:Class))";
-                    where += " FILTER NOT EXISTS {?firstParent rdf:type owl:Restriction}";
-
+                    //  where += "filter (?firstParent not in (owl:Restriction, owl:Class))";
+                    //  where += " FILTER NOT EXISTS {?firstParent rdf:type owl:Restriction}";
+                    where += "  filter (!regex(str(?firstParent),'http://www.w3.org/2002/07/owl#'))";
                     // make two queries and union them to solve timeout problem
                     if (schemaType == "OWL") {
                         var where1 = where.replace("|<http://www.w3.org/2004/02/skos/core#prefLabel>", "");
@@ -932,22 +1049,29 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                 //format result
                 function (callbackSeries) {
                     var skosLabelsMap = {};
+                    var conceptLabel = null;
 
                     function getConceptLabel(item) {
-                        var conceptLabel = null;
-                        if (item.conceptLabel) conceptLabel = item.conceptLabel.value;
-                        else if (item.skosLabel) conceptLabel = item.skosLabel.value;
-                        else if (item.skosAltLabel) conceptLabel = item.skosAltLabel.value;
-                        else conceptLabel = Sparql_common.getLabelFromURI(item.concept.value);
+                        if (item.conceptLabel) {
+                            conceptLabel = item.conceptLabel.value;
+                        } else if (item.skosLabel) {
+                            conceptLabel = item.skosLabel.value;
+                        } else if (item.skosAltLabel) {
+                            conceptLabel = item.skosAltLabel.value;
+                        } else {
+                            conceptLabel = Sparql_common.getLabelFromURI(item.concept.value);
+                        }
                         return conceptLabel;
                     }
 
                     allData.forEach(function (item) {
-                        if (!skosLabelsMap[item.concept.value]) skosLabelsMap[item.concept.value] = [];
-                        if (item.concept.value == "http://www.eionet.europa.eu/gemet/concept/4254") var x = 3;
-                        var conceptLabel = getConceptLabel(item);
+                        if (!skosLabelsMap[item.concept.value]) {
+                            skosLabelsMap[item.concept.value] = [];
+                        }
 
-                        if (!conceptLabel) return;
+                        if (!conceptLabel) {
+                            return;
+                        }
                         var decapitalizedLabel = common.decapitalizeLabel(conceptLabel);
                         if (decapitalizedLabel != conceptLabel) {
                             skosLabelsMap[item.concept.value].push(conceptLabel);
@@ -957,14 +1081,28 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                             allLabels[item.concept.value] = conceptLabel;
                         }
 
-                        if (item.skosLabel) if (skosLabelsMap[item.concept.value].indexOf(item.skosLabel.value) < 0) skosLabelsMap[item.concept.value].push(item.skosLabel.value);
-                        if (item.code) if (skosLabelsMap[item.concept.value].indexOf(item.code.value) < 0) skosLabelsMap[item.concept.value].push(item.code.value);
-                        if (item.skosAltLabel) if (skosLabelsMap[item.concept.value].indexOf(item.skosAltLabel.value) < 0) skosLabelsMap[item.concept.value].push(item.skosAltLabel.value);
+                        if (item.skosLabel) {
+                            if (skosLabelsMap[item.concept.value].indexOf(item.skosLabel.value) < 0) {
+                                skosLabelsMap[item.concept.value].push(item.skosLabel.value);
+                            }
+                        }
+                        if (item.code) {
+                            if (skosLabelsMap[item.concept.value].indexOf(item.code.value) < 0) {
+                                skosLabelsMap[item.concept.value].push(item.code.value);
+                            }
+                        }
+                        if (item.skosAltLabel) {
+                            if (skosLabelsMap[item.concept.value].indexOf(item.skosAltLabel.value) < 0) {
+                                skosLabelsMap[item.concept.value].push(item.skosAltLabel.value);
+                            }
+                        }
                     });
 
                     allData.forEach(function (item) {
                         var conceptLabel = getConceptLabel(item);
-                        if (!conceptLabel) return;
+                        if (!conceptLabel) {
+                            return;
+                        }
                         var decapitalizedLabel = common.decapitalizeLabel(conceptLabel);
                         if (decapitalizedLabel != conceptLabel) {
                             conceptLabel = decapitalizedLabel;
@@ -987,7 +1125,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                 function (callbackSeries) {
                     function recurse(nodeId, parents) {
                         var obj = allClassesMap[nodeId];
-                        if (!obj) return;
+                        if (!obj) {
+                            return;
+                        }
                         if (obj.parent && parents.indexOf(obj.parent) < 0) {
                             parents.push(obj.parent);
                             recurse(obj.parent, parents);
@@ -1041,7 +1181,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
     self.createDecapitalizedLabelTriples = function (source, callback) {
         Sparql_generic.getItems(source, {}, function (err, result) {
-            if (err) return callback(err);
+            if (err) {
+                return callback(err);
+            }
             var total = 0;
             var slices = common.array.slice(result, 100);
             async.eachSeries(
@@ -1052,7 +1194,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                     slice.forEach(function (item) {
                         if (item.conceptLabel) {
                             var decapitalizedLabel = common.decapitalizeLabel(item.conceptLabel.value);
-                            if (decapitalizedLabel == item.conceptLabel.value) return;
+                            if (decapitalizedLabel == item.conceptLabel.value) {
+                                return;
+                            }
 
                             triples.push({
                                 subject: item.concept.value,
@@ -1062,7 +1206,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                         }
                     });
 
-                    if (triples.length == 0) return callbackEach;
+                    if (triples.length == 0) {
+                        return callbackEach;
+                    }
                     self.insertTriples(source, triples, null, function (err, result) {
                         total += result;
                         // eslint-disable-next-line no-console
@@ -1072,7 +1218,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                     });
                 },
                 function (err) {
-                    if (err) return callback(err);
+                    if (err) {
+                        return callback(err);
+                    }
                     return callback(err, total);
                 }
             );

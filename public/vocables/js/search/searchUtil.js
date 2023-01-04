@@ -5,7 +5,9 @@ var SearchUtil = (function () {
     self.indexSourcesMap = {};
 
     self.initSourcesIndexesList = function (options, callback) {
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
         var payload = {
             dictionaries_listIndexes: 1,
         };
@@ -49,7 +51,9 @@ var SearchUtil = (function () {
      * @param callback array of source objects containing each target sources object matches
      */
     self.getSimilarLabelsInSources = function (fromSource, toSources, labels, ids, mode, options, callback) {
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
         var resultSize = 1;
         var size = 200;
         var offset = 0;
@@ -70,21 +74,25 @@ var SearchUtil = (function () {
                     [
                         function (callbackSeries) {
                             SearchUtil.initSourcesIndexesList(null, function (err, indexedSources) {
-                                if (err) return callbackSeries(err);
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
 
                                 indexes = [];
                                 /*  if (toSources) {
-                    toSources.forEach(function (source) {
-                        indexes.push(source.toLowerCase());
-                    });
-                }*/
+    toSources.forEach(function (source) {
+        indexes.push(source.toLowerCase());
+    });
+}*/
                                 indexedSources.forEach(function (source) {
                                     if (!toSources || toSources.length == 0 || toSources.indexOf(source) > -1) {
                                         indexes.push(source.toLowerCase());
                                         toSourcesIndexesMap[source.toLowerCase()] = source;
                                     }
                                 });
-                                if (toSources && toSources.length > 0 && Object.keys(toSourcesIndexesMap).length == 0) return callbackSeries(toSources.toString() + "Not in search index, see admin");
+                                if (toSources && toSources.length > 0 && Object.keys(toSourcesIndexesMap).length == 0) {
+                                    return callbackSeries(toSources.toString() + "Not in search index, see admin");
+                                }
                                 callbackSeries();
                             });
                         },
@@ -95,15 +103,21 @@ var SearchUtil = (function () {
                             }
 
                             self.getSourceLabels(fromSource.toLowerCase(), null, offset, size, function (err, hits) {
-                                if (err) return callbackWhilst(err);
+                                if (err) {
+                                    return callbackWhilst(err);
+                                }
                                 resultSize = hits.length;
                                 words = [];
                                 classesArray = [];
                                 offset += size;
 
                                 hits.forEach(function (hit) {
-                                    if (ids && ids.indexOf(hit._source.id) < 0) return;
-                                    if (labels && labels.indexOf(hit._source.label) < 0) return;
+                                    if (ids && ids.indexOf(hit._source.id) < 0) {
+                                        return;
+                                    }
+                                    if (labels && labels.indexOf(hit._source.label) < 0) {
+                                        return;
+                                    }
                                     words.push(hit._source.label);
                                     classesArray.push({
                                         source: fromSource,
@@ -117,11 +131,16 @@ var SearchUtil = (function () {
                             });
                         },
                         function (callbackSeries) {
-                            if (fromSource) return callbackSeries();
+                            if (fromSource) {
+                                return callbackSeries();
+                            }
                             if (ids) {
                                 words = ids;
-                            } else if (labels) words = labels;
-                            else return callbackSeries("too many null  parameters");
+                            } else if (labels) {
+                                words = labels;
+                            } else {
+                                return callbackSeries("too many null  parameters");
+                            }
 
                             words.forEach(function (word) {
                                 classesArray.push({
@@ -134,8 +153,10 @@ var SearchUtil = (function () {
                             callbackSeries();
                         },
                         function (callbackSeries) {
-                            self.getElasticSearchMatches(words, indexes, mode, 0, 1000, function (err, result) {
-                                if (err) return callbackSeries(err);
+                            self.getElasticSearchMatches(words, indexes, mode, 0, 1000, options, function (err, result) {
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
                                 allWords = allWords.concat(words);
 
                                 result.forEach(function (item, index) {
@@ -147,7 +168,9 @@ var SearchUtil = (function () {
                                     var matches = {};
                                     hits.forEach(function (toHit) {
                                         var source = toSourcesIndexesMap[toHit._index];
-                                        if (!matches[source]) matches[source] = [];
+                                        if (!matches[source]) {
+                                            matches[source] = [];
+                                        }
                                         matches[source].push({
                                             source: source,
                                             id: toHit._source.id,
@@ -159,7 +182,9 @@ var SearchUtil = (function () {
                                             //} && toHit._source.parents.split) {
                                             //.split("|")
                                             parentsArray.forEach(function (parent, indexParent) {
-                                                if (indexParent > 0 && !parentsMap[parent]) parentsMap[parent] = {};
+                                                if (indexParent > 0 && !parentsMap[parent]) {
+                                                    parentsMap[parent] = {};
+                                                }
                                             });
                                         } else {
                                             // Pass
@@ -174,7 +199,9 @@ var SearchUtil = (function () {
 
                         //get parentsLabels
                         function (callbackSeries) {
-                            if (!options.parentlabels) return callbackSeries();
+                            if (!options.parentlabels) {
+                                return callbackSeries();
+                            }
 
                             var ids = Object.keys(parentsMap);
 
@@ -218,8 +245,12 @@ var SearchUtil = (function () {
      * @param {string} index - Name of the ElasticSearch index to search
      */
     self.getSourceLabels = function (index, _ids, offset, size, callback) {
-        if (!offset) offset = 0;
-        if (!size) size = 10000;
+        if (!offset) {
+            offset = 0;
+        }
+        if (!size) {
+            size = 10000;
+        }
 
         if (_ids) {
             var slices = common.array.slice(_ids, 100);
@@ -229,7 +260,9 @@ var SearchUtil = (function () {
                 function (ids, callbackEach) {
                     var str = "";
                     var header = {};
-                    if (index) header = { index: index };
+                    if (index) {
+                        header = { index: index };
+                    }
                     ids.forEach(function (id) {
                         var query = {
                             query: {
@@ -247,7 +280,9 @@ var SearchUtil = (function () {
                         }
                         var hits = [];
                         result.forEach(function (item) {
-                            if (item.hits.hits.length > 0) hits.push(item.hits.hits[0]);
+                            if (item.hits.hits.length > 0) {
+                                hits.push(item.hits.hits[0]);
+                            }
                         });
                         allHits = allHits.concat(hits);
                         return callbackEach();
@@ -281,13 +316,15 @@ var SearchUtil = (function () {
         }
     };
 
-    self.getElasticSearchMatches = function (words, indexes, mode, from, size, callback) {
+    self.getElasticSearchMatches = function (words, indexes, mode, from, size, options, callback) {
         $("#waitImg").css("display", "block");
         //   MainController.UI.message("Searching exact matches ")
 
         self.getWordBulkQuery = function (word, mode, indexes) {
             var field = "label.keyword";
-            if (word.indexOf && word.indexOf("http://") == 0) field = "id.keyword";
+            if (word.indexOf && word.indexOf("http://") == 0) {
+                field = "id.keyword";
+            }
             var queryObj;
             if (!mode || mode == "exactMatch") {
                 queryObj = {
@@ -309,36 +346,47 @@ var SearchUtil = (function () {
             } else if (word.indexOf("*") > -1) {
                 queryObj = {
                     bool: {
-                        should: [
-                            {
-                                wildcard: {
-                                    label: {
-                                        value: word,
-                                        boost: 1.0,
-                                        rewrite: "constant_score",
-                                    },
-                                },
+                        must: {
+                            query_string: {
+                                query: word,
+                                fields: ["label", "skoslabel"],
                             },
-                        ],
+                        },
+                        // ,
+                        // "filter":  {"term":{"parents.keyword":"http://rds.posccaesar.org/ontology/lis14/rdl/Quality"}}
                     },
                 };
-            } else {
-                queryObj = {
-                    bool: {
-                        must: [
-                            {
-                                query_string: {
-                                    query: word,
-                                    fields: ["label", "skoslabels"],
-                                    default_operator: "AND",
-                                },
-                            },
-                        ],
+                //   if (options.classFilter) queryObj.bool.filter = { term: { "parents.keyword": options.classFilter } };
+            }
+            /*  else {
+        queryObj = {
+          bool: {
+            must: [
+              {
+                query_string: {
+                  query: word,
+                  fields: ["label", "skoslabels"],
+                  default_operator: "AND"
+                }
+              }
+            ]
+          }
+        };
+      }*/
+            if (options.classFilter) {
+                queryObj.bool.filter = {
+                    multi_match: {
+                        query: options.classFilter,
+                        fields: ["parents.keyword", "id.keyword"],
+                        operator: "or",
                     },
                 };
             }
+
             var header = {};
-            if (indexes) header = { index: indexes };
+            if (indexes) {
+                header = { index: indexes };
+            }
 
             var query = {
                 query: queryObj,
@@ -359,15 +407,21 @@ var SearchUtil = (function () {
         async.eachSeries(
             slices,
             function (wordSlice, callbackEach) {
-                if (wordSlice.length == 0) return callbackEach();
+                if (wordSlice.length == 0) {
+                    return callbackEach();
+                }
                 bulQueryStr = "";
                 wordSlice.forEach(function (word) {
-                    if (!word) return;
+                    if (!word) {
+                        return;
+                    }
                     var wordQuery = self.getWordBulkQuery(word, mode, indexes);
                     bulQueryStr += wordQuery;
                 });
                 ElasticSearchProxy.executeMsearch(bulQueryStr, function (err, result) {
-                    if (err) return callbackEach(err);
+                    if (err) {
+                        return callbackEach(err);
+                    }
 
                     allResults = allResults.concat(result);
                     callbackEach();
@@ -380,7 +434,9 @@ var SearchUtil = (function () {
     };
 
     self.indexData = function (indexName, data, replaceIndex, callback) {
-        if (data.length == 0) return callback();
+        if (data.length == 0) {
+            return callback();
+        }
         var options = { replaceIndex: replaceIndex, owltype: "Class" };
         var payload = {
             indexName: indexName,
@@ -438,10 +494,16 @@ var SearchUtil = (function () {
                                     slices,
                                     function (data, callbackEach) {
                                         var replaceIndex = false;
-                                        if (index++ == 0 && !options.ids) replaceIndex = true;
+                                        if (index++ == 0 && !options.ids) {
+                                            replaceIndex = true;
+                                        }
                                         self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, result) {
-                                            if (err) return callbackEach(err);
-                                            if (!result) return callbackEach();
+                                            if (err) {
+                                                return callbackEach(err);
+                                            }
+                                            if (!result) {
+                                                return callbackEach();
+                                            }
                                             totalLines += result.length;
                                             totalLinesAllsources += totalLines;
                                             MainController.UI.message("indexed " + totalLines + "/" + classesArray.length + " in index " + sourceLabel.toLowerCase());
@@ -459,11 +521,15 @@ var SearchUtil = (function () {
 
                         // index properties
                         function (callbackSeries) {
-                            if (!options.indexProperties) return callbackSeries();
+                            if (!options.indexProperties) {
+                                return callbackSeries();
+                            }
                             MainController.UI.message("indexing properties");
 
                             Sparql_OWL.getObjectProperties(sourceLabel, {}, function (err, result) {
-                                if (err) return callback(err);
+                                if (err) {
+                                    return callback(err);
+                                }
                                 var data = [];
                                 result.forEach(function (item) {
                                     data.push({
@@ -474,8 +540,12 @@ var SearchUtil = (function () {
                                     });
                                 });
                                 self.indexData(sourceLabel.toLowerCase(), data, false, function (err, result) {
-                                    if (err) return callbackSeries(err);
-                                    if (!result) return callbackSeries();
+                                    if (err) {
+                                        return callbackSeries(err);
+                                    }
+                                    if (!result) {
+                                        return callbackSeries();
+                                    }
                                     totalLines += result.length;
                                     totalLinesAllsources += totalLines;
                                     MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
@@ -494,18 +564,27 @@ var SearchUtil = (function () {
                 // }
             },
             function (err) {
-                if (err) alert(err.responseText);
-                else MainController.UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
-                if (callback) return callback(err);
+                if (err) {
+                    alert(err.responseText);
+                } else {
+                    MainController.UI.message("ALL DONE  total indexed : " + totalLinesAllsources);
+                }
+                if (callback) {
+                    return callback(err);
+                }
             }
         );
     };
 
     self.addPropertiesToIndex = function (sourceLabel, data, callback) {
-        if (!Array.isArray(data)) data = [data];
+        if (!Array.isArray(data)) {
+            data = [data];
+        }
 
         self.indexData(sourceLabel.toLowerCase(), data, false, function (err, _result) {
-            if (err) return callback(err);
+            if (err) {
+                return callback(err);
+            }
             callback();
         });
     };
@@ -525,7 +604,9 @@ var SearchUtil = (function () {
                     var replaceIndex = false;
 
                     self.indexData(sourceLabel.toLowerCase(), data, replaceIndex, function (err, _result) {
-                        if (err) return callbackEach(err);
+                        if (err) {
+                            return callbackEach(err);
+                        }
                         callbackEach();
                     });
                 },
@@ -571,7 +652,9 @@ var SearchUtil = (function () {
                                 },
                             };
                             ElasticSearchProxy.queryElastic(query, indexes, function (err, result) {
-                                if (err) return callback(err);
+                                if (err) {
+                                    return callback(err);
+                                }
                                 var hits = result.hits.hits;
                                 resultSize = hits.length;
                                 from += size;
@@ -599,7 +682,9 @@ var SearchUtil = (function () {
 
                         function (callbackWhilst) {
                             self.getSourceLabels(indexes[0], null, offset, size, function (err, hits) {
-                                if (err) return callbackWhilst(err);
+                                if (err) {
+                                    return callbackWhilst(err);
+                                }
                                 //
                                 resultSize = hits.length;
                                 offset += size;
@@ -623,17 +708,23 @@ var SearchUtil = (function () {
 
     self.getSourceLabelFromIndexName = function (index) {
         for (var source in Config.sources) {
-            if (source.toLowerCase() == index) return source;
+            if (source.toLowerCase() == index) {
+                return source;
+            }
         }
         return null;
     };
 
     self.getExistingIndexes = function (indices, callback) {
         function filterIndices() {
-            if (!indices) return self.existingIndexes;
+            if (!indices) {
+                return self.existingIndexes;
+            }
             var indices2 = [];
             indices.forEach(function (index) {
-                if (self.existingIndexes.indexOf(index) > -1) indices2.push(index);
+                if (self.existingIndexes.indexOf(index) > -1) {
+                    indices2.push(index);
+                }
             });
             return indices2;
         }

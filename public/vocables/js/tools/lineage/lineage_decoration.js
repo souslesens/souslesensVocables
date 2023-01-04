@@ -68,7 +68,9 @@ var Lineage_decoration = (function () {
      * @returns {*}
      */
     self.setTopLevelOntologyClassesMap = function (callback) {
-        if (!Config.currentTopLevelOntology) return callback(null, null);
+        if (!Config.currentTopLevelOntology) {
+            return callback(null, null);
+        }
 
         if (self.topOntologiesClassesMap[Config.currentTopLevelOntology]) {
             self.currentTopOntologyClassesMap = self.topOntologiesClassesMap[Config.currentTopLevelOntology];
@@ -76,26 +78,30 @@ var Lineage_decoration = (function () {
         }
         self.currentTopOntologyClassesMap = {};
         Sparql_generic.getSourceTaxonomy(Config.currentTopLevelOntology, { lang: Config.default_lang }, function (err, result) {
-            if (err) return callback(null, {});
+            if (err) {
+                return callback(null, {});
+            }
 
             self.currentTopOntologyClassesMap = result.classesMap;
             var countColors = 0;
             for (var topClass in self.currentTopOntologyClassesMap) {
                 var color = null;
-                if (self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][topClass])
+                if (self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][topClass]) {
                     //predifined color
                     color = self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][topClass];
-                else {
+                } else {
                     //look for a predifined parent class
                     self.currentTopOntologyClassesMap[topClass].parents.forEach(function (parent) {
-                        if (self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][parent])
+                        if (self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][parent]) {
                             //predifined color
                             color = self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][parent];
+                        }
                     });
                 }
-                if (!color)
+                if (!color) {
                     //calculated color in palette
                     color = common.paletteIntense[countColors % Object.keys(common.paletteIntense).length];
+                }
                 self.currentTopOntologyClassesMap[topClass].color = color;
                 countColors++;
             }
@@ -110,7 +116,9 @@ var Lineage_decoration = (function () {
    */
 
     self.getVisjsClassNodesTopLevelOntologyClass = function (ids, callback) {
-        if (!ids || ids.length == 0) return callback(null, []);
+        if (!ids || ids.length == 0) {
+            return callback(null, []);
+        }
 
         var sourceLabel = Lineage_sources.activeSource;
 
@@ -123,33 +131,42 @@ var Lineage_decoration = (function () {
         async.eachSeries(
             slices,
             function (slice, callbackEach) {
+                var filter = Sparql_common.setFilter("x", slice);
+                if (filter.indexOf("?x in( )") > -1) {
+                    return callbackEach();
+                }
+
                 var query =
                     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                     "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
-                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>";
-
-                query +=
+                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                     "  SELECT distinct ?x ?type ?g ?label" +
-                    strFrom +
-                    "WHERE {GRAPH ?g{" +
+                    strFrom;
+
+                var whereClass =
+                    " {GRAPH ?g{" +
                     "    ?x  rdf:type owl:Class. " +
                     "OPTIONAL {?x rdfs:label ?label}" +
                     " ?x   rdfs:subClassOf* ?type.  filter(regex(str(?type),'" +
                     uriPattern +
-                    "'))";
+                    "'))" +
+                    filter +
+                    "}}";
 
-                /*   query += "  SELECT distinct ?x ?type ?g ?label" +
-strFrom +
-"WHERE {GRAPH ?g{" +
-"    ?x  rdf:type ?s. " +
-"OPTIONAL {?x rdfs:label ?label}" +
-" ?x  (rdf:type|rdfs:subClassOf)+ ?type.  filter(regex(str(?type),'" + self.uriPattern + "'))";*/
+                var whereNamedIndividual =
+                    " {GRAPH ?g{" +
+                    "    ?x  rdf:type owl:NamedIndividual. " +
+                    "    ?x  rdf:type ?y. " +
+                    "OPTIONAL {?x rdfs:label ?label}" +
+                    " ?y   rdfs:subClassOf* ?type.  filter(regex(str(?type),'" +
+                    uriPattern +
+                    "'))" +
+                    filter +
+                    "}}";
 
-                var filter = Sparql_common.setFilter("x", slice);
-                if (filter.indexOf("?x in( )") > -1) return callbackEach();
+                query += " WHERE {" + whereClass + " UNION" + whereNamedIndividual + "}";
 
-                query += filter + "}}";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, skipCurrentQuery: true }, function (err, result) {
                     if (err) {
                         return callback(err);
@@ -166,7 +183,9 @@ strFrom +
     };
 
     self.getVisjsNamedIndividualNodesClass = function (ids, callback) {
-        if (!ids || ids.length == 0) return callback(null, []);
+        if (!ids || ids.length == 0) {
+            return callback(null, []);
+        }
 
         var sourceLabel = Lineage_sources.activeSource;
 
@@ -194,7 +213,9 @@ strFrom +
                     "  ?x   rdf:type+ ?class.  ?class rdf:type owl:Class ";
 
                 var filter = Sparql_common.setFilter("x", slice);
-                if (filter.indexOf("?x in( )") > -1) return callbackEach();
+                if (filter.indexOf("?x in( )") > -1) {
+                    return callbackEach();
+                }
 
                 query += filter + "}}";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
@@ -213,20 +234,28 @@ strFrom +
     };
 
     self.colorGraphNodesByType = function (visjsNodes) {
-        if (!Lineage_sources.activeSource) return;
+        if (!Lineage_sources.activeSource) {
+            return;
+        }
         Lineage_sources.setTopLevelOntologyFromImports(Lineage_sources.activeSource);
 
-        if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) return;
+        if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) {
+            return;
+        }
 
         self.currentVisjGraphNodesMap = {};
-        if (false && self.currentTopOntologyClassesMap && Object.keys(self.currentTopOntologyClassesMap).length > 0) return self.colorNodesByTopLevelOntologyTopType(visjsNodes);
+        if (false && self.currentTopOntologyClassesMap && Object.keys(self.currentTopOntologyClassesMap).length > 0) {
+            return self.colorNodesByTopLevelOntologyTopType(visjsNodes);
+        }
 
         self.setTopLevelOntologyClassesMap(function (err, result) {
             if (Config.topLevelOntologies[Config.currentTopLevelOntology]) {
                 // self.legendMap = {};
                 self.uriPattern = Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern;
                 self.colorNodesByTopLevelOntologyTopType(visjsNodes);
-            } else return;
+            } else {
+                return;
+            }
         });
     };
     self.clearLegend = function () {
@@ -235,29 +264,37 @@ strFrom +
     };
 
     self.colorNodesByTopLevelOntologyTopType = function (visjsNodes) {
-        if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) return;
+        if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) {
+            return;
+        }
 
         var nonTopLevelOntologynodeIds = [];
         var topLevelOntologynodeIds = [];
         var individualNodes = {};
-        if (!visjsNodes) visjsNodes = visjsGraph.data.nodes.get();
+        if (!visjsNodes) {
+            visjsNodes = visjsGraph.data.nodes.get();
+        }
 
-        if (visjsNodes.length == 0) return;
+        if (visjsNodes.length == 0) {
+            return;
+        }
 
         async.series(
             [
                 // split nodes by type
                 function (callbackSeries) {
                     visjsNodes.forEach(function (node) {
-                        if (node.data && node.data.rdfType == "NamedIndividual") individualNodes[node.id] = {};
-                        else if (true || node.id.indexOf(self.uriPattern) < 0) {
+                        if (node.data && node.data.rdfType == "NamedIndividual") {
+                            individualNodes[node.id] = {};
+                        } else if (true || node.id.indexOf(self.uriPattern) < 0) {
                             nonTopLevelOntologynodeIds.push(node.id);
                         } else {
-                            if (self.currentTopOntologyClassesMap[node.id])
+                            if (self.currentTopOntologyClassesMap[node.id]) {
                                 topLevelOntologynodeIds.push({
                                     id: node.id,
                                     color: self.currentTopOntologyClassesMap[node.id].color,
                                 });
+                            }
                         }
                     });
                     visjsGraph.data.nodes.update(topLevelOntologynodeIds);
@@ -266,10 +303,14 @@ strFrom +
                 //get individuals class and add it to nonTopLevelOntologynodeIds
                 function (callbackSeries) {
                     self.getVisjsNamedIndividualNodesClass(Object.keys(individualNodes), function (err, result) {
-                        if (err) return;
+                        if (err) {
+                            return;
+                        }
                         result.forEach(function (item) {
                             individualNodes[item.x.value] = item.class.value;
-                            if (nonTopLevelOntologynodeIds.indexOf(item.class.value) < 0) nonTopLevelOntologynodeIds.push(item.class.value);
+                            if (nonTopLevelOntologynodeIds.indexOf(item.class.value) < 0) {
+                                nonTopLevelOntologynodeIds.push(item.class.value);
+                            }
                         });
                         callbackSeries();
                     });
@@ -278,7 +319,9 @@ strFrom +
                 // set nodes topClasses
                 function (callbackSeries) {
                     self.getVisjsClassNodesTopLevelOntologyClass(nonTopLevelOntologynodeIds, function (err, result) {
-                        if (err) return;
+                        if (err) {
+                            return;
+                        }
                         var excludedTypes = ["TopConcept", "Class", "Restriction"];
 
                         var maxNumberOfParents = 0;
@@ -339,7 +382,9 @@ strFrom +
                     var newNodes = [];
                     for (var nodeId in self.currentVisjGraphNodesMap) {
                         var obj = self.currentVisjGraphNodesMap[nodeId];
-                        if (obj) newNodes.push({ id: nodeId, color: obj.color, legendType: obj.type });
+                        if (obj) {
+                            newNodes.push({ id: nodeId, color: obj.color, legendType: obj.type });
+                        }
 
                         /*
 var source2 = nodesTypesMap[node.data.id].graphUri ? Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri) : source;
@@ -349,10 +394,14 @@ if (source2) node.data.source = source2;*/
                     for (var individualId in individualNodes) {
                         var classId = individualNodes[individualId];
                         var obj = self.currentVisjGraphNodesMap[classId];
-                        if (obj) newNodes.push({ id: individualId, color: obj.color, legendType: obj.type });
+                        if (obj) {
+                            newNodes.push({ id: individualId, color: obj.color, legendType: obj.type });
+                        }
                     }
 
-                    if (visjsGraph.data && visjsGraph.data.nodes) visjsGraph.data.nodes.update(newNodes);
+                    if (visjsGraph.data && visjsGraph.data.nodes) {
+                        visjsGraph.data.nodes.update(newNodes);
+                    }
 
                     callbackSeries();
                 },
@@ -429,7 +478,9 @@ if (source2) node.data.source = source2;*/
         var newNodes = [];
         allNodes.forEach(function (node) {
             var hidden = true;
-            if (node && checkdeTopClassesIds.indexOf(node.legendType) > -1) hidden = false;
+            if (node && checkdeTopClassesIds.indexOf(node.legendType) > -1) {
+                hidden = false;
+            }
 
             newNodes.push({
                 id: node.id,
@@ -456,25 +507,31 @@ if (source2) node.data.source = source2;*/
         $("#graphPopupDiv").html(html);
     };
     self.hideShowLegendType = function (hide, only) {
-        if (hide) self.currentLegendObject.div.addClass("Lineage_legendTypeDivHidden");
-        else self.currentLegendObject.div.removeClass("Lineage_legendTypeDivHidden");
+        if (hide) {
+            self.currentLegendObject.div.addClass("Lineage_legendTypeDivHidden");
+        } else {
+            self.currentLegendObject.div.removeClass("Lineage_legendTypeDivHidden");
+        }
         var allNodes = visjsGraph.data.nodes.get();
         var newNodes = [];
         var hidden = hide ? true : false;
         allNodes.forEach(function (node) {
             if (only) {
-                if (only == "all" || (node && node.legendType == self.currentLegendObject.type))
+                if (only == "all" || (node && node.legendType == self.currentLegendObject.type)) {
                     newNodes.push({
                         id: node.id,
                         hidden: false,
                     });
-                else newNodes.push({ id: node.id, hidden: true });
+                } else {
+                    newNodes.push({ id: node.id, hidden: true });
+                }
             } else {
-                if (node && node.legendType == self.currentLegendObject.type)
+                if (node && node.legendType == self.currentLegendObject.type) {
                     newNodes.push({
                         id: node.id,
                         hidden: hidden,
                     });
+                }
             }
         });
         visjsGraph.data.nodes.update(newNodes);
@@ -488,7 +545,9 @@ if (source2) node.data.source = source2;*/
                 parent: "#",
             },
         ];
-        if (self.currentLegendDJstreedata[source]) newJstreeData = self.currentLegendDJstreedata[source];
+        if (self.currentLegendDJstreedata[source]) {
+            newJstreeData = self.currentLegendDJstreedata[source];
+        }
 
         self.drawLegend(newJstreeData);
     };

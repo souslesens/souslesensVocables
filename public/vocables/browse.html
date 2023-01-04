@@ -336,7 +336,7 @@
                     Config.sources[hit.source].controller = eval(Config.sources[hit.source].controller);
                 }
                 var node = { data: { id: hit.id } };
-                SourceBrowser.showNodeInfos(hit.source, node, "Browse_nodeInfosDiv", { hideButtons: true });
+                SourceBrowser.showNodeInfos(hit.source, node, "Browse_nodeInfosDiv", { hideModifyButtons: true });
 
                 $("#Browse_hitDetailsDiv").html(html);
             };

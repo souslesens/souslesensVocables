@@ -192,7 +192,7 @@ var util = {
         if (str.indexOf("http://") == 0) return str;
         if (!str || !str.replace) return null;
         str = str.trim();
-        str = str.replace(/\\/gm, "");
+        str = str.replace(/\\/gm, "_");
         str = str.replace(/"/gm, '\\"');
         // str = str.replace(/;/gm, "\\\;")
         //  str = str.replace(/\n/gm, "\\\\n")

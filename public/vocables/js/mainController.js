@@ -59,16 +59,17 @@ var MainController = (function () {
         });
     };*/
 
-    self.loadSources = function (callback) {
+    self.loadSources = function (sourcesFile, callback) {
         var _payload = {
             getSources: 1,
         };
 
-        var sourcesFileName = "";
-        if (Config.currentProfile.sourcesFile) sourcesFileName = "?sourcesFile=" + Config.currentProfile.sourcesFile;
+        var sourcesFileParam = "";
+        if (sourcesFile) sourcesFileParam = "?sourcesFile=" + sourcesFile;
+        else if (Config.currentProfile.sourcesFile) sourcesFileParam = "?sourcesFile=" + Config.currentProfile.sourcesFile;
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "/sources" + sourcesFileName,
+            url: Config.apiUrl + "/sources" + sourcesFileParam,
             dataType: "json",
             success: function (data_, _textStatus, _jqXHR) {
                 const data = data_.resources;
@@ -174,7 +175,7 @@ var MainController = (function () {
             async.series(
                 [
                     function (callbackSeries) {
-                        MainController.loadSources(function (_err, _result) {
+                        MainController.loadSources(null, function (_err, _result) {
                             callbackSeries(_err);
                         });
                     },

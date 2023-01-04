@@ -122,11 +122,15 @@ var KGcreator = (function () {
                 Config.currentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromImports(source);
 
                 self.currentGraphUri = Config.sources[source].graphUri;
-                if (!Config.currentTopLevelOntology) return alert("Source must have an upper ontology import");
+                if (!Config.currentTopLevelOntology) {
+                    return alert("Source must have an upper ontology import");
+                }
                 $("#KGcreator_owlSourceInput").html(source);
                 $("#KGcreator_topLevelOntologiesInput").html(Config.currentTopLevelOntology);
                 self.topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
-                if (callback) callback(null);
+                if (callback) {
+                    callback(null);
+                }
             });
         });
     };
@@ -154,11 +158,15 @@ var KGcreator = (function () {
 
             success: function (data, _textStatus, _jqXHR) {
                 common.fillSelectOptions("KGcreator_csvDirsSelect", data, true, "name", "name");
-                if (callback) return callback();
+                if (callback) {
+                    return callback();
+                }
             },
             error(err) {
                 return alert(err.responseText);
-                if (callback) return callback(err);
+                if (callback) {
+                    return callback(err);
+                }
             },
         });
     };
@@ -169,7 +177,9 @@ var KGcreator = (function () {
     };
 
     self.loadCsvDirs = function (options) {
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
         if (options.contextualMenuFn) {
             self.currentContextMenu = options.contextualMenuFn;
         } else {
@@ -224,7 +234,9 @@ var KGcreator = (function () {
                 self.mappingFiles = {};
                 result.forEach(function (file) {
                     var p;
-                    if ((p = file.indexOf(".json")) > -1) self.mappingFiles[file.substring(0, p) + ".csv"] = 1;
+                    if ((p = file.indexOf(".json")) > -1) {
+                        self.mappingFiles[file.substring(0, p) + ".csv"] = 1;
+                    }
                 });
             },
             error: function (err) {
@@ -255,11 +267,15 @@ var KGcreator = (function () {
                 for (var key in data) {
                     tables.push(key);
                 }
-                if (callback) return callback(null, data);
+                if (callback) {
+                    return callback(null, data);
+                }
                 self.showTablesTree(tables);
             },
             error: function (_err) {
-                if (callback) return callback(null);
+                if (callback) {
+                    return callback(null);
+                }
                 alert(err.responseText);
             },
         });
@@ -297,11 +313,15 @@ var KGcreator = (function () {
             //  withCheckboxes: true,
         };
         data.forEach(function (file) {
-            if (file.indexOf(".json") > 0) return;
+            if (file.indexOf(".json") > 0) {
+                return;
+            }
             var label = file;
 
             //  if (data.indexOf(file + ".json") > -1)
-            if (self.mappingFiles[file]) label = "<span class='KGcreator_fileWithMappings'>" + file + "</span>";
+            if (self.mappingFiles[file]) {
+                label = "<span class='KGcreator_fileWithMappings'>" + file + "</span>";
+            }
             jstreeData.push({
                 id: file,
                 text: label,
@@ -331,18 +351,23 @@ var KGcreator = (function () {
         $("#KGcreator_dataSampleDiv").val("");
 
         self.currentTreeNode = obj.node;
-        if (obj.node.parents.length == 0) return;
+        if (obj.node.parents.length == 0) {
+            return;
+        }
 
         //click column
         if (obj.node.parents.length == 2) {
             self.showSampleData(obj.node);
         } else {
-            if (obj.event && obj.event.button != 2)
+            if (obj.event && obj.event.button != 2) {
                 //if popup menu dont load
                 self.loadMappings(obj.node.data.id);
+            }
         }
 
-        if (obj.node.children.length > 0) return;
+        if (obj.node.children.length > 0) {
+            return;
+        }
 
         if (self.currentSourceType == "CSV") {
             // load csv columns
@@ -383,7 +408,9 @@ var KGcreator = (function () {
             label: "Subject",
             action: function (_e) {
                 // pb avec source
-                if (self.currentTreeNode.parents.length < 2) return;
+                if (self.currentTreeNode.parents.length < 2) {
+                    return;
+                }
                 $("#KGcreator_subjectInput").val(self.currentTreeNode.data.id);
             },
         };
@@ -392,7 +419,9 @@ var KGcreator = (function () {
             label: "Object",
             action: function (_e) {
                 // pb avec source
-                if (self.currentTreeNode.parents.length < 2) return;
+                if (self.currentTreeNode.parents.length < 2) {
+                    return;
+                }
                 $("#KGcreator_objectInput").val(self.currentTreeNode.data.id);
             },
         };
@@ -409,8 +438,10 @@ var KGcreator = (function () {
             label: "Add lookup",
             action: function (_e) {
                 // pb avec source
-                if (self.currentTreeNode.parents.length < 1) return;
-                $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupdialog.html", function () {
+                if (self.currentTreeNode.parents.length < 1) {
+                    return;
+                }
+                $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupDialog.html", function () {
                     $("#KGCreator_lookupFileName").val(self.currentTreeNode.data.id);
                 });
                 $("#KGcreator_dialogDiv").dialog("open");
@@ -420,7 +451,9 @@ var KGcreator = (function () {
             label: "Add Transform",
             action: function (_e) {
                 // pb avec source
-                if (self.currentTreeNode.parents.length != 2) return;
+                if (self.currentTreeNode.parents.length != 2) {
+                    return;
+                }
                 $("#KGcreator_dialogDiv").load("snippets/KGcreator/transformDialog.html", function () {
                     $("#KGcreator_transformColumn").val(self.currentTreeNode.data.id);
                 });
@@ -432,7 +465,9 @@ var KGcreator = (function () {
             label: "load",
             action: function (_e) {
                 // pb avec source
-                if (self.currentTreeNode.parents.length != 1) return;
+                if (self.currentTreeNode.parents.length != 1) {
+                    return;
+                }
                 KGcreator.loadMappings();
             },
         };
@@ -441,7 +476,9 @@ var KGcreator = (function () {
                 label: "editFile",
                 action: function (_e) {
                     // pb avec source
-                    if (self.currentTreeNode.parents.length != 1) return;
+                    if (self.currentTreeNode.parents.length != 1) {
+                        return;
+                    }
                     KGcreator.editFile();
                 },
             };
@@ -464,14 +501,18 @@ var KGcreator = (function () {
                 $("#KGcreator_dataSampleDiv").val(_result);
             },
             error(err) {
-                if (callback) return callback(err);
+                if (callback) {
+                    return callback(err);
+                }
                 return alert(err.responseText);
             },
         });
     };
 
     self.saveFile = function () {
-        if (!confirm("Save modified file?")) return;
+        if (!confirm("Save modified file?")) {
+            return;
+        }
         $("#KGcreator_saveFileButton").css("display", "none");
         var str = $("#KGcreator_dataSampleDiv").val();
 
@@ -491,7 +532,6 @@ var KGcreator = (function () {
                 $("#KGcreator_dataSampleDiv").val("");
             },
             error(err) {
-                if (callback) return callback(err);
                 return alert(err.responseText);
             },
         });
@@ -562,7 +602,9 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
             ],
 
             function (err) {
-                if (err) return alert(err.responseText);
+                if (err) {
+                    return alert(err.responseText);
+                }
             }
         );
     };
@@ -579,9 +621,15 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         var isRestrictionCBX = $("#KGcreator_isRestrictionCBX").prop("checked");
         var isSpecificPredicate = $("#KGcreator_isSpecificPredicateCBX").prop("checked");
 
-        if (!subject) return alert("missing subject");
-        if (!predicate) return alert("missing predicate");
-        if (!object) return alert("missing object");
+        if (!subject) {
+            return alert("missing subject");
+        }
+        if (!predicate) {
+            return alert("missing predicate");
+        }
+        if (!object) {
+            return alert("missing object");
+        }
         /*  if (predicate == "_part14Predefined") {
 predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
 }*/
@@ -592,14 +640,24 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
             tripleObj.dataType = predicate;
         }
 
-        if (isObjectString) tripleObj.isString = true;
-        else if (predicate.toLowerCase().indexOf("label") > -1) tripleObj.isString = true;
-        else if (predicate.toLowerCase().indexOf("definedBy") > -1) tripleObj.isString = true;
-        else if (predicate.toLowerCase().indexOf("comment") > -1) tripleObj.isString = true;
-        else if (predicate.toLowerCase().indexOf("example") > -1) tripleObj.isString = true;
+        if (isObjectString) {
+            tripleObj.isString = true;
+        } else if (predicate.toLowerCase().indexOf("label") > -1) {
+            tripleObj.isString = true;
+        } else if (predicate.toLowerCase().indexOf("definedby") > -1) {
+            tripleObj.isString = true;
+        } else if (predicate.toLowerCase().indexOf("comment") > -1) {
+            tripleObj.isString = true;
+        } else if (predicate.toLowerCase().indexOf("example") > -1) {
+            tripleObj.isString = true;
+        }
 
-        if (subjectLookupName) tripleObj.lookup_s = subjectLookupName;
-        if (objectLookupName) tripleObj.lookup_o = objectLookupName;
+        if (subjectLookupName) {
+            tripleObj.lookup_s = subjectLookupName;
+        }
+        if (objectLookupName) {
+            tripleObj.lookup_o = objectLookupName;
+        }
 
         if (isRestrictionCBX) {
             tripleObj.isRestriction = true;
@@ -633,15 +691,20 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         if (role == "s") {
             if (value == "_selectedColumn") {
                 $("#KGcreator_subjectInput").val(self.currentTreeNode.text);
-            } else $("#KGcreator_subjectInput").val(value);
+            } else {
+                $("#KGcreator_subjectInput").val(value);
+            }
             $("#KGcreator_subjectSelect").val("");
         } else if (role == "p") {
             $("#KGcreator_predicateInput").val(value);
 
             $("#KGcreator_predicateSelect").val("");
         } else if (role == "o") {
-            if (value == "_selectedColumn") $("#KGcreator_objectInput").val(self.currentTreeNode.text);
-            else $("#KGcreator_objectInput").val(value);
+            if (value == "_selectedColumn") {
+                $("#KGcreator_objectInput").val(self.currentTreeNode.text);
+            } else {
+                $("#KGcreator_objectInput").val(value);
+            }
 
             $("#KGcreator_objectSelect").val("");
         }
@@ -661,6 +724,7 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         self.mainJsonEditorModified = true;
         $("#KGcreator_dialogDiv").dialog("close");
     };
+
     self.showFunctionDialog = function (_role) {
         $("#KGcreator_dialogDiv").load("snippets/KGcreator/functionDialog.html");
         $("#KGcreator_dialogDiv").dialog("open");
@@ -687,9 +751,13 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         var fnObject = "function{" + fnBody + "}";
         //  var fnObject=JSON.stringify({"_function":fnBody})
         var role = self.currentTripleModelRole;
-        if (role == "s") $("#KGcreator_subjectInput").val(fnObject);
-        else if (role == "p") $("#KGcreator_predicateInput").val(fnObject);
-        else if (role == "o") $("#KGcreator_objectInput").val(fnObject);
+        if (role == "s") {
+            $("#KGcreator_subjectInput").val(fnObject);
+        } else if (role == "p") {
+            $("#KGcreator_predicateInput").val(fnObject);
+        } else if (role == "o") {
+            $("#KGcreator_objectInput").val(fnObject);
+        }
         $("#KGcreator_dialogDiv").dialog("close");
     };
 
@@ -705,7 +773,9 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         }
         fnBody = "function{" + fnBody + "}";
         self.currentJsonObject = self.mainJsonEditor.get();
-        if (!self.currentJsonObject.transform) self.currentJsonObject.transform = {};
+        if (!self.currentJsonObject.transform) {
+            self.currentJsonObject.transform = {};
+        }
         self.currentJsonObject.transform[column] = fnBody;
         self.mainJsonEditor.load(self.currentJsonObject);
         self.mainJsonEditorModified = true;
@@ -725,7 +795,9 @@ self.saveMappings({classId:classId})
         } catch (err) {
             alert(err.message);
         }
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
 
         self.currentJsonObject = data;
 
@@ -755,10 +827,14 @@ self.saveMappings({classId:classId})
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
                 MainController.UI.message("json saved");
-                if (callback) return callback();
+                if (callback) {
+                    return callback();
+                }
             },
             error(err) {
-                if (callback) return callback(err);
+                if (callback) {
+                    return callback(err);
+                }
                 return alert(err.responseText);
             },
         });
@@ -795,7 +871,9 @@ alert(err.message);
 
             setUpperOntologyPrefix = function () {
                 var currrentTopLevelOntology = Config.topLevelOntologies[Config.currentTopLevelOntology];
-                if (!currrentTopLevelOntology) return;
+                if (!currrentTopLevelOntology) {
+                    return;
+                }
                 if (!self.currentJsonObject.prefixes) {
                     self.currentJsonObject.prefixes = {};
                     if (!self.currentJsonObject.prefixes[currrentTopLevelOntology.prefix]) {
@@ -829,8 +907,11 @@ alert(err.message);
                 success: function (result, _textStatus, _jqXHR) {
                     self.currentJsonObject = JSON.parse(result);
 
-                    if (!self.currentJsonObject.graphUri) self.currentJsonObject.graphUri = self.currentGraphUri || "";
-                    else self.currentGraphUri = self.currentJsonObject.graphUri;
+                    if (!self.currentJsonObject.graphUri) {
+                        self.currentJsonObject.graphUri = self.currentGraphUri || "";
+                    } else {
+                        self.currentGraphUri = self.currentJsonObject.graphUri;
+                    }
                     setUpperOntologyPrefix();
                     self.mainJsonEditor.load(self.currentJsonObject);
                     self.mainJsonEditorModified = false;
@@ -851,7 +932,9 @@ alert(err.message);
 
         if (self.mainJsonEditorModified) {
             //self.currentJsonObject && self.currentJsonObject.tripleModels && self.currentJsonObject.tripleModels.length > 0) {
-            if (!self.currentJsonObject.fileName) return execLoadMappings();
+            if (!self.currentJsonObject.fileName) {
+                return execLoadMappings();
+            }
 
             if (confirm(" save current json before opening new file")) {
                 self.saveMappings(null, function (_err, _result) {
@@ -869,7 +952,9 @@ alert(err.message);
 if (selectedFiles.length > 0);*/
 
         $("#KGcreator_dataSampleDiv").val("creating triples...");
-        if (!self.currentJsonObject) return;
+        if (!self.currentJsonObject) {
+            return;
+        }
 
         var dataLocation = "";
         if (self.currentSourceType != "CSV") {
@@ -885,9 +970,13 @@ if (selectedFiles.length > 0);*/
 
         if (!self.currentJsonObject.graphUri) {
             var graphUri = "";
-            if (self.currentGraphUri) graphUri = self.currentGraphUri;
+            if (self.currentGraphUri) {
+                graphUri = self.currentGraphUri;
+            }
             graphUri = prompt("enter graphUri", graphUri);
-            if (!graphUri) return;
+            if (!graphUri) {
+                return;
+            }
             self.currentGraphUri = graphUri;
             self.currentJsonObject = self.mainJsonEditor.get();
             self.currentJsonObject.graphUri = graphUri;
@@ -906,10 +995,14 @@ if (selectedFiles.length > 0);*/
                 dataLocation: dataLocation,
             };
         }
-        if (_options && _options.deleteTriples) options.deleteTriples = true;
+        if (_options && _options.deleteTriples) {
+            options.deleteTriples = true;
+        }
 
         self.saveMappings(null, function (_err, _result) {
-            if (_err) return alert(_err);
+            if (_err) {
+                return alert(_err);
+            }
             $("#KGcreator_dataSampleDiv").val("");
             var payload = {
                 dir: "CSV/" + self.currentCsvDir,
@@ -941,22 +1034,34 @@ if (selectedFiles.length > 0);*/
     self.indexGraph = function () {
         var graphSource = null;
         for (var source in Config.sources) {
-            if (Config.sources[source].graphUri == self.currentGraphUri) graphSource = source;
+            if (Config.sources[source].graphUri == self.currentGraphUri) {
+                graphSource = source;
+            }
         }
-        if (!source) return alert("no source associated to graph " + self.currentGraphUri);
+        if (!source) {
+            return alert("no source associated to graph " + self.currentGraphUri);
+        }
         if (confirm("index source " + graphSource)) {
             SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
-                if (err) return alert(err);
+                if (err) {
+                    return alert(err);
+                }
                 $("#KGcreator_dataSampleDiv").val("indexed graph " + self.currentJsonObject.graphUri + " in index " + graphSource.toLowerCase());
             });
         }
     };
 
     self.clearGraph = function (deleteAllGraph) {
-        if (!self.currentJsonObject) return; //alert("no file mappings selected");
-        if (!self.currentJsonObject.graphUri) return alert("no graphUri");
+        if (!self.currentJsonObject) {
+            return;
+        } //alert("no file mappings selected");
+        if (!self.currentJsonObject.graphUri) {
+            return alert("no graphUri");
+        }
 
-        if (!confirm("Do you really want to clear graph " + self.currentJsonObject.graphUri)) return;
+        if (!confirm("Do you really want to clear graph " + self.currentJsonObject.graphUri)) {
+            return;
+        }
         const payload = { graphUri: self.currentJsonObject.graphUri };
         $.ajax({
             type: "POST",
@@ -973,25 +1078,37 @@ if (selectedFiles.length > 0);*/
     };
 
     self.deleteKGcreatorTriples = function (deleteAllGraph) {
-        if (!self.currentJsonObject) return; //alert("no file mappings selected");
-        if (!self.currentJsonObject.graphUri) return alert("no graphUri");
+        if (!self.currentJsonObject) {
+            return;
+        } //alert("no file mappings selected");
+        if (!self.currentJsonObject.graphUri) {
+            return alert("no graphUri");
+        }
 
         if (deleteAllGraph) {
-            if (!confirm("Do you really want to delete  triples created with KGCreator in " + self.currentJsonObject.graphUri)) return;
+            if (!confirm("Do you really want to delete  triples created with KGCreator in " + self.currentJsonObject.graphUri)) {
+                return;
+            }
 
             var filter = "?p =<http://purl.org/dc/terms/creator> && ?o='KGcreator'";
             Sparql_generic.deleteTriplesWithFilter(self.currentSource, filter, function (err, result) {
-                if (err) return alert(err.responseText);
+                if (err) {
+                    return alert(err.responseText);
+                }
                 alert("triples deleted");
             });
         } else {
-            if (!confirm("Do you really want to delete  triples created with KGCreator in " + self.currentJsonObject.fileName)) return;
+            if (!confirm("Do you really want to delete  triples created with KGCreator in " + self.currentJsonObject.fileName)) {
+                return;
+            }
             self.createTriples(false, { deleteTriples: true });
         }
     };
 
     self.showSampleData = function (node, allColumns, size, callback) {
-        if (!size) size = 200;
+        if (!size) {
+            size = 200;
+        }
         if (node.data.sample) {
             //csv
             $("#KGcreator_dataSampleDiv").val("");
@@ -1022,7 +1139,9 @@ if (selectedFiles.length > 0);*/
                     str += item[node.data.id] + "\n";
                 });
             }
-            if (callback) return callback(null, str);
+            if (callback) {
+                return callback(null, str);
+            }
             $("#KGcreator_dataSampleDiv").val(str);
         } else if (self.currentSourceType == "DATABASE") {
             var sqlQuery = "select top  " + size + " " + (allColumns ? "*" : node.data.id) + " from " + node.parent;
@@ -1064,11 +1183,15 @@ if (selectedFiles.length > 0);*/
                             str += item[node.data.id] + "\n";
                         });
                     }
-                    if (callback) return callback(null, str);
+                    if (callback) {
+                        return callback(null, str);
+                    }
                     $("#KGcreator_dataSampleDiv").val(str);
                 },
                 error(err) {
-                    if (callback) return callback(err);
+                    if (callback) {
+                        return callback(err);
+                    }
                     return alert(err, responseText);
                 },
             });
@@ -1088,16 +1211,28 @@ if (selectedFiles.length > 0);*/
                 // get objects Classes
                 function (callbackSeries) {
                     Sparql_OWL.getDictionary(topLevelOntology, null, null, function (err, result) {
-                        if (err) callbackSeries(err);
+                        if (err) {
+                            callbackSeries(err);
+                        }
                         result.sort(function (a, b) {
-                            if (!a.label || !b.label) return 0;
-                            if (a.label.value > b.label.value) return 1;
-                            if (a.label.value < b.label.value) return -1;
+                            if (!a.label || !b.label) {
+                                return 0;
+                            }
+                            if (a.label.value > b.label.value) {
+                                return 1;
+                            }
+                            if (a.label.value < b.label.value) {
+                                return -1;
+                            }
                             return 0;
                         });
                         result.forEach(function (item) {
-                            if (!item.id) return;
-                            if (item.id.type == "bnode") return;
+                            if (!item.id) {
+                                return;
+                            }
+                            if (item.id.type == "bnode") {
+                                return;
+                            }
                             currentObjectClasses.push({
                                 id: item.id.value,
                                 label: topLevelOntologyPrefix + ":" + (item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value)),
@@ -1110,11 +1245,19 @@ if (selectedFiles.length > 0);*/
                 //get predicates
                 function (callbackSeries) {
                     Sparql_OWL.getObjectPropertiesDomainAndRange(topLevelOntology, null, null, function (err, result) {
-                        if (err) callbackSeries(err);
+                        if (err) {
+                            callbackSeries(err);
+                        }
                         result.sort(function (a, b) {
-                            if (!a.propLabel || !b.propLabel) return 0;
-                            if (a.propLabel.value > b.propLabel.value) return 1;
-                            if (a.propLabel.value < b.propLabel.value) return -1;
+                            if (!a.propLabel || !b.propLabel) {
+                                return 0;
+                            }
+                            if (a.propLabel.value > b.propLabel.value) {
+                                return 1;
+                            }
+                            if (a.propLabel.value < b.propLabel.value) {
+                                return -1;
+                            }
                             return 0;
                         });
 
@@ -1127,12 +1270,16 @@ if (selectedFiles.length > 0);*/
                             };
 
                             var item2 = { id: item.prop.value, label: topLevelOntologyPrefix + ":" + item.propLabel.value };
-                            if (currentPredicates.indexOf(item2) < 0) currentPredicates.push(item2);
+                            if (currentPredicates.indexOf(item2) < 0) {
+                                currentPredicates.push(item2);
+                            }
                         });
                         // set missing inverse props
                         for (var key in propertiesMap) {
                             if (propertiesMap[key].inversePropLabel) {
-                                if (!propertiesMap[propertiesMap[key].inversePropLabel].inversePropLabel) propertiesMap[propertiesMap[key].inversePropLabel].inversePropLabel = key;
+                                if (!propertiesMap[propertiesMap[key].inversePropLabel].inversePropLabel) {
+                                    propertiesMap[propertiesMap[key].inversePropLabel].inversePropLabel = key;
+                                }
                                 propertiesMap[propertiesMap[key].inversePropLabel].inverseProp = propertiesMap[key];
                             }
                         }
@@ -1144,7 +1291,9 @@ if (selectedFiles.length > 0);*/
                 //get source specific properties and Classes
                 function (callbackSeries) {
                     Sparql_OWL.listObjectProperties(source, null, function (err, result) {
-                        if (err) return callbackSeries(err);
+                        if (err) {
+                            return callbackSeries(err);
+                        }
 
                         result.forEach(function (item) {
                             sourceSpecificPredicates.push({
@@ -1160,7 +1309,9 @@ if (selectedFiles.length > 0);*/
                 //get  upperOntology properties and Classes
                 function (callbackSeries) {
                     Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(source, function (err, result) {
-                        if (err) return alert(err.responseText);
+                        if (err) {
+                            return alert(err.responseText);
+                        }
 
                         //  self.currentPossibleClassesAndPredicates = result;
                         result.predicates.forEach(function (item) {
@@ -1196,7 +1347,9 @@ if (selectedFiles.length > 0);*/
                 function (callbackSeries) {
                     return callbackSeries();
                     Sparql_OWL.getObjectProperties(Config.currentTopLevelOntology, {}, function (err, result) {
-                        if (err) return callbackSeries(err);
+                        if (err) {
+                            return callbackSeries(err);
+                        }
                         currentPredicates.push({ id: "", label: "----------" });
                         result.forEach(function (item) {
                             currentPredicates.push({ id: item.property.value, label: item.propertyLabel.value });
@@ -1207,17 +1360,81 @@ if (selectedFiles.length > 0);*/
                 },
             ],
             function (err) {
-                if (err) return callback(err);
+                if (err) {
+                    return callback(err);
+                }
                 return callback(null, { predicates: currentPredicates, objectClasses: currentObjectClasses });
             }
         );
     };
 
     self.createPrefixTransformFn = function () {
-        var prefix = prompt("Enter Prefix");
-        if (!prefix) return;
-        var str = "return '" + prefix + "_'+value;";
+        var prefix = prompt("Enter Prefix", self.currentTreeNode.data.id);
+        if (!prefix) {
+            return;
+        }
+        var str = "if(mapping.isString && role=='o') return value; else return '" + prefix + "_'+value;";
         $("#KGcreator_fnBody").val(str);
+    };
+
+    self.graphMappings = function () {
+        var mappingsTriples = self.currentJsonObject.tripleModels;
+        var visjsData = { nodes: [], edges: [] };
+        var existingNodes = {};
+        var shape = "box";
+        mappingsTriples.forEach(function (item) {
+            function getColor(str) {
+                if (str.indexOf("http") > -1) {
+                    return "#70ac47";
+                }
+                if (str.indexOf(":") > -1) {
+                    return "#0067bb";
+                }
+                return "#fdbf01";
+            }
+
+            if (!existingNodes[item.s]) {
+                existingNodes[item.s] = 1;
+                visjsData.nodes.push({
+                    id: item.s,
+                    label: item.s,
+                    shape: shape,
+                    color: getColor(item.s),
+                });
+            }
+            if (!existingNodes[item.o]) {
+                existingNodes[item.o] = 1;
+                visjsData.nodes.push({
+                    id: item.o,
+                    label: item.o,
+                    shape: shape,
+                    color: getColor(item.o),
+                });
+            }
+            var edgeId = item.s + item.p + item.o;
+            if (!existingNodes[edgeId]) {
+                existingNodes[edgeId] = 1;
+                visjsData.edges.push({
+                    id: edgeId,
+                    from: item.s,
+                    to: item.o,
+                    label: item.p,
+                    // color: getColor(item.o),
+                    arrows: {
+                        to: {
+                            enabled: true,
+                            type: Lineage_classes.defaultEdgeArrowType,
+                            scaleFactor: 0.5,
+                        },
+                    },
+                });
+            }
+        });
+
+        var html = "<div id='KGcreator_mappingsGraphDiv' style='width:900px;height:750px'></div>";
+        $("#mainDialogDiv").dialog("open");
+        $("#mainDialogDiv").html(html);
+        visjsGraph.draw("KGcreator_mappingsGraphDiv", visjsData, {}, function () {});
     };
 
     return self;

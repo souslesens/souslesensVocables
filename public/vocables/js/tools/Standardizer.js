@@ -372,7 +372,7 @@ setTimeout(function () {
                 var indexes = self.getSelectedIndexes();
 
                 self.currentWordsCount += words.length;
-                SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, function (err, result) {
+                SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, words.length, {}, function (err, result) {
                     var html = self.processMatrixResult(words, result, indexes);
                     MainController.UI.message(" processed items: " + totalProcessed);
                     $("#KGmapping_matrixContainer").append(html);
@@ -463,7 +463,7 @@ setTimeout(function () {
                         });
 
                         var indexes = self.getSelectedIndexes(true);
-                        SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
+                        SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, {}, function (err, result) {
                             if (err) return callbackWhilst(err);
                             //  self.getMatchesClassesByIndex(result)
                             self.addDictionaryMatches(objects, function (err, result2) {
@@ -1200,7 +1200,7 @@ setTimeout(function () {
                     MainController.UI.message("matching " + words.length + "words");
                     var size = 200;
 
-                    SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, function (err, result) {
+                    SearchUtil.getElasticSearchMatches(words, indexes, "exactMatch", 0, size, {}, function (err, result) {
                         if (err) return callbackSeries(err);
                         searchResultArray = result;
                         MainController.UI.message("matches found :" + searchResultArray.length);
@@ -1595,7 +1595,7 @@ sortMethod: "hubsize",
         async.eachSeries(
             slices,
             function (words, callbackEach) {
-                SearchUtil.getElasticSearchMatches(words, indexes, searchType, 0, 10000, function (err, result) {
+                SearchUtil.getElasticSearchMatches(words, indexes, searchType, 0, 10000, {}, function (err, result) {
                     if (err) return alert(err);
                     var entities = [];
                     if (!result.forEach || result.hits) return MainController.UI.message("no result");

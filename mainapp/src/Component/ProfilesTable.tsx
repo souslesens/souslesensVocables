@@ -203,63 +203,43 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         return unwrappedSources;
     }, [unwrappedSources]);
 
-    // TODO: generate sourcesTree from sources
-    
-    const existGroup(sourcesTree: any[], root: string, group: string) = {
-        // root.forEach((name) => {
+    let sourcesTree: any[] = [];
 
-        // })
-    }
+    const fieldsFromSource = (source: any) => {
+        let fields = [source.schemaType];
 
+        if (source.group) {
+            fields = fields.concat(source.group.split("/"));
+        }
 
-    const sourcesTree_2: any[] = [];
+        return fields.concat(source.name);
+    };
+
     sources.forEach((source) => {
-        const groups = source.group.split("/");
-        let root: string[] = [];
-        groups.forEach((group) => {
-            root.push(group);
-            if (existGroup(sourcesTree_2, root, group)) {
-                // ...
+        let currentTree = sourcesTree;
+
+        fieldsFromSource(source).forEach((field) => {
+            let root = currentTree.find((key) => key.name == field);
+
+            if (root === undefined) {
+                root = {
+                    name: field,
+                    children: [],
+                };
+                currentTree.push(root);
             }
+            currentTree = root.children;
         });
-        const s = {
-            name: source.name,
-            source: source,
-            children: [],
-        };
-        sourcesTree_2.push(s);
     });
 
-    console.log(sourcesTree_2);
-
-    const sourcesTree = [
-        {
-            name: "OWL",
-            value: "default",
-            children: [
-                {
-                    name: "TSF",
-                    value: "default",
-                    children: [
-                        {
-                            name: "STANDARD",
-                            value: "default",
-                            children: [{ name: "Abstract", value: "default", children: [{ name: "ISO", elemType: "sources", source: {}, value: "default", children: [] }] }],
-                        },
-                    ],
-                },
-            ],
-        },
-    ];
-
-    const displayFormTree = (sourcesTree: any, index: number) => {
+    const displayFormTree = (sourcesTree: any) => {
         if (!sourcesTree) {
             return;
         }
         const html = sourcesTree.map((source: any) => {
             return (
-                <TreeItem nodeId={index.toString()} label={source.name}>
-                    {displayFormTree(source.children, index + 1)}
+                <TreeItem nodeId={source.name} label={source.name}>
+                    {displayFormTree(source.children)}
                 </TreeItem>
             );
         });
@@ -268,7 +248,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
 
     const formTree = (
         <TreeView aria-label="Sources access control navigator" defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
-            {displayFormTree(sourcesTree, 0)}
+            {displayFormTree(sourcesTree)}
         </TreeView>
     );
 

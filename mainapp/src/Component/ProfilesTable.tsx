@@ -23,6 +23,11 @@ import {
     RadioGroup,
     Radio,
 } from "@mui/material";
+
+import { TreeView, TreeItem } from "@mui/lab";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
@@ -197,6 +202,56 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const sources = React.useMemo(() => {
         return unwrappedSources;
     }, [unwrappedSources]);
+
+    let sourcesTree: any[] = [];
+
+    const fieldsFromSource = (source: any) => {
+        let fields = [source.schemaType];
+
+        if (source.group) {
+            fields = fields.concat(source.group.split("/"));
+        }
+
+        return fields.concat(source.name);
+    };
+
+    sources.forEach((source) => {
+        let currentTree = sourcesTree;
+
+        fieldsFromSource(source).forEach((field) => {
+            let root = currentTree.find((key) => key.name == field);
+
+            if (root === undefined) {
+                root = {
+                    name: field,
+                    children: [],
+                }
+                currentTree.push(root);
+            }
+            currentTree = root.children;
+        })
+    });
+
+    const displayFormTree = (sourcesTree: any) => {
+        if (!sourcesTree) {
+            return;
+        }
+        const html = sourcesTree.map((source: any) => {
+            return (
+                <TreeItem nodeId={source.name} label={source.name}>
+                    {displayFormTree(source.children)}
+                </TreeItem>
+            );
+        });
+        return html;
+    };
+
+    const formTree = (
+        <TreeView aria-label="Sources access control navigator" defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
+            {displayFormTree(sourcesTree)}
+        </TreeView>
+    );
+
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
     const tools: string[] = ["ALL", "sourceBrowser", "sourceMatcher", "evaluate", "ancestors", "lineage", "SPARQL", "ADLmappings", "ADLbrowser", "Standardizer", "SQLquery"];
     const [profileModel, update] = React.useReducer(updateProfile, { modal: false, profileForm: profile });
@@ -287,6 +342,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 allowDefault={false}
                                 editable={true}
                             />
+                            {formTree}
                         </FormControl>
                         <TextField
                             size="small"

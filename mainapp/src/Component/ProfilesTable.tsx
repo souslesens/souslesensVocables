@@ -217,9 +217,9 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const handleSourceAccessControlUpdate = React.useMemo(() => {
         return Object.fromEntries(
             sources.map((source) => [
-                source.id,
+                source.name,
                 (event: React.ChangeEvent<HTMLInputElement>) =>
-                    update({ type: Type.UserUpdatedSourceAccessControl, payload: { sourceId: source.id, newValue: event.target.value as SourceAccessControl | "default" } }),
+                    update({ type: Type.UserUpdatedSourceAccessControl, payload: { sourceId: source.name, newValue: event.target.value as SourceAccessControl | "default" } }),
             ])
         );
     }, [sources]);
@@ -304,8 +304,8 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                         <FormLabel id={source.id + "-source-access-control-label"}>{source.name}</FormLabel>
                                         <SourceAccessControlInput
                                             name={source.id + "-source-access-control"}
-                                            value={profileModel.profileForm.sourcesAccessControl[source.id] ?? "default"}
-                                            onChange={handleSourceAccessControlUpdate[source.id]}
+                                            value={profileModel.profileForm.sourcesAccessControl[source.name] ?? "default"}
+                                            onChange={handleSourceAccessControlUpdate[source.name]}
                                             allowDefault={true}
                                             editable={source.editable}
                                         />

@@ -149,9 +149,13 @@ function filterSources(allowedSources, sources) {
 function getAllowedSources(user, profiles, sources, formalOntologySourceLabel) {
     const aProfiles = Object.entries(profiles);
     const aSources = Object.entries(sources);
-
+    const userProfiles = aProfiles.filter(([profileName, profile]) => {
+        if (user.groups.includes(profileName)) {
+            return [profileName, profile];
+        }
+    });
     // for all profile
-    const allAccessControl = aProfiles.flatMap(([_k, profile]) => {
+    const allAccessControl = userProfiles.flatMap(([_k, profile]) => {
         const defaultSourceAccessControl = profile.defaultSourceAccessControl;
         const sourcesAccessControl = profile.sourcesAccessControl;
         const allowedSourceSchemas = profile.allowedSourceSchemas;

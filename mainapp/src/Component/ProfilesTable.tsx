@@ -23,6 +23,11 @@ import {
     RadioGroup,
     Radio,
 } from "@mui/material";
+
+import { TreeView, TreeItem } from "@mui/lab";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
@@ -197,6 +202,76 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const sources = React.useMemo(() => {
         return unwrappedSources;
     }, [unwrappedSources]);
+
+    // TODO: generate sourcesTree from sources
+    
+    const existGroup(sourcesTree: any[], root: string, group: string) = {
+        // root.forEach((name) => {
+
+        // })
+    }
+
+
+    const sourcesTree_2: any[] = [];
+    sources.forEach((source) => {
+        const groups = source.group.split("/");
+        let root: string[] = [];
+        groups.forEach((group) => {
+            root.push(group);
+            if (existGroup(sourcesTree_2, root, group)) {
+                // ...
+            }
+        });
+        const s = {
+            name: source.name,
+            source: source,
+            children: [],
+        };
+        sourcesTree_2.push(s);
+    });
+
+    console.log(sourcesTree_2);
+
+    const sourcesTree = [
+        {
+            name: "OWL",
+            value: "default",
+            children: [
+                {
+                    name: "TSF",
+                    value: "default",
+                    children: [
+                        {
+                            name: "STANDARD",
+                            value: "default",
+                            children: [{ name: "Abstract", value: "default", children: [{ name: "ISO", elemType: "sources", source: {}, value: "default", children: [] }] }],
+                        },
+                    ],
+                },
+            ],
+        },
+    ];
+
+    const displayFormTree = (sourcesTree: any, index: number) => {
+        if (!sourcesTree) {
+            return;
+        }
+        const html = sourcesTree.map((source: any) => {
+            return (
+                <TreeItem nodeId={index.toString()} label={source.name}>
+                    {displayFormTree(source.children, index + 1)}
+                </TreeItem>
+            );
+        });
+        return html;
+    };
+
+    const formTree = (
+        <TreeView aria-label="Sources access control navigator" defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
+            {displayFormTree(sourcesTree, 0)}
+        </TreeView>
+    );
+
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
     const tools: string[] = ["ALL", "sourceBrowser", "sourceMatcher", "evaluate", "ancestors", "lineage", "SPARQL", "ADLmappings", "ADLbrowser", "Standardizer", "SQLquery"];
     const [profileModel, update] = React.useReducer(updateProfile, { modal: false, profileForm: profile });
@@ -287,6 +362,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 allowDefault={false}
                                 editable={true}
                             />
+                            {formTree}
                         </FormControl>
                         <TextField
                             size="small"

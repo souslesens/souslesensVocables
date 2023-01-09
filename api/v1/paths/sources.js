@@ -30,7 +30,7 @@ module.exports = function () {
                 const profiles = await read(profilesJSON);
                 const parsedProfiles = JSON.parse(profiles);
                 const allowedSources = getAllowedSources(userInfo.user, parsedProfiles, parsedSources, config.formalOntologySourceLabel);
-                const filteredSources = filterSources(allowedSources, parsedSources);
+                filteredSources = filterSources(allowedSources, parsedSources);
             }
             // sort
             const sortedSources = sortObjectByKey(filteredSources);

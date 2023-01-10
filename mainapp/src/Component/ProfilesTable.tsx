@@ -236,14 +236,13 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         if (!sourcesTree) {
             return;
         }
-        const html = sourcesTree.map((source: any) => {
+        return sourcesTree.map((source: any) => {
             return (
                 <TreeItem nodeId={source.name} label={source.name}>
                     {displayFormTree(source.children)}
                 </TreeItem>
             );
         });
-        return html;
     };
 
     const formTree = (

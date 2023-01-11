@@ -68,7 +68,7 @@ self.graphTable(KGcreator.currentTreeNode);
     };
 
     self.showSampledata = function (table, column, targetDiv) {
-        var node = { parent: table, data: {} };
+        var node = { parent: (table.parent=="#"?table.id:table.parent), data: {} };
         var allColumns = true;
         if (column) {
             allColumns = false;
@@ -83,7 +83,7 @@ self.graphTable(KGcreator.currentTreeNode);
             result = result.replace(/\n/g, "</td><tr><td>");
             result = result.replace(/\t/g, "</td><td>");
             var html = "<table><tr><td>" + result + "</tr></table>";
-
+            $("#" + targetDiv).dialog("open");
             $("#" + targetDiv).html(html);
         });
     };

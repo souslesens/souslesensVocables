@@ -736,6 +736,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
      * @param callback return depending on options
      *  - ?g ?concept  ?prop ?propLabel ?conceptLabel  ?value ?valueLabel ?node
      */
+
     self.getObjectRestrictions = function (sourceLabel, ids, options, callback) {
         if (!options) {
             options = {};
@@ -918,6 +919,12 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         });
     };
 
+    /**
+     *
+      * @param source
+     * @param ids
+     * @param callback
+     */
     self.getNodesTypes = function (source, ids, callback) {
         var slices = common.array.slice(ids, 200);
         var allData = [];
@@ -962,6 +969,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
      *
      *
      */
+
     self.getPropertiesRestrictionsDescription = function (sourceLabel, propIds, options, callback) {
         if (!options) {
             options = {};

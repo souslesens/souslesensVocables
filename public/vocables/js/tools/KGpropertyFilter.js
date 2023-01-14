@@ -11,13 +11,14 @@ var KGpropertyFilter = (function() {
       topUris: ["http://datalenergies.total.com/resource/tsf/idcp/DataContainer"],
       options: { memberPredicate: 1 },
       levels: 3,
-      jstreeDiv: "KGpropertyFilter_dataContainerTreeDiv"
+      jstreeDiv: "KGpropertyFilter_dataContainerTreeDiv",
+      parentPredicate: "^rdfs:member"
     }
     ,
     templates: {
       source: "IDCP",
       topUris: ["http://datalenergies.total.com/resource/tsf/idcp/template"],
-      options: { memberPredicate:0, specificPredicates:["rdf:type","<http://datalenergies.total.com/resource/tsf/idcp/9fc7b10ede>"] },
+      options: { memberPredicate: 0, specificPredicates: ["rdf:type", "<http://datalenergies.total.com/resource/tsf/idcp/9fc7b10ede>"] },
       levels: 5,
       jstreeDiv: "KGpropertyFilter_templatesTree"
     },
@@ -41,14 +42,24 @@ var KGpropertyFilter = (function() {
       levels: 3,
       jstreeDiv: "KGpropertyFilter_systemsTree"
     },
-    businesssObjects: {
-      source: "BUSINESS_OBJETCS",
-      topUris: ["http://data.total.com/resource/tsf/ontology/business_objects/bag/Data_Domains"],
-      options: { memberPredicate: 1 },
+    businessObjects: {
+      editable:false,
+      source: "GIDEA-RAW",
+      topUris: ["http://datalenergies.total.com/resource/tsf/gidea-raw/LogicalEntity"],
+      options: {specificPredicates:["?p"]  },
       levels: 5,
       jstreeDiv: "KGpropertyFilter_businessObjectsTree"
     }
 
+
+  };
+
+  self.getTreeConfigByKey = function(key, value) {
+    for (var entry in self.treeConfigs) {
+      if (self.treeConfigs[entry][key] == value) {
+        return self.treeConfigs[entry];
+      }
+    }
 
   };
   self.onLoaded = function() {
@@ -99,9 +110,9 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
 
   self.onChangeSourceSelect = function(source) {
-   // self.resetMatrixPropertiesFilters();
+    // self.resetMatrixPropertiesFilters();
     self.currentSource = source;
-   // self.initFiltersSource(source);
+    // self.initFiltersSource(source);
 
     self.loadInJstree(self.treeConfigs["dataContainers"], function(err, result) {
       if (err) {
@@ -109,40 +120,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         return alert(err.responseText);
       }
     });
-  };
-
-
-
-  self.getJstreePropertiesContextMenu = function() {
-    var items = {};
-    items.create = {
-      label: "create child",
-      action: function(_e) {
-        // pb avec source
-        KGpropertyFilter.createChildNode();
-      }
-    };
-    items.nodeInfos = {
-      label: "Node infos",
-      action: function(_e) {
-        // pb avec source
-        SourceBrowser.showNodeInfos(self.currentSource, self.currentClassOrPropertyNode, "mainDialogDiv");
-      }
-    };
-    items.viewFilters = {
-      label: "View filters",
-      action: function(_e) {
-        KGpropertyFilter.loadPropertiesFilters();
-      }
-    };
-    items.associate = {
-      label: "Associate",
-      action: function(_e) {
-        KGpropertyFilter.associateFiltersToPropertyRestriction();
-        // KGpropertyFilter.showAssociateDialog();
-      }
-    };
-    return items;
   };
 
 
@@ -160,7 +137,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           });
         },
         function(callbackSeries) {
-        return callbackSeries()
+        //  return callbackSeries();
           self.loadInJstree(self.treeConfigs["businessObjects"], function(err, result) {
             callbackSeries(err);
           });
@@ -638,17 +615,17 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
   };
 
 
-  self.searchInPropertiesTree = function(event,inputDiv,jstreeDiv) {
+  self.searchInPropertiesTree = function(event, inputDiv, jstreeDiv) {
 
-    inputDiv="KGpropertyFilter_searchInPropertiesTreeInput"
-    jstreeDiv=self.treeConfigs["dataContainers"].jstreeDiv
+    inputDiv = "KGpropertyFilter_searchInPropertiesTreeInput";
+    jstreeDiv = self.treeConfigs["dataContainers"].jstreeDiv;
 
     if (event.keyCode != 13 && event.keyCode != 9) {
       return;
     }
-    var value = $("#"+inputDiv).val();
-    $("#"+jstreeDiv).jstree(true).search(value);
-    $("#"+inputDiv).val("");
+    var value = $("#" + inputDiv).val();
+    $("#" + jstreeDiv).jstree(true).search(value);
+    $("#" + inputDiv).val("");
   };
 
   self.loadInJstree = function(treeConfig, callback) {
@@ -668,75 +645,190 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         }
 
 
-          var jstreeData = [];
-          var existingNodes = {};
+        var jstreeData = [];
+        var existingNodes = {};
 
-          result.forEach(function(item) {
-            if (!existingNodes[item.concept.value]) {
-              existingNodes[item.concept.value] = 1;
+        result.forEach(function(item) {
+          if (!existingNodes[item.concept.value]) {
+            existingNodes[item.concept.value] = 1;
+            jstreeData.push({
+              parent: "#",
+              id: item.concept.value,
+              text: item.conceptLabel.value,
+              type: "Class",
+              data: {
+                type: "Class",
+                source: self.currentSource,
+                label: item.conceptLabel.value,
+                id: item.concept.value
+              }
+            });
+          }
+
+          for (var i = 1; i <= 10; i++) {
+            if (!item["child" + i]) {
+              break;
+            }
+            var parent = i == 1 ? item.concept.value : item["child" + (i - 1)].value;
+
+            var id = item["child" + i].value;
+            var label = item["child" + i + "Label"].value;
+            if (!existingNodes[id]) {
+              existingNodes[id] = 1;
               jstreeData.push({
-                parent: "#",
-                id: item.concept.value,
-                text: item.conceptLabel.value,
+                parent: parent,
+                id: id,
+                text: label,
                 type: "Class",
                 data: {
                   type: "Class",
                   source: self.currentSource,
-                  label: item.conceptLabel.value,
-                  id: item.concept.value
+                  label: label,
+                  id: id
                 }
               });
             }
+          }
+        });
 
-            for (var i = 1; i <= 10; i++) {
-              if (!item["child" + i]) {
-                break;
-              }
-              var parent = i == 1 ? item.concept.value : item["child" + (i - 1)].value;
+        var jstreeOptions = {
+          openAll: false,
+          withCheckboxes: true,
+          selectTreeNodeFn: KGpropertyFilter.commonJstreeActions.onSelectTreeNode,
+          // onAfterOpenNodeFn: KGpropertyFilter.onOpenClassesOrPropertyNode,
+          onCheckNodeFn: null, //KGpropertyFilter.loadPropertiesFilters,
+          tie_selection: false,
+          contextMenu: KGpropertyFilter.commonJstreeActions.getJstreePropertiesContextMenu(),
+          searchPlugin: {
+            case_insensitive: true,
+            fuzzy: false,
+            show_only_matches: true
+          }
+        };
+        common.jstree.loadJsTree(treeConfig.jstreeDiv, jstreeData, treeConfig.options.jstreeOptions || jstreeOptions);
 
-              var id = item["child" + i].value;
-              var label = item["child" + i + "Label"].value;
-              if (!existingNodes[id]) {
-                existingNodes[id] = 1;
-                jstreeData.push({
-                  parent: parent,
-                  id: id,
-                  text: label,
-                  type: "Class",
-                  data: {
-                    type: "Class",
-                    source: self.currentSource,
-                    label: label,
-                    id: id
-                  }
-                });
-              }
-            }
-          });
+        $("#waitImg").css("display", "none");
+        callback();
 
-          var options = {
-            openAll: false,
-            withCheckboxes: true,
-            selectTreeNodeFn: KGpropertyFilter.onClassOrPropertyNodeClicked,
-            onAfterOpenNodeFn: KGpropertyFilter.onOpenClassesOrPropertyNode,
-            onCheckNodeFn: null, //KGpropertyFilter.loadPropertiesFilters,
-            tie_selection: false,
-            contextMenu: KGpropertyFilter.getJstreePropertiesContextMenu(),
-            searchPlugin: {
-              case_insensitive: true,
-              fuzzy: false,
-              show_only_matches: true
-            }
-          };
-          common.jstree.loadJsTree(treeConfig.jstreeDiv, jstreeData, treeConfig.options);
-
-          $("#waitImg").css("display", "none");
-          callback();
-
-        }
-
+      }
     );
   };
 
-  return self;
-})();
+
+  self.commonJstreeActions = {
+
+    onSelectTreeNode: function(event, obj) {
+      self.currentTreeNode = obj.node;
+      self.currentTreeNode.treeDiv = event.currentTarget.id;
+
+    },
+    createChildNode: function() {
+      var parent = self.currentTreeNode.data.id;
+      var label = prompt("New child label");
+      if (!label) {
+        return;
+      }
+
+      var treeConfig = self.getTreeConfigByKey("jstreeDiv", self.currentTreeNode.treeDiv);
+      var parentPredicate = treeConfig.parentPredicate;
+      if (!parentPredicate) {
+        return alert("no parentPredicate in treeConfig");
+      }
+      var triples = [];
+      let graphUri = Config.sources[treeConfig.source].graphUri;
+      sourceUri = graphUri + common.formatStringForTriple(label, true);
+
+      triples.push({ subject: sourceUri, predicate: "rdfs:label", object: label });
+      triples.push({ subject: sourceUri, predicate: "rdf:type", object: "owl:NamedIndividual" });
+      triples.push({ subject: sourceUri, predicate: parentPredicate, object: parent });
+
+
+
+      Sparql_generic.insertTriples(treeConfig.source, triples, {}, function(err, _result) {
+        if (err) {
+          return alert(err.responseText);
+        }
+
+        MainController.UI.message("child Created");
+        var newNode={
+         id:graphUri,
+          text:label,
+          parent:parent,
+          data:{
+            id:graphUri,
+            label:label,
+            source:treeConfig.source
+          }
+
+        }
+        $("#"+ self.currentTreeNode.treeDiv).jstree()
+          .create_node(parent, newNode, "first", function (err, result) {
+            $("#"+self.currentTreeNode.treeDiv).jstree().open_node(parent);
+          });
+      })
+
+    },
+    deleteNode:function(){
+      var treeConfig = self.getTreeConfigByKey("jstreeDiv", self.currentTreeNode.treeDiv);
+      if(self.currentTreeNode.children && self.currentTreeNode.children.length>0){
+
+        var parentPredicate = treeConfig.parentPredicate;
+        if (!parentPredicate) {
+          return alert("no parentPredicate in treeConfig");
+        }
+        if(parentPredicate.indexOf("rdfs:member")<0)
+          return alert ("cannot delete nnode with children")
+      }
+
+      if(!confirm("delete node "+self.currentTreeNode.text))
+        return
+      Sparql_generic.deleteTriples(treeConfig.source,self.currentTreeNode.data.id,null,null,function(err,result){
+        if(err)
+          return alert(message)
+        $("#"+ self.currentTreeNode.treeDiv).jstree()
+          .delete_node(self.currentTreeNode.data.id)
+        return MainController.UI.message("node deleted")
+      })
+
+    },
+
+
+
+    getJstreePropertiesContextMenu:function() {
+    var items = {};
+    items.create = {
+      label: "create child",
+      action: function(_e) {
+        // pb avec source
+        KGpropertyFilter.commonJstreeActions.createChildNode();
+      }
+    };
+      items.delete = {
+        label: "delete node",
+        action: function(_e) {
+          // pb avec source
+          KGpropertyFilter.commonJstreeActions.deleteNode();
+        }
+      };
+
+    items.nodeInfos = {
+      label: "Node infos",
+      action: function(_e) {
+        // pb avec source
+        SourceBrowser.commonJstreeActions.showNodeInfos();
+      }
+    };
+
+    /*   items.associate = {
+         label: "Associate",
+         action: function(_e) {
+           KGpropertyFilter.commonJstreeActions.associateFiltersToPropertyRestriction();
+           // KGpropertyFilter.showAssociateDialog();
+         }
+       };*/
+    return items;
+  }
+};
+return self;
+})
+();

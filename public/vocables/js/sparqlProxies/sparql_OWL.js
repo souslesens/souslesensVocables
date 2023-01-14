@@ -16,20 +16,37 @@ var Sparql_OWL = (function () {
     /**
      * @param source
      * @returns sparql (composed) predicate defining chilhood relation for a source depending on its natrue (OWL ,SKOS) and sourceConfig.taxonomyPredicates
+     *
+     * @options
+     *    memberPredicate
+     *    specificPredicates
+     *
      */
     self.getSourceTaxonomyPredicates = function (source, options) {
         if (!options) options = {};
         var defaultTaxonomyPredicates = " <http://www.w3.org/2000/01/rdf-schema#subClassOf> ";
 
-        // problem for classes
-        if (false && Config.sources[source].allowIndividuals) defaultTaxonomyPredicates = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type> | " + defaultTaxonomyPredicates;
-
         if (!source) return defaultTaxonomyPredicates;
         var sourceConfig = Config.sources[source];
 
-        if (!sourceConfig || !sourceConfig.taxonomyPredicates) return defaultTaxonomyPredicates;
 
-        var str = "";
+
+        var str = " ";
+
+
+        if (options.specificPredicates) {
+            if(!Array.isArray(options.specificPredicates))
+                options.specificPredicates=[options.specificPredicates]
+            options.specificPredicates.forEach(function(predicate,index){
+                if (index > 0) str += "|";
+                str += predicate;
+            })
+            if (options.memberPredicate) str += "|^rdfs:member";
+            return str;
+        }
+
+        if (!sourceConfig || !sourceConfig.taxonomyPredicates)return  defaultTaxonomyPredicates;
+
         if (sourceConfig.taxonomyPredicates && sourceConfig.taxonomyPredicates.length == 0) return defaultTaxonomyPredicates;
         sourceConfig.taxonomyPredicates.forEach(function (item, index) {
             if (index > 0) str += "|";
@@ -152,7 +169,7 @@ var Sparql_OWL = (function () {
 
         for (let i = 1; i < descendantsDepth; i++) {
             query +=
-                "OPTIONAL { ?child" + (i + 1) + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?child" + i + "." + "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}";
+                "OPTIONAL { ?child" + (i + 1) + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel,options) + " ?child" + i + "." + "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}";
         }
 
         for (let i = 1; i < descendantsDepth; i++) {

@@ -2,14 +2,18 @@ var Lineage_linkedData_query = (function() {
   var self = {};
   self.databasesMap = {};
   self.relationObj = {};
-  self.currentRelation=null;
+  self.currentRelation = null;
   self.sqlContext = {};
   self.sqlContexts = [];
   self.existingTables = {};
+  self.isLoaded=false
 
   self.showLinkedDataDialog = function() {
     $("#mainDialogDiv").dialog("open");
+    if(self.isLoaded)
+      return;
     $("#mainDialogDiv").load("snippets/lineage/linkedData/lineage_linkedData_queryDialog.html", function() {
+      self.isLoaded=true;
       Lineage_linkedData_mappings.getSourceJoinsMappings(Lineage_sources.activeSource, {}, function(err, joinsMap) {
         if (err) {
           return alert(err.responseText);
@@ -35,13 +39,13 @@ var Lineage_linkedData_query = (function() {
   };
 
   self.onSelectRelation = function(relationId) {
-    self.currentRelation=relationId
+    self.currentRelation = relationId;
     $("#LineageLinkedDataQuery_tabs").tabs("option", { active: 1 });
     self.relationObj = self.joinsMap[relationId];
     self.databasesMap = self.joinsMap[relationId].databases;
-    for( var database in self.databasesMap) {
-      self.databasesMap[database].fromClass = self.joinsMap[relationId].from
-      self.databasesMap[database].toClass = self.joinsMap[relationId].to
+    for (var database in self.databasesMap) {
+      self.databasesMap[database].fromClass = self.joinsMap[relationId].from;
+      self.databasesMap[database].toClass = self.joinsMap[relationId].to;
     }
     common.fillSelectOptions("LineageLinkedDataQueryParams_database", Object.keys(self.databasesMap));
   };
@@ -58,8 +62,6 @@ var Lineage_linkedData_query = (function() {
           return alert(err.responseText);
         }
         self.databasesMap[database].model = model;
-
-
 
 
         var jstreeData = [];
@@ -90,9 +92,9 @@ var Lineage_linkedData_query = (function() {
         var fromColumns = model[fromTable];
         fromColumns.forEach(function(item) {
           jstreeData.push({
-            id: fromTable+"_"+item,
+            id: fromTable + "_" + item,
             text: item,
-            data: {table:fromTable,column:item},
+            data: { table: fromTable, column: item },
             parent: fromTable
           });
         });
@@ -108,9 +110,9 @@ var Lineage_linkedData_query = (function() {
         var toColumns = model[toTable];
         toColumns.forEach(function(item) {
           jstreeData.push({
-            id: toTable+"_"+item,
+            id: toTable + "_" + item,
             text: item,
-            data: {table:toTable,column:item},
+            data: { table: toTable, column: item },
             parent: toTable
           });
         });
@@ -142,7 +144,7 @@ var Lineage_linkedData_query = (function() {
   self.onColumnSelect = function() {
     var node = $("#LineageLinkedDataQueryParams_SQL_columnsTree").jstree().get_selected(true)[0];
     self.currentColumn = node.data.column;
-    self.currentTable =node.data.table;
+    self.currentTable = node.data.table;
     $("#LineageLinkedDataQueryParams_createFilterDiv").css("display", "block");
     $("#LineageLinkedDataQueryParams_ExecuteDiv").css("display", "block");
 
@@ -150,8 +152,9 @@ var Lineage_linkedData_query = (function() {
   };
 
   self.fillColumnValuesSelect = function() {
-    if( self.currentTable =="#")
+    if (self.currentTable == "#") {
       return;
+    }
     self.getColumnValues(self.currentTable, self.currentColumn, function(err, data) {
       if (data.size >= self.dataSizeLimit) {
         return alert("too many values");
@@ -250,18 +253,21 @@ var Lineage_linkedData_query = (function() {
     var selectAllColumns = $("#LineageLinkedDataQueryParams_allColumnsCBX").prop("checked");
 
 
-    if (!self.sqlContext.tables[self.currentTable]) {
-      self.sqlContext.tables[self.currentTable] = {};
+    for (var table in self.sqlContext.tables) {
+      self.sqlContext.tables[table].selectColumns = [];
     }
+
     columns.forEach(function(columnObj) {
-      if(columnObj.data && columnObj.data.column)
-      self.sqlContext.tables[columnObj.data.table].selectColumns .push(columnObj.data.column);
-    })
+      if (columnObj.data && columnObj.data.column) {
+        self.sqlContext.tables[columnObj.data.table].selectColumns.push(columnObj.data.column);
+      }
+    });
     if (!display) {
-       display=$("#LineageLinkedDataQueryParams_queryDisplaySelect").val();
+      display = $("#LineageLinkedDataQueryParams_queryDisplaySelect").val();
     }
-    if(!display)
-      display="table"
+    if (!display) {
+      display = "table";
+    }
     var selectStr = "";
     var fromStr = "";
     var whereStr = "";
@@ -270,11 +276,11 @@ var Lineage_linkedData_query = (function() {
     var hasFilter = false;
 
 
-    var fromObj=self.databasesMap[self.currentDatabase].from
-    var toObj=self.databasesMap[self.currentDatabase].to
+    var fromObj = self.databasesMap[self.currentDatabase].from;
+    var toObj = self.databasesMap[self.currentDatabase].to;
 
-    selectStr += fromObj.column +  " as [" + self.sqlContext.tables[fromObj.table].classObj.classLabel + "," + fromObj.column + ",PK]";
-    selectStr += "," +toObj.column+  " as [" + self.sqlContext.tables[toObj.table].classObj.classLabel + "," + toObj.column + ",PK]";
+    selectStr += fromObj.column + " as [" + self.sqlContext.tables[fromObj.table].classObj.classLabel + "," + fromObj.column + ",PK]";
+    selectStr += "," + toObj.column + " as [" + self.sqlContext.tables[toObj.table].classObj.classLabel + "," + toObj.column + ",PK]";
 
     for (var table in self.sqlContext.tables) {
       if (fromStr != "") {
@@ -282,19 +288,17 @@ var Lineage_linkedData_query = (function() {
       }
       fromStr += table;
 
-    if (self.sqlContext.tables[table].selectColumns) {
+      if (self.sqlContext.tables[table].selectColumns) {
         self.sqlContext.tables[table].selectColumns.forEach(function(column) {
 
 
-
-
-          if (column != table && fromObj.column!=(table+"."+column)  &&  toObj.column!=(table+"."+column) ) {
+          if (column != table && fromObj.column != (table + "." + column) && toObj.column != (table + "." + column)) {
 
             if (selectStr != "") {
               selectStr += ",";
             }
 
-            selectStr+="" + table + ".[" + column + "]" + " as [" + self.sqlContext.tables[table].classObj.classLabel + "." + column + "]";
+            selectStr += "" + table + ".[" + column + "]" + " as [" + self.sqlContext.tables[table].classObj.classLabel + "." + column + "]";
 
           }
         });
@@ -333,10 +337,6 @@ var Lineage_linkedData_query = (function() {
     var joinObj = self.databasesMap[self.currentDatabase];
 
 
-
-
-
-
     var joinStr = "";
     if (joinObj.joinTable) {
       joinStr = joinObj.joinWhere;
@@ -355,7 +355,6 @@ var Lineage_linkedData_query = (function() {
       whereStr += " AND ";
     }
     whereStr += joinStr;
-
 
 
     var sqlQuery = "SELECT " + selectStr + " FROM " + fromStr + " WHERE " + whereStr;
@@ -382,13 +381,13 @@ var Lineage_linkedData_query = (function() {
         if (data.size >= self.dataSizeLimit) {
           return alert("too many lines " + data.size + " limit " + self.dataSizeLimit);
         }
-       else if (data.size == 0) {
+        else if (data.size == 0) {
           return alert("too many values");
         }
-       else if (display == "table") {
+        else if (display == "table") {
           self.displayResultToTable(data);
         }
-       else if (display == "graph") {
+        else if (display == "graph") {
           self.displayResultToVisjsGraph(data);
         }
       },
@@ -399,7 +398,7 @@ var Lineage_linkedData_query = (function() {
     });
   };
 
-  self.displayResultToTable=function(data){
+  self.displayResultToTable = function(data) {
     var dataSet = [];
     var cols = [];
 
@@ -430,89 +429,92 @@ var Lineage_linkedData_query = (function() {
     $("#LineageLinkedDataQuery_tabs").tabs("option", { active: 2 });
     Export.showDataTable("LineageLinkedDataQuery_tableResult", cols, dataSet, null);
 
-  }
+  };
 
 
+  self.displayResultToVisjsGraph = function(data) {
 
-  self.displayResultToVisjsGraph=function(data){
-
-    var currentDatabase=self.currentDatabase
-    var fromClass=self.databasesMap[currentDatabase].fromClass
-    var toClass=self.databasesMap[currentDatabase].fromClass
+    var currentDatabase = self.currentDatabase;
+    var fromClass = self.databasesMap[currentDatabase].fromClass;
+    var toClass = self.databasesMap[currentDatabase].toClass;
 
 
-    var visjsData={nodes:[],edges:[]}
-    var existingNodes=visjsGraph.getExistingIdsMap();
+    var visjsData = { nodes: [], edges: [] };
+    var existingNodes = visjsGraph.getExistingIdsMap();
 
-    if(!existingNodes[fromClass.id]){
-      existingNodes[fromClass.id]=1
+    if (!existingNodes[fromClass.classId]) {
+      existingNodes[fromClass.classId] = 1;
       visjsData.nodes.push({
-        id:fromClass.id,
-         label: fromClass.label,
+        id: fromClass.classId,
+        label: fromClass.classLabel,
         shape: Lineage_classes.defaultShape,
-        color:Lineage_classes.getSourceColor(Lineage_sources.activeSource),
-        data:{
-          id:fromClass.id,
+        color: Lineage_classes.getSourceColor(Lineage_sources.activeSource),
+        data: {
+          id: fromClass.classId,
           label: fromClass.label,
-          source:Lineage_sources.activeSource,
-          type:"class"
+          source: Lineage_sources.activeSource,
+          type: "class"
         }
-      })
+      });
     }
-    if(!existingNodes[toClass.id]){
-      existingNodes[toClass.id]=1
+    if (!existingNodes[toClass.classId]) {
+      existingNodes[toClass.classId] = 1;
       visjsData.nodes.push({
-        id:toClass.id,
-        label: toClass.label,
+        id: toClass.classId,
+        label: toClass.classLabel,
         shape: Lineage_classes.defaultShape,
-        color:Lineage_classes.getSourceColor(Lineage_sources.activeSource),
-        data:{
-          id:toClass.id,
+        color: Lineage_classes.getSourceColor(Lineage_sources.activeSource),
+        data: {
+          id: toClass.classId,
           label: toClass.label,
-          source:Lineage_sources.activeSource,
-          type:"class"
+          source: Lineage_sources.activeSource,
+          type: "class"
         }
-      })
+      });
     }
-    var primaryKeyFromColumn=null;
-    var primaryKeyToColumn=null;
-    for( var columnAlias in data[0]){
+    var primaryKeyFromColumn = null;
+    var primaryKeyToColumn = null;
+    for (var columnAlias in data[0]) {
 
-      var array=columnAlias.split(",")
-      if(array.length==3) {
-        if(array[0]== fromClass.label)
-          primaryKeyFromColumn=columnAlias
-        else if(array[0]== toClass.label)
-          primaryKeyToColumn=columnAlias
+      var array = columnAlias.split(",");
+      if (array.length == 3) {
+        if (array[0] == fromClass.classLabel) {
+          primaryKeyFromColumn = columnAlias;
+        }
+        else if (array[0] == toClass.classLabel) {
+          primaryKeyToColumn = columnAlias;
+        }
 
       }
     }
-    data.forEach(function(item){
-      var idFrom=item[primaryKeyFromColumn]
-      var idTo=item[primaryKeyToColumn]
+    data.forEach(function(item) {
+      var idFrom = item[primaryKeyFromColumn];
+      var idTo = item[primaryKeyToColumn];
 
-        if(!existingNodes[idFrom]) {
-          existingNodes[idFrom] = 1
-          visjsData.nodes.push({
+      if (!existingNodes[idFrom]) {
+        existingNodes[idFrom] = 1;
+        visjsData.nodes.push({
+          id: idFrom,
+          label: idFrom,
+          shape: "square",
+          size: Lineage_classes.defaultShapeSize,
+          color: "brown",
+          data: {
             id: idFrom,
             label: idFrom,
-            shape: Lineage_classes.defaultShape,
-            color:  "yellow",
-            data: {
-              id: idFrom,
-              label: idFrom,
-              source: self.currentDatabase,
-              type: "linkedSQLdata"
-            }
-          })
-        }
+            source: self.currentDatabase,
+            type: "linkedSQLdata"
+          }
+        });
+      }
 
-      if(!existingNodes[idTo]) {
-        existingNodes[idTo] = 1
+      if (!existingNodes[idTo]) {
+        existingNodes[idTo] = 1;
         visjsData.nodes.push({
           id: idTo,
           label: idTo,
           shape: "square",
+          size: Lineage_classes.defaultShapeSize,
           color: "grey",
           data: {
             id: idTo,
@@ -520,10 +522,70 @@ var Lineage_linkedData_query = (function() {
             source: self.currentDatabase,
             type: "linkedSQLdata"
           }
-        })
+        });
+      }
+      var edgeId = idFrom + "_" + fromClass.classId;
+      if (!existingNodes[edgeId]) {
+        existingNodes[edgeId] = 1;
+        visjsData.edges.push({
+          id: edgeId,
+          from: idFrom,
+          to: fromClass.classId,
+          arrows: {
+            to: {
+              enabled: true,
+              type: "solid",
+              scaleFactor: 0.5
+            }
+          },
+          color: Lineage_classes.defaultEdgeColor
+
+        });
+      }
+      var edgeId = idTo + "_" + toClass.classId;
+      if (!existingNodes[edgeId]) {
+        existingNodes[edgeId] = 1;
+        visjsData.edges.push({
+          id: edgeId,
+          from: idTo,
+          to: toClass.classId,
+          arrows: {
+            to: {
+              enabled: true,
+              type: "solid",
+              scaleFactor: 0.5
+            }
+          },
+          color: Lineage_classes.defaultEdgeColor
+
+        });
+      }
+      var edgeId = idFrom + "_" + idTo;
+      if (!existingNodes[edgeId]) {
+        existingNodes[edgeId] = 1;
+        visjsData.edges.push({
+          id: edgeId,
+          from: idFrom,
+          to: idTo,
+          arrows: {
+            to: {
+              enabled: true,
+              type: "solid",
+              scaleFactor: 0.5
+            }
+          },
+          dashes: true,
+          color: "blue",
+          data: {
+            id: edgeId,
+            source: self.currentDatabase,
+            type: "linkedSQLdataEdge"
+          }
+        });
       }
 
-      })
+
+    });
 
     if (!visjsGraph.data || !visjsGraph.data.nodes) {
       self.drawNewGraph(visjsData);
@@ -532,7 +594,7 @@ var Lineage_linkedData_query = (function() {
     visjsGraph.data.edges.add(visjsData.edges);
     visjsGraph.network.fit();
     $("#waitImg").css("display", "none");
-  }
+  };
 
   self.copySqlToClipboard = function() {
     var sql = $("#LineageLinkedDataQueryParams_SqlDiv").html();
@@ -543,14 +605,13 @@ var Lineage_linkedData_query = (function() {
   };
 
   self.clearQuery = function() {
-    self.sqlContexts = {}
-    $("#LineageLinkedDataQueryParams_SqlDiv").html("")
-    $("#LineageLinkedDataQueryParams_SQL_columnsTree").jstree().uncheck_all()
-    self.onSelectRelation(self.currentRelation)
+    self.sqlContexts = {};
+    $("#LineageLinkedDataQueryParams_SqlDiv").html("");
+    $("#LineageLinkedDataQueryParams_SQL_columnsTree").jstree().uncheck_all();
+    self.onSelectRelation(self.currentRelation);
 
 
-
-  }
+  };
 
   self.viewSQL = function() {
     $("#LineageLinkedDataQueryParams_SqlDivWrapper").css("display", "block");

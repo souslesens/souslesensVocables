@@ -184,8 +184,9 @@ var CsvTripleBuilder = {
 
                         //load SQL dataSource
                         function (callbackSeries) {
-                            if (!mapping.dataSource) return callbackSeries();
-                            sqlServerProxy.getData(dataSource.dbName, dataSource.sql, function (err, result) {
+                            if (!mapping.databaseSource) return callbackSeries();
+                            var sqlQuery= "select * from "+mapping.fileName;
+                            sqlServerProxy.getData(mapping.databaseSource.dbName,sqlQuery, function (err, result) {
                                 if (err) return callbackSeries(err);
                                 csvData = [result];
                                 callbackSeries();
@@ -245,6 +246,7 @@ var CsvTripleBuilder = {
                                                         var lineError = "";
                                                         mapping.tripleModels.forEach(function (item) {
                                                             for (var key in line) {
+                                                                line[key]="" +line[key]
                                                                 if (line[key] && !CsvTripleBuilder.isUri(line[key])) line[key] = util.formatStringForTriple(line[key]);
                                                             }
 
@@ -816,7 +818,8 @@ var CsvTripleBuilder = {
                     var mappingsFilePath = path.join(__dirname, "../../data/" + dirName + "/" + mappingFileName);
                     var mappings = "" + fs.readFileSync(mappingsFilePath);
                     mappings = JSON.parse(mappings);
-                    if (typeof options.dataLocation == "string") mappings.csvDataFilePath = path.join(__dirname, "../../data/" + dirName + "/" + options.dataLocation);
+                    if (typeof options.dataLocation == "string")
+                        mappings.csvDataFilePath = path.join(__dirname, "../../data/" + dirName + "/" + options.dataLocation);
                     else mappings.datasource = options.dataLocation;
 
                     function getFunction(argsArray, fnStr, callback) {

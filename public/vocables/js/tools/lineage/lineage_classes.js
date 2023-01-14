@@ -515,7 +515,7 @@ sourceLabels.sort();
                 }
             },
         };
-        if (true) {
+        if (Lineage_sources.isSourceEditable) {
             // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
             options.manipulation = {
                 enabled: true,

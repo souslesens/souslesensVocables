@@ -179,9 +179,16 @@ $("#lineage_actionDiv_title_hidden").css("display","flex")*/
     }
   };
 
-  self.showHideEditButtons = function(source) {
-    if (!visjsGraph.isGraphNotEmpty()) {
+  self.showHideEditButtons = function(source,hide) {
+   /* var x=  $(".vis-edit-mode").length
+    if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
       return;
+    }*/
+    if(! visjsGraph.network)
+      return;
+    if(hide){
+      visjsGraph.network.disableEditMode();
+      $(".vis-edit-mode").css("display", "none");
     }
     var isNodeEditable = Lineage_sources.isSourceEditable(source);
     if (isNodeEditable) {
@@ -377,6 +384,7 @@ sourceDivId +
   };
 
   self.setAllWhiteBoardSources = function(remove) {
+    self.showHideEditButtons (null, true)
     if (remove) {
       Lineage_sources.fromAllWhiteboardSources = true;
     }
@@ -633,7 +641,7 @@ sourceDivId +
 
     self.realAccessControl = currentAccessControls.includes("readwrite") ? "readwrite" : currentAccessControls.includes("read") ? "read" : "forbidden";
 
-    if (self.realAccessControl === "readwrite" && Config.sources[source].editable > -1) {
+    if (self.realAccessControl === "readwrite" && Config.sources[source].editable) {
       return true;
     }
     else {

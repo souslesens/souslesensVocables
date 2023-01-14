@@ -126,6 +126,7 @@ var KGcreator = (function () {
                     return alert("Source must have an upper ontology import");
                 }
                 $("#KGcreator_owlSourceInput").html(source);
+                self.currentSlsvSource=source
                 $("#KGcreator_topLevelOntologiesInput").html(Config.currentTopLevelOntology);
                 self.topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
                 if (callback) {
@@ -403,7 +404,23 @@ var KGcreator = (function () {
     };
     self.getSystemsTreeContextMenu = function () {
         var items = {};
-
+        items.addBasicIndividual = {
+            label: "addBasicIndividual",
+            action: function (_e) {
+                // pb avec source
+                KGcreator.addBasicMapping("owl:NamedIndividual")
+            },
+        };
+        items.addBasicClass = {
+            label: "addBasicClass",
+            action: function (_e) {
+                // pb avec source
+                KGcreator.addBasicMapping("owl:Class")
+            },
+        };
+        
+        
+        
         items.setAsSubject = {
             label: "Subject",
             action: function (_e) {
@@ -433,6 +450,8 @@ var KGcreator = (function () {
                 navigator.clipboard.writeText(self.currentTreeNode.data.id);
             },
         };
+      
+
 
         items.showLookupDialog = {
             label: "Add lookup",
@@ -608,6 +627,30 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
             }
         );
     };
+    self.addBasicMapping=function(type){
+        var column=self.currentTreeNode.data.id
+        self.currentJsonObject.tripleModels.push({
+            s:column,
+            p:"rdf:type",
+            o:type
+        });
+        self.currentJsonObject.tripleModels.push({
+            s:column,
+            p:"rdfs:label",
+            o:column,
+            "isString":true
+        });
+        if(! self.currentJsonObject.transform[column])
+        self.currentJsonObject.transform[column]= "function{if (value=='null') return null;if(mapping.isString && role=='o') return value; else return '"+column+"_'+value;}"
+
+
+        self.mainJsonEditor.load(self.currentJsonObject);
+        self.mainJsonEditorModified = true;
+
+        $("#KGcreator_subjectInput").val(column);
+    }
+
+
 
     self.addTripleToTA = function () {
         $("#KGcreator_tripleMessageDiv").html("");
@@ -807,12 +850,14 @@ self.saveMappings({classId:classId})
 
         var payload = {};
         if (self.currentDataSourceModel) {
-            //database SQL
+
             self.currentCsvDir = self.currentdabase.dbName;
 
             self.currentJsonObject.databaseSource = self.currentdabase;
+
             payload = {
-                dir: "SQL/",
+
+                dir: "CSV/"+self.currentSlsvSource,
                 fileName: self.currentdabase.dbName + "_" + self.currentJsonObject.fileName + ".json",
                 data: JSON.stringify(self.currentJsonObject),
             };
@@ -843,25 +888,7 @@ self.saveMappings({classId:classId})
             },
         });
     };
-    /*  self.copyMappings = function() {
-try {
-var data = self.mainJsonEditor.get();
 
-data.tripleModels.forEach(function(item) {
-if (item.o["_function(line, mapping)_"]) {
-var expression = item.o["_function(line, mapping)_"];
-try {
-var fn = new Function("line", "mapping", expression);
-} catch (err) {
-$("#KGcreator_dataSampleDiv").val(err);
-}
-item.o = fn;
-}
-});
-} catch (err) {
-alert(err.message);
-}
-};*/
     self.clearMappings = function () {
         if (confirm("Clear mappings")) {
             self.mainJsonEditor.load({});
@@ -891,11 +918,11 @@ alert(err.message);
 
             var payload = {};
             if (self.currentDataSourceModel) {
-                //database SQL
+
                 var dbName = self.currentDbName;
                 payload = {
-                    dir: "SQL/",
-                    name: dbName + "_" + +csvFileName + ".json",
+                    dir: "CSV/"+self.currentSlsvSource,
+                    name: dbName + "_" + csvFileName + ".json",
                 };
             } else {
                 payload = {
@@ -962,7 +989,7 @@ if (selectedFiles.length > 0);*/
 
         var dataLocation = "";
         if (self.currentSourceType != "CSV") {
-            return alert("only triples from csv sources can be generated : IN PROGRESS, COMING SOON");
+           // return alert("only triples from csv sources can be generated : IN PROGRESS, COMING SOON");
             dataLocation = { xxx: "ee" };
         } else {
             dataLocation = self.currentJsonObject.fileName;
@@ -1008,11 +1035,21 @@ if (selectedFiles.length > 0);*/
                 return alert(_err);
             }
             $("#KGcreator_dataSampleDiv").val("");
-            var payload = {
-                dir: "CSV/" + self.currentCsvDir,
-                fileName: self.currentSource + "_" + self.currentJsonObject.fileName + ".json",
-                options: JSON.stringify(options),
-            };
+            var payload
+            if (self.currentSourceType == "CSV") {
+                payload = {
+                    dir: "CSV/" + self.currentCsvDir,
+                    fileName: self.currentSource + "_" + self.currentJsonObject.fileName + ".json",
+                    options: JSON.stringify(options),
+                };
+            } else  if (self.currentSourceType == "DATABASE") {
+                payload = {
+                    dir: "CSV/"+self.currentSlsvSource,
+                    fileName: self.currentDbName + "_" + self.currentJsonObject.fileName + ".json",
+                    options: JSON.stringify(options),
+                };
+            }
+
 
             $.ajax({
                 type: "POST",
@@ -1095,7 +1132,7 @@ if (selectedFiles.length > 0);*/
             }
 
             var filter = "?p =<http://purl.org/dc/terms/creator> && ?o='KGcreator'";
-            Sparql_generic.deleteTriplesWithFilter(self.currentSource, filter, function (err, result) {
+            Sparql_generic.deleteTriplesWithFilter(self.currentSlsvSource, filter, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }

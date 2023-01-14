@@ -11,34 +11,28 @@
 
 <div id="KGpropertyFilter_currentPropertyDiv" style="font-weight: bold; display: block; border: #0000cc solid 2px; background-color: #ddd">
     <span id="KGpropertyFilter_currentAspectSpan"></span>
-    <button onclick="KGpropertyFilter.associateFiltersToPropertyRestriction()" style="background-color: mediumseagreen">Associate Filters</button>
+    <!--<button onclick="KGpropertyFilter.associateFiltersToPropertyRestriction()" style="background-color: mediumseagreen">Associate Filters</button>-->
     <!-- <button onclick="KGpropertyFilter.saveNewRestrictionFilterTriples()">Save Filters</button>-->
 </div>
 
 <div id="KGpropertyFilter_rightPanelTabs" class="jstreeContainer">
     <ul>
-        <li style="background-color: #d9bb73"><a href="#KGpropertyFilter_MDMentities_accordionPanel">MDMentities</a></li>
-        <li style="background-color: beige"><a href="#KGpropertyFilter_LCI_accordionPanel">LifeCycle</a></li>
-        <li style="background-color: #d9bb73"><a href="#KGpropertyFilter_disiciplines_accordionPanel">Disciplines</a></li>
-        <li style="background-color: #d9bb73"><a href="#KGpropertyFilter_organization_accordionPanel">Organizations</a></li>
+        <li style="background-color: #d9bb73"><a href="#KGpropertyFilter_templates_accordionPanel">Templates</a></li>
+        <li style="background-color: beige"><a href="#KGpropertyFilter_disciplines_accordionPanel">Disciplines</a></li>
+        <li style="background-color: #d9bb73"><a href="#KGpropertyFilter_actors_accordionPanel">Actors</a></li>
+        <li style="background-color: #d9bb73"><a href="#KGpropertyFilter_systems_accordionPanel">Systems</a></li>
+        <li style="background-color: #d9bb73"><a href="#KGpropertyFilter_businessObjects_accordionPanel">BOs</a></li>
+
     </ul>
 
-    <div class="max-height" id="KGpropertyFilter_MDMentities_accordionPanel">
+    <div class="max-height" id="KGpropertyFilter_templates_accordionPanel">
         <div class="KGpropertyFilter_tripleDiv">
             <div class="jstreeContainer KGpropertyFilter_tree">
-                <div id="KGpropertyFilter_MDMentitiesTree"></div>
+                <div id="KGpropertyFilter_templatesTree"></div>
             </div>
         </div>
     </div>
-    <div class="max-height" id="KGpropertyFilter_LCI_accordionPanel">
-        <div class="KGpropertyFilter_tripleDiv">
-            <div class="jstreeContainer KGpropertyFilter_tree">
-                <div id="KGpropertyFilter_lifeCycleTree"></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="max-height" id="KGpropertyFilter_disiciplines_accordionPanel">
+    <div class="max-height" id="KGpropertyFilter_disciplines_accordionPanel">
         <div class="KGpropertyFilter_tripleDiv">
             <div class="jstreeContainer KGpropertyFilter_tree">
                 <div id="KGpropertyFilter_disciplinesTree"></div>
@@ -46,10 +40,25 @@
         </div>
     </div>
 
-    <div class="max-height" id="KGpropertyFilter_organization_accordionPanel">
+    <div class="max-height" id="KGpropertyFilter_actors_accordionPanel">
         <div class="KGpropertyFilter_tripleDiv">
             <div class="jstreeContainer KGpropertyFilter_tree">
-                <div id="KGpropertyFilter_organizationsTree"></div>
+                <div id="KGpropertyFilter_actorsTree"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-height" id="KGpropertyFilter_systems_accordionPanel">
+        <div class="KGpropertyFilter_tripleDiv">
+            <div class="jstreeContainer KGpropertyFilter_tree">
+                <div id="KGpropertyFilter_systemsTree"></div>
+            </div>
+        </div>
+    </div>
+    <div class="max-height" id="KGpropertyFilter_businessObjects_accordionPanel">
+        <div class="KGpropertyFilter_tripleDiv">
+            <div class="jstreeContainer KGpropertyFilter_tree">
+                <div id="KGpropertyFilter_businessObjectsTree"></div>
             </div>
         </div>
     </div>

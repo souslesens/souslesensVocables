@@ -43,10 +43,10 @@ var KGpropertyFilter = (function() {
       jstreeDiv: "KGpropertyFilter_systemsTree"
     },
     businessObjects: {
-      editable:false,
+      editable: false,
       source: "GIDEA-RAW",
       topUris: ["http://datalenergies.total.com/resource/tsf/gidea-raw/LogicalEntity"],
-      options: {specificPredicates:["?p"]  },
+      options: { specificPredicates: ["?p"] },
       levels: 5,
       jstreeDiv: "KGpropertyFilter_businessObjectsTree"
     }
@@ -71,6 +71,7 @@ var KGpropertyFilter = (function() {
       var sources = ["", "IDCP"];
       common.fillSelectOptions("KGpropertyFilter_sourceSelect", sources, true);
       $("#KGpropertyFilter_searchInPropertiesTreeInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
+      self.onChangeSourceSelect ("IDCP")
     });
 
     //  MainController.UI.showHideRightPanel(true);
@@ -137,10 +138,12 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           });
         },
         function(callbackSeries) {
-        //  return callbackSeries();
-          self.loadInJstree(self.treeConfigs["businessObjects"], function(err, result) {
-            callbackSeries(err);
-          });
+          $("#GenericTools_searchAllSourcesTermInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
+        //  $("#KGpropertyFilter_businessObjects_searchDiv").load("./snippets/searchAll.html");
+          return callbackSeries();
+          /*  self.loadInJstree(self.treeConfigs["businessObjects"], function(err, result) {
+                callbackSeries(err);
+              });*/
         },
         function(callbackSeries) {
           return callbackSeries();
@@ -171,288 +174,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
   };
 
 
-  self.loadLifeCycleTree = function(callback) {
-    Sparql_OWL.getNodeChildren("ISO-15663", null, null, 2, {}, function(err, result) {
-      if (err) {
-        return callback(err.responseText);
-      }
-      var jstreeData = [];
-      var existingNodes = {};
-      result.forEach(function(item) {
-        if (!existingNodes[item.concept.value]) {
-          existingNodes[item.concept.value] = 1;
-          jstreeData.push({
-            id: item.concept.value,
-            text: item.conceptLabel.value,
-            parent: "#",
-            data: {
-              id: item.concept.value,
-              label: item.conceptLabel.value,
-              source: "ISO-15663"
-            }
-          });
-        }
-        if (!existingNodes[item.child1.value]) {
-          existingNodes[item.child1.value] = 1;
-          jstreeData.push({
-            id: item.child1.value,
-            text: item.child1Label.value,
-            parent: item.concept.value,
-            data: {
-              id: item.child1.value,
-              label: item.child1Label.value,
-              source: "ISO-15663"
-            }
-          });
-        }
-      });
-      common.array.sort(jstreeData, "text");
-      var options = { openAll: false, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
-      common.jstree.loadJsTree("KGpropertyFilter_lifeCycleTree", jstreeData, options, function() {
-        $("#KGpropertyFilter_lifeCycleTree").jstree().open_node("http://rds.posccaesar.org/ontology/lis14/rdl/Activity");
-      });
 
-      callback();
-    });
-  };
-
-  self.loadDisciplinesTree = function(callback) {
-    Sparql_OWL.getNodeChildren("ISO_15926-PCA-2", null, ["http://data.15926.org/rdl/RDS6811233"], 3, {}, function(err, result) {
-      if (err) {
-        return callback(err.responseText);
-      }
-      var jstreeData = [];
-      var existingNodes = {};
-      result.forEach(function(item) {
-        if (!existingNodes[item.concept.value]) {
-          existingNodes[item.concept.value] = 1;
-          jstreeData.push({
-            id: item.concept.value,
-            text: item.conceptLabel.value,
-            parent: "#",
-            data: {
-              id: item.concept.value,
-              label: item.conceptLabel.value,
-              source: "ISO-15663"
-            }
-          });
-        }
-        if (!existingNodes[item.child1.value]) {
-          existingNodes[item.child1.value] = 1;
-          jstreeData.push({
-            id: item.child1.value,
-            text: item.child1Label.value,
-            parent: item.concept.value,
-            data: {
-              id: item.child1.value,
-              label: item.child1Label.value,
-              source: "ISO-15663"
-            }
-          });
-        }
-      });
-      var options = { openAll: true, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
-      common.array.sort(jstreeData, "text");
-      common.jstree.loadJsTree("KGpropertyFilter_disciplinesTree", jstreeData, options);
-      callback();
-    });
-  };
-
-  self.loadTemplatesTree = function(callback) {
-    Sparql_OWL.getNodeChildren("IDCP", null, ["http://datalenergies.total.com/resource/tsf/idcp/template"], 3, {}, function(err, result) {
-      if (err) {
-        return callback(err.responseText);
-      }
-      var jstreeData = [];
-      var existingNodes = {};
-      result.forEach(function(item) {
-        if (!existingNodes[item.concept.value]) {
-          existingNodes[item.concept.value] = 1;
-          jstreeData.push({
-            id: item.concept.value,
-            text: item.conceptLabel.value,
-            parent: "#",
-            data: {
-              id: item.concept.value,
-              label: item.conceptLabel.value,
-              source: "ISO-15663"
-            }
-          });
-        }
-        if (!existingNodes[item.child1.value]) {
-          existingNodes[item.child1.value] = 1;
-          jstreeData.push({
-            id: item.child1.value,
-            text: item.child1Label.value,
-            parent: item.concept.value,
-            data: {
-              id: item.child1.value,
-              label: item.child1Label.value,
-              source: "ISO-15663"
-            }
-          });
-        }
-      });
-      var options = { openAll: true, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
-      common.array.sort(jstreeData, "text");
-      common.jstree.loadJsTree("KGpropertyFilter_templatesTree", jstreeData, options);
-      callback();
-    });
-  };
-
-
-  self.loadOrganizationsTree = function(callback) {
-    Sparql_OWL.getNodeChildren("ISO_15926-org", null, ["http://data.15926.org/lci/Organization"], 2, {}, function(err, result) {
-      if (err) {
-        return callback(err.responseText);
-      }
-      var jstreeData = [];
-      var existingNodes = {};
-      result.forEach(function(item) {
-        if (!existingNodes[item.concept.value]) {
-          existingNodes[item.concept.value] = 1;
-          jstreeData.push({
-            id: item.concept.value,
-            text: item.conceptLabel.value,
-            parent: "#",
-            data: {
-              id: item.concept.value,
-              label: item.conceptLabel.value,
-              source: "ISO-15663"
-            }
-          });
-        }
-        if (!existingNodes[item.child1.value]) {
-          existingNodes[item.child1.value] = 1;
-          jstreeData.push({
-            id: item.child1.value,
-            text: item.child1Label.value,
-            parent: item.concept.value,
-            data: {
-              id: item.child1.value,
-              label: item.child1Label.value,
-              source: "ISO-15663"
-            }
-          });
-        }
-      });
-      common.array.sort(jstreeData, "text");
-      var options = { openAll: true, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
-      common.jstree.loadJsTree("KGpropertyFilter_organizationsTree", jstreeData, options);
-      callback();
-    });
-  };
-
-  /* self.loadDisciplinesTree = function(callback) {
-  Sparql_OWL.getNodeChildren("ISO_15926-org", null, ["http://data.15926.org/cfihos/15926200"], 2, {}, function(err, result) {
-    if (err) return callback(err.responseText);
-    var jstreeData = [];
-    var existingNodes = {};
-    result.forEach(function(item) {
-      if (!existingNodes[item.concept.value]) {
-        existingNodes[item.concept.value] = 1;
-        jstreeData.push({
-          id: item.concept.value,
-          text: item.conceptLabel.value,
-          parent: "#",
-          data: {
-            id: item.concept.value,
-            label: item.conceptLabel.value,
-            source: "ISO-15663"
-          }
-        });
-      }
-      if (!existingNodes[item.child1.value]) {
-        existingNodes[item.child1.value] = 1;
-        jstreeData.push({
-          id: item.child1.value,
-          text: item.child1Label.value,
-          parent: item.concept.value,
-          data: {
-            id: item.child1.value,
-            label: item.child1Label.value,
-            source: "ISO-15663"
-          }
-        });
-      }
-    });
-    var options = { openAll: true, withCheckboxes: true };
-    common.array.sort(jstreeData, "text");
-    common.jstree.loadJsTree("KGpropertyFilter_disciplinesTree", jstreeData, options);
-    callback();
-  });
-};*/
-  self.loadMDMentitiesTree = function(callback) {
-    var jstreeData = [];
-
-    jstreeData.push({
-      id: "http://data.total.com/resource/tsf/mdm/Tag",
-      text: "1-Tag",
-      parent: "#",
-      data: {
-        id: "http://data.total.com/resource/tsf/mdm/Tag",
-        label: "Tag",
-        source: "http://data.total.com/resource/tsf/mdm/"
-      }
-    });
-
-    jstreeData.push({
-      id: "http://data.total.com/resource/tsf/mdm/FunctionalClass",
-      text: "2-FunctionalClass",
-      parent: "#",
-      data: {
-        id: "http://data.total.com/resource/tsf/mdm/FunctionalClass",
-        label: "FunctionalClass",
-        source: "http://data.total.com/resource/tsf/mdm/"
-      }
-    });
-    jstreeData.push({
-      id: "http://data.total.com/resource/tsf/mdm/PhysicalClass",
-      text: "3-PhysicalClass",
-      parent: "#",
-      data: {
-        id: "http://data.total.com/resource/tsf/mdm/PhysicalClass",
-        label: "PhysicalClass",
-        source: "http://data.total.com/resource/tsf/mdm/"
-      }
-    });
-    jstreeData.push({
-      id: "http://data.total.com/resource/tsf/mdm/Model",
-      text: "4-Model",
-      parent: "#",
-      data: {
-        id: "http://data.total.com/resource/tsf/mdm/Model",
-        label: "Model",
-        source: "http://data.total.com/resource/tsf/mdm/"
-      }
-    });
-
-    jstreeData.push({
-      id: "http://data.total.com/resource/tsf/mdm/ModelItem",
-      text: "5-ModelItem",
-      parent: "#",
-      data: {
-        id: "http://data.total.com/resource/tsf/mdm/ModelItem",
-        label: "ModelItem",
-        source: "http://data.total.com/resource/tsf/mdm/"
-      }
-    });
-    jstreeData.push({
-      id: "http://data.total.com/resource/tsf/mdm/SparePart",
-      text: "6-SparePart",
-      parent: "#",
-      data: {
-        id: "http://data.total.com/resource/tsf/mdm/SparePart",
-        label: "SparePart",
-        source: "http://data.total.com/resource/tsf/mdm/"
-      }
-    });
-
-    var options = { openAll: true, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
-    common.array.sort(jstreeData, "text");
-    common.jstree.loadJsTree("KGpropertyFilter_MDMentitiesTree", jstreeData, options);
-    callback();
-  };
 
   self.execSparqlFilterQuery = function(classIds, callback) {
     var sparql =
@@ -693,11 +415,11 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
         var jstreeOptions = {
           openAll: false,
-          withCheckboxes: true,
+          // withCheckboxes: true,
           selectTreeNodeFn: KGpropertyFilter.commonJstreeActions.onSelectTreeNode,
           // onAfterOpenNodeFn: KGpropertyFilter.onOpenClassesOrPropertyNode,
-          onCheckNodeFn: null, //KGpropertyFilter.loadPropertiesFilters,
-          tie_selection: false,
+          //   onCheckNodeFn: null, //KGpropertyFilter.loadPropertiesFilters,
+          //  tie_selection: false,
           contextMenu: KGpropertyFilter.commonJstreeActions.getJstreePropertiesContextMenu(),
           searchPlugin: {
             case_insensitive: true,
@@ -743,66 +465,75 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       triples.push({ subject: sourceUri, predicate: parentPredicate, object: parent });
 
 
-
       Sparql_generic.insertTriples(treeConfig.source, triples, {}, function(err, _result) {
         if (err) {
           return alert(err.responseText);
         }
 
         MainController.UI.message("child Created");
-        var newNode={
-         id:graphUri,
-          text:label,
-          parent:parent,
-          data:{
-            id:graphUri,
-            label:label,
-            source:treeConfig.source
+        var newNode = {
+          id: graphUri,
+          text: label,
+          parent: parent,
+          data: {
+            id: graphUri,
+            label: label,
+            source: treeConfig.source
           }
 
-        }
-        $("#"+ self.currentTreeNode.treeDiv).jstree()
-          .create_node(parent, newNode, "first", function (err, result) {
-            $("#"+self.currentTreeNode.treeDiv).jstree().open_node(parent);
+        };
+        $("#" + self.currentTreeNode.treeDiv).jstree()
+          .create_node(parent, newNode, "first", function(err, result) {
+            $("#" + self.currentTreeNode.treeDiv).jstree().open_node(parent);
           });
-      })
+      });
 
     },
-    deleteNode:function(){
+    deleteNode: function() {
       var treeConfig = self.getTreeConfigByKey("jstreeDiv", self.currentTreeNode.treeDiv);
-      if(self.currentTreeNode.children && self.currentTreeNode.children.length>0){
+      if (self.currentTreeNode.children && self.currentTreeNode.children.length > 0) {
 
         var parentPredicate = treeConfig.parentPredicate;
         if (!parentPredicate) {
           return alert("no parentPredicate in treeConfig");
         }
-        if(parentPredicate.indexOf("rdfs:member")<0)
-          return alert ("cannot delete nnode with children")
+        if (parentPredicate.indexOf("rdfs:member") < 0) {
+          return alert("cannot delete nnode with children");
+        }
       }
 
-      if(!confirm("delete node "+self.currentTreeNode.text))
-        return
-      Sparql_generic.deleteTriples(treeConfig.source,self.currentTreeNode.data.id,null,null,function(err,result){
-        if(err)
-          return alert(message)
-        $("#"+ self.currentTreeNode.treeDiv).jstree()
-          .delete_node(self.currentTreeNode.data.id)
-        return MainController.UI.message("node deleted")
-      })
+      if (!confirm("delete node " + self.currentTreeNode.text)) {
+        return;
+      }
+      Sparql_generic.deleteTriples(treeConfig.source, self.currentTreeNode.data.id, null, null, function(err, result) {
+        if (err) {
+          return alert(message);
+        }
+        $("#" + self.currentTreeNode.treeDiv).jstree()
+          .delete_node(self.currentTreeNode.data.id);
+        return MainController.UI.message("node deleted");
+      });
+
+    },
+
+    searchBO:function(){
+      var term=self.currentTreeNode.text
+      $("#GenericTools_searchAllSourcesTermInput").val(term);
+      $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 4);
+      KGpropertyFilter.rightPanelsActions.searchBusinessObjects()
 
     },
 
 
-
-    getJstreePropertiesContextMenu:function() {
-    var items = {};
-    items.create = {
-      label: "create child",
-      action: function(_e) {
-        // pb avec source
-        KGpropertyFilter.commonJstreeActions.createChildNode();
-      }
-    };
+    getJstreePropertiesContextMenu: function() {
+      var items = {};
+      items.create = {
+        label: "create child",
+        action: function(_e) {
+          // pb avec source
+          KGpropertyFilter.commonJstreeActions.createChildNode();
+        }
+      };
       items.delete = {
         label: "delete node",
         action: function(_e) {
@@ -811,24 +542,48 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         }
       };
 
-    items.nodeInfos = {
-      label: "Node infos",
-      action: function(_e) {
-        // pb avec source
-        SourceBrowser.commonJstreeActions.showNodeInfos();
-      }
-    };
+      items.nodeInfos = {
+        label: "Node infos",
+        action: function(_e) {
+          // pb avec source
+          KGpropertyFilter.commonJstreeActions.showNodeInfos();
+        }
+      };
+      items.searchBO = {
+        label: "Node infos",
+        action: function(_e) {
+          // pb avec source
+          KGpropertyFilter.commonJstreeActions.searchBO()
+        }
+      };
 
-    /*   items.associate = {
-         label: "Associate",
-         action: function(_e) {
-           KGpropertyFilter.commonJstreeActions.associateFiltersToPropertyRestriction();
-           // KGpropertyFilter.showAssociateDialog();
-         }
-       };*/
-    return items;
+
+      /*   items.associate = {
+           label: "Associate",
+           action: function(_e) {
+             KGpropertyFilter.commonJstreeActions.associateFiltersToPropertyRestriction();
+             // KGpropertyFilter.showAssociateDialog();
+           }
+         };*/
+      return items;
+    }
+
+  };
+
+  self.rightPanelsActions = {
+    searchBusinessObjects: function(event) {
+      if (event &&  event.keyCode != 13 && event.keyCode != 9) {
+        return;
+      }
+      var options = {
+        jstreeDiv: "KGpropertyFilter_businessObjectsTree",
+        searchedSources: self.treeConfigs["businessObjects"].source
+      };
+      SourceBrowser.searchAllSourcesTerm(options)
+    }
   }
-};
-return self;
+
+
+  return self;
 })
 ();

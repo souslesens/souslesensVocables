@@ -483,31 +483,42 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
             return allowedSources;
         }
 
-        var sourcesScope = $("#GenericTools_searchScope").val();
-        if (sourcesScope == "currentSource") {
-            if (!Lineage_sources.activeSource) {
-                return alert("select a source or search in all source");
-            }
+        if(options.searchedSources) {
+            searchedSources = options.searchedSources
+        }
+        else {
+            var sourcesScope = $("#GenericTools_searchScope").val();
+            if (sourcesScope == "currentSource") {
+                if (!Lineage_sources.activeSource) {
+                    return alert("select a source or search in all source");
+                }
 
-            searchedSources.push(Lineage_sources.activeSource);
-        } else if (sourcesScope == "whiteboardSources") {
-            if (Lineage_combine.currentSources.length > 0) {
-                searchedSources = Lineage_combine.currentSources;
-            } else {
-                /*   var mainSource = Lineage_sources.activeSource;
-           searchedSources.push(mainSource);
-           var importedSources = Config.sources[mainSource].imports;
-           searchedSources = searchedSources.concat(importedSources);*/
-                searchedSources = Object.keys(Lineage_sources.loadedSources);
+                searchedSources.push(Lineage_sources.activeSource);
             }
-        } else if (sourcesScope == "all_OWLsources") {
-            searchedSources = getUserSources("OWL");
-        } else if (sourcesScope == "all_SKOSsources") {
-            searchedSources = getUserSources("SKOS");
-        } else if (sourcesScope == "all_IndividualsSources") {
-            searchedSources = getUserSources("INDIVIDUALS");
-        } else if (sourcesScope == "all_Sources") {
-            searchedSources = getUserSources(null);
+            else if (sourcesScope == "whiteboardSources") {
+                if (Lineage_combine.currentSources.length > 0) {
+                    searchedSources = Lineage_combine.currentSources;
+                }
+                else {
+                    /*   var mainSource = Lineage_sources.activeSource;
+               searchedSources.push(mainSource);
+               var importedSources = Config.sources[mainSource].imports;
+               searchedSources = searchedSources.concat(importedSources);*/
+                    searchedSources = Object.keys(Lineage_sources.loadedSources);
+                }
+            }
+            else if (sourcesScope == "all_OWLsources") {
+                searchedSources = getUserSources("OWL");
+            }
+            else if (sourcesScope == "all_SKOSsources") {
+                searchedSources = getUserSources("SKOS");
+            }
+            else if (sourcesScope == "all_IndividualsSources") {
+                searchedSources = getUserSources("INDIVIDUALS");
+            }
+            else if (sourcesScope == "all_Sources") {
+                searchedSources = getUserSources(null);
+            }
         }
 
         var jstreeData = [];

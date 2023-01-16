@@ -365,6 +365,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 allowDefault={false}
                                 editable={true}
                             />
+                            {formTree}
                         </FormControl>
                         <TextField
                             size="small"

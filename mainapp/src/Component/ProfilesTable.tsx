@@ -325,7 +325,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                 {create ? "Create Profile" : "Edit"}
             </Button>
             <Modal onClose={handleClose} open={profileModel.modal}>
-                <Box component="form" sx={style}>
+                <Box component="form" sx={style} style={{maxHeight: '100%', overflow: 'auto'}}>
                     <Stack spacing={4}>
                         <TextField fullWidth onChange={handleFieldUpdate("name")} value={profileModel.profileForm.name} id={`name`} label={"Name"} variant="standard" />
                         <TextField

@@ -24,8 +24,9 @@ import {
     RadioGroup,
     Radio,
 } from "@mui/material";
-
-import { TreeView, TreeItem } from "@mui/lab";
+import { alpha, styled } from "@mui/material/styles";
+// import Grid from '@mui/material/Grid';
+import { TreeView, TreeItem, TreeItemProps, treeItemClasses } from "@mui/lab";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
@@ -204,54 +205,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         return unwrappedSources;
     }, [unwrappedSources]);
 
-    let sourcesTree: any[] = [];
-
-    const fieldsFromSource = (source: any) => {
-        let fields = [source.schemaType];
-
-        if (source.group) {
-            fields = fields.concat(source.group.split("/"));
-        }
-
-        return fields.concat(source.name);
-    };
-
-    sources.forEach((source) => {
-        let currentTree = sourcesTree;
-
-        fieldsFromSource(source).forEach((field) => {
-            let root = currentTree.find((key) => key.name == field);
-
-            if (root === undefined) {
-                root = {
-                    name: field,
-                    children: [],
-                };
-                currentTree.push(root);
-            }
-            currentTree = root.children;
-        });
-    });
-
-    const displayFormTree = (sourcesTree: any) => {
-        if (!sourcesTree) {
-            return;
-        }
-        return sourcesTree.map((source: any) => {
-            return (
-                <TreeItem nodeId={source.name} label={source.name}>
-                    {displayFormTree(source.children)}
-                </TreeItem>
-            );
-        });
-    };
-
-    const formTree = (
-        <TreeView aria-label="Sources access control navigator" defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
-            {displayFormTree(sourcesTree)}
-        </TreeView>
-    );
-
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
     const tools: string[] = ["ALL", "sourceBrowser", "sourceMatcher", "evaluate", "ancestors", "lineage", "SPARQL", "ADLmappings", "ADLbrowser", "Standardizer", "SQLquery"];
     const [profileModel, update] = React.useReducer(updateProfile, { modal: false, profileForm: profile });
@@ -296,6 +249,76 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
     };
 
+    let sourcesTree: any[] = [];
+
+    const fieldsFromSource = (source: any) => {
+        let fields = [source.schemaType];
+
+        if (source.group) {
+            fields = fields.concat(source.group.split("/"));
+        }
+
+        return fields.concat(source.name);
+    };
+
+    let index = 0;
+    sources.forEach((source) => {
+        let currentTree = sourcesTree;
+
+        fieldsFromSource(source).forEach((field) => {
+            let root = currentTree.find((key) => key.name == field);
+            if (root === undefined) {
+                root = {
+                    name: field,
+                    children: [],
+                    index: index,
+                    source: source,
+                };
+                currentTree.push(root);
+            }
+            index = index + 1;
+            currentTree = root.children;
+        });
+    });
+
+    const displayFormTree = (sourcesTree: any) => {
+        if (!sourcesTree) {
+            return;
+        }
+
+        return sourcesTree.map((source: any) => {
+            return (
+                <TreeItem
+                    nodeId={source.index.toString()}
+                    label={
+                        <Grid container spacing={2}>
+                            <Grid item xs={6}>
+                                <p>{source.name}</p>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <SourceAccessControlInputSelect
+                                    name={source.source.id + "-source-access-control"}
+                                    value={profileModel.profileForm.sourcesAccessControl[source.source.name] ?? "default"}
+                                    onChange={handleSourceAccessControlUpdate[source.source.name]}
+                                    allowDefault={true}
+                                    editable={source.source.editable}
+                                />
+                            </Grid>
+                        </Grid>
+                    }
+                >
+                    {displayFormTree(source.children)}
+                </TreeItem>
+            );
+        });
+    };
+
+    const formTree = (
+        <TreeView aria-label="Sources access control navigator" defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
+            {displayFormTree(sourcesTree)}
+        </TreeView>
+    );
+
     return (
         <>
             <Button variant="contained" color="primary" onClick={handleOpen}>
@@ -335,14 +358,13 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                         </FormControl>
                         <FormControl>
                             <FormLabel id="default-source-access-control-label">Default source access control</FormLabel>
-                            <SourceAccessControlInput
+                            <SourceAccessControlInputRadio
                                 name="default-source-access-control"
                                 value={profileModel.profileForm.defaultSourceAccessControl}
                                 onChange={handleFieldUpdate("defaultSourceAccessControl")}
                                 allowDefault={false}
                                 editable={true}
                             />
-                            {formTree}
                         </FormControl>
                         <TextField
                             size="small"
@@ -352,22 +374,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                             sx={{ width: 300 }}
                             onChange={handleFilterSourcesAccessControl()}
                         />
-                        <Box style={{ marginTop: "0px", overflow: "auto", maxHeight: "15em" }}>
-                            {sources
-                                .filter((source) => source.name.toLowerCase().includes(filteringCharsSourcesAccessControl.toLowerCase()))
-                                .map((source) => (
-                                    <FormControl size="small" key={source.id}>
-                                        <FormLabel id={source.id + "-source-access-control-label"}>{source.name}</FormLabel>
-                                        <SourceAccessControlInput
-                                            name={source.id + "-source-access-control"}
-                                            value={profileModel.profileForm.sourcesAccessControl[source.name] ?? "default"}
-                                            onChange={handleSourceAccessControlUpdate[source.name]}
-                                            allowDefault={true}
-                                            editable={source.editable}
-                                        />
-                                    </FormControl>
-                                ))}
-                        </Box>
+                        <Box style={{ marginTop: "0px", overflow: "auto", maxHeight: "15em" }}>{formTree}</Box>
                         <FormGroup>
                             <FormControlLabel control={<Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />} label="Allow all tools" />
 
@@ -428,7 +435,7 @@ interface SourceAccessControlInputProps {
     editable: boolean;
 }
 
-const SourceAccessControlInput: React.FC<SourceAccessControlInputProps> = React.memo(function ({ name, value, onChange, allowDefault, editable }) {
+const SourceAccessControlInputRadio: React.FC<SourceAccessControlInputProps> = React.memo(function ({ name, value, onChange, allowDefault, editable }) {
     return (
         <RadioGroup row aria-labelledby={name} value={value} onChange={onChange} name={name}>
             {allowDefault ? <FormControlLabel value="default" control={<Radio size="small" />} label="Defaults" /> : null}
@@ -436,6 +443,22 @@ const SourceAccessControlInput: React.FC<SourceAccessControlInputProps> = React.
             <FormControlLabel value="read" control={<Radio size="small" />} label="Read" />
             <FormControlLabel disabled={!editable} value="readwrite" control={<Radio />} label="Read & Write" />
         </RadioGroup>
+    );
+});
+
+const SourceAccessControlInputSelect: React.FC<SourceAccessControlInputProps> = React.memo(function ({ name, value, onChange, allowDefault, editable }) {
+    return (
+        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+            <InputLabel id="select-sources-access-control">Access Control</InputLabel>
+            <Select labelId="select-sources-access-control" id="select-sources-access-control-select" value={value} label="AccessControl" onChange={onChange}>
+                {allowDefault ? <MenuItem value="default">Default</MenuItem> : null}
+                <MenuItem value="forbidden">Forbidden</MenuItem>
+                <MenuItem value="read">Read</MenuItem>
+                <MenuItem disabled={!editable} value="readwrite">
+                    Read & Write
+                </MenuItem>
+            </Select>
+        </FormControl>
     );
 });
 

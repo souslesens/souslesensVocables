@@ -7,6 +7,7 @@ var KGpropertyFilter = (function() {
 
   self.treeConfigs = {
     dataContainers: {
+      key: "dataContainers",
       source: "IDCP",
       topUris: ["http://datalenergies.total.com/resource/tsf/idcp/DataContainer"],
       options: { memberPredicate: 1 },
@@ -16,6 +17,7 @@ var KGpropertyFilter = (function() {
     }
     ,
     templates: {
+      key: "templates",
       source: "IDCP",
       topUris: ["http://datalenergies.total.com/resource/tsf/idcp/template"],
       options: { memberPredicate: 0, specificPredicates: ["rdf:type", "<http://datalenergies.total.com/resource/tsf/idcp/9fc7b10ede>"] },
@@ -23,6 +25,7 @@ var KGpropertyFilter = (function() {
       jstreeDiv: "KGpropertyFilter_templatesTree"
     },
     disciplines: {
+      key: "disciplines",
       source: "ISO_15926-PCA-2",
       topUris: ["http://data.15926.org/rdl/RDS6811233"],
       options: { memberPredicate: 1 },
@@ -30,12 +33,14 @@ var KGpropertyFilter = (function() {
       jstreeDiv: "KGpropertyFilter_disciplinesTree"
     },
     actors: {
+      key: "actors",
       source: "IDCP",
       topUris: ["http://datalenergies.total.com/resource/tsf/idcp/DataContainer"],
       options: { memberPredicate: 1 },
       jstreeDiv: "KGpropertyFilter_actorsTree"
     },
     systems: {
+      key: "systems",
       source: "IDCP",
       topUris: ["http://datalenergies.total.com/resource/tsf/idcp/DataContainer"],
       options: { memberPredicate: 1 },
@@ -43,6 +48,7 @@ var KGpropertyFilter = (function() {
       jstreeDiv: "KGpropertyFilter_systemsTree"
     },
     businessObjects: {
+      key: "businessObjects",
       editable: false,
       source: "GIDEA-RAW",
       topUris: ["http://datalenergies.total.com/resource/tsf/gidea-raw/LogicalEntity"],
@@ -71,40 +77,42 @@ var KGpropertyFilter = (function() {
       var sources = ["", "IDCP"];
       common.fillSelectOptions("KGpropertyFilter_sourceSelect", sources, true);
       $("#KGpropertyFilter_searchInPropertiesTreeInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
-      self.onChangeSourceSelect ("IDCP")
+      self.onChangeSourceSelect("IDCP");
     });
 
     //  MainController.UI.showHideRightPanel(true);
     $("#graphDiv").width(1000);
-    $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function() {
-      $("#KGpropertyFilter_filteringResult").height($("#graphDiv").height() - 200);
-      $("#KGpropertyFilter_filteringResult").width($("#graphDiv").width());
+    /*  $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function() {
+        $("#KGpropertyFilter_filteringResult").height($("#graphDiv").height() - 200);
+        $("#KGpropertyFilter_filteringResult").width($("#graphDiv").width());
 
-      $("#KGpropertyFilter_centralPanelTabs").tabs({
-        activate: function(e, ui) {
-          self.currentOwlType = "Class";
-          var divId = ui.newPanel.selector;
-          if (divId == "#LineageTypesTab") {
-            // pass
-          }
-        }
-      });
-
-      $("#rightPanelDiv").load("snippets/KGpropertyFilter/rightPanel.html", function() {
-        $("#KGpropertyFilter_rightPanelTabs").tabs({
-          activate: function(_e, _ui) {
-            self.currentAspect = _ui.newTab[0].textContent;
-          },
-          create(event, ui) {
-            self.initRightPanel();
-
-
-            /*  $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",1)
-$("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
+        $("#KGpropertyFilter_centralPanelTabs").tabs({
+          activate: function(e, ui) {
+            self.currentOwlType = "Class";
+            var divId = ui.newPanel.selector;
+            if (divId == "#LineageTypesTab") {
+              // pass
+            }
           }
         });
+        */
+
+
+    $("#rightPanelDiv").load("snippets/KGpropertyFilter/rightPanel.html", function() {
+      $("#KGpropertyFilter_rightPanelTabs").tabs({
+        activate: function(_e, _ui) {
+          self.currentAspect = _ui.newTab[0].textContent;
+        },
+        create(event, ui) {
+          self.initRightPanel();
+
+
+          /*  $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",1)
+$("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
+        }
       });
     });
+    // });
 
     $("#accordion").accordion("option", { active: 2 });
   };
@@ -139,11 +147,9 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         },
         function(callbackSeries) {
           $("#GenericTools_searchAllSourcesTermInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
-        //  $("#KGpropertyFilter_businessObjects_searchDiv").load("./snippets/searchAll.html");
+
           return callbackSeries();
-          /*  self.loadInJstree(self.treeConfigs["businessObjects"], function(err, result) {
-                callbackSeries(err);
-              });*/
+
         },
         function(callbackSeries) {
           return callbackSeries();
@@ -172,8 +178,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
   self.onSelectFilter = function() {
     // pass
   };
-
-
 
 
   self.execSparqlFilterQuery = function(classIds, callback) {
@@ -227,115 +231,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
   self.client = {};
 
-  self.matrix = {
-    showFiltersMatrix: function(filters, aspect) {
-      let html = "<div class='matrix'>";
-
-      self.matrixDivsMap = {};
-      var currentMatrixPropsMap = {};
-      var fitlersArray = [];
-
-      filters.forEach(function(item) {
-        if (fitlersArray.indexOf(item.filterLabel) < 0) {
-          fitlersArray.push(item.filterLabel);
-        }
-      });
-
-      filters.forEach(function(filter) {
-        let propId = filter.classId + "|" + filter.propertyId;
-        if (!currentMatrixPropsMap[propId]) {
-          currentMatrixPropsMap[propId] = filter;
-        }
-        if (!currentMatrixPropsMap[propId].propFilters) {
-          currentMatrixPropsMap[propId].propFilters = {};
-        }
-        fitlersArray.forEach(function(filterLabel) {
-          var value = 0;
-          if (filter.filterLabel == filterLabel) {
-            value = 1;
-          }
-          currentMatrixPropsMap[propId].propFilters[filterLabel] |= value;
-        });
-      });
-      {
-        // draw first row with col titles
-        let rowHtml = "<div  class='matrixRow " + "" + "'>";
-        rowHtml += "<div class='matrixRowTitle' >" + "" + "</div>";
-        fitlersArray.forEach(function(aspect) {
-          rowHtml += "<div class='matrixColTitle'>" + aspect + "</div>";
-        });
-        html += rowHtml + "</div>";
-      }
-
-      for (var propId in currentMatrixPropsMap) {
-        var prop = currentMatrixPropsMap[propId];
-        let matrixFilterClass = "matrixFilterClass";
-        let rowDivId = "r" + common.getRandomHexaId(8);
-        self.matrixDivsMap[rowDivId] = prop;
-        let rowHtml = "";
-        rowHtml += "<div id='" + rowDivId + "' class='matrixRow " + "" + "'>";
-        var statusClass = "matrixPropTitle_" + prop.status;
-        let propDivId = "r" + common.getRandomHexaId(8);
-        self.matrixDivsMap[propDivId] = { rowDivId: rowDivId, propId: propId };
-        rowHtml += "<div id='" + propDivId + "' class='matrixRowTitle " + statusClass + "'>" + prop.classLabel + "." + prop.propertyLabel + "</div>";
-
-        fitlersArray.forEach(function(propFilter) {
-          let cellDivId = "C" + common.getRandomHexaId(8);
-          self.matrixDivsMap[cellDivId] = { rowDivId: rowDivId, propId: propId, filterLabel: prop.filterLabel };
-          let cellHtml = "";
-          var cellClass = "";
-          cellClass = prop.propFilters[propFilter] == 1 ? "matrixCellMatch" : "";
-          cellHtml = "<div id='" + cellDivId + "' class='matrixCell " + cellClass + "' >&nbsp;</div>";
-          rowHtml += cellHtml;
-        });
-
-        html += rowHtml + "</div>";
-      }
-
-      $("#KGpropertyFilter_filteringResult").html(html);
-      $("#KGpropertyFilter_filteringResult").animate({ zoom: 1.2 }, 400);
-      $(".matrixRowTitle ").bind("click", KGpropertyFilter.matrix.onClickPropTitleDiv);
-      $(".matrixCell ").bind("click", KGpropertyFilter.matrix.onClickPropCellDiv);
-    },
-
-    onClickPropTitleDiv: function(e) {
-      var divId = $(this).attr("id");
-      var prop = self.matrixDivsMap[divId];
-      self.selectedMatrixProp = prop;
-      var menuhtml = "    <span  class=\"popupMenuItem\" onclick=\"KGpropertyFilter.matrix.removePropAllfilters();\">remove prop</span>";
-      $("#graphPopupDiv").html(menuhtml);
-      var point = { x: e.clientX, y: e.clientY };
-      MainController.UI.showPopup(point, "graphPopupDiv", true);
-    },
-
-    onClickPropCellDiv: function(e) {
-      var divId = $(this).attr("id");
-      var filter = self.matrixDivsMap[divId];
-      self.selectedMatrixFilter = filter;
-      var menuhtml = "    <span  class=\"popupMenuItem\" onclick=\"KGpropertyFilter.matrix.removePropfilter();\">remove prop</span>";
-      $("#graphPopupDiv").html(menuhtml);
-      var point = { x: e.clientX, y: e.clientY };
-      MainController.UI.showPopup(point, "graphPopupDiv", true);
-    },
-    removePropAllfilters: function() {
-      var prop = self.selectedMatrixProp;
-      alert("coming soon");
-    },
-    removePropfilter: function() {
-      var filter = (self.selectedMatrixFilter = filter);
-      alert("coming soon");
-    },
-
-    exportMatrix: function() {
-      return alert("coming soon");
-    },
-    copyMatrix: function() {
-      return alert("coming soon");
-      var html = $(".matrix").html();
-      common.copyTextToClipboard(html);
-    }
-  };
-
 
   self.searchInPropertiesTree = function(event, inputDiv, jstreeDiv) {
 
@@ -379,7 +274,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
               text: item.conceptLabel.value,
               type: "Class",
               data: {
-                type: "Class",
+                type: treeConfig.key,
                 source: self.currentSource,
                 label: item.conceptLabel.value,
                 id: item.concept.value
@@ -403,7 +298,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                 text: label,
                 type: "Class",
                 data: {
-                  type: "Class",
+                  type: treeConfig.key,
                   source: self.currentSource,
                   label: label,
                   id: id
@@ -420,7 +315,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           // onAfterOpenNodeFn: KGpropertyFilter.onOpenClassesOrPropertyNode,
           //   onCheckNodeFn: null, //KGpropertyFilter.loadPropertiesFilters,
           //  tie_selection: false,
-          contextMenu: KGpropertyFilter.commonJstreeActions.getJstreePropertiesContextMenu(),
+          contextMenu: KGpropertyFilter.commonJstreeActions.getJsTreeContextMenu(treeConfig.key),
           searchPlugin: {
             case_insensitive: true,
             fuzzy: false,
@@ -442,6 +337,13 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     onSelectTreeNode: function(event, obj) {
       self.currentTreeNode = obj.node;
       self.currentTreeNode.treeDiv = event.currentTarget.id;
+
+
+      if (self.currentTreeNode.data.type == "dataContainers") {
+        self.currentDataContainer = obj.node;
+        self.showDataContainerDetails(self.currentTreeNode);
+
+      }
 
     },
     createChildNode: function() {
@@ -516,55 +418,165 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
     },
 
-    searchBO:function(){
-      var term=self.currentTreeNode.text
+    searchBO: function() {
+      var term = self.currentTreeNode.text;
       $("#GenericTools_searchAllSourcesTermInput").val(term);
       $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 4);
-      KGpropertyFilter.rightPanelsActions.searchBusinessObjects()
+      KGpropertyFilter.rightPanelsActions.searchBusinessObjects();
 
     },
 
+    associateNodeToDataContainer: function() {
+      if (!self.currentDataContainer) {
+        return alert("no data container selected");
+      }
+      var selectedNodeData = self.currentTreeNode.data;
+      if (selectedNodeData.source == "GIDEA-RAW") {// create property
+        if (self.currentTreeNode.parent.indexOf("Attribute") > 0) {
+          if (!self.currentTreeNode.parentLogicalEntity) {
+            return self.rightPanelsActions.showAttributesParentsDialog();
+          }
+          else{
 
-    getJstreePropertiesContextMenu: function() {
+            // create a new individual that is object of the dataContainer  and subject of gidea Attribute and Logical entity
+            var newUri=Lineage_blend.graphModification.getURI("",selectedNodeData.source,"randomHexaNumber")
+            var triples = [
+
+              {
+                subject: newUri,
+                predicate:"rdf:type ",
+                object: "owl:NamedIndividual"
+
+              },
+              {
+                subject: newUri,
+                predicate:"rdf:type ",
+                object: "http://datalenergies.total.com/resource/tsf/idcp/gidea-attribute"
+
+              },
+              {
+                subject: newUri,
+                predicate:"rdfs:label ",
+                object: self.currentTreeNode.parentLogicalEntity.label+"."+self.currentTreeNode.data.label
+
+              },
+              {
+                subject: newUri,
+                predicate:"rdfs:label ",
+                object: self.currentTreeNode.parentLogicalEntity.label+"."+self.currentTreeNode.data.label
+
+              },
+              {
+
+                subject: self.currentDataContainer.data.id,
+                predicate: "http://datalenergies.total.com/resource/tsf/idcp/mapsWith",
+                object: newUri,
+
+              },
+              {
+
+                subject:newUri,
+                predicate: "http://rds.posccaesar.org/ontology/lis14/rdl/hasPart",
+                object: self.currentTreeNode.parentLogicalEntity.id,
+
+              },
+              {
+
+                subject:newUri ,
+                predicate: "http://rds.posccaesar.org/ontology/lis14/rdl/hasPart",
+                object: self.currentTreeNode.data.id,
+
+              },
+
+            ];
+
+            self.currentTreeNode.parentLogicalEntity=null;
+          }
+          triples=triples.concat(Lineage_blend.getCommonMetaDataTriples(newUri));
+        }
+
+        else if (self.currentTreeNode.parent.indexOf("LogicalEntity") > 0) {
+          var triples = [
+            {
+              object: selectedNodeData.id,
+              predicate: "http://datalenergies.total.com/resource/tsf/idcp/mapsWith",
+              subject: self.currentDataContainer.data.id
+
+            }
+          ];
+        }
+      }
+      else {// create member property
+        var triples = [
+          {
+            subject: selectedNodeData.id,
+            predicate: "rdfs:member",
+            object: self.currentDataContainer.data.id
+
+          }
+        ];
+      }
+      Sparql_generic.insertTriples(self.treeConfigs["dataContainers"].source, triples, {}, function(err, result) {
+        if (err) {
+          return alert(err.responseText);
+        }
+
+      });
+
+    },
+
+    getJsTreeContextMenu: function(treeConfigKey) {
       var items = {};
-      items.create = {
-        label: "create child",
-        action: function(_e) {
-          // pb avec source
-          KGpropertyFilter.commonJstreeActions.createChildNode();
-        }
-      };
-      items.delete = {
-        label: "delete node",
-        action: function(_e) {
-          // pb avec source
-          KGpropertyFilter.commonJstreeActions.deleteNode();
-        }
-      };
 
-      items.nodeInfos = {
-        label: "Node infos",
-        action: function(_e) {
-          // pb avec source
-          KGpropertyFilter.commonJstreeActions.showNodeInfos();
-        }
-      };
-      items.searchBO = {
-        label: "Node infos",
-        action: function(_e) {
-          // pb avec source
-          KGpropertyFilter.commonJstreeActions.searchBO()
-        }
-      };
+      if (treeConfigKey != "businessObjects") {
+        items.create = {
+          label: "create child",
+          action: function(_e) {
+            // pb avec source
+            KGpropertyFilter.commonJstreeActions.createChildNode();
+          }
+        };
+        items.delete = {
+          label: "delete node",
+          action: function(_e) {
+            // pb avec source
+            KGpropertyFilter.commonJstreeActions.deleteNode();
+          }
+        };
+      }
+      else if (treeConfigKey == "businessObjects") {
+        items.nodeInfos = {
+          label: "Node infos",
+          action: function(_e) {
+            // pb avec source
+            $("#mainDialogDiv").dialog("open");
+            SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+          }
+        };
+      }
+
+      if (treeConfigKey == "dataContainers") {
+        items.searchBO = {
+          label: "Search BO",
+          action: function(_e) {
+            // pb avec source
+            KGpropertyFilter.commonJstreeActions.searchBO();
+          }
+        };
+      }
+
+      if (treeConfigKey != "dataContainers") {
+
+        items.associate = {
+          label: "Associate",
+          action: function(_e) {
+            KGpropertyFilter.commonJstreeActions.associateNodeToDataContainer();
+
+          }
+        };
+      }
 
 
-      /*   items.associate = {
-           label: "Associate",
-           action: function(_e) {
-             KGpropertyFilter.commonJstreeActions.associateFiltersToPropertyRestriction();
-             // KGpropertyFilter.showAssociateDialog();
-           }
-         };*/
       return items;
     }
 
@@ -572,16 +584,127 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
   self.rightPanelsActions = {
     searchBusinessObjects: function(event) {
-      if (event &&  event.keyCode != 13 && event.keyCode != 9) {
+      if (event && event.keyCode != 13 && event.keyCode != 9) {
         return;
       }
       var options = {
         jstreeDiv: "KGpropertyFilter_businessObjectsTree",
-        searchedSources: self.treeConfigs["businessObjects"].source
+        searchedSources: [self.treeConfigs["businessObjects"].source, "BUSINESS_OBJECTS_DATA_DOMAINS"],
+        contextMenu: self.commonJstreeActions.getJsTreeContextMenu("businessObjects"),
+        selectTreeNodeFn: function(event, obj) {
+          self.currentTreeNode = obj.node;
+          return;
+        }
       };
-      SourceBrowser.searchAllSourcesTerm(options)
+      SourceBrowser.searchAllSourcesTerm(options);
     }
-  }
+
+    ,
+    showAttributesParentsDialog: function() {
+      self.currentTreeNode.parentLogicalEntity = null;
+      var html = "Select a Logical Entity<br>";
+      html += "<select size='10' onclick='KGpropertyFilter.rightPanelsActions.onValidateAttributesParentsDialog($(this).val())' id='KGpropertyFilter_logicalEntitySelect'></select>";
+
+      $("#mainDialogDiv").html(html);
+      $("#mainDialogDiv").dialog("open");
+      var source = "GIDEA-RAW";
+      var options = {
+        distinct: "?object ?objectLabel"
+      };
+      Sparql_OWL.getFilteredTriples(source, self.currentTreeNode.data.id, "http://datalenergies.total.com/resource/tsf/gidea-raw/describes", null, options, function(err, result) {
+        if (err) {
+          return alert(err.responseText);
+        }
+
+        var logicalEntities = [];
+        result.forEach(function(item) {
+          logicalEntities.push({
+            id: item.object.value,
+            label: item.objectLabel.value
+          });
+
+        });
+        common.fillSelectOptions("KGpropertyFilter_logicalEntitySelect", logicalEntities, false, "label", "id");
+
+      });
+    },
+    onValidateAttributesParentsDialog: function(logicalEntity) {
+      var label=$( "#KGpropertyFilter_logicalEntitySelect option:selected" ).text();
+
+      self.currentTreeNode.parentLogicalEntity ={id:logicalEntity,label:label};
+      $("#mainDialogDiv").dialog("close");
+      self.commonJstreeActions.associateNodeToDataContainer();
+    }
+  };
+  self.showDataContainerDetails = function(node) {
+    /* $("#KGpropertyFilter_nodeInfosDiv").load("snippets/KGpropertyFilter/dataContainer.html", function() {*/
+    var level = self.currentTreeNode.parents.length - 1;
+    var dataContainerId;
+    if (level == 1) {
+      dataContainerId = self.currentTreeNode;
+    }
+    else {
+      return;
+      dataContainerId = self.currentTreeNode.parents[level - 1];
+    }
+
+
+    /// $("#KGpropertyFilter_display_dataContainerDiv").html(self.currentTreeNode.text)
+    var visjsNodes = [];
+    var source = self.currentTreeNode.data.source;
+    async.series([
+      function(callbackSeries) {
+        visjsGraph.clearGraph();
+        return callbackSeries();
+
+      },
+      function(callbackSeries) {
+        Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0, { drawBeforeCallback: 1 }, function(err, result) {
+          return callbackSeries(err);
+        });
+      },
+      function(callbackSeries) {
+        var options = {
+          memberPredicate: true,
+          depth: 2,
+          drawBeforeCallback: 1
+        };
+        Lineage_classes.addChildrenToGraph(source, self.currentTreeNode.id, options, function(err, result) {
+          if (err) {
+            return callbackSeries(err);
+          }
+          result.nodes.forEach(function(node) {
+            visjsNodes.push(node.id);
+          });
+          return callbackSeries();
+        });
+      },
+
+
+      function(callbackSeries) {
+        var properties = ["rdfs:member"];
+        var options = { inversePredicate: 1 };
+        Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function(err, result) {
+          return callbackSeries(err);
+        });
+      },
+      function(callbackSeries) {
+        var properties = ["http://datalenergies.total.com/resource/tsf/idcp/mapsWith"];
+        var options = { };
+        Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function(err, result) {
+          return callbackSeries(err);
+        });
+      }
+
+
+    ], function(err) {
+      if (err) {
+        return alert(err.responseText);
+      }
+    });
+
+
+  };
 
 
   return self;

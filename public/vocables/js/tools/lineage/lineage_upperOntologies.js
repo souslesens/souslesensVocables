@@ -97,7 +97,7 @@ var Lineage_upperOntologies = (function () {
             predicates.push({ label: item, id: item });
         });
 
-        Sparql_OWL.getDictionary(source, { selectGraph: true, lang: Config.default_lang }, null, function (err, result) {
+        Sparql_OWL.getDictionary(source, { selectGraph: true, lang: Config.default_lang,type:"owl:Class" }, null, function (err, result) {
             if (err) callback(err);
 
             var sourceObjects = [];

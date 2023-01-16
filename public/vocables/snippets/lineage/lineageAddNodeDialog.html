@@ -94,7 +94,11 @@
     <div id="LineageBlend_creatingNodeSingleTab" style="display: flex; flex-direction: column">
         <div class="LineageBlend_creatingNodeClassParamsLine">rdfs:label&nbsp;<input style="width: 350px" id="LineageBlend_creatingNodeNewClassLabel" /></div>
         <div id="LineageBlend_creatingNodeClassDiv" class="LineageBlend_creatingNodeClassParamsLine">rdfs:subClassOf&nbsp;&nbsp;<select id="LineageBlend_creatingNodeObjectsSelect"></select></div>
-        <div id="LineageBlend_creatingNodeNameIndividualDiv" class="LineageBlend_creatingNodeClassParamsLine">rdf:type&nbsp;<select id="LineageBlend_creatingNodeObjects2Select"></select></div>
+        <div id="LineageBlend_creatingNodeNameIndividualDiv" class="LineageBlend_creatingNodeClassParamsLine">rdf:type&nbsp;
+            <select id="LineageBlend_creatingNodeObjects2Select"></select><br>
+           <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_blend.graphModification.searchIndividual()">Search NamedIndividual</button>
+        </div>
+
         <div class="LineageBlend_creatingNodeClassParamsLine">
             <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_blend.graphModification.addClassOrIndividualTriples()" style="width: 100px">OK</button>
         </div>

@@ -1248,13 +1248,13 @@ addNode:false
                 }
                 visjsGraph.network.fit();
                 if (callback) {
-                    callback();
+                    callback(null,visjsData);
                 }
                 return MainController.UI.message("", true);
             }
         );
     };
-    self.addChildrenToGraph = function (/** @type {string | number} */ source, /** @type {any} */ nodeIds, /** @type {{ owlType?: any; depth?: any; dontClusterNodes?: any; }} */ options, callback) {
+    self.addChildrenToGraph = function ( source,  nodeIds,options, callback) {
         var parentIds;
         if (!source) {
             source = Lineage_sources.activeSource;
@@ -1469,6 +1469,7 @@ addNode:false
                 }
             }
             if (callback) {
+                if(!options. drawBeforeCallback)
                 return callback(null, visjsData2);
             }
             var visjsData = {
@@ -1482,6 +1483,8 @@ addNode:false
             visjsGraph.network.fit();
 
             $("#waitImg").css("display", "none");
+            if(callback)
+            return callback(null, visjsData2);
         });
     };
 
@@ -2363,13 +2366,12 @@ addNode:false
     };
 
     self.drawNodeAndParents = function (
-        /** @type {{ source: string | number; label: any; text: any; id: string | number; }} */ nodeData,
+       nodeData,
         ancestorsDepth,
-        /** @type {(arg0: string | null, arg1: { nodes: never[]; edges: never[]; } | undefined) => any} */ callback
+        options,
+        callback
     ) {
-        /**
-         * @param {any[]} result
-         */
+
         function drawNodeAndparent(result) {
             var visjsData = { nodes: [], edges: [] };
             var color = self.getSourceColor(nodeData.source);
@@ -2503,8 +2505,14 @@ upperNodeIds.push(id);
                     // pass
                 });
             }
+            if(!options){
+                options={}
+            }
             if (callback) {
-                return callback(null, visjsData);
+                if(!options.drawBeforeCallback)
+                    callback(null, visjsData);
+
+
             }
 
             Lineage_sources.registerSource(nodeData.source);
@@ -2519,8 +2527,12 @@ upperNodeIds.push(id);
             setTimeout(function () {
                 self.zoomGraphOnNode(nodeData.id, false);
             }, 500);
-            $("#waitImg").css("display", "none");
-            return MainController.UI.message("No data found");
+            MainController.UI.message("",true);
+            if(callback)
+            return callback(null, visjsData);
+
+
+
         }
 
         var existingNodes = visjsGraph.getExistingIdsMap();

@@ -291,11 +291,11 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                 <TreeItem
                     nodeId={source.index.toString()}
                     label={
-                        <Grid container spacing={2}>
-                            <Grid item xs={6}>
-                                <p>{source.name}</p>
+                        <Grid container alignItems="center" spacing={2}>
+                            <Grid item xs>
+                                <p style={{margin: 0}}>{source.name}</p>
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs="auto">
                                 <SourceAccessControlInputSelect
                                     name={source.source.id + "-source-access-control"}
                                     value={profileModel.profileForm.sourcesAccessControl[source.source.name] ?? "default"}

@@ -249,7 +249,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
     };
 
-    let sourcesTree: any[] = [];
 
     const fieldsFromSource = (source: any) => {
         let fields = [source.schemaType];
@@ -261,25 +260,38 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         return fields.concat(source.name);
     };
 
-    let index = 0;
-    sources.forEach((source) => {
-        let currentTree = sourcesTree;
+    const generateSourcesTree = (source: any) => {
+        let sourcesTree: any[] = [];
 
-        fieldsFromSource(source).forEach((field) => {
-            let root = currentTree.find((key) => key.name == field);
-            if (root === undefined) {
-                root = {
-                    name: field,
-                    children: [],
-                    index: index,
-                    source: source,
-                };
-                currentTree.push(root);
-            }
-            index = index + 1;
-            currentTree = root.children;
+        let index = 0;
+        sources.forEach((source) => {
+            let currentTree = sourcesTree;
+
+            fieldsFromSource(source).forEach((field) => {
+                if (filteringCharsSourcesAccessControl !== "") {
+                    // FIXME: Case-sensitive only
+                    if (field.indexOf(filteringCharsSourcesAccessControl) == -1) {
+                        return;
+                    }
+                }
+
+                let root = currentTree.find((key) => key.name == field);
+                if (root === undefined) {
+                    root = {
+                        name: field,
+                        children: [],
+                        index: index,
+                        source: source,
+                    };
+                    currentTree.push(root);
+                }
+                index = index + 1;
+                currentTree = root.children;
+            });
         });
-    });
+
+        return sourcesTree;
+    };
 
     const displayFormTree = (sourcesTree: any) => {
         if (!sourcesTree) {
@@ -313,11 +325,19 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         });
     };
 
-    const formTree = (
-        <TreeView aria-label="Sources access control navigator" defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
-            {displayFormTree(sourcesTree)}
-        </TreeView>
-    );
+    function SourcesTreeView() {
+        const [treeviewSources, setTreeviewSources] = React.useState([]);
+
+        React.useEffect(() => {
+            setTreeviewSources(displayFormTree(generateSourcesTree(sources)));
+        }, [filteringCharsSourcesAccessControl]);
+
+        return (
+            <TreeView aria-label="Sources access control navigator" id="sources-access-treeview" defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
+                {treeviewSources}
+            </TreeView>
+        );
+    }
 
     return (
         <>
@@ -358,24 +378,16 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                         </FormControl>
                         <FormControl>
                             <FormLabel id="default-source-access-control-label">Default source access control</FormLabel>
-                            <SourceAccessControlInputRadio
-                                name="default-source-access-control"
-                                value={profileModel.profileForm.defaultSourceAccessControl}
-                                onChange={handleFieldUpdate("defaultSourceAccessControl")}
-                                allowDefault={false}
-                                editable={true}
+                            <TextField
+                                size="small"
+                                label="Filter sources by name"
+                                id="filter-sourcesaccesscontrol"
+                                value={filteringCharsSourcesAccessControl}
+                                sx={{ width: 300, my: 1 }}
+                                onChange={handleFilterSourcesAccessControl()}
                             />
-                            {formTree}
+                            <SourcesTreeView />
                         </FormControl>
-                        <TextField
-                            size="small"
-                            label="Filter sources by name"
-                            id="filter-sourcesaccesscontrol"
-                            value={filteringCharsSourcesAccessControl}
-                            sx={{ width: 300 }}
-                            onChange={handleFilterSourcesAccessControl()}
-                        />
-                        <Box style={{ marginTop: "0px", overflow: "auto", maxHeight: "15em" }}>{formTree}</Box>
                         <FormGroup>
                             <FormControlLabel control={<Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />} label="Allow all tools" />
 

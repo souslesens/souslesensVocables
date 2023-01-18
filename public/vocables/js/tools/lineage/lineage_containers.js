@@ -650,7 +650,7 @@ var Lineage_containers = (function() {
                     from: item.parent.value,
                     to: item.childMember.value,
                     source: source,
-                    arrows: " middle",
+                    arrows: " middle"
                   },
                   font: { multi: true, size: 10 },
 
@@ -662,32 +662,45 @@ var Lineage_containers = (function() {
 
           });
 
-          var nodelevels = {};
 
-          function recurse(from, level) {
-            visjsData.edges.forEach(function(edge) {
-              if(edge.from == edge.to)
-                return;
-              if (edge.from == from) {
-                nodelevels[edge.from] = level;
-                if(! nodelevels[edge.to])
-                recurse(edge.to, level + 1);
+          function setNodesLevel(visjsData) {
+            var nodelevels = {};
 
-              }
+            function recurse(from, level) {
+              visjsData.edges.forEach(function(edge) {
+                if (edge.from == edge.to) {
+                  return;
+                }
+                if (edge.from == from) {
+                  nodelevels[edge.from] = level;
+                  if (!nodelevels[edge.to]) {
+                    recurse(edge.to, level + 1);
+                  }
 
+                }
+
+              });
+            }
+
+            recurse(containerId, 1);
+            var maxLevel = 0;
+            visjsData.nodes.forEach(function(node, index) {
+              var level = (nodelevels[node.id] || 0)-1;
+              maxLevel = Math.max(maxLevel, level);
+              visjsData.nodes[index].level = level;
+
+            });
+
+            visjsData.nodes.forEach(function(node, index) {
+              if (node.level == -1) {
+                node.level = maxLevel;
+              } else
+                node.level=node.level
 
             });
           }
 
-          recurse(containerId, 1);
-          visjsData.nodes.forEach(function(node, index) {
-            var level = -1;
-            if (nodelevels[node.id]) {
-              level = nodelevels[node.id]-1;
-            }
-              visjsData.nodes[index].level = level;
-
-          });
+          setNodesLevel(visjsData);
 
           if (!visjsGraph.data || !visjsGraph.data.nodes) {
             Lineage_classes.drawNewGraph(visjsData);

@@ -378,6 +378,7 @@ indexes.push(source.toLowerCase());
             ]
           }
         };
+
       }
       if (options.classFilter) {
         queryObj.bool.filter = {

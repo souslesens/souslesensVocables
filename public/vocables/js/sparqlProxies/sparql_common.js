@@ -135,6 +135,7 @@ return str;
           }
           var conceptIdsStr = "";
           ids.forEach(function(id, _index) {
+            id=""+id
             if (conceptIdsStr != "") {
               conceptIdsStr += ",";
             }
@@ -142,7 +143,9 @@ return str;
                 return  (conceptIdsStr += "<" + id + ">");
             }*/
             if (id != "") {
-              if (true || (id.match && !id.match(/.+:.+|http.+|_:+/)) || id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1 || id.indexOf("_:") > -1) {
+            if( id.indexOf("http")<0 && id.split(":").length==2)// prefix
+                conceptIdsStr+=id
+              else if (true || (id.match && !id.match(/http.+|_:+/)) || id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1 || id.indexOf("_:") > -1) {
                 if (id.indexOf("^") == 0) {
                   conceptIdsStr += "^<" + id.substring(1) + ">";
                 }

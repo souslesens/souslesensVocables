@@ -3,6 +3,7 @@ var KGpropertyFilter = (function() {
 
   self.currentNewFilters = [];
   self.currentSavedFilters = [];
+  self.currentNodeData = null;
 
 
   self.treeConfigs = {
@@ -70,6 +71,9 @@ var KGpropertyFilter = (function() {
   };
   self.onLoaded = function() {
     var tsfPropertyFilterPrefix = Config.KGpropertyFilter.tsfPropertyFilterPrefix;
+    for (var key in self.treeConfigs) {
+      Config.sources[self.treeConfigs[key].source].editable = false;
+    }
 
 
     $("#actionDivContolPanelDiv").load("snippets/KGpropertyFilter/leftPanel.html", function() {
@@ -82,6 +86,7 @@ var KGpropertyFilter = (function() {
 
     //  MainController.UI.showHideRightPanel(true);
     $("#graphDiv").width(1000);
+
     /*  $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function() {
         $("#KGpropertyFilter_filteringResult").height($("#graphDiv").height() - 200);
         $("#KGpropertyFilter_filteringResult").width($("#graphDiv").width());
@@ -344,10 +349,16 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         self.showDataContainerDetails(self.currentTreeNode);
 
       }
+      else {
+        self.currentRightpanelNode = obj.node;
+
+
+      }
 
     },
     createChildNode: function() {
       var parent = self.currentTreeNode.data.id;
+      var parentLabel= self.currentTreeNode.data.label;
       var label = prompt("New child label");
       if (!label) {
         return;
@@ -360,11 +371,11 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       }
       var triples = [];
       let graphUri = Config.sources[treeConfig.source].graphUri;
-      sourceUri = graphUri + common.formatStringForTriple(label, true);
+      var newUri = graphUri + common.formatStringForTriple(parentLabel+"_"+label, true);
 
-      triples.push({ subject: sourceUri, predicate: "rdfs:label", object: label });
-      triples.push({ subject: sourceUri, predicate: "rdf:type", object: "owl:NamedIndividual" });
-      triples.push({ subject: sourceUri, predicate: parentPredicate, object: parent });
+      triples.push({ subject: newUri, predicate: "rdfs:label", object: label });
+      triples.push({ subject: newUri, predicate: "rdf:type", object: "owl:NamedIndividual" });
+      triples.push({ subject: newUri, predicate: parentPredicate, object: parent });
 
 
       Sparql_generic.insertTriples(treeConfig.source, triples, {}, function(err, _result) {
@@ -372,13 +383,14 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           return alert(err.responseText);
         }
 
+
         MainController.UI.message("child Created");
         var newNode = {
-          id: graphUri,
+          id: newUri,
           text: label,
           parent: parent,
           data: {
-            id: graphUri,
+            id: newUri,
             label: label,
             source: treeConfig.source
           }
@@ -387,6 +399,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         $("#" + self.currentTreeNode.treeDiv).jstree()
           .create_node(parent, newNode, "first", function(err, result) {
             $("#" + self.currentTreeNode.treeDiv).jstree().open_node(parent);
+            self.currentTreeNode=newNode
           });
       });
 
@@ -418,8 +431,14 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
     },
 
-    searchBO: function() {
-      var term = self.currentTreeNode.text;
+    searchBO: function(origin) {
+      if (origin == "graph") {
+        self.currentDataContainer = Lineage_classes.currentGraphNode;
+
+      }
+
+
+      var term = self.currentDataContainer.data.label;
       $("#GenericTools_searchAllSourcesTermInput").val(term);
       $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 4);
       KGpropertyFilter.rightPanelsActions.searchBusinessObjects();
@@ -430,75 +449,74 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       if (!self.currentDataContainer) {
         return alert("no data container selected");
       }
-      var selectedNodeData = self.currentTreeNode.data;
+      if (!self.currentRightpanelNode) {
+        return alert("no node selected in rightPanel");
+      }
+
+      var selectedNodeData = self.currentRightpanelNode.data;
       if (selectedNodeData.source == "GIDEA-RAW") {// create property
-        if (self.currentTreeNode.parent.indexOf("Attribute") > 0) {
-          if (!self.currentTreeNode.parentLogicalEntity) {
+        if (self.currentRightpanelNode.parent.indexOf("Attribute") > 0) {
+          if (!self.currentRightpanelNode.parentLogicalEntity) {
             return self.rightPanelsActions.showAttributesParentsDialog();
           }
-          else{
+          else {
 
             // create a new individual that is object of the dataContainer  and subject of gidea Attribute and Logical entity
-            var newUri=Lineage_blend.graphModification.getURI("",selectedNodeData.source,"randomHexaNumber")
+            var newUri = Lineage_blend.graphModification.getURI("", selectedNodeData.source, "randomHexaNumber");
             var triples = [
 
               {
                 subject: newUri,
-                predicate:"rdf:type ",
+                predicate: "rdf:type ",
                 object: "owl:NamedIndividual"
 
               },
               {
                 subject: newUri,
-                predicate:"rdf:type ",
+                predicate: "rdf:type ",
                 object: "http://datalenergies.total.com/resource/tsf/idcp/gidea-attribute"
 
               },
               {
                 subject: newUri,
-                predicate:"rdfs:label ",
-                object: self.currentTreeNode.parentLogicalEntity.label+"."+self.currentTreeNode.data.label
+                predicate: "http://www.w3.org/2000/01/rdf-schema#label ",
+                object: self.currentRightpanelNode.parentLogicalEntity.label + "." + self.currentTreeNode.data.label
 
               },
-              {
-                subject: newUri,
-                predicate:"rdfs:label ",
-                object: self.currentTreeNode.parentLogicalEntity.label+"."+self.currentTreeNode.data.label
 
-              },
               {
 
                 subject: self.currentDataContainer.data.id,
                 predicate: "http://datalenergies.total.com/resource/tsf/idcp/mapsWith",
-                object: newUri,
+                object: newUri
 
               },
               {
 
-                subject:newUri,
-                predicate: "http://rds.posccaesar.org/ontology/lis14/rdl/hasPart",
-                object: self.currentTreeNode.parentLogicalEntity.id,
+                subject: newUri,
+                predicate: "http://datalenergies.total.com/resource/tsf/idcp/fromEntity",
+                object: self.currentRightpanelNode.parentLogicalEntity.id
 
               },
               {
 
-                subject:newUri ,
-                predicate: "http://rds.posccaesar.org/ontology/lis14/rdl/hasPart",
-                object: self.currentTreeNode.data.id,
+                subject: newUri,
+                predicate: "http://datalenergies.total.com/resource/tsf/idcp/fromAttribute",
+                object: self.currentRightpanelNode.data.id
 
-              },
+              }
 
             ];
 
-            self.currentTreeNode.parentLogicalEntity=null;
+            self.currentRightpanelNode.parentLogicalEntity = null;
           }
-          triples=triples.concat(Lineage_blend.getCommonMetaDataTriples(newUri));
+          triples = triples.concat(Lineage_blend.getCommonMetaDataTriples(newUri));
         }
 
-        else if (self.currentTreeNode.parent.indexOf("LogicalEntity") > 0) {
+        else if (self.currentRightpanelNode.parent.indexOf("LogicalEntity") > 0 || self.currentRightpanelNode.parent.indexOf("BusinessObject") > 0) {
           var triples = [
             {
-              object: selectedNodeData.id,
+              object: self.currentRightpanelNode.id,
               predicate: "http://datalenergies.total.com/resource/tsf/idcp/mapsWith",
               subject: self.currentDataContainer.data.id
 
@@ -507,14 +525,20 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         }
       }
       else {// create member property
+        if (self.currentDataContainer.parents.length != 2) {
+          return alert("only dataContainers can be associated ");
+        }
         var triples = [
           {
-            subject: selectedNodeData.id,
-            predicate: "rdfs:member",
+            subject: self.currentRightpanelNode.id,
+            predicate: "http://www.w3.org/2000/01/rdf-schema#member",
             object: self.currentDataContainer.data.id
 
           }
         ];
+      }
+      if (!triples) {
+        return alert("no triples defined");
       }
       Sparql_generic.insertTriples(self.treeConfigs["dataContainers"].source, triples, {}, function(err, result) {
         if (err) {
@@ -544,7 +568,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           }
         };
       }
-      else if (treeConfigKey == "businessObjects") {
+      if (true || treeConfigKey == "businessObjects") {
         items.nodeInfos = {
           label: "Node infos",
           action: function(_e) {
@@ -574,10 +598,25 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
           }
         };
+        items.expand = {
+          label: "expand",
+          action: function(_e) {
+            KGpropertyFilter.commonJstreeActions.expandCommonTreeNode();
+
+          }
+        };
       }
 
 
       return items;
+    },
+
+    expandCommonTreeNode: function() {
+      if (self.currentTreeNode.id) {
+        var x = 3;
+      }
+
+
     }
 
   };
@@ -601,9 +640,9 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
     ,
     showAttributesParentsDialog: function() {
-      self.currentTreeNode.parentLogicalEntity = null;
+      self.currentRightpanelNode.parentLogicalEntity = null;
       var html = "Select a Logical Entity<br>";
-      html += "<select size='10' onclick='KGpropertyFilter.rightPanelsActions.onValidateAttributesParentsDialog($(this).val())' id='KGpropertyFilter_logicalEntitySelect'></select>";
+      html += "<select size='20' onclick='KGpropertyFilter.rightPanelsActions.onValidateAttributesParentsDialog($(this).val())' id='KGpropertyFilter_logicalEntitySelect'></select>";
 
       $("#mainDialogDiv").html(html);
       $("#mainDialogDiv").dialog("open");
@@ -629,9 +668,9 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       });
     },
     onValidateAttributesParentsDialog: function(logicalEntity) {
-      var label=$( "#KGpropertyFilter_logicalEntitySelect option:selected" ).text();
+      var label = $("#KGpropertyFilter_logicalEntitySelect option:selected").text();
 
-      self.currentTreeNode.parentLogicalEntity ={id:logicalEntity,label:label};
+      self.currentRightpanelNode.parentLogicalEntity = { id: logicalEntity, label: label };
       $("#mainDialogDiv").dialog("close");
       self.commonJstreeActions.associateNodeToDataContainer();
     }
@@ -648,21 +687,76 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       dataContainerId = self.currentTreeNode.parents[level - 1];
     }
 
-
+    Sparql_common.includeImports = 1;
     /// $("#KGpropertyFilter_display_dataContainerDiv").html(self.currentTreeNode.text)
     var visjsNodes = [];
     var source = self.currentTreeNode.data.source;
+
     async.series([
       function(callbackSeries) {
         visjsGraph.clearGraph();
+        var options = {
+          /*  layout: {
+              hierarchical: {
+                direction: "UD",
+                sortMethod: "hubsize"
+              }
+            }*/
+
+          physics: {
+            "forceAtlas2Based": {
+              "centralGravity": 0.45,
+              "springLength": 110,
+              "damping": 0.15
+            },
+            "minVelocity": 0.75
+          }
+          ,edges:{smooth:false}
+
+        };
+        Lineage_classes.drawNewGraph({ nodes: [], edges: [] }, null, options);
+        if (!self.graphButtonsInitialized) {
+          self.graphButtonsInitialized = 1;
+          var html = "<div  style='position: absolute;top:30px;left:450px;'>" +
+            "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='visjsGraph.clearGraph()'> clear Graph</button>" +
+            "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='Export.exportGraphToDataTable(null,\"GRAPH\")' > Export</button>" +
+            "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onClick='visjsGraph.showGraphConfig()'>Display</button>";
+          "</div>";
+          $("#centralPanelDiv").append(html);
+        }
         return callbackSeries();
 
       },
       function(callbackSeries) {
-        Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0, { drawBeforeCallback: 1 }, function(err, result) {
+
+        Lineage_containers.graphResources(source, self.currentTreeNode.id, { descendants: true }, function(err, result) {
+          /*  Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0, { drawBeforeCallback: 1 }, function(err, result) {*/
+          if (err) {
+            return callbackSeries(err);
+          }
+          result.nodes.forEach(function(node) {
+            visjsNodes.push(node.id);
+          });
           return callbackSeries(err);
         });
       },
+      function(callbackSeries) {
+        Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], function(err, result) {
+          /*  Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0, { drawBeforeCallback: 1 }, function(err, result) {*/
+          if (err) {
+            return callbackSeries(err);
+          }
+
+          return callbackSeries(err);
+        });
+      },
+      /*  function(callbackSeries) {// DC members of aspects
+          var properties = ["rdfs:member"];
+          var options = { inversePredicate: 1 };
+          Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function(err, result) {
+            return callbackSeries(err);
+          });
+        },
       function(callbackSeries) {
         var options = {
           memberPredicate: true,
@@ -678,10 +772,11 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           });
           return callbackSeries();
         });
-      },
+      },*/
 
 
       function(callbackSeries) {
+        return callbackSeries();
         var properties = ["rdfs:member"];
         var options = { inversePredicate: 1 };
         Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function(err, result) {
@@ -690,20 +785,70 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       },
       function(callbackSeries) {
         var properties = ["http://datalenergies.total.com/resource/tsf/idcp/mapsWith"];
-        var options = { };
+        var options = {};
         Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function(err, result) {
           return callbackSeries(err);
         });
-      }
+      },
+      function(callbackSeries) {//post processing vis
 
+        var nodes = visjsGraph.data.nodes.get();
+
+        var newNodes = [];
+        nodes.forEach(function(node) {
+          var shape = Lineage_classes.defaultShape;
+          var color = "#999";
+          if (node.level === 0) {
+            shape = "box";
+            color = "#70ac47";
+            node.data.graphPopupMenusFn = KGpropertyFilter.getGraphPopupMenuItem;
+          }
+          if (node.level === 1) {
+            shape = "box";
+            color = "#00afef";
+            node.data.graphPopupMenusFn = KGpropertyFilter.getGraphPopupMenuItem;
+          }
+          if (node.level === 2) {
+            node.data.graphPopupMenusFn = KGpropertyFilter.getGraphPopupMenuItem;
+          }
+
+          if (node.id.indexOf("gidea") > -1) {
+            shape = "square";
+            color = "#70309f";
+
+          }
+
+          if (node.id.indexOf("business") > -1) {
+            shape = "star";
+            color = "#f90edd";
+          }
+
+          if (node.data.type === 1) {
+
+          }
+
+          newNodes.push({ id: node.id, shape: shape, color: color });
+          visjsGraph.data.nodes.update(newNodes);
+
+
+        });
+        return callbackSeries();
+      }
 
     ], function(err) {
       if (err) {
         return alert(err.responseText);
       }
+
     });
 
 
+  };
+
+  self.getGraphPopupMenuItem = function() {
+    var html = " <span  class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showNodeInfos();\"> Node infos</span>" +
+      "<span  class=\"popupMenuItem\" onclick=\"KGpropertyFilter.commonJstreeActions.searchBO('graph');\"> Search BO</span>";
+    return html;
   };
 
 

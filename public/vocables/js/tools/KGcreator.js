@@ -418,6 +418,13 @@ var KGcreator = (function () {
                 KGcreator.addBasicMapping("owl:Class")
             },
         };
+        items.addBasicBag = {
+            label: "addBasicBag",
+            action: function (_e) {
+                // pb avec source
+                KGcreator.addBasicMapping("rdf:Bag")
+            },
+        };
         
         
         

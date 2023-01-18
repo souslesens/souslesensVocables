@@ -478,7 +478,9 @@ sourceLabels.sort();
         }
     };
 
-    self.drawNewGraph = function (visjsData, graphDiv) {
+    self.drawNewGraph = function (visjsData, graphDiv,_options) {
+        if(!_options)
+            _options={}
         graphContext = {};
         var options = {
             keepNodePositionOnDrag: true,
@@ -515,7 +517,18 @@ sourceLabels.sort();
                 }
             },
         };
-        if (Lineage_sources.isSourceEditable) {
+
+        if(_options.layout ) {
+            options.layout=_options.layout
+        }
+
+        if(_options.physics ) {
+            options.physics=_options.physics
+        }
+
+
+
+        if (Lineage_sources.isSourceEditable(Lineage_sources.activeSource)) {
             // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
             options.manipulation = {
                 enabled: true,
@@ -1427,7 +1440,7 @@ addNode:false
                                         shadow: self.nodeShadow,
                                         shape: attrs.shape,
                                         size: shapeSize,
-                                        level: self.currentExpandLevel,
+                                        level: i,
                                         color: attrs.color,
 
                                         data: {
@@ -2302,7 +2315,17 @@ addNode:false
         } else if (node.data && node.data.context == Lineage_linkedData_mappings.context) {
             html = "...";
             // '<span  class="popupMenuItem" onclick="Lineage_classes.graphActions.expandIndividual();"> Expand individual</span>';
-        } else {
+        }
+
+        else  if (node.data && node.data.graphPopupMenusFn){
+            html =  node.data.graphPopupMenusFn()
+        }
+
+
+        else {
+
+
+
             html =
                 '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showNodeInfos();"> Node infos</span>' +
                 '   <span  id=\'lineage_graphPopupMenuItem\' class="popupMenuItem" onclick="Lineage_classes.graphActions.expand();"> Expand</span>' +
@@ -2402,7 +2425,7 @@ addNode:false
                             type: conceptType,
                         },
                         shadow: self.nodeShadow,
-                        level: ancestorsDepth,
+                        level: 0,
                         shape: shape,
                         color: self.getSourceColor(nodeData.source, item.concept.value),
                         size: Lineage_classes.defaultShapeSize,
@@ -2431,7 +2454,7 @@ addNode:false
                                 shadow: self.nodeShadow,
                                 shape: Lineage_classes.defaultShape,
                                 color: color,
-                                level: ancestorsDepth - i,
+                                level: -i,
                                 size: Lineage_classes.defaultShapeSize,
                             });
                             newNodeIds.push(broader.value);

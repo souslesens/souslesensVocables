@@ -249,7 +249,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
     };
 
-
     const fieldsFromSource = (source: any) => {
         let fields = [source.schemaType];
 
@@ -266,15 +265,15 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         let index = 0;
         sources.forEach((source) => {
             let currentTree = sourcesTree;
-
+            let tree: string[] = [];
             fieldsFromSource(source).forEach((field) => {
+                tree.push(field);
                 if (filteringCharsSourcesAccessControl !== "") {
                     // FIXME: Case-sensitive only
                     if (field.indexOf(filteringCharsSourcesAccessControl) == -1) {
                         return;
                     }
                 }
-
                 let root = currentTree.find((key) => key.name == field);
                 if (root === undefined) {
                     root = {
@@ -282,6 +281,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                         children: [],
                         index: index,
                         source: source,
+                        treeStr: tree.join("/"),
                     };
                     currentTree.push(root);
                 }
@@ -299,18 +299,46 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         }
 
         return sourcesTree.map((source: any) => {
+            const sourcesAccessControlList = Object.entries(profileModel.profileForm.sourcesAccessControl);
+            const availableSourcesAccessControl = sourcesAccessControlList.map(([sac, _val]) => {
+                return sac;
+            });
+
+            // get all accessControl that match the tree
+            const matchingAccessControls: string[] = availableSourcesAccessControl
+                .map((path) => {
+                    if (source.treeStr.startsWith(path)) {
+                        return path;
+                    } else {
+                        return null;
+                    }
+                })
+                .filter((elem): elem is string => elem != null);
+
+            let accessControlValue = null;
+            if (matchingAccessControls.length > 0) {
+                // Get the longest accesscontrol
+                const matchingAccessControl = matchingAccessControls.reduce((a, b) => {
+                    return a.length >= b.length ? a : b;
+                });
+                // Get the value of this accessControl
+                accessControlValue = profileModel.profileForm.sourcesAccessControl[matchingAccessControl];
+            }
+
+            const value = accessControlValue ? accessControlValue : "default";
+
             return (
                 <TreeItem
                     nodeId={source.index.toString()}
                     label={
                         <Grid container alignItems="center" spacing={2}>
                             <Grid item xs>
-                                <p style={{margin: 0}}>{source.name}</p>
+                                <p style={{ margin: 0 }}>{source.name}</p>
                             </Grid>
                             <Grid item xs="auto">
                                 <SourceAccessControlInputSelect
                                     name={source.source.id + "-source-access-control"}
-                                    value={profileModel.profileForm.sourcesAccessControl[source.source.name] ?? "default"}
+                                    value={value}
                                     onChange={handleSourceAccessControlUpdate[source.source.name]}
                                     allowDefault={true}
                                     editable={source.source.editable}
@@ -345,7 +373,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                 {create ? "Create Profile" : "Edit"}
             </Button>
             <Modal onClose={handleClose} open={profileModel.modal}>
-                <Box component="form" sx={style} style={{maxHeight: '100%', overflow: 'auto'}}>
+                <Box component="form" sx={style} style={{ maxHeight: "100%", overflow: "auto" }}>
                     <Stack spacing={4}>
                         <TextField fullWidth onChange={handleFieldUpdate("name")} value={profileModel.profileForm.name} id={`name`} label={"Name"} variant="standard" />
                         <TextField

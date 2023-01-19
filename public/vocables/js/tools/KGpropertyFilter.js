@@ -27,8 +27,8 @@ var KGpropertyFilter = (function() {
     },
     disciplines: {
       key: "disciplines",
-      source: "ISO_15926-PCA-2",
-      topUris: ["http://data.15926.org/rdl/RDS6811233"],
+      source: "IDCP",
+      topUris: ["http://datalenergies.total.com/resource/tsf/idcp/Discipline"],
       options: { memberPredicate: 1 },
       levels: 3,
       jstreeDiv: "KGpropertyFilter_disciplinesTree"
@@ -36,14 +36,14 @@ var KGpropertyFilter = (function() {
     actors: {
       key: "actors",
       source: "IDCP",
-      topUris: ["http://datalenergies.total.com/resource/tsf/idcp/DataContainer"],
+      topUris: ["http://datalenergies.total.com/resource/tsf/idcp/role_IDCP"],
       options: { memberPredicate: 1 },
       jstreeDiv: "KGpropertyFilter_actorsTree"
     },
     systems: {
       key: "systems",
       source: "IDCP",
-      topUris: ["http://datalenergies.total.com/resource/tsf/idcp/DataContainer"],
+      topUris: ["http://datalenergies.total.com/resource/tsf/idcp/OGSystem"],
       options: { memberPredicate: 1 },
       levels: 3,
       jstreeDiv: "KGpropertyFilter_systemsTree"
@@ -164,7 +164,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         }
         ,
         function(callbackSeries) {
-          return callbackSeries();
           self.loadInJstree(self.treeConfigs["actors"], function(err, result) {
             callbackSeries(err);
           });
@@ -358,7 +357,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     },
     createChildNode: function() {
       var parent = self.currentTreeNode.data.id;
-      var parentLabel= self.currentTreeNode.data.label;
+      var parentLabel = self.currentTreeNode.data.label;
       var label = prompt("New child label");
       if (!label) {
         return;
@@ -371,7 +370,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       }
       var triples = [];
       let graphUri = Config.sources[treeConfig.source].graphUri;
-      var newUri = graphUri + common.formatStringForTriple(parentLabel+"_"+label, true);
+      var newUri = graphUri + common.formatStringForTriple(parentLabel + "_" + label, true);
 
       triples.push({ subject: newUri, predicate: "rdfs:label", object: label });
       triples.push({ subject: newUri, predicate: "rdf:type", object: "owl:NamedIndividual" });
@@ -399,7 +398,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         $("#" + self.currentTreeNode.treeDiv).jstree()
           .create_node(parent, newNode, "first", function(err, result) {
             $("#" + self.currentTreeNode.treeDiv).jstree().open_node(parent);
-            self.currentTreeNode=newNode
+            self.currentTreeNode = newNode;
           });
       });
 
@@ -453,8 +452,8 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         return alert("no node selected in rightPanel");
       }
 
-      var selectedNodeData = self.currentRightpanelNode.data;
-      if (selectedNodeData.source == "GIDEA-RAW") {// create property
+      var rightPanelNodeData = self.currentRightpanelNode.data;
+      if (rightPanelNodeData.source == "GIDEA-RAW") {// create property
         if (self.currentRightpanelNode.parent.indexOf("Attribute") > 0) {
           if (!self.currentRightpanelNode.parentLogicalEntity) {
             return self.rightPanelsActions.showAttributesParentsDialog();
@@ -462,7 +461,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           else {
 
             // create a new individual that is object of the dataContainer  and subject of gidea Attribute and Logical entity
-            var newUri = Lineage_blend.graphModification.getURI("", selectedNodeData.source, "randomHexaNumber");
+            var newUri = Lineage_blend.graphModification.getURI("", self.currentDataContainer.data.source, "randomHexaNumber");
             var triples = [
 
               {
@@ -479,7 +478,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
               },
               {
                 subject: newUri,
-                predicate: "http://www.w3.org/2000/01/rdf-schema#label ",
+                predicate: "http://www.w3.org/2000/01/rdf-schema#label",
                 object: self.currentRightpanelNode.parentLogicalEntity.label + "." + self.currentTreeNode.data.label
 
               },
@@ -516,9 +515,10 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         else if (self.currentRightpanelNode.parent.indexOf("LogicalEntity") > 0 || self.currentRightpanelNode.parent.indexOf("BusinessObject") > 0) {
           var triples = [
             {
-              object: self.currentRightpanelNode.id,
+
+              subject: self.currentDataContainer.data.id,
               predicate: "http://datalenergies.total.com/resource/tsf/idcp/mapsWith",
-              subject: self.currentDataContainer.data.id
+              object: self.currentRightpanelNode.id
 
             }
           ];
@@ -530,7 +530,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         }
         var triples = [
           {
-            subject: self.currentRightpanelNode.id,
+            subject: rightPanelNodeData.id,
             predicate: "http://www.w3.org/2000/01/rdf-schema#member",
             object: self.currentDataContainer.data.id
 
@@ -540,7 +540,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       if (!triples) {
         return alert("no triples defined");
       }
-      Sparql_generic.insertTriples(self.treeConfigs["dataContainers"].source, triples, {}, function(err, result) {
+      Sparql_generic.insertTriples(self.currentDataContainer.data.source, triples, {}, function(err, result) {
         if (err) {
           return alert(err.responseText);
         }
@@ -631,7 +631,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         searchedSources: [self.treeConfigs["businessObjects"].source, "BUSINESS_OBJECTS_DATA_DOMAINS"],
         contextMenu: self.commonJstreeActions.getJsTreeContextMenu("businessObjects"),
         selectTreeNodeFn: function(event, obj) {
-          self.currentTreeNode = obj.node;
+          self.currentRightpanelNode = obj.node;
           return;
         }
       };
@@ -650,7 +650,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       var options = {
         distinct: "?object ?objectLabel"
       };
-      Sparql_OWL.getFilteredTriples(source, self.currentTreeNode.data.id, "http://datalenergies.total.com/resource/tsf/gidea-raw/describes", null, options, function(err, result) {
+      Sparql_OWL.getFilteredTriples(source, self.currentRightpanelNode.data.id, "http://datalenergies.total.com/resource/tsf/gidea-raw/describes", null, options, function(err, result) {
         if (err) {
           return alert(err.responseText);
         }
@@ -711,7 +711,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             },
             "minVelocity": 0.75
           }
-          ,edges:{smooth:false}
+          , edges: { smooth: false }
 
         };
         Lineage_classes.drawNewGraph({ nodes: [], edges: [] }, null, options);
@@ -742,37 +742,32 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       },
       function(callbackSeries) {
         Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], function(err, result) {
-          /*  Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0, { drawBeforeCallback: 1 }, function(err, result) {*/
           if (err) {
             return callbackSeries(err);
           }
 
+          var newNodes = [];
+          result.nodes.forEach(function(node) {
+            newNodes.push({
+              id: node.id,
+              shape: "box",
+              color: "#bb8f00"
+            });
+
+          });
+          visjsGraph.data.nodes.update(newNodes);
+          var newEdges = [];
+          result.edges.forEach(function(edge) {
+            newEdges.push({
+              id: edge.id,
+              color: "#bb8f00"
+            });
+
+          });
+          visjsGraph.data.edges.update(newEdges);
           return callbackSeries(err);
         });
       },
-      /*  function(callbackSeries) {// DC members of aspects
-          var properties = ["rdfs:member"];
-          var options = { inversePredicate: 1 };
-          Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function(err, result) {
-            return callbackSeries(err);
-          });
-        },
-      function(callbackSeries) {
-        var options = {
-          memberPredicate: true,
-          depth: 2,
-          drawBeforeCallback: 1
-        };
-        Lineage_classes.addChildrenToGraph(source, self.currentTreeNode.id, options, function(err, result) {
-          if (err) {
-            return callbackSeries(err);
-          }
-          result.nodes.forEach(function(node) {
-            visjsNodes.push(node.id);
-          });
-          return callbackSeries();
-        });
-      },*/
 
 
       function(callbackSeries) {
@@ -796,8 +791,8 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
         var newNodes = [];
         nodes.forEach(function(node) {
-          var shape = Lineage_classes.defaultShape;
-          var color = "#999";
+          var shape = null;
+          var color = null;
           if (node.level === 0) {
             shape = "box";
             color = "#70ac47";
@@ -826,12 +821,13 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           if (node.data.type === 1) {
 
           }
-
-          newNodes.push({ id: node.id, shape: shape, color: color });
-          visjsGraph.data.nodes.update(newNodes);
+          if (shape != null) {
+            newNodes.push({ id: node.id, shape: shape, color: color });
+          }
 
 
         });
+        visjsGraph.data.nodes.update(newNodes);
         return callbackSeries();
       }
 

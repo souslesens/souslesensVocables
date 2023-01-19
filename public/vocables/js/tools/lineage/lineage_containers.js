@@ -871,7 +871,7 @@ var Lineage_containers = (function() {
             id: edgeId,
             from: item.container.value,
             to: item.node.value,
-
+arrows:"middle",
             data: { from: item.container.value, to: item.node.value, source: source },
             font: { multi: true, size: 10 },
 

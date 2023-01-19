@@ -1738,12 +1738,14 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
       });
     }
   };
-  self.searchInSourcesTree = function() {
+  self.searchInSourcesTree = function(event,sourcesTreeDiv) {
     if (event.keyCode != 13 && event.keyCode != 9) {
       return;
     }
     var value = $("#Lineage_classes_SearchSourceInput").val();
-    $("#searchAll_sourcesTree").jstree(true).search(value);
+    if(!sourcesTreeDiv)
+      sourcesTreeDiv="searchAll_sourcesTree"
+    $("#"+sourcesTreeDiv).jstree(true).search(value);
   };
   self.showSearchableSourcesTreeDialog = function(types, options, validateFn, okButtonValidateFn) {
     if (!options) {

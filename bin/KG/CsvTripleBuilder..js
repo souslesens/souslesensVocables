@@ -377,7 +377,7 @@ var CsvTripleBuilder = {
 
                                                                 var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
                                                                 var prop = propStr;
-                                                                if (prop.indexOf("$") == 0) prop = line[prop.substring(1)];
+                                                                if (prop.indexOf("$") == 0) prop =    CsvTripleBuilder.getUserPredicateUri(item.p,line,graphUri)
                                                                 if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
 
                                                                 if (!existingNodes[subjectStr + "_" + prop + "_" + objectStr]) {
@@ -411,7 +411,7 @@ var CsvTripleBuilder = {
                                                                         // blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
                                                                         blankNode = getNewBlankNodeId();
                                                                         prop = propStr;
-                                                                        if (prop.indexOf("$") == 0) prop = line[prop.substring(1)];
+                                                                        if (prop.indexOf("$") == 0) prop =  CsvTripleBuilder.getUserPredicateUri(item.p,line,graphUri)
                                                                         if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
 
                                                                         if (!existingNodes[objectStr + "_" + prop + "_" + subjectStr]) {
@@ -461,7 +461,7 @@ var CsvTripleBuilder = {
                                                                         return (lineError = e);
                                                                     }
                                                                 } else if (item.p.indexOf("$") == 0) {
-                                                                    propertyStr = line[item.p.substring(1)];
+                                                                    propertyStr = CsvTripleBuilder.getUserPredicateUri(item.p,line,graphUri)
                                                                 }
                                                                 if (!propertyStr) {
                                                                     var x = 3;
@@ -907,6 +907,18 @@ var CsvTripleBuilder = {
             }
         );
     },
+    getUserPredicateUri:function(predicate,line,graphUri){
+        if(predicate.indexOf("$")==0){
+            if(predicate.indexOf("http")<0 && predicate.indexOf(":")<0)
+               return graphUri+util.formatStringForTriple(line[predicate.substring(1)],true)
+            else
+                return line[predicate.substring(1)];
+
+        }else{
+            return predicate
+        }
+
+    }
 };
 
 module.exports = CsvTripleBuilder;

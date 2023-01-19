@@ -250,7 +250,7 @@ var MainController = (function () {
                 Object.keys(Config.sources)
                     .sort()
                     .forEach(function (sourceLabel, index) {
-                        if (sourceLabel == "TEST0211") var x = 3;
+
                         self.initControllers();
                         if (sources && sources.indexOf(sourceLabel) < 0) return;
                         if (Config.sources[sourceLabel].isDraft) return;

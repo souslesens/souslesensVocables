@@ -102,10 +102,22 @@ var allObjects = result.sourceObjects.concat(["---------"]).concat(result.TopLev
                                     },
                                 });
                             }
+                            if (true) {
+                                jstreeData.push({
+                                    id: "http://www.w3.org/2002/07/owl#equivalentClass",
+                                    text: "owl:equivalentClass",
+                                    parent: "#",
+                                    data: {
+                                        id: "http://www.w3.org/2002/07/owl#equivalentClass",
+                                        inSource: Config.dictionarySource,
+                                    },
+                                });
+                            }
 
                             if (true || self.sourceNode.rdfType == "NamedIndividual") {
                                 jstreeData.push({
                                     id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+
                                     text: "rdf:type",
                                     parent: "#",
                                     data: {
@@ -122,6 +134,17 @@ var allObjects = result.sourceObjects.concat(["---------"]).concat(result.TopLev
                                     parent: "#",
                                     data: {
                                         id: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                                        inSource: Lineage_sources.activeSource,
+                                    },
+                                });
+                            }
+                            if (Config.sources[Lineage_sources.activeSource].schemaType == "OWL") {
+                                jstreeData.push({
+                                    id: "http://www.w3.org/2000/01/rdf-schema#member",
+                                    text: "rdfs:member",
+                                    parent: "#",
+                                    data: {
+                                        id: "http://www.w3.org/2000/01/rdf-schema#member",
                                         inSource: Lineage_sources.activeSource,
                                     },
                                 });

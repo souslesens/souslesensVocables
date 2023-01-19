@@ -68,7 +68,7 @@ self.graphTable(KGcreator.currentTreeNode);
     };
 
     self.showSampledata = function (table, column, targetDiv) {
-        var node = { parent: table, data: {} };
+        var node = { parent: table.parent == "#" ? table.id : table.parent, data: {} };
         var allColumns = true;
         if (column) {
             allColumns = false;
@@ -76,12 +76,13 @@ self.graphTable(KGcreator.currentTreeNode);
             node.data = { id: column };
         }
         KGcreator.showSampleData(node, allColumns, 100, function (err, result) {
+            if (err) return alert(err.responseText);
             if (targetDiv == "mainDailogDiv") $("#mainDialogDiv").dialog("open");
 
             result = result.replace(/\n/g, "</td><tr><td>");
             result = result.replace(/\t/g, "</td><td>");
             var html = "<table><tr><td>" + result + "</tr></table>";
-
+            $("#" + targetDiv).dialog("open");
             $("#" + targetDiv).html(html);
         });
     };
@@ -282,11 +283,14 @@ self.graphTable(KGcreator.currentTreeNode);
     };
     self.joinTable = function (direction) {
         var joinColumn = $("#lineage_linkedData_join_joinColumnSelect").val();
+
         if (direction == "from") {
             var column = $("#lineage_linkedData_join_fromColumnSelect").val();
+            self.currentRelation.joinTable.fromColumn = joinColumn;
             $("#lineage_linkedData_join_fromJoinSpan").html(column + " -> " + joinColumn);
         } else if (direction == "to") {
             var column = $("#lineage_linkedData_join_toColumnSelect").val();
+            self.currentRelation.joinTable.toColumn = joinColumn;
             $("#lineage_linkedData_join_toJoinSpan").html(joinColumn + " -> " + column);
         }
     };

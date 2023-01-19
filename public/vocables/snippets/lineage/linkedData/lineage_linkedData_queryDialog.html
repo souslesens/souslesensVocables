@@ -89,7 +89,7 @@
                     <tr>
                         <td>table</td>
                         <td>
-                            <select class="lineage_linkedDataQuery_input" id="LineageLinkedDataQueryParams_classes" size="2" onchange="Lineage_linkedData_query.onClassChange($(this).val())"></select>
+                            <select class="lineage_linkedDataQuery_input" id="LineageLinkedDataQueryParams_classes" size="2"></select>
                         </td>
                     </tr>
 
@@ -113,7 +113,7 @@
 
                                 &nbsp; <button onclick="Lineage_linkedData_query.fillColumnValuesSelect()">List</button>
                                 &nbsp;
-                                <select id="LineageLinkedDataQueryParams_valuesSelect" style="width: 200px">
+                                <select id="LineageLinkedDataQueryParams_valuesSelect" onchange="Lineage_linkedData_query.onColumnValuesSelect()" style="width: 200px">
                                     <option value="" size="3"></option>
                                 </select>
                             </td>
@@ -140,14 +140,27 @@
                         Filters :
                         <div id="LineageLinkedDataQueryParams_Filters" style="display: flex; flex-direction: column; margin: 5px; padding: 5px; background-color: #ddd"></div>
                     </div>
+                    <!--  <div>
+                        All columns <input type="checkbox" id="LineageLinkedDataQueryParams_allColumnsCBX" checked="checked">
+
+                    </div>-->
                     <div>
-                        <button onclick="Lineage_linkedData_query.executeQuery()">Execute Query</button>
+                        Query Display
+                        <select id="LineageLinkedDataQueryParams_queryDisplaySelect">
+                            <option>table</option>
+                            <option>graph</option>
+                        </select>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_linkedData_query.executeQuery()">Execute</button>
+
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_linkedData_query.viewSQL()">view SQL</button>
                         <!--  <button onclick="Lineage_linkedData_query.stackContext()">Stack Query</button>-->
-                        <button onclick="Lineage_linkedData_query.viewSQL()">view SQL</button>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_linkedData_query.clearQuery()">Clear</button>
                     </div>
-                    <div id="LineageLinkedDataQueryParams_SqlDivWrapper" style="display: none">
+                    <div id="LineageLinkedDataQueryParams_SqlDivWrapper" style="display: block">
                         SQL
-                        <button onclick="Lineage_linkedData_query.copySqlToClipboard()">Copy</button>
+
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_linkedData_query.copySqlToClipboard()">Copy</button>
+
                         <div id="LineageLinkedDataQueryParams_SqlDiv" style="width: 500px; height: 400px; overflow: auto; background-color: #ccc; margin: 5px"></div>
                     </div>
                 </div>

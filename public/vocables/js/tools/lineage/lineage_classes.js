@@ -478,7 +478,8 @@ sourceLabels.sort();
         }
     };
 
-    self.drawNewGraph = function (visjsData, graphDiv) {
+    self.drawNewGraph = function (visjsData, graphDiv, _options) {
+        if (!_options) _options = {};
         graphContext = {};
         var options = {
             keepNodePositionOnDrag: true,
@@ -515,7 +516,16 @@ sourceLabels.sort();
                 }
             },
         };
-        if (true) {
+
+        if (_options.layout) {
+            options.layout = _options.layout;
+        }
+
+        if (_options.physics) {
+            options.physics = _options.physics;
+        }
+
+        if (Lineage_sources.isSourceEditable(Lineage_sources.activeSource)) {
             // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
             options.manipulation = {
                 enabled: true,
@@ -1248,13 +1258,13 @@ addNode:false
                 }
                 visjsGraph.network.fit();
                 if (callback) {
-                    callback();
+                    callback(null, visjsData);
                 }
                 return MainController.UI.message("", true);
             }
         );
     };
-    self.addChildrenToGraph = function (/** @type {string | number} */ source, /** @type {any} */ nodeIds, /** @type {{ owlType?: any; depth?: any; dontClusterNodes?: any; }} */ options, callback) {
+    self.addChildrenToGraph = function (source, nodeIds, options, callback) {
         var parentIds;
         if (!source) {
             source = Lineage_sources.activeSource;
@@ -1427,7 +1437,7 @@ addNode:false
                                         shadow: self.nodeShadow,
                                         shape: attrs.shape,
                                         size: shapeSize,
-                                        level: self.currentExpandLevel,
+                                        level: i,
                                         color: attrs.color,
 
                                         data: {
@@ -1469,7 +1479,7 @@ addNode:false
                 }
             }
             if (callback) {
-                return callback(null, visjsData2);
+                if (!options.drawBeforeCallback) return callback(null, visjsData2);
             }
             var visjsData = {
                 nodes: visjsDataClusters.nodes.concat(visjsData2.nodes),
@@ -1482,6 +1492,7 @@ addNode:false
             visjsGraph.network.fit();
 
             $("#waitImg").css("display", "none");
+            if (callback) return callback(null, visjsData2);
         });
     };
 
@@ -2299,6 +2310,8 @@ addNode:false
         } else if (node.data && node.data.context == Lineage_linkedData_mappings.context) {
             html = "...";
             // '<span  class="popupMenuItem" onclick="Lineage_classes.graphActions.expandIndividual();"> Expand individual</span>';
+        } else if (node.data && node.data.graphPopupMenusFn) {
+            html = node.data.graphPopupMenusFn();
         } else {
             html =
                 '    <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showNodeInfos();"> Node infos</span>' +
@@ -2362,14 +2375,7 @@ addNode:false
         visjsGraph.data.nodes.update(newNodes);
     };
 
-    self.drawNodeAndParents = function (
-        /** @type {{ source: string | number; label: any; text: any; id: string | number; }} */ nodeData,
-        ancestorsDepth,
-        /** @type {(arg0: string | null, arg1: { nodes: never[]; edges: never[]; } | undefined) => any} */ callback
-    ) {
-        /**
-         * @param {any[]} result
-         */
+    self.drawNodeAndParents = function (nodeData, ancestorsDepth, options, callback) {
         function drawNodeAndparent(result) {
             var visjsData = { nodes: [], edges: [] };
             var color = self.getSourceColor(nodeData.source);
@@ -2400,7 +2406,7 @@ addNode:false
                             type: conceptType,
                         },
                         shadow: self.nodeShadow,
-                        level: ancestorsDepth,
+                        level: 0,
                         shape: shape,
                         color: self.getSourceColor(nodeData.source, item.concept.value),
                         size: Lineage_classes.defaultShapeSize,
@@ -2429,7 +2435,7 @@ addNode:false
                                 shadow: self.nodeShadow,
                                 shape: Lineage_classes.defaultShape,
                                 color: color,
-                                level: ancestorsDepth - i,
+                                level: -i,
                                 size: Lineage_classes.defaultShapeSize,
                             });
                             newNodeIds.push(broader.value);
@@ -2503,8 +2509,11 @@ upperNodeIds.push(id);
                     // pass
                 });
             }
+            if (!options) {
+                options = {};
+            }
             if (callback) {
-                return callback(null, visjsData);
+                if (!options.drawBeforeCallback) callback(null, visjsData);
             }
 
             Lineage_sources.registerSource(nodeData.source);
@@ -2519,8 +2528,8 @@ upperNodeIds.push(id);
             setTimeout(function () {
                 self.zoomGraphOnNode(nodeData.id, false);
             }, 500);
-            $("#waitImg").css("display", "none");
-            return MainController.UI.message("No data found");
+            MainController.UI.message("", true);
+            if (callback) return callback(null, visjsData);
         }
 
         var existingNodes = visjsGraph.getExistingIdsMap();

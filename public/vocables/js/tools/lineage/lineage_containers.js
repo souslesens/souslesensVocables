@@ -49,11 +49,11 @@ var Lineage_containers = (function () {
         };
 
         /*  items["GraphContainerSetStyle"] = {
-      label: "Set Style",
-      action: function(_e) {
-        Lineage_styles.showDialog(self.currentContainer.data);
-      }
-    };*/
+  label: "Set Style",
+  action: function(_e) {
+    Lineage_styles.showDialog(self.currentContainer.data);
+  }
+};*/
 
         return items;
     };
@@ -329,6 +329,7 @@ var Lineage_containers = (function () {
                             id: edgeId,
                             from: container.id,
                             to: nodeData.id,
+                            arrows: " middle",
 
                             data: { propertyId: "http://www.w3.org/2000/01/rdf-schema#member", source: source },
                             font: { multi: true, size: 10 },
@@ -449,22 +450,21 @@ var Lineage_containers = (function () {
             common.jstree.addNodesToJstree("lineage_containers_containersJstree", containerId, jstreeData);
         });
     };
-    self.graphResources = function (source, containerId, options) {
+    self.graphResources = function (source, containerId, options, callback) {
         if (!options) {
             options = {};
         }
-        var existingChildren = common.jstree.getjsTreeNodes("lineage_containers_containersJstree", true, containerId);
 
         var data = [];
         var descendants = [];
         var stylesMap = {};
-
+        var visjsData;
         async.series(
             [
                 //getContainers descendants type container
                 function (callbackSeries) {
                     options.descendants = true;
-                    self.sparql_queries.getContainerDescendants(Lineage_sources.activeSource, containerId, options, function (err, result) {
+                    self.sparql_queries.getContainerDescendants(source, containerId, options, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -509,7 +509,7 @@ var Lineage_containers = (function () {
                     var color = Lineage_classes.getSourceColor(source);
                     var opacity = 1.0;
                     var existingNodes = visjsGraph.getExistingIdsMap();
-                    var visjsData = { nodes: [], edges: [] };
+                    visjsData = { nodes: [], edges: [] };
                     var objectProperties = [];
 
                     data.forEach(function (item) {
@@ -584,6 +584,7 @@ var Lineage_containers = (function () {
                                     id: edgeId,
                                     from: item.container0.value,
                                     to: item.parentMember.value,
+                                    arrows: " middle",
                                     data: {
                                         from: item.container0.value,
                                         to: item.parentMember.value,
@@ -636,6 +637,7 @@ var Lineage_containers = (function () {
                                         from: item.parent.value,
                                         to: item.childMember.value,
                                         source: source,
+                                        arrows: " middle",
                                     },
                                     font: { multi: true, size: 10 },
 
@@ -645,6 +647,41 @@ var Lineage_containers = (function () {
                             }
                         }
                     });
+
+                    function setNodesLevel(visjsData) {
+                        var nodelevels = {};
+
+                        function recurse(from, level) {
+                            visjsData.edges.forEach(function (edge) {
+                                if (edge.from == edge.to) {
+                                    return;
+                                }
+                                if (edge.from == from) {
+                                    nodelevels[edge.from] = level;
+                                    if (!nodelevels[edge.to]) {
+                                        recurse(edge.to, level + 1);
+                                    }
+                                }
+                            });
+                        }
+
+                        recurse(containerId, 1);
+                        var maxLevel = 0;
+                        visjsData.nodes.forEach(function (node, index) {
+                            var level = (nodelevels[node.id] || 0) - 1;
+                            maxLevel = Math.max(maxLevel, level);
+                            visjsData.nodes[index].level = level;
+                        });
+
+                        visjsData.nodes.forEach(function (node, index) {
+                            if (node.level == -1) {
+                                node.level = maxLevel;
+                            } else node.level = node.level;
+                        });
+                    }
+
+                    setNodesLevel(visjsData);
+
                     if (!visjsGraph.data || !visjsGraph.data.nodes) {
                         Lineage_classes.drawNewGraph(visjsData);
                     } else {
@@ -665,6 +702,9 @@ var Lineage_containers = (function () {
                 },
             ],
             function (err) {
+                if (callback) {
+                    return callback(null, visjsData);
+                }
                 return;
             }
         );
@@ -748,11 +788,14 @@ var Lineage_containers = (function () {
 
     self.applyContainerstyle = function (containerUrl) {};
 
-    self.graphWhiteboardNodesContainers = function () {
-        var source = Lineage_sources.activeSource;
+    self.graphWhiteboardNodesContainers = function (source, ids, callback) {
+        if (!source) {
+            source = Lineage_sources.activeSource;
+        }
         var fromStr = Sparql_common.getFromStr(source, false, true);
-
-        var ids = visjsGraph.data.nodes.getIds();
+        if (!ids) {
+            ids = visjsGraph.data.nodes.getIds();
+        }
         var filter = Sparql_common.setFilter("node", ids);
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -768,6 +811,9 @@ var Lineage_containers = (function () {
 
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
             if (err) {
+                if (callback) {
+                    return callback(err);
+                }
                 return alert(err);
             }
             var existingNodes = visjsGraph.getExistingIdsMap();
@@ -803,7 +849,7 @@ var Lineage_containers = (function () {
                         id: edgeId,
                         from: item.container.value,
                         to: item.node.value,
-
+                        arrows: "middle",
                         data: { from: item.container.value, to: item.node.value, source: source },
                         font: { multi: true, size: 10 },
 
@@ -818,6 +864,9 @@ var Lineage_containers = (function () {
 
             visjsGraph.network.fit();
             $("#waitImg").css("display", "none");
+            if (callback) {
+                return callback(null, visjsData);
+            }
         });
     };
 

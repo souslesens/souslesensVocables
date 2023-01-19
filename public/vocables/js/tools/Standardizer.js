@@ -11,6 +11,11 @@ var Standardizer = (function () {
     self.onSourceSelect = function () {
         // pass
     };
+
+    self.searchInSourcesTree = function (event) {
+        SourceBrowser.searchInSourcesTree(event, "Standardizer_sourcesTree");
+    };
+
     self.onLoaded = function (callback) {
         $("#actionDiv").html("");
         $("#graphDiv").html("");
@@ -23,6 +28,7 @@ var Standardizer = (function () {
         });
 
         $("#actionDivContolPanelDiv").load("snippets/standardizer/standardizer_left.html", function () {
+            $("#Lineage_classes_SearchSourceInput").bind("keydown", null, Standardizer.searchInSourcesTree);
             $("#Standardizer_leftTab").tabs({});
         });
         //  MainController.UI.toogleRightPanel(true);

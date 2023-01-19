@@ -20,9 +20,13 @@ var Sparql_common = (function () {
 
     self.getLangFilter = function (source, conceptName) {
         var sourceObj = Config.sources[source];
-        if (!sourceObj) return "";
+        if (!sourceObj) {
+            return "";
+        }
         var pref_lang = sourceObj.pref_lang;
-        if (!pref_lang) return "";
+        if (!pref_lang) {
+            return "";
+        }
         return " FILTER (lang(?" + conceptName + ")='" + pref_lang + "')";
     };
 
@@ -39,10 +43,16 @@ var Sparql_common = (function () {
     };
 
     self.setFilter = function (varName, ids, words, options) {
-        if (!ids && !words) return "";
+        if (!ids && !words) {
+            return "";
+        }
 
-        if (!words && ids.length == 0) return "";
-        if (!ids && words.length == 0) return "";
+        if (!words && ids.length == 0) {
+            return "";
+        }
+        if (!ids && words.length == 0) {
+            return "";
+        }
 
         function formatWord(str) {
             if (!checkClosingBrackets(str)) {
@@ -59,7 +69,9 @@ return str;
 */
         }
 
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
         var filter = ";";
 
         var varNames;
@@ -73,19 +85,30 @@ return str;
         varNames.forEach(function (varName) {
             if (words) {
                 if (Array.isArray(words)) {
-                    if (words.length == 0) return "";
-                    if (words[0] == null) return "";
+                    if (words.length == 0) {
+                        return "";
+                    }
+                    if (words[0] == null) {
+                        return "";
+                    }
                     var conceptWordStr = "";
                     words.forEach(function (word, _index) {
                         if (word.length > 1) {
-                            if (conceptWordStr != "") conceptWordStr += "|";
-                            if (options.exactMatch) conceptWordStr += "^" + formatWord(word) + "$";
-                            else conceptWordStr += "" + formatWord(word) + "";
+                            if (conceptWordStr != "") {
+                                conceptWordStr += "|";
+                            }
+                            if (options.exactMatch) {
+                                conceptWordStr += "^" + formatWord(word) + "$";
+                            } else {
+                                conceptWordStr += "" + formatWord(word) + "";
+                            }
                         }
                     });
                     filters.push("regex(?" + varName + 'Label , "' + conceptWordStr + '","i") ');
                 } else {
-                    if (words == null) return "";
+                    if (words == null) {
+                        return "";
+                    }
 
                     if (!options.exactMatch) {
                         filters.push("regex(?" + varName + 'Label, "' + words + '", "i")');
@@ -95,19 +118,35 @@ return str;
                 }
             } else if (ids) {
                 if (Array.isArray(ids)) {
-                    if (ids.length == 0) return "";
+                    if (ids.length == 0) {
+                        return "";
+                    }
                     var p = ids.indexOf("#");
-                    if (p > -1) ids.splice(p, 1);
-                    if (ids[0] == null) return "";
+                    if (p > -1) {
+                        ids.splice(p, 1);
+                    }
+                    if (ids[0] == null) {
+                        return "";
+                    }
                     var conceptIdsStr = "";
                     ids.forEach(function (id, _index) {
-                        if (conceptIdsStr != "") conceptIdsStr += ",";
+                        id = "" + id;
+                        if (conceptIdsStr != "") {
+                            conceptIdsStr += ",";
+                        }
                         /* if (!id.match || !id.match(/.+:.+|http.+|_:+/)) {
-                            return  (conceptIdsStr += "<" + id + ">");
-                        }*/
+                return  (conceptIdsStr += "<" + id + ">");
+            }*/
                         if (id != "") {
-                            if (true || (id.match && !id.match(/.+:.+|http.+|_:+/)) || id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1 || id.indexOf("_:") > -1) {
-                                conceptIdsStr += "<" + id + ">";
+                            if (id.indexOf("http") < 0 && id.split(":").length == 2)
+                                // prefix
+                                conceptIdsStr += id;
+                            else if (true || (id.match && !id.match(/http.+|_:+/)) || id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1 || id.indexOf("_:") > -1) {
+                                if (id.indexOf("^") == 0) {
+                                    conceptIdsStr += "^<" + id.substring(1) + ">";
+                                } else {
+                                    conceptIdsStr += "<" + id + ">";
+                                }
                             } else {
                                 conceptIdsStr += id;
                             }
@@ -116,9 +155,14 @@ return str;
 
                     filters.push(" ?" + varName + " in( " + conceptIdsStr + ")");
                 } else {
-                    if (ids == null) return "";
-                    if (ids.indexOf("http") > -1 || ids.indexOf("nodeID://") > -1) filters.push(" ?" + varName + " =<" + ids + ">");
-                    else filters.push(" ?" + varName + " =" + ids);
+                    if (ids == null) {
+                        return "";
+                    }
+                    if (ids.indexOf && (ids.indexOf("http") == 0 || ids.indexOf("nodeID://") > -1)) {
+                        filters.push(" ?" + varName + " =<" + ids + ">");
+                    } else {
+                        filters.push(" ?" + varName + " =" + ids);
+                    }
                 }
             } else {
                 return "";
@@ -127,7 +171,9 @@ return str;
 
         filter = " FILTER (";
         filters.forEach(function (filterStr, index) {
-            if (index > 0) filter += " || ";
+            if (index > 0) {
+                filter += " || ";
+            }
             filter += filterStr;
         });
         filter += " ) ";
@@ -136,27 +182,37 @@ return str;
     };
 
     self.setSparqlResultPropertiesLabels = function (sourceLabel, SparqlResults, propVariable, callback) {
-        if (SparqlResults.length == 0) return callback(null, SparqlResults);
+        if (SparqlResults.length == 0) {
+            return callback(null, SparqlResults);
+        }
         var propIds = [];
         SparqlResults.forEach(function (item) {
             if (!item[propVariable + "Label"]) {
-                if (propIds.indexOf(item[propVariable].value) < 0) propIds.push(item[propVariable].value);
+                if (propIds.indexOf(item[propVariable].value) < 0) {
+                    propIds.push(item[propVariable].value);
+                }
             }
         });
 
-        if (propIds.length == 0) return callback(null, SparqlResults);
+        if (propIds.length == 0) {
+            return callback(null, SparqlResults);
+        }
 
         //get props labels
         var filter = Sparql_common.setFilter("property", propIds);
         Sparql_OWL.getObjectProperties(sourceLabel, { filter: filter }, function (err, resultProps) {
-            if (err) return callback(err);
+            if (err) {
+                return callback(err);
+            }
             var labelsMap = {};
             resultProps.forEach(function (item) {
                 labelsMap[item.property.value] = item.propertyLabel ? item.propertyLabel.value : Sparql_common.getLabelFromURI(item.property.value);
             });
 
             SparqlResults.forEach(function (item) {
-                if (labelsMap[item[propVariable].value]) item[propVariable + "Label"] = { type: "literal", value: labelsMap[item[propVariable].value] };
+                if (labelsMap[item[propVariable].value]) {
+                    item[propVariable + "Label"] = { type: "literal", value: labelsMap[item[propVariable].value] };
+                }
             });
 
             return callback(null, SparqlResults);
@@ -165,9 +221,13 @@ return str;
 
     self.getVariableLangLabel = function (variable, optional, skosPrefLabel) {
         var pred = "";
-        if (skosPrefLabel) pred = "|<http://www.w3.org/2004/02/skos/core#prefLabel>";
+        if (skosPrefLabel) {
+            pred = "|<http://www.w3.org/2004/02/skos/core#prefLabel>";
+        }
         var str = "?" + variable + " rdfs:label" + pred + " ?" + variable + "Label. filter( lang(?" + variable + "Label)= '" + Config.default_lang + "' || !lang(?" + variable + "Label))";
-        if (optional) return " OPTIONAL {" + str + "} ";
+        if (optional) {
+            return " OPTIONAL {" + str + "} ";
+        }
         return str;
     };
 
@@ -177,18 +237,30 @@ return str;
         if (Array.isArray(uri)) {
             var str = "";
             uri.forEach(function (item, index) {
-                if (index > 0) str += ",";
+                if (index > 0) {
+                    str += ",";
+                }
                 let isLiteral = true;
-                if (item.indexOf("http") == 0 || (item.indexOf(":") > 0 && uri.indexOf(" ") < 0)) isLiteral = false;
-                if (isLiteral) str += "'" + item + "'";
-                else str += "<" + item + ">";
+                if (item.indexOf("http") == 0 || (item.indexOf(":") > 0 && uri.indexOf(" ") < 0)) {
+                    isLiteral = false;
+                }
+                if (isLiteral) {
+                    str += "'" + item + "'";
+                } else {
+                    str += "<" + item + ">";
+                }
             });
             filterStr = "filter (?" + varName + " in (" + str + "))";
         } else {
             let isLiteral = true;
-            if (uri.indexOf("http") == 0 || (uri.indexOf(":") > 0 && uri.indexOf(" ") < 0)) isLiteral = false;
-            if (isLiteral) filterStr += "filter( ?" + varName + "='" + uri + "').";
-            else filterStr += "filter( ?" + varName + "=<" + uri + ">).";
+            if (uri.indexOf("http") == 0 || (uri.indexOf(":") > 0 && uri.indexOf(" ") < 0)) {
+                isLiteral = false;
+            }
+            if (isLiteral) {
+                filterStr += "filter( ?" + varName + "='" + uri + "').";
+            } else {
+                filterStr += "filter( ?" + varName + "=<" + uri + ">).";
+            }
         }
         return filterStr;
     };
@@ -198,7 +270,9 @@ return str;
     };
 
     self.formatStringForTriple = function (str, forUri) {
-        if (!str || !str.replace) return null;
+        if (!str || !str.replace) {
+            return null;
+        }
         str = str.trim();
         str = str.replace(/\\/gm, "");
         str = str.replace(/"/gm, '\\"');
@@ -233,43 +307,62 @@ return str;
         if (!self.graphUrisMap) {
             self.graphUrisMap = {};
             for (var source in Config.sources) {
-                if (Config.sources[source].graphUri) self.graphUrisMap[Config.sources[source].graphUri] = source;
+                if (Config.sources[source].graphUri) {
+                    self.graphUrisMap[Config.sources[source].graphUri] = source;
+                }
             }
         }
         return self.graphUrisMap[graphUri];
     };
 
     self.getLabelFromURI = function (id) {
-        if (OwlSchema.currentSourceSchema && OwlSchema.currentSourceSchema.labelsMap[id]) return OwlSchema.currentSourceSchema.labelsMap[id];
+        if (OwlSchema.currentSourceSchema && OwlSchema.currentSourceSchema.labelsMap[id]) {
+            return OwlSchema.currentSourceSchema.labelsMap[id];
+        }
 
         const p = id.lastIndexOf("#");
-        if (p > -1) return id.substring(p + 1);
-        else {
+        if (p > -1) {
+            return id.substring(p + 1);
+        } else {
             const p = id.lastIndexOf("/");
             return id.substring(p + 1);
         }
     };
 
     self.getFromStr = function (source, named, withoutImports, options) {
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
         var from = " FROM ";
-        if (named) from += " NAMED";
+        if (named) {
+            from += " NAMED";
+        }
 
         var fromStr = "";
         var graphUris = Config.sources[source].graphUri;
-        if (!graphUris || graphUris == "") return "";
-        if (!Array.isArray(graphUris)) graphUris = [graphUris];
+        if (!graphUris || graphUris == "") {
+            return "";
+        }
+        if (!Array.isArray(graphUris)) {
+            graphUris = [graphUris];
+        }
 
         graphUris.forEach(function (graphUri, _index) {
             fromStr += from + "  <" + graphUri + "> ";
         });
-        if (withoutImports === undefined) withoutImports = self.withoutImports;
+        if (withoutImports === undefined) {
+            withoutImports = self.withoutImports;
+        }
         var imports = Config.sources[source].imports;
         if (Lineage_sources.fromAllWhiteboardSources) {
             for (var source2 in Lineage_sources.loadedSources) {
                 if (source2 != source) {
                     var graphUri = Config.sources[source2].graphUri;
-                    if (graphUri) if (graphUri && fromStr.indexOf(graphUri) < 0) fromStr += from + "  <" + graphUri + "> ";
+                    if (graphUri) {
+                        if (graphUri && fromStr.indexOf(graphUri) < 0) {
+                            fromStr += from + "  <" + graphUri + "> ";
+                        }
+                    }
                 }
             }
         }
@@ -277,24 +370,36 @@ return str;
         if (!withoutImports || self.includeImports) {
             if (imports) {
                 imports.forEach(function (source2) {
-                    if (!Config.sources[source2]) return console.error(source2 + "not found");
+                    if (!Config.sources[source2]) {
+                        return console.error(source2 + "not found");
+                    }
 
                     var importGraphUri = Config.sources[source2].graphUri;
-                    if (importGraphUri && fromStr.indexOf(importGraphUri) < 0) fromStr += from + "  <" + importGraphUri + "> ";
+                    if (importGraphUri && fromStr.indexOf(importGraphUri) < 0) {
+                        fromStr += from + "  <" + importGraphUri + "> ";
+                    }
                 });
             }
         }
 
         if (self.includeImports) {
             for (var source in Config.sources) {
-                if (from.indexOf(Config.sources[source].graphUri) < 0) if (Config.sources[source].isDictionary) fromStr += from + "  <" + Config.sources[source].graphUri + "> ";
+                if (from.indexOf(Config.sources[source].graphUri) < 0) {
+                    if (Config.sources[source].isDictionary) {
+                        fromStr += from + "  <" + Config.sources[source].graphUri + "> ";
+                    }
+                }
             }
         }
         if (options.includeSources) {
-            if (!Array.isArray(options.includeSources)) options.includeSources = [options.includeSources];
+            if (!Array.isArray(options.includeSources)) {
+                options.includeSources = [options.includeSources];
+            }
             options.includeSources.forEach(function (source) {
                 var importGraphUri = Config.sources[source].graphUri;
-                if (fromStr.indexOf(importGraphUri) < 0) fromStr += from + "  <" + importGraphUri + "> ";
+                if (fromStr.indexOf(importGraphUri) < 0) {
+                    fromStr += from + "  <" + importGraphUri + "> ";
+                }
             });
         }
 
@@ -302,7 +407,9 @@ return str;
     };
 
     self.getSparqlDate = function (date) {
-        if (!date) date = new Date();
+        if (!date) {
+            date = new Date();
+        }
         var str = JSON.stringify(date);
         return str + "^^xsd:dateTime";
     };
@@ -311,13 +418,19 @@ return str;
         var query = "select ?g where  {graph ?g {<" + uri + "> ?p ?o}} limit 1";
         var graph;
         Sparql_proxy.querySPARQL_GET_proxy("_default", query, "", {}, function (err, result) {
-            if (err) return callback(err);
+            if (err) {
+                return callback(err);
+            }
             var data = result.results.bindings;
-            if (data.length == 0) return null;
+            if (data.length == 0) {
+                return null;
+            }
             var source;
             var graphUri = data[0].g.value;
             for (var _source in Config.sources) {
-                if (Config.sources[_source].graphUri == graphUri) source = _source;
+                if (Config.sources[_source].graphUri == graphUri) {
+                    source = _source;
+                }
             }
             return callback(null, source);
         });
@@ -331,7 +444,9 @@ return str;
 
             str = str.replace(regex, function (match, capture, offset) {
                 var p = capture.indexOf(".");
-                if (p == capture.length - 1) return "<" + prefixes[key] + capture.substring(0, capture.length - 1) + ">.";
+                if (p == capture.length - 1) {
+                    return "<" + prefixes[key] + capture.substring(0, capture.length - 1) + ">.";
+                }
                 return "<" + prefixes[key] + capture + ">";
             });
         }

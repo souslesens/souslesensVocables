@@ -483,31 +483,35 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
             return allowedSources;
         }
 
-        var sourcesScope = $("#GenericTools_searchScope").val();
-        if (sourcesScope == "currentSource") {
-            if (!Lineage_sources.activeSource) {
-                return alert("select a source or search in all source");
-            }
+        if (options.searchedSources) {
+            searchedSources = options.searchedSources;
+        } else {
+            var sourcesScope = $("#GenericTools_searchScope").val();
+            if (sourcesScope == "currentSource") {
+                if (!Lineage_sources.activeSource) {
+                    return alert("select a source or search in all source");
+                }
 
-            searchedSources.push(Lineage_sources.activeSource);
-        } else if (sourcesScope == "whiteboardSources") {
-            if (Lineage_combine.currentSources.length > 0) {
-                searchedSources = Lineage_combine.currentSources;
-            } else {
-                /*   var mainSource = Lineage_sources.activeSource;
-           searchedSources.push(mainSource);
-           var importedSources = Config.sources[mainSource].imports;
-           searchedSources = searchedSources.concat(importedSources);*/
-                searchedSources = Object.keys(Lineage_sources.loadedSources);
+                searchedSources.push(Lineage_sources.activeSource);
+            } else if (sourcesScope == "whiteboardSources") {
+                if (Lineage_combine.currentSources.length > 0) {
+                    searchedSources = Lineage_combine.currentSources;
+                } else {
+                    /*   var mainSource = Lineage_sources.activeSource;
+     searchedSources.push(mainSource);
+     var importedSources = Config.sources[mainSource].imports;
+     searchedSources = searchedSources.concat(importedSources);*/
+                    searchedSources = Object.keys(Lineage_sources.loadedSources);
+                }
+            } else if (sourcesScope == "all_OWLsources") {
+                searchedSources = getUserSources("OWL");
+            } else if (sourcesScope == "all_SKOSsources") {
+                searchedSources = getUserSources("SKOS");
+            } else if (sourcesScope == "all_IndividualsSources") {
+                searchedSources = getUserSources("INDIVIDUALS");
+            } else if (sourcesScope == "all_Sources") {
+                searchedSources = getUserSources(null);
             }
-        } else if (sourcesScope == "all_OWLsources") {
-            searchedSources = getUserSources("OWL");
-        } else if (sourcesScope == "all_SKOSsources") {
-            searchedSources = getUserSources("SKOS");
-        } else if (sourcesScope == "all_IndividualsSources") {
-            searchedSources = getUserSources("INDIVIDUALS");
-        } else if (sourcesScope == "all_Sources") {
-            searchedSources = getUserSources(null);
         }
 
         var jstreeData = [];
@@ -841,11 +845,10 @@ return*/
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {
                     SourceBrowser.currentTreeNode = obj.node;
+
                     if (_options.selectTreeNodeFn) {
                         return _options.selectTreeNodeFn(event, obj);
-                    }
-
-                    if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) {
+                    } else if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) {
                         return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
                     }
 
@@ -853,19 +856,50 @@ return*/
                 },
                 contextMenu: function () {
                     var contextMenuFn = null;
-                    if (_options.contextMenuFn) {
-                        contextMenuFn = _options.contextMenuFn;
+                    if (_options.contextMenu) {
+                        return _options.contextMenu;
+                    } else if (_options.contextMenuFn) {
+                        return _options.contextMenuFn;
                     } else if (Config.tools[MainController.currentTool].controller.contextMenuFn) {
-                        contextMenuFn = Config.tools[MainController.currentTool].controller.contextMenuFn;
-                    }
-
-                    if (contextMenuFn) {
-                        return contextMenuFn();
+                        return Config.tools[MainController.currentTool].controller.contextMenuFn;
                     } else {
                         return self.getJstreeConceptsContextMenu();
                     }
                 },
             };
+            /*   if (_options.selectTreeNodeFn) {
+        jstreeOptions.selectTreeNodeFn = _options.selectTreeNodeFn(event, obj);
+      }
+      else if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) {
+        jstreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
+      }
+      else {
+        ;// jstreeOptions.selectTreeNodeFn= self.editThesaurusConceptInfos(obj.node.data.source, obj.node);
+      }
+
+
+      if (_options.contextMenuFn) {
+        jstreeOptions.contextMenu = _options.contextMenuFn();
+      }
+      else if (_options.contextMenuFn) {
+        jstreeOptions.contextMenu = _options.contextMenuFn();
+      }
+      else {
+        jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
+      }
+
+      if (_options.contextMenuFn) {
+        jstreeOptions.contextMenu = _options.contextMenuFn();
+      }
+      else if (_options.contextMenu) {
+        jstreeOptions.contextMenu = _options.contextMenu;
+      }
+      else if (Config.tools[MainController.currentTool].controller.contextMenuFn) {
+        jstreeOptions.contextMenu = Config.tools[MainController.currentTool].controller.contextMenuFn;
+      }
+      else {
+        jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
+      }*/
 
             common.jstree.loadJsTree(targetDiv, jstreeData, jstreeOptions);
             setTimeout(function () {
@@ -1406,9 +1440,9 @@ defaultLang = 'en';*/
 
     self.onClickLink = function (nodeId) {
         /*  var filter=Sparql_common.setFilter("concept",[nodeId])
-    Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(err, result){
+Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(err, result){
 
-        }})*/
+    }})*/
         var node = {
             data: {
                 id: nodeId,
@@ -1439,15 +1473,15 @@ defaultLang = 'en';*/
         common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.objectClasses, true, "label", "id");
 
         /*
-       if (predicate == "rdf:type") {
-        common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.basicTypeClasses.concat(["-----------"]).concat(allObjects.sourceObjects), true, "label", "id");
-    } else if (predicate == "rdfs:subClassOf") {
-        common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.sourceObjects.concat(["-----------"]).concat(allObjects.TopLevelOntologyObjects), true, "label", "id");
-    } else {
-        common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "label", "id");
-    }
+   if (predicate == "rdf:type") {
+    common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.basicTypeClasses.concat(["-----------"]).concat(allObjects.sourceObjects), true, "label", "id");
+} else if (predicate == "rdfs:subClassOf") {
+    common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.sourceObjects.concat(["-----------"]).concat(allObjects.TopLevelOntologyObjects), true, "label", "id");
+} else {
+    common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "label", "id");
+}
 
-     */
+ */
     };
     self.addProperty = function (property, value, source, createNewNode, callback) {
         if (!property) {
@@ -1660,12 +1694,15 @@ defaultLang = 'en';*/
             });
         }
     };
-    self.searchInSourcesTree = function () {
+    self.searchInSourcesTree = function (event, sourcesTreeDiv) {
         if (event.keyCode != 13 && event.keyCode != 9) {
             return;
         }
         var value = $("#Lineage_classes_SearchSourceInput").val();
-        $("#searchAll_sourcesTree").jstree(true).search(value);
+        if (!sourcesTreeDiv) sourcesTreeDiv = "searchAll_sourcesTree";
+        $("#" + sourcesTreeDiv)
+            .jstree(true)
+            .search(value);
     };
     self.showSearchableSourcesTreeDialog = function (types, options, validateFn, okButtonValidateFn) {
         if (!options) {

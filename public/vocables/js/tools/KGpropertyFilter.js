@@ -3,511 +3,127 @@ var KGpropertyFilter = (function () {
 
     self.currentNewFilters = [];
     self.currentSavedFilters = [];
+    self.currentNodeData = null;
+
+    self.treeConfigs = {
+        dataContainers: {
+            key: "dataContainers",
+            source: "IDCP",
+            topUris: ["http://datalenergies.total.com/resource/tsf/idcp/DataContainer"],
+            options: { memberPredicate: 1 },
+            levels: 3,
+            jstreeDiv: "KGpropertyFilter_dataContainerTreeDiv",
+            parentPredicate: "^rdfs:member",
+        },
+        templates: {
+            key: "templates",
+            source: "IDCP",
+            topUris: ["http://datalenergies.total.com/resource/tsf/idcp/template"],
+            options: { memberPredicate: 0, specificPredicates: ["rdf:type", "<http://datalenergies.total.com/resource/tsf/idcp/9fc7b10ede>"] },
+            levels: 5,
+            jstreeDiv: "KGpropertyFilter_templatesTree",
+        },
+        disciplines: {
+            key: "disciplines",
+            source: "IDCP",
+            topUris: ["http://datalenergies.total.com/resource/tsf/idcp/Discipline"],
+            options: { memberPredicate: 1 },
+            levels: 3,
+            jstreeDiv: "KGpropertyFilter_disciplinesTree",
+        },
+        actors: {
+            key: "actors",
+            source: "IDCP",
+            topUris: ["http://datalenergies.total.com/resource/tsf/idcp/role_IDCP"],
+            options: { memberPredicate: 1 },
+            jstreeDiv: "KGpropertyFilter_actorsTree",
+        },
+        systems: {
+            key: "systems",
+            source: "IDCP",
+            topUris: ["http://datalenergies.total.com/resource/tsf/idcp/OGSystem"],
+            options: { memberPredicate: 1 },
+            levels: 3,
+            jstreeDiv: "KGpropertyFilter_systemsTree",
+        },
+        businessObjects: {
+            key: "businessObjects",
+            editable: false,
+            source: "GIDEA-RAW",
+            topUris: ["http://datalenergies.total.com/resource/tsf/gidea-raw/LogicalEntity"],
+            options: { specificPredicates: ["?p"] },
+            levels: 5,
+            jstreeDiv: "KGpropertyFilter_businessObjectsTree",
+        },
+    };
+
+    self.getTreeConfigByKey = function (key, value) {
+        for (var entry in self.treeConfigs) {
+            if (self.treeConfigs[entry][key] == value) {
+                return self.treeConfigs[entry];
+            }
+        }
+    };
     self.onLoaded = function () {
         var tsfPropertyFilterPrefix = Config.KGpropertyFilter.tsfPropertyFilterPrefix;
-        self.aspectsMap = {
-            MDMentities: {
-                predicate: tsfPropertyFilterPrefix + "appliesToMDMentityFilter",
-                treeDiv: "KGpropertyFilter_MDMentitiesTree",
-            },
-            Disciplines: {
-                predicate: tsfPropertyFilterPrefix + "appliesToDiscipline",
-                treeDiv: "KGpropertyFilter_disciplinesTree",
-            },
-            LifeCycle: {
-                predicate: tsfPropertyFilterPrefix + "appliesToLifeCycleStatus",
-                treeDiv: "KGpropertyFilter_lifeCycleTree",
-            },
-            Organizations: {
-                predicate: tsfPropertyFilterPrefix + "appliesToOrganizationFilter",
-                treeDiv: "KGpropertyFilter_organizationsTree",
-            },
-        };
+        for (var key in self.treeConfigs) {
+            Config.sources[self.treeConfigs[key].source].editable = false;
+        }
 
         $("#actionDivContolPanelDiv").load("snippets/KGpropertyFilter/leftPanel.html", function () {
-            var sources = Config.KGpropertyFilter.sources;
+            //  var sources = Config.KGpropertyFilter.sources;
+            var sources = ["", "IDCP"];
             common.fillSelectOptions("KGpropertyFilter_sourceSelect", sources, true);
             $("#KGpropertyFilter_searchInPropertiesTreeInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
+            self.onChangeSourceSelect("IDCP");
         });
 
-        MainController.UI.toogleRightPanel(true);
-        $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function () {
-            $("#KGpropertyFilter_filteringResult").height($("#graphDiv").height() - 200);
-            $("#KGpropertyFilter_filteringResult").width($("#graphDiv").width());
+        //  MainController.UI.showHideRightPanel(true);
+        $("#graphDiv").width(1000);
 
-            $("#KGpropertyFilter_centralPanelTabs").tabs({
-                activate: function (e, ui) {
-                    self.currentOwlType = "Class";
-                    var divId = ui.newPanel.selector;
-                    if (divId == "#LineageTypesTab") {
-                        // pass
-                    }
+        /*  $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function() {
+        $("#KGpropertyFilter_filteringResult").height($("#graphDiv").height() - 200);
+        $("#KGpropertyFilter_filteringResult").width($("#graphDiv").width());
+
+        $("#KGpropertyFilter_centralPanelTabs").tabs({
+          activate: function(e, ui) {
+            self.currentOwlType = "Class";
+            var divId = ui.newPanel.selector;
+            if (divId == "#LineageTypesTab") {
+              // pass
+            }
+          }
+        });
+        */
+
+        $("#rightPanelDiv").load("snippets/KGpropertyFilter/rightPanel.html", function () {
+            $("#KGpropertyFilter_rightPanelTabs").tabs({
+                activate: function (_e, _ui) {
+                    self.currentAspect = _ui.newTab[0].textContent;
+                },
+                create(event, ui) {
+                    self.initRightPanel();
+
+                    /*  $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",1)
+$("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                 },
             });
-
-            $("#rightPanelDiv").load("snippets/KGpropertyFilter/rightPanel.html", function () {
-                $("#KGpropertyFilter_rightPanelTabs").tabs({
-                    activate: function (_e, _ui) {
-                        self.currentAspect = _ui.newTab[0].textContent;
-                    },
-                    create(event, ui) {
-                        self.initRightPanel();
-                        self.currentAspect = Object.keys(self.aspectsMap)[0];
-
-                        /*  $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",1)
-$("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
-                    },
-                });
-            });
         });
+        // });
 
         $("#accordion").accordion("option", { active: 2 });
     };
 
-    self.initFiltersSource = function (source) {
-        self.propertyFilteringSource = source + "_TSF-PROPERTY-FILTERING";
-        var filtersSourceGraphUri = Config.sources[source].graphUri + "property-filtering/";
-        Config.sources[self.propertyFilteringSource] = {
-            isDictionary: true,
-            editable: true,
-            graphUri: filtersSourceGraphUri,
-            imports: [],
-            sparql_server: {
-                url: "_default",
-            },
-            controller: "Sparql_OWL",
-            schemaType: "OWL",
-        };
-
-        self.loadedFilters = {};
-    };
-
     self.onChangeSourceSelect = function (source) {
-        self.resetMatrixPropertiesFilters();
+        // self.resetMatrixPropertiesFilters();
         self.currentSource = source;
-        self.initFiltersSource(source);
-        self.loadClassesTree(source);
-    };
+        // self.initFiltersSource(source);
 
-    self.resetMatrixPropertiesFilters = function () {
-        if (self.currentNewFilters.length == 0) return;
-        if (confirm("reset filters without saving them")) {
-            self.currentNewFilters = [];
-            $("#KGpropertyFilter_filteringResult").html("");
-        }
-    };
-
-    self.loadClassesTree = function (source) {
-        function drawTree(result) {
-            var jstreeData = [];
-            var existingNodes = {};
-
-            result.forEach(function (item) {
-                if (!existingNodes[item.concept.value]) {
-                    existingNodes[item.concept.value] = 1;
-                    jstreeData.push({
-                        parent: "#",
-                        id: item.concept.value,
-                        text: item.conceptLabel.value,
-                        type: "Class",
-                        data: {
-                            type: "Class",
-                            source: self.currentSource,
-                            label: item.conceptLabel.value,
-                            id: item.concept.value,
-                        },
-                    });
-                }
-
-                for (var i = 1; i <= 10; i++) {
-                    if (!item["child" + i]) break;
-                    var parent = i == 1 ? item.concept.value : item["child" + (i - 1)].value;
-
-                    var id = item["child" + i].value;
-                    var label = item["child" + i + "Label"].value;
-                    if (!existingNodes[id]) {
-                        existingNodes[id] = 1;
-                        jstreeData.push({
-                            parent: parent,
-                            id: id,
-                            text: label,
-                            type: "Class",
-                            data: {
-                                type: "Class",
-                                source: self.currentSource,
-                                label: label,
-                                id: id,
-                            },
-                        });
-                    }
-                }
-            });
-
-            var options = {
-                openAll: false,
-                withCheckboxes: true,
-                selectTreeNodeFn: KGpropertyFilter.onClassOrPropertyNodeClicked,
-                onAfterOpenNodeFn: KGpropertyFilter.onOpenClassesOrPropertyNode,
-                onCheckNodeFn: null, //KGpropertyFilter.loadPropertiesFilters,
-                tie_selection: false,
-                contextMenu: KGpropertyFilter.getJstreePropertiesContextMenu(),
-                searchPlugin: {
-                    case_insensitive: true,
-                    fuzzy: false,
-                    show_only_matches: true,
-                },
-            };
-            common.jstree.loadJsTree("KGpropertyFilter_propertiesTreeDiv", jstreeData, options);
-
-            $("#waitImg").css("display", "none");
-        }
-
-        if (source == "CFIHOS_1_5_PLUS") {
-            var depth = 3;
-            Sparql_generic.getNodeChildren(
-                self.currentSource,
-                null,
-                ["http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-P0000001723", "http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-F0000000801"],
-                3,
-                {},
-                function (err, result) {
-                    //    Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/TagClass/CFIHOS-30000311"], depth, {}, function (err, result) {
-                    if (err) {
-                        return MainController.UI.message(err);
-                    }
-                    drawTree(result);
-                }
-            );
-        } else if (source == "TSF_TEPDK_TEST") {
-            var depth = 1;
-            Sparql_generic.getNodeChildren(self.currentSource, null, ["http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject"], depth, {}, function (err, result) {
-                if (err) {
-                    return MainController.UI.message(err);
-                }
-
-                result.sort(function (a, b) {
-                    if (a.child1.value > b.child1.value) return 1;
-                    if (a.child1.value < b.child1.value) return -1;
-                    return 0;
-                });
-
-                drawTree(result);
-            });
-        } else if (source == "TSF_TEPDK_PHUSION") {
-            var depth = 1;
-            Sparql_generic.getNodeChildren(
-                self.currentSource,
-                null,
-                ["http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-P0000001723", "http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-F0000000801"],
-                3,
-                {},
-                function (err, result) {
-                    if (err) {
-                        return MainController.UI.message(err);
-                    }
-
-                    result.sort(function (a, b) {
-                        if (a.child1.value > b.child1.value) return 1;
-                        if (a.child1.value < b.child1.value) return -1;
-                        return 0;
-                    });
-
-                    drawTree(result);
-                }
-            );
-        }
-    };
-
-    self.getJstreePropertiesContextMenu = function () {
-        var items = {};
-        items.nodeInfos = {
-            label: "Node infos",
-            action: function (_e) {
-                // pb avec source
-                SourceBrowser.showNodeInfos(self.currentSource, self.currentClassOrPropertyNode, "mainDialogDiv");
-            },
-        };
-        items.viewFilters = {
-            label: "View filters",
-            action: function (_e) {
-                KGpropertyFilter.loadPropertiesFilters();
-            },
-        };
-        items.associate = {
-            label: "Associate",
-            action: function (_e) {
-                KGpropertyFilter.associateFiltersToPropertyRestriction();
-                // KGpropertyFilter.showAssociateDialog();
-            },
-        };
-        return items;
-    };
-
-    self.getJstreeAspectsContextMenu = function () {
-        var items = {};
-
-        items.associate = {
-            label: "Associate",
-            action: function (_e) {
-                KGpropertyFilter.associateFiltersToPropertyRestriction();
-                // KGpropertyFilter.showAssociateDialog();
-            },
-        };
-        return items;
-    };
-
-    self.showGraphPopupMenu = function () {};
-    /*  self.showAssociateDialog = function () {
-  var selectedProperties = common.jstree.getjsTreeNodes("KGpropertyFilter_propertiesTreeDiv", true, "#");
-
-  for (var key in self.aspectsMap)
-      var items = $("#" + selectId)
-          .jstree()
-          .get_checked(true);
-  items.forEach(function (item) {});
-};*/
-
-    self.onOpenClassesOrPropertyNode = function (evt, obj) {
-        //  var classIds=$("#KGpropertyFilter_propertiesTreeDiv").jstree().get_checked();
-        var classIds = obj.node.children;
-        self.loadClassesPropertiesTree(classIds);
-    };
-
-    self.onClassOrPropertyNodeClicked = function (event, obj) {
-        self.currentClassOrPropertyNode = obj.node;
-        if (obj.node.data.type == "Class") {
-            var propertyFilterTabIndex = $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active");
-            if (self.currentClassOrPropertyNode.parents.length > 1) self.currentClassId = self.currentClassOrPropertyNode.parents[1];
-            else self.currentClassId = self.currentClassOrPropertyNode.id;
-            $("#KGpropertyFilter_currentPropertyDiv").css("display", "block");
-            $("#KGpropertyFilter_currentPropertySpan").html(obj.node.text);
-            $("#KGpropertyFilter_currentPropertySpan2").html(obj.node.text);
-
-            // self.client.filterProperties(self.currentClassId);
-
-            if (true || obj.node.children.length == 0) {
-                self.loadClassesPropertiesTree(obj.node.id);
-                //  self.addPropertiestoClassesTree(obj.node.id);
-            }
-        } else {
-        }
-    };
-
-    self.associateFiltersToPropertyRestriction = function () {
-        var leftObjs = $("#KGpropertyFilter_propertiesTreeDiv").jstree().get_checked(true);
-        var selectedProperties = [];
-        leftObjs.forEach(function (item) {
-            if (item.data.type != "Property")
-                // filter selected Properties Only
-                return;
-            selectedProperties.push(item.data);
-        });
-        if (selectedProperties.length == 0) return alert("no property is selected");
-
-        var aspectObjs = $("#" + self.aspectsMap[self.currentAspect].treeDiv)
-            .jstree()
-            .get_checked(true);
-        if (aspectObjs.length == 0) return alert("no aspect value  is selected");
-
-        if (true);
-        // !confirm("Associate " + selectedProperties.length + "properties to  aspect selected  values of aspect" + self.currentAspect)) return;
-
-        var classId;
-        var classObj;
-        var classLabel;
-        self.currentNewFilters.currentAspect = self.currentAspect;
-        selectedProperties.forEach(function (propertyObj) {
-            aspectObjs.forEach(function (aspectObj) {
-                // $("#" + selectId + " option:selected").each(function () {
-                var filterId = propertyObj.retrictionId + "|" + aspectObj.data.id;
-                var newFilter = {
-                    type: "filterClass",
-                    classLabel: classLabel,
-                    propertyLabel: propertyObj.propLabel,
-                    propertyId: propertyObj.propId,
-                    classId: propertyObj.classId,
-                    classLabel: propertyObj.classLabel,
-                    propertyRetrictionId: propertyObj.retrictionId,
-                    aspect: self.currentAspect,
-                    aspectId: self.currentAspect,
-                    aspectLabel: aspectObj.data.label,
-                    filterId: aspectObj.data.id,
-                    filterLabel: aspectObj.data.label,
-                    status: "new",
-                };
-
-                self.currentNewFilters.push(newFilter);
-            });
-        });
-        $("#KGpropertyFilter_propertiesTreeDiv").jstree().uncheck_all();
-        for (var key in self.aspectsMap) {
-            $("#" + self.aspectsMap[key].treeDiv)
-                .jstree()
-                .uncheck_all();
-        }
-        self.showFilters(self.currentNewFilters);
-        return;
-    };
-
-    self.showFilters = function () {
-        var filters = self.currentNewFilters.concat(self.currentSavedFilters);
-        var displayType = $("#KGpropertyFilter_filtersDisplayTypeSelect").val();
-        if (displayType == "matrix") {
-            self.matrix.showFiltersMatrix(filters);
-        } else {
-            self.showFiltersDataTable(filters);
-        }
-    };
-
-    self.showFiltersDataTable = function (filters) {
-        var cols = [
-            {
-                title: "Selection",
-                className: "select-checkbox",
-                render: function (datum, type, row) {
-                    return "";
-                },
-            },
-            { title: "Class", defaultContent: "" },
-            { title: "Property", defaultContent: "" },
-            { title: "Aspect", defaultContent: "" },
-            { title: "Filter", defaultContent: "" },
-        ];
-        var dataset = [];
-        filters.forEach(function (item) {
-            dataset.push([item.propertyRetrictionId + "|" + item.filterId, item.classLabel, item.propertyLabel, item.aspectLabel, item.filterLabel]);
-        });
-        $("#KGpropertyFilter_filteringResult").html("<table id='dataTableDivExport'></table>");
-
-        setTimeout(function () {
-            self.dictionaryDataTable = $("#dataTableDivExport").DataTable({
-                data: dataset,
-                columns: cols,
-                pageLength: 200,
-                dom: "Bfrtip",
-                /* "columnDefs": [
-  { "width": "20px", "targets": 0 },
-  { "width": "50px", "targets": 1 },
-  { "width": "50px", "targets": 2 },
-  { "width": "50px", "targets": 3 },
-  { "width": "50px", "targets": 4 },
-  ],*/
-                // columnDefs: [{ className: "select-checkbox", targets: [0] }],
-                select: {
-                    style: "multi",
-                    selector: "td:first-child",
-                },
-                buttons: [
-                    {
-                        extend: "csvHtml5",
-                        text: "Export CSV",
-                        fieldBoundary: "",
-                        fieldSeparator: ";",
-                    },
-                    {
-                        text: "Select All",
-                        action: function (e, dt, node, config) {
-                            KGpropertyFilter.dictionaryDataTable.rows().select();
-                        },
-                    },
-                    {
-                        text: "UnSelect All",
-                        action: function (e, dt, node, config) {
-                            KGpropertyFilter.dictionaryDataTable.rows().deselect();
-                        },
-                    },
-
-                    {
-                        text: "Delete",
-                        action: function (e, dt, node, config) {
-                            return alert("in construction");
-                            var data = KGpropertyFilter.dictionaryDataTable.rows({ selected: true }).data();
-                            KGpropertyFilter.deleteFilters(data);
-                        },
-                    },
-                ],
-            });
-        }, 1000);
-    };
-
-    self.deleteFilters = function (dataTableData) {
-        if (dataTableData.length == 0) return alert("no row is selected");
-        if (!confirm(" remove  permanently " + dataTableData.length + " filters ?")) return;
-        var subjects = [];
-        var objects = [];
-        var query = "DELETE DATA FROM   <" + Config.sources[self.propertyFilteringSource].graphUri + "> {\n";
-        for (var i = 0; i < data.length; i++) {
-            var array = data[i][0].split("|");
-            query += "<" + array[0] + "> ?p <" + array[1] + ">.\n";
-        }
-        query += "}";
-        let url = Config.sources[self.propertyFilteringSource].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, {}, { source: self.propertyFilteringSource }, function (err, result) {
+        self.loadInJstree(self.treeConfigs["dataContainers"], function (err, result) {
             if (err) {
+                $("#KGpropertyFilter_searchInPropertiesTreeInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
                 return alert(err.responseText);
             }
-
-            return MainController.UI.message("Deleted " + data.length + " filters", true);
-        });
-    };
-
-    self.saveNewRestrictionFilterTriples = function () {
-        newFilters = self.currentNewFilters;
-        var triples = [];
-        newFilters.forEach(function (filter) {
-            triples.push({
-                subject: filter.propertyRetrictionId,
-                predicate: self.aspectsMap[self.currentNewFilters.currentAspect].predicate,
-                object: filter.filterId,
-            });
-        });
-
-        Sparql_generic.insertTriples(self.propertyFilteringSource, triples, { getSparqlOnly: false }, function (err, result) {
-            if (err) return alert(err.responseText);
-            MainController.UI.message(result + " filters created ");
-        });
-    };
-
-    self.loadPropertiesFilters = function (callback) {
-        var nodes = $("#KGpropertyFilter_propertiesTreeDiv").jstree().get_checked(true);
-
-        var restrictionIds = [];
-        nodes.forEach(function (item) {
-            if (item.data.retrictionId) restrictionIds.push(item.data.retrictionId);
-        });
-
-        var filterStr = Sparql_common.setFilter("restriction", restrictionIds);
-        var fromStr = "FROM <" + Config.sources[self.propertyFilteringSource].graphUri + ">";
-        fromStr += " FROM <" + Config.sources[self.currentSource].graphUri + ">";
-
-        var sparql =
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "SELECT * " +
-            fromStr +
-            " WHERE {\n" +
-            "  ?classId rdfs:subClassOf ?restriction .\n" +
-            "  ?restriction <http://www.w3.org/2002/07/owl#someValuesFrom> ?propertyId.\n" +
-            "  ?propertyId rdfs:label ?propertyLabel.\n" +
-            "  ?classId rdfs:label ?classLabel.\n" +
-            "  ?restriction ?aspect ?filter. filter (regex(str(?aspect),'http://data.total.com/resource/tsf/property-filtering/'))\n";
-        sparql += filterStr;
-        sparql += "} LIMIT 10000";
-        var url = Config.sources[self.propertyFilteringSource].sparql_server.url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, sparql, "", { source: self.propertyFilteringSource }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-
-            var filters = Sparql_common.getBindingsValues(result.results.bindings);
-            filters.forEach(function (item) {
-                item.filterLabel = Sparql_common.getLabelFromURI(item.filter);
-                item.aspectLabel = Sparql_common.getLabelFromURI(item.aspect);
-                item.status = "saved";
-            });
-            self.currentSavedFilters = filters;
-
-            self.showFilters();
         });
     };
 
@@ -515,29 +131,37 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         async.series(
             [
                 function (callbackSeries) {
-                    self.loadMDMentitiesTree(function (err, _result) {
+                    self.loadInJstree(self.treeConfigs["disciplines"], function (err, result) {
                         callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
-                    self.loadLifeCycleTree(function (err, _result) {
+                    self.loadInJstree(self.treeConfigs["templates"], function (err, result) {
                         callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
-                    self.loadDisciplinesTree(function (err, _result) {
+                    $("#GenericTools_searchAllSourcesTermInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
+
+                    return callbackSeries();
+                },
+                function (callbackSeries) {
+                    return callbackSeries();
+                    self.loadInJstree(self.treeConfigs["systems"], function (err, result) {
                         callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
-                    self.loadOrganizationsTree(function (err, _result) {
+                    self.loadInJstree(self.treeConfigs["actors"], function (err, result) {
                         callbackSeries(err);
                     });
                 },
             ],
             function (err) {
                 $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 0);
-                if (err) return alert(err.responseText);
+                if (err) {
+                    return alert(err.responseText);
+                }
             }
         );
 
@@ -545,285 +169,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     };
     self.onSelectFilter = function () {
         // pass
-    };
-
-    self.loadClassesPropertiesTree = function (classId) {
-        //  var classIds = ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/EquipmentClass/CFIHOS-30000521"];
-        // classIds = null
-
-        var options = { filter: "  FILTER (?prop in(<http://rds.posccaesar.org/ontology/lis14/rdl/hasQuality> ,<http://standards.iso.org/iso/15926/part14/rdl/hasQuality>))" };
-        Sparql_OWL.getObjectRestrictions(self.currentSource, classId, options, function (err, result) {
-            if (err) {
-                return MainController.UI.message(err.responseText);
-            }
-            var jstreeData = [];
-            var existingNodes = common.jstree.getjsTreeNodes("KGpropertyFilter_propertiesTreeDiv", true, "#");
-            var restrictionIds = [];
-            result.forEach(function (item) {
-                var id = item.concept.value + "_" + item.value.value;
-                if (!existingNodes[id]) {
-                    existingNodes[id] = 1;
-                    restrictionIds.push(id);
-                    existingNodes[id] = 1;
-                    jstreeData.push({
-                        id: id,
-                        text: "<span class='KGpropertyFilter_property' >" + item.valueLabel.value + "</span>",
-                        parent: item.concept.value,
-                        type: "Property",
-                        data: {
-                            type: "Property",
-                            propId: item.value.value,
-                            propLabel: item.valueLabel.value,
-                            retrictionId: item.node.value,
-                            classId: item.concept.value,
-                            classLabel: item.conceptLabel.value,
-                        },
-                    });
-                }
-            });
-            var options = {
-                selectTreeNodeFn: function (/** @type {any} */ event, /** @type {any} */ obj) {
-                    return (self.currentClassNode = obj.node);
-                },
-            };
-            if (jstreeData.length > 0) {
-                common.array.sort(jstreeData, "text");
-                common.jstree.addNodesToJstree("KGpropertyFilter_propertiesTreeDiv", classId, jstreeData, options);
-            }
-        });
-    };
-
-    self.loadLifeCycleTree = function (callback) {
-        Sparql_OWL.getNodeChildren("ISO-15663", null, null, 2, {}, function (err, result) {
-            if (err) return callback(err.responseText);
-            var jstreeData = [];
-            var existingNodes = {};
-            result.forEach(function (item) {
-                if (!existingNodes[item.concept.value]) {
-                    existingNodes[item.concept.value] = 1;
-                    jstreeData.push({
-                        id: item.concept.value,
-                        text: item.conceptLabel.value,
-                        parent: "#",
-                        data: {
-                            id: item.concept.value,
-                            label: item.conceptLabel.value,
-                            source: "ISO-15663",
-                        },
-                    });
-                }
-                if (!existingNodes[item.child1.value]) {
-                    existingNodes[item.child1.value] = 1;
-                    jstreeData.push({
-                        id: item.child1.value,
-                        text: item.child1Label.value,
-                        parent: item.concept.value,
-                        data: {
-                            id: item.child1.value,
-                            label: item.child1Label.value,
-                            source: "ISO-15663",
-                        },
-                    });
-                }
-            });
-            common.array.sort(jstreeData, "text");
-            var options = { openAll: false, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
-            common.jstree.loadJsTree("KGpropertyFilter_lifeCycleTree", jstreeData, options, function () {
-                $("#KGpropertyFilter_lifeCycleTree").jstree().open_node("http://rds.posccaesar.org/ontology/lis14/rdl/Activity");
-            });
-
-            callback();
-        });
-    };
-
-    self.loadDisciplinesTree = function (callback) {
-        Sparql_OWL.getNodeChildren("ISO_15926-org", null, ["http://data.15926.org/cfihos/15926200"], 2, {}, function (err, result) {
-            if (err) return callback(err.responseText);
-            var jstreeData = [];
-            var existingNodes = {};
-            result.forEach(function (item) {
-                if (!existingNodes[item.concept.value]) {
-                    existingNodes[item.concept.value] = 1;
-                    jstreeData.push({
-                        id: item.concept.value,
-                        text: item.conceptLabel.value,
-                        parent: "#",
-                        data: {
-                            id: item.concept.value,
-                            label: item.conceptLabel.value,
-                            source: "ISO-15663",
-                        },
-                    });
-                }
-                if (!existingNodes[item.child1.value]) {
-                    existingNodes[item.child1.value] = 1;
-                    jstreeData.push({
-                        id: item.child1.value,
-                        text: item.child1Label.value,
-                        parent: item.concept.value,
-                        data: {
-                            id: item.child1.value,
-                            label: item.child1Label.value,
-                            source: "ISO-15663",
-                        },
-                    });
-                }
-            });
-            var options = { openAll: true, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
-            common.array.sort(jstreeData, "text");
-            common.jstree.loadJsTree("KGpropertyFilter_disciplinesTree", jstreeData, options);
-            callback();
-        });
-    };
-    self.loadOrganizationsTree = function (callback) {
-        Sparql_OWL.getNodeChildren("ISO_15926-org", null, ["http://data.15926.org/lci/Organization"], 2, {}, function (err, result) {
-            if (err) return callback(err.responseText);
-            var jstreeData = [];
-            var existingNodes = {};
-            result.forEach(function (item) {
-                if (!existingNodes[item.concept.value]) {
-                    existingNodes[item.concept.value] = 1;
-                    jstreeData.push({
-                        id: item.concept.value,
-                        text: item.conceptLabel.value,
-                        parent: "#",
-                        data: {
-                            id: item.concept.value,
-                            label: item.conceptLabel.value,
-                            source: "ISO-15663",
-                        },
-                    });
-                }
-                if (!existingNodes[item.child1.value]) {
-                    existingNodes[item.child1.value] = 1;
-                    jstreeData.push({
-                        id: item.child1.value,
-                        text: item.child1Label.value,
-                        parent: item.concept.value,
-                        data: {
-                            id: item.child1.value,
-                            label: item.child1Label.value,
-                            source: "ISO-15663",
-                        },
-                    });
-                }
-            });
-            common.array.sort(jstreeData, "text");
-            var options = { openAll: true, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
-            common.jstree.loadJsTree("KGpropertyFilter_organizationsTree", jstreeData, options);
-            callback();
-        });
-    };
-
-    /* self.loadDisciplinesTree = function(callback) {
-    Sparql_OWL.getNodeChildren("ISO_15926-org", null, ["http://data.15926.org/cfihos/15926200"], 2, {}, function(err, result) {
-      if (err) return callback(err.responseText);
-      var jstreeData = [];
-      var existingNodes = {};
-      result.forEach(function(item) {
-        if (!existingNodes[item.concept.value]) {
-          existingNodes[item.concept.value] = 1;
-          jstreeData.push({
-            id: item.concept.value,
-            text: item.conceptLabel.value,
-            parent: "#",
-            data: {
-              id: item.concept.value,
-              label: item.conceptLabel.value,
-              source: "ISO-15663"
-            }
-          });
-        }
-        if (!existingNodes[item.child1.value]) {
-          existingNodes[item.child1.value] = 1;
-          jstreeData.push({
-            id: item.child1.value,
-            text: item.child1Label.value,
-            parent: item.concept.value,
-            data: {
-              id: item.child1.value,
-              label: item.child1Label.value,
-              source: "ISO-15663"
-            }
-          });
-        }
-      });
-      var options = { openAll: true, withCheckboxes: true };
-      common.array.sort(jstreeData, "text");
-      common.jstree.loadJsTree("KGpropertyFilter_disciplinesTree", jstreeData, options);
-      callback();
-    });
-  };*/
-    self.loadMDMentitiesTree = function (callback) {
-        var jstreeData = [];
-
-        jstreeData.push({
-            id: "http://data.total.com/resource/tsf/mdm/Tag",
-            text: "1-Tag",
-            parent: "#",
-            data: {
-                id: "http://data.total.com/resource/tsf/mdm/Tag",
-                label: "Tag",
-                source: "http://data.total.com/resource/tsf/mdm/",
-            },
-        });
-
-        jstreeData.push({
-            id: "http://data.total.com/resource/tsf/mdm/FunctionalClass",
-            text: "2-FunctionalClass",
-            parent: "#",
-            data: {
-                id: "http://data.total.com/resource/tsf/mdm/FunctionalClass",
-                label: "FunctionalClass",
-                source: "http://data.total.com/resource/tsf/mdm/",
-            },
-        });
-        jstreeData.push({
-            id: "http://data.total.com/resource/tsf/mdm/PhysicalClass",
-            text: "3-PhysicalClass",
-            parent: "#",
-            data: {
-                id: "http://data.total.com/resource/tsf/mdm/PhysicalClass",
-                label: "PhysicalClass",
-                source: "http://data.total.com/resource/tsf/mdm/",
-            },
-        });
-        jstreeData.push({
-            id: "http://data.total.com/resource/tsf/mdm/Model",
-            text: "4-Model",
-            parent: "#",
-            data: {
-                id: "http://data.total.com/resource/tsf/mdm/Model",
-                label: "Model",
-                source: "http://data.total.com/resource/tsf/mdm/",
-            },
-        });
-
-        jstreeData.push({
-            id: "http://data.total.com/resource/tsf/mdm/ModelItem",
-            text: "5-ModelItem",
-            parent: "#",
-            data: {
-                id: "http://data.total.com/resource/tsf/mdm/ModelItem",
-                label: "ModelItem",
-                source: "http://data.total.com/resource/tsf/mdm/",
-            },
-        });
-        jstreeData.push({
-            id: "http://data.total.com/resource/tsf/mdm/SparePart",
-            text: "6-SparePart",
-            parent: "#",
-            data: {
-                id: "http://data.total.com/resource/tsf/mdm/SparePart",
-                label: "SparePart",
-                source: "http://data.total.com/resource/tsf/mdm/",
-            },
-        });
-
-        var options = { openAll: true, withCheckboxes: true, contextMenu: KGpropertyFilter.getJstreeAspectsContextMenu() };
-        common.array.sort(jstreeData, "text");
-        common.jstree.loadJsTree("KGpropertyFilter_MDMentitiesTree", jstreeData, options);
-        callback();
     };
 
     self.execSparqlFilterQuery = function (classIds, callback) {
@@ -840,11 +185,15 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             " ?restriction owl:someValuesFrom ?property.\n" +
             "   ?property rdfs:label ?propertyLabel.\n";
 
-        if (classIds) sparql += Sparql_common.setFilter("class", classIds);
+        if (classIds) {
+            sparql += Sparql_common.setFilter("class", classIds);
+        }
 
         function addFilters(aspect, selectId) {
             var filterId = $("#" + selectId).val();
-            if (!filterId) return;
+            if (!filterId) {
+                return;
+            }
             var predicate = self.aspectsMap[aspect];
             sparql += " filter ( ?aspect=<" + predicate + "> &&  ?filterId=<" + filterId + ">  )";
         }
@@ -873,112 +222,554 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
     self.client = {};
 
-    self.matrix = {
-        showFiltersMatrix: function (filters, aspect) {
-            let html = "<div class='matrix'>";
+    self.searchInPropertiesTree = function (event, inputDiv, jstreeDiv) {
+        inputDiv = "KGpropertyFilter_searchInPropertiesTreeInput";
+        jstreeDiv = self.treeConfigs["dataContainers"].jstreeDiv;
 
-            self.matrixDivsMap = {};
-            var currentMatrixPropsMap = {};
-            var fitlersArray = [];
+        if (event.keyCode != 13 && event.keyCode != 9) {
+            return;
+        }
+        var value = $("#" + inputDiv).val();
+        $("#" + jstreeDiv)
+            .jstree(true)
+            .search(value);
+        $("#" + inputDiv).val("");
+    };
 
-            filters.forEach(function (item) {
-                if (fitlersArray.indexOf(item.filterLabel) < 0) fitlersArray.push(item.filterLabel);
-            });
-
-            filters.forEach(function (filter) {
-                let propId = filter.classId + "|" + filter.propertyId;
-                if (!currentMatrixPropsMap[propId]) currentMatrixPropsMap[propId] = filter;
-                if (!currentMatrixPropsMap[propId].propFilters) currentMatrixPropsMap[propId].propFilters = {};
-                fitlersArray.forEach(function (filterLabel) {
-                    var value = 0;
-                    if (filter.filterLabel == filterLabel) value = 1;
-                    currentMatrixPropsMap[propId].propFilters[filterLabel] |= value;
-                });
-            });
-            {
-                // draw first row with col titles
-                let rowHtml = "<div  class='matrixRow " + "" + "'>";
-                rowHtml += "<div class='matrixRowTitle' >" + "" + "</div>";
-                fitlersArray.forEach(function (aspect) {
-                    rowHtml += "<div class='matrixColTitle'>" + aspect + "</div>";
-                });
-                html += rowHtml + "</div>";
+    self.loadInJstree = function (treeConfig, callback) {
+        var depth = 3;
+        Sparql_generic.getNodeChildren(treeConfig.source, null, treeConfig.topUris, treeConfig.levels, treeConfig.options, function (err, result) {
+            //    Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/TagClass/CFIHOS-30000311"], depth, {}, function (err, result) {
+            if (err) {
+                return callback(err);
             }
 
-            for (var propId in currentMatrixPropsMap) {
-                var prop = currentMatrixPropsMap[propId];
-                let matrixFilterClass = "matrixFilterClass";
-                let rowDivId = "r" + common.getRandomHexaId(8);
-                self.matrixDivsMap[rowDivId] = prop;
-                let rowHtml = "";
-                rowHtml += "<div id='" + rowDivId + "' class='matrixRow " + "" + "'>";
-                var statusClass = "matrixPropTitle_" + prop.status;
-                let propDivId = "r" + common.getRandomHexaId(8);
-                self.matrixDivsMap[propDivId] = { rowDivId: rowDivId, propId: propId };
-                rowHtml += "<div id='" + propDivId + "' class='matrixRowTitle " + statusClass + "'>" + prop.classLabel + "." + prop.propertyLabel + "</div>";
+            var jstreeData = [];
+            var existingNodes = {};
 
-                fitlersArray.forEach(function (propFilter) {
-                    let cellDivId = "C" + common.getRandomHexaId(8);
-                    self.matrixDivsMap[cellDivId] = { rowDivId: rowDivId, propId: propId, filterLabel: prop.filterLabel };
-                    let cellHtml = "";
-                    var cellClass = "";
-                    cellClass = prop.propFilters[propFilter] == 1 ? "matrixCellMatch" : "";
-                    cellHtml = "<div id='" + cellDivId + "' class='matrixCell " + cellClass + "' >&nbsp;</div>";
-                    rowHtml += cellHtml;
-                });
+            result.forEach(function (item) {
+                if (!existingNodes[item.concept.value]) {
+                    existingNodes[item.concept.value] = 1;
+                    jstreeData.push({
+                        parent: "#",
+                        id: item.concept.value,
+                        text: item.conceptLabel.value,
+                        type: "Class",
+                        data: {
+                            type: treeConfig.key,
+                            source: self.currentSource,
+                            label: item.conceptLabel.value,
+                            id: item.concept.value,
+                        },
+                    });
+                }
 
-                html += rowHtml + "</div>";
+                for (var i = 1; i <= 10; i++) {
+                    if (!item["child" + i]) {
+                        break;
+                    }
+                    var parent = i == 1 ? item.concept.value : item["child" + (i - 1)].value;
+
+                    var id = item["child" + i].value;
+                    var label = item["child" + i + "Label"].value;
+                    if (!existingNodes[id]) {
+                        existingNodes[id] = 1;
+                        jstreeData.push({
+                            parent: parent,
+                            id: id,
+                            text: label,
+                            type: "Class",
+                            data: {
+                                type: treeConfig.key,
+                                source: self.currentSource,
+                                label: label,
+                                id: id,
+                            },
+                        });
+                    }
+                }
+            });
+
+            var jstreeOptions = {
+                openAll: false,
+                // withCheckboxes: true,
+                selectTreeNodeFn: KGpropertyFilter.commonJstreeActions.onSelectTreeNode,
+                // onAfterOpenNodeFn: KGpropertyFilter.onOpenClassesOrPropertyNode,
+                //   onCheckNodeFn: null, //KGpropertyFilter.loadPropertiesFilters,
+                //  tie_selection: false,
+                contextMenu: KGpropertyFilter.commonJstreeActions.getJsTreeContextMenu(treeConfig.key),
+                searchPlugin: {
+                    case_insensitive: true,
+                    fuzzy: false,
+                    show_only_matches: true,
+                },
+            };
+            common.jstree.loadJsTree(treeConfig.jstreeDiv, jstreeData, treeConfig.options.jstreeOptions || jstreeOptions);
+
+            $("#waitImg").css("display", "none");
+            callback();
+        });
+    };
+
+    self.commonJstreeActions = {
+        onSelectTreeNode: function (event, obj) {
+            self.currentTreeNode = obj.node;
+            self.currentTreeNode.treeDiv = event.currentTarget.id;
+
+            if (self.currentTreeNode.data.type == "dataContainers") {
+                self.currentDataContainer = obj.node;
+                self.showDataContainerDetails(self.currentTreeNode);
+            } else {
+                self.currentRightpanelNode = obj.node;
+            }
+        },
+        createChildNode: function () {
+            var parent = self.currentTreeNode.data.id;
+            var parentLabel = self.currentTreeNode.data.label;
+            var label = prompt("New child label");
+            if (!label) {
+                return;
             }
 
-            $("#KGpropertyFilter_filteringResult").html(html);
-            $("#KGpropertyFilter_filteringResult").animate({ zoom: 1.2 }, 400);
-            $(".matrixRowTitle ").bind("click", KGpropertyFilter.matrix.onClickPropTitleDiv);
-            $(".matrixCell ").bind("click", KGpropertyFilter.matrix.onClickPropCellDiv);
+            var treeConfig = self.getTreeConfigByKey("jstreeDiv", self.currentTreeNode.treeDiv);
+            var parentPredicate = treeConfig.parentPredicate;
+            if (!parentPredicate) {
+                return alert("no parentPredicate in treeConfig");
+            }
+            var triples = [];
+            let graphUri = Config.sources[treeConfig.source].graphUri;
+            var newUri = graphUri + common.formatStringForTriple(parentLabel + "_" + label, true);
+
+            triples.push({ subject: newUri, predicate: "rdfs:label", object: label });
+            triples.push({ subject: newUri, predicate: "rdf:type", object: "owl:NamedIndividual" });
+            triples.push({ subject: newUri, predicate: parentPredicate, object: parent });
+
+            Sparql_generic.insertTriples(treeConfig.source, triples, {}, function (err, _result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+
+                MainController.UI.message("child Created");
+                var newNode = {
+                    id: newUri,
+                    text: label,
+                    parent: parent,
+                    data: {
+                        id: newUri,
+                        label: label,
+                        source: treeConfig.source,
+                    },
+                };
+                $("#" + self.currentTreeNode.treeDiv)
+                    .jstree()
+                    .create_node(parent, newNode, "first", function (err, result) {
+                        $("#" + self.currentTreeNode.treeDiv)
+                            .jstree()
+                            .open_node(parent);
+                        self.currentTreeNode = newNode;
+                    });
+            });
+        },
+        deleteNode: function () {
+            var treeConfig = self.getTreeConfigByKey("jstreeDiv", self.currentTreeNode.treeDiv);
+            if (self.currentTreeNode.children && self.currentTreeNode.children.length > 0) {
+                var parentPredicate = treeConfig.parentPredicate;
+                if (!parentPredicate) {
+                    return alert("no parentPredicate in treeConfig");
+                }
+                if (parentPredicate.indexOf("rdfs:member") < 0) {
+                    return alert("cannot delete nnode with children");
+                }
+            }
+
+            if (!confirm("delete node " + self.currentTreeNode.text)) {
+                return;
+            }
+            Sparql_generic.deleteTriples(treeConfig.source, self.currentTreeNode.data.id, null, null, function (err, result) {
+                if (err) {
+                    return alert(message);
+                }
+                $("#" + self.currentTreeNode.treeDiv)
+                    .jstree()
+                    .delete_node(self.currentTreeNode.data.id);
+                return MainController.UI.message("node deleted");
+            });
         },
 
-        onClickPropTitleDiv: function (e) {
-            var divId = $(this).attr("id");
-            var prop = self.matrixDivsMap[divId];
-            self.selectedMatrixProp = prop;
-            var menuhtml = '    <span  class="popupMenuItem" onclick="KGpropertyFilter.matrix.removePropAllfilters();">remove prop</span>';
-            $("#graphPopupDiv").html(menuhtml);
-            var point = { x: e.clientX, y: e.clientY };
-            MainController.UI.showPopup(point, "graphPopupDiv", true);
+        searchBO: function (origin) {
+            if (origin == "graph") {
+                self.currentDataContainer = Lineage_classes.currentGraphNode;
+            }
+
+            var term = self.currentDataContainer.data.label;
+            $("#GenericTools_searchAllSourcesTermInput").val(term);
+            $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 4);
+            KGpropertyFilter.rightPanelsActions.searchBusinessObjects();
         },
 
-        onClickPropCellDiv: function (e) {
-            var divId = $(this).attr("id");
-            var filter = self.matrixDivsMap[divId];
-            self.selectedMatrixFilter = filter;
-            var menuhtml = '    <span  class="popupMenuItem" onclick="KGpropertyFilter.matrix.removePropfilter();">remove prop</span>';
-            $("#graphPopupDiv").html(menuhtml);
-            var point = { x: e.clientX, y: e.clientY };
-            MainController.UI.showPopup(point, "graphPopupDiv", true);
-        },
-        removePropAllfilters: function () {
-            var prop = self.selectedMatrixProp;
-            alert("coming soon");
-        },
-        removePropfilter: function () {
-            var filter = (self.selectedMatrixFilter = filter);
-            alert("coming soon");
+        associateNodeToDataContainer: function () {
+            if (!self.currentDataContainer) {
+                return alert("no data container selected");
+            }
+            if (!self.currentRightpanelNode) {
+                return alert("no node selected in rightPanel");
+            }
+
+            var rightPanelNodeData = self.currentRightpanelNode.data;
+            if (rightPanelNodeData.source == "GIDEA-RAW") {
+                // create property
+                if (self.currentRightpanelNode.parent.indexOf("Attribute") > 0) {
+                    if (!self.currentRightpanelNode.parentLogicalEntity) {
+                        return self.rightPanelsActions.showAttributesParentsDialog();
+                    } else {
+                        // create a new individual that is object of the dataContainer  and subject of gidea Attribute and Logical entity
+                        var newUri = Lineage_blend.graphModification.getURI("", self.currentDataContainer.data.source, "randomHexaNumber");
+                        var triples = [
+                            {
+                                subject: newUri,
+                                predicate: "rdf:type ",
+                                object: "owl:NamedIndividual",
+                            },
+                            {
+                                subject: newUri,
+                                predicate: "rdf:type ",
+                                object: "http://datalenergies.total.com/resource/tsf/idcp/gidea-attribute",
+                            },
+                            {
+                                subject: newUri,
+                                predicate: "http://www.w3.org/2000/01/rdf-schema#label",
+                                object: self.currentRightpanelNode.parentLogicalEntity.label + "." + self.currentTreeNode.data.label,
+                            },
+
+                            {
+                                subject: self.currentDataContainer.data.id,
+                                predicate: "http://datalenergies.total.com/resource/tsf/idcp/mapsWith",
+                                object: newUri,
+                            },
+                            {
+                                subject: newUri,
+                                predicate: "http://datalenergies.total.com/resource/tsf/idcp/fromEntity",
+                                object: self.currentRightpanelNode.parentLogicalEntity.id,
+                            },
+                            {
+                                subject: newUri,
+                                predicate: "http://datalenergies.total.com/resource/tsf/idcp/fromAttribute",
+                                object: self.currentRightpanelNode.data.id,
+                            },
+                        ];
+
+                        self.currentRightpanelNode.parentLogicalEntity = null;
+                    }
+                    triples = triples.concat(Lineage_blend.getCommonMetaDataTriples(newUri));
+                } else if (self.currentRightpanelNode.parent.indexOf("LogicalEntity") > 0 || self.currentRightpanelNode.parent.indexOf("BusinessObject") > 0) {
+                    var triples = [
+                        {
+                            subject: self.currentDataContainer.data.id,
+                            predicate: "http://datalenergies.total.com/resource/tsf/idcp/mapsWith",
+                            object: self.currentRightpanelNode.id,
+                        },
+                    ];
+                }
+            } else {
+                // create member property
+                if (self.currentDataContainer.parents.length != 2) {
+                    return alert("only dataContainers can be associated ");
+                }
+                var triples = [
+                    {
+                        subject: rightPanelNodeData.id,
+                        predicate: "http://www.w3.org/2000/01/rdf-schema#member",
+                        object: self.currentDataContainer.data.id,
+                    },
+                ];
+            }
+            if (!triples) {
+                return alert("no triples defined");
+            }
+            Sparql_generic.insertTriples(self.currentDataContainer.data.source, triples, {}, function (err, result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+            });
         },
 
-        exportMatrix: function () {
-            return alert("coming soon");
+        getJsTreeContextMenu: function (treeConfigKey) {
+            var items = {};
+
+            if (treeConfigKey != "businessObjects") {
+                items.create = {
+                    label: "create child",
+                    action: function (_e) {
+                        // pb avec source
+                        KGpropertyFilter.commonJstreeActions.createChildNode();
+                    },
+                };
+                items.delete = {
+                    label: "delete node",
+                    action: function (_e) {
+                        // pb avec source
+                        KGpropertyFilter.commonJstreeActions.deleteNode();
+                    },
+                };
+            }
+            if (true || treeConfigKey == "businessObjects") {
+                items.nodeInfos = {
+                    label: "Node infos",
+                    action: function (_e) {
+                        // pb avec source
+                        $("#mainDialogDiv").dialog("open");
+                        SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+                    },
+                };
+            }
+
+            if (treeConfigKey == "dataContainers") {
+                items.searchBO = {
+                    label: "Search BO",
+                    action: function (_e) {
+                        // pb avec source
+                        KGpropertyFilter.commonJstreeActions.searchBO();
+                    },
+                };
+            }
+
+            if (treeConfigKey != "dataContainers") {
+                items.associate = {
+                    label: "Associate",
+                    action: function (_e) {
+                        KGpropertyFilter.commonJstreeActions.associateNodeToDataContainer();
+                    },
+                };
+                items.expand = {
+                    label: "expand",
+                    action: function (_e) {
+                        KGpropertyFilter.commonJstreeActions.expandCommonTreeNode();
+                    },
+                };
+            }
+
+            return items;
         },
-        copyMatrix: function () {
-            return alert("coming soon");
-            var html = $(".matrix").html();
-            common.copyTextToClipboard(html);
+
+        expandCommonTreeNode: function () {
+            if (self.currentTreeNode.id) {
+                var x = 3;
+            }
         },
     };
 
-    self.searchInPropertiesTree = function (event) {
-        if (event.keyCode != 13 && event.keyCode != 9) return;
-        var value = $("#KGpropertyFilter_searchInPropertiesTreeInput").val();
-        $("#KGpropertyFilter_propertiesTreeDiv").jstree(true).search(value);
-        $("#KGpropertyFilter_searchInPropertiesTreeInput").val("");
+    self.rightPanelsActions = {
+        searchBusinessObjects: function (event) {
+            if (event && event.keyCode != 13 && event.keyCode != 9) {
+                return;
+            }
+            var options = {
+                jstreeDiv: "KGpropertyFilter_businessObjectsTree",
+                searchedSources: [self.treeConfigs["businessObjects"].source, "BUSINESS_OBJECTS_DATA_DOMAINS"],
+                contextMenu: self.commonJstreeActions.getJsTreeContextMenu("businessObjects"),
+                selectTreeNodeFn: function (event, obj) {
+                    self.currentRightpanelNode = obj.node;
+                    return;
+                },
+            };
+            SourceBrowser.searchAllSourcesTerm(options);
+        },
+
+        showAttributesParentsDialog: function () {
+            self.currentRightpanelNode.parentLogicalEntity = null;
+            var html = "Select a Logical Entity<br>";
+            html += "<select size='20' onclick='KGpropertyFilter.rightPanelsActions.onValidateAttributesParentsDialog($(this).val())' id='KGpropertyFilter_logicalEntitySelect'></select>";
+
+            $("#mainDialogDiv").html(html);
+            $("#mainDialogDiv").dialog("open");
+            var source = "GIDEA-RAW";
+            var options = {
+                distinct: "?object ?objectLabel",
+            };
+            Sparql_OWL.getFilteredTriples(source, self.currentRightpanelNode.data.id, "http://datalenergies.total.com/resource/tsf/gidea-raw/describes", null, options, function (err, result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+
+                var logicalEntities = [];
+                result.forEach(function (item) {
+                    logicalEntities.push({
+                        id: item.object.value,
+                        label: item.objectLabel.value,
+                    });
+                });
+                common.fillSelectOptions("KGpropertyFilter_logicalEntitySelect", logicalEntities, false, "label", "id");
+            });
+        },
+        onValidateAttributesParentsDialog: function (logicalEntity) {
+            var label = $("#KGpropertyFilter_logicalEntitySelect option:selected").text();
+
+            self.currentRightpanelNode.parentLogicalEntity = { id: logicalEntity, label: label };
+            $("#mainDialogDiv").dialog("close");
+            self.commonJstreeActions.associateNodeToDataContainer();
+        },
+    };
+    self.showDataContainerDetails = function (node) {
+        /* $("#KGpropertyFilter_nodeInfosDiv").load("snippets/KGpropertyFilter/dataContainer.html", function() {*/
+        var level = self.currentTreeNode.parents.length - 1;
+        var dataContainerId;
+        if (level == 1) {
+            dataContainerId = self.currentTreeNode;
+        } else {
+            return;
+            dataContainerId = self.currentTreeNode.parents[level - 1];
+        }
+
+        Sparql_common.includeImports = 1;
+        /// $("#KGpropertyFilter_display_dataContainerDiv").html(self.currentTreeNode.text)
+        var visjsNodes = [];
+        var source = self.currentTreeNode.data.source;
+
+        async.series(
+            [
+                function (callbackSeries) {
+                    visjsGraph.clearGraph();
+                    var options = {
+                        /*  layout: {
+              hierarchical: {
+                direction: "UD",
+                sortMethod: "hubsize"
+              }
+            }*/
+
+                        physics: {
+                            forceAtlas2Based: {
+                                centralGravity: 0.45,
+                                springLength: 110,
+                                damping: 0.15,
+                            },
+                            minVelocity: 0.75,
+                        },
+                        edges: { smooth: false },
+                    };
+                    Lineage_classes.drawNewGraph({ nodes: [], edges: [] }, null, options);
+                    if (!self.graphButtonsInitialized) {
+                        self.graphButtonsInitialized = 1;
+                        var html =
+                            "<div  style='position: absolute;top:30px;left:450px;'>" +
+                            "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='visjsGraph.clearGraph()'> clear Graph</button>" +
+                            '<button  class="btn btn-sm my-1 py-0 btn-outline-primary" onclick=\'Export.exportGraphToDataTable(null,"GRAPH")\' > Export</button>' +
+                            "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onClick='visjsGraph.showGraphConfig()'>Display</button>";
+                        ("</div>");
+                        $("#centralPanelDiv").append(html);
+                    }
+                    return callbackSeries();
+                },
+                function (callbackSeries) {
+                    Lineage_containers.graphResources(source, self.currentTreeNode.id, { descendants: true }, function (err, result) {
+                        /*  Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0, { drawBeforeCallback: 1 }, function(err, result) {*/
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        result.nodes.forEach(function (node) {
+                            visjsNodes.push(node.id);
+                        });
+                        return callbackSeries(err);
+                    });
+                },
+                function (callbackSeries) {
+                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+
+                        var newNodes = [];
+                        result.nodes.forEach(function (node) {
+                            newNodes.push({
+                                id: node.id,
+                                shape: "box",
+                                color: "#bb8f00",
+                            });
+                        });
+                        visjsGraph.data.nodes.update(newNodes);
+                        var newEdges = [];
+                        result.edges.forEach(function (edge) {
+                            newEdges.push({
+                                id: edge.id,
+                                color: "#bb8f00",
+                            });
+                        });
+                        visjsGraph.data.edges.update(newEdges);
+                        return callbackSeries(err);
+                    });
+                },
+
+                function (callbackSeries) {
+                    return callbackSeries();
+                    var properties = ["rdfs:member"];
+                    var options = { inversePredicate: 1 };
+                    Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
+                        return callbackSeries(err);
+                    });
+                },
+                function (callbackSeries) {
+                    var properties = ["http://datalenergies.total.com/resource/tsf/idcp/mapsWith"];
+                    var options = {};
+                    Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
+                        return callbackSeries(err);
+                    });
+                },
+                function (callbackSeries) {
+                    //post processing vis
+
+                    var nodes = visjsGraph.data.nodes.get();
+
+                    var newNodes = [];
+                    nodes.forEach(function (node) {
+                        var shape = null;
+                        var color = null;
+                        if (node.level === 0) {
+                            shape = "box";
+                            color = "#70ac47";
+                            node.data.graphPopupMenusFn = KGpropertyFilter.getGraphPopupMenuItem;
+                        }
+                        if (node.level === 1) {
+                            shape = "box";
+                            color = "#00afef";
+                            node.data.graphPopupMenusFn = KGpropertyFilter.getGraphPopupMenuItem;
+                        }
+                        if (node.level === 2) {
+                            node.data.graphPopupMenusFn = KGpropertyFilter.getGraphPopupMenuItem;
+                        }
+
+                        if (node.id.indexOf("gidea") > -1) {
+                            shape = "square";
+                            color = "#70309f";
+                        }
+
+                        if (node.id.indexOf("business") > -1) {
+                            shape = "star";
+                            color = "#f90edd";
+                        }
+
+                        if (node.data.type === 1) {
+                        }
+                        if (shape != null) {
+                            newNodes.push({ id: node.id, shape: shape, color: color });
+                        }
+                    });
+                    visjsGraph.data.nodes.update(newNodes);
+                    return callbackSeries();
+                },
+            ],
+            function (err) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+            }
+        );
+    };
+
+    self.getGraphPopupMenuItem = function () {
+        var html =
+            ' <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showNodeInfos();"> Node infos</span>' +
+            '<span  class="popupMenuItem" onclick="KGpropertyFilter.commonJstreeActions.searchBO(\'graph\');"> Search BO</span>';
+        return html;
     };
 
     return self;

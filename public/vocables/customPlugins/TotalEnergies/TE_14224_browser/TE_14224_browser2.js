@@ -320,7 +320,7 @@ var TE_14224_browser = (function () {
                                     id: id,
                                     source: self.referenceOntologySource,
                                 };
-                                Lineage_classes.drawNodeAndParents(nodeData14224, null, function (err, result) {
+                                Lineage_classes.drawNodeAndParents(nodeData14224, null, null, function (err, result) {
                                     if (err) return callbackSeries(err);
 
                                     visjsData.nodes = common.concatArraysWithoutDuplicate(visjsData.nodes, result.nodes, "id");

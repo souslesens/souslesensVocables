@@ -80,9 +80,9 @@ var SearchUtil = (function () {
 
                                 indexes = [];
                                 /*  if (toSources) {
-    toSources.forEach(function (source) {
-        indexes.push(source.toLowerCase());
-    });
+toSources.forEach(function (source) {
+indexes.push(source.toLowerCase());
+});
 }*/
                                 indexedSources.forEach(function (source) {
                                     if (!toSources || toSources.length == 0 || toSources.indexOf(source) > -1) {
@@ -357,22 +357,21 @@ var SearchUtil = (function () {
                     },
                 };
                 //   if (options.classFilter) queryObj.bool.filter = { term: { "parents.keyword": options.classFilter } };
+            } else {
+                queryObj = {
+                    bool: {
+                        must: [
+                            {
+                                query_string: {
+                                    query: word,
+                                    fields: ["label", "skoslabels"],
+                                    default_operator: "AND",
+                                },
+                            },
+                        ],
+                    },
+                };
             }
-            /*  else {
-        queryObj = {
-          bool: {
-            must: [
-              {
-                query_string: {
-                  query: word,
-                  fields: ["label", "skoslabels"],
-                  default_operator: "AND"
-                }
-              }
-            ]
-          }
-        };
-      }*/
             if (options.classFilter) {
                 queryObj.bool.filter = {
                     multi_match: {

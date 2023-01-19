@@ -102,10 +102,22 @@ var allObjects = result.sourceObjects.concat(["---------"]).concat(result.TopLev
                                     },
                                 });
                             }
+                            if (true) {
+                                jstreeData.push({
+                                    id: "http://www.w3.org/2002/07/owl#equivalentClass",
+                                    text: "owl:equivalentClass",
+                                    parent: "#",
+                                    data: {
+                                        id: "http://www.w3.org/2002/07/owl#equivalentClass",
+                                        inSource: Config.dictionarySource,
+                                    },
+                                });
+                            }
 
                             if (true || self.sourceNode.rdfType == "NamedIndividual") {
                                 jstreeData.push({
                                     id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+
                                     text: "rdf:type",
                                     parent: "#",
                                     data: {
@@ -122,6 +134,17 @@ var allObjects = result.sourceObjects.concat(["---------"]).concat(result.TopLev
                                     parent: "#",
                                     data: {
                                         id: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                                        inSource: Lineage_sources.activeSource,
+                                    },
+                                });
+                            }
+                            if (Config.sources[Lineage_sources.activeSource].schemaType == "OWL") {
+                                jstreeData.push({
+                                    id: "http://www.w3.org/2000/01/rdf-schema#member",
+                                    text: "rdfs:member",
+                                    parent: "#",
+                                    data: {
+                                        id: "http://www.w3.org/2000/01/rdf-schema#member",
                                         inSource: Lineage_sources.activeSource,
                                     },
                                 });
@@ -503,11 +526,13 @@ source: specificSourceLabel
         },
 
         getPossibleNamedIndividuals: function (callback) {
+            var individuals = {};
+            //   return callback(null, individuals);
             Sparql_OWL.getNamedIndividuals(Lineage_sources.activeSource, null, null, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
-                var individuals = {};
+
                 result.forEach(function (item) {
                     individuals[item.conceptLabel.value] = item.concept.value;
                 });
@@ -934,6 +959,34 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                     return callback(null, { type: "Restriction", id: blankNodeId });
                 });
             }
+        },
+
+        searchIndividual: function () {
+            var term = prompt("Individual contains...");
+            if (!term) return;
+            var options = {
+                selectGraph: true,
+                lang: Config.default_lang,
+                type: "owl:NamedIndividual",
+                filter: " FILTER ( regex(?label,'" + term + "','i'))",
+            };
+            Sparql_OWL.getDictionary(Lineage_sources.activeSource, options, null, function (err, result) {
+                if (err) alert(err.responseText);
+
+                var individuals = [];
+                result.forEach(function (item) {
+                    individuals.push({
+                        id: item.id.value,
+                        label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value),
+                    });
+                });
+                individuals.sort(function (a, b) {
+                    if (a.label > b.label) return 1;
+                    if (a.label < b.label) return -1;
+                    return 0;
+                });
+                common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", individuals, true, "label", "id");
+            });
         },
     };
 

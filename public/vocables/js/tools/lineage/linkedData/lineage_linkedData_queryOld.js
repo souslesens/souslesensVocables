@@ -42,9 +42,9 @@ var Lineage_linkedData_query = (function () {
         var classes = [
             {
                 label: self.relationObj.from.classLabel + "->" + self.databasesMap[self.currentDatabase].from.table,
-                id: "from,"+self.databasesMap[self.currentDatabase].from.table,
+                id: "from," + self.databasesMap[self.currentDatabase].from.table,
             },
-            { label: self.relationObj.to.classLabel + "->" + self.databasesMap[self.currentDatabase].to.table, id: "to,"+self.databasesMap[self.currentDatabase].to.table, },
+            { label: self.relationObj.to.classLabel + "->" + self.databasesMap[self.currentDatabase].to.table, id: "to," + self.databasesMap[self.currentDatabase].to.table },
         ];
         $("#LineageLinkedDataQueryParams_createFilterDiv").css("display", "none");
         common.fillSelectOptions("LineageLinkedDataQueryParams_classes", classes, null, "label", "id");
@@ -57,17 +57,17 @@ var Lineage_linkedData_query = (function () {
         }
     };
     self.onClassChange = function (classRoleandId) {
-        var array=classRoleandId.split(",")
-        var classRole=array[0]
-        self.currentTable=array[1]
+        var array = classRoleandId.split(",");
+        var classRole = array[0];
+        self.currentTable = array[1];
         if (self.currentTable) {
-            var currentClass=self.relationObj[classRole];
+            var currentClass = self.relationObj[classRole];
 
             if (!self.sqlContext.tables[self.currentTable])
                 self.sqlContext.tables[self.currentTable] = {
                     filters: {},
                     selectColumns: [],
-                    classObj:currentClass
+                    classObj: currentClass,
                 };
             if ($("#LineageLinkedDataQueryParams_SQL_columnsTree").jstree && $("#LineageLinkedDataQueryParams_SQL_columnsTree").jstree().get_checked) {
                 var columns = $("#LineageLinkedDataQueryParams_SQL_columnsTree").jstree().get_checked();
@@ -119,11 +119,11 @@ var Lineage_linkedData_query = (function () {
             $("#LineageLinkedDataQueryParams_operator").val("=");
         });
     };
-    self.onColumnValuesSelect=function(){
-        var value=$("#LineageLinkedDataQueryParams_valuesSelect").val();
+    self.onColumnValuesSelect = function () {
+        var value = $("#LineageLinkedDataQueryParams_valuesSelect").val();
         $("#LineageLinkedDataQueryParams_value").val(value);
         $("#LineageLinkedDataQueryParams_operator").val("=");
-    }
+    };
 
     self.getColumnValues = function (table, column, callback) {
         self.dataSizeLimit = 1000;
@@ -194,7 +194,7 @@ var Lineage_linkedData_query = (function () {
 
     self.executeQuery = function (output) {
         var columns = $("#LineageLinkedDataQueryParams_SQL_columnsTree").jstree().get_checked();
-        var selectAllColumns=$("#LineageLinkedDataQueryParams_allColumnsCBX").prop("checked")
+        var selectAllColumns = $("#LineageLinkedDataQueryParams_allColumnsCBX").prop("checked");
         if (!self.sqlContext.tables[self.currentTable]) self.sqlContext.tables[self.currentTable] = {};
         self.sqlContext.tables[self.currentTable].selectColumns = columns;
 
@@ -210,22 +210,19 @@ var Lineage_linkedData_query = (function () {
             if (fromStr != "") fromStr += ",";
             fromStr += table;
 
-            if(false && selectAllColumns){
+            if (false && selectAllColumns) {
                 if (selectStr != "") selectStr += ",";
-                selectStr += "" + table + ".*"
-            }
-
-           else if (self.sqlContext.tables[table].selectColumns) {
+                selectStr += "" + table + ".*";
+            } else if (self.sqlContext.tables[table].selectColumns) {
                 self.sqlContext.tables[table].selectColumns.forEach(function (column) {
                     if (column != table && allSelectColumns.indexOf(column) < 0) {
                         allSelectColumns.push(column);
                         if (selectStr != "") selectStr += ",";
-                        selectStr += "" + table + ".[" + column + "]"+ " as " + self.sqlContext.tables[table].classObj.classLabel+"_["+column+"]";
+                        selectStr += "" + table + ".[" + column + "]" + " as " + self.sqlContext.tables[table].classObj.classLabel + "_[" + column + "]";
                     }
                 });
-            }
-           else{
-               return alert( "select some columns")
+            } else {
+                return alert("select some columns");
             }
 
             for (var filterId in self.sqlContext.tables[table].filters) {
@@ -279,20 +276,16 @@ var Lineage_linkedData_query = (function () {
 
             success: function (data, _textStatus, _jqXHR) {
                 $("#waitImg").css("display", "none");
-                if (data.size >= self.dataSizeLimit) return alert("too many lines "+data.size+" limit "+self.dataSizeLimit);
-                if(data.size==0)return alert("too many values");
+                if (data.size >= self.dataSizeLimit) return alert("too many lines " + data.size + " limit " + self.dataSizeLimit);
+                if (data.size == 0) return alert("too many values");
                 if (output == "table") {
                     var dataSet = [];
                     var cols = [];
 
-
-                    if(false){
-
-                        allSelectColumns=[]
-                       for(var column in data[0]) {
-
-                            if(allSelectColumns.indexOf(column)<0)
-                                allSelectColumns.push(column)
+                    if (false) {
+                        allSelectColumns = [];
+                        for (var column in data[0]) {
+                            if (allSelectColumns.indexOf(column) < 0) allSelectColumns.push(column);
                         }
 
                         data.forEach(function (item) {
@@ -302,9 +295,7 @@ var Lineage_linkedData_query = (function () {
                             });
                             dataSet.push(line);
                         });
-
-
-                    }else{
+                    } else {
                         allSelectColumns.forEach(function (column) {
                             cols.push({ title: column, defaultContent: "" });
                         });
@@ -337,13 +328,11 @@ var Lineage_linkedData_query = (function () {
         self.sqlContexts.push(self.sqlContext);
     };
 
-    self.clearQuery=function(){
-        self.sqlContexts={}
-        $("#LineageLinkedDataQueryParams_SqlDiv").html("")
-        $("#LineageLinkedDataQueryParams_SQL_columnsTree").jstree().uncheck_all()
-
-
-    }
+    self.clearQuery = function () {
+        self.sqlContexts = {};
+        $("#LineageLinkedDataQueryParams_SqlDiv").html("");
+        $("#LineageLinkedDataQueryParams_SQL_columnsTree").jstree().uncheck_all();
+    };
 
     self.viewSQL = function () {
         $("#LineageLinkedDataQueryParams_SqlDivWrapper").css("display", "block");

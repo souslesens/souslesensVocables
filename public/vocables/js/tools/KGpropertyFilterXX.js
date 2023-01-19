@@ -25,14 +25,14 @@ var KGpropertyFilter = (function () {
         };
 
         $("#actionDivContolPanelDiv").load("snippets/KGpropertyFilter/leftPanel.html", function () {
-          var sources = Config.KGpropertyFilter.sources;
+            var sources = Config.KGpropertyFilter.sources;
 
-              common.fillSelectOptions("KGpropertyFilter_sourceSelect", sources, true);
+            common.fillSelectOptions("KGpropertyFilter_sourceSelect", sources, true);
             $("#KGpropertyFilter_searchInPropertiesTreeInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
         });
 
-      //  MainController.UI.showHideRightPanel(true);
-        $("#graphDiv").width(1000)
+        //  MainController.UI.showHideRightPanel(true);
+        $("#graphDiv").width(1000);
         $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function () {
             $("#KGpropertyFilter_filteringResult").height($("#graphDiv").height() - 200);
             $("#KGpropertyFilter_filteringResult").width($("#graphDiv").width());
@@ -167,20 +167,20 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         if (source == "CFIHOS_1_5_PLUS") {
             var depth = 3;
             Sparql_generic.getNodeChildren(
-              self.currentSource,
-              null,
-              ["http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-P0000001723", "http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-F0000000801"],
-              3,
-              {},
-              function (err, result) {
-                  //    Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/TagClass/CFIHOS-30000311"], depth, {}, function (err, result) {
-                  if (err) {
-                      return MainController.UI.message(err);
-                  }
-                  drawTree(result);
-              }
+                self.currentSource,
+                null,
+                ["http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-P0000001723", "http://data.total.com/resource/tsf/ontology/tepdk/phusion/TOTAL-F0000000801"],
+                3,
+                {},
+                function (err, result) {
+                    //    Sparql_generic.getNodeChildren(self.currentSource, null, ["http://data.totalenergies.com/resource/ontology/cfihos_1.5/TagClass/CFIHOS-30000311"], depth, {}, function (err, result) {
+                    if (err) {
+                        return MainController.UI.message(err);
+                    }
+                    drawTree(result);
+                }
             );
-        }  else if (source == "CFIHOS_1_5_PLUS") {
+        } else if (source == "CFIHOS_1_5_PLUS") {
             var depth = 3;
             Sparql_generic.getNodeChildren(
                 self.currentSource,
@@ -533,25 +533,25 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         async.series(
             [
                 function (callbackSeries) {
-                   return callbackSeries()
+                    return callbackSeries();
                     self.loadMDMentitiesTree(function (err, _result) {
                         callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
-                    return callbackSeries()
+                    return callbackSeries();
                     self.loadLifeCycleTree(function (err, _result) {
                         callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
-                    return callbackSeries()
+                    return callbackSeries();
                     self.loadDisciplinesTree(function (err, _result) {
                         callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
-                    return callbackSeries()
+                    return callbackSeries();
                     self.loadOrganizationsTree(function (err, _result) {
                         callbackSeries(err);
                     });

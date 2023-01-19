@@ -527,7 +527,7 @@ source: specificSourceLabel
 
         getPossibleNamedIndividuals: function (callback) {
             var individuals = {};
-          //   return callback(null, individuals);
+            //   return callback(null, individuals);
             Sparql_OWL.getNamedIndividuals(Lineage_sources.activeSource, null, null, function (err, result) {
                 if (err) {
                     return callback(err);
@@ -961,41 +961,34 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
             }
         },
 
-        searchIndividual:function() {
-            var term = prompt("Individual contains...")
-            if (!term)
-                return;
+        searchIndividual: function () {
+            var term = prompt("Individual contains...");
+            if (!term) return;
             var options = {
                 selectGraph: true,
                 lang: Config.default_lang,
                 type: "owl:NamedIndividual",
-                filter: " FILTER ( regex(?label,'" + term + "','i'))"
-            }
-            Sparql_OWL.getDictionary(Lineage_sources.activeSource, options, null, function(err, result) {
+                filter: " FILTER ( regex(?label,'" + term + "','i'))",
+            };
+            Sparql_OWL.getDictionary(Lineage_sources.activeSource, options, null, function (err, result) {
                 if (err) alert(err.responseText);
 
-                var individuals = []
-                result.forEach(function(item) {
+                var individuals = [];
+                result.forEach(function (item) {
                     individuals.push({
                         id: item.id.value,
-                        label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value)
-
-
-                    })
-                })
-                individuals.sort(function(a,b){
-                    if(a.label>b.label)
-                        return 1
-                    if(a.label<b.label)
-                        return -1
-                    return 0
-
-                })
-                common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", individuals, true, "label", "id")
-            })
-        }
-
-    }
+                        label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value),
+                    });
+                });
+                individuals.sort(function (a, b) {
+                    if (a.label > b.label) return 1;
+                    if (a.label < b.label) return -1;
+                    return 0;
+                });
+                common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", individuals, true, "label", "id");
+            });
+        },
+    };
 
     self.OnSelectAuthorizedPredicatesTreeDiv = function (event, obj) {
         event.stopPropagation();

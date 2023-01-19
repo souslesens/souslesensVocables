@@ -74,10 +74,9 @@ module.exports = AAPG;
 //AAPG.getLinks()
 //AAPG.linksToRdf();
 
-if(false) {
-    var str = fs.readFileSync("D:\\NLP\\ontologies\\sourcesProd_11_01_2023.json")
-    var data = JSON.parse("" + str)
+if (false) {
+    var str = fs.readFileSync("D:\\NLP\\ontologies\\sourcesProd_11_01_2023.json");
+    var data = JSON.parse("" + str);
     var sources = Object.keys(data);
-    console.log(sources)
-
+    console.log(sources);
 }

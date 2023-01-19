@@ -185,8 +185,8 @@ var CsvTripleBuilder = {
                         //load SQL dataSource
                         function (callbackSeries) {
                             if (!mapping.databaseSource) return callbackSeries();
-                            var sqlQuery= "select * from "+mapping.fileName;
-                            sqlServerProxy.getData(mapping.databaseSource.dbName,sqlQuery, function (err, result) {
+                            var sqlQuery = "select * from " + mapping.fileName;
+                            sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
                                 if (err) return callbackSeries(err);
                                 csvData = [result];
                                 callbackSeries();
@@ -246,7 +246,7 @@ var CsvTripleBuilder = {
                                                         var lineError = "";
                                                         mapping.tripleModels.forEach(function (item) {
                                                             for (var key in line) {
-                                                                line[key]="" +line[key]
+                                                                line[key] = "" + line[key];
                                                                 if (line[key] && !CsvTripleBuilder.isUri(line[key])) line[key] = util.formatStringForTriple(line[key]);
                                                             }
 
@@ -377,7 +377,7 @@ var CsvTripleBuilder = {
 
                                                                 var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
                                                                 var prop = propStr;
-                                                                if (prop.indexOf("$") == 0) prop =    CsvTripleBuilder.getUserPredicateUri(item.p,line,graphUri)
+                                                                if (prop.indexOf("$") == 0) prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
                                                                 if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
 
                                                                 if (!existingNodes[subjectStr + "_" + prop + "_" + objectStr]) {
@@ -411,7 +411,7 @@ var CsvTripleBuilder = {
                                                                         // blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
                                                                         blankNode = getNewBlankNodeId();
                                                                         prop = propStr;
-                                                                        if (prop.indexOf("$") == 0) prop =  CsvTripleBuilder.getUserPredicateUri(item.p,line,graphUri)
+                                                                        if (prop.indexOf("$") == 0) prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
                                                                         if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
 
                                                                         if (!existingNodes[objectStr + "_" + prop + "_" + subjectStr]) {
@@ -461,7 +461,7 @@ var CsvTripleBuilder = {
                                                                         return (lineError = e);
                                                                     }
                                                                 } else if (item.p.indexOf("$") == 0) {
-                                                                    propertyStr = CsvTripleBuilder.getUserPredicateUri(item.p,line,graphUri)
+                                                                    propertyStr = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
                                                                 }
                                                                 if (!propertyStr) {
                                                                     var x = 3;
@@ -818,8 +818,7 @@ var CsvTripleBuilder = {
                     var mappingsFilePath = path.join(__dirname, "../../data/" + dirName + "/" + mappingFileName);
                     var mappings = "" + fs.readFileSync(mappingsFilePath);
                     mappings = JSON.parse(mappings);
-                    if (typeof options.dataLocation == "string")
-                        mappings.csvDataFilePath = path.join(__dirname, "../../data/" + dirName + "/" + options.dataLocation);
+                    if (typeof options.dataLocation == "string") mappings.csvDataFilePath = path.join(__dirname, "../../data/" + dirName + "/" + options.dataLocation);
                     else mappings.datasource = options.dataLocation;
 
                     function getFunction(argsArray, fnStr, callback) {
@@ -907,18 +906,14 @@ var CsvTripleBuilder = {
             }
         );
     },
-    getUserPredicateUri:function(predicate,line,graphUri){
-        if(predicate.indexOf("$")==0){
-            if(predicate.indexOf("http")<0 && predicate.indexOf(":")<0)
-               return graphUri+util.formatStringForTriple(line[predicate.substring(1)],true)
-            else
-                return line[predicate.substring(1)];
-
-        }else{
-            return predicate
+    getUserPredicateUri: function (predicate, line, graphUri) {
+        if (predicate.indexOf("$") == 0) {
+            if (predicate.indexOf("http") < 0 && predicate.indexOf(":") < 0) return graphUri + util.formatStringForTriple(line[predicate.substring(1)], true);
+            else return line[predicate.substring(1)];
+        } else {
+            return predicate;
         }
-
-    }
+    },
 };
 
 module.exports = CsvTripleBuilder;

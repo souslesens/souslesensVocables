@@ -392,8 +392,8 @@ var Sparql_generic = (function () {
             if (elt.indexOf("http") == 0 || item.valueType == "uri") {
                 return "<" + elt + ">";
             }
-            if (elt.indexOf("<") == 0 ) {
-                return  elt;
+            if (elt.indexOf("<") == 0) {
+                return elt;
             }
 
             if ((p = elt.indexOf("^^")) > 0) {

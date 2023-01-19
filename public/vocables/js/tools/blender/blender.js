@@ -808,7 +808,6 @@ var Blender = (function () {
             return item;
         },
 
-
         createConceptFromWord: function () {
             var data = Clipboard.getContent()[0];
 

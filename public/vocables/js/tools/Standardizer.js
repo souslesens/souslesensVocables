@@ -12,11 +12,9 @@ var Standardizer = (function () {
         // pass
     };
 
-
-    self.searchInSourcesTree=function(event){
-        SourceBrowser.searchInSourcesTree(event,"Standardizer_sourcesTree");
-    }
-
+    self.searchInSourcesTree = function (event) {
+        SourceBrowser.searchInSourcesTree(event, "Standardizer_sourcesTree");
+    };
 
     self.onLoaded = function (callback) {
         $("#actionDiv").html("");

@@ -250,7 +250,6 @@ var MainController = (function () {
                 Object.keys(Config.sources)
                     .sort()
                     .forEach(function (sourceLabel, index) {
-
                         self.initControllers();
                         if (sources && sources.indexOf(sourceLabel) < 0) return;
                         if (Config.sources[sourceLabel].isDraft) return;
@@ -520,7 +519,7 @@ var MainController = (function () {
             var left = $("#rightPanelDiv").position().left;
             var w = $(window).width();
 
-            if (show || (w - left < 100)) {
+            if (show || w - left < 100) {
                 var lw = $("#rightPanelDiv").width();
                 if (lw < 100) return;
                 var newLeft = "" + (w - lw) + "px";

@@ -188,9 +188,34 @@ node --version
 npm --version
 ```
 
-### Install
+### Configure
 
-souslesensVocable is composed of a backend in node/express and a frontend in pure javascript and typescript/react.
+Run the config script to create a default configuration:
+
+```bash
+node scripts/init_config.js
+```
+
+Then, edit the `config/*.json` to your needs.
+
+### Start docker dependencies
+
+Start the servers with `docker-compose`
+
+```bash
+docker-compose -f docker-compose.dev.yaml up -d
+```
+
+Load some data into virtuoso
+
+```bash
+bash tests/load_data.sh
+```
+
+### Install souslesens
+
+souslesensVocable is composed of a backend in node/express and a frontend in pure javascript
+and typescript/react.
 
 ```bash
 # Install the server
@@ -202,17 +227,7 @@ npm ci
 cd ..
 ```
 
-### Configure
-
-Run the config script to create a default configuration:
-
-```bash
-node scripts/init_config.js
-```
-
-Then, edit the `config/*.json` to your needs.
-
-### Run
+### Run souslesens server
 
 The following command will build and watch the react app and run and watch the node app.
 

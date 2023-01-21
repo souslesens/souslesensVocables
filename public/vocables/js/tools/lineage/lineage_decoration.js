@@ -85,6 +85,8 @@ var Lineage_decoration = (function () {
             self.currentTopOntologyClassesMap = result.classesMap;
             var countColors = 0;
             for (var topClass in self.currentTopOntologyClassesMap) {
+                if(!self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology])
+                    return callback(null,[])
                 var color = null;
                 if (self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][topClass]) {
                     //predifined color

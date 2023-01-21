@@ -37,6 +37,7 @@ var Config = (function () {
         "ISO_15926-part-14_PCA": { uriPattern: "lis14", prefix: "part14", prefixtarget: "http://rds.posccaesar.org/ontology/lis14/rdl/" },
         BFO: { uriPattern: "obo", uriPatternXX: "BFO", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
         DOLCE: { uriPattern: "dul", prefix: "dul", prefixtarget: "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#" },
+        LML: { uriPattern: "lml", prefix: "lml", prefixtarget: "http://souslesens.org/ontology/lml/" },
     };
 
     self.namedSetsThesaurusGraphUri = "http://souslesens.org/resource/named-triple-sets/";

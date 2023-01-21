@@ -371,11 +371,18 @@ var Sparql_OWL = (function () {
         options.selectGraph = false;
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
 
+        var selectStr=" * ";
+        if(options.excludeType){
+            selectStr=" ?concept ?conceptLabel"
+            for(var i=1;i<=ancestorsDepth;i++){
+                selectStr+=" ?broader"+i+" ?broader"+i+"Label"
+            }
+        }
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-            " select distinct *  " +
+            " select distinct " +selectStr+
             fromStr +
             "  WHERE {";
         if (false && options.selectGraph) {

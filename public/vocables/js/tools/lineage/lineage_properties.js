@@ -367,7 +367,7 @@ action: function (_e) {
 
                 $("#waitImg").css("display", "none");
                 if (callback) {
-                    return callback();
+                    return callback(null, visjsData);
                 }
             });
         });

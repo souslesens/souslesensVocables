@@ -1,4 +1,4 @@
-var KGpropertyFilter = (function() {
+var Compose = (function() {
   var self = {};
 
   self.currentNewFilters = [];
@@ -13,7 +13,7 @@ var KGpropertyFilter = (function() {
       topUris: ["http://datalenergies.total.com/resource/tsf/idcp/DataContainer"],
       options: { memberPredicate: 1 },
       levels: 3,
-      jstreeDiv: "KGpropertyFilter_dataContainerTreeDiv",
+      jstreeDiv: "Compose_dataContainerTreeDiv",
       parentPredicate: "^rdfs:member"
     },
     templates: {
@@ -22,7 +22,7 @@ var KGpropertyFilter = (function() {
       topUris: ["http://datalenergies.total.com/resource/tsf/idcp/template"],
       options: { memberPredicate: 0, specificPredicates: ["rdf:type", "<http://datalenergies.total.com/resource/tsf/idcp/9fc7b10ede>"] },
       levels: 5,
-      jstreeDiv: "KGpropertyFilter_templatesTree",
+      jstreeDiv: "Compose_templatesTree",
       color: "#bb8f00"
     },
     disciplines: {
@@ -31,7 +31,7 @@ var KGpropertyFilter = (function() {
       topUris: ["http://datalenergies.total.com/resource/tsf/idcp/Discipline"],
       options: { memberPredicate: 1 },
       levels: 3,
-      jstreeDiv: "KGpropertyFilter_disciplinesTree",
+      jstreeDiv: "Compose_disciplinesTree",
       color: "#3a773a"
     },
     actors: {
@@ -39,7 +39,7 @@ var KGpropertyFilter = (function() {
       source: "IDCP",
       topUris: ["http://datalenergies.total.com/resource/tsf/idcp/role_IDCP"],
       options: { memberPredicate: 1 },
-      jstreeDiv: "KGpropertyFilter_actorsTree",
+      jstreeDiv: "Compose_actorsTree",
       color: "#ea59d8"
     },
     systems: {
@@ -48,7 +48,7 @@ var KGpropertyFilter = (function() {
       topUris: ["http://datalenergies.total.com/resource/tsf/idcp/OGSystem"],
       options: { memberPredicate: 1 },
       levels: 3,
-      jstreeDiv: "KGpropertyFilter_systemsTree",
+      jstreeDiv: "Compose_systemsTree",
       color: "#f5ef39"
     },
     businessObjects: {
@@ -58,7 +58,7 @@ var KGpropertyFilter = (function() {
       topUris: ["http://datalenergies.total.com/resource/tsf/gidea-raw/LogicalEntity"],
       options: { specificPredicates: ["?p"] },
       levels: 5,
-      jstreeDiv: "KGpropertyFilter_businessObjectsTree",
+      jstreeDiv: "Compose_businessObjectsTree",
       color: "#cb6601"
     }
   };
@@ -71,27 +71,27 @@ var KGpropertyFilter = (function() {
     }
   };
   self.onLoaded = function() {
-    var tsfPropertyFilterPrefix = Config.KGpropertyFilter.tsfPropertyFilterPrefix;
+    var tsfPropertyFilterPrefix = Config.Compose.tsfPropertyFilterPrefix;
     for (var key in self.treeConfigs) {
       Config.sources[self.treeConfigs[key].source].editable = false;
     }
 
-    $("#actionDivContolPanelDiv").load("snippets/KGpropertyFilter/leftPanel.html", function() {
-      //  var sources = Config.KGpropertyFilter.sources;
+    $("#actionDivContolPanelDiv").load("snippets/Compose/leftPanel.html", function() {
+      //  var sources = Config.Compose.sources;
       var sources = ["", "IDCP"];
-      common.fillSelectOptions("KGpropertyFilter_sourceSelect", sources, true);
-      $("#KGpropertyFilter_searchInPropertiesTreeInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
+      common.fillSelectOptions("Compose_sourceSelect", sources, true);
+      $("#Compose_searchInPropertiesTreeInput").bind("keyup", null, Compose.searchInPropertiesTree);
       self.onChangeSourceSelect("IDCP");
     });
 
     //  MainController.UI.showHideRightPanel(true);
     $("#graphDiv").width(1000);
 
-    /*  $("#graphDiv").load("snippets/KGpropertyFilter/centralPanel.html", function() {
-    $("#KGpropertyFilter_filteringResult").height($("#graphDiv").height() - 200);
-    $("#KGpropertyFilter_filteringResult").width($("#graphDiv").width());
+    /*  $("#graphDiv").load("snippets/Compose/centralPanel.html", function() {
+    $("#Compose_filteringResult").height($("#graphDiv").height() - 200);
+    $("#Compose_filteringResult").width($("#graphDiv").width());
 
-    $("#KGpropertyFilter_centralPanelTabs").tabs({
+    $("#Compose_centralPanelTabs").tabs({
       activate: function(e, ui) {
         self.currentOwlType = "Class";
         var divId = ui.newPanel.selector;
@@ -102,16 +102,16 @@ var KGpropertyFilter = (function() {
     });
     */
 
-    $("#rightPanelDiv").load("snippets/KGpropertyFilter/rightPanel.html", function() {
-      $("#KGpropertyFilter_rightPanelTabs").tabs({
+    $("#rightPanelDiv").load("snippets/Compose/rightPanel.html", function() {
+      $("#Compose_rightPanelTabs").tabs({
         activate: function(_e, _ui) {
           self.currentAspect = _ui.newTab[0].textContent;
         },
         create(event, ui) {
           self.initRightPanel();
 
-          /*  $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",1)
-$("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
+          /*  $("#Compose_rightPanelTabs").tabs("option","active",1)
+$("#Compose_rightPanelTabs").tabs("option","active",0)*/
         }
       });
     });
@@ -127,7 +127,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
     self.loadInJstree(self.treeConfigs["dataContainers"], function(err, result) {
       if (err) {
-        $("#KGpropertyFilter_searchInPropertiesTreeInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
+        $("#Compose_searchInPropertiesTreeInput").bind("keyup", null, Compose.searchInPropertiesTree);
         return alert(err.responseText);
       }
     });
@@ -147,7 +147,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           });
         },
         function(callbackSeries) {
-          $("#GenericTools_searchAllSourcesTermInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
+          $("#GenericTools_searchAllSourcesTermInput").bind("keyup", null, Compose.searchInPropertiesTree);
 
           return callbackSeries();
         },
@@ -168,7 +168,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         }
       ],
       function(err) {
-        $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 0);
+        $("#Compose_rightPanelTabs").tabs("option", "active", 0);
 
 
         if (err) {
@@ -179,7 +179,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         setTimeout(function() {
           for (var key in self.treeConfigs) {
             if (self.treeConfigs[key].color) {
-              $("#KGpropertyFilter_" + key + "_accordionDiv").css("background-color", self.treeConfigs[key].color + " !important");
+              $("#Compose_" + key + "_accordionDiv").css("background-color", self.treeConfigs[key].color + " !important");
             }
             self.treeConfigs[key].topUris.forEach(function(uri) {
               self.treeConfigTopUrisMap[uri] = key;
@@ -225,9 +225,9 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       sparql += " filter ( ?aspect=<" + predicate + "> &&  ?filterId=<" + filterId + ">  )";
     }
 
-    addFilters("LifeCycle", "KGpropertyFilter_lifeCycleSelect2");
-    addFilters("Discipline", "KGpropertyFilter_disciplineSelect2");
-    addFilters("Organization", "KGpropertyFilter_organizationSelect2");
+    addFilters("LifeCycle", "Compose_lifeCycleSelect2");
+    addFilters("Discipline", "Compose_disciplineSelect2");
+    addFilters("Organization", "Compose_organizationSelect2");
 
     sparql += "} limit 10000";
     var url = Config.sources[self.propertyFilteringSource].sparql_server.url + "?format=json&query=";
@@ -250,7 +250,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
   self.client = {};
 
   self.searchInPropertiesTree = function(event, inputDiv, jstreeDiv) {
-    inputDiv = "KGpropertyFilter_searchInPropertiesTreeInput";
+    inputDiv = "Compose_searchInPropertiesTreeInput";
     jstreeDiv = self.treeConfigs["dataContainers"].jstreeDiv;
 
     if (event.keyCode != 13 && event.keyCode != 9) {
@@ -320,11 +320,11 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       var jstreeOptions = {
         openAll: false,
         // withCheckboxes: true,
-        selectTreeNodeFn: KGpropertyFilter.commonJstreeActions.onSelectTreeNode,
-        // onAfterOpenNodeFn: KGpropertyFilter.onOpenClassesOrPropertyNode,
-        //   onCheckNodeFn: null, //KGpropertyFilter.loadPropertiesFilters,
+        selectTreeNodeFn: Compose.commonJstreeActions.onSelectTreeNode,
+        // onAfterOpenNodeFn: Compose.onOpenClassesOrPropertyNode,
+        //   onCheckNodeFn: null, //Compose.loadPropertiesFilters,
         //  tie_selection: false,
-        contextMenu: KGpropertyFilter.commonJstreeActions.getJsTreeContextMenu(treeConfig.key),
+        contextMenu: Compose.commonJstreeActions.getJsTreeContextMenu(treeConfig.key),
         searchPlugin: {
           case_insensitive: true,
           fuzzy: false,
@@ -431,8 +431,8 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
       var term = self.currentDataContainer.data.label;
       $("#GenericTools_searchAllSourcesTermInput").val(term);
-      $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 4);
-      KGpropertyFilter.rightPanelsActions.searchBusinessObjects();
+      $("#Compose_rightPanelTabs").tabs("option", "active", 4);
+      Compose.rightPanelsActions.searchBusinessObjects();
     },
 
     associateNodeToDataContainer: function() {
@@ -532,14 +532,14 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           label: "create child",
           action: function(_e) {
             // pb avec source
-            KGpropertyFilter.commonJstreeActions.createChildNode();
+            Compose.commonJstreeActions.createChildNode();
           }
         };
         items.delete = {
           label: "delete node",
           action: function(_e) {
             // pb avec source
-            KGpropertyFilter.commonJstreeActions.deleteNode();
+            Compose.commonJstreeActions.deleteNode();
           }
         };
       }
@@ -559,7 +559,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           label: "Search BO",
           action: function(_e) {
             // pb avec source
-            KGpropertyFilter.commonJstreeActions.searchBO();
+            Compose.commonJstreeActions.searchBO();
           }
         };
       }
@@ -568,7 +568,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         items.associate = {
           label: "Associate",
           action: function(_e) {
-            KGpropertyFilter.commonJstreeActions.associateNodeToDataContainer();
+            Compose.commonJstreeActions.associateNodeToDataContainer();
           }
         };
 
@@ -577,14 +577,14 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           items.visualize = {
             label: "Visualize",
             action: function(_e) {
-              KGpropertyFilter.visualizeAspect();
+              Compose.visualizeAspect();
             }
           };
 
         items.expand = {
           label: "expand",
           action: function(_e) {
-            KGpropertyFilter.commonJstreeActions.expandCommonTreeNode();
+            Compose.commonJstreeActions.expandCommonTreeNode();
           }
         };
       }
@@ -605,7 +605,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
         return;
       }
       var options = {
-        jstreeDiv: "KGpropertyFilter_businessObjectsTree",
+        jstreeDiv: "Compose_businessObjectsTree",
         searchedSources: [self.treeConfigs["businessObjects"].source, "BUSINESS_OBJECTS_DATA_DOMAINS"],
         contextMenu: self.commonJstreeActions.getJsTreeContextMenu("businessObjects"),
         selectTreeNodeFn: function(event, obj) {
@@ -619,7 +619,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     showAttributesParentsDialog: function() {
       self.currentRightpanelNode.parentLogicalEntity = null;
       var html = "Select a Logical Entity<br>";
-      html += "<select size='20' onclick='KGpropertyFilter.rightPanelsActions.onValidateAttributesParentsDialog($(this).val())' id='KGpropertyFilter_logicalEntitySelect'></select>";
+      html += "<select size='20' onclick='Compose.rightPanelsActions.onValidateAttributesParentsDialog($(this).val())' id='Compose_logicalEntitySelect'></select>";
 
       $("#mainDialogDiv").html(html);
       $("#mainDialogDiv").dialog("open");
@@ -639,11 +639,11 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             label: item.objectLabel.value
           });
         });
-        common.fillSelectOptions("KGpropertyFilter_logicalEntitySelect", logicalEntities, false, "label", "id");
+        common.fillSelectOptions("Compose_logicalEntitySelect", logicalEntities, false, "label", "id");
       });
     },
     onValidateAttributesParentsDialog: function(logicalEntity) {
-      var label = $("#KGpropertyFilter_logicalEntitySelect option:selected").text();
+      var label = $("#Compose_logicalEntitySelect option:selected").text();
 
       self.currentRightpanelNode.parentLogicalEntity = { id: logicalEntity, label: label };
       $("#mainDialogDiv").dialog("close");
@@ -660,7 +660,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
   };
   self.showDataContainerDetails = function(node) {
-    /* $("#KGpropertyFilter_nodeInfosDiv").load("snippets/KGpropertyFilter/dataContainer.html", function() {*/
+    /* $("#Compose_nodeInfosDiv").load("snippets/Compose/dataContainer.html", function() {*/
     var level = self.currentTreeNode.parents.length - 1;
     var dataContainerId;
     if (!node) {
@@ -675,7 +675,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
     }
 
     Sparql_common.includeImports = 1;
-    /// $("#KGpropertyFilter_display_dataContainerDiv").html(self.currentTreeNode.text)
+    /// $("#Compose_display_dataContainerDiv").html(self.currentTreeNode.text)
     var visjsNodes = [];
     var source = node.data.source;
     var rightPanelsNodeIds = [];
@@ -949,15 +949,15 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             if (node.level === 0) {
               shape = "box";
               color = "#70ac47";
-              node.data.graphPopupMenusFn = KGpropertyFilter.getGraphPopupMenuItem;
+              node.data.graphPopupMenusFn = Compose.getGraphPopupMenuItem;
             }
             if (node.level === 1) {
               shape = "box";
               color = "#00afef";
-              node.data.graphPopupMenusFn = KGpropertyFilter.getGraphPopupMenuItem;
+              node.data.graphPopupMenusFn = Compose.getGraphPopupMenuItem;
             }
             if (node.level === 2) {
-              node.data.graphPopupMenusFn = KGpropertyFilter.getGraphPopupMenuItem;
+              node.data.graphPopupMenusFn = Compose.getGraphPopupMenuItem;
             }
 
 
@@ -991,7 +991,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
   self.getGraphPopupMenuItem = function() {
     var html =
       " <span  class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showNodeInfos();\"> Node infos</span>" +
-      "<span  class=\"popupMenuItem\" onclick=\"KGpropertyFilter.commonJstreeActions.searchBO('graph');\"> Search BO</span>";
+      "<span  class=\"popupMenuItem\" onclick=\"Compose.commonJstreeActions.searchBO('graph');\"> Search BO</span>";
     return html;
   };
 

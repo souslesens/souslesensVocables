@@ -12,9 +12,6 @@ var Standardizer = (function () {
         // pass
     };
 
-
-
-
     self.searchInSourcesTree = function (event) {
         SourceBrowser.searchInSourcesTree(event, "Standardizer_sourcesTree");
     };

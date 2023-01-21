@@ -657,9 +657,10 @@ var Lineage_containers = (function () {
                                     return;
                                 }
                                 if (edge.from == from) {
-                                    nodelevels[edge.from] = level;
+
                                     if (!nodelevels[edge.to]) {
-                                        recurse(edge.to, level + 1);
+                                        nodelevels[edge.to] = level+1;
+                                        recurse(edge.to, level +1);
                                     }
                                 }
                             });
@@ -669,6 +670,9 @@ var Lineage_containers = (function () {
                         var maxLevel = 0;
                         visjsData.nodes.forEach(function (node, index) {
                             var level = (nodelevels[node.id] || 0) - 1;
+                            if(node.id==containerId)
+                                level=0
+
                             maxLevel = Math.max(maxLevel, level);
                             visjsData.nodes[index].level = level;
                         });

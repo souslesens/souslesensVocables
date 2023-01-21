@@ -1865,6 +1865,94 @@ addNode:false
     self.drawRestrictions(null, null, null, null, { inverse: true }, callback);
   };
 
+
+
+  self.drawRelationsDialog=function() {
+    $("#LineagePopup").dialog("open");
+    $("#LineagePopup").load("snippets/lineage/relationsDialog.html", function() {
+      Sparql_OWL.getObjectProperties(Lineage_sources.activeSource, {withGraph:true}, function(err, result) {
+        var jstreeData=[]
+        var uniqueNodes={}
+         result.forEach(function(item){
+           if(!uniqueNodes[item.g.value]){
+             uniqueNodes[item.g.value]=1
+             var label=Sparql_common.getSourceFromGraphUri(item.g.value)
+             jstreeData.push({
+               id:item.g.value,
+               text:label,
+               parent:"#"
+             })
+           }
+           if(!uniqueNodes[item.property.value]){
+             uniqueNodes[item.property.value]=1
+             var label=item.propertyLabel? item.propertyLabel.value:Sparql_common.getLabelFromURI(item.property.value)
+             jstreeData.push({
+               id:item.property.value,
+               text:label,
+               parent:item.g.value
+             })
+           }
+
+         })
+        jstreeData.sort(function(a,b){
+          if(a.label>b.label)
+            return 1;
+          else if(b.label>a.label)
+            return -1;
+          return 0
+
+        })
+        var options={
+          withCheckboxes:true
+        }
+common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv",jstreeData,options)
+      })
+    })
+  }
+
+  self.onDrawRelationsDialogValidate=function(action) {
+
+    var direction = $("input[name='lineageRelations_relDirection']:checked").val();
+    var type = $("input[name='lineageRelations_relType']:checked").val();
+    var caller = "leftPanel";
+    $("#LineagePopup").dialog("close");
+
+
+    if (action == "clear") {
+      var properties = $("#lineageRelations_propertiesJstreeDiv").jstree().get_checked(true)
+      var edges = visjsGraph.data.edges.get();
+      var edgesToClear = [];
+      edges.forEach(function(edge) {
+        if (properties.length > 0) {
+          properties.forEach(function(property) {
+            if (property.text == edge.label)
+              edgesToClear.push(edge.id)
+          })
+        }
+        else {
+          if (edge.label)
+            edgesToClear.push(edge.id)
+        }
+      })
+
+      visjsGraph.data.edges.remove(edgesToClear)
+
+
+      return;
+
+  }else{
+    var properties=$("#lineageRelations_propertiesJstreeDiv").jstree().get_checked()
+    var options={}
+
+  if(properties.length>0) {
+    var filter = Sparql_common.setFilter("prop", properties)
+    options.filter = filter;
+  }
+  }
+
+    self.drawRelations (direction, type, caller, options)
+  }
+
   self.drawRelations = function(direction, type, caller, options) {
     var data = null;
     var source = null;
@@ -1931,6 +2019,11 @@ addNode:false
 
         // draw objectProperties direct
         function(callbackSeries) {
+
+          if (!type || type != "predicates") {
+            return callbackSeries();
+          }
+
           if (type != "dictionary") {
             source = Lineage_sources.activeSource;
           }
@@ -1949,6 +2042,9 @@ addNode:false
         },
         // draw objectProperties inverse
         function(callbackSeries) {
+          if (!type || type != "predicates") {
+            return callbackSeries();
+          }
           if (type != "dictionary") {
             source = Lineage_sources.activeSource;
           }

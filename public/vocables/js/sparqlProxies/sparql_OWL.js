@@ -1315,24 +1315,25 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         );
     };
 
-    (self.getObjectProperties = function (sourceLabel, options, callback) {
+    self.getObjectProperties = function (sourceLabel, options, callback) {
         if (!options) {
             options = {};
         }
-        var fromStr = Sparql_common.getFromStr(sourceLabel);
+        var fromStr = Sparql_common.getFromStr(sourceLabel,options.withGraph );
         var query =
             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> " +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            "select distinct ?property ?propertyLabel   " +
+            "select distinct *  " +
             fromStr +
-            " WHERE " +
-            "{?property rdf:type owl:ObjectProperty. " +
-            Sparql_common.getVariableLangLabel("property", null, true);
+            " WHERE {" + (options.withGraph?" GRAPH ?g{":"")+
+            "?property rdf:type owl:ObjectProperty. " +
+            Sparql_common.getVariableLangLabel("property", null, options.skosLabels);
         if (options.filter) {
             query += options.filter;
         }
+        query += (options.withGraph?" }":"")
         query += "  }   limit 10000";
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
@@ -1342,8 +1343,8 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
 
             return callback(null, result.results.bindings);
         });
-    }),
-        (self.getGraphsByRegex = function (pattern, callback) {
+    }
+        self.getGraphsByRegex = function (pattern, callback) {
             var query = "SELECT * " + "WHERE {" + '  ?s <http://www.w3.org/2002/07/owl#versionIRI> ?graph. filter (regex(str(?graph),"' + pattern + '"))' + " ?graph ?p ?value." + "}";
 
             self.sparql_url = Config.default_sparql_url;
@@ -1354,7 +1355,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
                 }
                 return callback(null, result.results.bindings);
             });
-        });
+        };
 
     self.generateInverseRestrictions = function (source, propId, inversePropId, callback) {
         var filter = "filter (?prop=<" + propId + ">)";

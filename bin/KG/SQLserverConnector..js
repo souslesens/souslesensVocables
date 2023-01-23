@@ -76,13 +76,27 @@ docker cp  onemodel e775dc13f609:/var/opt/mssql/backups
 
 
 
+/*
+replace ' ' in column nams
+SELECT 'EXEC sp_rename '''+QUOTENAME(TABLE_CATALOG)+'.'+QUOTENAME(TABLE_SCHEMA)+'.'+QUOTENAME(TABLE_NAME)+'.'+QUOTENAME(column_name)+''','''+REPLACE(column_name, ' ', '')+''',''COLUMN'''
+FROM   information_schema.columns
+WHERE  column_name LIKE '_%'
 
 
 
+replace "-" in table Names
 
-
+SELECT 'EXEC sp_rename '''+QUOTENAME(TABLE_CATALOG)+'.'+QUOTENAME(TABLE_SCHEMA)+'.'+QUOTENAME(TABLE_NAME)+''','''+REPLACE(table_name, '-', '_')+''''
+FROM   information_schema.tables
+WHERE  table_name LIKE '_%-%'
 
  */
+
+
+
+
+
+
 
 var SQLserverConnector = {
     connection: null,

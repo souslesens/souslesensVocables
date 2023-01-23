@@ -1,5 +1,10 @@
 //https://openbase.com/js/@json-editor/json-editor/documentation
 
+
+
+
+
+
 var KGcreator = (function () {
     var self = {};
     self.mainJsonEditor = null;
@@ -205,7 +210,7 @@ var KGcreator = (function () {
             },
         });
     };
-    self.listObjects = function () {
+   /* self.listObjects = function () {
         console.log("KGcreator.listObjects");
         self.currentDataSourceModel = null;
         self.currentdabase = null;
@@ -215,18 +220,30 @@ var KGcreator = (function () {
         } else if (self.currentSourceType == "DATABASE") {
             self.listTables();
         }
-    };
+    };*/
 
     self.displayUploadApp = function () {
         $.getScript("/kg_upload_app.js");
     };
 
-    self.loadMappingsList = function () {
+    self.loadMappingsList = function (callback) {
         self.currentCsvDir = $("#KGcreator_csvDirsSelect").val();
         self.currentSource = self.currentCsvDir;
-        var payload = {
-            dir: "CSV/" + self.currentCsvDir,
-        };
+        var payload;
+        var prefix
+        if (self.currentDataSourceModel) {
+            prefix=self.currentSlsvSource
+            payload = {
+                dir: "CSV/" + self.currentSlsvSource,
+
+            };
+        } else {
+            prefix=self.currentCsvDir
+            payload = {
+                dir: "CSV/" + self.currentCsvDir,
+
+            };
+        }
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/data/files",
@@ -234,15 +251,18 @@ var KGcreator = (function () {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 self.mappingFiles = {};
+                if(result==null)
+                    return callback()
                 result.forEach(function (file) {
                     var p;
                     if ((p = file.indexOf(".json")) > -1) {
-                        self.mappingFiles[file.substring(0, p) + ".csv"] = 1;
+                        self.mappingFiles[file.substring(0, p)] = 1;
                     }
                 });
+                callback();
             },
             error: function (err) {
-                alert(err.responseText);
+                callback(err)
             },
         });
     };
@@ -307,46 +327,53 @@ var KGcreator = (function () {
     };
 
     self.showTablesTree = function (data) {
-        var jstreeData = [];
-        var options = {
-            openAll: true,
-            selectTreeNodeFn: KGcreator.onCsvtreeNodeClicked,
-            contextMenu: KGcreator.getContextMenu(),
-            //  withCheckboxes: true,
-        };
-        data.forEach(function (file) {
-            if (file.indexOf(".json") > 0) {
-                return;
-            }
-            var label = file;
 
-            //  if (data.indexOf(file + ".json") > -1)
-            if (self.mappingFiles[file]) {
-                label = "<span class='KGcreator_fileWithMappings'>" + file + "</span>";
-            }
-            jstreeData.push({
-                id: file,
-                text: label,
-                parent: "#",
-                data: { id: file },
-            });
-        });
-        if (self.currentDataSourceModel) {
-            options.openAll = false;
-            for (var key in self.currentDataSourceModel) {
-                var columns = self.currentDataSourceModel[key];
-                columns.forEach(function (column) {
-                    jstreeData.push({
-                        id: key + "_" + column,
-                        text: column,
-                        parent: key,
-                        data: { id: column },
-                    });
+        self.loadMappingsList(function(err) {
+
+            var jstreeData = [];
+            var options = {
+                openAll: true,
+                selectTreeNodeFn: KGcreator.onCsvtreeNodeClicked,
+                contextMenu: KGcreator.getContextMenu(),
+                //  withCheckboxes: true,
+            };
+            data.forEach(function(file) {
+                if (file.indexOf(".json") > 0) {
+                    return;
+                }
+                var label = file;
+
+                //  if (data.indexOf(file + ".json") > -1)
+                for(var key in self.mappingFiles){
+                    if (key.indexOf(file)>-1) {
+                        label = "<span class='KGcreator_fileWithMappings'>" + file + "</span>";
+                    }
+                }
+
+                jstreeData.push({
+                    id: file,
+                    text: label,
+                    parent: "#",
+                    data: { id: file },
                 });
+            });
+            if (self.currentDataSourceModel) {
+                options.openAll = false;
+                for (var key in self.currentDataSourceModel) {
+                    var columns = self.currentDataSourceModel[key];
+                    columns.forEach(function(column) {
+                        jstreeData.push({
+                            id: key + "_" + column,
+                            text: column,
+                            parent: key,
+                            data: { id: column },
+                        });
+                    });
+                }
             }
-        }
 
-        common.jstree.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
+            common.jstree.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
+        })
     };
 
     self.onCsvtreeNodeClicked = function (event, obj, callback) {
@@ -1227,7 +1254,7 @@ if (selectedFiles.length > 0);*/
                     if (callback) {
                         return callback(err);
                     }
-                    return alert(err, responseText);
+                    return alert(err.responseText);
                 },
             });
         }
@@ -1473,4 +1500,5 @@ if (selectedFiles.length > 0);*/
     };
 
     return self;
-})();
+})
+    ();

@@ -2020,7 +2020,7 @@ common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv",jstreeData,optio
         // draw objectProperties direct
         function(callbackSeries) {
 
-          if (!type || type != "predicates") {
+          if (type && type == "restrictions") {
             return callbackSeries();
           }
 
@@ -2042,7 +2042,7 @@ common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv",jstreeData,optio
         },
         // draw objectProperties inverse
         function(callbackSeries) {
-          if (!type || type != "predicates") {
+          if (type && type == "restrictions") {
             return callbackSeries();
           }
           if (type != "dictionary") {

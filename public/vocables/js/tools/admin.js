@@ -274,5 +274,11 @@ var Admin = (function () {
         });
     };
 
+    self.sparqlQuery=function(){
+        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        if (sources.length ==0) return alert("select at least one  source");
+       SparqlQueryUI.init(sources);
+    }
+
     return self;
 })();

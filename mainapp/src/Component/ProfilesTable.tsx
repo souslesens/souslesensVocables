@@ -145,7 +145,7 @@ const enum Mode {
 type Msg_ =
     | { type: Type.UserClickedModal; payload: boolean }
     | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } }
-    | { type: Type.UserUpdatedSourceAccessControl; payload: { sourceId: string; newValue: SourceAccessControl | "default" } }
+    | { type: Type.UserUpdatedSourceAccessControl; payload: { treeStr: string; newValue: SourceAccessControl | "default" } }
     | { type: Type.ResetProfile; payload: Profile }
     | { type: Type.UserClickedCheckAll; payload: { fieldname: string; value: boolean } }
     | { type: Type.UserUpdatedBlenderLevel; payload: number };
@@ -160,17 +160,17 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
             return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [fieldToUpdate]: msg.payload.newValue } };
 
         case Type.UserUpdatedSourceAccessControl: {
-            const { sourceId, newValue } = msg.payload;
+            const { treeStr, newValue } = msg.payload;
             const previousSourcesAccessControl = profileEditionState.profileForm.sourcesAccessControl;
             let newSourcesAccessControls: Record<string, SourceAccessControl>;
 
             if (newValue === "default") {
-                const { [sourceId]: value, ...otherSource } = previousSourcesAccessControl;
+                const { [treeStr]: value, ...otherSource } = previousSourcesAccessControl;
                 newSourcesAccessControls = otherSource;
             } else {
                 newSourcesAccessControls = {
                     ...profileEditionState.profileForm.sourcesAccessControl,
-                    [msg.payload.sourceId]: newValue,
+                    [msg.payload.treeStr]: newValue,
                 };
             }
 
@@ -218,11 +218,14 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
 
     const handleSourceAccessControlUpdate = React.useMemo(() => {
         return Object.fromEntries(
-            sources.map((source) => [
-                source.name,
-                (event: React.ChangeEvent<HTMLInputElement>) =>
-                    update({ type: Type.UserUpdatedSourceAccessControl, payload: { sourceId: source.name, newValue: event.target.value as SourceAccessControl | "default" } }),
-            ])
+            sources.map((source) => {
+                const treeStr = `${source.schemaType}/${source.group}/${source.name}`;
+                return [
+                    treeStr,
+                    (event: React.ChangeEvent<HTMLInputElement>) =>
+                        update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: treeStr, newValue: event.target.value as SourceAccessControl | "default" } }),
+                ];
+            })
         );
     }, [sources]);
 
@@ -326,7 +329,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 <SourceAccessControlInputSelect
                                     name={source.source.id + "-source-access-control"}
                                     value={value}
-                                    onChange={handleSourceAccessControlUpdate[source.source.name]}
+                                    onChange={handleSourceAccessControlUpdate[source.treeStr]}
                                     allowDefault={true}
                                     editable={source.source.editable}
                                 />

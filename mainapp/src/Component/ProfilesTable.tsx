@@ -216,12 +216,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
 
-    const [filteringCharsSourcesAccessControl, setFilteringCharsSourcesAccessControl] = React.useState("");
-
-    const handleFilterSourcesAccessControl = () => (event: React.ChangeEvent<HTMLInputElement>) => {
-        setFilteringCharsSourcesAccessControl(event.target.value);
-    };
-
     const handleSourceAccessControlUpdate = React.useMemo(() => {
         return Object.fromEntries(
             sources.map((source) => [
@@ -237,7 +231,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const handleNewBlenderNumber = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserUpdatedBlenderLevel, payload: parseInt(event.target.value.replace(/\D/g, "")) });
 
     const saveProfiles = () => {
-        setFilteringCharsSourcesAccessControl("");
         // const updateProfiles = unwrappedProfiles.map(p => p.name === profile.name ? profileModel.profileForm : p)
         // const addProfile = [...unwrappedProfiles, profileModel.profileForm]
         // updateModel({ type: 'UserClickedSaveChanges', payload: {} });
@@ -268,12 +261,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
             let tree: string[] = [];
             fieldsFromSource(source).forEach((field) => {
                 tree.push(field);
-                if (filteringCharsSourcesAccessControl !== "") {
-                    // FIXME: Case-sensitive only
-                    if (field.indexOf(filteringCharsSourcesAccessControl) == -1) {
-                        return;
-                    }
-                }
                 let root = currentTree.find((key) => key.name == field);
                 if (root === undefined) {
                     root = {
@@ -358,7 +345,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
 
         React.useEffect(() => {
             setTreeviewSources(displayFormTree(generateSourcesTree(sources)));
-        }, [filteringCharsSourcesAccessControl]);
+        }, []);
 
         return (
             <TreeView aria-label="Sources access control navigator" id="sources-access-treeview" defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
@@ -406,14 +393,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                         </FormControl>
                         <FormControl>
                             <FormLabel id="default-source-access-control-label">Default source access control</FormLabel>
-                            <TextField
-                                size="small"
-                                label="Filter sources by name"
-                                id="filter-sourcesaccesscontrol"
-                                value={filteringCharsSourcesAccessControl}
-                                sx={{ width: 300, my: 1 }}
-                                onChange={handleFilterSourcesAccessControl()}
-                            />
                             <SourcesTreeView />
                         </FormControl>
                         <FormGroup>

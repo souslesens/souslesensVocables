@@ -1,42 +1,56 @@
-
 <style>
-  .lineageRelations_div{
-      padding: 10px;
-      margin: 10px;
+    .lineageRelations_div {
+        padding: 10px;
+        margin: 10px;
+        border: 1px solid saddlebrown;
+        border-radius: 5px;
+        display: flex;flex-direction: column
 
-
-  }
+    }
 
 </style>
 
+<div style="display: flex;flex-direction: row">
+  <div style="display: flex;flex-direction: column">
 
-<div class="lineageRelations_div">
-  <b>Type</b>
-  <input type="radio" name="lineageRelations_relType" value="predicates">predicate
-  <input type="radio" name="lineageRelations_relType" value="restrictions">restriction
-  <input type="radio" name="lineageRelations_relType" value="" checked="checked">both
+    <div class="lineageRelations_div">
+      <div> <b>Selection</b></div>
+      <div> <input type="radio" name="lineageRelations_selection" value="predicates">graph currentNode </div>
+      <div> <input type="radio" name="lineageRelations_selection" value="restrictions">graph all nodes</div>
+      <div> <input type="radio" name="lineageRelations_selection" value="" checked="checked">source all nodes</div>
+    </div>
+    <div class="lineageRelations_div">
+      <div> <b>Type</b></div>
+     <div> <input type="radio" name="lineageRelations_relType" value="predicates">predicate</div>
+       <div> <input type="radio" name="lineageRelations_relType" value="restrictions">restriction</div>
+         <div> <input type="radio" name="lineageRelations_relType" value="" checked="checked">both</div>
+    </div>
+    &nbsp;
+    <div class="lineageRelations_div">
+      <div> <b>Direction</b></div>
+      <div> <input type="radio" name="lineageRelations_relDirection" value="direct">direct</div>
+        <div> <input type="radio" name="lineageRelations_relDirection" value="inverse">inverse</div>
+          <div> <input type="radio" name="lineageRelations_relDirection" value="" checked="checked">both</div>
 
-&nbsp;
-  <b>Direction</b>
-  <input type="radio" name="lineageRelations_relDirection" value="direct">direct
-  <input type="radio" name="lineageRelations_relDirection" value="inverse">inverse
-  <input type="radio" name="lineageRelations_relDirection" value="" checked="checked">both
+
+    </div>
+  </div>
+
+  <div>
+    Properties
+    <div style="width:350px;height: 450px">
+      <div id="lineageRelations_propertiesJstreeDiv"></div>
+    </div>
 
 
+    </select>
+
+
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.onDrawRelationsDialogValidate()">
+      Draw
+    </button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary"
+            onclick="Lineage_classes.onDrawRelationsDialogValidate('clear')">Clear
+    </button>
+  </div>
 </div>
-
-<div>
-  Properties
-<div style="width:350px;height: 400px">
-  <div id="lineageRelations_propertiesJstreeDiv"></div>
-</div>
-
-
-
-
-</select>
-
-
-</div>
-<button class ="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.onDrawRelationsDialogValidate()">Draw</button>
-<button class ="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.onDrawRelationsDialogValidate('clear')">Clear</button>

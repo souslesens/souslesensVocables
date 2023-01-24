@@ -71,7 +71,7 @@ var KGpropertyFilter = (function() {
     }
   };
   self.onLoaded = function() {
-    var tsfPropertyFilterPrefix = Config.KGpropertyFilter.tsfPropertyFilterPrefix;
+
     for (var key in self.treeConfigs) {
       Config.sources[self.treeConfigs[key].source].editable = false;
     }
@@ -623,7 +623,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
       $("#mainDialogDiv").html(html);
       $("#mainDialogDiv").dialog("open");
-      var source = "GIDEA-RAW";
+      var source = "GIDEA-RAW-2";
       var options = {
         distinct: "?object ?objectLabel"
       };

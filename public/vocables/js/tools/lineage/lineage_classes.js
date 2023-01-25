@@ -12,7 +12,7 @@ var Lineage_classes = (function() {
   var sourceColors = {};
 
   var self = {};
-  self.showLimit = 200;
+  self.showLimit = 300;
 
   var graphContext = {};
   self.propertyColors = {};
@@ -168,7 +168,7 @@ sourceLabels.sort();
 
     if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
       if (options.callee == "Graph") {
-        Lineage_classes.drawRelations(null, null, "Graph", {});
+        Lineage_relations.drawRelations(null, null, "Graph", {});
         //  Lineage_classes.graphActions.graphNodeNeighborhood("all");
       }
       else if (options.callee == "Tree") {
@@ -400,13 +400,10 @@ sourceLabels.sort();
             MainController.UI.message("No result ", true);
             return callbackEach();
           }
-          if (result.length > self.showLimit) {
-            alert("Too may nodes (" + result.length + ")  .Only will " + self.showLimit + "be displayed", true);
-            result = result.slice(0, self.showLimit);
+       result=Lineage_classes.truncateResultToVisGraphLimit(result)
+        
 
-            /* if (callback) return callback("too may nodes");
-return;*/
-          }
+
           /**
            * @type {any[]}
            */
@@ -483,6 +480,17 @@ return;*/
       }
     );
   };
+
+  self.truncateResultToVisGraphLimit=function(result){
+    if (result.length > self.showLimit) {
+      var ok=prompt("Too may nodes (" + result.length + ")  .Only  " + Lineage_classes.showLimit + " will be displayed", true);
+      if(ok)
+      result = result.slice(0, self.showLimit);
+      else
+        result=[]
+    }
+    return result;
+  }
 
   self.initWhiteBoard = function(force) {
     if (!visjsGraph.isGraphNotEmpty() || force) {
@@ -1351,6 +1359,10 @@ addNode:false
         $("#waitImg").css("display", "none");
         return MainController.UI.message("No data found");
       }
+
+      result=Lineage_classes.truncateResultToVisGraphLimit(result)
+
+
       var color = self.getSourceColor(source);
 
       //get Clusters
@@ -1867,211 +1879,6 @@ addNode:false
 
 
 
-  self.drawRelationsDialog=function() {
-    $("#LineagePopup").dialog("open");
-    $("#LineagePopup").load("snippets/lineage/relationsDialog.html", function() {
-      Sparql_OWL.getObjectProperties(Lineage_sources.activeSource, {withGraph:true}, function(err, result) {
-        var jstreeData=[]
-        var uniqueNodes={}
-         result.forEach(function(item){
-           if(!uniqueNodes[item.g.value]){
-             uniqueNodes[item.g.value]=1
-             var label=Sparql_common.getSourceFromGraphUri(item.g.value)
-             jstreeData.push({
-               id:item.g.value,
-               text:label,
-               parent:"#"
-             })
-           }
-           if(!uniqueNodes[item.property.value]){
-             uniqueNodes[item.property.value]=1
-             var label=item.propertyLabel? item.propertyLabel.value:Sparql_common.getLabelFromURI(item.property.value)
-             jstreeData.push({
-               id:item.property.value,
-               text:label,
-               parent:item.g.value
-             })
-           }
-
-         })
-        jstreeData.sort(function(a,b){
-          if(a.label>b.label)
-            return 1;
-          else if(b.label>a.label)
-            return -1;
-          return 0
-
-        })
-        var options={
-          withCheckboxes:true
-        }
-common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv",jstreeData,options)
-      })
-    })
-  }
-
-  self.onDrawRelationsDialogValidate=function(action) {
-
-    var direction = $("input[name='lineageRelations_relDirection']:checked").val();
-    var type = $("input[name='lineageRelations_relType']:checked").val();
-    var caller = "leftPanel";
-    $("#LineagePopup").dialog("close");
-
-
-    if (action == "clear") {
-      var properties = $("#lineageRelations_propertiesJstreeDiv").jstree().get_checked(true)
-      var edges = visjsGraph.data.edges.get();
-      var edgesToClear = [];
-      edges.forEach(function(edge) {
-        if (properties.length > 0) {
-          properties.forEach(function(property) {
-            if (property.text == edge.label)
-              edgesToClear.push(edge.id)
-          })
-        }
-        else {
-          if (edge.label)
-            edgesToClear.push(edge.id)
-        }
-      })
-
-      visjsGraph.data.edges.remove(edgesToClear)
-
-
-      return;
-
-  }else{
-    var properties=$("#lineageRelations_propertiesJstreeDiv").jstree().get_checked()
-    var options={}
-
-  if(properties.length>0) {
-    var filter = Sparql_common.setFilter("prop", properties)
-    options.filter = filter;
-  }
-  }
-
-    self.drawRelations (direction, type, caller, options)
-  }
-
-  self.drawRelations = function(direction, type, caller, options) {
-    var data = null;
-    var source = null;
-    if (caller == "Graph") {
-      data = self.currentGraphNode.data.id;
-    }
-    else if (caller == "Tree") {
-      data = self.currentTreeNode.data.id;
-    }
-    else if (caller == "Properties") {
-      data = null;
-    }
-    else if (caller == "leftPanel" || type == "dictionary") {
-      data = visjsGraph.data.nodes.getIds();
-    }
-    //   if (data && data.data) data = data.data.id;
-    if (!options) {
-      options = {};
-    }
-
-    async.series(
-      [
-        // draw equivClasses or sameLabel (coming from Config.dictionarySource)
-        function(callbackSeries) {
-          if (type != "dictionary") {
-            return callbackSeries();
-          }
-          source = Config.dictionarySource;
-          options.includeSources = Config.dictionarySource;
-          data = visjsGraph.data.nodes.getIds();
-          options.filter = "FILTER (?prop in (owl:sameAs,owl:equivalentClass))";
-          Lineage_sources.registerSource(Config.dictionarySource);
-
-          type = null;
-          return callbackSeries();
-        },
-
-        // draw restrictions normal
-        function(callbackSeries) {
-          if (type && type != "restrictions") {
-            return callbackSeries();
-          }
-          if (!direction || direction == "direct") {
-            options.inverse = false;
-            self.drawRestrictions(source, data, null, null, options, callbackSeries);
-          }
-          else {
-            return callbackSeries();
-          }
-        },
-        // draw restrictions inverse
-        function(callbackSeries) {
-          if (type && type != "restrictions") {
-            return callbackSeries();
-          }
-          if (!direction || direction == "inverse") {
-            options.inverse = true;
-            self.drawRestrictions(source, data, null, null, options, callbackSeries);
-          }
-          else {
-            return callbackSeries();
-          }
-        },
-
-        // draw objectProperties direct
-        function(callbackSeries) {
-
-          if (type && type == "restrictions") {
-            return callbackSeries();
-          }
-
-          if (type != "dictionary") {
-            source = Lineage_sources.activeSource;
-          }
-
-          if (!data) {
-            data = self.getGraphIdsFromSource(Lineage_sources.activeSource);
-          }
-          if (!direction || direction == "direct") {
-            Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
-              return callbackSeries(err);
-            });
-          }
-          else {
-            return callbackSeries();
-          }
-        },
-        // draw objectProperties inverse
-        function(callbackSeries) {
-          if (type && type == "restrictions") {
-            return callbackSeries();
-          }
-          if (type != "dictionary") {
-            source = Lineage_sources.activeSource;
-          }
-
-          if (!data) {
-            data = self.getGraphIdsFromSource(Lineage_sources.activeSource);
-          }
-          if (!direction || direction == "inverse") {
-            options.inversePredicate = true;
-            Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
-              return callbackSeries(err);
-            });
-          }
-          else {
-            return callbackSeries();
-          }
-        }
-      ],
-
-      function(err) {
-        if (err) {
-          return alert(err);
-        }
-      }
-    );
-  };
-
   self.reSpatializeGraph = function(mode) {
     var physics = true;
     if (mode == "excludeRelations") {
@@ -2159,6 +1966,7 @@ common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv",jstreeData,optio
             return callback(null, result);
           }
         }
+        result=Lineage_classes.truncateResultToVisGraphLimit(result)
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = visjsGraph.getExistingIdsMap();
         self.currentExpandLevel += 1;
@@ -2479,8 +2287,9 @@ common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv",jstreeData,optio
         "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawParents();\"> Parents</span>" +
         "    <span class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.drawSimilars();\"> Similars</span>" +
         "    <span  class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.collapse();\">Collapse</span>" +
-        "   <span  class=\"popupMenuItem\" onclick=\"Lineage_classes.drawRelations('direct',null,'Graph');\">Relations</span>" +
-        "    <span  class=\"popupMenuItem\" onclick=\"Lineage_classes.drawRelations('inverse',null,'Graph');\">Inverse Rels</span>" +
+        "    <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.showDrawRelationsDialog('Graph');\">Relations...</span>" +
+     //  "   <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.drawRelations('direct',null,'Graph');\">Relations</span>" +
+     //   "    <span  class=\"popupMenuItem\" onclick=\"Lineage_relations.drawRelations('inverse',null,'Graph');\">Inverse Rels</span>" +
         //  "    <span  class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.graphNodeNeighborhood('all');\">ObjectProperties</span>" +
         //   "    <span  class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showRestrictions();\">Restrictions</span>" +
         //   "  <span  class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showRestrictions();\">Inv Restr</span>" +

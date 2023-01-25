@@ -623,7 +623,7 @@ Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentCont
                             filter: Sparql_common.setFilter("prop", objectProperties),
                         };
                         options.allNodes = false;
-                        Lineage_classes.drawRelations(null, null, "Properties", options);
+                        Lineage_relations.drawRelations(null, null, "Properties", options);
                     }
                     return callbackSeries();
                 },
@@ -920,7 +920,7 @@ Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentCont
                             filter: Sparql_common.setFilter("prop", objectProperties),
                         };
                         options.allNodes = false;
-                        Lineage_classes.drawRelations(null, null, "Properties", options);
+                        Lineage_relations.drawRelations(null, null, "Properties", options);
                     }
                     return callbackSeries();
                 },

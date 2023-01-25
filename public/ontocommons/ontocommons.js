@@ -69,14 +69,10 @@ var Ontocommons = (function () {
     };
 
     self.loadSourceInSlsv = function (source) {
-        //source="VVO"
-        self.currentSource = source;
-        //   $("#slsv_iframe").attr("src","http://localhost:3010/vocables/")
-        var slsv = $("#slsv_iframe")[0].contentWindow;
-        slsv.MainController.currentTool = "lineage";
-        slsv.MainController.UI.initTool("lineage", function (err, result) {
-            slsv.Lineage_sources.showSourcesDialog(source);
-        });
+
+        $("#slsv_iframe").attr("src","http://localhost:3010/vocables/?tool=lineage&source="+source)
+
+
     };
 
     self.callSlsv = function () {

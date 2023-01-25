@@ -1,4 +1,4 @@
-var Compose = (function() {
+var Composer = (function() {
   var self = {};
 
   self.currentNewFilters = [];
@@ -71,23 +71,23 @@ var Compose = (function() {
     }
   };
   self.onLoaded = function() {
-    var tsfPropertyFilterPrefix = Config.Compose.tsfPropertyFilterPrefix;
+    var tsfPropertyFilterPrefix = Config.Composer.tsfPropertyFilterPrefix;
     for (var key in self.treeConfigs) {
       Config.sources[self.treeConfigs[key].source].editable = false;
     }
 
-    $("#actionDivContolPanelDiv").load("snippets/Compose/leftPanel.html", function() {
-      //  var sources = Config.Compose.sources;
+    $("#actionDivContolPanelDiv").load("snippets/Composer/leftPanel.html", function() {
+      //  var sources = Config.Composer.sources;
       var sources = ["", "IDCP"];
       common.fillSelectOptions("Compose_sourceSelect", sources, true);
-      $("#Compose_searchInPropertiesTreeInput").bind("keyup", null, Compose.searchInPropertiesTree);
+      $("#Compose_searchInPropertiesTreeInput").bind("keyup", null, Composer.searchInPropertiesTree);
       self.onChangeSourceSelect("IDCP");
     });
 
     //  MainController.UI.showHideRightPanel(true);
     $("#graphDiv").width(1000);
 
-    /*  $("#graphDiv").load("snippets/Compose/centralPanel.html", function() {
+    /*  $("#graphDiv").load("snippets/Composer/centralPanel.html", function() {
     $("#Compose_filteringResult").height($("#graphDiv").height() - 200);
     $("#Compose_filteringResult").width($("#graphDiv").width());
 
@@ -102,7 +102,7 @@ var Compose = (function() {
     });
     */
 
-    $("#rightPanelDiv").load("snippets/Compose/rightPanel.html", function() {
+    $("#rightPanelDiv").load("snippets/Composer/rightPanel.html", function() {
       $("#Compose_rightPanelTabs").tabs({
         activate: function(_e, _ui) {
           self.currentAspect = _ui.newTab[0].textContent;
@@ -127,7 +127,7 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
 
     self.loadInJstree(self.treeConfigs["dataContainers"], function(err, result) {
       if (err) {
-        $("#Compose_searchInPropertiesTreeInput").bind("keyup", null, Compose.searchInPropertiesTree);
+        $("#Compose_searchInPropertiesTreeInput").bind("keyup", null, Composer.searchInPropertiesTree);
         return alert(err.responseText);
       }
     });
@@ -147,7 +147,7 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
           });
         },
         function(callbackSeries) {
-          $("#GenericTools_searchAllSourcesTermInput").bind("keyup", null, Compose.searchInPropertiesTree);
+          $("#GenericTools_searchAllSourcesTermInput").bind("keyup", null, Composer.searchInPropertiesTree);
 
           return callbackSeries();
         },
@@ -320,11 +320,11 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
       var jstreeOptions = {
         openAll: false,
         // withCheckboxes: true,
-        selectTreeNodeFn: Compose.commonJstreeActions.onSelectTreeNode,
-        // onAfterOpenNodeFn: Compose.onOpenClassesOrPropertyNode,
-        //   onCheckNodeFn: null, //Compose.loadPropertiesFilters,
+        selectTreeNodeFn: Composer.commonJstreeActions.onSelectTreeNode,
+        // onAfterOpenNodeFn: Composer.onOpenClassesOrPropertyNode,
+        //   onCheckNodeFn: null, //Composer.loadPropertiesFilters,
         //  tie_selection: false,
-        contextMenu: Compose.commonJstreeActions.getJsTreeContextMenu(treeConfig.key),
+        contextMenu: Composer.commonJstreeActions.getJsTreeContextMenu(treeConfig.key),
         searchPlugin: {
           case_insensitive: true,
           fuzzy: false,
@@ -432,7 +432,7 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
       var term = self.currentDataContainer.data.label;
       $("#GenericTools_searchAllSourcesTermInput").val(term);
       $("#Compose_rightPanelTabs").tabs("option", "active", 4);
-      Compose.rightPanelsActions.searchBusinessObjects();
+      Composer.rightPanelsActions.searchBusinessObjects();
     },
 
     associateNodeToDataContainer: function() {
@@ -532,14 +532,14 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
           label: "create child",
           action: function(_e) {
             // pb avec source
-            Compose.commonJstreeActions.createChildNode();
+            Composer.commonJstreeActions.createChildNode();
           }
         };
         items.delete = {
           label: "delete node",
           action: function(_e) {
             // pb avec source
-            Compose.commonJstreeActions.deleteNode();
+            Composer.commonJstreeActions.deleteNode();
           }
         };
       }
@@ -559,7 +559,7 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
           label: "Search BO",
           action: function(_e) {
             // pb avec source
-            Compose.commonJstreeActions.searchBO();
+            Composer.commonJstreeActions.searchBO();
           }
         };
       }
@@ -568,7 +568,7 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
         items.associate = {
           label: "Associate",
           action: function(_e) {
-            Compose.commonJstreeActions.associateNodeToDataContainer();
+            Composer.commonJstreeActions.associateNodeToDataContainer();
           }
         };
 
@@ -577,14 +577,14 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
           items.visualize = {
             label: "Visualize",
             action: function(_e) {
-              Compose.visualizeAspect();
+              Composer.visualizeAspect();
             }
           };
 
         items.expand = {
           label: "expand",
           action: function(_e) {
-            Compose.commonJstreeActions.expandCommonTreeNode();
+            Composer.commonJstreeActions.expandCommonTreeNode();
           }
         };
       }
@@ -619,7 +619,7 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
     showAttributesParentsDialog: function() {
       self.currentRightpanelNode.parentLogicalEntity = null;
       var html = "Select a Logical Entity<br>";
-      html += "<select size='20' onclick='Compose.rightPanelsActions.onValidateAttributesParentsDialog($(this).val())' id='Compose_logicalEntitySelect'></select>";
+      html += "<select size='20' onclick='Composer.rightPanelsActions.onValidateAttributesParentsDialog($(this).val())' id='Compose_logicalEntitySelect'></select>";
 
       $("#mainDialogDiv").html(html);
       $("#mainDialogDiv").dialog("open");
@@ -660,7 +660,7 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
 
   };
   self.showDataContainerDetails = function(node) {
-    /* $("#Compose_nodeInfosDiv").load("snippets/Compose/dataContainer.html", function() {*/
+    /* $("#Compose_nodeInfosDiv").load("snippets/Composer/dataContainer.html", function() {*/
     var level = self.currentTreeNode.parents.length - 1;
     var dataContainerId;
     if (!node) {
@@ -949,15 +949,15 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
             if (node.level === 0) {
               shape = "box";
               color = "#70ac47";
-              node.data.graphPopupMenusFn = Compose.getGraphPopupMenuItem;
+              node.data.graphPopupMenusFn = Composer.getGraphPopupMenuItem;
             }
             if (node.level === 1) {
               shape = "box";
               color = "#00afef";
-              node.data.graphPopupMenusFn = Compose.getGraphPopupMenuItem;
+              node.data.graphPopupMenusFn = Composer.getGraphPopupMenuItem;
             }
             if (node.level === 2) {
-              node.data.graphPopupMenusFn = Compose.getGraphPopupMenuItem;
+              node.data.graphPopupMenusFn = Composer.getGraphPopupMenuItem;
             }
 
 
@@ -991,7 +991,7 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
   self.getGraphPopupMenuItem = function() {
     var html =
       " <span  class=\"popupMenuItem\" onclick=\"Lineage_classes.graphActions.showNodeInfos();\"> Node infos</span>" +
-      "<span  class=\"popupMenuItem\" onclick=\"Compose.commonJstreeActions.searchBO('graph');\"> Search BO</span>";
+      "<span  class=\"popupMenuItem\" onclick=\"Composer.commonJstreeActions.searchBO('graph');\"> Search BO</span>";
     return html;
   };
 

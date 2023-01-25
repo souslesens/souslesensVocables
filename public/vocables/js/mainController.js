@@ -189,6 +189,12 @@ var MainController = (function () {
                         MainController.UI.showToolsList("toolsTreeDiv");
                         callbackSeries();
                     },
+
+                  function(callbackSeries){
+                      MainController.parseUrlParam(function(){
+                          callbackSeries();
+                      })
+                  }
                 ],
                 function (_err) {
                     MainController.UI.configureUI();
@@ -554,6 +560,36 @@ var MainController = (function () {
         $("#mainDialogDiv").html("ISO-15926 part14 axioms<br><img  src=\"images/part14Axioms.png\" style='display: block; margin-left: auto; margin-right: auto width:400px;margin: auto;'>");
         $("#mainDialogDiv").dialog("open");
     };
+
+
+    self.parseUrlParam=function(callback){
+        var paramsMap=common.getUrlParamsMap();
+      if(paramsMap.tool){
+          var tool=paramsMap["tool"]
+
+              if(tool) {
+
+                  if(tool=="lineage"){
+                      var source = paramsMap["source"]
+                      Lineage_sources.noSourceDialogAtInit=true
+                          self.UI.initTool("lineage", function() {
+                              Lineage_sources.loadSources(source);
+                          })
+
+
+                  }else{
+                      self.UI.initTool(tool, function() {
+
+                      })
+                  }
+
+          }
+          callback()
+
+
+      }
+
+    }
 
     return self;
 })();

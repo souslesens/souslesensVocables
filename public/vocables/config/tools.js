@@ -54,10 +54,10 @@ self.tools["KGpropertyFilter"] = {
   toolDescriptionImg: null
 };
 
-self.tools["Compose"] = {
-  label: "Compose",
+self.tools["Composer"] = {
+  label: "Composer",
   noSource: 1,
-  controller: Compose,
+  controller: Composer,
   toolDescriptionImg: null
 };
 

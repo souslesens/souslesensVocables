@@ -15,22 +15,22 @@
 
     <div class="lineageRelations_div">
       <div> <b>Selection</b></div>
-      <div> <input type="radio" name="lineageRelations_selection" value="predicates">graph currentNode </div>
-      <div> <input type="radio" name="lineageRelations_selection" value="restrictions">graph all nodes</div>
-      <div> <input type="radio" name="lineageRelations_selection" value="" checked="checked">source all nodes</div>
+      <div> <input type="radio" name="lineageRelations_selection" value="selected"> selected </div>
+      <div> <input type="radio" name="lineageRelations_selection" value="visible"> visible</div>
+      <div> <input type="radio" name="lineageRelations_selection" value="all" checked="all">all</div>
     </div>
     <div class="lineageRelations_div">
       <div> <b>Type</b></div>
      <div> <input type="radio" name="lineageRelations_relType" value="predicates">predicate</div>
        <div> <input type="radio" name="lineageRelations_relType" value="restrictions">restriction</div>
-         <div> <input type="radio" name="lineageRelations_relType" value="" checked="checked">both</div>
+         <div> <input type="radio" name="lineageRelations_relType" value="both" checked="checked">both</div>
     </div>
     &nbsp;
     <div class="lineageRelations_div">
       <div> <b>Direction</b></div>
       <div> <input type="radio" name="lineageRelations_relDirection" value="direct">direct</div>
         <div> <input type="radio" name="lineageRelations_relDirection" value="inverse">inverse</div>
-          <div> <input type="radio" name="lineageRelations_relDirection" value="" checked="checked">both</div>
+          <div> <input type="radio" name="lineageRelations_relDirection" value="both" checked="checked">both</div>
 
 
     </div>
@@ -46,11 +46,11 @@
     </select>
 
 
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.onDrawRelationsDialogValidate()">
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.onshowDrawRelationsDialogValidate()">
       Draw
     </button>
     <button class="btn btn-sm my-1 py-0 btn-outline-primary"
-            onclick="Lineage_classes.onDrawRelationsDialogValidate('clear')">Clear
+            onclick="Lineage_relations.onshowDrawRelationsDialogValidate('clear')">Clear
     </button>
   </div>
 </div>

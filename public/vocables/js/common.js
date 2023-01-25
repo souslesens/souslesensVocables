@@ -1027,5 +1027,16 @@ if (callback) return callback(err);
         var stack = new Error().stack;
     };
 
+    self.getUrlParamsMap=function(){
+    var paramsMap={}
+    var paramsStr= window.location.search.substring(1);
+    var params=paramsStr.split("&")
+    params.forEach(function(param){
+        var array=param.split("=")
+        paramsMap[array[0]]=array[1]
+    })
+        return paramsMap;
+    }
+
     return self;
 })();

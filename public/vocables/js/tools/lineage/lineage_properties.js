@@ -290,7 +290,7 @@ action: function (_e) {
                             data: {
                                 source: source,
                                 id: item.subject.value,
-                                label: item.subject.value,
+                                label: item.subjectLabel.value,
                             },
                         });
                     }
@@ -314,7 +314,7 @@ action: function (_e) {
                             data: {
                                 source: source,
                                 id: item.object.value,
-                                label: item.object.value,
+                                label: item.objectLabel.value,
                             },
                         });
                     }

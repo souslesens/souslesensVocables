@@ -260,6 +260,7 @@ var Admin = (function () {
             body: JSON.stringify(body),
             POST: true,
         };
+        MainController.UI.message("copying source "+ source )
         $.ajax({
             type: "POST",
             url: `${Config.apiUrl}/httpProxy`,
@@ -267,6 +268,7 @@ var Admin = (function () {
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
                 alert(data.result + "triples imported in sparqlEndpoint " + toEndPointUrl + "");
+                MainController.UI.message( "source "+source +" copied",true)
             },
             error: function (err) {
                 return alert(err.responseText);

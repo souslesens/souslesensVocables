@@ -1033,6 +1033,7 @@ if (callback) return callback(err);
     var params=paramsStr.split("&")
     params.forEach(function(param){
         var array=param.split("=")
+
         paramsMap[array[0]]=array[1]
     })
         return paramsMap;

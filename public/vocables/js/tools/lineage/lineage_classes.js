@@ -483,7 +483,7 @@ sourceLabels.sort();
 
   self.truncateResultToVisGraphLimit=function(result){
     if (result.length > self.showLimit) {
-      var ok=prompt("Too may nodes (" + result.length + ")  .Only  " + Lineage_classes.showLimit + " will be displayed", true);
+      var ok=confirm("Too may nodes (" + result.length + ")  .Only  " + Lineage_classes.showLimit + " will be displayed", true);
       if(ok)
       result = result.slice(0, self.showLimit);
       else

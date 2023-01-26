@@ -1003,7 +1003,7 @@ self.saveMappings({classId:classId})
     self.createTriples = function (test, _options) {
         /*  var selectedFiles = $("#KGcreator_csvTreeDiv").jstree().get_checked(true);
 if (selectedFiles.length > 0);*/
-
+        MainController.UI.message( "creating triples...")
         $("#KGcreator_dataSampleDiv").val("creating triples...");
         if (!self.currentJsonObject) {
             return;
@@ -1082,9 +1082,12 @@ if (selectedFiles.length > 0);*/
                         var str = JSON.stringify(result, null, 2);
 
                         $("#KGcreator_dataSampleDiv").val(str);
+                        MainController.UI.message( "",true)
                     } else {
                         $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
+                        MainController.UI.message( "triples created",true)
                     }
+
                 },
                 error(err) {
                     return alert(err.responseText);

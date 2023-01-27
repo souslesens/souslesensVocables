@@ -12,12 +12,20 @@ var SourceBrowser = (function() {
   var self = {};
   self.currentTargetDiv = "currentSourceTreeDiv";
 
+
   self.onLoaded = function() {
     $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html", function() {
       $("#GenericTools_searchInAllSources").prop("checked", true);
       $("#GenericTools_searchSchemaType").val(Config.currentProfile.allowedSourceSchemas[0]);
+      
+      
     });
   };
+  
+  
+  
+  
+  
   self.onSourceSelect = function(sourceLabel) {
     MainController.currentSource = sourceLabel;
     OwlSchema.currentSourceSchema = null;
@@ -1236,8 +1244,11 @@ defaultLang = 'en';*/
             defaultProps.push(key);
           }
         }
+
+
+
         var str = "<div style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
-        str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_slsvCallback' href='" + nodeId + "'>" + nodeId + "</a></td></tr>";
+        str += "<tr><td class='detailsCellName'>UUID</td><td><a target='"+self.getUriTarget(nodeId)+"' href='" + nodeId + "'>" + nodeId + "</a></td></tr>";
         str += "<tr><td class='detailsCellName'>GRAPH</td><td>" + graphUri + "</td></tr>";
         str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
 
@@ -1250,7 +1261,7 @@ defaultLang = 'en';*/
 
           if (self.propertiesMap.properties[key].value) {
             var values = self.propertiesMap.properties[key].value;
-            str += "<td class='detailsCellName'>" + self.propertiesMap.properties[key].name + "</td>";
+            str += "<td class='detailsCellName'>" + "<a target='"+self.getUriTarget(self.propertiesMap.properties[key].propUri)+"' href='" + self.propertiesMap.properties[key].propUri + "'>" +  self.propertiesMap.properties[key].name + "</a>" + "</td>";
             var valuesStr = "";
             values.forEach(function(value, index) {
               var optionalStr = "";
@@ -1279,10 +1290,10 @@ defaultLang = 'en';*/
 
               if (value.indexOf("http") == 0) {
                 if (valueLabelsMap[value]) {
-                  value = "<a target='_slsvCallback' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
+                  value = "<a target='"+self.getUriTarget(nodeId)+"' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
                 }
                 else {
-                  value = "<a target='_slsvCallback' href='" + value + "'>" + value + "</a>";
+                  value = "<a target='"+self.getUriTarget(value)+"' href='" + value + "'>" + value + "</a>";
                 }
               }
               if (index > 0) {
@@ -1310,10 +1321,10 @@ defaultLang = 'en';*/
               values.forEach(function(value, index) {
                 if (value.indexOf("http") == 0) {
                   if (valueLabelsMap[value]) {
-                    value = "<a target='_slsvCallback' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
+                    value = "<a target='"+self.getUriTarget(nodeId)+"' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
                   }
                   else {
-                    value += "<a target='_slsvCallback' href='" + value + "'>" + value + "</a>";
+                    value += "<a target='"+self.getUriTarget(value)+"' href='" + value + "'>" + value + "</a>";
                   }
                 }
                 if (index > 0) {
@@ -1822,6 +1833,24 @@ common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "lab
 $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     }
   };
+  
+  self.isSLSVvisibleUri=function(uri){
+    
+    for(var source in Config.sources){
+      var graphUri=Config.sources[source].graphUri
+      if(graphUri && uri.indexOf(graphUri)==0)
+        return true;
+    }
+    return false;
+    
+  }
+  self.getUriTarget=function(nodeId) {
+    var target = "_blank"
+    if (self.isSLSVvisibleUri(nodeId))
+      target = "_slsvCallback"
+    return target
+  }
+
 
   return self;
 })();

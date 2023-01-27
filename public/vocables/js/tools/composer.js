@@ -6,75 +6,10 @@ var Composer = (function() {
   self.currentNodeData = null;
   self.treeConfigTopUrisMap = {};
 
-  self.treeConfigs = {
-    dataContainers: {
-      key: "dataContainers",
-      source: "IDCP",
-      topUris: ["http://datalenergies.total.com/resource/tsf/idcp/DataContainer"],
-      options: { memberPredicate: 1 },
-      levels: 3,
-      jstreeDiv: "Compose_dataContainerTreeDiv",
-      parentPredicate: "^rdfs:member"
-    },
-    templates: {
-      key: "templates",
-      source: "IDCP",
-      topUris: ["http://datalenergies.total.com/resource/tsf/idcp/template"],
-      options: { memberPredicate: 0, specificPredicates: ["rdf:type", "<http://datalenergies.total.com/resource/tsf/idcp/9fc7b10ede>"] },
-      levels: 5,
-      jstreeDiv: "Compose_templatesTree",
-      color: "#bb8f00"
-    },
-    disciplines: {
-      key: "disciplines",
-      source: "IDCP",
-      topUris: ["http://datalenergies.total.com/resource/tsf/idcp/Discipline"],
-      options: { memberPredicate: 1 },
-      levels: 3,
-      jstreeDiv: "Compose_disciplinesTree",
-      color: "#3a773a"
-    },
-    actors: {
-      key: "actors",
-      source: "IDCP",
-      topUris: ["http://datalenergies.total.com/resource/tsf/idcp/role_IDCP"],
-      options: { memberPredicate: 1 },
-      jstreeDiv: "Compose_actorsTree",
-      color: "#ea59d8"
-    },
-    systems: {
-      key: "systems",
-      source: "IDCP",
-      topUris: ["http://datalenergies.total.com/resource/tsf/idcp/OGSystem"],
-      options: { memberPredicate: 1 },
-      levels: 3,
-      jstreeDiv: "Compose_systemsTree",
-      color: "#f5ef39"
-    },
-    businessObjects: {
-      key: "businessObjects",
-      editable: false,
-      source: "GIDEA-RAW",
-      topUris: ["http://datalenergies.total.com/resource/tsf/gidea-raw/LogicalEntity"],
-      options: { specificPredicates: ["?p"] },
-      levels: 5,
-      jstreeDiv: "Compose_businessObjectsTree",
-      color: "#cb6601"
-    }
-  };
 
-  self.getTreeConfigByKey = function(key, value) {
-    for (var entry in self.treeConfigs) {
-      if (self.treeConfigs[entry][key] == value) {
-        return self.treeConfigs[entry];
-      }
-    }
-  };
   self.onLoaded = function() {
-    var tsfPropertyFilterPrefix = Config.Composer.tsfPropertyFilterPrefix;
-    for (var key in self.treeConfigs) {
-      Config.sources[self.treeConfigs[key].source].editable = false;
-    }
+
+    return self.initTreeDivs("leftPanelDiv", "GIDEA-RAW-2", "http://datalenergies.total.com/resource/tsf/gidea-raw/bag/Aspects");
 
     $("#actionDivContolPanelDiv").load("snippets/Composer/leftPanel.html", function() {
       //  var sources = Config.Composer.sources;
@@ -84,25 +19,11 @@ var Composer = (function() {
       self.onChangeSourceSelect("IDCP");
     });
 
-    //  MainController.UI.showHideRightPanel(true);
     $("#graphDiv").width(1000);
 
-    /*  $("#graphDiv").load("snippets/Composer/centralPanel.html", function() {
-    $("#Compose_filteringResult").height($("#graphDiv").height() - 200);
-    $("#Compose_filteringResult").width($("#graphDiv").width());
-
-    $("#Compose_centralPanelTabs").tabs({
-      activate: function(e, ui) {
-        self.currentOwlType = "Class";
-        var divId = ui.newPanel.selector;
-        if (divId == "#LineageTypesTab") {
-          // pass
-        }
-      }
-    });
-    */
 
     $("#rightPanelDiv").load("snippets/Composer/rightPanel.html", function() {
+
       $("#Compose_rightPanelTabs").tabs({
         activate: function(_e, _ui) {
           self.currentAspect = _ui.newTab[0].textContent;
@@ -110,15 +31,176 @@ var Composer = (function() {
         create(event, ui) {
           self.initRightPanel();
 
-          /*  $("#Compose_rightPanelTabs").tabs("option","active",1)
-$("#Compose_rightPanelTabs").tabs("option","active",0)*/
         }
       });
     });
-    // });
-
     $("#accordion").accordion("option", { active: 2 });
   };
+
+  self.initTreeDivs = function(targetDiv, source, topContainerId) {
+    var options = {
+      containers: 1,
+      descendants: 1
+    };
+
+//init and draw tree div panels
+    function drawtreeTabsHtml(result) {
+      var html = "<div id = 'Composer_treePanelTabs' style='width:400px' >\n";
+
+
+      var liHtml = "";
+      var divHtml = "";
+      result.forEach(function(item, index) {
+
+        var tabId = item.objectLabel.value.replace(/\//g, "_");
+        liHtml += "<li id ='Composer_" + tabId + "Div'><a href='#Composer_" + tabId + "Panel'>" + tabId + "</a></li>\n";
+        divHtml += "  <div className='max-height' id='Composer_" + tabId + "Panel'>" +
+          "            <div className='Composer_tripleDiv'>" +
+          "                <div className='jstreeContainer Composer_tree'>" +
+          "                    <div id='" + self.getjstreeDiv(tabId) + "'> </div>" +
+          "                </div>" +
+          "            </div>" +
+          "        </div>\n";
+
+
+      });
+      html += " <ul>" + liHtml + " </ul>\n" + divHtml + "\n";
+
+
+      $("#" + targetDiv).html(html);
+      $("#Composer_treePanelTabs").tabs({});
+
+    }
+
+
+    Lineage_containers.getContainerResources(source, [topContainerId], options, function(err, result) {
+      if (err) {
+        return alert(err.responseText);
+      }
+
+      drawtreeTabsHtml(result);
+//return
+      async.eachSeries(result, function(item, callbackEach) {
+
+        var jstreeOptions = {
+          openAll: false,
+          contextMenu: Composer.getContextJstreeMenu(),
+          selectTreeNodeFn: Composer.onSelectedNodeTreeclick
+
+        };
+
+
+        var tabId = item.objectLabel.value.replace(/\//g, "_");
+        var memberType = " in (rdf:Bag,rdf:List)";
+
+        var filter = "FILTER (?parentContainer=<" + item.object.value + ">)";
+
+        var jstreeDiv = self.getjstreeDiv(tabId);
+        var options = { jstreeOptions: jstreeOptions, tabId: tabId };
+        Lineage_containers.drawContainerJstree(source, filter, jstreeDiv, memberType, options, function(err, result) {
+          callbackEach();
+        });
+      });
+    });
+  };
+
+  self.getjstreeDiv = function(tabId) {
+    return "Composer_" + tabId + "treeDiv";
+  };
+
+  self.getContextJstreeMenu = function() {
+
+    var items = {};
+    items["NodeInfos"] = {
+      label: "Node infos",
+      action: function(_e) {
+        SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+      }
+    };
+    items["GraphNode"] = {
+      label: "Graph node",
+      action: function(_e) {
+        if (self.currentTreeNode.data.type == "container") {
+          Composer.graphResources(self.currentTreeNode.data.source, self.currentTreeNode.id, { onlyChildren: true });
+        }
+        else {
+          Composer.drawNodeAndParents(self.currentTreeNode.data, 0);
+        }
+      }
+    };
+    items["openAll"] = {
+      label: "Open all",
+      action: function(_e) {
+        $("#lineage_containers_containersJstree").jstree().open_all(self.currentTreeNode.id);
+      }
+    };
+
+
+
+
+
+    return items;
+  };
+
+  self.onSelectedNodeTreeclick = function(event, obj) {
+    self.currentTreeNode = obj.node;
+    var existingChildren = obj.node.children;
+    var source = self.currentTreeNode.data.source;
+    if (obj.event.button != 2) {
+      Lineage_containers.getContainerResources(source, self.currentTreeNode.id, { descendants: true }, function(err, result) {
+        if (err) {
+          return alert(err.responseText);
+        }
+        var jstreeData = [];
+        result.forEach(function(item) {
+          if (existingChildren.indexOf(item.object.value) < 0) {
+            existingChildren.push(item.object.value);
+
+            jstreeData.push({
+              id: item.object.value,
+              text: item.objectLabel.value,
+              parent: item.subject.value,
+              type: "class",
+              data: {
+                type: "resource",
+                source: source,
+                id: item.object.value,
+                label: item.objectLabel.value
+              }
+            });
+          }
+        });
+     /*   var jstreeData = [];
+        jstreeData.push({
+          id: "xxx",
+          text: "xxx",
+          parent:self.currentTreeNode.id,
+          type: "class",
+          data: {
+            type: "resource",
+            source: source,
+           // id: item.object.value,
+           // label: item.objectLabel.value
+          }
+        });*/
+
+        var jstreeDiv = event.currentTarget.id;
+
+     common.jstree.addNodesToJstree(jstreeDiv, self.currentTreeNode.id, jstreeData);
+      });
+    }
+
+  };
+
+
+  self.getTreeConfigByKey = function(key, value) {
+    for (var entry in self.treeConfigs) {
+      if (self.treeConfigs[entry][key] == value) {
+        return self.treeConfigs[entry];
+      }
+    }
+  };
+
 
   self.onChangeSourceSelect = function(source) {
     // self.resetMatrixPropertiesFilters();
@@ -573,13 +655,12 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
         };
 
 
-
-          items.visualize = {
-            label: "Visualize",
-            action: function(_e) {
-              Composer.visualizeAspect();
-            }
-          };
+        items.visualize = {
+          label: "Visualize",
+          action: function(_e) {
+            Composer.visualizeAspect();
+          }
+        };
 
         items.expand = {
           label: "expand",
@@ -651,13 +732,6 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
     }
 
 
-
-
-
-
-
-
-
   };
   self.showDataContainerDetails = function(node) {
     /* $("#Compose_nodeInfosDiv").load("snippets/Composer/dataContainer.html", function() {*/
@@ -701,47 +775,47 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
             var html =
               "<div  style='position: absolute;top:30px;left:450px;'>" +
               "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='visjsGraph.clearGraph()'> clear Graph</button>" +
-              "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='Export.exportGraphToDataTable(null,\"GRAPH\")' > Export</button>"+
-              "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick=\"Lineage_classes.addNodesAndParentsToGraph()\">Parents</button>"+
-              "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick=\"Lineage_classes.addChildrenToGraph()\">Expand</button>"+
-           //   "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onClick='visjsGraph.showGraphConfig()'>Display</button>";
-            ("</div>");
+              "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='Export.exportGraphToDataTable(null,\"GRAPH\")' > Export</button>" +
+              "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick=\"Lineage_classes.addNodesAndParentsToGraph()\">Parents</button>" +
+              "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick=\"Lineage_classes.addChildrenToGraph()\">Expand</button>" +
+              //   "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onClick='visjsGraph.showGraphConfig()'>Display</button>";
+              ("</div>");
             $("#centralPanelDiv").append(html);
           }
           return callbackSeries();
         },
         function(callbackSeries) {
           Lineage_containers.graphResources(source, self.currentTreeNode.id, { descendants: true }, function(err, result) {
-            /*  Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0, { drawBeforeCallback: 1 }, function(err, result) {*/
-            if (err) {
+              /*  Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0, { drawBeforeCallback: 1 }, function(err, result) {*/
+              if (err) {
+                return callbackSeries(err);
+              }
+              var newNodes = [];
+              var level1Offset = 150;
+              var level2Offset = 250;
+              var level3Offset = 300;
+              result.nodes.forEach(function(node) {
+                visjsNodes.push(node.id);
+
+
+                if (node.level == 1) {
+                  newNodes.push({ id: node.id, fixed: { y: true }, y: level1Offset });
+                  level1Offset += 20;
+
+                }
+                if (node.level == 2) {
+                  newNodes.push({ id: node.id, fixed: { y: true }, y: level2Offset });
+                  level2Offset += 20;
+                }
+                /*  else{
+                    newNodes.push({id:node.id, fixed:{y:true},y:level3Offset})
+                    level3Offset+=20
+                  }*/
+              });
+              visjsGraph.data.nodes.update(newNodes);
               return callbackSeries(err);
             }
-            var newNodes = [];
-            var level1Offset = 150;
-            var level2Offset = 250;
-            var level3Offset = 300;
-            result.nodes.forEach(function(node) {
-              visjsNodes.push(node.id);
-
-
-              if (node.level == 1) {
-                newNodes.push({ id: node.id, fixed: { y: true }, y: level1Offset });
-                level1Offset += 20;
-
-              }
-              if (node.level == 2) {
-                newNodes.push({ id: node.id, fixed: { y: true }, y: level2Offset });
-                level2Offset += 20;
-              }
-              /*  else{
-                  newNodes.push({id:node.id, fixed:{y:true},y:level3Offset})
-                  level3Offset+=20
-                }*/
-            });
-            visjsGraph.data.nodes.update(newNodes);
-            return callbackSeries(err);
-          }
-        )
+          )
           ;
         },
         function(callbackSeries) {
@@ -978,15 +1052,15 @@ $("#Compose_rightPanelTabs").tabs("option","active",0)*/
   };
 
 
-  self.visualizeAspect=function(node){
+  self.visualizeAspect = function(node) {
     if (!node) {
       node = self.currentRightpanelNode;
     }
 
-  return   self.showDataContainerDetails(node)
+    return self.showDataContainerDetails(node);
 
 
-  }
+  };
 
   self.getGraphPopupMenuItem = function() {
     var html =

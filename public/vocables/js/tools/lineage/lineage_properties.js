@@ -297,6 +297,7 @@ action: function (_e) {
                     if (!existingNodes[item.object.value]) {
                         existingNodes[item.object.value] = 1;
 
+
                         var shape = Lineage_classes.defaultShape;
 
                         var type = item.objectType.value;

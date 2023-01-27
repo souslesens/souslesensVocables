@@ -354,7 +354,7 @@ return str;
             withoutImports = self.withoutImports;
         }
         var imports = Config.sources[source].imports;
-        if (Lineage_sources.fromAllWhiteboardSources) {
+        if ( Lineage_sources.fromAllWhiteboardSources) {
             for (var source2 in Lineage_sources.loadedSources) {
                 if (source2 != source) {
                     var graphUri = Config.sources[source2].graphUri;

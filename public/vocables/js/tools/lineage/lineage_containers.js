@@ -160,10 +160,9 @@ Lineage_styles.showDialog(self.currentContainer.data);
             jstreeData.push(parentNode);
           }
         }
-        var memberType = "resource";
-        if (item.memberType && item.memberType.value.indexOf("Bag") > -1) {
-          memberType = "container";
-        }
+
+        var  memberType = "container";
+
         var node = {
           id: nodeId,
           text: item.memberLabel.value,
@@ -201,6 +200,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
           }
         };
       }
+
 
       common.jstree.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function() {
         $("#" + jstreeDiv).jstree().open_node("#");

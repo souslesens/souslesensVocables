@@ -2525,12 +2525,17 @@
 				if(i !== -1) {
 					i++;
 					for(j = m[obj.parent].children.length; i < j; i++) {
-						if(!m[m[obj.parent].children[i]].state.hidden) {
-							last_sibling = m[obj.parent].children[i];
-						}
-						if(last_sibling !== obj.id) {
-							break;
-						}
+					//	try {
+							if (!m[m[obj.parent].children[i]].state.hidden) {
+								last_sibling = m[obj.parent].children[i];
+							}
+							if (last_sibling !== obj.id) {
+								break;
+							}
+				/*		}
+						catch(e){
+							var x=3
+						}*/
 					}
 				}
 			}

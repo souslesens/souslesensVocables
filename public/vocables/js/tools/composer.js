@@ -45,6 +45,7 @@ var Composer = (function() {
 
 //init and draw tree div panels
     function drawtreeTabsHtml(result) {
+
       var html = "<div id = 'Composer_treePanelTabs' style='width:400px' >\n";
 
 
@@ -56,7 +57,7 @@ var Composer = (function() {
         liHtml += "<li id ='Composer_" + tabId + "Div'><a href='#Composer_" + tabId + "Panel'>" + tabId + "</a></li>\n";
         divHtml += "  <div className='max-height' id='Composer_" + tabId + "Panel'>" +
           "            <div className='Composer_tripleDiv'>" +
-          "                <div className='jstreeContainer Composer_tree'>" +
+          "                <div className='jstreeContainer composer_tree' style='height:500px'>" +
           "                    <div id='" + self.getjstreeDiv(tabId) + "'> </div>" +
           "                </div>" +
           "            </div>" +
@@ -97,6 +98,7 @@ var Composer = (function() {
 
         var jstreeDiv = self.getjstreeDiv(tabId);
         var options = { jstreeOptions: jstreeOptions, tabId: tabId };
+
         Lineage_containers.drawContainerJstree(source, filter, jstreeDiv, memberType, options, function(err, result) {
           callbackEach();
         });
@@ -121,17 +123,17 @@ var Composer = (function() {
       label: "Graph node",
       action: function(_e) {
         if (self.currentTreeNode.data.type == "container") {
-          Composer.graphResources(self.currentTreeNode.data.source, self.currentTreeNode.id, { onlyChildren: true });
+          Composer.drawDataContainerDetails( self.currentTreeNode, { onlyChildren: true });
         }
         else {
-          Composer.drawNodeAndParents(self.currentTreeNode.data, 0);
+          Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0);
         }
       }
     };
     items["openAll"] = {
       label: "Open all",
       action: function(_e) {
-        $("#lineage_containers_containersJstree").jstree().open_all(self.currentTreeNode.id);
+        $("#"+ self.currentTreeNode.data.jstreeDiv).jstree().open_all(self.currentTreeNode.id);
       }
     };
 
@@ -144,17 +146,21 @@ var Composer = (function() {
 
   self.onSelectedNodeTreeclick = function(event, obj) {
     self.currentTreeNode = obj.node;
+    var jstreeDiv = event.currentTarget.id;
+    self.currentTreeNode.data.jstreeDiv=jstreeDiv;
     var existingChildren = obj.node.children;
     var source = self.currentTreeNode.data.source;
     if (obj.event.button != 2) {
+
       Lineage_containers.getContainerResources(source, self.currentTreeNode.id, { descendants: true }, function(err, result) {
+        var children=$("#Composer_Application_ITdomaintreeDiv").jstree().get_json ( self.currentTreeNode.id  )
         if (err) {
           return alert(err.responseText);
         }
         var jstreeData = [];
         result.forEach(function(item) {
           if (existingChildren.indexOf(item.object.value) < 0) {
-            existingChildren.push(item.object.value);
+
 
             jstreeData.push({
               id: item.object.value,
@@ -170,23 +176,9 @@ var Composer = (function() {
             });
           }
         });
-     /*   var jstreeData = [];
-        jstreeData.push({
-          id: "xxx",
-          text: "xxx",
-          parent:self.currentTreeNode.id,
-          type: "class",
-          data: {
-            type: "resource",
-            source: source,
-           // id: item.object.value,
-           // label: item.objectLabel.value
-          }
-        });*/
-
-        var jstreeDiv = event.currentTarget.id;
 
      common.jstree.addNodesToJstree(jstreeDiv, self.currentTreeNode.id, jstreeData);
+
       });
     }
 
@@ -200,6 +192,359 @@ var Composer = (function() {
       }
     }
   };
+
+
+  self.drawDataContainerDetails = function(node) {
+
+    var level = self.currentTreeNode.parents.length - 1;
+    var dataContainerId;
+    if (!node) {
+      node = self.currentTreeNode;
+    }
+    if (level == 1) {
+      dataContainerId = node;
+    }
+    else {
+      return;
+      dataContainerId = node.parents[level - 1];
+    }
+
+    Sparql_common.includeImports = 1;
+    /// $("#KGpropertyFilter_display_dataContainerDiv").html(self.currentTreeNode.text)
+    var visjsNodes = [];
+    var source = node.data.source;
+    var rightPanelsNodeIds = [];
+    async.series(
+      [
+        function(callbackSeries) {
+          visjsGraph.clearGraph();
+          var options = {
+            skipColorGraphNodesByType: true,
+            physics: {
+              forceAtlas2Based: {
+                centralGravity: 0.45,
+                springLength: 110,
+                damping: 0.15
+              },
+              minVelocity: 0.75
+            }
+
+          };
+          Lineage_classes.drawNewGraph({ nodes: [], edges: [] }, null, options);
+          if (!self.graphButtonsInitialized) {
+            self.graphButtonsInitialized = 1;
+            var html =
+              "<div  style='position: absolute;top:30px;left:450px;'>" +
+              "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='visjsGraph.clearGraph()'> clear Graph</button>" +
+              "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='Export.exportGraphToDataTable(null,\"GRAPH\")' > Export</button>"+
+              "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick=\"Lineage_classes.addNodesAndParentsToGraph()\">Parents</button>"+
+              "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick=\"Lineage_classes.addChildrenToGraph()\">Expand</button>"+
+              //   "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onClick='visjsGraph.showGraphConfig()'>Display</button>";
+              ("</div>");
+            $("#centralPanelDiv").append(html);
+          }
+          return callbackSeries();
+        },
+
+        //draw  descendants container
+        function(callbackSeries) {
+          Lineage_containers.graphResources(source, self.currentTreeNode.id, { descendants: true }, function(err, result) {
+              /*  Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0, { drawBeforeCallback: 1 }, function(err, result) {*/
+              if (err) {
+                return callbackSeries(err);
+              }
+              var newNodes = [];
+              var level1Offset = 150;
+              var level2Offset = 250;
+              var level3Offset = 300;
+              result.nodes.forEach(function(node) {
+                visjsNodes.push(node.id);
+
+
+                if (node.level == 1) {
+                  newNodes.push({ id: node.id, fixed: { y: true }, y: level1Offset });
+                  level1Offset += 15;
+
+                }
+                if (node.level == 2) {
+                  newNodes.push({ id: node.id, fixed: { y: true }, y: level2Offset });
+                  level2Offset += 15;
+                }
+
+              });
+              visjsGraph.data.nodes.update(newNodes);
+              return callbackSeries(err);
+            }
+          )
+          ;
+        },
+
+        //draw  parent containers
+        function(callbackSeries) {
+          return callbackSeries()
+          Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], function(err, result) {
+            if (err) {
+              return callbackSeries(err);
+            }
+
+
+            var newNodes = [];
+            result.nodes.forEach(function(node) {
+              rightPanelsNodeIds.push(node.id);
+
+              newNodes.push({
+                id: node.id,
+                shape: "box",
+                color: "#bb8f00"
+              });
+            });
+            visjsGraph.data.nodes.update(newNodes);
+            var newEdges = [];
+            result.edges.forEach(function(edge) {
+              newEdges.push({
+                id: edge.id,
+                color: "#bb8f00"
+              });
+            });
+            visjsGraph.data.edges.update(newEdges);
+            return callbackSeries(err);
+          });
+        },
+
+        //parents container ancestors containers
+        function(callbackSeries) {
+          return callbackSeries()
+
+          if (rightPanelsNodeIds.length == 0) {
+            return callbackSeries();
+          }
+          var ancestorsDepth = 5;
+          Sparql_generic.getNodeParents(source, null, rightPanelsNodeIds, ancestorsDepth, { skipRestrictions: 1, memberPredicate: 1, excludeType: 1 }, function(err, result) {
+            if (err) {
+              return callbackSeries(err);
+            }
+            var existingNodes = visjsGraph.getExistingIdsMap();
+            var newNodesMap = {};
+            var uniqueNodesMap = {};
+            result.forEach(function(item) {
+              var itemParents = [];
+              itemParents.push({ id: item.concept.value, label: item.conceptLabel.value });
+              var rootId = null;
+              for (var i = 1; i < ancestorsDepth; i++) {
+                var parent = item["broader" + i];
+                if (!parent) {
+                  break;
+                }
+                var parentId = parent.value;
+                if (true || !uniqueNodesMap[parentId]) {
+                  uniqueNodesMap[parentId] = 1;
+                  itemParents.push({ id: parentId, label: item["broader" + i + "Label"].value });
+                  if (self.treeConfigTopUrisMap[parentId]) {
+                    rootId = parentId;
+
+                    if (!newNodesMap[self.treeConfigTopUrisMap[rootId]]) {
+                      newNodesMap[self.treeConfigTopUrisMap[rootId]] = [];
+                    }
+                    newNodesMap[self.treeConfigTopUrisMap[rootId]].push(itemParents);
+                    break;
+                  }
+                }
+              }
+            });
+            var visjsData = { nodes: [], edges: [] };
+
+
+            var xOffset = -300;
+            var yOffset = -350;
+            var xStep = 250;
+            for (var key in newNodesMap) {
+              var color = self.treeConfigs[key].color;
+              var conceptNodeId = newNodesMap[key].concept;
+
+              var from;
+              newNodesMap[key].forEach(function(path, index) {
+                visjsGraph.data.nodes.update({ id: path[0].id, color: color });
+                path.forEach(function(item, indexPath) {
+                  if (!existingNodes[item.id]) {
+                    existingNodes[item.id] = 1;
+                    var node = {
+                      id: item.id,
+                      label: item.label,
+                      shape: "box",
+                      color: color,
+                      data: {
+                        id: item.id,
+                        label: item.label,
+                        source: source
+                      }
+                    };
+                    if (indexPath == path.length - 1) {
+                      node.fixed = { x: true, y: true };
+                      node.x = xOffset;
+                      node.y = yOffset;
+                      xOffset += xStep;
+                    }
+                    visjsData.nodes.push(node);
+                  }
+                  if (indexPath == 0) {
+                    return;
+                  }
+                  from = item.id;
+                  var to = path[indexPath - 1].id;
+
+                  var edgeId = from + "_" + to;
+                  if (!existingNodes[edgeId]) {
+                    existingNodes[edgeId] = 1;
+                    visjsData.edges.push({
+                      id: edgeId,
+                      from: from,
+                      to: to,
+                      arrows: "middle",
+                      color: color,
+                      data: {
+                        id: edgeId,
+                        from: from,
+                        to: to,
+                        source: source
+                      }
+                    });
+                  }
+                });
+
+              });
+
+            }
+
+            visjsGraph.data.nodes.add(visjsData.nodes);
+            visjsGraph.data.edges.add(visjsData.edges);
+            return callbackSeries();
+          });
+
+
+        },
+
+
+        function(callbackSeries) {
+          return callbackSeries();
+          var properties = ["rdfs:member"];
+          var options = { inversePredicate: 1 };
+          Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function(err, result) {
+            return callbackSeries(err);
+          });
+        },
+        function(callbackSeries) {
+          return callbackSeries()
+          var properties = ["http://datalenergies.total.com/resource/tsf/idcp/mapsWith"];
+          var options = {};
+          Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function(err, result) {
+            if (err) {
+              return callbackSeries(err);
+            }
+            var xOffset = 300;
+            var yOffset = 400;
+            var xStep = 250;
+            var newNodes = [];
+            result.nodes.forEach(function(node) {
+              var newNode = {
+                id: node.id,
+                fixed: { y: true },
+                y: yOffset
+              };
+              if (true || node.id.indexOf("gidea") > -1) {
+                newNode.shape = "square";
+                newNode.color = "#70309f";
+              }
+
+              if (node.id.indexOf("business") > -1) {
+                newNode.shape = "star";
+                newNode.color = "#f90edd";
+              }
+              newNodes.push(newNode);
+            });
+            visjsGraph.data.nodes.update(newNodes);
+
+
+            return callbackSeries(err);
+
+
+          });
+        },
+        function(callbackSeries) {
+          //post processing vis
+          return callbackSeries()
+          var nodes = visjsGraph.data.nodes.get();
+
+          var newNodes = [];
+          nodes.forEach(function(node) {
+            var shape = null;
+            var color = null;
+            if (node.level === 0) {
+              shape = "box";
+              color = "#70ac47";
+              node.data.graphPopupMenusFn = KGpropertyFilter.getGraphPopupMenuItem;
+            }
+            if (node.level === 1) {
+              shape = "box";
+              color = "#00afef";
+              node.data.graphPopupMenusFn = KGpropertyFilter.getGraphPopupMenuItem;
+            }
+            if (node.level === 2) {
+              node.data.graphPopupMenusFn = KGpropertyFilter.getGraphPopupMenuItem;
+            }
+
+
+            if (shape != null) {
+              newNodes.push({ id: node.id, shape: shape, color: color });
+            }
+          });
+          visjsGraph.data.nodes.update(newNodes);
+          return callbackSeries();
+        }
+      ],
+      function(err) {
+        if (err) {
+          return alert(err.responseText);
+        }
+      }
+    );
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   self.onChangeSourceSelect = function(source) {

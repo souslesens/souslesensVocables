@@ -274,17 +274,14 @@ var common = (function() {
             self.jstree.setTreeAppearance();
             $("#" + jstreeDiv)
               .jstree(true)
-              .open_node(parentNodeId_, null, 500);
+              .open_node(parentNodeId, null, 500);
           });
       });
-      setTimeout(function() {
-        /*
-    self.jstree.setTreeAppearance();
-//   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);*/
+  /*    setTimeout(function() {
         $("#" + jstreeDiv)
           .jstree(true)
-          .open_node(parentNodeId_, null, 500);
-      }, 500);
+          .open_node(parentNodeId, null, 500);
+      }, 500);*/
     },
 
     deleteNode: function(jstreeDiv, nodeId) {

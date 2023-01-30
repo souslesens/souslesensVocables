@@ -1797,13 +1797,16 @@ common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "lab
         if (!types) {
           types = ["OWL"];
         }
-        $("#sourcesSelectionDialogdiv").on("dialogopen", function(event, ui) {
+        var sourcesSelectionDialogdiv="sourcesSelectionDialogdiv"
+        if(options.sourcesSelectionDialogdiv)
+          sourcesSelectionDialogdiv=options.sourcesSelectionDialogdiv
+
+        $("#"+sourcesSelectionDialogdiv).on("dialogopen", function(event, ui) {
           $("#Lineage_classes_SearchSourceInput").val("");
           MainController.UI.showSources("searchAll_sourcesTree", false, sources, types, jstreeOptions);
         });
 
-        var xx = $("#sourcesSelectionDialogdiv").length;
-        $("#sourcesSelectionDialogdiv").dialog("open");
+        $("#"+sourcesSelectionDialogdiv).dialog("open");
         $("#Lineage_classes_SearchSourceInput").focus();
         if (okButtonValidateFn) {
           $("#searchAllValidateButton").bind("click", okButtonValidateFn);
@@ -1830,7 +1833,7 @@ common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "lab
       }
     }
     else {
-      $("#sourcesSelectionDialogdiv").dialog("open");
+      $("#"+sourcesSelectionDialogdiv).dialog("open");
       $("#Lineage_classes_SearchSourceInput").focus();
       /*  if ($("#searchAll_sourcesTree").jstree())
 $("#searchAll_sourcesTree").jstree().uncheck_all();*/

@@ -952,7 +952,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
             }
         },
 
-        searchIndividual: function () {
+     /*   searchIndividual: function () {
             var term = prompt("Individual contains...");
             if (!term) return;
             var options = {
@@ -978,7 +978,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                 });
                 common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", individuals, true, "label", "id");
             });
-        },
+        }*/
     };
 
     self.OnSelectAuthorizedPredicatesTreeDiv = function (event, obj) {

@@ -113,34 +113,54 @@ var KGcreator = (function () {
     };
 
     self.showSourcesDialog = function (callback) {
-        $("#KGcreator_csvTreeDiv").empty();
-        $("#KGcreator_csvDirsSelect").val("_default");
+        if (Config.tools["KGcreator"].urlParam_source) {
+           return  self.initSource(Config.tools["KGcreator"].urlParam_source,callback)
+        }
 
-        SourceBrowser.searchableSourcesTreeIsInitialized = null;
-        $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").load("./snippets/searchAll.html", function () {
-            //    $("#sourceDivControlPanelDiv").load("./snippets/searchAll.html", function () {
-            SourceBrowser.showSearchableSourcesTreeDialog(["OWL"], { includeSourcesWithoutSearchIndex: true }, function () {
-                var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
-                $("#sourcesSelectionDialogdiv").dialog("close");
+       var html=" <div id=\"sourcesSelectionDialogdiv\" style=\"margin-bottom: 10px\">\n" +
+         "            <button className=\"btn btn-sm my-1 py-0 btn-outline-primary\" onClick=\"$('#sourcesSelectionDialogdiv').dialog('close')\">Cancel</button>\n" +
+         "            <button className=\"btn btn-sm my-1 py-0 btn-outline-primary\" id=\"searchAllValidateButton\">OK</button>\n" +
+         "            <div>Search : <input id=\"Lineage_classes_SearchSourceInput\" value=\"\" style=\"width: 200px; font-size: 12px; margin: 3px; padding: 3px\" /></div>\n" +
+         "            <div id=\"sourcesTreeDivContainer\" style=\"overflow: auto\" className=\"jstreeContainerXX XXXmax-height\">\n" +
+         "                <div className=\"jstreeContainer\" style=\"width: 360px; height: 600px; overflow: auto; margin-top: 5px\">\n" +
+         "                    <div id=\"searchAll_sourcesTree\"></div>\n" +
+         "                </div>\n" +
+         "            </div>\n" +
+         "        </div>"
+        $("#mainDialogDiv").html(html);
+
+        var options={
+            includeSourcesWithoutSearchIndex: true,
+            sourcesSelectionDialogdiv:"mainDialogDiv"
+        }
+            SourceBrowser.showSearchableSourcesTreeDialog(["OWL"], options, function () {
                 $("#mainDialogDiv").dialog("close");
-                self.currentSource = source;
-                Config.currentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromImports(source);
+                var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
+                self.initSource(source,callback);
 
-                self.currentGraphUri = Config.sources[source].graphUri;
-                if (!Config.currentTopLevelOntology) {
-                    return alert("Source must have an upper ontology import");
-                }
-                $("#KGcreator_owlSourceInput").html(source);
-                self.currentSlsvSource = source;
-                $("#KGcreator_topLevelOntologiesInput").html(Config.currentTopLevelOntology);
-                self.topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
-                if (callback) {
-                    callback(null);
-                }
             });
-        });
     };
+
+
+
+    self.initSource=function(source,callback){
+        self.currentSource = source;
+        Config.currentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromImports(source);
+
+        self.currentGraphUri = Config.sources[source].graphUri;
+        if (!Config.currentTopLevelOntology) {
+            return alert("Source must have an upper ontology import");
+        }
+        $("#KGcreator_owlSourceInput").html(source);
+        self.currentSlsvSource = source;
+        $("#KGcreator_topLevelOntologiesInput").html(Config.currentTopLevelOntology);
+        self.topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
+
+        if (callback) {
+            callback(null);
+        }
+
+    }
     self.onChangeSourceTypeSelect = function (sourceType, callback) {
         self.currentSourceType = sourceType;
         if (sourceType == "CSV") {

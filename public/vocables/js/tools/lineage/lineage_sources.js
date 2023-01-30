@@ -25,7 +25,7 @@ Lineage_sources = (function() {
     self.resetVisjsGraph();
     Lineage_selection.selectedNodes = [];
     self.setTheme(Config.defaultGraphTheme);
-    if (!Lineage_sources.noSourceDialogAtInit) {
+    if (!Config.tools["lineage"].noSourceDialogAtInit) {
       Lineage_sources.showSourcesDialog();
     }
   };
@@ -41,13 +41,12 @@ Lineage_sources = (function() {
   };
 
   self.showSourcesDialog = function() {
-    if (window.parent && window.parent.Ontocommons) {
-      // called from outside (iframe)
-      var calledSource = window.parent.Ontocommons.currentSource;
-      if (calledSource) {
-        return self.setCurrentSource(calledSource);
-      }
+
+    if (Config.tools["lineage"].urlParam_source) {
+      return  self.loadSources(Config.tools["lineage"].urlParam_source)
     }
+
+
 
     SourceBrowser.showSearchableSourcesTreeDialog(
       ["OWL", "SKOS"],

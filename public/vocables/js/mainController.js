@@ -683,25 +683,16 @@ return;*/
       var tool = paramsMap["tool"]
 
       if (tool) {
-        if(tool=="lineage"){
-          Lineage_sources.noSourceDialogAtInit=true
+        var source = paramsMap["source"]
+        if (source) {
+          Config.tools[tool].urlParam_source = source
         }
-
-          self.UI.initTool(tool, function() {
-            var source = paramsMap["source"]
-            if (source && tool=="lineage") {
-              Lineage_sources.loadSources(source);
-            }
-
-          })
-
+        self.UI.initTool(tool, function() {
+          callback()
+        })
 
       }
-      callback()
-
-
     }
-
   }
 
   return self;

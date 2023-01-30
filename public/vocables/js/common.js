@@ -480,15 +480,18 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
 
     if (data.length > Config.maxSelectListSize) {
       $("#" + selectId).attr("data-classes", JSON.stringify(data));
-      $("#" + selectId).append(
+      $("#" + selectId ).attr("data-classes", JSON.stringify(data));
+      $("#" + selectId).html(
         $("<option>", {
           text: "search value...",
           value: "_search"
 
         })
       );
-      $("#" + selectId).bind("change", function() {
-        if ($(this).val() == "_search") {
+
+      $("#" + selectId).bind("click", function() {
+        $("#" + selectId).unbind("click")
+        if ( $(this).val() == "_search") {
           event.preventDefault();
           var str = prompt(" enter label ...")
           str=str.toLowerCase()
@@ -499,7 +502,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
               if (item.label.toLowerCase().indexOf(str) > -1)
                 filteredData.push(item);
             })
-
+          $("#" + selectId).unbind("change")
           self.fillSelectOptions (selectId, filteredData, withBlanckOption, textfield, valueField, selectedValue) ;
         }
 

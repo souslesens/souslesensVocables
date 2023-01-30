@@ -1344,7 +1344,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
     if (!options) {
       options = {};
     }
-    var fromStr = Sparql_common.getFromStr(sourceLabel, options.withGraph);
+    var fromStr = Sparql_common.getFromStr(sourceLabel, options.withGraph,options.withoutImports);
     var query =
       "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> " +
       "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +

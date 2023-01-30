@@ -15,17 +15,8 @@ var Lineage_blend = (function () {
                         if (err) {
                             return alert(err.responseText);
                         }
-                        // self.currentPossibleClassesAndPredicates = result;
-                        /*   common.fillSelectOptions("lineage_selection_modifyPredicate_propertySelect", result.predicates, true, "label", "id");
 
-Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, function (err, result) {
-if (err) return alert(err.responseText);
-if (!Config.sources[Lineage_sources.activeSource].allowIndividuals) {
-$("#LineageBlend_creatingNamedIndividualButton").css("display", "none");
-}
 
-var allObjects = result.sourceObjects.concat(["---------"]).concat(result.TopLevelOntologyObjects).concat(["---------"]).concat(result.usualObjects);
-*/
                         common.fillSelectOptions("KGcreator_predicateSelect", result.predicates, true, "label", "id");
                         common.fillSelectOptions("KGcreator_objectSelect", result.objectClasses, true, "label", "id");
                         common.fillSelectOptions("LineageBlend_creatingNodePredicatesSelect", result.predicates, true, "label", "id");

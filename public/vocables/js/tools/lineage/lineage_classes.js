@@ -95,7 +95,7 @@ sourceLabels.sort();
           autoOpen: false,
           height: 600,
           width: 600,
-          modal: true
+          modal: false
         });
         $("#Lineage_Tabs").tabs({
           activate: function(/** @type {any} */ e, /** @type {{ newPanel: { selector: any; }; }} */ ui) {
@@ -552,7 +552,7 @@ sourceLabels.sort();
       options.edges = _options.edges;
     }
 
-    if (Lineage_sources.isSourceEditable(Lineage_sources.activeSource)) {
+    if (true || Lineage_sources.isSourceEditable(Lineage_sources.activeSource)) {
       // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
       options.manipulation = {
         enabled: true,
@@ -1171,7 +1171,7 @@ addNode:false
     );
   };
 
-  self.addNodesAndParentsToGraph = function(/** @type {any} */ source, /** @type {any} */ nodeIds, options, /** @type {(arg0: undefined) => void} */ callback) {
+  self.addNodesAndParentsToGraph = function(source,  nodeIds, options,  callback) {
     if (!nodeIds) {
       if (!source) {
         source = Lineage_sources.activeSource;
@@ -2354,6 +2354,8 @@ addNode:false
    * @returns {void|*}
    */
   self.drawNodeAndParents = function(nodeData, ancestorsDepth, options, callback) {
+
+
     function drawNodeAndparent(result) {
       var visjsData = { nodes: [], edges: [] };
       var color = self.getSourceColor(nodeData.source);

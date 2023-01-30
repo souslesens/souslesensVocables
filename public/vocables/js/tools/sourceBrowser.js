@@ -1627,7 +1627,10 @@ common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "lab
         if (err) {
           return alert(err.responseText);
         }
+
         common.fillSelectOptions("sourceBrowser_addPropertyPredicateSelect", result.predicates, true, "label", "id");
+
+
         self.SourcePossiblePredicatesAndObject = result;
       });
     });

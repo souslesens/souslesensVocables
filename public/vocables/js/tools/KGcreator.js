@@ -615,7 +615,7 @@ var KGcreator = (function () {
             [
                 function (callbackSeries) {
                     self.getSourcePropertiesAndObjectLists(self.currentSource, topLevelOntology, function (err, result) {
-                        currentObjectClasses = currentObjectClasses.concat(result.objectClasses);
+                            currentObjectClasses = currentObjectClasses.concat(result.objectClasses);
                         currentPredicates = result.predicates;
                         callbackSeries();
                     });
@@ -1291,6 +1291,8 @@ if (selectedFiles.length > 0);*/
                             }
                             return 0;
                         });
+
+
                         result.forEach(function (item) {
                             if (!item.id) {
                                 return;
@@ -1353,12 +1355,14 @@ if (selectedFiles.length > 0);*/
                     });
                 },
 
-                //get source specific properties and Classes
+                //get source specific properties
                 function (callbackSeries) {
                     Sparql_OWL.listObjectProperties(source, null, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
+
+
 
                         result.forEach(function (item) {
                             sourceSpecificPredicates.push({

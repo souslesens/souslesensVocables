@@ -588,7 +588,8 @@ Lineage_styles.showDialog(self.currentContainer.data);
                             existingNodes[item.parentMember.value] = 1;
                             var type;
                             var color2 = color;
-                            if (item.parentMemberType && item.parentMemberType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
+                           // if (item.parentMemberType && item.parentMemberType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
+                               if (!item.leafType) {
                                 type = "container";
                                 color2 = common.colorToRgba(color, opacity * 0.75);
                             } else {
@@ -795,26 +796,35 @@ Lineage_styles.showDialog(self.currentContainer.data);
         getContainerDescendants: function (source, containerId, options, callback) {
             var fromStr = Sparql_common.getFromStr(source, false, true);
             var filterContainer0Str = Sparql_common.setFilter("container0", containerId);
+
+            var where0= " ?container0  rdf:type ?container0Type.filter(?container0Type in (rdf:Bag,rdf:List))" +
+              "optional{?container0 rdfs:label ?container0Label.}"+"  ?container0 <http://www.w3.org/2000/01/rdf-schema#member> ?parentMember. " +
+              "optional{?parentMember rdfs:label ?parentMemberLabel.}" + "?parentMember rdf:type ?parentMemberType.";
+
+            if (options.descendants) {
+                where0 +=
+                  "  ?parentMember <http://www.w3.org/2000/01/rdf-schema#member>* ?childMember. " +
+                  "optional{?childMember rdfs:label ?childMemberLabel.}" +
+                  "?childMember rdf:type ?childMemberType." +
+                  "?parent rdfs:member ?childMember. ";
+            }
+            where0 += filterContainer0Str;
+
+
+
             var query =
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "select distinct *     " +
                 fromStr +
-                " WHERE { ?container0  rdf:type ?container0Type.filter(?container0Type in (rdf:Bag,rdf:List))" +
-                "optional{?container0 rdfs:label ?container0Label.}";
+                " WHERE {"
 
-            query +=
-                "  ?container0 <http://www.w3.org/2000/01/rdf-schema#member> ?parentMember. " + "optional{?parentMember rdfs:label ?parentMemberLabel.}" + "?parentMember rdf:type ?parentMemberType.";
 
-            if (options.descendants) {
-                query +=
-                    "  ?parentMember <http://www.w3.org/2000/01/rdf-schema#member>* ?childMember. " +
-                    "optional{?childMember rdfs:label ?childMemberLabel.}" +
-                    "?childMember rdf:type ?childMemberType." +
-                    "?parent rdfs:member ?childMember. ";
-            }
-            query += filterContainer0Str;
+            query +="{"+where0+" FILTER (?childMemberType in (rdf:Bag,rdf:List))}"
+            query+=" UNION "
+            query +="{"+where0+" FILTER (?childMemberType not in (rdf:Bag,rdf:List)) bind (?childMemberType as ?leafType)}"
+
 
             query += "} limit 10000";
 

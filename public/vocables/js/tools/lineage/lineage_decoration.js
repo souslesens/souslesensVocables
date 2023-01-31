@@ -235,6 +235,7 @@ var Lineage_decoration = (function () {
     };
 
     self.colorGraphNodesByType = function (visjsNodes) {
+        self.incomingQuery=Sparql_proxy.currentQuery
         if (!Lineage_sources.activeSource) {
             return;
         }
@@ -387,9 +388,7 @@ var Lineage_decoration = (function () {
                             newNodes.push({ id: nodeId, color: obj.color, legendType: obj.type });
                         }
 
-                        /*
-var source2 = nodesTypesMap[node.data.id].graphUri ? Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri) : source;
-if (source2) node.data.source = source2;*/
+
                     }
 
                     for (var individualId in individualNodes) {
@@ -408,6 +407,7 @@ if (source2) node.data.source = source2;*/
                 },
                 function (callbackSeries) {
                     self.drawLegend();
+                   Sparql_proxy.currentQuery= self.incomingQuery;
                     callbackSeries();
                 },
             ],

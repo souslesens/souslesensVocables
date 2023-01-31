@@ -193,6 +193,14 @@ var MainController = (function () {
             async.series(
                 [
                     function (callbackSeries) {
+                        var paramsMap = common.getUrlParamsMap();
+                        if(paramsMap.sourcesFile){
+                            Config.currentProfile.sourcesFile=paramsMap.sourcesFile
+                        }
+                        callbackSeries();
+
+                    },
+                    function (callbackSeries) {
                         MainController.loadSources(null, function (_err, _result) {
                             callbackSeries(_err);
                         });
@@ -209,12 +217,13 @@ var MainController = (function () {
                         MainController.UI.showToolsList("toolsTreeDiv");
                         callbackSeries();
                     },
-
                     function (callbackSeries) {
-                        MainController.parseUrlParam(function () {
+                        MainController.parseUrlParam(function(){
                             callbackSeries();
-                        });
+                        })
                     },
+
+
                 ],
                 function (_err) {
                     MainController.UI.configureUI();
@@ -658,7 +667,9 @@ return;*/
     };
 
     self.parseUrlParam = function (callback) {
+
         var paramsMap = common.getUrlParamsMap();
+
         if (paramsMap.tool) {
             var tool = paramsMap["tool"];
 
@@ -672,6 +683,8 @@ return;*/
                 });
             }
         }
+
+
     };
 
     return self;

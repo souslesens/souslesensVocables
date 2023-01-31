@@ -478,17 +478,10 @@ var common = (function() {
         );
       }
 
+
+      // manage long data in select options
       if (data.length > Config.maxSelectListSize) {
-
-
         $("#" + selectId).attr("data-classes", JSON.stringify(data));
-        /*  $("#" + selectId).html(
-            $("<option>", {
-              text: "",
-              value: ""
-
-            })
-          )*/
 
         $("#" + selectId).html(
           $("<option>", {
@@ -496,20 +489,9 @@ var common = (function() {
             value: "_search"
 
           }));
-
-
         $("#" + selectId).bind("click", function(event) {
-
-
           var optionText = event.currentTarget.outerText;
-          /*   var e = document.getElementById(selectId);
-             var index=e.selectedIndex
-             var value = e[index].value;*/
-
           var value = $(this).val();
-          console.log("--------" + value);
-
-          //   $("#" + selectId).unbind("click")
           if (value == "_search") {
             event.preventDefault();
             var str = prompt(" enter label ...");
@@ -528,20 +510,8 @@ var common = (function() {
 
             self.fillSelectOptions(selectId, filteredData, withBlanckOption, textfield, valueField, selectedValue);
 
-
-            /*  $("#" + selectId).html(
-                $("<option>", {
-                  text: "search value...",
-                  value: "_search"
-
-                })
-              )*/
           }
-
-
         });
-
-
         return;
       }
 

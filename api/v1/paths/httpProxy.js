@@ -32,7 +32,6 @@ module.exports = function () {
                 }
 
                 if (body.copyGraphToEndPoint) {
-                    const GraphTraversal = require("../../../bin/graphTraversal.");
                     ExportGraph.copyGraphToEndPoint(body.source, body.toEndPointConfig, body.options, function (err, result) {
                         processResponse(res, err, result);
                     });

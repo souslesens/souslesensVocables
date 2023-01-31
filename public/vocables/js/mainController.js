@@ -194,11 +194,10 @@ var MainController = (function () {
                 [
                     function (callbackSeries) {
                         var paramsMap = common.getUrlParamsMap();
-                        if(paramsMap.sourcesFile){
-                            Config.currentProfile.sourcesFile=paramsMap.sourcesFile
+                        if (paramsMap.sourcesFile) {
+                            Config.currentProfile.sourcesFile = paramsMap.sourcesFile;
                         }
                         callbackSeries();
-
                     },
                     function (callbackSeries) {
                         MainController.loadSources(null, function (_err, _result) {
@@ -218,12 +217,10 @@ var MainController = (function () {
                         callbackSeries();
                     },
                     function (callbackSeries) {
-                        MainController.parseUrlParam(function(){
+                        MainController.parseUrlParam(function () {
                             callbackSeries();
-                        })
+                        });
                     },
-
-
                 ],
                 function (_err) {
                     MainController.UI.configureUI();
@@ -667,7 +664,6 @@ return;*/
     };
 
     self.parseUrlParam = function (callback) {
-
         var paramsMap = common.getUrlParamsMap();
 
         if (paramsMap.tool) {
@@ -683,8 +679,6 @@ return;*/
                 });
             }
         }
-
-
     };
 
     return self;

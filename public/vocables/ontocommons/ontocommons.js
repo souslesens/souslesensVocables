@@ -1,6 +1,4 @@
-
-
-var  Config={}
+var Config = {};
 var Ontocommons = (function () {
     var self = {};
     var apiKey = "019adb70-1d64-41b7-8f6e-8f7e5eb54942";
@@ -75,7 +73,7 @@ var Ontocommons = (function () {
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-                $("#slsv_iframe").attr("src", window.location.origin + "/vocables/?sourcesFile=ontocommonsSources.json&tool=lineage&source="+ontologyId);
+                $("#slsv_iframe").attr("src", window.location.origin + "/vocables/?sourcesFile=ontocommonsSources.json&tool=lineage&source=" + ontologyId);
             },
             error(err) {
                 alert(err.responseText);

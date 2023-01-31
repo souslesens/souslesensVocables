@@ -147,19 +147,36 @@ var CsvTripleBuilder = {
                             async.eachSeries(
                                 mapping.lookups,
                                 function (lookup, callbackEachLookup) {
-                                    var lookupFilePath = lookup.filePath;
+                                    if (mapping.csvDataFilePath) {
+                                        var lookupFilePath = lookup.filePath;
 
-                                    CsvTripleBuilder.readCsv(lookupFilePath, null, function (err, result) {
-                                        if (err) return callbackEachLookup(err);
-                                        var lookupLines = result.data[0];
-                                        lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
-                                        lookupLines.forEach(function (line, index) {
-                                            if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) return console.log("missing lookup line" + index + " " + lookupFilePath);
-                                            lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
+                                        CsvTripleBuilder.readCsv(lookupFilePath, null, function (err, result) {
+                                            if (err) return callbackEachLookup(err);
+                                            var lookupLines = result.data[0];
+                                            lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
+                                            lookupLines.forEach(function (line, index) {
+                                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) return console.log("missing lookup line" + index + " " + lookupFilePath);
+                                                lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
+                                            });
+
+                                            callbackEachLookup();
                                         });
+                                    } else if (mapping.databaseSource) {
+                                        var sqlQuery = "select distinct " + lookup.sourceColumn + "," + lookup.targetColumn + " from " + lookup.fileName;
+                                        sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
+                                            if (err) return callbackEachLookup(err);
+                                            var lookupLines = result;
+                                            lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
+                                            lookupLines.forEach(function (line, index) {
+                                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) return console.log("missing lookup line" + index + " " + lookupFilePath);
 
-                                        callbackEachLookup();
-                                    });
+                                                // lookUpMap[lookup.name].dictionary[util.formatStringForTriple(line[lookup.sourceColumn],true)] =util.formatStringForTriple( line[lookup.targetColumn],true);
+                                                lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
+                                            });
+
+                                            callbackEachLookup();
+                                        });
+                                    }
                                 },
                                 function (err) {
                                     callbackSeries(err);
@@ -224,7 +241,9 @@ var CsvTripleBuilder = {
                                         }
                                     }
                                 });
-                                if (target == null) var x = 3;
+                                if (target == null) {
+                                    var x = 3;
+                                }
                                 return target;
                             }
 

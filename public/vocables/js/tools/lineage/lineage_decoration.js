@@ -235,7 +235,7 @@ var Lineage_decoration = (function () {
     };
 
     self.colorGraphNodesByType = function (visjsNodes) {
-        self.incomingQuery=Sparql_proxy.currentQuery
+        self.incomingQuery = Sparql_proxy.currentQuery;
         if (!Lineage_sources.activeSource) {
             return;
         }
@@ -387,8 +387,6 @@ var Lineage_decoration = (function () {
                         if (obj) {
                             newNodes.push({ id: nodeId, color: obj.color, legendType: obj.type });
                         }
-
-
                     }
 
                     for (var individualId in individualNodes) {
@@ -407,7 +405,7 @@ var Lineage_decoration = (function () {
                 },
                 function (callbackSeries) {
                     self.drawLegend();
-                   Sparql_proxy.currentQuery= self.incomingQuery;
+                    Sparql_proxy.currentQuery = self.incomingQuery;
                     callbackSeries();
                 },
             ],

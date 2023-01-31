@@ -258,6 +258,28 @@ var Lineage_query = (function() {
 
       }
     };
+    items.graphNode = {
+      label: "graph Node",
+      action: function(_e) {
+        // pb avec source
+        var selectedNodes = $("#lineageQuery_listResultDivTree").jstree().get_selected(true);
+        if (selectedNodes.length > 1) {
+          async.eachSeries(selectedNodes, function(node, callbackEach) {
+            Lineage_classes.drawNodeAndParents(node.data, 0, null, function(err, result) {
+
+              callbackEach(err);
+            });
+          }, function(err) {
+            if (err) {
+              return alert(err.responseText);
+            }
+          });
+        }
+        else {
+          Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0);
+        }
+      }
+    };
     return items;
   };
 

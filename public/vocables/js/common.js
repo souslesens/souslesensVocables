@@ -9,507 +9,541 @@
  */
 
 var common = (function() {
-  var self = {};
+    var self = {};
 
-  self.jstree = {
-    types: {
-      tool: {
-        icon: "../icons/tool.png"
-      },
-      SKOS: {
-        icon: "../icons/thesaurus.png"
-      },
-      OWL: {
-        icon: "../icons/ontology.png"
-      },
+    self.jstree = {
+      types: {
+        tool: {
+          icon: "../icons/tool.png"
+        },
+        SKOS: {
+          icon: "../icons/thesaurus.png"
+        },
+        OWL: {
+          icon: "../icons/ontology.png"
+        },
 
-      class: {
-        icon: "../icons/class.png"
-      },
-      concept: {
-        icon: "../icons/concept.png"
-      },
-      collection: {
-        icon: "../icons/collection.png"
-      },
-      default: {
-        icon: "../icons/default.png"
-      },
-      "owl:Class": {
-        li_attr: { style: "color:black" },
-        icon: "../icons/class.png"
-      },
-      "owl:ObjectProperty": {
-        icon: "../icons/property.png"
-      },
-      "owl:Restriction": {
-        icon: "../icons/restriction.png"
-      },
-      "owl:table": {
-        icon: "../icons/table.png"
-      },
-      importedClass: {
-        li_attr: { style: "color:#ccc" },
-        icon: "../icons/externalObject.png"
-      },
-      importedProperty: {
-        li_attr: { style: "color:#ccc" },
-        icon: "../icons/externalObject.png"
-      },
-      importedRestriction: {
-        li_attr: { style: "color:#ccc" },
-        icon: "../icons/externalObject.png"
-      },
-      Class: {
-        li_attr: { style: "color:black" },
-        icon: "../icons/class.png"
-      },
-      Property: {
-        li_attr: { style: "color:black" },
-        icon: "../icons/property.png"
-      }
-    },
-    loadJsTree: function(jstreeDiv, jstreeData, options, callback) {
-      var jstreeData2 = [];
-      jstreeData.forEach(function(item) {
-        if (item.parent != item.id) {
-          jstreeData2.push(item);
+        class: {
+          icon: "../icons/class.png"
+        },
+        concept: {
+          icon: "../icons/concept.png"
+        },
+        collection: {
+          icon: "../icons/collection.png"
+        },
+        default: {
+          icon: "../icons/default.png"
+        },
+        "owl:Class": {
+          li_attr: { style: "color:black" },
+          icon: "../icons/class.png"
+        },
+        "owl:ObjectProperty": {
+          icon: "../icons/property.png"
+        },
+        "owl:Restriction": {
+          icon: "../icons/restriction.png"
+        },
+        "owl:table": {
+          icon: "../icons/table.png"
+        },
+        importedClass: {
+          li_attr: { style: "color:#ccc" },
+          icon: "../icons/externalObject.png"
+        },
+        importedProperty: {
+          li_attr: { style: "color:#ccc" },
+          icon: "../icons/externalObject.png"
+        },
+        importedRestriction: {
+          li_attr: { style: "color:#ccc" },
+          icon: "../icons/externalObject.png"
+        },
+        Class: {
+          li_attr: { style: "color:black" },
+          icon: "../icons/class.png"
+        },
+        Property: {
+          li_attr: { style: "color:black" },
+          icon: "../icons/property.png"
         }
-      });
-      jstreeData = jstreeData2;
-
-      if (!options) {
-        options = {};
-      }
-
-      var plugins = [];
-      if (!options.cascade) {
-        options.cascade = "xxx";
-      }
-      if (options.selectDescendants) {
-        options.cascade = "down";
-      }
-      if (options.withCheckboxes) {
-        plugins.push("checkbox");
-      }
-      if (options.searchPlugin) {
-        plugins.push("search");
-      }
-
-      if (options.contextMenu) {
-        // $(".jstree-contextmenu").css("z-index",100)
-        plugins.push("contextmenu");
-      }
-      if (options.dnd) {
-        plugins.push("dnd");
-      }
-      plugins.push("types");
-
-      var check_callbackFn = function(op, node, parent, position, more) {
-        if (op == "move_node" && options.dropAllowedFn) {
-          return options.dropAllowedFn(op, node, parent, position, more);
-        }
-        else {
-          return true;
-        }
-      };
-
-      if ($("#" + jstreeDiv).jstree) {
-        $("#" + jstreeDiv).jstree("destroy");
-      }
-      $("#" + jstreeDiv)
-        .jstree({
-          /* "checkbox": {
-"keep_selected_style": false
-},*/
-          plugins: plugins,
-          core: {
-            data: jstreeData,
-            check_callback: check_callbackFn
-          },
-          dnd: options.dnd,
-          search: options.searchPlugin,
-          checkbox: {
-            tie_selection: options.tie_selection,
-            whole_node: false
-          },
-          types: common.jstree.types,
-
-          contextmenu: { items: options.contextMenu }
-        })
-        .on("loaded.jstree", function() {
-          //  setTimeout(function () {
-          if (options.openAll) {
-            $("#" + jstreeDiv)
-              .jstree(true)
-              .open_all();
-          }
-
-          self.jstree.setTreeAppearance();
-          if (!options.doNotAdjustDimensions) {
-            common.jstree.setTreeParentDivDimensions(jstreeDiv);
-          }
-          if (callback) {
-            callback();
-          }
-          //   }, 500)
-        })
-        .on("select_node.jstree", function(evt, obj) {
-          if (options.selectTreeNodeFn) {
-            options.selectTreeNodeFn(evt, obj);
-          }
-        })
-        .on("open_node.jstree", function(evt, obj) {
-          self.jstree.setTreeAppearance();
-          if (options.onOpenNodeFn) {
-            options.onOpenNodeFn(evt, obj);
-          }
-        })
-        .on(" after_open.jstree", function(evt, obj) {
-          self.jstree.setTreeAppearance();
-          if (options.onAfterOpenNodeFn) {
-            options.onAfterOpenNodeFn(evt, obj);
-          }
-        })
-
-        .on("enable_checkbox.jstree", function(evt, obj) {
-          if (options.onCheckNodeFn) {
-            options.onCheckNodeFn(evt, obj);
-          }
-        })
-        .on("check_node.jstree", function(evt, obj) {
-          if (options.onCheckNodeFn) {
-            options.onCheckNodeFn(evt, obj);
-          }
-        })
-        .on("uncheck_node.jstree", function(evt, obj) {
-          if (options.onUncheckNodeFn) {
-            options.onUncheckNodeFn(evt, obj);
-          }
-        })
-        .on("create_node.jstree", function(parent, node, position) {
-          if (options.onCreateNodeFn) {
-            options.onCreateNodeFn(parent, node, position);
-            self.jstree.setTreeAppearance();
-          }
-        })
-        .on("delete_node.jstree", function(node, parent) {
-          if (options.deleteNodeFn) {
-            options.deleteNodeFn(node, parent);
-            self.jstree.setTreeAppearance();
-          }
-        })
-        .on("move_node.jstree", function(node, parent, position, oldParent, oldPosition, is_multi, old_instance, new_instance) {
-          if (options.onMoveNodeFn) {
-            options.onMoveNodeFn(node, parent, position, oldParent, oldPosition, is_multi, old_instance, new_instance);
-            self.jstree.setTreeAppearance();
-          }
-        })
-        .on("show_contextmenu", function(node, x, y) {
-          if (options.onShowContextMenu) {
-            options.onShowContextMenu(node, x, y);
+      },
+      loadJsTree: function(jstreeDiv, jstreeData, options, callback) {
+        var jstreeData2 = [];
+        jstreeData.forEach(function(item) {
+          if (item.parent != item.id) {
+            jstreeData2.push(item);
           }
         });
+        jstreeData = jstreeData2;
 
-      if (options.dnd) {
-        if (options.dnd.drag_start) {
-          $(document).on("dnd_start.vakata", function(data, element, helper, event) {
-            options.dnd.drag_start(data, element, helper, event);
-          });
-        }
-        if (options.dnd.drag_move) {
-          $(document).on("dnd_move.vakata Event", function(data, element, helper, event) {
-            options.dnd.drag_move(data, element, helper, event);
-          });
-        }
-        if (options.dnd.drag_stop) {
-          $(document).on("dnd_stop.vakata Event", function(data, element, helper, event) {
-            options.dnd.drag_stop(data, element, helper, event);
-          });
-        }
-      }
-
-      if (options.onHoverNode) {
-        $("#" + jstreeDiv).on("hover_node.jstree", function(node) {
-          options.onHoverNode(node);
-        });
-      }
-    },
-    clear: function(jstreeDiv) {
-      $("#" + jstreeDiv)
-        .jstree("destroy")
-        .empty();
-    },
-
-    addNodesToJstree: function(jstreeDiv, parentNodeId_, jstreeData, options) {
-      if (!options) {
-        options = {};
-      }
-      var position = "first";
-      if (options.positionLast) {
-        position = "last";
-      }
-      jstreeData.forEach(function(node) {
-        var parentNodeId = parentNodeId_;
-
-        if (!parentNodeId_) {
-          parentNodeId = node.parent;
+        if (!options) {
+          options = {};
         }
 
-        if (!parentNodeId) {
-          return;
+        var plugins = [];
+        if (!options.cascade) {
+          options.cascade = "xxx";
+        }
+        if (options.selectDescendants) {
+          options.cascade = "down";
+        }
+        if (options.withCheckboxes) {
+          plugins.push("checkbox");
+        }
+        if (options.searchPlugin) {
+          plugins.push("search");
         }
 
-        if (parentNodeId == node.id) {
-          return console.error("  Error jstree parent == childNode : " + parentNodeId);
+        if (options.contextMenu) {
+          // $(".jstree-contextmenu").css("z-index",100)
+          plugins.push("contextmenu");
         }
+        if (options.dnd) {
+          plugins.push("dnd");
+        }
+        plugins.push("types");
 
-        var parentNodeObj = $("#" + jstreeDiv).jstree(true).get_node(parentNodeId);
-        if (parentNodeObj.children.indexOf(node) > -1) {
-          return;
-        }
-        $("#" + jstreeDiv)
-          .jstree(true)
-          .create_node(parentNodeId, node, position, function() {
-            self.jstree.setTreeAppearance();
-            $("#" + jstreeDiv)
-              .jstree(true)
-              .open_node(parentNodeId, null, 500);
-          });
-      });
-      /*    setTimeout(function() {
-            $("#" + jstreeDiv)
-              .jstree(true)
-              .open_node(parentNodeId, null, 500);
-          }, 500);*/
-    },
-
-    deleteNode: function(jstreeDiv, nodeId) {
-      $("#" + jstreeDiv)
-        .jstree(true)
-        .delete_node(nodeId);
-      self.jstree.setTreeAppearance();
-    },
-    deleteBranch: function(jstreeDiv, nodeId, deleteNodeItself) {
-      var descendants = self.jstree.getNodeDescendants(jstreeDiv, nodeId, null, true);
-      if (deleteNodeItself) {
-        if (descendants.indexOf(nodeId) < 0) {
-          descendants.push(nodeId);
-        }
-      }
-      else {
-        var index = descendants.indexOf(nodeId);
-        if (index > -1) {
-          descendants.splice(index, 1);
-        }
-      }
-      /* descendants.forEach(function(item){
-$("#" + jstreeDiv).jstree(true).delete_node(item)
-})*/
-      try {
-        $("#" + jstreeDiv)
-          .jstree(true)
-          .delete_node(descendants);
-      } catch (e) {
-        console.error(e);
-      }
-    },
-    getjsTreeNodes: function(jstreeDiv, IdsOnly, parentNodeId) {
-      if (!parentNodeId) {
-        parentNodeId = "#";
-      }
-      var idList = [];
-      var jsonNodes = $("#" + jstreeDiv)
-        .jstree(true)
-        .get_json(parentNodeId, { flat: true });
-      if (IdsOnly) {
-        jsonNodes.forEach(function(item) {
-          idList.push(item.id);
-        });
-        return idList;
-      }
-      else {
-        return jsonNodes;
-      }
-    },
-
-    getjsTreeNodeObj: function(jstreeDiv, id) {
-      return $("#" + jstreeDiv)
-        .jstree(true)
-        .get_node(id);
-    },
-    // get node from node.data field
-    getNodeByDataField: function(jstreeDiv, property, value) {
-      if (!$("#" + jstreeDiv).jstree(true)) {
-        return null;
-      }
-      var jsonNodes = $("#" + jstreeDiv)
-        .jstree(true)
-        .get_json("#", { flat: true });
-      var matchingNode = null;
-      jsonNodes.forEach(function(node) {
-        if (node.data && node.data[property] == value) {
-          return (matchingNode = node);
-        }
-      });
-      return matchingNode;
-    },
-
-    getNodeDescendants: function(jstreeDiv, nodeId, depth, onlyIds) {
-      var nodes = [];
-      var nodeIdsMap = {};
-      var currentLevel = 0;
-      var recurse = function(nodeId) {
-        if (depth && currentLevel++ > depth) {
-          return;
-        }
-
-        var node = $("#" + jstreeDiv)
-          .jstree(true)
-          .get_node(nodeId);
-        if (!nodeIdsMap[nodeId]) {
-          nodeIdsMap[nodeId] = 1;
-          if (onlyIds) {
-            nodes.push(node.id);
+        var check_callbackFn = function(op, node, parent, position, more) {
+          if (op == "move_node" && options.dropAllowedFn) {
+            return options.dropAllowedFn(op, node, parent, position, more);
           }
           else {
-            nodes.push(node);
+            return true;
           }
+        };
 
-          // Attempt to traverse if the node has children
-          if (node.children) {
-            node.children.forEach(function(child) {
-              recurse(child);
+        if ($("#" + jstreeDiv).jstree) {
+          $("#" + jstreeDiv).jstree("destroy");
+        }
+        $("#" + jstreeDiv)
+          .jstree({
+            /* "checkbox": {
+  "keep_selected_style": false
+  },*/
+            plugins: plugins,
+            core: {
+              data: jstreeData,
+              check_callback: check_callbackFn
+            },
+            dnd: options.dnd,
+            search: options.searchPlugin,
+            checkbox: {
+              tie_selection: options.tie_selection,
+              whole_node: false
+            },
+            types: common.jstree.types,
+
+            contextmenu: { items: options.contextMenu }
+          })
+          .on("loaded.jstree", function() {
+            //  setTimeout(function () {
+            if (options.openAll) {
+              $("#" + jstreeDiv)
+                .jstree(true)
+                .open_all();
+            }
+
+            self.jstree.setTreeAppearance();
+            if (!options.doNotAdjustDimensions) {
+              common.jstree.setTreeParentDivDimensions(jstreeDiv);
+            }
+            if (callback) {
+              callback();
+            }
+            //   }, 500)
+          })
+          .on("select_node.jstree", function(evt, obj) {
+            if (options.selectTreeNodeFn) {
+              options.selectTreeNodeFn(evt, obj);
+            }
+          })
+          .on("open_node.jstree", function(evt, obj) {
+            self.jstree.setTreeAppearance();
+            if (options.onOpenNodeFn) {
+              options.onOpenNodeFn(evt, obj);
+            }
+          })
+          .on(" after_open.jstree", function(evt, obj) {
+            self.jstree.setTreeAppearance();
+            if (options.onAfterOpenNodeFn) {
+              options.onAfterOpenNodeFn(evt, obj);
+            }
+          })
+
+          .on("enable_checkbox.jstree", function(evt, obj) {
+            if (options.onCheckNodeFn) {
+              options.onCheckNodeFn(evt, obj);
+            }
+          })
+          .on("check_node.jstree", function(evt, obj) {
+            if (options.onCheckNodeFn) {
+              options.onCheckNodeFn(evt, obj);
+            }
+          })
+          .on("uncheck_node.jstree", function(evt, obj) {
+            if (options.onUncheckNodeFn) {
+              options.onUncheckNodeFn(evt, obj);
+            }
+          })
+          .on("create_node.jstree", function(parent, node, position) {
+            if (options.onCreateNodeFn) {
+              options.onCreateNodeFn(parent, node, position);
+              self.jstree.setTreeAppearance();
+            }
+          })
+          .on("delete_node.jstree", function(node, parent) {
+            if (options.deleteNodeFn) {
+              options.deleteNodeFn(node, parent);
+              self.jstree.setTreeAppearance();
+            }
+          })
+          .on("move_node.jstree", function(node, parent, position, oldParent, oldPosition, is_multi, old_instance, new_instance) {
+            if (options.onMoveNodeFn) {
+              options.onMoveNodeFn(node, parent, position, oldParent, oldPosition, is_multi, old_instance, new_instance);
+              self.jstree.setTreeAppearance();
+            }
+          })
+          .on("show_contextmenu", function(node, x, y) {
+            if (options.onShowContextMenu) {
+              options.onShowContextMenu(node, x, y);
+            }
+          });
+
+        if (options.dnd) {
+          if (options.dnd.drag_start) {
+            $(document).on("dnd_start.vakata", function(data, element, helper, event) {
+              options.dnd.drag_start(data, element, helper, event);
+            });
+          }
+          if (options.dnd.drag_move) {
+            $(document).on("dnd_move.vakata Event", function(data, element, helper, event) {
+              options.dnd.drag_move(data, element, helper, event);
+            });
+          }
+          if (options.dnd.drag_stop) {
+            $(document).on("dnd_stop.vakata Event", function(data, element, helper, event) {
+              options.dnd.drag_stop(data, element, helper, event);
             });
           }
         }
-      };
-      recurse(nodeId);
 
-      return nodes;
-    },
-    openNodeDescendants: function(jstreeDiv, nodeId, depth) {
-      var descendants = common.jstree.getNodeDescendants(jstreeDiv, nodeId, depth);
-      $("#" + jstreeDiv)
-        .jstree()
-        .open_node(descendants);
-    },
+        if (options.onHoverNode) {
+          $("#" + jstreeDiv).on("hover_node.jstree", function(node) {
+            options.onHoverNode(node);
+          });
+        }
+      },
+      clear: function(jstreeDiv) {
+        $("#" + jstreeDiv)
+          .jstree("destroy")
+          .empty();
+      },
 
-    setTreeParentDivDimensions: function(jstreeDiv) {
-      var parentDiv = $("#" + jstreeDiv).parent();
-      if (!parentDiv)
-        // || parentDiv.width)
-      {
-        return;
-      }
+      addNodesToJstree: function(jstreeDiv, parentNodeId_, jstreeData, options) {
+        if (!options) {
+          options = {};
+        }
+        var position = "first";
+        if (options.positionLast) {
+          position = "last";
+        }
+        jstreeData.forEach(function(node) {
+          var parentNodeId = parentNodeId_;
 
-      var p = $("#" + jstreeDiv).offset();
-      if (p.top > 200)
-        //in case jstreeDiv in inactive tab
-      {
-        p.top = 200;
-      }
-      var h = $(window).height() - p.top - 50;
-      var w;
-      if (p.left < 600) {
-        w = 380;
-      }
-      else {
-        w = 340;
-      }
-      // parentDiv.width(w);
+          if (!parentNodeId_) {
+            parentNodeId = node.parent;
+          }
 
-      if (jstreeDiv == "LineageNodesJsTreeDiv")
-        // cannot do it generic !!!!!
-      {
-        parentDiv.height(h);
-      }
-      if (jstreeDiv == "Lineage_propertiesTree") {
-        parentDiv.height(h);
-      }
-      if (jstreeDiv == "Blender_conceptTreeDiv") {
-        parentDiv.height(h);
-      }
+          if (!parentNodeId) {
+            return;
+          }
 
-      parentDiv.css("overflow", "auto");
-      parentDiv.css("margin-top", "5px");
-    },
+          if (parentNodeId == node.id) {
+            return console.error("  Error jstree parent == childNode : " + parentNodeId);
+          }
 
-    setTreeAppearance: function() {
-      return;
-    },
-    onAllTreeCbxChange: function(allCBX, jstreeDiv) {
-      var checked = $(allCBX).prop("checked");
-      if (checked) {
+          var parentNodeObj = $("#" + jstreeDiv).jstree(true).get_node(parentNodeId);
+          if (parentNodeObj.children.indexOf(node) > -1) {
+            return;
+          }
+          $("#" + jstreeDiv)
+            .jstree(true)
+            .create_node(parentNodeId, node, position, function() {
+              self.jstree.setTreeAppearance();
+              $("#" + jstreeDiv)
+                .jstree(true)
+                .open_node(parentNodeId, null, 500);
+            });
+        });
+        /*    setTimeout(function() {
+              $("#" + jstreeDiv)
+                .jstree(true)
+                .open_node(parentNodeId, null, 500);
+            }, 500);*/
+      },
+
+      deleteNode: function(jstreeDiv, nodeId) {
         $("#" + jstreeDiv)
           .jstree(true)
-          .check_all();
-      }
-      else {
-        $("#" + jstreeDiv)
+          .delete_node(nodeId);
+        self.jstree.setTreeAppearance();
+      },
+      deleteBranch: function(jstreeDiv, nodeId, deleteNodeItself) {
+        var descendants = self.jstree.getNodeDescendants(jstreeDiv, nodeId, null, true);
+        if (deleteNodeItself) {
+          if (descendants.indexOf(nodeId) < 0) {
+            descendants.push(nodeId);
+          }
+        }
+        else {
+          var index = descendants.indexOf(nodeId);
+          if (index > -1) {
+            descendants.splice(index, 1);
+          }
+        }
+        /* descendants.forEach(function(item){
+  $("#" + jstreeDiv).jstree(true).delete_node(item)
+  })*/
+        try {
+          $("#" + jstreeDiv)
+            .jstree(true)
+            .delete_node(descendants);
+        } catch (e) {
+          console.error(e);
+        }
+      },
+      getjsTreeNodes: function(jstreeDiv, IdsOnly, parentNodeId) {
+        if (!parentNodeId) {
+          parentNodeId = "#";
+        }
+        var idList = [];
+        var jsonNodes = $("#" + jstreeDiv)
           .jstree(true)
-          .uncheck_all();
-      }
-    },
-    checkAll: function(jstreeDiv) {
-      $("#" + jstreeDiv)
-        .jstree()
-        .check_all();
-    },
-    openNode: function(jstreeDiv, nodeId) {
-      $("#" + jstreeDiv)
-        .jstree()
-        .open_node(nodeId);
-    }
-  };
+          .get_json(parentNodeId, { flat: true });
+        if (IdsOnly) {
+          jsonNodes.forEach(function(item) {
+            idList.push(item.id);
+          });
+          return idList;
+        }
+        else {
+          return jsonNodes;
+        }
+      },
 
+      getjsTreeNodeObj: function(jstreeDiv, id) {
+        return $("#" + jstreeDiv)
+          .jstree(true)
+          .get_node(id);
+      },
+      // get node from node.data field
+      getNodeByDataField: function(jstreeDiv, property, value) {
+        if (!$("#" + jstreeDiv).jstree(true)) {
+          return null;
+        }
+        var jsonNodes = $("#" + jstreeDiv)
+          .jstree(true)
+          .get_json("#", { flat: true });
+        var matchingNode = null;
+        jsonNodes.forEach(function(node) {
+          if (node.data && node.data[property] == value) {
+            return (matchingNode = node);
+          }
+        });
+        return matchingNode;
+      },
 
-  self.fillSelectOptions = function(selectId, data, withBlanckOption, textfield, valueField, selectedValue) {
-    $("#" + selectId)
-      .find("option")
-      .remove()
-      .end();
-    if (withBlanckOption) {
-      $("#" + selectId).append(
-        $("<option>", {
-          text: "",
-          value: ""
-        })
-      );
-    }
+      getNodeDescendants: function(jstreeDiv, nodeId, depth, onlyIds) {
+        var nodes = [];
+        var nodeIdsMap = {};
+        var currentLevel = 0;
+        var recurse = function(nodeId) {
+          if (depth && currentLevel++ > depth) {
+            return;
+          }
 
-    if (data.length > Config.maxSelectListSize) {
-      $("#" + selectId).attr("data-classes", JSON.stringify(data));
-      $("#" + selectId ).attr("data-classes", JSON.stringify(data));
-      $("#" + selectId).html(
-        $("<option>", {
-          text: "search value...",
-          value: "_search"
+          var node = $("#" + jstreeDiv)
+            .jstree(true)
+            .get_node(nodeId);
+          if (!nodeIdsMap[nodeId]) {
+            nodeIdsMap[nodeId] = 1;
+            if (onlyIds) {
+              nodes.push(node.id);
+            }
+            else {
+              nodes.push(node);
+            }
 
-        })
-      );
+            // Attempt to traverse if the node has children
+            if (node.children) {
+              node.children.forEach(function(child) {
+                recurse(child);
+              });
+            }
+          }
+        };
+        recurse(nodeId);
 
-      $("#" + selectId).bind("click", function() {
-        $("#" + selectId).unbind("click")
-        if ( $(this).val() == "_search") {
-          event.preventDefault();
-          var str = prompt(" enter label ...")
-          str=str.toLowerCase()
-          var data=  JSON.parse($("#" + selectId).attr("data-classes"));
+        return nodes;
+      },
+      openNodeDescendants: function(jstreeDiv, nodeId, depth) {
+        var descendants = common.jstree.getNodeDescendants(jstreeDiv, nodeId, depth);
+        $("#" + jstreeDiv)
+          .jstree()
+          .open_node(descendants);
+      },
 
-          var filteredData=[]
-          data.forEach(function(item) {
-              if (item.label.toLowerCase().indexOf(str) > -1)
-                filteredData.push(item);
-            })
-          $("#" + selectId).unbind("change")
-          self.fillSelectOptions (selectId, filteredData, withBlanckOption, textfield, valueField, selectedValue) ;
+      setTreeParentDivDimensions: function(jstreeDiv) {
+        var parentDiv = $("#" + jstreeDiv).parent();
+        if (!parentDiv)
+          // || parentDiv.width)
+        {
+          return;
         }
 
+        var p = $("#" + jstreeDiv).offset();
+        if (p.top > 200)
+          //in case jstreeDiv in inactive tab
+        {
+          p.top = 200;
+        }
+        var h = $(window).height() - p.top - 50;
+        var w;
+        if (p.left < 600) {
+          w = 380;
+        }
+        else {
+          w = 340;
+        }
+        // parentDiv.width(w);
 
-      });
-      return;
-    }
+        if (jstreeDiv == "LineageNodesJsTreeDiv")
+          // cannot do it generic !!!!!
+        {
+          parentDiv.height(h);
+        }
+        if (jstreeDiv == "Lineage_propertiesTree") {
+          parentDiv.height(h);
+        }
+        if (jstreeDiv == "Blender_conceptTreeDiv") {
+          parentDiv.height(h);
+        }
+
+        parentDiv.css("overflow", "auto");
+        parentDiv.css("margin-top", "5px");
+      },
+
+      setTreeAppearance: function() {
+        return;
+      },
+      onAllTreeCbxChange: function(allCBX, jstreeDiv) {
+        var checked = $(allCBX).prop("checked");
+        if (checked) {
+          $("#" + jstreeDiv)
+            .jstree(true)
+            .check_all();
+        }
+        else {
+          $("#" + jstreeDiv)
+            .jstree(true)
+            .uncheck_all();
+        }
+      },
+      checkAll: function(jstreeDiv) {
+        $("#" + jstreeDiv)
+          .jstree()
+          .check_all();
+      },
+      openNode: function(jstreeDiv, nodeId) {
+        $("#" + jstreeDiv)
+          .jstree()
+          .open_node(nodeId);
+      }
+    };
+
+
+    self.fillSelectOptions = function(selectId, data, withBlanckOption, textfield, valueField, selectedValue) {
+      $("#" + selectId)
+        .find("option")
+        .remove()
+        .end();
+      if (withBlanckOption) {
+        $("#" + selectId).append(
+          $("<option>", {
+            text: "",
+            value: ""
+          })
+        );
+      }
+
+      if (data.length > Config.maxSelectListSize) {
+
+
+        $("#" + selectId).attr("data-classes", JSON.stringify(data));
+        /*  $("#" + selectId).html(
+            $("<option>", {
+              text: "",
+              value: ""
+
+            })
+          )*/
+
+        $("#" + selectId).html(
+          $("<option>", {
+            text: "search value...",
+            value: "_search"
+
+          }));
+
+
+        $("#" + selectId).bind("click", function(event) {
+
+
+          var optionText = event.currentTarget.outerText;
+          /*   var e = document.getElementById(selectId);
+             var index=e.selectedIndex
+             var value = e[index].value;*/
+
+          var value = $(this).val();
+          console.log("--------" + value);
+
+          //   $("#" + selectId).unbind("click")
+          if (value == "_search") {
+            event.preventDefault();
+            var str = prompt(" enter label ...");
+            if (!str) {
+              return;
+            }
+            str = str.toLowerCase();
+            var data = JSON.parse($("#" + selectId).attr("data-classes"));
+
+            var filteredData = [{ [valueField]: "_search", [textfield]: "search value..." }];
+            data.forEach(function(item) {
+              if (item.label.toLowerCase().indexOf(str) > -1) {
+                filteredData.push(item);
+              }
+            });
+
+            self.fillSelectOptions(selectId, filteredData, withBlanckOption, textfield, valueField, selectedValue);
+
+
+            /*  $("#" + selectId).html(
+                $("<option>", {
+                  text: "search value...",
+                  value: "_search"
+
+                })
+              )*/
+          }
+
+
+        });
+
+
+        return;
+      }
 
 
       if (Array.isArray(data)) {
@@ -1275,4 +1309,4 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
     return self;
   }
 )
-  ();
+();

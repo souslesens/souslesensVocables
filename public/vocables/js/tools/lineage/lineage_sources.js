@@ -176,8 +176,7 @@ Lineage_sources = (function() {
       if (err) {
         return alert(err);
       }
-      if(result.length>50)
-        return;
+
       common.fillSelectOptions("GenericTools_searchAllClassSelect", result, true, "label", "id");
     });
   };

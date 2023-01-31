@@ -713,6 +713,10 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         var isRestrictionCBX = $("#KGcreator_isRestrictionCBX").prop("checked");
         var isSpecificPredicate = $("#KGcreator_isSpecificPredicateCBX").prop("checked");
 
+        $("#KGcreator_objectSelect").val("");
+        $("#KGcreator_predicateSelect").val("");
+
+
         if (!subject) {
             return alert("missing subject");
         }
@@ -786,11 +790,11 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
             } else {
                 $("#KGcreator_subjectInput").val(value);
             }
-            $("#KGcreator_subjectSelect").val("");
+          //  $("#KGcreator_subjectSelect").val("");
         } else if (role == "p") {
             $("#KGcreator_predicateInput").val(value);
 
-            $("#KGcreator_predicateSelect").val("");
+         //   $("#KGcreator_predicateSelect").val("");
         } else if (role == "o") {
             if (value == "_selectedColumn") {
                 $("#KGcreator_objectInput").val(self.currentTreeNode.text);
@@ -798,7 +802,7 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
                 $("#KGcreator_objectInput").val(value);
             }
 
-            $("#KGcreator_objectSelect").val("");
+         //   $("#KGcreator_objectSelect").val("");
         }
     };
 

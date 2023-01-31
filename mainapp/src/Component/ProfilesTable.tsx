@@ -199,6 +199,7 @@ type ProfileFormProps = {
 };
 
 const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: ProfileFormProps) => {
+    const [nodesClicked, setNodeToExpand] = React.useState<Set<string>>(new Set());
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
     const sources = React.useMemo(() => {
@@ -212,22 +213,17 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         update({ type: Type.ResetProfile, payload: profile });
     }, [profileModel.modal]);
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
-    const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
+    const handleClose = () => {
+        setNodeToExpand(new Set());
+        update({ type: Type.UserClickedModal, payload: false });
+    };
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
 
-    const handleSourceAccessControlUpdate = React.useMemo(() => {
-        return Object.fromEntries(
-            sources.map((source) => {
-                const treeStr = `${source.schemaType}/${source.group}/${source.name}`;
-                return [
-                    treeStr,
-                    (event: React.ChangeEvent<HTMLInputElement>) =>
-                        update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: treeStr, newValue: event.target.value as SourceAccessControl | "default" } }),
-                ];
-            })
-        );
-    }, [sources]);
+    const handleSourceAccessControlUpdate = (src) => (event) => {
+        const treeStr = src.treeStr;
+        update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: treeStr, newValue: event.target.value as SourceAccessControl | "default" } });
+    };
 
     const handleCheckedAll = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckAll, payload: { fieldname: fieldname, value: event.target.checked } });
@@ -319,7 +315,8 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
 
             return (
                 <TreeItem
-                    nodeId={source.index.toString()}
+                    nodeId={source.treeStr}
+                    key={source.index.toString()}
                     label={
                         <Grid container alignItems="center" spacing={2}>
                             <Grid item xs>
@@ -329,7 +326,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 <SourceAccessControlInputSelect
                                     name={source.source.id + "-source-access-control"}
                                     value={value}
-                                    onChange={handleSourceAccessControlUpdate[source.treeStr]}
+                                    onChange={handleSourceAccessControlUpdate(source)}
                                     allowDefault={true}
                                     editable={source.source.editable}
                                 />
@@ -344,14 +341,18 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     };
 
     function SourcesTreeView() {
-        const [treeviewSources, setTreeviewSources] = React.useState([]);
-
-        React.useEffect(() => {
-            setTreeviewSources(displayFormTree(generateSourcesTree(sources)));
-        }, []);
-
+        const treeviewSources = displayFormTree(generateSourcesTree(sources));
         return (
-            <TreeView aria-label="Sources access control navigator" id="sources-access-treeview" defaultCollapseIcon={<ExpandMoreIcon />} defaultExpandIcon={<ChevronRightIcon />}>
+            <TreeView
+                aria-label="Sources access control navigator"
+                id="sources-access-treeview"
+                defaultExpanded={Array.from(nodesClicked)}
+                onNodeSelect={(_event, nodeIds: string) => {
+                    setNodeToExpand(nodesClicked.has(nodeIds) ? new Set(Array.from(nodesClicked).filter((i) => i !== nodeIds)) : new Set([...nodesClicked, nodeIds]));
+                }}
+                defaultCollapseIcon={<ExpandMoreIcon />}
+                defaultExpandIcon={<ChevronRightIcon />}
+            >
                 {treeviewSources}
             </TreeView>
         );
@@ -469,7 +470,7 @@ const SourceAccessControlInputRadio: React.FC<SourceAccessControlInputProps> = R
     );
 });
 
-const SourceAccessControlInputSelect: React.FC<SourceAccessControlInputProps> = React.memo(function ({ name, value, onChange, allowDefault, editable }) {
+const SourceAccessControlInputSelect: React.FC<SourceAccessControlInputProps> = ({ name, value, onChange, allowDefault, editable }) => {
     return (
         <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
             <InputLabel id="select-sources-access-control">Access Control</InputLabel>
@@ -483,6 +484,6 @@ const SourceAccessControlInputSelect: React.FC<SourceAccessControlInputProps> = 
             </Select>
         </FormControl>
     );
-});
+};
 
 export { ProfilesTable, Mode, Msg_, Type };

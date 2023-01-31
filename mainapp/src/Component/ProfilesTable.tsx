@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
     Button,
     Checkbox,
@@ -23,10 +24,12 @@ import {
     Stack,
     RadioGroup,
     Radio,
+    Typography,
 } from "@mui/material";
+import clsx from "clsx";
 import { alpha, styled } from "@mui/material/styles";
 // import Grid from '@mui/material/Grid';
-import { TreeView, TreeItem, TreeItemProps, treeItemClasses } from "@mui/lab";
+import { TreeView, TreeItem, TreeItemProps, treeItemClasses, TreeItemContentProps, useTreeItem } from "@mui/lab";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 
@@ -199,7 +202,7 @@ type ProfileFormProps = {
 };
 
 const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: ProfileFormProps) => {
-    const [nodesClicked, setNodeToExpand] = React.useState<Set<string>>(new Set());
+    const [nodesClicked, setNodeToExpand] = React.useState<Array<string>>([]);
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
     const sources = React.useMemo(() => {
@@ -314,7 +317,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
             const value = accessControlValue ? accessControlValue : "default";
 
             return (
-                <TreeItem
+                <CustomTreeItem
                     nodeId={source.treeStr}
                     key={source.index.toString()}
                     label={
@@ -335,7 +338,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                     }
                 >
                     {displayFormTree(source.children)}
-                </TreeItem>
+                </CustomTreeItem>
             );
         });
     };
@@ -347,11 +350,12 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                 aria-label="Sources access control navigator"
                 id="sources-access-treeview"
                 defaultExpanded={Array.from(nodesClicked)}
-                onNodeSelect={(_event, nodeIds: string) => {
-                    setNodeToExpand(nodesClicked.has(nodeIds) ? new Set(Array.from(nodesClicked).filter((i) => i !== nodeIds)) : new Set([...nodesClicked, nodeIds]));
+                onNodeToggle={(_event, nodeIds) => {
+                    console.log("nodeIsToggled", nodeIds);
+                    setNodeToExpand(nodeIds);
                 }}
-                defaultCollapseIcon={<ExpandMoreIcon />}
-                defaultExpandIcon={<ChevronRightIcon />}
+                defaultCollapseIcon={<ExpandMoreIcon sx={{ width: 30, height: 30 }} />}
+                defaultExpandIcon={<ChevronRightIcon sx={{ width: 30, height: 30 }} />}
             >
                 {treeviewSources}
             </TreeView>
@@ -450,6 +454,54 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         </>
     );
 };
+
+const CustomContent = React.forwardRef(function CustomContent(props: TreeItemContentProps, ref) {
+    const { classes, className, label, nodeId, icon: iconProp, expansionIcon, displayIcon } = props;
+
+    const { disabled, expanded, selected, focused, handleExpansion, handleSelection, preventSelection } = useTreeItem(nodeId);
+
+    const icon = iconProp || expansionIcon || displayIcon;
+
+    const handleMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        console.log("mouseDown");
+        preventSelection(event);
+    };
+
+    const handleExpansionClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        console.log("UserClickedExpansion");
+        handleExpansion(event);
+    };
+
+    const handleSelectionClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        console.log("UserClickedSelection");
+        handleSelection(event);
+    };
+
+    return (
+        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+        <div
+            className={clsx(className, classes.root, {
+                [classes.expanded]: expanded,
+                [classes.selected]: selected,
+                [classes.focused]: focused,
+                [classes.disabled]: disabled,
+            })}
+            onMouseDown={handleMouseDown}
+            ref={ref as React.Ref<HTMLDivElement>}
+        >
+            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
+            <div onClick={handleExpansionClick} className={classes.iconContainer}>
+                {icon}
+            </div>
+            <Typography onClick={handleSelectionClick} component="div" className={classes.label}>
+                {label}
+            </Typography>
+        </div>
+    );
+});
+function CustomTreeItem(props: TreeItemProps) {
+    return <TreeItem ContentComponent={CustomContent} {...props} />;
+}
 
 interface SourceAccessControlInputProps {
     name: string;

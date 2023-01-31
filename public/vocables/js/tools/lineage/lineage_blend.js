@@ -16,7 +16,6 @@ var Lineage_blend = (function () {
                             return alert(err.responseText);
                         }
 
-
                         common.fillSelectOptions("KGcreator_predicateSelect", result.predicates, true, "label", "id");
                         common.fillSelectOptions("KGcreator_objectSelect", result.objectClasses, true, "label", "id");
                         common.fillSelectOptions("LineageBlend_creatingNodePredicatesSelect", result.predicates, true, "label", "id");
@@ -952,7 +951,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
             }
         },
 
-     /*   searchIndividual: function () {
+        /*   searchIndividual: function () {
             var term = prompt("Individual contains...");
             if (!term) return;
             var options = {

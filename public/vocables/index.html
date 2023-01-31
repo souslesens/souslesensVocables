@@ -108,8 +108,6 @@
         <script src="js/tools/composer.js"></script>
         <script src="js/tools/sparqlQueryUI.js"></script>
 
-
-
         <script src="js/tools/ontologiesStats.js"></script>
 
         <!-----------private tools--------------->
@@ -121,7 +119,7 @@
         <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_SqlTojstreeConnectors.js"></script>
 
         <script src="config/app_config.js"></script>
-    <!--    <script src="config/app_config_draft_tools.js"></script>-->
+        <!--    <script src="config/app_config_draft_tools.js"></script>-->
 
         <script src="config/tools.js"></script>
 
@@ -137,7 +135,7 @@
         <script src="js/sparqlProxies/sparql_schema.js"></script>
 
         <!--specific-->
-     <script src="js/sparqlProxies/sparql_WORDNET.js"></script>
+        <script src="js/sparqlProxies/sparql_WORDNET.js"></script>
         <script src="js/sparqlProxies/sparql_ISO_15926.js"></script>
         <script src="js/sparqlProxies/sparql_ISO_15926_part4.js"></script>
         <script src="js/sparqlProxies/sparql_NPD.js"></script>
@@ -146,7 +144,7 @@
         <script src="js/tools/ontologyUtil.js"></script>
 
         <script src="//unpkg.com/3d-force-graph"></script>
-      <!--  <script src="//unpkg.com/three"></script>
+        <!--  <script src="//unpkg.com/three"></script>
         <script src="//unpkg.com/three-spritetext"></script>-->
 
         <!--   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r99/three.min.js"></script>
@@ -231,7 +229,6 @@
             });
 
             $(function () {
-
                 MainController.initConfig(function (err) {
                     // sentry/glitchtip
                     if (Config.sentryDsnJsFront) {
@@ -276,15 +273,13 @@
                         var target = $(this).attr("target");
                         if (true && target == "_slsvCallback") {
                             var id = $(this).attr("href");
-                         //   event.stopPropagation();
-                            event.preventDefault()
+                            //   event.stopPropagation();
+                            event.preventDefault();
                             SourceBrowser.showNodeInfos(null, id, "mainDialogDiv");
                         }
-
                     });
 
                     MainController.UI.setCredits();
-
                 });
             });
         </script>
@@ -484,13 +479,11 @@
         </style>
     </head>
     <body>
-        <div class="rowXXX" style="display: flex; flex-direction: column;    min-height: 30px;">
+        <div class="rowXXX" style="display: flex; flex-direction: column; min-height: 30px">
             <div style="display: flex; flex-direction: row; justify-content: space-evenly">
-
                 <div>
                     <table>
                         <tr>
-
                             <td><img src="./images/waitAnimated.gif" id="waitImg" style="display: none; width: 15px; text-align: justify" /></td>
                             <td><span class="messageDiv" id="messageDiv"></span></td>
                         </tr>

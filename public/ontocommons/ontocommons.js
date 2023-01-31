@@ -69,10 +69,7 @@ var Ontocommons = (function () {
     };
 
     self.loadSourceInSlsv = function (source) {
-
-        $("#slsv_iframe").attr("src","http://localhost:3010/vocables/?tool=lineage&source="+source)
-
-
+        $("#slsv_iframe").attr("src", "http://localhost:3010/vocables/?tool=lineage&source=" + source);
     };
 
     self.callSlsv = function () {

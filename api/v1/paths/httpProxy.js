@@ -46,7 +46,6 @@ module.exports = function () {
                     return;
                 }
 
-
                 httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
                     processResponse(res, err, result);
                 });

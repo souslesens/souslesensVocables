@@ -28,7 +28,7 @@ var visjsGraph = (function () {
     self.showNodesLabelMinScale = 0.5;
     self.currentContext;
     self.drawingDone = false;
-    self.skipColorGraphNodesByType=false
+    self.skipColorGraphNodesByType = false;
     var lastClickTime = new Date();
     var dbleClickIntervalDuration = 500;
 
@@ -101,8 +101,7 @@ var visjsGraph = (function () {
             $("#visjsGraph_layoutSelect").val("");
         }
 
-        if(_options.skipColorGraphNodesByType)
-            self.skipColorGraphNodesByType=true
+        if (_options.skipColorGraphNodesByType) self.skipColorGraphNodesByType = true;
 
         self.globalOptions = options;
         self.network = new vis.Network(container, self.data, options);

@@ -92,12 +92,6 @@ WHERE  table_name LIKE '_%-%'
 
  */
 
-
-
-
-
-
-
 var SQLserverConnector = {
     connection: null,
 

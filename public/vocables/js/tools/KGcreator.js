@@ -1,10 +1,5 @@
 //https://openbase.com/js/@json-editor/json-editor/documentation
 
-
-
-
-
-
 var KGcreator = (function () {
     var self = {};
     self.mainJsonEditor = null;
@@ -114,36 +109,34 @@ var KGcreator = (function () {
 
     self.showSourcesDialog = function (callback) {
         if (Config.tools["KGcreator"].urlParam_source) {
-           return  self.initSource(Config.tools["KGcreator"].urlParam_source,callback)
+            return self.initSource(Config.tools["KGcreator"].urlParam_source, callback);
         }
 
-       var html=" <div id=\"sourcesSelectionDialogdiv\" style=\"margin-bottom: 10px\">\n" +
-         "            <button className=\"btn btn-sm my-1 py-0 btn-outline-primary\" onClick=\"$('#sourcesSelectionDialogdiv').dialog('close')\">Cancel</button>\n" +
-         "            <button className=\"btn btn-sm my-1 py-0 btn-outline-primary\" id=\"searchAllValidateButton\">OK</button>\n" +
-         "            <div>Search : <input id=\"Lineage_classes_SearchSourceInput\" value=\"\" style=\"width: 200px; font-size: 12px; margin: 3px; padding: 3px\" /></div>\n" +
-         "            <div id=\"sourcesTreeDivContainer\" style=\"overflow: auto\" className=\"jstreeContainerXX XXXmax-height\">\n" +
-         "                <div className=\"jstreeContainer\" style=\"width: 360px; height: 600px; overflow: auto; margin-top: 5px\">\n" +
-         "                    <div id=\"searchAll_sourcesTree\"></div>\n" +
-         "                </div>\n" +
-         "            </div>\n" +
-         "        </div>"
+        var html =
+            ' <div id="sourcesSelectionDialogdiv" style="margin-bottom: 10px">\n' +
+            "            <button className=\"btn btn-sm my-1 py-0 btn-outline-primary\" onClick=\"$('#sourcesSelectionDialogdiv').dialog('close')\">Cancel</button>\n" +
+            '            <button className="btn btn-sm my-1 py-0 btn-outline-primary" id="searchAllValidateButton">OK</button>\n' +
+            '            <div>Search : <input id="Lineage_classes_SearchSourceInput" value="" style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" /></div>\n' +
+            '            <div id="sourcesTreeDivContainer" style="overflow: auto" className="jstreeContainerXX XXXmax-height">\n' +
+            '                <div className="jstreeContainer" style="width: 360px; height: 600px; overflow: auto; margin-top: 5px">\n' +
+            '                    <div id="searchAll_sourcesTree"></div>\n' +
+            "                </div>\n" +
+            "            </div>\n" +
+            "        </div>";
         $("#mainDialogDiv").html(html);
 
-        var options={
+        var options = {
             includeSourcesWithoutSearchIndex: true,
-            sourcesSelectionDialogdiv:"mainDialogDiv"
-        }
-            SourceBrowser.showSearchableSourcesTreeDialog(["OWL"], options, function () {
-                $("#mainDialogDiv").dialog("close");
-                var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
-                self.initSource(source,callback);
-
-            });
+            sourcesSelectionDialogdiv: "mainDialogDiv",
+        };
+        SourceBrowser.showSearchableSourcesTreeDialog(["OWL"], options, function () {
+            $("#mainDialogDiv").dialog("close");
+            var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
+            self.initSource(source, callback);
+        });
     };
 
-
-
-    self.initSource=function(source,callback){
+    self.initSource = function (source, callback) {
         self.currentSource = source;
         Config.currentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromImports(source);
 
@@ -159,8 +152,7 @@ var KGcreator = (function () {
         if (callback) {
             callback(null);
         }
-
-    }
+    };
     self.onChangeSourceTypeSelect = function (sourceType, callback) {
         self.currentSourceType = sourceType;
         if (sourceType == "CSV") {
@@ -230,7 +222,7 @@ var KGcreator = (function () {
             },
         });
     };
-   /* self.listObjects = function () {
+    /* self.listObjects = function () {
         console.log("KGcreator.listObjects");
         self.currentDataSourceModel = null;
         self.currentdabase = null;
@@ -250,18 +242,16 @@ var KGcreator = (function () {
         self.currentCsvDir = $("#KGcreator_csvDirsSelect").val();
         self.currentSource = self.currentCsvDir;
         var payload;
-        var prefix
+        var prefix;
         if (self.currentDataSourceModel) {
-            prefix=self.currentSlsvSource
+            prefix = self.currentSlsvSource;
             payload = {
                 dir: "CSV/" + self.currentSlsvSource,
-
             };
         } else {
-            prefix=self.currentCsvDir
+            prefix = self.currentCsvDir;
             payload = {
                 dir: "CSV/" + self.currentCsvDir,
-
             };
         }
         $.ajax({
@@ -271,8 +261,7 @@ var KGcreator = (function () {
             dataType: "json",
             success: function (result, _textStatus, _jqXHR) {
                 self.mappingFiles = {};
-                if(result==null)
-                    return callback()
+                if (result == null) return callback();
                 result.forEach(function (file) {
                     var p;
                     if ((p = file.indexOf(".json")) > -1) {
@@ -282,7 +271,7 @@ var KGcreator = (function () {
                 callback();
             },
             error: function (err) {
-                callback(err)
+                callback(err);
             },
         });
     };
@@ -347,9 +336,7 @@ var KGcreator = (function () {
     };
 
     self.showTablesTree = function (data) {
-
-        self.loadMappingsList(function(err) {
-
+        self.loadMappingsList(function (err) {
             var jstreeData = [];
             var options = {
                 openAll: true,
@@ -357,15 +344,15 @@ var KGcreator = (function () {
                 contextMenu: KGcreator.getContextMenu(),
                 //  withCheckboxes: true,
             };
-            data.forEach(function(file) {
+            data.forEach(function (file) {
                 if (file.indexOf(".json") > 0) {
                     return;
                 }
                 var label = file;
 
                 //  if (data.indexOf(file + ".json") > -1)
-                for(var key in self.mappingFiles){
-                    if (key.indexOf(file)>-1) {
+                for (var key in self.mappingFiles) {
+                    if (key.indexOf(file) > -1) {
                         label = "<span class='KGcreator_fileWithMappings'>" + file + "</span>";
                     }
                 }
@@ -381,7 +368,7 @@ var KGcreator = (function () {
                 options.openAll = false;
                 for (var key in self.currentDataSourceModel) {
                     var columns = self.currentDataSourceModel[key];
-                    columns.forEach(function(column) {
+                    columns.forEach(function (column) {
                         jstreeData.push({
                             id: key + "_" + column,
                             text: column,
@@ -393,7 +380,7 @@ var KGcreator = (function () {
             }
 
             common.jstree.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
-        })
+        });
     };
 
     self.onCsvtreeNodeClicked = function (event, obj, callback) {
@@ -635,7 +622,7 @@ var KGcreator = (function () {
             [
                 function (callbackSeries) {
                     self.getSourcePropertiesAndObjectLists(self.currentSource, topLevelOntology, function (err, result) {
-                            currentObjectClasses = currentObjectClasses.concat(result.objectClasses);
+                        currentObjectClasses = currentObjectClasses.concat(result.objectClasses);
                         currentPredicates = result.predicates;
                         callbackSeries();
                     });
@@ -716,7 +703,6 @@ self.mainJsonEditor = new JSONEditor(element, {});*/
         $("#KGcreator_objectSelect").val("");
         $("#KGcreator_predicateSelect").val("");
 
-
         if (!subject) {
             return alert("missing subject");
         }
@@ -790,11 +776,11 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
             } else {
                 $("#KGcreator_subjectInput").val(value);
             }
-          //  $("#KGcreator_subjectSelect").val("");
+            //  $("#KGcreator_subjectSelect").val("");
         } else if (role == "p") {
             $("#KGcreator_predicateInput").val(value);
 
-         //   $("#KGcreator_predicateSelect").val("");
+            //   $("#KGcreator_predicateSelect").val("");
         } else if (role == "o") {
             if (value == "_selectedColumn") {
                 $("#KGcreator_objectInput").val(self.currentTreeNode.text);
@@ -802,7 +788,7 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
                 $("#KGcreator_objectInput").val(value);
             }
 
-         //   $("#KGcreator_objectSelect").val("");
+            //   $("#KGcreator_objectSelect").val("");
         }
     };
 
@@ -1027,7 +1013,7 @@ self.saveMappings({classId:classId})
     self.createTriples = function (test, _options) {
         /*  var selectedFiles = $("#KGcreator_csvTreeDiv").jstree().get_checked(true);
 if (selectedFiles.length > 0);*/
-        MainController.UI.message( "creating triples...")
+        MainController.UI.message("creating triples...");
         $("#KGcreator_dataSampleDiv").val("creating triples...");
         if (!self.currentJsonObject) {
             return;
@@ -1106,12 +1092,11 @@ if (selectedFiles.length > 0);*/
                         var str = JSON.stringify(result, null, 2);
 
                         $("#KGcreator_dataSampleDiv").val(str);
-                        MainController.UI.message( "",true)
+                        MainController.UI.message("", true);
                     } else {
                         $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
-                        MainController.UI.message( "triples created",true)
+                        MainController.UI.message("triples created", true);
                     }
-
                 },
                 error(err) {
                     return alert(err.responseText);
@@ -1316,7 +1301,6 @@ if (selectedFiles.length > 0);*/
                             return 0;
                         });
 
-
                         result.forEach(function (item) {
                             if (!item.id) {
                                 return;
@@ -1385,8 +1369,6 @@ if (selectedFiles.length > 0);*/
                         if (err) {
                             return callbackSeries(err);
                         }
-
-
 
                         result.forEach(function (item) {
                             sourceSpecificPredicates.push({
@@ -1531,5 +1513,4 @@ if (selectedFiles.length > 0);*/
     };
 
     return self;
-})
-    ();
+})();

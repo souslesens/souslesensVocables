@@ -261,7 +261,7 @@ action: function (_e) {
             if (err) {
                 return callback(err);
             }
-           result=Lineage_classes.truncateResultToVisGraphLimit(result)
+            result = Lineage_classes.truncateResultToVisGraphLimit(result);
             Sparql_common.setSparqlResultPropertiesLabels(source, result, "prop", function (err, result2) {
                 if (err) {
                     return callback(err);
@@ -269,7 +269,6 @@ action: function (_e) {
                 var visjsData = { nodes: [], edges: [] };
                 var existingNodes = visjsGraph.getExistingIdsMap();
                 var color = Lineage_classes.getSourceColor(source);
-
 
                 result2.forEach(function (item) {
                     if (!existingNodes[item.subject.value]) {
@@ -296,7 +295,6 @@ action: function (_e) {
                     }
                     if (!existingNodes[item.object.value]) {
                         existingNodes[item.object.value] = 1;
-
 
                         var shape = Lineage_classes.defaultShape;
 

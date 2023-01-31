@@ -260,7 +260,7 @@ var Admin = (function () {
             body: JSON.stringify(body),
             POST: true,
         };
-        MainController.UI.message("copying source "+ source )
+        MainController.UI.message("copying source " + source);
         $.ajax({
             type: "POST",
             url: `${Config.apiUrl}/httpProxy`,
@@ -268,7 +268,7 @@ var Admin = (function () {
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
                 alert(data.result + "triples imported in sparqlEndpoint " + toEndPointUrl + "");
-                MainController.UI.message( "source "+source +" copied",true)
+                MainController.UI.message("source " + source + " copied", true);
             },
             error: function (err) {
                 return alert(err.responseText);
@@ -276,11 +276,11 @@ var Admin = (function () {
         });
     };
 
-    self.sparqlQuery=function(){
+    self.sparqlQuery = function () {
         var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
-        if (sources.length ==0) return alert("select at least one  source");
-       SparqlQueryUI.init(sources);
-    }
+        if (sources.length == 0) return alert("select at least one  source");
+        SparqlQueryUI.init(sources);
+    };
 
     return self;
 })();

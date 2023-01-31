@@ -120,17 +120,17 @@ var Sparql_proxy = (function () {
             var query2 = encodeURIComponent(query);
             query2 = query2.replace(/%2B/g, "+").trim();
             payload.url = url + query2 + queryOptions;
-            if (sourceParams.sparql_server.headers) {
+            if (sourceParams && sourceParams.sparql_server.headers) {
                 payload.options = JSON.stringify({ headers: sourceParams.sparql_server.headers, useProxy: useProxy });
             }
         } else {
             //POST
             payload.POST = true;
 
-            if (sourceParams.sparql_server.headers) {
+            if (sourceParams && sourceParams.sparql_server.headers) {
                 body = JSON.stringify({ headers: sourceParams.sparql_server.headers });
             }
-            if (sourceParams.sparql_server.type == "fuseki") url = url.replace("&query=", "");
+            if (sourceParams && sourceParams.sparql_server.type == "fuseki") url = url.replace("&query=", "");
 
             if (options.acceptHeader) headers["Accept"] = options.acceptHeader;
             else headers["Accept"] = "application/sparql-results+json";
@@ -169,7 +169,7 @@ var Sparql_proxy = (function () {
                     alert(err.responseText.substring(0, err.responseText.indexOf(".")) + "\n select more detailed data");
                 } else {
                     console.log(err.responseText);
-                    return MainController.UI.message("error in sparql query");
+                    MainController.UI.message("error in sparql query");
                 }
 
                 $("#waitImg").css("display", "none");

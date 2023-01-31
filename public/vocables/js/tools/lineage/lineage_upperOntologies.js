@@ -102,6 +102,7 @@ var Lineage_upperOntologies = (function () {
 
             var sourceObjects = [];
             var TopLevelOntologyObjects = [];
+
             result.forEach(function (item) {
                 if (item.id.type == "bnode") return;
 

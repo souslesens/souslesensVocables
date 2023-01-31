@@ -49,10 +49,10 @@ var Lineage_containers = (function () {
         };
 
         /*  items["GraphContainerSetStyle"] = {
-  label: "Set Style",
-  action: function(_e) {
-    Lineage_styles.showDialog(self.currentContainer.data);
-  }
+label: "Set Style",
+action: function(_e) {
+Lineage_styles.showDialog(self.currentContainer.data);
+}
 };*/
 
         return items;
@@ -88,6 +88,17 @@ var Lineage_containers = (function () {
             return alert("enter a term to search for");
         }
 
+        self.drawContainerJstree(source, filter, "lineage_containers_containersJstree", memberType, {}, function (err, result) {
+            if (err) {
+                return alert(err.responseText);
+            }
+        });
+    };
+
+    self.drawContainerJstree = function (source, filter, jstreeDiv, memberType, options, callback) {
+        if (!options) {
+            options = {};
+        }
         var fromStr = Sparql_common.getFromStr(source, null, true);
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -105,15 +116,18 @@ var Lineage_containers = (function () {
 
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
             if (err) {
-                return alert(err.responseText);
+                return callback(err);
             }
 
             var nodesMap = {};
+
             result.results.bindings.forEach(function (item) {
                 //  var nodeId=item.parent+"_"+item.member.value
 
                 nodesMap[item.member.value] = item;
             });
+
+            var uniqueNodes = {};
 
             var jstreeData = [];
 
@@ -126,6 +140,7 @@ var Lineage_containers = (function () {
                         parent = "#";
                     }
                     if (!nodesMap[item.parentContainer.value]) {
+                        nodesMap[item.parentContainer.value] = 1;
                         var parentNode = {
                             id: parent,
                             text: item.parentContainerLabel.value,
@@ -136,15 +151,15 @@ var Lineage_containers = (function () {
                                 id: parent,
                                 text: item.parentContainer.value,
                                 currentParent: "#",
+                                tabId: options.tabId,
                             },
                         };
                         jstreeData.push(parentNode);
                     }
                 }
-                var memberType = "resource";
-                if (item.memberType && item.memberType.value.indexOf("Bag") > -1) {
-                    memberType = "container";
-                }
+
+                var memberType = "container";
+
                 var node = {
                     id: nodeId,
                     text: item.memberLabel.value,
@@ -155,28 +170,37 @@ var Lineage_containers = (function () {
                         id: item.member.value,
                         text: item.memberLabel.value,
                         currentParent: parent,
+                        tabId: options.tabId,
                     },
                 };
                 jstreeData.push(node);
             }
 
-            var options = {
-                openAll: false,
-                contextMenu: Lineage_containers.getContextJstreeMenu(),
-                selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
-                dnd: {
-                    drag_stop: function (data, element, helper, event) {
-                        self.onMoveContainer(data, element, helper, event);
+            var jstreeOptions;
+            if (options.jstreeOptions) {
+                jstreeOptions = options.jstreeOptions;
+            } else {
+                jstreeOptions = {
+                    openAll: false,
+                    contextMenu: Lineage_containers.getContextJstreeMenu(),
+                    selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
+                    dnd: {
+                        drag_stop: function (data, element, helper, event) {
+                            self.onMoveContainer(data, element, helper, event);
+                        },
+                        drag_start: function (data, element, helper, event) {
+                            var sourceNodeId = element.data.nodes[0];
+                            self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
+                        },
                     },
-                    drag_start: function (data, element, helper, event) {
-                        var sourceNodeId = element.data.nodes[0];
-                        self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
-                    },
-                },
-            };
+                };
+            }
 
-            common.jstree.loadJsTree("lineage_containers_containersJstree", jstreeData, options, function () {
-                $("#lineage_containers_containersJstree").jstree().open_node("#");
+            common.jstree.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
+                $("#" + jstreeDiv)
+                    .jstree()
+                    .open_node("#");
+                callback(null);
             });
         });
     };
@@ -367,7 +391,20 @@ var Lineage_containers = (function () {
             });
         });
     };
-
+    /**
+     *
+     *
+     *
+     *
+     * @param source
+     * @param containerIds
+     * @param options
+     *  allDescendants
+     *  nodes | containers
+     *  descendants
+     *
+     * @param callback
+     */
     self.getContainerResources = function (source, containerIds, options, callback) {
         var containers;
         var firstContainer;
@@ -551,7 +588,8 @@ var Lineage_containers = (function () {
                             existingNodes[item.parentMember.value] = 1;
                             var type;
                             var color2 = color;
-                            if (item.parentMemberType && item.parentMemberType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
+                            // if (item.parentMemberType && item.parentMemberType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
+                            if (!item.leafType) {
                                 type = "container";
                                 color2 = common.colorToRgba(color, opacity * 0.75);
                             } else {
@@ -657,8 +695,8 @@ var Lineage_containers = (function () {
                                     return;
                                 }
                                 if (edge.from == from) {
-                                    nodelevels[edge.from] = level;
                                     if (!nodelevels[edge.to]) {
+                                        nodelevels[edge.to] = level + 1;
                                         recurse(edge.to, level + 1);
                                     }
                                 }
@@ -669,6 +707,10 @@ var Lineage_containers = (function () {
                         var maxLevel = 0;
                         visjsData.nodes.forEach(function (node, index) {
                             var level = (nodelevels[node.id] || 0) - 1;
+                            if (node.id == containerId) {
+                                level = 0;
+                            }
+
                             maxLevel = Math.max(maxLevel, level);
                             visjsData.nodes[index].level = level;
                         });
@@ -676,7 +718,9 @@ var Lineage_containers = (function () {
                         visjsData.nodes.forEach(function (node, index) {
                             if (node.level == -1) {
                                 node.level = maxLevel;
-                            } else node.level = node.level;
+                            } else {
+                                node.level = node.level;
+                            }
                         });
                     }
 
@@ -696,7 +740,7 @@ var Lineage_containers = (function () {
                             filter: Sparql_common.setFilter("prop", objectProperties),
                         };
                         options.allNodes = false;
-                        Lineage_classes.drawRelations(null, null, "Properties", options);
+                        Lineage_relations.drawRelations(null, null, "Properties", options);
                     }
                     return callbackSeries();
                 },
@@ -752,26 +796,34 @@ var Lineage_containers = (function () {
         getContainerDescendants: function (source, containerId, options, callback) {
             var fromStr = Sparql_common.getFromStr(source, false, true);
             var filterContainer0Str = Sparql_common.setFilter("container0", containerId);
+
+            var where0 =
+                " ?container0  rdf:type ?container0Type.filter(?container0Type in (rdf:Bag,rdf:List))" +
+                "optional{?container0 rdfs:label ?container0Label.}" +
+                "  ?container0 <http://www.w3.org/2000/01/rdf-schema#member> ?parentMember. " +
+                "optional{?parentMember rdfs:label ?parentMemberLabel.}" +
+                "?parentMember rdf:type ?parentMemberType.";
+
+            if (options.descendants) {
+                where0 +=
+                    "  ?parentMember <http://www.w3.org/2000/01/rdf-schema#member>* ?childMember. " +
+                    "optional{?childMember rdfs:label ?childMemberLabel.}" +
+                    "?childMember rdf:type ?childMemberType." +
+                    "?parent rdfs:member ?childMember. ";
+            }
+            where0 += filterContainer0Str;
+
             var query =
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                 "select distinct *     " +
                 fromStr +
-                " WHERE { ?container0  rdf:type ?container0Type.filter(?container0Type in (rdf:Bag,rdf:List))" +
-                "optional{?container0 rdfs:label ?container0Label.}";
+                " WHERE {";
 
-            query +=
-                "  ?container0 <http://www.w3.org/2000/01/rdf-schema#member> ?parentMember. " + "optional{?parentMember rdfs:label ?parentMemberLabel.}" + "?parentMember rdf:type ?parentMemberType.";
-
-            if (options.descendants) {
-                query +=
-                    "  ?parentMember <http://www.w3.org/2000/01/rdf-schema#member>* ?childMember. " +
-                    "optional{?childMember rdfs:label ?childMemberLabel.}" +
-                    "?childMember rdf:type ?childMemberType." +
-                    "?parent rdfs:member ?childMember. ";
-            }
-            query += filterContainer0Str;
+            query += "{" + where0 + " FILTER (?childMemberType in (rdf:Bag,rdf:List))}";
+            query += " UNION ";
+            query += "{" + where0 + " FILTER (?childMemberType not in (rdf:Bag,rdf:List)) bind (?childMemberType as ?leafType)}";
 
             query += "} limit 10000";
 

@@ -179,13 +179,16 @@
   onclick="Lineage_classes.drawObjectProperties()">Properties
 </button>-->
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.clearSource()">Clear</button>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="MainController.UI.showHideRightPanel()">Search</button>
+        </div>
+        <div class="lineage_actionDiv" style="display: flex; flex-wrap: wrap; width: 100%; justify-content: space-evenly; gap: 5px 5px">
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_query.showQueryDailog()">Query</button>
 
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_classes.drawRelations('direct',null,'leftPanel')">Relations</button>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_classes.drawRelations('inverse',null,'leftPanel')">Inv Rels.</button>
+            <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_relations.drawRelations('direct',null,'leftPanel')">Relations</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_relations.drawRelations('inverse',null,'leftPanel')">Inv Rels.</button>-->
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_relations.showDrawRelationsDialog()">Relations...</button>
 
             <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_dictionary.showTSFdictionaryDialog('Lineage_similars')">Equiv Class</button>-->
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_classes.drawRelations(null,'dictionary')">Equiv Class</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_relations.drawRelations(null,'dictionary')">Equiv Class</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.getSimilars('graph')">Similars</button>
             <div class="lineage_button_group">
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_graphTraversal.showShortestPathDialog()">Pathes</button>

@@ -318,6 +318,22 @@ var Sparql_generic = (function () {
         });
     };
 
+    self.getEndPointAllGraphsMap = function (sparqlServerUrl, callback) {
+        if (!sparqlServerUrl) {
+            sparqlServerUrl = Config.default_sparql_url + "?format=json&query=";
+        }
+        var query = "select distinct ?g WHERE {GRAPH ?g{?s ?p ?o}} limit 10000";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var graphs = {};
+            result.results.bindings.forEach(function (item) {
+                graphs[item.g.value] = 1;
+            });
+            return callback(null, graphs);
+        });
+    };
     self.getNodesAllTriples = function (sourceLabel, subjectIds, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
         var sliceSize = 2000;

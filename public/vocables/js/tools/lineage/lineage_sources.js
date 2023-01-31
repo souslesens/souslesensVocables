@@ -25,7 +25,9 @@ Lineage_sources = (function () {
         self.resetVisjsGraph();
         Lineage_selection.selectedNodes = [];
         self.setTheme(Config.defaultGraphTheme);
-        Lineage_sources.showSourcesDialog();
+        if (!Config.tools["lineage"].noSourceDialogAtInit) {
+            Lineage_sources.showSourcesDialog();
+        }
     };
 
     self.resetAll = function () {
@@ -39,12 +41,8 @@ Lineage_sources = (function () {
     };
 
     self.showSourcesDialog = function () {
-        if (window.parent && window.parent.Ontocommons) {
-            // called from outside (iframe)
-            var calledSource = window.parent.Ontocommons.currentSource;
-            if (calledSource) {
-                return self.setCurrentSource(calledSource);
-            }
+        if (Config.tools["lineage"].urlParam_source) {
+            return self.loadSources(Config.tools["lineage"].urlParam_source);
         }
 
         SourceBrowser.showSearchableSourcesTreeDialog(
@@ -72,28 +70,42 @@ Lineage_sources = (function () {
                 //if checkbox
 
                 var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
-                if (sources.length > 0) {
-                    var firstSource = null;
-                    async.eachSeries(
-                        sources,
-                        function (source, callbackEach) {
-                            self.initSource(source, function (err, result) {
-                                if (!err) {
-                                    firstSource = source;
-                                }
-                                return callbackEach();
-                            });
-                        },
-                        function (err) {
-                            if (err) {
-                                alert(err);
-                            }
-                            self.setCurrentSource(firstSource);
-                            $("#sourcesSelectionDialogdiv").dialog("close");
-                            MainController.UI.showHideRightPanel();
-                            $("#lineage_allActions").css("visibility", "visible");
-                        }
-                    );
+                sources.length > 0;
+                self.loadSources(sources);
+            }
+        );
+    };
+
+    self.loadSources = function (sources) {
+        if (!sources) {
+            return alert("no source selected");
+        }
+        if (!Array.isArray(sources)) {
+            sources = [sources];
+        }
+        var firstSource = null;
+        async.eachSeries(
+            sources,
+            function (source, callbackEach) {
+                self.initSource(source, function (err, result) {
+                    if (!err) {
+                        firstSource = source;
+                    }
+                    return callbackEach();
+                });
+            },
+            function (err) {
+                if (err) {
+                    alert(err);
+                }
+                self.setCurrentSource(firstSource);
+                $("#sourcesSelectionDialogdiv").dialog("close");
+                MainController.UI.showHideRightPanel();
+                $("#lineage_allActions").css("visibility", "visible");
+            },
+            function (err) {
+                if (err) {
+                    return alert(err.responseText);
                 }
             }
         );
@@ -157,6 +169,7 @@ Lineage_sources = (function () {
             if (err) {
                 return alert(err);
             }
+
             common.fillSelectOptions("GenericTools_searchAllClassSelect", result, true, "label", "id");
         });
     };
@@ -177,10 +190,12 @@ $("#lineage_actionDiv_title_hidden").css("display","flex")*/
 
     self.showHideEditButtons = function (source, hide) {
         /* var x=  $(".vis-edit-mode").length
-    if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
-      return;
-    }*/
-        if (!visjsGraph.network) return;
+if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
+  return;
+}*/
+        if (!visjsGraph.network) {
+            return;
+        }
         if (hide) {
             visjsGraph.network.disableEditMode();
             $(".vis-edit-mode").css("display", "none");
@@ -724,23 +739,27 @@ visjsGraph.network.options.edges.font = { color: self.defaultEdgeFontColor };*/
         // Random tree
         const N = 300;
         /*    const gData = {
-        nodes: [...Array(N).keys()].map(i => ({ id: i })),
-        links: [...Array(N).keys()]
-        .filter(id => id)
-        .map(id => ({
-        source: id,
-        target: Math.round(Math.random() * (id-1))
-    }))
-    };*/
+    nodes: [...Array(N).keys()].map(i => ({ id: i })),
+    links: [...Array(N).keys()]
+    .filter(id => id)
+    .map(id => ({
+    source: id,
+    target: Math.round(Math.random() * (id-1))
+}))
+};*/
 
         var nodes = visjsGraph.data.nodes.get();
         var edges = visjsGraph.data.edges.get();
         var gData2 = { nodes: [], links: [] };
         nodes.forEach(function (node) {
-            if (node.id) gData2.nodes.push({ id: node.id, label: node.label, color: node.color, data: node.data });
+            if (node.id) {
+                gData2.nodes.push({ id: node.id, label: node.label, color: node.color, data: node.data });
+            }
         });
         edges.forEach(function (edge) {
-            if (nodes.indexOf(edge.from) && nodes.indexOf(edge.to)) gData2.links.push({ source: edge.from, target: edge.to, label: edge.label });
+            if (nodes.indexOf(edge.from) && nodes.indexOf(edge.to)) {
+                gData2.links.push({ source: edge.from, target: edge.to, label: edge.label });
+            }
         });
 
         const Graph = ForceGraph3D()(document.getElementById("graphDiv"))
@@ -751,7 +770,9 @@ visjsGraph.network.options.edges.font = { color: self.defaultEdgeFontColor };*/
             .showNavInfo(true)
             .linkColor((link) => (link.data && link.data.bNodeId ? "yellow" : "orange"))
             .nodeThreeObject((node) => {
-                if (!node) return null;
+                if (!node) {
+                    return null;
+                }
                 const sprite = new SpriteText(node.label);
                 sprite.material.depthWrite = false; // make sprite background transparent
                 sprite.color = node.color;

@@ -18,6 +18,7 @@ var SourceBrowser = (function () {
             $("#GenericTools_searchSchemaType").val(Config.currentProfile.allowedSourceSchemas[0]);
         });
     };
+
     self.onSourceSelect = function (sourceLabel) {
         MainController.currentSource = sourceLabel;
         OwlSchema.currentSourceSchema = null;
@@ -168,8 +169,24 @@ var SourceBrowser = (function () {
                 label: "graph Node",
                 action: function (_e) {
                     // pb avec source
-
-                    Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0);
+                    var selectedNodes = $("#LineageNodesJsTreeDiv").jstree().get_selected(true);
+                    if (selectedNodes.length > 1) {
+                        async.eachSeries(
+                            selectedNodes,
+                            function (node, callbackEach) {
+                                Lineage_classes.drawNodeAndParents(node.data, 0, null, function (err, result) {
+                                    callbackEach(err);
+                                });
+                            },
+                            function (err) {
+                                if (err) {
+                                    return alert(err.responseText);
+                                }
+                            }
+                        );
+                    } else {
+                        Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0);
+                    }
                 },
             };
 
@@ -498,9 +515,9 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
                     searchedSources = Lineage_combine.currentSources;
                 } else {
                     /*   var mainSource = Lineage_sources.activeSource;
-     searchedSources.push(mainSource);
-     var importedSources = Config.sources[mainSource].imports;
-     searchedSources = searchedSources.concat(importedSources);*/
+searchedSources.push(mainSource);
+var importedSources = Config.sources[mainSource].imports;
+searchedSources = searchedSources.concat(importedSources);*/
                     searchedSources = Object.keys(Lineage_sources.loadedSources);
                 }
             } else if (sourcesScope == "all_OWLsources") {
@@ -868,38 +885,38 @@ return*/
                 },
             };
             /*   if (_options.selectTreeNodeFn) {
-        jstreeOptions.selectTreeNodeFn = _options.selectTreeNodeFn(event, obj);
-      }
-      else if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) {
-        jstreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
-      }
-      else {
-        ;// jstreeOptions.selectTreeNodeFn= self.editThesaurusConceptInfos(obj.node.data.source, obj.node);
-      }
+  jstreeOptions.selectTreeNodeFn = _options.selectTreeNodeFn(event, obj);
+}
+else if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) {
+  jstreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
+}
+else {
+  ;// jstreeOptions.selectTreeNodeFn= self.editThesaurusConceptInfos(obj.node.data.source, obj.node);
+}
 
 
-      if (_options.contextMenuFn) {
-        jstreeOptions.contextMenu = _options.contextMenuFn();
-      }
-      else if (_options.contextMenuFn) {
-        jstreeOptions.contextMenu = _options.contextMenuFn();
-      }
-      else {
-        jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
-      }
+if (_options.contextMenuFn) {
+  jstreeOptions.contextMenu = _options.contextMenuFn();
+}
+else if (_options.contextMenuFn) {
+  jstreeOptions.contextMenu = _options.contextMenuFn();
+}
+else {
+  jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
+}
 
-      if (_options.contextMenuFn) {
-        jstreeOptions.contextMenu = _options.contextMenuFn();
-      }
-      else if (_options.contextMenu) {
-        jstreeOptions.contextMenu = _options.contextMenu;
-      }
-      else if (Config.tools[MainController.currentTool].controller.contextMenuFn) {
-        jstreeOptions.contextMenu = Config.tools[MainController.currentTool].controller.contextMenuFn;
-      }
-      else {
-        jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
-      }*/
+if (_options.contextMenuFn) {
+  jstreeOptions.contextMenu = _options.contextMenuFn();
+}
+else if (_options.contextMenu) {
+  jstreeOptions.contextMenu = _options.contextMenu;
+}
+else if (Config.tools[MainController.currentTool].controller.contextMenuFn) {
+  jstreeOptions.contextMenu = Config.tools[MainController.currentTool].controller.contextMenuFn;
+}
+else {
+  jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
+}*/
 
             common.jstree.loadJsTree(targetDiv, jstreeData, jstreeOptions);
             setTimeout(function () {
@@ -1188,8 +1205,9 @@ defaultLang = 'en';*/
                         defaultProps.push(key);
                     }
                 }
+
                 var str = "<div style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
-                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='_slsvCallback' href='" + nodeId + "'>" + nodeId + "</a></td></tr>";
+                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='" + self.getUriTarget(nodeId) + "' href='" + nodeId + "'>" + nodeId + "</a></td></tr>";
                 str += "<tr><td class='detailsCellName'>GRAPH</td><td>" + graphUri + "</td></tr>";
                 str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
 
@@ -1202,7 +1220,16 @@ defaultLang = 'en';*/
 
                     if (self.propertiesMap.properties[key].value) {
                         var values = self.propertiesMap.properties[key].value;
-                        str += "<td class='detailsCellName'>" + self.propertiesMap.properties[key].name + "</td>";
+                        str +=
+                            "<td class='detailsCellName'>" +
+                            "<a target='" +
+                            self.getUriTarget(self.propertiesMap.properties[key].propUri) +
+                            "' href='" +
+                            self.propertiesMap.properties[key].propUri +
+                            "'>" +
+                            self.propertiesMap.properties[key].name +
+                            "</a>" +
+                            "</td>";
                         var valuesStr = "";
                         values.forEach(function (value, index) {
                             var optionalStr = "";
@@ -1231,9 +1258,9 @@ defaultLang = 'en';*/
 
                             if (value.indexOf("http") == 0) {
                                 if (valueLabelsMap[value]) {
-                                    value = "<a target='_slsvCallback' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
+                                    value = "<a target='" + self.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
                                 } else {
-                                    value = "<a target='_slsvCallback' href='" + value + "'>" + value + "</a>";
+                                    value = "<a target='" + self.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
                                 }
                             }
                             if (index > 0) {
@@ -1260,9 +1287,9 @@ defaultLang = 'en';*/
                             values.forEach(function (value, index) {
                                 if (value.indexOf("http") == 0) {
                                     if (valueLabelsMap[value]) {
-                                        value = "<a target='_slsvCallback' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
+                                        value = "<a target='" + self.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
                                     } else {
-                                        value += "<a target='_slsvCallback' href='" + value + "'>" + value + "</a>";
+                                        value += "<a target='" + self.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
                                     }
                                 }
                                 if (index > 0) {
@@ -1442,7 +1469,7 @@ defaultLang = 'en';*/
         /*  var filter=Sparql_common.setFilter("concept",[nodeId])
 Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(err, result){
 
-    }})*/
+}})*/
         var node = {
             data: {
                 id: nodeId,
@@ -1473,15 +1500,15 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.objectClasses, true, "label", "id");
 
         /*
-   if (predicate == "rdf:type") {
-    common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.basicTypeClasses.concat(["-----------"]).concat(allObjects.sourceObjects), true, "label", "id");
+if (predicate == "rdf:type") {
+common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.basicTypeClasses.concat(["-----------"]).concat(allObjects.sourceObjects), true, "label", "id");
 } else if (predicate == "rdfs:subClassOf") {
-    common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.sourceObjects.concat(["-----------"]).concat(allObjects.TopLevelOntologyObjects), true, "label", "id");
+common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.sourceObjects.concat(["-----------"]).concat(allObjects.TopLevelOntologyObjects), true, "label", "id");
 } else {
-    common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "label", "id");
+common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "label", "id");
 }
 
- */
+*/
     };
     self.addProperty = function (property, value, source, createNewNode, callback) {
         if (!property) {
@@ -1563,7 +1590,9 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 if (err) {
                     return alert(err.responseText);
                 }
+
                 common.fillSelectOptions("sourceBrowser_addPropertyPredicateSelect", result.predicates, true, "label", "id");
+
                 self.SourcePossiblePredicatesAndObject = result;
             });
         });
@@ -1699,7 +1728,9 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             return;
         }
         var value = $("#Lineage_classes_SearchSourceInput").val();
-        if (!sourcesTreeDiv) sourcesTreeDiv = "searchAll_sourcesTree";
+        if (!sourcesTreeDiv) {
+            sourcesTreeDiv = "searchAll_sourcesTree";
+        }
         $("#" + sourcesTreeDiv)
             .jstree(true)
             .search(value);
@@ -1726,13 +1757,15 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 if (!types) {
                     types = ["OWL"];
                 }
-                $("#sourcesSelectionDialogdiv").on("dialogopen", function (event, ui) {
+                var sourcesSelectionDialogdiv = "sourcesSelectionDialogdiv";
+                if (options.sourcesSelectionDialogdiv) sourcesSelectionDialogdiv = options.sourcesSelectionDialogdiv;
+
+                $("#" + sourcesSelectionDialogdiv).on("dialogopen", function (event, ui) {
                     $("#Lineage_classes_SearchSourceInput").val("");
                     MainController.UI.showSources("searchAll_sourcesTree", false, sources, types, jstreeOptions);
                 });
 
-                var xx = $("#sourcesSelectionDialogdiv").length;
-                $("#sourcesSelectionDialogdiv").dialog("open");
+                $("#" + sourcesSelectionDialogdiv).dialog("open");
                 $("#Lineage_classes_SearchSourceInput").focus();
                 if (okButtonValidateFn) {
                     $("#searchAllValidateButton").bind("click", okButtonValidateFn);
@@ -1756,11 +1789,24 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 });
             }
         } else {
-            $("#sourcesSelectionDialogdiv").dialog("open");
+            $("#" + sourcesSelectionDialogdiv).dialog("open");
             $("#Lineage_classes_SearchSourceInput").focus();
             /*  if ($("#searchAll_sourcesTree").jstree())
 $("#searchAll_sourcesTree").jstree().uncheck_all();*/
         }
+    };
+
+    self.isSLSVvisibleUri = function (uri) {
+        for (var source in Config.sources) {
+            var graphUri = Config.sources[source].graphUri;
+            if (graphUri && uri.indexOf(graphUri) == 0) return true;
+        }
+        return false;
+    };
+    self.getUriTarget = function (nodeId) {
+        var target = "_blank";
+        if (self.isSLSVvisibleUri(nodeId)) target = "_slsvCallback";
+        return target;
     };
 
     return self;

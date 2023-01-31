@@ -54,6 +54,13 @@ self.tools["KGpropertyFilter"] = {
     toolDescriptionImg: null,
 };
 
+self.tools["Composer"] = {
+    label: "Composer",
+    noSource: 1,
+    controller: Composer,
+    toolDescriptionImg: null,
+};
+
 self.tools["TE_14224_browser"] = {
     label: "TE_14224_browser",
     multiSources: 0,

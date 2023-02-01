@@ -352,7 +352,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                 id="sources-access-treeview"
                 defaultExpanded={Array.from(nodesClicked)}
                 onNodeToggle={(_event, nodeIds) => {
-                    console.log("nodeIsToggled", nodeIds);
                     setNodeToExpand(nodeIds);
                 }}
                 defaultCollapseIcon={<ExpandMoreIcon sx={{ width: 30, height: 30 }} />}
@@ -464,17 +463,14 @@ const CustomContent = React.forwardRef(function CustomContent(props: TreeItemCon
     const icon = iconProp || expansionIcon || displayIcon;
 
     const handleMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        console.log("mouseDown");
         preventSelection(event);
     };
 
     const handleExpansionClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        console.log("UserClickedExpansion");
         handleExpansion(event);
     };
 
     const handleSelectionClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-        console.log("UserClickedSelection");
         handleSelection(event);
     };
 

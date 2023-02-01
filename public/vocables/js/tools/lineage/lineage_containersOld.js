@@ -13,7 +13,7 @@ var Lineage_containers = (function () {
             label: "Graph node",
             action: function (_e) {
                 if (self.currentContainer.data.type == "container") Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.id, { onlyChildren: true });
-                else Lineage_classes.drawNodeAndParents(self.currentContainer.data, 0);
+                else Lineage_classes.drawNodesAndParents(self.currentContainer, 0);
             },
         };
         items["openAll"] = {

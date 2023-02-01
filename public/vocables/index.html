@@ -271,9 +271,8 @@
 
                     $(document).on("click", "a", function () {
                         var target = $(this).attr("target");
-                        if (true && target == "_slsvCallback") {
+                        if (target == "_slsvCallback") {
                             var id = $(this).attr("href");
-                            //   event.stopPropagation();
                             event.preventDefault();
                             SourceBrowser.showNodeInfos(null, id, "mainDialogDiv");
                         }

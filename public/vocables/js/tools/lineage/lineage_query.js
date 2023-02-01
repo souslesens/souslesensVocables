@@ -9,30 +9,102 @@ var Lineage_query = (function () {
     self.isLoaded = false;
 
     self.showQueryDailog = function () {
-        $("#LineagePopup").dialog("open");
+        $("#QueryDialog").dialog("open");
         if (self.isLoaded) {
             return;
         }
-        $("#LineagePopup").load("snippets/lineage/queryDialog.html", function () {
-            var data = ["rdf:type", "rdfs:label", "rdfs:isDefinedBy", "rdfs:comment", "skos:altLabel", "skos:prefLabel", "skos:definition", "skos:example"];
+        self.filters = {};
+        self.isLoaded = true;
+        $("#QueryDialog").load("snippets/lineage/queryDialog.html", function () {
+            var data = [
+                "",
+                "rdf:type",
+                "rdfs:label",
+                "rdfs:isDefinedBy",
+                "rdfs:comment",
+                "skos:altLabel",
+                "skos:prefLabel",
+                "skos:definition",
+                "skos:example",
+                "rdfs:subClassOf",
+                "rdfs:member",
+                "OTHER",
+            ];
             common.fillSelectOptions("lineageQuery_predicateSelect", data, true);
+
+            $("#lineageQuery_value").keypress(function (e) {
+                if (e.which == 13) {
+                    var str = $("#lineageQuery_value").val();
+                    if (str.length > 0) Lineage_query.addFilter();
+                }
+            });
         });
     };
 
-    self.onSelectObjectType = function (type) {};
+    self.onSelectType = function (role, type) {
+        function fillUriSelect(target) {
+            var str = prompt("Class label contains");
+            if (!str) return;
+
+            var options = {
+                filter: "filter (?type=" + type + " && regex(?label,'" + str + "','i'))",
+            };
+            Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, options, function (err, result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+                $("#" + target).css("display", "block");
+                $("#lineageQuery_valueDiv").css("display", "none");
+
+                common.fillSelectOptions(target, result.sourceObjects, true, "label", "id");
+            });
+        }
+
+        if (role == "predicate" && type == "OTHER") {
+            Sparql_OWL.getObjectProperties(Lineage_sources.activeSource, { withoutImports: true }, function (err, result) {
+                if (err) return alert(err.responseText);
+                $("#lineageQuery_predicateUriSelect").css("display", "block");
+
+                common.fillSelectOptions("lineageQuery_predicateUriSelect", result, true, "propertyLabel", "property");
+            });
+            return;
+        }
+        if (type == "String") {
+            $("#lineageQuery_valueDiv").css("display", "block");
+        } else if (type == "Date") {
+        } else if (type == "owl:Class" || type == "owl:NamedIndividual" || type == "rdf:Bag") {
+            if (role == "subject") fillUriSelect("lineageQuery_subjectUriSelect");
+            if (role == "object") fillUriSelect("lineageQuery_objectUriSelect");
+        } else {
+        }
+    };
 
     self.addFilter = function () {
-        var predicate = $("#lineageQuery_predicateSelect").val();
         var subjectType = $("#lineageQuery_subjectTypeSelect").val();
+        var subjectUri = $("#lineageQuery_subjectUriSelect").val();
+        var subjectUriLabel = $("#lineageQuery_subjectUriSelect option:selected").text();
+
+        var predicateType = $("#lineageQuery_predicateSelect").val();
+        var predicateUri = $("#lineageQuery_predicateUriSelect").val();
+        var predicateUriLabel = $("#lineageQuery_predicateUriSelect option:selected").text();
+
         var objectType = $("#lineageQuery_objectTypeSelect").val();
+        var objectUri = $("#lineageQuery_objectUriSelect").val();
+        var objectUriLabel = $("#lineageQuery_objectUriSelect option:selected").text();
+        if (objectUri == "_seearch") {
+            objectUri = null;
+        }
+        if (subjectUri == "_seearch") {
+            subjectUri = null;
+        }
 
         var filterBooleanOperator = $("#filterBooleanOperator").val();
 
         var operator = $("#lineageQuery_operator").val();
         var value = $("#lineageQuery_value").val();
 
-        if (!objectType && !predicate) {
-            return alert(" you must select at least a subject type or a predicate ");
+        if (!objectType && !objectUri && !predicateType && !predicateUri) {
+            return alert(" not enough criteria ");
         }
 
         $("#LineageQuery_value").val("");
@@ -44,21 +116,29 @@ var Lineage_query = (function () {
 
         var obj = {
             subjectType: subjectType,
+            subjectUri: subjectUri,
+
+            predicatetype: predicateType,
+            predicateUri: predicateUri,
+
             objectType: objectType,
-            predicate: predicate,
+            objectUri: objectUri,
+
             filterBooleanOperator: filterBooleanOperator,
         };
 
+        var valueStr = "";
         if (value) {
             obj.operator = operator;
             obj.value = value;
-            if (Object.keys(self.filters).length > 0) {
-                html += filterBooleanOperator + " ";
-            }
-            html += "&nbsp;" + subjectType + " " + predicate + " " + objectType + " " + operator + "&nbsp;" + value + "&nbsp;";
-        } else {
-            html += "ALL &nbsp;";
+            valueStr = objectType + " " + operator + "&nbsp;" + value;
         }
+
+        if (Object.keys(self.filters).length > 0) {
+            html += filterBooleanOperator + " ";
+        }
+        html += "&nbsp;" + (subjectUriLabel || subjectType) + " " + (predicateUriLabel || predicateType) + " " + (objectUriLabel || valueStr) + "&nbsp;";
+
         html += "</div>";
 
         self.filters[filterId] = obj;
@@ -74,6 +154,8 @@ var Lineage_query = (function () {
     };
 
     self.executeQuery = function (queryType) {
+        if (Object.keys(self.filters).length == 0) return alert("add a  filter first ");
+
         var source = Lineage_sources.activeSource;
         var fromStr = Sparql_common.getFromStr(source);
         var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "select ";
@@ -95,39 +177,48 @@ var Lineage_query = (function () {
             filterIndex += 1;
 
             query += "{ ?s rdfs:label ?sLabel. ?s rdf:type ?sType. ";
+
             var filter = self.filters[key];
-            var filterStr = "";
 
-            if (filter.subjectType == "class") {
-                filterStr += "?s rdf:type owl:Class.";
-            } else if (filter.subjectType == "property") {
-                filterStr += "?s rdf:type owl:ObjectProperty.";
-            } else if (filter.subjectType == "bag") {
-                filterStr += "?s rdf:type rdf:Bag.";
+            var subjectFilterStr = "",
+                predicateFilterStr = "",
+                objectFilterStr = "";
+
+            if (filter.subjectUri) {
+                subjectFilterStr = " filter( ?s =<" + filter.subjectUri + ">) ";
+            } else if (filter.subjectType) {
+                subjectFilterStr = " filter( ?sType =" + filter.subjectType + ") ";
             }
 
-            var strO = "sLabel";
-            if (filter.predicate) {
-                query += " ?s ?p ?o. Filter(?p =" + filter.predicate + ") ";
-                strO = "o";
+            if (filter.predicateUri) {
+                predicateFilterStr = " ?s ?p ?o filter( ?p =<" + filter.predicateUri + ">) ";
+            } else if (filter.predicateType) {
+                predicateFilterStr = " ?s ?p ?o filter(  ?p =" + filter.predicateType + ") ";
             }
 
-            //filter object
-            if (filter.objectType == "string") {
-                if (filter.operator == "contains") {
-                    filterStr += " Filter(regex(str(?" + strO + "),'" + filter.value + "','i')).";
-                } else if (filter.operator == "not contains") {
-                    filterStr += " Filter( ! regex(str(?" + strO + "),'" + filter.value + "','i')).";
-                } else {
-                    filterStr += " Filter(?" + strO + "" + filter.operator + "'" + filter.value + "').";
+            if (filter.objectUri) {
+                objectFilterStr = "";
+                if (!filter.predicateUri) objectFilterStr = " ?s ?p ?o .";
+                objectFilterStr += "  filter( ?o =<" + filter.objectUri + ">) ";
+            } else if (filter.value) {
+                if (!filter.predicateUri) objectFilterStr = " ?s ?p ?o .";
+
+                if (filter.objectType == "string") {
+                    if (filter.operator == "contains") {
+                        objectFilterStr += " ?o rdfs:label ?oLabel . Filter(regex(str(?oLabel),'" + filter.value + "','i')).";
+                    } else if (filter.operator == "not contains") {
+                        objectFilterStr += " ?o rdfs:label ?oLabel . Filter( ! regex(str(?o),'" + filter.value + "','i')).";
+                    } else {
+                        objectFilterStr += " ?o rdfs:label ?oLabel . Filter(?oLabel" + filter.operator + "'" + filter.value + "').";
+                    }
+                } else if (filter.objectType == "number") {
+                    objectFilterStr += "  Filter(?o" + filter.operator + "'" + filter.value + "'^^xsd:float).";
+                } else if (filter.objectType == "date") {
+                    objectFilterStr += " Filter(?o" + filter.operator + "'" + filter.value + "'^^xsd:dateTime).";
                 }
-            } else if (filter.objectType == "number") {
-                filterStr += " Filter(?" + strO + "" + filter.operator + "'" + filter.value + "'^^xsd:float).";
-            } else if (filter.objectType == "date") {
-                filterStr += " Filter(?" + strO + "" + filter.operator + "'" + filter.value + "'^^xsd:dateTime).";
             }
 
-            query += filterStr;
+            query += " \n" + subjectFilterStr + " \n" + predicateFilterStr + " \n" + objectFilterStr;
 
             query += "}";
         }
@@ -207,30 +298,87 @@ var Lineage_query = (function () {
         items.graphNode = {
             label: "graph Node",
             action: function (_e) {
-                // pb avec source
                 var selectedNodes = $("#lineageQuery_listResultDivTree").jstree().get_selected(true);
                 if (selectedNodes.length > 1) {
-                    async.eachSeries(
-                        selectedNodes,
-                        function (node, callbackEach) {
-                            Lineage_classes.drawNodeAndParents(node.data, 0, null, function (err, result) {
-                                callbackEach(err);
-                            });
-                        },
-                        function (err) {
-                            if (err) {
-                                return alert(err.responseText);
-                            }
-                        }
-                    );
+                    Lineage_classes.drawNodesAndParents(selectedNodes, 0);
+                } else if (self.currentTreeNode.children.length > 0) {
+                    var selectedNodes = [];
+                    self.currentTreeNode.children.forEach(function (childId) {
+                        var node = $("#lineageQuery_listResultDivTree").jstree().get_node(childId);
+                        selectedNodes.push(node);
+                    });
+
+                    Lineage_classes.drawNodesAndParents(selectedNodes, 0);
                 } else {
-                    Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0);
+                    Lineage_classes.drawNodesAndParents(self.currentTreeNode, 1, null, function (err, result) {});
                 }
+            },
+        };
+
+        items["Decorate"] = {
+            label: "Decorate",
+            action: function (_e) {
+                self.showDecorateGraphDialog();
             },
         };
         return items;
     };
 
+    self.showDecorateGraphDialog = function () {
+        var existingNodes = visjsGraph.getExistingIdsMap();
+        if (Object.keys(existingNodes).length == 0) return alert("draw nodes first");
+        $("#LineagePopup").dialog("open");
+        $("#LineagePopup").load("snippets/lineage/selection/lineage_selection_decorateDialog.html", function () {
+            $("#lineage_selection_decorate_applyButton").bind("click", Lineage_query.decorateGraphNodes);
+            var colors = common.paletteIntense;
+            var array = [];
+            colors.forEach(function (color) {
+                array.push();
+            });
+            common.fillSelectOptions("lineage_selection_decorate_colorSelect", colors, true);
+
+            $("#lineage_selection_decorate_colorSelect option").each(function () {
+                $(this).css("background-color", $(this).val());
+            });
+
+            var shapes = ["ellipse", " circle", " database", " box", " text", "diamond", " dot", " star", " triangle", " triangleDown", " hexagon", " square"];
+            common.fillSelectOptions("lineage_selection_decorate_shapeSelect", shapes, true);
+        });
+    };
+
+    self.decorateGraphNodes = function () {
+        function decorate(nodes) {
+            var newIds = [];
+
+            var color = $("#lineage_selection_decorate_colorSelect").val();
+            var shape = $("#lineage_selection_decorate_shapeSelect").val();
+            var size = $("#lineage_selection_decorate_sizeInput").val();
+            var existingNodes = visjsGraph.getExistingIdsMap();
+            nodes.forEach(function (nodeId) {
+                if (!existingNodes[nodeId]) return;
+                var obj = { id: nodeId };
+                if (color) obj.color = color;
+                if (shape) obj.shape = shape;
+                if (size) obj.size = size;
+                newIds.push(obj);
+            });
+            $("#LineagePopup").dialog("close");
+            visjsGraph.data.nodes.update(newIds);
+        }
+
+        var selectedNodes = $("#lineageQuery_listResultDivTree").jstree().get_selected(true);
+        if (selectedNodes.length > 1) {
+            decorate(selectedNodes);
+        } else if (self.currentTreeNode.children.length > 0) {
+            var selectedNodes = [];
+            self.currentTreeNode.children.forEach(function (childId) {
+                selectedNodes.push(childId);
+            });
+            decorate(selectedNodes, 1);
+        } else {
+            decorate([self.currentTreeNode.id]);
+        }
+    };
     self.onColumnSelect = function () {
         var node = $("#LineageQuery_SQL_columnsTree").jstree().get_selected(true)[0];
         self.currentColumn = node.data.column;

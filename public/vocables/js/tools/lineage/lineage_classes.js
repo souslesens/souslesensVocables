@@ -93,8 +93,8 @@ sourceLabels.sort();
 
                 $("#LineagePopup").dialog({
                     autoOpen: false,
-                    height: 600,
-                    width: 600,
+                    height: 700,
+                    width: 700,
                     modal: false,
                 });
                 $("#Lineage_Tabs").tabs({
@@ -167,7 +167,7 @@ sourceLabels.sort();
                 Lineage_relations.drawRelations(null, null, "Graph", {});
                 //  Lineage_classes.graphActions.graphNodeNeighborhood("all");
             } else if (options.callee == "Tree") {
-                Lineage_classes.drawNodeAndParents(node.data);
+                Lineage_classes.drawNodesAndParents(node);
             }
         } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
             Lineage_selection.addNodeToSelection(node);
@@ -2297,22 +2297,60 @@ addNode:false
         visjsGraph.data.nodes.update(newNodes);
     };
     /**
-     * draws only one not parents (not an array)
+     * draws nodes and parents
      *
-     * @param nodeData
+     * @param node (with data id and source
      * @param ancestorsDepth
      * @param options
      * @param callback
      * @returns {void|*}
      */
-    self.drawNodeAndParents = function (nodeData, ancestorsDepth, options, callback) {
-        function drawNodeAndparent(result) {
-            var visjsData = { nodes: [], edges: [] };
-            var color = self.getSourceColor(nodeData.source);
-            var newNodeIds = [];
-            if (!nodeData.label && nodeData.text) {
-                nodeData.label = nodeData.text;
+    self.drawNodesAndParents = function (nodes, ancestorsDepth, options, callback) {
+        var source = Lineage_sources.activeSource;
+        if (!Array.isArray(nodes)) {
+            nodes = [nodes];
+        }
+
+        var nodeIds = [];
+        nodes.forEach(function (node) {
+            nodeIds.push(node.data.id);
+        });
+
+        var existingNodes = visjsGraph.getExistingIdsMap();
+        if (existingNodes[nodes[0].data.id]) {
+            return self.zoomGraphOnNode(nodes[0].data.id);
+        }
+
+        MainController.UI.message("");
+
+        if (ancestorsDepth != 0) {
+            ancestorsDepth = 5;
+        }
+        memberPredicate = false;
+        if (nodes[0].data.type == "container") {
+            memberPredicate = true;
+        }
+
+        var queryOptions = { skipRestrictions: 1, memberPredicate: memberPredicate, excludeType: 1, selectGraph: true };
+        Sparql_generic.getNodeParents(source, null, nodeIds, ancestorsDepth, queryOptions, function (err, result) {
+            if (err) {
+                if (callback) {
+                    return callback(err);
+                }
+                return MainController.UI.message(err);
             }
+            if (result.length == 0) {
+                if (callback) {
+                    return callback("No data found");
+                }
+                $("#waitImg").css("display", "none");
+                return MainController.UI.message("No data found");
+            }
+
+            var visjsData = { nodes: [], edges: [] };
+            var color = self.getSourceColor(source);
+            var newNodeIds = [];
+
             var existingNodes = visjsGraph.getExistingIdsMap();
 
             var conceptType = "Class";
@@ -2332,13 +2370,13 @@ addNode:false
                         data: {
                             id: item.concept.value,
                             label: item.conceptLabel.value,
-                            source: nodeData.source,
+                            source: source,
                             type: conceptType,
                         },
                         shadow: self.nodeShadow,
                         level: 0,
                         shape: shape,
-                        color: self.getSourceColor(nodeData.source, item.concept.value),
+                        color: self.getSourceColor(source, item.concept.value),
                         size: Lineage_classes.defaultShapeSize,
                     });
                 }
@@ -2358,7 +2396,7 @@ addNode:false
                                 id: broader.value,
                                 label: item["broader" + i + "Label"].value,
                                 data: {
-                                    source: nodeData.source,
+                                    source: source,
                                     label: item["broader" + i + "Label"].value,
                                     id: broader.value,
                                 },
@@ -2384,7 +2422,7 @@ addNode:false
                                     id: edgeId,
                                     from: broader.value,
                                     to: fromId,
-                                    data: { source: nodeData.source },
+                                    data: { source: source },
                                     color: Lineage_classes.defaultEdgeColor,
                                     arrows: {
                                         from: {
@@ -2410,7 +2448,7 @@ addNode:false
                                     id: edgeId,
                                     from: fromId,
                                     to: item["broader" + i].value,
-                                    data: { source: nodeData.source },
+                                    data: { source: source },
                                     color: Lineage_classes.defaultEdgeColor,
                                     arrows: {
                                         to: {
@@ -2423,18 +2461,12 @@ addNode:false
                             }
                             break;
                         }
-                    } else {
-                        /*    var id=item["broader" + (i-1)].value;
-if(upperNodeIds.indexOf(id)<0) {
-upperNodeIds.push(id);
-
-}*/
                     }
                 }
             });
 
             existingNodes = visjsGraph.getExistingIdsMap();
-            if (!existingNodes[nodeData.source]) {
+            if (!existingNodes[source]) {
                 visjsData.nodes.forEach(function (_item) {
                     // pass
                 });
@@ -2448,7 +2480,7 @@ upperNodeIds.push(id);
                 }
             }
 
-            Lineage_sources.registerSource(nodeData.source);
+            Lineage_sources.registerSource(source);
 
             if (!visjsGraph.data || !visjsGraph.data.nodes) {
                 self.drawNewGraph(visjsData);
@@ -2458,66 +2490,13 @@ upperNodeIds.push(id);
             }
 
             setTimeout(function () {
-                self.zoomGraphOnNode(nodeData.id, false);
+                self.zoomGraphOnNode(node.data[0].id, false);
             }, 500);
             MainController.UI.message("", true);
             if (callback) {
                 return callback(null, visjsData);
             }
-        }
-
-        var existingNodes = visjsGraph.getExistingIdsMap();
-        if (existingNodes[nodeData.id]) {
-            return self.zoomGraphOnNode(nodeData.id);
-        }
-
-        MainController.UI.message("");
-        var schemaType = Config.sources[nodeData.source].schemaType;
-        if (schemaType == "OWL" || schemaType == "SKOS") {
-            if (ancestorsDepth != 0) {
-                ancestorsDepth = 7;
-            }
-            memberPredicate = false;
-            if (nodeData.type == "container") {
-                memberPredicate = true;
-            }
-            Sparql_generic.getNodeParents(
-                nodeData.source,
-                null,
-                nodeData.id,
-                ancestorsDepth,
-                { skipRestrictions: 1, memberPredicate: memberPredicate, excludeType: 1 },
-                function (/** @type {any} */ err, /** @type {string | any[]} */ result) {
-                    if (err) {
-                        if (callback) {
-                            return callback(err);
-                        }
-                        return MainController.UI.message(err);
-                    }
-
-                    if (result.length == 0) {
-                        if (callback) {
-                            return callback("No data found");
-                        }
-                        $("#waitImg").css("display", "none");
-                        return MainController.UI.message("No data found");
-                    }
-                    return drawNodeAndparent(result);
-                }
-            );
-        } else if (schemaType == "KNOWLEDGE_GRAPH") {
-            var data = [
-                {
-                    concept: {
-                        value: nodeData.id,
-                    },
-                    conceptLabel: {
-                        value: nodeData.label,
-                    },
-                },
-            ];
-            return drawNodeAndparent(data);
-        }
+        });
     };
 
     self.graphActions = {

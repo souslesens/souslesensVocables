@@ -226,11 +226,43 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
 
     const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const treeStr = src.treeStr;
+
+        // Get the parent treeStr
+        let bf = "";
+        const parentList = treeStr
+            .split("/")
+            .map((branch) => {
+                const prt = bf === "" ? branch : [bf, branch].join("/");
+                bf = prt;
+                return prt;
+            })
+            .slice(0, -1);
+
+        const currentSac = profileModel.profileForm.sourcesAccessControl;
+
+        // get the nearest parent who have a value
+        const nearestParentWithValue = Object.entries(currentSac)
+            .map(([branch, _val]) => branch)
+            .filter((branch) => {
+                if (parentList.includes(branch)) {
+                    return branch;
+                }
+            })
+            .reduce((a, b) => {
+                return a.length >= b.length ? a : b;
+            });
+
+        // update current value if the nearest parent have a different value
+        if (currentSac[nearestParentWithValue] === event.target.value) {
+            update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: treeStr, newValue: null } });
+        } else {
+            update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: treeStr, newValue: event.target.value as SourceAccessControl } });
+        }
+
         // reset all children
         src.children.forEach((srcNode: SourceTreeNode) => {
             update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: srcNode.treeStr, newValue: null as SourceAccessControl | null } });
         });
-        update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: treeStr, newValue: event.target.value as SourceAccessControl } });
     };
 
     const handleCheckedAll = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
@@ -260,7 +292,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     };
 
     const generateSourcesTree = () => {
-        let sourcesTree: any[] = [];
+        let sourcesTree: SourceTreeNode[] = [];
 
         let index = 0;
         sources.forEach((source) => {

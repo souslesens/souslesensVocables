@@ -149,7 +149,7 @@ const enum Mode {
 type Msg_ =
     | { type: Type.UserClickedModal; payload: boolean }
     | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } }
-    | { type: Type.UserUpdatedSourceAccessControl; payload: { treeStr: string; newValue: SourceAccessControl | "default" } }
+    | { type: Type.UserUpdatedSourceAccessControl; payload: { treeStr: string; newValue: SourceAccessControl } }
     | { type: Type.ResetProfile; payload: Profile }
     | { type: Type.UserClickedCheckAll; payload: { fieldname: string; value: boolean } }
     | { type: Type.UserUpdatedBlenderLevel; payload: number };
@@ -168,15 +168,10 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
             const previousSourcesAccessControl = profileEditionState.profileForm.sourcesAccessControl;
             let newSourcesAccessControls: Record<string, SourceAccessControl>;
 
-            if (newValue === "default") {
-                const { [treeStr]: value, ...otherSource } = previousSourcesAccessControl;
-                newSourcesAccessControls = otherSource;
-            } else {
-                newSourcesAccessControls = {
-                    ...profileEditionState.profileForm.sourcesAccessControl,
-                    [msg.payload.treeStr]: newValue,
-                };
-            }
+            newSourcesAccessControls = {
+                ...profileEditionState.profileForm.sourcesAccessControl,
+                [msg.payload.treeStr]: newValue,
+            };
 
             return {
                 ...profileEditionState,
@@ -226,7 +221,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
 
     const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const treeStr = src.treeStr;
-        update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: treeStr, newValue: event.target.value as SourceAccessControl | "default" } });
+        update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: treeStr, newValue: event.target.value as SourceAccessControl } });
     };
 
     const handleCheckedAll = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
@@ -255,7 +250,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         return fields.concat(source.name);
     };
 
-    const generateSourcesTree = (source: any) => {
+    const generateSourcesTree = () => {
         let sourcesTree: any[] = [];
 
         let index = 0;
@@ -315,7 +310,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                 accessControlValue = profileModel.profileForm.sourcesAccessControl[matchingAccessControl];
             }
 
-            const value = accessControlValue ? accessControlValue : "default";
+            const value = accessControlValue ? accessControlValue : "forbidden";
 
             return (
                 <CustomTreeItem
@@ -331,7 +326,6 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                     name={source.source.id + "-source-access-control"}
                                     value={value}
                                     onChange={handleSourceAccessControlUpdate(source)}
-                                    allowDefault={true}
                                     editable={source.source.editable}
                                 />
                             </Grid>
@@ -345,7 +339,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     };
 
     function SourcesTreeView() {
-        const treeviewSources = displayFormTree(generateSourcesTree(sources));
+        const treeviewSources = displayFormTree(generateSourcesTree());
         return (
             <TreeView
                 aria-label="Sources access control navigator"
@@ -510,29 +504,16 @@ interface SourceTreeNode {
 
 interface SourceAccessControlInputProps {
     name: string;
-    value: SourceAccessControl | "default";
+    value: SourceAccessControl;
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    allowDefault: boolean;
     editable: boolean;
 }
 
-const SourceAccessControlInputRadio: React.FC<SourceAccessControlInputProps> = React.memo(function ({ name, value, onChange, allowDefault, editable }) {
-    return (
-        <RadioGroup row aria-labelledby={name} value={value} onChange={onChange} name={name}>
-            {allowDefault ? <FormControlLabel value="default" control={<Radio size="small" />} label="Defaults" /> : null}
-            <FormControlLabel value="forbidden" control={<Radio size="small" />} label="Forbidden" />
-            <FormControlLabel value="read" control={<Radio size="small" />} label="Read" />
-            <FormControlLabel disabled={!editable} value="readwrite" control={<Radio />} label="Read & Write" />
-        </RadioGroup>
-    );
-});
-
-const SourceAccessControlInputSelect: React.FC<SourceAccessControlInputProps> = ({ name, value, onChange, allowDefault, editable }) => {
+const SourceAccessControlInputSelect: React.FC<SourceAccessControlInputProps> = ({ name, value, onChange, editable }) => {
     return (
         <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
             <InputLabel id="select-sources-access-control">Access Control</InputLabel>
             <Select labelId="select-sources-access-control" id="select-sources-access-control-select" value={value} label="AccessControl" onChange={onChange}>
-                {allowDefault ? <MenuItem value="default">Default</MenuItem> : null}
                 <MenuItem value="forbidden">Forbidden</MenuItem>
                 <MenuItem value="read">Read</MenuItem>
                 <MenuItem disabled={!editable} value="readwrite">

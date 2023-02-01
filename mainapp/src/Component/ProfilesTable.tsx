@@ -149,7 +149,7 @@ const enum Mode {
 type Msg_ =
     | { type: Type.UserClickedModal; payload: boolean }
     | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } }
-    | { type: Type.UserUpdatedSourceAccessControl; payload: { treeStr: string; newValue: SourceAccessControl } }
+    | { type: Type.UserUpdatedSourceAccessControl; payload: { treeStr: string; newValue: SourceAccessControl | null } }
     | { type: Type.ResetProfile; payload: Profile }
     | { type: Type.UserClickedCheckAll; payload: { fieldname: string; value: boolean } }
     | { type: Type.UserUpdatedBlenderLevel; payload: number };
@@ -165,13 +165,18 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
 
         case Type.UserUpdatedSourceAccessControl: {
             const { treeStr, newValue } = msg.payload;
-            const previousSourcesAccessControl = profileEditionState.profileForm.sourcesAccessControl;
             let newSourcesAccessControls: Record<string, SourceAccessControl>;
+            const previousSourcesAccessControl = profileEditionState.profileForm.sourcesAccessControl;
 
-            newSourcesAccessControls = {
-                ...profileEditionState.profileForm.sourcesAccessControl,
-                [msg.payload.treeStr]: newValue,
-            };
+            if (newValue === null) {
+                const { [treeStr]: value, ...otherSource } = previousSourcesAccessControl;
+                newSourcesAccessControls = otherSource;
+            } else {
+                newSourcesAccessControls = {
+                    ...profileEditionState.profileForm.sourcesAccessControl,
+                    [msg.payload.treeStr]: newValue,
+                };
+            }
 
             return {
                 ...profileEditionState,
@@ -221,6 +226,10 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
 
     const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const treeStr = src.treeStr;
+        // reset all children
+        src.children.forEach((srcNode: SourceTreeNode) => {
+            update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: srcNode.treeStr, newValue: null as SourceAccessControl | null } });
+        });
         update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: treeStr, newValue: event.target.value as SourceAccessControl } });
     };
 
@@ -496,7 +505,7 @@ function CustomTreeItem(props: TreeItemProps) {
 
 interface SourceTreeNode {
     name: string;
-    children: SourceTreeNode;
+    children: SourceTreeNode[];
     index: number;
     source: Source;
     treeStr: string;

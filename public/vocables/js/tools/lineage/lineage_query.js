@@ -324,6 +324,7 @@ var Lineage_query = (function () {
         return items;
     };
 
+
     self.showDecorateGraphDialog = function () {
         var existingNodes = visjsGraph.getExistingIdsMap();
         if (Object.keys(existingNodes).length == 0) return alert("draw nodes first");

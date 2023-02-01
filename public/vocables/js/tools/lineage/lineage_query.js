@@ -341,7 +341,7 @@ var Lineage_query = (function () {
                 $(this).css("background-color", $(this).val());
             });
 
-            var shapes = ["ellipse", " circle", " database", " box", " text", "diamond", " dot", " star", " triangle", " triangleDown", " hexagon", " square"];
+            var shapes = ["ellipse", "circle", "database", "box", "text", "diamond", "dot", "star", "triangle", "triangleDown", "hexagon", "square"];
             common.fillSelectOptions("lineage_selection_decorate_shapeSelect", shapes, true);
         });
     };

@@ -156,7 +156,6 @@ function getAllowedSources(user, profiles, sources, formalOntologySourceLabel) {
     });
     // for all profile
     const allAccessControl = userProfiles.flatMap(([_k, profile]) => {
-        const defaultSourceAccessControl = profile.defaultSourceAccessControl;
         const sourcesAccessControl = profile.sourcesAccessControl;
         const allowedSourceSchemas = profile.allowedSourceSchemas;
         // browse all sources, filter allowedSourceSchemas and get accessControl
@@ -166,12 +165,19 @@ function getAllowedSources(user, profiles, sources, formalOntologySourceLabel) {
                     return [sourceName, source];
                 }
             })
-            .map(([sourceName, _v]) => {
-                if (sourceName in sourcesAccessControl) {
-                    return [sourceName, sourcesAccessControl[sourceName]];
-                } else {
-                    return [sourceName, defaultSourceAccessControl];
-                }
+            .map(([sourceName, source]) => {
+                const schemaType = source.schemaType;
+                const group = source.group;
+                const treeStr = [schemaType, group].join("/");
+                // find the closest parent accessControl
+                const closestParent = Object.entries(sourcesAccessControl)
+                    .filter(([k, v]) => {
+                        if (treeStr.startsWith(k)) {
+                            return [k, v];
+                        }
+                    })
+                    .reduce((acc, current) => (acc[0].length >= current[0].length ? acc : current), ["", ""]);
+                return [sourceName, closestParent[1]];
             });
     });
 

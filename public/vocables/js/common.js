@@ -494,11 +494,11 @@ var common = (function () {
 
                     var filteredData = [{ [valueField]: "_search", [textfield]: "search value..." }];
                     data.forEach(function (item) {
-                        if (item.label.toLowerCase().indexOf(str) > -1) {
+                        if (item.label && item.label.toLowerCase().indexOf(str) > -1) {
                             filteredData.push(item);
                         }
                     });
-
+                    if (filteredData.length > Config.maxSelectListSize) return alert("to many result, be more specific");
                     self.fillSelectOptions(selectId, filteredData, withBlanckOption, textfield, valueField, selectedValue);
                 }
             });

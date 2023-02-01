@@ -688,7 +688,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                 },
                 function (callbackSeries) {
                     Lineage_containers.graphResources(source, self.currentTreeNode.id, { descendants: true }, function (err, result) {
-                        /*  Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0, { drawBeforeCallback: 1 }, function(err, result) {*/
                         if (err) {
                             return callbackSeries(err);
                         }

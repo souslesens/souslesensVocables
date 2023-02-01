@@ -1383,7 +1383,7 @@ if (selectedFiles.length > 0);*/
 
                 //get  upperOntology properties and Classes
                 function (callbackSeries) {
-                    Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(source, function (err, result) {
+                    Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(source, {}, function (err, result) {
                         if (err) {
                             return alert(err.responseText);
                         }

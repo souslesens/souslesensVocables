@@ -171,21 +171,9 @@ var SourceBrowser = (function () {
                     // pb avec source
                     var selectedNodes = $("#LineageNodesJsTreeDiv").jstree().get_selected(true);
                     if (selectedNodes.length > 1) {
-                        async.eachSeries(
-                            selectedNodes,
-                            function (node, callbackEach) {
-                                Lineage_classes.drawNodeAndParents(node.data, 0, null, function (err, result) {
-                                    callbackEach(err);
-                                });
-                            },
-                            function (err) {
-                                if (err) {
-                                    return alert(err.responseText);
-                                }
-                            }
-                        );
+                        Lineage_classes.drawNodesAndParents(selectedNodes, 0);
                     } else {
-                        Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0);
+                        Lineage_classes.drawNodesAndParents(self.currentTreeNode, 0);
                     }
                 },
             };

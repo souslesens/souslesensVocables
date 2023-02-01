@@ -404,6 +404,7 @@ var Lineage_selection = (function () {
     self.decorate = {
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_decorateDialog.html", function () {
+                $("#lineage_selection_decorate_applyButton").bind("click", Lineage_selection.decorate);
                 var colors = common.paletteIntense;
                 var array = [];
                 colors.forEach(function (color) {

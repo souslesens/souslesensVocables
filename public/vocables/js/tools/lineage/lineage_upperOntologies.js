@@ -91,13 +91,20 @@ var Lineage_upperOntologies = (function () {
         });
     };
 
-    self.getSourcePossiblePredicatesAndObject = function (source, callback) {
+    self.getSourcePossiblePredicatesAndObject = function (source, options, callback) {
+        if (!options) options = {};
         var predicates = [];
         KGcreator.usualProperties.forEach(function (item) {
             predicates.push({ label: item, id: item });
         });
 
-        Sparql_OWL.getDictionary(source, { selectGraph: true, lang: Config.default_lang, type: "owl:Class" }, null, function (err, result) {
+        if (!options.filter) {
+            options.type = "owl:Class";
+        }
+        options.selectGraph = true;
+        options.lang = Config.default_lang;
+
+        Sparql_OWL.getDictionary(source, options, null, function (err, result) {
             if (err) callback(err);
 
             var sourceObjects = [];
@@ -110,9 +117,9 @@ var Lineage_upperOntologies = (function () {
                 var prefix = "";
                 if (item.g.value.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > -1) {
                     prefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix + ":";
-                    TopLevelOntologyObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
+                    TopLevelOntologyObjects.push({ label: prefix + item.label.value, id: item.id.value, type: item.type.value });
                 } else {
-                    if (item.label) sourceObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
+                    if (item.label) sourceObjects.push({ label: prefix + item.label.value, id: item.id.value, type: item.type.value });
                 }
             });
             sourceObjects.sort(function (a, b) {

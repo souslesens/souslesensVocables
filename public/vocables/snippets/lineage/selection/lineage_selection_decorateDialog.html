@@ -1,14 +1,24 @@
+<style>
+    .lineage_selection_decorate_div {
+        padding: 10px;
+        margin: 10px;
+        border: 1px solid saddlebrown;
+        border-radius: 5px;
+    }
+</style>
+
 <div>Decorate selection</div>
 
-<div>
+<div class="lineage_selection_decorate_div">
     Shape
     <select id="lineage_selection_decorate_shapeSelect"></select>
 </div>
+<div class="lineage_selection_decorate_div">
+    <div>Size <input id="lineage_selection_decorate_sizeInput" size="20" />px</div>
 
-<div>Size <input id="lineage_selection_decorate_sizeInput" /></div>
-
-<div>
-    Color
-    <select id="lineage_selection_decorate_colorSelect"></select>
+    <div class="lineage_selection_decorate_div">
+        Color
+        <select id="lineage_selection_decorate_colorSelect"></select>
+    </div>
+    <button id="lineage_selection_decorate_applyButton">Apply</button>
 </div>
-<button onclick="Lineage_selection.decorate.decorate()">Apply</button>

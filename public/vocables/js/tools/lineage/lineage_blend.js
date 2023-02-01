@@ -9,7 +9,7 @@ var Lineage_blend = (function () {
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").dialog("option", "title", "Create node in source " + Lineage_sources.activeSource);
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
-                Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, function (err, result) {
+                Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, {}, function (err, result) {
                     self.currentPossibleClassesAndPredicates = result;
                     KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function (err, result) {
                         if (err) {
@@ -856,11 +856,14 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                     $("#LineagePopup").dialog("close");
                     var nodeData = {
                         id: self.graphModification.creatingsourceUri,
-                        source: Lineage_sources.activeSource,
+                        data: {
+                            id: self.graphModification.creatingsourceUri,
+                            source: Lineage_sources.activeSource,
+                        },
                     };
                     MainController.UI.message("node Created");
                     self.graphModification.creatingNodeTriples = [];
-                    Lineage_classes.drawNodeAndParents(nodeData);
+                    Lineage_classes.drawNodesAndParents(nodeData);
                     SearchUtil.generateElasticIndex(Lineage_sources.activeSource, { ids: [self.graphModification.creatingsourceUri] }, function (err, result) {
                         if (err) {
                             return alert(err.responseText);

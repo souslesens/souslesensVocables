@@ -15,7 +15,7 @@ var Lineage_containers = (function () {
                 if (self.currentContainer.data.type == "container") {
                     Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.id, { onlyChildren: true });
                 } else {
-                    Lineage_classes.drawNodeAndParents(self.currentContainer.data, 0);
+                    Lineage_classes.drawNodesAndParents(self.currentContainer, 0);
                 }
             },
         };

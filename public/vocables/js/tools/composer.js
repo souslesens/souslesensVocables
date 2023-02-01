@@ -113,7 +113,7 @@ var Composer = (function () {
                 if (self.currentTreeNode.data.type == "container") {
                     Composer.drawDataContainerDetails(self.currentTreeNode, { onlyChildren: true });
                 } else {
-                    Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0);
+                    Lineage_classes.drawNodesAndParents(self.currentTreeNode, 0);
                 }
             },
         };
@@ -224,7 +224,6 @@ var Composer = (function () {
                 //draw  descendants container
                 function (callbackSeries) {
                     Lineage_containers.graphResources(source, self.currentTreeNode.id, { descendants: true }, function (err, result) {
-                        /*  Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0, { drawBeforeCallback: 1 }, function(err, result) {*/
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -1037,7 +1036,6 @@ var Composer = (function () {
                 },
                 function (callbackSeries) {
                     Lineage_containers.graphResources(source, self.currentTreeNode.id, { descendants: true }, function (err, result) {
-                        /*  Lineage_classes.drawNodeAndParents(self.currentTreeNode.data, 0, { drawBeforeCallback: 1 }, function(err, result) {*/
                         if (err) {
                             return callbackSeries(err);
                         }

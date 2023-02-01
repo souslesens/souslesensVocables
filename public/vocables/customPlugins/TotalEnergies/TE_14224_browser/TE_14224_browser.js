@@ -351,9 +351,12 @@ var TE_14224_browser = (function () {
                                 allGraphIds[id] = 1;
                                 nodeData14224 = {
                                     id: id,
-                                    source: self.referenceOntologySource,
+                                    data: {
+                                        source: self.referenceOntologySource,
+                                        id: id,
+                                    },
                                 };
-                                Lineage_classes.drawNodeAndParents(nodeData14224, null, null, function (err, result) {
+                                Lineage_classes.drawNodesAndParents(nodeData14224, null, null, function (err, result) {
                                     if (err) return callbackSeries(err);
 
                                     visjsData.nodes = common.concatArraysWithoutDuplicate(visjsData.nodes, result.nodes, "id");

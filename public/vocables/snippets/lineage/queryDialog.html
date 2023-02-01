@@ -4,6 +4,8 @@
         margin: 10px;
         border: 1px solid saddlebrown;
         border-radius: 5px;
+        display: flex;
+        flex-direction: column;
     }
 </style>
 
@@ -12,66 +14,74 @@
         <div><b>Selection</b></div>
         <div><input type="radio" name="lineageRelations_selection" value="selected" /> selected node</div>
         <div><input type="radio" name="lineageRelations_selection" value="visible" /> visible nodes</div>
-        <div><input type="radio" name="lineageRelations_selection" value="all" checked="all" />source nodes</div>
+        <div><input type="radio" name="lineageRelations_selection" value="all" checked="checked" />source nodes</div>
     </div>
 </div>
+<div style="display: flex; flex-direction: row">
+    <div class="lineageQuery_div">
+        Subject type
+        <select id="lineageQuery_subjectTypeSelect" onclick="Lineage_query.onSelectType('subject',$(this).val())">
+            <option value=""></option>
+            <option value="owl:Class">Class</option>
+            <option value="owl:NamedIndividual">Individual</option>
+            <option value="rdf:Bag">Bag</option>
+            <option value="owl:Property">Property</option>
+        </select>
 
-<div class="lineageQuery_div" class="lineageQuery_div">
-    Subject type
-    <select id="lineageQuery_subjectTypeSelect">
-        <option value=""></option>
-        <option value="class">Class</option>
-        <option value="property">Property</option>
-        <option value="bag">Bag</option>
-        <option value="individual">Individual</option>
-    </select>
+        &nbsp;<select id="lineageQuery_subjectUriSelect" style="display: none; width: 200px"></select>
+    </div>
+    <div class="lineageQuery_div">
+        Predicate
+        <select id="lineageQuery_predicateSelect" onclick="Lineage_query.onSelectType('predicate',$(this).val())"></select>
+        &nbsp;<select id="lineageQuery_predicateUriSelect" style="display: none; width: 200px"></select>
+    </div>
+    <div class="lineageQuery_div">
+        Object Type
+        <select id="lineageQuery_objectTypeSelect" onclick="Lineage_query.onSelectType('object',$(this).val())">
+            <option value="string">String</option>
+            <option value="number">Number</option>
+            <option value="date">Date</option>
+            <option value="owl:Class">Class</option>
+            <option value="rdf:Bag">Bag</option>
+            <option value="owl:NamedIndividual">NameIndividual</option>
+        </select>
 
-    predicate
-    <select id="lineageQuery_predicateSelect"></select>
+        &nbsp;<select id="lineageQuery_objectUriSelect" style="display: none; width: 200px"></select>
+        <div class="id" ="lineageQuery_valueDiv">
+            <select id="lineageQuery_operator">
+                <option>=</option>
+                <option selected="selected">contains</option>
+                <option>!=</option>
+                <option>&lt;</option>
+                <option>&gt;</option>
+                <option>&lt;=</option>
+                <option>&gt;=</option>
+                <option>not contains</option>
+            </select>
+            <input id="lineageQuery_value" size="20" value="" />
+        </div>
+    </div>
 </div>
-
-<div class="lineageQuery_div" class="lineageQuery_div">
-    Object Type
-    <select id="lineageQuery_objectTypeSelect" onclick="Lineage_query.onSelectObjectType($(this).val())">
-        <option value="string">string</option>
-        <option value="number">number</option>
-        <option value="date">Date</option>
+<div style="display: flex; flex-direction: row">
+    Filters :
+    <select id="filterBooleanOperator">
+        <option value=" FILTER  EXISTS ">and</option>
+        <option value=" UNION ">or</option>
     </select>
-
-    <select id="lineageQuery_operator">
-        <option>=</option>
-        <option selected="selected">contains</option>
-        <option>!=</option>
-        <option>&lt;</option>
-        <option>&gt;</option>
-        <option>&lt;=</option>
-        <option>&gt;=</option>
-        <option>not contains</option>
-    </select>
-    <input id="lineageQuery_value" size="20" value="" />
-
     <button onclick="Lineage_query.addFilter()">Add filter</button>
 </div>
-
 <div class="lineageQuery_div">
-    <div>
-        Filters :
-        <select id="filterBooleanOperator">
-            <option value="minus">and</option>
-            <option value="union">or</option>
-        </select>
-        <div id="lineageQuery_Filters" style="display: flex; flex-direction: column; margin: 5px; padding: 5px; background-color: #ddd"></div>
-    </div>
+    <div id="lineageQuery_Filters" style="display: flex; flex-direction: column; margin: 5px; padding: 5px; background-color: #ddd"></div>
     <!--  <div>
-      All columns <input type="checkbox" id="lineageQuery_allColumnsCBX" checked="checked">
+    All columns <input type="checkbox" id="lineageQuery_allColumnsCBX" checked="checked">
 
-  </div>-->
+</div>-->
     <div>
         <!--  Query Display
-      <select id="lineageQuery_queryDisplaySelect">
-        <option>table</option>
-        <option>graph</option>
-      </select>-->
+  <select id="lineageQuery_queryDisplaySelect">
+    <option>table</option>
+    <option>graph</option>
+  </select>-->
 
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('count')">Count</button>
 

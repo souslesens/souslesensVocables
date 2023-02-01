@@ -37,6 +37,7 @@ import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
 import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl } from "../Profile";
+import { Source } from "../Source";
 import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
@@ -217,13 +218,13 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     }, [profileModel.modal]);
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => {
-        setNodeToExpand(new Set());
+        setNodeToExpand(new Array());
         update({ type: Type.UserClickedModal, payload: false });
     };
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
 
-    const handleSourceAccessControlUpdate = (src) => (event) => {
+    const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const treeStr = src.treeStr;
         update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: treeStr, newValue: event.target.value as SourceAccessControl | "default" } });
     };
@@ -501,6 +502,14 @@ const CustomContent = React.forwardRef(function CustomContent(props: TreeItemCon
 });
 function CustomTreeItem(props: TreeItemProps) {
     return <TreeItem ContentComponent={CustomContent} {...props} />;
+}
+
+interface SourceTreeNode {
+    name: string;
+    children: SourceTreeNode;
+    index: number;
+    source: Source;
+    treeStr: string;
 }
 
 interface SourceAccessControlInputProps {

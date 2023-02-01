@@ -241,16 +241,28 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         const currentSac = profileModel.profileForm.sourcesAccessControl;
 
         // get the nearest parent who have a value
-        const nearestParentWithValue = Object.entries(currentSac)
+
+        const parentListWithValue = Object.entries(currentSac)
             .map(([branch, _val]) => branch)
             .filter((branch) => {
                 if (parentList.includes(branch)) {
                     return branch;
                 }
-            })
-            .reduce((a, b) => {
-                return a.length >= b.length ? a : b;
             });
+
+        const nearestParentWithValue =
+            parentListWithValue.length > 0
+                ? Object.entries(currentSac)
+                      .map(([branch, _val]) => branch)
+                      .filter((branch) => {
+                          if (parentList.includes(branch)) {
+                              return branch;
+                          }
+                      })
+                      .reduce((a, b) => {
+                          return a.length >= b.length ? a : b;
+                      })
+                : "";
 
         // update current value if the nearest parent have a different value
         if (currentSac[nearestParentWithValue] === event.target.value) {

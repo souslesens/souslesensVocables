@@ -345,7 +345,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
             // get all accessControl that match the tree
             const matchingAccessControls: string[] = availableSourcesAccessControl
                 .map((path) => {
-                    if (source.treeStr.startsWith(path)) {
+                    if (source.treeStr === path || source.treeStr.startsWith(`${path}/`)) {
                         return path;
                     } else {
                         return null;

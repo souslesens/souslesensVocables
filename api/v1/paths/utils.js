@@ -172,7 +172,7 @@ function getAllowedSources(user, profiles, sources, formalOntologySourceLabel) {
                 // find the closest parent accessControl
                 const closestParent = Object.entries(sourcesAccessControl)
                     .filter(([k, v]) => {
-                        if (treeStr.startsWith(k)) {
+                        if (treeStr === k || treeStr.startsWith(`${k}/`)) {
                             return [k, v];
                         }
                     })

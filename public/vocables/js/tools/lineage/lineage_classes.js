@@ -12,7 +12,7 @@ var Lineage_classes = (function () {
     var sourceColors = {};
 
     var self = {};
-    self.showLimit = 300;
+    self.showLimit = 500;
 
     var graphContext = {};
     self.propertyColors = {};

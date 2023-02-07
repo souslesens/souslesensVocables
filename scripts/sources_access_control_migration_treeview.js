@@ -15,23 +15,41 @@ fs.readFile(sourcesFilePath, (_err, sourcesRawData) => {
         const profilesListData = Object.entries(profilesData);
 
         const newProfilesListData = profilesListData.map(([profileName, profile]) => {
+            if (!profile.defaultSourceAccessControl) {
+                console.log("File is allready migrated!");
+                process.exit();
+            }
             const sourcesAccessControl = profile.sourcesAccessControl;
             const newSourcesAccessControl = Object.fromEntries(
-                Object.entries(sourcesAccessControl).map(([sourceName, accessControl]) => {
-                    const source = sourcesData[sourceName];
-                    const sourceGroup = source.group;
-                    const sourceSchemaType = source.schemaType;
-                    const newAccessControl = sourceSchemaType + "/" + sourceGroup + "/" + sourceName;
-                    return [newAccessControl, accessControl];
-                })
+                Object.entries(sourcesAccessControl)
+                    .map(([sourceName, accessControl]) => {
+                        const source = sourcesData[sourceName];
+                        if (source) {
+                            const sourceGroup = source.hasOwnProperty("group") ? source.group : "NONE";
+                            const sourceSchemaType = source.hasOwnProperty("schemaType") ? source.schemaType : "NONE";
+                            const newAccessControl = sourceSchemaType + "/" + sourceGroup + "/" + sourceName;
+                            return [newAccessControl, accessControl];
+                        }
+                        return [null, null];
+                    })
+                    .filter(([sourceName, accessControl]) => {
+                        if (sourceName) {
+                            return [sourceName, accessControl];
+                        }
+                    })
             );
             profile.sourcesAccessControl = newSourcesAccessControl;
+            delete profile.defaultSourceAccessControl;
+
             return [profileName, profile];
         });
 
         const newProfilesData = Object.fromEntries(newProfilesListData);
 
         if (argv.w) {
+            // create a backup file
+            const profilesBackupFilePath = path.resolve(configPath + "/profiles.json.bak");
+            fs.cpSync(profilesFilePath, profilesBackupFilePath);
             fs.writeFileSync(profilesFilePath, JSON.stringify(newProfilesData, null, 2));
         } else {
             console.log(newProfilesData);

@@ -143,7 +143,14 @@ function processResponse(response, error, result) {
 }
 
 function filterSources(allowedSources, sources) {
-    return Object.fromEntries(Object.entries(sources).filter(([sourceId, _source]) => allowedSources.includes(sourceId)));
+    return Object.fromEntries(
+        Object.entries(sources).filter(([sourceId, source]) => {
+            if (sourceId in allowedSources) {
+                source["accessControl"] = allowedSources[sourceId];
+                return [sourceId, source];
+            }
+        })
+    );
 }
 
 function getAllowedSources(user, profiles, sources, formalOntologySourceLabel) {
@@ -188,11 +195,30 @@ function getAllowedSources(user, profiles, sources, formalOntologySourceLabel) {
                 return sourceName;
             }
         })
-        .map(([sourceName, _v]) => sourceName)
-        .concat([formalOntologySourceLabel, "read"]);
+        .concat([[formalOntologySourceLabel, "read"]]);
 
-    // uniq
-    return Array.from(new Set(allowedSources));
+    // sort and uniq. If a source have read and readwrite, keep readwrite
+    // to keep readwrite, sort read first. fromEntries will keep the last
+    const sortedAndReducedAllowedSources = allowedSources
+        .sort((s1, s2) => {
+            if (s1[0] < s2[0]) {
+                return -1;
+            }
+            if (s1[0] > s2[0]) {
+                return 1;
+            }
+            return 0;
+        })
+        .sort((s1, s2) => {
+            if (s1[1] < s2[1]) {
+                return -1;
+            }
+            if (s1[1] > s2[1]) {
+                return 1;
+            }
+            return 0;
+        });
+    return Object.fromEntries(sortedAndReducedAllowedSources);
 }
 
 function sortObjectByKey(obj) {

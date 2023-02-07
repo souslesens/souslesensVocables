@@ -24,13 +24,21 @@ module.exports = function () {
             const sources = await read(sourcesFile);
             const parsedSources = JSON.parse(sources);
             // return all sources if user is admin
-            let filteredSources = parsedSources;
+            let filteredSources;
             if (!userInfo.user.groups.includes("admin")) {
                 // return filtered sources if user is not admin
                 const profiles = await read(profilesJSON);
                 const parsedProfiles = JSON.parse(profiles);
                 const allowedSources = getAllowedSources(userInfo.user, parsedProfiles, parsedSources, config.formalOntologySourceLabel);
                 filteredSources = filterSources(allowedSources, parsedSources);
+            } else {
+                // admin, return all sources with readwrite right
+                filteredSources = Object.fromEntries(
+                    Object.entries(parsedSources).map(([id, s]) => {
+                        s["accessControl"] = "readwrite";
+                        return [id, s];
+                    })
+                );
             }
             // sort
             const sortedSources = sortObjectByKey(filteredSources);

@@ -15,14 +15,14 @@ Lineage_sources = (function () {
             height: 800,
             width: 1000,
             modal: false,
-            position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
+          //  position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
         });
         $("#QueryDialog").dialog({
             autoOpen: false,
             height: 800,
             width: 700,
             modal: false,
-            position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
+           // position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
         });
         self.activeSource = null;
         self.loadedSources = {};

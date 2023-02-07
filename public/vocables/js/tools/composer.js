@@ -223,7 +223,7 @@ var Composer = (function () {
 
                 //draw  descendants container
                 function (callbackSeries) {
-                    Lineage_containers.graphResources(source, self.currentTreeNode.id, { descendants: true }, function (err, result) {
+                    Lineage_containers.graphResources(source, self.currentTreeNode.data, { descendants: true }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -1035,7 +1035,7 @@ var Composer = (function () {
                     return callbackSeries();
                 },
                 function (callbackSeries) {
-                    Lineage_containers.graphResources(source, self.currentTreeNode.id, { descendants: true }, function (err, result) {
+                    Lineage_containers.graphResources(source, self.currentTreeNode.data, { descendants: true }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }

@@ -252,6 +252,8 @@ if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
         var edges = visjsGraph.data.edges.get();
         var newEdges = [];
         edges.forEach(function (edge) {
+            if(!edge.data)
+                return
             if (edge.data && !edge.data.fullColor) {
                 edge.data.fullColor = edge.color;
             }
@@ -259,7 +261,8 @@ if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
             var color;
             var width;
             // var fontColor;
-            if (!source || nodesMapSources[edge.from] == source || nodesMapSources[edge.to] == source) {
+
+            if ( (!source || nodesMapSources[edge.from] == source || nodesMapSources[edge.to] == source)) {
                 color = edge.data.fullColor;
                 // width=2
             } else {

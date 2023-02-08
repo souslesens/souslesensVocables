@@ -239,7 +239,7 @@ var KGcreator = (function () {
     };
 
     self.loadMappingsList = function (callback) {
-        self.currentCsvDir = $("#KGcreator_csvDirsSelect").val();
+
         self.currentSource = self.currentCsvDir;
         var payload;
         var prefix;
@@ -336,6 +336,7 @@ var KGcreator = (function () {
     };
 
     self.showTablesTree = function (data) {
+
         self.loadMappingsList(function (err) {
             var jstreeData = [];
             var options = {
@@ -545,6 +546,7 @@ var KGcreator = (function () {
     };
 
     self.editFile = function () {
+
         const params = new URLSearchParams({
             dir: "CSV/" + self.currentCsvDir,
             name: self.currentTreeNode.data.id,
@@ -929,6 +931,7 @@ self.saveMappings({classId:classId})
         }
     };
     self.loadMappings = function (csvFileName) {
+
         function execLoadMappings() {
             self.currentJsonObject = {};
             self.mainJsonEditor.load(self.currentJsonObject);

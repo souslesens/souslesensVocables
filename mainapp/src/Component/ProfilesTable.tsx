@@ -522,7 +522,6 @@ const CustomContent = React.forwardRef(function CustomContent(props: TreeItemCon
     };
 
     return (
-        // eslint-disable-next-line jsx-a11y/no-static-element-interactions
         <div
             className={clsx(className, classes.root, {
                 [classes.expanded]: expanded,
@@ -533,16 +532,22 @@ const CustomContent = React.forwardRef(function CustomContent(props: TreeItemCon
             onMouseDown={handleMouseDown}
             ref={ref as React.Ref<HTMLDivElement>}
         >
-            {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-            <div style={{ padding: "1em" }} onClick={handleExpansionClick} className={classes.iconContainer}>
+            <CustomExpansionArrow onClick={handleExpansionClick} className={classes.iconContainer}>
                 {icon}
-            </div>
+            </CustomExpansionArrow>
             <Typography onClick={handleSelectionClick} component="div" className={classes.label}>
                 {label}
             </Typography>
         </div>
     );
 });
+
+const expansionArrowStyles = {
+    "&:hover": { backgroundColor: "#E4F2FF !important" },
+    padding: "1em",
+};
+
+const CustomExpansionArrow = styled("div")(expansionArrowStyles);
 function CustomTreeItem(props: TreeItemProps) {
     return <TreeItem ContentComponent={CustomContent} {...props} />;
 }

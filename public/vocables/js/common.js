@@ -475,14 +475,24 @@ var common = (function () {
             $("#" + selectId).attr("data-classes", JSON.stringify(data));
 
             $("#" + selectId).html(
-                $("<option>", {
+
+              $("<option>", {
+                  text: "",
+                  value: "",
+              }))
+            $("#" + selectId).append(
+
+              $("<option>", {
                     text: "search value...",
                     value: "_search",
                 })
             );
             $("#" + selectId).bind("click", function (event) {
-                var optionText = event.currentTarget.outerText;
                 var value = $(this).val();
+                if(!value)
+                    return;
+                var optionText = event.currentTarget.outerText;
+
                 if (value == "_search") {
                     event.preventDefault();
                     var str = prompt(" enter label ...");

@@ -53,7 +53,7 @@ var Lineage_query = (function() {
       var options = {
         filter: "filter (?type=" + type + " && regex(?label,'" + str + "','i'))"
       };
-      Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, options, function(err, result) {
+      Lineage_upperOntologies.getTopOntologyClasses(Lineage_sources.activeSource, options, function(err, result) {
         if (err) {
           return alert(err.responseText);
         }
@@ -143,7 +143,7 @@ var Lineage_query = (function() {
       subjectType: subjectType,
       subjectUri: subjectUri,
 
-      predicatetype: predicateType,
+      predicateType: predicateType,
       predicateUri: predicateUri,
 
       objectType: objectType,
@@ -181,22 +181,42 @@ var Lineage_query = (function() {
   self.executeQuery = function(queryType) {
 
 
-    function getSelectedNodesFilter(varname,type,callback) {
+    function getSelectedNodesFilter(varname, type,predicateType, callback) {
+      function getFilter(graphNodes) {
+        var key = "id";
+        if (["rdf:type", "rdfs:subClassOf"].indexOf(predicateType) < 0) //filter label
+        {
+          key = "label";
+        }
+        var array = [];
+        graphNodes.forEach(function(node) {
+          array.push(node.data[key]);
+        });
+        if (key == "id") {
+          return Sparql_common.setFilter(varname, array);
+        }
+        else {
+          return Sparql_common.setFilter(varname, null, array);
+        }
+      }
+
+
       if (type == "_selectedNode") {
         if (!Lineage_classes.currentGraphNode) {
 
-          return  callback("no node selected");
+
+          return callback("no node selected");
         }
-        var filter= Sparql_common.setFilter(varname, [Lineage_classes.currentGraphNode.data.id]);
-        return callback(null,filter);
+        var filter = getFilter( [Lineage_classes.currentGraphNode]);
+        return callback(null, filter);
       }
       else if (type == "_whiteBoardNodes") {
         if (!visjsGraph.data) {
           return callback("no nodes on witheboard");
 
         }
-        var filter= Sparql_common.setFilter(varname, visjsGraph.data.nodes.getIds());
-        return callback(null,filter);
+        var filter = getFilter( visjsGraph.data.nodes);
+        return callback(null, filter);
       }
       return "";
     }
@@ -241,13 +261,15 @@ var Lineage_query = (function() {
         subjectFilterStr = " filter( ?s =<" + filter.subjectUri + ">) ";
       }
       else if (filter.subjectType) {
-       getSelectedNodesFilter("s",filter.subjectType,function(err, result){
-         if(err)
-           return alert(err)
-         subjectFilterStr=result;
-       })
-        if(!subjectFilterStr)
-        subjectFilterStr = " filter( ?sType =" + filter.subjectType + ") ";
+        getSelectedNodesFilter("s", filter.subjectType, filter.predicateType,function(err, result) {
+          if (err) {
+            return alert(err);
+          }
+          subjectFilterStr = result;
+        });
+        if (!subjectFilterStr) {
+          subjectFilterStr = " filter( ?sType =" + filter.subjectType + ") ";
+        }
       }
 
       if (filter.predicateUri) {
@@ -290,16 +312,14 @@ var Lineage_query = (function() {
 
       }
       else {
-        getSelectedNodesFilter("o", filter.objectType, function(err, result) {
-          if (err)
-            return alert(err)
-          objectFilterStr =  objectFilterStr = " ?s ?p ?o ."+result;
-          if (filter.predicateUri) {
-            objectFilterStr += "filter( ?p =<" + filter.predicateUri + ">) "
-          }else if (filter.predicateType) {
-            objectFilterStr += "filter( ?p =" + filter.predicateType + ") "
+        getSelectedNodesFilter("o", filter.objectType, filter.predicateType,function(err, filter) {
+          if (err) {
+            return alert(err);
           }
-        })
+          filter=filter.replace("?oLabel","?o");
+          objectFilterStr = filter;
+
+        });
       }
 
       query += " \n" + subjectFilterStr + " \n" + predicateFilterStr + " \n" + objectFilterStr;
@@ -327,8 +347,9 @@ var Lineage_query = (function() {
         $("#lineageQuery_listResultDiv").html("" + count + " subjects found");
       }
       else if (queryType == "graph") {
-        if(result.results.bindings.length==0)
-         return  $("#lineageQuery_listResultDiv").html("no result");
+        if (result.results.bindings.length == 0) {
+          return $("#lineageQuery_listResultDiv").html("no result");
+        }
         self.setMessage("drawing nodes...", true);
         var nodeIds = [];
         result.results.bindings.forEach(function(item) {
@@ -347,8 +368,9 @@ var Lineage_query = (function() {
         var jsdata = [];
         var jstreeData = [];
         var uniqueNodes = {};
-        if(result.results.bindings.length==0)
-          return  $("#lineageQuery_listResultDiv").html("no result");
+        if (result.results.bindings.length == 0) {
+          return $("#lineageQuery_listResultDiv").html("no result");
+        }
         result.results.bindings.forEach(function(item) {
           if (!uniqueNodes[item.sType.value]) {
             uniqueNodes[item.sType.value] = 1;

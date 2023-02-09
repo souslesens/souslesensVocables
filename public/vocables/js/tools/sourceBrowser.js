@@ -1071,8 +1071,10 @@ else {
         str +=
             "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
             "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
-            "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
-            "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
+               "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='$(\"#sourceBrowser_addPropertyValue\").val($(this).val())'></select>&nbsp;" +
+          "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick=\"KGcreator.fillObjectOptionsFromPrompt(null,'sourceBrowser_addPropertyObjectSelect')\">Search...</button>"+
+
+          "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
             "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
 
         str += "</div>";
@@ -1483,9 +1485,12 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         window.open(wikiUrl, "_slsvWiki");
     };
     self.addPropertyObjectSelect = function () {
-        var predicate = $("#sourceBrowser_addPropertyPredicateSelect").val();
+        return;
+
+    /*    var predicate = $("#sourceBrowser_addPropertyPredicateSelect").val();
         var allObjects = self.SourcePossiblePredicatesAndObject;
         common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.objectClasses, true, "label", "id");
+        common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.objectClasses, true, "label", "id");*/
 
         /*
 if (predicate == "rdf:type") {
@@ -1574,15 +1579,29 @@ common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "lab
         $("#sourceBrowser_addPropertyDiv").css("display", "block");
         var properties = Config.Lineage.basicObjectProperties;
         $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
-            KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function (err, result) {
-                if (err) {
-                    return alert(err.responseText);
-                }
 
-                common.fillSelectOptions("sourceBrowser_addPropertyPredicateSelect", result.predicates, true, "label", "id");
 
-                self.SourcePossiblePredicatesAndObject = result;
-            });
+            KGcreator.fillPredicatesSelect(Lineage_sources.activeSource, "sourceBrowser_addPropertyPredicateSelect",  { usualProperties:true } , function(err) {
+
+                Lineage_upperOntologies.getTopOntologyClasses(Config.currentTopLevelOntology, {}, function(err, result) {
+                    if (err) {
+                        return callbackSeries(err.responseText);
+                    }
+                    var usualObjectClasses=[]
+                    KGcreator.usualObjectClasses.forEach(function(item) {
+                        usualObjectClasses.push({
+                            id: item,
+                            label: item
+                        });
+                    });
+
+                    usualObjectClasses=  usualObjectClasses .concat({ id: "", label: "--------" })
+                      .concat(result);
+                    common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", usualObjectClasses, true, "label", "id");
+
+            })
+
+            })
         });
     };
 

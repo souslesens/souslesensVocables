@@ -534,7 +534,7 @@ const CustomContent = React.forwardRef(function CustomContent(props: TreeItemCon
             ref={ref as React.Ref<HTMLDivElement>}
         >
             {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-            <div onClick={handleExpansionClick} className={classes.iconContainer}>
+            <div style={{ padding: "1em" }} onClick={handleExpansionClick} className={classes.iconContainer}>
                 {icon}
             </div>
             <Typography onClick={handleSelectionClick} component="div" className={classes.label}>

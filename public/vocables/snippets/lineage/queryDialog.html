@@ -20,7 +20,7 @@
 <div style="display: flex; flex-direction: row">
     <div class="lineageQuery_div">
         Subject type
-        <select id="lineageQuery_subjectTypeSelect" onclick="Lineage_query.onSelectType('subject',$(this).val())">
+        <select id="lineageQuery_subjectTypeSelect" onchange="Lineage_query.onSelectType('subject',$(this).val())">
             <option value=""></option>
             <option value="owl:Class">Class</option>
             <option value="owl:NamedIndividual">Individual</option>
@@ -34,12 +34,13 @@
     </div>
     <div class="lineageQuery_div">
         Predicate
-        <select id="lineageQuery_predicateSelect" onclick="Lineage_query.onSelectType('predicate',$(this).val())"></select>
+        <select id="lineageQuery_predicateSelect" onchange="Lineage_query.onSelectType('predicate',$(this).val())"></select>
         &nbsp;<select id="lineageQuery_predicateUriSelect" style="display: none; width: 200px"></select>
     </div>
     <div class="lineageQuery_div">
         Object Type
-        <select id="lineageQuery_objectTypeSelect" onclick="Lineage_query.onSelectType('object',$(this).val())">
+        <select id="lineageQuery_objectTypeSelect" onchange="Lineage_query.onSelectType('object',$(this).val())">
+            <option value=""></option>
             <option value="string">String</option>
             <option value="number">Number</option>
             <option value="date">Date</option>

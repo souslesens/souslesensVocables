@@ -44,25 +44,7 @@ var Lineage_query = (function() {
   };
 
   self.onSelectType = function(role, type) {
-    function fillUriSelect(target) {
-      var str = prompt("Class label contains");
-      if (!str) {
-        return;
-      }
 
-      var options = {
-        filter: "filter (?type=" + type + " && regex(?label,'" + str + "','i'))"
-      };
-      Lineage_upperOntologies.getTopOntologyClasses(Lineage_sources.activeSource, options, function(err, result) {
-        if (err) {
-          return alert(err.responseText);
-        }
-        $("#" + target).css("display", "block");
-        $("#lineageQuery_valueDiv").css("display", "none");
-
-        common.fillSelectOptions(target, result.sourceObjects, true, "label", "id");
-      });
-    }
 
     if (role == "predicate" && type == "OTHER") {
       Sparql_OWL.getObjectProperties(Lineage_sources.activeSource, { withoutImports: true }, function(err, result) {
@@ -82,10 +64,17 @@ var Lineage_query = (function() {
     }
     else if (type == "owl:Class" || type == "owl:NamedIndividual" || type == "rdf:Bag") {
       if (role == "subject") {
-        fillUriSelect("lineageQuery_subjectUriSelect");
+        $("#lineageQuery_subjectUriSelect" ).css("display", "block");
+        $("#lineageQuery_valueDiv").css("display", "none");
+        KGcreator.fillObjectOptionsFromPrompt(type,"lineageQuery_subjectUriSelect")
+      //  fillUriSelect("lineageQuery_subjectUriSelect");
       }
       if (role == "object") {
-        fillUriSelect("lineageQuery_objectUriSelect");
+        $("#lineageQuery_objectUriSelect" ).css("display", "block");
+        $("#lineageQuery_valueDiv").css("display", "none");
+        KGcreator.fillObjectOptionsFromPrompt(type,"lineageQuery_objectUriSelect")
+
+      //  fillUriSelect("lineageQuery_objectUriSelect");
       }
     }
     else {
@@ -196,7 +185,7 @@ var Lineage_query = (function() {
           return Sparql_common.setFilter(varname, array);
         }
         else {
-          return Sparql_common.setFilter(varname, null, array);
+          return Sparql_common.setFilter(varname, null, array,{exactMatch:1});
         }
       }
 

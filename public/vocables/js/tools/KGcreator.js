@@ -1474,7 +1474,7 @@ if (selectedFiles.length > 0);*/
     var options = {
       selectGraph: true,
       lang: Config.default_lang,
-      type:(type? "owl:"+type:null),
+      type:type,
       filter: " FILTER ( regex(?label,'" + term + "','i'))",
     };
 

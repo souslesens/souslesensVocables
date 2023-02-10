@@ -713,200 +713,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
           })
 
 
-if(false) {
 
-  data.forEach(function(item) {
-    if (item.parentMember.value == item.childMember.value)
-      return;
-    var shape = "dot";
-    var color2 = common.colorToRgba(color, opacity * 1);
-    var size = Lineage_classes.defaultShapeSize;
-
-    var containerStyle = stylesMap[item.container0.value];
-    if (containerStyle) {
-      shape = containerStyle.shape || shape;
-      color2 = containerStyle.color || color2;
-      size = containerStyle.size || colorsize2;
-    }
-
-    if (item.container0Type.value == "http://www.w3.org/2002/07/owl#ObjectProperty") {
-      return objectProperties.push(item.container.value);
-    }
-    if (!existingNodes[item.container0.value]) {
-      existingNodes[item.container0.value] = 1;
-
-      var type = "container";
-      visjsData.nodes.push({
-        id: item.container0.value,
-        label: item.container0Label.value,
-        shadow: self.nodeShadow,
-        shape: type == "container" ? "box" : shape,
-        size: size,
-        font: type == "container" ? { color: "#eee" } : null,
-        color: color2,
-        data: {
-          type: type,
-          source: source,
-          id: item.container0.value,
-          label: item.container0Label.value
-        }
-      });
-    }
-    if (item.parentMember && !existingNodes[item.parentMember.value]) {
-      existingNodes[item.parentMember.value] = 1;
-      var type;
-      var color2 = color;
-      // if (item.parentMemberType && item.parentMemberType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
-      //  if (!item.leafType) {
-      //   if (!item.childMemberTypes.value.indexOf("Bag")>-1) {
-      type = "container";
-      color2 = common.colorToRgba(color, opacity * 0.75);
-      /* } else {
-           type = "resource";
-       }*/
-
-      visjsData.nodes.push({
-        id: item.parentMember.value,
-        label: item.parentMemberLabel.value,
-        shadow: self.nodeShadow,
-        shape: type == "container" ? "box" : shape,
-        size: size,
-        font: type == "container" ? { color: "#fff", size: 12 } : null,
-        color: color2,
-        data: {
-          type: type,
-          source: source,
-          id: item.parentMember.value,
-          label: item.parentMemberLabel.value
-        }
-      });
-    }
-
-    if (item.parentMember) {
-      var edgeId = item.container0.value + "_" + "member" + "_" + item.parentMember.value;
-      if (!existingNodes[edgeId]) {
-        existingNodes[edgeId] = 1;
-
-        visjsData.edges.push({
-          id: edgeId,
-          from: item.container0.value,
-          to: item.parentMember.value,
-          arrows: " middle",
-          data: {
-            from: item.container0.value,
-            to: item.parentMember.value,
-            source: source
-          },
-          //  dashes: true,
-          color: "#8528c9"
-        });
-      }
-    }
-
-    if (item.childMember && !existingNodes[item.childMember.value]) {
-      existingNodes[item.childMember.value] = 1;
-      var type;
-
-      // if (item.childMemberType && item.childMemberType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
-      if (true || item.childMemberTypes.value.indexOf("Bag") > -1) {
-        type = "container";
-        color2 = common.colorToRgba(color, opacity * 1);
-      }
-      else {
-        type = "resource";
-      }
-      visjsData.nodes.push({
-        id: item.childMember.value,
-        label: item.childMemberLabel.value,
-
-        shadow: self.nodeShadow,
-        shape: type == "container" ? "box" : shape,
-        size: size,
-        font: type == "container" ? { color: "#fff", size: 10 } : null,
-        color: color2,
-        data: {
-          type: "container",
-          source: source,
-          id: item.childMember.value,
-          label: item.childMemberLabel.value
-        }
-      });
-    }
-
-    if (item.childMember) {
-      var edgeId = item.parentMember.value + "_" + "member" + "_" + item.childMember.value;
-      if (!existingNodes[edgeId]) {
-        existingNodes[edgeId] = 1;
-        visjsData.edges.push({
-          id: edgeId,
-          from: item.parentMember.value,
-          to: item.childMember.value,
-          //label: "<i>" + item.propertyLabel.value + "</i>",
-          data: {
-            from: item.parentMember.value,
-            to: item.childMember.value,
-            source: source,
-            arrows: " middle"
-          },
-          font: { multi: true, size: 10 },
-
-          //  dashes: true,
-          color: "#8528c9"
-        });
-      }
-    }
-
-
-    if (item.leaf && !existingNodes[item.leaf.value]) {
-      existingNodes[item.leaf.value] = 1;
-      var type;
-
-      // if (item.childMemberType && item.childMemberType.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") {
-      if (true || item.leafType.value.indexOf("Class") > -1) {
-        type = "resource";
-      }
-      visjsData.nodes.push({
-        id: item.leaf.value,
-        label: item.leafLabel.value,
-
-        shadow: self.nodeShadow,
-        shape: type == "container" ? "box" : shape,
-        size: size,
-        font: type == "container" ? { color: "#fff", size: 10 } : null,
-        color: color2,
-        data: {
-          type: "resource",
-          source: source,
-          id: item.leaf.value,
-          label: item.leafLabel.value
-        }
-      });
-    }
-
-    if (item.leaf) {
-      var edgeId = item.childMember.value + "_" + "member" + "_" + item.leaf.value;
-      if (!existingNodes[edgeId]) {
-        existingNodes[edgeId] = 1;
-        visjsData.edges.push({
-          id: edgeId,
-          from: item.childMember.value,
-          to: item.leaf.value,
-          //label: "<i>" + item.propertyLabel.value + "</i>",
-          data: {
-            from: item.childMember.value,
-            to: item.leaf.value,
-            source: source,
-            arrows: " middle"
-          },
-          font: { multi: true, size: 10 },
-
-          //  dashes: true,
-          color: "#8528c9"
-        });
-      }
-    }
-  });
-}
 
           function setNodesLevel(visjsData) {
             var nodelevels = {};
@@ -1025,7 +832,7 @@ if(false) {
 
   self.sparql_queries = {
     getContainerDescendants: function(source, containerId, options, callback) {
-      var fromStr = Sparql_common.getFromStr(source, false, true);
+      var fromStr = Sparql_common.getFromStr(source, false, false);
       var filterContainer0Str = Sparql_common.setFilter("parent0", containerId);
 
       /*      var where0 =
@@ -1105,7 +912,7 @@ if(false) {
 
       var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-        "SELECT distinct ?member ?memberLabel ?parent ?parentLabel (GROUP_CONCAT(distinct ?memberType,\",\") as ?memberTypes)  from <http://datalenergies.total.com/resource/tsf/gidea-raw/> WHERE {\n" +
+        "SELECT distinct ?member ?memberLabel ?parent ?parentLabel (GROUP_CONCAT(distinct ?memberType,\",\") as ?memberTypes)  "+ fromStr+" WHERE {\n" +
         "?parent0  rdfs:member+ ?member "+filterContainer0Str+
         "  ?member ^rdfs:member ?parent.\n" +
         "?parent0  rdfs:member* ?parent. \n"+

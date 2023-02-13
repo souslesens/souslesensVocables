@@ -41,7 +41,7 @@ module.exports = function () {
     }
     GET.apiDoc = {
         summary: "Return health of souslesens",
-        security: [{ restrictAdmin: [] }],
+        security: [],
         operationId: "getHealth",
         parameters: [],
         responses: {

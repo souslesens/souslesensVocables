@@ -56,7 +56,12 @@ var Lineage_classes = (function () {
     self.isLoaded = false;
     self.currentExpandLevel = 1;
 
-    self.onLoaded = function (/** @type {() => void} */ callback) {
+    /**
+     *
+     *
+      * @param callback
+     */
+    self.onLoaded = function ( callback) {
         if (self.isLoaded) {
         } // return;
         self.isLoaded = true;

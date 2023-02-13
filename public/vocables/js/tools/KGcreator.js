@@ -64,7 +64,21 @@ var KGcreator = (function() {
     "_function",
     "_blankNode",
     ""
+
   ];
+
+  self.xsdTypes=[
+
+    "xsd:string",
+    "xsd:dateTime",
+    "xsd:boolean",
+    "xsd:integer",
+    "xsd:float",
+    "xsd:double",
+    "xsd:decimal",
+    "rdf:XMLLiteral"
+
+  ]
 
   self.basicTypeClasses = ["owl:Class", "owl:NamedIndividual", "owl:Thing", ""];
   self.usualSubjectTypes = ["_function", "_blankNode", ""];

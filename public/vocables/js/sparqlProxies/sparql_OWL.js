@@ -1148,7 +1148,6 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
 
     /**
      *
-     * @return
      * @param sourceLabel
      * @param propIds
      * @param options

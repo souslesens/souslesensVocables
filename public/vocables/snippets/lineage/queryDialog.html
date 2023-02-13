@@ -35,7 +35,7 @@
     <div class="lineageQuery_div">
         Predicate
         <select id="lineageQuery_predicateSelect" onchange="Lineage_query.onSelectType('predicate',$(this).val())"></select>
-        &nbsp;<select id="lineageQuery_predicateUriSelect" style="display: none; width: 200px"></select>
+        &nbsp;<select id="lineageQuery_predicateUriSelect" style="display: none; width: 200px"  onchange="Lineage_query.onSelectType('predicate',$(this).val())"></select>
     </div>
     <div class="lineageQuery_div">
         Object Type
@@ -47,22 +47,13 @@
             <option value="owl:Class">Class</option>
             <option value="rdf:Bag">Bag</option>
             <option value="owl:NamedIndividual">NameIndividual</option>
-            <option value="_whiteBoardNodes">WhiteBoard nodes</option>
-            <option value="_selectedNode">Selected Node</option>
+            <option value="_whiteBoardNodes">_WhiteBoard nodes</option>
+            <option value="_selectedNode">_Selected Node</option>
         </select>
 
         &nbsp;<select id="lineageQuery_objectUriSelect" style="display: none; width: 200px"></select>
         <div class="lineageQuery_objectTypeSelect" id="lineageQuery_valueDiv">
-            <select id="lineageQuery_operator">
-                <option>=</option>
-                <option selected="selected">contains</option>
-                <option>!=</option>
-                <option>&lt;</option>
-                <option>&gt;</option>
-                <option>&lt;=</option>
-                <option>&gt;=</option>
-                <option>not contains</option>
-            </select>
+            <select id="lineageQuery_operator"> </select>
             <input id="lineageQuery_value" size="20" value="" />
         </div>
     </div>

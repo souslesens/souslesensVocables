@@ -269,6 +269,13 @@
                         modal: false,
                     });
 
+                    $("#smallDialogDiv").dialog({
+                        autoOpen: false,
+                        height: 200,
+                        width: 200,
+                        modal: true,
+                    });
+
                     $(document).on("click", "a", function () {
                         var target = $(this).attr("target");
                         if (target == "_slsvCallback") {
@@ -567,6 +574,8 @@
         </div>
 
         <div id="mainDialogDiv"></div>
+
+        <div id="smallDialogDiv"></div>
 
         <!-- Footer -->
         <footer class="bg-white">

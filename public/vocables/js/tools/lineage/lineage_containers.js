@@ -13,20 +13,29 @@ var Lineage_containers = (function() {
       label: "Graph node",
       action: function(_e) {
         if (self.currentContainer.data.type == "container") {
-          Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.data, { onlyChildren: true });
+          Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.data, { onlyOneLevel: true });
         }
         else {
           Lineage_classes.drawNodesAndParents(self.currentContainer, 0);
         }
       }
     };
-    items["openAll"] = {
-      label: "Open all",
+    items["Open node"] = {
+      label: "Open node",
       action: function(_e) {
-        $("#lineage_containers_containersJstree").jstree().open_all(self.currentContainer.id);
+       // $("#lineage_containers_containersJstree").jstree().open_all(self.currentContainer.id);
+        Lineage_containers.listContainerResources(Lineage_sources.activeSource,self.currentContainer,{onlyOneLevel:true,leaves:true})
       }
     };
-
+    items.copyNodes = {
+      label: "Copy Node(s)",
+      action: function(e) {
+        // pb avec source
+        SourceBrowser.copyNode(e);
+        var selectedNodes = $("#lineage_containers_containersJstree").jstree().get_selected(true);
+        Lineage_common.copyNodeToClipboard(selectedNodes);
+      }
+    };
     items["AddGraphNode"] = {
       label: "Add selected node to container",
       action: function(_e) {
@@ -34,11 +43,18 @@ var Lineage_containers = (function() {
         Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, self.currentContainer.data, graphNodeData);
       }
     };
+    items["PasteNodesInContainer"] = {
+      label: "Paste nodes in container",
+      action: function(_e) {
+
+        Lineage_containers.pasteNodesInContainer(Lineage_sources.activeSource, self.currentContainer);
+      }
+    };
 
     items["DeleteContainer"] = {
       label: "Delete container",
       action: function(_e) {
-        Lineage_containers.deleteContainer(Lineage_sources.activeSource, self.currentContainer.data.id);
+        Lineage_containers.deleteContainer(Lineage_sources.activeSource, self.currentContainer);
       }
     };
 
@@ -131,7 +147,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
       result.results.bindings.forEach(function(item) {
         //  var nodeId=item.parent+"_"+item.member.value
-
+        item.jstreeId = "_" + common.getRandomHexaId(5);
         nodesMap[item.member.value] = item;
       });
 
@@ -142,46 +158,29 @@ Lineage_styles.showDialog(self.currentContainer.data);
       for (var nodeId in nodesMap) {
         var item = nodesMap[nodeId];
         var parent = "#";
-        if (item.parentContainer) {
-          parent = item.parentContainer.value;
-          if (item.parentContainer.value == nodeId) {
-            parent = "#";
-          }
-          if (!nodesMap[item.parentContainer.value]) {
-            nodesMap[item.parentContainer.value] = 1;
-            var parentNode = {
-              id: parent,
-              text: item.parentContainerLabel.value,
-              parent: "#",
-              data: {
-                type: "container",
-                source: source,
-                id: parent,
-                label: item.parentContainer.value,
-                currentParent: "#",
-                tabId: options.tabId
-              }
-            };
-            jstreeData.push(parentNode);
-          }
-        }
+
 
         var memberType = "container";
 
-        var node = {
-          id: nodeId,
-          text: item.memberLabel.value,
-          parent: parent,
-          data: {
+        var parent = item.parentContainer ? nodesMap[item.parentContainer.value].jstreeId : "#";
+        if (!uniqueNodes[item.jstreeId]) {
+          uniqueNodes[item.jstreeId] = 1;
+          var node = {
+            id: item.jstreeId,
+            text: item.memberLabel.value,
+            parent: parent,
             type: memberType,
-            source: source,
-            id: item.member.value,
-            label: item.memberLabel.value,
-            currentParent: parent,
-            tabId: options.tabId
-          }
-        };
-        jstreeData.push(node);
+            data: {
+              type: memberType,
+              source: source,
+              id: item.member.value,
+              label: item.memberLabel.value,
+              currentParent: parent,
+              tabId: options.tabId
+            }
+          };
+          jstreeData.push(node);
+        }
       }
 
       var jstreeOptions;
@@ -296,7 +295,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
    * @param drawMembershipEdge add the edge (and the node) on the vizGraph
    */
   self.addResourcesToContainer = function(source, container, nodesData, drawMembershipEdge, callback) {
-    if (container.type != "container") {
+    if (container.data.type != "container") {
       return alert("can only add resources to containers");
     }
     // self.currentContainer=null;
@@ -316,7 +315,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
       }
       if (true || nodeData.source == source) {
         triples.push({
-          subject: "<" + container.id + ">",
+          subject: "<" + container.data.id + ">",
           predicate: "<http://www.w3.org/2000/01/rdf-schema#member>",
           object: "<" + nodeData.id + ">"
         });
@@ -337,12 +336,12 @@ Lineage_styles.showDialog(self.currentContainer.data);
       var jstreeData = [];
       nodesData.forEach(function(nodeData) {
         jstreeData.push({
-          id: nodeData.id,
+          id: nodeData.id + "_" + common.getRandomHexaId(5),
           text: nodeData.label,
           parent: container.id,
           type: "class",
           data: {
-            type: "resource",
+            type: nodesData.type || "resource",
             source: source,
             id: nodeData.id,
             label: nodeData.label
@@ -383,22 +382,52 @@ Lineage_styles.showDialog(self.currentContainer.data);
     });
   };
 
-  self.deleteContainer = function(source, containerId) {
+
+  self.pasteNodesInContainer = function(source, container) {
+
+
+    common.pasteTextFromClipboard(function(text) {
+      // debugger
+      if (!text) {
+        return MainController.UI.message("no node copied");
+      }
+      try {
+        var nodes = JSON.parse(text);
+        var nodesData = [];
+        nodes.forEach(function(node) {
+          if (node.data) {
+            nodesData.push(node.data);
+          }
+        });
+
+        self.addResourcesToContainer(source, container, nodesData);
+
+      } catch (e) {
+        console.log("wrong clipboard content");
+      }
+      return;
+    });
+
+
+  };
+
+
+  self.deleteContainer = function(source, container) {
     if (!confirm("delete container)")) {
       return;
     }
     self.currentContainer = null;
-    Sparql_generic.deleteTriples(source, containerId, null, null, function(err) {
+    Sparql_generic.deleteTriples(source, container.data.id, null, null, function(err) {
       if (err) {
         return alert(err.responseText);
       }
 
-      Sparql_generic.deleteTriples(source, null, null, containerId, function(err) {
-        var node = $("#lineage_containers_containersJstree").jstree().get_node(containerId);
+      Sparql_generic.deleteTriples(source, null, null, container.data.id, function(err) {
+        var node = $("#lineage_containers_containersJstree").jstree().get_node(container.id);
         if (node.children.length > 0) {
           $("#lineage_containers_containersJstree").jstree().move_node(node.children, "#");
         }
-        $("#lineage_containers_containersJstree").jstree().delete_node(containerId);
+        $("#lineage_containers_containersJstree").jstree().delete_node(container.id);
       });
     });
   };
@@ -466,7 +495,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
       propFilter = "";
     }
 
-    if (!propFilter && !objectTypeFilter) {
+    if (false && !propFilter && !objectTypeFilter) {
       return alert("no filter set");
     }
 
@@ -474,35 +503,55 @@ Lineage_styles.showDialog(self.currentContainer.data);
       return callback(err, result);
     });
   };
-  self.listContainerResources = function(source, containerId) {
-    var existingChildren = common.jstree.getjsTreeNodes("lineage_containers_containersJstree", true, containerId);
-    var filter = "filter(?objectType not in (rdf:Bag,redf:List))";
-    self.getContainerResources(source, containerId, { nodes: true, descendants: true }, function(err, result) {
+  self.listContainerResources = function(source, containerNode,options) {
+
+    var existingChildren = [];
+
+    self.sparql_queries.getContainerDescendants(source, containerNode.data.id, options, function(err, result) {
+
       if (err) {
         return alert(err.responseText);
       }
-      var jstreeData = [];
-      result.forEach(function(item) {
-        if (existingChildren.indexOf(item.object.value) < 0) {
-          existingChildren.push(item.object.value);
 
-          jstreeData.push({
-            id: item.object.value,
-            text: item.objectLabel.value,
-            parent: item.subject.value,
-            type: "class",
-            data: {
-              type: "resource",
-              source: source,
-              id: item.object.value,
-              label: item.objectLabel.value
-            }
+      var existingNodes=$("#lineage_containers_containersJstree").jstree().get_node(containerNode.id).children
+      var jstreeData = [];
+     var nodesMap={}
+
+          result.results.bindings.forEach(function(item) {
+            //  var nodeId=item.parent+"_"+item.member.value
+            item.jstreeId = "_" + common.getRandomHexaId(5);
+            nodesMap[item.member.value] = item;
           });
-        }
-      });
-      common.jstree.addNodesToJstree("lineage_containers_containersJstree", containerId, jstreeData);
+
+
+     for(var key in nodesMap) {
+       var item = nodesMap[key]
+       var parent = item.parent.value == containerNode.data.id ? containerNode.id : nodesMap[item.parent.value].jstreeId
+       if (!existingNodes[item.jstreeId]) {
+         existingNodes[item.jstreeId]=1
+         var type="class"
+         if(item.memberTypes.value.indexOf("Bag")>-1 || item.memberTypes.value.indexOf("List")>-1 )
+           type="container"
+         jstreeData.push({
+           id:item.jstreeId,
+           text: item.memberLabel.value,
+           parent: parent,
+           type: type,
+           data: {
+             type: type,
+             source: source,
+             id: item.member.value,
+             label: item.memberLabel.value
+           }
+         });
+       }
+     }
+
+
+      common.jstree.addNodesToJstree("lineage_containers_containersJstree", containerNode.id, jstreeData);
     });
   };
+
   self.graphResources = function(source, containerData, options, callback) {
     if (!options) {
       options = {};
@@ -572,12 +621,9 @@ Lineage_styles.showDialog(self.currentContainer.data);
           var objectProperties = [];
 
 
-
-
-
           var shape = "dot";
           var color2 = common.colorToRgba(color, opacity * .7);
-          var memberEdgeColor=common.colorToRgba("#8528c9", opacity * .7);
+          var memberEdgeColor = common.colorToRgba("#8528c9", opacity * .7);
           var size = Lineage_classes.defaultShapeSize;
 
 
@@ -603,8 +649,6 @@ Lineage_styles.showDialog(self.currentContainer.data);
           }
 
 
-
-
           data.forEach(function(item) {
 
 
@@ -625,7 +669,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 shadow: self.nodeShadow,
                 shape: type == "container" ? "box" : shape,
                 size: size,
-                font: type == "container" ? { color: "#eee", size:10} : null,
+                font: type == "container" ? { color: "#eee", size: 10 } : null,
                 color: color2,
                 data: {
                   type: type,
@@ -638,8 +682,9 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
             if (!existingNodes[item.member.value]) {
               var type = "container";
-              if (item.memberTypes.value.indexOf("Bag") < 0)
+              if (item.memberTypes.value.indexOf("Bag") < 0) {
                 type = "class";
+              }
 
               existingNodes[item.member.value] = 1;
               visjsData.nodes.push({
@@ -648,7 +693,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 shadow: self.nodeShadow,
                 shape: type == "container" ? "box" : shape,
                 size: size,
-                font: type == "container" ? { color: "#eee" , size:10} : null,
+                font: type == "container" ? { color: "#eee", size: 10 } : null,
                 color: color2,
                 data: {
                   type: type,
@@ -660,7 +705,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
             }
 
 
-            var edgeId = containerData.id+ "_" + "member" + "_" + item.parent.value;
+            var edgeId = containerData.id + "_" + "member" + "_" + item.parent.value;
             if (!existingNodes[edgeId]) {
               existingNodes[edgeId] = 1;
 
@@ -668,18 +713,20 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 id: edgeId,
                 from: containerData.id,
                 to: item.parent.value,
-                arrows: {middle:{
+                arrows: {
+                  middle: {
                     enabled: true,
                     type: Lineage_classes.defaultEdgeArrowType,
-                    scaleFactor: 0.5,
-                  }},
+                    scaleFactor: 0.5
+                  }
+                },
                 data: {
                   from: containerData.id,
                   to: item.parent.value,
                   source: source
                 },
                 //  dashes: true,
-                width:0.5,
+                width: 0.5,
                 color: memberEdgeColor
               });
             }
@@ -689,30 +736,29 @@ Lineage_styles.showDialog(self.currentContainer.data);
             if (!existingNodes[edgeId]) {
               existingNodes[edgeId] = 1;
               var type = "container";
-              if (item.memberTypes.value.indexOf("Bag") < 0)
+              if (item.memberTypes.value.indexOf("Bag") < 0) {
                 type = "class";
+              }
               visjsData.edges.push({
                 id: edgeId,
                 from: item.parent.value,
                 to: item.member.value,
                 arrows: {
-                enabled: true,
+                  enabled: true,
                   type: Lineage_classes.defaultEdgeArrowType,
-                  scaleFactor: 0.5,
-              },
+                  scaleFactor: 0.5
+                },
                 data: {
                   from: item.parent.value,
                   to: item.member.value,
                   source: source
                 },
                 //  dashes: true,
-                width:type == "container"?1:0.5,
+                width: type == "container" ? 1 : 0.5,
                 color: memberEdgeColor
               });
             }
-          })
-
-
+          });
 
 
           function setNodesLevel(visjsData) {
@@ -795,7 +841,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
   self.onSelectedNodeTreeclick = function(event, obj) {
     self.currentContainer = obj.node;
     if (obj.event.button != 2) {
-      self.listContainerResources(Lineage_sources.activeSource, self.currentContainer.data.id);
+      self.listContainerResources(Lineage_sources.activeSource, self.currentContainer,{onlyOneLevel:true,leaves:true});
     }
   };
 
@@ -907,24 +953,22 @@ Lineage_styles.showDialog(self.currentContainer.data);
       if (options.leaves) {
         query += "}} " ;
       }*/
-
-
-
-      var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+var pathOperator="+"
+if(options.onlyOneLevel)
+  pathOperator=""
+      var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
         "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-        "SELECT distinct ?member ?memberLabel ?parent ?parentLabel (GROUP_CONCAT(distinct ?memberType,\",\") as ?memberTypes)  "+ fromStr+" WHERE {\n" +
-        "?parent0  rdfs:member+ ?member "+filterContainer0Str+
+        "SELECT distinct ?member ?memberLabel ?parent ?parentLabel (GROUP_CONCAT(distinct ?memberType,\",\") as ?memberTypes)  " + fromStr + " WHERE {\n" +
+        "?parent0  rdfs:member"+pathOperator+" ?member " + filterContainer0Str +
         "  ?member ^rdfs:member ?parent.\n" +
-        "?parent0  rdfs:member* ?parent. \n"+
+        "?parent0  rdfs:member* ?parent. \n" +
         "  ?member rdf:type ?memberType.\n" +
         "   ?member rdfs:label ?memberLabel.\n" +
-        "   ?parent rdfs:label ?parentLabel.\n"
+        "   ?parent rdfs:label ?parentLabel.\n";
       if (!options.leaves) {
-        query+=" FILTER (?memberType in(rdf:Bag,rdf:List))"
+        query += " FILTER (?memberType in(rdf:Bag,rdf:List))";
       }
-       query+= "}  group by ?member ?memberLabel ?parent ?parentLabel"
-
-
+      query += "}  group by ?member ?memberLabel ?parent ?parentLabel";
 
 
       var url = Config.sources[source].sparql_server.url + "?format=json&query=";

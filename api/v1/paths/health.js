@@ -11,7 +11,7 @@ module.exports = function () {
     async function GET(req, res, next) {
         const sparqlUrl = `${config.default_sparql_url}/?default-graph-uri=&query=SELECT+*%0D%0AWHERE+%7B%3Fs+%3Fp+%3Fo%7D%0D%0ALIMIT+10&format=application%2Fsparql-results%2Bjson`;
         const elasticSearchUrl = `${config.ElasticSearch.url}/_cat/health`;
-        const spacyServerUrl = `http://${config.annotator.spacyServerUrl}/health_check`.replace("/pos", "");
+        const spacyServerUrl = `${config.annotator.spacyServerUrl}/health_check`.replace("/pos", "");
         const sqlServerConnStr = `Server=${config.SQLserver.server},1433;Database=${config.SQLserver.database};User Id=${config.SQLserver.user};Password=${config.SQLserver.password};Encrypt=false`;
         try {
             const fetchVirtuoso = fetch(sparqlUrl)

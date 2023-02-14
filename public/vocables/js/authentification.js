@@ -16,36 +16,37 @@ var authentication = (function () {
     self.currentUser = {};
 
     self.init = function (_activate) {
-        if (false && Config.loginMode == "json") {
-            var login = prompt("enter login");
-            var pss = prompt("enter password");
-            if (login && pss);
-        }
         // Redirect to login if user is not logged
         $.ajax({
             type: "GET",
             url: "/api/v1/auth/whoami",
             success: function (data) {
                 if (!data.logged) {
-                    location.href = "/login";
+                    // guest mode
+                    authentication.currentUser = {
+                        identifiant: "guest",
+                        login: "guest",
+                        groupes: ["guest"],
+                    };
                 } else {
+                    // logged user
                     authentication.currentUser = {
                         identifiant: data.user.login,
                         login: data.user.login,
                         groupes: data.user.groups,
                     };
-                    $("#user-username").html(" " + authentication.currentUser.identifiant);
-                    if (data.authSource == "keycloak") {
-                        $("#manage-account").attr("href", data.auth.authServerURL + "/realms/" + data.auth.realm + "/account?referrer=" + data.auth.clientID);
-                    } else {
-                        // eslint-disable-next-line no-console
-                        console.log("hide account management");
-                        $("#manage-account-li").hide();
-                    }
-
-                    MainController.onAfterLogin();
-                    if (typeof sparql_abstract !== "undefined") sparql_abstract.initSources();
                 }
+                $("#user-username").html(" " + authentication.currentUser.identifiant);
+                if (data.authSource == "keycloak") {
+                    $("#manage-account").attr("href", data.auth.authServerURL + "/realms/" + data.auth.realm + "/account?referrer=" + data.auth.clientID);
+                } else {
+                    // eslint-disable-next-line no-console
+                    console.log("hide account management");
+                    $("#manage-account-li").hide();
+                }
+
+                MainController.onAfterLogin();
+                if (typeof sparql_abstract !== "undefined") sparql_abstract.initSources();
             },
             error: function (err) {
                 var x = err;

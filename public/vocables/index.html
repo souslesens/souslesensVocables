@@ -220,13 +220,6 @@
             var w;
             var h;
 
-            // Redirect 401 to login page
-            $(document).ajaxError(function (e, xhr, settings) {
-                if (xhr.status == 401) {
-                    location.href = "/login";
-                }
-            });
-
             $(function () {
                 MainController.initConfig(function (err) {
                     // sentry/glitchtip

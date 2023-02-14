@@ -177,9 +177,6 @@ var MainController = (function () {
     }
 
     self.onAfterLogin = function () {
-        if (!authentication.currentUser) {
-            return alert(" no user identified");
-        }
         var groups = authentication.currentUser.groupes;
 
         MainController.loadProfiles(function (_err, _result) {

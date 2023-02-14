@@ -23,38 +23,57 @@ module.exports = function () {
     ///// GET api/v1/profiles
     async function GET(req, res, next) {
         try {
-            let profiles = await readResource(profilesJSON, res);
-            profiles = Object.fromEntries(
-                Object.entries(profiles).map(([profileId, profile]) => {
-                    profile.defaultSourceAccessControl = profile.defaultSourceAccessControl.toLowerCase();
-                    profile.sourcesAccessControl = Object.fromEntries(
-                        Object.entries(profile.sourcesAccessControl).map(([sourceId, accessControl]) => {
-                            return [sourceId, parseAccessControl(accessControl)];
-                        })
-                    );
-                    return [profileId, profile];
-                })
-            );
-            const sortedProfiles = sortObjectByKey(profiles);
             const currentUser = await userManager.getUser(req.user);
-            const groups = currentUser.user.groups;
-            if (groups.includes("admin")) {
-                resourceFetched(res, sortedProfiles);
+            const profiles = await readResource(profilesJSON, res);
+            const sortedProfiles = sortObjectByKey(profiles);
+            let filteredProfiles = {};
+            if (!req.user) {
+                // guest user, return empty dict
+                filteredProfiles = {
+                    guest: {
+                        name: "guest",
+                        _type: "profile",
+                        id: "0",
+                        allowedSourceSchemas: ["SKOS", "OWL"],
+                        sourcesAccessControl: {},
+                        allowedTools: "ALL",
+                        forbiddenTools: [],
+                        blender: {
+                            contextMenuActionStartLevel: 0,
+                        },
+                    },
+                };
+            } else if (groups.includes("admin")) {
+                // admin, return all profiles
+                filteredProfiles = sortedProfiles;
             } else {
-                const sortedUserProfiles = Object.fromEntries(
+                // standard user, return filtered profiles
+                const userProfiles = Object.fromEntries(
+                    Object.entries(profiles).map(([profileId, profile]) => {
+                        profile.defaultSourceAccessControl = profile.defaultSourceAccessControl.toLowerCase();
+                        profile.sourcesAccessControl = Object.fromEntries(
+                            Object.entries(profile.sourcesAccessControl).map(([sourceId, accessControl]) => {
+                                return [sourceId, parseAccessControl(accessControl)];
+                            })
+                        );
+                        return [profileId, profile];
+                    })
+                );
+                const groups = currentUser.user.groups;
+                filteredProfiles = Object.fromEntries(
                     Object.entries(sortedProfiles).filter(([profileId, _profile]) => {
                         return groups.includes(profileId);
                     })
                 );
-                resourceFetched(res, sortedUserProfiles);
             }
+            resourceFetched(res, filteredProfiles);
         } catch (error) {
             next(error);
         }
     }
     GET.apiDoc = {
         summary: "Returns all profiles",
-        security: [{ loginScheme: [] }],
+        security: [],
         operationId: "getProfiles",
         responses: responseSchema("Profiles", "GET"),
     };

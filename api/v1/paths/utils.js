@@ -146,6 +146,23 @@ function filterSources(allowedSources, sources) {
     return Object.fromEntries(Object.entries(sources).filter(([sourceId, _source]) => allowedSources.includes(sourceId)));
 }
 
+function getPublicSources(sources) {
+    const aSources = Object.entries(sources);
+    const publicSources = Object.fromEntries(
+        aSources
+            .filter(([sourceId, source]) => {
+                if (source.public) {
+                    return [sourceId, source];
+                }
+            })
+            .map(([sourceId, source]) => {
+                source.accessControl = "read";
+                return [sourceId, source];
+            })
+    );
+    return publicSources;
+}
+
 function getAllowedSources(user, profiles, sources, formalOntologySourceLabel) {
     const aProfiles = Object.entries(profiles);
     const aSources = Object.entries(sources);
@@ -214,6 +231,7 @@ module.exports = {
     processResponse,
     sanitizePath,
     getAllowedSources,
+    getPublicSources,
     filterSources,
     sortObjectByKey,
 };

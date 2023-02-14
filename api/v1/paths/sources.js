@@ -7,7 +7,7 @@ const util = require("util");
 const { readResource, writeResource, resourceCreated, responseSchema, resourceFetched } = require("./utils");
 const userManager = require(path.resolve("bin/user."));
 const read = util.promisify(fs.readFile);
-const { getAllowedSources, filterSources, sortObjectByKey } = require("./utils.js");
+const { getAllowedSources, getPublicSources, filterSources, sortObjectByKey } = require("./utils.js");
 module.exports = function () {
     let operations = {
         GET,
@@ -17,21 +17,26 @@ module.exports = function () {
     ///// GET api/v1/sources
     async function GET(req, res, next) {
         try {
-            const userInfo = await userManager.getUser(req.user);
-            var sourcesFile = sourcesJSON;
+            let sourcesFile = sourcesJSON;
+            // parse another sources file if params sourceFile is present
             if (req.query.sourcesFile) {
-                sourcesFile = path.resolve(configPath + "/" + req.query.sourcesFile);
+                sourcesFile = path.resolve(`${configPath}/${req.query.sourcesFile}`);
                 if (!sourcesFile.startsWith(path.resolve(configPath))) {
                     return res.status(403).json({ done: false, message: "forbidden path" });
                 }
             }
-            //  const sources = await read(sourcesJSON);
             const sources = await read(sourcesFile);
             const parsedSources = JSON.parse(sources);
-            // return all sources if user is admin
-            let filteredSources = parsedSources;
-            if (!userInfo.user.groups.includes("admin")) {
-                // return filtered sources if user is not admin
+            const userInfo = await userManager.getUser(req.user);
+            let filteredSources = {};
+            if (!req.user) {
+                // guest mode, return only public sources with read access
+                filteredSources = getPublicSources(parsedSources);
+            } else if (!userInfo.user.groups.includes("admin")) {
+                // admin, return all sources
+                filteredSources = parsedSources;
+            } else {
+                // a user is logged, return filtered sources
                 const profiles = await read(profilesJSON);
                 const parsedProfiles = JSON.parse(profiles);
                 const allowedSources = getAllowedSources(userInfo.user, parsedProfiles, parsedSources, config.formalOntologySourceLabel);
@@ -47,7 +52,7 @@ module.exports = function () {
     }
     GET.apiDoc = {
         summary: "Returns all sources",
-        security: [{ loginScheme: [] }],
+        security: [],
         operationId: "getSources",
         responses: responseSchema("Sources", "GET"),
         parameters: [

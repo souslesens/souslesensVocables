@@ -2494,9 +2494,9 @@ addNode:false
                 visjsGraph.data.edges.add(visjsData.edges);
             }
 
-            setTimeout(function () {
+          /*  setTimeout(function () {
                 self.zoomGraphOnNode(node.data[0].id, false);
-            }, 500);
+            }, 500);*/
             MainController.UI.message("", true);
             if (callback) {
                 return callback(null, visjsData);

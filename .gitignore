@@ -125,9 +125,10 @@ data/**/*.csv
 mainapp/static/*.js
 mainapp/static/*.js.map
 mainapp/lib
-/data/
+
 /public/vocables/customPlugins/TotalEnergies/
 /bin/dump-graphs.js
 /other/TEPDK/
 /public/vocables/config/sourcesNotUsed.json
 /public/vocables/images/2022-03-17_08-23-52.png
+

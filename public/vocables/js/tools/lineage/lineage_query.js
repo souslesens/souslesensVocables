@@ -274,7 +274,7 @@ var Lineage_query = (function() {
     query += fromStr;
 
     query += " where {";
-
+    query += "{ ?s rdfs:label ?sLabel. ?s rdf:type ?sType. ";
     var filterIndex = 0;
     for (var key in self.filters) {
       if (filterIndex > 0) {
@@ -282,7 +282,7 @@ var Lineage_query = (function() {
       }
       filterIndex += 1;
 
-      query += "{ ?s rdfs:label ?sLabel. ?s rdf:type ?sType. ";
+
 
       var filter = self.filters[key];
 
@@ -290,10 +290,8 @@ var Lineage_query = (function() {
         predicateFilterStr = "",
         objectFilterStr = "";
 
-      if (filter.subjectUri) {
-        subjectFilterStr = " filter( ?s =<" + filter.subjectUri + ">) ";
-      }
-      else if (filter.subjectType) {
+
+     if (filter.subjectType) {
         getSelectedNodesFilter("s", filter.subjectType, filter.predicateType, function(err, result) {
           if (err) {
             return alert(err);
@@ -305,18 +303,10 @@ var Lineage_query = (function() {
         }
       }
 
-      if (filter.predicateUri) {
-        predicateFilterStr = " ?s ?p" + filterIndex + " ?o" + filterIndex + " filter( ?p" + filterIndex + " =<" + filter.predicateUri + ">) ";
-      }
-      else if (filter.predicateType && filter.objectUri) {
-        predicateFilterStr = " ?s ?p" + filterIndex + " ?o" + filterIndex + " filter(  ?p" + filterIndex + " =" + filter.predicateType + ") ";
-      }
+
 
       if (filter.objectUri) {
-        objectFilterStr = "";
-        if (!filter.predicateUri) {
-          objectFilterStr = " ?s ?p" + filterIndex + " ?o" + filterIndex + " .";
-        }
+        objectFilterStr = " ?s ?p" + filterIndex + " ?o" + filterIndex + " .";
         objectFilterStr += "  filter( ?o" + filterIndex + " =<" + filter.objectUri + ">) ";
       }
       else if (filter.value) {
@@ -325,6 +315,7 @@ var Lineage_query = (function() {
         }
 
         if (filter.objectType == "string") {
+          objectFilterStr =  " ?s ?p" + filterIndex + " ?o" + filterIndex + " .";
           if (filter.operator == "contains") {
             objectFilterStr += " ?o" + filterIndex + " rdfs:label ?o" + filterIndex + "Label . Filter(regex(str(?o" + filterIndex + "Label),'" + filter.value + "','i')).";
           }
@@ -344,8 +335,8 @@ var Lineage_query = (function() {
 
 
       }
-      else {
-        getSelectedNodesFilter("s" + filterIndex, filter.objectType, filter.predicateType, function(err, filter) {
+      else {//usual types
+        getSelectedNodesFilter("s", filter.objectType, filter.predicateType, function(err, filter) {
           if (err) {
             return alert(err);
           }
@@ -353,6 +344,14 @@ var Lineage_query = (function() {
           objectFilterStr = filter;
 
         });
+      }
+
+      if (filter.predicateUri) {
+        predicateFilterSt=""
+        if(objectFilterStr.indexOf("p" + filterIndex)<0)
+          predicateFilterStr +="?s ?p" + filterIndex+" ?o" + filterIndex
+        predicateFilterStr +=" filter( ?p" + filterIndex + " =<" + filter.predicateUri + ">) ";
+
       }
 
       query += " \n" + subjectFilterStr + " \n" + predicateFilterStr + " \n" + objectFilterStr;

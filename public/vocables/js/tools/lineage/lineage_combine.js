@@ -74,7 +74,7 @@ var Lineage_combine = (function () {
             var visjsData = { nodes: [], edges: [] };
             commonNodes.forEach(function (item) {
                 var edgeId = item.fromNode.id + "_" + item.toNode.id;
-                var inverseEdgeId=item.toNode.id + "_" + item.fromNode.id;
+                var inverseEdgeId = item.toNode.id + "_" + item.fromNode.id;
                 if (!existingNodes[edgeId] && !existingNodes[inverseEdgeId]) {
                     existingNodes[edgeId] = 1;
 
@@ -84,7 +84,7 @@ var Lineage_combine = (function () {
                         to: item.toNode.id,
                         data: {
                             source: Lineage_sources.activeSource,
-                            label:"sameLabel"
+                            label: "sameLabel",
                         },
                         arrows: {
                             to: {

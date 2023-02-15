@@ -109,7 +109,7 @@ var Lineage_selection = (function () {
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_filterBy.html", function () {
                 return;
-                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, {withoutSourceObjects:1},function (err, result) {
+                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, { withoutSourceObjects: 1 }, function (err, result) {
                     if (err) return alert(err.responseText);
                     common.fillSelectOptions("Lineage_filterBy_propertySelect", result.predicates, true, "label", "id");
                 });
@@ -450,7 +450,7 @@ var Lineage_selection = (function () {
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_modifyPredicates.html", function () {
                 return;
-                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, {withoutSourceObjects:1},function (err, result) {
+                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, { withoutSourceObjects: 1 }, function (err, result) {
                     if (err) return alert(err.responseText);
 
                     common.fillSelectOptions("lineage_selection_modifyPredicate_propertySelect", result.predicates, true, "label", "id");

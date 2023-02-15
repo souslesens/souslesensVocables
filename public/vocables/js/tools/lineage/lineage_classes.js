@@ -59,9 +59,9 @@ var Lineage_classes = (function () {
     /**
      *
      *
-      * @param callback
+     * @param callback
      */
-    self.onLoaded = function ( callback) {
+    self.onLoaded = function (callback) {
         if (self.isLoaded) {
         } // return;
         self.isLoaded = true;
@@ -2494,7 +2494,7 @@ addNode:false
                 visjsGraph.data.edges.add(visjsData.edges);
             }
 
-          /*  setTimeout(function () {
+            /*  setTimeout(function () {
                 self.zoomGraphOnNode(node.data[0].id, false);
             }, 500);*/
             MainController.UI.message("", true);

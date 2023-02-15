@@ -1053,7 +1053,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                     allData = allData.concat(result);
                                     resultSize = result.length;
                                     totalCount += result.length;
-                                 //   MainController.UI.message(sourceLabel + "retreived triples :" + totalCount);
+                                    //   MainController.UI.message(sourceLabel + "retreived triples :" + totalCount);
                                     offset += limitSize;
                                     callbackWhilst();
                                 }

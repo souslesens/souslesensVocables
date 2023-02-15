@@ -1071,10 +1071,9 @@ else {
         str +=
             "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;'>" +
             "Property<select id='sourceBrowser_addPropertyPredicateSelect' onchange='SourceBrowser.addPropertyObjectSelect()'></select>&nbsp;" +
-               "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='SourceBrowser.onSelectNewPropertyObject($(this).val())'></select>&nbsp;" +
-          "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick=\"KGcreator.fillObjectOptionsFromPrompt(null,'sourceBrowser_addPropertyObjectSelect')\">Search...</button>"+
-
-          "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
+            "Value=&nbsp;<select id='sourceBrowser_addPropertyObjectSelect' style='width: 200px;background-color: #eee;' onclick='SourceBrowser.onSelectNewPropertyObject($(this).val())'></select>&nbsp;" +
+            '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.fillObjectOptionsFromPrompt(null,\'sourceBrowser_addPropertyObjectSelect\')">Search...</button>' +
+            "<input id='sourceBrowser_addPropertyValue' style='width:400px'></input>&nbsp;" +
             "<button  class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.addProperty()'>Add</button>";
 
         str += "</div>";
@@ -1089,18 +1088,15 @@ else {
         $("#" + self.currentNodeIdInfosDivId).prepend(str);
     };
 
-    self.onSelectNewPropertyObject=function(value){
-        if( value.indexOf("xsd")==0){
-            if( value=="xsd:dateTime") {
-                common.setDatePickerOnInput("sourceBrowser_addPropertyValue")
+    self.onSelectNewPropertyObject = function (value) {
+        if (value.indexOf("xsd") == 0) {
+            if (value == "xsd:dateTime") {
+                common.setDatePickerOnInput("sourceBrowser_addPropertyValue");
+            } else {
+                $("#sourceBrowser_addPropertyValue").val(value);
             }
-            else{
-                $("#sourceBrowser_addPropertyValue").val(value)
-            }
-        }
-        else
-        $("#sourceBrowser_addPropertyValue").val(value)
-    }
+        } else $("#sourceBrowser_addPropertyValue").val(value);
+    };
 
     self.drawCommonInfos = function (sourceLabel, nodeId, divId, _options, callback) {
         if (!_options) {
@@ -1500,7 +1496,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
     self.addPropertyObjectSelect = function () {
         return;
 
-    /*    var predicate = $("#sourceBrowser_addPropertyPredicateSelect").val();
+        /*    var predicate = $("#sourceBrowser_addPropertyPredicateSelect").val();
         var allObjects = self.SourcePossiblePredicatesAndObject;
         common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.objectClasses, true, "label", "id");
         common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", allObjects.objectClasses, true, "label", "id");*/
@@ -1525,17 +1521,14 @@ common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "lab
         }
 
         if (!property || !value) {
-            return alert ("enter property and value")
+            return alert("enter property and value");
         }
 
-        if($("#sourceBrowser_addPropertyObjectSelect").val()=="xsd:dateTime"){
-           if(!value.match(/\d\d\d\d-\d\d-\d\d/))
-           return alert ("wrong date format (need yyy-mm-dd")
-            value=value+"^^xsd:dateTime"
-            $( "#sourceBrowser_addPropertyValue" ).datepicker( "destroy" );
+        if ($("#sourceBrowser_addPropertyObjectSelect").val() == "xsd:dateTime") {
+            if (!value.match(/\d\d\d\d-\d\d-\d\d/)) return alert("wrong date format (need yyy-mm-dd");
+            value = value + "^^xsd:dateTime";
+            $("#sourceBrowser_addPropertyValue").datepicker("destroy");
         }
-
-
 
         if (source) {
             self.currentSource = source;
@@ -1601,86 +1594,76 @@ common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", [], true, "lab
         $("#sourceBrowser_addPropertyDiv").css("display", "block");
         var properties = Config.Lineage.basicObjectProperties;
         $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
-
-
-            KGcreator.fillPredicatesSelect(Lineage_sources.activeSource, "sourceBrowser_addPropertyPredicateSelect",  { usualProperties:true } , function(err) {
-
-                Lineage_upperOntologies.getTopOntologyClasses(Config.currentTopLevelOntology, {}, function(err, result) {
+            KGcreator.fillPredicatesSelect(Lineage_sources.activeSource, "sourceBrowser_addPropertyPredicateSelect", { usualProperties: true }, function (err) {
+                Lineage_upperOntologies.getTopOntologyClasses(Config.currentTopLevelOntology, {}, function (err, result) {
                     if (err) {
                         return callbackSeries(err.responseText);
                     }
-                    var usualObjectClasses=[]
-                    KGcreator.usualObjectClasses.forEach(function(item) {
+                    var usualObjectClasses = [];
+                    KGcreator.usualObjectClasses.forEach(function (item) {
                         usualObjectClasses.push({
                             id: item,
-                            label: item
+                            label: item,
                         });
                     });
 
-                    usualObjectClasses=  usualObjectClasses .concat({ id: "", label: "--------" })
-                      .concat(result)
-                      .concat({ id: "", label: "--------" })
+                    usualObjectClasses = usualObjectClasses.concat({ id: "", label: "--------" }).concat(result).concat({ id: "", label: "--------" });
 
-                    KGcreator.xsdTypes.forEach(function(item) {
+                    KGcreator.xsdTypes.forEach(function (item) {
                         usualObjectClasses.push({
                             id: item,
-                            label: item
+                            label: item,
                         });
                     });
 
                     common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", usualObjectClasses, true, "label", "id");
-
-            })
-
-            })
+                });
+            });
         });
     };
 
     self.deletePropertyValue = function (property, value) {
         if (confirm("delete property " + property)) {
-            var result=""
+            var result = "";
 
             async.series(
-              [
-                function(callbackSeries) {
-                  Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, value, function(err, _result) {
-                      if (err) {
-                          return alert(err);
-                      }
-                      result = _result;
-                      return callbackSeries()
-                  })
-              },
+                [
+                    function (callbackSeries) {
+                        Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, value, function (err, _result) {
+                            if (err) {
+                                return alert(err);
+                            }
+                            result = _result;
+                            return callbackSeries();
+                        });
+                    },
 
-                // when date cannot set the correct value in the triple filter
-                  function(callbackSeries) {
-                      if (result[0]["callret-0"].value.indexOf(" 0 triples -- nothing to do") > -1) {
-                          if (confirm("delete all predicates having  this subject with property " + property + "?")) {
+                    // when date cannot set the correct value in the triple filter
+                    function (callbackSeries) {
+                        if (result[0]["callret-0"].value.indexOf(" 0 triples -- nothing to do") > -1) {
+                            if (confirm("delete all predicates having  this subject with property " + property + "?")) {
+                                Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, null, function (err, _result) {
+                                    return callbackSeries(err);
+                                });
+                            } else {
+                                return callbackSeries("Property not deleted");
+                            }
+                        } else {
+                            return callbackSeries();
+                        }
+                    },
+                ],
+                function (err) {
+                    if (err) {
+                        return alert(err);
+                    }
+                    self.showNodeInfos(self.currentSource, self.currentNode, "mainDialogDiv");
 
-                              Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, property, null, function(err, _result) {
-                                  return callbackSeries(err)
-
-
-                              })
-                          }
-                          else {
-                              return callbackSeries("Property not deleted")
-                          }
-                      }
-                      else {
-                          return callbackSeries()
-                      }
-                  }
-            ],function(err){
-                      if (err) {
-                          return alert(err);
-                      }
-                  self.showNodeInfos(self.currentSource, self.currentNode, "mainDialogDiv");
-
-                  if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
-                      Lineage_classes.deleteEdge(self.currentNodeId, value, property);
-                  }
-                  })
+                    if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
+                        Lineage_classes.deleteEdge(self.currentNodeId, value, property);
+                    }
+                }
+            );
         }
     };
 

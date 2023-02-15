@@ -16,7 +16,6 @@ var authentication = (function () {
     self.currentUser = {};
 
     self.init = function (_activate) {
-        // Redirect to login if user is not logged
         $.ajax({
             type: "GET",
             url: "/api/v1/auth/whoami",
@@ -28,6 +27,8 @@ var authentication = (function () {
                         login: "guest",
                         groupes: ["guest"],
                     };
+                    // display a login button
+                    $("#user-btn").replaceWith($("<a>").addClass("btn btn-sm py-0 btn-outline-primary").attr("href", "/login").append("login"));
                 } else {
                     // logged user
                     authentication.currentUser = {
@@ -35,14 +36,14 @@ var authentication = (function () {
                         login: data.user.login,
                         groupes: data.user.groups,
                     };
-                }
-                $("#user-username").html(" " + authentication.currentUser.identifiant);
-                if (data.authSource == "keycloak") {
-                    $("#manage-account").attr("href", data.auth.authServerURL + "/realms/" + data.auth.realm + "/account?referrer=" + data.auth.clientID);
-                } else {
-                    // eslint-disable-next-line no-console
-                    console.log("hide account management");
-                    $("#manage-account-li").hide();
+                    $("#user-username").html(" " + authentication.currentUser.identifiant);
+                    if (data.authSource == "keycloak") {
+                        $("#manage-account").attr("href", data.auth.authServerURL + "/realms/" + data.auth.realm + "/account?referrer=" + data.auth.clientID);
+                    } else {
+                        // eslint-disable-next-line no-console
+                        console.log("hide account management");
+                        $("#manage-account-li").hide();
+                    }
                 }
 
                 MainController.onAfterLogin();

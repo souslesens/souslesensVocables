@@ -43,7 +43,7 @@ module.exports = function () {
                         },
                     },
                 };
-            } else if (groups.includes("admin")) {
+            } else if (req.user.groups.includes("admin")) {
                 // admin, return all profiles
                 filteredProfiles = sortedProfiles;
             } else {

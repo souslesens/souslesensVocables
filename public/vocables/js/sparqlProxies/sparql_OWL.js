@@ -1277,14 +1277,15 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         var allData = [];
         var resultSize = 1;
         var limitSize = 2000;
+        var totalLimit = options.limit || Config.queryLimit;
         var offset = 0;
         async.whilst(
             function (_test) {
-                return resultSize > 0;
+                return resultSize > 0 && allData.length<totalLimit;
             },
             function (callbackWhilst) {
                 var query2 = "" + query;
-                var limit = options.limit || Config.queryLimit;
+
                 query2 += " limit " + limitSize + " offset " + offset;
 
                 self.sparql_url = Config.sources[sourceLabel].sparql_server.url;

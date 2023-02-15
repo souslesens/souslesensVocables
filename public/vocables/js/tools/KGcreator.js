@@ -1484,18 +1484,22 @@ if (selectedFiles.length > 0);*/
   }
   self.fillObjectOptionsFromPrompt= function (type,selectId) {
     var term = prompt("Individual contains...");
-    if (!term) return;
+    if (term===null) return;
     var options = {
       selectGraph: true,
       lang: Config.default_lang,
       type:type,
-      filter: " FILTER ( regex(?label,'" + term + "','i'))",
+      filter: term?" FILTER ( regex(?label,'" + term + "','i'))":"",
+      limit:Config.maxSelectListSize
     };
 
     var source=Lineage_sources.activeSource || KGcreator.currentSource
     Sparql_OWL.getDictionary(source, options, null, function (err, result) {
       if (err) alert(err.responseText);
 
+      if(result.length>= Config.maxSelectListSize)
+       if(! confirm(" too many values; list truncated to  " +Config.maxSelectListSize+" values"))
+      return;
       var objs = [];
       result.forEach(function (item) {
         objs.push({

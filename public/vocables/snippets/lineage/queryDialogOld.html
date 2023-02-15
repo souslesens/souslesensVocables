@@ -20,9 +20,14 @@
 <div style="display: flex; flex-direction: row">
     <div class="lineageQuery_div">
         Subject type
-        <select id="lineageQuery_subjectIndexSelect" onchange="Lineage_query.onSelectType('subject',$(this).val())">
-            <option value="1">Subject1</option>
-
+        <select id="lineageQuery_subjectTypeSelect" onchange="Lineage_query.onSelectType('subject',$(this).val())">
+            <option value=""></option>
+            <option value="owl:Class">Class</option>
+            <option value="owl:NamedIndividual">Individual</option>
+            <option value="rdf:Bag">Bag</option>
+          <!--  <option value="owl:Property">Property</option>
+            <option value="_whiteBoardNodes">WhiteBoard nodes</option>
+            <option value="_selectedNode">Selected Node</option>-->
         </select>
 
         &nbsp;<select id="lineageQuery_subjectUriSelect" style="display: none; width: 200px"></select>
@@ -35,7 +40,7 @@
     <div class="lineageQuery_div">
         Object Type
         <select id="lineageQuery_objectTypeSelect" onchange="Lineage_query.onSelectType('object',$(this).val())">
-         <!--   <option value=""></option>
+            <option value=""></option>
             <option value="string">String</option>
             <option value="number">Number</option>
             <option value="date">Date</option>
@@ -43,7 +48,7 @@
             <option value="rdf:Bag">Bag</option>
             <option value="owl:NamedIndividual">NameIndividual</option>
             <option value="_whiteBoardNodes">_WhiteBoard nodes</option>
-            <option value="_selectedNode">_Selected Node</option>-->
+            <option value="_selectedNode">_Selected Node</option>
         </select>
 
         &nbsp;<select id="lineageQuery_objectUriSelect" style="display: none; width: 200px"></select>
@@ -89,7 +94,5 @@
     </tbody>
 </div>
         <div id="lineageQuery_listResultDiv"></div>
-
     </div>
-    <div id="lineageQuery_sparqlDiv"></div>
 </div>

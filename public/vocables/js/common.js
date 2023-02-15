@@ -476,7 +476,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
     }
 
     // manage long data in select options
-    if (data.length > Config.maxSelectListSize) {
+    if (false && data.length > Config.maxSelectListSize) {
       $("#" + selectId).attr("data-classes", JSON.stringify(data));
 
       $("#" + selectId).html(

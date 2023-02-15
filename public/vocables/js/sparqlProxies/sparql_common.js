@@ -94,14 +94,13 @@ return str;
                     var conceptWordStr = "";
                     words.forEach(function (word, _index) {
                         if (word.length > 1) {
-
                             if (options.exactMatch) {
                                 if (conceptWordStr != "") {
-                                   // conceptWordStr += "|";
+                                    // conceptWordStr += "|";
                                     conceptWordStr += ",";
                                 }
                                 //conceptWordStr += "^" + formatWord(word) + "$";
-                                conceptWordStr += "\"" +formatWord(word)+"\"";
+                                conceptWordStr += '"' + formatWord(word) + '"';
                             } else {
                                 if (conceptWordStr != "") {
                                     conceptWordStr += "|";
@@ -111,23 +110,20 @@ return str;
                         }
                     });
                     if (options.exactMatch) {
-                        filters.push("?"+varName + "Label  in(" + conceptWordStr + ")");
+                        filters.push("?" + varName + "Label  in(" + conceptWordStr + ")");
+                    } else {
+                        filters.push("regex(?" + varName + 'Label , "' + conceptWordStr + '","i") ');
                     }
-                    else
-                        {
-                            filters.push("regex(?" + varName + 'Label , "' + conceptWordStr + '","i") ');
-                        }
                 } else {
                     if (words == null) {
                         return "";
                     }
 
                     if (options.exactMatch) {
-                        filters.push( varName + "Label = \"" + words + "\"");
+                        filters.push(varName + 'Label = "' + words + '"');
                         //filters.push(" regex(?" + varName + 'Label, "^' + words + '$", "i")');
                     } else {
-                         filters.push("regex(?" + varName + 'Label, "' + words + '", "i")');
-
+                        filters.push("regex(?" + varName + 'Label, "' + words + '", "i")');
                     }
                 }
             } else if (ids) {

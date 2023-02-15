@@ -15,14 +15,14 @@ Lineage_sources = (function () {
             height: 800,
             width: 1000,
             modal: false,
-          //  position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
+            //  position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
         });
         $("#QueryDialog").dialog({
             autoOpen: false,
             height: 800,
             width: 700,
             modal: false,
-           // position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
+            // position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
         });
         self.activeSource = null;
         self.loadedSources = {};
@@ -252,8 +252,7 @@ if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
         var edges = visjsGraph.data.edges.get();
         var newEdges = [];
         edges.forEach(function (edge) {
-            if(!edge.data)
-                return
+            if (!edge.data) return;
             if (edge.data && !edge.data.fullColor) {
                 edge.data.fullColor = edge.color;
             }
@@ -262,7 +261,7 @@ if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
             var width;
             // var fontColor;
 
-            if ( (!source || nodesMapSources[edge.from] == source || nodesMapSources[edge.to] == source)) {
+            if (!source || nodesMapSources[edge.from] == source || nodesMapSources[edge.to] == source) {
                 color = edge.data.fullColor;
                 // width=2
             } else {

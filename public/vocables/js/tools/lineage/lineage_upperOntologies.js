@@ -91,8 +91,7 @@ var Lineage_upperOntologies = (function () {
         });
     };
 
-
-    self.getTopOntologyClasses= function (upperOntologySource, options, callback) {
+    self.getTopOntologyClasses = function (upperOntologySource, options, callback) {
         if (!options) options = {};
         var predicates = [];
 
@@ -114,7 +113,6 @@ var Lineage_upperOntologies = (function () {
                 if (!item.label) item.label = { value: Sparql_common.getLabelFromURI(item.id.value) };
 
                 topLevelOntologyObjects.push({ label: prefix + item.label.value, id: item.id.value, type: item.type.value });
-
             });
             topLevelOntologyObjects.sort(function (a, b) {
                 if (!a.label || !b.label) return 0;
@@ -123,12 +121,9 @@ var Lineage_upperOntologies = (function () {
                 return 0;
             });
 
-
-
             return callback(null, topLevelOntologyObjects);
         });
     };
-
 
     self.setPropertiesMapInverseProps = function (propsMap) {
         for (var prop in propsMap) {

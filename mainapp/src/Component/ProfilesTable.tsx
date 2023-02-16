@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 import {
     Button,
     Checkbox,
     FormControl,
     FormControlLabel,
     FormGroup,
+    Grid,
     InputLabel,
     FormLabel,
     MenuItem,
@@ -22,11 +24,20 @@ import {
     Stack,
     RadioGroup,
     Radio,
+    Typography,
 } from "@mui/material";
+import clsx from "clsx";
+import { alpha, styled } from "@mui/material/styles";
+// import Grid from '@mui/material/Grid';
+import { TreeView, TreeItem, TreeItemProps, treeItemClasses, TreeItemContentProps, useTreeItem } from "@mui/lab";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
 import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl } from "../Profile";
+import { Source } from "../Source";
 import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
@@ -138,7 +149,7 @@ const enum Mode {
 type Msg_ =
     | { type: Type.UserClickedModal; payload: boolean }
     | { type: Type.UserUpdatedField; payload: { fieldname: string; newValue: string } }
-    | { type: Type.UserUpdatedSourceAccessControl; payload: { sourceId: string; newValue: SourceAccessControl | "default" } }
+    | { type: Type.UserUpdatedSourceAccessControl; payload: { treeStr: string; newValue: SourceAccessControl | null } }
     | { type: Type.ResetProfile; payload: Profile }
     | { type: Type.UserClickedCheckAll; payload: { fieldname: string; value: boolean } }
     | { type: Type.UserUpdatedBlenderLevel; payload: number };
@@ -153,17 +164,17 @@ const updateProfile = (profileEditionState: ProfileEditionState, msg: Msg_): Pro
             return { ...profileEditionState, profileForm: { ...profileEditionState.profileForm, [fieldToUpdate]: msg.payload.newValue } };
 
         case Type.UserUpdatedSourceAccessControl: {
-            const { sourceId, newValue } = msg.payload;
-            const previousSourcesAccessControl = profileEditionState.profileForm.sourcesAccessControl;
+            const { treeStr, newValue } = msg.payload;
             let newSourcesAccessControls: Record<string, SourceAccessControl>;
+            const previousSourcesAccessControl = profileEditionState.profileForm.sourcesAccessControl;
 
-            if (newValue === "default") {
-                const { [sourceId]: value, ...otherSource } = previousSourcesAccessControl;
+            if (newValue === null) {
+                const { [treeStr]: value, ...otherSource } = previousSourcesAccessControl;
                 newSourcesAccessControls = otherSource;
             } else {
                 newSourcesAccessControls = {
                     ...profileEditionState.profileForm.sourcesAccessControl,
-                    [msg.payload.sourceId]: newValue,
+                    [msg.payload.treeStr]: newValue,
                 };
             }
 
@@ -192,11 +203,13 @@ type ProfileFormProps = {
 };
 
 const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: ProfileFormProps) => {
+    const [nodesClicked, setNodeToExpand] = React.useState<Array<string>>([]);
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
     const sources = React.useMemo(() => {
         return unwrappedSources;
     }, [unwrappedSources]);
+
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
     const tools: string[] = ["ALL", "sourceBrowser", "sourceMatcher", "evaluate", "ancestors", "lineage", "SPARQL", "ADLmappings", "ADLbrowser", "Standardizer", "SQLquery"];
     const [profileModel, update] = React.useReducer(updateProfile, { modal: false, profileForm: profile });
@@ -204,32 +217,71 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         update({ type: Type.ResetProfile, payload: profile });
     }, [profileModel.modal]);
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
-    const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
+    const handleClose = () => {
+        setNodeToExpand(new Array());
+        update({ type: Type.UserClickedModal, payload: false });
+    };
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
 
-    const [filteringCharsSourcesAccessControl, setFilteringCharsSourcesAccessControl] = React.useState("");
+    const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: React.ChangeEvent<HTMLInputElement>) => {
+        const treeStr = src.treeStr;
 
-    const handleFilterSourcesAccessControl = () => (event: React.ChangeEvent<HTMLInputElement>) => {
-        setFilteringCharsSourcesAccessControl(event.target.value);
+        // Get the parent treeStr
+        let bf = "";
+        const parentList = treeStr
+            .split("/")
+            .map((branch) => {
+                const prt = bf === "" ? branch : [bf, branch].join("/");
+                bf = prt;
+                return prt;
+            })
+            .slice(0, -1);
+
+        const currentSac = profileModel.profileForm.sourcesAccessControl;
+
+        // get the nearest parent who have a value
+
+        const parentListWithValue = Object.entries(currentSac)
+            .map(([branch, _val]) => branch)
+            .filter((branch) => {
+                if (parentList.includes(branch)) {
+                    return branch;
+                }
+            });
+
+        const nearestParentWithValue =
+            parentListWithValue.length > 0
+                ? Object.entries(currentSac)
+                      .map(([branch, _val]) => branch)
+                      .filter((branch) => {
+                          if (parentList.includes(branch)) {
+                              return branch;
+                          }
+                      })
+                      .reduce((a, b) => {
+                          return a.length >= b.length ? a : b;
+                      })
+                : "";
+
+        // update current value if the nearest parent have a different value
+        if (currentSac[nearestParentWithValue] === event.target.value) {
+            update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: treeStr, newValue: null } });
+        } else {
+            update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: treeStr, newValue: event.target.value as SourceAccessControl } });
+        }
+
+        // reset all children
+        src.children.forEach((srcNode: SourceTreeNode) => {
+            update({ type: Type.UserUpdatedSourceAccessControl, payload: { treeStr: srcNode.treeStr, newValue: null as SourceAccessControl | null } });
+        });
     };
-
-    const handleSourceAccessControlUpdate = React.useMemo(() => {
-        return Object.fromEntries(
-            sources.map((source) => [
-                source.name,
-                (event: React.ChangeEvent<HTMLInputElement>) =>
-                    update({ type: Type.UserUpdatedSourceAccessControl, payload: { sourceId: source.name, newValue: event.target.value as SourceAccessControl | "default" } }),
-            ])
-        );
-    }, [sources]);
 
     const handleCheckedAll = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckAll, payload: { fieldname: fieldname, value: event.target.checked } });
     const handleNewBlenderNumber = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserUpdatedBlenderLevel, payload: parseInt(event.target.value.replace(/\D/g, "")) });
 
     const saveProfiles = () => {
-        setFilteringCharsSourcesAccessControl("");
         // const updateProfiles = unwrappedProfiles.map(p => p.name === profile.name ? profileModel.profileForm : p)
         // const addProfile = [...unwrappedProfiles, profileModel.profileForm]
         // updateModel({ type: 'UserClickedSaveChanges', payload: {} });
@@ -241,13 +293,129 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
     };
 
+    const fieldsFromSource = (source: any) => {
+        let fields = [source.schemaType];
+
+        if (source.group) {
+            fields = fields.concat(source.group.split("/"));
+        }
+
+        return fields.concat(source.name);
+    };
+
+    const generateSourcesTree = () => {
+        let sourcesTree: SourceTreeNode[] = [];
+
+        let index = 0;
+        sources.forEach((source) => {
+            let currentTree = sourcesTree;
+            let tree: string[] = [];
+            fieldsFromSource(source).forEach((field) => {
+                tree.push(field);
+                let root = currentTree.find((key) => key.name == field);
+                if (root === undefined) {
+                    root = {
+                        name: field,
+                        children: [],
+                        index: index,
+                        source: source,
+                        treeStr: tree.join("/"),
+                    };
+                    currentTree.push(root);
+                }
+                index = index + 1;
+                currentTree = root.children;
+            });
+        });
+
+        return sourcesTree;
+    };
+
+    const displayFormTree = (sourcesTree: any) => {
+        if (!sourcesTree) {
+            return;
+        }
+
+        return sourcesTree.map((source: any) => {
+            const sourcesAccessControlList = Object.entries(profileModel.profileForm.sourcesAccessControl);
+            const availableSourcesAccessControl = sourcesAccessControlList.map(([sac, _val]) => {
+                return sac;
+            });
+
+            // get all accessControl that match the tree
+            const matchingAccessControls: string[] = availableSourcesAccessControl
+                .map((path) => {
+                    if (source.treeStr === path || source.treeStr.startsWith(`${path}/`)) {
+                        return path;
+                    } else {
+                        return null;
+                    }
+                })
+                .filter((elem): elem is string => elem != null);
+
+            let accessControlValue = null;
+            if (matchingAccessControls.length > 0) {
+                // Get the longest accesscontrol
+                const matchingAccessControl = matchingAccessControls.reduce((a, b) => {
+                    return a.length >= b.length ? a : b;
+                });
+                // Get the value of this accessControl
+                accessControlValue = profileModel.profileForm.sourcesAccessControl[matchingAccessControl];
+            }
+
+            const value = accessControlValue ? accessControlValue : "forbidden";
+
+            return (
+                <CustomTreeItem
+                    nodeId={source.treeStr}
+                    key={source.index.toString()}
+                    label={
+                        <Grid container alignItems="center" spacing={2}>
+                            <Grid item xs>
+                                <p style={{ margin: 0 }}>{source.name}</p>
+                            </Grid>
+                            <Grid item xs="auto">
+                                <SourceAccessControlInputSelect
+                                    name={source.source.id + "-source-access-control"}
+                                    value={value}
+                                    onChange={handleSourceAccessControlUpdate(source)}
+                                    editable={source.source.editable}
+                                />
+                            </Grid>
+                        </Grid>
+                    }
+                >
+                    {displayFormTree(source.children)}
+                </CustomTreeItem>
+            );
+        });
+    };
+
+    function SourcesTreeView() {
+        const treeviewSources = displayFormTree(generateSourcesTree());
+        return (
+            <TreeView
+                aria-label="Sources access control navigator"
+                id="sources-access-treeview"
+                defaultExpanded={Array.from(nodesClicked)}
+                onNodeToggle={(_event, nodeIds) => {
+                    setNodeToExpand(nodeIds);
+                }}
+                defaultCollapseIcon={<ExpandMoreIcon sx={{ width: 30, height: 30 }} />}
+                defaultExpandIcon={<ChevronRightIcon sx={{ width: 30, height: 30 }} />}
+            >
+                {treeviewSources}
+            </TreeView>
+        );
+    }
+
     return (
         <>
             <Button variant="contained" color="primary" onClick={handleOpen}>
                 {create ? "Create Profile" : "Edit"}
             </Button>
             <Modal onClose={handleClose} open={profileModel.modal}>
-                <Box component="form" sx={style}>
+                <Box component="form" sx={style} style={{ maxHeight: "100%", overflow: "auto" }}>
                     <Stack spacing={4}>
                         <TextField fullWidth onChange={handleFieldUpdate("name")} value={profileModel.profileForm.name} id={`name`} label={"Name"} variant="standard" />
                         <TextField
@@ -280,38 +448,8 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                         </FormControl>
                         <FormControl>
                             <FormLabel id="default-source-access-control-label">Default source access control</FormLabel>
-                            <SourceAccessControlInput
-                                name="default-source-access-control"
-                                value={profileModel.profileForm.defaultSourceAccessControl}
-                                onChange={handleFieldUpdate("defaultSourceAccessControl")}
-                                allowDefault={false}
-                                editable={true}
-                            />
+                            <SourcesTreeView />
                         </FormControl>
-                        <TextField
-                            size="small"
-                            label="Filter sources by name"
-                            id="filter-sourcesaccesscontrol"
-                            value={filteringCharsSourcesAccessControl}
-                            sx={{ width: 300 }}
-                            onChange={handleFilterSourcesAccessControl()}
-                        />
-                        <Box style={{ marginTop: "0px", overflow: "auto", maxHeight: "15em" }}>
-                            {sources
-                                .filter((source) => source.name.toLowerCase().includes(filteringCharsSourcesAccessControl.toLowerCase()))
-                                .map((source) => (
-                                    <FormControl size="small" key={source.id}>
-                                        <FormLabel id={source.id + "-source-access-control-label"}>{source.name}</FormLabel>
-                                        <SourceAccessControlInput
-                                            name={source.id + "-source-access-control"}
-                                            value={profileModel.profileForm.sourcesAccessControl[source.name] ?? "default"}
-                                            onChange={handleSourceAccessControlUpdate[source.name]}
-                                            allowDefault={true}
-                                            editable={source.editable}
-                                        />
-                                    </FormControl>
-                                ))}
-                        </Box>
                         <FormGroup>
                             <FormControlLabel control={<Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />} label="Allow all tools" />
 
@@ -364,23 +502,84 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     );
 };
 
+const CustomContent = React.forwardRef(function CustomContent(props: TreeItemContentProps, ref) {
+    const { classes, className, label, nodeId, icon: iconProp, expansionIcon, displayIcon } = props;
+
+    const { disabled, expanded, selected, focused, handleExpansion, handleSelection, preventSelection } = useTreeItem(nodeId);
+
+    const icon = iconProp || expansionIcon || displayIcon;
+
+    const handleMouseDown = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        preventSelection(event);
+    };
+
+    const handleExpansionClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        handleExpansion(event);
+    };
+
+    const handleSelectionClick = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        handleSelection(event);
+    };
+
+    return (
+        <div
+            className={clsx(className, classes.root, {
+                [classes.expanded]: expanded,
+                [classes.selected]: selected,
+                [classes.focused]: focused,
+                [classes.disabled]: disabled,
+            })}
+            onMouseDown={handleMouseDown}
+            ref={ref as React.Ref<HTMLDivElement>}
+        >
+            <CustomExpansionArrow onClick={handleExpansionClick} className={classes.iconContainer}>
+                {icon}
+            </CustomExpansionArrow>
+            <Typography onClick={handleSelectionClick} component="div" className={classes.label}>
+                {label}
+            </Typography>
+        </div>
+    );
+});
+
+const expansionArrowStyles = {
+    "&:hover": { backgroundColor: "#E4F2FF !important" },
+    padding: "1em",
+};
+
+const CustomExpansionArrow = styled("div")(expansionArrowStyles);
+function CustomTreeItem(props: TreeItemProps) {
+    return <TreeItem ContentComponent={CustomContent} {...props} />;
+}
+
+interface SourceTreeNode {
+    name: string;
+    children: SourceTreeNode[];
+    index: number;
+    source: Source;
+    treeStr: string;
+}
+
 interface SourceAccessControlInputProps {
     name: string;
-    value: SourceAccessControl | "default";
+    value: SourceAccessControl;
     onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    allowDefault: boolean;
     editable: boolean;
 }
 
-const SourceAccessControlInput: React.FC<SourceAccessControlInputProps> = React.memo(function ({ name, value, onChange, allowDefault, editable }) {
+const SourceAccessControlInputSelect: React.FC<SourceAccessControlInputProps> = ({ name, value, onChange, editable }) => {
     return (
-        <RadioGroup row aria-labelledby={name} value={value} onChange={onChange} name={name}>
-            {allowDefault ? <FormControlLabel value="default" control={<Radio size="small" />} label="Defaults" /> : null}
-            <FormControlLabel value="forbidden" control={<Radio size="small" />} label="Forbidden" />
-            <FormControlLabel value="read" control={<Radio size="small" />} label="Read" />
-            <FormControlLabel disabled={!editable} value="readwrite" control={<Radio />} label="Read & Write" />
-        </RadioGroup>
+        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+            <InputLabel id="select-sources-access-control">Access Control</InputLabel>
+            <Select labelId="select-sources-access-control" id="select-sources-access-control-select" value={value} label="AccessControl" onChange={onChange}>
+                <MenuItem value="forbidden">Forbidden</MenuItem>
+                <MenuItem value="read">Read</MenuItem>
+                <MenuItem disabled={!editable} value="readwrite">
+                    Read & Write
+                </MenuItem>
+            </Select>
+        </FormControl>
     );
-});
+};
 
 export { ProfilesTable, Mode, Msg_, Type };

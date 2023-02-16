@@ -26,7 +26,6 @@ module.exports = function () {
             let profiles = await readResource(profilesJSON, res);
             profiles = Object.fromEntries(
                 Object.entries(profiles).map(([profileId, profile]) => {
-                    profile.defaultSourceAccessControl = profile.defaultSourceAccessControl.toLowerCase();
                     profile.sourcesAccessControl = Object.fromEntries(
                         Object.entries(profile.sourcesAccessControl).map(([sourceId, accessControl]) => {
                             return [sourceId, parseAccessControl(accessControl)];

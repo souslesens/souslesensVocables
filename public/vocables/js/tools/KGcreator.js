@@ -1498,7 +1498,7 @@ if (selectedFiles.length > 0);*/
       if (err) alert(err.responseText);
 
       if(result.length>= Config.maxSelectListSize)
-       if(! confirm(" too many values; list truncated to  " +Config.maxSelectListSize+" values"))
+       if(confirm(" too many values; list truncated to  " +Config.maxSelectListSize+" values")===null)
       return;
       var objs = [];
       result.forEach(function (item) {

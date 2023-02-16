@@ -20,8 +20,8 @@
 <div style="display: flex; flex-direction: row">
     <div class="lineageQuery_div">
         Subject type
-        <select id="lineageQuery_subjectIndexSelect" onchange="Lineage_query.onSelectType('subject',$(this).val())">
-            <option value="1">Subject1</option>
+        <select id="lineageQuery_subjectVarSelect" onchange="Lineage_query.onSelectType('subject',$(this).val())">
+            <option value="?s1">Subject1</option>
 
         </select>
 
@@ -30,7 +30,10 @@
     <div class="lineageQuery_div">
         Predicate
         <select id="lineageQuery_predicateSelect" onchange="Lineage_query.onSelectType('predicate',$(this).val())"></select>
-        &nbsp;<select id="lineageQuery_predicateUriSelect" style="display: none; width: 200px"  onchange="Lineage_query.onSelectType('predicate',$(this).val())"></select>
+        &nbsp;<select id="lineageQuery_predicateUriSelect" style="display: none; width: 200px" ></select>
+        <div id="lineageQuery_inversePredicateDiv" style="display: none; ">
+             <input type="checkbox" id="lineageQuery_inversePredicateCBX">inverse predicate
+        </div>
     </div>
     <div class="lineageQuery_div">
         Object Type
@@ -55,11 +58,12 @@
 </div>
 <div style="display: flex; flex-direction: row">
     Filters :
-    <select id="filterBooleanOperator">
+<!--    <select id="filterBooleanOperator">
         <option value=" FILTER  EXISTS ">and</option>
         <option value=" UNION ">or</option>
-    </select>
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.addFilter()">Add filter</button>
+    </select>-->
+
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.addFilter()">Add filter</button>&nbsp;
     <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.reset()">Reset</button>
 </div>
 <div class="lineageQuery_div">
@@ -76,9 +80,12 @@
   </select>-->
 
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('count')">Count</button>
-
+        &nbsp;
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('graph')">Graph</button>
+        &nbsp;
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('list')">List</button>
+        &nbsp;
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('csv')">CSV</button>
 
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('copyQuery')">Copy Query</button>
 <div  class="messagediv">

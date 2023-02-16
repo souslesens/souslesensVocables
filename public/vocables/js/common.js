@@ -10,7 +10,12 @@
 
 var common = (function() {
   var self = {};
-
+  /**
+   *
+   *
+   *
+   * @type {{loadJsTree: self.jstree.loadJsTree, deleteBranch: self.jstree.deleteBranch, types: {"owl:ObjectProperty": {icon: string}, OWL: {icon: string}, concept: {icon: string}, "owl:Restriction": {icon: string}, collection: {icon: string}, importedProperty: {li_attr: {style: string}, icon: string}, tool: {icon: string}, importedRestriction: {li_attr: {style: string}, icon: string}, importedClass: {li_attr: {style: string}, icon: string}, default: {icon: string}, "owl:Class": {li_attr: {style: string}, icon: string}, SKOS: {icon: string}, "owl:table": {icon: string}, Class: {li_attr: {style: string}, icon: string}, class: {icon: string}, Property: {li_attr: {style: string}, icon: string}}, getNodeDescendants: (function(*, *, *, *): *[]), checkAll: self.jstree.checkAll, setTreeAppearance: self.jstree.setTreeAppearance, openNode: self.jstree.openNode, deleteNode: self.jstree.deleteNode, clear: self.jstree.clear, getNodeByDataField: ((function(*, *, *): (null|null))|*), setTreeParentDivDimensions: self.jstree.setTreeParentDivDimensions, getjsTreeNodes: ((function(*, *, *): (*[]))|*), onAllTreeCbxChange: self.jstree.onAllTreeCbxChange, addNodesToJstree: self.jstree.addNodesToJstree, openNodeDescendants: self.jstree.openNodeDescendants, getjsTreeNodeObj: (function(*, *): Object|jQuery|jQuery|*)}}
+   */
   self.jstree = {
     types: {
       tool: {

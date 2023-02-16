@@ -24,9 +24,10 @@ var Lineage_query = (function() {
 
     self.predicatesObjectsMap = {
       "rdf:type": ["owl:Class", "rdf:Bag", "owl:NamedIndividual"],
-      "rdfs:subClassOf": ["_whiteBoardNodes", "_selectedNode", "OTHER"],
+      "owl:subClassOf": ["_whiteBoardNodes", "_selectedNode", "OTHER"],
       "rdfs:member": ["_whiteBoardNodes", "_selectedNode", "OTHER"],
       "OTHER": ["_whiteBoardNodes", "_selectedNode", "OTHER", "string", "number", "date"],
+      "any": ["_whiteBoardNodes", "_selectedNode", "OTHER"],
       " ": " ",
       "rdfs:label": "string",
       "rdfs:isDefinedBy": "string",
@@ -56,11 +57,14 @@ var Lineage_query = (function() {
   };
 
   self.onSelectType = function(role, type) {
-    $("#lineageQuery_valueDiv").css("display", "none");
-    $("#lineageQuery_predicateUriSelect").css("display", "none");
-    $("#lineageQuery_objectUriSelect").css("display", "none");
+
 
     if (role == "predicate") {
+      $("#lineageQuery_predicateUriSelect").css("display", "none");
+
+        $("#lineageQuery_inversePredicateDiv").css("display",self.isObjectPredicate(type)?"block":"none");
+
+
       var objectTypes = self.predicatesObjectsMap[type];
       if (!Array.isArray(objectTypes)) {
         objectTypes = [objectTypes];
@@ -112,6 +116,7 @@ var Lineage_query = (function() {
         $("#lineageQuery_objectTypeSelect").val("date");
         common.fillSelectOptions("lineageQuery_operator", self.operators["number"], true);
         $("#lineageQuery_operator").val(">=");
+        common.fillSelectOptions("lineageQuery_objectTypeSelect",["date"])
 
         common.setDatePickerOnInput("lineageQuery_value");
       }
@@ -120,12 +125,14 @@ var Lineage_query = (function() {
         common.fillSelectOptions("lineageQuery_operator", self.operators["number"], true);
         $("#lineageQuery_operator").val("<=");
         common.setDatePickerOnInput("lineageQuery_value");
+        common.fillSelectOptions("lineageQuery_objectTypeSelect",["date"])
       }
 
 
     }
     else if (role == "object") {
-
+      $("#lineageQuery_objectUriSelect").css("display", "none");
+      $("#lineageQuery_valueDiv").css("display", "none");
       if (type == "string") {
         common.fillSelectOptions("lineageQuery_operator", self.operators["string"], true);
         $("#lineageQuery_valueDiv").css("display", "block");
@@ -150,20 +157,17 @@ var Lineage_query = (function() {
       }
 
       else if (type == "OTHER") {
-        if (role == "subject") {
-          $("#lineageQuery_subjectUriSelect").css("display", "block");
-          $("#lineageQuery_valueDiv").css("display", "none");
-          KGcreator.fillObjectOptionsFromPrompt(null, "lineageQuery_subjectUriSelect");
-          //  fillUriSelect("lineageQuery_subjectUriSelect");
-        }
+
+        $("#lineageQuery_objectUriSelect").css("display", "block");
+        $("#lineageQuery_valueDiv").css("display", "none");
+        KGcreator.fillObjectOptionsFromPrompt(null, "lineageQuery_objectUriSelect");
 
       }
     }
   };
 
   self.reset = function() {
-    $("#lineageQuery_subjectIndexSelect").val("");
-    $("#lineageQuery_subjectUriSelect").val("");
+    // $("#lineageQuery_subjectVarSelect").val("");
     $("#lineageQuery_predicateSelect").val("");
     $("#lineageQuery_predicateUriSelect").val("");
     $("#lineageQuery_objectTypeSelect").val("");
@@ -173,10 +177,10 @@ var Lineage_query = (function() {
     $("#lineageQuery_value").val("");
   };
 
+
   self.addFilter = function() {
-    var subjectIndex = $("#lineageQuery_subjectIndexSelect").val();
-    var subjectUri = $("#lineageQuery_subjectUriSelect").val();
-    var subjectUriLabel = $("#lineageQuery_subjectUriSelect option:selected").text();
+    var subjectVar = $("#lineageQuery_subjectVarSelect").val();
+
 
     var predicateType = $("#lineageQuery_predicateSelect").val();
     var predicateUri = $("#lineageQuery_predicateUriSelect").val();
@@ -185,14 +189,17 @@ var Lineage_query = (function() {
     var objectType = $("#lineageQuery_objectTypeSelect").val();
     var objectUri = $("#lineageQuery_objectUriSelect").val();
     var objectUriLabel = $("#lineageQuery_objectUriSelect option:selected").text();
-    if (objectUri == "_seearch") {
-      objectUri = null;
-    }
-    if (subjectUri == "_seearch") {
-      subjectUri = null;
+
+    var inversePredicate=$("#lineageQuery_inversePredicateCBX").prop("checked")
+
+
+    if (!subjectVar) {
+      return alert("select a subject");
     }
 
+
     var filterBooleanOperator = $("#filterBooleanOperator").val();
+    var filterBooleanOperatorText = $("#lineageQuery_subjectUriSelect option:selected").text();
 
     var operator = $("#lineageQuery_operator").val();
     var value = $("#lineageQuery_value").val();
@@ -208,11 +215,20 @@ var Lineage_query = (function() {
     var html = "<div class='LineageQuery_QueryElt' id='" + filterId + "'> ";
     html += "<button style='size: 10px' onclick='Lineage_query.removeFilter(\"" + filterId + "\")'>X</button>";
 
+
+    if (predicateType == "OTHER") {
+      predicateType = null;
+    }
+    if (objectType == "OTHER") {
+      objectType = null;
+    }
+
     var obj = {
-      subjectIndex: subjectIndex,
+      subjectVar: subjectVar,
 
       predicateType: predicateType,
       predicateUri: predicateUri,
+      inversePredicate:inversePredicate,
 
       objectType: objectType,
       objectUri: objectUri,
@@ -228,19 +244,22 @@ var Lineage_query = (function() {
     }
 
     if (Object.keys(self.filters).length > 0) {
-      html += filterBooleanOperator + " ";
+      html += filterBooleanOperatorText + " ";
     }
-    html += "&nbsp;subject" + subjectIndex + " " + (predicateUriLabel || predicateType || "") + " " + (objectUriLabel || valueStr || objectType) + "&nbsp;";
+    html += "&nbsp;subject" + subjectVar + " " + (predicateUriLabel || predicateType || "") + " " + (objectUriLabel || valueStr || objectType) + "&nbsp;";
 
     html += "</div>";
 
     self.filters[filterId] = obj;
 
-    if (self.isObjectPredicate(predicateType)) {
-      var subjectIndex = parseInt($("#lineageQuery_subjectIndexSelect").val());
-      subjectIndex += 1;
-      $("#lineageQuery_subjectIndexSelect").append(" <option value='" + subjectIndex + "'>Subject" + subjectIndex + "</option>");
+
+    //allows to get object var as subject for next filter
+    if (!objectType && !objectUri) {
+      var filterIndex = Object.keys(self.filters).length;
+      var varName = "?o" + filterIndex;
+      $("#lineageQuery_subjectVarSelect").append(" <option value='" + varName + "'>Object" + filterIndex + "</option>");
     }
+
 
     $("#lineageQuery_Filters").append(html);
     ///  $("#LineageQuery_createFilterDiv").css("display", "none");
@@ -260,50 +279,9 @@ var Lineage_query = (function() {
   };
 
 
-  
-  
-  
-  
-  
   self.executeQuery = function(queryType) {
-   /* function getSelectedNodesFilter(varname, type, predicateType, callback) {
-      function getFilter(graphNodes) {
-        var key = "id";
-        if (!self.isObjectPredicate(predicateType)) {
-          key = "label";
-        }
-        var array = [];
-        graphNodes.forEach(function(node) {
-          array.push(node.data[key]);
-        });
-        if (key == "id") {
-          return Sparql_common.setFilter(varname, array);
-        }
-        else {
-          return Sparql_common.setFilter(varname, null, array, { exactMatch: 1 });
-        }
-      }
 
 
-      if (type == "_selectedNode") {
-        if (!Lineage_classes.currentGraphNode) {
-
-
-          return callback("no node selected");
-        }
-        var filter = getFilter([Lineage_classes.currentGraphNode]);
-        return callback(null, filter);
-      }
-      else if (type == "_whiteBoardNodes") {
-        if (!visjsGraph.data) {
-          return callback("no nodes on witheboard");
-
-        }
-        var filter = getFilter(visjsGraph.data.nodes);
-        return callback(null, filter);
-      }
-      return "";
-    }*/
 
 
     if (Object.keys(self.filters).length == 0) {
@@ -326,46 +304,55 @@ var Lineage_query = (function() {
 
 
     query += " where {";
-    //  query += "{ ?s rdfs:label ?sLabel. ?s rdf:type ?sType. ";
+
+    query += " ?s1 rdf:type ?s1Type.  ";
+    if (queryType != "count") {
+      query += " ?s1 rdfs:label ?s1Label.  ";
+    }
+
     var filterIndex = 0;
     for (var key in self.filters) {
-      if (filterIndex > 0) {
-        query += "\n " + filter.filterBooleanOperator + " \n";
-      }
+
+
+      /*   if ( filterIndex > 0) {
+           query += "\n " + filter.filterBooleanOperator + " \n";
+         }*/
+
+
       filterIndex += 1;
 
 
       var filter = self.filters[key];
 
-      var subjectIndex = filter.subjectIndex;
+      var subjectVar = filter.subjectVar;
 
-        var predicateFilterStr = "{";
-
-
+      var predicateFilterStr = "{";
 
 
-
-
-      var  predicate= filter.predicateUri || filter.predicateType
-      if(predicate) {
-        if(predicate.indexOf("http")==0)
-        predicate = "<" + predicate + ">"
+      var predicate = filter.predicateUri || filter.predicateType;
+      if (predicate) {
+        if (predicate.indexOf("http") == 0) {
+          predicate = "<" + predicate + ">";
+        }
+        if(predicate=="any")
+          predicate ="?p"+ filterIndex;
       }
-      else
-        predicate="?p"+filterIndex
+      else {
+        predicate = "?p" + filterIndex;
+      }
+      if(filter.inversePredicate)
+        predicate="^"+inversePredicate
 
 
+      if (filter.value) {// datatypeProperty predicate
 
 
-     if (filter.value) {// datatypeProperty predicate
-
-
-       predicateFilterStr +=  "?s"+subjectIndex +" "+predicate+ "  ?o" + filterIndex + ".";
+        predicateFilterStr += subjectVar + " " + predicate + "  ?o" + filterIndex + ".";
         if (filter.objectType == "string") {
 
 
           if (filter.operator == "contains") {
-            predicateFilterStr+=" FILTER (regex(str(?o" + filterIndex+"),'" + filter.value + "','i')).";
+            predicateFilterStr += " FILTER (regex(str(?o" + filterIndex + "),'" + filter.value + "','i')).";
           }
           else if (filter.operator == "not contains") {
             predicateFilterStr += "FILTER( ! regex(str(?o" + filterIndex + "),'" + filter.value + "','i')).";
@@ -383,27 +370,45 @@ var Lineage_query = (function() {
 
 
       }
+      else if (filter.objectType == "_selectedNode") {
+        if (!Lineage_classes.currentGraphNode) {
+          return callback("no node selected");
+        }
+        predicateFilterStr += subjectVar + " " + predicate + " <" +Lineage_classes.currentGraphNode.data.id + ">. ";
+      }
+      else if (filter.objectType == "_whiteBoardNodes") {
+        if (!visjsGraph.data) {
+          return callback("no nodes on witheboard");
 
-     //object predicate
-      else{
+        }
+        var graphNodeIds=visjsGraph.data.nodes.getIds()
+
+
+        var filter= Sparql_common.setFilter("o" + filterIndex, graphNodeIds,null , );
+        predicateFilterStr += subjectVar + " " + predicate +  "  ?o" + filterIndex + "."+filter ;
+
+
+      }
+
+      //object predicate
+      else {
 
 
         if (filter.objectUri) {
-          predicateFilterStr += " ?s"+subjectIndex +" "+predicate+ " <"+ filter.objectUri + ">. ";
-      }
-       if(filter.objectType ){
-         predicateFilterStr += " ?s"+subjectIndex +" "+predicate+ " "+ filter.objectType + ". ";
-       }
-     else  {
-          predicateFilterStr += " ?s"+subjectIndex +" "+predicate+ " ?o"+filterIndex + ". ";
+          predicateFilterStr += subjectVar + " " + predicate + " <" + filter.objectUri + ">. ";
+        }
+        else if (false && filter.objectType) {
+          predicateFilterStr += subjectVar + " " + predicate + " " + filter.objectType + ". ";
+        }
+        else {
+          predicateFilterStr += subjectVar + " " + predicate + " ?o" + filterIndex + ". ";
         }
 
 
       }
 
 
-
-      query += " \n" +predicateFilterStr;
+      query += " \n" + predicateFilterStr;
 
       query += "}";
     }
@@ -417,7 +422,7 @@ var Lineage_query = (function() {
 
 
     self.setMessage("executing query...", true);
-    $("#lineageQuery_sparqlDiv").html(query)
+ //   $("#lineageQuery_sparqlDiv").html(query);
     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
       self.setMessage("");
       if (err) {
@@ -435,8 +440,8 @@ var Lineage_query = (function() {
         self.setMessage("drawing nodes...", true);
         var nodeIds = [];
         result.results.bindings.forEach(function(item) {
-          if (nodeIds.indexOf(item.s.value) < 0) {
-            nodeIds.push(item.s.value);
+          if (nodeIds.indexOf(item.s1.value) < 0) {
+            nodeIds.push(item.s1.value);
           }
         });
         Lineage_classes.addNodesAndParentsToGraph(source, nodeIds, {});
@@ -454,23 +459,23 @@ var Lineage_query = (function() {
           return $("#lineageQuery_listResultDiv").html("no result");
         }
         result.results.bindings.forEach(function(item) {
-          if (!uniqueNodes[item.sType.value]) {
-            uniqueNodes[item.sType.value] = 1;
+          if (!uniqueNodes[item.s1Type.value]) {
+            uniqueNodes[item.s1Type.value] = 1;
             jstreeData.push({
-              id: item.sType.value,
+              id: item.s1Type.value,
               text: Sparql_common.getLabelFromURI(item.sType.value),
               parent: "#"
             });
           }
-          if (!uniqueNodes[item.s.value]) {
-            uniqueNodes[item.s.value] = 1;
-            var label = item.s ? item.sLabel.value : Sparql_common.getLabelFromURI(item.s.value);
+          if (!uniqueNodes[item.s1.value]) {
+            uniqueNodes[item.s1.value] = 1;
+            var label = item.s1 ? item.s1Label.value : Sparql_common.getLabelFromURI(item.s1.value);
             jstreeData.push({
-              id: item.s.value,
+              id: item.s1.value,
               text: label,
-              parent: item.sType.value,
+              parent: item.s1Type.value,
               data: {
-                id: item.s.value,
+                id: item.s1.value,
                 label: label,
                 source: source
               }
@@ -489,8 +494,60 @@ var Lineage_query = (function() {
         common.jstree.loadJsTree("lineageQuery_listResultDivTree", jstreeData, options, function() {
         });
       }
+
+      else if (queryType == "csv") {
+
+        var currentQueryLabelsMap = self.getQuerylabelsMap(query);
+
+        if (result.results.bindings.length == 0) {
+          return $("#lineageQuery_listResultDiv").html("no result");
+        }
+        var cols = [];
+        result.head.vars.forEach(function(varName) {
+          var title = currentQueryLabelsMap[varName] || varName;
+
+          cols.push({ title: title, defaultContent: "" });
+        });
+
+        var dataSet = [];
+        result.results.bindings.forEach(function(item) {
+          var line = [];
+          result.head.vars.forEach(function(varName) {
+            var str = "";
+            var obj = item[varName];
+            if (obj) {
+              str = obj.value;
+            }
+            else {
+              str = "";
+            }
+            line.push(str);
+          });
+          dataSet.push(line);
+        });
+        Export.showDataTable(null, cols, dataSet);
+      }
     });
   };
+
+  /**
+   * get a map where the predicate of witch the varname is the object
+   * @param query
+   * @returns {{}}
+   */
+  self.getQuerylabelsMap = function(query) {
+    var regex = /\?([^ \s]\d) +([^ .]*) +\?(o\d)/gm;
+    var array = [];
+    var map = {};
+    while ((array = regex.exec(query)) != null) {
+      if (array.length == 4) {
+        map[array[3]] = array[1]+Sparql_common.getLabelFromURI(array[2]);
+      }
+    }
+    return map;
+  };
+
+
   self.setMessage = function(message, waitImage) {
 
     $("#lineageQuery_messageSpan").html(message);

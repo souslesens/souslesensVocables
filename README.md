@@ -235,6 +235,16 @@ The following command will build and watch the react app and run and watch the n
 npm run devserver
 ```
 
+### Run migration scripts
+
+Certain version need migration of data. Run the script for the following version:
+
+#### Release 1.27
+
+```bash
+node scripts/sources_access_control_migration_treeview.js -c config -w
+```
+
 SouslesensVocables will be available at [localhost:3010](http://localhost:3010).
 
 ## Contribute to souslesensVocable

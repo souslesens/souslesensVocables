@@ -15,6 +15,14 @@ Lineage_sources = (function () {
             height: 800,
             width: 1000,
             modal: false,
+            //  position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
+        });
+        $("#QueryDialog").dialog({
+            autoOpen: false,
+            height: 800,
+            width: 700,
+            modal: false,
+            // position: { my: "left top", at: "left bottom", of: "#leftPanelDiv" },
         });
         self.activeSource = null;
         self.loadedSources = {};
@@ -25,7 +33,9 @@ Lineage_sources = (function () {
         self.resetVisjsGraph();
         Lineage_selection.selectedNodes = [];
         self.setTheme(Config.defaultGraphTheme);
-        Lineage_sources.showSourcesDialog();
+        if (!Config.tools["lineage"].noSourceDialogAtInit) {
+            Lineage_sources.showSourcesDialog();
+        }
     };
 
     self.resetAll = function () {
@@ -39,12 +49,8 @@ Lineage_sources = (function () {
     };
 
     self.showSourcesDialog = function () {
-        if (window.parent && window.parent.Ontocommons) {
-            // called from outside (iframe)
-            var calledSource = window.parent.Ontocommons.currentSource;
-            if (calledSource) {
-                return self.setCurrentSource(calledSource);
-            }
+        if (Config.tools["lineage"].urlParam_source) {
+            return self.loadSources(Config.tools["lineage"].urlParam_source);
         }
 
         SourceBrowser.showSearchableSourcesTreeDialog(
@@ -72,28 +78,42 @@ Lineage_sources = (function () {
                 //if checkbox
 
                 var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
-                if (sources.length > 0) {
-                    var firstSource = null;
-                    async.eachSeries(
-                        sources,
-                        function (source, callbackEach) {
-                            self.initSource(source, function (err, result) {
-                                if (!err) {
-                                    firstSource = source;
-                                }
-                                return callbackEach();
-                            });
-                        },
-                        function (err) {
-                            if (err) {
-                                alert(err);
-                            }
-                            self.setCurrentSource(firstSource);
-                            $("#sourcesSelectionDialogdiv").dialog("close");
-                            MainController.UI.showHideRightPanel();
-                            $("#lineage_allActions").css("visibility", "visible");
-                        }
-                    );
+                sources.length > 0;
+                self.loadSources(sources);
+            }
+        );
+    };
+
+    self.loadSources = function (sources) {
+        if (!sources) {
+            return alert("no source selected");
+        }
+        if (!Array.isArray(sources)) {
+            sources = [sources];
+        }
+        var firstSource = null;
+        async.eachSeries(
+            sources,
+            function (source, callbackEach) {
+                self.initSource(source, function (err, result) {
+                    if (!err) {
+                        firstSource = source;
+                    }
+                    return callbackEach();
+                });
+            },
+            function (err) {
+                if (err) {
+                    alert(err);
+                }
+                self.setCurrentSource(firstSource);
+                $("#sourcesSelectionDialogdiv").dialog("close");
+                MainController.UI.showHideRightPanel();
+                $("#lineage_allActions").css("visibility", "visible");
+            },
+            function (err) {
+                if (err) {
+                    return alert(err.responseText);
                 }
             }
         );
@@ -157,6 +177,7 @@ Lineage_sources = (function () {
             if (err) {
                 return alert(err);
             }
+
             common.fillSelectOptions("GenericTools_searchAllClassSelect", result, true, "label", "id");
         });
     };
@@ -175,9 +196,17 @@ $("#lineage_actionDiv_title_hidden").css("display","flex")*/
         }
     };
 
-    self.showHideEditButtons = function (source) {
-        if (!visjsGraph.isGraphNotEmpty()) {
+    self.showHideEditButtons = function (source, hide) {
+        /* var x=  $(".vis-edit-mode").length
+if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
+  return;
+}*/
+        if (!visjsGraph.network) {
             return;
+        }
+        if (hide) {
+            visjsGraph.network.disableEditMode();
+            $(".vis-edit-mode").css("display", "none");
         }
         var isNodeEditable = Lineage_sources.isSourceEditable(source);
         if (isNodeEditable) {
@@ -223,6 +252,7 @@ $("#lineage_actionDiv_title_hidden").css("display","flex")*/
         var edges = visjsGraph.data.edges.get();
         var newEdges = [];
         edges.forEach(function (edge) {
+            if (!edge.data) return;
             if (edge.data && !edge.data.fullColor) {
                 edge.data.fullColor = edge.color;
             }
@@ -230,6 +260,7 @@ $("#lineage_actionDiv_title_hidden").css("display","flex")*/
             var color;
             var width;
             // var fontColor;
+
             if (!source || nodesMapSources[edge.from] == source || nodesMapSources[edge.to] == source) {
                 color = edge.data.fullColor;
                 // width=2
@@ -370,6 +401,7 @@ sourceDivId +
     };
 
     self.setAllWhiteBoardSources = function (remove) {
+        self.showHideEditButtons(null, true);
         if (remove) {
             Lineage_sources.fromAllWhiteboardSources = true;
         }
@@ -700,6 +732,85 @@ visjsGraph.network.options.edges.font = { color: self.defaultEdgeFontColor };*/
             });
             callback(null, sourceObjects);
         });
+    };
+
+    self.test3D = function () {
+        //return Lineage_3D.testThree()
+        // Random tree
+        const N = 300;
+        /*    const gData = {
+    nodes: [...Array(N).keys()].map(i => ({ id: i })),
+    links: [...Array(N).keys()]
+    .filter(id => id)
+    .map(id => ({
+    source: id,
+    target: Math.round(Math.random() * (id-1))
+}))
+};*/
+
+        var nodes = visjsGraph.data.nodes.get();
+        var edges = visjsGraph.data.edges.get();
+        var gData2 = { nodes: [], links: [] };
+        nodes.forEach(function (node) {
+            if (node.id) {
+                gData2.nodes.push({ id: node.id, label: node.label, color: node.color, data: node.data });
+            }
+        });
+        edges.forEach(function (edge) {
+            if (nodes.indexOf(edge.from) && nodes.indexOf(edge.to)) {
+                gData2.links.push({ source: edge.from, target: edge.to, label: edge.label });
+            }
+        });
+
+        const Graph = ForceGraph3D()(document.getElementById("graphDiv"))
+            .graphData(gData2)
+            .width($("#graphDiv").width())
+            .height($("#graphDiv").height())
+            .backgroundColor("#333")
+            .showNavInfo(true)
+            .linkColor((link) => (link.data && link.data.bNodeId ? "yellow" : "orange"))
+            .nodeThreeObject((node) => {
+                if (!node) {
+                    return null;
+                }
+                const sprite = new SpriteText(node.label);
+                sprite.material.depthWrite = false; // make sprite background transparent
+                sprite.color = node.color;
+
+                sprite.textHeight = 8;
+                return sprite;
+            })
+            .linkThreeObjectExtend(true)
+            .linkWidth(2)
+            .linkThreeObject((link) => {
+                // extend link with text sprite
+                const sprite = new SpriteText(link.label);
+                sprite.color = "#cb6601";
+                sprite.textHeight = 1.5;
+                return sprite;
+            })
+            .linkPositionUpdate((sprite, { start, end }) => {
+                const middlePos = Object.assign(
+                    ...["x", "y", "z"].map((c) => ({
+                        [c]: start[c] + (end[c] - start[c]) / 2, // calc middle point
+                    }))
+                );
+
+                // Position sprite
+                Object.assign(sprite.position, middlePos);
+            })
+
+            .onNodeClick(function (node, event) {
+                SourceBrowser.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
+            })
+            // .nodeAutoColorBy('group')
+            .onNodeDragEnd((node) => {
+                node.fx = node.x;
+                node.fy = node.y;
+                node.fz = node.z;
+            });
+
+        const linkForce = Graph.d3Force("link").distance((link) => (link.data && link.data.bNodeId ? 400 : 10));
     };
 
     return self;

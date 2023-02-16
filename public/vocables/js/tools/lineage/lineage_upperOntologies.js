@@ -91,54 +91,37 @@ var Lineage_upperOntologies = (function () {
         });
     };
 
-    self.getSourcePossiblePredicatesAndObject = function (source, callback) {
+    self.getTopOntologyClasses = function (upperOntologySource, options, callback) {
+        if (!options) options = {};
         var predicates = [];
-        KGcreator.usualProperties.forEach(function (item) {
-            predicates.push({ label: item, id: item });
-        });
 
-        Sparql_OWL.getDictionary(source, { selectGraph: true, lang: Config.default_lang }, null, function (err, result) {
+        if (!options.filter) {
+            options.type = "owl:Class";
+        }
+        options.selectGraph = true;
+        options.lang = Config.default_lang;
+
+        Sparql_OWL.getDictionary(upperOntologySource, options, null, function (err, result) {
             if (err) callback(err);
 
-            var sourceObjects = [];
-            var TopLevelOntologyObjects = [];
+            var topLevelOntologyObjects = [];
+
+            var prefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix + ":";
             result.forEach(function (item) {
                 if (item.id.type == "bnode") return;
 
                 if (!item.label) item.label = { value: Sparql_common.getLabelFromURI(item.id.value) };
-                var prefix = "";
-                if (item.g.value.indexOf(Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern) > -1) {
-                    prefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix + ":";
-                    TopLevelOntologyObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
-                } else {
-                    if (item.label) sourceObjects.push({ label: prefix + item.label.value, id: item.id.value, type: "Class" });
-                }
+
+                topLevelOntologyObjects.push({ label: prefix + item.label.value, id: item.id.value, type: item.type.value });
             });
-            sourceObjects.sort(function (a, b) {
+            topLevelOntologyObjects.sort(function (a, b) {
                 if (!a.label || !b.label) return 0;
                 if (a.label > b.label) return 1;
                 if (a.label < b.label) return -1;
                 return 0;
             });
 
-            var usualObjects = [];
-            KGcreator.usualObjectClasses.forEach(function (item) {
-                if (item.indexOf("_") < 0) usualObjects.push({ label: item, id: item });
-            });
-
-            var basicTypeClasses = [];
-            KGcreator.basicTypeClasses.forEach(function (item) {
-                basicTypeClasses.push({ label: item, id: item });
-            });
-
-            // var allObjects=usualObjects.concat(sourceObjects);
-            return callback(null, {
-                predicates: predicates,
-                usualObjects: usualObjects,
-                sourceObjects: sourceObjects,
-                TopLevelOntologyObjects: TopLevelOntologyObjects,
-                basicTypeClasses: basicTypeClasses,
-            });
+            return callback(null, topLevelOntologyObjects);
         });
     };
 

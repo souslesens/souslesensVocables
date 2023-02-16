@@ -71,6 +71,7 @@
         <script src="js/tools/lineage/lineage_selection.js"></script>
         <script src="js/tools/lineage/lineage_filterBy.js"></script>
         <script src="js/tools/lineage/lineage_styles.js"></script>
+        <script src="js/tools/lineage/lineage_query.js"></script>
 
         <script src="js/tools/owlEditor.js"></script>
 
@@ -104,6 +105,8 @@
 
         <script src="js/tools/KGcreator.js"></script>
         <script src="js/tools/KGpropertyFilter.js"></script>
+        <script src="js/tools/composer.js"></script>
+        <script src="js/tools/sparqlQueryUI.js"></script>
 
         <script src="js/tools/ontologiesStats.js"></script>
 
@@ -116,7 +119,7 @@
         <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_SqlTojstreeConnectors.js"></script>
 
         <script src="config/app_config.js"></script>
-        <script src="config/app_config_draft_tools.js"></script>
+        <!--    <script src="config/app_config_draft_tools.js"></script>-->
 
         <script src="config/tools.js"></script>
 
@@ -139,6 +142,13 @@
         <script src="js/tools/orchestrator.js"></script>
         <script src="js/search/searchUtil.js"></script>
         <script src="js/tools/ontologyUtil.js"></script>
+
+        <script src="//unpkg.com/3d-force-graph"></script>
+        <!--  <script src="//unpkg.com/three"></script>
+        <script src="//unpkg.com/three-spritetext"></script>-->
+
+        <!--   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r99/three.min.js"></script>
+        <script src="js/tools/lineage/lineage_3d.js"></script>-->
 
         <!--
   <script src="js/external/socket.io.js"></script>
@@ -259,14 +269,20 @@
                         modal: false,
                     });
 
+                    $("#smallDialogDiv").dialog({
+                        autoOpen: false,
+                        height: 200,
+                        width: 200,
+                        modal: true,
+                    });
+
                     $(document).on("click", "a", function () {
                         var target = $(this).attr("target");
-                        if (false && target == "_slsvCallback") {
+                        if (target == "_slsvCallback") {
                             var id = $(this).attr("href");
-                            event.stopPropagation();
-                            //  SourceBrowser.showNodeInfos(null, id, "mainDialogDiv");
+                            event.preventDefault();
+                            SourceBrowser.showNodeInfos(null, id, "mainDialogDiv");
                         }
-                        //   alert("You're trying to go to " + href);
                     });
 
                     MainController.UI.setCredits();
@@ -469,16 +485,11 @@
         </style>
     </head>
     <body>
-        <div class="rowXXX" style="display: flex; flex-direction: column">
+        <div class="rowXXX" style="display: flex; flex-direction: column; min-height: 30px">
             <div style="display: flex; flex-direction: row; justify-content: space-evenly">
-                <!--</div> <div style="display: flex;flex-direction: row">-->
-                <!-- <div class="colXXX" style="min-height: 25px;"-->
                 <div>
                     <table>
                         <tr>
-                            <td>
-                                <!-- <button onclick="MainController.test()">T</button>-->
-                            </td>
                             <td><img src="./images/waitAnimated.gif" id="waitImg" style="display: none; width: 15px; text-align: justify" /></td>
                             <td><span class="messageDiv" id="messageDiv"></span></td>
                         </tr>
@@ -563,6 +574,8 @@
         </div>
 
         <div id="mainDialogDiv"></div>
+
+        <div id="smallDialogDiv"></div>
 
         <!-- Footer -->
         <footer class="bg-white">

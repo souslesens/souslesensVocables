@@ -261,6 +261,7 @@ action: function (_e) {
             if (err) {
                 return callback(err);
             }
+            result = Lineage_classes.truncateResultToVisGraphLimit(result);
             Sparql_common.setSparqlResultPropertiesLabels(source, result, "prop", function (err, result2) {
                 if (err) {
                     return callback(err);
@@ -268,6 +269,7 @@ action: function (_e) {
                 var visjsData = { nodes: [], edges: [] };
                 var existingNodes = visjsGraph.getExistingIdsMap();
                 var color = Lineage_classes.getSourceColor(source);
+
                 result2.forEach(function (item) {
                     if (!existingNodes[item.subject.value]) {
                         existingNodes[item.subject.value] = 1;
@@ -287,7 +289,7 @@ action: function (_e) {
                             data: {
                                 source: source,
                                 id: item.subject.value,
-                                label: item.subject.value,
+                                label: item.subjectLabel.value,
                             },
                         });
                     }
@@ -311,7 +313,7 @@ action: function (_e) {
                             data: {
                                 source: source,
                                 id: item.object.value,
-                                label: item.object.value,
+                                label: item.objectLabel.value,
                             },
                         });
                     }
@@ -367,7 +369,7 @@ action: function (_e) {
 
                 $("#waitImg").css("display", "none");
                 if (callback) {
-                    return callback();
+                    return callback(null, visjsData);
                 }
             });
         });
@@ -1164,7 +1166,7 @@ action: function (_e) {
                 if (!nodeIds) {
                     options.allNodes = true;
                 }
-                Lineage_classes.drawRelations(null, null, "Properties", options);
+                Lineage_relations.drawRelations(null, null, "Properties", options);
                 // Lineage_properties.drawPredicatesGraph(source, nodeIds, properties);
             } else if (target == "table") {
                 //  Lineage_classes.graphNodeNeighborhood(data, "outcoming", function(err, result) {

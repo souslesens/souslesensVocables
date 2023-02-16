@@ -1,6 +1,6 @@
 {
     "name": "souslesensvocables",
-    "version": "1.22.0",
+    "version": "1.26.0",
     "private": true,
     "scripts": {
         "build:app": "cd mainapp && npm run build",
@@ -75,6 +75,7 @@
         "superagent": "^8.0.5",
         "superagent-proxy": "^3.0.0",
         "swagger-ui-express": "^4.6.0",
+        "three": "^0.148.0",
         "tika-server": "^1.2.12",
         "tmp": "^0.2.1",
         "ulid": "^2.3.0",

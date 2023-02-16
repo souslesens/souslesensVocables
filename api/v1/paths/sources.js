@@ -19,7 +19,12 @@ module.exports = function () {
         try {
             const userInfo = await userManager.getUser(req.user);
             var sourcesFile = sourcesJSON;
-            if (req.query.sourcesFile) sourcesFile = path.resolve(configPath + "/" + req.query.sourcesFile);
+            if (req.query.sourcesFile) {
+                sourcesFile = path.resolve(configPath + "/" + req.query.sourcesFile);
+                if (!sourcesFile.startsWith(path.resolve(configPath))) {
+                    return res.status(403).json({ done: false, message: "forbidden path" });
+                }
+            }
             //  const sources = await read(sourcesJSON);
             const sources = await read(sourcesFile);
             const parsedSources = JSON.parse(sources);

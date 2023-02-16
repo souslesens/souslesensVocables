@@ -10,6 +10,8 @@ const request = require("request");
 const Util = require("./util.");
 const fs = require("fs");
 
+var exec = require("child_process").exec;
+
 var importsSourcesMap = {
     "http://purl.org/vso/ns": "VSO-NS",
     "https://w3id.org/affectedBy": "AFFECTEDBY",
@@ -64,6 +66,27 @@ var topOntologyPatternsMap = {
 };
 
 var SourceIntegrator = {
+    jenaParse: function (filePath, callback) {
+        var cmd = 'D: && cd D:\\apache-jena-4.7.0 && java -cp "./lib/*"  mystest.java ' + filePath;
+        console.log("EXECUTING " + cmd);
+        exec(cmd, { maxBuffer: 1024 * 30000 }, function (err, stdout, stderr) {
+            if (err) {
+                console.log(stderr);
+                return callback(err);
+            }
+            console.log(stdout);
+            var json = JSON.parse(stdout);
+            json.forEach(function (item, index) {
+                triples.push({
+                    subject: item[0],
+                    predicate: item[1],
+                    object: item[2],
+                });
+            });
+            callback(null, triples);
+        });
+    },
+
     insertTriples: function (sparqlServerUrl, graphUri, triples, callback) {
         triples = triples.replace(/_:([^\s.]+)\s/g, function (a, b) {
             return "<" + b + ">";
@@ -83,6 +106,7 @@ var SourceIntegrator = {
             return callback();
         });
     },
+
     clearGraph: function (sparqlServerUrl, graphUri, callback) {
         var strClear = "CLEAR GRAPH <" + graphUri + "> ";
 
@@ -211,7 +235,6 @@ var SourceIntegrator = {
             parseTTL();
         }
     },
-
     importSourceFromTurtle: function (ontologyUrl, sourceName, options, callback) {
         console.log("----------importing " + sourceName);
         var Config;
@@ -420,7 +443,6 @@ var SourceIntegrator = {
             return callback(null, format);
         });
     },
-
     listPortalOntologies: function (apiKey, callback) {
         var url = "http://data.industryportal.enit.fr/ontologies?apikey=" + apiKey;
         request(url, function (error, response, body) {
@@ -437,7 +459,6 @@ var SourceIntegrator = {
             return callback(null, ontologiesMap);
         });
     },
-
     getOntologiesInfos: function (callback) {
         var apiKey = "019adb70-1d64-41b7-8f6e-8f7e5eb54942";
         SourceIntegrator.listPortalOntologies(apiKey, function (err, ontologiesMap) {
@@ -479,7 +500,6 @@ var SourceIntegrator = {
             );
         });
     },
-
     checkImports: function () {
         var fs = require("fs");
         var path = "D:\\NLP\\ontologies\\Ontocommons\\ontologiesStats.json";
@@ -517,7 +537,6 @@ var SourceIntegrator = {
             }
         );
     },
-
     listImports: function () {
         var fs = require("fs");
         var path = "D:\\NLP\\ontologies\\Ontocommons\\ontologiesStats2.json";
@@ -551,7 +570,6 @@ var SourceIntegrator = {
         console.log(JSON.stringify(koImports, null, 2));
         console.log(JSON.stringify(importsMap, null, 2));
     },
-
     importImportsMap: function () {
         async.eachSeries(
             Object.keys(importsSourcesMap),
@@ -580,7 +598,6 @@ var SourceIntegrator = {
             }
         );
     },
-
     replaceSourcesImportUrlBySourceName: function () {
         var sourcesJsonFile = "ontocommonsSources.json";
         var sourcesPath = path.join(__dirname, "../" + "config/" + sourcesJsonFile);
@@ -605,6 +622,15 @@ var SourceIntegrator = {
     },
 };
 module.exports = SourceIntegrator;
+
+if (false) {
+    try {
+        var filePath = "D:\\apache-jena-4.7.0\\data\\lov_vvo.rdf";
+        SourceIntegrator.jenaParse(filePath, function (err, triples) {});
+    } catch (e) {
+        var x = e;
+    }
+}
 
 if (false) {
     var url = "http://data.industryportal.enit.fr/ontologies/VVO/submissions/1/download?apikey=521da659-7f0a-4961-b0d8-5e15b52fd185";

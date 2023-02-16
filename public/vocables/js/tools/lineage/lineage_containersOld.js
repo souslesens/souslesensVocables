@@ -13,7 +13,7 @@ var Lineage_containers = (function () {
             label: "Graph node",
             action: function (_e) {
                 if (self.currentContainer.data.type == "container") Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.id, { onlyChildren: true });
-                else Lineage_classes.drawNodeAndParents(self.currentContainer.data, 0);
+                else Lineage_classes.drawNodesAndParents(self.currentContainer, 0);
             },
         };
         items["openAll"] = {
@@ -623,7 +623,7 @@ Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentCont
                             filter: Sparql_common.setFilter("prop", objectProperties),
                         };
                         options.allNodes = false;
-                        Lineage_classes.drawRelations(null, null, "Properties", options);
+                        Lineage_relations.drawRelations(null, null, "Properties", options);
                     }
                     return callbackSeries();
                 },
@@ -920,7 +920,7 @@ Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentCont
                             filter: Sparql_common.setFilter("prop", objectProperties),
                         };
                         options.allNodes = false;
-                        Lineage_classes.drawRelations(null, null, "Properties", options);
+                        Lineage_relations.drawRelations(null, null, "Properties", options);
                     }
                     return callbackSeries();
                 },

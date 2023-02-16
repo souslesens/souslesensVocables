@@ -1,0 +1,99 @@
+<style>
+    .lineageQuery_div {
+        padding: 10px;
+        margin: 10px;
+        border: 1px solid saddlebrown;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+    }
+</style>
+
+<div style="display: flex; flex-direction: column">
+    <!-- <div style="display: flex; flex-direction: row; justify-content: space-evenly" class="lineageQuery_div">
+        <div><b>Selection</b></div>
+        <div><input type="radio" name="lineageQuery_selection" value="selected" /> selected node</div>
+        <div><input type="radio" name="lineageQuery_selection" value="visible" /> visible nodes</div>
+        <div><input type="radio" name="lineageQuery_selection" value="all" checked="checked" />source nodes</div>
+    </div>-->
+</div>
+<div style="display: flex; flex-direction: row">
+    <div class="lineageQuery_div">
+        Subject type
+        <select id="lineageQuery_subjectTypeSelect" onchange="Lineage_query.onSelectType('subject',$(this).val())">
+            <option value=""></option>
+            <option value="owl:Class">Class</option>
+            <option value="owl:NamedIndividual">Individual</option>
+            <option value="rdf:Bag">Bag</option>
+            <!--  <option value="owl:Property">Property</option>
+            <option value="_whiteBoardNodes">WhiteBoard nodes</option>
+            <option value="_selectedNode">Selected Node</option>-->
+        </select>
+
+        &nbsp;<select id="lineageQuery_subjectUriSelect" style="display: none; width: 200px"></select>
+    </div>
+    <div class="lineageQuery_div">
+        Predicate
+        <select id="lineageQuery_predicateSelect" onchange="Lineage_query.onSelectType('predicate',$(this).val())"></select>
+        &nbsp;<select id="lineageQuery_predicateUriSelect" style="display: none; width: 200px" onchange="Lineage_query.onSelectType('predicate',$(this).val())"></select>
+    </div>
+    <div class="lineageQuery_div">
+        Object Type
+        <select id="lineageQuery_objectTypeSelect" onchange="Lineage_query.onSelectType('object',$(this).val())">
+            <option value=""></option>
+            <option value="string">String</option>
+            <option value="number">Number</option>
+            <option value="date">Date</option>
+            <option value="owl:Class">Class</option>
+            <option value="rdf:Bag">Bag</option>
+            <option value="owl:NamedIndividual">NameIndividual</option>
+            <option value="_whiteBoardNodes">_WhiteBoard nodes</option>
+            <option value="_selectedNode">_Selected Node</option>
+        </select>
+
+        &nbsp;<select id="lineageQuery_objectUriSelect" style="display: none; width: 200px"></select>
+        <div class="lineageQuery_objectTypeSelect" id="lineageQuery_valueDiv">
+            <select id="lineageQuery_operator"></select>
+            <input id="lineageQuery_value" size="20" value="" />
+        </div>
+    </div>
+</div>
+<div style="display: flex; flex-direction: row">
+    Filters :
+    <select id="filterBooleanOperator">
+        <option value=" FILTER  EXISTS ">and</option>
+        <option value=" UNION ">or</option>
+    </select>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.addFilter()">Add filter</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.reset()">Reset</button>
+</div>
+<div class="lineageQuery_div">
+    <div id="lineageQuery_Filters" style="display: flex; flex-direction: column; margin: 5px; padding: 5px; background-color: #ddd"></div>
+    <!--  <div>
+    All columns <input type="checkbox" id="lineageQuery_allColumnsCBX" checked="checked">
+
+</div>-->
+    <div>
+        <!--  Query Display
+  <select id="lineageQuery_queryDisplaySelect">
+    <option>table</option>
+    <option>graph</option>
+  </select>-->
+
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('count')">Count</button>
+
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('graph')">Graph</button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('list')">List</button>
+
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('copyQuery')">Copy Query</button>
+        <div class="messagediv">
+            <tbody>
+                <tr>
+                    <td><img src="./images/waitAnimated.gif" id="LineageQuery_waitImg" style="display: none; width: 15px; text-align: justify" /></td>
+                    <td><span class="messageDiv" id="lineageQuery_messageSpan">No data found</span></td>
+                </tr>
+            </tbody>
+        </div>
+        <div id="lineageQuery_listResultDiv"></div>
+    </div>
+</div>

@@ -8,32 +8,28 @@ var Lineage_blend = (function () {
             self.graphModification.creatingsourceUri = null;
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").dialog("option", "title", "Create node in source " + Lineage_sources.activeSource);
+
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
-                Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, function (err, result) {
-                    self.currentPossibleClassesAndPredicates = result;
-                    KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function (err, result) {
+                async.series(
+                    [
+                        function (callbackSeries) {
+                            Lineage_upperOntologies.getTopOntologyClasses(Config.currentTopLevelOntology, {}, function (err, result) {
+                                if (err) {
+                                    return callbackSeries(err.responseText);
+                                }
+                                common.fillSelectOptions("LineageBlend_creatingNodeObjectsUpperSelect", result, true, "label", "id");
+                                common.fillSelectOptions("LineageBlend_creatingNodeObjectsUpper2Select", result, true, "label", "id");
+
+                                return callbackSeries();
+                            });
+                        },
+                    ],
+                    function (err) {
                         if (err) {
                             return alert(err.responseText);
                         }
-                        // self.currentPossibleClassesAndPredicates = result;
-                        /*   common.fillSelectOptions("lineage_selection_modifyPredicate_propertySelect", result.predicates, true, "label", "id");
-
-Lineage_upperOntologies.getSourcePossiblePredicatesAndObject(Lineage_sources.activeSource, function (err, result) {
-if (err) return alert(err.responseText);
-if (!Config.sources[Lineage_sources.activeSource].allowIndividuals) {
-$("#LineageBlend_creatingNamedIndividualButton").css("display", "none");
-}
-
-var allObjects = result.sourceObjects.concat(["---------"]).concat(result.TopLevelOntologyObjects).concat(["---------"]).concat(result.usualObjects);
-*/
-                        common.fillSelectOptions("KGcreator_predicateSelect", result.predicates, true, "label", "id");
-                        common.fillSelectOptions("KGcreator_objectSelect", result.objectClasses, true, "label", "id");
-                        common.fillSelectOptions("LineageBlend_creatingNodePredicatesSelect", result.predicates, true, "label", "id");
-                        common.fillSelectOptions("LineageBlend_creatingNodeObjectsSelect", result.objectClasses, true, "label", "id");
-                        common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", result.objectClasses, true, "label", "id");
-                    });
-                    self.possibleNamedIndividuals = {};
-                });
+                    }
+                );
             });
         },
         showAddEdgeFromGraphDialog: function (edgeData, callback) {
@@ -102,10 +98,22 @@ var allObjects = result.sourceObjects.concat(["---------"]).concat(result.TopLev
                                     },
                                 });
                             }
+                            if (true) {
+                                jstreeData.push({
+                                    id: "http://www.w3.org/2002/07/owl#equivalentClass",
+                                    text: "owl:equivalentClass",
+                                    parent: "#",
+                                    data: {
+                                        id: "http://www.w3.org/2002/07/owl#equivalentClass",
+                                        inSource: Config.dictionarySource,
+                                    },
+                                });
+                            }
 
                             if (true || self.sourceNode.rdfType == "NamedIndividual") {
                                 jstreeData.push({
                                     id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
+
                                     text: "rdf:type",
                                     parent: "#",
                                     data: {
@@ -122,6 +130,17 @@ var allObjects = result.sourceObjects.concat(["---------"]).concat(result.TopLev
                                     parent: "#",
                                     data: {
                                         id: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+                                        inSource: Lineage_sources.activeSource,
+                                    },
+                                });
+                            }
+                            if (Config.sources[Lineage_sources.activeSource].schemaType == "OWL") {
+                                jstreeData.push({
+                                    id: "http://www.w3.org/2000/01/rdf-schema#member",
+                                    text: "rdfs:member",
+                                    parent: "#",
+                                    data: {
+                                        id: "http://www.w3.org/2000/01/rdf-schema#member",
                                         inSource: Lineage_sources.activeSource,
                                     },
                                 });
@@ -503,11 +522,13 @@ source: specificSourceLabel
         },
 
         getPossibleNamedIndividuals: function (callback) {
+            var individuals = {};
+            //   return callback(null, individuals);
             Sparql_OWL.getNamedIndividuals(Lineage_sources.activeSource, null, null, function (err, result) {
                 if (err) {
                     return callback(err);
                 }
-                var individuals = {};
+
                 result.forEach(function (item) {
                     individuals[item.conceptLabel.value] = item.concept.value;
                 });
@@ -516,6 +537,10 @@ source: specificSourceLabel
         },
 
         showCreatingNodeClassOrNamedIndividualDialog: function (type) {
+            $("#LineageBlend_creatingNodeObjectsUpperSelect").val("");
+            $("#LineageBlend_creatingNodeObjectsUpper2Select").val("");
+            $("#LineageBlend_creatingNodeObjectsSelect").val("");
+            $("#LineageBlend_creatingNodeObjectsSelect").val("");
             self.graphModification.currentCreatingNodeType = type;
             var showClassDiv = type == "Class";
             if (showClassDiv) {
@@ -528,7 +553,7 @@ source: specificSourceLabel
 
             $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open");
             $("#LineageBlend_creatingNodeClassParamsDiv").tabs({});
-            if (type == "NamedIndividual") {
+            if (false && type == "NamedIndividual") {
                 self.graphModification.getPossibleNamedIndividuals(function (err, result) {
                     if (err) {
                         return alert(err.responseText);
@@ -575,7 +600,9 @@ source: specificSourceLabel
         },
         getURI: function (label, source, uriType) {
             var uri = null;
-            if (!uriType) uriType = $("#LineageBlend_creatingNodeUriType").val();
+            if (!uriType) {
+                uriType = $("#LineageBlend_creatingNodeUriType").val();
+            }
             var specificUri = $("#LineageBlend_creatingNodeSubjectUri").val();
             if (specificUri) {
                 uriType = "specific";
@@ -644,7 +671,7 @@ source: specificSourceLabel
         },
 
         addClassOrIndividualTriples: function () {
-            $("#LineageBlend_creatingNodeClassParamsDiv").dialog("close");
+            $("#LineageBlend_creatingNodeTiplesDiv").html("");
 
             var label = $("#LineageBlend_creatingNodeNewClassLabel").val();
             if (!label) {
@@ -655,20 +682,23 @@ source: specificSourceLabel
             var type = $("#LineageBlend_creatingNodePredicatesSelect").val();
 
             if (self.graphModification.currentCreatingNodeType == "Class") {
-                var superClass = $("#LineageBlend_creatingNodeObjectsSelect").val();
+                var superClass = $("#LineageBlend_creatingNodeObjectsUpperSelect").val() || $("#LineageBlend_creatingNodeObjectsSelect").val();
                 if (!superClass) {
                     return alert("owl:Class is mandatory");
                 }
                 self.graphModification.addTripleToCreatingNode("rdf:type", "owl:Class");
                 self.graphModification.addTripleToCreatingNode("rdfs:subClassOf", superClass);
             } else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
-                var individualtypeClass = $("#LineageBlend_creatingNodeObjects2Select").val();
+                var individualtypeClass = $("#LineageBlend_creatingNodeObjectsUpper2Select").val() || $("#LineageBlend_creatingNodeObjects2Select").val();
                 if (!individualtypeClass) {
                     return alert("owl:Class is mandatory");
                 }
                 self.graphModification.addTripleToCreatingNode("rdf:type", "owl:NamedIndividual");
                 self.graphModification.addTripleToCreatingNode("rdf:type", individualtypeClass);
             }
+
+            $("#LineageBlend_creatingNodeClassParamsDiv").dialog("close");
+
             var origin = "Lineage_addNode";
             var status = "draft";
             var metaDataTriples = self.getCommonMetaDataTriples(self.graphModification.creatingsourceUri, origin, status, null);
@@ -841,11 +871,14 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                     $("#LineagePopup").dialog("close");
                     var nodeData = {
                         id: self.graphModification.creatingsourceUri,
-                        source: Lineage_sources.activeSource,
+                        data: {
+                            id: self.graphModification.creatingsourceUri,
+                            source: Lineage_sources.activeSource,
+                        },
                     };
                     MainController.UI.message("node Created");
                     self.graphModification.creatingNodeTriples = [];
-                    Lineage_classes.drawNodeAndParents(nodeData);
+                    Lineage_classes.drawNodesAndParents(nodeData);
                     SearchUtil.generateElasticIndex(Lineage_sources.activeSource, { ids: [self.graphModification.creatingsourceUri] }, function (err, result) {
                         if (err) {
                             return alert(err.responseText);

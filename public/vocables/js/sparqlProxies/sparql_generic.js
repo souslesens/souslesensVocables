@@ -318,6 +318,22 @@ var Sparql_generic = (function () {
         });
     };
 
+    self.getEndPointAllGraphsMap = function (sparqlServerUrl, callback) {
+        if (!sparqlServerUrl) {
+            sparqlServerUrl = Config.default_sparql_url + "?format=json&query=";
+        }
+        var query = "select distinct ?g WHERE {GRAPH ?g{?s ?p ?o}} limit 10000";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var graphs = {};
+            result.results.bindings.forEach(function (item) {
+                graphs[item.g.value] = 1;
+            });
+            return callback(null, graphs);
+        });
+    };
     self.getNodesAllTriples = function (sourceLabel, subjectIds, callback) {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
         var sliceSize = 2000;
@@ -391,6 +407,9 @@ var Sparql_generic = (function () {
             }
             if (elt.indexOf("http") == 0 || item.valueType == "uri") {
                 return "<" + elt + ">";
+            }
+            if (elt.indexOf("<") == 0) {
+                return elt;
             }
 
             if ((p = elt.indexOf("^^")) > 0) {
@@ -1034,7 +1053,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                     allData = allData.concat(result);
                                     resultSize = result.length;
                                     totalCount += result.length;
-                                    MainController.UI.message(sourceLabel + "retreived triples :" + totalCount);
+                                    //   MainController.UI.message(sourceLabel + "retreived triples :" + totalCount);
                                     offset += limitSize;
                                     callbackWhilst();
                                 }

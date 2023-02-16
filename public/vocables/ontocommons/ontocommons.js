@@ -1,3 +1,4 @@
+var Config = {};
 var Ontocommons = (function () {
     var self = {};
     var apiKey = "019adb70-1d64-41b7-8f6e-8f7e5eb54942";
@@ -72,7 +73,7 @@ var Ontocommons = (function () {
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-                $("#slsv_iframe").attr("src", window.location.origin + "/vocables/");
+                $("#slsv_iframe").attr("src", window.location.origin + "/vocables/?sourcesFile=ontocommonsSources.json&tool=lineage&source=" + ontologyId);
             },
             error(err) {
                 alert(err.responseText);
@@ -81,6 +82,7 @@ var Ontocommons = (function () {
     };
 
     self.loadSourceInSlsv = function (source) {
+        return;
         self.currentSource = source;
         var slsv = $("#slsv_iframe")[0].contentWindow;
         slsv.MainController.currentTool = "lineage";

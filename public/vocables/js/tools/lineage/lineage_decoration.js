@@ -85,6 +85,7 @@ var Lineage_decoration = (function () {
             self.currentTopOntologyClassesMap = result.classesMap;
             var countColors = 0;
             for (var topClass in self.currentTopOntologyClassesMap) {
+                if (!self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology]) return callback(null, []);
                 var color = null;
                 if (self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][topClass]) {
                     //predifined color
@@ -234,6 +235,7 @@ var Lineage_decoration = (function () {
     };
 
     self.colorGraphNodesByType = function (visjsNodes) {
+        self.incomingQuery = Sparql_proxy.currentQuery;
         if (!Lineage_sources.activeSource) {
             return;
         }
@@ -385,10 +387,6 @@ var Lineage_decoration = (function () {
                         if (obj) {
                             newNodes.push({ id: nodeId, color: obj.color, legendType: obj.type });
                         }
-
-                        /*
-var source2 = nodesTypesMap[node.data.id].graphUri ? Sparql_common.getSourceFromGraphUri(nodesTypesMap[node.data.id].graphUri) : source;
-if (source2) node.data.source = source2;*/
                     }
 
                     for (var individualId in individualNodes) {
@@ -407,6 +405,7 @@ if (source2) node.data.source = source2;*/
                 },
                 function (callbackSeries) {
                     self.drawLegend();
+                    Sparql_proxy.currentQuery = self.incomingQuery;
                     callbackSeries();
                 },
             ],

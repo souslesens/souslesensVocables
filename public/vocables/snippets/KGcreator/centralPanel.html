@@ -40,14 +40,20 @@
             </div>
             <div class="KGcreator_tripleDiv">
                 Object
-                <select id="KGcreator_objectSelect" onchange="KGcreator.onTripleModelSelect('o',$(this).val())"></select>
+                <div>Usual objs.<select id="KGcreator_objectUpperOntSelect" style="width: 150px" onchange="KGcreator.onTripleModelSelect('o',$(this).val())"></select></div>
+                <div>
+                    or <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.fillObjectOptionsFromPrompt('owl:Class','KGcreator_objectSelect')">Search...</button>
+                    <select id="KGcreator_objectSelect" style="width: 150px" onchange="KGcreator.onTripleModelSelect('o',$(this).val())"></select>
+                </div>
+
                 <input id="KGcreator_objectInput" class="KGcreator_tripleInput" />
-                <div>is String<input type="checkbox" id="KGcreator_isObjectStringCBX" /> <br />lookup name<input id="KGcreator_objectLookupName" /></div>
+                <div>
+                    is String<input type="checkbox" id="KGcreator_isObjectStringCBX" /> <br />lookup name<input id="KGcreator_objectLookupName" />
+                    <button onclick="KGcreator.addTripleToTA()">Add</button>
+                </div>
             </div>
 
-            <div>
-                <button onclick="KGcreator.addTripleToTA()">Add</button>
-            </div>
+            <div></div>
         </div>
 
         <div style="width: 100%; display: flex; flex-direction: column; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">

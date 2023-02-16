@@ -72,23 +72,37 @@ var common = (function () {
         loadJsTree: function (jstreeDiv, jstreeData, options, callback) {
             var jstreeData2 = [];
             jstreeData.forEach(function (item) {
-                if (item.parent != item.id) jstreeData2.push(item);
+                if (item.parent != item.id) {
+                    jstreeData2.push(item);
+                }
             });
             jstreeData = jstreeData2;
 
-            if (!options) options = {};
+            if (!options) {
+                options = {};
+            }
 
             var plugins = [];
-            if (!options.cascade) options.cascade = "xxx";
-            if (options.selectDescendants) options.cascade = "down";
-            if (options.withCheckboxes) plugins.push("checkbox");
-            if (options.searchPlugin) plugins.push("search");
+            if (!options.cascade) {
+                options.cascade = "xxx";
+            }
+            if (options.selectDescendants) {
+                options.cascade = "down";
+            }
+            if (options.withCheckboxes) {
+                plugins.push("checkbox");
+            }
+            if (options.searchPlugin) {
+                plugins.push("search");
+            }
 
             if (options.contextMenu) {
                 // $(".jstree-contextmenu").css("z-index",100)
                 plugins.push("contextmenu");
             }
-            if (options.dnd) plugins.push("dnd");
+            if (options.dnd) {
+                plugins.push("dnd");
+            }
             plugins.push("types");
 
             var check_callbackFn = function (op, node, parent, position, more) {
@@ -99,7 +113,9 @@ var common = (function () {
                 }
             };
 
-            if ($("#" + jstreeDiv).jstree) $("#" + jstreeDiv).jstree("destroy");
+            if ($("#" + jstreeDiv).jstree) {
+                $("#" + jstreeDiv).jstree("destroy");
+            }
             $("#" + jstreeDiv)
                 .jstree({
                     /* "checkbox": {
@@ -122,18 +138,25 @@ var common = (function () {
                 })
                 .on("loaded.jstree", function () {
                     //  setTimeout(function () {
-                    if (options.openAll)
+                    if (options.openAll) {
                         $("#" + jstreeDiv)
                             .jstree(true)
                             .open_all();
+                    }
 
                     self.jstree.setTreeAppearance();
-                    if (!options.doNotAdjustDimensions) common.jstree.setTreeParentDivDimensions(jstreeDiv);
-                    if (callback) callback();
+                    if (!options.doNotAdjustDimensions) {
+                        common.jstree.setTreeParentDivDimensions(jstreeDiv);
+                    }
+                    if (callback) {
+                        callback();
+                    }
                     //   }, 500)
                 })
                 .on("select_node.jstree", function (evt, obj) {
-                    if (options.selectTreeNodeFn) options.selectTreeNodeFn(evt, obj);
+                    if (options.selectTreeNodeFn) {
+                        options.selectTreeNodeFn(evt, obj);
+                    }
                 })
                 .on("open_node.jstree", function (evt, obj) {
                     self.jstree.setTreeAppearance();
@@ -182,7 +205,9 @@ var common = (function () {
                     }
                 })
                 .on("show_contextmenu", function (node, x, y) {
-                    if (options.onShowContextMenu) options.onShowContextMenu(node, x, y);
+                    if (options.onShowContextMenu) {
+                        options.onShowContextMenu(node, x, y);
+                    }
                 });
 
             if (options.dnd) {
@@ -216,34 +241,48 @@ var common = (function () {
         },
 
         addNodesToJstree: function (jstreeDiv, parentNodeId_, jstreeData, options) {
-            if (!options) options = {};
+            if (!options) {
+                options = {};
+            }
             var position = "first";
-            if (options.positionLast) position = "last";
+            if (options.positionLast) {
+                position = "last";
+            }
             jstreeData.forEach(function (node) {
                 var parentNodeId = parentNodeId_;
 
-                if (!parentNodeId_) parentNodeId = node.parent;
+                if (!parentNodeId_) {
+                    parentNodeId = node.parent;
+                }
 
-                if (!parentNodeId) return;
+                if (!parentNodeId) {
+                    return;
+                }
 
-                if (parentNodeId == node.id) return console.error("  Error jstree parent == childNode : " + parentNodeId);
+                if (parentNodeId == node.id) {
+                    return console.error("  Error jstree parent == childNode : " + parentNodeId);
+                }
 
+                var parentNodeObj = $("#" + jstreeDiv)
+                    .jstree(true)
+                    .get_node(parentNodeId);
+                if (parentNodeObj.children.indexOf(node) > -1) {
+                    return;
+                }
                 $("#" + jstreeDiv)
                     .jstree(true)
                     .create_node(parentNodeId, node, position, function () {
                         self.jstree.setTreeAppearance();
                         $("#" + jstreeDiv)
                             .jstree(true)
-                            .open_node(parentNodeId_, null, 500);
+                            .open_node(parentNodeId, null, 500);
                     });
             });
-            setTimeout(function () {
-                /*
-            self.jstree.setTreeAppearance();
-//   $("#" + jstreeDiv).jstree(true).close_node(parentNodeId);*/ $("#" + jstreeDiv)
-                    .jstree(true)
-                    .open_node(parentNodeId_, null, 500);
-            }, 500);
+            /*    setTimeout(function() {
+        $("#" + jstreeDiv)
+          .jstree(true)
+          .open_node(parentNodeId, null, 500);
+      }, 500);*/
         },
 
         deleteNode: function (jstreeDiv, nodeId) {
@@ -255,7 +294,9 @@ var common = (function () {
         deleteBranch: function (jstreeDiv, nodeId, deleteNodeItself) {
             var descendants = self.jstree.getNodeDescendants(jstreeDiv, nodeId, null, true);
             if (deleteNodeItself) {
-                if (descendants.indexOf(nodeId) < 0) descendants.push(nodeId);
+                if (descendants.indexOf(nodeId) < 0) {
+                    descendants.push(nodeId);
+                }
             } else {
                 var index = descendants.indexOf(nodeId);
                 if (index > -1) {
@@ -274,11 +315,14 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             }
         },
         getjsTreeNodes: function (jstreeDiv, IdsOnly, parentNodeId) {
-            if (!parentNodeId) parentNodeId = "#";
+            if (!parentNodeId) {
+                parentNodeId = "#";
+            }
             var idList = [];
             var jsonNodes = $("#" + jstreeDiv)
-                .jstree(true)
+                .jstree()
                 .get_json(parentNodeId, { flat: true });
+
             if (IdsOnly) {
                 jsonNodes.forEach(function (item) {
                     idList.push(item.id);
@@ -296,13 +340,17 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         },
         // get node from node.data field
         getNodeByDataField: function (jstreeDiv, property, value) {
-            if (!$("#" + jstreeDiv).jstree(true)) return null;
+            if (!$("#" + jstreeDiv).jstree(true)) {
+                return null;
+            }
             var jsonNodes = $("#" + jstreeDiv)
                 .jstree(true)
                 .get_json("#", { flat: true });
             var matchingNode = null;
             jsonNodes.forEach(function (node) {
-                if (node.data && node.data[property] == value) return (matchingNode = node);
+                if (node.data && node.data[property] == value) {
+                    return (matchingNode = node);
+                }
             });
             return matchingNode;
         },
@@ -312,15 +360,20 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             var nodeIdsMap = {};
             var currentLevel = 0;
             var recurse = function (nodeId) {
-                if (depth && currentLevel++ > depth) return;
+                if (depth && currentLevel++ > depth) {
+                    return;
+                }
 
                 var node = $("#" + jstreeDiv)
                     .jstree(true)
                     .get_node(nodeId);
                 if (!nodeIdsMap[nodeId]) {
                     nodeIdsMap[nodeId] = 1;
-                    if (onlyIds) nodes.push(node.id);
-                    else nodes.push(node);
+                    if (onlyIds) {
+                        nodes.push(node.id);
+                    } else {
+                        nodes.push(node);
+                    }
 
                     // Attempt to traverse if the node has children
                     if (node.children) {
@@ -343,25 +396,35 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
 
         setTreeParentDivDimensions: function (jstreeDiv) {
             var parentDiv = $("#" + jstreeDiv).parent();
-            if (!parentDiv)
+            if (!parentDiv) {
                 // || parentDiv.width)
                 return;
+            }
 
             var p = $("#" + jstreeDiv).offset();
-            if (p.top > 200)
+            if (p.top > 200) {
                 //in case jstreeDiv in inactive tab
                 p.top = 200;
+            }
             var h = $(window).height() - p.top - 50;
             var w;
-            if (p.left < 600) w = 380;
-            else w = 340;
+            if (p.left < 600) {
+                w = 380;
+            } else {
+                w = 340;
+            }
             // parentDiv.width(w);
 
-            if (jstreeDiv == "LineageNodesJsTreeDiv")
+            if (jstreeDiv == "LineageNodesJsTreeDiv") {
                 // cannot do it generic !!!!!
                 parentDiv.height(h);
-            if (jstreeDiv == "Lineage_propertiesTree") parentDiv.height(h);
-            if (jstreeDiv == "Blender_conceptTreeDiv") parentDiv.height(h);
+            }
+            if (jstreeDiv == "Lineage_propertiesTree") {
+                parentDiv.height(h);
+            }
+            if (jstreeDiv == "Blender_conceptTreeDiv") {
+                parentDiv.height(h);
+            }
 
             parentDiv.css("overflow", "auto");
             parentDiv.css("margin-top", "5px");
@@ -407,6 +470,54 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                 })
             );
         }
+
+        // manage long data in select options
+        if (data.length > Config.maxSelectListSize) {
+            $("#" + selectId).attr("data-classes", JSON.stringify(data));
+
+            $("#" + selectId).html(
+                $("<option>", {
+                    text: "",
+                    value: "",
+                })
+            );
+            $("#" + selectId).append(
+                $("<option>", {
+                    text: "search value...",
+                    value: "_search",
+                })
+            );
+            $("#" + selectId).bind("click", function (event) {
+                var value = $(this).val();
+                if (!value) {
+                    return;
+                }
+                var optionText = event.currentTarget.outerText;
+
+                if (value == "_search") {
+                    event.preventDefault();
+                    var str = prompt(" enter label ...");
+                    if (!str) {
+                        return;
+                    }
+                    str = str.toLowerCase();
+                    var data = JSON.parse($("#" + selectId).attr("data-classes"));
+
+                    var filteredData = [{ [valueField]: "_search", [textfield]: "search value..." }];
+                    data.forEach(function (item) {
+                        if (item.label && item.label.toLowerCase().indexOf(str) > -1) {
+                            filteredData.push(item);
+                        }
+                    });
+                    if (filteredData.length > Config.maxSelectListSize) {
+                        return alert("to many result, be more specific");
+                    }
+                    self.fillSelectOptions(selectId, filteredData, withBlanckOption, textfield, valueField, selectedValue);
+                }
+            });
+            return;
+        }
+
         if (Array.isArray(data)) {
             data.forEach(function (item, _index) {
                 var text, value;
@@ -423,7 +534,9 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                     value = item;
                 }
                 var selected;
-                if (selectedValue && value == selectedValue) selected = "selected";
+                if (selectedValue && value == selectedValue) {
+                    selected = "selected";
+                }
                 $("#" + selectId).append(
                     $("<option>", {
                         text: text,
@@ -450,7 +563,9 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         Object.keys(Config.sources)
             .sort()
             .forEach(function (item) {
-                if (!type || Config.sources[item].schemaType.indexOf(type) > -1) sources.push(item);
+                if (!type || Config.sources[item].schemaType.indexOf(type) > -1) {
+                    sources.push(item);
+                }
             });
         return sources;
     };
@@ -479,7 +594,9 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                     value = item;
                 } else {
                     value = item[key];
-                    if (value && value.value) value = value.value;
+                    if (value && value.value) {
+                        value = value.value;
+                    }
                 }
                 if (!distinctValues[value]) {
                     distinctValues[value] = 1;
@@ -499,12 +616,20 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                     valueB = b;
                 } else {
                     valueA = a[key];
-                    if (valueA && valueA.value) valueA = valueA.value;
+                    if (valueA && valueA.value) {
+                        valueA = valueA.value;
+                    }
                     valueB = b[key];
-                    if (valueB && valueB.value) valueB = valueB.value;
+                    if (valueB && valueB.value) {
+                        valueB = valueB.value;
+                    }
                 }
-                if (valueA > valueB) return x;
-                if (valueA < valueB) return -x;
+                if (valueA > valueB) {
+                    return x;
+                }
+                if (valueA < valueB) {
+                    return -x;
+                }
                 return 0;
             });
             return array;
@@ -519,8 +644,12 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             array.sort(function (a, b) {
                 var aValue = a[field] ? a[field] : "";
                 var bValue = b[field] ? b[field] : "";
-                if (aValue > bValue) return 1;
-                if (aValue < bValue) return -1;
+                if (aValue > bValue) {
+                    return 1;
+                }
+                if (aValue < bValue) {
+                    return -1;
+                }
                 return 0;
             });
             return array;
@@ -576,18 +705,25 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                     refuse = item == addedItem;
                 }
             });
-            if (!refuse) filteredArray.push(addedItem);
+            if (!refuse) {
+                filteredArray.push(addedItem);
+            }
         });
         return filteredArray;
     };
 
     self.removeDuplicatesFromArray = function (array, key, uniques) {
-        if (!uniques) uniques = [];
+        if (!uniques) {
+            uniques = [];
+        }
         var cleanedArray = [];
         array.forEach(function (item) {
             var value;
-            if (key) value = item[key];
-            else value = item;
+            if (key) {
+                value = item[key];
+            } else {
+                value = item;
+            }
             if (!uniques[value]) {
                 uniques[value] = 1;
                 cleanedArray.push(item);
@@ -596,10 +732,16 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         return cleanedArray;
     };
     self.formatStringForTriple = function (str, forUri) {
-        if (!str) return str;
+        if (!str) {
+            return str;
+        }
         str = str.trim();
-        if (str.indexOf("http://") == 0) return str;
-        if (!str || !str.replace) return null;
+        if (str.indexOf("http://") == 0) {
+            return str;
+        }
+        if (!str || !str.replace) {
+            return null;
+        }
         str = str.trim();
         str = str.replace(/\\/gm, "");
         str = str.replace(/"/gm, '\\"');
@@ -666,9 +808,13 @@ str = str.replace(/%2F/gm, "/");*/
     };
 
     self.decapitalizeLabel = function (label) {
-        if (!label.match(/[a-z]/)) return label;
+        if (!label.match(/[a-z]/)) {
+            return label;
+        }
         var altLabel = label.replace(/[A-Z]/g, function (maj) {
-            if (label.indexOf(" ") > -1) return "" + maj;
+            if (label.indexOf(" ") > -1) {
+                return "" + maj;
+            }
             return " " + maj;
         });
         return altLabel.trim();
@@ -686,28 +832,42 @@ str = str.replace(/%2F/gm, "/");*/
     };
 
     self.getItemLabel = function (item, varName, _lang) {
-        if (item[varName + "Label"]) return item[varName + "Label"].value;
-        else {
+        if (item[varName + "Label"]) {
+            return item[varName + "Label"].value;
+        } else {
             var p = item[varName].value.lastIndexOf("#");
-            if (p < 0) p = item[varName].value.lastIndexOf("/");
+            if (p < 0) {
+                p = item[varName].value.lastIndexOf("/");
+            }
             return item[varName].value.substring(p + 1);
         }
     };
     self.getUriLabel = function (uri) {
         var p = uri.lastIndexOf("#");
-        if (p < 0) p = uri.lastIndexOf("/");
-        if (p > -1) return uri.substring(p + 1);
-        else return uri;
+        if (p < 0) {
+            p = uri.lastIndexOf("/");
+        }
+        if (p > -1) {
+            return uri.substring(p + 1);
+        } else {
+            return uri;
+        }
     };
     self.getNewUri = function (sourceLabel, length) {
-        if (!length) length = 10;
+        if (!length) {
+            length = 10;
+        }
         var sourceUri = Config.sources[sourceLabel].graphUri;
-        if (sourceUri.lastIndexOf("/") != sourceUri.length - 1) sourceUri += "/";
+        if (sourceUri.lastIndexOf("/") != sourceUri.length - 1) {
+            sourceUri += "/";
+        }
         var nodeId = sourceUri + common.getRandomHexaId(length);
         return nodeId;
     };
     self.getNewId = function (prefix, length) {
-        if (!length) length = 10;
+        if (!length) {
+            length = 10;
+        }
         return prefix + common.getRandomHexaId(length);
     };
 
@@ -719,10 +879,14 @@ str = str.replace(/%2F/gm, "/");*/
                     navigator.clipboard.writeText(text);
                     if (callback) {
                         return callback(null, "graph copied in clipboard");
-                    } else return alert("graph copied in clipboard");
+                    } else {
+                        return alert("graph copied in clipboard");
+                    }
                 } catch (err) {
                     MainController.UI.message("graph copy failed");
-                    if (callback) return callback(err);
+                    if (callback) {
+                        return callback(err);
+                    }
                 }
             } else {
                 // text area method
@@ -741,10 +905,14 @@ str = str.replace(/%2F/gm, "/");*/
                     if (ok) {
                         if (callback) {
                             return callback(null, "graph copied in clipboard");
-                        } else return alert("graph copied in clipboard");
+                        } else {
+                            return alert("graph copied in clipboard");
+                        }
                     } else {
                         MainController.UI.message("graph copy failed");
-                        if (callback) return callback(err);
+                        if (callback) {
+                            return callback(err);
+                        }
                     }
                     textArea.remove();
                 });
@@ -754,7 +922,7 @@ str = str.replace(/%2F/gm, "/");*/
 await navigator.clipboard.writeText(text);
 
 if (callback) {
-    return callback(null, "graph copied in clipboard");
+return callback(null, "graph copied in clipboard");
 } else return alert("graph copied in clipboard");
 } catch (err) {
 MainController.UI.message("graph copy failed");
@@ -840,23 +1008,42 @@ if (callback) return callback(err);
     };
 
     self.deconcatSQLTableColumn = function (str, removeSchema) {
-        if (str.indexOf(":") > -1) return null;
+        if (str.indexOf(":") > -1) {
+            return null;
+        }
         var array = str.split(".");
-        if (array.length < 2) return null;
+        if (array.length < 2) {
+            return null;
+        }
         if (array.length == 2) {
             return { table: array[0], column: array[1] };
         } else if (array.length == 3) {
-            if (!removeSchema) return { table: array[0] + "." + array[1], column: array[2] };
-            else return { table: array[1], column: array[2] };
-        } else return null;
+            if (!removeSchema) {
+                return { table: array[0] + "." + array[1], column: array[2] };
+            } else {
+                return { table: array[1], column: array[2] };
+            }
+        } else {
+            return null;
+        }
     };
 
     (self.convertNumStringToNumber = function (value) {
-        if (value.match && value.match(/.*[a-zA-Z/\\$].*/)) return value;
-        if (self.isInt(value)) return parseInt(value);
-        if (self.isFloat(value)) return parseFloat(value);
-        if (value == "true") return true;
-        if (value == "false") return false;
+        if (value.match && value.match(/.*[a-zA-Z/\\$].*/)) {
+            return value;
+        }
+        if (self.isInt(value)) {
+            return parseInt(value);
+        }
+        if (self.isFloat(value)) {
+            return parseFloat(value);
+        }
+        if (value == "true") {
+            return true;
+        }
+        if (value == "false") {
+            return false;
+        }
         return value;
     }),
         (self.dateToSQlserverString = function (date) {
@@ -864,11 +1051,17 @@ if (callback) return callback(err);
             var dateArray = date.toLocaleString("en-US").split(" ");
             if (date instanceof Date && isFinite(date)) {
                 var month = "" + (date.getMonth() + 1);
-                if (month.length == 1) month = "0" + month;
+                if (month.length == 1) {
+                    month = "0" + month;
+                }
                 var day = "" + date.getDate();
-                if (day.length == 1) day = "0" + day;
+                if (day.length == 1) {
+                    day = "0" + day;
+                }
                 str = date.getFullYear() + "" + month + "" + day + " " + dateArray[1] + " " + dateArray[2];
-            } else str = "";
+            } else {
+                str = "";
+            }
             return str;
         });
 
@@ -878,17 +1071,29 @@ if (callback) return callback(err);
         var str = "";
         if (date instanceof Date && isFinite(date)) {
             var month = "" + (date.getMonth() + 1);
-            if (month.length == 1) month = "0" + month;
+            if (month.length == 1) {
+                month = "0" + month;
+            }
             var day = "" + date.getDate();
-            if (day.length == 1) day = "0" + day;
+            if (day.length == 1) {
+                day = "0" + day;
+            }
             var hour = "" + date.getHours();
-            if (day.hour == 1) hour = "0" + hour;
+            if (day.hour == 1) {
+                hour = "0" + hour;
+            }
             var min = "" + date.getMinutes();
-            if (min.length == 1) min = "0" + min;
+            if (min.length == 1) {
+                min = "0" + min;
+            }
             var sec = "" + date.getSeconds();
-            if (sec.length == 1) sec = "0" + sec;
+            if (sec.length == 1) {
+                sec = "0" + sec;
+            }
             str = date.getFullYear() + "-" + month + "-" + day + "T" + hour + ":" + min + ":" + sec;
-        } else str = "";
+        } else {
+            str = "";
+        }
         return str;
     };
 
@@ -974,12 +1179,20 @@ if (callback) return callback(err);
     };
 
     self.colorToRgba = function (hex, alpha) {
-        if (!alpha) alpha = 1;
+        if (!alpha) {
+            alpha = 1;
+        }
 
-        if (alpha > 1) alpha = 1;
-        if (alpha < 0) alpha = 0;
+        if (alpha > 1) {
+            alpha = 1;
+        }
+        if (alpha < 0) {
+            alpha = 0;
+        }
         var c;
-        if (!hex) return;
+        if (!hex) {
+            return;
+        }
         if (hex.indexOf("rgba") == 0) {
             return hex.replace(/,\d(\.\d)*\)/, "," + alpha + ")");
         }
@@ -1025,6 +1238,23 @@ if (callback) return callback(err);
         console.debug();
         var xx = console.trace();
         var stack = new Error().stack;
+    };
+
+    self.getUrlParamsMap = function () {
+        var paramsMap = {};
+        var paramsStr = window.location.search.substring(1);
+        var params = paramsStr.split("&");
+        params.forEach(function (param) {
+            var array = param.split("=");
+
+            paramsMap[array[0]] = array[1];
+        });
+        return paramsMap;
+    };
+
+    self.setDatePickerOnInput = function (inputId, options) {
+        $("#" + inputId).datepicker({});
+        $("#" + inputId).datepicker("option", "dateFormat", "yy-mm-dd");
     };
 
     return self;

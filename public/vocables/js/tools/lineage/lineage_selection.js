@@ -108,7 +108,8 @@ var Lineage_selection = (function () {
     self.filterBy = {
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_filterBy.html", function () {
-                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function (err, result) {
+                return;
+                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, { withoutSourceObjects: 1 }, function (err, result) {
                     if (err) return alert(err.responseText);
                     common.fillSelectOptions("Lineage_filterBy_propertySelect", result.predicates, true, "label", "id");
                 });
@@ -404,6 +405,7 @@ var Lineage_selection = (function () {
     self.decorate = {
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_decorateDialog.html", function () {
+                $("#lineage_selection_decorate_applyButton").bind("click", Lineage_selection.decorate);
                 var colors = common.paletteIntense;
                 var array = [];
                 colors.forEach(function (color) {
@@ -447,8 +449,10 @@ var Lineage_selection = (function () {
     self.modifyPredicates = {
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_modifyPredicates.html", function () {
-                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, function (err, result) {
+                return;
+                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, { withoutSourceObjects: 1 }, function (err, result) {
                     if (err) return alert(err.responseText);
+
                     common.fillSelectOptions("lineage_selection_modifyPredicate_propertySelect", result.predicates, true, "label", "id");
                     common.fillSelectOptions("lineage_selection_modifyPredicate_objectSelect", result.objectClasses, true, "label", "id");
                 });

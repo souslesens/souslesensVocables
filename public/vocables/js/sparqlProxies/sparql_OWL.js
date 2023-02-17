@@ -663,6 +663,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
             selectStr = options.distinct;
         }
 
+
         query += " select distinct " + selectStr + " " + fromStr + "  WHERE {";
 
         if (!Config.sources[sourceLabel].graphUri) {
@@ -1630,6 +1631,64 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
             }
         );
     };
+    self.getTriples = function (sourceLabel,  options, callback) {
+
+        if (!options) {
+            options = {};
+        }
+
+        var fromStr =
+            fromStr = Sparql_common.getFromStr(sourceLabel);
+
+        var selectStr="*";
+        if(options.selectVars)
+            selectStr=options.selectVars
+
+              var query =
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                "SELECT   " +selectStr+" "+fromStr +
+                " WHERE { ?s ?p ?o.";
+          if(options.filter)
+              query +=options.filter
+
+              query += "}"
+             if(options.orderBy)
+                 query +=" ORDER BY "+options.orderBy
+                   query +=" LIMIT 10000";
+
+              var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+              Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+                  if (err) {
+                      return callback(err);
+                  }
+                  allResults=_result.results.bindings;
+                  callback(null,allResults);
+              });
+
+    };
+
+
+    self.getStoredQueries = function (source,scope,options, callback) {
+
+        if (!options) {
+            options = {};
+        }
+        var fromStr=Sparql_common.getFromStr(source)
+
+        var query ="PREFIX slsv:<"+Config.storedQueries_graphUri+"> \nselect * "+fromStr+" where {?s ?p ?o.?s slsv:hasScope \""+scope+"\"}order by ?label"
+
+              var url = Config.default_sparql_url + "?format=json&query=";
+              Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, _result) {
+                  if (err) {
+                      return callback(err);
+                  }
+                return calback(null, _result.results.bindings);
+
+              });
+    };
+
 
     self.generateOWL = function (sourceLabel, options, callback) {
         var graphUri = Config.sources[sourceLabel].graphUri;

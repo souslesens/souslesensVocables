@@ -18,6 +18,7 @@ var Config = (function () {
 
     self.defaultNewUriRoot = "http://souslesens.org/resource/";
     self.linkedData_mappings_graphUri = "http://souslesens.org/resource/linkedData_mappings/";
+    self.storedQueries_graphUri = "http://souslesens.org/resource/stored-queries/";
     self.styles_graphUri = "http://souslesens.org/resource/styles/";
     self.loginMode = "json";
 

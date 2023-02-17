@@ -8,6 +8,22 @@
         flex-direction: column;
     }
 </style>
+<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#lineageQuery_storedQueries').css('display','block')">Stored Queries...</button>
+<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="$('#lineageQuery_storedQueries').css('display','none')">X</button>
+<div id="lineageQuery_storedQueries" style="display: none;width:100%;height:200px" >
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.storedQueries.listQueries()">load</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.storedQueries.deleteQuery()">delete</button>
+    <select id="lineageQuery_storedQueries_scope">
+        <option>personal</option>
+        <option>public</option>
+    </select>
+    <br>
+    <select id="lineageQuery_storedQueries_queriesSelect" style="width: 90%" size="10" onclick="Lineage_query.storedQueries.loadQuery($(this).val())"></select>
+
+
+
+
+</div>
 
 <div style="display: flex; flex-direction: column">
    <!-- <div style="display: flex; flex-direction: row; justify-content: space-evenly" class="lineageQuery_div">
@@ -30,7 +46,7 @@
     <div class="lineageQuery_div">
         Predicate
         <select id="lineageQuery_predicateSelect" onchange="Lineage_query.onSelectType('predicate',$(this).val())"></select>
-        &nbsp;<select id="lineageQuery_predicateUriSelect" style="display: none; width: 200px" ></select>
+        &nbsp;<select id="lineageQuery_predicateUriSelect"  onchange="Lineage_query.onSelectType('predicateUri',$(this).val())" style="display: none; width: 200px" ></select>
         <div id="lineageQuery_inversePredicateDiv" style="display: none; ">
              <input type="checkbox" id="lineageQuery_inversePredicateCBX">inverse predicate
         </div>
@@ -88,6 +104,8 @@
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('csv')">CSV</button>
 
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('copyQuery')">Copy Query</button>
+
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.storedQueries.saveCurrentQuery()">Save </button>
 <div  class="messagediv">
     <tbody><tr>
         <td><img src="./images/waitAnimated.gif" id="LineageQuery_waitImg" style="display: none; width: 15px; text-align: justify;"></td>

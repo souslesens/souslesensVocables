@@ -25,10 +25,12 @@ jobs:
               run: |
                   sudo apt-get update
                   sudo apt install -y docker-compose
-            - name: Deploy containers & load data
+            - name: Deploy containers
               run: |
                   sudo docker-compose -f docker-compose.test.yaml up -d
                   sleep 1m
+            - name: Load data
+              run: |
                   bash tests/load_data.sh
                   sleep 30s
             - name: Build mainapp

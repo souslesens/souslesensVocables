@@ -31,7 +31,7 @@ jobs:
                   sleep 1m
             - name: Load data
               run: |
-                  bash tests/load_data.sh
+                  sudo bash tests/load_data.sh
                   sleep 30s
             - name: Build mainapp
               working-directory: ./mainapp

@@ -11,9 +11,8 @@ env:
 
 jobs:
     cypress-run:
-        runs-on: self-hosted
+        runs-on: sirius
         timeout-minutes: 10
-        if: ${{ false }}
 
         steps:
             - name: Checkout
@@ -58,9 +57,8 @@ jobs:
                       cypress/e2e/SQLquery.cy.js
                   runTests: true
     cleanup:
-        runs-on: self-hosted
+        runs-on: sirius
         needs: cypress-run
-        if: ${{ false }}
         steps:
             - name: Cleanup
               run: sudo docker-compose -f docker-compose.test.yaml down

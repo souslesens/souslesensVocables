@@ -1432,7 +1432,8 @@ defaultLang = 'en';*/
                 var str = "<b>TypeOf </b><br><table>";
 
                 data.forEach(function (item) {
-                    var targetClassStr = "<span class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.value.value + "\")'>" + item.valueLabel.value + "</span>";
+                  var label=item.valueLabel?item.valueLabel.value:  Sparql_common.getLabelFromURI(item.value.value)
+                    var targetClassStr = "<span class='detailsCellValue' onclick=' SourceBrowser.onClickLink(\"" + item.value.value + "\")'>" + label + "</span>";
                     str += "<tr><td>" + targetClassStr + "</td></tr>";
                 });
                 str += "</table>";

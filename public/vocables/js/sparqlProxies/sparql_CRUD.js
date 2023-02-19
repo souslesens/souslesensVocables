@@ -1,0 +1,169 @@
+var Sparql_CRUD = (function() {
+  var self = {};
+
+  self.contentPredicate = "hasContent";
+  self.scopePredicate = "hasScope";
+  self.sourcePredicate = "hasSource";
+
+  self.initCRUDsource = function(CRUDsource) {
+    self.currentSourceLabel = CRUDsource;
+    self.currentSourceObj = Config.CRUDsources[CRUDsource];
+
+    if (!self.currentSourceObj) {
+      return alert("CRUD source " + CRUDsource + " is not registered");
+    }
+    Config.sources[CRUDsource] = self.currentSourceObj;
+  };
+
+  self.showDialog = function(CRUDsource, target, source, scope, loadItemCallback) {
+    self.loadItemCallback = loadItemCallback;
+
+    if (target.indexOf("Dialog") > -1) {
+      $("#" + target).dialog("open");
+    }
+    $("#" + target).load("snippets/sparql_CRUD.html", function() {
+      if (source) {
+        self.list(CRUDsource, source, scope);
+      }
+    });
+
+
+  };
+
+  self.list = function(CRUDsource, dataSource, scope, target) {
+    CRUDsource =CRUDsource ||  self.currentSourceLabel;
+    self.initCRUDsource(CRUDsource);
+    if (!target) {
+      target = "sparql_CRUD_itemsSelect";
+    }
+    if (!scope) {
+      scope = $("#sparql_CRUD_scope").val();
+    }
+    if (scope == "private") {
+      scope = authentication.currentUser.login;
+    }
+    if (!dataSource) {
+      dataSource = Lineage_sources.activeSource;
+    }
+    var filter = "";
+    if (scope) {
+      filter += "?s <" + self.currentSourceObj.graphUri + self.scopePredicate + "> '" + scope + "'.";
+    }
+    filter += "?s <" + self.currentSourceObj.graphUri + self.sourcePredicate + "> '" + dataSource + "'.";
+    filter += "?s rdfs:label ?o";
+    var options = {
+      selectVars: "distinct ?s ?o",
+      filter: filter,
+      orderBy: "?o"
+    };
+    Sparql_OWL.getTriples(CRUDsource, options, function(err, result) {
+      if (err) {
+        return alert(err.responseText);
+      }
+      var data = [];
+      result.forEach(function(item) {
+        data.push({ label: item.o.value, id: item.s.value });
+      });
+      common.fillSelectOptions(target, data, false, "label", "id");
+    });
+
+  };
+
+  self.loadItem = function(uri, options) {
+    var filter = "FILTER (?s =<" + uri + ">) ";
+    var options = {
+      filter: filter
+    };
+    Sparql_OWL.getTriples(self.currentSourceLabel, options, function(err, result) {
+
+      if (err) {
+        return self.loadItemCallback(err.responseText);
+      }
+      if (false && !options.content) {
+        return self.loadItemCallback(null, result);
+      }
+
+      var contentPredicate = self.currentSourceObj.graphUri + self.contentPredicate;
+
+      result.forEach(function(triple) {
+        var predicate = triple.p.value;
+        if (predicate == contentPredicate) {
+          var content = JSON.parse(atob(triple.o.value));
+          return self.loadItemCallback(null, content);
+        }
+      });
+    });
+  };
+  self.save = function(CRUDsource, dataSource, data, scope) {
+    self.initCRUDsource(CRUDsource);
+    var triples = [];
+
+
+    var label = prompt("query name");
+    if (!label) {
+      return;
+    }
+    if (!scope) {
+      scope = $("#sparql_CRUD_scope").val();
+    }
+    if (!dataSource) {
+      dataSource = Lineage_sources.activeSource;
+    }
+
+    if (!confirm("save query " + label + "with scope " + scope + " in source " + CRUDsource + " ?")) {
+      return;
+    }
+
+    if (scope == "private") {
+      scope = authentication.currentUser.login;
+    }
+    var queryUri = self.currentSourceObj.graphUri + common.getRandomHexaId(10);
+    var content64 = btoa(JSON.stringify(data));
+    triples.push({
+      subject: queryUri,
+      predicate: "rdfs:label",
+      object: label
+    });
+    triples.push({
+      subject: queryUri,
+      predicate: "rdf:type",
+      object: "slsv:" + self.currentSourceObj.type
+    });
+    triples.push({
+      subject: queryUri,
+      predicate: "slsv:" + self.contentPredicate,
+      object: content64
+
+    });
+    triples.push({
+      subject: queryUri,
+      predicate: "slsv:" + self.sourcePredicate,
+      object: dataSource
+
+    });
+    triples.push({
+      subject: queryUri,
+      predicate: "slsv:" + self.scopePredicate,
+      object: scope
+    });
+    triples = triples.concat(Lineage_blend.getCommonMetaDataTriples(queryUri, self.currentSourceLabel));
+    var options = {
+      sparqlPrefixes: { "slsv": self.currentSourceObj.graphUri }
+    };
+    Sparql_generic.insertTriples(CRUDsource, triples, options, function(err, result) {
+      if (err) {
+        return alert(err.responseText);
+      }
+      $("#sparql_CRUD_itemsSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
+
+
+    });
+
+
+  };
+
+
+  return self;
+
+
+})();

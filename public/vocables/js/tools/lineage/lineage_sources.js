@@ -40,7 +40,7 @@ Lineage_sources = (function () {
 
     self.resetAll = function () {
         self.init();
-        self.showSourcesDialog();
+        self.showSourcesDialog(true);
     };
 
     self.resetVisjsGraph = function () {
@@ -48,8 +48,8 @@ Lineage_sources = (function () {
         Lineage_classes.drawNewGraph({ nodes: [], edges: [] });
     };
 
-    self.showSourcesDialog = function () {
-        if (Config.tools["lineage"].urlParam_source) {
+    self.showSourcesDialog = function (forceDialog) {
+        if (!forceDialog && Config.tools["lineage"].urlParam_source) {
             return self.loadSources(Config.tools["lineage"].urlParam_source);
         }
 

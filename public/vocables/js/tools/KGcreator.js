@@ -162,10 +162,14 @@ var KGcreator = (function() {
     self.currentSlsvSource = source;
     $("#KGcreator_topLevelOntologiesInput").html(Config.currentTopLevelOntology);
     self.topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
+    self.initModel(source, function(err, result){
+      if(err)
+        return alert(err.responseText)
+      if (callback) {
+        callback(err);
+      }
+    })
 
-    if (callback) {
-      callback(null);
-    }
   };
   self.onChangeSourceTypeSelect = function(sourceType, callback) {
     self.currentSourceType = sourceType;
@@ -938,47 +942,52 @@ self.saveMappings({classId:classId})
     if (!options) {
       options = {};
     }
+    self.checkModel(self.currentSource, self.currentJsonObject, function(err, result) {
+      if (err)
+        return alert(err)
+      MainController.UI.message("Mapping conssitant with model")
 
-    self.currentJsonObject = data;
+      self.currentJsonObject = data;
 
-    var payload = {};
-    if (self.currentDataSourceModel) {
-      self.currentCsvDir = self.currentdabase.dbName;
+      var payload = {};
+      if (self.currentDataSourceModel) {
+        self.currentCsvDir = self.currentdabase.dbName;
 
-      self.currentJsonObject.databaseSource = self.currentdabase;
+        self.currentJsonObject.databaseSource = self.currentdabase;
 
-      payload = {
-        dir: "CSV/" + self.currentSlsvSource,
-        fileName: self.currentdabase.dbName + "_" + self.currentJsonObject.fileName + ".json",
-        data: JSON.stringify(self.currentJsonObject)
-      };
-    }
-    else {
-      payload = {
-        dir: "CSV/" + self.currentCsvDir,
-        fileName: self.currentSource + "_" + self.currentJsonObject.fileName + ".json",
-        data: JSON.stringify(self.currentJsonObject)
-      };
-    }
-
-    $.ajax({
-      type: "POST",
-      url: `${Config.apiUrl}/data/file`,
-      data: payload,
-      dataType: "json",
-      success: function(_result, _textStatus, _jqXHR) {
-        MainController.UI.message("json saved");
-        if (callback) {
-          return callback();
-        }
-      },
-      error(err) {
-        if (callback) {
-          return callback(err);
-        }
-        return alert(err.responseText);
+        payload = {
+          dir: "CSV/" + self.currentSlsvSource,
+          fileName: self.currentdabase.dbName + "_" + self.currentJsonObject.fileName + ".json",
+          data: JSON.stringify(self.currentJsonObject)
+        };
       }
-    });
+      else {
+        payload = {
+          dir: "CSV/" + self.currentCsvDir,
+          fileName: self.currentSource + "_" + self.currentJsonObject.fileName + ".json",
+          data: JSON.stringify(self.currentJsonObject)
+        };
+      }
+
+      $.ajax({
+        type: "POST",
+        url: `${Config.apiUrl}/data/file`,
+        data: payload,
+        dataType: "json",
+        success: function(_result, _textStatus, _jqXHR) {
+          MainController.UI.message("json saved");
+          if (callback) {
+            return callback();
+          }
+        },
+        error(err) {
+          if (callback) {
+            return callback(err);
+          }
+          return alert(err.responseText);
+        }
+      });
+    })
   };
 
   self.clearMappings = function() {
@@ -1076,8 +1085,7 @@ self.saveMappings({classId:classId})
     }
   };
   self.createTriples = function(test, _options) {
-    /*  var selectedFiles = $("#KGcreator_csvTreeDiv").jstree().get_checked(true);
-if (selectedFiles.length > 0);*/
+
     MainController.UI.message("creating triples...");
     $("#KGcreator_dataSampleDiv").val("creating triples...");
     if (!self.currentJsonObject) {
@@ -1129,49 +1137,52 @@ if (selectedFiles.length > 0);*/
       options.deleteTriples = true;
     }
 
-    self.saveMappings(null, function(_err, _result) {
-      if (_err) {
-        return alert(_err);
-      }
-      $("#KGcreator_dataSampleDiv").val("");
-      var payload;
-      if (self.currentSourceType == "CSV") {
-        payload = {
-          dir: "CSV/" + self.currentCsvDir,
-          fileName: self.currentSource + "_" + self.currentJsonObject.fileName + ".json",
-          options: JSON.stringify(options)
-        };
-      }
-      else if (self.currentSourceType == "DATABASE") {
-        payload = {
-          dir: "CSV/" + self.currentSlsvSource,
-          fileName: self.currentDbName + "_" + self.currentJsonObject.fileName + ".json",
-          options: JSON.stringify(options)
-        };
-      }
 
-      $.ajax({
-        type: "POST",
-        url: `${Config.apiUrl}/kg/csv/triples`,
-        data: payload,
-        dataType: "json",
-        success: function(result, _textStatus, _jqXHR) {
-          if (test) {
-            var str = JSON.stringify(result, null, 2);
 
-            $("#KGcreator_dataSampleDiv").val(str);
-            MainController.UI.message("", true);
-          }
-          else {
-            $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
-            MainController.UI.message("triples created", true);
-          }
-        },
-        error(err) {
-          return alert(err.responseText);
+      self.saveMappings(null, function(_err, _result) {
+        if (_err) {
+          return alert(_err);
         }
-      });
-    });
+        $("#KGcreator_dataSampleDiv").val("");
+        var payload;
+        if (self.currentSourceType == "CSV") {
+          payload = {
+            dir: "CSV/" + self.currentCsvDir,
+            fileName: self.currentSource + "_" + self.currentJsonObject.fileName + ".json",
+            options: JSON.stringify(options)
+          };
+        }
+        else if (self.currentSourceType == "DATABASE") {
+          payload = {
+            dir: "CSV/" + self.currentSlsvSource,
+            fileName: self.currentDbName + "_" + self.currentJsonObject.fileName + ".json",
+            options: JSON.stringify(options)
+          };
+        }
+
+        $.ajax({
+          type: "POST",
+          url: `${Config.apiUrl}/kg/csv/triples`,
+          data: payload,
+          dataType: "json",
+          success: function(result, _textStatus, _jqXHR) {
+            if (test) {
+              var str = JSON.stringify(result, null, 2);
+
+              $("#KGcreator_dataSampleDiv").val(str);
+              MainController.UI.message("", true);
+            }
+            else {
+              $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
+              MainController.UI.message("triples created", true);
+            }
+          },
+          error(err) {
+            return alert(err.responseText);
+          }
+        });
+
+    })
   };
 
   self.indexGraph = function() {
@@ -1516,5 +1527,61 @@ if (selectedFiles.length > 0);*/
     });
   }
 
+
+
+  self.initModel=function(source,callback){
+    Sparql_OWL.getObjectRestrictions(source, null, null, function(err, result) {
+      if (err) {
+        return alert(err.responseText);
+      }
+      self.currentSourceRestrictions = {}
+      var data = []
+      result.forEach(function(item) {
+        for (var key in item) {
+          item[key] = item[key].value
+        }
+        self.currentSourceRestrictions[item.prop] = item;
+      })
+      return callback(null,self.currentSourceRestrictions)
+    })
+  }
+
+
+  /**
+   * check if prdicate are conform to restrictions defined in Lineage_classes
+   *
+   *
+   * @param source
+   * @param mappings
+   * @param callback
+   */
+  self.checkModel=function(source, mappings,callback){
+var sourceObjects={}
+
+    mappings.tripleModels.forEach(function(item){
+      if(["rdf:type","rdfs:subClassOf"].indexOf(item.p)>-1 && item.o.indexOf("http:")>0)
+        sourceObjects[item.o]=item.s
+
+    })
+
+    var errors="";
+    mappings.tripleModels.forEach(function(item){
+
+      var restriction=self.currentSourceRestrictions[item.p]
+      if(restriction){
+
+        if(sourceObjects[item.s] && sourceObjects[item.s]!=restriction.concept)
+          errors+="wrong subject for prop "+restriction.propLabel+" type "+restriction.concept+" needed\n"
+        if(sourceObjects[item.o] && sourceObjects[item.o]!=restriction.value)
+          errors+="wrong object for prop "+restriction.propLabel+" type "+restriction.value+" needed\n"
+
+
+      }
+
+
+    })
+    return  callback(null, errors)
+
+  }
   return self;
 })();

@@ -20,11 +20,6 @@ var Lineage_query = (function() {
     self.isLoaded = true;
 
 
-    Config.sources["STORED_QUERIES"] = {
-      graphUri: Config.storedQueries_graphUri,
-      sparql_server: { url: "_default" }
-    };
-
     self.operators = {
       "string": ["contains", "not contains", "="],
       "number": ["=", "!=", "<", "<=", ">", ">="]
@@ -49,6 +44,10 @@ var Lineage_query = (function() {
 
 
     $("#QueryDialog").load("snippets/lineage/queryDialog.html", function() {
+      $("#lineageQuery_tabsDiv").tabs();
+      self.storedQueries.showStoredQueriesTab();
+
+      self.queryModel.loadSourceModel();
 
       var predicates = Object.keys(self.predicatesObjectsMap);
       common.fillSelectOptions("lineageQuery_predicateSelect", predicates, true);
@@ -176,7 +175,10 @@ var Lineage_query = (function() {
     }
   };
 
-  self.reset = function() {
+  self.reset = function(subjectAlso) {
+    if (subjectAlso) {
+      $("#lineageQuery_subjectVarSelect").append(" <option value='" + varName + "'>Object" + filterIndex + "</option>");
+    }
     // $("#lineageQuery_subjectVarSelect").val("");
     $("#lineageQuery_predicateSelect").val("");
     $("#lineageQuery_predicateUriSelect").val("");
@@ -185,39 +187,44 @@ var Lineage_query = (function() {
     $("#filterBooleanOperator").val(" FILTER  EXISTS ");
     $("#lineageQuery_operator").val("contains");
     $("#lineageQuery_value").val("");
-    $("#lineageQuery_predicateUriSelect").css("display","none");
-    $("#lineageQuery_objectUriSelect").css("display","none");
+    $("#lineageQuery_predicateUriSelect").css("display", "none");
+    $("#lineageQuery_objectUriSelect").css("display", "none");
     $("#lineageQuery_inversePredicateCBX").removeProp("checked");
-    $("#lineageQuery_inversePredicateDiv").css("display","none");
+    $("#lineageQuery_inversePredicateDiv").css("display", "none");
 
   };
 
 
-  self.addFilter = function() {
-    var subjectVar = $("#lineageQuery_subjectVarSelect").val();
+  self.addFilter = function(filter) {
+    if(!filter)
+      filter={}
+
+    var subjectVar = filter.subjectVar || $("#lineageQuery_subjectVarSelect").val();
 
 
-    var predicateType = $("#lineageQuery_predicateSelect").val();
-    var predicateUri = $("#lineageQuery_predicateUriSelect").val();
-    var predicateUriLabel = $("#lineageQuery_predicateUriSelect option:selected").text();
+    var predicateType =filter.predicateType || $("#lineageQuery_predicateSelect").val();
+    var predicateUri =filter.predicateUri || $("#lineageQuery_predicateUriSelect").val();
+    var predicateUriLabel =filter.predicateUriLabel || $("#lineageQuery_predicateUriSelect option:selected").text();
 
-    var objectType = $("#lineageQuery_objectTypeSelect").val();
-    var objectUri = $("#lineageQuery_objectUriSelect").val();
-    var objectUriLabel = $("#lineageQuery_objectUriSelect option:selected").text();
+    var objectType =filter.objectType || $("#lineageQuery_objectTypeSelect").val();
+    var objectUri =filter.objectUri || $("#lineageQuery_objectUriSelect").val();
+    var objectUriLabel = filter.objectUriLabel ||$("#lineageQuery_objectUriSelect option:selected").text();
 
-    var inversePredicate = $("#lineageQuery_inversePredicateCBX").prop("checked");
+    var inversePredicate =filter.inversePredicate || $("#lineageQuery_inversePredicateCBX").prop("checked");
 
+
+    var filterBooleanOperator = filter.filterBooleanOperator ||$("#filterBooleanOperator").val();
+    var filterBooleanOperatorText = filter.filterBooleanOperatorText ||$("#lineageQuery_subjectUriSelect option:selected").text();
+
+    var operator =filter.operator || $("#lineageQuery_operator").val();
+    var value = filter.value ||$("#lineageQuery_value").val();
 
     if (!subjectVar) {
       return alert("select a subject");
     }
 
 
-    var filterBooleanOperator = $("#filterBooleanOperator").val();
-    var filterBooleanOperatorText = $("#lineageQuery_subjectUriSelect option:selected").text();
 
-    var operator = $("#lineageQuery_operator").val();
-    var value = $("#lineageQuery_value").val();
 
     if (!objectType && !objectUri && !predicateType && !predicateUri) {
       return alert(" not enough criteria ");
@@ -243,10 +250,12 @@ var Lineage_query = (function() {
 
       predicateType: predicateType,
       predicateUri: predicateUri,
+      predicateUriLabel: predicateUriLabel,
       inversePredicate: inversePredicate,
 
       objectType: objectType,
       objectUri: objectUri,
+      objectUriLabel: objectUriLabel,
 
       filterBooleanOperator: filterBooleanOperator
     };
@@ -261,10 +270,10 @@ var Lineage_query = (function() {
     if (Object.keys(self.filters).length > 0) {
       html += filterBooleanOperatorText + " ";
     }
-    html += "&nbsp;subject" + subjectVar + " " + (inversePredicate ? "^" : "") + (predicateUriLabel || predicateType || "") + " " + (objectUriLabel || valueStr || objectType) + "&nbsp;";
-
+    // html += "&nbsp;subject" + subjectVar + " " + (inversePredicate ? "^" : "") + (predicateUriLabel || predicateType || "") + " " + (objectUriLabel || valueStr || objectType) + "&nbsp;";
+    html += self.getFilterHtml(obj);
     html += "</div>";
-
+    obj.id = filterId;
     self.filters[filterId] = obj;
 
 
@@ -283,6 +292,17 @@ var Lineage_query = (function() {
     return obj;
   };
 
+
+  self.getFilterHtml = function(filter, editvalue) {
+    var valueStr = filter.value;
+    if (editvalue) {
+      valueStr = "<input class='storedQuery_value' id='" + filter.id + "_value' value='" + filter.value + "' />";
+    }
+
+    return "&nbsp;" + filter.subjectVar + " " + (filter.inversePredicate ? "^" : "") + (filter.predicateUriLabel || filter.predicateType || "") + " " + (filter.objectUriLabel || valueStr || filter.objectType) + "&nbsp;";
+
+
+  };
   self.removeFilter = function(filterId) {
     delete self.filters[filterId];
     $("#" + filterId).remove();
@@ -295,6 +315,15 @@ var Lineage_query = (function() {
 
 
   self.executeQuery = function(queryType) {
+
+    var activeTab = $("#lineageQuery_tabsDiv").tabs("option", "active");
+    if (activeTab == 2) {//storedQueries
+      if (!self.storedQueries.currentQuery) {
+        return alert(" no stored Query selected");
+      }
+      self.storedQueries.updateStoredQueryParams();
+      self.filters = self.storedQueries.currentQuery;
+    }
 
 
     if (Object.keys(self.filters).length == 0) {
@@ -318,6 +347,8 @@ var Lineage_query = (function() {
 
     query += " where {";
 
+
+
     query += " ?s1 rdf:type ?s1Type.  ";
     if (queryType != "count") {
       query += " ?s1 rdfs:label ?s1Label.  ";
@@ -325,6 +356,7 @@ var Lineage_query = (function() {
 
     var filterIndex = 0;
     for (var key in self.filters) {
+
 
 
       /*   if ( filterIndex > 0) {
@@ -478,7 +510,7 @@ var Lineage_query = (function() {
             uniqueNodes[item.s1Type.value] = 1;
             jstreeData.push({
               id: item.s1Type.value,
-              text: Sparql_common.getLabelFromURI(item.sType.value),
+              text: Sparql_common.getLabelFromURI(item.s1Type.value),
               parent: "#"
             });
           }
@@ -927,129 +959,150 @@ var Lineage_query = (function() {
     self.queryContexts.push(self.queryContext);
   };
 
+
   self.clearQuery = function() {
     self.queryContexts = {};
-    $("#LineageQuery_SqlDiv").html("");
-    $("#LineageQuery_SQL_columnsTree").jstree().uncheck_all();
-    self.onSelectRelation(self.currentRelation);
+    $("#lineageQuery_Filters").html("");
+    self.filters={}
+
   };
 
   self.viewSQL = function() {
     $("#LineageQuery_SqlDivWrapper").css("display", "block");
   };
 
+
   self.storedQueries = {
-    listQueries: function(type) {
-
-      var scope = $("#lineageQuery_storedQueries_scope").val();
-      if (scope == "personal") {
-        scope = authentication.currentUser.login;
-      }
-      var filter = "?s <"+Config.storedQueries_graphUri+"hasScope> '"+scope+"'."
-      filter+="?s rdfs:label ?o"
-      var options = {
-        selectVars: "distinct ?s ?o",
-        filter: filter,
-        orderBy:"?o"
-      };
-      Sparql_OWL.getTriples(self.storedQueriesSource, options, function(err, result) {
-
-        if (err) {
-          return alert(err.responseText);
-        }
-        var data=[];
-        result.forEach(function(item){
-          data.push({label:item.o.value,id:item.s.value})
-        })
-       common.fillSelectOptions("lineageQuery_storedQueries_queriesSelect", data, false, "label", "id");
-
-      });
-
-    },
-    loadQuery: function(uri) {
-      var filter = "FILTER (?s =<"+uri+">) "
-      var options = {
-        filter: filter,
-      };
-      Sparql_OWL.getTriples(self.storedQueriesSource, options, function(err, result) {
-
-        if (err) {
-          return alert(err.responseText);
-        }
-        result.forEach(function(triple){
-          var predicate=triple.p.value
-          if(predicate=="http://souslesens.org/resource/stored-queries/filters"){
-            var filters=JSON.parse(atob(triple.o.value));
-            for(var key in filters){
-
-            }
-
-          }
-        })
-      })
-    },
-    saveCurrentQuery: function(type) {
-      var triples = [];
-
-      var fitlersArray = [];
+    saveCurrentQuery: function() {
       if (Object.keys(self.filters).length == 0) {
         return alert("n query to save");
       }
-      var label = prompt("query name");
-      if (!label) {
-        return;
-      }
-      var scope = $("#lineageQuery_storedQueries_scope").val();
-      if (!confirm("save query " + label + "with scope " + scope + " ?")) {
-        return;
-      }
-      var filtersStr = btoa(JSON.stringify(self.filters));
-      if (scope == "personal") {
-        scope = authentication.currentUser.login;
-      }
-      var queryUri = Config.storedQueries_graphUri + common.getRandomHexaId(10);
-      triples.push({
-        subject: queryUri,
-        predicate: "rdfs:label",
-        object: label
-      });
-      triples.push({
-        subject: queryUri,
-        predicate: "rdf:type",
-        object: "slsv:StoredQuery"
-      });
-      triples.push({
-        subject: queryUri,
-        predicate: "slsv:filters",
-        object: filtersStr
-
-      });
-      triples.push({
-        subject: queryUri,
-        predicate: "slsv:hasScope",
-        object: scope
-      });
-      triples = triples.concat(Lineage_blend.getCommonMetaDataTriples(queryUri, self.storedQueriesSource));
-      var options = {
-        sparqlPrefixes: { "slsv": Config.sources[self.storedQueriesSource].graphUri }
-      };
-      Sparql_generic.insertTriples(self.storedQueriesSource, triples, options, function(err, result) {
-        if (err) {
-          return alert(err.responseText);
-        }
-        $("#lineageQuery_storedQueries_queriesSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
+      Sparql_CRUD.save("STORED_QUERIES", Lineage_sources.activeSource, self.filters, "private");
 
 
-      });
+    }, showStoredQueriesTab: function() {
+      Sparql_CRUD.showDialog("STORED_QUERIES", "LineageQuery_storedQueriesDiv", Lineage_sources.activeSource, null, self.storedQueries.onLoadStoredQuery);
 
 
     },
-    saveCurrent: function(type) {
 
+    onLoadStoredQuery: function(err, filters) {
+
+      if (err) {
+        return alert(err.responseText || err);
+      }
+      var html = "";
+      for (var key in filters) {
+        var filter = filters[key];
+        html += "<div>" + self.getFilterHtml(filter, true) + "</div>";
+      }
+      //  html += "<div><button onclick='Lineage_query.executeStoredQuery()'>Execute</button></div>";
+      $("#LineageQuery_currrentStoredQueryDiv").html(html);
+      self.storedQueries.currentQuery = filters;
+
+    }
+
+    , updateStoredQueryParams: function() {
+      var inputs = $(".storedQuery_value");
+      inputs.each(function() {
+        var filter = $(this).attr("id").replace("_value", "");
+        var value = $(this).val();
+        self.storedQueries.currentQuery[filter].value = value;
+
+      });
     }
 
 
   };
+
+  self.queryModel = {
+
+    loadSourceModel: function() {
+      Sparql_OWL.getObjectRestrictions(Lineage_sources.activeSource, null, null, function(err, result) {
+        if (err) {
+          return alert(err.responseText);
+        }
+        self.currentSourceRestrictions={}
+        var data=[]
+        result.forEach(function(item){
+          for(var key in item){
+            item[key]= item[key].value
+          }
+          self.currentSourceRestrictions[item.node]=item;
+          var label=item.conceptLabel+" - "+item.propLabel+" - >"+item.valueLabel
+          data.push({id: item.node, label :label})
+
+        })
+        data.sort(function(a,b){
+          if(a.label>b.label)
+            return 1;
+          if(a.label<b.label)
+            return -1;
+         return 0
+        })
+        common.fillSelectOptions("LineageQuery_queryModelSelect",data, false,"label","id")
+      });
+
+    },
+    onSelectRestriction: function(restrictionId) {
+      if(!confirm("add filter "))
+        return;
+      var restriction=self.currentSourceRestrictions[restrictionId]
+
+      self.reset();
+      self.clearQuery()
+      var filter= {
+          subjectVar: "?s1",
+
+          predicateType: "rdf:type",
+          predicateUri: null,
+          inversePredicate: null,
+
+          objectType: null,
+          objectUri: restriction.concept,
+        objectUriLabel:restriction.conceptLabel,
+
+          filterBooleanOperator: null
+        };
+      self.addFilter(filter)
+      var filter= {
+        subjectVar: "?s1",
+
+        predicateType: null,
+        predicateUri: restriction.prop,
+        predicateUriLabel:restriction.propLabel,
+        inversePredicate: null,
+
+        objectType: null,
+        objectUri: null,
+
+        filterBooleanOperator: null
+      };
+      self.addFilter(filter)
+      var filter= {
+        subjectVar: "?o2",
+
+        predicateType: "rdf:type",
+        predicateUri: null,
+        inversePredicate: null,
+
+        objectType: null,
+        objectUri: restriction.value,
+        objectUriLabel:restriction.valueLabel,
+
+        filterBooleanOperator: null
+      };
+      self.addFilter(filter)
+
+      $("#lineageQuery_tabsDiv").tabs("option","active",1);
+
+
+
+
+
+      }
+  };
+
 
   return self;
 })();

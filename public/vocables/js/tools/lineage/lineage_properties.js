@@ -257,6 +257,11 @@ action: function (_e) {
 
         options.filter = (options.filter || "") + " " + filter;
 
+
+
+
+
+
         Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function (err, result) {
             if (err) {
                 return callback(err);
@@ -266,6 +271,7 @@ action: function (_e) {
                 if (err) {
                     return callback(err);
                 }
+
                 var visjsData = { nodes: [], edges: [] };
                 var existingNodes = visjsGraph.getExistingIdsMap();
                 var color = Lineage_classes.getSourceColor(source);
@@ -275,7 +281,8 @@ action: function (_e) {
                         existingNodes[item.subject.value] = 1;
 
                         var shape = Lineage_classes.defaultShape;
-                        var type = item.subjectType.value;
+
+                        var type =item.subjectType? item.subjectType.value:"?";
                         if (type.indexOf("NamedIndividual") > -1) {
                             shape = Lineage_classes.namedIndividualShape;
                         }
@@ -298,15 +305,24 @@ action: function (_e) {
 
                         var shape = Lineage_classes.defaultShape;
 
-                        var type = item.objectType.value;
+                        var type =item.objectType? item.objectType.value:"?";
 
                         if (type.indexOf("NamedIndividual") > -1) {
                             shape = Lineage_classes.namedIndividualShape;
                         }
+                        var label=item.objectLabel.value
+
+                        if(Config.Lineage.logicalOperatorsMap[item.prop.value]){
+                           label=Config.Lineage.logicalOperatorsMap[item.prop.value]
+                            shape="hegagon"
+                            color="#EEE"
+
+                            }
+
 
                         visjsData.nodes.push({
                             id: item.object.value,
-                            label: item.objectLabel.value,
+                            label: label,
                             shape: shape,
                             size: Lineage_classes.defaultShapeSize,
                             color: color,
@@ -325,10 +341,9 @@ action: function (_e) {
                         {
                             var nodeSource = source;
                             var prop = item.prop.value;
-                            if (
-                                (options.includeSources && options.includeSources.length > 0 && prop == "http://www.w3.org/2002/07/owl#sameAs") ||
-                                prop == "http://www.w3.org/2002/07/owl#equivalentClass"
-                            ) {
+                            if (options.includeSources && options.includeSources.length > 0 &&
+                              (prop == "http://www.w3.org/2002/07/owl#sameAs" ||
+                                prop == "http://www.w3.org/2002/07/owl#equivalentClass")){
                                 nodeSource = options.includeSources[0];
                             }
                         }

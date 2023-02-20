@@ -550,8 +550,8 @@ var Sparql_OWL = (function () {
                 " WHERE {?subject ?prop ?object. " +
                 filterStr +
                 " " +
-                "?subject rdf:type ?subjectType. " +
-                "?object rdf:type ?objectType. " +
+                "OPTIONAL {?subject rdf:type ?subjectType.} " +
+                "OPTIONAL {?object rdf:type ?objectType.} " +
                 Sparql_common.getVariableLangLabel("prop", true) +
                 Sparql_common.getVariableLangLabel("subject", true) +
                 Sparql_common.getVariableLangLabel("object", true);

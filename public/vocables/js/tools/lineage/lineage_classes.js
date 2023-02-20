@@ -1939,9 +1939,9 @@ addNode:false
                 self.currentExpandLevel += 1;
 
                 var restrictionSource = source;
-                if (!Config.sources[source].editable) {
+              /*  if (!Config.sources[source].editable) {
                     restrictionSource = Config.predicatesSource;
-                }
+                }*/
 
                 var shape = Lineage_classes.defaultShape;
                 result.forEach(function (
@@ -1989,11 +1989,18 @@ addNode:false
                         shape = "hexagon";
                         color = "#f5ef39";
                     }
+                    var label=item.valueLabel.value
+                    if(Config.Lineage.logicalOperatorsMap[item.prop.value]){
+                        label=Config.Lineage.logicalOperatorsMap[item.prop.value]
+                        shape="hegagon"
+                        color="#EEE"
+
+                    }
                     if (!existingNodes[item.value.value]) {
                         existingNodes[item.value.value] = 1;
                         visjsData.nodes.push({
                             id: item.value.value,
-                            label: item.valueLabel.value,
+                            label: label,
                             shadow: self.nodeShadow,
                             shape: shape,
                             size: size,
@@ -2011,7 +2018,12 @@ addNode:false
                     var edgeId = item.node.value; //item.value.value + "_" + item.concept.value + "_" + item.prop.value;
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
+                        if(Config.Lineage.logicalOperatorsMap[item.prop.value]){
+                            label=Config.Lineage.logicalOperatorsMap[item.prop.value]
+                            shape="hegagon"
+                            color="#EEE"
 
+                        }
                         if (options.inverse) {
                             visjsData.edges.push({
                                 id: edgeId,

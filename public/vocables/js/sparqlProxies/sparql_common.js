@@ -59,14 +59,7 @@ var Sparql_common = (function () {
                 str = str.replace(/[()]/g, "");
             }
             return self.formatStringForTriple(str);
-            /*   var str = str.replace(/\\/g, "")
-str = str.replace(/\(/gm, "")
-str = str.replace(/\)/gm, "")
-str = str.replace(/\[/gm, "")
-str = str.replace(/\]/gm, "")
 
-return str;
-*/
         }
 
         if (!options) {
@@ -131,7 +124,8 @@ return str;
                     }
                 }
             } else if (ids) {
-                if (Array.isArray(ids)) {
+                if (!Array.isArray(ids))
+                    ids=[ids]
                     if (ids.length == 0) {
                         return "";
                     }
@@ -148,36 +142,21 @@ return str;
                         if (conceptIdsStr != "") {
                             conceptIdsStr += ",";
                         }
-                        /* if (!id.match || !id.match(/.+:.+|http.+|_:+/)) {
-                return  (conceptIdsStr += "<" + id + ">");
-            }*/
+
                         if (id != "") {
                             if (id.indexOf("http") < 0 && id.split(":").length == 2)
                                 // prefix
                                 conceptIdsStr += id;
-                            else if (true || (id.match && !id.match(/http.+|_:+/)) || id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1 || id.indexOf("_:") > -1) {
-                                if (id.indexOf("^") == 0) {
-                                    conceptIdsStr += "^<" + id.substring(1) + ">";
-                                } else {
+                            else {// || (id.match && !id.match(/http.+|_:+/)) || id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1 || id.indexOf("_:") > -1) {
+
                                     conceptIdsStr += "<" + id + ">";
-                                }
-                            } else {
-                                conceptIdsStr += id;
+
                             }
                         }
                     });
 
                     filters.push(" ?" + varName + " in( " + conceptIdsStr + ")");
-                } else {
-                    if (ids == null) {
-                        return "";
-                    }
-                    if (ids.indexOf && (ids.indexOf("http") == 0 || ids.indexOf("nodeID://") > -1)) {
-                        filters.push(" ?" + varName + " =<" + ids + ">");
-                    } else {
-                        filters.push(" ?" + varName + " =" + ids);
-                    }
-                }
+
             } else {
                 return "";
             }
@@ -385,7 +364,7 @@ return str;
             if (imports) {
                 imports.forEach(function (source2) {
                     if (!Config.sources[source2]) {
-                        return console.error(source2 + "not found");
+                        return ;// console.error(source2 + "not found");
                     }
 
                     var importGraphUri = Config.sources[source2].graphUri;

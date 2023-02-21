@@ -67,7 +67,7 @@ var KGcreator = (function() {
 
   ];
 
-  self.xsdTypes=[
+  self.xsdTypes = [
 
     "xsd:string",
     "xsd:dateTime",
@@ -78,7 +78,7 @@ var KGcreator = (function() {
     "xsd:decimal",
     "rdf:XMLLiteral"
 
-  ]
+  ];
 
   self.basicTypeClasses = ["owl:Class", "owl:NamedIndividual", "owl:Thing", ""];
   self.usualSubjectTypes = ["_function", "_blankNode", ""];
@@ -162,13 +162,14 @@ var KGcreator = (function() {
     self.currentSlsvSource = source;
     $("#KGcreator_topLevelOntologiesInput").html(Config.currentTopLevelOntology);
     self.topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
-    self.initModel(source, function(err, result){
-      if(err)
-        return alert(err.responseText)
+    self.initModel(source, function(err, result) {
+      if (err) {
+        return alert(err.responseText);
+      }
       if (callback) {
         callback(err);
       }
-    })
+    });
 
   };
   self.onChangeSourceTypeSelect = function(sourceType, callback) {
@@ -659,9 +660,9 @@ var KGcreator = (function() {
 
         // fill predicate options
         function(callbackSeries) {
-          self.fillPredicatesSelect(self.currentSource, "KGcreator_predicateSelect", { usualProperties:true }, function(err) {
-            return callbackSeries(err)
-          })
+          self.fillPredicatesSelect(self.currentSource, "KGcreator_predicateSelect", { usualProperties: true }, function(err) {
+            return callbackSeries(err);
+          });
         },
 
 
@@ -674,7 +675,7 @@ var KGcreator = (function() {
             var usualObjectClasses = [
               { id: "_selectedColumn", label: "_selectedColumn" },
               { id: "", label: "--------" }
-            ]
+            ];
             self.usualObjectClasses.forEach(function(item) {
               usualObjectClasses.push({
                 id: item,
@@ -682,7 +683,7 @@ var KGcreator = (function() {
               });
             });
 
-            usualObjectClasses=  usualObjectClasses .concat({ id: "", label: "--------" })
+            usualObjectClasses = usualObjectClasses.concat({ id: "", label: "--------" })
               .concat(result);
             common.fillSelectOptions("KGcreator_objectUpperOntSelect", usualObjectClasses, true, "label", "id");
 
@@ -943,9 +944,10 @@ self.saveMappings({classId:classId})
       options = {};
     }
     self.checkModel(self.currentSource, self.currentJsonObject, function(err, result) {
-      if (err)
-        return alert(err)
-      MainController.UI.message("Mapping conssitant with model")
+      if (err) {
+        return alert(err);
+      }
+      MainController.UI.message("Mapping conssitant with model");
 
       self.currentJsonObject = data;
 
@@ -987,7 +989,7 @@ self.saveMappings({classId:classId})
           return alert(err.responseText);
         }
       });
-    })
+    });
   };
 
   self.clearMappings = function() {
@@ -996,29 +998,30 @@ self.saveMappings({classId:classId})
       self.mainJsonEditorModified = false;
     }
   };
-  self.loadMappings = function(csvFileName) {
 
-    function execLoadMappings() {
-      self.currentJsonObject = {};
-      self.mainJsonEditor.load(self.currentJsonObject);
+  self.setUpperOntologyPrefix = function() {
+    var currentTopLevelOntology = Config.topLevelOntologies[Config.currentTopLevelOntology];
+    if (!currentTopLevelOntology) {
+      return;
+    }
+    if (!self.currentJsonObject.prefixes) {
+      self.currentJsonObject.prefixes = {};
+      if (!self.currentJsonObject.prefixes[currentTopLevelOntology.prefix]) {
+        self.currentJsonObject.prefixes[currentTopLevelOntology.prefix] = currentTopLevelOntology.prefixtarget;
+      }
+    }
+    else {
+      currentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromPrefix(Object.keys(self.currentJsonObject.prefixes)[0]);
+      $("#KGcreator_topLevelOntologiesSelect").val(currentTopLevelOntology);
+    }
+  };
 
-      setUpperOntologyPrefix = function() {
-        var currrentTopLevelOntology = Config.topLevelOntologies[Config.currentTopLevelOntology];
-        if (!currrentTopLevelOntology) {
-          return;
-        }
-        if (!self.currentJsonObject.prefixes) {
-          self.currentJsonObject.prefixes = {};
-          if (!self.currentJsonObject.prefixes[currrentTopLevelOntology.prefix]) {
-            self.currentJsonObject.prefixes[currrentTopLevelOntology.prefix] = currrentTopLevelOntology.prefixtarget;
-          }
-        }
-        else {
-          currrentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromPrefix(Object.keys(self.currentJsonObject.prefixes)[0]);
-          $("#KGcreator_topLevelOntologiesSelect").val(currrentTopLevelOntology);
-        }
-      };
 
+  self.loadMappings = function(csvFileName, callback) {
+
+
+    function getMappingFileJson(callback2) {
+      var currentJsonObject = {};
       var payload = {};
       if (self.currentDataSourceModel) {
         var dbName = self.currentDbName;
@@ -1039,49 +1042,70 @@ self.saveMappings({classId:classId})
         data: payload,
         dataType: "json",
         success: function(result, _textStatus, _jqXHR) {
-          self.currentJsonObject = JSON.parse(result);
+          currentJsonObject = JSON.parse(result);
 
-          if (!self.currentJsonObject.graphUri) {
-            self.currentJsonObject.graphUri = self.currentGraphUri || "";
-          }
-          else {
-            self.currentGraphUri = self.currentJsonObject.graphUri;
-          }
-          setUpperOntologyPrefix();
-          self.mainJsonEditor.load(self.currentJsonObject);
-          self.mainJsonEditorModified = false;
+          callback2(null, currentJsonObject);
+
         },
         error(_err) {
-          self.currentJsonObject = {
+          currentJsonObject = {
             fileName: csvFileName,
             tripleModels: [],
             transform: {},
             lookups: [],
             graphUri: ""
           };
-          setUpperOntologyPrefix();
-          self.mainJsonEditor.load(self.currentJsonObject);
+          callback2(null, currentJsonObject);
+
         }
       });
+
+
     }
 
-    if (self.mainJsonEditorModified) {
-      //self.currentJsonObject && self.currentJsonObject.tripleModels && self.currentJsonObject.tripleModels.length > 0) {
-      if (!self.currentJsonObject.fileName) {
-        return execLoadMappings();
-      }
+    if (callback) {
+      return getMappingFileJson(function(err, result) {
+        return callback(null, result);
 
-      if (confirm(" save current json before opening new file")) {
-        self.saveMappings(null, function(_err, _result) {
-          execLoadMappings();
-        });
-      }
-      else {
-        execLoadMappings();
-      }
+      });
     }
     else {
-      execLoadMappings();
+      function showMappings() {
+        return getMappingFileJson(function(err, result) {
+          self.currentJsonObject = result;
+          self.mainJsonEditor.load(result);
+          self.setUpperOntologyPrefix();
+
+          self.mainJsonEditorModified = false;
+
+          if (!self.currentJsonObject.graphUri) {
+            currentJsonObject.graphUri = currentGraphUri || "";
+          }
+          else {
+            self.currentGraphUri = self.currentJsonObject.graphUri;
+          }
+
+        });
+      }
+
+      if (self.mainJsonEditorModified) {
+        //self.currentJsonObject && self.currentJsonObject.tripleModels && self.currentJsonObject.tripleModels.length > 0) {
+        if (!self.currentJsonObject.fileName) {
+          return showMappings();
+        }
+
+        if (confirm(" save current json before opening new file")) {
+          self.saveMappings(null, function(_err, _result) {
+            showMappings();
+          });
+        }
+        else {
+          showMappings();
+        }
+      }
+      else {
+        showMappings();
+      }
     }
   };
   self.createTriples = function(test, _options) {
@@ -1138,51 +1162,50 @@ self.saveMappings({classId:classId})
     }
 
 
+    self.saveMappings(null, function(_err, _result) {
+      if (_err) {
+        return alert(_err);
+      }
+      $("#KGcreator_dataSampleDiv").val("");
+      var payload;
+      if (self.currentSourceType == "CSV") {
+        payload = {
+          dir: "CSV/" + self.currentCsvDir,
+          fileName: self.currentSource + "_" + self.currentJsonObject.fileName + ".json",
+          options: JSON.stringify(options)
+        };
+      }
+      else if (self.currentSourceType == "DATABASE") {
+        payload = {
+          dir: "CSV/" + self.currentSlsvSource,
+          fileName: self.currentDbName + "_" + self.currentJsonObject.fileName + ".json",
+          options: JSON.stringify(options)
+        };
+      }
 
-      self.saveMappings(null, function(_err, _result) {
-        if (_err) {
-          return alert(_err);
-        }
-        $("#KGcreator_dataSampleDiv").val("");
-        var payload;
-        if (self.currentSourceType == "CSV") {
-          payload = {
-            dir: "CSV/" + self.currentCsvDir,
-            fileName: self.currentSource + "_" + self.currentJsonObject.fileName + ".json",
-            options: JSON.stringify(options)
-          };
-        }
-        else if (self.currentSourceType == "DATABASE") {
-          payload = {
-            dir: "CSV/" + self.currentSlsvSource,
-            fileName: self.currentDbName + "_" + self.currentJsonObject.fileName + ".json",
-            options: JSON.stringify(options)
-          };
-        }
+      $.ajax({
+        type: "POST",
+        url: `${Config.apiUrl}/kg/csv/triples`,
+        data: payload,
+        dataType: "json",
+        success: function(result, _textStatus, _jqXHR) {
+          if (test) {
+            var str = JSON.stringify(result, null, 2);
 
-        $.ajax({
-          type: "POST",
-          url: `${Config.apiUrl}/kg/csv/triples`,
-          data: payload,
-          dataType: "json",
-          success: function(result, _textStatus, _jqXHR) {
-            if (test) {
-              var str = JSON.stringify(result, null, 2);
-
-              $("#KGcreator_dataSampleDiv").val(str);
-              MainController.UI.message("", true);
-            }
-            else {
-              $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
-              MainController.UI.message("triples created", true);
-            }
-          },
-          error(err) {
-            return alert(err.responseText);
+            $("#KGcreator_dataSampleDiv").val(str);
+            MainController.UI.message("", true);
           }
-        });
+          else {
+            $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
+            MainController.UI.message("triples created", true);
+          }
+        },
+        error(err) {
+          return alert(err.responseText);
+        }
+      });
 
-    })
+    });
   };
 
   self.indexGraph = function() {
@@ -1436,7 +1459,7 @@ self.saveMappings({classId:classId})
    * @param selectId
    * @param callback
    */
-  self.fillPredicatesSelect=function(source,selectId,options,callback){
+  self.fillPredicatesSelect = function(source, selectId, options, callback) {
     var sourcePredicates = [];
     Sparql_OWL.getObjectProperties(source, { withoutImports: 1 }, function(err, result) {
 
@@ -1467,13 +1490,12 @@ self.saveMappings({classId:classId})
           return callback(err.responseText);
         }
         var predicates = [];
-        if(options.usualProperties) {
+        if (options.usualProperties) {
           KGcreator.usualProperties.forEach(function(item) {
             predicates.push({ label: item, id: item });
           });
           predicates.push({ label: "-------", id: "" });
         }
-
 
 
         predicates = predicates.concat(sourcePredicates);
@@ -1492,59 +1514,68 @@ self.saveMappings({classId:classId})
       });
     });
 
-  }
-  self.fillObjectOptionsFromPrompt= function (type,selectId) {
+  };
+  self.fillObjectOptionsFromPrompt = function(type, selectId) {
     var term = prompt("Individual contains...");
-    if (term===null) return;
+    if (term === null) {
+      return;
+    }
     var options = {
       selectGraph: true,
       lang: Config.default_lang,
-      type:type,
-      filter: term?" FILTER ( regex(?label,'" + term + "','i'))":"",
-      limit:Config.maxSelectListSize
+      type: type,
+      filter: term ? " FILTER ( regex(?label,'" + term + "','i'))" : "",
+      limit: Config.maxSelectListSize
     };
 
-    var source=Lineage_sources.activeSource || KGcreator.currentSource
-    Sparql_OWL.getDictionary(source, options, null, function (err, result) {
-      if (err) alert(err.responseText);
+    var source = Lineage_sources.activeSource || KGcreator.currentSource;
+    Sparql_OWL.getDictionary(source, options, null, function(err, result) {
+      if (err) {
+        alert(err.responseText);
+      }
 
-      if(result.length>= Config.maxSelectListSize)
-       if(confirm(" too many values; list truncated to  " +Config.maxSelectListSize+" values")===null)
-      return;
+      if (result.length >= Config.maxSelectListSize) {
+        if (confirm(" too many values; list truncated to  " + Config.maxSelectListSize + " values") === null) {
+          return;
+        }
+      }
       var objs = [];
-      result.forEach(function (item) {
+      result.forEach(function(item) {
         objs.push({
           id: item.id.value,
-          label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value),
+          label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value)
         });
       });
-      objs.sort(function (a, b) {
-        if (a.label > b.label) return 1;
-        if (a.label < b.label) return -1;
+      objs.sort(function(a, b) {
+        if (a.label > b.label) {
+          return 1;
+        }
+        if (a.label < b.label) {
+          return -1;
+        }
         return 0;
       });
       common.fillSelectOptions(selectId, objs, true, "label", "id");
     });
-  }
+  };
 
 
-
-  self.initModel=function(source,callback){
+  self.initModel = function(source, callback) {
     Sparql_OWL.getObjectRestrictions(source, null, null, function(err, result) {
       if (err) {
         return alert(err.responseText);
       }
-      self.currentSourceRestrictions = {}
-      var data = []
+      self.currentSourceRestrictions = {};
+      var data = [];
       result.forEach(function(item) {
         for (var key in item) {
-          item[key] = item[key].value
+          item[key] = item[key].value;
         }
         self.currentSourceRestrictions[item.prop] = item;
-      })
-      return callback(null,self.currentSourceRestrictions)
-    })
-  }
+      });
+      return callback(null, self.currentSourceRestrictions);
+    });
+  };
 
 
   /**
@@ -1555,33 +1586,64 @@ self.saveMappings({classId:classId})
    * @param mappings
    * @param callback
    */
-  self.checkModel=function(source, mappings,callback){
-var sourceObjects={}
+  self.checkModel = function(source, mappings, callback) {
+    var sourceObjects = {};
+    self.getAllMappings(function(err, result) {
+      mappings.tripleModels.forEach(function(item) {
+        if (["rdf:type", "rdfs:subClassOf"].indexOf(item.p) > -1 && item.o.indexOf("http:") > -1) {
+          sourceObjects[item.o] = item.s;
+        }
 
-    mappings.tripleModels.forEach(function(item){
-      if(["rdf:type","rdfs:subClassOf"].indexOf(item.p)>-1 && item.o.indexOf("http:")>0)
-        sourceObjects[item.o]=item.s
+      });
 
+      var errors = "";
+      mappings.tripleModels.forEach(function(item) {
+
+        var restriction = self.currentSourceRestrictions[item.p];
+        if (restriction) {
+
+          if (sourceObjects[item.s] && sourceObjects[item.s] != restriction.concept) {
+            errors += "wrong subject for prop " + restriction.propLabel + " type " + restriction.concept + " needed\n";
+          }
+          if (sourceObjects[item.o] && sourceObjects[item.o] != restriction.value) {
+            errors += "wrong object for prop " + restriction.propLabel + " type " + restriction.value + " needed\n";
+          }
+
+
+        }
+
+
+      });
+      return callback(null, errors);
+    });
+
+  };
+
+  self.getAllMappings = function(callback) {
+    var allMappings = {};
+    var files = Object.keys(self.mappingFiles);
+    async.eachSeries(files, function(file, callbackEach) {
+      var file2=file.substring(file.indexOf("_")+1)
+      self.loadMappings(file2, function(err, result) {
+        if(err)
+          return callbackEach();
+
+        for(var key in result.tripleModels){
+          var mapping=result.tripleModels[key]
+          if(!allMappings[mapping.s])
+            allMappings[mapping.s]=[]
+          allMappings[mapping.s].push({p:mapping.p,o:mapping.o})
+
+        }
+
+        callbackEach()
+      })
+
+
+    },function(err){
+      self.allMappingsSubjectsmap=allMappings
+      return callback(null, allMappings)
     })
-
-    var errors="";
-    mappings.tripleModels.forEach(function(item){
-
-      var restriction=self.currentSourceRestrictions[item.p]
-      if(restriction){
-
-        if(sourceObjects[item.s] && sourceObjects[item.s]!=restriction.concept)
-          errors+="wrong subject for prop "+restriction.propLabel+" type "+restriction.concept+" needed\n"
-        if(sourceObjects[item.o] && sourceObjects[item.o]!=restriction.value)
-          errors+="wrong object for prop "+restriction.propLabel+" type "+restriction.value+" needed\n"
-
-
-      }
-
-
-    })
-    return  callback(null, errors)
-
   }
   return self;
 })();

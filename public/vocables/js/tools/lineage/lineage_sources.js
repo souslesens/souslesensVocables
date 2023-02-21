@@ -474,7 +474,7 @@ sourceDivId +
         });
         return Config.currentTopLevelOntology;
     };
-    self.setTopLevelOntologyFromPrefix = function () {
+    self.setTopLevelOntologyFromPrefix = function (prefix) {
         Config.currentTopLevelOntology = null;
         for (var key in Config.topLevelOntologies) {
             if (Config.topLevelOntologies[key].prefix == prefix) {

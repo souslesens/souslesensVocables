@@ -5,53 +5,97 @@ Lineage_relations = (function() {
     self.drawRelationCurrentCaller = caller;
     $("#LineagePopup").dialog("open");
     $("#LineagePopup").load("snippets/lineage/relationsDialog.html", function() {
+      var cbxValue;
       if (caller == "Graph" || caller == "Tree") {
-        $("input[name='lineageRelations_selection'][value='selected']").prop("checked", true);
+        cbxValue="selected";
       }
       else {
-        $("input[name='lineageRelations_selection'][value='visible']").prop("checked", true);
+        if(!visjsGraph.data  || visjsGraph.data.nodes.get().length==0)
+          cbxValue="all"
+        else
+          cbxValue="visible"
       }
 
-      Sparql_OWL.getObjectProperties(Lineage_sources.activeSource, { withGraph: true }, function(err, result) {
-        var jstreeData = [];
-        var uniqueNodes = {};
-        result.forEach(function(item) {
-          if (!uniqueNodes[item.g.value]) {
-            uniqueNodes[item.g.value] = 1;
-            var label = Sparql_common.getSourceFromGraphUri(item.g.value);
+      $("input[name='lineageRelations_selection'][value="+cbxValue+"]").prop("checked", true);
+
+      var jstreeData = [];
+      var uniqueNodes = {};
+      async.series([
+
+        function(callbackSeries) {
+       Sparql_OWL.getObjectProperties(Lineage_sources.activeSource, { withGraph: true }, function(err, result) {
+
+            result.forEach(function(item) {
+              if (!uniqueNodes[item.g.value]) {
+                uniqueNodes[item.g.value] = 1;
+                var label = Sparql_common.getSourceFromGraphUri(item.g.value);
+                jstreeData.push({
+                  id: item.g.value,
+                  text: label,
+                  parent: "#"
+                });
+              }
+              if (!uniqueNodes[item.property.value]) {
+                uniqueNodes[item.property.value] = 1;
+                var label = item.propertyLabel ? item.propertyLabel.value : Sparql_common.getLabelFromURI(item.property.value);
+                jstreeData.push({
+                  id: item.property.value,
+                  text: label,
+                  parent: item.g.value
+                });
+              }
+
+            });
+            return callbackSeries();
+          });
+
+        },
+        function(callbackSeries) {
+
+          var parent="others"
             jstreeData.push({
-              id: item.g.value,
-              text: label,
+              id: parent,
+              text: parent,
               parent: "#"
             });
-          }
-          if (!uniqueNodes[item.property.value]) {
-            uniqueNodes[item.property.value] = 1;
-            var label = item.propertyLabel ? item.propertyLabel.value : Sparql_common.getLabelFromURI(item.property.value);
-            jstreeData.push({
-              id: item.property.value,
-              text: label,
-              parent: item.g.value
+
+
+          Sparql_OWL. getPredicates(Lineage_sources.activeSource, { }, function(err, result) {
+            result.forEach(function(item) {
+              if (!uniqueNodes[item.property.value]) {
+                uniqueNodes[item.property.value] = 1;
+                var label = item.propertyLabel ? item.propertyLabel.value : Sparql_common.getLabelFromURI(item.property.value);
+                jstreeData.push({
+                  id: item.property.value,
+                  text: label,
+                  parent: parent
+                });
+              }
+
             });
-          }
-        });
-        jstreeData.sort(function(a, b) {
-          if (a.label > b.label) {
-            return 1;
-          }
-          else if (b.label > a.label) {
-            return -1;
-          }
-          return 0;
-        });
-        var options = {
-          withCheckboxes: true
-        };
-        common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv", jstreeData, options, function() {
-          var sourceNodeId = Config.sources[Lineage_sources.activeSource].graphUri;
-          $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(sourceNodeId);
-        });
-      });
+          return callbackSeries();
+        })
+
+        }, function(callbackSeries) {
+          jstreeData.sort(function(a, b) {
+            if (a.label > b.label) {
+              return 1;
+            }
+            else if (b.label > a.label) {
+              return -1;
+            }
+            return 0;
+          });
+          var options = {
+            withCheckboxes: true
+          };
+          common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv", jstreeData, options, function() {
+            var sourceNodeId = Config.sources[Lineage_sources.activeSource].graphUri;
+            $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(sourceNodeId);
+          });
+        }
+      ]);
+
     });
   };
 
@@ -108,7 +152,7 @@ Lineage_relations = (function() {
         // if active source selected take all properties( ==no filter on props)
         var filter = "";
         if (properties.indexOf(Config.sources[Lineage_sources.activeSource].graphUri) < 0) {
-           filter = Sparql_common.setFilter("prop", properties);
+          filter = Sparql_common.setFilter("prop", properties);
         }
         options.filter = filter;
       }
@@ -131,7 +175,7 @@ Lineage_relations = (function() {
 
     var source = null;
     var data = null;
-    if (!options.data ) {
+    if (!options.data) {
       if (caller == "Graph") {
         data = Lineage_classes.currentGraphNode.data.id;
       }

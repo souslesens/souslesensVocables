@@ -1952,6 +1952,12 @@ addNode:false
                         var color = self.getSourceColor(source);
 
                         var size = Lineage_classes.defaultShapeSize;
+                        if(Config.Lineage.logicalOperatorsMap[item.prop.value]){
+                            label=Config.Lineage.logicalOperatorsMap[item.prop.value]
+                            shape="hegagon"
+                            color="#EEE"
+
+                        }
                         visjsData.nodes.push({
                             id: item.concept.value,
                             label: item.conceptLabel.value,

@@ -171,7 +171,8 @@ var SourceIntegrator = {
     }
 
     function parseImports(quad) {
-      if (quad.predicate.value == "http://www.w3.org/2002/07/owl#imports") {
+      if (quad.predicate.value.indexOf("owl#imports")>-1) {
+
         imports.push(quad.object.value);
       }
 
@@ -401,7 +402,7 @@ var SourceIntegrator = {
             },
             editable: options.editable,
             controller: "Sparql_OWL",
-            topClassFilter: "?topConcept rdf:type owl:Class .",
+            topClassFilter: "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
             schemaType: "OWL",
             allowIndividuals: options.allowIndividuals,
             predicates: {

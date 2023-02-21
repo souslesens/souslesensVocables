@@ -137,7 +137,7 @@ var Lineage_decoration = (function () {
                     return callbackEach();
                 }
 
-                var query =
+             /*  var query =
                     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                     "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
@@ -166,7 +166,23 @@ var Lineage_decoration = (function () {
                     filter +
                     "}}";
 
-                query += " WHERE {" + whereClass + " UNION" + whereNamedIndividual + "}";
+                query += " WHERE {" + whereClass + " UNION" + whereNamedIndividual + "}";x*/
+
+
+
+                var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                  "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                  "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
+                  "PREFIX owl: <http://www.w3.org/2002/07/owl#>  SELECT distinct ?type ?sLabel ?x   WHERE {\n" +
+                  "GRAPH <"+ Config.sources[Config.currentTopLevelOntology].graphUri+">{\n" +
+                  "  ?s rdfs:label|skos:prefLabel ?sLabel. bind(?s as ?type)\n" +
+                  "}\n" +
+                  "  {GRAPH <"+Config.sources[sourceLabel].graphUri+">{  \n" +
+                  "      ?x rdfs:subClassOf|rdf:type* ?s. ?x ?ww ?xx}\n" +
+                    filter  +
+                  "    }} LIMIT 10000"
+
+
 
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, skipCurrentQuery: true }, function (err, result) {
                     if (err) {
@@ -332,7 +348,7 @@ var Lineage_decoration = (function () {
                             if (!self.currentVisjGraphNodesMap[item.x.value]) {
                                 self.currentVisjGraphNodesMap[item.x.value] = {
                                     type: item.type.value,
-                                    graphUri: item.g.value,
+                                   // graphUri: item.g.value,
                                     label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.x.value),
                                     topLevelOntologyClass: null,
                                     topLevelOntologyNumberOfParents: 0,

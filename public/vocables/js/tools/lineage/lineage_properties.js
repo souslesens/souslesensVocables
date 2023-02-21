@@ -287,6 +287,12 @@ action: function (_e) {
                             shape = Lineage_classes.namedIndividualShape;
                         }
 
+                        if(Config.Lineage.logicalOperatorsMap[item.prop.value]){
+                            label=Config.Lineage.logicalOperatorsMap[item.prop.value]
+                            shape="hegagon"
+                            color="#EEE"
+
+                        }
                         visjsData.nodes.push({
                             id: item.subject.value,
                             label: item.subjectLabel.value,

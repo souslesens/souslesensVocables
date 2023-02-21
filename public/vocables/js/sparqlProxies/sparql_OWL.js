@@ -1317,6 +1317,36 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         );
     };
 
+
+
+    self.getPredicates=function(sourceLabel,options,callback){
+        if(!options)
+            options={}
+        var fromStr=""
+        if(options.withoutImports)
+         fromStr = Sparql_common.getFromStr(sourceLabel, false,true)
+        else
+            fromStr = Sparql_common.getFromStr(sourceLabel, true,false)
+
+        var query="PREFIX owl: <https://www.w3.org/2002/07/owl#>\n" +
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+          "SELECT distinct ?g ?property  " +fromStr+"WHERE {\n"
+        if(!options.withoutImports)
+            query+= "  GRAPH ?g"
+        query+="" +"{ ?sub ?property ?obj ." + Sparql_common.getVariableLangLabel("property", true, true)+
+          "}" +
+          "} LIMIT 10000"
+
+        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+
+            return callback(null, result.results.bindings);
+        });
+    };
     self.getObjectProperties = function (sourceLabel, options, callback) {
         if (!options) {
             options = {};

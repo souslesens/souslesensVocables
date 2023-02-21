@@ -119,6 +119,8 @@ var Config = (function() {
     ],
    logicalOperatorsMap:{
       "http://www.w3.org/2002/07/owl#intersectionOf":"⊓",
+     "https://www.w3.org/2002/07/owl#unionOf":"⨆",
+     "http://www.w3.org/1999/02/22-rdf-syntax-ns#intersectionOf":"⊓",
       "http://www.w3.org/1999/02/22-rdf-syntax-ns#unionOf":"⨆",
 
     }

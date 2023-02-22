@@ -9,6 +9,7 @@ const openapi = require("express-openapi");
 const swaggerUi = require("swagger-ui-express");
 const httpProxy = require(path.resolve("bin/httpProxy."));
 const userManager = require(path.resolve("bin/user."));
+const querystring = require("querystring");
 require("./bin/authentication.");
 const { config } = require("./model/config");
 
@@ -124,27 +125,30 @@ app.use(
 // legacy routes
 
 // Home (redirect to /vocables)
-app.get("/", function (req, res, _next) {
-    res.redirect("vocables");
+app.get("/", function (req, res, next) {
+    const query = querystring.stringify(req.query);
+    const redirect = query ? `vocables?${query}` : "vocables";
+    res.redirect(redirect);
 });
 
 // Login routes
 if (config.auth !== "disabled") {
     if (config.auth == "keycloak") {
-        app.get("/login", passport.authenticate("provider", { scope: ["openid", "email", "profile"] }));
-        app.get("/login/callback", passport.authenticate("provider", { successRedirect: "/", failureRedirect: "/login" }));
-    } else {
-        app.get("/login", function (req, res, _next) {
-            res.render("login", { title: "souslesensVocables - Login" });
+        app.get("/login", function (req, res, next) {
+            passport.authenticate("keycloak", { scope: ["openid", "email", "profile"] })(req, res, next);
         });
-        app.post(
-            "/auth/login",
-            passport.authenticate("local", {
-                successRedirect: "/vocables",
-                failureRedirect: "/login",
-                failureMessage: true,
-            })
-        );
+        app.get("/login/callback", function (req, res, next) {
+            passport.authenticate("keycloak", { successRedirect: "/vocables", failureRedirect: "/login" })(req, res, next);
+        });
+    } else {
+        app.get("/login", function (req, res, next) {
+            const redirect = req.query.redirect;
+            res.render("login", { title: "souslesensVocables - Login", redirect: redirect });
+        });
+        app.post("/auth/login", function (req, res, next) {
+            const redirect = req.query.redirect;
+            passport.authenticate("local", { successRedirect: redirect, failureRedirect: "/login", failureMessage: true })(req, res, next);
+        });
     }
 } else {
     app.get("/login", function (req, res, _next) {

@@ -24,7 +24,7 @@ const { config } = require("../model/config");
 
 if (config.auth == "keycloak") {
     passport.use(
-        "provider",
+        "keycloak",
         new KeyCloakStrategy(
             {
                 clientID: config.keycloak.clientID,

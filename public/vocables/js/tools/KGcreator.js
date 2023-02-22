@@ -943,9 +943,11 @@ self.saveMappings({classId:classId})
     if (!options) {
       options = {};
     }
-    self.checkModel(self.currentSource, self.currentJsonObject, function(err, result) {
+    self.checkModel(self.currentSource, function(err, result) {
       if (err) {
-        return alert(err);
+        $("#KGcreator_dataSampleDiv").val(err)
+        if (!confirm("errors in mappings , save anyway ?" ))
+          return ;
       }
       MainController.UI.message("Mapping conssitant with model");
 
@@ -1583,43 +1585,49 @@ self.saveMappings({classId:classId})
    *
    *
    * @param source
-   * @param mappings
    * @param callback
    */
-  self.checkModel = function(source, mappings, callback) {
+  self.checkModel = function(source, callback) {
     var sourceObjects = {};
-    self.getAllMappings(function(err, result) {
-      mappings.tripleModels.forEach(function(item) {
-        if (["rdf:type", "rdfs:subClassOf"].indexOf(item.p) > -1 && item.o.indexOf("http:") > -1) {
-          sourceObjects[item.o] = item.s;
-        }
+    self.getAllMappings(function(err, allMappings) {
+      for(var subject in allMappings) {
+        var item=allMappings[subject]
+        item.forEach(function(mapping) {
+          if (["rdf:type", "rdfs:subClassOf"].indexOf(mapping.p) > -1 && mapping.o.indexOf("http:") > -1) {
+            sourceObjects[subject] =mapping.o ;
+          }
+        })
 
-      });
+      };
 
       var errors = "";
-      mappings.tripleModels.forEach(function(item) {
+   //   mappings.tripleModels.forEach(function(item) {
+        for(var subject in allMappings) {
+          var item=allMappings[subject]
+          item.forEach(function(mapping) {
+            var restriction = self.currentSourceRestrictions[mapping.p];
+            if (restriction) {
 
-        var restriction = self.currentSourceRestrictions[item.p];
-        if (restriction) {
-
-          if (sourceObjects[item.s] && sourceObjects[item.s] != restriction.concept) {
-            errors += "wrong subject for prop " + restriction.propLabel + " type " + restriction.concept + " needed\n";
-          }
-          if (sourceObjects[item.o] && sourceObjects[item.o] != restriction.value) {
-            errors += "wrong object for prop " + restriction.propLabel + " type " + restriction.value + " needed\n";
-          }
+              if (sourceObjects[subject] && sourceObjects[subject] != restriction.concept) {
+                errors += "wrong subject for prop " + restriction.propLabel + " type " + restriction.concept + " needed\n";
+              }
+              if (sourceObjects[mapping.o] && sourceObjects[mapping.o] != restriction.value) {
+                errors += "wrong object for prop " + restriction.propLabel + " type " + restriction.value + " needed\n";
+              }
 
 
-        }
+            }
+          })
 
 
-      });
-      return callback(null, errors);
+      };
+      return callback( errors);
     });
 
   };
 
   self.getAllMappings = function(callback) {
+
     var allMappings = {};
     var files = Object.keys(self.mappingFiles);
     async.eachSeries(files, function(file, callbackEach) {

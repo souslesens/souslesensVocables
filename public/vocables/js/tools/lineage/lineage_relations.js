@@ -60,7 +60,7 @@ Lineage_relations = (function() {
             });
 
 
-          Sparql_OWL. getPredicates(Lineage_sources.activeSource, { }, function(err, result) {
+          Sparql_OWL. getPredicates(Config.currentTopLevelOntology, { }, function(err, result) {
             result.forEach(function(item) {
               if (!uniqueNodes[item.property.value]) {
                 uniqueNodes[item.property.value] = 1;

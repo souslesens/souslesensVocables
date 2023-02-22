@@ -317,7 +317,7 @@ var Lineage_query = (function() {
   self.executeQuery = function(queryType) {
 
     var activeTab = $("#lineageQuery_tabsDiv").tabs("option", "active");
-    if (activeTab == 2) {//storedQueries
+    if (activeTab == 1) {//storedQueries
       if (!self.storedQueries.currentQuery) {
         return alert(" no stored Query selected");
       }

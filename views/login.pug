@@ -10,7 +10,7 @@ block content
             | Login
         // Modal Body
         .modal-body
-          form(role='form' method='POST' action='/auth/login')
+          form(role='form' method='POST' action='/auth/login?redirect=' + redirect)
             div.form-group
               label(for='username') Username:
               input#username.form-control(type='text', placeholder='username' name='username', value="")

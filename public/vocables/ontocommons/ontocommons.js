@@ -45,7 +45,7 @@ var Ontocommons = (function () {
     self.showOntologyInSLSV = function (ontologyId) {
         if (!ontologyId) return;
         var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
-
+var sourceUrl="http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey="+ apiKey+"&download_format=rdf"
         self.currentSource = ontologyId;
         var reload = $("#reloadOntologyCBX").prop("checked");
         var editable = $("#editableCBX").prop("checked");

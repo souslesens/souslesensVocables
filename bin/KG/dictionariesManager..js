@@ -37,7 +37,6 @@ var DictionariesManager = {
 
     listIndexes: function (callback) {
         ConfigManager.getGeneralConfig(function (err, config) {
-            console.log("ee");
             if (err) return callback(err);
             const elasticUrl = config.ElasticSearch.url;
             ElasticRestProxy.listIndexes(elasticUrl, function (err, indexes) {

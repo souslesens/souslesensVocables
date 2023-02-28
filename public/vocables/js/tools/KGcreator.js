@@ -1609,10 +1609,10 @@ self.saveMappings({classId:classId})
             if (restriction) {
 
               if (sourceObjects[subject] && sourceObjects[subject] != restriction.concept) {
-                errors += "wrong subject for prop " + restriction.propLabel + " type " + restriction.concept + " needed\n";
+                errors += " missing column with type  "+ restriction.concept +"\n for prop " + restriction.propLabel+"(subject)\n";
               }
               if (sourceObjects[mapping.o] && sourceObjects[mapping.o] != restriction.value) {
-                errors += "wrong object for prop " + restriction.propLabel + " type " + restriction.value + " needed\n";
+                errors += " missing column with type  "+ restriction.concept +"\n for prop " + restriction.propLabel+" (object)\n";
               }
 
 

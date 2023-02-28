@@ -77,9 +77,14 @@ var SourceIntegrator = {
         console.log(stderr);
         return callback(err);
       }
-      console.log(stdout);
+     // console.log(stdout);
+
+      return callback(null, stdout);
+
+
+      var triples=[]
       var json=JSON.parse(stdout)
-      json.forEach(function(item,index) {
+      json.triples.forEach(function(item,index) {
           triples.push(
             {
               subject: item[0],
@@ -239,7 +244,22 @@ var SourceIntegrator = {
     }
 
     writer = new N3.Writer({ format: "N-Triples", prefixes: {} });
-    if (format == "rdf") {
+
+    if(true){
+      request(url, function(error, response, body) {
+        if (error) {
+          return callback(err);
+        }
+        var filePath = "D:\\apache-jena-4.7.0\\data\\temp.rdf"
+        fs.writeFileSync(filePath, body)
+        SourceIntegrator.jenaParse(filePath, function(err, triples) {
+if( err)
+  return callback(err)
+          writeTriples(triples);
+        })
+      })
+    }
+    else if (format == "rdf") {
       parseRdfXml();
     }
     else if (format == "ttl") {
@@ -288,7 +308,7 @@ var SourceIntegrator = {
           });
         },
 
-        //check if ontology already exist (with graphUri)
+        //cif (options.reload clear graph
         function(callbackSeries) {
           if (!options.reload) {
             return callbackSeries();
@@ -494,7 +514,9 @@ var SourceIntegrator = {
         array,
         function(ontologyId, callbackEach) {
           var graphUri = "http://industryportal.enit.fr/ontologies/" + ontologyId + "#";
-          var ontologyUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
+       //   var ontologyUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
+          var ontologyUrl="http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey="+apiKey+"&download_format=rdf"
+
           SourceIntegrator.getOntologyFormat(ontologyUrl, function(err, result) {
             if (err) {
               return callbackEach(err);

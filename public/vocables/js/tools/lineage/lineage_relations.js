@@ -7,23 +7,25 @@ Lineage_relations = (function() {
     $("#LineagePopup").load("snippets/lineage/relationsDialog.html", function() {
       var cbxValue;
       if (caller == "Graph" || caller == "Tree") {
-        cbxValue="selected";
+        cbxValue = "selected";
       }
       else {
-        if(!visjsGraph.data  || visjsGraph.data.nodes.get().length==0)
-          cbxValue="all"
-        else
-          cbxValue="visible"
+        if (!visjsGraph.data || visjsGraph.data.nodes.get().length == 0) {
+          cbxValue = "all";
+        }
+        else {
+          cbxValue = "visible";
+        }
       }
 
-      $("input[name='lineageRelations_selection'][value="+cbxValue+"]").prop("checked", true);
+      $("input[name='lineageRelations_selection'][value=" + cbxValue + "]").prop("checked", true);
 
       var jstreeData = [];
       var uniqueNodes = {};
       async.series([
 
         function(callbackSeries) {
-       Sparql_OWL.getObjectProperties(Lineage_sources.activeSource, { withGraph: true }, function(err, result) {
+          Sparql_OWL.getObjectProperties(Lineage_sources.activeSource, { withGraph: true }, function(err, result) {
 
             result.forEach(function(item) {
               if (!uniqueNodes[item.g.value]) {
@@ -51,16 +53,17 @@ Lineage_relations = (function() {
 
         },
         function(callbackSeries) {
+          if (!Config.currentTopLevelOntology) {
+            return callbackSeries();
+          }
+          var parent = "others";
+          jstreeData.push({
+            id: parent,
+            text: parent,
+            parent: "#"
+          });
 
-          var parent="others"
-            jstreeData.push({
-              id: parent,
-              text: parent,
-              parent: "#"
-            });
-
-
-          Sparql_OWL. getPredicates(Config.currentTopLevelOntology, { }, function(err, result) {
+          Sparql_OWL.getPredicates(Config.currentTopLevelOntology, {}, function(err, result) {
             result.forEach(function(item) {
               if (!uniqueNodes[item.property.value]) {
                 uniqueNodes[item.property.value] = 1;
@@ -73,8 +76,8 @@ Lineage_relations = (function() {
               }
 
             });
-          return callbackSeries();
-        })
+            return callbackSeries();
+          });
 
         }, function(callbackSeries) {
           jstreeData.sort(function(a, b) {

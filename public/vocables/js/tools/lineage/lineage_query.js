@@ -27,7 +27,7 @@ var Lineage_query = (function() {
     };
 
     self.predicatesObjectsMap = {
-      "rdf:type": ["owl:Class", "rdf:Bag", "owl:NamedIndividual"],
+      "rdf:type": ["owl:Class", "rdf:Bag", "owl:NamedIndividual", "OTHER"],
       "owl:subClassOf": ["_whiteBoardNodes", "_selectedNode", "OTHER"],
       "rdfs:member": ["_whiteBoardNodes", "_selectedNode", "OTHER"],
       "OTHER": ["_whiteBoardNodes", "_selectedNode", "OTHER", "string", "number", "date"],
@@ -317,7 +317,7 @@ var Lineage_query = (function() {
   self.executeQuery = function(queryType) {
 
     var activeTab = $("#lineageQuery_tabsDiv").tabs("option", "active");
-    if (activeTab == 1) {//storedQueries
+    if (activeTab == 2) {//storedQueries
       if (!self.storedQueries.currentQuery) {
         return alert(" no stored Query selected");
       }

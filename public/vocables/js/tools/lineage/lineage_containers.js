@@ -40,7 +40,7 @@ var Lineage_containers = (function() {
       label: "Add selected node to container",
       action: function(_e) {
         var graphNodeData = Lineage_classes.currentGraphNode.data;
-        Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, self.currentContainer.data, graphNodeData);
+        Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, self.currentContainer, graphNodeData);
       }
     };
     items["PasteNodesInContainer"] = {

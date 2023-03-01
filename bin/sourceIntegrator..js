@@ -77,20 +77,20 @@ var SourceIntegrator = {
         console.log(stderr);
         return callback(err);
       }
-     // console.log(stdout);
+      // console.log(stdout);
 
       return callback(null, stdout);
 
 
-      var triples=[]
-      var json=JSON.parse(stdout)
-      json.triples.forEach(function(item,index) {
-          triples.push(
-            {
-              subject: item[0],
-              predicate: item[1],
-              object: item[2]
-            });
+      var triples = [];
+      var json = JSON.parse(stdout);
+      json.triples.forEach(function(item, index) {
+        triples.push(
+          {
+            subject: item[0],
+            predicate: item[1],
+            object: item[2]
+          });
 
       });
       callback(null, triples);
@@ -150,6 +150,8 @@ var SourceIntegrator = {
 
       var triplesArray = triples.split("\n");
 
+      totalTriples=triplesArray.length;
+
       triplesArray.forEach(function(item, index) {
         if (fetchCount++ < fechSize) {
           tripleSlice += item + "\n";
@@ -176,7 +178,7 @@ var SourceIntegrator = {
     }
 
     function parseImports(quad) {
-      if (quad.predicate.value.indexOf("owl#imports")>-1) {
+      if (quad.predicate.value.indexOf("owl#imports") > -1) {
 
         imports.push(quad.object.value);
       }
@@ -245,19 +247,20 @@ var SourceIntegrator = {
 
     writer = new N3.Writer({ format: "N-Triples", prefixes: {} });
 
-    if(true){
+    if (true) {
       request(url, function(error, response, body) {
         if (error) {
           return callback(err);
         }
-        var filePath = "D:\\apache-jena-4.7.0\\data\\temp.rdf"
-        fs.writeFileSync(filePath, body)
+        var filePath = "D:\\apache-jena-4.7.0\\data\\temp.rdf";
+        fs.writeFileSync(filePath, body);
         SourceIntegrator.jenaParse(filePath, function(err, triples) {
-if( err)
-  return callback(err)
+          if (err) {
+            return callback(err);
+          }
           writeTriples(triples);
-        })
-      })
+        });
+      });
     }
     else if (format == "rdf") {
       parseRdfXml();
@@ -281,6 +284,7 @@ if( err)
     var importUris = [];
     var importsSources = [];
     var format = null;
+    var journal = "";
     async.series(
       [
         //getConfig
@@ -301,6 +305,10 @@ if( err)
 
         //get sources
         function(callbackSeries) {
+        if(options.sources){
+          sources = options.sources;
+          return callbackSeries();
+        }
           var sourcesPath = path.join(__dirname, "../" + "config/" + options.sourcesJsonFile);
           jsonFileStorage.retrieve(path.resolve(sourcesPath), function(err, _sources) {
             sources = _sources;
@@ -308,7 +316,7 @@ if( err)
           });
         },
 
-        //cif (options.reload clear graph
+        //if (options.reload) clear graph
         function(callbackSeries) {
           if (!options.reload) {
             return callbackSeries();
@@ -380,6 +388,7 @@ if( err)
             graphUri = result.graphUri;
             sparqlInsertStr = result.sparqlInsertStr;
             importUris = result.imports;
+            journal+="     " +result.totalTriples+"triples  imported  in graph "+graphUri+"\n"
             return callbackSeries();
           });
         },
@@ -401,6 +410,51 @@ if( err)
 
           return callbackSeries();
         },
+
+        //manage Imports : create a source and create triples  if not exist for each import
+        function(callbackSeries) {
+          if (options.reload && options.metadata && options.metadata.imports && options.metadata.imports.length > 0) {
+            importsSources = [];
+            async.eachSeries(options.metadata.imports, function(importUri, callbackEach) {
+              var p = importUri.lastIndexOf("/");
+              if (p = importUri.length - 1) {
+                p = importUri.substring(0, p).lastIndexOf("/");
+              }
+              if (p < 0) {
+               journal+="wrong importUri"+importUri;
+               return callbackEach()
+              }
+              var sourceLabel = importUri.substring(p + 1);
+
+              console.log("create import source " + sourceLabel + " from uri" + importUri);
+
+
+
+
+
+              SourceIntegrator.importSourceFromTurtle(importUri, sourceLabel, {graphUri:importUri, sources:sources}, function(err, result) {
+                if (err) {
+                  journal += "******************error in import " + importUri + " " + result + "\n";
+                }
+                else {
+                  importsSources.push(sourceLabel);
+                }
+
+
+                return callbackEach();
+              });
+
+            }, function(err) {
+              return callbackSeries(err);
+            });
+
+
+          }
+          else {
+            return callbackSeries();
+          }
+        },
+
 
         //register source if not exists
         function(callbackSeries) {
@@ -447,7 +501,10 @@ if( err)
       ],
 
       function(err) {
-        return callback(err, "done");
+        journal += "DONE";
+
+        console.log(journal);
+        return callback(err, journal);
       }
     );
   }
@@ -514,8 +571,8 @@ if( err)
         array,
         function(ontologyId, callbackEach) {
           var graphUri = "http://industryportal.enit.fr/ontologies/" + ontologyId + "#";
-       //   var ontologyUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
-          var ontologyUrl="http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey="+apiKey+"&download_format=rdf"
+          //   var ontologyUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
+          var ontologyUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
 
           SourceIntegrator.getOntologyFormat(ontologyUrl, function(err, result) {
             if (err) {

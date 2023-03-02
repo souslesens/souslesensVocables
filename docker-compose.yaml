@@ -13,6 +13,7 @@ services:
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/logs:/app/logs"
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/data/CSV:/app/data/CSV"
             - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/data/mappings:/app/data/mappings"
+            - "${DATA_ROOT_DIR:-/tmp}/souslesens/vocables/jena"
         environment:
             USER_USERNAME: admin
             USER_PASSWORD: ${USER_PASSWORD}

@@ -70,14 +70,28 @@ var topOntologyPatternsMap = {
 var SourceIntegrator = {
 
   jenaParse: function(filePath, callback) {
-    var cmd = "D: && cd D:\\apache-jena-4.7.0 && java -cp \"./lib/*\"  mystest.java " + filePath;
+    var jenaPath = path.join(__dirname, "../jena/");
+
+    var cmd
+    if(process.platform === "win32")// my dev env
+      cmd="D: && cd "+jenaPath+" && java -cp \"./lib/*\"  RDF2triples.java " + filePath;
+    else
+      cmd="D: | cd "+jenaPath+" | && java -cp \"./lib/*\"  RDF2triples.java " + filePath;
+
+
+   // var cmd =jenaPath+" && java -cp \"./lib/*\"  RDF2triples.java " + filePath;
+
+   // var cmd =" && java -cp \""+jenaPath+"lib/*\"  RDF2triples.java " + filePath;
+
+
+  // var cmd = "D: && cd D:\\apache-jena-4.7.0 && java -cp \"./lib/*\"  mystest.java " + filePath;
     console.log("EXECUTING " + cmd);
     exec(cmd, { maxBuffer: 1024 * 30000 }, function(err, stdout, stderr) {
       if (err) {
         console.log(stderr);
         return callback(err);
       }
-      // console.log(stdout);
+
 
       return callback(null, stdout);
 
@@ -252,7 +266,8 @@ var SourceIntegrator = {
         if (error) {
           return callback(err);
         }
-        var filePath = "D:\\apache-jena-4.7.0\\data\\temp.rdf";
+      //  var filePath = "D:\\apache-jena-4.7.0\\data\\temp.rdf";
+        var filePath = path.join(__dirname, "../jena/data/temp.rdf");
         fs.writeFileSync(filePath, body);
         SourceIntegrator.jenaParse(filePath, function(err, triples) {
           if (err) {

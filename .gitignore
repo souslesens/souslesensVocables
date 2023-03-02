@@ -134,4 +134,4 @@ mainapp/lib
 
 /public/vocables/customPlugins/
 /jena/data/temp.rdf
-/jena/lib/*
+/jena/lib/

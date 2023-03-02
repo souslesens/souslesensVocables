@@ -79,9 +79,6 @@ var SourceIntegrator = {
       cmd="D: | cd "+jenaPath+" | && java -cp \"./lib/*\"  RDF2triples.java " + filePath;
 
 
-   // var cmd =jenaPath+" && java -cp \"./lib/*\"  RDF2triples.java " + filePath;
-
-   // var cmd =" && java -cp \""+jenaPath+"lib/*\"  RDF2triples.java " + filePath;
 
 
   // var cmd = "D: && cd D:\\apache-jena-4.7.0 && java -cp \"./lib/*\"  mystest.java " + filePath;

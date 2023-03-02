@@ -79,7 +79,7 @@ var SourceIntegrator = {
       cmd="D: | cd "+jenaPath+" | && java -cp \"./lib/*\"  RDF2triples.java " + filePath;
 
 
-  // var cmd = "D: && cd D:\\apache-jena-4.7.0 && java -cp \"./lib/*\"  mystest.java " + filePath;
+   var cmd = "D: && cd D:\\apache-jena-4.7.0 && java -cp \"./lib/*\"  mystest.java " + filePath;
     console.log("EXECUTING " + cmd);
     exec(cmd, { maxBuffer: 1024 * 30000 }, function(err, stdout, stderr) {
       if (err) {

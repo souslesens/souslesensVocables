@@ -64,9 +64,13 @@ var Lineage_combine = (function () {
             if (!node1.data) return;
             nodes.forEach(function (node2) {
                 if (!node2.data) return;
-                if (node1.data.id == node2.data.id) return;
-                if (node1.data.label == node2.data.label) commonNodes.push({ fromNode: node1, toNode: node2 });
-                if (node1.label == node2.label) commonNodes.push({ fromNode: node1, toNode: node2 });
+                if (node1.data.id == node2.data.id && node1.data.source== node2.data.source) return;
+                if (node1.data.label.toLowerCase().replace(/ /g,"") == node2.data.label.toLowerCase().replace(/ /g,"") ) {
+                    commonNodes.push({ fromNode: node1, toNode: node2 });
+                }
+                if (node1.label == node2.label){
+                    commonNodes.push({ fromNode: node1, toNode: node2 });
+                }
             });
         });
 

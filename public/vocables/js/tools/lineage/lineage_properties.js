@@ -281,23 +281,34 @@ action: function (_e) {
                         existingNodes[item.subject.value] = 1;
 
                         var shape = Lineage_classes.defaultShape;
+                        var size=Lineage_classes.defaultShapeSize
 
                         var type =item.subjectType? item.subjectType.value:"?";
                         if (type.indexOf("NamedIndividual") > -1) {
                             shape = Lineage_classes.namedIndividualShape;
                         }
 
-                        if(Config.Lineage.logicalOperatorsMap[item.prop.value]){
-                            label=Config.Lineage.logicalOperatorsMap[item.prop.value]
-                            shape="hegagon"
-                            color="#EEE"
+                        if (options.inversePredicate) {
+                            if (item.subject.type == "bnode") {
+                                label = ""
+                                shape = "circle"
+                                color = "#EEE"
+                                size=2
 
+                            }
+
+                            if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
+                                label = Config.Lineage.logicalOperatorsMap[item.prop.value]
+                                shape = "circle"
+                                color = "#EEE"
+
+                            }
                         }
                         visjsData.nodes.push({
                             id: item.subject.value,
-                            label: item.subjectLabel.value,
+                            label:label,
                             shape: shape,
-                            size: Lineage_classes.defaultShapeSize,
+                            size: size,
                             color: color,
                             data: {
                                 source: source,
@@ -313,24 +324,38 @@ action: function (_e) {
 
                         var type =item.objectType? item.objectType.value:"?";
 
+                        var size=Lineage_classes.defaultShapeSize
                         if (type.indexOf("NamedIndividual") > -1) {
                             shape = Lineage_classes.namedIndividualShape;
                         }
                         var label=item.objectLabel.value
 
-                        if(Config.Lineage.logicalOperatorsMap[item.prop.value]){
-                           label=Config.Lineage.logicalOperatorsMap[item.prop.value]
-                            shape="hegagon"
-                            color="#EEE"
+                        if (!options.inversePredicate) {
+                            if (item.object.type == "bnode") {
+                                label = ""
+                                shape = "circle"
+                                color = "#EEE"
+                                size=2
 
                             }
+
+                            if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
+                                label = Config.Lineage.logicalOperatorsMap[item.prop.value] || ""
+                                shape = "circle"
+                                color = "#EEE"
+
+
+                            }
+                        }
+
+
 
 
                         visjsData.nodes.push({
                             id: item.object.value,
                             label: label,
                             shape: shape,
-                            size: Lineage_classes.defaultShapeSize,
+                            size: size,
                             color: color,
                             data: {
                                 source: source,

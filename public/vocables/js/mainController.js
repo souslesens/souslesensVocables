@@ -81,27 +81,31 @@ var MainController = (function () {
                         data[source].sparql_server.url = Config.default_sparql_url;
                     }
                     //manage imports that are not declared as sources in sources.json : create in memory sources
-                    if (data[source].imports) {
-                        var imports2 = [];
-                        data[source].imports.forEach(function (item) {
-                            if (item.graphUri) {
-                                var importSourceName = Sparql_common.getLabelFromURI(item.graphUri);
-                                if (!item.sparql_server) {
-                                    item.sparql_server = data[source].sparql_server;
-                                } else if (item.sparql_server.url == "_default") {
-                                    item.sparql_server.url = Config.default_sparql_url;
-                                }
 
-                                item.controller = data[source].controller;
-                                if (!item.topClassFilter) {
-                                    item.topClassFilter = data[source].topClassFilter;
+                    if( false) {
+                        if (data[source].imports) {
+                            var imports2 = [];
+                            data[source].imports.forEach(function(item) {
+                                if (item.graphUri) {
+                                    var importSourceName = Sparql_common.getLabelFromURI(item.graphUri);
+                                    if (!item.sparql_server) {
+                                        item.sparql_server = data[source].sparql_server;
+                                    }
+                                    else if (item.sparql_server.url == "_default") {
+                                        item.sparql_server.url = Config.default_sparql_url;
+                                    }
+
+                                    item.controller = data[source].controller;
+                                    if (!item.topClassFilter) {
+                                        item.topClassFilter = data[source].topClassFilter;
+                                    }
+                                    data[importSourceName] = item;
+                                    imports2.push(importSourceName);
                                 }
-                                data[importSourceName] = item;
-                                imports2.push(importSourceName);
+                            });
+                            if (imports2.length > 0) {
+                                data[source].imports = imports2;
                             }
-                        });
-                        if (imports2.length > 0) {
-                            data[source].imports = imports2;
                         }
                     }
                 }
@@ -221,6 +225,13 @@ var MainController = (function () {
                             callbackSeries();
                         });
                     },
+                    function (callbackSeries) {
+                       Sparql_generic.initBasicVocabGraphs(function () {
+                            callbackSeries();
+                        });
+                    },
+
+
                 ],
                 function (_err) {
                     MainController.UI.configureUI();

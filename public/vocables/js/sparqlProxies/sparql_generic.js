@@ -382,7 +382,7 @@ var Sparql_generic = (function() {
       filterStr += Sparql_common.getUriFilter("p", predicateUri);
     }
     if (objectUri) {
-      filterStr += Sparql_common.getUriFilter("o", objectUri);
+      filterStr +=Sparql_common.getUriFilter("o", objectUri);
     }
     var graphUri = Config.sources[sourceLabel].graphUri;
     if (Array.isArray(graphUri)) {
@@ -1269,6 +1269,50 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
       );
     });
   };
+
+
+  self.initBasicVocabGraphs=function(callback){
+    var vocabs=Object.keys(Config.basicVocabGraphs)
+    let url = Config.default_sparql_url + "?format=json&query=";
+
+    async.eachSeries(vocabs,function(vocab,callbackEach){
+      var graphUri=Config.basicVocabGraphs[vocab].graphUri
+      var query="PREFIX "+vocab+": <"+graphUri+"> ";
+      query+="select distinct ?prop ?propLabel FROM <"+graphUri+"> where{ ?sub ?prop ?obj.OPTIONAL{ ?prop rdfs:label ?propLabel}}"
+
+
+      Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {  }, function(err, result) {
+        if (err) {
+          return callbackEach(err);
+        }
+       result.results.bindings.forEach(function(item) {
+         Config.basicVocabGraphs[vocab].properties.push({ id: item.prop.value, label: (item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value)) })
+       })
+
+
+        var query="PREFIX "+vocab+": <"+graphUri+"> ";
+        query+="select distinct ?sub ?subLabel FROM <"+graphUri+"> where{ ?sub ?prop ?obj.OPTIONAL{ ?sub rdfs:label ?subLabel}}"
+
+
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { }, function(err, result) {
+          if (err) {
+            return callbackEach(err);
+          }
+          result.results.bindings.forEach(function(item) {
+            Config.basicVocabGraphs[vocab].classes.push({ id: item.sub.value, label: (item.subLabel ? item.subLabel.value : Sparql_common.getLabelFromURI(item.sub.value)) })
+          })
+
+          callbackEach()
+        });
+
+      });
+
+
+    },function(err){
+      if(callback)
+       return  callback(err)
+    })
+  }
 
   return self;
 })();

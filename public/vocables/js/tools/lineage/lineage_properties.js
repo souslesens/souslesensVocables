@@ -40,15 +40,7 @@ Lineage_properties = (function () {
             },
         };
         if (MainController.currentTool == "lineage") {
-            /* items.drawRangesAndDomainsProperty = {
-label: "Draw ranges and domains",
-action: function (_e) {
-  // pb avec source
-  setTimeout(function () {
-      self.drawRangeAndDomainsGraph(self.currentTreeNode);
-  }, 200);
-},
-};*/
+
             items.copyNodeToClipboard = {
                 label: "copy to Clipboard",
                 action: function (_e) {
@@ -146,6 +138,7 @@ action: function (_e) {
         }
         if (words) {
             options.words = words;
+
         }
         options.whitoutImports = true;
         var distinctIds = {};
@@ -186,6 +179,11 @@ action: function (_e) {
                 },
 
                 function (callbackSeries) {
+
+                return  callbackSeries(null);
+
+
+
                     options = { distinct: "?prop ?Label" };
                     Sparql_OWL.getFilteredTriples(source, null, null, null, options, function (err, result) {
                         if (err) {
@@ -232,6 +230,8 @@ action: function (_e) {
      * @param nodeData
      */
     self.drawPredicatesGraph = function (source, nodeIds, properties, options, callback) {
+        if(!options)
+            options={}
         if (nodeIds && !Array.isArray(nodeIds)) {
             nodeIds = [nodeIds];
         }
@@ -421,8 +421,9 @@ action: function (_e) {
         });
     };
 
-    self.drawObjectPropertiesRestrictions = function (source, nodeIds, properties) {
-        var options = {};
+    self.drawObjectPropertiesRestrictions = function (source, nodeIds, properties,options) {
+       if(!options)
+           options = {};
 
         if (nodeIds && nodeIds.length > 0) {
             options.filter = Sparql_common.setFilter("sourceClass", nodeIds);
@@ -543,7 +544,7 @@ action: function (_e) {
         if (visjsGraph.data && visjsGraph.data.nodes && nodesSelection == "currentGraphNodes") {
             targetnodes = visjsGraph.data.nodes.getIds();
         }
-        self.getPropertiesRangeAndDomain(source, property, function (err, result) {
+        self.getPropertiesRangeAndDomain(source, property, {},function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -595,8 +596,8 @@ action: function (_e) {
      *
      * @param property : a specific property uri or null (all)
      */
-    self.drawRangeAndDomainsGraph = function (source, targetnodes, property) {
-        self.getPropertiesRangeAndDomain(source, property, function (err, result) {
+    self.drawRangeAndDomainsGraph = function (source, targetnodes,options, property) {
+        self.getPropertiesRangeAndDomain(source, property, options,function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -928,9 +929,10 @@ action: function (_e) {
      *           item.inverseProperty
      *           item.subProperties
      */
-    self.getPropertiesRangeAndDomain = function (source, properties, callback) {
+    self.getPropertiesRangeAndDomain = function (source, properties,options, callback) {
         if (Config.sources[source].schemaType == "OWL") {
-            var options = {};
+           if(!options)
+               options = {};
             var mode = $("#LineagePropertie_nodesSelectionSelect").val();
             var filterNodes = null;
             if (mode == "currentGraphNodes") {
@@ -947,10 +949,14 @@ action: function (_e) {
 
                 for (var propId in result) {
                     var item = result[propId];
-                    if (!filterNodes || filterNodes.indexOf(item.domain) > -1 || filterNodes.indexOf(item.range) > -1) {
+                    if (filterNodes ){
+                    if( (filterNodes.indexOf(item.domain) > -1 || filterNodes.indexOf(item.range) > -1)) {
                         if (!properties || properties.indexOf(item.prop) > -1) {
                             allProps.push(item);
                         }
+                    }
+                    }else{
+                        allProps.push(item);
                     }
                 }
 
@@ -1010,9 +1016,14 @@ action: function (_e) {
 
         if (!term || term == "") {
             term == null;
-        } else if (!exactMatch && term.indexOf("*") < 0) {
-            term += "*";
+        } else {
+            if(term.indexOf("*")>-1) {
+                exactMatch = false
+                $("#LineageProperties_allExactMatchSearchCBX").removeProp("checked");
+            }
+            term = term.replace("*", "")
         }
+
 
         var searchedSources = [];
         if (searchAllSources) {
@@ -1211,6 +1222,7 @@ action: function (_e) {
                 };
                 if (!nodeIds) {
                     options.allNodes = true;
+                    options.withoutImports=true;
                 }
                 Lineage_relations.drawRelations(null, null, "Properties", options);
                 // Lineage_properties.drawPredicatesGraph(source, nodeIds, properties);
@@ -1224,19 +1236,19 @@ action: function (_e) {
                 return alert("You must select properties or nodes to show predicates");
             }
             if (target == "visj") {
-                Lineage_properties.drawPredicatesGraph(source, nodeIds, properties);
+                Lineage_properties.drawPredicatesGraph(source, nodeIds, properties,{withoutImports:true});
             } else if (target == "table") {
                 //  Lineage_classes.graphNodeNeighborhood(data, "outcoming", function(err, result) {
             }
         } else if (action == "restrictions") {
             if (target == "visj") {
-                Lineage_properties.drawObjectPropertiesRestrictions(source, nodeIds, properties);
+                Lineage_properties.drawObjectPropertiesRestrictions(source, nodeIds, properties,{withoutImports:true});
             } else if (target == "table") {
-                Lineage_properties.drawObjectPropertiesRestrictions(source, nodeIds, properties);
+                Lineage_properties.drawObjectPropertiesRestrictions(source, nodeIds, properties,{withoutImports:true});
             }
         } else if (action == "rangesAndDomains") {
             if (target == "visj") {
-                self.drawRangeAndDomainsGraph(source, nodeIds, properties);
+                self.drawRangeAndDomainsGraph(source, nodeIds,{withoutImports:true}, properties);
             } else if (target == "table") {
                 self.exportRangeAndDomainsGraph(source, nodeIds, properties);
             }

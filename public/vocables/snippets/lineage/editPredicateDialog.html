@@ -1,34 +1,28 @@
 <div style="display: flex;flex-direction: column;    justify-content: flex-start;margin:5px">
 
-  <div>Property</div>
-  <div> common<select id="sourceBrowser_addPropertyPredicateSelect"
-                      onchange="SourceBrowser.onSelectPredicateProperty($(this).val())"></select></div>
-  <div>others<select id="sourceBrowser_basicVocabGraphsSelect"
-                     onchange="SourceBrowser.setCurrentVocabPropertiesSelect($(this).val())"></select>
-    <select id="sourceBrowser_basicVocabPredicateSelect"
-            onchange="SourceBrowser.onSelectPredicateProperty($(this).val())"></select>
+  <div><b>Property</b></div>
+  <div>vocabulary <select id="sourceBrowser_vocabularySelect"  style="min-width: 100px;background-color: #ddd"
+                                                 onchange="SourceBrowser.setCurrentVocabPropertiesSelect($(this).val())"></select>
+ <select id="sourceBrowser_currentVocabPredicateSelect" style="min-width: 200px;background-color: #ddd"
+               onchange="SourceBrowser.onSelectPredicateProperty($(this).val())"></select>
   </div>
   <input id="sourceBrowser_addPropertyPredicateValue" style="width:350px"><br>
 </div>
 <div style="display: flex;flex-direction: column; justify-content: flex-start;margin:5px">
-  <div>Object</div>
+  <div><b>Object</b> &nbsp;<button class="btn btn-sm my-1 py-0 btn-outline-primary" id="SourceBrowser_savePredicateButton"><b>Save</b>
+  </button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="SourceBrowser.hideAddPredicateDiv()"><b>cancel</b>
+    </button>
+  </div>
   <div>
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary"
-            onclick="KGcreator.fillObjectOptionsFromPrompt(null,'sourceBrowser_addPropertyObjectSelect')"> Search...
-    </button>
-    <select id="sourceBrowser_addPropertyObjectSelect" style="width: 200px;background-color: #eee;"
-            onclick="SourceBrowser.onSelectPredicateObject($(this).val())"></select>&nbsp;
+    vocabulary<select id="sourceBrowser_vocabularySelect2"  style="min-width: 100px;background-color: #ddd"
+                      onchange="SourceBrowser.setCurrentVocabClassesSelect($(this).val())"></select>&nbsp;
+
+    <select id="sourceBrowser_currentVocabObjectSelect" style="min-width: 200px;background-color: #ddd"
+            onchange="SourceBrowser.onSelectCurrentVocabObject($(this).val())"></select>
   </div>
-  <div> others<select id="sourceBrowser_basicVocabGraphsSelect2"
-                      onchange="SourceBrowser.setBasicVocabObjectsSelect($(this).val())"></select>
-    <select id="sourceBrowser_basicVocabObjectSelect"
-            onchange="SourceBrowser.onSelectPredicateObject($(this).val())"></select>
-  </div>
-<div>
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="SourceBrowser_savePredicateButton"><b>Save</b>
-    </button>
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="SourceBrowser.hideAddPredicateDiv"><b>cancel</b>
-    </button>
+  <div>
+
 
   </div>
   <textarea id="sourceBrowser_addPropertyValue" style="width:550px"></textarea>&nbsp;

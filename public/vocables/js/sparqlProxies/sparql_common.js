@@ -292,7 +292,7 @@ var Sparql_common = (function() {
 
 
         let isLiteral = true;
-        if (item.indexOf("http") == 0 || (item.indexOf(":") > 0 && value.indexOf(" ") < 0)) {
+        if (item.indexOf("http") == 0 || (item.indexOf(":") > 0 && item.indexOf(" ") < 0)) {
           isLiteral = false;
         }
 

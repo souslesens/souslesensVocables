@@ -429,7 +429,7 @@ var Sparql_generic = (function() {
       }
 
       var array = elt.split(":");
-      if (array.length > 1 && allowedPrefixes.indexOf(array[0])==0) {
+      if (array.length ==2 && allowedPrefixes.indexOf(array[0])>-1) {
         return elt;
       }
 

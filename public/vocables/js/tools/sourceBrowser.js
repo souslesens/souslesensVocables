@@ -1125,7 +1125,7 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
   self.onSelectPredicateProperty = function(value) {
     $("#sourceBrowser_addPropertyPredicateValue").val(value);
   };
-  self.onSelectPredicateObject = function(value) {
+  self.onSelectCurrentVocabObject = function(value) {
     if (value.indexOf("xsd") == 0) {
       if (value == "xsd:dateTime") {
         common.setDatePickerOnInput("sourceBrowser_addPropertyValue");
@@ -1630,61 +1630,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
     }
   };
 
-  self.hideAddPredicateDiv = function() {
-    $("#sourceBrowser_addPropertyDiv").css("display", "none");
-  };
-  self.showAddPredicateDiv = function() {
-    $("#sourceBrowser_addPropertyDiv").css("display", "flex");
-    $("#sourceBrowser_addPropertyPredicateValue").prop("disabled", false);
-    $("#sourceBrowser_addPropertyPredicateSelect").prop("disabled", false);
-    $("#sourceBrowser_addPropertyObjectSelect").prop("disabled", false);
 
-   // var basicVocabs = Object.keys(Config.basicVocabGraphs);
-    var basicVocabs=["usual","currentOntology","topLevelOntology" ].concat(Object.keys(Config.basicVocabGraphs));
-
-
-    common.fillSelectOptions("sourceBrowser_basicVocabGraphsSelect", basicVocabs, true);
-    common.fillSelectOptions("sourceBrowser_basicVocabGraphsSelect2", basicVocabs, true);
-
-
-    $("#SourceBrowser_savePredicateButton").click(function() {
-      SourceBrowser.addPredicate();
-    });
-    var properties = Config.Lineage.basicObjectProperties;
-
-    KGcreator.fillPredicatesSelect(Lineage_sources.activeSource, "sourceBrowser_addPropertyPredicateSelect", { usualProperties: true }, function(err) {
-
-      Lineage_upperOntologies.getTopOntologyClasses(Config.currentTopLevelOntology, {}, function(err, result) {
-        if (err) {
-          return callbackSeries(err.responseText);
-        }
-        var usualObjectClasses = [];
-        KGcreator.usualObjectClasses.forEach(function(item) {
-          usualObjectClasses.push({
-            id: item,
-            label: item
-          });
-        });
-
-        usualObjectClasses = usualObjectClasses.concat({ id: "", label: "--------" })
-          .concat(result)
-          .concat({ id: "", label: "--------" });
-
-        KGcreator.xsdTypes.forEach(function(item) {
-          usualObjectClasses.push({
-            id: item,
-            label: item
-          });
-        });
-
-        common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", usualObjectClasses, true, "label", "id");
-
-      });
-
-    });
-
-    //  });
-  };
 
   self.deletePredicate = function(predicateId) {
     var currentEditingItem = self.predicatesIdsMap[predicateId];
@@ -1733,6 +1679,8 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
           }
           self.showNodeInfos(self.currentSource, self.currentNode, "mainDialogDiv");
 
+          var property=currentEditingItem.item.prop.value
+          var value=currentEditingItem.item.value.value
           if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
             Lineage_classes.deleteEdge(self.currentNodeId, value, property);
           }
@@ -1923,7 +1871,7 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     }
     self.showAddPredicateDiv();
     $("#SourceBrowser_savePredicateButton").click(function() {
-      SourceBrowser.modifyPredicateValue();
+      SourceBrowser.updatePredicateValue();
     });
     $("#sourceBrowser_addPropertyPredicateValue").prop("disabled", true);
     $("#sourceBrowser_addPropertyPredicateSelect").prop("disabled", true);
@@ -1932,11 +1880,13 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
 
     $("#sourceBrowser_addPropertyPredicateValue").val(self.currentEditingItem.item.prop.value);
     $("#sourceBrowser_addPropertyValue").val(self.currentEditingItem.item.value.value);
+var h=Math.max((self.currentEditingItem.item.value.value.length/80)*30,50)
+    $("#sourceBrowser_addPropertyValue").css("height",h+"px")
 
 
   };
 
-  self.modifyPredicateValue = function() {
+  self.updatePredicateValue = function() {
     if (!self.currentEditingItem) {
       return;
     }
@@ -1945,7 +1895,9 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     var newValue = $("#sourceBrowser_addPropertyValue").val();
 
     var oldValue = self.currentEditingItem.item.value.value;
-
+    if (self.currentEditingItem.item.value.type == "literal") {
+      oldValue = { isString: true,value:oldValue };
+    }
     Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, self.currentEditingItem.item.prop.value, oldValue, function(err, _result) {
       if (err) {
         return alert(err);
@@ -1954,7 +1906,7 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
         if (err) {
           return alert(err.responseText);
         }
-        if (self.currentEditingItem.item.prop.value.indexOf("label" > -1)) {
+        if (self.currentEditingItem.item.prop.value.indexOf("label") > -1) {
           if (self.currentNodeId.from) {
             var jstreeNode = common.jstree.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNode.data.id);
             if (jstreeNode) {
@@ -1976,6 +1928,8 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
 
   };
 
+  
+  
 
   self.setCurrentVocabPropertiesSelect = function(basicVocab) {
     var properties=[]
@@ -2009,7 +1963,7 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
           { label: item.propertyLabel.value, id: item.property.value }
         );
       });
-      common.fillSelectOptions("sourceBrowser_basicVocabPredicateSelect", properties, true, "label", "id");
+      common.fillSelectOptions("sourceBrowser_currentVocabPredicateSelect", properties, true, "label", "id");
     })
   }
   else if(basicVocab=="topLevelOntology"){
@@ -2025,7 +1979,7 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
           var item = result[key];
           properties.push({ label: (prefix + ":" + item.propLabel), id: item.prop });
         }
-        common.fillSelectOptions("sourceBrowser_basicVocabPredicateSelect", properties, true, "label", "id");
+        common.fillSelectOptions("sourceBrowser_currentVocabPredicateSelect", properties, true, "label", "id");
 
       })
     }else
@@ -2035,16 +1989,115 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
        properties = Config.basicVocabGraphs[basicVocab].properties;
     }
 
-    common.fillSelectOptions("sourceBrowser_basicVocabPredicateSelect", properties, true, "label", "id");
+    common.fillSelectOptions("sourceBrowser_currentVocabPredicateSelect", properties, true, "label", "id");
   };
 
+  
+  
+  
+  
+  
 
-  self.setBasicVocabObjectsSelect = function(basicVocab) {
-    var classes = Config.basicVocabGraphs[basicVocab].classes;
-    common.fillSelectOptions("sourceBrowser_basicVocabObjectSelect", classes, true, "label", "id");
+  self.setCurrentVocabClassesSelect = function(basicVocab) {
+
+var classes=[]
+    if(basicVocab=="usual"){
+      KGcreator.usualObjectClasses.forEach(function(item) {
+        classes.push({
+          id: item,
+          label: item
+        });
+      });
+
+    }else if(basicVocab=="currentOntology"){
+     return  KGcreator.fillObjectOptionsFromPrompt(null,'sourceBrowser_currentVocabObjectSelect')
+   
+    }
+    else if(basicVocab=="topLevelOntology"){
+      if(Config.currentTopLevelOntology) {
+        Lineage_upperOntologies.getTopOntologyClasses(Config.currentTopLevelOntology, {}, function(err, result) {
+          if (err) {
+            return callbackSeries(err.responseText);
+          }
+          classes=result;
+
+          return common.fillSelectOptions("sourceBrowser_currentVocabObjectSelect", classes, true, "label", "id");
+        })
+      }else
+        return alert ("no topLevelOntology for this ontology")
+
+    }else {
+
+
+      var classes = Config.basicVocabGraphs[basicVocab].classes;
+    }
+      common.fillSelectOptions("sourceBrowser_currentVocabObjectSelect", classes, true, "label", "id");
 
   }
 
+
+
+  self.hideAddPredicateDiv = function() {
+    $("#sourceBrowser_addPropertyDiv").css("display", "none");
+  };
+  self.showAddPredicateDiv = function() {
+    $("#sourceBrowser_addPropertyDiv").css("display", "flex");
+    $("#sourceBrowser_addPropertyPredicateValue").prop("disabled", false);
+    $("#sourceBrowser_addPropertyPredicateSelect").prop("disabled", false);
+    $("#sourceBrowser_addPropertyObjectSelect").prop("disabled", false);
+
+
+    var basicVocabs=["usual","currentOntology", ]
+     if(Config.currentTopLevelOntology)
+       basicVocabs.push("topLevelOntology")
+    basicVocabs=basicVocabs.concat(Object.keys(Config.basicVocabGraphs));
+
+    common.fillSelectOptions("sourceBrowser_vocabularySelect", basicVocabs, true);
+    common.fillSelectOptions("sourceBrowser_vocabularySelect2", basicVocabs, true);
+    self.setCurrentVocabClassesSelect("usual")
+    self.setCurrentVocabPropertiesSelect("usual")
+
+  $("#sourceBrowser_vocabularySelect").val("usual")
+    $("#sourceBrowser_vocabularySelect2").val("usual")
+
+    $("#SourceBrowser_savePredicateButton").click(function() {
+      SourceBrowser.addPredicate();
+    });
+    var properties = Config.Lineage.basicObjectProperties;
+
+  /* KGcreator.fillPredicatesSelect(Lineage_sources.activeSource, "sourceBrowser_addPropertyPredicateSelect", { usualProperties: true }, function(err) {
+
+      Lineage_upperOntologies.getTopOntologyClasses(Config.currentTopLevelOntology, {}, function(err, result) {
+        if (err) {
+          return callbackSeries(err.responseText);
+        }
+        var usualObjectClasses = [];
+        KGcreator.usualObjectClasses.forEach(function(item) {
+          usualObjectClasses.push({
+            id: item,
+            label: item
+          });
+        });
+
+        usualObjectClasses = usualObjectClasses.concat({ id: "", label: "--------" })
+          .concat(result)
+          .concat({ id: "", label: "--------" });
+
+        KGcreator.xsdTypes.forEach(function(item) {
+          usualObjectClasses.push({
+            id: item,
+            label: item
+          });
+        });
+
+        common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", usualObjectClasses, true, "label", "id");
+
+      });
+
+    });*/
+
+
+  };
 
   return self;
 })

@@ -30,15 +30,18 @@
             <div><input type="radio" name="lineageRelations_relDirection" value="inverse" />inverse</div>
             <div><input type="radio" name="lineageRelations_relDirection" value="both" checked="checked" />both</div>
         </div>
+        <div class="lineageRelations_div">
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.onshowDrawRelationsDialogValidate()">Draw</button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.onshowDrawRelationsDialogValidate('clear')">Clear</button>
+        </div>
     </div>
 
     <div>
-        Properties
-        <div style="width: 350px; height: 450px">
+        <B>Properties</B> search<input id="LineageRelations_searchJsTreeInput">
+        <div style="width: 450px; height: 550px">
             <div id="lineageRelations_propertiesJstreeDiv"></div>
         </div>
-
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.onshowDrawRelationsDialogValidate()">Draw</button>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.onshowDrawRelationsDialogValidate('clear')">Clear</button>
+        <input type="checkbox" id="Lineage_classes_excludeRelationsFromGraphSpatializationCBX"  checked="checked"> exclude relations from graph spatialization
+        </div>
     </div>
 </div>

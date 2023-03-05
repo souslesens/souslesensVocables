@@ -1285,11 +1285,18 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
     let url = Config.default_sparql_url + "?format=json&query=";
 
     async.eachSeries(vocabs,function(vocab,callbackEach){
-      var graphUri=Config.basicVocabGraphs[vocab].graphUri
-      var query="PREFIX "+vocab+": <"+graphUri+"> ";
-      query+="select distinct ?prop ?propLabel FROM <"+graphUri+"> where{ ?sub ?prop ?obj.OPTIONAL{ ?prop rdfs:label ?propLabel}}"
+      var graphUri=Config.basicVocabGraphs[vocab].graphUri;
 
+    /*  var query="PREFIX "+vocab+": <"+graphUri+"> ";
+      query+=" PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+      query+="  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
+      query+="select distinct ?prop ?propLabel FROM <"+graphUri+"> where{  ?prop rdf:type rdf:Property.OPTIONAL{ ?prop rdfs:label ?propLabel}}"*/
 
+var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+  "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+  "SELECT distinct ?prop ?propLabel from <"+graphUri+">  WHERE {\n" +
+  "  ?prop rdf:type rdf:Property optional{?prop rdfs:label ?proplabel}\n" +
+  "} "
       Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {  }, function(err, result) {
         if (err) {
           return callbackEach(err);
@@ -1300,7 +1307,9 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
 
         var query="PREFIX "+vocab+": <"+graphUri+"> ";
-        query+="select distinct ?sub ?subLabel FROM <"+graphUri+"> where{ ?sub ?prop ?obj.OPTIONAL{ ?sub rdfs:label ?subLabel}}"
+        query+=" PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
+        query+="  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
+        query+="select distinct ?sub ?subLabel FROM <"+graphUri+"> where{ ?sub rdf:type rdfs:Class.OPTIONAL{ ?sub rdfs:label ?subLabel}}"
 
 
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { }, function(err, result) {

@@ -830,7 +830,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
             setNodesLevel(visjsData);
 
-            if (!visjsGraph.data || !visjsGraph.data.nodes) {
+            if (!visjsGraph.isGraphNotEmpty()) {
               Lineage_classes.drawNewGraph(visjsData);
             }
             else {

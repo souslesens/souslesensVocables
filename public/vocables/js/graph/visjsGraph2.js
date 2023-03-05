@@ -326,10 +326,13 @@ var visjsGraph = (function () {
         // comment ca marche  bad doc???
 
         if (self.data && self.data.nodes) {
-            var edges = self.data.edges.getIds();
-            if (edges.lengt > 0) self.data.edges.remove(edges);
+          //  var edges = self.data.edges.getIds();
+            self.data.edges.clear();
+            self.data.nodes.clear();
+          //  if (edges.length > 0) self.data.edges.remove(edges);
             var nodes = self.data.nodes.getIds();
-            if (nodes.length > 0) self.data.nodes.remove(nodes);
+            var edges = self.data.edges.getIds();
+           // if (nodes.length > 0) self.data.nodes.remove(nodes);
         }
         self.data = null;
     };

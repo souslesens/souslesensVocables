@@ -1631,7 +1631,6 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
   };
 
 
-
   self.deletePredicate = function(predicateId) {
     var currentEditingItem = self.predicatesIdsMap[predicateId];
     if (confirm("delete predicate")) {
@@ -1642,7 +1641,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
           function(callbackSeries) {
 
             var object = currentEditingItem.item.value.value;
-            if (currentEditingItem.item.value.type == "literal"){
+            if (currentEditingItem.item.value.type == "literal") {
               object = { isString: true, value: currentEditingItem.item.value.value };
             }
             Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, currentEditingItem.item.prop.value, object, function(err, _result) {
@@ -1679,8 +1678,8 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
           }
           self.showNodeInfos(self.currentSource, self.currentNode, "mainDialogDiv");
 
-          var property=currentEditingItem.item.prop.value
-          var value=currentEditingItem.item.value.value
+          var property = currentEditingItem.item.prop.value;
+          var value = currentEditingItem.item.value.value;
           if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
             Lineage_classes.deleteEdge(self.currentNodeId, value, property);
           }
@@ -1873,15 +1872,19 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     $("#SourceBrowser_savePredicateButton").click(function() {
       SourceBrowser.updatePredicateValue();
     });
+    $("#sourceBrowser_currentVocabPredicateSelect").prop("disabled", true);
+    $("#sourceBrowser_vocabularySelect").prop("disabled", true);
     $("#sourceBrowser_addPropertyPredicateValue").prop("disabled", true);
-    $("#sourceBrowser_addPropertyPredicateSelect").prop("disabled", true);
-    self.currentEditingItem.item.value.type == "literal";
-    $("#sourceBrowser_addPropertyObjectSelect").prop("disabled", true);
+
+    //  $("#sourceBrowser_addPropertyObjectSelect").prop("disabled", true);
+    //  self.currentEditingItem.item.value.type == "literal";
 
     $("#sourceBrowser_addPropertyPredicateValue").val(self.currentEditingItem.item.prop.value);
     $("#sourceBrowser_addPropertyValue").val(self.currentEditingItem.item.value.value);
-var h=Math.max((self.currentEditingItem.item.value.value.length/80)*30,50)
-    $("#sourceBrowser_addPropertyValue").css("height",h+"px")
+    var h = Math.max((self.currentEditingItem.item.value.value.length / 80) * 30, 50);
+    $("#sourceBrowser_addPropertyValue").css("height", h + "px");
+
+    $("#sourceBrowser_addPropertyValue").focus()
 
 
   };
@@ -1896,7 +1899,7 @@ var h=Math.max((self.currentEditingItem.item.value.value.length/80)*30,50)
 
     var oldValue = self.currentEditingItem.item.value.value;
     if (self.currentEditingItem.item.value.type == "literal") {
-      oldValue = { isString: true,value:oldValue };
+      oldValue = { isString: true, value: oldValue };
     }
     Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, self.currentEditingItem.item.prop.value, oldValue, function(err, _result) {
       if (err) {
@@ -1928,177 +1931,111 @@ var h=Math.max((self.currentEditingItem.item.value.value.length/80)*30,50)
 
   };
 
-  
-  
 
-  self.setCurrentVocabPropertiesSelect = function(basicVocab) {
-    var properties=[]
-  if(basicVocab=="usual"){
-    KGcreator.usualProperties.forEach(function(item) {
-      properties.push({ label: item, id: item });
-    });
-    properties.push({ label: "-------", id: "" });
-
-  }else if(basicVocab=="currentOntology"){
-    Sparql_OWL.getObjectProperties(Lineage_sources.activeSource, { withoutImports: 1 }, function(err, result) {
-
-      if (err) {
-        callback(err);
-      }
-      result.sort(function(a, b) {
-        if (!a.propertyLabel || !b.propertyLabel) {
-          return 0;
-        }
-        if (a.propertyLabel.value > b.propertyLabel.value) {
-          return 1;
-        }
-        if (a.propertyLabel.value < b.propertyLabel.value) {
-          return -1;
-        }
-        return 0;
+  self.setCurrentVocabPropertiesSelect = function(vocabulary) {
+    var properties = [];
+    if (vocabulary == "usual") {
+      KGcreator.usualProperties.forEach(function(item) {
+        properties.push({ label: item, id: item });
       });
-
-      result.forEach(function(item) {
-        properties.push(
-          { label: item.propertyLabel.value, id: item.property.value }
-        );
-      });
+      properties.push({ label: "-------", id: "" });
       common.fillSelectOptions("sourceBrowser_currentVocabPredicateSelect", properties, true, "label", "id");
-    })
-  }
-  else if(basicVocab=="topLevelOntology"){
-    if(Config.currentTopLevelOntology) {
 
-      Lineage_upperOntologies.getUpperOntologyObjectPropertiesDescription(Config.currentTopLevelOntology, false, function(err, result) {
-        if (err) {
-          return alert(err.responseText);
-        }
-
-        var prefix = "";//Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
-        for (var key in result) {
-          var item = result[key];
-          properties.push({ label: (prefix + ":" + item.propLabel), id: item.prop });
-        }
+    }else  if (Config.basicVocabGraphs[vocabulary]) {
+        properties = Config.basicVocabGraphs[vocabulary].properties;
         common.fillSelectOptions("sourceBrowser_currentVocabPredicateSelect", properties, true, "label", "id");
+      }
+      else {
+        Sparql_OWL.getObjectProperties(vocabulary, { withoutImports: 1 }, function(err, result) {
 
-      })
-    }else
-      return alert ("no topLevelOntology for this ontology")
-
-    }else {
-       properties = Config.basicVocabGraphs[basicVocab].properties;
-    }
-
-    common.fillSelectOptions("sourceBrowser_currentVocabPredicateSelect", properties, true, "label", "id");
-  };
-
-  
-  
-  
-  
-  
-
-  self.setCurrentVocabClassesSelect = function(basicVocab) {
-
-var classes=[]
-    if(basicVocab=="usual"){
-      KGcreator.usualObjectClasses.forEach(function(item) {
-        classes.push({
-          id: item,
-          label: item
-        });
-      });
-
-    }else if(basicVocab=="currentOntology"){
-     return  KGcreator.fillObjectOptionsFromPrompt(null,'sourceBrowser_currentVocabObjectSelect')
-   
-    }
-    else if(basicVocab=="topLevelOntology"){
-      if(Config.currentTopLevelOntology) {
-        Lineage_upperOntologies.getTopOntologyClasses(Config.currentTopLevelOntology, {}, function(err, result) {
           if (err) {
-            return callbackSeries(err.responseText);
+            callback(err);
           }
-          classes=result;
+          result.sort(function(a, b) {
+            if (!a.propertyLabel || !b.propertyLabel) {
+              return 0;
+            }
+            if (a.propertyLabel.value > b.propertyLabel.value) {
+              return 1;
+            }
+            if (a.propertyLabel.value < b.propertyLabel.value) {
+              return -1;
+            }
+            return 0;
+          });
 
-          return common.fillSelectOptions("sourceBrowser_currentVocabObjectSelect", classes, true, "label", "id");
-        })
-      }else
-        return alert ("no topLevelOntology for this ontology")
+          result.forEach(function(item) {
+            properties.push(
+              { label: item.propertyLabel.value, id: item.property.value }
+            );
+          });
+          common.fillSelectOptions("sourceBrowser_currentVocabPredicateSelect", properties, true, "label", "id");
+        });
+      }
 
-    }else {
 
-
-      var classes = Config.basicVocabGraphs[basicVocab].classes;
     }
-      common.fillSelectOptions("sourceBrowser_currentVocabObjectSelect", classes, true, "label", "id");
-
-  }
 
 
 
-  self.hideAddPredicateDiv = function() {
-    $("#sourceBrowser_addPropertyDiv").css("display", "none");
-  };
-  self.showAddPredicateDiv = function() {
-    $("#sourceBrowser_addPropertyDiv").css("display", "flex");
-    $("#sourceBrowser_addPropertyPredicateValue").prop("disabled", false);
-    $("#sourceBrowser_addPropertyPredicateSelect").prop("disabled", false);
-    $("#sourceBrowser_addPropertyObjectSelect").prop("disabled", false);
+    self.setCurrentVocabClassesSelect = function(vocabulary) {
 
-
-    var basicVocabs=["usual","currentOntology", ]
-     if(Config.currentTopLevelOntology)
-       basicVocabs.push("topLevelOntology")
-    basicVocabs=basicVocabs.concat(Object.keys(Config.basicVocabGraphs));
-
-    common.fillSelectOptions("sourceBrowser_vocabularySelect", basicVocabs, true);
-    common.fillSelectOptions("sourceBrowser_vocabularySelect2", basicVocabs, true);
-    self.setCurrentVocabClassesSelect("usual")
-    self.setCurrentVocabPropertiesSelect("usual")
-
-  $("#sourceBrowser_vocabularySelect").val("usual")
-    $("#sourceBrowser_vocabularySelect2").val("usual")
-
-    $("#SourceBrowser_savePredicateButton").click(function() {
-      SourceBrowser.addPredicate();
-    });
-    var properties = Config.Lineage.basicObjectProperties;
-
-  /* KGcreator.fillPredicatesSelect(Lineage_sources.activeSource, "sourceBrowser_addPropertyPredicateSelect", { usualProperties: true }, function(err) {
-
-      Lineage_upperOntologies.getTopOntologyClasses(Config.currentTopLevelOntology, {}, function(err, result) {
-        if (err) {
-          return callbackSeries(err.responseText);
-        }
-        var usualObjectClasses = [];
+      var classes = [];
+      if (vocabulary == "usual") {
         KGcreator.usualObjectClasses.forEach(function(item) {
-          usualObjectClasses.push({
+          classes.push({
             id: item,
             label: item
           });
         });
+        common.fillSelectOptions("sourceBrowser_currentVocabObjectSelect", classes, true, "label", "id");
 
-        usualObjectClasses = usualObjectClasses.concat({ id: "", label: "--------" })
-          .concat(result)
-          .concat({ id: "", label: "--------" });
+      }
+      else if (Config.basicVocabGraphs[vocabulary]) {
+        var classes = Config.basicVocabGraphs[vocabulary].classes;
+        common.fillSelectOptions("sourceBrowser_currentVocabObjectSelect", classes, true, "label", "id");
 
-        KGcreator.xsdTypes.forEach(function(item) {
-          usualObjectClasses.push({
-            id: item,
-            label: item
-          });
-        });
+      }
 
-        common.fillSelectOptions("sourceBrowser_addPropertyObjectSelect", usualObjectClasses, true, "label", "id");
+      else {
+        return KGcreator.fillObjectOptionsFromPrompt(null, "sourceBrowser_currentVocabObjectSelect", vocabulary);
+      }
+    };
 
+
+    self.hideAddPredicateDiv = function() {
+      $("#sourceBrowser_addPropertyDiv").css("display", "none");
+    };
+    self.showAddPredicateDiv = function() {
+      $("#sourceBrowser_addPropertyDiv").css("display", "flex");
+
+      $("#sourceBrowser_currentVocabPredicateSelect").prop("disabled", false);
+      $("#sourceBrowser_vocabularySelect").prop("disabled", false);
+      $("#sourceBrowser_addPropertyPredicateValue").prop("disabled", false);
+
+
+      var vocabularies = ["usual", Lineage_sources.activeSource];
+      vocabularies = vocabularies.concat(Config.sources[Lineage_sources.activeSource].imports);
+      vocabularies = vocabularies.concat(Object.keys(Config.basicVocabGraphs));
+
+      common.fillSelectOptions("sourceBrowser_vocabularySelect", vocabularies, true);
+      common.fillSelectOptions("sourceBrowser_vocabularySelect2", vocabularies, true);
+      self.setCurrentVocabClassesSelect("usual");
+      self.setCurrentVocabPropertiesSelect("usual");
+
+      $("#sourceBrowser_vocabularySelect").val("usual");
+      $("#sourceBrowser_vocabularySelect2").val("usual");
+
+      $("#SourceBrowser_savePredicateButton").click(function() {
+        SourceBrowser.addPredicate();
       });
+      var properties = Config.Lineage.basicObjectProperties;
 
-    });*/
 
 
-  };
 
-  return self;
-})
-();
+    };
+
+    return self;
+  })
+  ();

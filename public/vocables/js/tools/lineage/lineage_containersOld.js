@@ -609,7 +609,7 @@ Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentCont
                             }
                         }
                     });
-                    if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                    if (!visjsGraph.isGraphNotEmpty()) {
                         Lineage_classes.drawNewGraph(visjsData);
                     } else {
                         visjsGraph.data.nodes.add(visjsData.nodes);
@@ -906,7 +906,7 @@ Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentCont
                         });
                     }
 
-                    if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                    if (!visjsGraph.isGraphNotEmpty()) {
                         Lineage_classes.drawNewGraph(visjsData);
                     } else {
                         visjsGraph.data.nodes.add(visjsData.nodes);

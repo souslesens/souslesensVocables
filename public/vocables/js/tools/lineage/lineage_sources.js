@@ -220,7 +220,7 @@ if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
 
     self.whiteboard_setGraphOpacity = function (source) {
         var nodesMapSources = {};
-        if (!visjsGraph.data || !visjsGraph.data.nodes) {
+        if (!visjsGraph.isGraphNotEmpty()) {
             return;
         }
         var nodes = visjsGraph.data.nodes.get();

@@ -1517,7 +1517,7 @@ self.saveMappings({classId:classId})
     });
 
   };
-  self.fillObjectOptionsFromPrompt = function(type, selectId) {
+  self.fillObjectOptionsFromPrompt = function(type, selectId,source) {
     var term = prompt("Individual contains...");
     if (term === null) {
       return;
@@ -1529,8 +1529,8 @@ self.saveMappings({classId:classId})
       filter: term ? " FILTER ( regex(?label,'" + term + "','i'))" : "",
       limit: Config.maxSelectListSize
     };
-
-    var source = Lineage_sources.activeSource || KGcreator.currentSource;
+if(!source)
+    source = Lineage_sources.activeSource || KGcreator.currentSource;
     Sparql_OWL.getDictionary(source, options, null, function(err, result) {
       if (err) {
         alert(err.responseText);

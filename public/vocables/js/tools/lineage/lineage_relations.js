@@ -2,9 +2,18 @@
 Lineage_relations = (function() {
   var self = {};
   self.showDrawRelationsDialog = function(caller) {
+
     self.drawRelationCurrentCaller = caller;
     $("#LineagePopup").dialog("open");
     $("#LineagePopup").load("snippets/lineage/relationsDialog.html", function() {
+
+      $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
+        if (e.which == 13) {
+          var term=$("#LineageRelations_searchJsTreeInput").val()
+          $("#lineageRelations_propertiesJstreeDiv").jstree(true).search(term);
+        }
+      });
+
       var cbxValue;
       if (caller == "Graph" || caller == "Tree") {
         cbxValue = "selected";
@@ -22,64 +31,96 @@ Lineage_relations = (function() {
 
       var jstreeData = [];
       var uniqueNodes = {};
+
+
+      var vocabulariesPropertiesMap={}
       async.series([
 
+
         function(callbackSeries) {
-          Sparql_OWL.getObjectProperties(Lineage_sources.activeSource, { withGraph: true }, function(err, result) {
+          var vocabularies = ["usual", Lineage_sources.activeSource];
+          vocabularies = vocabularies.concat(Config.sources[Lineage_sources.activeSource].imports);
+          vocabularies = vocabularies.concat(Object.keys(Config.basicVocabGraphs));
 
-            result.forEach(function(item) {
-              if (!uniqueNodes[item.g.value]) {
-                uniqueNodes[item.g.value] = 1;
-                var label = Sparql_common.getSourceFromGraphUri(item.g.value);
-                jstreeData.push({
-                  id: item.g.value,
-                  text: label,
-                  parent: "#"
+          async.eachSeries(vocabularies, function(vocabulary, callbackEach) {
+              if (vocabulary == "usual") {
+                var properties = [];
+                KGcreator.usualProperties.forEach(function(item) {
+                  properties.push({ label: item, id: item });
                 });
+
+                vocabulariesPropertiesMap[vocabulary] = properties;
+                return callbackEach()
               }
-              if (!uniqueNodes[item.property.value]) {
-                uniqueNodes[item.property.value] = 1;
-                var label = item.propertyLabel ? item.propertyLabel.value : Sparql_common.getLabelFromURI(item.property.value);
-                jstreeData.push({
-                  id: item.property.value,
-                  text: label,
-                  parent: item.g.value
-                });
+              else if (Config.basicVocabGraphs[vocabulary]) {
+                properties = Config.basicVocabGraphs[vocabulary].properties;
+                vocabulariesPropertiesMap[vocabulary] = properties;
+                return callbackEach()
+              }
+              else {
+                Sparql_OWL.getObjectProperties(vocabulary, { withoutImports: 1 }, function(err, result) {
+
+                  if (err) {
+                    callbackEach(err);
+                  }
+                  result.sort(function(a, b) {
+                    if (!a.propertyLabel || !b.propertyLabel) {
+                      return 0;
+                    }
+                    if (a.propertyLabel.value > b.propertyLabel.value) {
+                      return 1;
+                    }
+                    if (a.propertyLabel.value < b.propertyLabel.value) {
+                      return -1;
+                    }
+                    return 0;
+                  });
+                  var properties = [];
+                  result.forEach(function(item) {
+                    properties.push(
+                      { label: item.propertyLabel.value, id: item.property.value }
+                    );
+                  });
+                  vocabulariesPropertiesMap[vocabulary] = properties;
+                  return callbackEach()
+                })
               }
 
-            });
-            return callbackSeries();
-          });
+
+            }, function(err) {
+              callbackSeries(err)
+            }
+          )
+        },
+
+
+        function(callbackSeries) {
+        for(var vocabulary in vocabulariesPropertiesMap) {
+          var properties = vocabulariesPropertiesMap[vocabulary]
+          jstreeData.push({
+            id:vocabulary,
+            text:vocabulary,
+            parent:"#",
+          })
+          properties.forEach(function(item){
+            jstreeData.push({
+              id:item.id,
+              text:item.label,
+              parent:vocabulary,
+              data:{ id:item.id,
+                label:item.label,
+                source:vocabulary
+              }
+            })
+          })
+
+        }
+        callbackSeries()
 
         },
-        function(callbackSeries) {
-          if (!Config.currentTopLevelOntology) {
-            return callbackSeries();
-          }
-          var parent = "others";
-          jstreeData.push({
-            id: parent,
-            text: parent,
-            parent: "#"
-          });
 
-          Sparql_OWL.getPredicates(Config.currentTopLevelOntology, {}, function(err, result) {
-            result.forEach(function(item) {
-              if (!uniqueNodes[item.property.value]) {
-                uniqueNodes[item.property.value] = 1;
-                var label = item.propertyLabel ? item.propertyLabel.value : Sparql_common.getLabelFromURI(item.property.value);
-                jstreeData.push({
-                  id: item.property.value,
-                  text: label,
-                  parent: parent
-                });
-              }
 
-            });
-            return callbackSeries();
-          });
-
-        }, function(callbackSeries) {
+    function(callbackSeries) {
           jstreeData.sort(function(a, b) {
             if (a.label > b.label) {
               return 1;
@@ -90,11 +131,12 @@ Lineage_relations = (function() {
             return 0;
           });
           var options = {
-            withCheckboxes: true
+            withCheckboxes: true,
+            searchPlugin:true
           };
           common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv", jstreeData, options, function() {
-            var sourceNodeId = Config.sources[Lineage_sources.activeSource].graphUri;
-            $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(sourceNodeId);
+         //   var sourceNodeId = Config.sources[Lineage_sources.activeSource].graphUri;
+            $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(Lineage_sources.activeSource);
           });
         }
       ]);
@@ -143,6 +185,9 @@ Lineage_relations = (function() {
         }
       }
       else if (selection == "visible") {
+        if(!visjsGraph.isGraphNotEmpty)
+          options.data=null;
+        else
         options.data = visjsGraph.data.nodes.getIds();
       }
       else if (selection == "all") {

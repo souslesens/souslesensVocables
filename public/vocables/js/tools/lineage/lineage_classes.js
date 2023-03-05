@@ -456,7 +456,7 @@ sourceLabels.sort();
                 }
                 //   MainController.UI.message("", true)
                 //  self.drawNewGraph(visjsData);
-                if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                if (!visjsGraph.isGraphNotEmpty()) {
                     self.drawNewGraph(visjsData);
                 } else {
                     visjsGraph.data.nodes.add(visjsData.nodes);
@@ -623,7 +623,7 @@ addNode:false
     };
 
     self.getGraphIdsFromSource = function (/** @type {any} */ source) {
-        if (!visjsGraph.data || !visjsGraph.data.nodes) {
+        if (!visjsGraph.isGraphNotEmpty()) {
             return null;
         }
         var existingNodes = visjsGraph.data.nodes.get();
@@ -735,7 +735,7 @@ addNode:false
     self.drawSimilarsNodes = function (/** @type {any} */ _similarType, /** @type {any} */ _node, /** @type {any} */ _sources, /** @type {any} */ _descendantsAlso) {
         var toSource = $("#sourcesTreeDiv").jstree().get_selected()[0];
         var fromSource = Lineage_sources.activeSource;
-        if (!visjsGraph.data || !visjsGraph.data.nodes) {
+        if (!visjsGraph.isGraphNotEmpty()) {
             return;
         }
         var nodes = visjsGraph.data.nodes.get();
@@ -1687,7 +1687,7 @@ addNode:false
                 }
             });
             self.currentLinkedDataProperties = existingNodes;
-            if (!visjsGraph.data || !visjsGraph.data.nodes) {
+            if (!visjsGraph.isGraphNotEmpty()) {
                 self.drawNewGraph(visjsData);
             } else {
                 visjsGraph.data.nodes.add(visjsData.nodes);
@@ -1770,7 +1770,7 @@ addNode:false
                 }
             }
         });
-        if (!visjsGraph.data || !visjsGraph.data.nodes) {
+        if (!visjsGraph.isGraphNotEmpty()) {
             self.drawNewGraph(visjsData);
         }
         visjsGraph.data.nodes.add(visjsData.nodes);
@@ -1793,8 +1793,8 @@ addNode:false
             classIds = null;
         }
         var physics = true;
-        var graphSpatialisation = $("#Lineage_classes_graphSpatialisationSelect").val();
-        if ((graphSpatialisation = "excludeRelations")) {
+        var graphSpatialisation = $("#Lineage_classes_excludeRelationsFromGraphSpatializationCBX").prop("checked");
+        if (excludeRelationsFromPhysic) {
             physics = false;
         }
 
@@ -1879,8 +1879,8 @@ addNode:false
             classIds = null;
         }
         var physics = true;
-        var graphSpatialisation = $("#Lineage_classes_graphSpatialisationSelect").val();
-        if (graphSpatialisation == "excludeRelations") {
+        var excludeRelationsFromPhysic = $("#Lineage_classes_excludeRelationsFromGraphSpatializationCBX").prop("checked");
+        if (excludeRelationsFromPhysic) {
             physics = false;
         }
         MainController.UI.message("");
@@ -2084,7 +2084,7 @@ addNode:false
                     }
                 });
 
-                if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                if (!visjsGraph.isGraphNotEmpty()) {
                     self.drawNewGraph(visjsData);
                 } else {
                     visjsGraph.data.nodes.add(visjsData.nodes);
@@ -2505,7 +2505,7 @@ addNode:false
 
             Lineage_sources.registerSource(source);
 
-            if (!visjsGraph.data || !visjsGraph.data.nodes) {
+            if (!visjsGraph.isGraphNotEmpty()) {
                 self.drawNewGraph(visjsData);
             } else {
                 visjsGraph.data.nodes.add(visjsData.nodes);

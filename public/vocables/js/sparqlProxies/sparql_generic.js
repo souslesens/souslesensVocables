@@ -368,8 +368,17 @@ var Sparql_generic = (function() {
       }
     );
   };
-
-  self.deleteTriples = function(sourceLabel, subjectUri, predicateUri, objectUri, callback) {
+  /**
+   *
+   *
+   * @param sourceLabel
+   * @param subjectUri
+   * @param predicateUri
+   * @param object a string represetning an uri or a literal or an object with
+   * @param callback
+   * @returns {*}
+   */
+  self.deleteTriples = function(sourceLabel, subjectUri, predicateUri, object, callback) {
     if (!subjectUri && !predicateUri && !objectUri) {
       return callback("no subject predicate or object filter : cannot delete");
     }
@@ -381,8 +390,8 @@ var Sparql_generic = (function() {
     if (predicateUri) {
       filterStr += Sparql_common.getUriFilter("p", predicateUri);
     }
-    if (objectUri) {
-      filterStr +=Sparql_common.getUriFilter("o", objectUri);
+    if (object) {
+        filterStr += Sparql_common.getUriFilter("o", object);
     }
     var graphUri = Config.sources[sourceLabel].graphUri;
     if (Array.isArray(graphUri)) {
@@ -416,15 +425,15 @@ var Sparql_generic = (function() {
 
       if ((p = elt.indexOf("^^")) > 0) {
         //xsd type
-        return "'" + item.object.substring(0, p) + "'" + item.object.substring(p);
+        return "\"" + item.object.substring(0, p) + "\"" + item.object.substring(p);
       }
 
       var array = elt.split(":");
-      if (array.length > 1 && allowedPrefixes.indexOf(array[0])) {
+      if (array.length > 1 && allowedPrefixes.indexOf(array[0])==0) {
         return elt;
       }
 
-      return "'" + elt + "'";
+      return "\"" + elt.replace(/"/g,"'") + "\"";
     }
 
     var subjectStr = setElementSyntax(item.subject);

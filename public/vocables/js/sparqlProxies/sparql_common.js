@@ -268,19 +268,34 @@ var Sparql_common = (function() {
     return str;
   };
 
-  self.getUriFilter = function(varName, value) {
-    var filterStr = "";
+  self.getUriFilter = function(varName, values) {
 
-    if (Array.isArray(value)) {
+
+    if( values.value){
+      if(values.isString ) {
+        str = "\"" + values.value.replace(/"/g, "'") + "\"";
+        return "filter( ?" + varName + "=" + str + ").";
+      }
+
+    }
+
+    if (!Array.isArray(values))
+      values=[values]
+
       var str = "";
-      value.forEach(function(item, index) {
+    var filterStr = "";
+      values.forEach(function(item, index) {
         if (index > 0) {
           str += ",";
         }
+
+
+
         let isLiteral = true;
         if (item.indexOf("http") == 0 || (item.indexOf(":") > 0 && value.indexOf(" ") < 0)) {
           isLiteral = false;
         }
+
         if (isLiteral) {
           str += "\"" + item.replace(/"/g,"'") + "\"";
         }
@@ -288,20 +303,13 @@ var Sparql_common = (function() {
           str += "<" + item + ">";
         }
       });
+
+      if(values.length>1)
       filterStr = "filter (?" + varName + " in (" + str + "))";
-    }
-    else {
-      let isLiteral = true;
-      if (value.indexOf("http") == 0 || (value.indexOf(":") > 0 && value.indexOf(" ") < 0)) {
-        isLiteral = false;
-      }
-      if (isLiteral) {
-        filterStr += "filter( ?" + varName + "=\"" + value.replace(/"/g,"'") + "\").";
-      }
-      else {
-        filterStr += "filter( ?" + varName + "=<" + value + ">).";
-      }
-    }
+      else
+        filterStr += "filter( ?" + varName + "=" + str + ").";
+
+
     return filterStr;
   };
 

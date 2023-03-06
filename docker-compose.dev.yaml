@@ -29,6 +29,16 @@ services:
         networks:
             - dev-backend
 
+    mysql:
+        image: mariadb:10
+        ports:
+            - 3306:3306
+        environment:
+            MARIADB_USER: slsv
+            MARIADB_PASSWORD: slsv
+        networks:
+            - dev-backend
+
     elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.17.4
         ports:

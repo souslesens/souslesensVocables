@@ -11,16 +11,16 @@
  */
 
 const { userModel } = require("../model/users");
-var mySqlProxy = require("./mySQLproxy..js");
-const bcrypt = require("bcrypt");
 
+const bcrypt = require("bcrypt");
+const mariadb = require("mariadb");
 const passport = require("passport");
 const LocalStrategy = require("passport-local");
 const KeyCloakStrategy = require("passport-keycloak-oauth2-oidc").Strategy;
 const ULID = require("ulid");
 
 // Get config
-const { configPath, config } = require("../model/config");
+const { config } = require("../model/config");
 
 if (config.auth == "keycloak") {
     passport.use(
@@ -63,7 +63,7 @@ if (config.auth == "keycloak") {
             }
         )
     );
-} else if (config.auth === "local") {
+} else if (config.auth === "local" || config.auth === "database") {
     passport.use(
         new LocalStrategy(function (username, password, cb) {
             userModel.checkUserPassword(username, password).then((checkOK) => {
@@ -71,38 +71,6 @@ if (config.auth == "keycloak") {
                     return cb(null, false, { message: "Incorrect username or password." });
                 }
                 userModel.findUserAccount(username).then((userAccount) => cb(null, userAccount));
-            });
-        })
-    );
-} else if (config.auth === "database") {
-    passport.use(
-        new LocalStrategy(function (username, password, cb) {
-            var connection = config.authenticationDatabase;
-            if (!config.authenticationDatabase) return cb("No authenticationDatabase declared in mainConfig.json");
-            var sql = "select * from " + connection.table + " where " + connection.loginColumn + "='" + username + "'";
-
-            mySqlProxy.exec(connection, sql, function (err, result) {
-                if (err) {
-                    console.log("connection To authentication database failed");
-                    return cb(err);
-                }
-                console.log("connection To authentication database ok");
-                if (result.length == 0) {
-                    console.log("bad Login");
-                    return cb(null, false, { message: "Incorrect username or password." });
-                }
-                if (password != result[0][connection.passwordColum]) {
-                    console.log("bad Password");
-                    // bcrypt.compare(password, result[0].motDePasse, function (err, res) {
-                    return cb(null, false, { message: "Incorrect username or password." });
-                }
-
-                var user = result[0];
-                // delete user.password;
-                user.login = username;
-                user.groups = user[connection.groupsColumn].split(",");
-                console.log(JSON.stringify(user));
-                return cb(null, user);
             });
         })
     );

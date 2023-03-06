@@ -19,7 +19,7 @@ module.exports = function () {
 
         if (config.auth === "keycloak") {
             result.redirect = config.keycloak.authServerURL + "/realms/" + config.keycloak.realm + "/protocol/openid-connect/logout?redirect_uri=" + config.souslesensUrl;
-        } else if (config.auth === "local") {
+        } else if (config.auth === "local" || config.auth === "database") {
             result.redirect = "/login";
         } else {
             throw new Error(`unkown config.auth ${config.auth}`);

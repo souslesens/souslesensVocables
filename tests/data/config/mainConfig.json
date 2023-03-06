@@ -53,5 +53,16 @@
     },
     "wiki": {
         "url": ""
+    },
+    "authenticationDatabase": {
+        "host": "localhost",
+        "port": 3306,
+        "user": "slsv",
+        "password": "slsv",
+        "database": "slsv",
+        "table": "user",
+        "loginColumn": "login",
+        "passwordColumn": "password",
+        "groupsColumn": "groups"
     }
 }

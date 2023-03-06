@@ -43,15 +43,14 @@ var Lineage_query = (function() {
     };
 
 
-    $("#QueryDialog").load("snippets/lineage/lineageQueryDialog.html", function() {
+    $("#QueryDialog").load("snippets/lineage/queryDialog.html", function() {
       $("#lineageQuery_tabsDiv").tabs();
-    self.storedQueries.showStoredQueriesTab();
+      self.storedQueries.showStoredQueriesTab();
 
-     // self.queryModel.loadSourceModel();
+      self.queryModel.loadSourceModel();
 
-
-     /* var predicates = Object.keys(self.predicatesObjectsMap);
-      common.fillSelectOptions("lineageQuery_predicateSelect", predicates, true);*/
+      var predicates = Object.keys(self.predicatesObjectsMap);
+      common.fillSelectOptions("lineageQuery_predicateSelect", predicates, true);
 
       $("#lineageQuery_value").keypress(function(e) {
         if (e.which == 13) {
@@ -64,18 +63,6 @@ var Lineage_query = (function() {
       });
     });
   };
-
-
-
-  self.initUI=function(){
-    var vocabularies = ["usual", Lineage_sources.activeSource];
-    vocabularies = vocabularies.concat(Config.sources[Lineage_sources.activeSource].imports);
-    vocabularies = vocabularies.concat(Object.keys(Config.basicVocabGraphs));
-
-    common.fillSelectOptions("lineageQuery_vocabularySelect", vocabularies, true);
-
-  }
-
 
   self.onSelectType = function(role, type) {
 

@@ -7,14 +7,14 @@ Lineage_relations = (function() {
     $("#LineagePopup").dialog("open");
     $("#LineagePopup").load("snippets/lineage/relationsDialog.html", function() {
 
-      $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
+      $("#LineageRelations_searchJsTreeInput").keypress(function(e) {
         if (e.which == 13 || e.which == 9) {
-          $("#lineageRelations_propertiesJstreeDiv").jstree(true).uncheck_all ()
-          $("#lineageRelations_propertiesJstreeDiv").jstree(true).settings.checkbox.cascade ="";
-          var term=$("#LineageRelations_searchJsTreeInput").val()
+          $("#lineageRelations_propertiesJstreeDiv").jstree(true).uncheck_all();
+          $("#lineageRelations_propertiesJstreeDiv").jstree(true).settings.checkbox.cascade = "";
+          var term = $("#LineageRelations_searchJsTreeInput").val();
 
           $("#lineageRelations_propertiesJstreeDiv").jstree(true).search(term);
-          $("#LineageRelations_searchJsTreeInput").val("")
+          $("#LineageRelations_searchJsTreeInput").val("");
         }
       });
 
@@ -37,30 +37,32 @@ Lineage_relations = (function() {
       var uniqueNodes = {};
 
 
-      var vocabulariesPropertiesMap={}
+      var vocabulariesPropertiesMap = {};
       async.series([
 
 
         function(callbackSeries) {
           var vocabularies = ["usual", Lineage_sources.activeSource];
-          vocabularies = vocabularies.concat(Config.sources[Lineage_sources.activeSource].imports);
+          if (Config.sources[Lineage_sources.activeSource].imports){
+            vocabularies = vocabularies.concat(Config.sources[Lineage_sources.activeSource].imports);
+          }
           vocabularies = vocabularies.concat(Object.keys(Config.basicVocabGraphs));
 
           async.eachSeries(vocabularies, function(vocabulary, callbackEach) {
               if (vocabulary == "usual") {
-                return callbackEach()
+                return callbackEach();
                 var properties = [];
                 KGcreator.usualProperties.forEach(function(item) {
                   properties.push({ label: item, id: item });
                 });
 
                 vocabulariesPropertiesMap[vocabulary] = properties;
-                return callbackEach()
+                return callbackEach();
               }
               else if (Config.basicVocabGraphs[vocabulary]) {
                 properties = Config.basicVocabGraphs[vocabulary].properties;
                 vocabulariesPropertiesMap[vocabulary] = properties;
-                return callbackEach()
+                return callbackEach();
               }
               else {
                 Sparql_OWL.getObjectProperties(vocabulary, { withoutImports: 1 }, function(err, result) {
@@ -87,45 +89,46 @@ Lineage_relations = (function() {
                     );
                   });
                   vocabulariesPropertiesMap[vocabulary] = properties;
-                  return callbackEach()
-                })
+                  return callbackEach();
+                });
               }
 
 
             }, function(err) {
-              callbackSeries(err)
+              callbackSeries(err);
             }
-          )
+          );
         },
 
 
         function(callbackSeries) {
-        for(var vocabulary in vocabulariesPropertiesMap) {
-          var properties = vocabulariesPropertiesMap[vocabulary]
-          jstreeData.push({
-            id:vocabulary,
-            text:vocabulary,
-            parent:"#",
-          })
-          properties.forEach(function(item){
+          for (var vocabulary in vocabulariesPropertiesMap) {
+            var properties = vocabulariesPropertiesMap[vocabulary];
             jstreeData.push({
-              id:item.id,
-              text:item.label,
-              parent:vocabulary,
-              data:{ id:item.id,
-                label:item.label,
-                source:vocabulary
-              }
-            })
-          })
+              id: vocabulary,
+              text: vocabulary,
+              parent: "#"
+            });
+            properties.forEach(function(item) {
+              jstreeData.push({
+                id: item.id,
+                text: item.label,
+                parent: vocabulary,
+                data: {
+                  id: item.id,
+                  label: item.label,
+                  source: vocabulary
+                }
+              });
+            });
 
-        }
-        callbackSeries()
+          }
+          callbackSeries();
 
         },
 
 
-    function(callbackSeries) {
+        function(callbackSeries) {
           jstreeData.sort(function(a, b) {
             if (a.label > b.label) {
               return 1;
@@ -140,12 +143,12 @@ Lineage_relations = (function() {
             searchPlugin: {
               case_insensitive: true,
               fuzzy: false,
-              show_only_matches: true,
+              show_only_matches: true
             }
           };
           common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv", jstreeData, options, function() {
-         //   var sourceNodeId = Config.sources[Lineage_sources.activeSource].graphUri;
-            $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(Lineage_sources.activeSource);
+
+            //  $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(Lineage_sources.activeSource);
           });
         }
       ]);
@@ -194,10 +197,12 @@ Lineage_relations = (function() {
         }
       }
       else if (selection == "visible") {
-        if(!visjsGraph.isGraphNotEmpty)
-          options.data=null;
-        else
-        options.data = visjsGraph.data.nodes.getIds();
+        if (!visjsGraph.isGraphNotEmpty) {
+          options.data = null;
+        }
+        else {
+          options.data = visjsGraph.data.nodes.getIds();
+        }
       }
       else if (selection == "all") {
         options.data = "allSourceNodes";
@@ -252,7 +257,31 @@ Lineage_relations = (function() {
     else {
       data = options.data;
     }
+// manage drawing at the end off all visjs query
+    options.returnVisjsData = true;
+    var existingNodes = visjsGraph.getExistingIdsMap();
+    var allVisjsData = { nodes: [], edges: [] };
 
+    function concatVisjsdata(visjsData) {
+      if (!visjsData.nodes || !visjsData.edges) {
+        return;
+      }
+      visjsData.nodes.forEach(function(item) {
+        if (!existingNodes[item.id]) {
+          existingNodes[item.id] = 1;
+          allVisjsData.nodes.push(item);
+        }
+      });
+      visjsData.edges.forEach(function(item) {
+        if (!existingNodes[item.id]) {
+          existingNodes[item.id] = 1;
+          allVisjsData.edges.push(item);
+        }
+      });
+    }
+
+
+    var totalTriples = 0;
     async.series(
       [
         // draw equivClasses or sameLabel (coming from Config.dictionarySource)
@@ -262,6 +291,7 @@ Lineage_relations = (function() {
           }
           source = Config.dictionarySource;
           options.includeSources = Config.dictionarySource;
+
           data = visjsGraph.data.nodes.getIds();
           options.filter = "FILTER (?prop in (owl:sameAs,owl:equivalentClass))";
           Lineage_sources.registerSource(Config.dictionarySource);
@@ -277,8 +307,15 @@ Lineage_relations = (function() {
           }
           if (!direction || direction == "direct") {
             options.inverse = false;
-            MainController.UI.message("searching restrictions")
-            Lineage_classes.drawRestrictions(source, data, null, null, options, callbackSeries);
+
+            MainController.UI.message("searching restrictions");
+            Lineage_classes.drawRestrictions(source, data, null, null, options, function(err, result) {
+              if (err) {
+                return callbackSeries(err);
+              }
+              concatVisjsdata(result);
+              return callbackSeries();
+            });
           }
           else {
             return callbackSeries();
@@ -291,8 +328,14 @@ Lineage_relations = (function() {
           }
           if (!direction || direction == "inverse") {
             options.inverse = true;
-            MainController.UI.message("searching inverse restrictions")
-            Lineage_classes.drawRestrictions(source, data, null, null, options, callbackSeries);
+            MainController.UI.message("searching inverse restrictions");
+            Lineage_classes.drawRestrictions(source, data, null, null, options, function(err, result) {
+              if (err) {
+                return callbackSeries(err);
+              }
+              concatVisjsdata(result);
+              return callbackSeries();
+            });
           }
           else {
             return callbackSeries();
@@ -315,8 +358,12 @@ Lineage_relations = (function() {
             }
           }
           if (!direction || direction == "direct") {
-            MainController.UI.message("searching predicates")
+            MainController.UI.message("searching predicates");
             Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
+              if (err) {
+                return callbackSeries(err);
+              }
+              concatVisjsdata(result);
               return callbackSeries(err);
             });
           }
@@ -340,9 +387,13 @@ Lineage_relations = (function() {
           }
           if (!direction || direction == "inverse") {
             options.inversePredicate = true;
-            MainController.UI.message("searching inverse predicates")
+            MainController.UI.message("searching inverse predicates");
             Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
-              return callbackSeries(err);
+              if (err) {
+                return callbackSeries(err);
+              }
+              concatVisjsdata(result);
+              return callbackSeries();
             });
           }
           else {
@@ -352,7 +403,17 @@ Lineage_relations = (function() {
       ],
 
       function(err) {
-        MainController.UI.message("drawing...",true)
+        if (allVisjsData.nodes.length == 0 && allVisjsData.edges.length == 0) {
+          return MainController.UI.message("no data found", true);
+        }
+        MainController.UI.message("drawing " + allVisjsData.nodes.length + "nodes and " + allVisjsData.edges.length + " edges...", true);
+        if (visjsGraph.isGraphNotEmpty()) {
+          visjsGraph.data.nodes.add(allVisjsData.nodes);
+          visjsGraph.data.edges.add(allVisjsData.edges);
+        }
+        else {
+          Lineage_classes.drawNewGraph(allVisjsData);
+        }
         if (err) {
 
           return alert(err);

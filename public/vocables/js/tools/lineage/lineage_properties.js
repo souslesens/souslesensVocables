@@ -407,6 +407,9 @@ Lineage_properties = (function () {
                         });
                     }
                 });
+                if (callback && options.returnVisjsData ) {
+                    return callback(null, visjsData);
+                }
                 if (visjsGraph.isGraphNotEmpty()) {
                     visjsGraph.data.nodes.add(visjsData.nodes);
                     visjsGraph.data.edges.add(visjsData.edges);

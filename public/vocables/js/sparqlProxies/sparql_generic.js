@@ -1294,8 +1294,11 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
 var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
   "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+  "PREFIX owl: <http://www.w3.org/2002/07/owl#>"+
   "SELECT distinct ?prop ?propLabel from <"+graphUri+">  WHERE {\n" +
-  "  ?prop rdf:type rdf:Property optional{?prop rdfs:label ?proplabel}\n" +
+  "  {?prop ?p ?o optional{?prop rdfs:label ?proplabel} VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty } }" +
+ // " UNION {?prop rdf:type owl:ObjectProperty optional{?prop rdfs:label ?proplabel}}" +
+
   "} "
       Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {  }, function(err, result) {
         if (err) {
@@ -1309,7 +1312,11 @@ var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
         var query="PREFIX "+vocab+": <"+graphUri+"> ";
         query+=" PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
         query+="  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
-        query+="select distinct ?sub ?subLabel FROM <"+graphUri+"> where{ ?sub rdf:type rdfs:Class.OPTIONAL{ ?sub rdfs:label ?subLabel}}"
+        query+="PREFIX owl: <http://www.w3.org/2002/07/owl#>"
+        query+="select distinct ?sub ?subLabel FROM <"+graphUri+"> where{" +
+          "{ ?sub rdf:type rdfs:Class. OPTIONAL{ ?sub rdfs:label ?subLabel}}" +
+          "UNION { ?sub rdf:type owl:Class. OPTIONAL{ ?sub rdfs:label ?subLabel}}" +
+          "}"
 
 
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { }, function(err, result) {

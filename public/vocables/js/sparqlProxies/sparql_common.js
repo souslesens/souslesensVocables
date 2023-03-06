@@ -134,6 +134,29 @@ var Sparql_common = (function() {
         if (ids.length == 0) {
           return "";
         }
+
+
+        var conceptIdsStr = "";
+
+        ids.forEach(function(id, _index) {
+          if (!id) {
+            return;
+          }
+          if (conceptIdsStr != "")
+            conceptIdsStr += " ";
+
+            id = "" + id;
+            if (id.match(/<.*>/)) {
+              conceptIdsStr += id;
+            }
+            else {
+              conceptIdsStr += "<" + id + ">";
+            }
+
+        });
+        filters.push(" VALUES ?" + varName + "{" + conceptIdsStr + "}");
+
+
         var p = ids.indexOf("#");
         if (p > -1) {
           ids.splice(p, 1);
@@ -147,16 +170,16 @@ var Sparql_common = (function() {
         ids.forEach(function(id, _index) {
           id = "" + id;
 
-          var str=""
-             if ((p = id.indexOf("nodeID://")) > -1) {//blank node
-              blankNodes.push(id.substring(9));
-              return;
+          var str = "";
+          if ((p = id.indexOf("nodeID://")) > -1) {//blank node
+            blankNodes.push(id.substring(9));
+            return;
 
-            }
-            else if ((p = id.indexOf("_:")) > -1) {//blank node
-              blankNodes.push(id.substring(3));
-              return;
-            }
+          }
+          else if ((p = id.indexOf("_:")) > -1) {//blank node
+            blankNodes.push(id.substring(3));
+            return;
+          }
 
           if (id != "") {
             if (id.match(/<.*>/)) {
@@ -169,8 +192,9 @@ var Sparql_common = (function() {
             }
 
             if (str != "") {
-              if(conceptIdsStr!="")
-                conceptIdsStr += ","
+              if (conceptIdsStr != "") {
+                conceptIdsStr += ",";
+              }
               conceptIdsStr += str;
             }
 
@@ -189,15 +213,17 @@ var Sparql_common = (function() {
 
 
         //blankNodes see https://stackoverflow.com/questions/55440728/how-to-filter-by-blanknode-id
-        if (blankNodes.length > 0) {
-          var strBnodes = "";
-          blankNodes.forEach(function(id, index) {
-            if (index > 0) {
-              strBnodes += "|";
-            }
-            strBnodes += "" + id + "";
-          });
-          filters.push("regex(str(?" + varName + "), \"" + strBnodes + "\")");
+        if (true) {
+          if (blankNodes.length > 0) {
+            var strBnodes = "";
+            blankNodes.forEach(function(id, index) {
+              if (index > 0) {
+                strBnodes += "|";
+              }
+              strBnodes += "" + id + "";
+            });
+            filters.push("regex(str(?" + varName + "), \"" + strBnodes + "\")");
+          }
         }
 
       }
@@ -205,6 +231,8 @@ var Sparql_common = (function() {
         return "";
       }
     });
+
+    return filters[0];
 
     filter = " FILTER (";
     filters.forEach(function(filterStr, index) {
@@ -271,43 +299,45 @@ var Sparql_common = (function() {
   self.getUriFilter = function(varName, values) {
 
 
-    if( values.value){
-      if(values.isString ) {
+    if (values.value) {
+      if (values.isString) {
         str = "\"" + values.value.replace(/"/g, "'") + "\"";
         return "filter( ?" + varName + "=" + str + ").";
       }
 
     }
 
-    if (!Array.isArray(values))
-      values=[values]
+    if (!Array.isArray(values)) {
+      values = [values];
+    }
 
-      var str = "";
+    var str = "";
     var filterStr = "";
-      values.forEach(function(item, index) {
-        if (index > 0) {
-          str += ",";
-        }
+    values.forEach(function(item, index) {
+      if (index > 0) {
+        str += ",";
+      }
 
 
+      let isLiteral = true;
+      if (item.indexOf("http") == 0 || (item.indexOf(":") > 0 && item.indexOf(" ") < 0)) {
+        isLiteral = false;
+      }
 
-        let isLiteral = true;
-        if (item.indexOf("http") == 0 || (item.indexOf(":") > 0 && item.indexOf(" ") < 0)) {
-          isLiteral = false;
-        }
+      if (isLiteral) {
+        str += "\"" + item.replace(/"/g, "'") + "\"";
+      }
+      else {
+        str += "<" + item + ">";
+      }
+    });
 
-        if (isLiteral) {
-          str += "\"" + item.replace(/"/g,"'") + "\"";
-        }
-        else {
-          str += "<" + item + ">";
-        }
-      });
-
-      if(values.length>1)
+    if (values.length > 1) {
       filterStr = "filter (?" + varName + " in (" + str + "))";
-      else
-        filterStr += "filter( ?" + varName + "=" + str + ").";
+    }
+    else {
+      filterStr += "filter( ?" + varName + "=" + str + ").";
+    }
 
 
     return filterStr;

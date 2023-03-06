@@ -1845,6 +1845,8 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
   };
 
   self.isSLSVvisibleUri = function(uri) {
+    if(!uri || uri.indexOf)
+      return false;
     for (var source in Config.sources) {
       var graphUri = Config.sources[source].graphUri;
       if (graphUri && uri.indexOf(graphUri) == 0) {
@@ -1932,18 +1934,20 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
   };
 
 
-  self.setCurrentVocabPropertiesSelect = function(vocabulary) {
+  self.setCurrentVocabPropertiesSelect = function(vocabulary,selectId) {
     var properties = [];
+
+
     if (vocabulary == "usual") {
       KGcreator.usualProperties.forEach(function(item) {
         properties.push({ label: item, id: item });
       });
       properties.push({ label: "-------", id: "" });
-      common.fillSelectOptions("sourceBrowser_currentVocabPredicateSelect", properties, true, "label", "id");
+      common.fillSelectOptions(selectId, properties, true, "label", "id");
 
     }else  if (Config.basicVocabGraphs[vocabulary]) {
         properties = Config.basicVocabGraphs[vocabulary].properties;
-        common.fillSelectOptions("sourceBrowser_currentVocabPredicateSelect", properties, true, "label", "id");
+        common.fillSelectOptions(selectId, properties, true, "label", "id");
       }
       else {
         Sparql_OWL.getObjectProperties(vocabulary, { withoutImports: 1 }, function(err, result) {
@@ -1978,7 +1982,7 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
 
 
 
-    self.setCurrentVocabClassesSelect = function(vocabulary) {
+    self.setCurrentVocabClassesSelect = function(vocabulary,selectId) {
 
       var classes = [];
       if (vocabulary == "usual") {
@@ -1988,12 +1992,12 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
             label: item
           });
         });
-        common.fillSelectOptions("sourceBrowser_currentVocabObjectSelect", classes, true, "label", "id");
+        common.fillSelectOptions(selectId, classes, true, "label", "id");
 
       }
       else if (Config.basicVocabGraphs[vocabulary]) {
         var classes = Config.basicVocabGraphs[vocabulary].classes;
-        common.fillSelectOptions("sourceBrowser_currentVocabObjectSelect", classes, true, "label", "id");
+        common.fillSelectOptions(selectId, classes, true, "label", "id");
 
       }
 
@@ -2006,6 +2010,12 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     self.hideAddPredicateDiv = function() {
       $("#sourceBrowser_addPropertyDiv").css("display", "none");
     };
+
+
+
+
+
+
     self.showAddPredicateDiv = function() {
       $("#sourceBrowser_addPropertyDiv").css("display", "flex");
 
@@ -2021,7 +2031,7 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
       common.fillSelectOptions("sourceBrowser_vocabularySelect", vocabularies, true);
       common.fillSelectOptions("sourceBrowser_vocabularySelect2", vocabularies, true);
       self.setCurrentVocabClassesSelect("usual");
-      self.setCurrentVocabPropertiesSelect("usual");
+      self.setCurrentVocabPropertiesSelect("usual","sourceBrowser_currentVocabPredicateSelect");
 
       $("#sourceBrowser_vocabularySelect").val("usual");
       $("#sourceBrowser_vocabularySelect2").val("usual");

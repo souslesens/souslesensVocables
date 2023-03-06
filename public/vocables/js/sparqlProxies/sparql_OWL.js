@@ -172,6 +172,7 @@ var Sparql_OWL = (function() {
    *   variables [?conceptGraph] ?concept (parent) ?conceptLabel ?child[X] ?shild[X]label
    *
    */
+
   self.getNodeChildren = function(sourceLabel, words, ids, descendantsDepth, options, callback) {
     if (!options) {
       options = {};
@@ -947,6 +948,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
     var filterStr = "";
     if (ids) {
       if (options.inverseRestriction) {
+        options.someValuesFrom=1
         filterStr = Sparql_common.setFilter("value", ids, null, options);
       }
       else {
@@ -1612,6 +1614,9 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
       return callback(null, _result.results.bindings);
     });
   };
+
+
+
   self.getPropertiesWithoutDomainsAndRanges = function(sourceLabel, options, callback) {
     var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports);
     var query =
@@ -1645,9 +1650,10 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
     });
   };
 
+
+
   self.getAllTriples = function(sourceLabel, role, ids, options, callback) {
-    //   if (!role) return callback("no role sepecified");
-    //   if (!ids) return callback("no uris sepecified");
+
     if (!options) {
       options = {};
     }
@@ -1695,6 +1701,9 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
       }
     );
   };
+
+
+
   self.getTriples = function(sourceLabel, options, callback) {
 
     if (!options) {

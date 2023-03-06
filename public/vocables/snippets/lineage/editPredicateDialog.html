@@ -2,7 +2,7 @@
 
   <div><b>Property</b></div>
   <div>vocabulary <select id="sourceBrowser_vocabularySelect"  style="min-width: 100px;background-color: #ddd"
-                                                 onchange="SourceBrowser.setCurrentVocabPropertiesSelect($(this).val())"></select>
+                                                 onchange="SourceBrowser.setCurrentVocabPropertiesSelect($(this).val(),'sourceBrowser_currentVocabPredicateSelect')"></select>
  <select id="sourceBrowser_currentVocabPredicateSelect" style="min-width: 200px;background-color: #ddd"
                onchange="SourceBrowser.onSelectPredicateProperty($(this).val())"></select>
   </div>
@@ -16,7 +16,7 @@
   </div>
   <div>
     vocabulary<select id="sourceBrowser_vocabularySelect2"  style="min-width: 100px;background-color: #ddd"
-                      onchange="SourceBrowser.setCurrentVocabClassesSelect($(this).val())"></select>&nbsp;
+                      onchange="SourceBrowser.setCurrentVocabClassesSelect($(this).val(),'sourceBrowser_currentVocabObjectSelect')"></select>&nbsp;
 
     <select id="sourceBrowser_currentVocabObjectSelect" style="min-width: 200px;background-color: #ddd"
             onchange="SourceBrowser.onSelectCurrentVocabObject($(this).val())"></select>

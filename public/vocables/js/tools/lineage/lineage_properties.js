@@ -948,8 +948,8 @@ MainController.UI.message("searching...")
                     return callback(err);
                 }
                 var allProps = [];
-if(Object.keys(allProps).length==0)
-    MainController.UI.message("No data found",true)
+if(Object.keys(allProps).length==0);
+  //  MainController.UI.message("No data found",true)
 
                 MainController.UI.message("drawing...")
                 for (var propId in result) {

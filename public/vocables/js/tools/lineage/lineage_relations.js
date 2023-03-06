@@ -8,9 +8,13 @@ Lineage_relations = (function() {
     $("#LineagePopup").load("snippets/lineage/relationsDialog.html", function() {
 
       $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
-        if (e.which == 13) {
+        if (e.which == 13 || e.which == 9) {
+          $("#lineageRelations_propertiesJstreeDiv").jstree(true).uncheck_all ()
+          $("#lineageRelations_propertiesJstreeDiv").jstree(true).settings.checkbox.cascade ="";
           var term=$("#LineageRelations_searchJsTreeInput").val()
+
           $("#lineageRelations_propertiesJstreeDiv").jstree(true).search(term);
+          $("#LineageRelations_searchJsTreeInput").val("")
         }
       });
 
@@ -44,6 +48,7 @@ Lineage_relations = (function() {
 
           async.eachSeries(vocabularies, function(vocabulary, callbackEach) {
               if (vocabulary == "usual") {
+                return callbackEach()
                 var properties = [];
                 KGcreator.usualProperties.forEach(function(item) {
                   properties.push({ label: item, id: item });
@@ -132,7 +137,11 @@ Lineage_relations = (function() {
           });
           var options = {
             withCheckboxes: true,
-            searchPlugin:true
+            searchPlugin: {
+              case_insensitive: true,
+              fuzzy: false,
+              show_only_matches: true,
+            }
           };
           common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv", jstreeData, options, function() {
          //   var sourceNodeId = Config.sources[Lineage_sources.activeSource].graphUri;
@@ -268,6 +277,7 @@ Lineage_relations = (function() {
           }
           if (!direction || direction == "direct") {
             options.inverse = false;
+            MainController.UI.message("searching restrictions")
             Lineage_classes.drawRestrictions(source, data, null, null, options, callbackSeries);
           }
           else {
@@ -281,6 +291,7 @@ Lineage_relations = (function() {
           }
           if (!direction || direction == "inverse") {
             options.inverse = true;
+            MainController.UI.message("searching inverse restrictions")
             Lineage_classes.drawRestrictions(source, data, null, null, options, callbackSeries);
           }
           else {
@@ -304,6 +315,7 @@ Lineage_relations = (function() {
             }
           }
           if (!direction || direction == "direct") {
+            MainController.UI.message("searching predicates")
             Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
               return callbackSeries(err);
             });
@@ -328,6 +340,7 @@ Lineage_relations = (function() {
           }
           if (!direction || direction == "inverse") {
             options.inversePredicate = true;
+            MainController.UI.message("searching inverse predicates")
             Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
               return callbackSeries(err);
             });
@@ -339,7 +352,9 @@ Lineage_relations = (function() {
       ],
 
       function(err) {
+        MainController.UI.message("drawing...",true)
         if (err) {
+
           return alert(err);
         }
       }

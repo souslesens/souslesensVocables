@@ -53,6 +53,18 @@ describe("UserModel", () => {
         const emptyArray = await userModel.findUserAccount("unknown");
         expect(emptyArray).toStrictEqual(undefined);
     });
+    test("check user and password match with checkUserPassword()", async () => {
+        let goodpass = await userModel.checkUserPassword("admin", "pass");
+        expect(goodpass).toStrictEqual(true);
+        let badpass = await userModel.checkUserPassword("admin", "badpassword");
+        expect(badpass).toStrictEqual(false);
+        let nouser = await userModel.checkUserPassword("unknown", "pass");
+        expect(nouser).toStrictEqual(false);
+        let emptypassword = await userModel.checkUserPassword("skos_user", "pass");
+        expect(emptypassword).toStrictEqual(false);
+        emptypassword = await userModel.checkUserPassword("skos_user", "");
+        expect(emptypassword).toStrictEqual(false);
+    });
     test("append a new user with add()", async () => {
         tmpDir = tmp.dirSync({ unsafeCleanup: true });
         fs.mkdirSync(path.join(tmpDir.name, "users"));

@@ -60,6 +60,34 @@ class UserModel {
     };
 
     /**
+     * @param {string} login
+     * @param {string} password
+     * @returns {boolean} true if login and password match, otherwise false
+     */
+    checkUserPassword = async (login, password) => {
+        const userAccountsWithPassword = await this._read();
+        const userKey = Object.keys(userAccountsWithPassword).find((key) => userAccountsWithPassword[key].login == login);
+        if (!userKey) {
+            // console.debug(`user ${login} not found`);
+            return false;
+        }
+        const userAccount = userAccountsWithPassword[userKey];
+        if (userAccount.password === undefined) {
+            // console.debug(`no password defined for user ${login}`);
+            return false;
+        }
+        if (userAccount.password === "") {
+            return false;
+        } else if (userAccount.password.startsWith("$2b$") && bcrypt.compareSync(password, userAccount.password)) {
+            return true;
+        } else if (userAccount.password == password) {
+            return true;
+        }
+        // console.debug(`password does not match for user ${login}`);
+        return false;
+    };
+
+    /**
      * @param {UserAccount} newUserAccount
      */
     addUserAccount = async (newUserAccount) => {

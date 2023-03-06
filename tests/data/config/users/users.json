@@ -2,7 +2,7 @@
     "admin": {
         "id": "admin",
         "login": "admin",
-        "password": "$2b$10$ed6ZDHUbN7NfOGrufiDniudK9EMLCFg9qFgJ0N/T.nRTBPlA5Mm9C",
+        "password": "$2b$10$LhdaXF3tHrvA8b8fKMvNmeOSyogCBgN/L9XLN/vqjz6tgN5rSxMyy",
         "groups": ["admin"],
         "source": "json",
         "_type": "user",
@@ -20,7 +20,7 @@
     "skos_user": {
         "id": "skos_user",
         "login": "skos_user",
-        "password": "$2b$10$ed6ZDHUbN7NfOGrufiDniudK9EMLCFg9qFgJ0N/T.nRTBPlA5Mm9C",
+        "password": "",
         "groups": ["skos_only"],
         "source": "json",
         "_type": "user",

@@ -44,7 +44,8 @@
       <div class="lineageQuery_div">
         Property
         <div>
-          vocabulary<select id="lineageQuery_vocabularySelect" style="min-width: 100px;background-color: #ddd" onchange="SourceBrowser.setCurrentVocabPropertiesSelect($(this).val(),'lineageQuery_currentVocabPropertySelect')"><option value=""></option><option value="usual">usual</option><option value="BFO">BFO</option><option></option><option value="rdf">rdf</option><option value="rdfs">rdfs</option><option value="owl">owl</option><option value="iof-av">iof-av</option><option value="skos">skos</option></select>&nbsp;
+          vocabulary<select id="lineageQuery_vocabularySelect" style="min-width: 100px;background-color: #ddd"
+                            onchange="SourceBrowser.setCurrentVocabPropertiesSelect($(this).val(),'lineageQuery_currentVocabPropertySelect')">
 
           <select id="lineageQuery_currentVocabPropertySelect" style="min-width: 200px;background-color: #ddd" onchange="Lineage_query.onSelectCurrentVocabProperty($(this).val())"><option value=""></option><option value="owl:Thing">owl:Thing</option><option value="owl:Class">owl:Class</option><option value="owl:NamedIndividual">owl:NamedIndividual</option><option value="owl:Thing">owl:Thing</option><option value="owl:ObjectProperty">owl:ObjectProperty</option><option value="owl:DatatypeProperty">owl:DatatypeProperty</option><option value="owl:Restriction">owl:Restriction</option><option value="rdf:Bag">rdf:Bag</option><option value="rdf:List">rdf:List</option><option value="skos:Concept">skos:Concept</option><option value="skos:Collection">skos:Collection</option><option value="slsv:TopConcept">slsv:TopConcept</option><option value="_function">_function</option><option value="_blankNode">_blankNode</option><option value=""></option></select>
           <br><input type="checkbox" id="lineageQuery_inversePredicateCBX">inverse predicate
@@ -53,13 +54,14 @@
       <div class="lineageQuery_div">
         Object Type
         <div>
-          vocabulary<select id="lineageQuery_vocabularySelect2" style="min-width: 100px;background-color: #ddd" onchange="SourceBrowser.setCurrentVocabClassesSelect($(this).val(),'lineageQuery_currentVocabObjectSelect')"><option value=""></option><option value="usual">usual</option><option value="BFO">BFO</option><option></option><option value="rdf">rdf</option><option value="rdfs">rdfs</option><option value="owl">owl</option><option value="iof-av">iof-av</option><option value="skos">skos</option></select>&nbsp;
+          vocabulary<select id="lineageQuery_vocabularySelect2" style="min-width: 100px;background-color: #ddd"
+                            onchange="SourceBrowser.setCurrentVocabClassesSelect($(this).val(),'lineageQuery_currentVocabObjectSelect')"><option value=""></option><option value="usual">usual</option><option value="BFO">BFO</option><option></option><option value="rdf">rdf</option><option value="rdfs">rdfs</option><option value="owl">owl</option><option value="iof-av">iof-av</option><option value="skos">skos</option></select>&nbsp;
 
           <select id="lineageQuery_currentVocabObjectSelect" style="min-width: 200px;background-color: #ddd" onchange="Lineage_query.onSelectCurrentVocabObject($(this).val())"><option value=""></option><option value="owl:Thing">owl:Thing</option><option value="owl:Class">owl:Class</option><option value="owl:NamedIndividual">owl:NamedIndividual</option><option value="owl:Thing">owl:Thing</option><option value="owl:ObjectProperty">owl:ObjectProperty</option><option value="owl:DatatypeProperty">owl:DatatypeProperty</option><option value="owl:Restriction">owl:Restriction</option><option value="rdf:Bag">rdf:Bag</option><option value="rdf:List">rdf:List</option><option value="skos:Concept">skos:Concept</option><option value="skos:Collection">skos:Collection</option><option value="slsv:TopConcept">slsv:TopConcept</option><option value="_function">_function</option><option value="_blankNode">_blankNode</option><option value=""></option></select>
 
         </div>
 
-        &nbsp;<select id="lineageQuery_objectUriSelect" style="display: none; width: 200px"></select>
+        &nbsp;<select id="lineageQuery_objectUriSelect2" style="display: none; width: 200px"></select>
         <div class="lineageQuery_objectTypeSelect" id="lineageQuery_valueDiv">
           <select id="lineageQuery_operator"> </select>
           <input id="lineageQuery_value" size="20" value="" />

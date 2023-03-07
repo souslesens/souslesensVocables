@@ -480,51 +480,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
       );
     }
 
-    // manage long data in select options
-    if (false && data.length > Config.maxSelectListSize) {
-      $("#" + selectId).attr("data-classes", JSON.stringify(data));
 
-      $("#" + selectId).html(
-        $("<option>", {
-          text: "",
-          value: ""
-        }));
-      $("#" + selectId).append(
-        $("<option>", {
-          text: "search value...",
-          value: "_search"
-        })
-      );
-      $("#" + selectId).bind("click", function(event) {
-        var value = $(this).val();
-        if (!value) {
-          return;
-        }
-        var optionText = event.currentTarget.outerText;
-
-        if (value == "_search") {
-          event.preventDefault();
-          var str = prompt(" enter label ...");
-          if (!str) {
-            return;
-          }
-          str = str.toLowerCase();
-          var data = JSON.parse($("#" + selectId).attr("data-classes"));
-
-          var filteredData = [{ [valueField]: "_search", [textfield]: "search value..." }];
-          data.forEach(function(item) {
-            if (item.label && item.label.toLowerCase().indexOf(str) > -1) {
-              filteredData.push(item);
-            }
-          });
-          if (filteredData.length > Config.maxSelectListSize) {
-            return alert("to many result, be more specific");
-          }
-          self.fillSelectOptions(selectId, filteredData, withBlanckOption, textfield, valueField, selectedValue);
-        }
-      });
-      return;
-    }
 
     if (Array.isArray(data)) {
       data.forEach(function(item, _index) {
@@ -568,6 +524,22 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
       }
     }
   };
+
+
+  self.fillSelectWithColorPalette=function(selectId,colors){
+    if(!colors)
+    colors = common.paletteIntense;
+    var array = [];
+    colors.forEach(function (color) {
+      array.push();
+    });
+    common.fillSelectOptions(selectId, colors, true);
+
+    $("#"+selectId+" option").each(function () {
+      $(this).css("background-color", $(this).val());
+    });
+  }
+
 
   self.getAllsourcesWithType = function(type) {
     var sources = [];

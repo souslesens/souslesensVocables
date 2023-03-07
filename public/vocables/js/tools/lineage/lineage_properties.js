@@ -394,7 +394,7 @@ Lineage_properties = (function () {
                                 source: nodeSource,
                             },
                             label: item.propLabel.value,
-                            font: { color: Lineage_classes.defaultPredicateEdgeColor },
+                            font: { color: options.edgesColor || Lineage_classes.defaultPredicateEdgeColor },
                             arrows: {
                                 to: {
                                     enabled: true,
@@ -403,7 +403,7 @@ Lineage_properties = (function () {
                                 },
                             },
                             dashes: [3, 3],
-                            color: Lineage_classes.defaultPredicateEdgeColor,
+                            color:  options.edgesColor || Lineage_classes.defaultPredicateEdgeColor,
                         });
                     }
                 });

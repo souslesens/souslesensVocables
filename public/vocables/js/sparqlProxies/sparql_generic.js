@@ -391,7 +391,7 @@ var Sparql_generic = (function() {
       filterStr += Sparql_common.getUriFilter("p", predicateUri);
     }
     if (object) {
-        filterStr += Sparql_common.getUriFilter("o", object);
+      filterStr += Sparql_common.getUriFilter("o", object);
     }
     var graphUri = Config.sources[sourceLabel].graphUri;
     if (Array.isArray(graphUri)) {
@@ -429,11 +429,11 @@ var Sparql_generic = (function() {
       }
 
       var array = elt.split(":");
-      if (array.length ==2 && allowedPrefixes.indexOf(array[0])>-1) {
+      if (array.length == 2 && allowedPrefixes.indexOf(array[0]) > -1) {
         return elt;
       }
 
-      return "\"" + elt.replace(/"/g,"'") + "\"";
+      return "\"" + elt.replace(/"/g, "'") + "\"";
     }
 
     var subjectStr = setElementSyntax(item.subject);
@@ -445,7 +445,7 @@ var Sparql_generic = (function() {
       objectStr = "'" + item.object + "'" + langStr;
     }
     if (item.isString) {
-      objectStr= "\"" + item.object + "\"";
+      objectStr = "\"" + item.object + "\"";
     }
 
     else {
@@ -1280,62 +1280,99 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
   };
 
 
-  self.initBasicVocabGraphs=function(callback){
-    var vocabs=Object.keys(Config.basicVocabGraphs)
+  self.initBasicVocabGraphs = function(callback) {
+    var vocabs = Object.keys(Config.basicVocabGraphs);
     let url = Config.default_sparql_url + "?format=json&query=";
 
-    async.eachSeries(vocabs,function(vocab,callbackEach){
-      var graphUri=Config.basicVocabGraphs[vocab].graphUri;
 
-    /*  var query="PREFIX "+vocab+": <"+graphUri+"> ";
-      query+=" PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-      query+="  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
-      query+="select distinct ?prop ?propLabel FROM <"+graphUri+"> where{  ?prop rdf:type rdf:Property.OPTIONAL{ ?prop rdfs:label ?propLabel}}"*/
+    var queryP = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+      "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+      "PREFIX owl: <http://www.w3.org/2002/07/owl#>"
 
-var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-  "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-  "PREFIX owl: <http://www.w3.org/2002/07/owl#>"+
-  "SELECT distinct ?prop ?propLabel from <"+graphUri+">  WHERE {\n" +
-  "  {?prop ?p ?o optional{?prop rdfs:label ?proplabel} VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty } }" +
- // " UNION {?prop rdf:type owl:ObjectProperty optional{?prop rdfs:label ?proplabel}}" +
-
-  "} "
-      Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {  }, function(err, result) {
-        if (err) {
-          return callbackEach(err);
-        }
-       result.results.bindings.forEach(function(item) {
-         Config.basicVocabGraphs[vocab].properties.push({ id: item.prop.value, label: (item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value)) })
-       })
+    async.eachSeries(vocabs, function(vocab, callbackEach) {
+      var graphUri = Config.basicVocabGraphs[vocab].graphUri;
 
 
-        var query="PREFIX "+vocab+": <"+graphUri+"> ";
-        query+=" PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-        query+="  PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>"
-        query+="PREFIX owl: <http://www.w3.org/2002/07/owl#>"
-        query+="select distinct ?sub ?subLabel FROM <"+graphUri+"> where{" +
-          "{ ?sub rdf:type rdfs:Class. OPTIONAL{ ?sub rdfs:label ?subLabel}}" +
-          "UNION { ?sub rdf:type owl:Class. OPTIONAL{ ?sub rdfs:label ?subLabel}}" +
-          "}"
+        async.series([
+
+            function(callbackSeries) {
+
+              var query = queryP + " SELECT distinct ?prop ?propLabel from <" + graphUri + ">  WHERE {\n" +
+                "  ?prop ?p ?o optional{?prop rdfs:label ?proplabel} VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty } }";
+              Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+                if (err) {
+                  return callbackSeries(err);
+                }
+                result.results.bindings.forEach(function(item) {
+                  Config.basicVocabGraphs[vocab].properties.push({
+                    id: item.prop.value,
+                    label: (item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value))
+                  });
+                });
+
+                callbackSeries();
+              });
+            },
+            function(callbackSeries) {
+              var query = queryP + " select distinct ?sub ?subLabel FROM <" + graphUri + "> where{" +
+                " ?sub rdf:type ?class. OPTIONAL{ ?sub rdfs:label ?subLabel} VALUES ?Class {owl:Class rdf:class rdfs:Class} }";
+              Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+                if (err) {
+                  return callbackSeries(err);
+                }
+                result.results.bindings.forEach(function(item) {
+                  Config.basicVocabGraphs[vocab].classes.push({ id: item.sub.value, label: (item.subLabel ? item.subLabel.value : Sparql_common.getLabelFromURI(item.sub.value)) });
+                });
+                callbackSeries();
+              });
+            }
+            , function(callbackSeries) {
+              var query = queryP + " select distinct ?prop ?domain FROM <" + graphUri + "> where{" +
+                " ?prop rdfs:domain ?domain.OPTIONAL{ ?domain rdfs:label ?domainLabel} }";
+              Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+                if (err) {
+                  return callbackSeries(err);
+                }
+                result.results.bindings.forEach(function(item) {
+                  if (!Config.basicVocabGraphs[vocab].constraints[item.prop.value]) {
+                    Config.basicVocabGraphs[vocab].constraints[item.prop.value] = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+                  }
+                  Config.basicVocabGraphs[vocab].constraints[item.prop.value].domain = item.domain.value;
+                  Config.basicVocabGraphs[vocab].constraints[item.prop.value].domainLabel = item.domainLabel ? item.domainLabel.value : Sparql_common.getLabelFromURI(item.domain.value);
+
+                });
+                callbackSeries();
+              });
+            }
+            , function(callbackSeries) {
+              var query = queryP + " select distinct ?prop ?range FROM <" + graphUri + "> where{" +
+                " ?prop rdfs:range ?range.OPTIONAL{ ?range rdfs:label ?rangeLabel} }";
+              Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+                if (err) {
+                  return callbackSeries(err);
+                }
+                result.results.bindings.forEach(function(item) {
+                  if (!Config.basicVocabGraphs[vocab].constraints[item.prop.value]) {
+                    Config.basicVocabGraphs[vocab].constraints[item.prop.value] = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+                  }
+                  Config.basicVocabGraphs[vocab].constraints[item.prop.value].range = item.range.value;
+                  Config.basicVocabGraphs[vocab].constraints[item.prop.value].rangeLabel = item.rangeLabel ? item.rangeLabel.value : Sparql_common.getLabelFromURI(item.range.value);
+
+                });
+                callbackSeries();
+              });
+            }
+
+          ],
+          function(err) {
+            callbackEach(err);
+          });
 
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { }, function(err, result) {
-          if (err) {
-            return callbackEach(err);
-          }
-          result.results.bindings.forEach(function(item) {
-            Config.basicVocabGraphs[vocab].classes.push({ id: item.sub.value, label: (item.subLabel ? item.subLabel.value : Sparql_common.getLabelFromURI(item.sub.value)) })
-          })
-
-          callbackEach()
-        });
-
-      });
-
-
-    },function(err){
-      if(callback)
-       return  callback(err)
+    }, function(err) {
+      if (callback) {
+        return callback(err)
+      }
     })
   }
 

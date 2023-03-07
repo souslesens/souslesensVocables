@@ -1002,11 +1002,9 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
       query += "?node owl:aValueFrom ?value." + Sparql_common.getVariableLangLabel("value", true); // OPTIONAL {?value rdfs:label ?valueLabel}";
     }
     else {
-      query += "?node owl:allValuesFrom|owl:someValuesFrom|owl:aValueFrom ?value." + Sparql_common.getVariableLangLabel("value", true); // OPTIONAL {?value rdfs:label ?valueLabel}";
-      /*  query +=
-"  OPTIONAL {?node owl:allValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
-"   OPTIONAL {?node owl:someValuesFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}" +
-"   OPTIONAL {?node owl:aValueFrom ?value. OPTIONAL {?value rdfs:label ?valueLabel}}";*/
+      query +=" ?node ?p ?value. ?value rdf:type ?valueType. filter (?valueType in (rdf:Class,owl:Class)) "
+     // query += "?node owl:allValuesFrom|owl:someValuesFrom|owl:aValueFrom ?value." + Sparql_common.getVariableLangLabel("value", true); // OPTIONAL {?value rdfs:label ?valueLabel}";
+
     }
 
     if (options.getMetadata) {

@@ -193,7 +193,7 @@ npm --version
 Run the config script to create a default configuration:
 
 ```bash
-node scripts/init_config.js
+node scripts/init_configs.js
 ```
 
 Then, edit the `config/*.json` to your needs.

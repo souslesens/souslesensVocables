@@ -18,6 +18,8 @@ Lineage_relations = (function() {
         }
       });
 
+      common.fillSelectWithColorPalette("lineageRelations_colorsSelect");
+
       var cbxValue;
       if (caller == "Graph" || caller == "Tree") {
         cbxValue = "selected";
@@ -43,7 +45,7 @@ Lineage_relations = (function() {
 
         function(callbackSeries) {
           var vocabularies = ["usual", Lineage_sources.activeSource];
-          if (Config.sources[Lineage_sources.activeSource].imports){
+          if (Config.sources[Lineage_sources.activeSource].imports) {
             vocabularies = vocabularies.concat(Config.sources[Lineage_sources.activeSource].imports);
           }
           vocabularies = vocabularies.concat(Object.keys(Config.basicVocabGraphs));
@@ -139,6 +141,8 @@ Lineage_relations = (function() {
             return 0;
           });
           var options = {
+            contextMenu: Lineage_query.getPropertiesJstreeMenu(),
+            selectTreeNodeFn: Lineage_query.onSelectPropertyTreeNode,
             withCheckboxes: true,
             searchPlugin: {
               case_insensitive: true,
@@ -155,6 +159,24 @@ Lineage_relations = (function() {
 
     });
   };
+
+
+
+
+  self.onFilterObjectTypeSelect=function(role,type){
+    var valueStr=""
+    if(type=="String"){
+      valueStr=" <div class=\"lineageQuery_objectTypeSelect\" id=\"lineageQuery_valueDiv\">\n" +
+        "          <select id=\"lineageQuery_operator\"> </select>\n" +
+        "          <input id=\"lineageQuery_value\" size=\"20\" value=\"\" />\n" +
+        "        </div>"
+
+    }
+    domainValue=valueStr
+
+  }
+
+
 
   self.onshowDrawRelationsDialogValidate = function(action) {
     if (action == "clear") {
@@ -186,6 +208,9 @@ Lineage_relations = (function() {
       var type = $("input[name='lineageRelations_relType']").filter(":checked").val();
       var selection = $("input[name='lineageRelations_selection']").filter(":checked").val();
       var options = {};
+
+      options.edgesColor = $("#lineageRelations_colorsSelect").val();
+
 
       var caller = self.drawRelationCurrentCaller;
       if (selection == "selected") {

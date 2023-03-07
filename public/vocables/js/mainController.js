@@ -690,6 +690,9 @@ return;*/
                 });
             }
         }
+        else{
+            callback();
+        }
     };
 
     return self;

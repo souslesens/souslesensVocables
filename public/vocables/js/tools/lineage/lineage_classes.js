@@ -23,7 +23,7 @@ var Lineage_classes = (function() {
   self.objectPropertyColor = "#f50707";
   self.defaultEdgeArrowType = "triangle";
   self.defaultEdgeColor = "#aaa";
-  self.defaultPredicateEdgeColor = "#ce9152";
+  self.defaultPredicateEdgeColor = "#266264";
   self.restrictionColor = "#fdbf01";
   self.namedIndividualShape = "triangle";
   self.namedIndividualColor = "#0067bb";
@@ -2073,6 +2073,7 @@ addNode:false
                 to: item.concept.value,
                 //  label: "<i>" + item.propLabel.value + "</i>",
                 label: item.propLabel.value,
+                font:{color:options.edgesColor || Lineage_classes.restrictionColor},
                 data: {
                   propertyId: item.prop.value,
                   bNodeId: item.node.value,
@@ -2088,7 +2089,7 @@ addNode:false
                   }
                 },
                 dashes: true,
-                color: Lineage_classes.restrictionColor,
+                color: options.edgesColor || Lineage_classes.restrictionColor,
                 physics: physics
               });
             }
@@ -2099,6 +2100,7 @@ addNode:false
                 from: item.concept.value,
                 //  label: "<i>" + item.propLabel.value + "</i>",
                 label: item.propLabel.value,
+                font:{color:options.edgesColor || Lineage_classes.restrictionColor},
                 data: {
                   propertyId: item.prop.value,
                   bNodeId: item.node.value,
@@ -2114,7 +2116,7 @@ addNode:false
                   }
                 },
                 dashes: true,
-                color: Lineage_classes.restrictionColor,
+                color: options.edgesColor || Lineage_classes.restrictionColor,
                 physics: physics
               });
             }
@@ -2401,6 +2403,12 @@ addNode:false
     memberPredicate = false;
     if (nodes[0].data.type == "container") {
       memberPredicate = true;
+    }
+
+
+    // manage draw node from outer source
+    if(nodes.length==1 &&  nodes[0].data &&  nodes[0].data.source){
+     source= nodes[0].data.source
     }
 
     var queryOptions = { skipRestrictions: 1, memberPredicate: memberPredicate, excludeType: 1, selectGraph: true };

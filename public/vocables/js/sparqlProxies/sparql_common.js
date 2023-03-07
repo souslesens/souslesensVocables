@@ -157,75 +157,6 @@ var Sparql_common = (function() {
         filters.push(" VALUES ?" + varName + "{" + conceptIdsStr + "}");
 
 
-        var p = ids.indexOf("#");
-        if (p > -1) {
-          ids.splice(p, 1);
-        }
-        if (ids[0] == null) {
-          return "";
-        }
-        var conceptIdsStr = "";
-        var blankNodes = [];
-        var p;
-        ids.forEach(function(id, _index) {
-          id = "" + id;
-
-          var str = "";
-          if ((p = id.indexOf("nodeID://")) > -1) {//blank node
-            blankNodes.push(id.substring(9));
-            return;
-
-          }
-          else if ((p = id.indexOf("_:")) > -1) {//blank node
-            blankNodes.push(id.substring(3));
-            return;
-          }
-
-          if (id != "") {
-            if (id.match(/<.*>/)) {
-              str += id;
-            }
-
-
-            else {
-              str += "<" + id + ">";
-            }
-
-            if (str != "") {
-              if (conceptIdsStr != "") {
-                conceptIdsStr += ",";
-              }
-              conceptIdsStr += str;
-            }
-
-            /*  if (id.indexOf("http") < 0 && id.split(":").length != 2)
-                  // prefix
-                  conceptIdsStr += id;
-              if (id.indexOf("http") == 0|| id.indexOf("nodeID://") > -1 || id.indexOf("_:") > -1) {
-
-                      conceptIdsStr += "<" + id + ">";
-
-              }*/
-          }
-        });
-
-        filters.push(" ?" + varName + " in( " + conceptIdsStr + ")");
-
-
-        //blankNodes see https://stackoverflow.com/questions/55440728/how-to-filter-by-blanknode-id
-        if (true) {
-          if (blankNodes.length > 0) {
-            var strBnodes = "";
-            blankNodes.forEach(function(id, index) {
-              if (index > 0) {
-                strBnodes += "|";
-              }
-              strBnodes += "" + id + "";
-            });
-            filters.push("regex(str(?" + varName + "), \"" + strBnodes + "\")");
-          }
-        }
-
       }
       else {
         return "";
@@ -234,14 +165,13 @@ var Sparql_common = (function() {
 
     return filters[0];
 
-    filter = " FILTER (";
+    var filter=""
     filters.forEach(function(filterStr, index) {
       if (index > 0) {
-        filter += " || ";
+        filter += "  ";
       }
       filter += filterStr;
     });
-    filter += " ) ";
 
     return filter;
   };

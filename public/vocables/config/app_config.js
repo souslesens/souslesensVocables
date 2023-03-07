@@ -62,11 +62,11 @@ var Config = (function() {
 
 
   self.basicVocabGraphs = {
-    rdf: {graphUri:"https://www.w3.org/1999/02/22-rdf-syntax-ns",properties:[],classes:[]},
-    rdfs: {graphUri:"https://www.w3.org/2000/01/rdf-schema",properties:[],classes:[]},
-    owl: {graphUri:"https://www.w3.org/2002/07/owl",properties:[],classes:[]},
-    "iof-av":{graphUri:"https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/",properties:[],classes:[]},
-    skos: {graphUri:"http://www.w3.org/2004/02/skos/core/",properties:[],classes:[]}
+    rdf: {graphUri:"https://www.w3.org/1999/02/22-rdf-syntax-ns",properties:[],classes:[],constraints:{}},
+    rdfs: {graphUri:"https://www.w3.org/2000/01/rdf-schema",properties:[],classes:[],constraints:{}},
+    owl: {graphUri:"https://www.w3.org/2002/07/owl",properties:[],classes:[],constraints:{}},
+    "iof-av":{graphUri:"https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/",properties:[],classes:[],constraints:{}},
+    skos: {graphUri:"http://www.w3.org/2004/02/skos/core/",properties:[],classes:[],constraints:{}}
   };
 
   self.namedSetsThesaurusGraphUri = "http://souslesens.org/resource/named-triple-sets/";

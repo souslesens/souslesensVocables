@@ -212,6 +212,12 @@ Load some data into virtuoso
 bash tests/load_data.sh
 ```
 
+Create a user account in MariaDB (for database authentication)
+
+```bash
+bash scripts/create_user_in_db.sh dev <login> <password>
+```
+
 ### Install souslesens
 
 souslesensVocable is composed of a backend in node/express and a frontend in pure javascript

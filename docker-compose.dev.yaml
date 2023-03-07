@@ -29,13 +29,15 @@ services:
         networks:
             - dev-backend
 
-    mysql:
+    mariadb:
         image: mariadb:10
         ports:
             - 3306:3306
         environment:
+            MARIADB_ROOT_PASSWORD: root
             MARIADB_USER: slsv
             MARIADB_PASSWORD: slsv
+            MARIADB_DATABASE: slsv
         networks:
             - dev-backend
 

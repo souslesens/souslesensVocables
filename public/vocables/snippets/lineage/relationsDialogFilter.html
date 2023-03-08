@@ -24,46 +24,46 @@
 </style>
 
 
-<div style="display:flex;flex-direction: row">
+<div style="display:flex;flex-direction: column">
 
 
-  <div class="lineageRelations_div">
+  <span style="font-weight: bold">Property</span>
+  <span style="font-weight: bold;color:saddlebrown" id="Lineage_relation_property"></span>
 
 
-    <span style="font-weight: bold" >Property</span>
-    <span style="font-weight: bold;color:saddlebrown"  id="Lineage_relation_property"></span>
-
-  </div>
-
-
-
-  <div class="lineageRelations_div">
-    <span style="font-weight: bold">Domain</span>
-    <span id="Lineage_relation_domain"></span>
-    <select id="Lineage_relation_domainTypeSelect" onchange="Lineage_query.onSelectResourceType('domain',$(this).val())"></select>
-    <div id="Lineage_relation_domainValueDiv">
-      <select id="Lineage_relation_domainVocabularySelect"  onchange="Lineage_query.onSelectResource('domain',$(this).val())"></select>
-      <select id="Lineage_relation_domainResourcesSelect" ></select>
-
-    </div>
-  </div>
-
-  <div class="lineageRelations_div">
-    <span style="font-weight: bold">Range</span>
-    <span id="Lineage_relation_range"></span>
-    <select id="Lineage_relation_rangeTypeSelect" onchange="Lineage_query.onSelectResourceType('range',$(this).val())"></select>
-    <div id="Lineage_relation_rangeValueDiv">
-      <select id="Lineage_relation_rangeVocabularySelect"  onchange="Lineage_query.onSelectResource('range',$(this).val())"></select>
-      <select id="Lineage_relation_rangeResourcesSelect"  "></select>
-    </div>
-  </div>
-
-
-
-
-
-<div class="lineageRelations_div" style="display:none" id="lineageQuery_valueDiv">
-  <select id="lineageQuery_operator"> </select>
-  <input id="lineageQuery_value" size="20" value="" />
 </div>
+
+
+<div class="lineageRelations_div">
+  <div>
+    Filter role <select id="lineage_relation_filterRoleSelect" onchange="Lineage_query.onSelectRoleType($(this).val())">
+    <option></option>
+    <option>subject</option>
+    <option>object</option>
+  </select>
+  </div>
+  <span style="font-weight: bold" id="lineage_relation_filterRole"></span>
+  <span id="Lineage_relation_filter"></span>
+  <select id="Lineage_relation_filterTypeSelect"
+          onchange="Lineage_query.onSelectResourceType('domain',$(this).val())"></select>
+  <div id="Lineage_relation_filterValueDiv">
+    <select id="Lineage_relation_filterVocabularySelect"
+            onchange="Lineage_query.onSelectResource('domain',$(this).val())"></select>
+    <select id="Lineage_relation_filterResourcesSelect"></select>
+
+  </div>
+
+
+
+
+
+  <div class="lineageRelations_div" style="display:none" id="lineageQuery_valueDiv">
+    <select id="lineageQuery_operator"> </select>
+    <input id="lineageQuery_value" size="20" value="" />
+  </div>
+</div>
+<div>
+  <span id="Lineage_relation_filterText"></span>
+  <button onclick="Lineage_query.attachFilterToProperty()">OK</button>
+  <button onclick="$('#mainDialogDiv').dialog('close')")>Cancel</button>
 </div>

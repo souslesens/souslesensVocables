@@ -148,6 +148,10 @@ class UserModelDatabase extends UserModel {
      */
     constructor(sqlConfig) {
         super();
+        // check sql columns are alphanum to avoid sql injection
+        if (!(this._isAlphaNum(sqlConfig.loginColumn) && this._isAlphaNum(sqlConfig.passwordColumn) && this._isAlphaNum(sqlConfig.groupsColumn))) {
+            throw Error("sqlConfig.loginColumn, sqlConfig.passwordColumn and sqlConfig.groupsColumn MUST BE alphanumeric string");
+        }
         this.sqlConfig = sqlConfig;
         this.poolParams = {
             host: sqlConfig.host,

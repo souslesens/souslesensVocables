@@ -110,9 +110,9 @@ Lineage_relations = (function () {
             restrictions = [];
             result.forEach(function (item) {
                 var domain, range, domainLabel, rangeLabel, prop, propLabel, node, domainSourceLabel, rangeSourceLabel;
-                if (item.concept) domain = item.concept.value;
+                if (item.subject) domain = item.subject.value;
                 if (item.value) range = item.value.value;
-                if (item.conceptLabel) domainLabel = item.conceptLabel.value;
+                if (item.subjectLabel) domainLabel = item.subjectLabel.value;
                 if (item.valueLabel) rangeLabel = item.valueLabel.value;
                 if (item.prop) prop = item.prop.value;
                 if (item.propLabel) propLabel = item.propLabel.value;

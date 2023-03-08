@@ -704,12 +704,12 @@ searchedSources = searchedSources.concat(importedSources);*/
             item["broader" + i].jstreeId = sourceLabel + "_" + item["broader" + i].value;
           }
         }
-        item.concept.jstreeId = sourceLabel + "_" + item.concept.value;
+        item.subject.jstreeId = sourceLabel + "_" + item.subject.value;
       });
 
       var type = Config.sources[sourceLabel].schemaType;
       if (type == "SKOS") {
-        type = "concept";
+        type = "subject";
       }
       else if (type == "OWL") {
         type = "class";
@@ -746,11 +746,11 @@ searchedSources = searchedSources.concat(importedSources);*/
           }
         }
 
-        jstreeId = item.concept.jstreeId;
+        jstreeId = item.subject.jstreeId;
         if (!existingNodes[jstreeId]) {
           existingNodes[jstreeId] = 1;
-          var text = "<span class='searched_concept'>" + item.conceptLabel.value + "</span>";
-          id = item.concept.value;
+          var text = "<span class='searched_concept'>" + item.subjectLabel.value + "</span>";
+          id = item.subject.value;
           self.currentFoundIds.push(id);
 
           var broader1 = item["broader1"];
@@ -771,7 +771,7 @@ searchedSources = searchedSources.concat(importedSources);*/
               type: "http://www.w3.org/2002/07/owl#Class",
               source: sourceLabel,
               id: id,
-              label: item.conceptLabel.value
+              label: item.subjectLabel.value
             }
           });
         }
@@ -1434,7 +1434,7 @@ defaultLang = 'en';*/
 
                 var targetClassStr = "any";
                 if (item.value) {
-                  targetClassStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.concept.value + "\")'>" + item.conceptLabel.value + "</span>";
+                  targetClassStr = "<span class='detailsCellName' onclick=' SourceBrowser.onClickLink(\"" + item.subject.value + "\")'>" + item.subjectLabel.value + "</span>";
                 }
                 str += "<td class='detailsCellValue'>" + targetClassStr + "</td>";
 
@@ -1518,7 +1518,7 @@ defaultLang = 'en';*/
   };
 
   self.onClickLink = function(nodeId) {
-    /*  var filter=Sparql_common.setFilter("concept",[nodeId])
+    /*  var filter=Sparql_common.setFilter("subject",[nodeId])
 Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(err, result){
 
 }})*/

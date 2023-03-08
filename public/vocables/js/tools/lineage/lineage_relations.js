@@ -141,13 +141,14 @@ Lineage_relations = (function() {
             return 0;
           });
           var options = {
-            contextMenu: Lineage_query.getPropertiesJstreeMenu(),
+           // contextMenu: Lineage_query.getPropertiesJstreeMenu(),
             selectTreeNodeFn: Lineage_query.onSelectPropertyTreeNode,
             withCheckboxes: true,
             searchPlugin: {
               case_insensitive: true,
               fuzzy: false,
               show_only_matches: true
+
             }
           };
           common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv", jstreeData, options, function() {
@@ -222,7 +223,7 @@ Lineage_relations = (function() {
         }
       }
       else if (selection == "visible") {
-        if (!visjsGraph.isGraphNotEmpty) {
+        if (!visjsGraph.isGraphNotEmpty()) {
           options.data = null;
         }
         else {
@@ -239,9 +240,12 @@ Lineage_relations = (function() {
         // if active source selected take all properties( ==no filter on props)
         var filter = "";
         if (properties.indexOf(Config.sources[Lineage_sources.activeSource].graphUri) < 0) {
-          filter = Sparql_common.setFilter("prop", properties);
+          filterProp = Sparql_common.setFilter("prop", properties);
         }
-        options.filter = filter;
+
+          options.filter= filterProp
+        if( self.filter)
+        options.filter+=self.filter
       }
       if (type == "both") {
         type = null;

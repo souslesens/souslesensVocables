@@ -184,7 +184,7 @@ self.graphTable(KGcreator.currentTreeNode);
         relation.from = edge.from;
         relation.to = edge.to;
         self.currentRelation = relation;
-        var filterStr = Sparql_common.setFilter("concept", [relation.from, relation.to]);
+        var filterStr = Sparql_common.setFilter("subject", [relation.from, relation.to]);
 
         self.queryColumnsMappings(
             Lineage_sources.activeSource,
@@ -195,10 +195,10 @@ self.graphTable(KGcreator.currentTreeNode);
             function (err, columns) {
                 if (err) return alert(err.responseText);
                 for (var col in columns) {
-                    if (columns[col].concept == relation.from) {
+                    if (columns[col].subject == relation.from) {
                         relation.fromColumn = columns[col];
                     }
-                    if (columns[col].concept == relation.to) {
+                    if (columns[col].subject == relation.to) {
                         relation.toColumn = columns[col];
                     }
                 }
@@ -210,8 +210,8 @@ self.graphTable(KGcreator.currentTreeNode);
                 $("#mainDialogDiv").dialog("open");
                 $("#mainDialogDiv").load("snippets/lineage/linkedData/lineage_linkedData_joinTablesDialog.html", function () {
                     $("#lineage_linkedData_join_databaseId").html(relation.fromColumn.database);
-                    $("#lineage_linkedData_join_fromClassId").html(relation.fromColumn.conceptLabel);
-                    $("#lineage_linkedData_join_toClassId").html(relation.toColumn.conceptLabel);
+                    $("#lineage_linkedData_join_fromClassId").html(relation.fromColumn.subjectLabel);
+                    $("#lineage_linkedData_join_toClassId").html(relation.toColumn.subjectLabel);
 
                     $("#lineage_linkedData_join_fromTableId").html(relation.fromColumn.table);
                     $("#lineage_linkedData_join_toTableId").html(relation.toColumn.table);
@@ -501,7 +501,7 @@ self.graphTable(KGcreator.currentTreeNode);
             "select distinct *  " +
             fromStr +
             "  FROM  <http://souslesens.org/resource/linkedData_mappings/> where { \n" +
-            "  ?concept   <http://souslesens.org/resource/linkedData_mappings/hasColumnMapping> ?column . optional{?concept rdfs:label ?conceptLabel}\n" +
+            "  ?subject   <http://souslesens.org/resource/linkedData_mappings/hasColumnMapping> ?column . optional{?subject rdfs:label ?subjectLabel}\n" +
             "  ?column ?prop ?value.";
         if (options.filter) query += " " + options.filter;
         if (options.database) query += "?column slsv:database ?database.filter (?database='" + options.database + "') ";
@@ -518,8 +518,8 @@ self.graphTable(KGcreator.currentTreeNode);
             result.results.bindings.forEach(function (item) {
                 if (!columns[item.column.value])
                     columns[item.column.value] = {
-                        concept: item.concept.value,
-                        conceptLabel: item.concept ? item.conceptLabel.value : Sparql_common.getLabelFromURI(item.concept.value),
+                        concept: item.subject.value,
+                        conceptLabel: item.subject ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value),
                     };
                 if (item.prop.value == "http://souslesens.org/resource/linkedData_mappings/database") columns[item.column.value].database = item.value.value;
                 if (item.prop.value == "http://souslesens.org/resource/linkedData_mappings/table") columns[item.column.value].table = item.value.value;
@@ -542,7 +542,7 @@ self.graphTable(KGcreator.currentTreeNode);
                             if (joinsIds.indexOf(item.join.value) < 0) joinsIds.push(item.join.value);
                             joinsMap[item.join.value] = {
                                 bNode: item.node.value,
-                                from: { classId: item.concept.value, classLabel: item.conceptLabel.value },
+                                from: { classId: item.subject.value, classLabel: item.subjectLabel.value },
                                 to: { classId: item.value.value, classLabel: item.valueLabel.value },
                                 prop: item.prop.value,
                                 propLabel: item.propLabel.value,
@@ -760,11 +760,11 @@ self.graphTable(KGcreator.currentTreeNode);
                 });
             }
 
-            if (!existingNodes[columnObj.concept]) {
-                existingNodes[columnObj.concept] = 1;
+            if (!existingNodes[columnObj.subject]) {
+                existingNodes[columnObj.subject] = 1;
                 visjsData.nodes.push({
-                    id: columnObj.concept,
-                    label: columnObj.conceptLabel,
+                    id: columnObj.subject,
+                    label: columnObj.subjectLabel,
 
                     shadow: Lineage_classes.nodeShadow,
                     shape: Lineage_classes.defaultShape,
@@ -773,20 +773,20 @@ self.graphTable(KGcreator.currentTreeNode);
                     color: Lineage_classes.getSourceColor(Lineage_sources.currentSource),
                     data: {
                         source: Lineage_sources.activeSource,
-                        id: columnObj.concept,
-                        label: columnObj.conceptLabel,
+                        id: columnObj.subject,
+                        label: columnObj.subjectLabel,
                     },
                 });
             }
 
-            var edgeId = columnId + "_" + columnObj.concept;
+            var edgeId = columnId + "_" + columnObj.subject;
             if (!existingNodes[edgeId]) {
                 existingNodes[edgeId] = 1;
 
                 visjsData.edges.push({
                     id: edgeId,
                     from: columnId,
-                    to: columnObj.concept,
+                    to: columnObj.subject,
                     data: {
                         type: "relation",
                     },
@@ -915,7 +915,7 @@ self.graphTable(KGcreator.currentTreeNode);
 
                         jstreeData.push({
                             id: resourceId,
-                            text: item.conceptLabel + "->" + item.table + "." + item.column,
+                            text: item.subjectLabel + "->" + item.table + "." + item.column,
                             parent: item.database + "column_mappings",
                         });
                     }

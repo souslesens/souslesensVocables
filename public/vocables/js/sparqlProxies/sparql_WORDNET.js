@@ -39,17 +39,17 @@ var Sparql_WORDNET = (function () {
 
         var strFilter = "";
         if (words) {
-            strFilter = Sparql_common.setFilter("concept", null, words, null);
+            strFilter = Sparql_common.setFilter("subject", null, words, null);
         } else if (ids) {
-            strFilter = Sparql_common.setFilter("concept", ids, null);
+            strFilter = Sparql_common.setFilter("subject", ids, null);
         }
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "  PREFIX wordnet: <http://www.w3.org/2006/03/wn/wn20/schema/>" +
             "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            " SELECT distinct * WHERE { ?concept rdfs:label ?conceptLabel." +
+            " SELECT distinct * WHERE { ?subject rdfs:label ?subjectLabel." +
             strFilter +
-            "?child1 wordnet:hyponymOf  ?concept." +
+            "?child1 wordnet:hyponymOf  ?subject." +
             "?child1 rdfs:label ?child1Label." +
             // " filter (?child1 rdf:type <http://www.w3.org/2006/03/wn/wn20/schema/NounSynset>"+
             "}" +
@@ -92,9 +92,9 @@ var Sparql_WORDNET = (function () {
         if (!options) options = {};
         var strFilter = "";
         if (words) {
-            strFilter = Sparql_common.setFilter("concept", null, words, { exactMatch: true });
+            strFilter = Sparql_common.setFilter("subject", null, words, { exactMatch: true });
         } else if (ids) {
-            strFilter = Sparql_common.setFilter("concept", ids, null);
+            strFilter = Sparql_common.setFilter("subject", ids, null);
         }
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -102,12 +102,12 @@ var Sparql_WORDNET = (function () {
             "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             " select distinct *   WHERE {{";
 
-        query += "?concept rdfs:label ?conceptLabel. " + strFilter + "?broader rdf:type wordnet:NounSynset ";
+        query += "?subject rdfs:label ?subjectLabel. " + strFilter + "?broader rdf:type wordnet:NounSynset ";
 
         ancestorsDepth = self.ancestorsDepth;
         for (var i = 1; i <= ancestorsDepth; i++) {
             if (i == 1) {
-                query += "  ?concept wordnet:hyponymOf ?broader" + i + "." + "?broader rdf:type wordnet:NounSynset " + "?broader" + i + " rdfs:label ?broader" + i + "Label.";
+                query += "  ?subject wordnet:hyponymOf ?broader" + i + "." + "?broader rdf:type wordnet:NounSynset " + "?broader" + i + " rdfs:label ?broader" + i + "Label.";
             } else {
                 if (i < ancestorsDepth) query += "  ?broader" + (i - 1) + " wordnet:hyponymOf ?broader" + i + ".";
                 else query += "OPTIONAL { ?broader" + (i - 1) + " wordnet:hyponymOf ?broader" + i + ".";

@@ -26,8 +26,8 @@ var SourceManager = {
                         " select distinct *  FROM <" +
                         referenceSource.graphUri +
                         ">  WHERE" +
-                        " {{?concept skos:prefLabel ?conceptLabel.    OPTIONAL{?concept rdf:type ?type.}  " +
-                        "?concept skos:broader ?broader1.?broader1 skos:prefLabel ?broader1Label.?broader1 rdf:type ?type." +
+                        " {{?subject skos:prefLabel ?subjectLabel.    OPTIONAL{?subject rdf:type ?type.}  " +
+                        "?subject skos:broader ?broader1.?broader1 skos:prefLabel ?broader1Label.?broader1 rdf:type ?type." +
                         "" +
                         "?broader1 skos:broader ?broader2.?broader2 skos:prefLabel ?broader2Label.?broader2 rdf:type ?type." +
                         "filter (?broader2Label='Thing'@en)" +
@@ -78,17 +78,17 @@ var SourceManager = {
                 var predicates = "";
 
                 sourcePredicates.forEach(function (item) {
-                    var conceptUri = urisMap[item.concept.value];
+                    var conceptUri = urisMap[item.subject.value];
                     if (!conceptUri) {
                         if (!keepOriginalUris) {
                             conceptUri = " <" + graphUri + util.getRandomHexaId(10) + ">";
-                            urisMap[item.concept.value] = conceptUri;
-                            if (addExactMatchPredicate) predicates += conceptUri + " skos:exactMatch <" + item.concept.value + "> .";
+                            urisMap[item.subject.value] = conceptUri;
+                            if (addExactMatchPredicate) predicates += conceptUri + " skos:exactMatch <" + item.subject.value + "> .";
                         } else {
-                            urisMap[item.concept.value] = "<" + item.concept.value + ">";
+                            urisMap[item.subject.value] = "<" + item.subject.value + ">";
                         }
                         predicates += conceptUri + " rdf:type " + "skos:Concept.";
-                        predicates += conceptUri + " skos:prefLabel " + "'" + item.conceptLabel.value + "'@" + lang + ". ";
+                        predicates += conceptUri + " skos:prefLabel " + "'" + item.subjectLabel.value + "'@" + lang + ". ";
                     }
 
                     var previousBroader = null;
@@ -100,7 +100,7 @@ var SourceManager = {
                                 if (!keepOriginalUris) {
                                     var broaderUri = " <" + graphUri + util.getRandomHexaId(10) + ">";
                                     urisMap[broader.value] = broaderUri;
-                                    if (addExactMatchPredicate) predicates += broaderUri + " skos:exactMatch <" + item.concept.value + "> .";
+                                    if (addExactMatchPredicate) predicates += broaderUri + " skos:exactMatch <" + item.subject.value + "> .";
                                 } else {
                                     urisMap[broader.value] = "<" + broader.value + ">";
                                 }

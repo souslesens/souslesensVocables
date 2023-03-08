@@ -64,10 +64,10 @@ var OwlEditor = (function () {
             [
                 //load Classes
                 function (callbackSeries) {
-                    var options = { filter: "?concept rdf:type owl:Class", selectGraph: 1 };
+                    var options = { filter: "?subject rdf:type owl:Class", selectGraph: 1 };
                     Sparql_OWL.getItems(source, options, function (err, result) {
                         if (err) return callbackSeries(err);
-                        self.currentSourceData["owl:Class"] = common.array.sort(common.array.distinctValues(result, "concept"), "conceptLabel");
+                        self.currentSourceData["owl:Class"] = common.array.sort(common.array.distinctValues(result, "subject"), "conceptLabel");
                         callbackSeries();
                     });
                 },
@@ -106,25 +106,25 @@ var OwlEditor = (function () {
                     var distinctIds = {};
                     var rootClass = "http://www.w3.org/2002/07/owl#Thing";
                     self.currentSourceData["owl:Class"].forEach(function (item) {
-                        if (!distinctIds[item.concept.value]) {
-                            distinctIds[item.concept.value] = 1;
+                        if (!distinctIds[item.subject.value]) {
+                            distinctIds[item.subject.value] = 1;
 
                             var type = "owl:Class";
                             if (item.g && item.g.value != self.currentSourceData.graphUri) type = "importedClass";
 
                             var parent = "owl:Class";
-                            if (item.superClass && item.concept.value != rootClass) parent = item.superClass.value;
+                            if (item.superClass && item.subject.value != rootClass) parent = item.superClass.value;
                             var graphUri = null;
                             if (item.g) graphUri = item.g.value;
                             jstreeData.push({
-                                text: item.conceptLabel.value,
-                                id: item.concept.value,
+                                text: item.subjectLabel.value,
+                                id: item.subject.value,
                                 parent: parent,
                                 type: type,
                                 data: {
                                     type: type,
-                                    label: item.conceptLabel.value,
-                                    id: item.concept.value,
+                                    label: item.subjectLabel.value,
+                                    id: item.subject.value,
                                     graphUri: graphUri,
                                 },
                             });
@@ -181,10 +181,10 @@ var OwlEditor = (function () {
                                 values: {},
                                 type: type,
                             };
-                        if (!distinctRestrictionNodes[item.node.value].subClasses[item.concept.value])
-                            distinctRestrictionNodes[item.node.value].subClasses[item.concept.value] = {
-                                id: item.concept.value,
-                                label: item.conceptLabel.value,
+                        if (!distinctRestrictionNodes[item.node.value].subClasses[item.subject.value])
+                            distinctRestrictionNodes[item.node.value].subClasses[item.subject.value] = {
+                                id: item.subject.value,
+                                label: item.subjectLabel.value,
                             };
                         if (!distinctRestrictionNodes[item.node.value].values[item.value.value])
                             distinctRestrictionNodes[item.node.value].values[item.value.value] = {
@@ -281,7 +281,7 @@ var OwlEditor = (function () {
                     inputHtml += "<option></option>";
 
                     self.currentSourceData[range].forEach(function (item) {
-                        if (item.concept) inputHtml += "<option  value='" + item.concept.value + "'>" + item.conceptLabel.value + "</option>";
+                        if (item.subject) inputHtml += "<option  value='" + item.subject.value + "'>" + item.subjectLabel.value + "</option>";
                         else if (item.prop) inputHtml += "<option value='" + item.prop.value + "'>" + item.propLabel.value + "</option>";
                     });
                     inputHtml += "<option value='" + "http://www.w3.org/2002/07/owl#Thing" + "'>" + "Thing" + "</option>";

@@ -1608,11 +1608,11 @@ if(!source)
             var restriction = self.currentSourceRestrictions[mapping.p];
             if (restriction) {
 
-              if (sourceObjects[subject] && sourceObjects[subject] != restriction.concept) {
-                errors += " missing column with type  "+ restriction.concept +"\n for prop " + restriction.propLabel+"(subject)\n";
+              if (sourceObjects[subject] && sourceObjects[subject] != restriction.subject) {
+                errors += " missing column with type  "+ restriction.subject +"\n for prop " + restriction.propLabel+"(subject)\n";
               }
               if (sourceObjects[mapping.o] && sourceObjects[mapping.o] != restriction.value) {
-                errors += " missing column with type  "+ restriction.concept +"\n for prop " + restriction.propLabel+" (object)\n";
+                errors += " missing column with type  "+ restriction.subject +"\n for prop " + restriction.propLabel+" (object)\n";
               }
 
 

@@ -132,7 +132,7 @@ var SourceMatcher = (function () {
                 function (callbackSeries) {
                     if (!compareAll) return callbackSeries();
                     var options = {};
-                    if (rdfType && rdfType != "") options = { filter: "?concept rdf:type " + rdfType };
+                    if (rdfType && rdfType != "") options = { filter: "?subject rdf:type " + rdfType };
                     Sparql_generic.getItems(fromSourceId, options, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
@@ -140,10 +140,10 @@ var SourceMatcher = (function () {
                         sourceConceptsCount = result.length;
                         result.forEach(function (item) {
                             allSourceConcepts.push({
-                                id: item.concept.value,
-                                label: item.conceptLabel.value,
+                                id: item.subject.value,
+                                label: item.subjectLabel.value,
                             });
-                            commonConceptsMap[item.conceptLabel.value.toLowerCase()] = { source: { id: item.concept.value, label: item.conceptLabel.value, broaders: [] } };
+                            commonConceptsMap[item.subjectLabel.value.toLowerCase()] = { source: { id: item.subject.value, label: item.subjectLabel.value, broaders: [] } };
                         });
                         callbackSeries();
                     });
@@ -169,8 +169,8 @@ var SourceMatcher = (function () {
 
                                 result.forEach(function (item) {
                                     var targetObj = {
-                                        id: item.concept.value,
-                                        label: item.conceptLabel.value,
+                                        id: item.subject.value,
+                                        label: item.subjectLabel.value,
                                     };
                                     var targetBroaders = [];
                                     for (var i = 1; i < targetConceptAggrDepth; i++) {
@@ -187,8 +187,8 @@ var SourceMatcher = (function () {
                                         }
                                     }
                                     targetObj.broaders = targetBroaders;
-                                    if (commonConceptsMap[item.conceptLabel.value.toLowerCase()]) {
-                                        commonConceptsMap[item.conceptLabel.value.toLowerCase()].target = targetObj;
+                                    if (commonConceptsMap[item.subjectLabel.value.toLowerCase()]) {
+                                        commonConceptsMap[item.subjectLabel.value.toLowerCase()].target = targetObj;
                                     }
                                 });
                                 MainController.UI.message(targetConceptsCount + " processed" + sourceConceptsProcessed + "/" + sourceConceptsCount);
@@ -233,8 +233,8 @@ var SourceMatcher = (function () {
                                             }
                                         }
                                     }
-                                    if (item.conceptLabel && item.conceptLabel.value && commonConceptsMap[item.conceptLabel.value.toLowerCase()]) {
-                                        commonConceptsMap[item.conceptLabel.value.toLowerCase()].source.broaders = sourceBroaders;
+                                    if (item.subjectLabel && item.subjectLabel.value && commonConceptsMap[item.subjectLabel.value.toLowerCase()]) {
+                                        commonConceptsMap[item.subjectLabel.value.toLowerCase()].source.broaders = sourceBroaders;
                                     }
                                 });
 

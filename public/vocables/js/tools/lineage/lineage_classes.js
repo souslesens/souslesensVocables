@@ -417,7 +417,7 @@ sourceLabels.sort();
 
           var shape = self.defaultShape;
           result.forEach(function(/** @type {{ topConcept: { value: string; }; topConceptLabel: { value: any; }; }} */ item) {
-            var nodeSource = item.conceptGraph ? Sparql_common.getSourceFromGraphUri(item.conceptGraph.value) : source;
+            var nodeSource = item.subjectGraph ? Sparql_common.getSourceFromGraphUri(item.subjectGraph.value) : source;
             //  var color = self.getSourceColor(nodeSource);
             var attrs = self.getNodeVisjAttrs(item.topConcept, null, nodeSource);
             if (!existingNodes[item.topConcept.value]) {
@@ -713,7 +713,7 @@ addNode:false
     }
 
     var color = self.getSourceColor(clusterNode.data.source);
-    var attrs = self.getNodeVisjAttrs(item.child1.type, item.concept, clusterNode.data.source);
+    var attrs = self.getNodeVisjAttrs(item.child1.type, item.subject, clusterNode.data.source);
     var visjsData = { nodes: [], edges: [] };
     var existingNodes = visjsGraph.getExistingIdsMap();
     clusterNode.data.cluster.forEach(function(/** @type {{ child1: string; child1Label: any; concept: string; }} */ item) {
@@ -733,11 +733,11 @@ addNode:false
           }
         });
 
-        var edgeId = item.child1 + "_" + item.concept;
+        var edgeId = item.child1 + "_" + item.subject;
         visjsData.edges.push({
           id: edgeId,
           from: item.child1,
-          to: item.concept
+          to: item.subject
         });
       }
     });
@@ -995,12 +995,12 @@ addNode:false
             slices,
             function(_ids, callbackEach) {
               var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " + "select * " + fromStr + " where {";
-              var filter = Sparql_common.setFilter("concept", _ids);
+              var filter = Sparql_common.setFilter("subject", _ids);
 
-              var queryOutcoming = "{?concept ?prop ?value.  " + filter + Sparql_common.getVariableLangLabel("value", true) + "}";
+              var queryOutcoming = "{?subject ?prop ?value.  " + filter + Sparql_common.getVariableLangLabel("value", true) + "}";
               // "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} " +
               ("?prop rdf:type owl:ObjectProperty. ?value rdf:type ?valueType filter (?valueType in (owl:Class,owl:NamedIndividual))}");
-              var queryIncoming = " {?value ?prop ?concept.  " + filter + filter + Sparql_common.getVariableLangLabel("value", true) + "}";
+              var queryIncoming = " {?value ?prop ?subject.  " + filter + filter + Sparql_common.getVariableLangLabel("value", true) + "}";
               // "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel}" +
               ("?prop rdf:type owl:ObjectProperty. ?value rdf:type ?valueType filter (?valueType in (owl:Class,owl:NamedIndividual))}");
 
@@ -1031,11 +1031,11 @@ addNode:false
                 var visjsData = { nodes: [], edges: [] };
                 var existingIds = visjsGraph.getExistingIdsMap();
                 data.forEach(function(item) {
-                  if (!existingIds[item.concept.value]) {
-                    existingIds[item.concept.value] = 1;
+                  if (!existingIds[item.subject.value]) {
+                    existingIds[item.subject.value] = 1;
                     var node = {
-                      id: item.concept.value,
-                      label: item.concept.value,
+                      id: item.subject.value,
+                      label: item.subject.value,
                       shadow: self.nodeShadow,
                       shape: Lineage_classes.defaultShape,
                       size: Lineage_classes.defaultShapeSize,
@@ -1044,8 +1044,8 @@ addNode:false
                       level: 5,
                       data: {
                         source: Lineage_sources.activeSource,
-                        id: item.concept.value,
-                        label: item.concept.value
+                        id: item.subject.value,
+                        label: item.subject.value
                       }
                     };
 
@@ -1095,8 +1095,8 @@ addNode:false
                       else {
                         propLabel = Sparql_common.getLabelFromURI(item.prop.value);
                       }
-                      var edgeId = item.concept.value + "_" + item.value.value;
-                      var inverseEdgeId = item.value.value + "_" + item.concept.value;
+                      var edgeId = item.subject.value + "_" + item.value.value;
+                      var inverseEdgeId = item.value.value + "_" + item.subject.value;
                       var arrows;
                       if (propFilter == "outcoming" || propFilter == "all") {
                         arrows = {
@@ -1121,14 +1121,14 @@ addNode:false
                         existingIds[edgeId] = 1;
                         visjsData.edges.push({
                           id: edgeId,
-                          from: item.concept.value,
+                          from: item.subject.value,
                           label: propLabel.indexOf("subClassOf") > -1 ? null : propLabel,
                           font: { multi: true, size: 8 },
                           color: Lineage_classes.defaultEdgeColor,
                           to: item.value.value,
                           arrows: arrows,
                           data: {
-                            from: item.concept.value,
+                            from: item.subject.value,
                             to: item.value.value,
                             prop: item.prop.value,
                             type: "ObjectProperty",
@@ -1222,19 +1222,19 @@ addNode:false
               let nodeSource = item.broader1Graph ? Sparql_common.getSourceFromGraphUri(item.broader1Graph.value) : source;
               let nodeColor = self.getSourceColor(nodeSource);
 
-              if (!existingNodes[item.concept.value]) {
-                existingNodes[item.concept.value] = 1;
+              if (!existingNodes[item.subject.value]) {
+                existingNodes[item.subject.value] = 1;
                 var node = {
-                  id: item.concept.value,
-                  label: item.conceptLabel.value,
+                  id: item.subject.value,
+                  label: item.subjectLabel.value,
                   shadow: self.nodeShadow,
                   shape: shape,
                   color: nodeColor,
                   size: Lineage_classes.defaultShapeSize,
                   data: {
                     source: source,
-                    label: item.conceptLabel.value,
-                    id: item.concept.value
+                    label: item.subjectLabel.value,
+                    id: item.subject.value
                   }
                 };
 
@@ -1266,12 +1266,12 @@ addNode:false
               //link node to source
 
               if (item.broader1.value != source) {
-                var edgeId = item.concept.value + "_" + item.broader1.value;
+                var edgeId = item.subject.value + "_" + item.broader1.value;
                 if (!existingNodes[edgeId]) {
                   existingNodes[edgeId] = 1;
                   var edge = {
                     id: edgeId,
-                    from: item.concept.value,
+                    from: item.subject.value,
                     to: item.broader1.value,
                     color: self.defaultEdgeColor,
                     arrows: {
@@ -1373,22 +1373,22 @@ addNode:false
       var clusters = [];
 
       result.forEach(function(item) {
-        if (item.concept && (item.concept.type == "bnode" || item.concept.value.indexOf("_:") == 0)) {
+        if (item.subject && (item.subject.type == "bnode" || item.subject.value.indexOf("_:") == 0)) {
           //skip blank nodes
           return;
         }
-        if (!parentsMap[item.concept.value]) {
-          parentsMap[item.concept.value] = [];
+        if (!parentsMap[item.subject.value]) {
+          parentsMap[item.subject.value] = [];
         }
         var obj = {};
         for (var key in item) {
           obj[key] = item[key] ? item[key].value : null;
         }
-        parentsMap[item.concept.value].push(obj);
+        parentsMap[item.subject.value].push(obj);
 
         var cancelCluster = true;
-        if (!cancelCluster && !clusters[item.concept.value] && !options.dontClusterNodes && parentsMap[item.concept.value].length > Lineage_classes.minChildrenForClusters) {
-          clusters.push([item.concept.value]);
+        if (!cancelCluster && !clusters[item.subject.value] && !options.dontClusterNodes && parentsMap[item.subject.value].length > Lineage_classes.minChildrenForClusters) {
+          clusters.push([item.subject.value]);
         }
       });
 
@@ -1472,7 +1472,7 @@ addNode:false
                 let childNodeSource = item["child" + i + "Graph"] ? Sparql_common.getSourceFromGraphUri(item["child" + i + "Graph"]) : source;
 
                 if (!existingIds[item["child" + i]]) {
-                  var attrs = self.getNodeVisjAttrs(item["child" + i + "Type"], item.concept, childNodeSource);
+                  var attrs = self.getNodeVisjAttrs(item["child" + i + "Type"], item.subject, childNodeSource);
                   var isIndividualId = namedLinkedDataMap[item["child" + i]];
 
                   var xxx = item["child" + i + "Label"];
@@ -1504,7 +1504,7 @@ addNode:false
                 }
                 var parent;
                 if (i == 1) {
-                  parent = item.concept;
+                  parent = item.subject;
                 }
                 else {
                   parent = item["child" + (i - 1)];
@@ -1982,8 +1982,8 @@ addNode:false
         result.forEach(function(
           /** @type {{ concept: { value: string; }; conceptLabel: { value: any; }; value: { value: any; }; prop: { value: string; }; valueLabel: { value: any; }; propLabel: { value: string; }; node: { value: any; }; }} */ item
         ) {
-          if (!existingNodes[item.concept.value]) {
-            existingNodes[item.concept.value] = 1;
+          if (!existingNodes[item.subject.value]) {
+            existingNodes[item.subject.value] = 1;
             var color = self.getSourceColor(source);
 
             var size = Lineage_classes.defaultShapeSize;
@@ -1994,8 +1994,8 @@ addNode:false
 
             }
             visjsData.nodes.push({
-              id: item.concept.value,
-              label: item.conceptLabel.value,
+              id: item.subject.value,
+              label: item.subjectLabel.value,
               shadow: self.nodeShadow,
               shape: shape,
               size: size,
@@ -2004,8 +2004,8 @@ addNode:false
               level: self.currentExpandLevel,
               data: {
                 source: source,
-                id: item.concept.value,
-                label: item.conceptLabel.value,
+                id: item.subject.value,
+                label: item.subjectLabel.value,
                 varName: "value"
               }
             });
@@ -2057,7 +2057,7 @@ addNode:false
               }
             });
           }
-          var edgeId = item.node.value; //item.value.value + "_" + item.concept.value + "_" + item.prop.value;
+          var edgeId = item.node.value; //item.value.value + "_" + item.subject.value + "_" + item.prop.value;
           if (!existingNodes[edgeId]) {
             existingNodes[edgeId] = 1;
             if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
@@ -2070,7 +2070,7 @@ addNode:false
               visjsData.edges.push({
                 id: edgeId,
                 from: item.value.value,
-                to: item.concept.value,
+                to: item.subject.value,
                 //  label: "<i>" + item.propLabel.value + "</i>",
                 label: item.propLabel.value,
                 font:{color:options.edgesColor || Lineage_classes.restrictionColor},
@@ -2097,7 +2097,7 @@ addNode:false
               visjsData.edges.push({
                 id: edgeId,
                 to: item.value.value,
-                from: item.concept.value,
+                from: item.subject.value,
                 //  label: "<i>" + item.propLabel.value + "</i>",
                 label: item.propLabel.value,
                 font:{color:options.edgesColor || Lineage_classes.restrictionColor},
@@ -2213,31 +2213,31 @@ addNode:false
           });
         }
 
-        if (!existingNodes[item.concept.value]) {
-          existingNodes[item.concept.value] = 1;
+        if (!existingNodes[item.subject.value]) {
+          existingNodes[item.subject.value] = 1;
           visjsData.nodes.push({
-            id: item.concept.value,
-            label: item.conceptLabel.value,
+            id: item.subject.value,
+            label: item.subjectLabel.value,
             shadow: self.nodeShadow,
             shape: Lineage_classes.namedIndividualShape,
             size: Lineage_classes.defaultShapeSize,
             color: color,
             data: {
               source: source,
-              id: item.concept.value,
-              label: item.conceptLabel.value,
+              id: item.subject.value,
+              label: item.subjectLabel.value,
               varName: "value",
               type: "NamedIndividual"
             }
           });
         }
-        var edgeId = item.concept.value + "_" + item.node.value;
+        var edgeId = item.subject.value + "_" + item.node.value;
         if (!existingNodes[edgeId]) {
           existingNodes[edgeId] = 1;
 
           visjsData.edges.push({
             id: edgeId,
-            from: item.concept.value,
+            from: item.subject.value,
             to: item.node.value,
             arrows: {
               to: {
@@ -2435,32 +2435,32 @@ addNode:false
 
       var conceptType = "Class";
       result.forEach(function(item) {
-        if (item.conceptType && item.conceptType.value.indexOf("NamedIndividual") > -1) {
+        if (item.subjectType && item.subjectType.value.indexOf("NamedIndividual") > -1) {
           conceptType = "NamedIndividual";
         }
       });
 
       result.forEach(function(/** @type {{ [x: string]: { value: any; }; concept: { value: string | number; }; conceptLabel: { value: any; }; }} */ item) {
         var shape = conceptType == "NamedIndividual" ? self.namedIndividualShape : self.defaultShape;
-        if (!existingNodes[item.concept.value]) {
-          existingNodes[item.concept.value] = 1;
+        if (!existingNodes[item.subject.value]) {
+          existingNodes[item.subject.value] = 1;
           visjsData.nodes.push({
-            id: item.concept.value,
-            label: item.conceptLabel.value,
+            id: item.subject.value,
+            label: item.subjectLabel.value,
             data: {
-              id: item.concept.value,
-              label: item.conceptLabel.value,
+              id: item.subject.value,
+              label: item.subjectLabel.value,
               source: source,
               type: conceptType
             },
             shadow: self.nodeShadow,
             level: 0,
             shape: shape,
-            color: self.getSourceColor(source, item.concept.value),
+            color: self.getSourceColor(source, item.subject.value),
             size: Lineage_classes.defaultShapeSize
           });
         }
-        newNodeIds.push(item.concept.value);
+        newNodeIds.push(item.subject.value);
 
         var edgeId;
         for (var i = 1; i < ancestorsDepth; i++) {
@@ -2489,7 +2489,7 @@ addNode:false
               newNodeIds.push(broader.value);
               var fromId;
               if (i == 1) {
-                fromId = item.concept.value;
+                fromId = item.subject.value;
               }
               else {
                 fromId = item["broader" + (i - 1)].value;
@@ -2518,7 +2518,7 @@ addNode:false
             else {
               //join an existing node
               if (i == 1) {
-                fromId = item.concept.value;
+                fromId = item.subject.value;
               }
               else {
                 fromId = item["broader" + (i - 1)].value;
@@ -2701,7 +2701,7 @@ addNode:false
 
     expandIndividual: function() {
       var source = Lineage_sources.activeSource;
-      var filter = "?concept ?p2 <" + self.currentGraphNode.data.id + ">. ";
+      var filter = "?subject ?p2 <" + self.currentGraphNode.data.id + ">. ";
       Sparql_OWL.getItems(self.currentGraphNode.data.source, { filter: filter }, function(err, result) {
         if (err) {
           return MainController.UI.message(err.responseText);
@@ -2710,12 +2710,12 @@ addNode:false
         var visjsData = { nodes: [], edges: [] };
         var color = self.getSourceColor(source);
         result.forEach(function(item) {
-          if (!existingNodes[item.concept.value]) {
-            existingNodes[item.concept.value] = 1;
-            var label = item.conceptLabel ? item.conceptLabel.value : Sparql_common.getLabelFromURI(item.concept.value);
+          if (!existingNodes[item.subject.value]) {
+            existingNodes[item.subject.value] = 1;
+            var label = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value);
 
             visjsData.nodes.push({
-              id: item.concept.value,
+              id: item.subject.value,
               label: label,
               shadow: self.nodeShadow,
               shape: self.namedIndividualShape,
@@ -2724,18 +2724,18 @@ addNode:false
               color: color,
 
               data: {
-                id: item.concept.value,
+                id: item.subject.value,
                 label: label,
                 source: source,
                 type: "NamedIndividual"
               }
             });
 
-            var edgeId = item.concept.value + "_" + self.currentGraphNode.id;
+            var edgeId = item.subject.value + "_" + self.currentGraphNode.id;
             visjsData.edges.push({
               id: edgeId,
               to: self.currentGraphNode.id,
-              from: item.concept.value,
+              from: item.subject.value,
               color: color,
               arrows: {
                 to: {
@@ -2747,7 +2747,7 @@ addNode:false
               data: {
                 id: edgeId,
                 to: self.currentGraphNode.id,
-                from: item.concept.value,
+                from: item.subject.value,
                 type: "partOf",
                 source: source
               }

@@ -547,7 +547,7 @@ source: specificSourceLabel
         }
 
         result.forEach(function(item) {
-          individuals[item.conceptLabel.value] = item.concept.value;
+          individuals[item.subjectLabel.value] = item.subject.value;
         });
         return callback(null, individuals);
       });

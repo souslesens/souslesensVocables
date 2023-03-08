@@ -77,13 +77,13 @@ var Genealogy = (function () {
                     }
 
                     result.forEach(function (item) {
-                        var conceptId = item.concept.value;
+                        var conceptId = item.subject.value;
                         if (!conceptsMap[conceptId]) {
                             /*  if (result.length == 1)
                                       selectedIds.push(item.id)*/
                             conceptsMap[conceptId] = item;
                             item.sourceId = sourceId;
-                            item.title = item.conceptLabel.value + " / " + item.description; //|| item.broader1Label.value)
+                            item.title = item.subjectLabel.value + " / " + item.description; //|| item.broader1Label.value)
 
                             var newNode = { id: conceptId, text: "<span class='tree_level_2'>" + item.title + "</span>", data: item };
                             // setTimeout(function () {
@@ -151,7 +151,7 @@ var Genealogy = (function () {
         drawRootNode(self.context.currentWord);
         setTimeout(function () {
             selectedConcepts.forEach(function (item) {
-                var conceptId = item.concept.value;
+                var conceptId = item.subject.value;
                 item.color = Config.sources[item.sourceId].color;
 
                 if (direction == "ancestors") {
@@ -180,7 +180,7 @@ var Genealogy = (function () {
 
         var existingIds = visjsGraph.getExistingIdsMap();
         // edge beetwen word and concept
-        var conceptId = bindings[0].concept.value;
+        var conceptId = bindings[0].subject.value;
         var id = rootNodeId + "_" + conceptId;
         if (!existingIds[id]) {
             existingIds[id] = 1;
@@ -195,7 +195,7 @@ var Genealogy = (function () {
 
         for (var i = 1; i < depth; i++) {
             var fromVar = "";
-            if (i == 1) fromVar = "concept";
+            if (i == 1) fromVar = "subject";
             else fromVar = "broader" + (i - 1);
 
             var toVar = "broader" + i;
@@ -248,7 +248,7 @@ var Genealogy = (function () {
                     self.currentChildren[item.child1.value] = { children2: item.child2 ? 1 : null };
                 });
 
-                var visjsData = GraphController.toVisjsData(null, result, self.graphActions.currentNode.id, "concept", "child1", {
+                var visjsData = GraphController.toVisjsData(null, result, self.graphActions.currentNode.id, "subject", "child1", {
                     from: {},
                     to: { shape: Genealogy.graphActions.getVisjsGraphColor, color: self.graphActions.currentNode.color },
                     data: self.graphActions.currentNode.data,

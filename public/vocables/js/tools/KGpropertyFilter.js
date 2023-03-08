@@ -268,18 +268,18 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             var existingNodes = {};
 
             result.forEach(function (item) {
-                if (!existingNodes[item.concept.value]) {
-                    existingNodes[item.concept.value] = 1;
+                if (!existingNodes[item.subject.value]) {
+                    existingNodes[item.subject.value] = 1;
                     jstreeData.push({
                         parent: "#",
-                        id: item.concept.value,
-                        text: item.conceptLabel.value,
+                        id: item.subject.value,
+                        text: item.subjectLabel.value,
                         type: "Class",
                         data: {
                             type: treeConfig.key,
                             source: self.currentSource,
-                            label: item.conceptLabel.value,
-                            id: item.concept.value,
+                            label: item.subjectLabel.value,
+                            id: item.subject.value,
                         },
                     });
                 }
@@ -288,7 +288,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     if (!item["child" + i]) {
                         break;
                     }
-                    var parent = i == 1 ? item.concept.value : item["child" + (i - 1)].value;
+                    var parent = i == 1 ? item.subject.value : item["child" + (i - 1)].value;
 
                     var id = item["child" + i].value;
                     var label = item["child" + i + "Label"].value;
@@ -757,7 +757,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                         var uniqueNodesMap = {};
                         result.forEach(function (item) {
                             var itemParents = [];
-                            itemParents.push({ id: item.concept.value, label: item.conceptLabel.value });
+                            itemParents.push({ id: item.subject.value, label: item.subjectLabel.value });
                             var rootId = null;
                             for (var i = 1; i < ancestorsDepth; i++) {
                                 var parent = item["broader" + i];
@@ -798,7 +798,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                         var xStep = 250;
                         for (var key in newNodesMap) {
                             var color = self.treeConfigs[key].color;
-                            var conceptNodeId = newNodesMap[key].concept;
+                            var conceptNodeId = newNodesMap[key].subject;
 
                             var from;
                             newNodesMap[key].forEach(function (path, index) {

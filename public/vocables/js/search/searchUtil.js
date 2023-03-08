@@ -589,8 +589,8 @@ indexes.push(source.toLowerCase());
     };
 
     self.addObjectsToIndex = function (sourceLabel, ids, callback) {
-        var filter = " filter (?concept =<" + self.currentNodeId + ">) ";
-        filter = Sparql_common.setFilter("concept", ids);
+        var filter = " filter (?subject =<" + self.currentNodeId + ">) ";
+        filter = Sparql_common.setFilter("subject", ids);
         Sparql_generic.getSourceTaxonomy(sourceLabel, { filter: filter }, function (err, result) {
             var classesArray = [];
             for (var key in result.classesMap) {

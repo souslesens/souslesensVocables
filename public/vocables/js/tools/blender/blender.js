@@ -257,14 +257,14 @@ var Blender = (function () {
                 if (type == "externalReferenceTopConcept") return;
                 if (propertiesMap.event.ctrlKey) {
                     if (Blender.displayMode == "centralPanelDiv") {
-                        self.nodeEdition.editNode("concept");
+                        self.nodeEdition.editNode("subject");
                     }
                     Clipboard.copy(
                         {
                             id: self.currentTreeNode.data.id,
                             label: self.currentTreeNode.text,
                             source: self.currentSource,
-                            type: "concept",
+                            type: "subject",
                         },
                         self.currentTreeNode.data.id + "_anchor",
                         propertiesMap.event
@@ -342,35 +342,35 @@ var Blender = (function () {
             menuItems.editNode = {
                 label: "Edit node",
                 action: function (/** @type {any} */ _obj, /** @type {any} */ _sss, /** @type {any} */ _cc) {
-                    self.nodeEdition.editNode("concept");
+                    self.nodeEdition.editNode("subject");
                 },
             };
 
             menuItems.deleteNode = {
                 label: "Delete node",
                 action: function (/** @type {any} */ _obj, /** @type {any} */ _sss, /** @type {any} */ _cc) {
-                    self.menuActions.deleteNode("concept");
+                    self.menuActions.deleteNode("subject");
                 },
             };
 
             menuItems.copyNode = {
                 label: "Copy Node",
                 action: function (/** @type {any} */ _obj, /** @type {any} */ _sss, /** @type {any} */ _cc) {
-                    self.menuActions.copyNode("concept");
+                    self.menuActions.copyNode("subject");
                 },
             };
 
             menuItems.cutNode = {
                 label: "Cut Node",
                 action: function (/** @type {any} */ _obj, /** @type {any} */ _sss, /** @type {any} */ _cc) {
-                    self.menuActions.cutNode("concept");
+                    self.menuActions.cutNode("subject");
                 },
             };
 
             menuItems.addChildNodeNode = {
                 label: "Create child",
                 action: function (/** @type {any} */ _obj, /** @type {any} */ _sss, /** @type {any} */ _cc) {
-                    self.nodeEdition.createChildNode(null, "concept");
+                    self.nodeEdition.createChildNode(null, "subject");
                 },
             };
             /*     menuItems.openBranch = {
@@ -497,7 +497,7 @@ var Blender = (function () {
              */
             var treeDivId;
 
-            if (type == "concept") {
+            if (type == "subject") {
                 if (!node) node = self.currentTreeNode;
                 treeDivId = "Blender_conceptTreeDiv";
             } else if (type == "collection") {
@@ -513,7 +513,7 @@ var Blender = (function () {
                         function (/** @type {(arg0: undefined) => void} */ callbackSeries) {
                             // descendants of type concept
                             if (node.children.length == 0) return callbackSeries();
-                            if (type != "concept") return callbackSeries();
+                            if (type != "subject") return callbackSeries();
 
                             Sparql_generic.getSingleNodeAllDescendants(self.currentSource, node.data.id, function (/** @type {any} */ err, /** @type {any[]} */ result) {
                                 if (err) {
@@ -556,7 +556,7 @@ var Blender = (function () {
                         },
                         function (/** @type {(arg0: undefined) => void} */ callbackSeries) {
                             // delete members triple in parentNode
-                            if (type == "concept") return callbackSeries();
+                            if (type == "subject") return callbackSeries();
 
                             Sparql_generic.deleteTriples(
                                 self.currentSource,
@@ -574,7 +574,7 @@ var Blender = (function () {
                         function (/** @type {() => void} */ callbackSeries) {
                             // delete from tree
                             common.jstree.deleteNode(treeDivId, node.id);
-                            if (type == "concept") {
+                            if (type == "subject") {
                                 self.currentTreeNode = null;
                             } else if (type == "collection") {
                                 Collection.currentTreeNode = null;
@@ -651,7 +651,7 @@ var Blender = (function () {
                 var targetSourceObj = Config.sources[toParentNode.source];
                 var uri = "<" + targetSourceObj.graphUri + common.getRandomHexaId(10) + ">";
                 var triples = "";
-                if (pasteType == "concept") {
+                if (pasteType == "subject") {
                     triples += uri + " <http://www.w3.org/2004/02/skos/core#broader> <" + toParentNode.id + "> .\n";
                     triples += uri + " <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2004/02/skos/core#Concept>.\n";
                     triples += uri + "  <http://www.w3.org/2004/02/skos/core#prefLabel> '" + word + "'@en .\n";
@@ -668,8 +668,8 @@ var Blender = (function () {
                     MainController.UI.message("", true);
                     $("#Evaluate_infosDiv").html("word " + word + " created as " + pasteType);
                     var parentJstreeNode = $("#Blender_conceptTreeDiv").jstree().get_node(toParentNode.id);
-                    if (pasteType == "concept") SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source, parentJstreeNode, { reopen: true });
-                    else if (pasteType == "altLabel") Blender.nodeEdition.editNode("concept");
+                    if (pasteType == "subject") SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source, parentJstreeNode, { reopen: true });
+                    else if (pasteType == "altLabel") Blender.nodeEdition.editNode("subject");
                 });
 
                 return;
@@ -687,9 +687,9 @@ var Blender = (function () {
                                 Sparql_generic.getNodeChildren(fromNodeData.source, null, [fromNodeData.id], depth, options, function (/** @type {any} */ _err, /** @type {any[]} */ result) {
                                     sourceNodesId[fromNodeData.id] = 1;
                                     result.forEach(function (/** @type {{ [x: string]: { value: string; }; concept: { value: string | number; }; conceptLabel: { value: string; }; }} */ item) {
-                                        if (!sourceNodesId[item.concept.value]) {
-                                            sourceNodesId[item.concept.value] = 1;
-                                            sourceNodesLabels[item.conceptLabel.value.toLowerCase()] = item.concept.value;
+                                        if (!sourceNodesId[item.subject.value]) {
+                                            sourceNodesId[item.subject.value] = 1;
+                                            sourceNodesLabels[item.subjectLabel.value.toLowerCase()] = item.subject.value;
                                         }
                                         for (var i = 1; i < depth; i++) {
                                             var child = item["child" + i];
@@ -708,7 +708,7 @@ var Blender = (function () {
                             //check nodes with same label in target taxonomy
                             function (/** @type {(arg0: undefined) => any} */ callbackSeries) {
                                 if (fromDataArray[0].cut) return callbackSeries();
-                                var filterStr = Sparql_common.setFilter("concept", null, Object.keys(sourceNodesLabels), null, { exactMatch: true });
+                                var filterStr = Sparql_common.setFilter("subject", null, Object.keys(sourceNodesLabels), null, { exactMatch: true });
                                 Sparql_generic.getItems(toParentNode.source, { filter: filterStr }, function (/** @type {any} */ err, /** @type {any[]} */ result) {
                                     if (err) return callbackSeries(err);
                                     else if (result.length == 0) return callbackSeries();
@@ -723,9 +723,9 @@ var Blender = (function () {
 
                                         if (choice == "S") {
                                             result.forEach(function (/** @type {{ conceptLabel: { value: string; }; concept: { value: string | number; }; }} */ item) {
-                                                var targetLabel = sourceNodesLabels[item.conceptLabel.value.toLowerCase()];
+                                                var targetLabel = sourceNodesLabels[item.subjectLabel.value.toLowerCase()];
                                                 if (targetLabel && targetLabel && targetLabel != toParentNode.label.toLowerCase()) {
-                                                    delete sourceNodesId[item.concept.value];
+                                                    delete sourceNodesId[item.subject.value];
                                                 } else {
                                                     if (targetLabel) {
                                                         var message = "Cannot copy nodes containing label similar to new parent node label";
@@ -772,7 +772,7 @@ var Blender = (function () {
                                     SourceBrowser.openTreeNode("Blender_conceptTreeDiv", toParentNode.source, parentJstreeNode, { reopen: true });
                                     if (fromDataArray[0].cut) {
                                         var cutJstreeNode = $("#Blender_conceptTreeDiv").jstree().get_node(fromNodeData.id);
-                                        self.menuActions.deleteNode("concept", cutJstreeNode, true);
+                                        self.menuActions.deleteNode("subject", cutJstreeNode, true);
                                     }
                                     callbackSeries();
                                 });
@@ -820,7 +820,7 @@ var Blender = (function () {
                     },
                 ],
             };
-            self.nodeEdition.createChildNode(initData, "concept");
+            self.nodeEdition.createChildNode(initData, "subject");
             Clipboard.clear();
         },
     };
@@ -851,7 +851,7 @@ var Blender = (function () {
         },
 
         getSourceDefaultRdfType: function () {
-            if (Config.sources[self.currentSource].schemaType.indexOf("SKOS") > -1) return "concept";
+            if (Config.sources[self.currentSource].schemaType.indexOf("SKOS") > -1) return "subject";
             if (Config.sources[self.currentSource].schemaType.indexOf("OWL") > -1) {
                 return "class";
             }
@@ -863,7 +863,7 @@ var Blender = (function () {
 
             if (!type) alert(" no type");
 
-            if (type == "concept") {
+            if (type == "subject") {
                 var conceptType;
 
                 if (Config.sources[self.currentSource].schemaType == "SKOS") conceptType = "http://www.w3.org/2004/02/skos/core#Concept";
@@ -894,7 +894,7 @@ var Blender = (function () {
             var parentProperty;
             var mandatoryProps;
 
-            if (type == "concept") {
+            if (type == "subject") {
                 parentNode = self.currentTreeNode;
                 parentProperty = OwlSchema.currentSourceSchema.newObject.treeParentProperty;
                 mandatoryProps = OwlSchema.currentSourceSchema.newObject.mandatoryProperties;
@@ -971,7 +971,7 @@ var Blender = (function () {
 
                 var treeDiv;
 
-                if (editingObject.type.indexOf("Concept") > 0) {
+                if (editingObject.type.indexOf("subject") > 0) {
                     treeDiv = "Blender_conceptTreeDiv";
                 }
                 if (editingObject.type.indexOf("Collection") > 0) {
@@ -1163,8 +1163,8 @@ var Blender = (function () {
                         id: id,
                         text: item.prefLabel || "X",
                         parent: parent,
-                        type: "concept",
-                        data: { source: self.currentSource, id: id, label: item.prefLabel, type: "concept" },
+                        type: "subject",
+                        data: { source: self.currentSource, id: id, label: item.prefLabel, type: "subject" },
                     });
                 }
 

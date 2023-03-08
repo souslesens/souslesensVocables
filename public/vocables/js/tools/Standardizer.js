@@ -716,8 +716,8 @@ setTimeout(function () {
                                 strBroaderLabels += broaderLabel + "/";
                             }
                         }
-                        idsMap[item2.concept.value].superClassUris = strBroaderUris;
-                        idsMap[item2.concept.value].superClassLabels = strBroaderLabels;
+                        idsMap[item2.subject.value].superClassUris = strBroaderUris;
+                        idsMap[item2.subject.value].superClassLabels = strBroaderLabels;
                     });
 
                     callbackEachSource();
@@ -1827,7 +1827,7 @@ $("#Standardizer_wordsTA").val(str)
                     if (!filterTargetClass || ids.indexOf(connection.value.value) > -1) {
                         if (!distinctNodes[connection.node.value]) {
                             html += "<tr>";
-                            html += "<td>" + connection.conceptLabel.value + "</td><td>" + connection.propLabel.value + "</td><td>" + connection.valueLabel.value + "</td>";
+                            html += "<td>" + connection.subjectLabel.value + "</td><td>" + connection.propLabel.value + "</td><td>" + connection.valueLabel.value + "</td>";
                             html += "</tr>";
                         }
                     }

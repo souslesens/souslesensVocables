@@ -144,12 +144,12 @@ var mediaWikiTagger = {
                 //extract TheasurusPageWords in    categoriesRdfTriples and store them
                 function (callbackSeries) {
                     var bulkStr = "";
-                    //  thesauriiConcepts["test"].conceptsWords.forEach(function (conceptWord) {
+                    //  thesauriiConcepts["test"].subjectsWords.forEach(function (conceptWord) {
                     async.eachSeries(thesaurusGraphUris, function (graphUri, callbackEach) {
                         bulkStr = "";
                         var thesaurusPagesMatchCount = [];
                         var conceptsFound = 0;
-                        thesauriiConcepts[graphUri].concepts.forEach(function (concept) {
+                        thesauriiConcepts[graphUri].subjects.forEach(function (concept) {
                             var queryString = "";
                             concept.synonyms.forEach(function (synonym, indexSynonym) {
                                 if (indexSynonym > 0) queryString += " OR ";
@@ -196,7 +196,7 @@ var mediaWikiTagger = {
                                     conceptsFound += 1;
                                     var page = response.hits.hits[0]._source.pageName;
                                     if (thesaurusPagesMatchCount.indexOf(page) < 0) thesaurusPagesMatchCount.push(page);
-                                    var concept = thesauriiConcepts[graphUri].concepts[responseIndex];
+                                    var concept = thesauriiConcepts[graphUri].subjects[responseIndex];
                                     var categories = response.hits.hits[0]._source.categories;
                                     categories.forEach(function (category) {
                                         if (category == "") return;
@@ -251,8 +251,8 @@ var mediaWikiTagger = {
             thesaurusGraphUri +
             "> where{" +
             "  " +
-            //   "  ?concept  rdf:type skos:Concept." +
-            "  ?concept skos:prefLabel ?conceptLabel filter(lang(?conceptLabel)='en') " +
+            //   "  ?subject  rdf:type skos:Concept." +
+            "  ?subject skos:prefLabel ?subjectLabel filter(lang(?subjectLabel)='en') " +
             "  " +
             "}limit " +
             limit;
@@ -275,10 +275,10 @@ var mediaWikiTagger = {
                     }
                     length = result.results.bindings.length;
                     result.results.bindings.forEach(function (item) {
-                        var prefLabel = item.conceptLabel.value.toLowerCase();
+                        var prefLabel = item.subjectLabel.value.toLowerCase();
                         if (options.withIds)
                             thesaurusConcepts.push({
-                                id: item.concept.value,
+                                id: item.subject.value,
                                 prefLabel: prefLabel,
                                 synonyms: [prefLabel],
                             });
@@ -385,7 +385,7 @@ var mediaWikiTagger = {
         });
     },
     deleteTriples: function (_graph) {
-        // var query = "DELETE WHERE  {" + "  GRAPH <http://souslesens.org/oil-gas/upstream/>" + "  { ?concept <http://souslesens.org/vocab#wikimedia-category> ?category} }";
+        // var query = "DELETE WHERE  {" + "  GRAPH <http://souslesens.org/oil-gas/upstream/>" + "  { ?subject <http://souslesens.org/vocab#wikimedia-category> ?category} }";
     },
     generateCatWordsMatrix: function (categoryWord, thesaurusWord, callback) {
         var limit = 10000;
@@ -407,14 +407,14 @@ var mediaWikiTagger = {
 
         var query =
             "prefix skos: <http://www.w3.org/2004/02/skos/core#>" +
-            "select ?concept ?category   where { GRAPH ?g {" +
+            "select ?subject ?category   where { GRAPH ?g {" +
             "    ?a <http://souslesens.org/vocab#wikimedia-category> ?category. " +
             filter +
-            " ?a skos:prefLabel ?concept filter(lang(?concept)='en')" +
+            " ?a skos:prefLabel ?subject filter(lang(?subject)='en')" +
             "?a skos:broader ?broader. ?broader skos:prefLabel ?broaderLabel. filter(lang(?broaderLabel)='en')" +
             " " +
             "" +
-            "}} order by ?concept limit " +
+            "}} order by ?subject limit " +
             limit;
 
         async.whilst(
@@ -433,12 +433,12 @@ var mediaWikiTagger = {
                     }
                     length = result.results.bindings.length;
                     result.results.bindings.forEach(function (item) {
-                        var concept = item.concept.value.toLowerCase();
+                        var concept = item.subject.value.toLowerCase();
                         var category = item.category.value.toLowerCase();
                         category = category.substring(category.lastIndexOf("/") + 1);
                         if (Allconcepts.indexOf(concept) < 0) Allconcepts.push(concept);
                         if (!catWordsMap[category]) catWordsMap[category] = { concepts: [], occurences: [] };
-                        catWordsMap[category].concepts.push(concept);
+                        catWordsMap[category].subjects.push(concept);
                     });
 
                     callbackWhilst();
@@ -449,7 +449,7 @@ var mediaWikiTagger = {
 
                 Allconcepts.forEach(function (concept) {
                     for (var category in catWordsMap) {
-                        if (catWordsMap[category].concepts.indexOf(concept) > -1) {
+                        if (catWordsMap[category].subjects.indexOf(concept) > -1) {
                             catWordsMap[category].occurences.push(1);
                         } else catWordsMap[category].occurences.push(0);
                     }
@@ -730,7 +730,7 @@ var mediaWikiTagger = {
                         "select distinct ?prefLabel   from <" +
                         graphIri +
                         "> " +
-                        " where {?concept skos:prefLabel|skos:altLabel ?prefLabel  " +
+                        " where {?subject skos:prefLabel|skos:altLabel ?prefLabel  " +
                         'filter (lang(?prefLabel)="en" && regex(?prefLabel," ' +
                         wordsFilter +
                         '", "i"))' +
@@ -787,7 +787,7 @@ var mediaWikiTagger = {
                         "select distinct ?altLabel " +
                         graphFilter +
                         "" +
-                        " where {?concept skos:altLabel ?altLabel  " +
+                        " where {?subject skos:altLabel ?altLabel  " +
                         'filter (lang(?altLabel)="en" && regex(?altLabel," ' +
                         wordsFilter +
                         '", "i"))' +
@@ -830,7 +830,7 @@ var mediaWikiTagger = {
                         "from <" +
                         graphUri +
                         ">" +
-                        "where{?scheme rdfsyn:type ?type. filter(?type in( <http://www.w3.org/2004/02/skos/core#ConceptScheme>,<http://www.w3.org/2004/02/skos/core#Collection>))?scheme skos:prefLabel|rdfs:label|elements:title ?schemeLabel.?concept skos:broader|skos:topConceptOf|rdfs:isDefinedBy|^terms:subject ?scheme.?concept skos:prefLabel|rdfs:label ?conceptLabel.  }ORDER BY ?conceptLabel limit 10000 ";
+                        "where{?scheme rdfsyn:type ?type. filter(?type in( <http://www.w3.org/2004/02/skos/core#ConceptScheme>,<http://www.w3.org/2004/02/skos/core#Collection>))?scheme skos:prefLabel|rdfs:label|elements:title ?schemeLabel.?subject skos:broader|skos:topConceptOf|rdfs:isDefinedBy|^terms:subject ?scheme.?subject skos:prefLabel|rdfs:label ?subjectLabel.  }ORDER BY ?subjectLabel limit 10000 ";
 
                     var params = { query: query };
 
@@ -862,7 +862,7 @@ var mediaWikiTagger = {
                                         "prefix skos: <http://www.w3.org/2004/02/skos/core#>prefix foaf: <http://xmlns.com/foaf/0.1/>prefix schema: <http://schema.org/>" +
                                         "with <http://souslesens.org/oil-gas/upstream/>" +
                                         "insert {" +
-                                        "  ?concept" +
+                                        "  ?subject" +
                                         i +
                                         " <http://www.w3.org/2004/02/skos/core#inScheme> <" +
                                         scheme.id +
@@ -871,31 +871,31 @@ var mediaWikiTagger = {
                                         "}" +
                                         "";
                                     query +=
-                                        "WHERE{  ?concept1  skos:broader <" +
+                                        "WHERE{  ?subject1  skos:broader <" +
                                         scheme.id +
                                         ">.  " +
-                                        "  optional {?concept2 skos:broader ?concept1. " +
-                                        "optional {?concept2 ^skos:broader ?concept3. " +
-                                        "optional {?concept3 ^skos:broader ?concept4. " +
-                                        "optional {?concept4 ^skos:broader ?concept5.  " +
-                                        "optional {?concept5 ^skos:broader ?concept6. " +
-                                        "optional {?concept6 ^skos:broader ?concept7. " +
-                                        "optional {?concept7 ^skos:broader ?concept8.  " +
+                                        "  optional {?subject2 skos:broader ?subject1. " +
+                                        "optional {?subject2 ^skos:broader ?subject3. " +
+                                        "optional {?subject3 ^skos:broader ?subject4. " +
+                                        "optional {?subject4 ^skos:broader ?subject5.  " +
+                                        "optional {?subject5 ^skos:broader ?subject6. " +
+                                        "optional {?subject6 ^skos:broader ?subject7. " +
+                                        "optional {?subject7 ^skos:broader ?subject8.  " +
                                         "}}}}}}}" +
                                         "  " +
                                         "       } ";
                                     /*
                                         query +=
-                                            "WHERE{  ?concept1 ^skos:narrower <" +
+                                            "WHERE{  ?subject1 ^skos:narrower <" +
                                             scheme.id +
                                             ">.  " +
-                                            "  optional {?concept2 ^skos:narrower ?concept1. " +
-                                            "optional {?concept2 skos:narrower ?concept3. " +
-                                            "optional {?concept3 skos:narrower ?concept4. " +
-                                            "optional {?concept4 skos:narrower ?concept5.  " +
-                                            "optional {?concept5 skos:narrower ?concept6. " +
-                                            "optional {?concept6 skos:narrower ?concept7. " +
-                                            "optional {?concept7 skos:narrower ?concept8.  " +
+                                            "  optional {?subject2 ^skos:narrower ?subject1. " +
+                                            "optional {?subject2 skos:narrower ?subject3. " +
+                                            "optional {?subject3 skos:narrower ?subject4. " +
+                                            "optional {?subject4 skos:narrower ?subject5.  " +
+                                            "optional {?subject5 skos:narrower ?subject6. " +
+                                            "optional {?subject6 skos:narrower ?subject7. " +
+                                            "optional {?subject7 skos:narrower ?subject8.  " +
                                             "}}}}}}}" +
                                             "  " +
                                             "       } ";
@@ -905,27 +905,27 @@ var mediaWikiTagger = {
                                             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                                             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                                             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                                            "SELECT (count(distinct ?concept) as ?Level1) (count(distinct ?concept2)as ?Level2) " +
-                                            "(count(distinct ?concept3) as ?Level3) " +
-                                            "(count( distinct ?concept4) as ?Level4) " +
-                                            "(count(distinct ?concept5) as ?Level5) " +
-                                            "(count(distinct ?concept6) as ?Level6) " +
-                                            "(count(distinct ?concept7)  as ?Level7)" +
-                                            // "(count(distinct ?concept9) as ?Level8) " +
-                                            // "  (count(distinct ?concept9)  as ?Leve9)" +
+                                            "SELECT (count(distinct ?subject) as ?Level1) (count(distinct ?subject2)as ?Level2) " +
+                                            "(count(distinct ?subject3) as ?Level3) " +
+                                            "(count( distinct ?subject4) as ?Level4) " +
+                                            "(count(distinct ?subject5) as ?Level5) " +
+                                            "(count(distinct ?subject6) as ?Level6) " +
+                                            "(count(distinct ?subject7)  as ?Level7)" +
+                                            // "(count(distinct ?subject9) as ?Level8) " +
+                                            // "  (count(distinct ?subject9)  as ?Leve9)" +
 
                                             "" +
-                                            "WHERE{  ?concept  skos:broader <" +
+                                            "WHERE{  ?subject  skos:broader <" +
                                             scheme.id +
                                             ">.  " +
-                                            "  optional {?concept2 skos:broader|^skos:narrower ?concept. " +
-                                            "optional {?concept2 ^skos:broader|skos:narrower ?concept3. " +
-                                            "optional {?concept3 ^skos:broader|skos:narrower ?concept4. " +
-                                            "optional {?concept4 ^skos:broader|skos:narrower ?concept5.  " +
-                                            "optional {?concept5 ^skos:broader|skos:narrower ?concept6. " +
-                                            "optional {?concept6 ^skos:broader|skos:narrower ?concept7. " +
-                                            // "optional {?concept7 ^skos:broader|skos:narrower ?concept8.  " +
-                                            // "optional {?concept8 ^skos:broader|skos:narrower ?concept9. " +
+                                            "  optional {?subject2 skos:broader|^skos:narrower ?subject. " +
+                                            "optional {?subject2 ^skos:broader|skos:narrower ?subject3. " +
+                                            "optional {?subject3 ^skos:broader|skos:narrower ?subject4. " +
+                                            "optional {?subject4 ^skos:broader|skos:narrower ?subject5.  " +
+                                            "optional {?subject5 ^skos:broader|skos:narrower ?subject6. " +
+                                            "optional {?subject6 ^skos:broader|skos:narrower ?subject7. " +
+                                            // "optional {?subject7 ^skos:broader|skos:narrower ?subject8.  " +
+                                            // "optional {?subject8 ^skos:broader|skos:narrower ?subject9. " +
                                             // "                }}" +
                                             "}}}}}}" +
                                             "  " +

@@ -72,7 +72,7 @@ var CustomPluginController = (function () {
                 // eslint-disable-next-line no-console
                 if (err) return console.log(err);
                 result.forEach(function (item) {
-                    var newNode = { id: item.concept.value };
+                    var newNode = { id: item.subject.value };
                     if (Lineage_classes.sourcesGraphUriMap[item.g.value]) {
                         var source = Lineage_classes.sourcesGraphUriMap[item.g.value].name;
                         if (
@@ -81,7 +81,7 @@ var CustomPluginController = (function () {
                             Config.sources[Lineage_sources.activeSource].imports.indexOf(source) > -1
                         )
                             // only those in the imports of mainSource
-                            var node = visjsGraph.data.nodes.get(item.concept.value);
+                            var node = visjsGraph.data.nodes.get(item.subject.value);
                         if (node) node.data.source = source;
                     }
 
@@ -93,7 +93,7 @@ var CustomPluginController = (function () {
                         newNode.borderWidth = 4;
                         //  newNode.imagePadding = 4
                         /* newNodes.push({
-                             id:item.concept.value,
+                             id:item.subject.value,
                              image:path+self.typeUrisIcons[item.type.value],
                              shape:"circularImage",
                              size:10

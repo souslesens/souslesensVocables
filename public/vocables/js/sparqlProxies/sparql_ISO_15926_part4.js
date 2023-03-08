@@ -23,7 +23,7 @@ var Sparql_ISO_15926_part4 = (function () {
             self.graphUri +
             "> where{" +
             "?topConcept rdfs:subClassOf <http://standards.iso.org/iso/15926/part14#class>." +
-            "}order by ?conceptLabel limit 5000";
+            "}order by ?subjectLabel limit 5000";
 
         self.execute_GET_query(query, function (err, result) {
             if (err) {
@@ -43,16 +43,16 @@ var Sparql_ISO_15926_part4 = (function () {
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var strFilter = "";
         if (words) {
-            strFilter = Sparql_common.setFilter("concept", null, words, options);
+            strFilter = Sparql_common.setFilter("subject", null, words, options);
         } else if (ids) {
-            strFilter = Sparql_common.setFilter("concept", ids, null, options);
+            strFilter = Sparql_common.setFilter("subject", ids, null, options);
         }
 
         var query =
             "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "select distinct *  from <" +
             self.graphUri +
-            "> where { ?child1 rdfs:subClassOf|rdf:type ?concept. " +
+            "> where { ?child1 rdfs:subClassOf|rdf:type ?subject. " +
             strFilter;
 
         for (let i = 1; i < descendantsDepth; i++) {
@@ -92,9 +92,9 @@ var Sparql_ISO_15926_part4 = (function () {
         if (!options) options = {};
         var strFilter = "";
         if (words) {
-            strFilter = Sparql_common.setFilter("concept", null, words, options);
+            strFilter = Sparql_common.setFilter("subject", null, words, options);
         } else if (ids) {
-            strFilter = Sparql_common.setFilter("concept", ids, null);
+            strFilter = Sparql_common.setFilter("subject", ids, null);
         }
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -103,12 +103,12 @@ var Sparql_ISO_15926_part4 = (function () {
             self.graphUri +
             ">  WHERE {{";
 
-        query += "?concept rdfs:label ?conceptLabel. " + strFilter;
+        query += "?subject rdfs:label ?subjectLabel. " + strFilter;
 
         ancestorsDepth = self.ancestorsDepth;
         for (var i = 1; i <= ancestorsDepth; i++) {
             if (i == 1) {
-                query += "  ?concept rdfs:subClassOf  ?broader" + i + ".";
+                query += "  ?subject rdfs:subClassOf  ?broader" + i + ".";
             } else {
                 query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf ?broader" + i + "." + "OPTIONAL { ?broader" + i + " rdfs:subClassOf ?broader" + i + ".";
             }

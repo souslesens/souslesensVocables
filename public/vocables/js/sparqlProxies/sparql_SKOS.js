@@ -38,11 +38,11 @@ var Sparql_SKOS = (function () {
     /**
          *
          * request example with collection filtering
-         PREFIX  terms:<http://purl.org/dc/terms/> PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX  elements:<http://purl.org/dc/elements/1.1/>  select distinct ?child1,?child1Label, ?conceptLabel,?collLabel  FROM <http://souslesens/thesaurus/TEST/>   WHERE {?child1 skos:broader ?concept.
+         PREFIX  terms:<http://purl.org/dc/terms/> PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX  elements:<http://purl.org/dc/elements/1.1/>  select distinct ?child1,?child1Label, ?subjectLabel,?collLabel  FROM <http://souslesens/thesaurus/TEST/>   WHERE {?child1 skos:broader ?subject.
 
-  ?concept skos:prefLabel ?conceptLabel.
+  ?subject skos:prefLabel ?subjectLabel.
 
-  OPTIONAL{ ?child1 skos:prefLabel ?child1Label. } .filter( ?concept =<http://souslesens/thesaurus/TEST/9d53e3925c>)OPTIONAL{?child1 rdf:type ?child1Type.}
+  OPTIONAL{ ?child1 skos:prefLabel ?child1Label. } .filter( ?subject =<http://souslesens/thesaurus/TEST/9d53e3925c>)OPTIONAL{?child1 rdf:type ?child1Type.}
 
   ?collection skos:member* ?acollection. ?acollection rdf:type skos:Collection.   ?collection skos:prefLabel ?collLabel.  ?acollection skos:prefLabel ?acollLabel.filter (?collection= <http://souslesens/thesaurus/TEST/5d97abb964> )
    ?acollection skos:member ?aconcept. ?aconcept rdf:type skos:Concept.?aconcept skos:prefLabel ?aconceptLabel.
@@ -69,7 +69,7 @@ var Sparql_SKOS = (function () {
         $("#waitImg").css("display", "block");
 
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
-        var filterStr = Sparql_common.setFilter("concept", ids, words, options);
+        var filterStr = Sparql_common.setFilter("subject", ids, words, options);
         if (filterStr == "") return alert("no parent specified for getNodeChildren ");
         if (!options) {
             options = { depth: 0 };
@@ -79,7 +79,7 @@ var Sparql_SKOS = (function () {
         query += sourceVariables.prefixesStr;
         query += " select distinct * " + sourceVariables.fromStr + "  WHERE {";
 
-        query += "?child1 " + sourceVariables.broaderPredicate + " ?concept." + "OPTIONAL{ ?child1 " + sourceVariables.prefLabelPredicate + " ?child1Label. ";
+        query += "?child1 " + sourceVariables.broaderPredicate + " ?subject." + "OPTIONAL{ ?child1 " + sourceVariables.prefLabelPredicate + " ?child1Label. ";
         if (sourceVariables.lang && !options.noLang) query += 'filter( lang(?child1Label)="' + sourceVariables.lang + '")';
         query += "}";
         query += filterStr;
@@ -117,7 +117,7 @@ var Sparql_SKOS = (function () {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept", "child"]);
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "child"]);
 
             result.results.bindings = Sparql_generic.sortBindings(result.results.bindings, "child1Label");
             return callback(null, result.results.bindings);
@@ -196,22 +196,22 @@ var Sparql_SKOS = (function () {
 
         options.source = sourceLabel;
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
-        var filterStr = Sparql_common.setFilter("concept", ids, words, options);
+        var filterStr = Sparql_common.setFilter("subject", ids, words, options);
         var query = "";
         query += sourceVariables.prefixesStr;
         query += " select distinct * " + sourceVariables.fromStr + "  WHERE {{";
 
         var labelPredicate = sourceVariables.prefLabelPredicate;
         if (options.searchAltLabels) labelPredicate = sourceVariables.prefLabelPredicate + "|skos:altLabel";
-        query += "?concept " + labelPredicate + " ?conceptLabel. ";
-        if (sourceVariables.lang && sourceVariables.lang != "" && !options.noLang) query += 'filter( lang(?conceptLabel)="' + sourceVariables.lang + '")';
+        query += "?subject " + labelPredicate + " ?subjectLabel. ";
+        if (sourceVariables.lang && sourceVariables.lang != "" && !options.noLang) query += 'filter( lang(?subjectLabel)="' + sourceVariables.lang + '")';
         query += filterStr;
-        query += "OPTIONAL{?concept rdf:type ?type.}";
+        query += "OPTIONAL{?subject rdf:type ?type.}";
 
         ancestorsDepth = Math.min(ancestorsDepth, sourceVariables.optionalDepth);
         for (var i = 1; i <= ancestorsDepth; i++) {
             if (i == 1) {
-                query += "  OPTIONAL{?concept " + sourceVariables.broaderPredicate + " ?broader" + i + "." + "?broader" + i + " " + sourceVariables.prefLabelPredicate + " ?broader" + i + "Label.";
+                query += "  OPTIONAL{?subject " + sourceVariables.broaderPredicate + " ?broader" + i + "." + "?broader" + i + " " + sourceVariables.prefLabelPredicate + " ?broader" + i + "Label.";
                 if (sourceVariables.lang) query += "filter(lang(?broader" + i + 'Label)="' + sourceVariables.lang + '")';
             } else {
                 query +=
@@ -250,7 +250,7 @@ var Sparql_SKOS = (function () {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept", "broader"]);
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "broader"]);
             return callback(null, result.results.bindings);
         });
     };
@@ -300,14 +300,14 @@ var Sparql_SKOS = (function () {
         var sourceVariables = Sparql_generic.getSourceVariables(sourceLabel);
         var query = "";
         query += sourceVariables.prefixesStr;
-        query += " select distinct * " + sourceVariables.fromStr + "  WHERE {  ?concept ?x ?y. ";
-        query += "OPTIONAL {?concept " + sourceVariables.prefLabelPredicate + " ?conceptLabel.}";
+        query += " select distinct * " + sourceVariables.fromStr + "  WHERE {  ?subject ?x ?y. ";
+        query += "OPTIONAL {?subject " + sourceVariables.prefLabelPredicate + " ?subjectLabel.}";
 
         if (options.filter) query += options.filter;
 
-        if (sourceVariables.lang) query += "filter(lang(?conceptLabel )='" + sourceVariables.lang + "')";
+        if (sourceVariables.lang) query += "filter(lang(?subjectLabel )='" + sourceVariables.lang + "')";
 
-        if (options.filterCollections) query += "?collection skos:member ?concept. " + Sparql_common.getUriFilter("collection", options.filterCollections);
+        if (options.filterCollections) query += "?collection skos:member ?subject. " + Sparql_common.getUriFilter("collection", options.filterCollections);
 
         query += "  } ";
         query += "limit " + sourceVariables.limit + " ";
@@ -316,7 +316,7 @@ var Sparql_SKOS = (function () {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "concept");
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "subject");
             return callback(null, result.results.bindings);
         });
     };
@@ -336,10 +336,10 @@ var Sparql_SKOS = (function () {
         query += sourceVariables.prefixesStr;
         query += " select distinct * " + sourceVariables.fromStr + "  WHERE {";
         query +=
-            "  ?concept " +
+            "  ?subject " +
             sourceVariables.broaderPredicate +
             "* ?broader." +
-            "filter (?concept=<" +
+            "filter (?subject=<" +
             id +
             ">) " +
             "?broader " +
@@ -364,12 +364,12 @@ var Sparql_SKOS = (function () {
         query += sourceVariables.prefixesStr;
         query += " select distinct * " + sourceVariables.fromStr + "  WHERE {";
         query +=
-            "  ?concept ^" +
+            "  ?subject ^" +
             sourceVariables.broaderPredicate +
             "*|" +
             sourceVariables.narrowerPredicate +
             "* ?narrower." +
-            "filter (?concept=<" +
+            "filter (?subject=<" +
             id +
             ">) " +
             "?narrower " +
@@ -395,14 +395,14 @@ var Sparql_SKOS = (function () {
             " select distinct * " +
             sourceVariables.fromStr +
             "  WHERE {" +
-            "?concept   rdf:type   ?type." +
-            "?concept " +
+            "?subject   rdf:type   ?type." +
+            "?subject " +
             sourceVariables.prefLabelPredicate +
-            " ?conceptLabel." +
-            "filter (?concept=<" +
+            " ?subjectLabel." +
+            "filter (?subject=<" +
             id +
             ">) ";
-        if (sourceVariables.lang) query += 'filter( lang(?conceptLabel)="' + sourceVariables.lang + '")';
+        if (sourceVariables.lang) query += 'filter( lang(?subjectLabel)="' + sourceVariables.lang + '")';
 
         query += "}limit " + sourceVariables.limit + " ";
 

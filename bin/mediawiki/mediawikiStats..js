@@ -22,13 +22,13 @@ var mediawikiStats = {
             var catWordsMap = {};
 
             bindings.forEach(function (item) {
-                var concept = item.concept.value.toLowerCase();
+                var concept = item.subject.value.toLowerCase();
                 var category = item.category.value.toLowerCase();
                 category = category.substring(category.lastIndexOf("/") + 1);
                 if (Allconcepts.indexOf(concept) < 0) Allconcepts.push(concept);
                 if (!catWordsMap[category]) catWordsMap[category] = { concepts: {} };
-                if (!catWordsMap[category].concepts[concept]) catWordsMap[category].concepts[concept] = 0;
-                catWordsMap[category].concepts[concept] += 1;
+                if (!catWordsMap[category].subjects[concept]) catWordsMap[category].subjects[concept] = 0;
+                catWordsMap[category].subjects[concept] += 1;
             });
 
             /*  var str = "titre\tx\n"
@@ -51,17 +51,17 @@ var mediawikiStats = {
             var catWordsMap = {};
 
             bindings.forEach(function (item) {
-                var concept = item.concept.value.toLowerCase();
+                var concept = item.subject.value.toLowerCase();
                 var category = item.category.value.toLowerCase();
                 category = category.substring(category.lastIndexOf("/") + 1);
                 if (Allconcepts.indexOf(concept) < 0) Allconcepts.push(concept);
                 if (!catWordsMap[category]) catWordsMap[category] = { concepts: [], occurences: [] };
-                catWordsMap[category].concepts.push(concept);
+                catWordsMap[category].subjects.push(concept);
             });
 
             Allconcepts.forEach(function (concept) {
                 for (var category in catWordsMap) {
-                    if (catWordsMap[category].concepts.indexOf(concept) > -1) {
+                    if (catWordsMap[category].subjects.indexOf(concept) > -1) {
                         catWordsMap[category].occurences.push(1);
                     } else catWordsMap[category].occurences.push(0);
                 }
@@ -99,14 +99,14 @@ var mediawikiStats = {
 
         var query =
             "prefix skos: <http://www.w3.org/2004/02/skos/core#>" +
-            "select ?concept ?category   where { GRAPH ?g {" +
+            "select ?subject ?category   where { GRAPH ?g {" +
             "    ?a <http://souslesens.org/vocab#wikimedia-category> ?category. " +
             filter +
-            " ?a skos:prefLabel ?concept filter(lang(?concept)='en')" +
+            " ?a skos:prefLabel ?subject filter(lang(?subject)='en')" +
             "?a skos:broader ?broader. ?broader skos:prefLabel ?broaderLabel. filter(lang(?broaderLabel)='en')" +
             " " +
             "" +
-            "}} order by ?concept limit " +
+            "}} order by ?subject limit " +
             limit;
 
         async.whilst(

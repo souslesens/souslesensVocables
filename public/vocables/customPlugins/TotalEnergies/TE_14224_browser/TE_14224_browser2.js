@@ -63,7 +63,7 @@ var TE_14224_browser = (function () {
                 pAsset = item.o.value.lastIndexOf("#") + 1;
                 if (item.o.value.indexOf(asset) > -1) {
                     var assetId = item.o.value.substring(pAsset);
-                    var iso14224Code = item.concept.value; //;.substring(pIso)
+                    var iso14224Code = item.subject.value; //;.substring(pIso)
                     if (!self.asset_iso14224Map[assetId]) self.asset_iso14224Map[assetId] = [];
                     self.asset_iso14224Map[assetId].push(iso14224Code);
 
@@ -795,15 +795,15 @@ var TE_14224_browser = (function () {
                         if (err) return callbackEach(err);
 
                         result.forEach(function (item) {
-                            if (!existingNodes[item.concept.value]) {
-                                existingNodes[item.concept.value] = 1;
+                            if (!existingNodes[item.subject.value]) {
+                                existingNodes[item.subject.value] = 1;
                                 jstreeData.push({
-                                    id: item.concept.value,
-                                    text: item.conceptLabel.value,
+                                    id: item.subject.value,
+                                    text: item.subjectLabel.value,
                                     parent: topClass.id,
                                     data: {
-                                        id: item.concept.value,
-                                        label: item.conceptLabel.value,
+                                        id: item.subject.value,
+                                        label: item.subjectLabel.value,
                                         type: topClass.type,
                                     },
                                 });
@@ -814,7 +814,7 @@ var TE_14224_browser = (function () {
                                 jstreeData.push({
                                     id: item.child1.value,
                                     text: item.child1Label.value,
-                                    parent: item.concept.value,
+                                    parent: item.subject.value,
                                     data: {
                                         id: item.child1.value,
                                         label: item.child1Label.value,

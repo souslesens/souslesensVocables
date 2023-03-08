@@ -108,10 +108,10 @@ var Lineage_sets = (function () {
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = {};
             result.forEach(function (item) {
-                if (!existingNodes[item.concept.value]) {
-                    existingNodes[item.concept.value] = 1;
+                if (!existingNodes[item.subject.value]) {
+                    existingNodes[item.subject.value] = 1;
                     var node = {
-                        id: item.concept.value,
+                        id: item.subject.value,
                     };
 
                     if (item.p.value.indexOf("type") > -1) {

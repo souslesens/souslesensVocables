@@ -194,7 +194,7 @@ var Lineage_selection = (function () {
                                                     if (item["child" + i]) {
                                                         var parent;
                                                         if (i == 1) {
-                                                            var parent = item.concept.value;
+                                                            var parent = item.subject.value;
                                                             if (mergeDepth == "nodeDescendantsOnly") parent = targetNode;
                                                             item["child" + i].parent = parent;
                                                         } else item["child" + i].parent = item["child" + (i - 1)].value;

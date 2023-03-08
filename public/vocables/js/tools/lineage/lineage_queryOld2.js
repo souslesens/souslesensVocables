@@ -1029,7 +1029,7 @@ var Lineage_query = (function() {
             item[key]= item[key].value
           }
           self.currentSourceRestrictions[item.node]=item;
-          var label=item.conceptLabel+" - "+item.propLabel+" - >"+item.valueLabel
+          var label=item.subjectLabel+" - "+item.propLabel+" - >"+item.valueLabel
           data.push({id: item.node, label :label})
 
         })
@@ -1059,8 +1059,8 @@ var Lineage_query = (function() {
           inversePredicate: null,
 
           objectType: null,
-          objectUri: restriction.concept,
-        objectUriLabel:restriction.conceptLabel,
+          objectUri: restriction.subject,
+        objectUriLabel:restriction.subjectLabel,
 
           filterBooleanOperator: null
         };

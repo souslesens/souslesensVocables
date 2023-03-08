@@ -54,9 +54,9 @@ var Sparql_NPD = (function () {
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var strFilter = "";
         if (words) {
-            strFilter = Sparql_common.setFilter("concept", null, words, null);
+            strFilter = Sparql_common.setFilter("subject", null, words, null);
         } else if (ids) {
-            strFilter = Sparql_common.setFilter("concept", ids, null);
+            strFilter = Sparql_common.setFilter("subject", ids, null);
         }
 
         var query =
@@ -65,7 +65,7 @@ var Sparql_NPD = (function () {
             "select   distinct * from <" +
             self.graphUri +
             ">  where {" +
-            "?child1   rdfs:subClassOf ?concept. " +
+            "?child1   rdfs:subClassOf ?subject. " +
             strFilter +
             "} order by ?child1 limit 10000";
 
@@ -99,18 +99,18 @@ var Sparql_NPD = (function () {
         if (!options) options = {};
         var strFilter = "";
         if (words) {
-            strFilter = Sparql_common.setFilter("concept", null, words, { exactMatch: true });
+            strFilter = Sparql_common.setFilter("subject", null, words, { exactMatch: true });
         } else if (ids) {
-            strFilter = Sparql_common.setFilter("concept", ids, null);
+            strFilter = Sparql_common.setFilter("subject", ids, null);
         }
         var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + " select distinct *   WHERE {{";
 
-        query += "?concept rdfs:label ?conceptLabel. " + strFilter;
+        query += "?subject rdfs:label ?subjectLabel. " + strFilter;
 
         ancestorsDepth = self.ancestorsDepth;
         for (var i = 1; i <= ancestorsDepth; i++) {
             if (i == 1) {
-                query += "  ?concept rdfs:subClassOf  ?broader" + i + "." + "?broader" + i + " rdfs:label ?broader" + i + "Label.";
+                query += "  ?subject rdfs:subClassOf  ?broader" + i + "." + "?broader" + i + " rdfs:label ?broader" + i + "Label.";
             } else {
                 query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf ?broader" + i + ".";
 

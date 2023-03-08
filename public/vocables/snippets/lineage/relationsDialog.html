@@ -10,43 +10,91 @@
 </style>
 
 <div style="display: flex; flex-direction: row">
-    <div style="display: flex; flex-direction: column">
-        <div class="lineageRelations_div">
-            <div><b>Selection</b></div>
-            <div><input type="radio" name="lineageRelations_selection" value="selected" /> selected node</div>
-            <div><input type="radio" name="lineageRelations_selection" value="visible" /> visible nodes</div>
-            <div><input type="radio" name="lineageRelations_selection" value="all" checked="all" />source nodes</div>
-        </div>
-        <div class="lineageRelations_div">
-            <div><b>Type</b></div>
-            <div><input type="radio" name="lineageRelations_relType" value="predicates" />predicate</div>
-            <div><input type="radio" name="lineageRelations_relType" value="restrictions" />restriction</div>
-            <div><input type="radio" name="lineageRelations_relType" value="both" checked="checked" />both</div>
-        </div>
-        &nbsp;
-        <div class="lineageRelations_div">
-            <div><b>Direction</b></div>
-            <div><input type="radio" name="lineageRelations_relDirection" value="direct" />direct</div>
-            <div><input type="radio" name="lineageRelations_relDirection" value="inverse" />inverse</div>
-            <div><input type="radio" name="lineageRelations_relDirection" value="both" checked="checked" />both</div>
-        </div>
-        <div class="lineageRelations_div">
-            <div><b>Color</b></div>
-          <select id="lineageRelations_colorsSelect"></select>
-        </div>
-
-        <div class="lineageRelations_div">
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.onshowDrawRelationsDialogValidate()">Draw</button>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.onshowDrawRelationsDialogValidate('clear')">Clear</button>
-        </div>
+  <div style="display: flex; flex-direction: column">
+    <div class="lineageRelations_div">
+      <div><b>Selection</b></div>
+      <div><input type="radio" name="lineageRelations_selection" value="selected" /> selected node</div>
+      <div><input type="radio" name="lineageRelations_selection" value="visible" /> visible nodes</div>
+      <div><input type="radio" name="lineageRelations_selection" value="all" checked="all" />source nodes</div>
+    </div>
+    <div class="lineageRelations_div">
+      <div><b>Type</b></div>
+      <div><input type="radio" name="lineageRelations_relType" value="predicates" />predicate</div>
+      <div><input type="radio" name="lineageRelations_relType" value="restrictions" />restriction</div>
+      <div><input type="radio" name="lineageRelations_relType" value="both" checked="checked" />both</div>
+    </div>
+    &nbsp;
+    <div class="lineageRelations_div">
+      <div><b>Direction</b></div>
+      <div><input type="radio" name="lineageRelations_relDirection" value="direct" />direct</div>
+      <div><input type="radio" name="lineageRelations_relDirection" value="inverse" />inverse</div>
+      <div><input type="radio" name="lineageRelations_relDirection" value="both" checked="checked" />both</div>
+    </div>
+    <div class="lineageRelations_div">
+      <div><b>Color</b></div>
+      <select id="lineageRelations_colorsSelect"></select>
     </div>
 
-    <div>
-        <B>Properties</B> search<input id="LineageRelations_searchJsTreeInput">
-        <div style="width: 450px; height: 550px">
-            <div id="lineageRelations_propertiesJstreeDiv"></div>
-        </div>
-        <input type="checkbox" id="Lineage_classes_excludeRelationsFromGraphSpatializationCBX"  checked="checked"> exclude relations from graph spatialization
-        </div>
+    <div class="lineageRelations_div">
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary"
+              onclick="Lineage_relations.onshowDrawRelationsDialogValidate()">Draw
+      </button>
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary"
+              onclick="Lineage_relations.onshowDrawRelationsDialogValidate('clear')">Clear
+      </button>
     </div>
+  </div>
+
+  <div>
+    <B>Properties</B> search<input id="LineageRelations_searchJsTreeInput">
+    <div style="width: 250px; height: 400px">
+      <div id="lineageRelations_propertiesJstreeDiv"></div>
+    </div>
+
+  </div>
+
+  <div >
+    <span style="" id="Lineage_relation_constraints"></span>
+
+
+    <div style="display:flex;flex-direction: column;display:none" id="lineageRelations_filterDiv">
+
+      <div class="lineageRelations_div">
+        <div>
+          Filter role <select id="lineage_relation_filterRoleSelect"
+                              onchange="Lineage_query.onSelectRoleType($(this).val())">
+          <option></option>
+          <option>subject</option>
+          <option>object</option>
+        </select>
+        </div>
+        <span style="font-weight: bold" id="lineage_relation_filterRole"></span>
+        <span id="Lineage_relation_filter"></span>
+        <select id="Lineage_relation_filterTypeSelect"
+                onchange="Lineage_query.onSelectResourceType('domain',$(this).val())"></select>
+        <div id="Lineage_relation_filterValueDiv">
+          <select id="Lineage_relation_filterVocabularySelect"
+                  onchange="Lineage_query.onSelectResource('domain',$(this).val())"></select>
+          <select id="Lineage_relation_filterResourcesSelect"></select>
+
+        </div>
+
+
+        <div class="lineageRelations_div" style="display:none" id="lineageQuery_valueDiv">
+          <select id="lineageQuery_operator"> </select>
+          <input id="lineageQuery_value" size="20" value="" />
+        </div>
+      </div>
+      <div>
+        <span id="Lineage_relation_filterText"></span>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.attachFilterToProperty()">set filter</button>
+
+      </div>
+    </div>
+
+  </div>
 </div>
+  <div>
+    <input type="checkbox" id="Lineage_classes_excludeRelationsFromGraphSpatializationCBX" checked="checked"> exclude
+    relations from graph spatialization
+  </div>

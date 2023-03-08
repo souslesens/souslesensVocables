@@ -98,11 +98,11 @@ var Sparql_generic = (function() {
   /**
    *
    * request example with collection filtering
-   PREFIX  terms:<http://purl.org/dc/terms/> PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX  elements:<http://purl.org/dc/elements/1.1/>  select distinct ?child1,?child1Label, ?conceptLabel,?collLabel  FROM <http://souslesens/thesaurus/TEST/>   WHERE {?child1 skos:broader ?concept.
+   PREFIX  terms:<http://purl.org/dc/terms/> PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> PREFIX  elements:<http://purl.org/dc/elements/1.1/>  select distinct ?child1,?child1Label, ?subjectLabel,?collLabel  FROM <http://souslesens/thesaurus/TEST/>   WHERE {?child1 skos:broader ?subject.
 
-  ?concept skos:prefLabel ?conceptLabel.
+  ?subject skos:prefLabel ?subjectLabel.
 
-  OPTIONAL{ ?child1 skos:prefLabel ?child1Label. } .filter( ?concept =<http://souslesens/thesaurus/TEST/9d53e3925c>)OPTIONAL{?child1 rdf:type ?child1Type.}
+  OPTIONAL{ ?child1 skos:prefLabel ?child1Label. } .filter( ?subject =<http://souslesens/thesaurus/TEST/9d53e3925c>)OPTIONAL{?child1 rdf:type ?child1Type.}
 
   ?collection skos:member* ?acollection. ?acollection rdf:type skos:Collection.   ?collection skos:prefLabel ?collLabel.  ?acollection skos:prefLabel ?acollLabel.filter (?collection= <http://souslesens/thesaurus/TEST/5d97abb964> )
    ?acollection skos:member ?aconcept. ?aconcept rdf:type skos:Concept.?aconcept skos:prefLabel ?aconceptLabel.
@@ -239,10 +239,10 @@ var Sparql_generic = (function() {
     query += sourceVariables.prefixesStr;
     query += " select distinct * " + sourceVariables.fromStr + "  WHERE {";
     query +=
-      "  ?concept " +
+      "  ?subject " +
       sourceVariables.broaderPredicate +
       "* ?broader." +
-      "filter (?concept=<" +
+      "filter (?subject=<" +
       id +
       ">) " +
       "?broader " +
@@ -267,12 +267,12 @@ var Sparql_generic = (function() {
     query += sourceVariables.prefixesStr;
     query += " select distinct * " + sourceVariables.fromStr + "  WHERE {";
     query +=
-      "  ?concept ^" +
+      "  ?subject ^" +
       sourceVariables.broaderPredicate +
       "*|" +
       sourceVariables.narrowerPredicate +
       "* ?narrower." +
-      "filter (?concept=<" +
+      "filter (?subject=<" +
       id +
       ">) " +
       "?narrower " +
@@ -299,15 +299,15 @@ var Sparql_generic = (function() {
       " select distinct * " +
       sourceVariables.fromStr +
       "  WHERE {" +
-      "?concept   rdf:type   ?type." +
-      "?concept " +
+      "?subject   rdf:type   ?type." +
+      "?subject " +
       sourceVariables.prefLabelPredicate +
-      " ?conceptLabel." +
-      "filter (?concept=<" +
+      " ?subjectLabel." +
+      "filter (?subject=<" +
       id +
       ">) ";
     if (lang) {
-      query += "filter( lang(?conceptLabel)=\"" + lang + "\")";
+      query += "filter( lang(?subjectLabel)=\"" + lang + "\")";
     }
 
     query += "}limit " + sourceVariables.limit + " ";
@@ -1006,7 +1006,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
       return alert("no schema type");
     }
     if (options.ids) {
-      var idFilter = Sparql_common.setFilter("concept", options.ids);
+      var idFilter = Sparql_common.setFilter("subject", options.ids);
       if (!options.filter) {
         options.filter = "";
       }
@@ -1039,7 +1039,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             "SELECT distinct * " +
             fromStr +
             " WHERE {";
-          var where = "  ?concept " + parentType + " ?firstParent." + Sparql_common.getVariableLangLabel("concept", false, true) + "OPTIONAL{?concept skos:altLabel ?skosAltLabel }";
+          var where = "  ?subject " + parentType + " ?firstParent." + Sparql_common.getVariableLangLabel("subject", false, true) + "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
           if (options.filter) {
             where += " " + options.filter + " ";
           }
@@ -1050,7 +1050,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
           // make two queries and union them to solve timeout problem
           if (schemaType == "OWL") {
             var where1 = where.replace("|<http://www.w3.org/2004/02/skos/core#prefLabel>", "");
-            var where2 = where.replace("?concept rdfs:label|", "?concept ");
+            var where2 = where.replace("?subject rdfs:label|", "?subject ");
             where = "{" + where1 + "}\n UNION \n{" + where2 + "}";
           }
           query += where;
@@ -1101,8 +1101,8 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
           var conceptLabel = null;
 
           function getConceptLabel(item) {
-            if (item.conceptLabel) {
-              conceptLabel = item.conceptLabel.value;
+            if (item.subjectLabel) {
+              conceptLabel = item.subjectLabel.value;
             }
             else if (item.skosLabel) {
               conceptLabel = item.skosLabel.value;
@@ -1111,14 +1111,14 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
               conceptLabel = item.skosAltLabel.value;
             }
             else {
-              conceptLabel = Sparql_common.getLabelFromURI(item.concept.value);
+              conceptLabel = Sparql_common.getLabelFromURI(item.subject.value);
             }
             return conceptLabel;
           }
 
           allData.forEach(function(item) {
-            if (!skosLabelsMap[item.concept.value]) {
-              skosLabelsMap[item.concept.value] = [];
+            if (!skosLabelsMap[item.subject.value]) {
+              skosLabelsMap[item.subject.value] = [];
             }
 
             if (!conceptLabel) {
@@ -1126,26 +1126,26 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             }
             var decapitalizedLabel = common.decapitalizeLabel(conceptLabel);
             if (decapitalizedLabel != conceptLabel) {
-              skosLabelsMap[item.concept.value].push(conceptLabel);
+              skosLabelsMap[item.subject.value].push(conceptLabel);
               conceptLabel = decapitalizedLabel;
             }
-            if (!allLabels[item.concept.value]) {
-              allLabels[item.concept.value] = conceptLabel;
+            if (!allLabels[item.subject.value]) {
+              allLabels[item.subject.value] = conceptLabel;
             }
 
             if (item.skosLabel) {
-              if (skosLabelsMap[item.concept.value].indexOf(item.skosLabel.value) < 0) {
-                skosLabelsMap[item.concept.value].push(item.skosLabel.value);
+              if (skosLabelsMap[item.subject.value].indexOf(item.skosLabel.value) < 0) {
+                skosLabelsMap[item.subject.value].push(item.skosLabel.value);
               }
             }
             if (item.code) {
-              if (skosLabelsMap[item.concept.value].indexOf(item.code.value) < 0) {
-                skosLabelsMap[item.concept.value].push(item.code.value);
+              if (skosLabelsMap[item.subject.value].indexOf(item.code.value) < 0) {
+                skosLabelsMap[item.subject.value].push(item.code.value);
               }
             }
             if (item.skosAltLabel) {
-              if (skosLabelsMap[item.concept.value].indexOf(item.skosAltLabel.value) < 0) {
-                skosLabelsMap[item.concept.value].push(item.skosAltLabel.value);
+              if (skosLabelsMap[item.subject.value].indexOf(item.skosAltLabel.value) < 0) {
+                skosLabelsMap[item.subject.value].push(item.skosAltLabel.value);
               }
             }
           });
@@ -1159,11 +1159,11 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             if (decapitalizedLabel != conceptLabel) {
               conceptLabel = decapitalizedLabel;
             }
-            if (!allClassesMap[item.concept.value]) {
-              allClassesMap[item.concept.value] = {
-                id: item.concept.value,
+            if (!allClassesMap[item.subject.value]) {
+              allClassesMap[item.subject.value] = {
+                id: item.subject.value,
                 label: conceptLabel,
-                skoslabels: skosLabelsMap[item.concept.value],
+                skoslabels: skosLabelsMap[item.subject.value],
                 parent: item.firstParent.value,
                 parents: [],
                 type: conceptType
@@ -1244,14 +1244,14 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
           var triples = [];
 
           slice.forEach(function(item) {
-            if (item.conceptLabel) {
-              var decapitalizedLabel = common.decapitalizeLabel(item.conceptLabel.value);
-              if (decapitalizedLabel == item.conceptLabel.value) {
+            if (item.subjectLabel) {
+              var decapitalizedLabel = common.decapitalizeLabel(item.subjectLabel.value);
+              if (decapitalizedLabel == item.subjectLabel.value) {
                 return;
               }
 
               triples.push({
-                subject: item.concept.value,
+                subject: item.subject.value,
                 predicate: "http://www.w3.org/2004/02/skos/core#altLabel",
                 object: decapitalizedLabel
               });

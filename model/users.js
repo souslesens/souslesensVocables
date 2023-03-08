@@ -1,6 +1,6 @@
 const fs = require("fs");
 const bcrypt = require("bcrypt");
-const { config, configPath: defaultConfigPath } = require("./config");
+const { config, configUsersPath } = require("./config");
 const { Lock } = require("async-await-mutex-lock");
 const mariadb = require("mariadb");
 
@@ -119,12 +119,11 @@ class UserModel {
 
 class UserModelJson extends UserModel {
     /**
-     * @param {string} configPath - path of the config directory
+     * @param {string} configUsersPath - path of the users.json file
      */
-    constructor(configPath) {
+    constructor(configUsersPath) {
         super();
-        this.configPath = configPath;
-        this.userPath = this.configPath + "/users/users.json";
+        this.userPath = configUsersPath;
     }
 
     /**
@@ -285,8 +284,6 @@ class UserModelDatabase extends UserModel {
     };
 }
 
-const userModelJson = new UserModelJson(defaultConfigPath);
-const userModelDatabase = new UserModelDatabase(config.authenticationDatabase);
-const userModel = config.auth === "database" ? userModelDatabase : userModelJson;
+const userModel = config.auth === "database" ? new UserModelDatabase(config.authenticationDatabase) : new UserModelJson(configUsersPath);
 
 module.exports = { UserModelJson, UserModelDatabase, userModel };

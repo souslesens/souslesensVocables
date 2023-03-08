@@ -99,7 +99,7 @@ const UsersTable = () => {
                                                                 <Box sx={{ display: "flex" }}>
                                                                     <UserForm id={`edit-button-${user.id}`} maybeuser={user} />
                                                                     <ButtonWithConfirmation
-                                                                        disabled={user.source == "json" ? false : true}
+                                                                        disabled={user.source != "keycloak" ? false : true}
                                                                         label="Delete"
                                                                         msg={() => deleteUser(user, updateModel)}
                                                                     />{" "}
@@ -208,7 +208,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
 
     return (
         <>
-            {create ? (config.auth == "local" ? createEditButton : null) : createEditButton}
+            {create ? (config.auth != "keycloak" ? createEditButton : null) : createEditButton}
             <Modal onClose={handleClose} open={userModel.modal}>
                 <Box sx={style}>
                     <Stack spacing={4}>
@@ -221,7 +221,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
                                 value={userModel.userForm.login}
                                 id={`login`}
                                 label={"Login"}
-                                disabled={create ? false : user.source == "json" ? true : false}
+                                disabled={create ? false : user.source != "keycloak" ? true : false}
                             />
                         </FormControl>
 
@@ -234,7 +234,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
                                 type={displayPassword ? "text" : "password"}
                                 id={`password`}
                                 label={"Password"}
-                                disabled={user.source == "json" ? false : true}
+                                disabled={user.source != "keycloak" ? false : true}
                                 endAdornment={
                                     <InputAdornment position="end">
                                         <IconButton aria-label="toggle password visibility" onClick={handleClickShowPassword} onMouseDown={handleMouseDownPassword} edge="end">

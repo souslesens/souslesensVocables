@@ -61,8 +61,8 @@ var Lineage_query = (function() {
 
         };
 
-        if (Config.basicVocabGraphs[self.currentProperty.vocabulary]) {
-          var constraints = Config.basicVocabGraphs[self.currentProperty.vocabulary].constraints;
+        if (Config.ontologiesVocabularyModels[self.currentProperty.vocabulary]) {
+          var constraints = Config.ontologiesVocabularyModels[self.currentProperty.vocabulary].constraints;
 
 
           if (constraints) {
@@ -116,10 +116,15 @@ var Lineage_query = (function() {
 
     var types = Object.keys(self.ObjectsTypesMap);
 
+    var ok=false;
     for (var type in self.ObjectsTypesMap) {
       if ((role == "subject" && self.domain.indexOf(type) > -1) || (role == "object" && self.range.indexOf(type) > -1)) {
+        ok=true
         common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap[type], true);
       }
+    }
+    if(!ok){
+      common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap["any"], true);
     }
 
   };
@@ -160,9 +165,10 @@ var Lineage_query = (function() {
     if (type == "whiteBoardNodes") {
     }
     else {
-      if (resourceType == "owl:Class") {
+
+    //  if (resourceType == "owl:Class") {
         KGcreator.fillObjectOptionsFromPrompt("owl:Class", "Lineage_relation_filterResourcesSelect", type);
-      }
+    //  }
     }
 
 
@@ -194,7 +200,7 @@ var Lineage_query = (function() {
       if (role == "subject") {
         filter.filterStr = " ?subject rdf:type " + resourceType + ". "
         if (resource)
-          filter.filterStr += " VALUES ?subject {" + resource + "} "
+          filter.filterStr += " VALUES ?subject {<" + resource + ">} "
       }
       else  if (role == "object") {
         filter.filterStr = " ?object rdf:type " + resourceType + ". "
@@ -209,6 +215,7 @@ var Lineage_query = (function() {
     }
 
     Lineage_relations.filter= filter.filterStr;
+    $("#Lineage_relation_filterText").val(filter.filterStr);
 
 
   };

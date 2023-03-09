@@ -4,8 +4,8 @@ Lineage_relations = (function() {
   self.showDrawRelationsDialog = function(caller) {
 
     self.drawRelationCurrentCaller = caller;
-    $("#LineagePopup").dialog("open");
-    $("#LineagePopup").load("snippets/lineage/relationsDialog.html", function() {
+    $("#mainDialogDiv").dialog("open");
+    $("#mainDialogDiv").load("snippets/lineage/relationsDialog.html", function() {
 
       $("#LineageRelations_searchJsTreeInput").keypress(function(e) {
         if (e.which == 13 || e.which == 9) {
@@ -48,7 +48,7 @@ Lineage_relations = (function() {
           if (Config.sources[Lineage_sources.activeSource].imports) {
             vocabularies = vocabularies.concat(Config.sources[Lineage_sources.activeSource].imports);
           }
-          vocabularies = vocabularies.concat(Object.keys(Config.basicVocabGraphs));
+          vocabularies = vocabularies.concat(Object.keys(Config.ontologiesVocabularyModels));
 
           async.eachSeries(vocabularies, function(vocabulary, callbackEach) {
               if (vocabulary == "usual") {
@@ -61,8 +61,8 @@ Lineage_relations = (function() {
                 vocabulariesPropertiesMap[vocabulary] = properties;
                 return callbackEach();
               }
-              else if (Config.basicVocabGraphs[vocabulary]) {
-                properties = Config.basicVocabGraphs[vocabulary].properties;
+              else if (Config.ontologiesVocabularyModels[vocabulary]) {
+                properties = Config.ontologiesVocabularyModels[vocabulary].properties;
                 vocabulariesPropertiesMap[vocabulary] = properties;
                 return callbackEach();
               }
@@ -141,7 +141,7 @@ Lineage_relations = (function() {
             return 0;
           });
           var options = {
-           // contextMenu: Lineage_query.getPropertiesJstreeMenu(),
+            // contextMenu: Lineage_query.getPropertiesJstreeMenu(),
             selectTreeNodeFn: Lineage_query.onSelectPropertyTreeNode,
             withCheckboxes: true,
             searchPlugin: {
@@ -162,21 +162,18 @@ Lineage_relations = (function() {
   };
 
 
-
-
-  self.onFilterObjectTypeSelect=function(role,type){
-    var valueStr=""
-    if(type=="String"){
-      valueStr=" <div class=\"lineageQuery_objectTypeSelect\" id=\"lineageQuery_valueDiv\">\n" +
+  self.onFilterObjectTypeSelect = function(role, type) {
+    var valueStr = "";
+    if (type == "String") {
+      valueStr = " <div class=\"lineageQuery_objectTypeSelect\" id=\"lineageQuery_valueDiv\">\n" +
         "          <select id=\"lineageQuery_operator\"> </select>\n" +
         "          <input id=\"lineageQuery_value\" size=\"20\" value=\"\" />\n" +
-        "        </div>"
+        "        </div>";
 
     }
-    domainValue=valueStr
+    domainValue = valueStr;
 
-  }
-
+  };
 
 
   self.onshowDrawRelationsDialogValidate = function(action) {
@@ -243,9 +240,10 @@ Lineage_relations = (function() {
           filterProp = Sparql_common.setFilter("prop", properties);
         }
 
-          options.filter= filterProp
-        if( self.filter)
-        options.filter+=self.filter
+        options.filter = filterProp;
+        if (self.filter) {
+          options.filter += self.filter;
+        }
       }
       if (type == "both") {
         type = null;
@@ -256,7 +254,7 @@ Lineage_relations = (function() {
 
       self.drawRelations(direction, type, caller, options);
     }
-    $("#LineagePopup").dialog("close");
+    $("#mainDialogDiv").dialog("close");
   };
 
   self.drawRelations = function(direction, type, caller, options) {
@@ -336,7 +334,9 @@ Lineage_relations = (function() {
           }
           if (!direction || direction == "direct") {
             options.inverse = false;
-
+            if (options.filter) {
+              options.filter = options.filter.replace(/subject/g, "value");
+            }
             MainController.UI.message("searching restrictions");
             Lineage_classes.drawRestrictions(source, data, null, null, options, function(err, result) {
               if (err) {
@@ -358,6 +358,9 @@ Lineage_relations = (function() {
           if (!direction || direction == "inverse") {
             options.inverse = true;
             MainController.UI.message("searching inverse restrictions");
+            if (options.filter) {
+              options.filter = options.filter.replace(/subject/g, "value");
+            }
             Lineage_classes.drawRestrictions(source, data, null, null, options, function(err, result) {
               if (err) {
                 return callbackSeries(err);
@@ -388,6 +391,9 @@ Lineage_relations = (function() {
           }
           if (!direction || direction == "direct") {
             MainController.UI.message("searching predicates");
+            if (options.filter) {
+              options.filter = options.filter.replace(/value/g, "object");
+            }
             Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
               if (err) {
                 return callbackSeries(err);
@@ -417,6 +423,9 @@ Lineage_relations = (function() {
           if (!direction || direction == "inverse") {
             options.inversePredicate = true;
             MainController.UI.message("searching inverse predicates");
+            if (options.filter) {
+              options.filter = options.filter.replace(/value/g, "object");
+            }
             Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
               if (err) {
                 return callbackSeries(err);
@@ -451,5 +460,168 @@ Lineage_relations = (function() {
     );
   };
 
+  self.addSourceToConfigModels = function(source, callback) {
+   var graphUri = Config.sources[source].graphUri;
+   if(!graphUri)
+     return callback()
+
+    Config.ontologiesVocabularyModels[source] = { graphUri:graphUri,constraints: {} ,classes:[],properties:[]};
+    async.series([
+
+        //constraints from restrictions
+        function(callbackSeries) {
+          Sparql_OWL.getObjectRestrictions(source, null, { withoutBlankNodes: 1, withoutImports: 1 }, function(err, result) {
+
+            var classes = [];
+            var properties = [];
+
+            result.forEach(function(item) {
+              var domainLabel = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value);
+              var rangeLabel = item.valueLabel ? item.valueLabel.value : Sparql_common.getLabelFromURI(item.value.value);
+              var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
+
+              Config.ontologiesVocabularyModels[source].constraints[item.prop.value] = {
+                domain: item.subject.value,
+                range: item.value.value,
+                domainLabel: domainLabel,
+                rangeLabel: rangeLabel
+              };
+
+
+            });
+
+            callbackSeries();
+          });
+
+
+        },
+        //constraints from domain and ranges
+        function(callbackSeries) {
+          self.initSourcesModel(source, callbackSeries);
+
+        }
+
+
+      ],
+
+      function(err) {
+        if (callback) {
+          return callback(err);
+        }
+
+
+      }
+    );
+
+
+  };
+
+  self.initSourcesModel = function(sources, callback) {
+
+    if (!Array.isArray(sources)) {
+      sources = [sources];
+    }
+
+    let url = Config.default_sparql_url + "?format=json&query=";
+
+
+    var queryP = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+      "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+      "PREFIX owl: <http://www.w3.org/2002/07/owl#>";
+
+    async.eachSeries(sources, function(source, callbackEach) {
+
+      var graphUri = Config.ontologiesVocabularyModels[source].graphUri;
+
+
+
+      async.series([
+
+          function(callbackSeries) {
+
+            var query = queryP + " SELECT distinct ?prop ?propLabel from <" + graphUri + ">  WHERE {\n" +
+              "  ?prop ?p ?o optional{?prop rdfs:label ?proplabel} VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty } }";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+              if (err) {
+                return callbackSeries(err);
+              }
+              result.results.bindings.forEach(function(item) {
+
+                Config.ontologiesVocabularyModels[source].properties.push({
+                  id: item.prop.value,
+                  label: (item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value))
+                });
+              });
+
+              callbackSeries();
+            });
+          },
+          function(callbackSeries) {
+            var query = queryP + " select distinct ?sub ?subLabel FROM <" + graphUri + "> where{" +
+              " ?sub rdf:type ?class. OPTIONAL{ ?sub rdfs:label ?subLabel} VALUES ?Class {owl:Class rdf:class rdfs:Class} }";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+              if (err) {
+                return callbackSeries(err);
+              }
+              result.results.bindings.forEach(function(item) {
+                Config.ontologiesVocabularyModels[source].classes.push({
+                  id: item.sub.value,
+                  label: (item.subLabel ? item.subLabel.value : Sparql_common.getLabelFromURI(item.sub.value))
+                });
+              });
+              callbackSeries();
+            });
+          }
+          , function(callbackSeries) {
+            var query = queryP + " select distinct ?prop ?domain FROM <" + graphUri + "> where{" +
+              " ?prop rdfs:domain ?domain.OPTIONAL{ ?domain rdfs:label ?domainLabel} }";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+              if (err) {
+                return callbackSeries(err);
+              }
+              result.results.bindings.forEach(function(item) {
+                if (!Config.ontologiesVocabularyModels[source].constraints[item.prop.value]) {
+                  Config.ontologiesVocabularyModels[source].constraints[item.prop.value] = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+                }
+                Config.ontologiesVocabularyModels[source].constraints[item.prop.value].domain = item.domain.value;
+                Config.ontologiesVocabularyModels[source].constraints[item.prop.value].domainLabel = item.domainLabel ? item.domainLabel.value : Sparql_common.getLabelFromURI(item.domain.value);
+
+              });
+              callbackSeries();
+            });
+          }
+          , function(callbackSeries) {
+            var query = queryP + " select distinct ?prop ?range FROM <" + graphUri + "> where{" +
+              " ?prop rdfs:range ?range.OPTIONAL{ ?range rdfs:label ?rangeLabel} }";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+              if (err) {
+                return callbackSeries(err);
+              }
+              result.results.bindings.forEach(function(item) {
+                if (!Config.ontologiesVocabularyModels[source].constraints[item.prop.value]) {
+                  Config.ontologiesVocabularyModels[source].constraints[item.prop.value] = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+                }
+                Config.ontologiesVocabularyModels[source].constraints[item.prop.value].range = item.range.value;
+                Config.ontologiesVocabularyModels[source].constraints[item.prop.value].rangeLabel = item.rangeLabel ? item.rangeLabel.value : Sparql_common.getLabelFromURI(item.range.value);
+
+              });
+              callbackSeries();
+            });
+          }
+
+        ],
+        function(err) {
+          callbackEach(err);
+        });
+
+
+    }, function(err) {
+      if (callback) {
+        return callback(err)
+      }
+    })
+  }
+
   return self;
-})();
+})
+();

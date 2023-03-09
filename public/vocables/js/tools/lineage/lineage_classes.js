@@ -1,3 +1,4 @@
+
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
@@ -12,7 +13,7 @@ var Lineage_classes = (function() {
   var sourceColors = {};
 
   var self = {};
-  self.showLimit = 500;
+  self.showLimit =1000;
 
   var graphContext = {};
   self.propertyColors = {};
@@ -514,6 +515,13 @@ sourceLabels.sort();
       onRightClickFn: Lineage_classes.graphActions.showGraphPopupMenu,
       onHoverNodeFn: Lineage_selection.selectNodesOnHover,
       physics: {
+        stabilization: {
+          enabled: true,
+          iterations: 180, // maximum number of iteration to stabilize
+          updateInterval: 10,
+          onlyDynamicEdges: false,
+          fit: true
+        },
         barnesHut: {
           springLength: 0,
           damping: 0.15,
@@ -629,16 +637,44 @@ addNode:false
 
     options.skipColorGraphNodesByType = _options.skipColorGraphNodesByType;
 
+
+
+
+
+
     if (!graphDiv) {
       graphDiv = "graphDiv";
     }
+
     visjsGraph.draw(graphDiv, visjsData, options, function() {
       MainController.UI.message("", true);
       if (!visjsGraph.skipColorGraphNodesByType) {
         Lineage_decoration.colorGraphNodesByType();
       }
-    });
-  };
+    })
+
+  if(false) {
+    var sliceSize = 50
+    var nodesSlices = common.array.slice(visjsData.nodes, sliceSize);
+
+
+    nodesSlices.forEach(function(nodes, sliceIndex) {
+      if (sliceIndex == 0) {
+        var visjsDataSlice = { nodes: nodes, edges: [] }
+        visjsGraph.draw(graphDiv, visjsDataSlice, options, function() {
+          MainController.UI.message("", true);
+          if (!visjsGraph.skipColorGraphNodesByType) {
+            Lineage_decoration.colorGraphNodesByType();
+          }
+        });
+      }
+      else {
+        visjsGraph.data.nodes.add(nodes)
+      }
+    })
+    visjsGraph.data.edges.add(visjsData.edges)
+  }
+  }
 
   self.getGraphIdsFromSource = function(/** @type {any} */ source) {
     if (!visjsGraph.isGraphNotEmpty()) {

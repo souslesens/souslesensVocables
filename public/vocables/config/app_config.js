@@ -35,6 +35,9 @@ var Config = (function() {
   self.predicatesSource = "TSF-PREDICATES";
   self.dictionarySource = "TSF-DICTIONARY";
 
+  self.sousLeSensVocablesGraphUri= "http://data.souslesens.org/";
+  self.formalOntologySourceLabel="ISO_15926-part-14_PCA";
+
 
   self.CRUDsources = {
     "STORED_QUERIES": {
@@ -61,13 +64,16 @@ var Config = (function() {
   };
 
 
-  self.basicVocabGraphs = {
+  self.ontologiesVocabularyModels = {
     rdf: {graphUri:"https://www.w3.org/1999/02/22-rdf-syntax-ns",properties:[],classes:[],constraints:{}},
     rdfs: {graphUri:"https://www.w3.org/2000/01/rdf-schema",properties:[],classes:[],constraints:{}},
     owl: {graphUri:"https://www.w3.org/2002/07/owl",properties:[],classes:[],constraints:{}},
     "iof-av":{graphUri:"https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/",properties:[],classes:[],constraints:{}},
     skos: {graphUri:"http://www.w3.org/2004/02/skos/core/",properties:[],classes:[],constraints:{}}
   };
+  self.sourcesConstraints={
+
+  }
 
   self.namedSetsThesaurusGraphUri = "http://souslesens.org/resource/named-triple-sets/";
 

@@ -226,8 +226,9 @@ var MainController = (function () {
                         });
                     },
                     function (callbackSeries) {
-                       Sparql_generic.initBasicVocabGraphs(function () {
-                            callbackSeries();
+                    var sources=Object.keys(Config.ontologiesVocabularyModels)
+                       Lineage_relations.initSourcesModel(sources,function (err) {
+                            callbackSeries(err);
                         });
                     },
 

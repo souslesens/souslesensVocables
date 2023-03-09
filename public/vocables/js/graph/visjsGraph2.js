@@ -108,7 +108,8 @@ var visjsGraph = (function () {
         self.simulationOn = true;
 
         // self.network.startSimulation()
-        window.setTimeout(function () {
+
+      /*  window.setTimeout(function () {
             return;
             // if (!_options.layoutHierarchical) {
             //     if (!self.network.stopSimulation) return;
@@ -117,7 +118,7 @@ var visjsGraph = (function () {
             //     self.simulationOn = false;
             //     if (_options.afterDrawing) _options.afterDrawing();
             // }
-        }, self.simulationTimeOut);
+        }, self.simulationTimeOut);*/
 
         self.network.on("afterDrawing", function (/** @type {any} */ _params) {
             self.drawingDone = true;

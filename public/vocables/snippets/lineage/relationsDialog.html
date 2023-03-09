@@ -30,35 +30,27 @@
       <div><input type="radio" name="lineageRelations_relDirection" value="inverse" />inverse</div>
       <div><input type="radio" name="lineageRelations_relDirection" value="both" checked="checked" />both</div>
     </div>
-    <div class="lineageRelations_div">
-      <div><b>Color</b></div>
-      <select id="lineageRelations_colorsSelect"></select>
-    </div>
 
-    <div class="lineageRelations_div">
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary"
-              onclick="Lineage_relations.onshowDrawRelationsDialogValidate()">Draw
-      </button>
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary"
-              onclick="Lineage_relations.onshowDrawRelationsDialogValidate('clear')">Clear
-      </button>
-    </div>
+
+
   </div>
 
-  <div>
-    <B>Properties</B> search<input id="LineageRelations_searchJsTreeInput">
-    <div style="width: 250px; height: 400px">
+  <div class="lineageRelations_div">
+    <B>Properties</B>
+    <div>search<input id="LineageRelations_searchJsTreeInput"></div>
+    <div style="width: 350px; height: 600px">
       <div id="lineageRelations_propertiesJstreeDiv"></div>
     </div>
 
   </div>
 
   <div >
-    <span style="" id="Lineage_relation_constraints"></span>
 
 
-    <div style="display:flex;flex-direction: column;display:none" id="lineageRelations_filterDiv">
 
+    <div class="lineageRelations_div" style="display:none" id="lineageRelations_filterDiv">
+      <b> predicates filter</b>
+      <div style="" id="Lineage_relation_constraints"></div>
       <div class="lineageRelations_div">
         <div>
           Filter role <select id="lineage_relation_filterRoleSelect"
@@ -84,17 +76,32 @@
           <select id="lineageQuery_operator"> </select>
           <input id="lineageQuery_value" size="20" value="" />
         </div>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.attachFilterToProperty()">set filter</button>
+        <textarea id="Lineage_relation_filterText" style="max-width: 300px;height: 50px"></textarea>
       </div>
       <div>
-        <span id="Lineage_relation_filterText"></span>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.attachFilterToProperty()">set filter</button>
 
+
+
+      </div>
+    </div>
+    <div class="lineageRelations_div" style="display: block">
+      Color</b>
+      <select id="lineageRelations_colorsSelect"></select>
+
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary"
+              onclick="Lineage_relations.onshowDrawRelationsDialogValidate()">Draw
+      </button>
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary"
+              onclick="Lineage_relations.onshowDrawRelationsDialogValidate('clear')">Cancel
+      </button>
+
+      <div>
+        <input type="checkbox" id="Lineage_classes_excludeRelationsFromGraphSpatializationCBX" checked="checked"> exclude
+        relations from graph spatialization
       </div>
     </div>
 
   </div>
 </div>
-  <div>
-    <input type="checkbox" id="Lineage_classes_excludeRelationsFromGraphSpatializationCBX" checked="checked"> exclude
-    relations from graph spatialization
-  </div>
+

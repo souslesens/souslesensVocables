@@ -143,7 +143,7 @@ var Sparql_common = (function() {
             return;
           }
           if (conceptIdsStr != "")
-            conceptIdsStr += " ";
+            conceptIdsStr += options.useFilterKeyWord?",":" ";
 
             id = "" + id;
             if (id.match(/<.*>/)) {
@@ -154,6 +154,10 @@ var Sparql_common = (function() {
             }
 
         });
+
+        if(options.useFilterKeyWord)
+          filters.push(" FILTER( ?" + varName + " in (" + conceptIdsStr + "))");
+
         filters.push(" VALUES ?" + varName + "{" + conceptIdsStr + "}");
 
 

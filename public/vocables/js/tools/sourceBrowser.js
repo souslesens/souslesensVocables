@@ -1945,8 +1945,8 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
       properties.push({ label: "-------", id: "" });
       common.fillSelectOptions(selectId, properties, true, "label", "id");
 
-    }else  if (Config.basicVocabGraphs[vocabulary]) {
-        properties = Config.basicVocabGraphs[vocabulary].properties;
+    }else  if (Config.ontologiesVocabularyModels[vocabulary]) {
+        properties = Config.ontologiesVocabularyModels[vocabulary].properties;
         common.fillSelectOptions(selectId, properties, true, "label", "id");
       }
       else {
@@ -1995,8 +1995,8 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
         common.fillSelectOptions(selectId, classes, true, "label", "id");
 
       }
-      else if (Config.basicVocabGraphs[vocabulary]) {
-        var classes = Config.basicVocabGraphs[vocabulary].classes;
+      else if (Config.ontologiesVocabularyModels[vocabulary]) {
+        var classes = Config.ontologiesVocabularyModels[vocabulary].classes;
         common.fillSelectOptions(selectId, classes, true, "label", "id");
 
       }
@@ -2026,7 +2026,7 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
 
       var vocabularies = ["usual", Lineage_sources.activeSource];
       vocabularies = vocabularies.concat(Config.sources[Lineage_sources.activeSource].imports);
-      vocabularies = vocabularies.concat(Object.keys(Config.basicVocabGraphs));
+      vocabularies = vocabularies.concat(Object.keys(Config.ontologiesVocabularyModels));
 
       common.fillSelectOptions("sourceBrowser_vocabularySelect", vocabularies, true);
       common.fillSelectOptions("sourceBrowser_vocabularySelect2", vocabularies, true);

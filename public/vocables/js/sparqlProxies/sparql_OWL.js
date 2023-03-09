@@ -974,7 +974,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
       query += " SELECT distinct ?prop ?propLabel ";
     }
     else if (options.withoutBlankNodes) {
-      query += " SELECT distinct ?subject  ?prop ?propLabel ?subjectLabel  ?value ?valueLabel ?node";
+      query += " SELECT distinct ?subject  ?subjectLabel  ?prop ?propLabel ?value ?valueLabel ";
     }
     else {
       query += "SELECT distinct * ";

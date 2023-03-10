@@ -428,7 +428,7 @@ var Sparql_generic = (function() {
         return "\"" + item.object.substring(0, p) + "\"" + item.object.substring(p);
       }
 
-      var array = elt.split(":");
+      var array = elt.trim().split(":");
       if (array.length == 2 && allowedPrefixes.indexOf(array[0]) > -1) {
         return elt;
       }

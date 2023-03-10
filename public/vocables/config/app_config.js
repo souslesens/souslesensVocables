@@ -65,11 +65,11 @@ var Config = (function() {
 
 
   self.ontologiesVocabularyModels = {
-    rdf: {graphUri:"https://www.w3.org/1999/02/22-rdf-syntax-ns",properties:[],classes:[],constraints:{}},
-    rdfs: {graphUri:"https://www.w3.org/2000/01/rdf-schema",properties:[],classes:[],constraints:{}},
-    owl: {graphUri:"https://www.w3.org/2002/07/owl",properties:[],classes:[],constraints:{}},
-    "iof-av":{graphUri:"https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/",properties:[],classes:[],constraints:{}},
-    skos: {graphUri:"http://www.w3.org/2004/02/skos/core/",properties:[],classes:[],constraints:{}}
+    rdf: {graphUri:"https://www.w3.org/1999/02/22-rdf-syntax-ns"},
+    rdfs: {graphUri:"https://www.w3.org/2000/01/rdf-schema"},
+    owl: {graphUri:"https://www.w3.org/2002/07/owl"},
+    "iof-av":{graphUri:"https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/"},
+    skos: {graphUri:"http://www.w3.org/2004/02/skos/core/"}
   };
   self.sourcesConstraints={
 

@@ -343,7 +343,7 @@ return;
       return;
     }
 
-    Lineage_relations.addSourceToConfigModels(sourceLabel, function(err, result) {
+    Lineage_relations.registerSourcesModel(sourceLabel, function(err, result) {
       if (err) {
         return callback(err);
       }

@@ -142,23 +142,26 @@ var Sparql_common = (function() {
           if (!id) {
             return;
           }
-          if (conceptIdsStr != "")
-            conceptIdsStr += options.useFilterKeyWord?",":" ";
+          if (conceptIdsStr != "") {
+            conceptIdsStr += options.useFilterKeyWord ? "," : " ";
+          }
 
-            id = "" + id;
-            if (id.match(/<.*>/)) {
-              conceptIdsStr += id;
-            }
-            else {
-              conceptIdsStr += "<" + id + ">";
-            }
+          id = "" + id;
+          if (id.match(/<.*>/)) {
+            conceptIdsStr += id;
+          }
+          else {
+            conceptIdsStr += "<" + id + ">";
+          }
 
         });
 
-        if(options.useFilterKeyWord)
+        if (options.useFilterKeyWord) {
           filters.push(" FILTER( ?" + varName + " in (" + conceptIdsStr + "))");
-
-        filters.push(" VALUES ?" + varName + "{" + conceptIdsStr + "}");
+        }
+        else {
+          filters.push(" VALUES ?" + varName + "{" + conceptIdsStr + "}");
+        }
 
 
       }
@@ -169,7 +172,7 @@ var Sparql_common = (function() {
 
     return filters[0];
 
-    var filter=""
+    var filter = "";
     filters.forEach(function(filterStr, index) {
       if (index > 0) {
         filter += "  ";

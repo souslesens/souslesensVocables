@@ -1460,6 +1460,52 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
     });
   };
 
+  self.getPropertiesInheritedConstraints=function(sourceLabel,properties,options,callback){
+    var fromStr = Sparql_common.getFromStr(sourceLabel, options.withGraph, options.withoutImports);
+    var filterProps=Sparql_common.setFilter("prop0",properties,null,{useFilterKeyWord:1})
+    var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+      "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+      "SELECT distinct * "+fromStr+" WHERE {" +
+      "{?prop0 rdfs:subPropertyOf+ ?prop . ?prop rdfs:domain ?domain }"+//optional {?domain rdfs:label ?domainLabel}"+ filterProps+"}"+
+      " UNION "+
+      "{?prop0 rdfs:subPropertyOf+ ?prop . ?prop rdfs:range ?range }"+//optional {?range rdfs:label ?rangeLabel}"+ filterProps+"}"+
+
+      "} LIMIT 10000"
+
+    var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+    Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function(err, result) {
+      if (err) {
+        return callback(err);
+      }
+      result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "propRange", "domain", "range", "subProp", "inverseProp"]);
+
+      var propsMap = {};
+
+
+
+
+      result.results.bindings.forEach(function(item) {
+        var obj={}
+        for(var key in item){
+          obj[key]=item[key].value;
+        }
+        propsMap[obj.prop0]={
+          parentProp:obj.prop,
+          prop:obj.prop0,
+          domain:obj.domain,
+          range:obj.range,
+          domainLabel:obj.domainLabel || obj.domain?Sparql_common.getLabelFromURI(obj.domain): null,
+          rangeLabel:obj.rangeLabel || obj.range?Sparql_common.getLabelFromURI(obj.range):null
+        }
+
+      })
+
+      return callback(null,propsMap)
+
+      })
+
+  }
+
   /**
    * calculates also ranges and domains for inverse properties
    *

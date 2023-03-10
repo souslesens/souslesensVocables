@@ -227,7 +227,7 @@ var MainController = (function () {
                     },
                     function (callbackSeries) {
                     var sources=Object.keys(Config.ontologiesVocabularyModels)
-                       Lineage_relations.initSourcesModel(sources,function (err) {
+                       Lineage_relations.registerSourcesModel(sources,function (err) {
                             callbackSeries(err);
                         });
                     },

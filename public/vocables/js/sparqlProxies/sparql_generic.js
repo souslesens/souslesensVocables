@@ -379,7 +379,7 @@ var Sparql_generic = (function() {
    * @returns {*}
    */
   self.deleteTriples = function(sourceLabel, subjectUri, predicateUri, object, callback) {
-    if (!subjectUri && !predicateUri && !objectUri) {
+    if (!subjectUri && !predicateUri && !object) {
       return callback("no subject predicate or object filter : cannot delete");
     }
 

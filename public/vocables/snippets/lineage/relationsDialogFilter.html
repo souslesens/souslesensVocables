@@ -36,7 +36,7 @@
 
 <div class="lineageRelations_div">
   <div>
-    Filter role <select id="lineage_relation_filterRoleSelect" onchange="Lineage_query.onSelectRoleType($(this).val())">
+    Filter role <select id="lineage_relation_filterRoleSelect" onchange="Lineage_relationFilter.onSelectRoleType($(this).val())">
     <option></option>
     <option>subject</option>
     <option>object</option>
@@ -45,10 +45,10 @@
   <span style="font-weight: bold" id="lineage_relation_filterRole"></span>
   <span id="Lineage_relation_filter"></span>
   <select id="Lineage_relation_filterTypeSelect"
-          onchange="Lineage_query.onSelectResourceType('domain',$(this).val())"></select>
+          onchange="Lineage_relationFilter.onSelectResourceType($(this).val())"></select>
   <div id="Lineage_relation_filterValueDiv">
     <select id="Lineage_relation_filterVocabularySelect"
-            onchange="Lineage_query.onSelectResource('domain',$(this).val())"></select>
+            onchange="Lineage_relationFilter.onSelectResource($(this).val())"></select>
     <select id="Lineage_relation_filterResourcesSelect"></select>
 
   </div>
@@ -61,6 +61,6 @@
 </div>
 <div>
   <span id="Lineage_relation_filterText"></span>
-  <button onclick="Lineage_query.attachFilterToProperty()">OK</button>
+  <button onclick="Lineage_relationFilter.attachFilterToProperty()">OK</button>
   <button onclick="$('#mainDialogDiv').dialog('close')" )>Cancel</button>
 </div>

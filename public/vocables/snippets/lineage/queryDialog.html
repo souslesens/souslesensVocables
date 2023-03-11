@@ -25,7 +25,7 @@
 
 
  <div id="LineageQuery_queryModelTab" style="display: flex; flex-direction: column">
-    <select id="LineageQuery_queryModelSelect" style="width: 90%" size="10" onclick="Lineage_query.queryModel.onSelectRestriction($(this).val())"></select>
+    <select id="LineageQuery_queryModelSelect" style="width: 90%" size="10" onclick="Lineage_relationFilter.queryModel.onSelectRestriction($(this).val())"></select>
 
 </div>
   <div id="LineageQuery_freeQueryTab" style="display: flex; flex-direction: column">
@@ -34,7 +34,7 @@
     <div style="display: flex; flex-direction: row">
       <div class="lineageQuery_div">
         Subject type
-        <select id="lineageQuery_subjectVarSelect" onchange="Lineage_query.onSelectType('subject',$(this).val())">
+        <select id="lineageQuery_subjectVarSelect" onchange="Lineage_relationFilter.onSelectType('subject',$(this).val())">
           <option value="?s1">Subject1</option>
 
         </select>
@@ -44,9 +44,9 @@
       <div class="lineageQuery_div">
         Predicate
         <select id="lineageQuery_predicateSelect"
-                onchange="Lineage_query.onSelectType('predicate',$(this).val())"></select>
+                onchange="Lineage_relationFilter.onSelectType('predicate',$(this).val())"></select>
         &nbsp;<select id="lineageQuery_predicateUriSelect"
-                      onchange="Lineage_query.onSelectType('predicateUri',$(this).val())"
+                      onchange="Lineage_relationFilter.onSelectType('predicateUri',$(this).val())"
                       style="display: none; width: 200px"></select>
         <div id="lineageQuery_inversePredicateDiv" style="display: none; ">
           <input type="checkbox" id="lineageQuery_inversePredicateCBX">inverse predicate
@@ -54,7 +54,7 @@
       </div>
       <div class="lineageQuery_div">
         Object Type
-        <select id="lineageQuery_objectTypeSelect" onchange="Lineage_query.onSelectType('object',$(this).val())">
+        <select id="lineageQuery_objectTypeSelect" onchange="Lineage_relationFilter.onSelectType('object',$(this).val())">
           <!--   <option value=""></option>
              <option value="string">String</option>
              <option value="number">Number</option>
@@ -80,8 +80,8 @@
               <option value=" UNION ">or</option>
           </select>-->
 
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.addFilter()">Add filter</button>&nbsp;
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.reset(true)">Reset</button>
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.addFilter()">Add filter</button>&nbsp;
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.reset(true)">Reset</button>
     </div>
     <div class="lineageQuery_div">
       <div id="lineageQuery_Filters"
@@ -102,23 +102,23 @@
   <div>
 
 
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('count')">Count
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('count')">Count
     </button>
     &nbsp;
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('graph')">Graph
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('graph')">Graph
     </button>
     &nbsp;
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('list')">List
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('list')">List
     </button>
     &nbsp;
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('csv')">CSV
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('csv')">CSV
     </button>
 
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('copyQuery')">Copy
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('copyQuery')">Copy
       Query
     </button>
 
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.storedQueries.saveCurrentQuery()">Save
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.storedQueries.saveCurrentQuery()">Save
     </button>
     <div class="messagediv">
       <tbody>

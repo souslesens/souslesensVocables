@@ -1067,7 +1067,7 @@ var TE_AssetConfigurator = (function () {
                 var html = "Properties CFIHOS <br><table>";
 
                 result.forEach(function (item) {
-                    html += "<tr><td>" + item.propLabel.value + "</td><td>" + item.valueLabel.value + "</td></tr>";
+                    html += "<tr><td>" + item.propLabel.value + "</td><td>" + item.objectLabel.value + "</td></tr>";
                 });
                 html += "</table>";
                 $("#TE_AssetConfigurator_ProprertiesDiv").html(html);

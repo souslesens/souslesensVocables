@@ -1002,7 +1002,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
       query += "?node owl:aValueFrom ?value." + Sparql_common.getVariableLangLabel("value", true); // OPTIONAL {?value rdfs:label ?valueLabel}";
     }
     else {
-      query +=" ?node ?p ?value. ?value rdf:type ?valueType. filter (?valueType in (rdf:Class,owl:Class)) "
+      query +=" ?node ?p ?value. ?value rdf:type ?valueType.OPTIONAL {?value rdfs:label ?valueLabel} filter (?valueType in (rdf:Class,owl:Class)) "
      // query += "?node owl:allValuesFrom|owl:someValuesFrom|owl:aValueFrom ?value." + Sparql_common.getVariableLangLabel("value", true); // OPTIONAL {?value rdfs:label ?valueLabel}";
 
     }
@@ -1017,8 +1017,11 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         "?node <http://data.souslesens.org/property#rangeSourceLabel> ?rangeSourceLabel.";
     }
 
-    if (options.filter) {
-      query += " " + options.filter + " ";
+
+      var filter2=options.filter
+    if (filter2) {
+      filter2 = filter2.replace(/object/g, "value");
+      query += " " + filter2 + " ";
     }
 
     query += "} }";
@@ -1878,43 +1881,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
     );
   };
 
-  self.schema = {
-    getOwlChildrenClasses: function(callback) {
-      var query =
-        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
-        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-        "SELECT *  from <http://data.total.com/resource/one-model/rdfsOwlSimplified/> WHERE {\n" +
-        "  ?sub rdf:type rdfs:Class .\n" +
-        "} LIMIT 500";
 
-      var url = OwlSchema.currentSourceSchema.sparql_url;
-      Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Blender.currentSource }, function(err, result) {
-        if (err) {
-          return callback(err);
-        }
-
-        return callback(null, result.results.bindings);
-      });
-    },
-
-    getObjectProperties: function(classId, callback) {
-      var query =
-        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
-        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-        "SELECT *  from <http://data.total.com/resource/one-model/rdfsOwlSimplified/> WHERE {\n" +
-        "  ?sub rdf:type rdf:Property .\n" +
-        "} LIMIT 500";
-
-      var url = OwlSchema.currentSourceSchema.sparql_url;
-      Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: Blender.currentSource }, function(err, result) {
-        if (err) {
-          return callback(err);
-        }
-
-        return callback(null, result.results.bindings);
-      });
-    },
-  };
 
   return self;
 })();

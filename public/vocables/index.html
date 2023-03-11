@@ -33,16 +33,17 @@
         <script src="js/treeController.js"></script>
         <script src="js/clipboard.js"></script>
 
-        <script src="js/tools/sourceBrowser.js"></script>
+    <script src="js/tools/sourceBrowser.js"></script>
 
-        <script src="js/tools/sourceMatcher.js"></script>
-        <!--script src="js/tools/evaluate.js"></script-->
-        <script src="js/tools/evaluate.js"></script>
-        <script src="js/tools/genealogy.js"></script>
-        <script src="js/tools/owlSchema.js"></script>
-        <script src="js/tools/annotator.js"></script>
-        <script src="js/tools/childHood.js"></script>
-        <script src="js/tools/importCSV.js"></script>
+        <!--
+            <script src="js/tools/sourceMatcher.js"></script>
+           <script src="js/tools/evaluate.js"></script>
+           <script src="js/tools/evaluate.js"></script>
+           <script src="js/tools/genealogy.js"></script>
+           <script src="js/tools/owlSchema.js"></script>
+           <script src="js/tools/annotator.js"></script>
+           <script src="js/tools/childHood.js"></script>
+           <script src="js/tools/importCSV.js"></script>-->
 
         <script src="js/tools/blender/blender.js"></script>
         <script src="js/tools/blender/collection.js"></script>
@@ -71,30 +72,33 @@
         <script src="js/tools/lineage/lineage_selection.js"></script>
         <script src="js/tools/lineage/lineage_filterBy.js"></script>
         <script src="js/tools/lineage/lineage_styles.js"></script>
-        <script src="js/tools/lineage/lineage_query.js"></script>
+        <script src="js/tools/lineage/lineage_relationFilter.js"></script>
+
+        <script src="js/commonUIwidgets.js"></script>
+
 
         <script src="js/tools/owlEditor.js"></script>
 
         <!-- <script src="js/tools/lineage/KGquery.js"></script>-->
 
-        <script src="js/tools/KG/mappings/KGmappings.js"></script>
+   <!--     <script src="js/tools/KG/mappings/KGmappings.js"></script>
         <script src="js/tools/KG/mappings/KGmappingGraph.js"></script>
         <script src="js/tools/KG/mappings/KGmappingData.js"></script>
         <script src="js/tools/KG/mappings/KGadvancedMapping.js"></script>
         <script src="js/tools/KG/KGassetGraph.js"></script>
-        <script src="js/tools/KG/mappings/KGbuild.js"></script>
+        <script src="js/tools/KG/mappings/KGbuild.js"></script>-->
 
-        <script src="js/tools/KG/TextAnnotator.js"></script>
+     <!--   <script src="js/tools/KG/TextAnnotator.js"></script>-->
 
-        <script src="js/tools/KG/KGcommon.js"></script>
+     <!--   <script src="js/tools/KG/KGcommon.js"></script>
         <script src="js/tools/KG/browser/KGbrowserGraph.js"></script>
         <script src="js/tools/KG/browser/KGbrowserQuery.js"></script>
-        <!-- <script src="js/tools/KG/browser/KGbrowserQueryNew.js"></script>-->
+         <script src="js/tools/KG/browser/KGbrowserQueryNew.js"></script>
         <script src="js/tools/KG/browser/KGbrowser.js"></script>
         <script src="js/tools/KG/browser/KGbrowser_2.js"></script>
         <script src="js/tools/KG/browser/KGbrowserBI.js"></script>
         <script src="js/tools/KG/browser/KGbrowserDataTable.js"></script>
-        <script src="js/tools/KG/browser/KGbrowserCustom.js"></script>
+        <script src="js/tools/KG/browser/KGbrowserCustom.js"></script>-->
 
         <script src="js/tools/Standardizer.js"></script>
 
@@ -129,18 +133,18 @@
         <script src="js/sparqlProxies/sparql_generic.js"></script>
         <script src="js/sparqlProxies/sparql_SKOS.js"></script>
         <script src="js/sparqlProxies/sparql_OWL.js"></script>
-        <script src="js/sparqlProxies/sparql_INDIVIDUALS.js"></script>
+     <!--   <script src="js/sparqlProxies/sparql_INDIVIDUALS.js"></script>-->
 
         <script src="js/sparqlProxies/sparql_common.js"></script>
-        <script src="js/sparqlProxies/sparql_schema.js"></script>
+       <!-- <script src="js/sparqlProxies/sparql_schema.js"></script>-->
         <script src="js/sparqlProxies/sparql_CRUD.js"></script>
 
         <!--specific-->
-        <script src="js/sparqlProxies/sparql_WORDNET.js"></script>
+  <!--      <script src="js/sparqlProxies/sparql_WORDNET.js"></script>
         <script src="js/sparqlProxies/sparql_ISO_15926.js"></script>
         <script src="js/sparqlProxies/sparql_ISO_15926_part4.js"></script>
         <script src="js/sparqlProxies/sparql_NPD.js"></script>
-        <script src="js/tools/orchestrator.js"></script>
+        <script src="js/tools/orchestrator.js"></script>-->
         <script src="js/search/searchUtil.js"></script>
         <script src="js/tools/ontologyUtil.js"></script>
 
@@ -260,7 +264,7 @@
                     });
                     $("#accordion").accordion("option", { active: 0 });
                     $("#accordion").on("accordionbeforeactivate", function (event, ui) {
-                        if (!KGmappings.checkMappingEditionSave()) return false;
+                       ;
                     });
                     $("#accordion").on("accordionactivate", function (event, ui) {});
                     $("#mainDialogDiv").dialog({

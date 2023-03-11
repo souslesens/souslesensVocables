@@ -35,6 +35,17 @@ var Config = (function() {
   self.predicatesSource = "TSF-PREDICATES";
   self.dictionarySource = "TSF-DICTIONARY";
 
+  self._defaultSource= {
+      "graphUri": null,
+      "sparql_server": {
+      "url": "_default"
+    },
+    "imports": [ ],
+      "controller": "Sparql_OWL",
+      "topClassFilter": "?topConcept rdf:type  owl:Class ",
+      "schemaType": "OWL",
+  }
+
   self.sousLeSensVocablesGraphUri= "http://data.souslesens.org/";
   self.formalOntologySourceLabel="ISO_15926-part-14_PCA";
 
@@ -64,16 +75,14 @@ var Config = (function() {
   };
 
 
-  self.ontologiesVocabularyModels = {
+  self.basicVocabularies = {
     rdf: {graphUri:"https://www.w3.org/1999/02/22-rdf-syntax-ns"},
     rdfs: {graphUri:"https://www.w3.org/2000/01/rdf-schema"},
     owl: {graphUri:"https://www.w3.org/2002/07/owl"},
     "iof-av":{graphUri:"https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/"},
     skos: {graphUri:"http://www.w3.org/2004/02/skos/core/"}
   };
-  self.sourcesConstraints={
-
-  }
+  self.ontologiesVocabularyModels=JSON.parse(JSON.stringify(self.basicVocabularies))
 
   self.namedSetsThesaurusGraphUri = "http://souslesens.org/resource/named-triple-sets/";
 

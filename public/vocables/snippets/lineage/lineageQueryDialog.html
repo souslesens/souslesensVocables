@@ -25,7 +25,7 @@
 
 
  <!--<div id="LineageQuery_queryModelTab" style="display: flex; flex-direction: column">
-    <select id="LineageQuery_queryModelSelect" style="width: 90%" size="10" onclick="Lineage_query.queryModel.onSelectRestriction($(this).val())"></select>
+    <select id="LineageQuery_queryModelSelect" style="width: 90%" size="10" onclick="Lineage_relationFilter.queryModel.onSelectRestriction($(this).val())"></select>
 
 </div>-->
   <div id="LineageQuery_freeQueryTab" style="display: flex; flex-direction: column">
@@ -34,7 +34,7 @@
     <div style="display: flex; flex-direction: row">
       <div class="lineageQuery_div">
         Subject type
-        <select id="lineageQuery_subjectVarSelect" onchange="Lineage_query.onSelectType('subject',$(this).val())">
+        <select id="lineageQuery_subjectVarSelect" onchange="Lineage_relationFilter.onSelectType('subject',$(this).val())">
           <option value="?s1">Subject1</option>
 
         </select>
@@ -47,7 +47,7 @@
           vocabulary<select id="lineageQuery_vocabularySelect" style="min-width: 100px;background-color: #ddd"
                             onchange="SourceBrowser.setCurrentVocabPropertiesSelect($(this).val(),'lineageQuery_currentVocabPropertySelect')">
 
-          <select id="lineageQuery_currentVocabPropertySelect" style="min-width: 200px;background-color: #ddd" onchange="Lineage_query.onSelectCurrentVocabProperty($(this).val())"><option value=""></option><option value="owl:Thing">owl:Thing</option><option value="owl:Class">owl:Class</option><option value="owl:NamedIndividual">owl:NamedIndividual</option><option value="owl:Thing">owl:Thing</option><option value="owl:ObjectProperty">owl:ObjectProperty</option><option value="owl:DatatypeProperty">owl:DatatypeProperty</option><option value="owl:Restriction">owl:Restriction</option><option value="rdf:Bag">rdf:Bag</option><option value="rdf:List">rdf:List</option><option value="skos:Concept">skos:Concept</option><option value="skos:Collection">skos:Collection</option><option value="slsv:TopConcept">slsv:TopConcept</option><option value="_function">_function</option><option value="_blankNode">_blankNode</option><option value=""></option></select>
+          <select id="lineageQuery_currentVocabPropertySelect" style="min-width: 200px;background-color: #ddd" onchange="Lineage_relationFilter.onSelectCurrentVocabProperty($(this).val())"><option value=""></option><option value="owl:Thing">owl:Thing</option><option value="owl:Class">owl:Class</option><option value="owl:NamedIndividual">owl:NamedIndividual</option><option value="owl:Thing">owl:Thing</option><option value="owl:ObjectProperty">owl:ObjectProperty</option><option value="owl:DatatypeProperty">owl:DatatypeProperty</option><option value="owl:Restriction">owl:Restriction</option><option value="rdf:Bag">rdf:Bag</option><option value="rdf:List">rdf:List</option><option value="skos:Concept">skos:Concept</option><option value="skos:Collection">skos:Collection</option><option value="slsv:TopConcept">slsv:TopConcept</option><option value="_function">_function</option><option value="_blankNode">_blankNode</option><option value=""></option></select>
           <br><input type="checkbox" id="lineageQuery_inversePredicateCBX">inverse predicate
         </div>
       </div>
@@ -57,7 +57,7 @@
           vocabulary<select id="lineageQuery_vocabularySelect2" style="min-width: 100px;background-color: #ddd"
                             onchange="SourceBrowser.setCurrentVocabClassesSelect($(this).val(),'lineageQuery_currentVocabObjectSelect')"><option value=""></option><option value="usual">usual</option><option value="BFO">BFO</option><option></option><option value="rdf">rdf</option><option value="rdfs">rdfs</option><option value="owl">owl</option><option value="iof-av">iof-av</option><option value="skos">skos</option></select>&nbsp;
 
-          <select id="lineageQuery_currentVocabObjectSelect" style="min-width: 200px;background-color: #ddd" onchange="Lineage_query.onSelectCurrentVocabObject($(this).val())"><option value=""></option><option value="owl:Thing">owl:Thing</option><option value="owl:Class">owl:Class</option><option value="owl:NamedIndividual">owl:NamedIndividual</option><option value="owl:Thing">owl:Thing</option><option value="owl:ObjectProperty">owl:ObjectProperty</option><option value="owl:DatatypeProperty">owl:DatatypeProperty</option><option value="owl:Restriction">owl:Restriction</option><option value="rdf:Bag">rdf:Bag</option><option value="rdf:List">rdf:List</option><option value="skos:Concept">skos:Concept</option><option value="skos:Collection">skos:Collection</option><option value="slsv:TopConcept">slsv:TopConcept</option><option value="_function">_function</option><option value="_blankNode">_blankNode</option><option value=""></option></select>
+          <select id="lineageQuery_currentVocabObjectSelect" style="min-width: 200px;background-color: #ddd" onchange="Lineage_relationFilter.onSelectCurrentVocabObject($(this).val())"><option value=""></option><option value="owl:Thing">owl:Thing</option><option value="owl:Class">owl:Class</option><option value="owl:NamedIndividual">owl:NamedIndividual</option><option value="owl:Thing">owl:Thing</option><option value="owl:ObjectProperty">owl:ObjectProperty</option><option value="owl:DatatypeProperty">owl:DatatypeProperty</option><option value="owl:Restriction">owl:Restriction</option><option value="rdf:Bag">rdf:Bag</option><option value="rdf:List">rdf:List</option><option value="skos:Concept">skos:Concept</option><option value="skos:Collection">skos:Collection</option><option value="slsv:TopConcept">slsv:TopConcept</option><option value="_function">_function</option><option value="_blankNode">_blankNode</option><option value=""></option></select>
 
         </div>
 
@@ -75,8 +75,8 @@
               <option value=" UNION ">or</option>
           </select>-->
 
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.addFilter()">Add filter</button>&nbsp;
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.reset(true)">Reset</button>
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.addFilter()">Add filter</button>&nbsp;
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.reset(true)">Reset</button>
     </div>
     <div class="lineageQuery_div">
       <div id="lineageQuery_Filters"
@@ -97,23 +97,23 @@
   <div>
 
 
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('count')">Count
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('count')">Count
     </button>
     &nbsp;
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('graph')">Graph
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('graph')">Graph
     </button>
     &nbsp;
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('list')">List
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('list')">List
     </button>
     &nbsp;
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('csv')">CSV
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('csv')">CSV
     </button>
 
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.executeQuery('copyQuery')">Copy
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('copyQuery')">Copy
       Query
     </button>
 
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.storedQueries.saveCurrentQuery()">Save
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.storedQueries.saveCurrentQuery()">Save
     </button>
     <div class="messagediv">
       <tbody>

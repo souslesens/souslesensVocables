@@ -331,9 +331,6 @@ var Sparql_common = (function() {
   };
 
   self.getLabelFromURI = function(id) {
-    if (OwlSchema.currentSourceSchema && OwlSchema.currentSourceSchema.labelsMap[id]) {
-      return OwlSchema.currentSourceSchema.labelsMap[id];
-    }
 
     const p = id.lastIndexOf("#");
     if (p > -1) {

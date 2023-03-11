@@ -152,6 +152,7 @@ var KGcreator = (function() {
 
   self.initSource = function(source, callback) {
     self.currentSource = source;
+    self.currentSlsvSource = source;
     Config.currentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromImports(source);
 
     self.currentGraphUri = Config.sources[source].graphUri;
@@ -159,7 +160,7 @@ var KGcreator = (function() {
       return alert("Source must have an upper ontology import");
     }
     $("#KGcreator_owlSourceInput").html(source);
-    self.currentSlsvSource = source;
+
     $("#KGcreator_topLevelOntologiesInput").html(Config.currentTopLevelOntology);
     self.topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
     self.initModel(source, function(err, result) {
@@ -243,17 +244,7 @@ var KGcreator = (function() {
       }
     });
   };
-  /* self.listObjects = function () {
-      console.log("KGcreator.listObjects");
-      self.currentDataSourceModel = null;
-      self.currentdabase = null;
-      self.loadMappingsList();
-      if (self.currentSourceType == "CSV") {
-          self.listFiles();
-      } else if (self.currentSourceType == "DATABASE") {
-          self.listTables();
-      }
-  };*/
+
 
   self.displayUploadApp = function() {
     $.getScript("/kg_upload_app.js");
@@ -657,10 +648,18 @@ var KGcreator = (function() {
 
         },
 
+        function(callbackSeries) {
+
+          $("#sharedPredicatesPanel").load("snippets/commonUIwidgets/editPredicateDialog.html",function(){
+            CommonUIwidgets.predicatesSelectorWidget.showPredicateDiv()
+
+          return callbackSeries();
+        },
+
 
         // fill predicate options
         function(callbackSeries) {
-          self.fillPredicatesSelect(self.currentSource, "KGcreator_predicateSelect", { usualProperties: true }, function(err) {
+          self.fillPredicatesSelect(self.currentSlsvSource, "KGcreator_predicateSelect", { usualProperties: true }, function(err) {
             return callbackSeries(err);
           });
         },
@@ -685,7 +684,7 @@ var KGcreator = (function() {
 
             usualObjectClasses = usualObjectClasses.concat({ id: "", label: "--------" })
               .concat(result);
-            common.fillSelectOptions("KGcreator_objectUpperOntSelect", usualObjectClasses, true, "label", "id");
+            common.fillSelectOptions("KGcreator_usualObjectsSelect", usualObjectClasses, true, "label", "id");
 
 
             return callbackSeries();
@@ -1517,49 +1516,7 @@ self.saveMappings({classId:classId})
     });
 
   };
-  self.fillObjectOptionsFromPrompt = function(type, selectId,source) {
-    var term = prompt("Individual contains...");
-    if (term === null) {
-      return;
-    }
-    var options = {
-      selectGraph: true,
-      lang: Config.default_lang,
-      type: type,
-      filter: term ? " FILTER ( regex(?label,'" + term + "','i'))" : "",
-      limit: Config.maxSelectListSize
-    };
-if(!source)
-    source = Lineage_sources.activeSource || KGcreator.currentSource;
-    Sparql_OWL.getDictionary(source, options, null, function(err, result) {
-      if (err) {
-        alert(err.responseText);
-      }
 
-      if (result.length >= Config.maxSelectListSize) {
-        if (confirm(" too many values; list truncated to  " + Config.maxSelectListSize + " values") === null) {
-          return;
-        }
-      }
-      var objs = [];
-      result.forEach(function(item) {
-        objs.push({
-          id: item.id.value,
-          label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value)
-        });
-      });
-      objs.sort(function(a, b) {
-        if (a.label > b.label) {
-          return 1;
-        }
-        if (a.label < b.label) {
-          return -1;
-        }
-        return 0;
-      });
-      common.fillSelectOptions(selectId, objs, true, "label", "id");
-    });
-  };
 
 
   self.initModel = function(source, callback) {

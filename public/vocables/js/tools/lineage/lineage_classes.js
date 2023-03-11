@@ -516,10 +516,10 @@ sourceLabels.sort();
       onHoverNodeFn: Lineage_selection.selectNodesOnHover,
       physics: {
         stabilization: {
-          enabled: true,
+          enabled: false,
           iterations: 180, // maximum number of iteration to stabilize
           updateInterval: 10,
-          onlyDynamicEdges: false,
+       ///  onlyDynamicEdges: false,
           fit: true
         },
         barnesHut: {

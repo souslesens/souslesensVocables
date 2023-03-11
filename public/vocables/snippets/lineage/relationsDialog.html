@@ -32,7 +32,6 @@
     </div>
 
 
-
   </div>
 
   <div class="lineageRelations_div">
@@ -44,52 +43,54 @@
 
   </div>
 
-  <div >
+  <div
+    style="    display: flex; align-content: space-around;flex-direction: column;justify-content: space-evenly;width:450px">
 
-
+    <div style="text-align: center; background-color: #eee;margin: 5px" id="Lineage_relation_constraints"></div>
 
     <div class="lineageRelations_div" style="display:none" id="lineageRelations_filterDiv">
       <b> predicates filter</b>
-      <div style="" id="Lineage_relation_constraints"></div>
-      <div class="lineageRelations_div">
-        <div>
-          Filter role <select id="lineage_relation_filterRoleSelect"
-                              onchange="Lineage_query.onSelectRoleType($(this).val())">
-          <option></option>
-          <option>subject</option>
-          <option>object</option>
-        </select>
-        </div>
-        <span style="font-weight: bold" id="lineage_relation_filterRole"></span>
-        <span id="Lineage_relation_filter"></span>
-        <select id="Lineage_relation_filterTypeSelect"
-                onchange="Lineage_query.onSelectResourceType('domain',$(this).val())"></select>
-        <div id="Lineage_relation_filterValueDiv">
-          <select id="Lineage_relation_filterVocabularySelect"
-                  onchange="Lineage_query.onSelectResource('domain',$(this).val())"></select>
-          <select id="Lineage_relation_filterResourcesSelect"></select>
-
-        </div>
 
 
-        <div class="lineageRelations_div" style="display:none" id="lineageQuery_valueDiv">
-          <select id="lineageQuery_operator"> </select>
-          <input id="lineageQuery_value" size="20" value="" />
-        </div>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_query.attachFilterToProperty()">set filter</button>
-        <textarea id="Lineage_relation_filterText" style="max-width: 300px;height: 50px"></textarea>
-      </div>
       <div>
-
-
+        Filter role <select id="lineage_relation_filterRoleSelect"
+                            onchange="Lineage_relationFilter.onSelectRoleType($(this).val())">
+        <option></option>
+        <option>subject</option>
+        <option>object</option>
+      </select>
+      </div>
+      <span style="font-weight: bold" id="lineage_relation_filterRole"></span>
+      <span id="Lineage_relation_filter"></span>
+      <select id="Lineage_relation_filterTypeSelect"
+              onchange="Lineage_relationFilter.onSelectResourceType('domain',$(this).val())"></select>
+      <div id="Lineage_relation_filterValueDiv">
+        <select id="Lineage_relation_filterVocabularySelect"
+                onchange="Lineage_relationFilter.onSelectResource('domain',$(this).val())"></select>
+        <select id="Lineage_relation_filterResourcesSelect"></select>
 
       </div>
+
+
+      <div class="lineageRelations_div" style="display:none" id="lineageQuery_valueDiv">
+        <select id="lineageQuery_operator"> </select>
+        <input id="lineageQuery_value" size="20" value="" />
+      </div>
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary"
+              onclick="Lineage_relationFilter.attachFilterToProperty()">set
+        filter
+      </button>
+      <textarea id="Lineage_relation_filterText" style="width: 400px;height: 100px"></textarea>
     </div>
-    <div class="lineageRelations_div" style="display: block">
+    <div>
+
+
+    </div>
+    <div class="lineageRelations_div" style="display: block;background-color: beige">
       Color</b>
       <select id="lineageRelations_colorsSelect"></select>
 
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary"
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold"
               onclick="Lineage_relations.onshowDrawRelationsDialogValidate()">Draw
       </button>
       <button class="btn btn-sm my-1 py-0 btn-outline-primary"
@@ -97,7 +98,8 @@
       </button>
 
       <div>
-        <input type="checkbox" id="Lineage_classes_excludeRelationsFromGraphSpatializationCBX" checked="checked"> exclude
+        <input type="checkbox" id="Lineage_classes_excludeRelationsFromGraphSpatializationCBX" checked="checked">
+        exclude
         relations from graph spatialization
       </div>
     </div>

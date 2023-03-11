@@ -411,14 +411,16 @@ sourceDivId +
     });
   };
 
-  self.registerSourceImports = function(sourceLabel,callback) {
+  self.registerSourceImports = function(sourceLabel, callback) {
     var imports = Config.sources[sourceLabel].imports;
     if (!imports) {
       imports = [];
     }
     async.eachSeries(imports, function(importSource, callbackEach) {
-      self.registerSource(importSource, callbackEach);
-    },callback);
+
+          self.registerSource(importSource, callbackEach);
+
+    }, callback);
   };
 
   self.setAllWhiteBoardSources = function(remove) {

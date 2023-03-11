@@ -984,6 +984,8 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
   };
 
   self.showNodeInfos = function(sourceLabel, node, divId, options, callback) {
+    if(!sourceLabel)
+      sourceLabel="_defaultSource"
     self.newProperties = null;
     self.currentNodeId = null;
     self.currentNode = null;
@@ -1096,13 +1098,13 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
     }
     var str = "<div>";
     if (Lineage_sources.isSourceEditable(self.currentSource) && !options.hideModifyButtons) {
-      str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.showAddPredicateDiv()'>  Add Predicate </button>";
+      str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='CommonUIwidgets.predicatesSelectorWidget.showPredicateDiv()'>  Add Predicate </button>";
       if (true || Config.sources[source].editable) {
         str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>";
       }
     }
     str +=
-      "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;background-color: #b9cbe6;padding:5px';display:flex;>";
+      "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;background-color: #e1ddd1;padding:5px';display:flex;>";
 
 
     if (self.visitedNodes.length > 1) {
@@ -1117,27 +1119,18 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
     $("#" + self.currentNodeIdInfosDivId).prepend(str);
 
     if (Lineage_sources.isSourceEditable(self.currentSource) && !options.hideModifyButtons) {
-      $("#sourceBrowser_addPropertyDiv").load("snippets/lineage/editPredicateDialog.html");
+      $("#sourceBrowser_addPropertyDiv").load("snippets/commonUIwidgets/editPredicateDialog.html",function(){
+        $("#editPredicate_controlsDiv").css("display","block");
+      });
+
+
     }
+
+
 
   };
 
-  self.onSelectPredicateProperty = function(value) {
-    $("#sourceBrowser_addPropertyPredicateValue").val(value);
-  };
-  self.onSelectCurrentVocabObject = function(value) {
-    if (value.indexOf("xsd") == 0) {
-      if (value == "xsd:dateTime") {
-        common.setDatePickerOnInput("sourceBrowser_addPropertyValue");
-      }
-      else {
-        $("#sourceBrowser_addPropertyValue").val(value);
-      }
-    }
-    else {
-      $("#sourceBrowser_addPropertyValue").val(value);
-    }
-  };
+
 
   self.drawCommonInfos = function(sourceLabel, nodeId, divId, _options, callback) {
     if (!_options) {
@@ -1168,7 +1161,7 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
 
         var type = null;
         var graphUri = "";
-        self.predicatesIdsMap = {};
+
         data.forEach(function(item) {
 
           if (item.g) {
@@ -1214,7 +1207,7 @@ value = item.valueLabel.value;*/
             };
           }
           var predicateId = common.getRandomHexaId(5);
-          self.predicatesIdsMap[predicateId] = { item: item };
+          CommonUIwidgets.predicatesSelectorWidget.predicatesIdsMap[predicateId] = { item: item };
 
           if (item.value && item.value["xml:lang"]) {
             if (!self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]]) {
@@ -1550,10 +1543,10 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
 
   self.addPredicate = function(property, value, source, createNewNode, callback) {
     if (!property) {
-      property = $("#sourceBrowser_addPropertyPredicateValue").val();
+      property = $("#editPredicate_addPropertyPredicateValue").val();
     }
     if (!value) {
-      value = $("#sourceBrowser_addPropertyValue").val().trim();
+      value = $("#editPredicate_addPropertyValue").val().trim();
     }
 
     if (!property || !value) {
@@ -1565,7 +1558,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         return alert("wrong date format (need yyy-mm-dd");
       }
       value = value + "^^xsd:dateTime";
-      $("#sourceBrowser_addPropertyValue").datepicker("destroy");
+      $("#editPredicate_addPropertyValue").datepicker("destroy");
     }
 
     $("#sourceBrowser_addPropertyDiv").css("display", "none");
@@ -1632,7 +1625,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
 
 
   self.deletePredicate = function(predicateId) {
-    var currentEditingItem = self.predicatesIdsMap[predicateId];
+    var currentEditingItem = CommonUIwidgets.predicatesSelectorWidget.predicatesIdsMap[predicateId];
     if (confirm("delete predicate")) {
       var result = "";
 
@@ -1864,32 +1857,7 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
   };
 
 
-  self.showModifyPredicateDialog = function(predicateId) {
 
-    self.currentEditingItem = self.predicatesIdsMap[predicateId];
-    if (!self.currentEditingItem) {
-      return alert("error");
-    }
-    self.showAddPredicateDiv();
-    $("#SourceBrowser_savePredicateButton").click(function() {
-      SourceBrowser.updatePredicateValue();
-    });
-    $("#sourceBrowser_currentVocabPredicateSelect").prop("disabled", true);
-    $("#sourceBrowser_vocabularySelect").prop("disabled", true);
-    $("#sourceBrowser_addPropertyPredicateValue").prop("disabled", true);
-
-    //  $("#sourceBrowser_addPropertyObjectSelect").prop("disabled", true);
-    //  self.currentEditingItem.item.value.type == "literal";
-
-    $("#sourceBrowser_addPropertyPredicateValue").val(self.currentEditingItem.item.prop.value);
-    $("#sourceBrowser_addPropertyValue").val(self.currentEditingItem.item.value.value);
-    var h = Math.max((self.currentEditingItem.item.value.value.length / 80) * 30, 50);
-    $("#sourceBrowser_addPropertyValue").css("height", h + "px");
-
-    $("#sourceBrowser_addPropertyValue").focus()
-
-
-  };
 
   self.updatePredicateValue = function() {
     if (!self.currentEditingItem) {
@@ -1897,7 +1865,7 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     }
 
 
-    var newValue = $("#sourceBrowser_addPropertyValue").val();
+    var newValue = $("#editPredicate_addPropertyValue").val();
 
     var oldValue = self.currentEditingItem.item.value.value;
     if (self.currentEditingItem.item.value.type == "literal") {
@@ -1932,119 +1900,37 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     });
 
   };
+  self.showModifyPredicateDialog =function(predicateId) {
 
-
-  self.setCurrentVocabPropertiesSelect = function(vocabulary,selectId) {
-    var properties = [];
-
-
-    if (vocabulary == "usual") {
-      KGcreator.usualProperties.forEach(function(item) {
-        properties.push({ label: item, id: item });
-      });
-      properties.push({ label: "-------", id: "" });
-      common.fillSelectOptions(selectId, properties, true, "label", "id");
-
-    }else  if (Config.ontologiesVocabularyModels[vocabulary]) {
-        properties = Config.ontologiesVocabularyModels[vocabulary].properties;
-        common.fillSelectOptions(selectId, properties, true, "label", "id");
-      }
-      else {
-        Sparql_OWL.getObjectProperties(vocabulary, { withoutImports: 1 }, function(err, result) {
-
-          if (err) {
-            callback(err);
-          }
-          result.sort(function(a, b) {
-            if (!a.propertyLabel || !b.propertyLabel) {
-              return 0;
-            }
-            if (a.propertyLabel.value > b.propertyLabel.value) {
-              return 1;
-            }
-            if (a.propertyLabel.value < b.propertyLabel.value) {
-              return -1;
-            }
-            return 0;
-          });
-
-          result.forEach(function(item) {
-            properties.push(
-              { label: item.propertyLabel.value, id: item.property.value }
-            );
-          });
-          common.fillSelectOptions("sourceBrowser_currentVocabPredicateSelect", properties, true, "label", "id");
-        });
-      }
-
-
+    CommonUIwidgets.predicatesSelectorWidget.currentEditingItem = CommonUIwidgets.predicatesSelectorWidget.predicatesIdsMap[predicateId];
+    if (!CommonUIwidgets.predicatesSelectorWidget.currentEditingItem) {
+      return alert("error");
     }
+    CommonUIwidgets.predicatesSelectorWidget.showPredicateDiv();
+    $("#editPredicate_savePredicateButton").click(function() {
+      SourceBrowser.updatePredicateValue();
+    });
+    $("#editPredicate_currentVocabPredicateSelect").prop("disabled", true);
+    $("#editPredicate_vocabularySelect").prop("disabled", true);
+    $("#editPredicate_addPropertyPredicateValue").prop("disabled", true);
 
 
 
-    self.setCurrentVocabClassesSelect = function(vocabulary,selectId) {
+    $("#editPredicate_addPropertyPredicateValue").val( CommonUIwidgets.predicatesSelectorWidget.currentEditingItem.item.prop.value);
+    $("#editPredicate_addPropertyValue").val(CommonUIwidgets.predicatesSelectorWidget.currentEditingItem.item.value.value);
+    var h = Math.max((CommonUIwidgets.predicatesSelectorWidget.currentEditingItem.item.value.value.length / 80) * 30, 50);
+    $("#editPredicate_addPropertyValue").css("height", h + "px");
 
-      var classes = [];
-      if (vocabulary == "usual") {
-        KGcreator.usualObjectClasses.forEach(function(item) {
-          classes.push({
-            id: item,
-            label: item
-          });
-        });
-        common.fillSelectOptions(selectId, classes, true, "label", "id");
-
-      }
-      else if (Config.ontologiesVocabularyModels[vocabulary]) {
-        var classes = Config.ontologiesVocabularyModels[vocabulary].classes;
-        common.fillSelectOptions(selectId, classes, true, "label", "id");
-
-      }
-
-      else {
-        return KGcreator.fillObjectOptionsFromPrompt(null, "sourceBrowser_currentVocabObjectSelect", vocabulary);
-      }
-    };
+    $("#editPredicate_addPropertyValue").focus()
 
 
-    self.hideAddPredicateDiv = function() {
-      $("#sourceBrowser_addPropertyDiv").css("display", "none");
-    };
+  }
+  self.hideAddPredicateDiv = function() {
+    $("#sourceBrowser_addPropertyDiv").css("display", "none");
+  };
 
 
 
-
-
-
-    self.showAddPredicateDiv = function() {
-      $("#sourceBrowser_addPropertyDiv").css("display", "flex");
-
-      $("#sourceBrowser_currentVocabPredicateSelect").prop("disabled", false);
-      $("#sourceBrowser_vocabularySelect").prop("disabled", false);
-      $("#sourceBrowser_addPropertyPredicateValue").prop("disabled", false);
-
-
-      var vocabularies = ["usual", Lineage_sources.activeSource];
-      vocabularies = vocabularies.concat(Config.sources[Lineage_sources.activeSource].imports);
-      vocabularies = vocabularies.concat(Object.keys(Config.ontologiesVocabularyModels));
-
-      common.fillSelectOptions("sourceBrowser_vocabularySelect", vocabularies, true);
-      common.fillSelectOptions("sourceBrowser_vocabularySelect2", vocabularies, true);
-      self.setCurrentVocabClassesSelect("usual");
-      self.setCurrentVocabPropertiesSelect("usual","sourceBrowser_currentVocabPredicateSelect");
-
-      $("#sourceBrowser_vocabularySelect").val("usual");
-      $("#sourceBrowser_vocabularySelect2").val("usual");
-
-      $("#SourceBrowser_savePredicateButton").click(function() {
-        SourceBrowser.addPredicate();
-      });
-      var properties = Config.Lineage.basicObjectProperties;
-
-
-
-
-    };
 
     return self;
   })

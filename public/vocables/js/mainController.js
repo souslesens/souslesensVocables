@@ -110,6 +110,8 @@ var MainController = (function () {
                     }
                 }
                 Config.sources = data;
+
+                Config.sources["_defaultSource"]=Config._defaultSource
                 if (callback) {
                     return callback();
                 }
@@ -227,6 +229,7 @@ var MainController = (function () {
                     },
                     function (callbackSeries) {
                     var sources=Object.keys(Config.ontologiesVocabularyModels)
+                        self.basic
                        Lineage_relations.registerSourcesModel(sources,function (err) {
                             callbackSeries(err);
                         });
@@ -247,7 +250,11 @@ var MainController = (function () {
             .forEach(function (sourceLabel, _index) {
                 if (!Config.sources[sourceLabel].controllerName) {
                     Config.sources[sourceLabel].controllerName = "" + Config.sources[sourceLabel].controller;
-                    Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller);
+                    try {
+                        Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller);
+                    }catch(e){
+                        console.log( "cannot parse "+Config.sources[sourceLabel].controller)
+                    }
                 } else {
                     Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controllerName);
                 }
@@ -550,8 +557,8 @@ return;*/
             if (Config.tools[self.currentTool].multiSources) {
                 return;
             }
-            OwlSchema.currentSourceSchema = null;
-            Collection.currentCollectionFilter = null;
+          //  OwlSchema.currentSourceSchema = null;
+         //   Collection.currentCollectionFilter = null;
             self.UI.updateActionDivLabel();
             self.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource);
             var controller = Config.tools[self.currentTool].controller;

@@ -141,8 +141,8 @@ Lineage_relations = (function() {
             return 0;
           });
           var options = {
-            // contextMenu: Lineage_query.getPropertiesJstreeMenu(),
-            selectTreeNodeFn: Lineage_query.onSelectPropertyTreeNode,
+            contextMenu: Lineage_relations.getPropertiesJstreeMenu(),
+            selectTreeNodeFn: Lineage_relations.onSelectPropertyTreeNode,
             withCheckboxes: true,
             searchPlugin: {
               case_insensitive: true,
@@ -161,19 +161,44 @@ Lineage_relations = (function() {
     });
   };
 
+  self.getPropertiesJstreeMenu = function() {
+    var items = {};
 
-  self.onFilterObjectTypeSelect = function(role, type) {
-    var valueStr = "";
-    if (type == "String") {
-      valueStr = " <div class=\"lineageQuery_objectTypeSelect\" id=\"lineageQuery_valueDiv\">\n" +
-        "          <select id=\"lineageQuery_operator\"> </select>\n" +
-        "          <input id=\"lineageQuery_value\" size=\"20\" value=\"\" />\n" +
-        "        </div>";
-
-    }
-    domainValue = valueStr;
-
+    items.PropertyInfos = {
+      label: "PropertyInfos",
+      action: function(_e) {
+        $("#LineagePopup").dialog("open");
+        SourceBrowser.showNodeInfos(self.curentPropertiesJstreeNode.parent, self.curentPropertiesJstreeNode, "LineagePopup");
+      }
+    };
+    return items;
   };
+
+  self.onSelectPropertyTreeNode = function(event, object) {
+    if (object.node.parent == "#") {
+      return self.currentProperty = null;
+    }
+
+    var vocabulary = object.node.parent;
+    self.curentPropertiesJstreeNode = object.node;
+    Lineage_relationFilter.currentProperty = { id: object.node.data.id, label: object.node.data.label, vocabulary: vocabulary };
+    Lineage_relationFilter.showAddFilterDiv();
+
+  },
+
+
+    self.onFilterObjectTypeSelect = function(role, type) {
+      var valueStr = "";
+      if (type == "String") {
+        valueStr = " <div class=\"lineageQuery_objectTypeSelect\" id=\"lineageQuery_valueDiv\">\n" +
+          "          <select id=\"lineageQuery_operator\"> </select>\n" +
+          "          <input id=\"lineageQuery_value\" size=\"20\" value=\"\" />\n" +
+          "        </div>";
+
+      }
+      domainValue = valueStr;
+
+    };
 
 
   self.onshowDrawRelationsDialogValidate = function(action) {
@@ -334,9 +359,7 @@ Lineage_relations = (function() {
           }
           if (!direction || direction == "direct") {
             options.inverse = false;
-            if (options.filter) {
-              options.filter = options.filter.replace(/subject/g, "value");
-            }
+
             MainController.UI.message("searching restrictions");
             Lineage_classes.drawRestrictions(source, data, null, null, options, function(err, result) {
               if (err) {
@@ -358,9 +381,7 @@ Lineage_relations = (function() {
           if (!direction || direction == "inverse") {
             options.inverse = true;
             MainController.UI.message("searching inverse restrictions");
-            if (options.filter) {
-              options.filter = options.filter.replace(/subject/g, "value");
-            }
+
             Lineage_classes.drawRestrictions(source, data, null, null, options, function(err, result) {
               if (err) {
                 return callbackSeries(err);
@@ -391,9 +412,7 @@ Lineage_relations = (function() {
           }
           if (!direction || direction == "direct") {
             MainController.UI.message("searching predicates");
-            if (options.filter) {
-              options.filter = options.filter.replace(/value/g, "object");
-            }
+
             Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
               if (err) {
                 return callbackSeries(err);
@@ -423,9 +442,7 @@ Lineage_relations = (function() {
           if (!direction || direction == "inverse") {
             options.inversePredicate = true;
             MainController.UI.message("searching inverse predicates");
-            if (options.filter) {
-              options.filter = options.filter.replace(/value/g, "object");
-            }
+
             Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
               if (err) {
                 return callbackSeries(err);
@@ -491,25 +508,33 @@ Lineage_relations = (function() {
       Config.ontologiesVocabularyModels[source].properties = [];
 
       var uniqueProperties = {};
-      var propsWithoutDomain=[]
-      var propsWithoutRange=[]
+      var propsWithoutDomain = [];
+      var propsWithoutRange = [];
+      var inversePropsMap = [];
       async.series([
 // set propertie
           function(callbackSeries) {
 
-            var query = queryP + " SELECT distinct ?prop ?propLabel from <" + graphUri + ">  WHERE {\n" +
-              "  ?prop ?p ?o optional{?prop rdfs:label ?propLabel} VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty } }";
+            var query = queryP + " SELECT distinct ?prop ?propLabel ?inverseProp from <" + graphUri + ">  WHERE {\n" +
+              "  ?prop ?p ?o optional{?prop rdfs:label ?propLabel}" +
+              "optional{?prop owl:inverseOf ?inverseProp}" +
+              " VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty } }";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
               if (err) {
                 return callbackSeries(err);
               }
+
               result.results.bindings.forEach(function(item) {
                 if (!uniqueProperties[item.prop.value]) {
                   uniqueProperties[item.prop.value] = 1;
                   Config.ontologiesVocabularyModels[source].properties.push({
                     id: item.prop.value,
-                    label: (item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value))
+                    label: (item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value)),
+                    inversProp: item.inverseProp ? item.inverseProp.value : null
                   });
+                }
+                if (item.inverseProp) {
+                  inversePropsMap[item.prop.value] = item.inverseProp.value;
                 }
               });
 
@@ -518,17 +543,17 @@ Lineage_relations = (function() {
           },
           // set model classes (if source not  declared in sources.json)
           function(callbackSeries) {
-            if (Config.sources[source]) {// dont take relations  declared in sources.json
+            if (!Config.sources[source] ||  !Config.topLevelOntologies[source]) {// dont take relations  declared in sources.json
               return callbackSeries();
             }
             var query = queryP + " select distinct ?sub ?subLabel FROM <" + graphUri + "> where{" +
-              " ?sub rdf:type ?class. OPTIONAL{ ?sub rdfs:label ?subLabel} VALUES ?Class {owl:Class rdf:class rdfs:Class} }";
+              " ?sub rdf:type ?class. OPTIONAL{ ?sub rdfs:label ?subLabel} VALUES ?Class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))}";
             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
               if (err) {
                 return callbackSeries(err);
               }
               result.results.bindings.forEach(function(item) {
-                if(!Config.ontologiesVocabularyModels[source].classes[item.sub.value]) {
+                if (!Config.ontologiesVocabularyModels[source].classes[item.sub.value]) {
                   Config.ontologiesVocabularyModels[source].classes[item.sub.value] = {
                     id: item.sub.value,
                     label: (item.subLabel ? item.subLabel.value : Sparql_common.getLabelFromURI(item.sub.value))
@@ -578,10 +603,49 @@ Lineage_relations = (function() {
             });
           },
 
-        // set retrictions constraints
+
+          //setinversPropsconstraints
+          function(callbackSeries) {
+            for (var propId in inversePropsMap) {
+              var propConstraints = Config.ontologiesVocabularyModels[source].constraints[propId];
+              var inversePropConstraints = Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]];
+              if (!propConstraints) {
+                propConstraints = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+                Config.ontologiesVocabularyModels[source].constraints[propId] = propConstraints;
+              }
+              if (!inversePropConstraints) {
+                inversePropConstraints = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+                Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]] = inversePropConstraints;
+              }
+
+              if (propConstraints.domain && !inversePropConstraints.range) {
+                Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].range = propConstraints.domain;
+                Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].rangeLabel = propConstraints.domainLabel;
+              }
+              if (propConstraints.range && !inversePropConstraints.domain) {
+                Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].domain = propConstraints.range;
+                Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].domainLabel = propConstraints.rangeLabel;
+              }
+
+              if (inversePropConstraints.domain && !propConstraints.range) {
+                Config.ontologiesVocabularyModels[source].constraints[propId].range = inversePropConstraints.domain;
+                Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = inversePropConstraints.domainLabel;
+              }
+              if (inversePropConstraints.range && !propConstraints.domain) {
+                Config.ontologiesVocabularyModels[source].constraints[propId].domain = inversePropConstraints.range;
+                Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = inversePropConstraints.rangeLabel;
+              }
+
+
+            }
+            callbackSeries();
+
+
+          },
+          // set retrictions constraints
           function(callbackSeries) {
             // only relations  declared in sources.json
-            if (!Config.sources[source]) {
+            if ( !Config.sources[source] ) {
               return callbackSeries();
             }
             Sparql_OWL.getObjectRestrictions(source, null, { withoutBlankNodes: 1, withoutImports: 1 }, function(err, result) {
@@ -592,6 +656,9 @@ Lineage_relations = (function() {
                 var rangeLabel = item.valueLabel ? item.valueLabel.value : Sparql_common.getLabelFromURI(item.value.value);
                 var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
 
+
+
+
                 if (!uniqueProperties[item.prop.value]) {
                   uniqueProperties[item.prop.value] = 1;
                   Config.ontologiesVocabularyModels[source].properties.push({
@@ -599,13 +666,14 @@ Lineage_relations = (function() {
                     label: propLabel
                   });
                 }
-                Config.ontologiesVocabularyModels[source].restrictions[item.prop.value] = {
+                if(! Config.ontologiesVocabularyModels[source].restrictions[item.prop.value])
+                Config.ontologiesVocabularyModels[source].restrictions[item.prop.value]=[]
+                Config.ontologiesVocabularyModels[source].restrictions[item.prop.value].push( {
                   domain: item.subject.value,
                   range: item.value.value,
                   domainLabel: domainLabel,
                   rangeLabel: rangeLabel
-                };
-
+                });
 
 
               });
@@ -615,63 +683,68 @@ Lineage_relations = (function() {
           },
 
 
-        //set inherited Constraints
-        function(callbackSeries) {
-          if (!Config.sources[source]) {
-            return callbackSeries();
-          }
-          var constraints = Config.ontologiesVocabularyModels[source].constraints
-          Config.ontologiesVocabularyModels[source].properties.forEach(function(prop) {
-            if (!constraints[prop.id]) {
-              propsWithoutDomain.push(prop.id)
-              propsWithoutRange.push(prop.id)
+          //set inherited Constraints
+          function(callbackSeries) {
+            if (!Config.sources[source] ||  !Config.topLevelOntologies[source]) {
+              return callbackSeries();
             }
-            else {
-              if (!constraints[prop.id].domain)
-                propsWithoutDomain.push(prop.id)
-              if (!constraints[prop.id].range)
-                propsWithoutRange.push(prop.id)
-            }
+            var constraints = Config.ontologiesVocabularyModels[source].constraints;
+            Config.ontologiesVocabularyModels[source].properties.forEach(function(prop) {
+              if (!constraints[prop.id]) {
+                propsWithoutDomain.push(prop.id);
+                propsWithoutRange.push(prop.id);
+              }
+              else {
+                if (!constraints[prop.id].domain) {
+                  propsWithoutDomain.push(prop.id);
+                }
+                if (!constraints[prop.id].range) {
+                  propsWithoutRange.push(prop.id);
+                }
+              }
 
-          })
-          callbackSeries();
-        },
+            });
+            callbackSeries();
+          },
 
           //set inherited domains
           function(callbackSeries) {
-        if(propsWithoutDomain.length==0)
-          return callbackSeries()
-            var props=propsWithoutDomain.concat(propsWithoutRange)
-          Sparql_OWL.getPropertiesInheritedConstraints(source,props,{},function(err, propsMap){
-            if(err)
-              return callbackSeries(err)
-
-            for(var propId in propsMap) {
-              var constraint = propsMap[propId]
-              if (!Config.ontologiesVocabularyModels[source].constraints[propId])
-                Config.ontologiesVocabularyModels[source].constraints[propId] = { domain: "", range: "" }
-
-              if (constraint.domain && !Config.ontologiesVocabularyModels[source].constraints[propId].domain) {
-                Config.ontologiesVocabularyModels[source].constraints[propId].domain = constraint.domain
-                Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = constraint.domainLabel
-                Config.ontologiesVocabularyModels[source].constraints[propId].domainParentProperty = constraint.parentProp
-              }
-
-
-              if (constraint.range && !Config.ontologiesVocabularyModels[source].constraints[propId].range) {
-                Config.ontologiesVocabularyModels[source].constraints[propId].range = constraint.range
-                Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = constraint.rangeLabel
-                Config.ontologiesVocabularyModels[source].constraints[propId].rangeParentProperty = constraint.parentProp
-              }
-
-
+            if (propsWithoutDomain.length == 0) {
+              return callbackSeries();
             }
+            var props = propsWithoutDomain.concat(propsWithoutRange);
+            Sparql_OWL.getPropertiesInheritedConstraints(source, props, {}, function(err, propsMap) {
+              if (err) {
+                return callbackSeries(err);
+              }
 
-            return callbackSeries()
-          })
+              for (var propId in propsMap) {
+                var constraint = propsMap[propId];
+                if (!Config.ontologiesVocabularyModels[source].constraints[propId]) {
+                  Config.ontologiesVocabularyModels[source].constraints[propId] = { domain: "", range: "" };
+                }
+
+                if (constraint.domain && !Config.ontologiesVocabularyModels[source].constraints[propId].domain) {
+                  Config.ontologiesVocabularyModels[source].constraints[propId].domain = constraint.domain;
+                  Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = constraint.domainLabel;
+                  Config.ontologiesVocabularyModels[source].constraints[propId].domainParentProperty = constraint.parentProp;
+                }
 
 
-        }
+                if (constraint.range && !Config.ontologiesVocabularyModels[source].constraints[propId].range) {
+                  Config.ontologiesVocabularyModels[source].constraints[propId].range = constraint.range;
+                  Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = constraint.rangeLabel;
+                  Config.ontologiesVocabularyModels[source].constraints[propId].rangeParentProperty = constraint.parentProp;
+                }
+
+
+              }
+
+              return callbackSeries();
+            });
+
+
+          }
 
 
         ],

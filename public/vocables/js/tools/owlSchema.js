@@ -133,9 +133,7 @@ var OwlSchema = (function () {
                             annotations: {},
                         };
                         return callbackSeries();
-                        /* Sparql_OWL.schema.getOwlChildrenClasses(classId,function (err, result) {
 
-                        })*/
                     } else {
                         return callbackSeries("Schema type " + schemaType + " not supported");
                     }
@@ -165,10 +163,6 @@ var OwlSchema = (function () {
                                 };
 
                             callbackSeries();
-                        });
-                    } else if (schemaType == "OWL") {
-                        Sparql_OWL.schema.getObjectProperties(classId, function (_err, _result) {
-                            return null;
                         });
                     } else {
                         return callbackSeries("Schema type " + schemaType + " not supported");
@@ -214,10 +208,6 @@ var OwlSchema = (function () {
                                 if (item.domain) self.currentSourceSchema.classes[classId].objectProperties[item.prop.value].domain = item.domain.value;
                             });
                             callbackSeries();
-                        });
-                    } else if (schemaType == "OWL") {
-                        Sparql_OWL.schema.getObjectProperties(function (_err, _result) {
-                            return null;
                         });
                     } else {
                         return callbackSeries("Schema type " + schemaType + " not supported");

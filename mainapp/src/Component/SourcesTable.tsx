@@ -58,12 +58,21 @@ const SourcesTable = () => {
                         imports: joinWhenArray(imports),
                         taxonomyPredicates: joinWhenArray(taxonomyPredicates),
                     };
-                    return { ...processedData };
+                    const dataWithoutCarriageReturns = Object.fromEntries(
+                        Object.entries(processedData).map(([key, value]) => {
+                            if (typeof value === "string") {
+                                return [key, value.replace("\n", " ")];
+                            }
+                            return [key, value];
+                        })
+                    );
+
+                    return { ...dataWithoutCarriageReturns };
                 });
                 return (
                     <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                         <Stack>
-                            <CsvDownloader separator="&#9;" filename="sources.tsv" datas={datas} />
+                            <CsvDownloader separator="&#9;" filename="sources" extension=".tsv" datas={datas} />
                             <Autocomplete
                                 disablePortal
                                 id="search-sources"

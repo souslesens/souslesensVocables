@@ -1,20 +1,20 @@
 const fs = require("fs");
 const bcrypt = require("bcrypt");
 const path = require("path");
-const { UserModel } = require("../model/users");
+const { UserModelJson } = require("../model/users");
 const tmp = require("tmp");
 
-describe("UserModel", () => {
+describe("UserModelJson", () => {
     /**
-     * @type {UserModel}
+     * @type {UserModelJson}
      */
-    let userModel;
+    let userModelJson;
     beforeAll(() => {
-        userModel = new UserModel(path.join(__dirname, "data/config"));
+        userModelJson = new UserModelJson(path.join(__dirname, "data/config"));
     });
 
     test("read the list of users with get()", async () => {
-        const users = await userModel.getUserAccounts();
+        const users = await userModelJson.getUserAccounts();
         expect(users).toStrictEqual({
             admin: {
                 id: "admin",
@@ -40,7 +40,7 @@ describe("UserModel", () => {
         });
     });
     test("find a user with findUserAccount()", async () => {
-        const users = await userModel.findUserAccount("admin");
+        const users = await userModelJson.findUserAccount("admin");
         expect(users).toStrictEqual({
             id: "admin",
             login: "admin",
@@ -50,14 +50,26 @@ describe("UserModel", () => {
         });
     });
     test("fail to find a user with findUserAccount()", async () => {
-        const emptyArray = await userModel.findUserAccount("unknown");
+        const emptyArray = await userModelJson.findUserAccount("unknown");
         expect(emptyArray).toStrictEqual(undefined);
+    });
+    test("check user and password match with checkUserPassword()", async () => {
+        let goodpass = await userModelJson.checkUserPassword("admin", "pass");
+        expect(goodpass).toStrictEqual(true);
+        let badpass = await userModelJson.checkUserPassword("admin", "badpassword");
+        expect(badpass).toStrictEqual(false);
+        let nouser = await userModelJson.checkUserPassword("unknown", "pass");
+        expect(nouser).toStrictEqual(false);
+        let emptypassword = await userModelJson.checkUserPassword("skos_user", "pass");
+        expect(emptypassword).toStrictEqual(false);
+        emptypassword = await userModelJson.checkUserPassword("skos_user", "");
+        expect(emptypassword).toStrictEqual(false);
     });
     test("append a new user with add()", async () => {
         tmpDir = tmp.dirSync({ unsafeCleanup: true });
         fs.mkdirSync(path.join(tmpDir.name, "users"));
         fs.writeFileSync(path.join(tmpDir.name, "users", "users.json"), "{}");
-        const tmpUserModel = new UserModel(tmpDir.name);
+        const tmpUserModelJson = new UserModelJson(tmpDir.name);
         const newUser = {
             id: "ID",
             login: "LOGIN",
@@ -73,8 +85,8 @@ describe("UserModel", () => {
             source: "",
             _type: "user",
         };
-        await tmpUserModel.addUserAccount(newUser);
-        const users = await tmpUserModel.getUserAccounts();
+        await tmpUserModelJson.addUserAccount(newUser);
+        const users = await tmpUserModelJson.getUserAccounts();
         expect(users).toStrictEqual({ LOGIN: expected });
         tmpDir.removeCallback();
     });
@@ -93,7 +105,7 @@ describe("UserModel", () => {
         tmpDir = tmp.dirSync({ unsafeCleanup: true });
         fs.mkdirSync(path.join(tmpDir.name, "users"));
         fs.writeFileSync(path.join(tmpDir.name, "users", "users.json"), JSON.stringify(USERS));
-        const tmpUserModel = new UserModel(tmpDir.name);
+        const tmpUserModelJson = new UserModelJson(tmpDir.name);
         const modifiedUser = {
             id: "ID1",
             login: "LOGIN1",
@@ -108,8 +120,8 @@ describe("UserModel", () => {
             source: "",
             _type: "user",
         };
-        await tmpUserModel.updateUserAccount(modifiedUser);
-        const users = await tmpUserModel.getUserAccounts();
+        await tmpUserModelJson.updateUserAccount(modifiedUser);
+        const users = await tmpUserModelJson.getUserAccounts();
         expect(users).toStrictEqual({ LOGIN1: modifiedUser, LOGIN2: user2WithoutPass });
         tmpDir.removeCallback();
     });

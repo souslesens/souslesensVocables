@@ -212,6 +212,12 @@ Load some data into virtuoso
 bash tests/load_data.sh
 ```
 
+Create a user account in MariaDB (for database authentication)
+
+```bash
+bash scripts/create_user_in_db.sh dev <login> <password>
+```
+
 ### Install souslesens
 
 souslesensVocable is composed of a backend in node/express and a frontend in pure javascript
@@ -233,6 +239,16 @@ The following command will build and watch the react app and run and watch the n
 
 ```bash
 npm run devserver
+```
+
+### Run migration scripts
+
+Certain version need migration of data. Run the script for the following version:
+
+#### Release 1.27
+
+```bash
+node scripts/sources_access_control_migration_treeview.js -c config -w
 ```
 
 SouslesensVocables will be available at [localhost:3010](http://localhost:3010).

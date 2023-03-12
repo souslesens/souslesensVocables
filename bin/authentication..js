@@ -9,158 +9,68 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-var jsonFileStorage = require("./jsonFileStorage.js");
-var path = require("path");
-var fs = require("fs");
-var mySqlProxy = require("./mySQLproxy..js");
-const bcrypt = require("bcrypt");
 
-var passport = require("passport");
-var Strategy = require("passport-local");
-var KeyCloakStrategy = require("passport-keycloak-oauth2-oidc").Strategy;
+const { userModel } = require("../model/users");
+
+const bcrypt = require("bcrypt");
+const mariadb = require("mariadb");
+const passport = require("passport");
+const LocalStrategy = require("passport-local");
+const KeyCloakStrategy = require("passport-keycloak-oauth2-oidc").Strategy;
 const ULID = require("ulid");
 
 // Get config
-const { configPath, config } = require("../model/config");
+const { config } = require("../model/config");
 
 if (config.auth == "keycloak") {
-    // Configure auth client (Keycloak)
-    let client = new KeyCloakStrategy(
-        {
-            clientID: config.keycloak.clientID,
-            realm: config.keycloak.realm,
-            publicClient: config.keycloak.publicClient,
-            clientSecret: config.keycloak.clientSecret,
-            sslRequired: "external",
-            authServerURL: config.keycloak.authServerURL,
-            callbackURL: "/login/callback",
-        },
-        function (accessToken, refreshToken, profile, done) {
-            // Auth user here
-            const usersLocation = path.join(__dirname, "../" + configPath + "/users/users.json");
-            let users = JSON.parse("" + fs.readFileSync(usersLocation));
-
-            // Search users
-            let findUser = Object.keys(users)
-                .map(function (key, _index) {
-                    return {
-                        id: users[key].id,
-                        login: users[key].login,
-                        groups: users[key].groups,
-                        source: users[key].source,
-                    };
-                })
-                .find((user) => user.login == profile.username);
-
-            if (findUser && findUser.source != "keycloak") {
-                // Rewrite local user
-                users[findUser.id].password = "";
-                users[findUser.id].source = "keycloak";
-
-                findUser.source = "keycloak";
-
-                fs.writeFile(usersLocation, JSON.stringify(users, null, 2), (err) => {
-                    if (err) throw err;
-                });
-            }
-
-            if (!findUser) {
-                // write user with default group
-                const userUlid = ULID.ulid();
-                users[profile.username] = {
-                    id: userUlid,
-                    login: profile.username,
-                    password: "",
-                    source: "keycloak",
-                    _type: "user",
-                    groups: config.defaultGroups ? config.defaultGroups : [],
-                };
-
-                findUser = {
-                    id: userUlid,
-                    login: profile.username,
-                    groups: config.defaultGroups ? config.defaultGroups : [],
-                    source: "keycloak",
-                };
-
-                fs.writeFile(usersLocation, JSON.stringify(users, null, 2), (err) => {
-                    if (err) throw err;
-                });
-            }
-
-            done(null, findUser);
-        }
-    );
-    passport.use("provider", client);
-} else if (config.auth === "local") {
     passport.use(
-        new Strategy(function (username, password, cb) {
-            var usersLocation = path.join(__dirname, "../" + configPath + "/users/users.json");
-            jsonFileStorage.retrieve(path.resolve(usersLocation), function (err, users) {
-                // console.log(users)
-                if (err) {
-                    return cb(err);
-                }
-
-                var findUser = Object.keys(users)
-                    .map(function (key, _index) {
-                        return {
-                            login: users[key].login,
-                            password: users[key].password,
-                            groups: users[key].groups,
+        "provider",
+        new KeyCloakStrategy(
+            {
+                clientID: config.keycloak.clientID,
+                realm: config.keycloak.realm,
+                publicClient: config.keycloak.publicClient,
+                clientSecret: config.keycloak.clientSecret,
+                sslRequired: "external",
+                authServerURL: config.keycloak.authServerURL,
+                callbackURL: "/login/callback",
+            },
+            function (accessToken, refreshToken, profile, done) {
+                userModel.findUserAccount(profile.username).then((userAccount) => {
+                    // if no local UserAccount, create one
+                    if (!userAccount) {
+                        userAccount = {
+                            id: ULID.ulid(),
+                            login: profile.username,
+                            password: "",
+                            source: "keycloak",
+                            _type: "user",
+                            groups: config.defaultGroups ? config.defaultGroups : [],
                         };
-                    })
-                    .find((user) => user.login == username);
-
-                if (!findUser) {
-                    return cb(null, false, { message: "Incorrect username or password." });
-                }
-                console.log(JSON.stringify(findUser));
-                // Compare hash is password is hased
-                if (findUser.password.startsWith("$2b$")) {
-                    if (!bcrypt.compareSync(password, findUser.password)) {
-                        return cb(null, false, { message: "Incorrect username or password." });
+                        userModel.addUserAccount(userAccount);
                     }
-                    // plain text comparaison
-                } else {
-                    if (findUser.password != password) {
-                        return cb(null, false, { message: "Incorrect username or password." });
+                    // make sure source is keycloak and password is empty
+                    if (userAccount.source != "keycloak") {
+                        userAccount.source = "keycloak";
+                        userAccount.password = "";
+                        userModel.updateUserAccount(userAccount);
                     }
-                }
-
-                return cb(null, findUser);
-            });
-        })
+                    // do not disclose password and _type
+                    delete userAccount["password"];
+                    delete userAccount["_type"];
+                    done(null, userAccount);
+                });
+            }
+        )
     );
-} else if (config.auth === "database") {
+} else if (config.auth === "local" || config.auth === "database") {
     passport.use(
-        new Strategy(function (username, password, cb) {
-            var connection = config.authenticationDatabase;
-            if (!config.authenticationDatabase) return cb("No authenticationDatabase declared in mainConfig.json");
-            var sql = "select * from " + connection.table + " where " + connection.loginColumn + "='" + username + "'";
-
-            mySqlProxy.exec(connection, sql, function (err, result) {
-                if (err) {
-                    console.log("connection To authentication database failed");
-                    return cb(err);
-                }
-                console.log("connection To authentication database ok");
-                if (result.length == 0) {
-                    console.log("bad Login");
+        new LocalStrategy(function (username, password, cb) {
+            userModel.checkUserPassword(username, password).then((checkOK) => {
+                if (!checkOK) {
                     return cb(null, false, { message: "Incorrect username or password." });
                 }
-                if (password != result[0][connection.passwordColum]) {
-                    console.log("bad Password");
-                    // bcrypt.compare(password, result[0].motDePasse, function (err, res) {
-                    return cb(null, false, { message: "Incorrect username or password." });
-                }
-
-                var user = result[0];
-                // delete user.password;
-                user.login = username;
-                user.groups = user[connection.groupsColumn].split(",");
-                console.log(JSON.stringify(user));
-                return cb(null, user);
+                userModel.findUserAccount(username).then((userAccount) => cb(null, userAccount));
             });
         })
     );

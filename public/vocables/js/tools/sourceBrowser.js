@@ -1098,7 +1098,7 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
     }
     var str = "<div>";
     if (Lineage_sources.isSourceEditable(self.currentSource) && !options.hideModifyButtons) {
-      str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='CommonUIwidgets.predicatesSelectorWidget.showPredicateDiv()'>  Add Predicate </button>";
+      str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource,\"addPredicate\")'>  Add Predicate </button>";
       if (true || Config.sources[source].editable) {
         str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>";
       }
@@ -1543,10 +1543,10 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
 
   self.addPredicate = function(property, value, source, createNewNode, callback) {
     if (!property) {
-      property = $("#editPredicate_addPropertyPredicateValue").val();
+      property = $("#editPredicate_propertyValue").val();
     }
     if (!value) {
-      value = $("#editPredicate_addPropertyValue").val().trim();
+      value = $("#editPredicate_objectValue").val().trim();
     }
 
     if (!property || !value) {
@@ -1558,7 +1558,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
         return alert("wrong date format (need yyy-mm-dd");
       }
       value = value + "^^xsd:dateTime";
-      $("#editPredicate_addPropertyValue").datepicker("destroy");
+      $("#editPredicate_objectValue").datepicker("destroy");
     }
 
     $("#sourceBrowser_addPropertyDiv").css("display", "none");
@@ -1865,7 +1865,7 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     }
 
 
-    var newValue = $("#editPredicate_addPropertyValue").val();
+    var newValue = $("#editPredicate_objectValue").val();
 
     var oldValue = self.currentEditingItem.item.value.value;
     if (self.currentEditingItem.item.value.type == "literal") {
@@ -1906,22 +1906,17 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     if (!CommonUIwidgets.predicatesSelectorWidget.currentEditingItem) {
       return alert("error");
     }
-    CommonUIwidgets.predicatesSelectorWidget.showPredicateDiv();
-    $("#editPredicate_savePredicateButton").click(function() {
-      SourceBrowser.updatePredicateValue();
-    });
-    $("#editPredicate_currentVocabPredicateSelect").prop("disabled", true);
-    $("#editPredicate_vocabularySelect").prop("disabled", true);
-    $("#editPredicate_addPropertyPredicateValue").prop("disabled", true);
+    CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource,"modifyPredicate");
 
 
 
-    $("#editPredicate_addPropertyPredicateValue").val( CommonUIwidgets.predicatesSelectorWidget.currentEditingItem.item.prop.value);
-    $("#editPredicate_addPropertyValue").val(CommonUIwidgets.predicatesSelectorWidget.currentEditingItem.item.value.value);
+
+    $("#editPredicate_propertyValue").val( CommonUIwidgets.predicatesSelectorWidget.currentEditingItem.item.prop.value);
+    $("#editPredicate_objectValue").val(CommonUIwidgets.predicatesSelectorWidget.currentEditingItem.item.value.value);
     var h = Math.max((CommonUIwidgets.predicatesSelectorWidget.currentEditingItem.item.value.value.length / 80) * 30, 50);
-    $("#editPredicate_addPropertyValue").css("height", h + "px");
+    $("#editPredicate_objectValue").css("height", h + "px");
 
-    $("#editPredicate_addPropertyValue").focus()
+    $("#editPredicate_objectValue").focus()
 
 
   }

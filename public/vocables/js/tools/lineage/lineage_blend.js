@@ -14,6 +14,17 @@ var Lineage_blend = (function() {
 
       $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function() {
 
+        $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function() {
+
+          $("#LineageBlend_commonPredicateObjectDiv").load("snippets/commonUIwidgets/editPredicateDialog.html", function() {
+            CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource,"createNode")
+          });
+          $("#LineageBlend_commonPredicateObjectDiv2").load("snippets/commonUIwidgets/editPredicateDialog.html", function() {
+            CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource,"createNode")
+          });
+        });
+
+        return;
 
         async.series([
 
@@ -705,7 +716,8 @@ $("#LineageBlend_creatingNodeTiplesDiv").html("")
       var type = $("#LineageBlend_creatingNodePredicatesSelect").val();
 
       if (self.graphModification.currentCreatingNodeType == "Class") {
-        var superClass =$("#LineageBlend_creatingNodeObjectsUpperSelect").val() || $("#LineageBlend_creatingNodeObjectsSelect").val() ;
+        var superClass =$("#editPredicate_objectSelect").val()
+       // var superClass =$("#LineageBlend_creatingNodeObjectsUpperSelect").val() || $("#LineageBlend_creatingNodeObjectsSelect").val() ;
         if (!superClass) {
           return alert("owl:Class is mandatory");
         }
@@ -713,7 +725,8 @@ $("#LineageBlend_creatingNodeTiplesDiv").html("")
         self.graphModification.addTripleToCreatingNode("rdfs:subClassOf", superClass);
       }
       else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
-        var individualtypeClass =$("#LineageBlend_creatingNodeObjectsUpper2Select").val() || $("#LineageBlend_creatingNodeObjects2Select").val() ;
+        var individualtypeClass =$("#editPredicate_objectSelect").val()
+       // var individualtypeClass =$("#LineageBlend_creatingNodeObjectsUpper2Select").val() || $("#LineageBlend_creatingNodeObjects2Select").val() ;
         if (!individualtypeClass) {
           return alert("owl:Class is mandatory");
         }

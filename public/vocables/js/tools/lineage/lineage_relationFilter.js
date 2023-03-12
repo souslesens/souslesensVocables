@@ -210,6 +210,19 @@ var Lineage_relationFilter = (function() {
 
     };
 
+    self.onCommonUIWidgetSelectObjectValue=function(value) {
+      if (value.indexOf("xsd") == 0) {
+        if (value == "xsd:dateTime") {
+          common.setDatePickerOnInput("editPredicate_objectValue");
+        }
+        else {
+          $("#editPredicate_objectValue").val(value);
+        }
+      }
+      else {
+      }
+    }
+
     self.attachFilterToProperty = function() {
 
       var role = self.currentFilterRole;

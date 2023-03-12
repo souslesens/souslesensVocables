@@ -2,7 +2,7 @@ CommonUIwidgets = (function() {
 
   var self = {};
 
-  self.fillObjectTypeOptionsOnPromptFilter = function(type, selectId,source) {
+  self.fillObjectTypeOptionsOnPromptFilter = function(type, selectId, source) {
     var term = prompt("Individual contains...");
     if (term === null) {
       return;
@@ -14,8 +14,9 @@ CommonUIwidgets = (function() {
       filter: term ? " FILTER ( regex(?label,'" + term + "','i'))" : "",
       limit: Config.maxSelectListSize
     };
-    if(!source)
+    if (!source) {
       source = Lineage_sources.activeSource || KGcreator.currentSlsvSource;
+    }
     Sparql_OWL.getDictionary(source, options, null, function(err, result) {
       if (err) {
         alert(err.responseText);
@@ -45,15 +46,77 @@ CommonUIwidgets = (function() {
       common.fillSelectOptions(selectId, objs, true, "label", "id");
     });
   };
-  
-  
-  
-  
-  
+
+
   self.predicatesSelectorWidget = {
-    predicatesIdsMap :{},
 
 
+    predicatesIdsMap: {},
+
+
+    configure: function(context) {
+      self.predicatesSelectorWidget.onSelectPropertyFn=null;
+      self.predicatesSelectorWidget.onSelectObjectFn=null;
+      $("#editPredicate_vocabularySelect").val("usual");
+      $("#editPredicate_vocabularySelect2").val("usual");
+
+      if (context == ("addPredicate")) {
+
+        $("#editPredicate_savePredicateButton").click(function() {
+          SourceBrowser.addPredicate();
+        });
+      }
+
+      else if (context == ("modifyPredicate")) {
+        $("#editPredicate_savePredicateButton").click(function() {
+          SourceBrowser.updatePredicateValue();
+        });
+        $("#editPredicate_currentVocabPredicateSelect").prop("disabled", true);
+        $("#editPredicate_vocabularySelect").prop("disabled", true);
+        $("#editPredicate_propertyValue").prop("disabled", true);
+
+        $("#editPredicate_savePredicateButton").click(function() {
+          SourceBrowser.addPredicate();
+        });
+
+      }
+      else if (context == ("KGcreator")) {
+        self.predicatesSelectorWidget.onSelectObjectFn=function(value){
+
+        }
+        self.predicatesSelectorWidget.onSelectPropertyFn=function(value){
+
+        }
+
+      }
+      else if (context == ("createNode")) {
+        $("#editPredicate_propertyDiv").css("display", "none");
+
+      }
+
+    },
+    init: function(source,context) {
+      $("#sourceBrowser_addPropertyDiv").css("display", "flex");
+
+      $("#editPredicate_currentVocabPredicateSelect").prop("disabled", false);
+      $("#editPredicate_vocabularySelect").prop("disabled", false);
+      $("#editPredicate_propertyValue").prop("disabled", false);
+
+
+      var vocabularies = ["usual", source];
+      vocabularies = vocabularies.concat(Config.sources[source].imports);
+      vocabularies = vocabularies.concat(Object.keys(Config.ontologiesVocabularyModels));
+
+      common.fillSelectOptions("editPredicate_vocabularySelect", vocabularies, true);
+      common.fillSelectOptions("editPredicate_vocabularySelect2", vocabularies, true);
+      CommonUIwidgets.predicatesSelectorWidget.setCurrentVocabClassesSelect("usual", "editPredicate_objectSelect");
+      CommonUIwidgets.predicatesSelectorWidget.setCurrentVocabPropertiesSelect("usual", "editPredicate_currentVocabPredicateSelect");
+
+
+      // var properties = Config.Lineage.basicObjectProperties;
+
+      CommonUIwidgets.predicatesSelectorWidget.configure(context);
+    },
 
 
 
@@ -81,30 +144,28 @@ CommonUIwidgets = (function() {
     }
     ,
     onSelectPredicateProperty: function(value) {
-      $("#editPredicate_addPropertyPredicateValue").val(value);
+      $("#editPredicate_propertyValue").val(value);
+      if(self.predicatesSelectorWidget.onSelectPropertyFn)
+        self.predicatesSelectorWidget.onSelectPropertyFn(value);
     },
+
+
+
+
     onSelectCurrentVocabObject: function(value) {
       if (value == "_search") {
-
-          return CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter(null,"editPredicate_currentVocabObjectSelect",self.predicatesSelectorWidget.currentVocabulary)
-
+        return CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter(null, "editPredicate_objectSelect", self.predicatesSelectorWidget.currentVocabulary);
       }
-
-      if (value.indexOf("xsd") == 0) {
-        if (value == "xsd:dateTime") {
-          common.setDatePickerOnInput("editPredicate_addPropertyValue");
-        }
-        else {
-          $("#editPredicate_addPropertyValue").val(value);
-        }
-      }
-      else {
-        $("#editPredicate_addPropertyValue").val(value);
-      }
+        $("#editPredicate_objectValue").val(value);
+      if(self.predicatesSelectorWidget.onSelectObjectFn)
+        self.predicatesSelectorWidget.onSelectObjectFn(value);
     },
 
-    setCurrentVocabClassesSelect : function(vocabulary,selectId) {
-self.predicatesSelectorWidget.currentVocabulary=vocabulary
+
+
+
+    setCurrentVocabClassesSelect: function(vocabulary, selectId) {
+      self.predicatesSelectorWidget.currentVocabulary = vocabulary;
       var classes = [];
 
       if (vocabulary == "usual") {
@@ -118,68 +179,44 @@ self.predicatesSelectorWidget.currentVocabulary=vocabulary
 
       }
       else if (Config.ontologiesVocabularyModels[vocabulary]) {
-        var classes=[{id:"_search",label:"search..."}]
+        var classes = [{ id: "_search", label: "search..." }];
 
-        var uniqueClasses={}
-        for( var key in Config.ontologiesVocabularyModels[vocabulary].classes) {
-          if(!uniqueClasses[key]) {
-            uniqueClasses[key]=1
+        var uniqueClasses = {};
+        for (var key in Config.ontologiesVocabularyModels[vocabulary].classes) {
+          if (!uniqueClasses[key]) {
+            uniqueClasses[key] = 1;
             classes.push(Config.ontologiesVocabularyModels[vocabulary].classes[key]);
           }
         }
 
-        var restrictionsRanges=[]
+        var restrictionsRanges = [];
 
-        for( var key in Config.ontologiesVocabularyModels[vocabulary].restrictions){
-          var restrictions=Config.ontologiesVocabularyModels[vocabulary].restrictions[key]
+        for (var key in Config.ontologiesVocabularyModels[vocabulary].restrictions) {
+          var restrictions = Config.ontologiesVocabularyModels[vocabulary].restrictions[key];
           restrictions.forEach(function(restriction) {
-            if(!uniqueClasses[restriction.range]) {
-              uniqueClasses[restriction.range] = 1
+            if (!uniqueClasses[restriction.range]) {
+              uniqueClasses[restriction.range] = 1;
               restrictionsRanges.push({
                 id: restriction.range,
                 label: restriction.rangeLabel
-              })
+              });
             }
-          })
+          });
         }
 
-        classes=classes.concat(restrictionsRanges)
-      classes=common.array.sort(classes,"label")
+        classes = classes.concat(restrictionsRanges);
+        classes = common.array.sort(classes, "label");
         common.fillSelectOptions(selectId, classes, true, "label", "id");
 
       }
 
       else {
-        return CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter(null, "editPredicate_currentVocabObjectSelect", vocabulary);
+        return CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter(null, "editPredicate_objectSelect", vocabulary);
       }
     },
-    showPredicateDiv : function() {
-      $("#sourceBrowser_addPropertyDiv").css("display", "flex");
-
-      $("#editPredicate_currentVocabPredicateSelect").prop("disabled", false);
-      $("#editPredicate_vocabularySelect").prop("disabled", false);
-      $("#editPredicate_addPropertyPredicateValue").prop("disabled", false);
 
 
-      var vocabularies = ["usual", Lineage_sources.activeSource];
-      vocabularies = vocabularies.concat(Config.sources[Lineage_sources.activeSource].imports);
-      vocabularies = vocabularies.concat(Object.keys(Config.ontologiesVocabularyModels));
 
-      common.fillSelectOptions("editPredicate_vocabularySelect", vocabularies, true);
-      common.fillSelectOptions("editPredicate_vocabularySelect2", vocabularies, true);
-      CommonUIwidgets.predicatesSelectorWidget.setCurrentVocabClassesSelect("usual","editPredicate_currentVocabObjectSelect");
-      CommonUIwidgets.predicatesSelectorWidget.setCurrentVocabPropertiesSelect("usual","editPredicate_currentVocabPredicateSelect");
-
-      $("#editPredicate_vocabularySelect").val("usual");
-      $("#editPredicate_vocabularySelect2").val("usual");
-
-      $("#editPredicate_savePredicateButton").click(function() {
-        SourceBrowser.addPredicate();
-      });
-      var properties = Config.Lineage.basicObjectProperties;
-
-
-    }
 
 
   };

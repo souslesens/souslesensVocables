@@ -496,7 +496,7 @@ var KGcreator = (function() {
         if (self.currentTreeNode.parents.length < 2) {
           return;
         }
-        $("#KGcreator_objectInput").val(self.currentTreeNode.data.id);
+        $("#editPredicate_objectValue").val(self.currentTreeNode.data.id);
       }
     };
 
@@ -647,18 +647,23 @@ var KGcreator = (function() {
           return callbackSeries();
 
         },
-
         function(callbackSeries) {
 
-          $("#sharedPredicatesPanel").load("snippets/commonUIwidgets/editPredicateDialog.html",function(){
-            CommonUIwidgets.predicatesSelectorWidget.showPredicateDiv()
+          $("#sharedPredicatesPanel").load("snippets/commonUIwidgets/editPredicateDialog.html", function() {
+            CommonUIwidgets.predicatesSelectorWidget.init(KGcreator.currentSlsvSource,"KGcreator")
 
-          return callbackSeries();
+            var html=" is String<input type=\"checkbox\" id=\"KGcreator_isObjectStringCBX\" /> " +
+              "lookup <input id=\"KGcreator_objectLookupName\" style='width:100px'/>"+
+              " <button onclick=\"KGcreator.addTripleToTA()\">Add</button></div>"
+            $("#editPredicate_customContentDiv").html(html)
+            return callbackSeries();
+          })
         },
 
 
         // fill predicate options
         function(callbackSeries) {
+          return callbackSeries();
           self.fillPredicatesSelect(self.currentSlsvSource, "KGcreator_predicateSelect", { usualProperties: true }, function(err) {
             return callbackSeries(err);
           });
@@ -667,6 +672,7 @@ var KGcreator = (function() {
 
         //fill objectOptions
         function(callbackSeries) {
+          return callbackSeries();
           Lineage_upperOntologies.getTopOntologyClasses(Config.currentTopLevelOntology, {}, function(err, result) {
             if (err) {
               return callbackSeries(err.responseText);
@@ -743,8 +749,13 @@ var KGcreator = (function() {
   self.addTripleToTA = function() {
     $("#KGcreator_tripleMessageDiv").html("");
     var subject = $("#KGcreator_subjectInput").val();
-    var predicate = $("#KGcreator_predicateInput").val();
-    var object = $("#KGcreator_objectInput").val();
+  //  var predicate = $("#KGcreator_predicateInput").val();
+  //  var object = $("#KGcreator_objectInput").val();
+
+    var predicate = $("#editPredicate_propertyValue").val();
+    var object = $("#editPredicate_objectValue").val();
+
+
     var isObjectString = $("#KGcreator_isObjectStringCBX").prop("checked");
 
     var subjectLookupName = $("#KGcreator_subjectLookupName").val();

@@ -10,29 +10,7 @@
 </style>
 
 <div style="display: flex; flex-direction: row">
-  <div style="display: flex; flex-direction: column">
-    <div class="lineageRelations_div">
-      <div><b>Selection</b></div>
-      <div><input type="radio" name="lineageRelations_selection" value="selected" /> selected node</div>
-      <div><input type="radio" name="lineageRelations_selection" value="visible" /> visible nodes</div>
-      <div><input type="radio" name="lineageRelations_selection" value="all" checked="all" />source nodes</div>
-    </div>
-    <div class="lineageRelations_div">
-      <div><b>Type</b></div>
-      <div><input type="radio" name="lineageRelations_relType" value="predicates" />predicate</div>
-      <div><input type="radio" name="lineageRelations_relType" value="restrictions" />restriction</div>
-      <div><input type="radio" name="lineageRelations_relType" value="both" checked="checked" />both</div>
-    </div>
-    &nbsp;
-    <div class="lineageRelations_div">
-      <div><b>Direction</b></div>
-      <div><input type="radio" name="lineageRelations_relDirection" value="direct" />direct</div>
-      <div><input type="radio" name="lineageRelations_relDirection" value="inverse" />inverse</div>
-      <div><input type="radio" name="lineageRelations_relDirection" value="both" checked="checked" />both</div>
-    </div>
 
-
-  </div>
 
   <div class="lineageRelations_div">
     <B>Properties</B>
@@ -82,28 +60,55 @@
       </button>
       <textarea id="Lineage_relation_filterText" style="width: 400px;height: 100px"></textarea>
     </div>
-    <div>
 
 
-    </div>
-    <div class="lineageRelations_div" style="display: block;background-color: beige">
-      Color</b>
-      <select id="lineageRelations_colorsSelect"></select>
 
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold"
-              onclick="Lineage_relations.onshowDrawRelationsDialogValidate()">Draw
-      </button>
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary"
-              onclick="Lineage_relations.onshowDrawRelationsDialogValidate('clear')">Cancel
-      </button>
 
-      <div>
-        <input type="checkbox" id="Lineage_classes_excludeRelationsFromGraphSpatializationCBX" checked="checked">
-        exclude
-        relations from graph spatialization
+    <div style="display: flex; align-content: stretch;flex-direction: column;align-items: center;">
+
+      <div style="display: flex; flex-direction: row">
+        <div class="lineageRelations_div">
+          <div><b>Selection</b></div>
+          <div><input type="radio" name="lineageRelations_selection" value="selected" /> selected node</div>
+          <div><input type="radio" name="lineageRelations_selection" value="visible" /> visible nodes</div>
+          <div><input type="radio" name="lineageRelations_selection" value="all" checked="all" />source nodes</div>
+        </div>
+        <div class="lineageRelations_div">
+          <div><b>Type</b></div>
+          <div><input type="radio" name="lineageRelations_relType" value="predicates" />predicate</div>
+          <div><input type="radio" name="lineageRelations_relType" value="restrictions" />restriction</div>
+          <div><input type="radio" name="lineageRelations_relType" value="both" checked="checked" />both</div>
+        </div>
+        &nbsp;
+        <div class="lineageRelations_div">
+          <div><b>Direction</b></div>
+          <div><input type="radio" name="lineageRelations_relDirection" value="direct" />direct</div>
+          <div><input type="radio" name="lineageRelations_relDirection" value="inverse" />inverse</div>
+          <div><input type="radio" name="lineageRelations_relDirection" value="both" checked="checked" />both</div>
+        </div>
+
+
+      </div>
+
+
+      <div class="lineageRelations_div" style="display: block;background-color: beige;width:100%">
+        Color</b>
+        <select id="lineageRelations_colorsSelect"></select>
+
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold"
+                onclick="Lineage_relations.onshowDrawRelationsDialogValidate()">Draw
+        </button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary"
+                onclick="Lineage_relations.onshowDrawRelationsDialogValidate('clear')">Cancel
+        </button>
+
+        <div>
+          <input type="checkbox" id="Lineage_classes_excludeRelationsFromGraphSpatializationCBX" checked="checked">
+          exclude
+          relations from graph spatialization
+        </div>
       </div>
     </div>
-
   </div>
 </div>
 

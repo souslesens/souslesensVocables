@@ -13,49 +13,40 @@
         background-color: #eee;
         margin: 2px;
         text-align: center;
-        min-width: 30px;}
+        min-width: 30px;
+    }
 </style>
 
 <div id="lineageQuery_tabsDiv">
-  <ul>
-  <li class="Lineage_ClassTabLi"><a href="#LineageQuery_queryModelTab">Query Model</a></li>
-    <li class="Lineage_ClassTabLi"><a href="#LineageQuery_freeQueryTab">Free Query </a></li>
-    <li class="Lineage_ClassTabLi"><a href="#LineageQuery_storedQueriesTab">Stored Queries</a></li>
-  </ul>
+    <ul>
+        <li class="Lineage_ClassTabLi"><a href="#LineageQuery_queryModelTab">Query Model</a></li>
+        <li class="Lineage_ClassTabLi"><a href="#LineageQuery_freeQueryTab">Free Query </a></li>
+        <li class="Lineage_ClassTabLi"><a href="#LineageQuery_storedQueriesTab">Stored Queries</a></li>
+    </ul>
 
+    <div id="LineageQuery_queryModelTab" style="display: flex; flex-direction: column">
+        <select id="LineageQuery_queryModelSelect" style="width: 90%" size="10" onclick="Lineage_relationFilter.queryModel.onSelectRestriction($(this).val())"></select>
+    </div>
+    <div id="LineageQuery_freeQueryTab" style="display: flex; flex-direction: column">
+        <div style="display: flex; flex-direction: row">
+            <div class="lineageQuery_div">
+                Subject type
+                <select id="lineageQuery_subjectVarSelect" onchange="Lineage_relationFilter.onSelectType('subject',$(this).val())">
+                    <option value="?s1">Subject1</option>
+                </select>
 
- <div id="LineageQuery_queryModelTab" style="display: flex; flex-direction: column">
-    <select id="LineageQuery_queryModelSelect" style="width: 90%" size="10" onclick="Lineage_relationFilter.queryModel.onSelectRestriction($(this).val())"></select>
-
-</div>
-  <div id="LineageQuery_freeQueryTab" style="display: flex; flex-direction: column">
-
-
-    <div style="display: flex; flex-direction: row">
-      <div class="lineageQuery_div">
-        Subject type
-        <select id="lineageQuery_subjectVarSelect" onchange="Lineage_relationFilter.onSelectType('subject',$(this).val())">
-          <option value="?s1">Subject1</option>
-
-        </select>
-
-        &nbsp;<select id="lineageQuery_subjectUriSelect" style="display: none; width: 200px"></select>
-      </div>
-      <div class="lineageQuery_div">
-        Predicate
-        <select id="lineageQuery_predicateSelect"
-                onchange="Lineage_relationFilter.onSelectType('predicate',$(this).val())"></select>
-        &nbsp;<select id="lineageQuery_predicateUriSelect"
-                      onchange="Lineage_relationFilter.onSelectType('predicateUri',$(this).val())"
-                      style="display: none; width: 200px"></select>
-        <div id="lineageQuery_inversePredicateDiv" style="display: none; ">
-          <input type="checkbox" id="lineageQuery_inversePredicateCBX">inverse predicate
-        </div>
-      </div>
-      <div class="lineageQuery_div">
-        Object Type
-        <select id="lineageQuery_objectTypeSelect" onchange="Lineage_relationFilter.onSelectType('object',$(this).val())">
-          <!--   <option value=""></option>
+                &nbsp;<select id="lineageQuery_subjectUriSelect" style="display: none; width: 200px"></select>
+            </div>
+            <div class="lineageQuery_div">
+                Predicate
+                <select id="lineageQuery_predicateSelect" onchange="Lineage_relationFilter.onSelectType('predicate',$(this).val())"></select>
+                &nbsp;<select id="lineageQuery_predicateUriSelect" onchange="Lineage_relationFilter.onSelectType('predicateUri',$(this).val())" style="display: none; width: 200px"></select>
+                <div id="lineageQuery_inversePredicateDiv" style="display: none"><input type="checkbox" id="lineageQuery_inversePredicateCBX" />inverse predicate</div>
+            </div>
+            <div class="lineageQuery_div">
+                Object Type
+                <select id="lineageQuery_objectTypeSelect" onchange="Lineage_relationFilter.onSelectType('object',$(this).val())">
+                    <!--   <option value=""></option>
              <option value="string">String</option>
              <option value="number">Number</option>
              <option value="date">Date</option>
@@ -64,73 +55,59 @@
              <option value="owl:NamedIndividual">NameIndividual</option>
              <option value="_whiteBoardNodes">_WhiteBoard nodes</option>
              <option value="_selectedNode">_Selected Node</option>-->
-        </select>
+                </select>
 
-        &nbsp;<select id="lineageQuery_objectUriSelect" style="display: none; width: 200px"></select>
-        <div class="lineageQuery_objectTypeSelect" id="lineageQuery_valueDiv">
-          <select id="lineageQuery_operator"> </select>
-          <input id="lineageQuery_value" size="20" value="" />
+                &nbsp;<select id="lineageQuery_objectUriSelect" style="display: none; width: 200px"></select>
+                <div class="lineageQuery_objectTypeSelect" id="lineageQuery_valueDiv">
+                    <select id="lineageQuery_operator"></select>
+                    <input id="lineageQuery_value" size="20" value="" />
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-    <div style="display: flex; flex-direction: row">
-      Filters :
-      <!--    <select id="filterBooleanOperator">
+        <div style="display: flex; flex-direction: row">
+            Filters :
+            <!--    <select id="filterBooleanOperator">
               <option value=" FILTER  EXISTS ">and</option>
               <option value=" UNION ">or</option>
           </select>-->
 
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.addFilter()">Add filter</button>&nbsp;
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.reset(true)">Reset</button>
-    </div>
-    <div class="lineageQuery_div">
-      <div id="lineageQuery_Filters"
-           style="display: flex; flex-direction: column; margin: 5px; padding: 5px; background-color: #ddd"></div>
-      <!--  <div>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.addFilter()">Add filter</button>&nbsp;
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.reset(true)">Reset</button>
+        </div>
+        <div class="lineageQuery_div">
+            <div id="lineageQuery_Filters" style="display: flex; flex-direction: column; margin: 5px; padding: 5px; background-color: #ddd"></div>
+            <!--  <div>
       All columns <input type="checkbox" id="lineageQuery_allColumnsCBX" checked="checked">
 
   </div>-->
-
+        </div>
     </div>
-  </div>
 
-  <div id="LineageQuery_storedQueriesTab">
-    <div id="LineageQuery_storedQueriesDiv" style="width:100%;height: 200px"></div>
-    <div id="LineageQuery_currrentStoredQueryDiv" style="width:100%;height: 100px"></div>
-
-  </div>
-  <div>
-
-
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('count')">Count
-    </button>
-    &nbsp;
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('graph')">Graph
-    </button>
-    &nbsp;
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('list')">List
-    </button>
-    &nbsp;
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('csv')">CSV
-    </button>
-
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('copyQuery')">Copy
-      Query
-    </button>
-
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.storedQueries.saveCurrentQuery()">Save
-    </button>
-    <div class="messagediv">
-      <tbody>
-      <tr>
-        <td><img src="./images/waitAnimated.gif" id="LineageQuery_waitImg"
-                 style="display: none; width: 15px; text-align: justify;"></td>
-        <td><span class="messageDiv" id="lineageQuery_messageSpan">No data found</span></td>
-      </tr>
-      </tbody>
+    <div id="LineageQuery_storedQueriesTab">
+        <div id="LineageQuery_storedQueriesDiv" style="width: 100%; height: 200px"></div>
+        <div id="LineageQuery_currrentStoredQueryDiv" style="width: 100%; height: 100px"></div>
     </div>
-    <div id="lineageQuery_listResultDiv"></div>
+    <div>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('count')">Count</button>
+        &nbsp;
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('graph')">Graph</button>
+        &nbsp;
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('list')">List</button>
+        &nbsp;
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('csv')">CSV</button>
 
-  </div>
-  <div id="lineageQuery_sparqlDiv"></div>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.executeQuery('copyQuery')">Copy Query</button>
+
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.storedQueries.saveCurrentQuery()">Save</button>
+        <div class="messagediv">
+            <tbody>
+                <tr>
+                    <td><img src="./images/waitAnimated.gif" id="LineageQuery_waitImg" style="display: none; width: 15px; text-align: justify" /></td>
+                    <td><span class="messageDiv" id="lineageQuery_messageSpan">No data found</span></td>
+                </tr>
+            </tbody>
+        </div>
+        <div id="lineageQuery_listResultDiv"></div>
+    </div>
+    <div id="lineageQuery_sparqlDiv"></div>
 </div>

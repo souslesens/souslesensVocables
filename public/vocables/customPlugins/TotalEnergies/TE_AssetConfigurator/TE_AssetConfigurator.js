@@ -1145,7 +1145,7 @@ var TE_AssetConfigurator = (function () {
             self.addToGraph(visjsData);
         },
         getLinkedAssetNodesMap: function () {
-            if (!visjsGraph.isGraphNotEmpty())  return {};
+            if (!visjsGraph.isGraphNotEmpty()) return {};
             var assetNodesMap = {};
             var nodes = visjsGraph.data.nodes.get();
             nodes.forEach(function (node) {

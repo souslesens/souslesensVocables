@@ -15,9 +15,6 @@ self.tools["sourceBrowser"] = {
     toolDescriptionImg: null,
 };
 
-
-
-
 self.tools["Standardizer"] = {
     label: "Standardizer",
     multiSources: 0,
@@ -31,8 +28,6 @@ self.tools["TSF_Dictionary"] = {
     controller: Lineage_dictionary,
     toolDescriptionImg: null,
 };
-
-
 
 self.tools["KGpropertyFilter"] = {
     label: "KGpropertyFilter",

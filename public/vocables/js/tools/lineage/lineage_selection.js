@@ -109,7 +109,7 @@ var Lineage_selection = (function () {
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_filterBy.html", function () {
                 return;
-                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, {withoutSourceObjects:1},function (err, result) {
+                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, { withoutSourceObjects: 1 }, function (err, result) {
                     if (err) return alert(err.responseText);
                     common.fillSelectOptions("Lineage_filterBy_propertySelect", result.predicates, true, "label", "id");
                 });
@@ -407,9 +407,7 @@ var Lineage_selection = (function () {
             $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_decorateDialog.html", function () {
                 $("#lineage_selection_decorate_applyButton").bind("click", Lineage_selection.decorate);
 
-                common.fillSelectWithColorPalette("lineage_selection_decorate_colorSelect")
-
-
+                common.fillSelectWithColorPalette("lineage_selection_decorate_colorSelect");
 
                 var shapes = ["ellipse", " circle", " database", " box", " text", "diamond", " dot", " star", " triangle", " triangleDown", " hexagon", " square"];
                 common.fillSelectOptions("lineage_selection_decorate_shapeSelect", shapes, true);
@@ -444,7 +442,7 @@ var Lineage_selection = (function () {
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_modifyPredicates.html", function () {
                 return;
-                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, {withoutSourceObjects:1},function (err, result) {
+                KGcreator.getSourcePropertiesAndObjectLists(Lineage_sources.activeSource, Config.currentTopLevelOntology, { withoutSourceObjects: 1 }, function (err, result) {
                     if (err) return alert(err.responseText);
 
                     common.fillSelectOptions("lineage_selection_modifyPredicate_propertySelect", result.predicates, true, "label", "id");

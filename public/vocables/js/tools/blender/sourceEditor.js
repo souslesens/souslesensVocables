@@ -43,7 +43,7 @@ var SourceEditor = (function () {
     self.onSourceSelect = function (sourceLabel) {
         MainController.currentSource = sourceLabel;
         self.currentSourceUri = Config.sources[sourceLabel].graphUri;
-     /*   OwlSchema.initSourceSchema(sourceLabel, function (err, _result) {
+        /*   OwlSchema.initSourceSchema(sourceLabel, function (err, _result) {
             if (err) return MainController.UI.message(err);
             var contextMenu = self.getJstreeConceptsContextMenu();
             SourceBrowser.showThesaurusTopConcepts(sourceLabel, {

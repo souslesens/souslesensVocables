@@ -1,14 +1,10 @@
-<div  style="width:100%;height:200px" >
-  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Sparql_CRUD.list(null,$('#sparql_CRUD_scope').val())">load</button>
-  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Sparql_CRUD.delete()">delete</button>
-  <select id="sparql_CRUD_scope">
-    <option>private</option>
-    <option>public</option>
-  </select>
-  <br>
-  <select id="sparql_CRUD_itemsSelect" style="width: 90%" size="10" onclick="Sparql_CRUD.loadItem($(this).val())"></select>
-
-
-
-
+<div style="width: 100%; height: 200px">
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Sparql_CRUD.list(null,$('#sparql_CRUD_scope').val())">load</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Sparql_CRUD.delete()">delete</button>
+    <select id="sparql_CRUD_scope">
+        <option>private</option>
+        <option>public</option>
+    </select>
+    <br />
+    <select id="sparql_CRUD_itemsSelect" style="width: 90%" size="10" onclick="Sparql_CRUD.loadItem($(this).val())"></select>
 </div>

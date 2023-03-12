@@ -64,11 +64,11 @@ var Lineage_combine = (function () {
             if (!node1.data) return;
             nodes.forEach(function (node2) {
                 if (!node2.data && !node1.data.label) return;
-                if (node1.data.id == node2.data.id && node1.data.source== node2.data.source) return;
-                if (node1.data.label.toLowerCase().replace(/ /g,"") == node2.data.label.toLowerCase().replace(/ /g,"") ) {
+                if (node1.data.id == node2.data.id && node1.data.source == node2.data.source) return;
+                if (node1.data.label.toLowerCase().replace(/ /g, "") == node2.data.label.toLowerCase().replace(/ /g, "")) {
                     commonNodes.push({ fromNode: node1, toNode: node2 });
                 }
-                if (node1.label == node2.label){
+                if (node1.label == node2.label) {
                     commonNodes.push({ fromNode: node1, toNode: node2 });
                 }
             });
@@ -78,7 +78,7 @@ var Lineage_combine = (function () {
             var visjsData = { nodes: [], edges: [] };
             commonNodes.forEach(function (item) {
                 var edgeId = item.fromNode.id + "_" + item.toNode.id;
-                var inverseEdgeId=item.toNode.id + "_" + item.fromNode.id;
+                var inverseEdgeId = item.toNode.id + "_" + item.fromNode.id;
                 if (!existingNodes[edgeId] && !existingNodes[inverseEdgeId]) {
                     existingNodes[edgeId] = 1;
 
@@ -88,7 +88,7 @@ var Lineage_combine = (function () {
                         to: item.toNode.id,
                         data: {
                             source: Lineage_sources.activeSource,
-                            label:"sameLabel"
+                            label: "sameLabel",
                         },
                         arrows: {
                             to: {

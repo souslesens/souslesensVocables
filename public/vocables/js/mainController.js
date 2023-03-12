@@ -82,16 +82,15 @@ var MainController = (function () {
                     }
                     //manage imports that are not declared as sources in sources.json : create in memory sources
 
-                    if( false) {
+                    if (false) {
                         if (data[source].imports) {
                             var imports2 = [];
-                            data[source].imports.forEach(function(item) {
+                            data[source].imports.forEach(function (item) {
                                 if (item.graphUri) {
                                     var importSourceName = Sparql_common.getLabelFromURI(item.graphUri);
                                     if (!item.sparql_server) {
                                         item.sparql_server = data[source].sparql_server;
-                                    }
-                                    else if (item.sparql_server.url == "_default") {
+                                    } else if (item.sparql_server.url == "_default") {
                                         item.sparql_server.url = Config.default_sparql_url;
                                     }
 
@@ -111,7 +110,7 @@ var MainController = (function () {
                 }
                 Config.sources = data;
 
-                Config.sources["_defaultSource"]=Config._defaultSource
+                Config.sources["_defaultSource"] = Config._defaultSource;
                 if (callback) {
                     return callback();
                 }
@@ -228,14 +227,12 @@ var MainController = (function () {
                         });
                     },
                     function (callbackSeries) {
-                    var sources=Object.keys(Config.ontologiesVocabularyModels)
-                        self.basic
-                       Lineage_relations.registerSourcesModel(sources,function (err) {
+                        var sources = Object.keys(Config.ontologiesVocabularyModels);
+                        self.basic;
+                        Lineage_relations.registerSourcesModel(sources, function (err) {
                             callbackSeries(err);
                         });
                     },
-
-
                 ],
                 function (_err) {
                     MainController.UI.configureUI();
@@ -252,8 +249,8 @@ var MainController = (function () {
                     Config.sources[sourceLabel].controllerName = "" + Config.sources[sourceLabel].controller;
                     try {
                         Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controller);
-                    }catch(e){
-                        console.log( "cannot parse "+Config.sources[sourceLabel].controller)
+                    } catch (e) {
+                        console.log("cannot parse " + Config.sources[sourceLabel].controller);
                     }
                 } else {
                     Config.sources[sourceLabel].controller = eval(Config.sources[sourceLabel].controllerName);
@@ -557,8 +554,8 @@ return;*/
             if (Config.tools[self.currentTool].multiSources) {
                 return;
             }
-          //  OwlSchema.currentSourceSchema = null;
-         //   Collection.currentCollectionFilter = null;
+            //  OwlSchema.currentSourceSchema = null;
+            //   Collection.currentCollectionFilter = null;
             self.UI.updateActionDivLabel();
             self.writeUserLog(authentication.currentUser, self.currentTool, self.currentSource);
             var controller = Config.tools[self.currentTool].controller;
@@ -697,8 +694,7 @@ return;*/
                     callback();
                 });
             }
-        }
-        else{
+        } else {
             callback();
         }
     };

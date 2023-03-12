@@ -133,7 +133,6 @@ var OwlSchema = (function () {
                             annotations: {},
                         };
                         return callbackSeries();
-
                     } else {
                         return callbackSeries("Schema type " + schemaType + " not supported");
                     }

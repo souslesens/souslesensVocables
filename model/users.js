@@ -196,7 +196,6 @@ class UserModelDatabase extends UserModel {
      * @param {string} str
      */
     _isAlphaNum = (str) => {
-        return true;
         const exp = /^([0-9]|[a-z])+([0-9a-z]+)$/i;
         if (!str.match(exp)) {
             return false;

@@ -84,8 +84,64 @@ var Lineage_blend = (function () {
                 if (!self.targetNode.rdfType) {
                     self.targetNode.rdfType = self.targetNode.type;
                 }
+
+                var source =Lineage_sources.activeSource
+
+                var validProps={}
+
                 async.series(
                     [
+
+
+                        //get  source node ancestors
+                        function (callbackSeries) {
+       return callbackSeries()
+                           Sparql_OWL.getClassAncestorsArray(source,self.sourceNode.id,{},function(err,result){
+                               self.sourceNode.ancestors=result;
+                               callbackSeries()
+                           })
+                        },
+
+                        //get target source node ancestors
+                        function (callbackSeries) {
+                            return callbackSeries()
+                            Sparql_OWL.getClassAncestorsArray(source,self.targetNode.id,{},function(err,result){
+                                self.targetNode.ancestors=result;
+                                callbackSeries()
+                            })
+                        },
+
+                        //matching restrictions
+                        function (callbackSeries) {
+                            return callbackSeries()
+                        for (var prop in  Config.ontologiesVocabularyModels[source].restriction){
+                            var restriction=Config.ontologiesVocabularyModels[source].restriction[prop];
+                           if(restriction.domain==self.sourceNode.id &&   restriction.range==self.targetNode.id) {
+                               validProps[prop] = { type: "restriction", domain: restriction.domain, range: restriction.range }
+                           }
+                            }
+                        },
+                        //matching constraints
+                        function (callbackSeries) {
+                            return callbackSeries()
+                            for (var prop in  Config.ontologiesVocabularyModels[source].constraints){
+                                var constraints=Config.ontologiesVocabularyModels[source].constraints[prop];
+                               if( constraints.domain==self.sourceNode.id  ||   constraints.range==self.targetNode.id) {
+                                   validProps[prop] = { type: "constraint", domain: restriction.domain, range: restriction.range }
+                               }
+                            }
+
+
+                        },
+
+                      //get node constraints
+                        function (callbackSeries) {
+                            return callbackSeries()
+                        },
+
+
+
+
                         function (callbackSeries) {
                             if (true || (self.sourceNode.rdfType == "NamedIndividual" && self.targetNode.rdfType == "NamedIndividual")) {
                                 jstreeData.push({

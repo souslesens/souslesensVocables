@@ -468,10 +468,10 @@ var Sparql_OWL = (function() {
       "select distinct *  " + fromStr +
 
       "WHERE {?subject rdfs:subClassOf* ?ancestor ." +
-      "FILTER (?subject=<"+id+">) "+
+      "FILTER (?subject=<" + id + ">) " +
       "?ancestor  rdf:type owl:Class. " +
       "?ancestor  rdfs:subClassOf ?parent. " +
-      "?parent  rdf:type owl:Class. "
+      "?parent  rdf:type owl:Class. ";
 
     if (options.withLabels) {
       query += "OPTIONAL {?subject rdfs: label subjectLabel } OPTIONAL {?parent rdfs: label parentLabel }";
@@ -490,15 +490,30 @@ var Sparql_OWL = (function() {
       }
       result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "parent"]);
 
-      var parentsArray=[id];
+      var parentsArray = [];
 
-      result.results.bindings.forEach(function(item){
-        var  p=parentsArray.indexOf(item.ancestor.value);
-        var q=parentsArray.indexOf(item.parent.value);
-        if(q<0) {
-          parentsArray.splice(p+1,0,item.parent.value)
-        }
-      })
+      if (options.orderAncestors) {// manage only one parentClass
+        recurse = function(childId) {
+          result.results.bindings.forEach(function(item) {
+            if (item.ancestor.value == childId) {
+              var p = parentsArray.indexOf(item.ancestor.value);
+
+              if (p < 0) {
+                parentsArray.push(item.ancestor.value);
+                recurse(item.parent.value);
+              }
+
+            }
+          });
+        };
+        recurse(id);
+      }
+      else {
+        parentsArray = [id];
+        result.results.bindings.forEach(function(item) {
+          parentsArray.push(item.parent.value);
+        });
+      }
       return callback(null, parentsArray);
     });
   };

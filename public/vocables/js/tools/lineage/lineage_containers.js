@@ -955,7 +955,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 if (!existingNodes[item.container.value]) {
                     existingNodes[item.container.value] = 1;
 
-                    var color2 = "#0067bb";
+                    var color2 = "#00afef";
                     visjsData.nodes.push({
                         id: item.container.value,
                         label: item.containerLabel.value,

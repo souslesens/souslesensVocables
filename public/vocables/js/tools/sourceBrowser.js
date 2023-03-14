@@ -1253,7 +1253,7 @@ defaultLang = 'en';*/
                                 }
                             }
                             if (index > 0) {
-                                valuesStr += "<hr>";
+                                valuesStr += "<br>";
                             }
                             valuesStr += value + optionalStr;
                         });
@@ -1316,7 +1316,7 @@ defaultLang = 'en';*/
                 str += "</table></div>";
 
                 str +=
-                    " <hr><div id='nodeInfos_listsDiv' style='display:flex;flex-direction: row;justify-content: space-evenly';>" +
+                    " <br><div id='nodeInfos_listsDiv' style='display:flex;flex-direction: row;justify-content: space-evenly';>" +
                     "<div id='nodeInfos_restrictionsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
                     "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
                     "</div>";
@@ -1783,7 +1783,7 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     };
 
     self.isSLSVvisibleUri = function (uri) {
-        if (!uri || uri.indexOf) return false;
+        if (!uri || !uri.indexOf) return false;
         for (var source in Config.sources) {
             var graphUri = Config.sources[source].graphUri;
             if (graphUri && uri.indexOf(graphUri) == 0) {

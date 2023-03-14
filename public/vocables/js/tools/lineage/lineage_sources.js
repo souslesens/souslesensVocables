@@ -4,7 +4,7 @@ Lineage_sources = (function () {
     self.loadedSources = {};
     self.sourceDivsMap = {};
 
-    self.init = function () {
+    self.init = function (showDialog) {
         if (self.loadedSources) {
             for (var source in self.loadedSources) {
                 self.menuActions.closeSource(source);
@@ -34,13 +34,13 @@ Lineage_sources = (function () {
         Lineage_selection.selectedNodes = [];
         self.setTheme(Config.defaultGraphTheme);
         if (!Config.tools["lineage"].noSourceDialogAtInit) {
-            Lineage_sources.showSourcesDialog();
+            Lineage_sources.showSourcesDialog(showDialog);
         }
     };
 
-    self.resetAll = function () {
-        self.init();
-        self.showSourcesDialog(true);
+    self.resetAll = function (showDialog) {
+        self.init(showDialog);
+
     };
 
     self.resetVisjsGraph = function () {
@@ -317,6 +317,8 @@ return;
 
     self.indexSourceIfNotIndexed = function (source) {
         SearchUtil.initSourcesIndexesList(null, function (err, indexedSources) {
+            if(err)
+                return alert(err.responseText)
             if (indexedSources.indexOf(source) < 0) {
                 MainController.UI.message("indexing source " + source);
                 $("#waitImg").css("display", "block");

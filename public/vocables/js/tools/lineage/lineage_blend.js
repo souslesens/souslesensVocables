@@ -13,10 +13,11 @@ var Lineage_blend = (function() {
         $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function() {
           $("#LineageBlend_commonPredicateObjectDiv").load("snippets/commonUIwidgets/editPredicateDialog.html", function() {
             CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, "createNode");
+            $("#LineageBlend_commonPredicateObjectDiv2").load("snippets/commonUIwidgets/editPredicateDialog.html", function() {
+              CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, "createNode");
+            });
           });
-          $("#LineageBlend_commonPredicateObjectDiv2").load("snippets/commonUIwidgets/editPredicateDialog.html", function() {
-            CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, "createNode");
-          });
+
         });
 
         return;
@@ -1042,6 +1043,11 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
           return callback(null, { type: "Restriction", id: blankNodeId });
         });
       }
+    },
+
+    onselectNodeUriType:function(uryType){
+      var display=(uriType=="specific"?"block":"none")
+        $("#LineageBlend_creatingNodeSubjectUri").css("display","display")
     }
   };
 

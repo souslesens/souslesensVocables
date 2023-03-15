@@ -106,7 +106,7 @@ var Lineage_relationFilter = (function () {
             common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap[type], true);
         } else {
             for (var type in self.ObjectsTypesMap) {
-                if ((role == "subject" && self.domain.indexOf(type) > -1) || (role == "object" && self.range.indexOf(type) > -1)) {
+                if ((role == "subject" && self.domain && self.domain.indexOf(type) > -1) || (role == "object" && self.range && self.range.indexOf(type) > -1)) {
                     ok = true;
                     common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap[type], true);
                 }

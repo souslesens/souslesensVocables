@@ -74,8 +74,6 @@ CommonUIwidgets = (function () {
             }
         },
 
-
-
         setVocabulariesSelect: function (source, filter) {
             var vocabularies = [];
             if (!filter || filter == "_all") {

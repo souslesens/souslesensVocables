@@ -3,7 +3,6 @@
   "listenPort": "3010",
   "serverUrl": "../slsv",
   "default_sparql_url": "http://xxxxxx:8890/sparql",
-  "datalab_sparql_url": "http://xxxxxx:8890/sparql",
   "auth": "local",
   "defaultGroups": [],
   "logDir": "logs",

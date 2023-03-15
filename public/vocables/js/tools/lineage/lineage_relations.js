@@ -479,7 +479,7 @@ Lineage_relations = (function () {
                                 ">  WHERE {\n" +
                                 "  ?prop ?p ?o optional{?prop rdfs:label ?propLabel}" +
                                 "optional{?prop owl:inverseOf ?inverseProp}" +
-                                " VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty } }";
+                                " VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty owl:AnnotationProperty} }";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);

@@ -103,8 +103,7 @@ var Lineage_combine = (function () {
                                 scaleFactor: 0.5,
                             },
                         },
-                        // label: join.propLabel,
-                        // font: { color: "green", size: 12, background: "#eee" },
+
                         dashes: true,
                         color: "green",
                         width: 2,

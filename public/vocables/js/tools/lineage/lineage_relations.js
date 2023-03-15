@@ -94,8 +94,8 @@ Lineage_relations = (function () {
                 function (callbackSeries) {
                     for (var vocabulary in vocabulariesPropertiesMap) {
                         var properties = vocabulariesPropertiesMap[vocabulary];
-                        if(! properties){
-                            return callbackSeries()
+                        if (!properties) {
+                            return callbackSeries();
                         }
                         jstreeData.push({
                             id: vocabulary,
@@ -532,9 +532,7 @@ Lineage_relations = (function () {
 
                         //set domain constraints
                         function (callbackSeries) {
-                            var query = queryP + "" +
-                              " select distinct ?prop ?domain FROM <" + graphUri + "> where{" + " ?prop rdfs:domain ?domain." +
-                              "OPTIONAL{ ?domain rdfs:label ?domainLabel} }";
+                            var query = queryP + "" + " select distinct ?prop ?domain FROM <" + graphUri + "> where{" + " ?prop rdfs:domain ?domain." + "OPTIONAL{ ?domain rdfs:label ?domainLabel} }";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -707,109 +705,97 @@ Lineage_relations = (function () {
         );
     };
 
-
-
-    self.getPropsAllowedFromRestrictions=function(source,sourceNode, targetNode,options,callback){
-
+    self.getPropsAllowedFromRestrictions = function (source, sourceNode, targetNode, options, callback) {
         var validProps = {
             DR: [],
             D: [],
-            R: []
-        }
-        async.series(
-          [
-
-
-              //get  source node ancestors
-              function(callbackSeries) {
-                  //   return callbackSeries()
-                  Sparql_OWL.getClassAncestorsArray(source, self.sourceNode.id, {}, function(err, result) {
-                      self.sourceNode.ancestors = result;
-                      callbackSeries();
-                  });
-              },
-
-              //get target source node ancestors
-              function(callbackSeries) {
-                  //      return callbackSeries()
-                  Sparql_OWL.getClassAncestorsArray(source, self.targetNode.id, {}, function(err, result) {
-                      self.targetNode.ancestors = result;
-                      callbackSeries();
-                  });
-              }]
-          ,function(err){
-              return  validProps();
-          })
-
+            R: [],
         };
+        async.series(
+            [
+                //get  source node ancestors
+                function (callbackSeries) {
+                    //   return callbackSeries()
+                    Sparql_OWL.getClassAncestorsArray(source, self.sourceNode.id, {}, function (err, result) {
+                        self.sourceNode.ancestors = result;
+                        callbackSeries();
+                    });
+                },
 
+                //get target source node ancestors
+                function (callbackSeries) {
+                    //      return callbackSeries()
+                    Sparql_OWL.getClassAncestorsArray(source, self.targetNode.id, {}, function (err, result) {
+                        self.targetNode.ancestors = result;
+                        callbackSeries();
+                    });
+                },
+            ],
+            function (err) {
+                return validProps();
+            }
+        );
+    };
 
-    self.getPropsAllowedFromDomainRangeConstraints=function(source,sourceNode, targetNode,options,callback){
-
+    self.getPropsAllowedFromDomainRangeConstraints = function (source, sourceNode, targetNode, options, callback) {
         var validProps = {
             DR: [],
             D: [],
-            R: []
+            R: [],
         };
 
         async.series(
-          [
+            [
+                //get  source node ancestors
+                function (callbackSeries) {
+                    //   return callbackSeries()
+                    Sparql_OWL.getClassAncestorsArray(source, self.sourceNode.id, {}, function (err, result) {
+                        self.sourceNode.ancestors = result;
+                        callbackSeries();
+                    });
+                },
 
-              //get  source node ancestors
-        function(callbackSeries) {
-            //   return callbackSeries()
-            Sparql_OWL.getClassAncestorsArray(source, self.sourceNode.id, {}, function(err, result) {
-                self.sourceNode.ancestors = result;
-                callbackSeries();
-            });
-        },
+                //get target source node ancestors
+                function (callbackSeries) {
+                    //      return callbackSeries()
+                    Sparql_OWL.getClassAncestorsArray(source, self.targetNode.id, {}, function (err, result) {
+                        self.targetNode.ancestors = result;
+                        callbackSeries();
+                    });
+                },
+                //get properties constraints
+                function (callbackSeries) {
+                    Config.ontologiesVocabularyModels[source].properties.forEach(function (item) {
+                        var prop = item.id;
+                        var constraint = Config.ontologiesVocabularyModels[source].constraints[prop];
+                        if (constraint) {
+                            var p = -1,
+                                q = -1;
 
-        //get target source node ancestors
-        function(callbackSeries) {
-            //      return callbackSeries()
-            Sparql_OWL.getClassAncestorsArray(source, self.targetNode.id, {}, function(err, result) {
-                self.targetNode.ancestors = result;
-                callbackSeries();
-            });
-        },
-        //get properties constraints
-        function(callbackSeries) {
-
-            Config.ontologiesVocabularyModels[source].properties.forEach(function(item) {
-                var prop = item.id;
-                var constraint = Config.ontologiesVocabularyModels[source].constraints[prop];
-                if (constraint) {
-                    var p = -1, q = -1;
-
-                    if (constraint.domain) {
-                        p = self.sourceNode.ancestors.indexOf(constraint.domain);
-
-                    }
-                    if (constraint.range) {
-                        var q = self.targetNode.ancestors.indexOf(constraint.range);
-                    }
-                    if (p > 0 && q > 0) {
-                        validProps.DR.push(prop);
-                    }
-                    else if (p > -1 && q < 0) {
-                        validProps.D.push(prop);
-                    }
-
-                    else if (p < 0 && q > -1) {
-                        validProps.R.push(prop);
-                    }
-                    else {
-
-                    }
-                }
-            });
-            return callbackSeries();
-        }
-        ],function(err){
-              return  validProps();
-          })
-    }
-
+                            if (constraint.domain) {
+                                p = self.sourceNode.ancestors.indexOf(constraint.domain);
+                            }
+                            if (constraint.range) {
+                                var q = self.targetNode.ancestors.indexOf(constraint.range);
+                            }
+                            if (p > 0 && q > 0) {
+                                validProps.DR.push(prop);
+                            } else if (p > -1 && q < 0) {
+                                validProps.D.push(prop);
+                            } else if (p < 0 && q > -1) {
+                                validProps.R.push(prop);
+                            } else {
+                            }
+                        }
+                    });
+                    return callbackSeries();
+                },
+            ],
+            function (err) {
+                return validProps();
+            }
+        );
+    };
 
     return self;
 })();

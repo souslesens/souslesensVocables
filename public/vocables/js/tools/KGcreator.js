@@ -624,7 +624,7 @@ var KGcreator = (function () {
                 },
                 function (callbackSeries) {
                     $("#sharedPredicatesPanel").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
-                        CommonUIwidgets.predicatesSelectorWidget.init(KGcreator.currentSlsvSource, function(){
+                        CommonUIwidgets.predicatesSelectorWidget.init(KGcreator.currentSlsvSource, function () {
                             self.predicatesSelectorWidget.onSelectObjectFn = function (value) {};
                             self.predicatesSelectorWidget.onSelectPropertyFn = function (value) {};
                         });

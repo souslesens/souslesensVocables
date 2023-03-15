@@ -40,7 +40,6 @@ Lineage_sources = (function () {
 
     self.resetAll = function (showDialog) {
         self.init(showDialog);
-
     };
 
     self.resetVisjsGraph = function () {
@@ -317,8 +316,7 @@ return;
 
     self.indexSourceIfNotIndexed = function (source) {
         SearchUtil.initSourcesIndexesList(null, function (err, indexedSources) {
-            if(err)
-                return alert(err.responseText)
+            if (err) return alert(err.responseText);
             if (indexedSources.indexOf(source) < 0) {
                 MainController.UI.message("indexing source " + source);
                 $("#waitImg").css("display", "block");

@@ -58,40 +58,34 @@
     <div id="LineageBlend_creatingNodeTiplesDiv"></div>
 </div>
 
-<div class="LineageBlend_creatingNodeClassParamsLine"  >
+<div class="LineageBlend_creatingNodeClassParamsLine">
     subject URI&nbsp;type
-    <select id="LineageBlend_creatingNodeUriType"  onclick="Lineage_blend.graphModification.onselectNodeUriType($(this).val())">
+    <select id="LineageBlend_creatingNodeUriType" onclick="Lineage_blend.graphModification.onselectNodeUriType($(this).val())">
         <option>fromLabel</option>
         <option>randomHexaNumber</option>
         <option>specific</option>
     </select>
     <br />
-   <input style="width: 500px;display:none" id="LineageBlend_creatingNodeSubjectUri" />
+    <input style="width: 500px; display: none" id="LineageBlend_creatingNodeSubjectUri" />
 </div>
 
-
-
 <div id="LineageBlend_creatingNodeClassParamsDiv">
-  <ul>
-      <li style="background-color: #d9bb73"><a href="#LineageBlend_creatingNodeSingleTab">SingleNode</a></li>
-      <li style="background-color: beige"><a href="#LineageBlend_creatingNodeListTab">List</a></li>
-      <li style="background-color: beige"><a href="#LineageBlend_creatingNodeListJournalTab">journal</a></li>
-  </ul>
-  <div id="LineageBlend_creatingNodeSingleTab" style="display: flex; flex-direction: column">
-      <div class="LineageBlend_creatingNodeClassParamsLine">rdfs:label&nbsp;<input style="width: 350px" id="LineageBlend_creatingNodeNewClassLabel" /></div>
-      <div id="LineageBlend_creatingNodeClassDiv" class="LineageBlend_creatingNodeClassParamsLine">
-        <span id="LineageBlend_creatingNodeParentTypeSpan">rdfs:subClassOf&nbsp;&nbsp;</span>
-          <div id="LineageBlend_commonPredicateObjectDiv"></div>
-
+    <ul>
+        <li style="background-color: #d9bb73"><a href="#LineageBlend_creatingNodeSingleTab">SingleNode</a></li>
+        <li style="background-color: beige"><a href="#LineageBlend_creatingNodeListTab">List</a></li>
+        <li style="background-color: beige"><a href="#LineageBlend_creatingNodeListJournalTab">journal</a></li>
+    </ul>
+    <div id="LineageBlend_creatingNodeSingleTab" style="display: flex; flex-direction: column">
+        <div class="LineageBlend_creatingNodeClassParamsLine">rdfs:label&nbsp;<input style="width: 350px" id="LineageBlend_creatingNodeNewClassLabel" /></div>
+        <div id="LineageBlend_creatingNodeClassDiv" class="LineageBlend_creatingNodeClassParamsLine">
+            <span id="LineageBlend_creatingNodeParentTypeSpan">rdfs:subClassOf&nbsp;&nbsp;</span>
+            <div id="LineageBlend_commonPredicateObjectDiv"></div>
         </div>
 
         <div class="LineageBlend_creatingNodeClassParamsLine">
             <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_blend.graphModification.addClassOrIndividualTriples()" style="width: 100px">OK</button>
         </div>
     </div>
-
-
-
 
     <div id="LineageBlend_creatingNodeListTab" style="display: flex; flex-direction: column; height: 400px">
         <span><b>Paste table data here:</b> column1 = Label, column2= Class Label; separator tab or ,</span>

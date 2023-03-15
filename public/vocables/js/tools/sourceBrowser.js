@@ -1066,7 +1066,7 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
         if (Lineage_sources.isSourceEditable(self.currentSource) && !options.hideModifyButtons) {
             str +=
                 "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
-              "onclick='CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, SourceBrowser.configureEditPredicateWidget)'>  Add Predicate </button>";
+                "onclick='CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, SourceBrowser.configureEditPredicateWidget)'>  Add Predicate </button>";
             if (true || Config.sources[source].editable) {
                 str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>";
             }
@@ -1090,11 +1090,11 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
         }
     };
 
-    self.configureEditPredicateWidget=function() {
-        $("#editPredicate_savePredicateButton").click(function() {
+    self.configureEditPredicateWidget = function () {
+        $("#editPredicate_savePredicateButton").click(function () {
             SourceBrowser.addPredicate();
-        })
-    }
+        });
+    };
 
     self.drawCommonInfos = function (sourceLabel, nodeId, divId, _options, callback) {
         if (!_options) {
@@ -1849,11 +1849,11 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
         if (!CommonUIwidgets.predicatesSelectorWidget.currentEditingItem) {
             return alert("error");
         }
-        CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, function(){
+        CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
             $("#editPredicate_savePredicateButton").click(function () {
                 SourceBrowser.addPredicate();
             });
-    });
+        });
 
         $("#editPredicate_propertyValue").val(CommonUIwidgets.predicatesSelectorWidget.currentEditingItem.item.prop.value);
         $("#editPredicate_objectValue").val(CommonUIwidgets.predicatesSelectorWidget.currentEditingItem.item.value.value);

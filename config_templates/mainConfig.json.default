@@ -44,6 +44,16 @@
   },
   "wiki": {
     "url": "https://xxxxxxxx"
+  },
+  "authenticationDatabase": {
+     "user": "xxx",
+     "password": "xxxx",
+     "host": "127.0.0.1",
+     "database": "slsv",
+     "table": "user",
+     "loginColumn": "login",
+     "passwordColumn": "password",
+     "groupsColumn": "groups"
   }
 
 

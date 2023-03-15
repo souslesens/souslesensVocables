@@ -10,7 +10,7 @@ describe("UserModelJson", () => {
      */
     let userModelJson;
     beforeAll(() => {
-        userModelJson = new UserModelJson(path.join(__dirname, "data/config"));
+        userModelJson = new UserModelJson(path.join(__dirname, "data/config/users/users.json"));
     });
 
     test("read the list of users with get()", async () => {
@@ -68,8 +68,9 @@ describe("UserModelJson", () => {
     test("append a new user with add()", async () => {
         tmpDir = tmp.dirSync({ unsafeCleanup: true });
         fs.mkdirSync(path.join(tmpDir.name, "users"));
-        fs.writeFileSync(path.join(tmpDir.name, "users", "users.json"), "{}");
-        const tmpUserModelJson = new UserModelJson(tmpDir.name);
+        const usersPath = path.join(tmpDir.name, "users", "users.json");
+        fs.writeFileSync(usersPath, "{}");
+        const tmpUserModelJson = new UserModelJson(usersPath);
         const newUser = {
             id: "ID",
             login: "LOGIN",
@@ -104,8 +105,9 @@ describe("UserModelJson", () => {
         };
         tmpDir = tmp.dirSync({ unsafeCleanup: true });
         fs.mkdirSync(path.join(tmpDir.name, "users"));
-        fs.writeFileSync(path.join(tmpDir.name, "users", "users.json"), JSON.stringify(USERS));
-        const tmpUserModelJson = new UserModelJson(tmpDir.name);
+        const usersPath = path.join(tmpDir.name, "users", "users.json");
+        fs.writeFileSync(usersPath, JSON.stringify(USERS));
+        const tmpUserModelJson = new UserModelJson(usersPath);
         const modifiedUser = {
             id: "ID1",
             login: "LOGIN1",

@@ -18,6 +18,7 @@ var Config = (function () {
 
     self.defaultNewUriRoot = "http://souslesens.org/resource/";
     self.linkedData_mappings_graphUri = "http://souslesens.org/resource/linkedData_mappings/";
+
     self.styles_graphUri = "http://souslesens.org/resource/styles/";
     self.loginMode = "json";
 
@@ -34,16 +35,55 @@ var Config = (function () {
     self.predicatesSource = "TSF-PREDICATES";
     self.dictionarySource = "TSF-DICTIONARY";
 
+    self._defaultSource = {
+        graphUri: null,
+        sparql_server: {
+            url: "_default",
+        },
+        imports: [],
+        controller: "Sparql_OWL",
+        topClassFilter: "?topConcept rdf:type  owl:Class ",
+        schemaType: "OWL",
+    };
+
+    self.sousLeSensVocablesGraphUri = "http://data.souslesens.org/";
+    self.formalOntologySourceLabel = "ISO_15926-part-14_PCA";
+
+    self.CRUDsources = {
+        STORED_QUERIES: {
+            graphUri: "http://souslesens.org/resource/stored-queries/",
+            sparql_server: { url: "_default" },
+            type: "slsv:StoredQuery",
+        },
+        STORED_GRAPHS: {
+            graphUri: "http://souslesens.org/resource/stored-graphs/",
+            sparql_server: { url: "_default" },
+            type: "slsv:StoredGraph",
+        },
+    };
+
     self.topLevelOntologies = {
         "ISO_15926-part-14_PCA": { uriPattern: "lis14", prefix: "part14", prefixtarget: "http://rds.posccaesar.org/ontology/lis14/rdl/" },
-        BFO: { uriPattern: "obo", uriPatternXX: "BFO", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
+        BFO: { uriPattern: "obo", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
+        "BFO-2020": { uriPattern: "obo", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
+        // "bfo.owl": { uriPattern: "obo", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
+
         DOLCE: { uriPattern: "dul", prefix: "dul", prefixtarget: "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#" },
         LML: { uriPattern: "lml", prefix: "lml", prefixtarget: "http://souslesens.org/ontology/lml/" },
     };
 
+    self.basicVocabularies = {
+        rdf: { graphUri: "https://www.w3.org/1999/02/22-rdf-syntax-ns" },
+        rdfs: { graphUri: "https://www.w3.org/2000/01/rdf-schema" },
+        owl: { graphUri: "https://www.w3.org/2002/07/owl" },
+        "iof-av": { graphUri: "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/" },
+        skos: { graphUri: "http://www.w3.org/2004/02/skos/core/" },
+    };
+    self.ontologiesVocabularyModels = JSON.parse(JSON.stringify(self.basicVocabularies));
+
     self.namedSetsThesaurusGraphUri = "http://souslesens.org/resource/named-triple-sets/";
 
-    (self.defaultSparqlPrefixes = {
+    self.defaultSparqlPrefixes = {
         xs: "<http://www.w3.org/2001/XMLSchema#>",
         rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
         rdfs: "<http://www.w3.org/2000/01/rdf-schema#>",
@@ -57,18 +97,18 @@ var Config = (function () {
         dul: "<http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#>",
         slsv: "<http://souslesens.org/resource/vocabulary/>",
         dcterms: "<http://purl.org/dc/terms/>",
-    }),
-        (self.dictionaryMetaDataPropertiesMap = {
-            prop: "http://www.w3.org/2002/07/owl#onProperty",
-            range: "http://www.w3.org/2002/07/owl#someValuesFrom",
-            domain: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-            status: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
-            domainSourceLabel: "http://data.souslesens.org/property#domainSourceLabel",
-            rangeSourceLabel: "http://data.souslesens.org/property#rangeSourceLabel",
-            author: "http://purl.org/dc/terms/creator",
-            provenance: "http://purl.org/dc/terms/source",
-            creationDate: "http://purl.org/dc/terms/created",
-        });
+    };
+    self.dictionaryMetaDataPropertiesMap = {
+        prop: "http://www.w3.org/2002/07/owl#onProperty",
+        range: "http://www.w3.org/2002/07/owl#someValuesFrom",
+        domain: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+        status: "https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status",
+        domainSourceLabel: "http://data.souslesens.org/property#domainSourceLabel",
+        rangeSourceLabel: "http://data.souslesens.org/property#rangeSourceLabel",
+        author: "http://purl.org/dc/terms/creator",
+        provenance: "http://purl.org/dc/terms/source",
+        creationDate: "http://purl.org/dc/terms/created",
+    };
     self.dictionaryStatusMap = {
         promote: "OK",
         unPromote: "Candidate",
@@ -100,6 +140,14 @@ var Config = (function () {
             },
             { id: "http://www.w3.org/2004/02/skos/core#prefLabel", label: "skos:prefLabel", type: "dataTypeProperty" },
         ],
+        logicalOperatorsMap: {
+            "http://www.w3.org/2002/07/owl#intersectionOf": "⊓",
+            "https://www.w3.org/2002/07/owl#intersectionOf": "⊓",
+            "https://www.w3.org/2002/07/owl#unionOf": "⨆",
+            "http://www.w3.org/2002/07/owl#unionOf": "⨆",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#intersectionOf": "⊓",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#unionOf": "⨆",
+        },
     };
 
     /*****************************************************************************/

@@ -59,14 +59,6 @@ var Sparql_common = (function () {
                 str = str.replace(/[()]/g, "");
             }
             return self.formatStringForTriple(str);
-            /*   var str = str.replace(/\\/g, "")
-str = str.replace(/\(/gm, "")
-str = str.replace(/\)/gm, "")
-str = str.replace(/\[/gm, "")
-str = str.replace(/\]/gm, "")
-
-return str;
-*/
         }
 
         if (!options) {
@@ -127,66 +119,50 @@ return str;
                     }
                 }
             } else if (ids) {
-                if (Array.isArray(ids)) {
-                    if (ids.length == 0) {
-                        return "";
-                    }
-                    var p = ids.indexOf("#");
-                    if (p > -1) {
-                        ids.splice(p, 1);
-                    }
-                    if (ids[0] == null) {
-                        return "";
-                    }
-                    var conceptIdsStr = "";
-                    ids.forEach(function (id, _index) {
-                        id = "" + id;
-                        if (conceptIdsStr != "") {
-                            conceptIdsStr += ",";
-                        }
-                        /* if (!id.match || !id.match(/.+:.+|http.+|_:+/)) {
-                return  (conceptIdsStr += "<" + id + ">");
-            }*/
-                        if (id != "") {
-                            if (id.indexOf("http") < 0 && id.split(":").length == 2)
-                                // prefix
-                                conceptIdsStr += id;
-                            else if (true || (id.match && !id.match(/http.+|_:+/)) || id.indexOf("http") > -1 || id.indexOf("nodeID://") > -1 || id.indexOf("_:") > -1) {
-                                if (id.indexOf("^") == 0) {
-                                    conceptIdsStr += "^<" + id.substring(1) + ">";
-                                } else {
-                                    conceptIdsStr += "<" + id + ">";
-                                }
-                            } else {
-                                conceptIdsStr += id;
-                            }
-                        }
-                    });
+                if (!Array.isArray(ids)) {
+                    ids = [ids];
+                }
+                if (ids.length == 0) {
+                    return "";
+                }
 
-                    filters.push(" ?" + varName + " in( " + conceptIdsStr + ")");
-                } else {
-                    if (ids == null) {
-                        return "";
+                var conceptIdsStr = "";
+
+                ids.forEach(function (id, _index) {
+                    if (!id) {
+                        return;
                     }
-                    if (ids.indexOf && (ids.indexOf("http") == 0 || ids.indexOf("nodeID://") > -1)) {
-                        filters.push(" ?" + varName + " =<" + ids + ">");
+                    if (conceptIdsStr != "") {
+                        conceptIdsStr += options.useFilterKeyWord ? "," : " ";
+                    }
+
+                    id = "" + id;
+                    if (id.match(/<.*>/)) {
+                        conceptIdsStr += id;
                     } else {
-                        filters.push(" ?" + varName + " =" + ids);
+                        conceptIdsStr += "<" + id + ">";
                     }
+                });
+
+                if (options.useFilterKeyWord) {
+                    filters.push(" FILTER( ?" + varName + " in (" + conceptIdsStr + "))");
+                } else {
+                    filters.push(" VALUES ?" + varName + "{" + conceptIdsStr + "}");
                 }
             } else {
                 return "";
             }
         });
 
-        filter = " FILTER (";
+        return filters[0];
+
+        var filter = "";
         filters.forEach(function (filterStr, index) {
             if (index > 0) {
-                filter += " || ";
+                filter += "  ";
             }
             filter += filterStr;
         });
-        filter += " ) ";
 
         return filter;
     };
@@ -241,37 +217,43 @@ return str;
         return str;
     };
 
-    self.getUriFilter = function (varName, uri) {
-        var filterStr = "";
-
-        if (Array.isArray(uri)) {
-            var str = "";
-            uri.forEach(function (item, index) {
-                if (index > 0) {
-                    str += ",";
-                }
-                let isLiteral = true;
-                if (item.indexOf("http") == 0 || (item.indexOf(":") > 0 && uri.indexOf(" ") < 0)) {
-                    isLiteral = false;
-                }
-                if (isLiteral) {
-                    str += "'" + item + "'";
-                } else {
-                    str += "<" + item + ">";
-                }
-            });
-            filterStr = "filter (?" + varName + " in (" + str + "))";
-        } else {
-            let isLiteral = true;
-            if (uri.indexOf("http") == 0 || (uri.indexOf(":") > 0 && uri.indexOf(" ") < 0)) {
-                isLiteral = false;
-            }
-            if (isLiteral) {
-                filterStr += "filter( ?" + varName + "='" + uri + "').";
-            } else {
-                filterStr += "filter( ?" + varName + "=<" + uri + ">).";
+    self.getUriFilter = function (varName, values) {
+        if (values.value) {
+            if (values.isString) {
+                str = '"' + values.value.replace(/"/g, "'") + '"';
+                return "filter( ?" + varName + "=" + str + ").";
             }
         }
+
+        if (!Array.isArray(values)) {
+            values = [values];
+        }
+
+        var str = "";
+        var filterStr = "";
+        values.forEach(function (item, index) {
+            if (index > 0) {
+                str += ",";
+            }
+
+            let isLiteral = true;
+            if (item.indexOf("http") == 0 || (item.indexOf(":") > 0 && item.indexOf(" ") < 0)) {
+                isLiteral = false;
+            }
+
+            if (isLiteral) {
+                str += '"' + item.replace(/"/g, "'") + '"';
+            } else {
+                str += "<" + item + ">";
+            }
+        });
+
+        if (values.length > 1) {
+            filterStr = "filter (?" + varName + " in (" + str + "))";
+        } else {
+            filterStr += "filter( ?" + varName + "=" + str + ").";
+        }
+
         return filterStr;
     };
 
@@ -326,10 +308,6 @@ return str;
     };
 
     self.getLabelFromURI = function (id) {
-        if (OwlSchema.currentSourceSchema && OwlSchema.currentSourceSchema.labelsMap[id]) {
-            return OwlSchema.currentSourceSchema.labelsMap[id];
-        }
-
         const p = id.lastIndexOf("#");
         if (p > -1) {
             return id.substring(p + 1);
@@ -381,7 +359,7 @@ return str;
             if (imports) {
                 imports.forEach(function (source2) {
                     if (!Config.sources[source2]) {
-                        return console.error(source2 + "not found");
+                        return; // console.error(source2 + "not found");
                     }
 
                     var importGraphUri = Config.sources[source2].graphUri;

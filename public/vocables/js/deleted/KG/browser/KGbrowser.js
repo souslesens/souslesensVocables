@@ -320,7 +320,7 @@ var KGbrowser = (function () {
                                 for (var i = 1; i < self.aspectsChildrenDepth; i++) {
                                     if (item["child" + i]) {
                                         var parent;
-                                        self.OneModelDictionary[item.concept.value] = item.conceptLabel.value;
+                                        self.OneModelDictionary[item.subject.value] = item.subjectLabel.value;
                                         parent = topAspect.id;
 
                                         if (item["child" + i] && !item["child" + (i + 1)]) {

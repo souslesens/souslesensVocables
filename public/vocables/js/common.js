@@ -10,7 +10,12 @@
 
 var common = (function () {
     var self = {};
-
+    /**
+     *
+     *
+     *
+     * @type {{loadJsTree: self.jstree.loadJsTree, deleteBranch: self.jstree.deleteBranch, types: {"owl:ObjectProperty": {icon: string}, OWL: {icon: string}, concept: {icon: string}, "owl:Restriction": {icon: string}, collection: {icon: string}, importedProperty: {li_attr: {style: string}, icon: string}, tool: {icon: string}, importedRestriction: {li_attr: {style: string}, icon: string}, importedClass: {li_attr: {style: string}, icon: string}, default: {icon: string}, "owl:Class": {li_attr: {style: string}, icon: string}, SKOS: {icon: string}, "owl:table": {icon: string}, Class: {li_attr: {style: string}, icon: string}, class: {icon: string}, Property: {li_attr: {style: string}, icon: string}}, getNodeDescendants: (function(*, *, *, *): *[]), checkAll: self.jstree.checkAll, setTreeAppearance: self.jstree.setTreeAppearance, openNode: self.jstree.openNode, deleteNode: self.jstree.deleteNode, clear: self.jstree.clear, getNodeByDataField: ((function(*, *, *): (null|null))|*), setTreeParentDivDimensions: self.jstree.setTreeParentDivDimensions, getjsTreeNodes: ((function(*, *, *): (*[]))|*), onAllTreeCbxChange: self.jstree.onAllTreeCbxChange, addNodesToJstree: self.jstree.addNodesToJstree, openNodeDescendants: self.jstree.openNodeDescendants, getjsTreeNodeObj: (function(*, *): Object|jQuery|jQuery|*)}}
+     */
     self.jstree = {
         types: {
             tool: {
@@ -471,53 +476,6 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             );
         }
 
-        // manage long data in select options
-        if (data.length > Config.maxSelectListSize) {
-            $("#" + selectId).attr("data-classes", JSON.stringify(data));
-
-            $("#" + selectId).html(
-                $("<option>", {
-                    text: "",
-                    value: "",
-                })
-            );
-            $("#" + selectId).append(
-                $("<option>", {
-                    text: "search value...",
-                    value: "_search",
-                })
-            );
-            $("#" + selectId).bind("click", function (event) {
-                var value = $(this).val();
-                if (!value) {
-                    return;
-                }
-                var optionText = event.currentTarget.outerText;
-
-                if (value == "_search") {
-                    event.preventDefault();
-                    var str = prompt(" enter label ...");
-                    if (!str) {
-                        return;
-                    }
-                    str = str.toLowerCase();
-                    var data = JSON.parse($("#" + selectId).attr("data-classes"));
-
-                    var filteredData = [{ [valueField]: "_search", [textfield]: "search value..." }];
-                    data.forEach(function (item) {
-                        if (item.label && item.label.toLowerCase().indexOf(str) > -1) {
-                            filteredData.push(item);
-                        }
-                    });
-                    if (filteredData.length > Config.maxSelectListSize) {
-                        return alert("to many result, be more specific");
-                    }
-                    self.fillSelectOptions(selectId, filteredData, withBlanckOption, textfield, valueField, selectedValue);
-                }
-            });
-            return;
-        }
-
         if (Array.isArray(data)) {
             data.forEach(function (item, _index) {
                 var text, value;
@@ -556,6 +514,19 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                 );
             }
         }
+    };
+
+    self.fillSelectWithColorPalette = function (selectId, colors) {
+        if (!colors) colors = common.paletteIntense;
+        var array = [];
+        colors.forEach(function (color) {
+            array.push();
+        });
+        common.fillSelectOptions(selectId, colors, true);
+
+        $("#" + selectId + " option").each(function () {
+            $(this).css("background-color", $(this).val());
+        });
     };
 
     self.getAllsourcesWithType = function (type) {

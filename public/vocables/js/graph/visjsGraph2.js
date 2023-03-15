@@ -108,7 +108,8 @@ var visjsGraph = (function () {
         self.simulationOn = true;
 
         // self.network.startSimulation()
-        window.setTimeout(function () {
+
+        /*  window.setTimeout(function () {
             return;
             // if (!_options.layoutHierarchical) {
             //     if (!self.network.stopSimulation) return;
@@ -117,7 +118,7 @@ var visjsGraph = (function () {
             //     self.simulationOn = false;
             //     if (_options.afterDrawing) _options.afterDrawing();
             // }
-        }, self.simulationTimeOut);
+        }, self.simulationTimeOut);*/
 
         self.network.on("afterDrawing", function (/** @type {any} */ _params) {
             self.drawingDone = true;
@@ -326,10 +327,13 @@ var visjsGraph = (function () {
         // comment ca marche  bad doc???
 
         if (self.data && self.data.nodes) {
-            var edges = self.data.edges.getIds();
-            if (edges.lengt > 0) self.data.edges.remove(edges);
+            //  var edges = self.data.edges.getIds();
+            self.data.edges.clear();
+            self.data.nodes.clear();
+            //  if (edges.length > 0) self.data.edges.remove(edges);
             var nodes = self.data.nodes.getIds();
-            if (nodes.length > 0) self.data.nodes.remove(nodes);
+            var edges = self.data.edges.getIds();
+            // if (nodes.length > 0) self.data.nodes.remove(nodes);
         }
         self.data = null;
     };

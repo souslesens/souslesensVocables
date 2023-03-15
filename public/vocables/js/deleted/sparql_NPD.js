@@ -8,30 +8,43 @@
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-var Sparql_ISO_15926 = (function () {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+var Sparql_NPD = (function () {
     var self = {};
+
     self.ancestorsDepth = 6;
+    self.sparql_url = "http://51.178.139.80:8890/sparql";
 
-    self.getTopConcepts = function (sourceLabel, _options, callback) {
+    self.getTopConcepts = function (sourceLabel, options, callback) {
+        self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-        /*  if( !self.sparql_url ) {
-                self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-                return self.selectGraphDialog()
-            }*/
 
-        var query = "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>";
+        var query =
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "prefix owl: <http://www.w3.org/2002/07/owl#>" +
+            "" +
+            "select   distinct *  from <" +
+            self.graphUri +
+            ">  where {";
+        /*   "?topConcept   rdfs:label ?topConceptLabel." +
+                " filter( not EXISTS {?topConcept rdfs:subClassOf ?d})" +
+                "}limit 1000" */
+
+        // query+="  ?prop   rdf:type owl:DatatypeProperty.  ?prop rdfs:domain ?topConcept.   ?prop rdfs:range ?range.   }limit 1000"
         query +=
-            "select * where{" +
-            // "?topConcept rdfs:subClassOf <http://data.15926.org/dm/Thing>." +
-            "?topConcept rdfs:subClassOf <http://data.posccaesar.org/dm/Thing>." +
-            "?topConcept rdfs:label ?topConceptLabel." +
-            "?topConcept rdf:type ?topConceptType." +
-            "}order by ?conceptLabel limit 5000";
-
+            "   ?topConcept   rdfs:subClassOf ?class. filter (?class in(<http://www.ifomis.org/bfo/1.1/snap#Continuant> ,<http://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>,<thttp://www.ifomis.org/bfo/1.1/snap#IndependentContinuant>))}order by ?topConcept limit 1000";
+        //  query+="   ?topConcept   rdfs:subClassOf ?d}order by ?topConcept limit 1000"
         self.execute_GET_query(query, function (err, result) {
             if (err) {
                 return callback(err);
             }
+            result.results.bindings.forEach(function (item) {
+                var id = item.topConcept.value;
+                item.topConceptLabel = { value: id.substring(id.lastIndexOf("#") + 1) };
+                item.topConceptType = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
+            });
+
             return callback(null, result.results.bindings);
         });
     };
@@ -41,36 +54,36 @@ var Sparql_ISO_15926 = (function () {
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var strFilter = "";
         if (words) {
-            strFilter = Sparql_common.setFilter("concept", null, words, options);
+            strFilter = Sparql_common.setFilter("subject", null, words, null);
         } else if (ids) {
-            strFilter = Sparql_common.setFilter("concept", ids, null, options);
+            strFilter = Sparql_common.setFilter("subject", ids, null);
         }
 
         var query =
-            "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            "select distinct *  where { ?child1 rdfs:subClassOf ?concept. " +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "select   distinct * from <" +
+            self.graphUri +
+            ">  where {" +
+            "?child1   rdfs:subClassOf ?subject. " +
             strFilter +
-            "?child1 rdfs:label ?child1Label." +
-            "?child1 rdf:type ?child1Type.";
+            "} order by ?child1 limit 10000";
 
-        for (let i = 1; i < descendantsDepth; i++) {
-            query += "OPTIONAL { ?child" + (i + 1) + " rdfs:subClassOf ?child" + i + "." + "OPTIONAL {?child" + (i + 1) + " rdfs:label  ?child" + (i + 1) + "Label.}";
-        }
-        for (let i = 1; i < descendantsDepth; i++) {
-            query += "} ";
-        }
-
-        query += "}" + "LIMIT 10000";
-
-        self.execute_GET_query(query, function (err, result) {
+        var url = self.sparql_url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
             if (err) {
                 return callback(err);
             }
+            result.results.bindings.forEach(function (item) {
+                item.child1Type = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
+                var id = item.child1.value;
+                item.child1Label = { value: id.substring(id.lastIndexOf("#") + 1) };
+            });
             return callback(null, result.results.bindings);
         });
     };
 
-    self.getNodeInfos = function (sourceLabel, conceptId, _options, callback) {
+    self.getNodeInfos = function (sourceLabel, conceptId, options, callback) {
         self.graphUri = Config.sources[sourceLabel].graphUri;
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
 
@@ -83,27 +96,21 @@ var Sparql_ISO_15926 = (function () {
         });
     };
     self.getNodeParents = function (sourceLabel, words, ids, ancestorsDepth, options, callback) {
-        self.graphUri = Config.sources[sourceLabel].graphUri;
-        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
-
         if (!options) options = {};
         var strFilter = "";
         if (words) {
-            strFilter = Sparql_common.setFilter("concept", null, words, options);
+            strFilter = Sparql_common.setFilter("subject", null, words, { exactMatch: true });
         } else if (ids) {
-            strFilter = Sparql_common.setFilter("concept", ids, null);
+            strFilter = Sparql_common.setFilter("subject", ids, null);
         }
-        var query =
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            " select distinct *   WHERE {{";
+        var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "PREFIX  rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + " select distinct *   WHERE {{";
 
-        query += "?concept rdfs:label ?conceptLabel. " + strFilter;
+        query += "?subject rdfs:label ?subjectLabel. " + strFilter;
 
         ancestorsDepth = self.ancestorsDepth;
-        for (let i = 1; i <= ancestorsDepth; i++) {
+        for (var i = 1; i <= ancestorsDepth; i++) {
             if (i == 1) {
-                query += "  ?concept rdfs:subClassOf  ?broader" + i + "." + "?broader" + i + " rdfs:label ?broader" + i + "Label.";
+                query += "  ?subject rdfs:subClassOf  ?broader" + i + "." + "?broader" + i + " rdfs:label ?broader" + i + "Label.";
             } else {
                 query += "OPTIONAL { ?broader" + (i - 1) + " rdfs:subClassOf ?broader" + i + ".";
 
@@ -111,7 +118,7 @@ var Sparql_ISO_15926 = (function () {
             }
         }
 
-        for (let i = 1; i < ancestorsDepth; i++) {
+        for (i = 1; i < ancestorsDepth; i++) {
             query += "} ";
         }
 
@@ -122,12 +129,13 @@ var Sparql_ISO_15926 = (function () {
         }
         query += "}limit 1000 ";
 
-        self.execute_GET_query(query, function (err, result) {
+        var url = self.sparql_url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", null, function (err, result) {
             if (err) {
                 return callback(err);
             }
             result.results.bindings.forEach(function (item) {
-                item.broader1Type = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
+                item.child1Type = { value: "http://www.w3.org/2004/02/skos/core#Concept" };
             });
             return callback(null, result.results.bindings);
         });
@@ -137,13 +145,13 @@ var Sparql_ISO_15926 = (function () {
         var query2 = encodeURIComponent(query);
         query2 = query2.replace(/%2B/g, "+").trim();
 
-        var url = self.sparql_url + "?output=json&format=json&query=" + query2;
-        //
+        var url = self.sparql_url + "?output=json&query=" + query2;
+
         var body = {
             headers: {
                 Accept: "application/sparql-results+json",
                 "Content-Type": "application/x-www-form-urlencoded",
-                Referer: "", // "<" + self.graphUri + ">",
+                Referer: self.graphUri,
             },
         };
         var payload = {
@@ -155,14 +163,17 @@ var Sparql_ISO_15926 = (function () {
 
         $.ajax({
             type: "POST",
-            url: Config.apiUrl,
+            url: `${Config.apiUrl}/httpProxy`,
             data: payload,
             dataType: "json",
+            /* beforeSend: function(request) {
+                     request.setRequestHeader('Age', '10000');
+                 },*/
+
             success: function (data, _textStatus, _jqXHR) {
-                if (typeof data === "string") data = JSON.parse(data);
-                else if (data.result && typeof data.result != "object")
+                if (data.result && typeof data.result != "object")
                     //cas GEMET
-                    data = JSON.parse(data.result.trim());
+                    data = JSON.parse(data.result);
 
                 callback(null, data);
             },
@@ -170,39 +181,16 @@ var Sparql_ISO_15926 = (function () {
                 $("#messageDiv").html(err.responseText);
 
                 $("#waitImg").css("display", "none");
-                console.error(JSON.stringify(err));
-                console.error(JSON.stringify(query));
+                // eslint-disable-next-line no-console
+                console.log(JSON.stringify(err));
+                // eslint-disable-next-line no-console
+                console.log(JSON.stringify(query));
                 if (callback) {
                     return callback(err);
                 }
                 return err;
             },
         });
-    };
-
-    self.selectGraphDialog = function (_callback) {
-        var query = "select distinct ?g WHERE{ GRAPH ?g{?a ?b ?c}} order by ?g";
-        Sparql_ISO_15926.execute_GET_query(query, function (err, result) {
-            if (err) return MainController.UI.message(err);
-            var sparql_urls = [];
-            result.results.bindings.forEach(function (item) {
-                sparql_urls.push(item.g.value);
-            });
-
-            $("#mainDialogDiv").dialog("open");
-            var html = "select a endPoint<br> <select size='20' id='Sparql_ISO_15926_sparql_urlSelect'onclick='Sparql_ISO_15926.setCurrentSparql_url($(this).val())'></select>";
-            sparql_urls.sort();
-            sparql_urls = ["ALL", ...sparql_urls];
-            $("#mainDialogDiv").html(html);
-            setTimeout(function () {
-                common.fillSelectOptions("Sparql_ISO_15926_sparql_urlSelect", sparql_urls);
-            }, 200);
-        });
-    };
-
-    self.setCurrentSparql_url = function (sparql_url) {
-        if (sparql_url !== "ALL") self.sparql_url = sparql_url;
-        $("#mainDialogDiv").dialog("close");
     };
 
     return self;

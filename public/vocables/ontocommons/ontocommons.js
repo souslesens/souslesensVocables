@@ -26,7 +26,6 @@ var Ontocommons = (function () {
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-                var x = data;
                 var jsonArray = JSON.parse(data.result);
                 self.ontologiesMap = {};
 
@@ -42,43 +41,92 @@ var Ontocommons = (function () {
         });
     };
 
-    self.showOntologyInSLSV = function (ontologyId) {
-        if (!ontologyId) return;
-        var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
-
-        self.currentSource = ontologyId;
-        var reload = $("#reloadOntologyCBX").prop("checked");
-        var editable = $("#editableCBX").prop("checked");
-
-        var body = {
-            importSourceFromUrl: 1,
-            sourceUrl: sourceUrl,
-            sourceName: ontologyId,
-            options: {
-                sourcesJsonFile: sourcesJsonFile,
-                reload: reload,
-                editable: editable,
-            },
-        };
-
+    self.getOntologyMetaData = function (ontologyId, callback) {
+        var metaDataUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1?display=all&apikey=" + apiKey;
+        self.apiUrl = "/api/v1";
         var payload = {
-            url: "_default",
-            body: JSON.stringify(body),
-            POST: true,
+            url: metaDataUrl,
+            GET: true,
         };
-
         $.ajax({
             type: "POST",
             url: `${self.apiUrl}/httpProxy`,
             data: payload,
             dataType: "json",
+
             success: function (data, _textStatus, _jqXHR) {
-                $("#slsv_iframe").attr("src", window.location.origin + "/vocables/?sourcesFile=ontocommonsSources.json&tool=lineage&source=" + ontologyId);
+                var json = JSON.parse(data.result);
+                var metaData = {
+                    URI: json.URI,
+                    imports: json.useImports,
+                };
+                return callback(null, metaData);
             },
             error(err) {
-                alert(err.responseText);
+                return callback(err);
             },
         });
+    };
+
+    self.showOntologyInSLSV = function (ontologyId) {
+        if (!ontologyId) {
+            return;
+        }
+
+        self.getOntologyMetaData(ontologyId, function (err, metadata) {
+            if (err) return alert(err.responseText);
+
+            $("#slsv_iframe").attr("src", null);
+            // var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
+            var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
+            self.currentSource = ontologyId;
+            var reload = $("#reloadOntologyCBX").prop("checked");
+            var editable = $("#editableCBX").prop("checked");
+
+            var body = {
+                importSourceFromUrl: 1,
+                sourceUrl: sourceUrl,
+                sourceName: ontologyId,
+
+                options: {
+                    metadata: metadata,
+                    sourcesJsonFile: sourcesJsonFile,
+                    reload: reload,
+                    editable: editable,
+                    graphUri: metadata.URI || null,
+                },
+            };
+
+            var payload = {
+                url: "_default",
+                body: JSON.stringify(body),
+                POST: true,
+            };
+
+            $("#waitImg").css("display", "block");
+            self.message("loading ontology and imports...");
+            $.ajax({
+                type: "POST",
+                url: `${self.apiUrl}/httpProxy`,
+                data: payload,
+                dataType: "json",
+                success: function (data, _textStatus, _jqXHR) {
+                    self.message("");
+
+                    if (data.result != "DONE") {
+                        alert(data.result);
+                    }
+
+                    $("#slsv_iframe").attr("src", window.location.origin + "/vocables/?sourcesFile=ontocommonsSources.json&tool=lineage&source=" + ontologyId);
+                },
+                error(err) {
+                    alert(err.responseText);
+                },
+            });
+        });
+    };
+    self.message = function (message) {
+        $("#messageDiv").html(message);
     };
 
     self.loadSourceInSlsv = function (source) {
@@ -87,9 +135,13 @@ var Ontocommons = (function () {
         var slsv = $("#slsv_iframe")[0].contentWindow;
         slsv.MainController.currentTool = "lineage";
         slsv.MainController.loadSources(sourcesJsonFile, function (err, result) {
-            if (err) return callback(err);
+            if (err) {
+                return callback(err);
+            }
             slsv.MainController.UI.initTool("lineage", function (err, result) {
-                if (err) return callback(err);
+                if (err) {
+                    return callback(err);
+                }
                 slsv.Lineage_sources.showSourcesDialog(source);
             });
         });

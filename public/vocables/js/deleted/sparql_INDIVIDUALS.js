@@ -87,9 +87,9 @@ var Sparql_INDIVIDUALS = (function () {
         if (!options) options = {};
         var strFilter = "";
         if (words) {
-            strFilter = Sparql_common.setFilter("concept", null, words, options);
+            strFilter = Sparql_common.setFilter("subject", null, words, options);
         } else if (ids) {
-            strFilter = Sparql_common.setFilter("concept", ids, null);
+            strFilter = Sparql_common.setFilter("subject", ids, null);
         }
 
         var fromStr = Sparql_common.getFromStr(sourceLabel);
@@ -103,7 +103,7 @@ var Sparql_INDIVIDUALS = (function () {
             fromStr +
             "  WHERE {";
 
-        query += "?concept rdfs:label ?conceptLabel. " + "?concept rdf:type ?broader1." + "FILTER (!isBlank(?concept))" + strFilter;
+        query += "?subject rdfs:label ?subjectLabel. " + "?subject rdf:type ?broader1." + "FILTER (!isBlank(?subject))" + strFilter;
 
         query += "  }";
 
@@ -119,7 +119,7 @@ var Sparql_INDIVIDUALS = (function () {
             if (err) {
                 return callback(err);
             }
-            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["concept", "broader"]);
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "broader"]);
             return callback(null, result.results.bindings);
         });
     };

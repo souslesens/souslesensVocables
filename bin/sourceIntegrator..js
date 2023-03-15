@@ -67,6 +67,14 @@ var topOntologyPatternsMap = {
 
 var SourceIntegrator = {
     jenaParse: function (filePath, callback) {
+        var jenaPath = path.join(__dirname, "../jena/");
+
+        var cmd;
+        if (process.platform === "win32")
+            // my dev env
+            cmd = "D: && cd " + jenaPath + ' && java -cp "./lib/*"  RDF2triples.java ' + filePath;
+        else cmd = "D: | cd " + jenaPath + ' | && java -cp "./lib/*"  RDF2triples.java ' + filePath;
+
         var cmd = 'D: && cd D:\\apache-jena-4.7.0 && java -cp "./lib/*"  mystest.java ' + filePath;
         console.log("EXECUTING " + cmd);
         exec(cmd, { maxBuffer: 1024 * 30000 }, function (err, stdout, stderr) {
@@ -74,9 +82,12 @@ var SourceIntegrator = {
                 console.log(stderr);
                 return callback(err);
             }
-            console.log(stdout);
+
+            return callback(null, stdout);
+
+            var triples = [];
             var json = JSON.parse(stdout);
-            json.forEach(function (item, index) {
+            json.triples.forEach(function (item, index) {
                 triples.push({
                     subject: item[0],
                     predicate: item[1],
@@ -137,6 +148,8 @@ var SourceIntegrator = {
 
             var triplesArray = triples.split("\n");
 
+            totalTriples = triplesArray.length;
+
             triplesArray.forEach(function (item, index) {
                 if (fetchCount++ < fechSize) {
                     tripleSlice += item + "\n";
@@ -162,7 +175,7 @@ var SourceIntegrator = {
         }
 
         function parseImports(quad) {
-            if (quad.predicate.value == "http://www.w3.org/2002/07/owl#imports") {
+            if (quad.predicate.value.indexOf("owl#imports") > -1) {
                 imports.push(quad.object.value);
             }
 
@@ -229,7 +242,23 @@ var SourceIntegrator = {
         }
 
         writer = new N3.Writer({ format: "N-Triples", prefixes: {} });
-        if (format == "rdf") {
+
+        if (true) {
+            request(url, function (error, response, body) {
+                if (error) {
+                    return callback(err);
+                }
+                //  var filePath = "D:\\apache-jena-4.7.0\\data\\temp.rdf";
+                var filePath = path.join(__dirname, "../jena/data/temp.rdf");
+                fs.writeFileSync(filePath, body);
+                SourceIntegrator.jenaParse(filePath, function (err, triples) {
+                    if (err) {
+                        return callback(err);
+                    }
+                    writeTriples(triples);
+                });
+            });
+        } else if (format == "rdf") {
             parseRdfXml();
         } else if (format == "ttl") {
             parseTTL();
@@ -248,6 +277,7 @@ var SourceIntegrator = {
         var importUris = [];
         var importsSources = [];
         var format = null;
+        var journal = "";
         async.series(
             [
                 //getConfig
@@ -267,6 +297,10 @@ var SourceIntegrator = {
 
                 //get sources
                 function (callbackSeries) {
+                    if (options.sources) {
+                        sources = options.sources;
+                        return callbackSeries();
+                    }
                     var sourcesPath = path.join(__dirname, "../" + "config/" + options.sourcesJsonFile);
                     jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, _sources) {
                         sources = _sources;
@@ -274,7 +308,7 @@ var SourceIntegrator = {
                     });
                 },
 
-                //check if ontology already exist (with graphUri)
+                //if (options.reload) clear graph
                 function (callbackSeries) {
                     if (!options.reload) {
                         return callbackSeries();
@@ -345,6 +379,7 @@ var SourceIntegrator = {
                         graphUri = result.graphUri;
                         sparqlInsertStr = result.sparqlInsertStr;
                         importUris = result.imports;
+                        journal += "     " + result.totalTriples + "triples  imported  in graph " + graphUri + "\n";
                         return callbackSeries();
                     });
                 },
@@ -364,6 +399,44 @@ var SourceIntegrator = {
                     });
 
                     return callbackSeries();
+                },
+
+                //manage Imports : create a source and create triples  if not exist for each import
+                function (callbackSeries) {
+                    if (options.reload && options.metadata && options.metadata.imports && options.metadata.imports.length > 0) {
+                        importsSources = [];
+                        async.eachSeries(
+                            options.metadata.imports,
+                            function (importUri, callbackEach) {
+                                var p = importUri.lastIndexOf("/");
+                                if ((p = importUri.length - 1)) {
+                                    p = importUri.substring(0, p).lastIndexOf("/");
+                                }
+                                if (p < 0) {
+                                    journal += "wrong importUri" + importUri;
+                                    return callbackEach();
+                                }
+                                var sourceLabel = importUri.substring(p + 1);
+
+                                console.log("create import source " + sourceLabel + " from uri" + importUri);
+
+                                SourceIntegrator.importSourceFromTurtle(importUri, sourceLabel, { graphUri: importUri, sources: sources }, function (err, result) {
+                                    if (err) {
+                                        journal += "******************error in import " + importUri + " " + result + "\n";
+                                    } else {
+                                        importsSources.push(sourceLabel);
+                                    }
+
+                                    return callbackEach();
+                                });
+                            },
+                            function (err) {
+                                return callbackSeries(err);
+                            }
+                        );
+                    } else {
+                        return callbackSeries();
+                    }
                 },
 
                 //register source if not exists
@@ -386,7 +459,7 @@ var SourceIntegrator = {
                         },
                         editable: options.editable,
                         controller: "Sparql_OWL",
-                        topClassFilter: "?topConcept rdf:type owl:Class .",
+                        topClassFilter: "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
                         schemaType: "OWL",
                         allowIndividuals: options.allowIndividuals,
                         predicates: {
@@ -411,7 +484,10 @@ var SourceIntegrator = {
             ],
 
             function (err) {
-                return callback(err, "done");
+                journal += "DONE";
+
+                console.log(journal);
+                return callback(err, journal);
             }
         );
     },
@@ -470,7 +546,9 @@ var SourceIntegrator = {
                 array,
                 function (ontologyId, callbackEach) {
                     var graphUri = "http://industryportal.enit.fr/ontologies/" + ontologyId + "#";
-                    var ontologyUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
+                    //   var ontologyUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
+                    var ontologyUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
+
                     SourceIntegrator.getOntologyFormat(ontologyUrl, function (err, result) {
                         if (err) {
                             return callbackEach(err);

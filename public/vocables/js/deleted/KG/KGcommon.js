@@ -112,15 +112,15 @@ var KGcommon = (function () {
                         Sparql_OWL.getNodeChildren(self.currentSource, null, null, depth, null, function (err, result) {
                             if (err) return callbackSeries(err);
                             result.forEach(function (item) {
-                                if (!self.allObjectsMap[item.concept.value]) {
-                                    self.allObjectsMap[item.concept.value] = { type: "Class", label: item.conceptLabel.value, data: {}, parent: null };
+                                if (!self.allObjectsMap[item.subject.value]) {
+                                    self.allObjectsMap[item.subject.value] = { type: "Class", label: item.subjectLabel.value, data: {}, parent: null };
                                 }
                                 for (var i = 1; i < depth; i++) {
                                     if (item["child" + i]) {
                                         var childId = item["child" + i].value;
 
                                         if (childId == "http://data.total.com/resource/one-model/ontology#Tag") var parentId;
-                                        if (i == 1) parentId = item.concept.value;
+                                        if (i == 1) parentId = item.subject.value;
                                         else parentId = item["child" + (i - 1)].value;
 
                                         if (!self.allObjectsMap[childId]) {
@@ -134,13 +134,13 @@ var KGcommon = (function () {
                     },
                     // loadClasses
                     function (callbackSeries) {
-                        var filter = "?concept rdf:type owl:Class";
+                        var filter = "?subject rdf:type owl:Class";
                         Sparql_OWL.getItems(self.currentSource, { filter: filter }, function (err, result) {
                             if (err) return callbackSeries(err);
                             result.forEach(function (item) {
-                                if (self.allObjectsMap[item.concept.value])
-                                    // if (self.constraintsMap.domains[item.concept.value] || self.constraintsMap.ranges[item.concept.value])
-                                    self.allObjectsMap[item.concept.value].label = item.conceptLabel.value;
+                                if (self.allObjectsMap[item.subject.value])
+                                    // if (self.constraintsMap.domains[item.subject.value] || self.constraintsMap.ranges[item.subject.value])
+                                    self.allObjectsMap[item.subject.value].label = item.subjectLabel.value;
                             });
                             callbackSeries();
                         });

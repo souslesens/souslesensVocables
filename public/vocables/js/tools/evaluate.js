@@ -7,7 +7,7 @@ var Evaluate = (function () {
     self.categoriesTreeId = "evaluate_treeDiv";
 
     self.copyTypeColors = {};
-    self.copyTypeColors["concept"] = "#a2afc8";
+    self.copyTypeColors["subject"] = "#a2afc8";
     self.copyTypeColors["altLabel"] = "#bfb4a1";
 
     self.onSourceSelect = function () {
@@ -301,12 +301,12 @@ var Evaluate = (function () {
                         Sparql_generic.getNodeParents(source, null, concepts, ancestorsDepth, null, function (err, result) {
                             if (err) return callbackSlice(err);
                             result.forEach(function (item) {
-                                var conceptId = item.conceptLabel.value;
+                                var conceptId = item.subjectLabel.value;
                                 if (!existingNode[conceptId]) {
                                     existingNode[conceptId] = 1;
                                     visjsData.nodes.push({
                                         id: conceptId,
-                                        label: item.conceptLabel.value,
+                                        label: item.subjectLabel.value,
                                         shape: "box",
                                         color: nounColor,
                                         fixed: { x: true, y: true },
@@ -315,9 +315,9 @@ var Evaluate = (function () {
                                         data: {
                                             type: "leafConcept",
                                             source: source,
-                                            varName: "concept",
+                                            varName: "subject",
                                             id: conceptId,
-                                            label: item.conceptLabel.value,
+                                            label: item.subjectLabel.value,
                                         },
                                     });
                                     offsetY += offsetYlength;
@@ -447,10 +447,10 @@ var Evaluate = (function () {
             "</b>&nbsp;" +
             "<div style='    font-style: italic;color: #37d237;' id='Evaluate_infosDiv'></div>" +
             "<button class='btn btn-sm my-1 py-0 btn-outline-primary' style=' background-color: " +
-            Evaluate.copyTypeColors["concept"] +
+            Evaluate.copyTypeColors["subject"] +
             "' onclick='Evaluate.copyWordToClipboard(\"" +
             word +
-            '","concept")\'>Copy as Concept</button>' +
+            '","subject")\'>Copy as Concept</button>' +
             "<button class='btn btn-sm my-1 py-0 btn-outline-primary' style=' background-color: " +
             Evaluate.copyTypeColors["altLabel"] +
             "' onclick='Evaluate.copyWordToClipboard(\"" +

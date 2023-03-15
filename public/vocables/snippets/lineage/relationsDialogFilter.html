@@ -1,0 +1,56 @@
+<style>
+    .lineageQuery_div {
+        padding: 10px;
+        margin: 10px;
+        border: 1px solid saddlebrown;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .storedQuery_value {
+        border-radius: 5px;
+        background-color: #eee;
+        margin: 2px;
+        text-align: center;
+        min-width: 30px;
+    }
+
+    .Lineage_relation_filterPanel {
+        display: flex;
+        flex-direction: row;
+    }
+</style>
+
+<div style="display: flex; flex-direction: column">
+    <span style="font-weight: bold">Property</span>
+    <span style="font-weight: bold; color: saddlebrown" id="Lineage_relation_property"></span>
+</div>
+
+<div class="lineageRelations_div">
+    <div>
+        Filter role
+        <select id="lineage_relation_filterRoleSelect" onchange="Lineage_relationFilter.onSelectRoleType($(this).val())">
+            <option></option>
+            <option>subject</option>
+            <option>object</option>
+        </select>
+    </div>
+    <span style="font-weight: bold" id="lineage_relation_filterRole"></span>
+    <span id="Lineage_relation_filter"></span>
+    <select id="Lineage_relation_filterTypeSelect" onchange="Lineage_relationFilter.onSelectResourceType($(this).val())"></select>
+    <div id="Lineage_relation_filterValueDiv">
+        <select id="Lineage_relation_filterVocabularySelect" onchange="Lineage_relationFilter.onSelectResource($(this).val())"></select>
+        <select id="Lineage_relation_filterResourcesSelect"></select>
+    </div>
+
+    <div class="lineageRelations_div" style="display: none" id="lineageQuery_valueDiv">
+        <select id="lineageQuery_operator"></select>
+        <input id="lineageQuery_value" size="20" value="" />
+    </div>
+</div>
+<div>
+    <span id="Lineage_relation_filterText"></span>
+    <button onclick="Lineage_relationFilter.attachFilterToProperty()">OK</button>
+    <button onclick="$('#mainDialogDiv').dialog('close')" )>Cancel</button>
+</div>

@@ -194,7 +194,7 @@ var Lineage_selection = (function () {
                                                     if (item["child" + i]) {
                                                         var parent;
                                                         if (i == 1) {
-                                                            var parent = item.concept.value;
+                                                            var parent = item.subject.value;
                                                             if (mergeDepth == "nodeDescendantsOnly") parent = targetNode;
                                                             item["child" + i].parent = parent;
                                                         } else item["child" + i].parent = item["child" + (i - 1)].value;
@@ -406,16 +406,8 @@ var Lineage_selection = (function () {
         showDialog: function () {
             $("#lineage_selection_rightPanel").load("snippets/lineage/selection/lineage_selection_decorateDialog.html", function () {
                 $("#lineage_selection_decorate_applyButton").bind("click", Lineage_selection.decorate);
-                var colors = common.paletteIntense;
-                var array = [];
-                colors.forEach(function (color) {
-                    array.push();
-                });
-                common.fillSelectOptions("lineage_selection_decorate_colorSelect", colors, true);
 
-                $("#lineage_selection_decorate_colorSelect option").each(function () {
-                    $(this).css("background-color", $(this).val());
-                });
+                common.fillSelectWithColorPalette("lineage_selection_decorate_colorSelect");
 
                 var shapes = ["ellipse", " circle", " database", " box", " text", "diamond", " dot", " star", " triangle", " triangleDown", " hexagon", " square"];
                 common.fillSelectOptions("lineage_selection_decorate_shapeSelect", shapes, true);

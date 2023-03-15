@@ -382,8 +382,8 @@ var onTheFlyTagger = {
             thesaurusGraphUri +
             "> where{" +
             "  " +
-            "  ?concept  rdf:type skos:Concept." +
-            "  ?concept skos:prefLabel ?conceptLabel filter(lang(?conceptLabel)='en') " +
+            "  ?subject  rdf:type skos:Concept." +
+            "  ?subject skos:prefLabel ?subjectLabel filter(lang(?subjectLabel)='en') " +
             "  " +
             "}limit " +
             limit;
@@ -407,10 +407,10 @@ var onTheFlyTagger = {
                     result.results.bindings.forEach(function (item) {
                         if (options.withIds)
                             thesaurusConcepts.push({
-                                id: item.concept.value,
-                                label: item.conceptLabel.value.toLowerCase(),
+                                id: item.subject.value,
+                                label: item.subjectLabel.value.toLowerCase(),
                             });
-                        else thesaurusConcepts.push(item.conceptLabel.value.toLowerCase());
+                        else thesaurusConcepts.push(item.subjectLabel.value.toLowerCase());
                     });
                     callbackWhilst();
                 });
@@ -553,7 +553,7 @@ var onTheFlyTagger = {
                                         console.log(" on graph " + graph);
 
                                         var conceptLabels = [];
-                                        thesaurusConceptsMap[graph].concepts.forEach(function (item) {
+                                        thesaurusConceptsMap[graph].subjects.forEach(function (item) {
                                             conceptLabels.push(item.label);
                                         });
                                         var commonWords = onTheFlyTagger.intersection_destructive(JSON.parse(JSON.stringify(currentpageWords)), conceptLabels);
@@ -561,7 +561,7 @@ var onTheFlyTagger = {
 
                                         var clonedPage = JSON.parse(JSON.stringify(page));
                                         clonedPage.commonTerms = [];
-                                        thesaurusConceptsMap[graph].concepts.forEach(function (item) {
+                                        thesaurusConceptsMap[graph].subjects.forEach(function (item) {
                                             var p;
                                             if ((p = commonWords.indexOf(item.label)) > -1)
                                                 clonedPage.commonTerms.push({

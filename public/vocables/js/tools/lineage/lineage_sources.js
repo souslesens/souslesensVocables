@@ -4,7 +4,7 @@ Lineage_sources = (function () {
     self.loadedSources = {};
     self.sourceDivsMap = {};
 
-    self.init = function () {
+    self.init = function (showDialog) {
         if (self.loadedSources) {
             for (var source in self.loadedSources) {
                 self.menuActions.closeSource(source);
@@ -34,13 +34,12 @@ Lineage_sources = (function () {
         Lineage_selection.selectedNodes = [];
         self.setTheme(Config.defaultGraphTheme);
         if (!Config.tools["lineage"].noSourceDialogAtInit) {
-            Lineage_sources.showSourcesDialog();
+            Lineage_sources.showSourcesDialog(showDialog);
         }
     };
 
-    self.resetAll = function () {
-        self.init();
-        self.showSourcesDialog();
+    self.resetAll = function (showDialog) {
+        self.init(showDialog);
     };
 
     self.resetVisjsGraph = function () {
@@ -48,8 +47,8 @@ Lineage_sources = (function () {
         Lineage_classes.drawNewGraph({ nodes: [], edges: [] });
     };
 
-    self.showSourcesDialog = function () {
-        if (Config.tools["lineage"].urlParam_source) {
+    self.showSourcesDialog = function (forceDialog) {
+        if (!forceDialog && Config.tools["lineage"].urlParam_source) {
             return self.loadSources(Config.tools["lineage"].urlParam_source);
         }
 
@@ -199,7 +198,7 @@ $("#lineage_actionDiv_title_hidden").css("display","flex")*/
     self.showHideEditButtons = function (source, hide) {
         /* var x=  $(".vis-edit-mode").length
 if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
-  return;
+return;
 }*/
         if (!visjsGraph.network) {
             return;
@@ -220,7 +219,7 @@ if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
 
     self.whiteboard_setGraphOpacity = function (source) {
         var nodesMapSources = {};
-        if (!visjsGraph.data || !visjsGraph.data.nodes) {
+        if (!visjsGraph.isGraphNotEmpty()) {
             return;
         }
         var nodes = visjsGraph.data.nodes.get();
@@ -252,7 +251,9 @@ if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
         var edges = visjsGraph.data.edges.get();
         var newEdges = [];
         edges.forEach(function (edge) {
-            if (!edge.data) return;
+            if (!edge.data) {
+                return;
+            }
             if (edge.data && !edge.data.fullColor) {
                 edge.data.fullColor = edge.color;
             }
@@ -292,24 +293,30 @@ if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
             return callback("not a source");
         }
 
-        self.registerSource(source);
-        Lineage_sources.setTopLevelOntologyFromImports(source);
-        Lineage_sources.registerSourceImports(source);
-
-        var drawTopConcepts = false;
-        if (drawTopConcepts) {
-            Lineage_classes.drawTopConcepts(source, function (err) {
+        self.registerSource(source, function (err) {
+            Lineage_sources.setTopLevelOntologyFromImports(source);
+            Lineage_sources.registerSourceImports(source, function (err) {
                 if (err) {
-                    return MainController.UI.message(err);
+                    return callback(err);
                 }
+
+                var drawTopConcepts = false;
+                if (drawTopConcepts) {
+                    Lineage_classes.drawTopConcepts(source, function (err) {
+                        if (err) {
+                            return MainController.UI.message(err);
+                        }
+                    });
+                }
+                self.indexSourceIfNotIndexed(source);
+                callback(null, source);
             });
-        }
-        self.indexSourceIfNotIndexed(source);
-        callback(null, source);
+        });
     };
 
     self.indexSourceIfNotIndexed = function (source) {
         SearchUtil.initSourcesIndexesList(null, function (err, indexedSources) {
+            if (err) return alert(err.responseText);
             if (indexedSources.indexOf(source) < 0) {
                 MainController.UI.message("indexing source " + source);
                 $("#waitImg").css("display", "block");
@@ -323,35 +330,42 @@ if (x ==0 || !visjsGraph.isGraphNotEmpty()) {
         });
     };
 
-    self.registerSource = function (sourceLabel) {
+    self.registerSource = function (sourceLabel, callback) {
         if (self.loadedSources[sourceLabel]) {
             return;
         }
-        var sourceDivId = "source_" + common.getRandomHexaId(5);
-        self.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
-        self.sourceDivsMap[sourceDivId] = sourceLabel;
-        var html =
-            "<div  id='" +
-            sourceDivId +
-            "' style='color: " +
-            Lineage_classes.getSourceColor(sourceLabel) +
-            "'" +
-            " class='Lineage_sourceLabelDiv' " +
-            ">" +
-            sourceLabel +
-            "&nbsp;" +
-            /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+
+        Lineage_relations.registerSourcesModel(sourceLabel, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var sourceDivId = "source_" + common.getRandomHexaId(5);
+            self.loadedSources[sourceLabel] = { sourceDivId: sourceDivId };
+            self.sourceDivsMap[sourceDivId] = sourceLabel;
+            var html =
+                "<div  id='" +
+                sourceDivId +
+                "' style='color: " +
+                Lineage_classes.getSourceColor(sourceLabel) +
+                "'" +
+                " class='Lineage_sourceLabelDiv' " +
+                ">" +
+                sourceLabel +
+                "&nbsp;" +
+                /*   "<i class='lineage_sources_menuIcon' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
 sourceDivId +
 "\")'>[-]</i>";*/
-            "<input type='image' src='./icons/caret-right.png'  style='opacity: 0.5; width: 15px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
-            sourceDivId +
-            "\")'/> </div>";
-        $("#lineage_drawnSources").append(html);
+                "<input type='image' src='./icons/caret-right.png'  style='opacity: 0.5; width: 15px;}' onclick='Lineage_sources.showSourceDivPopupMenu(\"" +
+                sourceDivId +
+                "\")'/> </div>";
+            $("#lineage_drawnSources").append(html);
 
-        $("#" + sourceDivId).bind("click", function (e) {
-            var sourceDivId = $(this).attr("id");
-            var source = self.sourceDivsMap[sourceDivId];
-            self.setCurrentSource(source);
+            $("#" + sourceDivId).bind("click", function (e) {
+                var sourceDivId = $(this).attr("id");
+                var source = self.sourceDivsMap[sourceDivId];
+                self.setCurrentSource(source);
+            });
+            return callback();
         });
     };
     self.showSourceDivPopupMenu = function (sourceDivId) {
@@ -389,15 +403,18 @@ sourceDivId +
         });
     };
 
-    self.registerSourceImports = function (sourceLabel) {
+    self.registerSourceImports = function (sourceLabel, callback) {
         var imports = Config.sources[sourceLabel].imports;
         if (!imports) {
             imports = [];
         }
-
-        imports.forEach(function (/** @type {any} */ source) {
-            self.registerSource(source);
-        });
+        async.eachSeries(
+            imports,
+            function (importSource, callbackEach) {
+                self.registerSource(importSource, callbackEach);
+            },
+            callback
+        );
     };
 
     self.setAllWhiteBoardSources = function (remove) {
@@ -473,7 +490,7 @@ sourceDivId +
         });
         return Config.currentTopLevelOntology;
     };
-    self.setTopLevelOntologyFromPrefix = function () {
+    self.setTopLevelOntologyFromPrefix = function (prefix) {
         Config.currentTopLevelOntology = null;
         for (var key in Config.topLevelOntologies) {
             if (Config.topLevelOntologies[key].prefix == prefix) {
@@ -645,12 +662,22 @@ sourceDivId +
 
     self.isSourceEditable = function (source) {
         if (!Config.sources[source]) {
+            return console.log("no source " + source);
+        }
+        const groups = authentication.currentUser.groupes;
+        const currentAccessControls = groups.map((group) => {
+            const defaultAccessControl = Config.profiles[group].defaultSourceAccessControl;
+            const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
+            return sourcesAccessControl.hasOwnProperty(source) ? sourcesAccessControl[source] : defaultAccessControl;
+        });
+
+        self.realAccessControl = currentAccessControls.includes("readwrite") ? "readwrite" : currentAccessControls.includes("read") ? "read" : "forbidden";
+
+        if (self.realAccessControl === "readwrite" && Config.sources[source].editable) {
+            return true;
+        } else {
             return false;
         }
-        if (Config.sources[source].editable && Config.sources[source].accessControl === "readwrite") {
-            return true;
-        }
-        return false;
     };
 
     self.clearSource = function (source) {
@@ -739,12 +766,12 @@ visjsGraph.network.options.edges.font = { color: self.defaultEdgeFontColor };*/
         // Random tree
         const N = 300;
         /*    const gData = {
-    nodes: [...Array(N).keys()].map(i => ({ id: i })),
-    links: [...Array(N).keys()]
-    .filter(id => id)
-    .map(id => ({
-    source: id,
-    target: Math.round(Math.random() * (id-1))
+nodes: [...Array(N).keys()].map(i => ({ id: i })),
+links: [...Array(N).keys()]
+.filter(id => id)
+.map(id => ({
+source: id,
+target: Math.round(Math.random() * (id-1))
 }))
 };*/
 

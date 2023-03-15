@@ -43,7 +43,7 @@ var SourceEditor = (function () {
     self.onSourceSelect = function (sourceLabel) {
         MainController.currentSource = sourceLabel;
         self.currentSourceUri = Config.sources[sourceLabel].graphUri;
-        OwlSchema.initSourceSchema(sourceLabel, function (err, _result) {
+        /*   OwlSchema.initSourceSchema(sourceLabel, function (err, _result) {
             if (err) return MainController.UI.message(err);
             var contextMenu = self.getJstreeConceptsContextMenu();
             SourceBrowser.showThesaurusTopConcepts(sourceLabel, {
@@ -56,7 +56,7 @@ var SourceEditor = (function () {
             $("#actionDivContolPanelDiv").html(
                 "<input id='GenericTools_searchTermInput'> <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.searchTerm()'>Search</button>"
             );
-        });
+        });*/
     };
 
     self.selectTreeNodeFn = function (event, propertiesMap) {

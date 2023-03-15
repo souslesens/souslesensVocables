@@ -105,25 +105,25 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             var existingNodes = {};
 
             result.forEach(function (item) {
-                if (!existingNodes[item.concept.value]) {
-                    existingNodes[item.concept.value] = 1;
+                if (!existingNodes[item.subject.value]) {
+                    existingNodes[item.subject.value] = 1;
                     jstreeData.push({
                         parent: "#",
-                        id: item.concept.value,
-                        text: item.conceptLabel.value,
+                        id: item.subject.value,
+                        text: item.subjectLabel.value,
                         type: "Class",
                         data: {
                             type: "Class",
                             source: self.currentSource,
-                            label: item.conceptLabel.value,
-                            id: item.concept.value,
+                            label: item.subjectLabel.value,
+                            id: item.subject.value,
                         },
                     });
                 }
 
                 for (var i = 1; i <= 10; i++) {
                     if (!item["child" + i]) break;
-                    var parent = i == 1 ? item.concept.value : item["child" + (i - 1)].value;
+                    var parent = i == 1 ? item.subject.value : item["child" + (i - 1)].value;
 
                     var id = item["child" + i].value;
                     var label = item["child" + i + "Label"].value;
@@ -582,7 +582,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             var existingNodes = common.jstree.getjsTreeNodes("KGpropertyFilter_propertiesTreeDiv", true, "#");
             var restrictionIds = [];
             result.forEach(function (item) {
-                var id = item.concept.value + "_" + item.value.value;
+                var id = item.subject.value + "_" + item.value.value;
                 if (!existingNodes[id]) {
                     existingNodes[id] = 1;
                     restrictionIds.push(id);
@@ -590,15 +590,15 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     jstreeData.push({
                         id: id,
                         text: "<span class='KGpropertyFilter_property' >" + item.valueLabel.value + "</span>",
-                        parent: item.concept.value,
+                        parent: item.subject.value,
                         type: "Property",
                         data: {
                             type: "Property",
                             propId: item.value.value,
                             propLabel: item.valueLabel.value,
                             retrictionId: item.node.value,
-                            classId: item.concept.value,
-                            classLabel: item.conceptLabel.value,
+                            classId: item.subject.value,
+                            classLabel: item.subjectLabel.value,
                         },
                     });
                 }
@@ -621,15 +621,15 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             var jstreeData = [];
             var existingNodes = {};
             result.forEach(function (item) {
-                if (!existingNodes[item.concept.value]) {
-                    existingNodes[item.concept.value] = 1;
+                if (!existingNodes[item.subject.value]) {
+                    existingNodes[item.subject.value] = 1;
                     jstreeData.push({
-                        id: item.concept.value,
-                        text: item.conceptLabel.value,
+                        id: item.subject.value,
+                        text: item.subjectLabel.value,
                         parent: "#",
                         data: {
-                            id: item.concept.value,
-                            label: item.conceptLabel.value,
+                            id: item.subject.value,
+                            label: item.subjectLabel.value,
                             source: "ISO-15663",
                         },
                     });
@@ -639,7 +639,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     jstreeData.push({
                         id: item.child1.value,
                         text: item.child1Label.value,
-                        parent: item.concept.value,
+                        parent: item.subject.value,
                         data: {
                             id: item.child1.value,
                             label: item.child1Label.value,
@@ -664,15 +664,15 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             var jstreeData = [];
             var existingNodes = {};
             result.forEach(function (item) {
-                if (!existingNodes[item.concept.value]) {
-                    existingNodes[item.concept.value] = 1;
+                if (!existingNodes[item.subject.value]) {
+                    existingNodes[item.subject.value] = 1;
                     jstreeData.push({
-                        id: item.concept.value,
-                        text: item.conceptLabel.value,
+                        id: item.subject.value,
+                        text: item.subjectLabel.value,
                         parent: "#",
                         data: {
-                            id: item.concept.value,
-                            label: item.conceptLabel.value,
+                            id: item.subject.value,
+                            label: item.subjectLabel.value,
                             source: "ISO-15663",
                         },
                     });
@@ -682,7 +682,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     jstreeData.push({
                         id: item.child1.value,
                         text: item.child1Label.value,
-                        parent: item.concept.value,
+                        parent: item.subject.value,
                         data: {
                             id: item.child1.value,
                             label: item.child1Label.value,
@@ -703,15 +703,15 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             var jstreeData = [];
             var existingNodes = {};
             result.forEach(function (item) {
-                if (!existingNodes[item.concept.value]) {
-                    existingNodes[item.concept.value] = 1;
+                if (!existingNodes[item.subject.value]) {
+                    existingNodes[item.subject.value] = 1;
                     jstreeData.push({
-                        id: item.concept.value,
-                        text: item.conceptLabel.value,
+                        id: item.subject.value,
+                        text: item.subjectLabel.value,
                         parent: "#",
                         data: {
-                            id: item.concept.value,
-                            label: item.conceptLabel.value,
+                            id: item.subject.value,
+                            label: item.subjectLabel.value,
                             source: "ISO-15663",
                         },
                     });
@@ -721,7 +721,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     jstreeData.push({
                         id: item.child1.value,
                         text: item.child1Label.value,
-                        parent: item.concept.value,
+                        parent: item.subject.value,
                         data: {
                             id: item.child1.value,
                             label: item.child1Label.value,
@@ -743,15 +743,15 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
       var jstreeData = [];
       var existingNodes = {};
       result.forEach(function(item) {
-        if (!existingNodes[item.concept.value]) {
-          existingNodes[item.concept.value] = 1;
+        if (!existingNodes[item.subject.value]) {
+          existingNodes[item.subject.value] = 1;
           jstreeData.push({
-            id: item.concept.value,
-            text: item.conceptLabel.value,
+            id: item.subject.value,
+            text: item.subjectLabel.value,
             parent: "#",
             data: {
-              id: item.concept.value,
-              label: item.conceptLabel.value,
+              id: item.subject.value,
+              label: item.subjectLabel.value,
               source: "ISO-15663"
             }
           });
@@ -761,7 +761,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
           jstreeData.push({
             id: item.child1.value,
             text: item.child1Label.value,
-            parent: item.concept.value,
+            parent: item.subject.value,
             data: {
               id: item.child1.value,
               label: item.child1Label.value,

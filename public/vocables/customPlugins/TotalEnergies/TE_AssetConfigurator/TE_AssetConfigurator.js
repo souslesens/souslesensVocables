@@ -217,7 +217,7 @@ var TE_AssetConfigurator = (function () {
                 self.setTreeSystemNodesInfos(obj.node.id);
             },
             contextMenu: TE_AssetConfigurator.getSystemsTreeContextMenu(),
-            optionalData: { system: "concept" },
+            optionalData: { system: "subject" },
         };
         return options;
     };
@@ -641,14 +641,14 @@ var TE_AssetConfigurator = (function () {
                 ids.push(item.data.id);
             });
             var options = {
-                filter: Sparql_common.setFilter("concept", ids),
+                filter: Sparql_common.setFilter("subject", ids),
             };
             Sparql_OWL.getItems(self.currentSource, options, function (err, result2) {
                 if (err) return MainController.UI.message(err);
                 if (!self.systemsMap[self.currentSystem].items) self.systemsMap[self.currentSystem].items = {};
                 result2.forEach(function (item) {
-                    var obj = { id: item.concept.value };
-                    obj.code = item.concept.value.substring(item.concept.value.lastIndexOf("/") + 1);
+                    var obj = { id: item.subject.value };
+                    obj.code = item.subject.value.substring(item.subject.value.lastIndexOf("/") + 1);
                     if (item.p.value == "http://souslesens.org/resource/vocabulary/hasCode") obj.code = item.o.value;
                     if (item.p.value == "http://www.w3.org/2004/02/skos/core#definition") obj.definition = item.o.value;
 
@@ -838,8 +838,8 @@ var TE_AssetConfigurator = (function () {
                         if (err) return callbackSeries(err);
                         self.currentSameAsIds = {};
                         result.forEach(function (item) {
-                            if (!self.currentSameAsIds[item.concept.value]) self.currentSameAsIds[item.concept.value] = [];
-                            self.currentSameAsIds[item.concept.value].push(item.value.value);
+                            if (!self.currentSameAsIds[item.subject.value]) self.currentSameAsIds[item.subject.value] = [];
+                            self.currentSameAsIds[item.subject.value].push(item.value.value);
                         });
                         callbackSeries();
                     });
@@ -1067,7 +1067,7 @@ var TE_AssetConfigurator = (function () {
                 var html = "Properties CFIHOS <br><table>";
 
                 result.forEach(function (item) {
-                    html += "<tr><td>" + item.propLabel.value + "</td><td>" + item.valueLabel.value + "</td></tr>";
+                    html += "<tr><td>" + item.propLabel.value + "</td><td>" + item.objectLabel.value + "</td></tr>";
                 });
                 html += "</table>";
                 $("#TE_AssetConfigurator_ProprertiesDiv").html(html);
@@ -1145,7 +1145,7 @@ var TE_AssetConfigurator = (function () {
             self.addToGraph(visjsData);
         },
         getLinkedAssetNodesMap: function () {
-            if (!visjsGraph.data || !visjsGraph.data.nodes) return {};
+            if (!visjsGraph.isGraphNotEmpty()) return {};
             var assetNodesMap = {};
             var nodes = visjsGraph.data.nodes.get();
             nodes.forEach(function (node) {

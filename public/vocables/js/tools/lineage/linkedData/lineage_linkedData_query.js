@@ -545,7 +545,7 @@ var Lineage_linkedData_query = (function () {
             }
         });
 
-        if (!visjsGraph.data || !visjsGraph.data.nodes) {
+        if (!visjsGraph.isGraphNotEmpty()) {
             self.drawNewGraph(visjsData);
         }
         visjsGraph.data.nodes.add(visjsData.nodes);

@@ -229,7 +229,7 @@ npm ci
 # Install the front
 cd mainapp
 npm ci
-# Build Webpack files 
+# Build Webpack files
 npm run build
 # Go back to root
 cd ..

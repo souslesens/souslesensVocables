@@ -185,7 +185,7 @@ var skosToElastic = {
                     });
 
                     hitsIndexSource.forEach(function (item, _index) {
-                        //   var label = item._source.concept;
+                        //   var label = item._source.subject;
                         var label = item._source.name;
 
                         var elasticQuery = {
@@ -250,10 +250,10 @@ var skosToElastic = {
                                 target: hitsIndexTarget[index],
                             });
                             // var targetIds = [];
-                            //    console.log(hitsIndexSource[index]._source.concept+"  "+hitsIndexTarget[index]._source.path)
+                            //    console.log(hitsIndexSource[index]._source.subject+"  "+hitsIndexTarget[index]._source.path)
                             /*    hits.forEach(function (hit) {
                                 targetIds.push({
-                                    source_name: hitsIndexSource[index]._source.concept,
+                                    source_name: hitsIndexSource[index]._source.subject,
                                     source_id: hitsIndexSource[index]._source.id,
                                     taregt_name: hit._source.prefLabel,
                                     target_id: hit._source.pathIds[0]
@@ -284,7 +284,7 @@ var skosToElastic = {
                     var payload = {
                         query: {
                             match_all: {},
-                            //  "match":{"concept":"corrosion"}
+                            //  "match":{"subject":"corrosion"}
                         },
                         // "from": 4800,
                         size: 5000,

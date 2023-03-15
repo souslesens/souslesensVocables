@@ -24,7 +24,7 @@ var Import = (function () {
         if (!type) type = self.currentType;
         if (!type) alert("no type");
         var parentNode, treeDivId, predicate;
-        if (type == "concept") {
+        if (type == "subject") {
             parentNode = Blender.currentTreeNode;
             skosType = "http://www.w3.org/2004/02/skos/core#Concept";
             predicate = "http://www.w3.org/2004/02/skos/core#broader";
@@ -52,7 +52,7 @@ var Import = (function () {
             if (!word) return;
 
             words2.push({ id: newNodeId, label: word, type: skosType });
-            if (type == "concept") {
+            if (type == "subject") {
                 triples.push({ subject: newNodeId, predicate: predicate, object: parentNode.data.id, valueType: "uri" });
             } else if (type == "collection") {
                 triples.push({ subject: parentNode.id, predicate: predicate, object: newNodeId, valueType: "uri" });

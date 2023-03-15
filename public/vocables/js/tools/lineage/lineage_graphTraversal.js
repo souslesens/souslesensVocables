@@ -134,7 +134,7 @@ var Lineage_graphTraversal = (function () {
     };
 
     self.showPathNodesList = function (source, path) {
-        var filter = Sparql_common.setFilter("concept", path, null);
+        var filter = Sparql_common.setFilter("subject", path, null);
         Sparql_OWL.getItems(source, { filter: filter }, function (err, result) {});
     };
 

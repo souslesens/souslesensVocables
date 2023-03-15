@@ -39,7 +39,7 @@ var Lineage_containers = (function () {
             label: "Add selected node to container",
             action: function (_e) {
                 var graphNodeData = Lineage_classes.currentGraphNode.data;
-                Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, self.currentContainer.data, graphNodeData);
+                Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, self.currentContainer, graphNodeData);
             },
         };
         items["PasteNodesInContainer"] = {
@@ -796,7 +796,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
                     setNodesLevel(visjsData);
 
-                    if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                    if (!visjsGraph.isGraphNotEmpty()) {
                         Lineage_classes.drawNewGraph(visjsData);
                     } else {
                         visjsGraph.data.nodes.add(visjsData.nodes);
@@ -874,79 +874,11 @@ Lineage_styles.showDialog(self.currentContainer.data);
             var fromStr = Sparql_common.getFromStr(source, false, false);
             var filterContainer0Str = "";
             if (containerId) {
-                filterContainer0Str = Sparql_common.setFilter("parent0", containerId);
+                // needs options.useFilterKeyWord because VALUES dont work
+                filterContainer0Str = Sparql_common.setFilter("parent0", containerId, null, { useFilterKeyWord: 1 });
             }
 
-            /*      var where0 =
-                    " ?container0  rdf:type ?container0Type.filter(?container0Type in (rdf:Bag,rdf:List))" +
-                    "optional{?container0 rdfs:label ?container0Label.}" +
-                    "  ?container0 <http://www.w3.org/2000/01/rdf-schema#member> ?parentMember. " +
-                    "optional{?parentMember rdfs:label ?parentMemberLabel.}" +
-                    "?parentMember rdf:type ?parentMemberType.";
-
-                if (options.descendants) {
-                    where0 +=
-                        "  ?parentMember <http://www.w3.org/2000/01/rdf-schema#member>* ?childMember. " +
-                        "optional{?childMember rdfs:label ?childMemberLabel.}" +
-                        "?childMember rdf:type ?childMemberType." +
-                        "?parent rdfs:member ?childMember. ";
-                }
-                where0 += filterContainer0Str;
-
-                var query =
-                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                    "select distinct *     " +
-                    fromStr +
-                    " WHERE {";
-
-                query += "{" + where0 + " FILTER (?childMemberType in (rdf:Bag,rdf:List))}";
-              query += " UNION ";
-                query += "{" + where0 + " FILTER (?childMemberType not in (rdf:Bag,rdf:List)) bind (?childMemberType as ?leafType)}";
-
-                query += "} limit 10000";*/
-
-            /*     var query="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-               "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-               "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>select distinct\n" +
-               "?container0 ?container0Type ?container0Label ?parentMember  ?parentMemberType ?parentMemberLabel ?childMember ?childMemberLabel" +
-               " GROUP_CONCAT(distinct ?childMemberType ,\",\") as  ?childMemberTypes\n" +
-
-               fromStr +" WHERE {{ ?container0  rdf:type ?container0Type.filter(?container0Type in (rdf:Bag,rdf:List))" +
-               "optional{?container0 rdfs:label ?container0Label.} " +
-               " ?container0 <http://www.w3.org/2000/01/rdf-schema#member> " +
-               "?parentMember. optional{?parentMember rdfs:label ?parentMemberLabel.}" +
-               "?parentMember rdf:type ?parentMemberType. " +
-               " ?parentMember <http://www.w3.org/2000/01/rdf-schema#member>* ?childMember. " +
-               "optional{?childMember rdfs:label ?childMemberLabel.}" +
-               "?childMember rdf:type ?childMemberType.?parent rdfs:member ?childMember. " +
-               filterContainer0Str +
-               "  }} group by ?container0 ?container0Type ?container0Label ?parentMember  ?parentMemberType ?parentMemberLabel ?childMember ?childMemberLabel"
-
-  */
-
-            /*var query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-          "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-          "select distinct ?container0 ?container0Type ?container0Label ?parentMember  ?parentMemberType ?parentMemberLabel ?childMember ?childMemberLabel ?leaf  ?leafType ?leafLabel " + fromStr + "WHERE { ";
-
-        if (options.leaves) {
-          query += "  ?childMember rdfs:member* ?leaf. ?leaf rdf:type ?leafType. ?leaf rdfs:label ?leafLabel. filter (?leafType not in (rdf:List,rdf:Bag))" +
-            " {select ?container0 ?container0Type ?container0Label ?parentMember  ?parentMemberType ?parentMemberLabel ?childMember ?childMemberLabel ?childMemberType  WHERE {";
-
-        }
-        query += " ?parentMember <http://www.w3.org/2000/01/rdf-schema#member>* ?childMember." +
-          " optional{?childMember rdfs:label ?childMemberLabel.}?childMember rdf:type ?childMemberType." +
-
-          "{select ?container0 ?container0Type ?container0Label ?parentMember  ?parentMemberType ?parentMemberLabel  WHERE { { ?container0  rdf:type ?container0Type. " +
-          " filter(?container0Type in (rdf:Bag,rdf:List))optional{?container0 rdfs:label ?container0Label.}" +
-          "  ?container0 <http://www.w3.org/2000/01/rdf-schema#member> ?parentMember." +
-          " optional{?parentMember rdfs:label ?parentMemberLabel.}?parentMember rdf:type ?parentMemberType.  " +
-          filterContainer0Str + " }} }}";
-        if (options.leaves) {
-          query += "}} " ;
-        }*/
+            //  var pathOperator = "+";
             var pathOperator = "+";
             if (options.onlyOneLevel) {
                 pathOperator = "";
@@ -1023,7 +955,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 if (!existingNodes[item.container.value]) {
                     existingNodes[item.container.value] = 1;
 
-                    var color2 = "#0067bb";
+                    var color2 = "#00afef";
                     visjsData.nodes.push({
                         id: item.container.value,
                         label: item.containerLabel.value,

@@ -63,10 +63,14 @@ var Lineage_combine = (function () {
         nodes.forEach(function (node1) {
             if (!node1.data) return;
             nodes.forEach(function (node2) {
-                if (!node2.data) return;
-                if (node1.data.id == node2.data.id) return;
-                if (node1.data.label == node2.data.label) commonNodes.push({ fromNode: node1, toNode: node2 });
-                if (node1.label == node2.label) commonNodes.push({ fromNode: node1, toNode: node2 });
+                if (!node2.data && !node1.data.label) return;
+                if (node1.data.id == node2.data.id && node1.data.source == node2.data.source) return;
+                if (node1.data.label.toLowerCase().replace(/ /g, "") == node2.data.label.toLowerCase().replace(/ /g, "")) {
+                    commonNodes.push({ fromNode: node1, toNode: node2 });
+                }
+                if (node1.label == node2.label) {
+                    commonNodes.push({ fromNode: node1, toNode: node2 });
+                }
             });
         });
 
@@ -99,8 +103,7 @@ var Lineage_combine = (function () {
                                 scaleFactor: 0.5,
                             },
                         },
-                        // label: join.propLabel,
-                        // font: { color: "green", size: 12, background: "#eee" },
+
                         dashes: true,
                         color: "green",
                         width: 2,
@@ -198,7 +201,7 @@ var Lineage_combine = (function () {
                                                 if (item["child" + i]) {
                                                     var parent;
                                                     if (i == 1) {
-                                                        var parent = item.concept.value;
+                                                        var parent = item.subject.value;
                                                         if (mergeDepth == "nodeDescendantsOnly") parent = targetNode;
                                                         item["child" + i].parent = parent;
                                                     } else item["child" + i].parent = item["child" + (i - 1)].value;

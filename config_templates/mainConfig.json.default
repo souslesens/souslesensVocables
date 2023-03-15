@@ -3,7 +3,6 @@
   "listenPort": "3010",
   "serverUrl": "../slsv",
   "default_sparql_url": "http://xxxxxx:8890/sparql",
-  "datalab_sparql_url": "http://xxxxxx:8890/sparql",
   "auth": "local",
   "defaultGroups": [],
   "logDir": "logs",
@@ -55,4 +54,17 @@
      "passwordColumn": "password",
      "groupsColumn": "groups"
   }
+
+
+  ,
+   "authenticationDatabase": {
+          "user": "root",
+          "password": "xxx",
+          "host": "127.0.0.1",
+          "database": "slsv",
+          "table": "users",
+          "loginColumn": "login",
+          "passwordColumn": "password",
+          "groupsColumn": "groups"
+      }
 }

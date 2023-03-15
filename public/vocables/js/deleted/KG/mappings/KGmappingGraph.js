@@ -40,7 +40,7 @@ var KGmappingGraph = (function () {
                 visjsData.nodes.push(node);
             }
 
-            if (!visjsGraph.data || !visjsGraph.data.nodes) {
+            if (!visjsGraph.isGraphNotEmpty()) {
                 var options = {
                     selectNodeFn: function (node, _event) {
                         MainController.UI.hidePopup("graphPopupDiv");
@@ -190,7 +190,7 @@ var KGmappingGraph = (function () {
                     });
                 }
 
-                if (!visjsGraph.data || !visjsGraph.data.nodes) {
+                if (!visjsGraph.isGraphNotEmpty()) {
                     var options = {
                         onclickFn: function (_node, _event) {
                             return;

@@ -69,8 +69,7 @@ var Clipboard = (function () {
         }
 
         var newNodes = [];
-        if (!visjsGraph.data) return;
-        if (!visjsGraph.data || !visjsGraph.data.nodes) return;
+        if (!visjsGraph.isGraphNotEmpty()) return;
         visjsGraph.data.nodes.getIds().forEach(function (id) {
             var newNode = { id: id, hidden: false };
             if (selectedNodeId && selectedNodeId == id) {

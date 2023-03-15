@@ -75,7 +75,7 @@ var ChildHood = (function () {
                                     for (var i = 1; i <= depth; i++) {
                                         if (item["child" + i]) {
                                             var parent;
-                                            if (i == 1) parent = item.concept.value;
+                                            if (i == 1) parent = item.subject.value;
                                             else parent = item["child" + (i - 1)].value;
 
                                             sourceNodes.push({

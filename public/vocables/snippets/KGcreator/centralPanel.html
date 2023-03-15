@@ -31,27 +31,28 @@
                 <input id="KGcreator_subjectInput" class="KGcreator_tripleInput" />
                 lookup name<input id="KGcreator_subjectLookupName" />
             </div>
-            <div class="KGcreator_tripleDiv">
+
+            <div class="KGcreator_tripleDivXX" id="sharedPredicatesPanel" style="display: flex; flex-direction: row"></div>
+
+            <!--      <div class="KGcreator_tripleDiv">
                 Predicate
                 <select id="KGcreator_predicateSelect" onchange="KGcreator.onTripleModelSelect('p',$(this).val())"></select>
                 <input id="KGcreator_predicateInput" class="KGcreator_tripleInput" />
                 <div>is Restriction<input type="checkbox" id="KGcreator_isRestrictionCBX" /></div>
-                <!--isSpecificPredicate<input type="checkbox" id="KGcreator_isSpecificPredicateCBX" /-->
+
             </div>
             <div class="KGcreator_tripleDiv">
+
+
                 Object
-                <div>Usual objs.<select id="KGcreator_objectUpperOntSelect" style="width: 150px" onchange="KGcreator.onTripleModelSelect('o',$(this).val())"></select></div>
-                <div>
-                    or <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.fillObjectOptionsFromPrompt('owl:Class','KGcreator_objectSelect')">Search...</button>
-                    <select id="KGcreator_objectSelect" style="width: 150px" onchange="KGcreator.onTripleModelSelect('o',$(this).val())"></select>
-                </div>
+                <div> Usual objs.<select id="KGcreator_usualObjectsSelect"  style="width:150px" onchange="KGcreator.onTripleModelSelect('o',$(this).val())"></select></div>
+                <div>  or <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter('owl:Class','KGcreator_objectSelect')">Search...</button>
+              <select id="KGcreator_objectSelect" style="width:150px" onchange="KGcreator.onTripleModelSelect('o',$(this).val())"></select></div>
 
                 <input id="KGcreator_objectInput" class="KGcreator_tripleInput" />
-                <div>
-                    is String<input type="checkbox" id="KGcreator_isObjectStringCBX" /> <br />lookup name<input id="KGcreator_objectLookupName" />
-                    <button onclick="KGcreator.addTripleToTA()">Add</button>
-                </div>
-            </div>
+                <div>is String<input type="checkbox" id="KGcreator_isObjectStringCBX" /> <br />lookup name<input id="KGcreator_objectLookupName" />
+                    <button onclick="KGcreator.addTripleToTA()">Add</button></div>
+            </div>-->
 
             <div></div>
         </div>
@@ -70,7 +71,6 @@
 
             <!--  <button onclick="KGcreator.copyMappings()">Copy</button>-->
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearMappings()">Clear mappings</button>
-
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.createTriples(true)">View Sample triples</button>
             <!--  <input type="checkbox" id="KGcreator_addAllPredefinedPart14PredicatesTriples" />addPredefinedPart14Triples-->
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.createTriples()">Create triples</button>

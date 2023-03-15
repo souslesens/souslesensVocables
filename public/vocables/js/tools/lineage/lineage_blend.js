@@ -12,10 +12,10 @@ var Lineage_blend = (function() {
       $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function() {
         $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function() {
           $("#LineageBlend_commonPredicateObjectDiv").load("snippets/commonUIwidgets/editPredicateDialog.html", function() {
-            CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, "createNode");
-            $("#LineageBlend_commonPredicateObjectDiv2").load("snippets/commonUIwidgets/editPredicateDialog.html", function() {
-              CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, "createNode");
+            CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, function() {
+              $("#editPredicate_propertyDiv").css("display", "none");
             });
+
           });
 
         });
@@ -90,13 +90,8 @@ var Lineage_blend = (function() {
         var source = Lineage_sources.activeSource;
 
 
-
-
         async.series(
           [
-
-
-
 
 
             //matching restrictions
@@ -601,56 +596,27 @@ source: specificSourceLabel
       $("#LineageBlend_creatingNodeObjectsSelect").val("");
       $("#LineageBlend_creatingNodeObjectsSelect").val("");
       self.graphModification.currentCreatingNodeType = type;
-      var showClassDiv = type == "Class";
-      if (showClassDiv) {
-        $("#LineageBlend_creatingNodeClassDiv").css("display", "block");
-        $("#LineageBlend_creatingNodeNameIndividualDiv").css("display", "none");
+      var vocabs = [];
+      $("#editPredicate_vocabularySelect2 option").each(function() {
+        vocabs.push($(this).val());
+      });
+
+      if (type == "NamedIndividual") {
+        $("#LineageBlend_creatingNodeParentTypeSpan").html("rdf:type");
+        CommonUIwidgets.predicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource,"_curentSourceAndImports")
       }
       else {
-        $("#LineageBlend_creatingNodeClassDiv").css("display", "none");
-        $("#LineageBlend_creatingNodeNameIndividualDiv").css("display", "block");
+        $("#LineageBlend_creatingNodeParentTypeSpan").html("owl:subClassOf");
+        CommonUIwidgets.predicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource,"_all")
       }
+
+      $("#LineageBlend_creatingNodeClassDiv").css("display", "block");
+
 
       $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open");
       $("#LineageBlend_creatingNodeClassParamsDiv").tabs({});
-      if (false && type == "NamedIndividual") {
-        self.graphModification.getPossibleNamedIndividuals(function(err, result) {
-          if (err) {
-            return alert(err.responseText);
-          }
-          self.possibleNamedIndividuals = result;
-
-          // add existing individuals as possible type object
-          var existingIndividuals = [];
-          for (var key in self.possibleNamedIndividuals) {
-            existingIndividuals.push({
-              id: self.possibleNamedIndividuals[key],
-              label: "i_" + key,
-              type: "NamedIndividual"
-            });
-          }
-          existingIndividuals.sort(function(a, b) {
-            if (a.label > b.label) {
-              return 1;
-            }
-            if (a.labe < b.label) {
-              return -1;
-            }
-            return 0;
-          });
-          var sourceObjects = self.currentPossibleClassesAndPredicates.sourceObjects.concat(existingIndividuals);
-          common.fillSelectOptions("LineageBlend_creatingNodeObjects2Select", sourceObjects, true, "label", "id");
-          if (Lineage_classes.currentGraphNode && Lineage_classes.currentGraphNode.data) {
-            setTimeout(function() {
-              $("#LineageBlend_creatingNodeObjects2Select").val(Lineage_classes.currentGraphNode.data.id);
-            }, 200);
-          }
-        });
-      }
-      else {
-        if (Lineage_classes.currentGraphNode && Lineage_classes.currentGraphNode.data) {
-          $("#LineageBlend_creatingNodeObjectsSelect").val(Lineage_classes.currentGraphNode.data.id);
-        }
+      if (Lineage_classes.currentGraphNode && Lineage_classes.currentGraphNode.data) {
+        $("#LineageBlend_creatingNodeObjectsSelect").val(Lineage_classes.currentGraphNode.data.id);
       }
     },
 
@@ -1045,9 +1011,9 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
       }
     },
 
-    onselectNodeUriType:function(uryType){
-      var display=(uriType=="specific"?"block":"none")
-        $("#LineageBlend_creatingNodeSubjectUri").css("display","display")
+    onselectNodeUriType: function(uryType) {
+      var display = (uriType == "specific" ? "block" : "none");
+      $("#LineageBlend_creatingNodeSubjectUri").css("display", "display");
     }
   };
 

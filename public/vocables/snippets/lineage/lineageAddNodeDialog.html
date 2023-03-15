@@ -70,24 +70,7 @@
 </div>
 
 
-<!--
-<div id="lineageAddEdgeDialog_mainDiv" style="background-color: white; display: flex; flex-direction: row">
-<div class="blendCreateNode_lineDiv">
-      Predicate
-      <select id="KGcreator_predicateSelect" onchange="KGcreator.onTripleModelSelect('p',$(this).val())"></select>
-      <input id="KGcreator_predicateInput" class="KGcreator_tripleInput" />
-  </div>
-  <div class="blendCreateNode_lineDiv">
-      Object
-      <select id="KGcreator_objectSelect" onchange="KGcreator.onTripleModelSelect('o',$(this).val());Lineage_blend.graphModification.addTripleToCreatingNode();"></select>
-      <div>
-          <input id="KGcreator_objectInput" class="KGcreator_tripleInput" />
-          <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_blend.graphModification.addTripleToCreatingNode()" style="width: 50px">Add</button>
-      </div>
-  </div>
-</div>
 
-  -->
 <div id="LineageBlend_creatingNodeClassParamsDiv">
   <ul>
       <li style="background-color: #d9bb73"><a href="#LineageBlend_creatingNodeSingleTab">SingleNode</a></li>
@@ -97,14 +80,10 @@
   <div id="LineageBlend_creatingNodeSingleTab" style="display: flex; flex-direction: column">
       <div class="LineageBlend_creatingNodeClassParamsLine">rdfs:label&nbsp;<input style="width: 350px" id="LineageBlend_creatingNodeNewClassLabel" /></div>
       <div id="LineageBlend_creatingNodeClassDiv" class="LineageBlend_creatingNodeClassParamsLine">
-          rdfs:subClassOf&nbsp;&nbsp;
+        <span id="LineageBlend_creatingNodeParentTypeSpan">rdfs:subClassOf&nbsp;&nbsp;</span>
           <div id="LineageBlend_commonPredicateObjectDiv"></div>
 
         </div>
-        <div id="LineageBlend_creatingNodeNameIndividualDiv" class="LineageBlend_creatingNodeClassParamsLine">
-            rdf:type&nbsp;
-            <div id="LineageBlend_commonPredicateObjectDiv2"></div>
-              </div>
 
         <div class="LineageBlend_creatingNodeClassParamsLine">
             <button class="class=&quot;btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_blend.graphModification.addClassOrIndividualTriples()" style="width: 100px">OK</button>

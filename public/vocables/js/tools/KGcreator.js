@@ -624,7 +624,10 @@ var KGcreator = (function () {
                 },
                 function (callbackSeries) {
                     $("#sharedPredicatesPanel").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
-                        CommonUIwidgets.predicatesSelectorWidget.init(KGcreator.currentSlsvSource, "KGcreator");
+                        CommonUIwidgets.predicatesSelectorWidget.init(KGcreator.currentSlsvSource, function(){
+                            self.predicatesSelectorWidget.onSelectObjectFn = function (value) {};
+                            self.predicatesSelectorWidget.onSelectPropertyFn = function (value) {};
+                        });
 
                         var html =
                             ' is String<input type="checkbox" id="KGcreator_isObjectStringCBX" /> ' +

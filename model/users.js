@@ -62,7 +62,7 @@ class UserModel {
      */
     checkUserPassword = async (login, password) => {
         const userAccount = await this._readOne(login);
-        if (!userAccount) {
+        if (userAccount === undefined) {
             // console.debug(`user ${login} not found`);
             return false;
         }
@@ -145,7 +145,7 @@ class UserModelJson extends UserModel {
      */
 
     _readOne = async (login) => {
-        const users = await fs.promises.readFile(this.userPath).then((data) => JSON.parse(data.toString()));
+        const users = await this._read();
         return Object.entries(users)
             .map(([_id, user]) => user)
             .find((user) => user.login === login);

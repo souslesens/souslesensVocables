@@ -45,8 +45,8 @@ Cypress.Commands.add("logout", () => {
     });
     // eslint-disable-next-line cypress/no-unnecessary-waiting
     // eslint-disable-next-line cypress/no-unnecessary-waiting
-    cy.get("#dropdownMenuLink").click();
-    cy.get("#logout-button").click();
+    cy.get("#user-username").click();
+    cy.get("#logout-button").click({ force: true });
 });
 
 Cypress.Commands.add("refreshBfoIndex", () => {

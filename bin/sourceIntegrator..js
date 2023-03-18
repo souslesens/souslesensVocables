@@ -241,6 +241,7 @@ var SourceIntegrator = {
             });
         }
 
+
         writer = new N3.Writer({ format: "N-Triples", prefixes: {} });
 
         if (true) {

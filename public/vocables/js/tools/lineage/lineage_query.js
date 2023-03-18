@@ -26,7 +26,7 @@ var Lineage_query = (function () {
             $("#lineage_relation_filterRoleSelect").val("");
             $("#Lineage_relation_filterTypeSelect").val("");
             $("#Lineage_relation_filterVocabularySelect").val("");
-            $("#lineageQuery_valueDiv").css("display", "none");
+            $("#lineageQuery_literalValueDiv").css("display", "none");
             if (!self.currentProperty) {
                 return;
             }
@@ -134,7 +134,7 @@ var Lineage_query = (function () {
     self.onSelectResourceType = function (role, type) {
         if (type == "String") {
             common.fillSelectOptions("lineageQuery_operator", self.operators["String"]);
-            $("#lineageQuery_valueDiv").css("display", "block");
+            $("#lineageQuery_literalValueDiv").css("display", "block");
         } else {
             var scopes = [];
             if (visjsGraph.isGraphNotEmpty) {

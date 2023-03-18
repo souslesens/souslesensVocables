@@ -3,10 +3,13 @@ var Lineage_relationFilter = (function () {
     var restrictions = null;
     var constraints = null;
     self.showAddFilterDiv = function () {
+        $("#Lineage_relation_constraints").html("");
         $("#lineage_relation_filterRoleSelect").val("");
         $("#Lineage_relation_filterTypeSelect").val("");
         $("#Lineage_relation_filterVocabularySelect").val("");
-        $("#lineageQuery_valueDiv").css("display", "none");
+        $("#lineageQuery_uriValueDiv").css("display", "none");
+        $("#lineageQuery_literalValueDiv").css("display", "none");
+
         if (!self.currentProperty) {
             return;
         }
@@ -119,10 +122,20 @@ var Lineage_relationFilter = (function () {
 
     self.onSelectResourceType = function (type) {
         var role = self.currentFilterRole;
-        if (role == "String") {
+
+        if (type == "String") {
+            $("#lineageQuery_literalValueDiv").css("display", "block");
             common.fillSelectOptions("lineageQuery_operator", self.operators["String"]);
-            $("#lineageQuery_valueDiv").css("display", "block");
+        }
+        if (type == "Date") {
+            $("#lineageQuery_literalValueDiv").css("display", "block");
+            common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
+        }
+        if (type == "Number") {
+            $("#lineageQuery_literalValueDiv").css("display", "block");
+            common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
         } else if (restrictions[self.currentProperty.id]) {
+            $("#lineageQuery_uriValueDiv").css("display", "block");
             common.fillSelectOptions("Lineage_relation_filterVocabularySelect", [], false);
             if (role == "subject") {
                 common.fillSelectOptions("Lineage_relation_filterResourcesSelect", self.domain, true, "label", "id");
@@ -130,6 +143,7 @@ var Lineage_relationFilter = (function () {
                 common.fillSelectOptions("Lineage_relation_filterResourcesSelect", self.range, true, "label", "id");
             }
         } else {
+            $("#lineageQuery_uriValueDiv").css("display", "block");
             var scopes = [];
             if (visjsGraph.isGraphNotEmpty) {
                 scopes.push("whiteBoardNodes");
@@ -170,6 +184,29 @@ var Lineage_relationFilter = (function () {
     };
 
     self.attachFilterToProperty = function () {
+        function getLiteralValueFilter() {
+            var filterIndex = "";
+            var operator = $("#lineageQuery_operator").val();
+            var value = $("#lineageQuery_value").val();
+            var type = $("#Lineage_relation_filterTypeSelect").val();
+            var objectFilterStr = "";
+            if (type == "String") {
+                if (operator == "contains") {
+                    objectFilterStr += " Filter(regex(str(?object" + filterIndex + "),'" + value + "','i')).";
+                } else if (operator == "not contains") {
+                    objectFilterStr += "Filter( ! regex(str(?object" + filterIndex + "),'" + value + "','i')).";
+                } else {
+                    objectFilterStr += " Filter(?object" + filterIndex + "" + operator + "'" + value + "').";
+                }
+            } else if (filter.objectType == "Number") {
+                objectFilterStr += "  Filter(?object" + filterIndex + operator + "'" + value + "'^^xsd:float).";
+            } else if (filter.objectType == "Date") {
+                objectFilterStr += " Filter(?object" + filterIndex + operator + "'" + value + "'^^xsd:dateTime).";
+            }
+
+            return objectFilterStr;
+        }
+
         var role = self.currentFilterRole;
         var resourceType = $("#Lineage_relation_filterTypeSelect").val();
         var resource = $("#Lineage_relation_filterResourcesSelect").val();
@@ -189,7 +226,7 @@ var Lineage_relationFilter = (function () {
             }
         } else {
             if (resourceType == "String") {
-                filter.filterStr = "FILTER ";
+                filter.filterStr = getLiteralValueFilter();
             } else {
                 if (role == "subject") {
                     filter.filterStr = " ?subject rdf:type " + resourceType + ". ";

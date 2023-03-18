@@ -31,6 +31,9 @@ var Config = (function () {
     self.searchLimit = 500;
     self.searchDepth = 6;
     self.maxSelectListSize = 500;
+    self.whiteBoardMaxLabelLength = 20;
+
+    self.dataTableOutputLimit = 500;
     self.defaultGraphTheme = "white"; //dark
     self.predicatesSource = "TSF-PREDICATES";
     self.dictionarySource = "TSF-DICTIONARY";
@@ -63,6 +66,7 @@ var Config = (function () {
     };
 
     self.topLevelOntologies = {
+        IDO: { uriPattern: "lis14", prefix: "ido", prefixtarget: "http://rds.posccaesar.org/ontology/lis14/rdl/" },
         "ISO_15926-part-14_PCA": { uriPattern: "lis14", prefix: "part14", prefixtarget: "http://rds.posccaesar.org/ontology/lis14/rdl/" },
         BFO: { uriPattern: "obo", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
         "BFO-2020": { uriPattern: "obo", prefix: "bfo", prefixtarget: "http://purl.obolibrary.org/obo/" },
@@ -79,6 +83,7 @@ var Config = (function () {
         "iof-av": { graphUri: "https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/" },
         skos: { graphUri: "http://www.w3.org/2004/02/skos/core/" },
     };
+
     self.ontologiesVocabularyModels = JSON.parse(JSON.stringify(self.basicVocabularies));
 
     self.namedSetsThesaurusGraphUri = "http://souslesens.org/resource/named-triple-sets/";
@@ -148,6 +153,46 @@ var Config = (function () {
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#intersectionOf": "⊓",
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#unionOf": "⨆",
         },
+    };
+
+    self.topLevelOntologyFixedlegendMap = {
+        IDO: {
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#F90EDD",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject": "#00AFEF",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject": "#FDBF01",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject": "#70AC47",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Activity": "#70309f",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Aspect": "#cb6601",
+        },
+        "ISO_15926-part-14_PCA": {
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#F90EDD",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject": "#00AFEF",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject": "#FDBF01",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject": "#70AC47",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Activity": "#70309f",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Aspect": "#cb6601",
+        },
+        BFO: {
+            "http://purl.obolibrary.org/obo/BFO_0000030": "#00AFEF",
+            "http://purl.obolibrary.org/obo/BFO_0000024": "#00AFEF",
+            "http://purl.obolibrary.org/obo/BFO_0000027": "#00AFEF",
+            "http://purl.obolibrary.org/obo/BFO_0000145": "#cb6601",
+            "http://purl.obolibrary.org/obo/BFO_0000023": "#cb6601",
+            "http://purl.obolibrary.org/obo/BFO_0000016": "#cb6601",
+            "http://purl.obolibrary.org/obo/BFO_0000019": "#cb6601",
+            "http://purl.obolibrary.org/obo/BFO_0000017": "#cb6601",
+            "http://purl.obolibrary.org/obo/BFO_0000006": "#F90EDD",
+            "http://purl.obolibrary.org/obo/BFO_0000029": "#F90EDD",
+            "http://purl.obolibrary.org/obo/BFO_0000140": "#F90EDD",
+            "http://purl.obolibrary.org/obo/BFO_0000182": "#70309f",
+            "http://purl.obolibrary.org/obo/BFO_0000144": "#70309f",
+            "http://purl.obolibrary.org/obo/BFO_0000148": "#70309f",
+            "http://purl.obolibrary.org/obo/BFO_0000038": "#70309f",
+            "http://purl.obolibrary.org/obo/BFO_0000203": "#70309f",
+            "http://purl.obolibrary.org/obo/BFO_0000015": "#70309f",
+            "http://purl.obolibrary.org/obo/BFO_0000008": "#70309f",
+        },
+        DOLCE: {},
     };
 
     /*****************************************************************************/

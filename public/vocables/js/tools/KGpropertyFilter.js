@@ -677,7 +677,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                         var html =
                             "<div  style='position: absolute;top:30px;left:450px;'>" +
                             "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='visjsGraph.clearGraph()'> clear Graph</button>" +
-                            '<button  class="btn btn-sm my-1 py-0 btn-outline-primary" onclick=\'Export.exportGraphToDataTable(null,"GRAPH")\' > Export</button>' +
+                            "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='Export.exportGraphToDataTable()' > Export</button>" +
                             '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.addNodesAndParentsToGraph()">Parents</button>' +
                             '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.addChildrenToGraph()">Expand</button>' +
                             //   "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onClick='visjsGraph.showGraphConfig()'>Display</button>";

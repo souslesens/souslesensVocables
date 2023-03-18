@@ -42,11 +42,10 @@
     <div id="Lineage_relation_filterValueDiv">
         <select id="Lineage_relation_filterVocabularySelect" onchange="Lineage_relationFilter.onSelectResource($(this).val())"></select>
         <select id="Lineage_relation_filterResourcesSelect"></select>
-    </div>
-
-    <div class="lineageRelations_div" style="display: none" id="lineageQuery_valueDiv">
-        <select id="lineageQuery_operator"></select>
-        <input id="lineageQuery_value" size="20" value="" />
+        <div id="lineageQuery_literalValueDiv" class="lineageRelations_divXX" style="display: block">
+            <select id="lineageQuery_operator"></select>
+            <input id="lineageQuery_value" size="20" value="" />
+        </div>
     </div>
 </div>
 <div>

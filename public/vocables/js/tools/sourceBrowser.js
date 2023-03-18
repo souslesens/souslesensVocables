@@ -186,7 +186,7 @@ var SourceBrowser = (function () {
                 },
             };
 
-            items.graphNodeNeighborhood = {
+            /*   items.graphNodeNeighborhood = {
                 label: "graph node neighborhood ",
                 action: false,
                 submenu: {
@@ -209,7 +209,14 @@ var SourceBrowser = (function () {
                         },
                     },
                 },
+            };*/
+            items.relations = {
+                label: "Relations...",
+                action: function (e) {
+                    Lineage_relations.showDrawRelationsDialog("Tree");
+                },
             };
+
             items.copyNode = {
                 label: "Copy Node",
                 action: function (e) {
@@ -271,7 +278,7 @@ Lineage_common.deleteNode(self.currentTreeNode, self.currentTargetDiv);
         /*    items.toDataTable = {
 label: "export to Table",
 action: function (e) {// pb avec source
-Export.exportTeeToDataTable()
+Export.exportTreeToDataTable()
 
 }
 

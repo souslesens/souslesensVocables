@@ -244,20 +244,13 @@ var SourceIntegrator = {
         writer = new N3.Writer({ format: "N-Triples", prefixes: {} });
 
         if (true) {
-            request(url, function (error, response, body) {
-                if (error) {
-                    return callback(err);
-                }
-                //  var filePath = "D:\\apache-jena-4.7.0\\data\\temp.rdf";
-                var filePath = path.join(__dirname, "../jena/data/temp.rdf");
-                fs.writeFileSync(filePath, body);
-                SourceIntegrator.jenaParse(filePath, function (err, triples) {
+                SourceIntegrator.jenaParse(url, function (err, triples) {
                     if (err) {
                         return callback(err);
                     }
                     writeTriples(triples);
                 });
-            });
+
         } else if (format == "rdf") {
             parseRdfXml();
         } else if (format == "ttl") {
@@ -743,4 +736,12 @@ if (false) {
 
 if (false) {
     SourceIntegrator.replaceSourcesImportUrlBySourceName();
+}
+
+if( false){
+    SourceIntegrator.jenaParse("https://www.w3.org/2002/07/owl",function( err, result){
+
+    })
+
+
 }

@@ -19,7 +19,7 @@
     </div>
 
     <div style="display: flex; align-content: space-around; flex-direction: column; justify-content: space-evenly; width: 450px">
-        <div style="text-align: center; background-color: #eee; margin: 5px" id="Lineage_relation_constraints"></div>
+        <div style="text-align: center; background-color: #eee; margin: 5px; max-height: 200px; overflow: auto" id="Lineage_relation_constraints"></div>
 
         <div class="lineageRelations_div" style="display: none" id="lineageRelations_filterDiv">
             <b> predicates filter</b>
@@ -34,15 +34,17 @@
             </div>
             <span style="font-weight: bold" id="lineage_relation_filterRole"></span>
             <span id="Lineage_relation_filter"></span>
-            <select id="Lineage_relation_filterTypeSelect" onchange="Lineage_relationFilter.onSelectResourceType('domain',$(this).val())"></select>
+            <select id="Lineage_relation_filterTypeSelect" onchange="Lineage_relationFilter.onSelectResourceType($(this).val())"></select>
             <div id="Lineage_relation_filterValueDiv">
-                <select id="Lineage_relation_filterVocabularySelect" onchange="Lineage_relationFilter.onSelectResource('domain',$(this).val())"></select>
-                <select id="Lineage_relation_filterResourcesSelect"></select>
-            </div>
+                <div class="lineageRelations_div" style="display: none" id="lineageQuery_uriValueDiv">
+                    <select id="Lineage_relation_filterVocabularySelect" onchange="Lineage_relationFilter.onSelectResource($(this).val())"></select>
+                    <select id="Lineage_relation_filterResourcesSelect"></select>
+                </div>
 
-            <div class="lineageRelations_div" style="display: none" id="lineageQuery_valueDiv">
-                <select id="lineageQuery_operator"></select>
-                <input id="lineageQuery_value" size="20" value="" />
+                <div class="lineageRelations_div" style="display: none" id="lineageQuery_literalValueDiv">
+                    <select id="lineageQuery_operator"></select>
+                    <input id="lineageQuery_value" size="20" value="" />
+                </div>
             </div>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.attachFilterToProperty()">set filter</button>
             <textarea id="Lineage_relation_filterText" style="width: 400px; height: 100px"></textarea>
@@ -75,7 +77,9 @@
                 Color
                 <select id="lineageRelations_colorsSelect"></select>
 
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_relations.onshowDrawRelationsDialogValidate()">Draw</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_relations.onshowDrawRelationsDialogValidate('graph')">Draw</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_relations.onshowDrawRelationsDialogValidate('table')">Table</button>
+
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.onshowDrawRelationsDialogValidate('clear')">Cancel</button>
 
                 <div>

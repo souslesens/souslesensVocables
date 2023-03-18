@@ -225,7 +225,9 @@ Lineage_properties = (function () {
      * @param nodeData
      */
     self.drawPredicatesGraph = function (source, nodeIds, properties, options, callback) {
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
         if (nodeIds && !Array.isArray(nodeIds)) {
             nodeIds = [nodeIds];
         }
@@ -255,14 +257,16 @@ Lineage_properties = (function () {
             if (err) {
                 return callback(err);
             }
-            result = Lineage_classes.truncateResultToVisGraphLimit(result);
+            if (options.output != "table") {
+                result = Lineage_classes.truncateResultToVisGraphLimit(result);
+            }
             Sparql_common.setSparqlResultPropertiesLabels(source, result, "prop", function (err, result2) {
                 if (err) {
                     return callback(err);
                 }
 
                 var visjsData = { nodes: [], edges: [] };
-                var existingNodes = visjsGraph.getExistingIdsMap();
+                var existingNodes = options.output == "table" ? {} : visjsGraph.getExistingIdsMap();
                 var color = Lineage_classes.getSourceColor(source);
 
                 result2.forEach(function (item) {
@@ -327,9 +331,16 @@ Lineage_properties = (function () {
 
                             if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
                                 label = Config.Lineage.logicalOperatorsMap[item.prop.value] || "";
-                                shape = "circle";
+                                shape = "hexagon";
                                 color = "#EEE";
                             }
+                        }
+                        var font = null;
+                        if (item.object.type == "literal") {
+                            shape = "text";
+                            if (label.length > Config.whiteBoardMaxLabelLength) label = label.substring(0, Config.whiteBoardMaxLabelLength) + "...";
+
+                            font = "12px arial #3c8fe1";
                         }
 
                         visjsData.nodes.push({
@@ -338,10 +349,12 @@ Lineage_properties = (function () {
                             shape: shape,
                             size: size,
                             color: color,
+                            font: font,
                             data: {
                                 source: source,
                                 id: item.object.value,
                                 label: item.objectLabel.value,
+                                type: item.object.type,
                             },
                         });
                     }
@@ -384,7 +397,7 @@ Lineage_properties = (function () {
                                     scaleFactor: 0.5,
                                 },
                             },
-                            dashes: [3, 3],
+                            dashes: [6, 2, 3],
                             color: options.edgesColor || Lineage_classes.defaultPredicateEdgeColor,
                         });
                     }
@@ -408,7 +421,9 @@ Lineage_properties = (function () {
     };
 
     self.drawObjectPropertiesRestrictions = function (source, nodeIds, properties, options) {
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
 
         if (nodeIds && nodeIds.length > 0) {
             options.filter = Sparql_common.setFilter("sourceClass", nodeIds);
@@ -891,7 +906,7 @@ Lineage_properties = (function () {
 
             /*  visjsGraph.network.fit();
 
-           */
+     */
             self.graphInited = true;
         });
     };
@@ -915,7 +930,9 @@ Lineage_properties = (function () {
      */
     self.getPropertiesRangeAndDomain = function (source, properties, options, callback) {
         if (Config.sources[source].schemaType == "OWL") {
-            if (!options) options = {};
+            if (!options) {
+                options = {};
+            }
             var mode = $("#LineagePropertie_nodesSelectionSelect").val();
             var filterNodes = null;
             if (mode == "currentGraphNodes") {
@@ -929,7 +946,8 @@ Lineage_properties = (function () {
                     return callback(err);
                 }
                 var allProps = [];
-                if (Object.keys(allProps).length == 0);
+                if (Object.keys(allProps).length == 0) {
+                }
                 //  MainController.UI.message("No data found",true)
 
                 MainController.UI.message("drawing...");

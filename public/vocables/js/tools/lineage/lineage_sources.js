@@ -123,12 +123,18 @@ Lineage_sources = (function () {
             return;
         }
 
+        if (true) {
+            $("#Lineage_Tabs").tabs("disable", 3);
+            $("#lineage_classes_showLinkedDataButton").prop("disabled", true);
+        }
+
         function highlightSourceDiv(source) {
             $(".Lineage_sourceLabelDiv").removeClass("Lineage_selectedSourceDiv");
             $("#" + self.loadedSources[source].sourceDivId).addClass("Lineage_selectedSourceDiv");
         }
 
         self.activeSource = source;
+        common.jstree.clear("lineage_containers_containersJstree");
         //new source to load
         if (!self.loadedSources[source]) {
             self.initSource(source, function (err, sourceDivId) {
@@ -335,7 +341,7 @@ return;
             return;
         }
 
-        Lineage_relations.registerSourcesModel(sourceLabel, function (err, result) {
+        OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -565,11 +571,11 @@ sourceDivId +
         },
         hideSource: function (source) {
             MainController.UI.hidePopup("graphPopupDiv");
-            Lineage_sources.showHideCurrentSourceNodes(true);
+            Lineage_sources.showHideCurrentSourceNodes(null, true);
         },
         showSource: function () {
             MainController.UI.hidePopup("graphPopupDiv");
-            Lineage_sources.showHideCurrentSourceNodes(false);
+            Lineage_sources.showHideCurrentSourceNodes(null, false);
         },
         groupSource: function (source) {
             MainController.UI.hidePopup("graphPopupDiv");

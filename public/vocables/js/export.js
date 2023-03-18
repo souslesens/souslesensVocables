@@ -5,9 +5,11 @@ var Export = (function () {
     self.currentSource = null;
     self.dataTable;
 
-    self.exportGraphToDataTable = function () {
-        var nodes = visjsGraph.data.nodes.get();
-        var edges = visjsGraph.data.edges.get();
+    self.exportGraphToDataTable = function (nodes, edges) {
+        if (!nodes && !edges) {
+            nodes = visjsGraph.data.nodes.get();
+            edges = visjsGraph.data.edges.get();
+        }
 
         var nodesFromMap = {};
 
@@ -26,21 +28,46 @@ var Export = (function () {
             return nodesFromMap[a] - nodesFromMap[b];
         });
 
-        var str = "fromLabel\tedgeLabel\ttoLabel\tfromURI\tedgeURI\ttoURI\n";
-        nodesFromArray.forEach(function (nodeFromId, index) {
-            nodesFromMap[nodeFromId].forEach(function (edge) {
-                if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) return;
-                var edgeLabel = edge.label || "-";
-                edgeLabel = edgeLabel.replaceAll("<[^>]*>", "");
-                str += allNodesMap[nodeFromId].data.label + "\t";
-                str += edgeLabel + "\t";
-                str += allNodesMap[edge.to].data ? allNodesMap[edge.to].data.label : "??";
-                str += "\t" + nodeFromId + "\t" + edge.id + "\t" + edge.to;
-                str += "\n";
-            });
-        });
+        var header = "fromLabel\tedgeLabel\ttoLabel\tfromURI\tedgeURI\ttoURI\n";
+        if (nodesFromArray.length < Config.dataTableOutputLimit) {
+            var cols = [];
+            var dataset = [];
+            header
+                .trim()
+                .split("\t")
+                .forEach(function (colName, index) {
+                    var width = "100";
+                    if (index < 3) width = "200";
+                    cols.push({ title: colName, defaultContent: "" });
+                });
 
-        common.copyTextToClipboard(str);
+            nodesFromArray.forEach(function (nodeFromId, index) {
+                nodesFromMap[nodeFromId].forEach(function (edge) {
+                    if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) return;
+                    var line = [allNodesMap[nodeFromId].data.label, edge.label || "", allNodesMap[edge.to].data ? allNodesMap[edge.to].data.label : "?", nodeFromId, edge.id, edge.to];
+                    dataset.push(line);
+                });
+            });
+            MainController.UI.message("", true);
+            var columnDefs = [{ width: 200, targets: [0, 1, 2] }];
+            Export.showDataTable(null, cols, dataset, null, { fixedColumns: 1, columnDefs: columnDefs });
+        } else {
+            var str = header;
+            nodesFromArray.forEach(function (nodeFromId, index) {
+                nodesFromMap[nodeFromId].forEach(function (edge) {
+                    if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) return;
+                    var edgeLabel = edge.label || "-";
+                    edgeLabel = edgeLabel.replaceAll("<[^>]*>", "");
+                    str += allNodesMap[nodeFromId].data.label + "\t";
+                    str += edgeLabel + "\t";
+                    str += allNodesMap[edge.to].data ? allNodesMap[edge.to].data.label : "??";
+                    str += "\t" + nodeFromId + "\t" + edge.id + "\t" + edge.to;
+                    str += "\n";
+                });
+            });
+
+            common.copyTextToClipboard(str);
+        }
     };
 
     self.exportGraphToDataTableOld = function () {
@@ -156,7 +183,7 @@ var Export = (function () {
         self.showDataTable(null, cols, dataSet);
     };
 
-    self.exportTeeToDataTable = function (jstreeDiv, nodeId) {
+    self.exportTreeToDataTable = function (jstreeDiv, nodeId) {
         if (!jstreeDiv) jstreeDiv = SourceBrowser.currentTargetDiv;
         if (!nodeId) nodeId = SourceBrowser.currentTreeNode ? SourceBrowser.currentTreeNode.id : "#";
         if (!nodeId) nodeId = "#";
@@ -292,7 +319,7 @@ var Export = (function () {
         return { cols: cols, dataSet: dataSet };
     };
 
-    self.showDataTable = function (div, cols, dataSet, buttons) {
+    self.showDataTable = function (div, cols, dataSet, buttons, options) {
         if (self.dataTable) {
             self.dataTable.destroy();
             $("#dataTableDiv").html("");
@@ -304,18 +331,16 @@ var Export = (function () {
         } else {
             $("#" + div).html("<table id='dataTableDivExport'></table>");
         }
+
+        if (!buttons) buttons = "Bfrtip";
         setTimeout(function () {
             if (!buttons) buttons = "Bfrtip";
-            self.dataTable = $("#dataTableDivExport").DataTable({
+            var params = {
                 data: dataSet,
                 columns: cols,
-
-                // async: false,
+                fixedColumns: true,
                 pageLength: 15,
                 dom: buttons,
-                /*buttons: [
-            'copy', 'csv', 'excel', 'pdf', 'print'
-        ]*/
                 buttons: [
                     {
                         extend: "csvHtml5",
@@ -325,11 +350,24 @@ var Export = (function () {
                     },
                     "copy",
                 ],
-                /* 'columnDefs': [
-             {'max-width': '20%', 'targets': 0}
-         ],*/
-                order: [],
-            });
+
+                paging: false,
+                /*  columnDefs: [
+                    { width: 400, targets: 0 }
+                ],
+                fixedColumns: true*/
+
+                //  order: []
+            };
+
+            if (false && options && options.fixedColumns) {
+                params.fixedColumns = true;
+            }
+            if (false && options && options.columnDefs) {
+                params.columnDefs = options.columnDefs;
+            }
+
+            self.dataTable = $("#dataTableDivExport").DataTable(params);
         }, 200);
     };
 

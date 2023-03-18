@@ -90,7 +90,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
         var filter = "";
         if (term) {
-            filter = Sparql_common.setFilter("member", null, term);
+            filter = "FILTER (" + Sparql_common.setFilter("member", null, term) + ")";
         }
         var memberType;
         if (searchWhat == "bags") {
@@ -134,6 +134,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
             memberType +
             ")" +
             " OPTIONAL {?member ^rdfs:member ?parentContainer.?parentContainer rdf:type ?type.filter (?type in (rdf:Bag,rdf:List)).?parentContainer rdfs:label ?parentContainerLabel}" +
+            " " +
             filter +
             "}";
         var sparql_url = Config.sources[source].sparql_server.url;
@@ -148,6 +149,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
             result.results.bindings.forEach(function (item) {
                 //  var nodeId=item.parent+"_"+item.member.value
+
                 item.jstreeId = "_" + common.getRandomHexaId(5);
                 nodesMap[item.member.value] = item;
             });
@@ -495,6 +497,8 @@ Lineage_styles.showDialog(self.currentContainer.data);
     };*/
     self.listContainerResources = function (source, containerNode, options) {
         var existingChildren = [];
+
+        if (containerNode.children.length > 0) return;
 
         self.sparql_queries.getContainerDescendants(source, containerNode ? containerNode.data.id : null, options, function (err, result) {
             if (err) {

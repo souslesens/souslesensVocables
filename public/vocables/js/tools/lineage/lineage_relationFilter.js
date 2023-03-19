@@ -4,14 +4,16 @@ var Lineage_relationFilter = (function () {
     var constraints = null;
     self.showAddFilterDiv = function () {
         $("#Lineage_relation_constraints").html("");
-        $("#lineage_relation_filterRoleSelect").val("");
+      //  $("#lineage_relation_filterRoleSelect").val("");
         $("#Lineage_relation_filterTypeSelect").val("");
         $("#Lineage_relation_filterVocabularySelect").val("");
         $("#lineageQuery_uriValueDiv").css("display", "none");
         $("#lineageQuery_literalValueDiv").css("display", "none");
 
-        if (!self.currentProperty) {
-            return;
+
+        var propStr = "";""
+        if (self.currentProperty) {
+            propStr = self.currentProperty.vocabulary + "." + self.currentProperty.label + "<br>";
         }
 
         $("#lineageRelations_filterDiv").css("display", "flex");
@@ -19,7 +21,7 @@ var Lineage_relationFilter = (function () {
         /* $("#mainDialogDiv").dialog("open");
          $("#mainDialogDiv").load("snippets/lineage/relationsDialogFilter.html", function() {*/
 
-        var propStr = self.currentProperty.vocabulary + "." + self.currentProperty.label + "<br>";
+
 
         self.domainValue = "";
         self.rangeValue = "";
@@ -46,7 +48,7 @@ var Lineage_relationFilter = (function () {
             return "<a href='" + uri + "' target='" + target + "'>" + label + "</a>";
         }
 
-        if (Config.ontologiesVocabularyModels[self.currentProperty.vocabulary]) {
+        if (self.currentProperty && Config.ontologiesVocabularyModels[self.currentProperty.vocabulary]) {
             restrictions = Config.ontologiesVocabularyModels[self.currentProperty.vocabulary].restrictions;
             constraints = Config.ontologiesVocabularyModels[self.currentProperty.vocabulary].constraints;
 
@@ -100,6 +102,12 @@ var Lineage_relationFilter = (function () {
         self.currentFilterRole = role;
         $("#lineage_relation_filterRole").html(role);
 
+
+
+        if(!self.currentProperty)
+           return common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap["any"], true);
+
+
         var types = Object.keys(self.ObjectsTypesMap);
 
         var ok = false;
@@ -122,19 +130,25 @@ var Lineage_relationFilter = (function () {
 
     self.onSelectResourceType = function (type) {
         var role = self.currentFilterRole;
+        $("#lineageQuery_value" ).datepicker( "destroy" )
+        $("#lineageQuery_value").val("")
 
         if (type == "String") {
             $("#lineageQuery_literalValueDiv").css("display", "block");
             common.fillSelectOptions("lineageQuery_operator", self.operators["String"]);
+            $("#lineageQuery_operator").val("contains")
         }
-        if (type == "Date") {
+        else if (type == "Date") {
             $("#lineageQuery_literalValueDiv").css("display", "block");
             common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
+            common.setDatePickerOnInput("lineageQuery_value");
+            $("#lineageQuery_operator").val(">=")
         }
-        if (type == "Number") {
+        else if (type == "Number") {
             $("#lineageQuery_literalValueDiv").css("display", "block");
             common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
-        } else if (restrictions[self.currentProperty.id]) {
+            $("#lineageQuery_operator").val(">=")
+        } else if (self.currentProperty && restrictions[self.currentProperty.id]) {
             $("#lineageQuery_uriValueDiv").css("display", "block");
             common.fillSelectOptions("Lineage_relation_filterVocabularySelect", [], false);
             if (role == "subject") {
@@ -198,10 +212,10 @@ var Lineage_relationFilter = (function () {
                 } else {
                     objectFilterStr += " Filter(?object" + filterIndex + "" + operator + "'" + value + "').";
                 }
-            } else if (filter.objectType == "Number") {
+            } else if (type == "Number") {
                 objectFilterStr += "  Filter(?object" + filterIndex + operator + "'" + value + "'^^xsd:float).";
-            } else if (filter.objectType == "Date") {
-                objectFilterStr += " Filter(?object" + filterIndex + operator + "'" + value + "'^^xsd:dateTime).";
+            } else if (type == "Date") {
+                objectFilterStr += " bind (?object as ?date) Filter( ?date " + filterIndex + operator + "'" + value + "'^^xsd:dateTime).";
             }
 
             return objectFilterStr;
@@ -227,7 +241,14 @@ var Lineage_relationFilter = (function () {
         } else {
             if (resourceType == "String") {
                 filter.filterStr = getLiteralValueFilter();
-            } else {
+            }
+            else if (resourceType == "Date") {
+                filter.filterStr = getLiteralValueFilter();
+            }
+            else if (resourceType == "Number") {
+                filter.filterStr = getLiteralValueFilter();
+            }
+            else {
                 if (role == "subject") {
                     filter.filterStr = " ?subject rdf:type " + resourceType + ". ";
                     if (resource) {
@@ -243,7 +264,8 @@ var Lineage_relationFilter = (function () {
         }
 
         Lineage_relations.filter = filter.filterStr;
-        $("#Lineage_relation_filterText").val(filter.filterStr);
+        var text=  $("#Lineage_relation_filterText").val()
+        $("#Lineage_relation_filterText").val(text+"\n"+filter.filterStr);
     };
 
     return self;

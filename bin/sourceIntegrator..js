@@ -89,14 +89,6 @@ var SourceIntegrator = {
             if (root && distinctUriRoots.indexOf(root) < 0) {
                 distinctUriRoots.push(root);
             }
-            var root = getUriRoot(triple.object);
-            if (root && distinctUriRoots.indexOf(root) < 0) {
-                distinctUriRoots.push(root);
-            }
-            var root = getUriRoot(triple.predicate);
-            if (root && distinctUriRoots.indexOf(root) < 0) {
-                distinctUriRoots.push(root);
-            }
         });
         return distinctUriRoots;
     },
@@ -446,7 +438,5 @@ var SourceIntegrator = {
 module.exports = SourceIntegrator;
 
 if (false) {
-    //"https://rds.posccaesar.org/ontology/plm/ont/equipment/0.9.0/plm-equipment.rdf"
-    var uri = "http://data.industryportal.enit.fr/ontologies/BRICK/download?apikey=019adb70-1d64-41b7-8f6e-8f7e5eb54942&download_format=rdf";
-    SourceIntegrator.jenaParse(uri, { extractUriRoots: 1 }, function (err, result) {});
+    SourceIntegrator.jenaParse("https://rds.posccaesar.org/ontology/plm/ont/equipment/0.9.0/plm-equipment.rdf", { extractUriRoots: 1 }, function (err, result) {});
 }

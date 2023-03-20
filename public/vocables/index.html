@@ -230,7 +230,8 @@
             // Redirect 401 to login page
             $(document).ajaxError(function (e, xhr, settings) {
                 if (xhr.status == 401) {
-                    location.href = "/login";
+                    const uri = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
+                    location.href = `/login?redirect=${uri}`;
                 }
             });
 

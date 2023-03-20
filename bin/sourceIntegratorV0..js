@@ -65,7 +65,7 @@ var topOntologyPatternsMap = {
     gufo: "gufo",
 };
 
-var SourceIntegrator = {
+var SourceIntegratorV0 = {
     jenaParse: function (filePath, callback) {
         var jenaPath = path.join(__dirname, "../jena/");
 
@@ -75,7 +75,7 @@ var SourceIntegrator = {
             cmd = "D: && cd " + jenaPath + ' && java -cp "./lib/*"  RDF2triples.java ' + filePath;
         else cmd = "D: | cd " + jenaPath + ' | && java -cp "./lib/*"  RDF2triples.java ' + filePath;
 
-        //  var cmd = 'D: && cd D:\\apache-jena-4.7.0 && java -cp "./lib/*"  mystest.java ' + filePath;
+        var cmd = 'D: && cd D:\\apache-jena-4.7.0 && java -cp "./lib/*"  mystest.java ' + filePath;
         console.log("EXECUTING " + cmd);
         exec(cmd, { maxBuffer: 1024 * 30000 }, function (err, stdout, stderr) {
             if (err) {

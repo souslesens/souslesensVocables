@@ -42,9 +42,17 @@ class UserModel {
      * @param {string} login
      */
     findUserAccount = async (login) => {
-        const userAccounts = await this.getUserAccounts();
-        const findUserKey = Object.keys(userAccounts).find((key) => userAccounts[key].login == login);
-        return findUserKey ? userAccounts[findUserKey] : undefined;
+        const userAccount = await this._readOne(login);
+        if (userAccount) {
+            return {
+                id: userAccount.id,
+                login: userAccount.login,
+                groups: userAccount.groups,
+                source: userAccount.source,
+                _type: userAccount._type,
+            };
+        }
+        return undefined;
     };
 
     /**
@@ -53,13 +61,11 @@ class UserModel {
      * @returns {boolean} true if login and password match, otherwise false
      */
     checkUserPassword = async (login, password) => {
-        const userAccountsWithPassword = await this._read();
-        const userKey = Object.keys(userAccountsWithPassword).find((key) => userAccountsWithPassword[key].login == login);
-        if (!userKey) {
+        const userAccount = await this._readOne(login);
+        if (userAccount === undefined) {
             // console.debug(`user ${login} not found`);
             return false;
         }
-        const userAccount = userAccountsWithPassword[userKey];
         if (userAccount.password === undefined) {
             // console.debug(`no password defined for user ${login}`);
             return false;
@@ -134,6 +140,18 @@ class UserModelJson extends UserModel {
     };
 
     /**
+     * @param {string} login - user login
+     * @returns {Promise<UserAccountWithPassword|undefined>} a UserAccount
+     */
+
+    _readOne = async (login) => {
+        const users = await this._read();
+        return Object.entries(users)
+            .map(([_id, user]) => user)
+            .find((user) => user.login === login);
+    };
+
+    /**
      * @param {Record<string,UserAccount>} userAccounts - a collection of UserAccount
      */
     _write = async (userAccounts) => {
@@ -192,6 +210,33 @@ class UserModelDatabase extends UserModel {
     };
 
     /**
+     * @param {string} login - user login
+     * @returns {Promise<UserAccountWithPassword | undefined>} a UserAccount
+     */
+    _readOne = async (login) => {
+        const pool = mariadb.createPool(this.poolParams);
+        let conn;
+        try {
+            conn = await pool.getConnection();
+            const query = `SELECT ${this.sqlConfig.loginColumn}, ${this.sqlConfig.passwordColumn}, ${this.sqlConfig.groupsColumn} FROM ${this.sqlConfig.table} WHERE ${this.sqlConfig.loginColumn} = ?`;
+            const rows = await conn.query(query, [login]);
+            if (rows.length === 1) {
+                return {
+                    id: rows[0].login,
+                    _type: "user",
+                    password: rows[0][this.sqlConfig.passwordColumn],
+                    login: rows[0][this.sqlConfig.loginColumn],
+                    groups: rows[0][this.sqlConfig.groupsColumn].split(","),
+                    source: "database",
+                };
+            }
+            return undefined;
+        } finally {
+            if (conn) conn.release();
+        }
+    };
+
+    /**
      * @param {string} str
      */
     _isAlphaNum = (str) => {
@@ -227,7 +272,6 @@ class UserModelDatabase extends UserModel {
         conn = await pool.getConnection();
         try {
             const groupsString = userAccount.groups.join(",");
-            console.log("userAccount", userAccount);
             let query, values;
             if (Object.keys(userAccount).includes("password")) {
                 query = `UPDATE user SET ${this.sqlConfig.passwordColumn} = ?, ${this.sqlConfig.groupsColumn} = ? WHERE ${this.sqlConfig.loginColumn} = '${userAccount.login}'`;
@@ -272,8 +316,6 @@ class UserModelDatabase extends UserModel {
                 modifiedUserAccount.password = bcrypt.hashSync(modifiedUserAccount.password, 10);
             }
             const userAccounts = await this._read();
-            console.log("userAccounts", userAccounts);
-            console.log("modifiedUserAccount", modifiedUserAccount);
             if (!Object.keys(userAccounts).includes(modifiedUserAccount.login)) {
                 throw Error("UserAccount does not exist, try adding it.");
             }

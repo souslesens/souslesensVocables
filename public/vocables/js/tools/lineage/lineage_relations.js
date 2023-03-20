@@ -64,18 +64,7 @@ Lineage_relations = (function () {
                                     if (err) {
                                         callbackEach(err);
                                     }
-                                    result.sort(function (a, b) {
-                                        if (!a.propertyLabel || !b.propertyLabel) {
-                                            return 0;
-                                        }
-                                        if (a.propertyLabel.value > b.propertyLabel.value) {
-                                            return 1;
-                                        }
-                                        if (a.propertyLabel.value < b.propertyLabel.value) {
-                                            return -1;
-                                        }
-                                        return 0;
-                                    });
+
                                     var properties = [];
                                     result.forEach(function (item) {
                                         properties.push({ label: item.propertyLabel.value, id: item.property.value });
@@ -120,9 +109,9 @@ Lineage_relations = (function () {
 
                 function (callbackSeries) {
                     jstreeData.sort(function (a, b) {
-                        if (a.label > b.label) {
+                        if (a.text > b.text) {
                             return 1;
-                        } else if (b.label > a.label) {
+                        } else if (b.text > a.text) {
                             return -1;
                         }
                         return 0;
@@ -346,7 +335,7 @@ Lineage_relations = (function () {
                     if (type && type != "restrictions") {
                         return callbackSeries();
                     }
-                    if (options.filter && options.filter.indexOf("^^" > -1)) {
+                    if (options.filter && options.filter.indexOf("^^") > -1) {
                         return callbackSeries();
                     }
 
@@ -370,7 +359,7 @@ Lineage_relations = (function () {
                     if (type && type != "restrictions") {
                         return callbackSeries();
                     }
-                    if (options.filter && options.filter.indexOf("^^" > -1)) {
+                    if (options.filter && options.filter.indexOf("^^") > -1) {
                         return callbackSeries();
                     }
                     if (!direction || direction == "inverse") {

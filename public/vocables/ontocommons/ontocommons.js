@@ -68,6 +68,10 @@ var Ontocommons = (function () {
         });
     };
 
+    self.onOntologiesSelect = function (ontologyId) {
+        $("#ontolologyUrl").val(ontologyId);
+    };
+
     self.showOntologyInSLSV = function (ontologyId) {
         if (!ontologyId) {
             return;
@@ -146,8 +150,6 @@ var Ontocommons = (function () {
             });
         });
     };
-
-
 
     self.getOntologyRootUris = function (url) {
         var body = {

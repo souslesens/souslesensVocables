@@ -26,13 +26,15 @@
     </head>
     <body>
         <div>
-            Ontologies<select id="ontocommons_ontologiesSelect" onchange="Ontocommons.showOntologyInSLSV($(this).val())"></select>
+            Ontologies<select id="ontocommons_ontologiesSelect" onchange="Ontocommons.onOntologiesSelect($(this).val())"></select>
             <!--  <button onclick="Ontocommons.loadSourceInSlsv()">loadSourceInSlsv</button>-->
 
             &nbsp; <input type="checkbox" id="editableCBX" /> editable&nbsp; <input type="checkbox" id="reloadOntologyCBX" /> reload ontology &nbsp;<span id="messageDiv"></span>
 
             &nbsp; &nbsp;
-            <input id="ontolologyUrl" style="width: 500px" /> <button onclick="Ontocommons.getOntologyRootUris($('#ontolologyUrl').val())">Get rootUri's</button>
+            <input id="ontolologyUrl" style="width: 500px" />
+            <button onclick="Ontocommons.showOntologyInSLSV($('#ontolologyUrl').val())">open in SLSV</button>
+            <button onclick="Ontocommons.getOntologyRootUris($('#ontolologyUrl').val())">Get rootUri's</button>
             <span id="resultDiv" style="width: 800px; height: 50px; overflow: auto"></span>
         </div>
 

@@ -30,6 +30,10 @@
             <!--  <button onclick="Ontocommons.loadSourceInSlsv()">loadSourceInSlsv</button>-->
 
             &nbsp; <input type="checkbox" id="editableCBX" /> editable&nbsp; <input type="checkbox" id="reloadOntologyCBX" /> reload ontology &nbsp;<span id="messageDiv"></span>
+
+            &nbsp; &nbsp;
+            <input id="ontolologyUrl" style="width:500px" /> <button onclick="Ontocommons.getOntologyRootUris($('#ontolologyUrl').val())">Get rootUri's</button>
+            <span id="resultDiv" style="width:800px;height: 50px;overflow: auto;"></span>
         </div>
 
         <iframe id="slsv_iframe" style="width: 100%; height: 900px"> </iframe>

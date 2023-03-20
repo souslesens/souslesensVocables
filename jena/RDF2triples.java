@@ -19,7 +19,9 @@ public class rdf2triples
         Model m = ModelFactory.createDefaultModel() ;
         // read into the model.
 		String fileName=args[0];
-        m.read(fileName);//,"http://xxx.org") ;
+   m.read(fileName);//,"http://xxx.org") ;
+      //    m.read(fileName,null,"RDF/XML") ;
+
 	
 		
  StmtIterator sIter = m.listStatements();

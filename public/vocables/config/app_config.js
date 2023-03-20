@@ -9,7 +9,7 @@
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-var Config = (function () {
+ var Config = (function () {
     var self = {};
 
     self.apiUrl = "/api/v1";
@@ -141,12 +141,51 @@ var Config = (function () {
             { id: "http://www.w3.org/2004/02/skos/core#prefLabel", label: "skos:prefLabel", type: "dataTypeProperty" },
         ],
         logicalOperatorsMap: {
+            // Owl Class Constructors
+            "http://www.w3.org/2002/07/owl#complementOf": "┓",
+            "https://www.w3.org/2002/07/owl#complementOf": "┓",
             "http://www.w3.org/2002/07/owl#intersectionOf": "⊓",
             "https://www.w3.org/2002/07/owl#intersectionOf": "⊓",
             "https://www.w3.org/2002/07/owl#unionOf": "⨆",
             "http://www.w3.org/2002/07/owl#unionOf": "⨆",
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#intersectionOf": "⊓",
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#unionOf": "⨆",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#complementOf": "┓",
+            "http://www.w3.org/2002/07/owl#someValuesFrom": "∃",
+            "https://www.w3.org/2002/07/owl#someValuesFrom": "∃",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#someValuesFrom": "∃",
+            "http://www.w3.org/2002/07/owl#allValuesFrom": "∀",
+            "https://www.w3.org/2002/07/owl#allValuesFrom": "∀",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#allValuesFrom": "∀",
+
+            // Owl Axioms
+            "http://www.w3.org/2002/07/owl#subClassOf": "⊑",
+            "https://www.w3.org/2002/07/owl#subClassOf": "⊑",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#subClassOf": "⊑",
+            "https://www.w3.org/2000/01/rdf-schema#subClassOf": "⊑",
+            "http://www.w3.org/2000/01/rdf-schema#subClassOf": "⊑",
+            "http://www.w3.org/2002/07/owl#equivalentClass": "≡",
+            "https://www.w3.org/2002/07/owl#equivalentClass": "≡",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#equivalentClass": "≡",
+            "http://www.w3.org/2002/07/owl#disjointWith": "⊑ ┓",
+            "https://www.w3.org/2002/07/owl#disjointWith": "⊑ ┓",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#disjointWith": "⊑ ┓",
+            "http://www.w3.org/2002/07/owl#sameIndividualAs": "≡",
+            "https://www.w3.org/2002/07/owl#sameIndividualAs": "≡",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#sameIndividualAs": "≡",
+            "http://www.w3.org/2002/07/owl#differentFrom": "⊑ ┓",
+            "https://www.w3.org/2002/07/owl#differentFrom": "⊑ ┓",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#differentFrom": "⊑ ┓",
+            "http://www.w3.org/2002/07/owl#subPropertyOf": "⊑",
+            "https://www.w3.org/2002/07/owl#subPropertyOf": "⊑",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#subPropertyOf": "⊑",
+            "https://www.w3.org/1999/02/22-rdf-syntax-ns#subPropertyOf": "⊑",
+            "http://www.w3.org/2000/01/rdf-schema#subPropertyOf": "⊑",
+            "https://www.w3.org/2000/01/rdf-schema#subPropertyOf": "⊑",
+            "http://www.w3.org/2002/07/owl#equivalentProperty": "≡",
+            "https://www.w3.org/2002/07/owl#equivalentProperty": "≡",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#equivalentProperty": "≡",
+
         },
     };
 

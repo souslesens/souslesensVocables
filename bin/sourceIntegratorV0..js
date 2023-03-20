@@ -10,9 +10,7 @@ const request = require("request");
 const Util = require("./util.");
 const fs = require("fs");
 
-
 var exec = require("child_process").exec;
-
 
 var importsSourcesMap = {
     "http://purl.org/vso/ns": "VSO-NS",
@@ -57,58 +55,51 @@ var importsSourcesMap = {
     "http://www.industrialontologies.org/IOFAnnotationVocabulary/": "IOF-ANNOTATION-VOCABULARY",
     "http://www.industrialontologies.org/core/": "INDUSTRIAL-ONTOLOGIES-CORE-3",
     "http://purl.oclc.org/NET/ssnx/ssn": "SSNX-SSN",
-    "http://www.loa.istc.cnr.it/ontologies/DUL.owl": "DUL"
+    "http://www.loa.istc.cnr.it/ontologies/DUL.owl": "DUL",
 };
 
 var topOntologyPatternsMap = {
     "/obo": "BFO",
     "/dul": "DOLCE",
     sumo: "SUMO",
-    gufo: "gufo"
+    gufo: "gufo",
 };
 
 var SourceIntegratorV0 = {
-
-    jenaParse: function(filePath, callback) {
+    jenaParse: function (filePath, callback) {
         var jenaPath = path.join(__dirname, "../jena/");
 
-        var cmd
-        if(process.platform === "win32")// my dev env
-            cmd="D: && cd "+jenaPath+" && java -cp \"./lib/*\"  RDF2triples.java " + filePath;
-        else
-            cmd="D: | cd "+jenaPath+" | && java -cp \"./lib/*\"  RDF2triples.java " + filePath;
+        var cmd;
+        if (process.platform === "win32")
+            // my dev env
+            cmd = "D: && cd " + jenaPath + ' && java -cp "./lib/*"  RDF2triples.java ' + filePath;
+        else cmd = "D: | cd " + jenaPath + ' | && java -cp "./lib/*"  RDF2triples.java ' + filePath;
 
-
-        var cmd = "D: && cd D:\\apache-jena-4.7.0 && java -cp \"./lib/*\"  mystest.java " + filePath;
+        var cmd = 'D: && cd D:\\apache-jena-4.7.0 && java -cp "./lib/*"  mystest.java ' + filePath;
         console.log("EXECUTING " + cmd);
-        exec(cmd, { maxBuffer: 1024 * 30000 }, function(err, stdout, stderr) {
+        exec(cmd, { maxBuffer: 1024 * 30000 }, function (err, stdout, stderr) {
             if (err) {
                 console.log(stderr);
                 return callback(err);
             }
 
-
             return callback(null, stdout);
-
 
             var triples = [];
             var json = JSON.parse(stdout);
-            json.triples.forEach(function(item, index) {
-                triples.push(
-                  {
-                      subject: item[0],
-                      predicate: item[1],
-                      object: item[2]
-                  });
-
+            json.triples.forEach(function (item, index) {
+                triples.push({
+                    subject: item[0],
+                    predicate: item[1],
+                    object: item[2],
+                });
             });
             callback(null, triples);
         });
     },
 
-
-    insertTriples: function(sparqlServerUrl, graphUri, triples, callback) {
-        triples = triples.replace(/_:([^\s.]+)\s/g, function(a, b) {
+    insertTriples: function (sparqlServerUrl, graphUri, triples, callback) {
+        triples = triples.replace(/_:([^\s.]+)\s/g, function (a, b) {
             return "<" + b + ">";
         });
         triples = triples.replace(/\n/g, "");
@@ -119,31 +110,29 @@ var SourceIntegratorV0 = {
         headers["Accept"] = "application/sparql-results+json";
         headers["Content-Type"] = "application/x-www-form-urlencoded";
         var sparqlUrl = sparqlServerUrl + "?query=";
-        httpProxy.post(sparqlUrl, headers, { query: strInsert }, function(err, result) {
+        httpProxy.post(sparqlUrl, headers, { query: strInsert }, function (err, result) {
             if (err) {
                 return callback(err);
             }
             return callback();
         });
-    }
+    },
 
-    ,
-    clearGraph: function(sparqlServerUrl, graphUri, callback) {
+    clearGraph: function (sparqlServerUrl, graphUri, callback) {
         var strClear = "CLEAR GRAPH <" + graphUri + "> ";
 
         var headers = {};
         headers["Accept"] = "application/sparql-results+json";
         headers["Content-Type"] = "application/x-www-form-urlencoded";
         var sparqlUrl = sparqlServerUrl + "?query=";
-        httpProxy.post(sparqlUrl, headers, { query: strClear }, function(err, result) {
+        httpProxy.post(sparqlUrl, headers, { query: strClear }, function (err, result) {
             if (err) {
                 return callback(err);
             }
             return callback();
         });
-    }
-    ,
-    ontologyUrl2tripleStore: function(url, sparqlServerUrl, graphUri, format, callback) {
+    },
+    ontologyUrl2tripleStore: function (url, sparqlServerUrl, graphUri, format, callback) {
         var totalTriples = 0;
         var fechSize = 200;
         var fetchCount = 0;
@@ -159,13 +148,12 @@ var SourceIntegratorV0 = {
 
             var triplesArray = triples.split("\n");
 
-            totalTriples=triplesArray.length;
+            totalTriples = triplesArray.length;
 
-            triplesArray.forEach(function(item, index) {
+            triplesArray.forEach(function (item, index) {
                 if (fetchCount++ < fechSize) {
                     tripleSlice += item + "\n";
-                }
-                else {
+                } else {
                     tripleSlices.push("" + tripleSlice);
                     tripleSlice = "";
                     fetchCount = 0;
@@ -174,21 +162,20 @@ var SourceIntegratorV0 = {
             tripleSlices.push("" + tripleSlice);
 
             async.eachSeries(
-              tripleSlices,
-              function(triples, callbackEach) {
-                  SourceIntegrator.insertTriples(sparqlServerUrl, graphUri, triples, function(err, result) {
-                      return callbackEach(err);
-                  });
-              },
-              function(err) {
-                  return callback(null, { graphUri: graphUri, imports: imports, totalTriples: totalTriples });
-              }
+                tripleSlices,
+                function (triples, callbackEach) {
+                    SourceIntegrator.insertTriples(sparqlServerUrl, graphUri, triples, function (err, result) {
+                        return callbackEach(err);
+                    });
+                },
+                function (err) {
+                    return callback(null, { graphUri: graphUri, imports: imports, totalTriples: totalTriples });
+                }
             );
         }
 
         function parseImports(quad) {
             if (quad.predicate.value.indexOf("owl#imports") > -1) {
-
                 imports.push(quad.object.value);
             }
 
@@ -214,17 +201,17 @@ var SourceIntegratorV0 = {
         function parseRdfXml() {
             try {
                 const myParser = new RdfXmlParser();
-                myParser.on("data", function(quad) {
+                myParser.on("data", function (quad) {
                     parseImports(quad);
                     totalTriples++;
                     writer.addQuad(quad.subject, quad.predicate, quad.object);
                 });
-                myParser.on("end", function(quad) {
+                myParser.on("end", function (quad) {
                     writer.end((error, triples) => {
                         writeTriples(triples);
                     });
                 });
-                myParser.on("error", function(err) {
+                myParser.on("error", function (err) {
                     callback(err);
                 });
                 request.get(url).pipe(myParser);
@@ -238,18 +225,18 @@ var SourceIntegratorV0 = {
             const streamParser = new N3.StreamParser();
             request.get(url).pipe(streamParser);
 
-            streamParser.on("data", function(quad) {
+            streamParser.on("data", function (quad) {
                 parseImports(quad);
                 totalTriples++;
                 writer.addQuad(quad.subject, quad.predicate, quad.object);
             });
-            streamParser.on("end", function(quad) {
+            streamParser.on("end", function (quad) {
                 writer.end((error, triples) => {
                     writeTriples(triples);
                 });
             });
 
-            streamParser.on("error", function(err) {
+            streamParser.on("error", function (err) {
                 callback(err);
             });
         }
@@ -257,31 +244,27 @@ var SourceIntegratorV0 = {
         writer = new N3.Writer({ format: "N-Triples", prefixes: {} });
 
         if (true) {
-            request(url, function(error, response, body) {
+            request(url, function (error, response, body) {
                 if (error) {
                     return callback(err);
                 }
                 //  var filePath = "D:\\apache-jena-4.7.0\\data\\temp.rdf";
                 var filePath = path.join(__dirname, "../jena/data/temp.rdf");
                 fs.writeFileSync(filePath, body);
-                SourceIntegrator.jenaParse(filePath, function(err, triples) {
+                SourceIntegrator.jenaParse(filePath, function (err, triples) {
                     if (err) {
                         return callback(err);
                     }
                     writeTriples(triples);
                 });
             });
-        }
-        else if (format == "rdf") {
+        } else if (format == "rdf") {
             parseRdfXml();
-        }
-        else if (format == "ttl") {
+        } else if (format == "ttl") {
             parseTTL();
         }
-    }
-    ,
-
-    importSourceFromTurtle: function(ontologyUrl, sourceName, options, callback) {
+    },
+    importSourceFromTurtle: function (ontologyUrl, sourceName, options, callback) {
         console.log("----------importing " + sourceName);
         var Config;
         var documentStr = "";
@@ -296,367 +279,343 @@ var SourceIntegratorV0 = {
         var format = null;
         var journal = "";
         async.series(
-          [
-              //getConfig
-              function(callbackSeries) {
-                  if (options.graphUri) {
-                      graphUri = options.graphUri;
-                  }
-                  else {
-                      graphUri = "http://industryportal.enit.fr/ontologies/" + sourceName + "#";
-                  }
-                  configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
-                  jsonFileStorage.retrieve(path.resolve(configPath), function(err, _config) {
-                      Config = _config;
-                      sparqlServerUrl = options.sparqlServerUrl || Config.default_sparql_url;
-                      return callbackSeries();
-                  });
-              },
+            [
+                //getConfig
+                function (callbackSeries) {
+                    if (options.graphUri) {
+                        graphUri = options.graphUri;
+                    } else {
+                        graphUri = "http://industryportal.enit.fr/ontologies/" + sourceName + "#";
+                    }
+                    configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
+                    jsonFileStorage.retrieve(path.resolve(configPath), function (err, _config) {
+                        Config = _config;
+                        sparqlServerUrl = options.sparqlServerUrl || Config.default_sparql_url;
+                        return callbackSeries();
+                    });
+                },
 
-              //get sources
-              function(callbackSeries) {
-                  if(options.sources){
-                      sources = options.sources;
-                      return callbackSeries();
-                  }
-                  var sourcesPath = path.join(__dirname, "../" + "config/" + options.sourcesJsonFile);
-                  jsonFileStorage.retrieve(path.resolve(sourcesPath), function(err, _sources) {
-                      sources = _sources;
-                      return callbackSeries();
-                  });
-              },
+                //get sources
+                function (callbackSeries) {
+                    if (options.sources) {
+                        sources = options.sources;
+                        return callbackSeries();
+                    }
+                    var sourcesPath = path.join(__dirname, "../" + "config/" + options.sourcesJsonFile);
+                    jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, _sources) {
+                        sources = _sources;
+                        return callbackSeries();
+                    });
+                },
 
-              //if (options.reload) clear graph
-              function(callbackSeries) {
-                  if (!options.reload) {
-                      return callbackSeries();
-                  }
-                  SourceIntegrator.clearGraph(sparqlServerUrl, graphUri, function(err, result) {
-                      return callbackSeries(err);
-                  });
-              },
+                //if (options.reload) clear graph
+                function (callbackSeries) {
+                    if (!options.reload) {
+                        return callbackSeries();
+                    }
+                    SourceIntegrator.clearGraph(sparqlServerUrl, graphUri, function (err, result) {
+                        return callbackSeries(err);
+                    });
+                },
 
-              //check if ontology already exist (with graphUri)
-              function(callbackSeries) {
-                  if (!options.clear) {
-                      return callbackSeries();
-                  }
-                  SourceIntegrator.clearGraph(sparqlServerUrl, graphUri, function(err, result) {
-                      return callback(err);
-                  });
-              },
+                //check if ontology already exist (with graphUri)
+                function (callbackSeries) {
+                    if (!options.clear) {
+                        return callbackSeries();
+                    }
+                    SourceIntegrator.clearGraph(sparqlServerUrl, graphUri, function (err, result) {
+                        return callback(err);
+                    });
+                },
 
-              //check if ontology already exist (with graphUri)
-              function(callbackSeries) {
-                  if (options.reload) {
-                      sourceStatus.exists = false;
-                      return callbackSeries();
-                  }
+                //check if ontology already exist (with graphUri)
+                function (callbackSeries) {
+                    if (options.reload) {
+                        sourceStatus.exists = false;
+                        return callbackSeries();
+                    }
 
-                  var sourcesArray = Object.keys(sources);
-                  if (sourcesArray.indexOf(sourceName) > -1) {
-                      sourceStatus.exists = true;
-                      return callbackSeries();
-                  }
+                    var sourcesArray = Object.keys(sources);
+                    if (sourcesArray.indexOf(sourceName) > -1) {
+                        sourceStatus.exists = true;
+                        return callbackSeries();
+                    }
 
-                  for (var source in sources) {
-                      if (sources[source].graphUri == graphUri) {
-                          sourceStatus.exists = source;
-                      }
-                      else {
-                          sourceStatus.exists = false;
-                      }
-                  }
-                  return callbackSeries();
-              },
+                    for (var source in sources) {
+                        if (sources[source].graphUri == graphUri) {
+                            sourceStatus.exists = source;
+                        } else {
+                            sourceStatus.exists = false;
+                        }
+                    }
+                    return callbackSeries();
+                },
 
-              //get ontology format
-              function(callbackSeries) {
-                  if (sourceStatus.exists) {
-                      return callbackSeries();
-                  }
-                  SourceIntegrator.getOntologyFormat(ontologyUrl, function(err, result) {
-                      if (err) {
-                          return callbackSeries(err);
-                      }
-                      format = result;
+                //get ontology format
+                function (callbackSeries) {
+                    if (sourceStatus.exists) {
+                        return callbackSeries();
+                    }
+                    SourceIntegrator.getOntologyFormat(ontologyUrl, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        format = result;
 
-                      return callbackSeries();
-                  });
-              },
+                        return callbackSeries();
+                    });
+                },
 
-              //parse and write triples
-              function(callbackSeries) {
-                  if (sourceStatus.exists) {
-                      return callbackSeries();
-                  }
+                //parse and write triples
+                function (callbackSeries) {
+                    if (sourceStatus.exists) {
+                        return callbackSeries();
+                    }
 
-                  SourceIntegrator.ontologyUrl2tripleStore(ontologyUrl, sparqlServerUrl, graphUri, format, function(err, result) {
-                      if (err) {
-                          return callbackSeries(err);
-                      }
-                      graphUri = result.graphUri;
-                      sparqlInsertStr = result.sparqlInsertStr;
-                      importUris = result.imports;
-                      journal+="     " +result.totalTriples+"triples  imported  in graph "+graphUri+"\n"
-                      return callbackSeries();
-                  });
-              },
+                    SourceIntegrator.ontologyUrl2tripleStore(ontologyUrl, sparqlServerUrl, graphUri, format, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        graphUri = result.graphUri;
+                        sparqlInsertStr = result.sparqlInsertStr;
+                        importUris = result.imports;
+                        journal += "     " + result.totalTriples + "triples  imported  in graph " + graphUri + "\n";
+                        return callbackSeries();
+                    });
+                },
 
-              // get imports sources
-              function(callbackSeries) {
-                  if (!importUris || importUris.length == 0) {
-                      return callbackSeries();
-                  }
+                // get imports sources
+                function (callbackSeries) {
+                    if (!importUris || importUris.length == 0) {
+                        return callbackSeries();
+                    }
 
-                  importUris.forEach(function(importUri) {
-                      if (importsSourcesMap[importUri]) {
-                          importsSources.push(importsSourcesMap[importUri]);
-                      }
-                      else {
-                          console.log(importUri);
-                      }
-                  });
+                    importUris.forEach(function (importUri) {
+                        if (importsSourcesMap[importUri]) {
+                            importsSources.push(importsSourcesMap[importUri]);
+                        } else {
+                            console.log(importUri);
+                        }
+                    });
 
-                  return callbackSeries();
-              },
+                    return callbackSeries();
+                },
 
-              //manage Imports : create a source and create triples  if not exist for each import
-              function(callbackSeries) {
-                  if (options.reload && options.metadata && options.metadata.imports && options.metadata.imports.length > 0) {
-                      importsSources = [];
-                      async.eachSeries(options.metadata.imports, function(importUri, callbackEach) {
-                          var p = importUri.lastIndexOf("/");
-                          if (p = importUri.length - 1) {
-                              p = importUri.substring(0, p).lastIndexOf("/");
-                          }
-                          if (p < 0) {
-                              journal+="wrong importUri"+importUri;
-                              return callbackEach()
-                          }
-                          var sourceLabel = importUri.substring(p + 1);
+                //manage Imports : create a source and create triples  if not exist for each import
+                function (callbackSeries) {
+                    if (options.reload && options.metadata && options.metadata.imports && options.metadata.imports.length > 0) {
+                        importsSources = [];
+                        async.eachSeries(
+                            options.metadata.imports,
+                            function (importUri, callbackEach) {
+                                var p = importUri.lastIndexOf("/");
+                                if ((p = importUri.length - 1)) {
+                                    p = importUri.substring(0, p).lastIndexOf("/");
+                                }
+                                if (p < 0) {
+                                    journal += "wrong importUri" + importUri;
+                                    return callbackEach();
+                                }
+                                var sourceLabel = importUri.substring(p + 1);
 
-                          console.log("create import source " + sourceLabel + " from uri" + importUri);
+                                console.log("create import source " + sourceLabel + " from uri" + importUri);
 
+                                SourceIntegrator.importSourceFromTurtle(importUri, sourceLabel, { graphUri: importUri, sources: sources }, function (err, result) {
+                                    if (err) {
+                                        journal += "******************error in import " + importUri + " " + result + "\n";
+                                    } else {
+                                        importsSources.push(sourceLabel);
+                                    }
 
+                                    return callbackEach();
+                                });
+                            },
+                            function (err) {
+                                return callbackSeries(err);
+                            }
+                        );
+                    } else {
+                        return callbackSeries();
+                    }
+                },
 
+                //register source if not exists
+                function (callbackSeries) {
+                    if (sourceStatus.exists) {
+                        return callbackSeries();
+                    }
 
+                    var id = Util.getRandomHexaId(10);
+                    var newSource = {
+                        name: sourceName,
+                        _type: "source",
+                        id: id,
+                        type: "",
+                        graphUri: graphUri,
+                        sparql_server: {
+                            url: sparqlServerUrl,
+                            method: "Post",
+                            headers: [],
+                        },
+                        editable: options.editable,
+                        controller: "Sparql_OWL",
+                        topClassFilter: "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+                        schemaType: "OWL",
+                        allowIndividuals: options.allowIndividuals,
+                        predicates: {
+                            broaderPredicate: "",
+                            lang: "",
+                        },
+                        group: "ONTOCOMMONS",
+                        imports: importsSources,
+                        taxonomyPredicates: ["rdfs:subClassOf", "rdf:type"],
+                    };
 
-                          SourceIntegrator.importSourceFromTurtle(importUri, sourceLabel, {graphUri:importUri, sources:sources}, function(err, result) {
-                              if (err) {
-                                  journal += "******************error in import " + importUri + " " + result + "\n";
-                              }
-                              else {
-                                  importsSources.push(sourceLabel);
-                              }
+                    sources[sourceName] = newSource;
+                    var sourcesPath = path.join(__dirname, "../" + "config" + "/ontocommonsSources.json");
+                    jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        sourceStatus.exists = true;
+                        return callbackSeries();
+                    });
+                },
+            ],
 
+            function (err) {
+                journal += "DONE";
 
-                              return callbackEach();
-                          });
-
-                      }, function(err) {
-                          return callbackSeries(err);
-                      });
-
-
-                  }
-                  else {
-                      return callbackSeries();
-                  }
-              },
-
-
-              //register source if not exists
-              function(callbackSeries) {
-                  if (sourceStatus.exists) {
-                      return callbackSeries();
-                  }
-
-                  var id = Util.getRandomHexaId(10);
-                  var newSource = {
-                      name: sourceName,
-                      _type: "source",
-                      id: id,
-                      type: "",
-                      graphUri: graphUri,
-                      sparql_server: {
-                          url: sparqlServerUrl,
-                          method: "Post",
-                          headers: []
-                      },
-                      editable: options.editable,
-                      controller: "Sparql_OWL",
-                      topClassFilter: "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
-                      schemaType: "OWL",
-                      allowIndividuals: options.allowIndividuals,
-                      predicates: {
-                          broaderPredicate: "",
-                          lang: ""
-                      },
-                      group: "ONTOCOMMONS",
-                      imports: importsSources,
-                      taxonomyPredicates: ["rdfs:subClassOf", "rdf:type"]
-                  };
-
-                  sources[sourceName] = newSource;
-                  var sourcesPath = path.join(__dirname, "../" + "config" + "/ontocommonsSources.json");
-                  jsonFileStorage.store(path.resolve(sourcesPath), sources, function(err, result) {
-                      if (err) {
-                          return callbackSeries(err);
-                      }
-                      sourceStatus.exists = true;
-                      return callbackSeries();
-                  });
-              }
-          ],
-
-          function(err) {
-              journal += "DONE";
-
-              console.log(journal);
-              return callback(err, journal);
-          }
+                console.log(journal);
+                return callback(err, journal);
+            }
         );
-    }
-    ,
-    getOntologyFormat: function(ontologyUrl, callback) {
-        request(ontologyUrl, function(error, response, body) {
+    },
+    getOntologyFormat: function (ontologyUrl, callback) {
+        request(ontologyUrl, function (error, response, body) {
             if (error) {
                 return callback(err);
             }
             if (body.indexOf("<?xml") == 0) {
                 format = "rdf";
-            }
-            else {
+            } else {
                 format = "ttl";
             }
 
             return callback(null, format);
         });
-    }
-    ,
-    getOntologyFormat: function(ontologyUrl, callback) {
-        request(ontologyUrl, { timeout: 1500 }, function(error, response, body) {
+    },
+    getOntologyFormat: function (ontologyUrl, callback) {
+        request(ontologyUrl, { timeout: 1500 }, function (error, response, body) {
             if (error) {
                 return callback(error);
             }
             if (body.indexOf("<?xml") == 0) {
                 format = "rdf";
-            }
-            else {
+            } else {
                 format = "ttl";
             }
 
             return callback(null, format);
         });
-    }
-    ,
-
-    listPortalOntologies: function(apiKey, callback) {
+    },
+    listPortalOntologies: function (apiKey, callback) {
         var url = "http://data.industryportal.enit.fr/ontologies?apikey=" + apiKey;
-        request(url, function(error, response, body) {
+        request(url, function (error, response, body) {
             if (error) {
                 return callback(error);
             }
             var jsonArray = JSON.parse(body);
             var ontologiesMap = {};
 
-            jsonArray.forEach(function(item) {
+            jsonArray.forEach(function (item) {
                 ontologiesMap[item.acronym] = {};
             });
             var x = ontologiesMap;
             return callback(null, ontologiesMap);
         });
-    }
-    ,
-
-    getOntologiesInfos: function(callback) {
+    },
+    getOntologiesInfos: function (callback) {
         var apiKey = "019adb70-1d64-41b7-8f6e-8f7e5eb54942";
-        SourceIntegrator.listPortalOntologies(apiKey, function(err, ontologiesMap) {
+        SourceIntegrator.listPortalOntologies(apiKey, function (err, ontologiesMap) {
             if (err) {
                 return callback(err);
             }
             var array = Object.keys(ontologiesMap);
             async.eachSeries(
-              array,
-              function(ontologyId, callbackEach) {
-                  var graphUri = "http://industryportal.enit.fr/ontologies/" + ontologyId + "#";
-                  //   var ontologyUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
-                  var ontologyUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
+                array,
+                function (ontologyId, callbackEach) {
+                    var graphUri = "http://industryportal.enit.fr/ontologies/" + ontologyId + "#";
+                    //   var ontologyUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
+                    var ontologyUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
 
-                  SourceIntegrator.getOntologyFormat(ontologyUrl, function(err, result) {
-                      if (err) {
-                          return callbackEach(err);
-                      }
-                      var format = result;
-                      SourceIntegrator.ontologyUrl2tripleStore(ontologyUrl, null, graphUri, format, function(err, result) {
-                          if (err) {
-                              ontologiesMap[ontologyId] = {
-                                  ERROR: err
-                              };
-                          }
-                          else {
-                              ontologiesMap[ontologyId] = {
-                                  graphUri: graphUri,
-                                  format: format,
-                                  totalTriples: result.totalTriples,
-                                  imports: result.imports
-                              };
-                          }
+                    SourceIntegrator.getOntologyFormat(ontologyUrl, function (err, result) {
+                        if (err) {
+                            return callbackEach(err);
+                        }
+                        var format = result;
+                        SourceIntegrator.ontologyUrl2tripleStore(ontologyUrl, null, graphUri, format, function (err, result) {
+                            if (err) {
+                                ontologiesMap[ontologyId] = {
+                                    ERROR: err,
+                                };
+                            } else {
+                                ontologiesMap[ontologyId] = {
+                                    graphUri: graphUri,
+                                    format: format,
+                                    totalTriples: result.totalTriples,
+                                    imports: result.imports,
+                                };
+                            }
 
-                          return callbackEach();
-                      });
-                  });
-              },
-              function(err) {
-                  console.log(JSON.stringify(ontologiesMap));
-              }
+                            return callbackEach();
+                        });
+                    });
+                },
+                function (err) {
+                    console.log(JSON.stringify(ontologiesMap));
+                }
             );
         });
-    }
-    ,
-
-    checkImports: function() {
+    },
+    checkImports: function () {
         var fs = require("fs");
         var path = "D:\\NLP\\ontologies\\Ontocommons\\ontologiesStats.json";
         var str = "" + fs.readFileSync(path);
         var ontologiesMap = JSON.parse(str);
         var array = Object.keys(ontologiesMap);
         async.eachSeries(
-          array,
-          function(ontologyId, callbackEach) {
-              var obj = ontologiesMap[ontologyId];
-              ontologiesMap[ontologyId].checkedImports = {};
-              if (!obj.imports || obj.imports.length == 0) {
-                  return callbackEach();
-              }
-              async.eachSeries(
-                obj.imports,
-                function(importUrl, callbackEach2) {
-                    SourceIntegrator.getOntologyFormat(importUrl, function(err, result) {
-                        if (err) {
-                            ontologiesMap[ontologyId].checkedImports[importUrl] = "KO";
-                        }
-                        else {
-                            ontologiesMap[ontologyId].checkedImports[importUrl] = result;
-                        }
-
-                        callbackEach2();
-                    });
-                },
-                function(err) {
-                    callbackEach();
+            array,
+            function (ontologyId, callbackEach) {
+                var obj = ontologiesMap[ontologyId];
+                ontologiesMap[ontologyId].checkedImports = {};
+                if (!obj.imports || obj.imports.length == 0) {
+                    return callbackEach();
                 }
-              );
-          },
-          function(err) {
-              console.log(JSON.stringify(ontologiesMap));
-          }
-        );
-    }
-    ,
+                async.eachSeries(
+                    obj.imports,
+                    function (importUrl, callbackEach2) {
+                        SourceIntegrator.getOntologyFormat(importUrl, function (err, result) {
+                            if (err) {
+                                ontologiesMap[ontologyId].checkedImports[importUrl] = "KO";
+                            } else {
+                                ontologiesMap[ontologyId].checkedImports[importUrl] = result;
+                            }
 
-    listImports: function() {
+                            callbackEach2();
+                        });
+                    },
+                    function (err) {
+                        callbackEach();
+                    }
+                );
+            },
+            function (err) {
+                console.log(JSON.stringify(ontologiesMap));
+            }
+        );
+    },
+    listImports: function () {
         var fs = require("fs");
         var path = "D:\\NLP\\ontologies\\Ontocommons\\ontologiesStats2.json";
         var str = "" + fs.readFileSync(path);
@@ -670,8 +629,7 @@ var SourceIntegratorV0 = {
                         koImports[importUri] = 0;
                     }
                     koImports[importUri] += 1;
-                }
-                else {
+                } else {
                     if (!okImports[importUri]) {
                         okImports[importUri] = 0;
                     }
@@ -689,53 +647,48 @@ var SourceIntegratorV0 = {
 
         console.log(JSON.stringify(koImports, null, 2));
         console.log(JSON.stringify(importsMap, null, 2));
-    }
-    ,
-
-    importImportsMap: function() {
+    },
+    importImportsMap: function () {
         async.eachSeries(
-          Object.keys(importsSourcesMap),
-          function(importUrl, callbackEach) {
-              var sourceName = importsSourcesMap[importUrl];
-              var options = {
-                  graphUri: importUrl,
-                  sourceName: sourceName,
-                  allowIndividuals: true,
-                  editable: false,
-                  sourcesJsonFile: "ontocommonsSources.json",
-                  reload: true
-                  // clear:true
-              };
+            Object.keys(importsSourcesMap),
+            function (importUrl, callbackEach) {
+                var sourceName = importsSourcesMap[importUrl];
+                var options = {
+                    graphUri: importUrl,
+                    sourceName: sourceName,
+                    allowIndividuals: true,
+                    editable: false,
+                    sourcesJsonFile: "ontocommonsSources.json",
+                    reload: true,
+                    // clear:true
+                };
 
-              SourceIntegrator.importSourceFromTurtle(importUrl, sourceName, options, function(err, result) {
-                  if (err) {
-                      console.log({ [importUrl]: "ERROR : " + err });
-                  }
+                SourceIntegrator.importSourceFromTurtle(importUrl, sourceName, options, function (err, result) {
+                    if (err) {
+                        console.log({ [importUrl]: "ERROR : " + err });
+                    }
 
-                  callbackEach();
-              });
-          },
-          function(err) {
-              console.log(err);
-          }
+                    callbackEach();
+                });
+            },
+            function (err) {
+                console.log(err);
+            }
         );
-    }
-    ,
-
-    replaceSourcesImportUrlBySourceName: function() {
+    },
+    replaceSourcesImportUrlBySourceName: function () {
         var sourcesJsonFile = "ontocommonsSources.json";
         var sourcesPath = path.join(__dirname, "../" + "config/" + sourcesJsonFile);
-        jsonFileStorage.retrieve(path.resolve(sourcesPath), function(err, _sources) {
+        jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, _sources) {
             var sources = _sources;
 
             for (var sourceName in sources) {
                 var source = sources[sourceName];
                 var sourceImportNames = [];
-                source.imports.forEach(function(importUrl) {
+                source.imports.forEach(function (importUrl) {
                     if (importsSourcesMap[importUrl]) {
                         sourceImportNames.push(importsSourcesMap[importUrl]);
-                    }
-                    else {
+                    } else {
                         sourceImportNames.push(importUrl);
                     }
                 });
@@ -744,23 +697,18 @@ var SourceIntegratorV0 = {
 
             console.log(JSON.stringify(sources, null, 2));
         });
-    }
-
+    },
 };
 module.exports = SourceIntegrator;
-
 
 if (false) {
     try {
         var filePath = "D:\\apache-jena-4.7.0\\data\\lov_vvo.rdf";
-        SourceIntegrator.jenaParse(filePath, function(err, triples) {
-
-        });
+        SourceIntegrator.jenaParse(filePath, function (err, triples) {});
     } catch (e) {
         var x = e;
     }
 }
-
 
 if (false) {
     var url = "http://data.industryportal.enit.fr/ontologies/VVO/submissions/1/download?apikey=521da659-7f0a-4961-b0d8-5e15b52fd185";
@@ -779,11 +727,10 @@ if (false) {
         allowIndividuals: true,
         editable: false,
         sourcesJsonFile: "ontocommonsSources.json",
-        reload: true
+        reload: true,
     };
 
-    SourceIntegrator.importSourceFromTurtle(url, sourceName, options, function(err, result) {
-    });
+    SourceIntegrator.importSourceFromTurtle(url, sourceName, options, function (err, result) {});
 }
 
 if (false) {

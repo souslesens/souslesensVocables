@@ -148,13 +148,11 @@ var Ontocommons = (function () {
     };
 
 
-    self.getOntologyRootUris=function(url){
-
+    self.getOntologyRootUris = function (url) {
         var body = {
             getOntologyRootUris: 1,
             sourceUrl: url,
-            options:{}
-
+            options: {},
         };
 
         var payload = {
@@ -163,7 +161,6 @@ var Ontocommons = (function () {
             POST: true,
         };
 
-
         self.message("proecessing ontology ...");
         $.ajax({
             type: "POST",
@@ -171,19 +168,16 @@ var Ontocommons = (function () {
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-             /*  var myFrame = $("#slsv_iframe").contents().find('body');
+                /*  var myFrame = $("#slsv_iframe").contents().find('body');
                 myFrame.html("<html>"+data.uriRoots+"</html>");*/
-            //   $("#resultDiv").html(data.uriRoots)
-                alert(data.uriRoots)
-
+                //   $("#resultDiv").html(data.uriRoots)
+                alert(data.uriRoots);
             },
             error(err) {
                 alert(err.responseText);
             },
         });
-
-
-    }
+    };
 
     return self;
 })();

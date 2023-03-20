@@ -45,13 +45,12 @@ module.exports = function () {
                     return;
                 }
                 if (body.getOntologyRootUris) {
-                   // const SourceIntegrator = require("../../../bin/sourceIntegrator.");
-                    SourceIntegrator.getOntologyRootUris(body.sourceUrl,  body.options, function (err, result) {
+                    // const SourceIntegrator = require("../../../bin/sourceIntegrator.");
+                    SourceIntegrator.getOntologyRootUris(body.sourceUrl, body.options, function (err, result) {
                         processResponse(res, err, result);
                     });
                     return;
                 }
-
 
                 httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
                     processResponse(res, err, result);

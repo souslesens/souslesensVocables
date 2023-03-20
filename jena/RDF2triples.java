@@ -9,6 +9,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 
+
 public class rdf2triples
 {
     public static void main(String[] args) {
@@ -24,11 +25,13 @@ public class rdf2triples
  StmtIterator sIter = m.listStatements();
  String str="";
  int i=0;
+
+ ArrayList<List> allLines = new ArrayList<List>();
  while (sIter.hasNext()){
 	 Statement statement =sIter.next();
 	 if(i++>0)
-		 str+=".\n" ;
-		//str+=",\n" ;
+		// str+=".\n" ;
+		str+=",\n" ;
 	String objectStr="";
 	RDFNode objectNode=statement.getObject();
 	
@@ -36,19 +39,26 @@ public class rdf2triples
 		objectStr="<"+objectNode.toString()+">";
 	else
 		objectStr="'"+objectNode.toString().replaceAll("'","")+"'";
-		
-	str+=("<"+statement.getSubject().toString()+"> <"+statement.getPredicate().toString()+"> "+objectStr+"");
-	//	str+=("[\""+statement.getSubject().toString()+"\",\""+statement.getPredicate().toString()+"\",\""+statement.getObject()+"\"]");
+		objectStr=objectStr.replaceAll("\n","");
+		objectStr=objectStr.replaceAll("\r","");
+		objectStr=objectStr.replaceAll("\"","");
+		objectStr=objectStr.replaceAll("\\\\","");
+
+
+		ArrayList<String> line = new ArrayList<String>();
+		line.add("\"<"+statement.getSubject().toString()+">\"");
+		line.add("\"<"+statement.getPredicate().toString()+">\"");
+		line.add("\""+objectStr+"\"");
+
+allLines.add(line);
+
+	//str+=("<"+statement.getSubject().toString()+">\t<"+statement.getPredicate().toString()+">\t"+objectStr+"");
+		//str+=("[\""+statement.getSubject().toString()+"\",\""+statement.getPredicate().toString()+"\",\""+statement.getObject()+"\"]");
 	 
  }
- 
-/* List  array= sIter.toList();*/
 
- 
- 
- // String jsonStr="{\"triples\":["+str+"]}";
- 
-System.out.println(str);
+ System.out.println(allLines.toString());
+//System.out.println("["+str+"]");
  
  return;
  

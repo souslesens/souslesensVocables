@@ -147,5 +147,43 @@ var Ontocommons = (function () {
         });
     };
 
+
+    self.getOntologyRootUris=function(url){
+
+        var body = {
+            getOntologyRootUris: 1,
+            sourceUrl: url,
+            options:{}
+
+        };
+
+        var payload = {
+            url: "_default",
+            body: JSON.stringify(body),
+            POST: true,
+        };
+
+
+        self.message("proecessing ontology ...");
+        $.ajax({
+            type: "POST",
+            url: `${self.apiUrl}/httpProxy`,
+            data: payload,
+            dataType: "json",
+            success: function (data, _textStatus, _jqXHR) {
+             /*  var myFrame = $("#slsv_iframe").contents().find('body');
+                myFrame.html("<html>"+data.uriRoots+"</html>");*/
+            //   $("#resultDiv").html(data.uriRoots)
+                alert(data.uriRoots)
+
+            },
+            error(err) {
+                alert(err.responseText);
+            },
+        });
+
+
+    }
+
     return self;
 })();

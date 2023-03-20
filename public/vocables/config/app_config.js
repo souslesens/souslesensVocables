@@ -195,6 +195,7 @@
             "https://www.w3.org/2002/07/owl#equivalentProperty": "≡",
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#equivalentProperty": "≡",
             "https://www.w3.org/1999/02/22-rdf-syntax-ns#equivalentProperty": "≡",
+            //
 
         },
     };

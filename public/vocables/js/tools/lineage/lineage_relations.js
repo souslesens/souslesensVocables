@@ -41,6 +41,7 @@ Lineage_relations = (function () {
                     if (Config.sources[Lineage_sources.activeSource].imports) {
                         vocabularies = vocabularies.concat(Config.sources[Lineage_sources.activeSource].imports);
                     }
+
                     vocabularies = vocabularies.concat(Object.keys(Config.ontologiesVocabularyModels));
 
                     async.eachSeries(

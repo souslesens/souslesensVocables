@@ -630,7 +630,7 @@ var Sparql_OWL = (function () {
             if (options.filter) {
                 query += " " + options.filter;
             }
-            if (true || options.onlyObject) {
+            if (!options.filter && !options.filter.indexOf("?object") < 0) {
                 query += " filter (!isLiteral(?object) )";
 
                 /*   query += " filter (?subjectType in (owl:NamedIndividual, owl:Class))";

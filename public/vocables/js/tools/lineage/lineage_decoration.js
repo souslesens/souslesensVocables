@@ -6,40 +6,9 @@ var Lineage_decoration = (function () {
     self.legendMap = {};
     self.currentVisjGraphNodesMap = {};
     self.currentLegendDJstreedata = {};
-    var topLevelOntologyFixedlegendMap = {
-        "ISO_15926-part-14_PCA": {
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#F90EDD",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject": "#00AFEF",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject": "#FDBF01",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject": "#70AC47",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Activity": "#70309f",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Aspect": "#cb6601",
-        },
-        BFO: {
-            "http://purl.obolibrary.org/obo/BFO_0000030": "#00AFEF",
-            "http://purl.obolibrary.org/obo/BFO_0000024": "#00AFEF",
-            "http://purl.obolibrary.org/obo/BFO_0000027": "#00AFEF",
-            "http://purl.obolibrary.org/obo/BFO_0000145": "#cb6601",
-            "http://purl.obolibrary.org/obo/BFO_0000023": "#cb6601",
-            "http://purl.obolibrary.org/obo/BFO_0000016": "#cb6601",
-            "http://purl.obolibrary.org/obo/BFO_0000019": "#cb6601",
-            "http://purl.obolibrary.org/obo/BFO_0000017": "#cb6601",
-            "http://purl.obolibrary.org/obo/BFO_0000006": "#F90EDD",
-            "http://purl.obolibrary.org/obo/BFO_0000029": "#F90EDD",
-            "http://purl.obolibrary.org/obo/BFO_0000140": "#F90EDD",
-            "http://purl.obolibrary.org/obo/BFO_0000182": "#70309f",
-            "http://purl.obolibrary.org/obo/BFO_0000144": "#70309f",
-            "http://purl.obolibrary.org/obo/BFO_0000148": "#70309f",
-            "http://purl.obolibrary.org/obo/BFO_0000038": "#70309f",
-            "http://purl.obolibrary.org/obo/BFO_0000203": "#70309f",
-            "http://purl.obolibrary.org/obo/BFO_0000015": "#70309f",
-            "http://purl.obolibrary.org/obo/BFO_0000008": "#70309f",
-        },
-        DOLCE: {},
-    };
-    self.topLevelOntologyPredifinedLegendMap = JSON.parse(JSON.stringify(topLevelOntologyFixedlegendMap));
 
-    self.init = function () {
+    /*  self.init = function () {
+
         self.operationsMap = {
             colorNodesByType: self.colorGraphNodesByType,
             colorNodesByTopLevelOntologyTopType: self.colorNodesByTopLevelOntologyTopType,
@@ -50,7 +19,7 @@ var Lineage_decoration = (function () {
         self.currentVisjGraphNodesMap = {};
         self.legendMap = {};
         self.currentLegendDJstreedata = {};
-    };
+    };*/
     self.run = function (operation) {
         $("#Lineage_classes_graphDecoration_operationSelect").val("");
         self.operationsMap[operation]();
@@ -71,7 +40,7 @@ var Lineage_decoration = (function () {
         if (!Config.currentTopLevelOntology) {
             return callback(null, null);
         }
-
+        self.topLevelOntologyPredifinedLegendMap = JSON.parse(JSON.stringify(Config.topLevelOntologyFixedlegendMap));
         if (self.topOntologiesClassesMap[Config.currentTopLevelOntology]) {
             self.currentTopOntologyClassesMap = self.topOntologiesClassesMap[Config.currentTopLevelOntology];
             return callback(null, self.currentTopOntologyClassesMap);

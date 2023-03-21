@@ -394,7 +394,10 @@ sourceLabels.sort();
                         MainController.UI.message("No result ", true);
                         return callbackEach();
                     }
-                    result = Lineage_classes.truncateResultToVisGraphLimit(result);
+
+                    if (options.output != "table") {
+                        result = Lineage_classes.truncateResultToVisGraphLimit(result);
+                    }
 
                     /**
                      * @type {any[]}
@@ -1366,8 +1369,6 @@ addNode:false
                 return MainController.UI.message("No data found");
             }
 
-            result = Lineage_classes.truncateResultToVisGraphLimit(result);
-
             var color = self.getSourceColor(source);
 
             //get Clusters
@@ -1965,9 +1966,11 @@ addNode:false
                         return callback(null, result);
                     }
                 }
-                result = Lineage_classes.truncateResultToVisGraphLimit(result);
+                if (options.output != "table") {
+                    result = Lineage_classes.truncateResultToVisGraphLimit(result);
+                }
                 var visjsData = { nodes: [], edges: [] };
-                var existingNodes = visjsGraph.getExistingIdsMap();
+                var existingNodes = options.output == "table" ? {} : visjsGraph.getExistingIdsMap();
                 self.currentExpandLevel += 1;
 
                 var restrictionSource = source;
@@ -2032,6 +2035,12 @@ addNode:false
                         shape = "hegagon";
                         color = "#EEE";
                     }
+
+                    if (item.value.type == "literal") {
+                        shape = "text";
+                        if (label.length > Config.whiteBoardMaxLabelLength) label = label.substring(0, Config.whiteBoardMaxLabelLength) + "...";
+                    }
+
                     if (!existingNodes[item.value.value]) {
                         existingNodes[item.value.value] = 1;
                         visjsData.nodes.push({
@@ -2048,6 +2057,7 @@ addNode:false
                                 id: item.value.value,
                                 label: item.valueLabel.value,
                                 varName: "value",
+                                type: item.value.type,
                             },
                         });
                     }

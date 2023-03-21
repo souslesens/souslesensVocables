@@ -61,9 +61,9 @@ var Lineage_combine = (function () {
         var existingNodes = visjsGraph.getExistingIdsMap();
         var nodes = visjsGraph.data.nodes.get();
         nodes.forEach(function (node1) {
-            if (!node1.data) return;
+            if (!node1.data && !node1.data.label) return;
             nodes.forEach(function (node2) {
-                if (!node2.data && !node1.data.label) return;
+                if (!node2.data && !node2.data.label) return;
                 if (node1.data.id == node2.data.id && node1.data.source == node2.data.source) return;
                 if (node1.data.label.toLowerCase().replace(/ /g, "") == node2.data.label.toLowerCase().replace(/ /g, "")) {
                     commonNodes.push({ fromNode: node1, toNode: node2 });

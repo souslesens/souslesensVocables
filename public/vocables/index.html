@@ -74,6 +74,8 @@
         <script src="js/tools/lineage/lineage_styles.js"></script>
         <script src="js/tools/lineage/lineage_relationFilter.js"></script>
 
+        <script src="js/ontologyModels.js"></script>
+
         <script src="js/commonUIwidgets.js"></script>
 
         <script src="js/tools/owlEditor.js"></script>
@@ -176,9 +178,6 @@
         <!--  <script src="js/external/d3/d3.v3.min.js"></script>
         <script src="js/sunburst.js"></script>-->
 
-        <!--   <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
-        <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>-->
-
         <!--  <script src="js/authentification.js"></script>-->
 
         <link
@@ -219,6 +218,9 @@
 
         <script src="https://browser.sentry-cdn.com/5.5.0/bundle.min.js" crossorigin="anonymous"></script>
 
+        <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
+        <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
+
         <script>
             var leftPanelWidth = 400;
             var rightPanelWidth = 400;
@@ -228,7 +230,8 @@
             // Redirect 401 to login page
             $(document).ajaxError(function (e, xhr, settings) {
                 if (xhr.status == 401) {
-                    location.href = "/login";
+                    const uri = encodeURIComponent(`${window.location.pathname}${window.location.search}`);
+                    location.href = `/login?redirect=${uri}`;
                 }
             });
 
@@ -484,6 +487,18 @@
             .ui-dialog-title {
 
                 color: #337ab7;
+            }
+
+
+            element.style {
+                padding: 3px !important;
+                border: #e1d9bf solid 1px !important;
+            }
+
+            table.dataTable tbody th, table.dataTable tbody td {
+                padding: 3px !important;
+                border: #e1d9bf solid 1px !important;
+
             }
         </style>
     </head>

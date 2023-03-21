@@ -228,8 +228,8 @@ var MainController = (function () {
                     },
                     function (callbackSeries) {
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
-                        self.basic;
-                        Lineage_relations.registerSourcesModel(sources, function (err) {
+
+                        OntologyModels.registerSourcesModel(sources, function (err) {
                             callbackSeries(err);
                         });
                     },

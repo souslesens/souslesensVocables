@@ -128,7 +128,14 @@ var Sparql_common = (function () {
 
                 var conceptIdsStr = "";
 
+                var uriIds = [];
                 ids.forEach(function (id, _index) {
+                    if (id.indexOf(":") > -1)
+                        // literal
+                        uriIds.push(id);
+                });
+
+                uriIds.forEach(function (id, _index) {
                     if (!id) {
                         return;
                     }
@@ -144,6 +151,7 @@ var Sparql_common = (function () {
                     }
                 });
 
+                if (conceptIdsStr == "") return "";
                 if (options.useFilterKeyWord) {
                     filters.push(" FILTER( ?" + varName + " in (" + conceptIdsStr + "))");
                 } else {

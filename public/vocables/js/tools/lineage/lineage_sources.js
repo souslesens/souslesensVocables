@@ -667,10 +667,13 @@ sourceDivId +
     };
 
     self.isSourceEditable = function (source) {
+        const groups = authentication.currentUser.groupes;
+        if (groups.includes("admin") && Config.sources[source].editable) {
+            return true;
+        }
         if (!Config.sources[source]) {
             return console.log("no source " + source);
         }
-        const groups = authentication.currentUser.groupes;
         const currentAccessControls = groups.map((group) => {
             const defaultAccessControl = Config.profiles[group].defaultSourceAccessControl;
             const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;

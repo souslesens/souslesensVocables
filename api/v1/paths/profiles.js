@@ -38,7 +38,22 @@ module.exports = function () {
             const currentUser = await userManager.getUser(req.user);
             const groups = currentUser.user.groups;
             if (groups.includes("admin")) {
-                resourceFetched(res, sortedProfiles);
+                // return an admin profile with all right
+                adminProfile = {
+                    name: "admin",
+                    _type: "profile",
+                    id: "admin",
+                    allowedSourceSchemas: ["OWL", "SKOS"],
+                    defaultSourceAccessControl: "readwrite",
+                    sourcesAccessControl: {},
+                    allowedTools: "ALL",
+                    forbiddenTools: [],
+                    blender: {
+                        contextMenuActionStartLevel: 0,
+                    },
+                };
+                const sortedProfilesWithAdmin = sortObjectByKey({ ...sortedProfiles, admin: adminProfile });
+                resourceFetched(res, sortedProfilesWithAdmin);
             } else {
                 const sortedUserProfiles = Object.fromEntries(
                     Object.entries(sortedProfiles).filter(([profileId, _profile]) => {

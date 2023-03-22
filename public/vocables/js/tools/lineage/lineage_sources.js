@@ -672,10 +672,13 @@ sourceDivId +
         }
         const groups = authentication.currentUser.groupes;
         const currentAccessControls = groups.map((group) => {
+
             const defaultAccessControl = Config.profiles[group].defaultSourceAccessControl;
             const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
             return sourcesAccessControl.hasOwnProperty(source) ? sourcesAccessControl[source] : defaultAccessControl;
         });
+        if(groups.indexOf("admin")>-1)
+            return true;
 
         self.realAccessControl = currentAccessControls.includes("readwrite") ? "readwrite" : currentAccessControls.includes("read") ? "read" : "forbidden";
 

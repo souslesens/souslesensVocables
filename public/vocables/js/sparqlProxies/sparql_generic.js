@@ -390,11 +390,13 @@ var Sparql_generic = (function () {
         }
         if (object) {
             filterStr += Sparql_common.getUriFilter("o", object);
+
         }
         var graphUri = Config.sources[sourceLabel].graphUri;
         if (Array.isArray(graphUri)) {
             graphUri = graphUri[0];
         }
+
         var query = self.getDefaultSparqlPrefixesStr();
         query += "with <" + graphUri + "> " + " DELETE {?s ?p ?o} WHERE{ ?s ?p ?o " + filterStr + "}";
         var queryOptions = "";
@@ -411,6 +413,10 @@ var Sparql_generic = (function () {
         var allowedPrefixes = Object.keys(Config.defaultSparqlPrefixes);
 
         function setElementSyntax(elt) {
+            var p=-1
+            if ((p=elt.indexOf("@")) >0) {
+                return '"'+elt.substring(0,p)+'"'+elt.substring(p);
+            }
             if (elt.indexOf("_:b") == 0) {
                 return "<" + elt + ">";
             }

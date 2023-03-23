@@ -64,6 +64,7 @@ CommonUIwidgets = (function () {
 
             CommonUIwidgets.predicatesSelectorWidget.configure(configureFn);
         },
+
         configure: function (configureFn) {
             self.predicatesSelectorWidget.onSelectPropertyFn = null;
             self.predicatesSelectorWidget.onSelectObjectFn = null;

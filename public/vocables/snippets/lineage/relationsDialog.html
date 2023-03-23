@@ -12,27 +12,46 @@
 <div style="display: flex; flex-direction: row">
     <div class="lineageRelations_div">
         <b>Properties</b>
-        <div>search<input id="LineageRelations_searchJsTreeInput" /> or <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.showAddFilterDiv()">Any</button></div>
+        <div>
+            search<input id="LineageRelations_searchJsTreeInput" /> or
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.showAddFilterDiv(true)">Any</button>
+        </div>
         <div style="width: 350px; height: 600px">
             <div id="lineageRelations_propertiesJstreeDiv"></div>
         </div>
     </div>
 
     <div style="display: flex; align-content: space-around; flex-direction: column; justify-content: space-evenly; width: 450px">
-        <div style="text-align: center; background-color: #eee; margin: 5px; max-height: 200px; overflow: auto" id="Lineage_relation_constraints"></div>
+        <div class="lineageRelations_div" style="display: block" id="lineageRelations_historyDiv">
+            <div>
+                Queries
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineageRelations_history_previousBtn" onclick="Lineage_relations.callPreviousQuery()">previous</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.loadUserQueries()">saved</button>
+                <button
+                    class="btn btn-sm my-1 py-0 btn-outline-primary"
+                    id="lineageRelations_history_deleteBtn"
+                    onclick="Lineage_relations.deleteSavedQuery($('#lineageRelations_savedQueriesSelect').val())"
+                >
+                    delete selected
+                </button>
+            </div>
+            <select id="lineageRelations_savedQueriesSelect" onclick="Lineage_relations.onSelectSavedQuery($(this).val())" style="width: 400px" size="5"></select>
+        </div>
+
+        <div style="text-align: center; background-color: #eee; margin: 5px; max-height: 100px; overflow: auto" id="Lineage_relation_constraints"></div>
 
         <div class="lineageRelations_div" style="display: none" id="lineageRelations_filterDiv">
             <b> Predicates filter</b>
 
             <div>
                 Role
-                <select id="lineage_relation_filterRoleSelect" style="overflow-y: auto; width: 100px; text-align: center" size="2" onchange="Lineage_relationFilter.onSelectRoleType($(this).val())">
+                <select id="lineage_relation_filterRoleSelect" style="overflow-y: auto; width: 100px; text-align: center" size="2" onclick="Lineage_relationFilter.onSelectRoleType($(this).val())">
                     <option>subject</option>
                     <option>object</option>
                 </select>
 
                 <!-- <span style="font-weight: bold" id="lineage_relation_filterRole"></span>
-            <span id="Lineage_relation_filter"></span>-->
+    <span id="Lineage_relation_filter"></span>-->
                 Type<select id="Lineage_relation_filterTypeSelect" onchange="Lineage_relationFilter.onSelectResourceType($(this).val())"></select>
             </div>
             <div id="Lineage_relation_filterValueDiv">
@@ -82,11 +101,11 @@
 
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_relations.onshowDrawRelationsDialogValidate('graph')">Draw</button>
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_relations.onshowDrawRelationsDialogValidate('table')">Table</button>
-
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.saveCurrentQuery()">Save query</button>
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.onshowDrawRelationsDialogValidate('clear')">Cancel</button>
 
                 <div>
-                    <input type="checkbox" id="Lineage_classes_excludeRelationsFromGraphSpatializationCBX" checked="checked" />
+                    <input type="checkbox" id="Lineage_classes_excludeRelationsFromGraphSpatializationCBX" />
                     exclude relations from graph spatialization
                 </div>
             </div>

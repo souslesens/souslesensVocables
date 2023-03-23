@@ -15,7 +15,10 @@ var SourceManager = require("./sourceManager.");
 var path = require("path");
 var async = require("async");
 var fs = require("fs");
-const { configPath, config } = require("../model/config");
+
+//const { configPath, config } = require("../model/config");
+const x = require.resolve("../model/config");
+const { configPath, config } = require(x);
 
 var ConfigManager = {
     // TODO move to model/config

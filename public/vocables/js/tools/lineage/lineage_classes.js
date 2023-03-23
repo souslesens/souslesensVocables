@@ -1269,8 +1269,7 @@ addNode:false
                                 };
 
                                 visjsData.nodes.push(node);
-                            }else{
-
+                            } else {
                             }
                             //link node to source
 

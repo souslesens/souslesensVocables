@@ -66,7 +66,7 @@ var Sparql_CRUD = (function () {
         });
     };
 
-    self.loadItem = function (uri, options,callback) {
+    self.loadItem = function (uri, options, callback) {
         var filter = "FILTER (?s =<" + uri + ">) ";
         var options = {
             filter: filter,
@@ -75,7 +75,6 @@ var Sparql_CRUD = (function () {
             if (err) {
                 return callback(err.responseText);
             }
-
 
             var contentPredicate = self.currentSourceObj.graphUri + self.contentPredicate;
 
@@ -89,9 +88,7 @@ var Sparql_CRUD = (function () {
         });
     };
 
-
-
-    self.save = function (CRUDsource, dataSource, data, scope,callback) {
+    self.save = function (CRUDsource, dataSource, data, scope, callback) {
         self.initCRUDsource(CRUDsource);
         var triples = [];
 
@@ -123,7 +120,7 @@ var Sparql_CRUD = (function () {
         triples.push({
             subject: queryUri,
             predicate: "rdf:type",
-            object:  self.currentSourceObj.type,
+            object: self.currentSourceObj.type,
         });
         triples.push({
             subject: queryUri,
@@ -146,22 +143,19 @@ var Sparql_CRUD = (function () {
         };
         Sparql_generic.insertTriples(CRUDsource, triples, options, function (err, result) {
             if (err) {
-                if(callback)
-                    return callback(err)
+                if (callback) return callback(err);
                 return alert(err.responseText);
             }
-            if(callback)
-            return callback(null,{id:queryUri,label:label})
-           // $("#sparql_CRUD_itemsSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
+            if (callback) return callback(null, { id: queryUri, label: label });
+            // $("#sparql_CRUD_itemsSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
         });
     };
 
-    self.delete = function(CRUDsource,uri,callback){
+    self.delete = function (CRUDsource, uri, callback) {
         CRUDsource = CRUDsource || self.currentSourceLabel;
-        self.initCRUDsource (CRUDsource)
-        Sparql_generic.deleteTriples(CRUDsource,uri,null,null,callback)
-
-    }
+        self.initCRUDsource(CRUDsource);
+        Sparql_generic.deleteTriples(CRUDsource, uri, null, null, callback);
+    };
 
     return self;
 })();

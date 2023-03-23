@@ -3,6 +3,7 @@ import { Mode, Type, Msg_ } from "./Component/ProfilesTable";
 import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import React from "react";
+import { z } from "zod";
 
 type Response = { message: string; resources: ProfileJson[] };
 const endpoint = "/api/v1/profiles";
@@ -79,10 +80,6 @@ type ProfileJson = {
     blender: Blender;
 };
 
-type Blender = {
-    contextMenuActionStartLevel: number;
-};
-
 const decodeProfile = (key: string, profile: ProfileJson): Profile => {
     return {
         name: profile.name ? profile.name : key,
@@ -96,18 +93,31 @@ const decodeProfile = (key: string, profile: ProfileJson): Profile => {
     };
 };
 
-type Profile = {
-    name: string;
-    _type: string;
-    id: string;
-    allowedSourceSchemas: string[];
-    sourcesAccessControl: Record<string, SourceAccessControl>;
-    allowedTools: string | string[];
-    forbiddenTools: string[];
-    blender: Blender;
-};
+type Profile = z.infer<typeof ProfileSchema>;
+const BlenderSchema = z.object({
+    contextMenuActionStartLevel: z.coerce.number(),
+});
 
-type SourceAccessControl = "forbidden" | "read" | "readwrite";
+const SourceAccessControlSchema = z.union([z.literal("forbidden"), z.literal("read"), z.literal("readwrite")]);
+const ProfileSchema = z.object({
+    name: z
+        .string()
+        .refine((val) => val !== "admin", { message: "Name can't be admin" })
+        .refine((val) => !val.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i), { message: "Name can only contain alphanumeric characters" }),
+    _type: z.string().optional(),
+    id: z.string().default(ulid()),
+    allowedSourceSchemas: z
+        .array(z.string().nullish())
+        .nullish()
+        .transform((a) => (a ?? []).flatMap((item) => (item ? item : []))),
+    sourcesAccessControl: z.record(SourceAccessControlSchema).default({}),
+    allowedTools: z.union([z.string(), z.array(z.string())]).default("ALL"),
+    forbiddenTools: z.array(z.string()).default([]),
+    blender: BlenderSchema.default({ contextMenuActionStartLevel: 0 }),
+});
+type Blender = z.infer<typeof BlenderSchema>;
+
+type SourceAccessControl = z.infer<typeof SourceAccessControlSchema>;
 
 export const defaultProfile = (uuid: string): Profile => {
     return {
@@ -121,4 +131,4 @@ export const defaultProfile = (uuid: string): Profile => {
         blender: { contextMenuActionStartLevel: 0 },
     };
 };
-export { getProfiles, deleteProfile, Profile, SourceAccessControl };
+export { getProfiles, deleteProfile, Profile, SourceAccessControl, ProfileSchema };

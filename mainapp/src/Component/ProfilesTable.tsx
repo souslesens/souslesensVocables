@@ -32,17 +32,21 @@ import { alpha, styled } from "@mui/material/styles";
 import { TreeView, TreeItem, TreeItemProps, treeItemClasses, TreeItemContentProps, useTreeItem } from "@mui/lab";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { useZorm, createCustomIssues } from "react-zorm";
+import { ZodIssue } from "zod";
 
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
-import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl } from "../Profile";
+import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema } from "../Profile";
 import { Source } from "../Source";
 import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import Autocomplete from "@mui/material/Autocomplete";
 import CsvDownloader from "react-csv-downloader";
+import red from "@mui/material/colors/red";
+import { ErrorGetter, ZormError } from "react-zorm/dist/types";
 
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();
@@ -214,6 +218,8 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const [nodesClicked, setNodeToExpand] = React.useState<Array<string>>([]);
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
+    const unwrappedProfiles = SRD.unwrap([], identity, model.profiles);
+    const [issues, setIssues] = React.useState<ZodIssue[]>([]);
     const sources = React.useMemo(() => {
         return unwrappedSources;
     }, [unwrappedSources]);
@@ -221,17 +227,19 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
     const tools: string[] = ["ALL", "sourceBrowser", "sourceMatcher", "evaluate", "ancestors", "lineage", "SPARQL", "ADLmappings", "ADLbrowser", "Standardizer", "SQLquery"];
     const [profileModel, update] = React.useReducer(updateProfile, { modal: false, profileForm: profile });
+
     React.useEffect(() => {
         update({ type: Type.ResetProfile, payload: profile });
     }, [profileModel.modal]);
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => {
-        setNodeToExpand(new Array());
+        setNodeToExpand([]);
         update({ type: Type.UserClickedModal, payload: false });
     };
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
 
+    const zo = useZorm("form", ProfileSchema, { setupListeners: false, customIssues: issues });
     const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const treeStr = src.treeStr;
 
@@ -289,19 +297,22 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         update({ type: Type.UserClickedCheckAll, payload: { fieldname: fieldname, value: event.target.checked } });
     const handleNewBlenderNumber = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserUpdatedBlenderLevel, payload: parseInt(event.target.value.replace(/\D/g, "")) });
 
+    function validateProfileName(profileName: string) {
+        const issues = createCustomIssues(ProfileSchema);
+
+        if (unwrappedProfiles.reduce((acc, p) => (acc ||= p.name === profileName), false)) {
+            issues.name(`Profile name ${profileName} is already in use`);
+        }
+
+        return {
+            issues: issues.toArray(),
+        };
+    }
     const saveProfiles = () => {
-        // const updateProfiles = unwrappedProfiles.map(p => p.name === profile.name ? profileModel.profileForm : p)
-        // const addProfile = [...unwrappedProfiles, profileModel.profileForm]
-        // updateModel({ type: 'UserClickedSaveChanges', payload: {} });
-        // putProfiles(create ? addProfile : updateProfiles)
-        //     .then((person) => updateModel({ type: 'ServerRespondedWithProfiles', payload: success(person) }))
-        //     .then(() => update({ type: Type.UserClickedModal, payload: false }))
-        //     .then(() => update({ type: Type.ResetProfile, payload: create ? Mode.Creation : Mode.Edition }))
-        //     .catch((err) => updateModel({ type: 'ServerRespondedWithProfiles', payload: failure(err.msg) }));
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
     };
 
-    const fieldsFromSource = (source: any) => {
+    const fieldsFromSource = (source: Source) => {
         let fields = [source.schemaType];
 
         if (source.group) {
@@ -312,12 +323,12 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     };
 
     const generateSourcesTree = () => {
-        let sourcesTree: SourceTreeNode[] = [];
+        const sourcesTree: SourceTreeNode[] = [];
 
         let index = 0;
         sources.forEach((source) => {
             let currentTree = sourcesTree;
-            let tree: string[] = [];
+            const tree: string[] = [];
             fieldsFromSource(source).forEach((field) => {
                 tree.push(field);
                 let root = currentTree.find((key) => key.name == field);
@@ -339,12 +350,12 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         return sourcesTree;
     };
 
-    const displayFormTree = (sourcesTree: any) => {
+    const displayFormTree = (sourcesTree: SourceTreeNode[]) => {
         if (!sourcesTree) {
             return;
         }
 
-        return sourcesTree.map((source: any) => {
+        return sourcesTree.map((source: SourceTreeNode) => {
             const sourcesAccessControlList = Object.entries(profileModel.profileForm.sourcesAccessControl);
             const availableSourcesAccessControl = sourcesAccessControlList.map(([sac, _val]) => {
                 return sac;
@@ -383,12 +394,22 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 <p style={{ margin: 0 }}>{source.name}</p>
                             </Grid>
                             <Grid item xs="auto">
-                                <SourceAccessControlInputSelect
-                                    name={source.source.id + "-source-access-control"}
-                                    value={value}
-                                    onChange={handleSourceAccessControlUpdate(source)}
-                                    editable={source.source.editable}
-                                />
+                                <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
+                                    <InputLabel id="select-sources-access-control">Access Control</InputLabel>
+                                    <Select
+                                        labelId="select-sources-access-control"
+                                        id="select-sources-access-control-select"
+                                        value={value}
+                                        label="AccessControl"
+                                        onChange={handleSourceAccessControlUpdate(source)}
+                                    >
+                                        <MenuItem value="forbidden">Forbidden</MenuItem>
+                                        <MenuItem value="read">Read</MenuItem>
+                                        <MenuItem disabled={!source.source.editable} value="readwrite">
+                                            Read & Write
+                                        </MenuItem>
+                                    </Select>
+                                </FormControl>
                             </Grid>
                         </Grid>
                     }
@@ -423,12 +444,44 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                 {create ? "Create Profile" : "Edit"}
             </Button>
             <Modal onClose={handleClose} open={profileModel.modal}>
-                <Box component="form" sx={style} style={{ maxHeight: "100%", overflow: "auto" }}>
+                <Box
+                    component="form"
+                    ref={zo.ref}
+                    onSubmit={(e) => {
+                        const validation = zo.validate();
+                        if (!validation.success) {
+                            e.preventDefault();
+                            console.error("error", e);
+                            return;
+                        }
+                        e.preventDefault();
+                        saveProfiles();
+                    }}
+                    sx={style}
+                    style={{ maxHeight: "100%", overflow: "auto" }}
+                >
                     <Stack spacing={4}>
-                        <TextField fullWidth onChange={handleFieldUpdate("name")} value={profileModel.profileForm.name} id={`name`} label={"Name"} variant="standard" />
                         <TextField
+                            name={zo.fields.name()}
+                            helperText={errorMessage(zo.errors.name)}
+                            fullWidth
+                            onChange={handleFieldUpdate("name")}
+                            onBlur={() => {
+                                zo.validate();
+                                const isUniq = validateProfileName(profileModel.profileForm.name);
+                                setIssues(isUniq.issues);
+                            }}
+                            value={profileModel.profileForm.name}
+                            id={`name`}
+                            label={"Name"}
+                            variant="standard"
+                        />
+                        <TextField
+                            name={zo.fields.blender.contextMenuActionStartLevel()}
+                            helperText={errorMessage(zo.errors.blender.contextMenuActionStartLevel)}
                             fullWidth
                             onChange={handleNewBlenderNumber}
+                            onBlur={() => zo.validate()}
                             value={profileModel.profileForm.blender.contextMenuActionStartLevel.toString()}
                             id={`blender`}
                             label={"Blender Level"}
@@ -446,9 +499,13 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                 onChange={handleFieldUpdate("allowedSourceSchemas")}
                             >
-                                {schemaTypes.map((schemaType) => (
+                                {schemaTypes.map((schemaType, i) => (
                                     <MenuItem key={schemaType} value={schemaType}>
-                                        <Checkbox checked={profileModel.profileForm.allowedSourceSchemas.indexOf(schemaType) > -1} />
+                                        <Checkbox
+                                            id={zo.fields.allowedSourceSchemas(i)("id")}
+                                            name={zo.fields.allowedSourceSchemas(i)("name")}
+                                            checked={profileModel.profileForm.allowedSourceSchemas.indexOf(schemaType) > -1}
+                                        />
                                         {schemaType}
                                     </MenuItem>
                                 ))}
@@ -500,7 +557,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 ))}
                             </Select>
                         </FormControl>
-                        <Button variant="contained" color="primary" onClick={saveProfiles}>
+                        <Button disabled={zo.validation?.success === false || zo.customIssues.length > 0} type="submit" variant="contained" color="primary">
                             Save Profile
                         </Button>
                     </Stack>
@@ -556,6 +613,10 @@ const expansionArrowStyles = {
 };
 
 const CustomExpansionArrow = styled("div")(expansionArrowStyles);
+function errorMessage(zormError: ErrorGetter): React.ReactNode {
+    return zormError((e) => <p style={{ color: "red" }}>{e.message}</p>);
+}
+
 function CustomTreeItem(props: TreeItemProps) {
     return <TreeItem ContentComponent={CustomContent} {...props} />;
 }
@@ -567,27 +628,5 @@ interface SourceTreeNode {
     source: Source;
     treeStr: string;
 }
-
-interface SourceAccessControlInputProps {
-    name: string;
-    value: SourceAccessControl;
-    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-    editable: boolean;
-}
-
-const SourceAccessControlInputSelect: React.FC<SourceAccessControlInputProps> = ({ name, value, onChange, editable }) => {
-    return (
-        <FormControl sx={{ m: 1, minWidth: 120 }} size="small">
-            <InputLabel id="select-sources-access-control">Access Control</InputLabel>
-            <Select labelId="select-sources-access-control" id="select-sources-access-control-select" value={value} label="AccessControl" onChange={onChange}>
-                <MenuItem value="forbidden">Forbidden</MenuItem>
-                <MenuItem value="read">Read</MenuItem>
-                <MenuItem disabled={!editable} value="readwrite">
-                    Read & Write
-                </MenuItem>
-            </Select>
-        </FormControl>
-    );
-};
 
 export { ProfilesTable, Mode, Msg_, Type };

@@ -156,7 +156,10 @@ var Sparql_CRUD = (function () {
         });
     };
 
-    self.save = function(uri){
+    self.delete = function(CRUDsource,uri,callback){
+        CRUDsource = CRUDsource || self.currentSourceLabel;
+        self.initCRUDsource (CRUDsource)
+        Sparql_generic.deleteTriples(CRUDsource,uri,null,null,callback)
 
     }
 

@@ -77,7 +77,7 @@ Lineage_sources = (function () {
                 //if checkbox
 
                 var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
-                sources.length > 0;
+
                 self.loadSources(sources);
             }
         );
@@ -90,10 +90,13 @@ Lineage_sources = (function () {
         if (!Array.isArray(sources)) {
             sources = [sources];
         }
+
         var firstSource = null;
         async.eachSeries(
             sources,
             function (source, callbackEach) {
+                if(  self.loadedSources[source])
+                    return callbackEach();
                 self.initSource(source, function (err, result) {
                     if (!err) {
                         firstSource = source;

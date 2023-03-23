@@ -1167,8 +1167,13 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
 
         var type = null;
         var graphUri = "";
-
+        var uniqueTriples={}
         data.forEach(function(item) {
+          var key=item.prop.value+"_"+item.value.value+item.value["xml:lang"]
+          if(uniqueTriples[key])
+            return
+          uniqueTriples[key]=1
+
           if (item.g) {
             graphUri = item.g.value;
             var realSource = Sparql_common.getSourceFromGraphUri(graphUri);
@@ -1248,6 +1253,8 @@ value = item.valueLabel.value;*/
         var defaultLang = Config.default_lang;
         /* if (!defaultLang)
 defaultLang = 'en';*/
+
+
 
         for (var key in self.propertiesMap.properties) {
           if (defaultProps.indexOf(key) < 0) {

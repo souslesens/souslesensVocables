@@ -5,7 +5,9 @@ Lineage_relations = (function() {
     self.drawRelationCurrentCaller = caller;
     $("#mainDialogDiv").dialog("open");
     $("#mainDialogDiv").load("snippets/lineage/relationsDialog.html", function() {
-      $("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)
+      $("#lineageRelations_history_previousBtn").css("display",self.previousQuery?"inline":"none")
+      $("#lineageRelations_history_deleteBtn").css("display","none")
+      //$("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)
       $("#LineageRelations_searchJsTreeInput").keypress(function(e) {
         if (e.which == 13 || e.which == 9) {
           $("#lineageRelations_propertiesJstreeDiv").jstree(true).uncheck_all();
@@ -511,8 +513,8 @@ Lineage_relations = (function() {
     Sparql_CRUD.list("STORED_QUERIES", null, null, "lineageRelations_savedQueriesSelect");
 
   };
-  self.onSelectSavedQuery = function(e,x) {
-
+  self.onSelectSavedQuery = function(id) {
+    $("#lineageRelations_history_deleteBtn").css("display","inline")
     Sparql_CRUD.loadItem(id,{},function(err, result){
       if(err)
         return alert(err.responseText)
@@ -545,6 +547,20 @@ Lineage_relations = (function() {
   };
 
   self.deleteSavedQuery=function(id){
+    if(confirm( "delete query" )){
+      Sparql_CRUD.delete("STORED_QUERIES",id,function(err, result){
+        if(err)
+          return alert(err.responseText)
+       self.loadUserQueries()
+        $("#lineageRelations_history_deleteBtn").css("display","none")
+      })
+
+
+
+
+
+
+    }
 
 
   }

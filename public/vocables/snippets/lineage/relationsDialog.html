@@ -29,17 +29,17 @@
 
     <div class="lineageRelations_div" style="display: block" id="lineageRelations_historyDiv">
       <div>Queries
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.callPreviousQuery()">
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary"  id="lineageRelations_history_previousBtn" onclick="Lineage_relations.callPreviousQuery()">
           previous
         </button>
         <button class="btn btn-sm my-1 py-0 btn-outline-primary"
                 onclick="Lineage_relations.loadUserQueries()">saved
         </button>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary"
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineageRelations_history_deleteBtn"
                 onclick="Lineage_relations.deleteSavedQuery($('#lineageRelations_savedQueriesSelect').val())">delete selected
         </button>
       </div>
-      <select id="lineageRelations_savedQueriesSelect"  style="width:400px" size="5"></select>
+      <select id="lineageRelations_savedQueriesSelect" onclick="Lineage_relations.onSelectSavedQuery($(this).val())" style="width:400px" size="5"></select>
     </div>
 
 

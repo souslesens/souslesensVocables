@@ -79,7 +79,7 @@ Lineage_properties = (function () {
         if (obj.node.children && obj.node.children.length > 0) {
             return;
         }
-        self.openNode(obj.node);
+      //  self.openNode(obj.node);
     };
 
     self.openNode = function (node) {
@@ -309,6 +309,8 @@ Lineage_properties = (function () {
                             },
                         });
                     }
+                    if(options.skipLiterals  && item.object.type=="literal" )
+                        return;
                     if (!existingNodes[item.object.value]) {
                         existingNodes[item.object.value] = 1;
                         var label = item.objectLabel ? item.objectLabel.value : Sparql_common.getLabelFromURI(item.object.value);

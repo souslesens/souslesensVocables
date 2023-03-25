@@ -1072,7 +1072,7 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
             options = {};
         }
         var str = "<div>";
-        if (Lineage_sources.isSourceEditable(self.currentSource) && !options.hideModifyButtons) {
+        if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             str +=
                 "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
                 "onclick='CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, SourceBrowser.configureEditPredicateWidget)'>  Add Predicate </button>";
@@ -1092,7 +1092,7 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
 
         $("#" + self.currentNodeIdInfosDivId).prepend(str);
 
-        if (Lineage_sources.isSourceEditable(self.currentSource) && !options.hideModifyButtons) {
+        if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             $("#sourceBrowser_addPropertyDiv").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
                 $("#editPredicate_controlsDiv").css("display", "block");
             });
@@ -1184,7 +1184,7 @@ value = item.valueLabel.value;*/
                     CommonUIwidgets.predicatesSelectorWidget.predicatesIdsMap[predicateId] = { item: item };
 
                     // dont manage lang clustering when source is editable
-                    if (!Lineage_sources.isSourceEditable(sourceLabel) && item.value && item.value["xml:lang"]) {
+                    if (!Lineage_sources.isSourceEditableForUser(sourceLabel) && item.value && item.value["xml:lang"]) {
                         if (!self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]]) {
                             self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]] = [];
                         }
@@ -1193,7 +1193,7 @@ value = item.valueLabel.value;*/
                         if (!self.propertiesMap.properties[propName].value) {
                             self.propertiesMap.properties[propName].value = [];
                         }
-                        if (Lineage_sources.isSourceEditable(sourceLabel) && item.value && item.value["xml:lang"]) {
+                        if (Lineage_sources.isSourceEditableForUser(sourceLabel) && item.value && item.value["xml:lang"]) {
                             value += "@" + item.value["xml:lang"];
                         }
                         self.propertiesMap.properties[propName].value.push({ value: value, predicateId: predicateId });
@@ -1230,7 +1230,7 @@ defaultLang = 'en';*/
 
                 function getOptionalStr(key, predicateId) {
                     var optionalStr = "";
-                    if (Lineage_sources.isSourceEditable(sourceLabel) && !_options.hideModifyButtons) {
+                    if (Lineage_sources.isSourceEditableForUser(sourceLabel) && !_options.hideModifyButtons) {
                         //  if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1 && !_options.hideModifyButtons) {
                         var propUri = self.propertiesMap.properties[key].propUri;
 

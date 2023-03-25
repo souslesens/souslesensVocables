@@ -168,13 +168,25 @@ sourceLabels.sort();
         }
 
         if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
-            if (options.callee == "Graph") {
+            if (options.callee == "Graph") {// remove literals
+                Lineage_relations.drawRelations(null, null, "Graph", {skipLiterals:1});
+                //  Lineage_classes.graphActions.graphNodeNeighborhood("all");
+            } else if (options.callee == "Tree") {
+                Lineage_classes.drawNodesAndParents(node);
+            }
+        }
+
+        else if (nodeEvent.altKey && nodeEvent.shiftKey) {
+            if (options.callee == "Graph") {//all predicates
                 Lineage_relations.drawRelations(null, null, "Graph", {});
                 //  Lineage_classes.graphActions.graphNodeNeighborhood("all");
             } else if (options.callee == "Tree") {
                 Lineage_classes.drawNodesAndParents(node);
             }
-        } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
+        }
+
+
+        else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
             Lineage_selection.addNodeToSelection(node);
         } else if (nodeEvent.ctrlKey) {
             SourceBrowser.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
@@ -554,7 +566,7 @@ sourceLabels.sort();
             options.edges = _options.edges;
         }
 
-        if (true || Lineage_sources.isSourceEditable(Lineage_sources.activeSource)) {
+        if (true || Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
             // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
             options.manipulation = {
                 enabled: true,
@@ -2282,13 +2294,13 @@ addNode:false
             html += '    <span class="popupMenuItem" onclick="Lineage_classes.graphActions.listClusterToClipboard();"> list to clipboard</span>';
         } else if (node.from && node.data.bNodeId) {
             html += '    <span class="popupMenuItem" onclick="Lineage_classes.graphActions.showPropertyInfos(true);"> Relation Infos</span>';
-            if (Lineage_sources.isSourceEditable(node.data.source)) {
+            if (Lineage_sources.isSourceEditableForUser(node.data.source)) {
                 //   if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[node.data.source] && Config.sources[node.data.source].editable) {
                 html += '    <span class="popupMenuItem" onclick="Lineage_classes.graphActions.deleteRestriction();"> Delete relation</span>';
             }
         } else if (node.from && node.data.type == "ObjectProperty") {
             html += '    <span class="popupMenuItem" onclick="Lineage_classes.graphActions.showPropertyInfos();"> Property Infos</span>';
-            if (Lineage_sources.isSourceEditable(node.data.source)) {
+            if (Lineage_sources.isSourceEditableForUser(node.data.source)) {
                 html += '    <span class="popupMenuItem" onclick="Lineage_classes.graphActions.deleteObjectProperty();"> Delete relation</span>';
             }
         } else if (false && node.data && node.data.type == "NamedIndividual") {

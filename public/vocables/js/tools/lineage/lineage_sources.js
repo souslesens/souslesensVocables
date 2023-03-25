@@ -126,7 +126,7 @@ Lineage_sources = (function () {
         }
 
         if (true) {
-            $("#Lineage_Tabs").tabs("disable", 3);
+           // $("#Lineage_Tabs").tabs("disable", 3);
             $("#lineage_classes_showLinkedDataButton").prop("disabled", true);
         }
 
@@ -215,7 +215,7 @@ return;
             visjsGraph.network.disableEditMode();
             $(".vis-edit-mode").css("display", "none");
         }
-        var isNodeEditable = Lineage_sources.isSourceEditable(source);
+        var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
         if (isNodeEditable) {
             visjsGraph.network.enableEditMode();
             $(".vis-edit-mode").css("display", "block");
@@ -668,9 +668,9 @@ sourceDivId +
         $("#lineage_classes_whiteboardSelect").val("");
     };
 
-    self.isSourceEditable = function (source) {
+    self.isSourceEditableForUser = function (source) {
         if (!Config.sources[source]) {
-            return console.log("no source " + source);
+            return;// console.log("no source " + source);
         }
         const groups = authentication.currentUser.groupes;
         const currentAccessControls = groups.map((group) => {

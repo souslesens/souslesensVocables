@@ -206,8 +206,6 @@ var util = {
         str = str.replace(/—/gm, " ");
         str = str.replace(/:/gm, "");
         str = str.replace(/\:/gm, "");
-        str = str.replace(/\'/gm, "");
-
 
         if (forUri) {
             str = str.replace(/ /gm, "_");

@@ -1224,8 +1224,12 @@ defaultLang = 'en';*/
                 }
 
                 var str = "<div style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
-                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='" + self.getUriTarget(nodeId) + "' href='" + nodeId + "'>" + nodeId + "</a></td></tr>";
-                str += "<tr><td class='detailsCellName'>GRAPH</td><td>" + graphUri + "</td></tr>";
+                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='" + self.getUriTarget(nodeId) + "' href='" + nodeId + "'>" + nodeId + "</a>" +
+                  "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' SourceBrowser.copyUri(\""+nodeId+"\",$(this))'>copy</button>";
+                  "</td></tr>";
+                str += "<tr><td class='detailsCellName'>GRAPH</td><td>" + graphUri +
+                  "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' SourceBrowser.copyUri(\""+graphUri+"\",$(this))'>copy</button>";
+                "</td></tr>";
                 str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
 
                 function getOptionalStr(key, predicateId) {
@@ -1892,6 +1896,13 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     self.hideAddPredicateDiv = function () {
         $("#sourceBrowser_addPropertyDiv").css("display", "none");
     };
+
+
+    self.copyUri=function(text,caller){
+        common.copyTextToClipboard(text, function(){
+            caller.css("border-width","3px")
+        })
+    }
 
     return self;
 })();

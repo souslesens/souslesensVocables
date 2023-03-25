@@ -309,7 +309,7 @@ Lineage_properties = (function () {
                             },
                         });
                     }
-                    if(options.skipLiterals  && item.object.type=="literal" )
+                    if(options.skipLiterals  && (item.object.type=="literal"  || item.object.type.indexOf("xml")>-1))
                         return;
                     if (!existingNodes[item.object.value]) {
                         existingNodes[item.object.value] = 1;

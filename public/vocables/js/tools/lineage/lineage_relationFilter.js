@@ -15,6 +15,8 @@ var Lineage_relationFilter = (function () {
         ("");
         if (self.currentProperty) {
             propStr = self.currentProperty.vocabulary + "." + self.currentProperty.label + "<br>";
+        }else{
+
         }
 
         $("#lineageRelations_filterDiv").css("display", "flex");
@@ -101,7 +103,7 @@ var Lineage_relationFilter = (function () {
         self.currentFilterRole = role;
         $("#lineage_relation_filterRole").html(role);
 
-        if (!self.currentProperty) return common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap["any"], true);
+        if (!self.currentProperty) return common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap["any"], false);
 
         var types = Object.keys(self.ObjectsTypesMap);
 
@@ -109,16 +111,16 @@ var Lineage_relationFilter = (function () {
 
         if (restrictions[self.currentProperty.id]) {
             type = "Resource";
-            common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap[type], true);
+            common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap[type], false);
         } else {
             for (var type in self.ObjectsTypesMap) {
                 if ((role == "subject" && self.domain && self.domain.indexOf(type) > -1) || (role == "object" && self.range && self.range.indexOf(type) > -1)) {
                     ok = true;
-                    common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap[type], true);
+                    common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap[type], false);
                 }
             }
             if (!ok) {
-                common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap["any"], true);
+                common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap["any"], false);
             }
         }
     };
@@ -144,15 +146,13 @@ var Lineage_relationFilter = (function () {
         } else if (self.currentProperty && restrictions[self.currentProperty.id]) {
             $("#lineageQuery_uriValueDiv").css("display", "block");
             common.fillSelectOptions("Lineage_relation_filterVocabularySelect", [], false);
-            if (role == "subject") {
+
                 common.fillSelectOptions("Lineage_relation_filterResourcesSelect", self.domain, true, "label", "id");
-            } else if (role == "object") {
-                common.fillSelectOptions("Lineage_relation_filterResourcesSelect", self.range, true, "label", "id");
-            }
+
         } else {
             $("#lineageQuery_uriValueDiv").css("display", "block");
             var scopes = [];
-            if (visjsGraph.isGraphNotEmpty) {
+            if (visjsGraph.isGraphNotEmpty()) {
                 scopes.push("whiteBoardNodes");
             }
             scopes.push(Lineage_sources.activeSource);
@@ -160,11 +160,9 @@ var Lineage_relationFilter = (function () {
             if (imports) {
                 scopes = scopes.concat(imports);
             }
-            if (role == "subject") {
+
                 common.fillSelectOptions("Lineage_relation_filterVocabularySelect", scopes, true);
-            } else if (role == "object") {
-                common.fillSelectOptions("Lineage_relation_rangesVocabularySelect", scopes, true);
-            }
+
         }
     };
 

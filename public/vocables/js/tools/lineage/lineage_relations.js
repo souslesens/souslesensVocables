@@ -3,10 +3,14 @@ Lineage_relations = (function () {
     var self = {};
     self.showDrawRelationsDialog = function (caller) {
         self.drawRelationCurrentCaller = caller;
+
         $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").load("snippets/lineage/relationsDialog.html", function () {
             $("#lineageRelations_history_previousBtn").css("display", self.previousQuery ? "inline" : "none");
             $("#lineageRelations_history_deleteBtn").css("display", "none");
+            Lineage_relationFilter.showAddFilterDiv(true);
+
+
             //$("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)
             $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
                 if (e.which == 13 || e.which == 9) {
@@ -16,6 +20,8 @@ Lineage_relations = (function () {
 
                     $("#lineageRelations_propertiesJstreeDiv").jstree(true).search(term);
                     $("#LineageRelations_searchJsTreeInput").val("");
+
+
                 }
             });
 

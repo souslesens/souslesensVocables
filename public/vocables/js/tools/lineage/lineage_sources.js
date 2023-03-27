@@ -39,6 +39,8 @@ Lineage_sources = (function () {
     };
 
     self.resetAll = function (showDialog) {
+
+        OntologyModels.unRegisterSourceModel()
         self.init(showDialog);
     };
 

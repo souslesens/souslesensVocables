@@ -79,7 +79,7 @@ Lineage_properties = (function () {
         if (obj.node.children && obj.node.children.length > 0) {
             return;
         }
-      //  self.openNode(obj.node);
+        //  self.openNode(obj.node);
     };
 
     self.openNode = function (node) {
@@ -309,8 +309,7 @@ Lineage_properties = (function () {
                             },
                         });
                     }
-                    if(options.skipLiterals  &&  item.object.type && item.object.type.indexOf("literal")>-1)
-                        return;
+                    if (options.skipLiterals && item.object.type && item.object.type.indexOf("literal") > -1) return;
                     if (!existingNodes[item.object.value]) {
                         existingNodes[item.object.value] = 1;
                         var label = item.objectLabel ? item.objectLabel.value : Sparql_common.getLabelFromURI(item.object.value);
@@ -376,11 +375,11 @@ Lineage_properties = (function () {
                                 nodeSource = options.includeSources[0];
                             }
                         }
-                        var dashes= false;
-                        var edgeColor=options.edgesColor || Lineage_classes.defaultPredicateEdgeColor;
-                        if(item.object.type.indexOf("literal")>-1){
-                            edgeColor= "#3c8fe1";
-                            dashes=[6, 2, 3]
+                        var dashes = false;
+                        var edgeColor = options.edgesColor || Lineage_classes.defaultPredicateEdgeColor;
+                        if (item.object.type.indexOf("literal") > -1) {
+                            edgeColor = "#3c8fe1";
+                            dashes = [6, 2, 3];
                         }
 
                         visjsData.edges.push({
@@ -397,7 +396,7 @@ Lineage_properties = (function () {
                                 source: nodeSource,
                             },
                             label: item.propLabel.value,
-                            font: { edgeColor},
+                            font: { edgeColor },
                             arrows: {
                                 to: {
                                     enabled: true,

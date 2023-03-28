@@ -453,8 +453,7 @@ setTimeout(function () {
                     var sourceClassUri = [];
                     var objects = [];
                     hits.forEach(function (hit) {
-                        if( !hit._source ||!hit._source.parents)
-                            return ;
+                        if (!hit._source || !hit._source.parents) return;
                         words.push(hit._source.label);
                         hit._source.parent = hit._source.parents[hit._source.parents.length - 1];
                         if (hit._source.parent && hit._source.parent.length > 1) {

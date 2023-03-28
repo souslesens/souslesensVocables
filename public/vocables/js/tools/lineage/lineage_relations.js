@@ -10,7 +10,6 @@ Lineage_relations = (function () {
             $("#lineageRelations_history_deleteBtn").css("display", "none");
             Lineage_relationFilter.showAddFilterDiv(true);
 
-
             //$("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)
             $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
                 if (e.which == 13 || e.which == 9) {
@@ -20,8 +19,6 @@ Lineage_relations = (function () {
 
                     $("#lineageRelations_propertiesJstreeDiv").jstree(true).search(term);
                     $("#LineageRelations_searchJsTreeInput").val("");
-
-
                 }
             });
 
@@ -279,7 +276,7 @@ Lineage_relations = (function () {
         if (!options) {
             options = {};
         }
-        options.skipLiterals=true
+        options.skipLiterals = true;
         var source = null;
         var data = null;
         if (!options.data) {
@@ -339,8 +336,6 @@ Lineage_relations = (function () {
                     data = visjsGraph.data.nodes.getIds();
                     options.filter = "FILTER (?prop in (owl:sameAs,owl:equivalentClass))";
                     Lineage_sources.registerSource(Config.dictionarySource);
-
-
 
                     type = null;
                     return callbackSeries();

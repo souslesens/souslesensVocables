@@ -101,8 +101,7 @@ var Lineage_decoration = (function () {
         async.eachSeries(
             slices,
             function (slice, callbackEach) {
-                if(!slice )
-                    return callback(null,[]);
+                if (!slice) return callback(null, []);
                 var filter = Sparql_common.setFilter("x", slice);
                 if (filter.indexOf("?x in( )") > -1) {
                     return callbackEach();

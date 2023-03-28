@@ -12,7 +12,7 @@ CommonUIwidgets = (function () {
             type: type,
             filter: term ? " FILTER ( regex(?label,'" + term + "','i'))" : "",
             limit: Config.maxSelectListSize,
-            withoutImports:true
+            withoutImports: true,
         };
         if (!source) {
             source = Lineage_sources.activeSource || KGcreator.currentSlsvSource;

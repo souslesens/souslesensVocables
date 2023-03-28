@@ -15,8 +15,7 @@ var Lineage_relationFilter = (function () {
         ("");
         if (self.currentProperty) {
             propStr = self.currentProperty.vocabulary + "." + self.currentProperty.label + "<br>";
-        }else{
-
+        } else {
         }
 
         $("#lineageRelations_filterDiv").css("display", "flex");
@@ -147,8 +146,7 @@ var Lineage_relationFilter = (function () {
             $("#lineageQuery_uriValueDiv").css("display", "block");
             common.fillSelectOptions("Lineage_relation_filterVocabularySelect", [], false);
 
-                common.fillSelectOptions("Lineage_relation_filterResourcesSelect", self.domain, true, "label", "id");
-
+            common.fillSelectOptions("Lineage_relation_filterResourcesSelect", self.domain, true, "label", "id");
         } else {
             $("#lineageQuery_uriValueDiv").css("display", "block");
             var scopes = [];
@@ -161,8 +159,7 @@ var Lineage_relationFilter = (function () {
                 scopes = scopes.concat(imports);
             }
 
-                common.fillSelectOptions("Lineage_relation_filterVocabularySelect", scopes, true);
-
+            common.fillSelectOptions("Lineage_relation_filterVocabularySelect", scopes, true);
         }
     };
 
@@ -253,7 +250,7 @@ var Lineage_relationFilter = (function () {
 
         Lineage_relations.filter = filter.filterStr;
         var text = $("#Lineage_relation_filterText").val();
-        $("#Lineage_relation_filterText").val(text  + filter.filterStr+ "\n");
+        $("#Lineage_relation_filterText").val(text + filter.filterStr + "\n");
     };
 
     return self;

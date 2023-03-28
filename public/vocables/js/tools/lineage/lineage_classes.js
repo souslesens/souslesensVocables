@@ -168,25 +168,22 @@ sourceLabels.sort();
         }
 
         if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
-            if (options.callee == "Graph") {// remove literals
-                Lineage_relations.drawRelations(null, null, "Graph", {skipLiterals:1});
+            if (options.callee == "Graph") {
+                // remove literals
+                Lineage_relations.drawRelations(null, null, "Graph", { skipLiterals: 1 });
                 //  Lineage_classes.graphActions.graphNodeNeighborhood("all");
             } else if (options.callee == "Tree") {
                 Lineage_classes.drawNodesAndParents(node);
             }
-        }
-
-        else if (nodeEvent.altKey && nodeEvent.shiftKey) {
-            if (options.callee == "Graph") {//all predicates
+        } else if (nodeEvent.altKey && nodeEvent.shiftKey) {
+            if (options.callee == "Graph") {
+                //all predicates
                 Lineage_relations.drawRelations(null, null, "Graph", {});
                 //  Lineage_classes.graphActions.graphNodeNeighborhood("all");
             } else if (options.callee == "Tree") {
                 Lineage_classes.drawNodesAndParents(node);
             }
-        }
-
-
-        else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
+        } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
             Lineage_selection.addNodeToSelection(node);
         } else if (nodeEvent.ctrlKey) {
             SourceBrowser.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
@@ -2955,31 +2952,27 @@ attrs.color=self.getSourceColor(superClassValue)
         }
     };
 
-
-    self.showEdgesLegend=function(){
-        var edges=visjsGraph.data.edges.get();
-        var newEdges=[];
-        var distinctEdgeLabels={}
-        edges.forEach(function(edge){
-            if(edge.label ){
-
-            if( !distinctEdgeLabels[edge.label]){
-                var color=Lineage_classes.getPropertyColor(edge.label)
-                distinctEdgeLabels[edge.label]={color:color}
-                  newEdges.push({id:edge.id, color:color,label:null})
+    self.showEdgesLegend = function () {
+        var edges = visjsGraph.data.edges.get();
+        var newEdges = [];
+        var distinctEdgeLabels = {};
+        edges.forEach(function (edge) {
+            if (edge.label) {
+                if (!distinctEdgeLabels[edge.label]) {
+                    var color = Lineage_classes.getPropertyColor(edge.label);
+                    distinctEdgeLabels[edge.label] = { color: color };
+                    newEdges.push({ id: edge.id, color: color, label: null });
+                }
             }
-            }
+        });
 
-        })
-
-        var html=""
-        for( var key in distinctEdgeLabels){
-            html+="&nbsp;<span style='color:"+distinctEdgeLabels[key].color+"'>"+key+"</span>"
+        var html = "";
+        for (var key in distinctEdgeLabels) {
+            html += "&nbsp;<span style='color:" + distinctEdgeLabels[key].color + "'>" + key + "</span>";
         }
-        visjsGraph.data.edges.update(newEdges)
+        visjsGraph.data.edges.update(newEdges);
 
-
-        $(".vis-manipulation").html(html)
-    }
+        $(".vis-manipulation").html(html);
+    };
     return self;
 })();

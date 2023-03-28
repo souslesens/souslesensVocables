@@ -527,7 +527,7 @@ var CsvTripleBuilder = {
                                                     }
                                                 });
                                                 triples = triples.concat(metaDataTriples);
-                                               // socket.message("KGbuild", "loading ONE MODEL superClasses ");
+                                                // socket.message("KGbuild", "loading ONE MODEL superClasses ");
                                                 console.log("writing triples:" + triples.length);
                                                 var slices = util.sliceArray(triples, 200);
                                                 triples = [];

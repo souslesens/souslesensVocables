@@ -966,16 +966,13 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
             sourceLabel = "_defaultSource";
         }
 
-
-
         self.newProperties = null;
         self.currentNodeId = null;
         self.currentNode = null;
         if (typeof node == "object") {
             self.currentNode = node;
             if (node.data) {
-                if(node.data.type && node.data.type.indexOf("literal")>-1)
-                    return
+                if (node.data.type && node.data.type.indexOf("literal") > -1) return;
 
                 //  if (node.data.propertyId) self.currentNodeId = node.data.propertyId;
                 if (node.data.propertyId && !node.data.id) {
@@ -1230,12 +1227,25 @@ defaultLang = 'en';*/
                 }
 
                 var str = "<div style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
-                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='" + self.getUriTarget(nodeId) + "' href='" + nodeId + "'>" + nodeId + "</a>" +
-                  "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' SourceBrowser.copyUri(\""+nodeId+"\",$(this))'>copy</button>";
-                  "</td></tr>";
-                str += "<tr><td class='detailsCellName'>GRAPH</td><td>" + graphUri +
-                  "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' SourceBrowser.copyUri(\""+graphUri+"\",$(this))'>copy</button>";
-                "</td></tr>";
+                str +=
+                    "<tr><td class='detailsCellName'>UUID</td><td><a target='" +
+                    self.getUriTarget(nodeId) +
+                    "' href='" +
+                    nodeId +
+                    "'>" +
+                    nodeId +
+                    "</a>" +
+                    "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' SourceBrowser.copyUri(\"" +
+                    nodeId +
+                    "\",$(this))'>copy</button>";
+                ("</td></tr>");
+                str +=
+                    "<tr><td class='detailsCellName'>GRAPH</td><td>" +
+                    graphUri +
+                    "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' SourceBrowser.copyUri(\"" +
+                    graphUri +
+                    "\",$(this))'>copy</button>";
+                ("</td></tr>");
                 str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
 
                 function getOptionalStr(key, predicateId) {
@@ -1374,7 +1384,6 @@ defaultLang = 'en';*/
             [
                 //direct restrictions
                 function (callbackSeries) {
-
                     Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, { withoutBlankNodes: 1 }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
@@ -1904,12 +1913,11 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
         $("#sourceBrowser_addPropertyDiv").css("display", "none");
     };
 
-
-    self.copyUri=function(text,caller){
-        common.copyTextToClipboard(text, function(){
-            caller.css("border-width","3px")
-        })
-    }
+    self.copyUri = function (text, caller) {
+        common.copyTextToClipboard(text, function () {
+            caller.css("border-width", "3px");
+        });
+    };
 
     return self;
 })();

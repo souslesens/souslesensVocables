@@ -39,8 +39,7 @@ Lineage_sources = (function () {
     };
 
     self.resetAll = function (showDialog) {
-
-        OntologyModels.unRegisterSourceModel()
+        OntologyModels.unRegisterSourceModel();
         self.init(showDialog);
     };
 
@@ -128,7 +127,7 @@ Lineage_sources = (function () {
         }
 
         if (true) {
-           // $("#Lineage_Tabs").tabs("disable", 3);
+            // $("#Lineage_Tabs").tabs("disable", 3);
             $("#lineage_classes_showLinkedDataButton").prop("disabled", true);
         }
 
@@ -672,7 +671,7 @@ sourceDivId +
 
     self.isSourceEditableForUser = function (source) {
         if (!Config.sources[source]) {
-            return;// console.log("no source " + source);
+            return; // console.log("no source " + source);
         }
         const groups = authentication.currentUser.groupes;
         const currentAccessControls = groups.map((group) => {

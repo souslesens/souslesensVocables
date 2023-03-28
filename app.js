@@ -143,12 +143,10 @@ if (config.auth !== "disabled") {
     } else {
         app.get("/login", function (req, res, next) {
             const redirect = req.query.redirect ? req.query.redirect : "/vocables";
-            console.log("redirect in /login", redirect);
             res.render("login", { title: "souslesensVocables - Login", redirect: redirect });
         });
         app.post("/auth/login", function (req, res, next) {
             const redirect = req.query.redirect;
-            console.log("redirect in auth/login", redirect);
             passport.authenticate("local", { successRedirect: redirect, failureRedirect: "/login", failureMessage: true })(req, res, next);
         });
     }

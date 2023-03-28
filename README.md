@@ -281,9 +281,9 @@ bash tests/load_data.sh
 To create a new release:
 
 ```bash
-npm run patch|minor|major
-git commit package* -m "release x.x.x"
-git tag x.x.x
+bash release-new.sh
 git push
 git push --tags
 ```
+
+GitHub releases and docker images are created on tags with GitHub Actions.

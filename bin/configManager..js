@@ -18,7 +18,6 @@ var fs = require("fs");
 
 const { configPath, config } = require("../model/config");
 
-
 var ConfigManager = {
     // TODO move to model/config
     getGeneralConfig: function (callback) {

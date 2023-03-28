@@ -175,7 +175,7 @@ function getAllowedSources(user, profiles, sources, formalOntologySourceLabel) {
             .map(([sourceName, source]) => {
                 const schemaType = source.schemaType;
                 const group = source.group;
-                const treeStr = [schemaType, group].join("/");
+                const treeStr = [schemaType, group, sourceName].join("/");
                 // find the closest parent accessControl
                 const closestParent = Object.entries(sourcesAccessControl)
                     .filter(([k, v]) => {

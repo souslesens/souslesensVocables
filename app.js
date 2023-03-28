@@ -127,7 +127,7 @@ app.use(
 // Home (redirect to /vocables)
 app.get("/", function (req, res, next) {
     const query = querystring.stringify(req.query);
-    const redirect = query ? `vocables?${query}` : "vocables";
+    const redirect = query ? `vocables?${query}` : "/vocables";
     res.redirect(redirect);
 });
 
@@ -142,11 +142,13 @@ if (config.auth !== "disabled") {
         });
     } else {
         app.get("/login", function (req, res, next) {
-            const redirect = req.query.redirect;
+            const redirect = req.query.redirect ? req.query.redirect : "/vocables";
+            console.log("redirect in /login", redirect);
             res.render("login", { title: "souslesensVocables - Login", redirect: redirect });
         });
         app.post("/auth/login", function (req, res, next) {
             const redirect = req.query.redirect;
+            console.log("redirect in auth/login", redirect);
             passport.authenticate("local", { successRedirect: redirect, failureRedirect: "/login", failureMessage: true })(req, res, next);
         });
     }

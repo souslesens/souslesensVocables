@@ -103,7 +103,7 @@ const ProfileSchema = z.object({
     name: z
         .string()
         .refine((val) => val !== "admin", { message: "Name can't be admin" })
-        .refine((val) => !val.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i), { message: "Name can only contain alphanumeric characters" }),
+        .refine((val) => val.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i), { message: "Name can only contain alphanumeric characters" }),
     _type: z.string().optional(),
     id: z.string().default(ulid()),
     allowedSourceSchemas: z

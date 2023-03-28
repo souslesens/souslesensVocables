@@ -10,14 +10,14 @@ import { Profile } from "./Profile";
 import { SourcesTable } from "./Component/SourcesTable";
 import { UsersTable } from "./Component/UsersTable";
 import { LogsTable } from "./Component/LogsTable";
-import { Source, getSources } from "./Source";
+import { ServerSource, getSources } from "./Source";
 import { Config, getConfig } from "./Config";
 import { Log, getLogs } from "./Log";
 
 type Model = {
     users: RD<string, User[]>;
     profiles: RD<string, Profile[]>;
-    sources: RD<string, Source[]>;
+    sources: RD<string, ServerSource[]>;
     logs: RD<string, Log[]>;
     config: RD<string, Config>;
     isModalOpen: boolean;
@@ -81,7 +81,7 @@ function useModel() {
 type Msg =
     | { type: "ServerRespondedWithUsers"; payload: RD<string, User[]> }
     | { type: "ServerRespondedWithProfiles"; payload: RD<string, Profile[]> }
-    | { type: "ServerRespondedWithSources"; payload: RD<string, Source[]> }
+    | { type: "ServerRespondedWithSources"; payload: RD<string, ServerSource[]> }
     | { type: "ServerRespondedWithConfig"; payload: RD<string, Config> }
     | { type: "ServerRespondedWithLogs"; payload: RD<string, Log[]> }
     | { type: "UserUpdatedField"; payload: UpadtedFieldPayload }

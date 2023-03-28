@@ -2,7 +2,8 @@ var Lineage_relationFilter = (function () {
     var self = {};
     var restrictions = null;
     var constraints = null;
-    self.showAddFilterDiv = function () {
+    self.showAddFilterDiv = function (clear) {
+        if (clear) self.currentProperty = null;
         $("#Lineage_relation_constraints").html("");
         //  $("#lineage_relation_filterRoleSelect").val("");
         $("#Lineage_relation_filterTypeSelect").val("");

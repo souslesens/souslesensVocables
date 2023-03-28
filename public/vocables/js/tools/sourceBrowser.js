@@ -187,29 +187,29 @@ var SourceBrowser = (function () {
             };
 
             /*   items.graphNodeNeighborhood = {
-                label: "graph node neighborhood ",
-                action: false,
-                submenu: {
-                    graphNodeNeighborhood_incoming: {
-                        label: "incoming",
-                        action: function () {
-                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, "incoming");
-                        },
-                    },
-                    graphNodeNeighborhood_outcoming: {
-                        label: "outcoming",
-                        action: function () {
-                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, "outcoming");
-                        },
-                    },
-                    graphNodeNeighborhood_ranges: {
-                        label: "ranges",
-                        action: function () {
-                            Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, "ranges");
-                        },
-                    },
-                },
-            };*/
+          label: "graph node neighborhood ",
+          action: false,
+          submenu: {
+              graphNodeNeighborhood_incoming: {
+                  label: "incoming",
+                  action: function () {
+                      Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, "incoming");
+                  },
+              },
+              graphNodeNeighborhood_outcoming: {
+                  label: "outcoming",
+                  action: function () {
+                      Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, "outcoming");
+                  },
+              },
+              graphNodeNeighborhood_ranges: {
+                  label: "ranges",
+                  action: function () {
+                      Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, "ranges");
+                  },
+              },
+          },
+      };*/
             items.relations = {
                 label: "Relations...",
                 action: function (e) {
@@ -962,7 +962,9 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
     };
 
     self.showNodeInfos = function (sourceLabel, node, divId, options, callback) {
-        if (!sourceLabel) sourceLabel = "_defaultSource";
+        if (!sourceLabel) {
+            sourceLabel = "_defaultSource";
+        }
         self.newProperties = null;
         self.currentNodeId = null;
         self.currentNode = null;
@@ -1132,8 +1134,12 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
 
                 var type = null;
                 var graphUri = "";
-
+                var uniqueTriples = {};
                 data.forEach(function (item) {
+                    var key = item.prop.value + "_" + item.value.value + item.value["xml:lang"];
+                    if (uniqueTriples[key]) return;
+                    uniqueTriples[key] = 1;
+
                     if (item.g) {
                         graphUri = item.g.value;
                         var realSource = Sparql_common.getSourceFromGraphUri(graphUri);
@@ -1177,7 +1183,8 @@ value = item.valueLabel.value;*/
                     var predicateId = common.getRandomHexaId(5);
                     CommonUIwidgets.predicatesSelectorWidget.predicatesIdsMap[predicateId] = { item: item };
 
-                    if (item.value && item.value["xml:lang"]) {
+                    // dont manage lang clustering when source is editable
+                    if (!Lineage_sources.isSourceEditable(sourceLabel) && item.value && item.value["xml:lang"]) {
                         if (!self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]]) {
                             self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]] = [];
                         }
@@ -1186,7 +1193,9 @@ value = item.valueLabel.value;*/
                         if (!self.propertiesMap.properties[propName].value) {
                             self.propertiesMap.properties[propName].value = [];
                         }
-
+                        if (Lineage_sources.isSourceEditable(sourceLabel) && item.value && item.value["xml:lang"]) {
+                            value += "@" + item.value["xml:lang"];
+                        }
                         self.propertiesMap.properties[propName].value.push({ value: value, predicateId: predicateId });
                     }
                 });
@@ -1219,6 +1228,22 @@ defaultLang = 'en';*/
                 str += "<tr><td class='detailsCellName'>GRAPH</td><td>" + graphUri + "</td></tr>";
                 str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
 
+                function getOptionalStr(key, predicateId) {
+                    var optionalStr = "";
+                    if (Lineage_sources.isSourceEditable(sourceLabel) && !_options.hideModifyButtons) {
+                        //  if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1 && !_options.hideModifyButtons) {
+                        var propUri = self.propertiesMap.properties[key].propUri;
+
+                        optionalStr +=
+                            "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' SourceBrowser.showModifyPredicateDialog(\"" +
+                            predicateId +
+                            "\")'>edit</button>";
+                        optionalStr +=
+                            "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='font-size: 10px'" + " onclick='SourceBrowser.deletePredicate(\"" + predicateId + "\")'>X</button>";
+                    }
+                    return optionalStr;
+                }
+
                 defaultProps.forEach(function (key) {
                     if (!self.propertiesMap.properties[key]) {
                         return;
@@ -1243,21 +1268,7 @@ defaultLang = 'en';*/
                         values.forEach(function (valueObj, index) {
                             var value = valueObj.value;
                             var predicateId = valueObj.predicateId;
-                            var optionalStr = "";
-                            if (Lineage_sources.isSourceEditable(sourceLabel) && !_options.hideModifyButtons) {
-                                //  if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1 && !_options.hideModifyButtons) {
-                                var propUri = self.propertiesMap.properties[key].propUri;
-
-                                optionalStr +=
-                                    "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' SourceBrowser.showModifyPredicateDialog(\"" +
-                                    predicateId +
-                                    "\")'>edit</button>";
-                                optionalStr +=
-                                    "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='font-size: 10px'" +
-                                    " onclick='SourceBrowser.deletePredicate(\"" +
-                                    predicateId +
-                                    "\")'>X</button>";
-                            }
+                            var optionalStr = getOptionalStr(key, predicateId);
 
                             if (value.indexOf("http") == 0) {
                                 if (valueLabelsMap[value]) {
@@ -1274,6 +1285,7 @@ defaultLang = 'en';*/
                         str += "<td class='detailsCellValue'>" + valuesStr + "</td>";
                         str += "</tr>";
                     } else {
+                        // manage lang
                         var keyName = self.propertiesMap.properties[key].name;
                         var selectId = "detailsLangSelect_" + keyName;
                         var propNameSelect = "<select id='" + selectId + "' onchange=SourceBrowser.onNodeDetailsLangChange('" + keyName + "') >";
@@ -1288,6 +1300,7 @@ defaultLang = 'en';*/
                             propNameSelect += "<option " + selected + ">" + lang + "</option> ";
                             valuesStr = "";
                             values.forEach(function (valueObject, index) {
+                                var optionalStr = getOptionalStr(key, valueObject.predicateId);
                                 value = valueObject.value;
                                 if (value.indexOf("http") == 0) {
                                     if (valueLabelsMap[value]) {
@@ -1296,10 +1309,12 @@ defaultLang = 'en';*/
                                         value += "<a target='" + self.getUriTarget(value) + "' href='" + value + "'>" + value + "</a>";
                                     }
                                 }
+                                var optionalStr = ""; //  complcated to manage lang together with edit and delete
+                                // var optionalStr = getOptionalStr(key,valueObject.predicateId);
                                 if (index > 0) {
                                     valuesStr += "<br>";
                                 }
-                                valuesStr += value;
+                                valuesStr += value + optionalStr;
                             });
 
                             langDivs += "<div class='detailsLangDiv_" + keyName + "' id='detailsLangDiv_" + keyName + "_" + lang + "'>" + valuesStr + "</div>";
@@ -1594,6 +1609,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
 
     self.deletePredicate = function (predicateId) {
         var currentEditingItem = CommonUIwidgets.predicatesSelectorWidget.predicatesIdsMap[predicateId];
+        var property = currentEditingItem.item.prop.value;
         if (confirm("delete predicate")) {
             var result = "";
 
@@ -1602,7 +1618,9 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                     function (callbackSeries) {
                         var object = currentEditingItem.item.value.value;
                         if (currentEditingItem.item.value.type == "literal") {
-                            object = { isString: true, value: currentEditingItem.item.value.value };
+                            object = { isString: true, value: currentEditingItem.item.value.value, lang: currentEditingItem.item.value["xml:lang"] };
+                            /*   if(currentEditingItem.item.value["xml:lang"])
+                object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         }
                         Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, currentEditingItem.item.prop.value, object, function (err, _result) {
                             if (err) {
@@ -1797,7 +1815,9 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     };
 
     self.isSLSVvisibleUri = function (uri) {
-        if (!uri || !uri.indexOf) return false;
+        if (!uri || !uri.indexOf) {
+            return false;
+        }
         for (var source in Config.sources) {
             var graphUri = Config.sources[source].graphUri;
             if (graphUri && uri.indexOf(graphUri) == 0) {

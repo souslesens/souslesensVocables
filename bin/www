@@ -3,6 +3,8 @@
 /**
  * Module dependencies.
  */
+
+//global.__base = __dirname ;
 const http = require("http");
 const { config } = require("../model/config");
 

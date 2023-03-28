@@ -1315,7 +1315,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         if (!Config.sources[sourceLabel].graphUri) {
             options.selectGraph = false;
         }
-        var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
+        var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph,options.withoutImports );
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -1342,7 +1342,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         if (options.type) {
             typeFilterStr = "FILTER (?type =" + options.type + ")";
         } else {
-            typeFilterStr = "FILTER (?type in(owl:Class, owl:NamedIndividual))";
+            typeFilterStr = "FILTER (?type in(owl:Class, owl:NamedIndividual,))";
         }
         query += "{ ?id rdf:type ?type. " + typeFilterStr + " OPTIONAL {?id rdfs:label ?label " + langFilter + "}" + filter + " }}";
 

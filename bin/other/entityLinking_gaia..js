@@ -148,6 +148,35 @@ var EntityLinking_gaia = {
     }
 
 
+    function addRestriction(domainUri,propUri,rangeUri) {
+      var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
+
+          modelTriples.push({
+            s: blankNode,
+            p: "rdf:type",
+            o: "owl:Restriction"
+          });
+          modelTriples.push({
+            s: blankNode,
+            p: "owl:onProperty",
+            o: propUri
+          });
+      if(rangeUri) {
+        modelTriples.push({
+          s: blankNode,
+          p: "owl:someValuesFrom",
+          o: rangeUri
+        });
+      }
+          modelTriples.push({
+            s: domainUri,
+            p: "rdfs:subClassOf",
+            o: blankNode
+          });
+    }
+
+
+
     var uniqueEntities = {};
 
     // setModel
@@ -162,8 +191,22 @@ var EntityLinking_gaia = {
       var documentHasTextUri = addPropertyTriples("documentHasText", "<http://rds.posccaesar.org/ontology/lis14/rdl/contains>");
       var factHasTermPropUri = addPropertyTriples("factContainsTerm", "<http://rds.posccaesar.org/ontology/lis14/rdl/contains>");
       var factHasEntityUri = addPropertyTriples("factContainsEntity", "<http://rds.posccaesar.org/ontology/lis14/rdl/contains>");
+      var termInEntityUri = addPropertyTriples("termInEntity", "<http://rds.posccaesar.org/ontology/lis14/rdl/containedBy>");
 
-      modelTriples.push({
+
+      addRestriction(entityClassUri,gptRelationUri,entityClassUri);
+
+      addRestriction(entityClassUri,inDocumentPropUri,documentClassUri);
+
+      addRestriction(factClassUri,factHasTermPropUri,termClassUri);
+      addRestriction(factClassUri,factHasTermPropUri,null);
+      addRestriction(factClassUri,inDocumentPropUri,documentClassUri);
+      addRestriction(factClassUri,"<http://rds.posccaesar.org/ontology/lis14/rdl/isAbout>",entityClassUri);
+      addRestriction(termClassUri,termInEntityUri,entityClassUri);
+
+
+
+   /*   modelTriples.push({
         s: gptRelationUri,
         p: "rdfs:domain",
         o: entityClassUri
@@ -203,7 +246,7 @@ var EntityLinking_gaia = {
         s: documentHasTextUri,
         p: "rdfs:domain",
         o: documentClassUri
-      });
+      });*/
 
 
     }
@@ -249,38 +292,16 @@ var EntityLinking_gaia = {
               if (!uniqueEntities[propUri]) {
                 uniqueEntities[propUri] = 1;
 
-            if(true) {
-              modelTriples.push({
-                s: blankNode,
-                p: "rdf:type",
-                o: "owl:Restriction"
-              });
-              modelTriples.push({
-                s: blankNode,
-                p: "owl:onProperty",
-                o: propUri
-              });
-              modelTriples.push({
-                s: blankNode,
-                p: "rdfs:label",
-                o: propUri
-              });
-              modelTriples.push({
-                s: blankNode,
-                p: "owl:someValuesFrom",
-                o: toUri
-              });
-              modelTriples.push({
-                s: fromUri,
-                p: "rdfs:subClassOf",
-                o: blankNode
-              });
-            }
 
                 dataTriples.push({
                   s: propUri,
                   p: "rdfs:label",
                   o: "'" + Util.formatStringForTriple(item.from + "-" + key + "-" + item.to) + "'"
+                });
+                dataTriples.push({
+                  s: propUri,
+                  p: "rdf:type",
+                  o: "owl:ObjectProperty"
                 });
                 dataTriples.push({
                   s: propUri,
@@ -291,7 +312,7 @@ var EntityLinking_gaia = {
 
               }
 
-              //entityFrom
+              //entityFrom Class
               if (!uniqueEntities[item.from]) {
                 uniqueEntities[item.from] = 1;
                 dataTriples.push({
@@ -311,7 +332,7 @@ var EntityLinking_gaia = {
                 });
               }
 
-              //entityTo
+              //entityTo Class
               if (!uniqueEntities[item.to]) {
                 uniqueEntities[item.to] = 1;
                 dataTriples.push({
@@ -331,13 +352,61 @@ var EntityLinking_gaia = {
                 });
               }
 
+              //term
+              if(!uniqueEntities[item.fromTerm]) {
+                uniqueEntities[item.fromTerm] = 1
+                dataTriples.push({
+                  s: fromTermUri,
+                  p: "rdf:type",
+                  o: termClassUri
+                });
+                dataTriples.push({
+                  s: fromTermUri,
+                  p: "rdfs:label",
+                  o: "'" + Util.formatStringForTriple(item.fromTerm) + "'"
+                });
+                dataTriples.push({
+                  s: fromTermUri,
+                  p: termInEntityUri,
+                  o: fromUri
+                });
+
+              }
+              if(!uniqueEntities[item.toTerm]) {
+                uniqueEntities[item.toTerm] = 1
+                dataTriples.push({
+                  s: toTermUri,
+                  p: "rdf:type",
+                  o: termClassUri
+                });
+                dataTriples.push({
+                  s: toTermUri,
+                  p: "rdfs:label",
+                  o: "'" + Util.formatStringForTriple(item.toTerm) + "'"
+                });
+
+                dataTriples.push({
+                  s: toTermUri,
+                  p: termInEntityUri,
+                  o: toUri
+                });
+
+              }
+
+
+
               //fact
               if (!uniqueEntities[factUri]) {
                 uniqueEntities[factUri] = 1;
                 dataTriples.push({
                   s: factUri,
-                  p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
+                  p: "rdf:type",
                   o: factClassUri
+                });
+                dataTriples.push({
+                  s: factUri,
+                  p: "rdf:type",
+                  o: "owl:NamedIndividual"
                 });
                 dataTriples.push({
                   s: factUri,
@@ -345,11 +414,11 @@ var EntityLinking_gaia = {
                   o: "'" + Util.formatStringForTriple(item.fromTerm + "_" + key + "_" + item.toTerm) + "'"
                 });
 
-                dataTriples.push({
+              /*  dataTriples.push({
                   s: factUri,
                   p: propUri,
                   o: "'" + Util.formatStringForTriple(item.fromTerm + "_" + key + "_" + item.toTerm) + "'"
-                });
+                });*/
 
                 dataTriples.push({
                   s: factUri,
@@ -357,41 +426,12 @@ var EntityLinking_gaia = {
                   o: propUri
                 });
 
+
                 dataTriples.push({
                   s: factUri,
-                  p: factHasTermPropUri,
-                  o: "'" + Util.formatStringForTriple(item.fromTerm) + "'"
+                  p: factHasEntityUri,
+                  o: fromUri
                 });
-
-                if(!uniqueEntities[item.fromTerm]) {
-                  uniqueEntities[item.fromTerm] = 1
-                  dataTriples.push({
-                    s: fromTermUri,
-                    p: "rdf:type",
-                    o: termClassUri
-                  });
-                  dataTriples.push({
-                    s: fromTermUri,
-                    p: "rdfs:label",
-                    o: "'" + Util.formatStringForTriple(item.fromTerm) + "'"
-                  });
-
-                }
-                if(!uniqueEntities[item.toTerm]) {
-                  uniqueEntities[item.toTerm] = 1
-                  dataTriples.push({
-                    s: toTermUri,
-                    p: "rdf:type",
-                    o: termClassUri
-                  });
-                  dataTriples.push({
-                    s: toTermUri,
-                    p: "rdfs:label",
-                    o: "'" + Util.formatStringForTriple(item.toTerm) + "'"
-                  });
-
-                }
-
 
                 dataTriples.push({
                   s: factUri,
@@ -399,18 +439,22 @@ var EntityLinking_gaia = {
                   o: fromTermUri
                 });
 
+
                 dataTriples.push({
                   s: factUri,
                   p: factHasEntityUri,
+                  o: toUri
+
+                });
+
+
+                dataTriples.push({
+                  s: factUri,
+                  p: factHasTermPropUri,
                   o: toTermUri
-
                 });
 
-                dataTriples.push({
-                  s: factUri,
-                  p: factHasEntityUri,
-                  o: "'" + Util.formatStringForTriple(item.to) + "'"
-                });
+
 
 
                 dataTriples.push({

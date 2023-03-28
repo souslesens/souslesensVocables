@@ -56,27 +56,28 @@
                       onclick="Lineage_relationFilter.onSelectResourceType($(this).val())"></select>
         </div>
         <div style="    display: flex;flex-direction: column; justify-content: flex-end;">
-          <div id="Lineage_relation_filterValueDiv">
+          <div id="Lineage_relation_filterValueDivX" >
             <div class="lineageRelations_div" style="display: none ;width: 200px" id="lineageQuery_uriValueDiv";>
               <select id="Lineage_relation_filterVocabularySelect"
                       onchange="Lineage_relationFilter.onSelectResource($(this).val())"></select>
               <select id="Lineage_relation_filterResourcesSelect" style="width: 200px"></select>
             </div>
 
-            <div class="lineageRelations_div" style="display: none" id="lineageQuery_literalValueDiv">
+            <div class="lineageRelations_divX" style="display: none" id="lineageQuery_literalValueDiv">
               <select id="lineageQuery_operator"></select>
               <input id="lineageQuery_value" size="20" value="" />
+              <div>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary"
+                        onclick="Lineage_relationFilter.attachFilterToProperty()">set filter
+                </button>
+              </div>
             </div>
-            <textarea id="Lineage_relation_filterText" style="width: 300px; height: 60px"></textarea>
+            <textarea id="Lineage_relation_filterText" style="width: 300px; height: 100px; margin-left: 10px;"></textarea>
           </div>
 
 
 
-          <div>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary"
-                    onclick="Lineage_relationFilter.attachFilterToProperty()">set filter
-            </button>
-          </div>
+
         </div>
       </div>
     </div>

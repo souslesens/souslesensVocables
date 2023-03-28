@@ -279,7 +279,7 @@ Lineage_relations = (function () {
         if (!options) {
             options = {};
         }
-
+        options.skipLiterals=true
         var source = null;
         var data = null;
         if (!options.data) {
@@ -339,6 +339,8 @@ Lineage_relations = (function () {
                     data = visjsGraph.data.nodes.getIds();
                     options.filter = "FILTER (?prop in (owl:sameAs,owl:equivalentClass))";
                     Lineage_sources.registerSource(Config.dictionarySource);
+
+
 
                     type = null;
                     return callbackSeries();

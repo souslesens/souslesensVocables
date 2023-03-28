@@ -965,12 +965,18 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
         if (!sourceLabel) {
             sourceLabel = "_defaultSource";
         }
+
+
+
         self.newProperties = null;
         self.currentNodeId = null;
         self.currentNode = null;
         if (typeof node == "object") {
             self.currentNode = node;
             if (node.data) {
+                if(node.data.type && node.data.type.indexOf("literal")>-1)
+                    return
+
                 //  if (node.data.propertyId) self.currentNodeId = node.data.propertyId;
                 if (node.data.propertyId && !node.data.id) {
                     //when  a property in a restriction
@@ -1368,6 +1374,7 @@ defaultLang = 'en';*/
             [
                 //direct restrictions
                 function (callbackSeries) {
+
                     Sparql_OWL.getObjectRestrictions(sourceLabel, nodeId, { withoutBlankNodes: 1 }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);

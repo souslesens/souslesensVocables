@@ -172,7 +172,7 @@ var Lineage_relationFilter = (function () {
         if (type == "whiteBoardNodes") {
         } else {
             //  if (resourceType == "owl:Class") {
-            CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter("owl:Class", "Lineage_relation_filterResourcesSelect", type);
+            CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter(resourceType, "Lineage_relation_filterResourcesSelect", type);
             //  }
         }
     };
@@ -253,7 +253,7 @@ var Lineage_relationFilter = (function () {
 
         Lineage_relations.filter = filter.filterStr;
         var text = $("#Lineage_relation_filterText").val();
-        $("#Lineage_relation_filterText").val(text + "\n" + filter.filterStr);
+        $("#Lineage_relation_filterText").val(text  + filter.filterStr+ "\n");
     };
 
     return self;

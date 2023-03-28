@@ -39,14 +39,14 @@ import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
 import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema } from "../Profile";
-import { Source } from "../Source";
+import { ServerSource } from "../Source";
 import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import Autocomplete from "@mui/material/Autocomplete";
 import CsvDownloader from "react-csv-downloader";
 import red from "@mui/material/colors/red";
-import { ErrorGetter, ZormError } from "react-zorm/dist/types";
+import { errorMessage } from "./errorMessage";
 
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();
@@ -312,7 +312,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
         void saveProfile(profileModel.profileForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
     };
 
-    const fieldsFromSource = (source: Source) => {
+    const fieldsFromSource = (source: ServerSource) => {
         let fields = [source.schemaType];
 
         if (source.group) {
@@ -613,10 +613,6 @@ const expansionArrowStyles = {
 };
 
 const CustomExpansionArrow = styled("div")(expansionArrowStyles);
-function errorMessage(zormError: ErrorGetter): React.ReactNode {
-    return zormError((e) => <p style={{ color: "red" }}>{e.message}</p>);
-}
-
 function CustomTreeItem(props: TreeItemProps) {
     return <TreeItem ContentComponent={CustomContent} {...props} />;
 }
@@ -625,7 +621,7 @@ interface SourceTreeNode {
     name: string;
     children: SourceTreeNode[];
     index: number;
-    source: Source;
+    source: ServerSource;
     treeStr: string;
 }
 

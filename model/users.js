@@ -146,9 +146,21 @@ class UserModelJson extends UserModel {
 
     _readOne = async (login) => {
         const users = await this._read();
+        /*
         return Object.entries(users)
             .map(([_id, user]) => user)
-            .find((user) => user.login === login);
+            .find((user) => {
+                user.login === login});
+        */
+        var ok =false;
+        for(var key in users){
+            if (users[key].login===login){
+                ok=users[key]
+            }
+            
+
+        }  
+        return(ok)       
     };
 
     /**

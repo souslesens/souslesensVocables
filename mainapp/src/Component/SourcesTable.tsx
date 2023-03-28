@@ -29,6 +29,7 @@ import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
 import Autocomplete from "@mui/material/Autocomplete";
 import CsvDownloader from "react-csv-downloader";
+import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
 
@@ -72,7 +73,7 @@ const SourcesTable = () => {
                 return (
                     <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                         <Stack>
-                            <CsvDownloader separator="&#9;" filename="sources" extension=".tsv" datas={datas} />
+                            <CsvDownloader separator="&#9;" filename="sources" extension=".tsv" datas={datas as Datas} />
                             <Autocomplete
                                 disablePortal
                                 id="search-sources"

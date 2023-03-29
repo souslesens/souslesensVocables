@@ -10,7 +10,7 @@ var Lineage_relationFilter = (function () {
         $("#Lineage_relation_filterVocabularySelect").val("");
         $("#lineageQuery_uriValueDiv").css("display", "none");
         $("#lineageQuery_literalValueDiv").css("display", "none");
-
+$("#Lineage_relation_filterText").css("display", "none");
         var propStr = "";
         ("");
         if (self.currentProperty) {
@@ -250,6 +250,7 @@ var Lineage_relationFilter = (function () {
 
         Lineage_relations.filter = filter.filterStr;
         var text = $("#Lineage_relation_filterText").val();
+        $("#Lineage_relation_filterText").css("display", "block");
         $("#Lineage_relation_filterText").val(text + filter.filterStr + "\n");
     };
 

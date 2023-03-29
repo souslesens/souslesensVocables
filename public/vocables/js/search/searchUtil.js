@@ -529,28 +529,37 @@ indexes.push(source.toLowerCase());
                                 if (err) {
                                     return callback(err);
                                 }
-                                var data = [];
-                                result.forEach(function (item) {
-                                    data.push({
+                                var allData = [];
+                                result.forEach(function(item) {
+                                    allData.push({
                                         id: item.property.value,
                                         label: item.propertyLabel.value,
                                         type: "property",
                                         owltype: "ObjectProperty",
                                     });
                                 });
-                                self.indexData(sourceLabel.toLowerCase(), data, false, function (err, result) {
-                                    if (err) {
-                                        return callbackSeries(err);
-                                    }
-                                    if (!result) {
-                                        return callbackSeries();
-                                    }
-                                    totalLines += result.length;
-                                    totalLinesAllsources += totalLines;
-                                    MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
-                                    callbackSeries();
-                                });
-                            });
+
+                                var slices = common.array.slice(allData, 50);
+                                async.eachSeries(
+                                  slices,
+                                  function(data, callbackEach) {
+
+                                      self.indexData(sourceLabel.toLowerCase(), data, false, function(err, result) {
+                                          if (err) {
+                                              return callbackEach(err);
+                                          }
+                                          if (!result) {
+                                              return callbackSeries();
+                                          }
+                                          totalLines += result.length;
+                                          totalLinesAllsources += totalLines;
+                                          MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
+                                          callbackEach();
+                                      });
+                                  }, function(err) {
+                                      return callbackSeries(err);
+                                  });
+                            })
                         },
                     ],
                     function (err) {

@@ -20,6 +20,27 @@ var clusterQuery =
     "\n" +
     "LIMIT 1000";
 
+
+
+/*
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+ PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT distinct ?relationLabel count (distinct ?fact) from <http://data.total.com/resource/tsf/ontology/ontogaia/gpt2/> WHERE {
+      ?fact owl:onProperty ?relation .
+?relation rdfs:label ?relationLabel.
+
+
+    }
+group by ?relationLabel order by desc (count (distinct ?fact))
+
+    LIMIT 10000
+
+
+
+
+ */
+
 var EntityLinking_gaia = {
     readData: function (filePath, callback) {
         var json;
@@ -191,6 +212,35 @@ var EntityLinking_gaia = {
             addRestriction(factClassUri, inDocumentPropUri, documentClassUri);
             addRestriction(factClassUri, "<http://rds.posccaesar.org/ontology/lis14/rdl/isAbout>", entityClassUri);
             addRestriction(termClassUri, termInEntityUri, entityClassUri);
+
+
+            modelTriples.push({
+                s: factClassUri,
+                p:"rdfs:comment",
+                o:  " 'a couple of terms  inside a document linked by a GptRelation, each term belonging to an Entity'"
+            })
+
+            modelTriples.push({
+                s: entityClassUri,
+                p:"rdfs:comment",
+                o:  " 'Class (Entity)  conceptually predefined in Ontogaia Ontology  uses to extract entities from texts'"
+            })
+
+            modelTriples.push({
+                s: termClassUri,
+                p:"rdfs:comment",
+                o:  " 'Class of terms  extracted   from texts using Proxem studio matching Entities'"
+            })
+
+            modelTriples.push({
+                s: documentClassUri,
+                p:"rdfs:comment",
+                o:  " 'a Paragraph of text used for term, entity and entity linking extraction'"
+            })
+
+
+
+
 
             /*   modelTriples.push({
         s: gptRelationUri,

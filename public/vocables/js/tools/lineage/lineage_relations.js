@@ -481,6 +481,7 @@ Lineage_relations = (function () {
 
         if (self.previousQuery.propFilter) {
             Lineage_relationFilter.showAddFilterDiv(true);
+            $("#Lineage_relation_filterText").css("display", "block");
             $("#Lineage_relation_filterText").val(self.previousQuery.propFilter);
         }
     };

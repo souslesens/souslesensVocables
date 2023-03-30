@@ -1342,13 +1342,15 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         if (options.type) {
             typeFilterStr = "FILTER (?type =" + options.type + ")";
         } else {
-            typeFilterStr = "FILTER (?type in(owl:Class, owl:NamedIndividual,))";
+            typeFilterStr = "";
         }
         query += "{ ?id rdf:type ?type. " + typeFilterStr + " OPTIONAL {?id rdfs:label ?label " + langFilter + "}" + filter + " }}";
 
         var allData = [];
         var resultSize = 1;
         var limitSize = 2000;
+        if(options.processorFectchSize)
+            limitSize=options.processorFectchSize
         var totalLimit = options.limit || Config.queryLimit;
         var offset = 0;
         async.whilst(

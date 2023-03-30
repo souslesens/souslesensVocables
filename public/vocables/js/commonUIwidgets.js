@@ -1,8 +1,13 @@
 CommonUIwidgets = (function () {
     var self = {};
 
+
     self.fillObjectTypeOptionsOnPromptFilter = function (type, selectId, source) {
-        var term = prompt("Individual contains...");
+        if( Config.selectListsCache[type]){
+           return common.fillSelectOptions(selectId, Config.selectListsCache[type], true, "label", "id");
+        }
+
+        var term = prompt(" filter values ...");
         if (term === null) {
             return;
         }
@@ -27,7 +32,8 @@ CommonUIwidgets = (function () {
                     return;
                 }
             }
-            var objs = [];
+
+                var objs = [];
             result.forEach(function (item) {
                 objs.push({
                     id: item.id.value,
@@ -43,6 +49,10 @@ CommonUIwidgets = (function () {
                 }
                 return 0;
             });
+            if (result.length <= Config.minSelectListSize) {
+                Config.selectListsCache[type]=objs;
+            }
+
             common.fillSelectOptions(selectId, objs, true, "label", "id");
         });
     };

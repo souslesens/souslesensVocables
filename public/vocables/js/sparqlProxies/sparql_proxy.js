@@ -143,6 +143,8 @@ var Sparql_proxy = (function () {
             payload.body = JSON.stringify(body);
             payload.url = url + queryOptions;
         }
+        if(Config.logSparqlQueries)
+            console.log(query)
 
         $.ajax({
             type: "POST",

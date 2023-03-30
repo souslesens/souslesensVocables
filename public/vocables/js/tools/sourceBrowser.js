@@ -551,6 +551,9 @@ searchedSources = searchedSources.concat(importedSources);*/
                 if (_err) {
                     return alert(_err);
                 }
+                if(Object.keys(result[0].matches).length==0)
+                  return  $("#"+(options.jstreeDiv || self.currentTargetDiv)).html("<b>No matches found</b>")
+
                 self.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
                     if (err) {
                         return alert(err);

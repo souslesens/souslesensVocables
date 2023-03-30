@@ -478,9 +478,11 @@ Lineage_relations = (function () {
         }
         $("#lineageRelations_propertiesJstreeDiv").jstree().uncheck_all();
         $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(self.previousQuery.propIds);
+        $("#Lineage_relation_filterText").css("display", "block");
+        $("#lineageQuery_addFilterButton").removeProp("disabled")
 
         if (self.previousQuery.propFilter) {
-            Lineage_relationFilter.showAddFilterDiv(true);
+          //  Lineage_relationFilter.showAddFilterDiv(true);
             $("#Lineage_relation_filterText").css("display", "block");
             $("#Lineage_relation_filterText").val(self.previousQuery.propFilter);
         }
@@ -494,9 +496,11 @@ Lineage_relations = (function () {
             if (err) return alert(err.responseText);
             $("#lineageRelations_propertiesJstreeDiv").jstree().uncheck_all();
             $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(result.propIds);
+            $("#Lineage_relation_filterText").css("display", "block");
+            $("#lineageQuery_addFilterButton").removeProp("disabled")
 
             if (result.propFilter) {
-                Lineage_relationFilter.showAddFilterDiv(true);
+              //  Lineage_relationFilter.showAddFilterDiv(true);
                 $("#Lineage_relation_filterText").val(result.propFilter);
             }
         });

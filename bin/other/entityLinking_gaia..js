@@ -20,8 +20,6 @@ var clusterQuery =
     "\n" +
     "LIMIT 1000";
 
-
-
 /*
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
  PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -213,34 +211,29 @@ var EntityLinking_gaia = {
             addRestriction(factClassUri, "<http://rds.posccaesar.org/ontology/lis14/rdl/isAbout>", entityClassUri);
             addRestriction(termClassUri, termInEntityUri, entityClassUri);
 
-
             modelTriples.push({
                 s: factClassUri,
-                p:"rdfs:comment",
-                o:  " 'a couple of terms  inside a document linked by a GptRelation, each term belonging to an Entity'"
-            })
+                p: "rdfs:comment",
+                o: " 'a couple of terms  inside a document linked by a GptRelation, each term belonging to an Entity'",
+            });
 
             modelTriples.push({
                 s: entityClassUri,
-                p:"rdfs:comment",
-                o:  " 'Class (Entity)  conceptually predefined in Ontogaia Ontology  uses to extract entities from texts'"
-            })
+                p: "rdfs:comment",
+                o: " 'Class (Entity)  conceptually predefined in Ontogaia Ontology  uses to extract entities from texts'",
+            });
 
             modelTriples.push({
                 s: termClassUri,
-                p:"rdfs:comment",
-                o:  " 'Class of terms  extracted   from texts using Proxem studio matching Entities'"
-            })
+                p: "rdfs:comment",
+                o: " 'Class of terms  extracted   from texts using Proxem studio matching Entities'",
+            });
 
             modelTriples.push({
                 s: documentClassUri,
-                p:"rdfs:comment",
-                o:  " 'a Paragraph of text used for term, entity and entity linking extraction'"
-            })
-
-
-
-
+                p: "rdfs:comment",
+                o: " 'a Paragraph of text used for term, entity and entity linking extraction'",
+            });
 
             /*   modelTriples.push({
         s: gptRelationUri,
@@ -304,6 +297,11 @@ var EntityLinking_gaia = {
                             s: docUri,
                             p: "rdf:type",
                             o: documentClassUri,
+                        });
+                        dataTriples.push({
+                            s: docUri,
+                            p: "rdfs:label",
+                            o: "'" + Util.formatStringForTriple(docId) + "'",
                         });
                     }
 
@@ -388,6 +386,11 @@ var EntityLinking_gaia = {
                                 });
                                 dataTriples.push({
                                     s: fromTermUri,
+                                    p: "rdf:type",
+                                    o: "owl:NameIndividual",
+                                });
+                                dataTriples.push({
+                                    s: fromTermUri,
                                     p: "rdfs:label",
                                     o: "'" + Util.formatStringForTriple(item.fromTerm) + "'",
                                 });
@@ -403,6 +406,11 @@ var EntityLinking_gaia = {
                                     s: toTermUri,
                                     p: "rdf:type",
                                     o: termClassUri,
+                                });
+                                dataTriples.push({
+                                    s: toTermUri,
+                                    p: "rdf:type",
+                                    o: "owl:NameIndividual",
                                 });
                                 dataTriples.push({
                                     s: toTermUri,
@@ -451,6 +459,11 @@ var EntityLinking_gaia = {
                                 dataTriples.push({
                                     s: factUri,
                                     p: factHasEntityUri,
+                                    o: fromUri,
+                                });
+                                dataTriples.push({
+                                    s: factUri,
+                                    p:"rdfs:label",
                                     o: fromUri,
                                 });
 

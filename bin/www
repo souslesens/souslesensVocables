@@ -64,16 +64,23 @@ server.on("error", (error) => {
 });
 
 /**
- * Create WebSocket server
+ * Create WebSocket IO server
  *
- * TODO use plain websocket instead of socket.io ?
- * https://github.com/websockets/ws
+ * see https://socket.io/
  */
-const socketio = require("socket.io");
-const io = socketio(server);
+const { Server } = require("socket.io");
+const io = new Server(server);
 const SocketManager = require("./socketManager.");
 
-io.on("connection", (clientSocket) => {
-    clientSocket.emit("hello", "hello");
+io.on('connection', (clientSocket) => {
+    clientSocket.emit("Hello", "Thank you to connect to SLSV");
+    console.log('A user connected');
+
+    clientSocket.on('Hello', (msg) => {
+        console.log('A customer say hello: ' + msg);
+      });
+
     SocketManager.initClientSocket(clientSocket);
+    console.log('Test SocketManager send message' );
+
 });

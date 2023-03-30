@@ -14,10 +14,10 @@ const async = require("async");
 var httpProxy = require("../httpProxy.");
 var sqlConnector = require("./KGSqlConnector.");
 var SQLserverConnector = require("./SQLserverConnector.");
-var socket = require("../socketManager.");
+var socketIo = require("../socketManager.");
 
 var KGcontroller = require("./KGcontroller.");
-
+var builderName= "KGbuild";
 var originalKGproperty = "http://data.total.com/resource/one-model#originalIdOf";
 // var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlId";
 // var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlUri";
@@ -213,10 +213,10 @@ var KGbuilder = {
                 function (callbackSeries) {
                     if (!options.replaceGraph) return callbackSeries();
 
-                    socket.message("KGbuild", "clearing Graph");
+                    socketIo.message(builderName, "clearing Graph");
                     var queryDeleteGraph = " CLEAR GRAPH <" + KGgraphUri + ">";
                     var params = { query: queryDeleteGraph };
-                    socket.message("KGbuild", "delete graph " + KGgraphUri);
+                    socketIo.message(builderName, "delete graph " + KGgraphUri);
                     httpProxy.post(options.sparqlServerUrl, null, params, function (err, _result) {
                         callbackSeries(err);
                     });
@@ -225,7 +225,7 @@ var KGbuilder = {
                 // load ARDL dictionary
                 function (callbackSeries) {
                     if (options.dataSource.local_dictionary) {
-                        socket.message("KGbuild", "loading KG local_dictionary ");
+                        socketIo.message(builderName, "loading KG local_dictionary ");
 
                         var sqlQuery =
                             "select " + options.dataSource.local_dictionary.idColumn + "," + options.dataSource.local_dictionary.labelColumn + " from " + options.dataSource.local_dictionary.table;
@@ -243,7 +243,7 @@ var KGbuilder = {
 
                 // load reference dictionary
                 function (callbackSeries) {
-                    socket.message("KGbuild", "loading ONE MODEL reference dictionary ");
+                    socketIo.message(builderName, "loading ONE MODEL reference dictionary ");
 
                     var sqlQuery = "select term,superClassUri,superClassLabel,classLabel,classUri,source from reference_dictionary ";
                     SQLserverConnector.getData("onemodel", sqlQuery, function (err, result) {
@@ -275,7 +275,7 @@ var KGbuilder = {
 
                 // load reference dictionary
                 function (callbackSeries) {
-                    socket.message("KGbuild", "loading ONE MODEL superClasses ");
+                    socketIo.message(builderName, "loading ONE MODEL superClasses ");
 
                     var sqlQuery = "select * from superClasses ";
                     SQLserverConnector.getData("onemodel", sqlQuery, function (err, result) {
@@ -290,7 +290,7 @@ var KGbuilder = {
                 // get previously created uris
                 function (callbackSeries) {
                     if (options.replaceGraph) return callbackSeries();
-                    socket.message("KGbuild", "loading KG existing IDS ");
+                    socketIo.message(builderName, "loading KG existing IDS ");
                     KGbuilder.getExistingLabelUriMap(options.sparqlServerUrl, KGgraphUri, null, function (err, result) {
                         if (err) return callbackSeries(err);
                         existingUrisMap = result;
@@ -370,10 +370,10 @@ var KGbuilder = {
 
                                     httpProxy.post(options.sparqlServerUrl, null, params, function (err, _result) {
                                         if (err) {
-                                            socket.message(err);
+                                            socketIo.message(err);
                                             return callbackEach(err);
                                         }
-                                        socket.message("KGbuild", "rows processed :" + fetchedCount + "  triples created: " + totalTriples);
+                                        socketIo.message(builderName, "rows processed :" + fetchedCount + "  triples created: " + totalTriples);
                                         totalTriples += triples.length;
                                         return callbackEach(null);
                                     });
@@ -403,10 +403,10 @@ var KGbuilder = {
                         var sqlQuery = "select count(*) as count from  " + dbConnection.dbName + "." + sqlTable + " ";
                         SQLserverConnector.getData(dbConnection.dbName, sqlQuery, function (err, result) {
                             if (err) {
-                                console.log(err);
+                                socketIo.message(builderName,err);
                                 return callback(err);
                             }
-                            socket.message("KGbuild", "tableSize_" + result[0].count);
+                            socketIo.message(builderName, "tableSize_" + result[0].count);
 
                             var sqlQuery = "select distinct " + selectStr + " from  " + dbConnection.dbName + "." + sqlTable + " ";
 
@@ -496,15 +496,15 @@ var KGbuilder = {
                 };
                 httpProxy.post(body.url, body.headers, body.params, function (err, result) {
                     if (err) {
-                        console.log(query2);
-                        socket.message("KGbuild", err);
+                        //console.log(query2);
+                        socketIo.message(builderName, err);
                         return callbackWhilst(err);
                     }
 
                     offset += result.results.bindings.length;
                     resultSize = result.results.bindings.length;
 
-                    socket.message("KGbuild", "existing ids retrieved " + offset);
+                    socketIo.message(builderName, "existing ids retrieved " + offset);
 
                     result.results.bindings.forEach(function (item) {
                         existingUrisMap[item.oneModelId.value] = item.term.value;
@@ -523,7 +523,7 @@ var KGbuilder = {
             mappingFilePaths,
             function (mappingFilePath1, callbackEach) {
                 if (count++ > 0) replaceGraph = false;
-                socket.message("KGbuild", "-----------Processing " + mappingFilePath1 + "--------------");
+                socketIo.message(builderName, "-----------Processing " + mappingFilePath1 + "--------------");
 
                 mappingFilePath = KGcontroller.getMappingsDirPath() + mappingFilePath;
 
@@ -541,7 +541,7 @@ var KGbuilder = {
                     _options: _options,
                 };
 
-                socket.message("KGbuild", "creating triples for mapping " + mappingFilePath);
+                socketIo.message(builderName, "creating triples for mapping " + mappingFilePath);
                 KGbuilder.generateAdlSqlTriples(mappingFilePath, graphUri, options, function (err, _result) {
                     if (err) return callbackEach(err);
                     //  totalTriples += result.length
@@ -550,7 +550,7 @@ var KGbuilder = {
             },
             function (err) {
                 if (err) callback(err);
-                //   socket.message("KGbuild", "total triples created " + totalTriples)
+                //   socketIo.message(builderName, "total triples created " + totalTriples)
                 callback();
             }
         );
@@ -574,7 +574,7 @@ if (false) {
     }
 
     KGbuilder.buidlKG(mappingFilePaths, sparqlServerUrl, adlGraphUri, replaceGraph, function (err, _result) {
-        if (err) return socket.message("KGbuild", err);
-        return socket.message("KGbuild", "ALL DONE");
+        if (err) return socketIo.message(builderName, err);
+        return socketIo.message("KGbuild", "ALL DONE");
     });
 }*/

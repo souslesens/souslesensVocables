@@ -115,6 +115,7 @@ public/vocables/images/descriptionXX.png
 
 # .vscode local setting for workspace of each other
 .vscode
+.vscode/*
 
 /config/
 

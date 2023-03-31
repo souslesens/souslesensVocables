@@ -15,10 +15,9 @@ var SocketManager = {
         }*/
         if (SocketManager.currentClient) {
             SocketManager.currentClient.emit(channel, message);
-        }else{
-            console.log()
+        } else {
+            console.log();
         }
     },
 };
 module.exports = SocketManager;
-

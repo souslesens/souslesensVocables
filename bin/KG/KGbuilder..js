@@ -17,7 +17,7 @@ var SQLserverConnector = require("./SQLserverConnector.");
 var socketIo = require("../socketManager.");
 
 var KGcontroller = require("./KGcontroller.");
-var builderName= "KGbuild";
+var builderName = "KGbuild";
 var originalKGproperty = "http://data.total.com/resource/one-model#originalIdOf";
 // var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlId";
 // var totalRdlIdProperty = "http://data.total.com/resource/one-model#hasTotalRdlUri";
@@ -403,7 +403,7 @@ var KGbuilder = {
                         var sqlQuery = "select count(*) as count from  " + dbConnection.dbName + "." + sqlTable + " ";
                         SQLserverConnector.getData(dbConnection.dbName, sqlQuery, function (err, result) {
                             if (err) {
-                                socketIo.message(builderName,err);
+                                socketIo.message(builderName, err);
                                 return callback(err);
                             }
                             socketIo.message(builderName, "tableSize_" + result[0].count);

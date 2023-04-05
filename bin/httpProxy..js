@@ -82,7 +82,13 @@ var httpProxy = {
             method: "POST",
 
             url: url,
+
         };
+
+        if(params.auth)
+            options.auth=params.auth;
+
+
         if (headers) {
             options.headers = headers;
 

@@ -176,7 +176,7 @@ Lineage_relations = (function () {
         domainValue = valueStr;
     };
 
-    self.onshowDrawRelationsDialogValidate = function (action) {
+    self.onshowDrawRelationsDialogValidate = function (action,_type) {
         if (action == "clear") {
             var properties = $("#lineageRelations_propertiesJstreeDiv").jstree().get_checked(true);
             var edges = visjsGraph.data.edges.get();
@@ -218,6 +218,7 @@ Lineage_relations = (function () {
                     options.data = Lineage_classes.currentTreeNode.data.id;
                 }
             } else if (selection == "visible") {
+                Lineage_sources.fromAllWhiteboardSources = true;
                 if (!visjsGraph.isGraphNotEmpty()) {
                     options.data = null;
                 } else {
@@ -231,6 +232,7 @@ Lineage_relations = (function () {
                     options.data = data;
                 }
             } else if (selection == "all") {
+               // Lineage_sources.fromAllWhiteboardSources = false;
                 options.data = "allSourceNodes";
             }
 
@@ -262,6 +264,8 @@ Lineage_relations = (function () {
             if (direction == "both") {
                 direction = null;
             }
+            if(_type)
+                type=_type
 
             self.previousQuery = {
                 propIds: propIds,

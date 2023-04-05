@@ -9,7 +9,7 @@ const { DataFactory } = N3;
 const { namedNode, literal } = DataFactory;
 var graphUrisMap = {};
 
-var sparql_server_url = "http://51.178.139.80:8890/sparql";
+var sparql_server_url = "";
 
 var RDF_IO = {
     getGraphUri: function (sourceLabel) {

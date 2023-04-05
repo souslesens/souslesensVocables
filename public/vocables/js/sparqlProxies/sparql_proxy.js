@@ -138,6 +138,7 @@ var Sparql_proxy = (function () {
             var body = {
                 params: { query: query, useProxy: useProxy },
                 headers: headers,
+                user:authentication.currentUser
             };
 
             payload.body = JSON.stringify(body);

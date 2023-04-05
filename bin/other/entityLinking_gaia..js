@@ -504,7 +504,7 @@ var EntityLinking_gaia = {
                 }
             }
         }
-        var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
+        var sparqlServerUrl = "";
         var slices = util.sliceArray(dataTriples, 200);
         console.log("-- data triples length :" + dataTriples.length);
 

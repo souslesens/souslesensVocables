@@ -16,15 +16,6 @@ module.exports = function () {
 
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);
-
-                if (body.getOntologyRootUris) {
-                    // const SourceIntegrator = require("../../../bin/sourceIntegrator.");
-                    SourceIntegrator.getOntologyRootUris(body.sourceUrl, body.options, function (err, result) {
-                        processResponse(res, err, result);
-                    });
-                    return;
-                }
-
                 httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
                     processResponse(res, err, result);
                 });

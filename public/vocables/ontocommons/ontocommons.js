@@ -152,7 +152,6 @@ var Ontocommons = (function () {
 
     self.getOntologyRootUris = function (url) {
         var body = {
-            getOntologyRootUris: 1,
             sourceUrl: url,
             options: {},
         };
@@ -166,7 +165,7 @@ var Ontocommons = (function () {
         self.message("proecessing ontology ...");
         $.ajax({
             type: "POST",
-            url: `${self.apiUrl}/httpProxy`,
+            url: `${self.apiUrl}/getontologyrooturis`,
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {

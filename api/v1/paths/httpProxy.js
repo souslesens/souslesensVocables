@@ -17,13 +17,6 @@ module.exports = function () {
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);
 
-                if (body.importSourceFromUrl) {
-                    const SourceIntegrator = require("../../../bin/sourceIntegrator.");
-                    SourceIntegrator.importSourceFromTurtle(body.sourceUrl, body.sourceName, body.options, function (err, result) {
-                        processResponse(res, err, result);
-                    });
-                    return;
-                }
                 if (body.getOntologyRootUris) {
                     // const SourceIntegrator = require("../../../bin/sourceIntegrator.");
                     SourceIntegrator.getOntologyRootUris(body.sourceUrl, body.options, function (err, result) {

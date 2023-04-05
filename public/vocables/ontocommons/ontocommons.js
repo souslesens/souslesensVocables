@@ -88,7 +88,6 @@ var Ontocommons = (function () {
             var editable = $("#editableCBX").prop("checked");
 
             var body = {
-                importSourceFromUrl: 1,
                 sourceUrl: sourceUrl,
                 sourceName: ontologyId,
 
@@ -111,7 +110,7 @@ var Ontocommons = (function () {
             self.message("loading ontology and imports...");
             $.ajax({
                 type: "POST",
-                url: `${self.apiUrl}/httpProxy`,
+                url: `${self.apiUrl}/importsource`,
                 data: payload,
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {

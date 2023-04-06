@@ -162,7 +162,8 @@ export const InputSourceSchema = z.object({
     name: z
         .string()
         .nonempty({ message: "Required" })
-        .refine((val) => val !== "admin", { message: "Name can't be admin" }),
+        .refine((val) => val !== "admin", { message: "Name can't be admin" })
+        .refine((val) => val.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i), { message: "Name can only contain alphanumeric characters" }),
 
     _type: z.string().optional(),
     type: z.string().default(""),

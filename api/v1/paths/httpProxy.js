@@ -4,8 +4,7 @@ const GraphTraversal = require("../../../bin/graphTraversal.");
 const ExportGraph = require("../../../bin/exportGraph.");
 const SourceIntegrator = require("../../../bin/sourceIntegrator.");
 const ConfigManager = require("../../../bin/configManager.");
-const UserRequestFiltering= require("../../../bin/userRequestFiltering.");
-
+const UserRequestFiltering = require("../../../bin/userRequestFiltering.");
 
 
 module.exports = function() {
@@ -58,24 +57,31 @@ module.exports = function() {
         }
 
 
-
         if (ConfigManager.config && req.body.url.indexOf(ConfigManager.config.default_sparql_url) == 0) {
-          UserRequestFiltering.filterSparqlRequest(body.params.query, body.user.identifiant, function(parsingError, filteredQuery) {
-            if(parsingError)
-             return  processResponse(res, parsingError, null);
+        ConfigManager.getUserSources(req, res, function(err, userSources) {
+            if (err) {
+              return processResponse(res, err, userSources);
+            }
 
-            body.params.query=filteredQuery
-            body.params.auth = {
-              user: ConfigManager.config.sparql_server.user,
-              pass: ConfigManager.config.sparql_server.password,
-              sendImmediately: false
-            };
-            httpProxy.post(req.body.url, body.headers, body.params, function(err, result) {
-              processResponse(res, err, result);
+            UserRequestFiltering.filterSparqlRequest(body.params.query, userSources, function(parsingError, filteredQuery) {
+              if (parsingError) {
+                return processResponse(res, parsingError, null);
+              }
 
+              body.params.query = filteredQuery;
+              body.params.auth = {
+                user: ConfigManager.config.sparql_server.user,
+                pass: ConfigManager.config.sparql_server.password,
+                sendImmediately: false
+              };
+              httpProxy.post(req.body.url, body.headers, body.params, function(err, result) {
+                processResponse(res, err, result);
+
+              });
             });
-          })
-        }else {
+          });
+        }
+        else {
 
           httpProxy.post(req.body.url, body.headers, body.params, function(err, result) {
             processResponse(res, err, result);

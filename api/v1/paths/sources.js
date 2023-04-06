@@ -1,6 +1,9 @@
 const path = require("path");
 const fs = require("fs");
 const { configPath, config } = require("../../../model/config");
+
+const ConfigManager = require("../../../bin/configManager.");
+
 const sourcesJSON = path.resolve(configPath + "/sources.json");
 const profilesJSON = path.resolve(configPath + "/profiles.json");
 const util = require("util");
@@ -16,6 +19,7 @@ module.exports = function () {
 
     ///// GET api/v1/sources
     async function GET(req, res, next) {
+
         try {
             const userInfo = await userManager.getUser(req.user);
             var sourcesFile = sourcesJSON;

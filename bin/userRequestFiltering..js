@@ -155,7 +155,7 @@ var UserRequestFiltering = {
 
 
     filterSparqlRequest: function(query, userSourcesMap, callback) {
-    return callback(null,query);
+   // return callback(null,query);
       var login = "TEST_r";
       var error = "";
       var filteredQuery = query;

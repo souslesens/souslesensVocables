@@ -57,7 +57,7 @@ module.exports = function() {
         }
 
 
-        if (ConfigManager.config && req.body.url.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+        if (false && ConfigManager.config && req.body.url.indexOf(ConfigManager.config.default_sparql_url) == 0) {
         ConfigManager.getUserSources(req, res, function(err, userSources) {
             if (err) {
               return processResponse(res, err, userSources);

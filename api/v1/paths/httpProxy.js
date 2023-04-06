@@ -57,29 +57,39 @@ module.exports = function() {
         }
 
 
-        if (false && ConfigManager.config && req.body.url.indexOf(ConfigManager.config.default_sparql_url) == 0) {
-        ConfigManager.getUserSources(req, res, function(err, userSources) {
-            if (err) {
-              return processResponse(res, err, userSources);
-            }
+        if (ConfigManager.config && req.body.url.indexOf(ConfigManager.config.default_sparql_url) == 0) {
 
-            UserRequestFiltering.filterSparqlRequest(body.params.query, userSources, function(parsingError, filteredQuery) {
-              if (parsingError) {
-                return processResponse(res, parsingError, null);
+          body.params.auth = {
+            user: ConfigManager.config.sparql_server.user,
+            pass: ConfigManager.config.sparql_server.password,
+            sendImmediately: false
+          };
+          if (false) {
+            ConfigManager.getUserSources(req, res, function(err, userSources) {
+              if (err) {
+                return processResponse(res, err, userSources);
               }
 
-              body.params.query = filteredQuery;
-              body.params.auth = {
-                user: ConfigManager.config.sparql_server.user,
-                pass: ConfigManager.config.sparql_server.password,
-                sendImmediately: false
-              };
-              httpProxy.post(req.body.url, body.headers, body.params, function(err, result) {
-                processResponse(res, err, result);
+              UserRequestFiltering.filterSparqlRequest(body.params.query, userSources, function(parsingError, filteredQuery) {
+                if (parsingError) {
+                  return processResponse(res, parsingError, null);
+                }
+                body.params.query = filteredQuery;
 
+                httpProxy.post(req.body.url, body.headers, body.params, function(err, result) {
+                  processResponse(res, err, result);
+
+                });
               });
             });
-          });
+
+          }
+          else {
+            httpProxy.post(req.body.url, body.headers, body.params, function(err, result) {
+              processResponse(res, err, result);
+
+            });
+          }
         }
         else {
 

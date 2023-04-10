@@ -42,7 +42,7 @@ var UserRequestFiltering = {
       for (var key in userSourcesMap) {
         var source = userSourcesMap[key];
         if (source.sparql_server.url == "_default" && source.graphUri) {
-          userGraphUrisMap[source.graphUri] = { source: key, acl: source.acl };
+          userGraphUrisMap[source.graphUri] = { source: key, acl: source.accessControl=="readwrite"?"w":"r" };
         }
       }
 
@@ -84,28 +84,31 @@ var UserRequestFiltering = {
 
       var error = "";
       var operation = null;
-      var modifyRegex = /(DELETE|INSERT|CLEAR|LOAD|CREATE|DROP|COPY|MOVE|ADD)  /gim;
+      var modifyRegex = /(DELETE|INSERT|CLEAR|LOAD|CREATE|DROP|COPY|MOVE|ADD)/gmi;
       var array = modifyRegex.exec(query);
-      if (array.length == 1) {
-        operation = array[1];
+      if (array.length == 2) {
+        operation = array[1].trim();
       }
 
       if (!operation) {
-        error = ("no operation");
+        error = ("DATA PROTECTION : no operation");
       }
       else {
         var graphUri = null;
-        var graphRegex = /(INTO|GRAPH) +<(.*)> /gim;
+        var graphRegex =/(INTO|GRAPH) +<(.*)>/gmi
         var array = graphRegex.exec(query);
-        if (array.length ==3) {
-          graphUri = array[2];
+        if (array && array.length ==3) {
+          graphUri = array[2].trim();
         }
         if (!graphUri) {
-          error = ("operation " + operation + " needs explicit graph declaration");
+          error = ("DATA PROTECTION : operation " + operation + " needs explicit graph declaration");
         }
         else {
           if (!userGraphUrisMap[graphUri]) {
-            error = " graphUri not allowed for user  " + fromGraphUri.value + "\n";
+            error = " DATA PROTECTION : graphUri not allowed for user  " + graphUri + "\n";
+          }else{
+            if(userGraphUrisMap[graphUri].acl!="w")
+              error = " DATA PROTECTION : current  user cannot execute "+operation+  " on graph "+ graphUri + "\n";
           }
         }
 
@@ -125,25 +128,25 @@ var UserRequestFiltering = {
 
       var error = "";
       if (!json.from) {
-        error += " missing from  <graph> clause ";
+        error += "DATA PROTECTION : missing from  <graph> clause ";
       }
       // check no from graph
      else {
         if (json.from.default.length == 0 && json.from.named.length == 0) {
-          error += " missing from  <graph> clause \n";
+          error += "DATA PROTECTION : missing from  <graph> clause \n";
         }
 
         //check graphuris authorized for user
         var fromError = "";
         json.from.default.forEach(function(fromGraphUri) {
           if (!userGraphUrisMap[fromGraphUri.value]) {
-            fromError += " graphUri "+ fromGraphUri.value +" not allowed for current user ";
+            fromError += "DATA PROTECTION: graphUri "+ fromGraphUri.value +" not allowed for current user ";
           }
         });
 
         json.from.named.forEach(function(fromGraphUri) {
           if (!userGraphUrisMap[fromGraphUri.value]) {
-            fromError += " graphUri  " + fromGraphUri.value + " not allowed for current user";
+            fromError += "DATA PROTECTION : graphUri  " + fromGraphUri.value + " not allowed for current user";
           }
         });
         error += fromError;
@@ -165,7 +168,7 @@ var UserRequestFiltering = {
 
       selectRegex = /(SELECT)/gim;
       var array = selectRegex.exec(query);
-      if (array.length > 0) {
+      if (array && array.length > 0) {
         UserRequestFiltering.checkSelectQuery(query, userGraphUrisMap, function(err, result) {
           if(err)
             return callback(err)
@@ -183,11 +186,13 @@ var UserRequestFiltering = {
 
       }
     },
-    filterElasticRequest: function(request, user, callback) {
+
+
+
+    filterElasticRequest: function(query, userSourcesMap, callback) {
 
 
     }
-
 
   }
 ;

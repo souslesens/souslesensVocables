@@ -16,42 +16,6 @@ module.exports = function () {
 
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);
-
-                if (body.getShortestPath) {
-                    const GraphTraversal = require("../../../bin/graphTraversal.");
-                    if (body.numberOfPathes > 1) {
-                        GraphTraversal.getAllShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, body.numberOfPathes, body.options, function (err, result) {
-                            processResponse(res, err, result);
-                        });
-                    } else {
-                        GraphTraversal.getShortestPath(body.sparqlServerUrl, body.graphUri, body.fromNodeUri, body.toNodeUri, body.options, function (err, result) {
-                            processResponse(res, err, result);
-                        });
-                    }
-                    return;
-                }
-
-                if (body.copyGraphToEndPoint) {
-                    ExportGraph.copyGraphToEndPoint(body.source, body.toEndPointConfig, body.options, function (err, result) {
-                        processResponse(res, err, result);
-                    });
-                    return;
-                }
-                if (body.importSourceFromUrl) {
-                    const SourceIntegrator = require("../../../bin/sourceIntegrator.");
-                    SourceIntegrator.importSourceFromTurtle(body.sourceUrl, body.sourceName, body.options, function (err, result) {
-                        processResponse(res, err, result);
-                    });
-                    return;
-                }
-                if (body.getOntologyRootUris) {
-                    // const SourceIntegrator = require("../../../bin/sourceIntegrator.");
-                    SourceIntegrator.getOntologyRootUris(body.sourceUrl, body.options, function (err, result) {
-                        processResponse(res, err, result);
-                    });
-                    return;
-                }
-
                 httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {
                     processResponse(res, err, result);
                 });

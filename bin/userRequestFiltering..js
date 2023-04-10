@@ -159,6 +159,9 @@ var UserRequestFiltering = {
     },
 
 
+
+
+
     filterSparqlRequest: function(query, userSourcesMap, callback) {
    // return callback(null,query);
       var login = "TEST_r";

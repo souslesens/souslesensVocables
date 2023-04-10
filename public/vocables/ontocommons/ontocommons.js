@@ -88,7 +88,6 @@ var Ontocommons = (function () {
             var editable = $("#editableCBX").prop("checked");
 
             var body = {
-                importSourceFromUrl: 1,
                 sourceUrl: sourceUrl,
                 sourceName: ontologyId,
 
@@ -111,7 +110,7 @@ var Ontocommons = (function () {
             self.message("loading ontology and imports...");
             $.ajax({
                 type: "POST",
-                url: `${self.apiUrl}/httpProxy`,
+                url: `${self.apiUrl}/importsource`,
                 data: payload,
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
@@ -151,11 +150,9 @@ var Ontocommons = (function () {
         });
     };
 
-    self.getOntologyRootUris = function (ontologyId) {
-        var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
+    self.getOntologyRootUris = function (url) {
         var body = {
-            getOntologyRootUris: 1,
-            sourceUrl: sourceUrl,
+            sourceUrl: url,
             options: {},
         };
 
@@ -168,7 +165,7 @@ var Ontocommons = (function () {
         self.message("proecessing ontology ...");
         $.ajax({
             type: "POST",
-            url: `${self.apiUrl}/httpProxy`,
+            url: `${self.apiUrl}/getontologyrooturis`,
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {

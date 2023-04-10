@@ -125,25 +125,25 @@ var UserRequestFiltering = {
 
       var error = "";
       if (!json.from) {
-        error += " missing from named graph clause \n";
+        error += " missing from  <graph> clause ";
       }
       // check no from graph
      else {
         if (json.from.default.length == 0 && json.from.named.length == 0) {
-          error += " missing from named graph clause \n";
+          error += " missing from  <graph> clause \n";
         }
 
         //check graphuris authorized for user
         var fromError = "";
         json.from.default.forEach(function(fromGraphUri) {
           if (!userGraphUrisMap[fromGraphUri.value]) {
-            fromError += " graphUri not allowed for user  " + fromGraphUri.value + "\n";
+            fromError += " graphUri "+ fromGraphUri.value +" not allowed for current user ";
           }
         });
 
         json.from.named.forEach(function(fromGraphUri) {
           if (!userGraphUrisMap[fromGraphUri.value]) {
-            fromError += " graphUri not allowed for user  " + fromGraphUri.value + "\n";
+            fromError += " graphUri  " + fromGraphUri.value + " not allowed for current user";
           }
         });
         error += fromError;
@@ -167,16 +167,16 @@ var UserRequestFiltering = {
       var array = selectRegex.exec(query);
       if (array.length > 0) {
         UserRequestFiltering.checkSelectQuery(query, userGraphUrisMap, function(err, result) {
-          if(error)
-            return callback(error)
+          if(err)
+            return callback(err)
           callback(null, result);
         });
 
       }
       else {
         UserRequestFiltering.checkQueryByRegex(query, userGraphUrisMap, function(err, result) {
-          if(error)
-            return callback(error)
+          if(err)
+            return callback(err)
           callback(null, result);
         });
 

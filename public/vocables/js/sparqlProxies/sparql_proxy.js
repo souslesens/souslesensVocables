@@ -57,7 +57,7 @@ var Sparql_proxy = (function () {
                 };
                 $.ajax({
                     type: "POST",
-                    url: `${Config.apiUrl}/httpProxy`,
+                    url: `${Config.apiUrl}/sparqlProxy`,
                     data: payload,
                     dataType: "json",
                     success: function (data, _textStatus, _jqXHR) {
@@ -144,12 +144,11 @@ var Sparql_proxy = (function () {
             payload.body = JSON.stringify(body);
             payload.url = url + queryOptions;
         }
-        if(Config.logSparqlQueries)
-            console.log(query)
+
 
         $.ajax({
             type: "POST",
-            url: `${Config.apiUrl}/httpProxy`,
+            url: `${Config.apiUrl}/sparqlProxy`,
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
@@ -164,9 +163,11 @@ var Sparql_proxy = (function () {
             },
             error: function (err) {
                 console.error(err);
-                console.error("------QUERY--------");
-                console.error(query);
-                console.error("------END QUERY--------");
+                if(Config.logSparqlQueries) {
+                    console.error("------QUERY ERROR--------");
+                    console.error(query);
+                    console.error("------END QUERY ERROR--------");
+                }
                 if (err.responseText.indexOf("Virtuoso 42000") > -1) {
                     //Virtuoso 42000 The estimated execution time
                     alert(err.responseText.substring(0, err.responseText.indexOf(".")) + "\n select more detailed data");
@@ -220,7 +221,7 @@ var Sparql_proxy = (function () {
 
         $.ajax({
             type: "POST",
-            url: `${Config.apiUrl}/httpProxy`,
+            url: `${Config.apiUrl}/sparqlProxy`,
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {

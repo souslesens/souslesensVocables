@@ -163,8 +163,6 @@ var UserRequestFiltering = {
 
 
     filterSparqlRequest: function(query, userSourcesMap, callback) {
-   // return callback(null,query);
-      var login = "TEST_r";
       var error = "";
       var filteredQuery = query;
       var userGraphUrisMap = UserRequestFiltering.getUserGraphUrisMap(userSourcesMap);
@@ -202,48 +200,4 @@ var UserRequestFiltering = {
 module.exports = UserRequestFiltering;
 
 
-if (false) {
 
-  var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-    "PREFIX owl: <http://www.w3.org/2002/07/owl#> \n" +
-    "SELECT distinct ?prop ?propLabel ?inverseProp\n" +
-    " from <http://data.total.com/resource/tsf/ontology/gaia-test/>  WHERE {\n" +
-    " \n" +
-    " ?prop ?p ?o optional{?prop rdfs:label ?propLabel}optional{?prop owl:inverseOf ?inverseProp}" +
-    " VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty owl:AnnotationProperty}\n" +
-    " }";
-
-
-  var queryInsert = "with GRAPH <http://www.w3.org/1999/02/22-rdf-syntax-ns#> " +
-    "insert data{ <oo> <ppp> <oo>}";
-  queryInsert = "PREFIX xs: <http://www.w3.org/2001/XMLSchema#>\n" +
-    "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n\"";
-  " PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-  " PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-  " PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-  " PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
-  " PREFIX iso14224: <http://data.total.com/resource/tsf/iso_14224#>\n" +
-  " PREFIX req: <https://w3id.org/requirement-ontology/rdl/>\n" +
-  " PREFIX part14: <http://rds.posccaesar.org/ontology/lis14/rdl/>\n" +
-  " PREFIX iso81346: <http://data.total.com/resource/tsf/IEC_ISO_81346/>\n" +
-  " PREFIX bfo: <http://purl.obolibrary.org/obo/bfo.owl>\n" +
-  " PREFIX dul: <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#>\n" +
-  " PREFIX slsv: <http://souslesens.org/resource/vocabulary/>\n" +
-  " PREFIX dcterms: <http://purl.org/dc/terms/>\n" +
-  " WITH GRAPH  <http://data.total.com/resource/tsf/ontology/gaia-test/>\n" +
-  " INSERT DATA  {<http://data.total.com/resource/tsf/ontology/gaia-test/JeanXXXX111> rdfs:label \"JeanXXXX111\".\n" +
-  " <http://data.total.com/resource/tsf/ontology/gaia-test/JeanXXXX111> rdf:type owl:Class.\n" +
-  " <http://data.total.com/resource/tsf/ontology/gaia-test/JeanXXXX111> rdfs:subClassOf owl:Thing.\n" +
-  " <http://data.total.com/resource/tsf/ontology/gaia-test/JeanXXXX111> <http://purl.org/dc/terms/creator> \"admin\".\n" +
-  " <http://data.total.com/resource/tsf/ontology/gaia-test/JeanXXXX111> <http://purl.org/dc/terms/created> \"2023-04-04T9:40:57\"^^xsd:dateTime.\n" +
-  " <http://data.total.com/resource/tsf/ontology/gaia-test/JeanXXXX111> <https://www.dublincore.org/specifications/bibo/bibo/bibo.rdf.xml#status> \"draft\".\n" +
-  " <http://data.total.com/resource/tsf/ontology/gaia-test/JeanXXXX111> <http://purl.org/dc/terms/source> \"Lineage_addNode\".\n" +
-  " }\n";
-
-
-  var user = "TEST_r";
-  UserRequestFiltering.filterSparqlRequest(queryInsert, user, function(err, result) {
-
-  })
-}

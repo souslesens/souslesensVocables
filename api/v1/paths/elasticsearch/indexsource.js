@@ -1,5 +1,5 @@
 const path = require("path");
-const dictionariesManager = require(path.resolve("bin/KG/dictionariesManager."));
+const elasticRestProxy = require(path.resolve("bin/elasticRestProxy..js"));
 
 module.exports = function () {
     let operations = {
@@ -7,7 +7,7 @@ module.exports = function () {
     };
 
     function POST(req, res, _next) {
-        dictionariesManager.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, result) {
+        elasticRestProxy.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, result) {
             if (err) {
                 return res.status(400).json({ error: err });
             }

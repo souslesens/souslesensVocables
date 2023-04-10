@@ -1,13 +1,13 @@
 const path = require("path");
-const dictionariesManager = require(path.resolve("bin/KG/dictionariesManager."));
 
+const elasticRestProxy = require(path.resolve("bin/elasticRestProxy..js"));
 module.exports = function () {
     let operations = {
         GET,
     };
 
     function GET(req, res, _next) {
-        dictionariesManager.listIndexes(function (err, result) {
+        elasticRestProxy.listIndexes(function (err, result) {
             if (err) {
                 return res.status(400).json({ error: err });
             }

@@ -64,7 +64,7 @@ module.exports = function() {
             pass: ConfigManager.config.sparql_server.password,
             sendImmediately: false
           };
-          if (false) {
+          if (true) {
             ConfigManager.getUserSources(req, res, function(err, userSources) {
               if (err) {
                 return processResponse(res, err, userSources);

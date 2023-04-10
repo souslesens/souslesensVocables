@@ -128,24 +128,26 @@ var UserRequestFiltering = {
         error += " missing from named graph clause \n";
       }
       // check no from graph
-      if (json.from.default.length == 0 && json.from.named.length == 0) {
-        error += " missing from named graph clause \n";
+     else {
+        if (json.from.default.length == 0 && json.from.named.length == 0) {
+          error += " missing from named graph clause \n";
+        }
+
+        //check graphuris authorized for user
+        var fromError = "";
+        json.from.default.forEach(function(fromGraphUri) {
+          if (!userGraphUrisMap[fromGraphUri.value]) {
+            fromError += " graphUri not allowed for user  " + fromGraphUri.value + "\n";
+          }
+        });
+
+        json.from.named.forEach(function(fromGraphUri) {
+          if (!userGraphUrisMap[fromGraphUri.value]) {
+            fromError += " graphUri not allowed for user  " + fromGraphUri.value + "\n";
+          }
+        });
+        error += fromError;
       }
-
-      //check graphuris authorized for user
-      var fromError = "";
-      json.from.default.forEach(function(fromGraphUri) {
-        if (!userGraphUrisMap[fromGraphUri.value]) {
-          fromError += " graphUri not allowed for user  " + fromGraphUri.value + "\n";
-        }
-      });
-
-      json.from.named.forEach(function(fromGraphUri) {
-        if (!userGraphUrisMap[fromGraphUri.value]) {
-          fromError += " graphUri not allowed for user  " + fromGraphUri.value + "\n";
-        }
-      });
-      error += fromError;
 
 
       callback(error, query);

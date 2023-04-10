@@ -186,30 +186,7 @@ var SourceBrowser = (function () {
                 },
             };
 
-            /*   items.graphNodeNeighborhood = {
-          label: "graph node neighborhood ",
-          action: false,
-          submenu: {
-              graphNodeNeighborhood_incoming: {
-                  label: "incoming",
-                  action: function () {
-                      Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, "incoming");
-                  },
-              },
-              graphNodeNeighborhood_outcoming: {
-                  label: "outcoming",
-                  action: function () {
-                      Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, "outcoming");
-                  },
-              },
-              graphNodeNeighborhood_ranges: {
-                  label: "ranges",
-                  action: function () {
-                      Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, "ranges");
-                  },
-              },
-          },
-      };*/
+
             items.relations = {
                 label: "Relations...",
                 action: function (e) {
@@ -249,30 +226,17 @@ var SourceBrowser = (function () {
                         });
                     },
                 };
-                /*   items.editNode = {
-label: "Edit node",
-action: function(_obj, _sss, _cc) {
-SourceEditor.editNode("DialogDiv", self.currentSource, self.currentTreeNode.data.id, "OWL", false);
-}
-};
-items.deleteClass = {
-label: "delete Class",
-action: function(_e) {
-// pb avec source
 
-Lineage_common.deleteNode(self.currentTreeNode, self.currentTargetDiv);
-}
-};*/
             }
 
-            if (MainController.currentSource && Config.sources[MainController.currentSource].protegeFilePath) {
+         /*   if (MainController.currentSource && Config.sources[MainController.currentSource].protegeFilePath) {
                 items.uploadOntologyFromOwlFile = {
                     label: "upload Ontology FromOwl File",
                     action: function (_e) {
                         SourceBrowser.uploadOntologyFromOwlFile();
                     },
                 };
-            }
+            }*/
         }
 
         /*    items.toDataTable = {

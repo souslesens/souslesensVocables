@@ -151,10 +151,11 @@ var Ontocommons = (function () {
         });
     };
 
-    self.getOntologyRootUris = function (url) {
+    self.getOntologyRootUris = function (ontologyId) {
+        var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
         var body = {
             getOntologyRootUris: 1,
-            sourceUrl: url,
+            sourceUrl: sourceUrl,
             options: {},
         };
 

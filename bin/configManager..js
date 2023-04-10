@@ -154,8 +154,9 @@ var ConfigManager = {
     },
 
    getUserSources:   async  function(req, res, next){
-     //  const path = require("path");
-    //   const fs = require("fs");
+
+
+
        const { configPath, config } = require("../model/config");
        const sourcesJSON = path.resolve(configPath + "/sources.json");
        const profilesJSON = path.resolve(configPath + "/profiles.json");
@@ -165,7 +166,8 @@ var ConfigManager = {
        const read = util.promisify(fs.readFile);
        const { getAllowedSources, filterSources, sortObjectByKey } = require("../api/v1/paths/utils.js");
         try {
-            const userInfo = await userManager.getUser(req.user);
+            const userInfo = await userManager.getUser(req.user || null);
+
             var sourcesFile = sourcesJSON;
             if (req.query.sourcesFile) {
                 sourcesFile = path.resolve(configPath + "/" + req.query.sourcesFile);

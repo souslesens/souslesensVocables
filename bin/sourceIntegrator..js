@@ -15,9 +15,9 @@ var SourceIntegrator = {
         var cmd;
         if (process.platform === "win32") {
             // my dev env
-            cmd = "D: && cd " + jenaPath + ' && java -cp "./lib/*"  RDF2triples.java ' + filePath;
+            cmd = "D: && cd " + jenaPath + ' && java -cp "./lib/*"  RDF2triples.java ' + '"'+filePath+'"';
         } else {
-            cmd = "D: | cd " + jenaPath + ' | && java -cp "./lib/*"  RDF2triples.java ' + filePath;
+            cmd = "D: | cd " + jenaPath + ' | && java -cp "./lib/*"  RDF2triples.java ' + '"'+filePath+'"';
         }
 
         console.log("EXECUTING " + cmd);
@@ -29,10 +29,16 @@ var SourceIntegrator = {
 
             // return callback(null, stdout);
 
-            console.log(stdout);
+        //    console.log(stdout);
 
             var triples = [];
-            var json = JSON.parse(stdout);
+            try {
+                var json = JSON.parse(stdout);
+            }catch(e){
+                var x=stdout;
+                return callback(e)
+            }
+
             json.forEach(function (line, index) {
                 triples.push({
                     subject: line[0],
@@ -118,14 +124,17 @@ var SourceIntegrator = {
 
         var uriRoots = [];
 
-        function writeTriples(triples) {
+        function writeTriples(triplesArray) {
             if (!sparqlServerUrl) {
                 return callback(null, { graphUri: graphUri, imports: imports, totalTriples: totalTriples });
             }
 
-            var triplesArray = triples.split("\n");
+
 
             totalTriples = triplesArray.length;
+            if(totalTriples==0)
+                callback("no triples to import")
+
 
             triplesArray.forEach(function (item, index) {
                 if (fetchCount++ < fechSize) {

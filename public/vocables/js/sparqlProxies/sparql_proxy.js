@@ -138,13 +138,12 @@ var Sparql_proxy = (function () {
             var body = {
                 params: { query: query, useProxy: useProxy },
                 headers: headers,
-                user:authentication.currentUser
+                user: authentication.currentUser,
             };
 
             payload.body = JSON.stringify(body);
             payload.url = url + queryOptions;
         }
-
 
         $.ajax({
             type: "POST",
@@ -163,7 +162,7 @@ var Sparql_proxy = (function () {
             },
             error: function (err) {
                 console.error(err);
-                if(Config.logSparqlQueries) {
+                if (Config.logSparqlQueries) {
                     console.error("------QUERY ERROR--------");
                     console.error(query);
                     console.error("------END QUERY ERROR--------");

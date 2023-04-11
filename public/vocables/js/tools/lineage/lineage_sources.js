@@ -329,7 +329,7 @@ return;
             if (indexedSources.indexOf(source) < 0) {
                 MainController.UI.message("indexing source " + source);
                 $("#waitImg").css("display", "block");
-                SearchUtil.generateElasticIndex(source, { indexProperties: 1 ,indexNamedIndividuals:1}, function (err, _result) {
+                SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
                     if (err) {
                         return MainController.UI.message(err, true);
                     }

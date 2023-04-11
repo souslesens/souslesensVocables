@@ -150,7 +150,7 @@ sourceLabels.sort();
     ) {};
 
     self.onGraphOrTreeNodeClick = function (node, nodeEvent, options) {
-      //  console.trace("onGraphOrTreeNodeClick");
+        //  console.trace("onGraphOrTreeNodeClick");
         if (!node.data || !node.data.source) {
             return console.log("no data.source in node");
         }

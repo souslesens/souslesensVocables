@@ -16,64 +16,46 @@ var filePath = "D:\\NLP\\ontologies\\OntoGaia\\validationXDB3.csv";
 
   */
 
+fs.readFile(filePath, function (err, data) {
+    var data = "" + data;
 
-fs.readFile(filePath, function(err, data) {
-  var data = "" + data;
+    var lines = data.split("\n");
 
+    var relations = [];
 
-  var lines = data.split("\n");
+    lines.forEach(function (line, indexLine) {
+        var cells = line.split(";");
 
-
-  var relations = [];
-
-
-  lines.forEach(function(line, indexLine) {
-    var cells = line.split(";");
-
-    cells.forEach(function(header, indexCol) {
-
-      var colName = cells[indexCol - 1];
-      if (indexLine == 0) {
-
-        relations.push({ entities: colName, data: [] });
-      }
+        cells.forEach(function (header, indexCol) {
+            var colName = cells[indexCol - 1];
+            if (indexLine == 0) {
+                relations.push({ entities: colName, data: [] });
+            }
+        });
     });
-  });
 
+    lines.forEach(function (line, indexLine) {
+        var cells = line.split(";");
 
-  lines.forEach(function(line, indexLine) {
-    var cells = line.split(";");
-
-
-    if (indexLine > 0) {
-      relations.forEach(function(header, indexCol) {
-        var colName = cells[indexCol - 1];
-        if (indexCol > 0 && indexCol % 2 == 0) {
-          if (cells[indexCol - 1]) {
-            relations[indexCol].data.push({ label: cells[indexCol - 1], status: cells[indexCol]|| "-" });
-          }
-
+        if (indexLine > 0) {
+            relations.forEach(function (header, indexCol) {
+                var colName = cells[indexCol - 1];
+                if (indexCol > 0 && indexCol % 2 == 0) {
+                    if (cells[indexCol - 1]) {
+                        relations[indexCol].data.push({ label: cells[indexCol - 1], status: cells[indexCol] || "-" });
+                    }
+                }
+            });
         }
-      });
-    }
-
-
-  });
-
-  var str = "";
-  relations.forEach(function(relation, indexCol) {
-    relation.data.forEach(function(item) {
-      str += relation.entities + "\t"+item.label+"\t"+item.status.trim()+"\n"
     });
-  });
 
-  fs.writeSync(filePath.replace(".","_transorm."),str)
+    var str = "";
+    relations.forEach(function (relation, indexCol) {
+        relation.data.forEach(function (item) {
+            str += relation.entities + "\t" + item.label + "\t" + item.status.trim() + "\n";
+        });
+    });
 
-
+    fs.writeSync(filePath.replace(".", "_transorm."), str);
 });
 return;
-
-
-
-
-

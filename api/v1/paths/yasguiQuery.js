@@ -18,9 +18,9 @@ module.exports = function () {
                 headers["Accept"] = "application/sparql-results+json";
                 headers["Content-Type"] = "application/x-www-form-urlencoded";
 
-                var params= {query: query}
+                var params = { query: query };
 
-           /*     if (ConfigManager.config && req.query.url.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                /*     if (ConfigManager.config && req.query.url.indexOf(ConfigManager.config.default_sparql_url) == 0) {
                     params.auth = {
                         user: ConfigManager.config.sparql_server.user,
                         pass: ConfigManager.config.sparql_server.password,
@@ -28,22 +28,19 @@ module.exports = function () {
                     };
                 }*/
 
-
-
                 if (ConfigManager.config && req.query.url.indexOf(ConfigManager.config.default_sparql_url) == 0) {
-
-                  params.auth = {
+                    params.auth = {
                         user: ConfigManager.config.sparql_server.user,
                         pass: ConfigManager.config.sparql_server.password,
-                        sendImmediately: false
+                        sendImmediately: false,
                     };
                     if (true) {
-                        ConfigManager.getUserSources(req, res, function(err, userSources) {
+                        ConfigManager.getUserSources(req, res, function (err, userSources) {
                             if (err) {
                                 return processResponse(res, err, userSources);
                             }
 
-                            UserRequestFiltering.filterSparqlRequest(req.body.query, userSources, function(parsingError, filteredQuery) {
+                            UserRequestFiltering.filterSparqlRequest(req.body.query, userSources, function (parsingError, filteredQuery) {
                                 if (parsingError) {
                                     return processResponse(res, parsingError, null);
                                 }
@@ -52,22 +49,12 @@ module.exports = function () {
                                 });
                             });
                         });
-
-                    }
-                    else {
+                    } else {
                         httpProxy.post(req.query.url, headers, params, function (err, result) {
                             processResponse(res, err, result);
                         });
                     }
                 }
-
-
-
-
-
-
-
-
             } else if (req.query.method == "GET") {
                 headers["Accept"] = "application/sparql-results+json";
                 headers["Content-Type"] = "application/x-www-form-urlencoded";

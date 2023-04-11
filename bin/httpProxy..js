@@ -82,12 +82,9 @@ var httpProxy = {
             method: "POST",
 
             url: url,
-
         };
 
-        if(params.auth)
-            options.auth=params.auth;
-
+        if (params.auth) options.auth = params.auth;
 
         if (headers) {
             options.headers = headers;
@@ -116,9 +113,7 @@ var httpProxy = {
                 return callback(error);
             }
 
-            if(response.statusCode!=200)
-                return callback(response.statusMessage);
-
+            if (response.statusCode != 200) return callback(response.statusMessage);
 
             if (headers && headers["Accept"].indexOf("json") < 0) return callback(null, body);
             if (typeof body === "string") {

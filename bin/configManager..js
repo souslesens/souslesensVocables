@@ -153,31 +153,25 @@ var ConfigManager = {
         });
     },
 
-
-    getUser : async  function(req, res, next){
+    getUser: async function (req, res, next) {
         const userManager = require(path.resolve("bin/user."));
         try {
             const userInfo = await userManager.getUser(req.user || null);
-            next(null,userInfo)
-
-    } catch (err) {
-          next(err);
-      }
+            next(null, userInfo);
+        } catch (err) {
+            next(err);
+        }
     },
 
-
-
-   getUserSources:   async  function(req, res, next){
-
-
-       const { configPath, config } = require("../model/config");
-       const sourcesJSON = path.resolve(configPath + "/sources.json");
-       const profilesJSON = path.resolve(configPath + "/profiles.json");
-      const util = require("util");
-       const { readResource, writeResource, resourceCreated, responseSchema, resourceFetched } = require("../api/v1/paths/utils");
-       const userManager = require(path.resolve("bin/user."));
-       const read = util.promisify(fs.readFile);
-       const { getAllowedSources, filterSources, sortObjectByKey } = require("../api/v1/paths/utils.js");
+    getUserSources: async function (req, res, next) {
+        const { configPath, config } = require("../model/config");
+        const sourcesJSON = path.resolve(configPath + "/sources.json");
+        const profilesJSON = path.resolve(configPath + "/profiles.json");
+        const util = require("util");
+        const { readResource, writeResource, resourceCreated, responseSchema, resourceFetched } = require("../api/v1/paths/utils");
+        const userManager = require(path.resolve("bin/user."));
+        const read = util.promisify(fs.readFile);
+        const { getAllowedSources, filterSources, sortObjectByKey } = require("../api/v1/paths/utils.js");
         try {
             const userInfo = await userManager.getUser(req.user || null);
 
@@ -202,28 +196,21 @@ var ConfigManager = {
             } else {
                 // admin, return all sources with readwrite right
                 filteredSources = Object.fromEntries(
-                  Object.entries(parsedSources).map(([id, s]) => {
-                      s["accessControl"] = "readwrite";
-                      return [id, s];
-                  })
+                    Object.entries(parsedSources).map(([id, s]) => {
+                        s["accessControl"] = "readwrite";
+                        return [id, s];
+                    })
                 );
             }
             // sort
             const sortedSources = sortObjectByKey(filteredSources);
             // return
-            next(null,sortedSources)
-          //  resourceFetched(res, sortedSources);
-
+            next(null, sortedSources);
+            //  resourceFetched(res, sortedSources);
         } catch (err) {
             next(err);
         }
-    }
-
-
-
-
-
-
+    },
 };
 ConfigManager.getGeneralConfig();
 module.exports = ConfigManager;

@@ -463,7 +463,7 @@ var EntityLinking_gaia = {
                                 });
                                 dataTriples.push({
                                     s: factUri,
-                                    p:"rdfs:label",
+                                    p: "rdfs:label",
                                     o: fromUri,
                                 });
 

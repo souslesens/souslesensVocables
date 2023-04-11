@@ -176,7 +176,7 @@ Lineage_relations = (function () {
         domainValue = valueStr;
     };
 
-    self.onshowDrawRelationsDialogValidate = function (action,_type) {
+    self.onshowDrawRelationsDialogValidate = function (action, _type) {
         if (action == "clear") {
             var properties = $("#lineageRelations_propertiesJstreeDiv").jstree().get_checked(true);
             var edges = visjsGraph.data.edges.get();
@@ -232,7 +232,7 @@ Lineage_relations = (function () {
                     options.data = data;
                 }
             } else if (selection == "all") {
-               // Lineage_sources.fromAllWhiteboardSources = false;
+                // Lineage_sources.fromAllWhiteboardSources = false;
                 options.data = "allSourceNodes";
             }
 
@@ -264,8 +264,7 @@ Lineage_relations = (function () {
             if (direction == "both") {
                 direction = null;
             }
-            if(_type)
-                type=_type
+            if (_type) type = _type;
 
             self.previousQuery = {
                 propIds: propIds,
@@ -483,10 +482,10 @@ Lineage_relations = (function () {
         $("#lineageRelations_propertiesJstreeDiv").jstree().uncheck_all();
         $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(self.previousQuery.propIds);
         $("#Lineage_relation_filterText").css("display", "block");
-        $("#lineageQuery_addFilterButton").removeProp("disabled")
+        $("#lineageQuery_addFilterButton").removeProp("disabled");
 
         if (self.previousQuery.propFilter) {
-          //  Lineage_relationFilter.showAddFilterDiv(true);
+            //  Lineage_relationFilter.showAddFilterDiv(true);
             $("#Lineage_relation_filterText").css("display", "block");
             $("#Lineage_relation_filterText").val(self.previousQuery.propFilter);
         }
@@ -501,10 +500,10 @@ Lineage_relations = (function () {
             $("#lineageRelations_propertiesJstreeDiv").jstree().uncheck_all();
             $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(result.propIds);
             $("#Lineage_relation_filterText").css("display", "block");
-            $("#lineageQuery_addFilterButton").removeProp("disabled")
+            $("#lineageQuery_addFilterButton").removeProp("disabled");
 
             if (result.propFilter) {
-              //  Lineage_relationFilter.showAddFilterDiv(true);
+                //  Lineage_relationFilter.showAddFilterDiv(true);
                 $("#Lineage_relation_filterText").val(result.propFilter);
             }
         });

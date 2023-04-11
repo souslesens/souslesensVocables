@@ -1349,8 +1349,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         var allData = [];
         var resultSize = 1;
         var limitSize = 2000;
-        if(options.processorFectchSize)
-            limitSize=options.processorFectchSize
+        if (options.processorFectchSize) limitSize = options.processorFectchSize;
         var totalLimit = options.limit || Config.queryLimit;
         var offset = 0;
         async.whilst(

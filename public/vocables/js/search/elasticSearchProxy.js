@@ -33,10 +33,10 @@ var ElasticSearchProxy = (function () {
         });
     };
 
-    self.executeMsearch = function (ndjson,indexes, callback) {
+    self.executeMsearch = function (ndjson, indexes, callback) {
         var payload = {
             ndjson: ndjson,
-            indexes:indexes
+            indexes: indexes,
         };
 
         $.ajax({

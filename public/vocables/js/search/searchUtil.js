@@ -278,7 +278,7 @@ indexes.push(source.toLowerCase());
             str += JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
           });
           MainController.UI.message("getting labels " + allHits.length + " ...");
-          ElasticSearchProxy.executeMsearch(str, function(err, result) {
+          ElasticSearchProxy.executeMsearch(str, [index],function(err, result) {
             if (err) {
               return callbackEach(err);
             }
@@ -424,7 +424,7 @@ indexes.push(source.toLowerCase());
           var wordQuery = self.getWordBulkQuery(word, mode, indexes);
           bulQueryStr += wordQuery;
         });
-        ElasticSearchProxy.executeMsearch(bulQueryStr, function(err, result) {
+        ElasticSearchProxy.executeMsearch(bulQueryStr, indexes,function(err, result) {
           if (err) {
             return callbackEach(err);
           }

@@ -153,8 +153,21 @@ var ConfigManager = {
         });
     },
 
-   getUserSources:   async  function(req, res, next){
 
+    getUser : async  function(req, res, next){
+        const userManager = require(path.resolve("bin/user."));
+        try {
+            const userInfo = await userManager.getUser(req.user || null);
+            next(null,userInfo)
+
+    } catch (err) {
+          next(err);
+      }
+    },
+
+
+
+   getUserSources:   async  function(req, res, next){
 
 
        const { configPath, config } = require("../model/config");

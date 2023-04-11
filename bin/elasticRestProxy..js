@@ -45,18 +45,21 @@ var elasticRestProxy = {
   sendAuthRequest: function(options, callback) {
 
     if (ConfigManager.config.ElasticSearch) {
-      options.auth = {
-        user: ConfigManager.config.ElasticSearch.user,
-        password: ConfigManager.config.ElasticSearch.password
+      if(options.method=="POST") {
+        options.auth = {
+          user: ConfigManager.config.ElasticSearch.user,
+          password: ConfigManager.config.ElasticSearch.password
 
-      };
-      var token = Buffer.from(options.auth.user + ":" + options.auth.password).toString("base64");
-      options.headers.Authorization = "Basic "+token;
+        };
+      }else {
+        var token = Buffer.from(ConfigManager.config.ElasticSearch.user + ":" + ConfigManager.config.ElasticSearch.password).toString("base64");
+        options.headers.Authorization = "Basic " + token;
+      }
     }
     process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
     request(options, function(error, response, body) {
 
-      return callback(null, response, body);
+      return callback(error, response, body);
 
     });
   },
@@ -323,19 +326,9 @@ var elasticRestProxy = {
       });
       callback(null, indexes);
     });
-  }
-
-  , listIndexes: function(callback) {
-    ConfigManager.getGeneralConfig(function(err, config) {
-      if (err) {
-        return callback(err);
-      }
-      const elasticUrl = config.ElasticSearch.url;
-      ElasticRestProxy.listIndexes(elasticUrl, function(err, indexes) {
-        return callback(err, indexes);
-      });
-    });
   },
+
+
 
   indexSource: function(indexName, data, options, callback) {
     if (!options) {
@@ -361,7 +354,7 @@ var elasticRestProxy = {
           if (!options.replaceIndex) {
             return callbackSeries();
           }
-          ElasticRestProxy.deleteIndex(elasticUrl, indexName, function(err, _result) {
+          elasticRestProxy.deleteIndex(elasticUrl, indexName, function(err, _result) {
             callbackSeries(err);
           });
         },
@@ -444,7 +437,7 @@ var elasticRestProxy = {
             },
             url: elasticUrl + indexName
           };
-          ElasticRestProxy.sendAuthRequest(requestOptions, function(error, _response, _body) {
+          elasticRestProxy.sendAuthRequest(requestOptions, function(error, _response, _body) {
             //  request(requestOptions, function (error, _response, _body) {
             if (error) {
               return callbackSeries(error);
@@ -464,7 +457,7 @@ var elasticRestProxy = {
             },
             url: elasticUrl
           };
-          ElasticRestProxy.sendAuthRequest(requestOptions, function(error, _response, _body) {
+          elasticRestProxy.sendAuthRequest(requestOptions, function(error, _response, _body) {
             //  request(requestOptions, function (error, _response, _body) {
             if (error) {
               return callbackSeries(error);
@@ -504,12 +497,12 @@ var elasticRestProxy = {
             },
             url: elasticUrl + "_bulk?refresh=wait_for"
           };
-          ElasticRestProxy.sendAuthRequest(requestOptions, function(error, response, body) {
+          elasticRestProxy.sendAuthRequest(requestOptions, function(error, response, body) {
             // request(requestOptions, function (error, response, body) {
             if (error) {
               return callbackSeries(error);
             }
-            ElasticRestProxy.checkBulkQueryResponse(body, function(err, _result) {
+            elasticRestProxy.checkBulkQueryResponse(body, function(err, _result) {
               if (err) {
                 return callbackSeries(err);
               }

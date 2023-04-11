@@ -188,12 +188,36 @@ var UserRequestFiltering = {
       }
     },
 
+  validateElasticSearchIndices: function(userGroups,indices, userSourcesMap,acl, callback) {
 
+   if(userGroups && userGroups.indexOf("admin")>-1)
+     return callback(null,indices);
 
-    filterElasticRequest: function(query, userSourcesMap, callback) {
-
-
+    var indicesMap = {};
+    for (var source in userSourcesMap) {
+      indicesMap[source.toLowerCase()] = { source: source, acl: source.accessControl == "readwrite" ? "w" : "r" };
     }
+    indices.forEach(function(indexName) {
+      if (!indicesMap[indexName]) {
+        return callback("DATA PROTECTION : index  " + indexName + " not allowed to current user");
+      }
+      else {
+        if (acl == "w" && indicesMap[indexName].acl != acl) {
+          return callback("DATA PROTECTION : user cannot write to index  " + indexName);
+        }
+
+      }
+    })
+    return callback(null,indices);
+
+
+  }
+
+
+
+
+
+
 
   }
 ;

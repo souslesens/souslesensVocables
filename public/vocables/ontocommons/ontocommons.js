@@ -152,30 +152,36 @@ var Ontocommons = (function () {
         });
     };
 
-    self.getOntologyRootUris = function (url) {
+    self.getOntologyRootUris = function (ontologyId) {
+        $("#TA").val("")
+        var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
+
         var body = {
-            sourceUrl: url,
+            sourceUrl: sourceUrl,
             options: {},
         };
 
         var payload = {
             url: "_default",
-            body: JSON.stringify(body),
+            body: body,
             POST: true,
         };
 
-        self.message("proecessing ontology ...");
+        self.message("processing ontology ...");
         $.ajax({
             type: "POST",
-            url: `${self.apiUrl}/getontologyrooturis`,
+            url: `${self.apiUrl}/getOntologyRootUris`,
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-                /*  var myFrame = $("#slsv_iframe").contents().find('body');
-                myFrame.html("<html>"+data.uriRoots+"</html>");*/
-                //   $("#resultDiv").html(data.uriRoots)
-                alert(data.uriRoots);
-                $("#slsv_iframe").html(data.uriRoots)
+
+                var myFrame = $("#slsv_iframe").contents().find('body');
+
+                $(myFrame).addClass('iframeDiv')
+                myFrame.html("<textarea id='TA' style='width:500px;height: 600px'>"+ontologyId+"\n"+data.uriRoots+"</textarea>");
+              // $("TA").val(data.uriRoots);
+               // alert(data.uriRoots);
+              //  $("#slsv_iframe").html(data.uriRoots)
             },
             error(err) {
                 alert(err.responseText);

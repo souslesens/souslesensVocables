@@ -16,20 +16,7 @@ var request = require("request");
 var proxy = null;
 var httpProxy = {
     host: null,
-    setProxyForServerDomain: function (host) {
-        if (!proxy) {
-            var domainWithProxy = "XXXmain.glb.corp.local";
-            var proxyUrl = "http:10.16.152.65:8080";
-            //console.log(" -----------setting up proxy---------"+proxyUrl)
-            if (proxyUrl && host && host.indexOf(domainWithProxy) > -1) {
-                /// proxy for request
-                process.env["http_proxy"] = proxyUrl;
-                process.env["https_proxy"] = proxyUrl;
 
-                proxy = proxyUrl;
-            }
-        }
-    },
 
     get: function (url, options, callback) {
         if (!options.headers) {

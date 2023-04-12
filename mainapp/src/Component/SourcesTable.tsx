@@ -27,6 +27,7 @@ import { ServerSource, saveSource, defaultSource, deleteSource, InputSourceSchem
 import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
+import TableSortLabel from "@mui/material/TableSortLabel";
 import Autocomplete from "@mui/material/Autocomplete";
 import CsvDownloader from "react-csv-downloader";
 import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
@@ -37,6 +38,14 @@ const SourcesTable = () => {
     const { model, updateModel } = useModel();
 
     const [filteringChars, setFilteringChars] = React.useState("");
+    const [orderBy, setOrderBy] = React.useState<keyof ServerSource>("name");
+    const [order, setOrder] = React.useState<Order>("asc");
+    type Order = "asc" | "desc";
+    function handleRequestSort(property: keyof ServerSource) {
+        const isAsc = orderBy === property && order === "asc";
+        setOrder(isAsc ? "desc" : "asc");
+        setOrderBy(property);
+    }
 
     const renderSources = SRD.match(
         {
@@ -62,6 +71,7 @@ const SourcesTable = () => {
                         imports: joinWhenArray(imports),
                         taxonomyPredicates: joinWhenArray(taxonomyPredicates),
                     };
+
                     const dataWithoutCarriageReturns = Object.fromEntries(
                         Object.entries(processedData).map(([key, value]) => {
                             if (typeof value === "string") {
@@ -72,6 +82,11 @@ const SourcesTable = () => {
                     );
 
                     return { ...dataWithoutCarriageReturns };
+                });
+                const sortedSources: ServerSource[] = gotSources.slice().sort((a: ServerSource, b: ServerSource) => {
+                    const left: string = a[orderBy] as string;
+                    const right: string = b[orderBy] as string;
+                    return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 });
                 return (
                     <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
@@ -92,13 +107,17 @@ const SourcesTable = () => {
                                     <Table>
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell style={{ fontWeight: "bold" }}>Name</TableCell>
+                                                <TableCell style={{ fontWeight: "bold" }}>
+                                                    <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
+                                                        Name
+                                                    </TableSortLabel>
+                                                </TableCell>
                                                 <TableCell style={{ fontWeight: "bold" }}>graphUri</TableCell>
                                                 <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody sx={{ width: "100%", overflow: "visible" }}>
-                                            {gotSources
+                                            {sortedSources
                                                 .filter((source) => source.name.includes(filteringChars))
                                                 .map((source) => {
                                                     return (

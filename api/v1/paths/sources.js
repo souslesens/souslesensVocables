@@ -9,7 +9,7 @@ const util = require("util");
 const { readResource, writeResource, resourceCreated, responseSchema, resourceFetched } = require("./utils");
 const userManager = require(path.resolve("bin/user."));
 const read = util.promisify(fs.readFile);
-const { getAllowedSources, filterSources, sortObjectByKey } = require("./utils.js");
+const { successfullyFetched, successfullyCreated } = require("./utils.js");
 module.exports = function () {
     let operations = {
         GET,
@@ -33,9 +33,7 @@ module.exports = function () {
             }
 
             const userSources = await localSourceModel.getUserSources(userInfo.user);
-
-            // return
-            resourceFetched(res, userSources);
+            res.status(200).json(successfullyFetched(userSources));
         } catch (err) {
             next(err);
         }
@@ -59,18 +57,14 @@ module.exports = function () {
     ///// POST api/v1/sources
     async function POST(req, res, next) {
         try {
-            const profileToAdd = req.body;
-            //        const successfullyCreated = newProfiles[req.params.id]
-            const oldProfiles = await readResource(sourcesJSON, res);
-            const profileDoesntExist = !Object.keys(oldProfiles).includes(Object.keys(profileToAdd)[0]);
-            const objectToCreateKey = req.body;
-            const newProfiles = { ...oldProfiles, ...objectToCreateKey };
-            if (profileDoesntExist) {
-                const saved = await writeResource(sourcesJSON, newProfiles, res);
-                resourceCreated(res, saved);
-            } else {
-                res.status(400).json({ message: "Resource already exists. If you want to update an existing resource, use PUT instead." });
-            }
+            const newSource = req.body;
+            await Promise.all(
+                Object.entries(newSource).map(async ([_key, value]) => {
+                    await sourceModel.addSource(value);
+                })
+            );
+            const sources = await sourceModel.getAllSources();
+            res.status(200).json(successfullyCreated(sources));
         } catch (err) {
             next(err);
         }

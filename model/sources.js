@@ -1,6 +1,9 @@
 const fs = require("fs");
+const { Lock } = require("async-await-mutex-lock");
 const { config, configSourcesPath, configProfilesPath } = require("./config");
 const { ProfileModel } = require("./profiles");
+
+const lock = new Lock();
 
 class SourceModel {
     constructor(sourcesPath, profilesPath) {
@@ -118,12 +121,33 @@ class SourceModel {
         return await this._sortSources(Object.fromEntries(filterSourcesList));
     };
 
+    getAllSources = async () => {
+        return await this._sortSources(await this._read());
+    };
+
     getUserSources = async (user) => {
         const allSources = await this._read();
         if (user.login === "admin" || user.groups.includes("admin")) {
             return await this._getAdminSources(allSources);
         }
         return await this._getAllowedSources(allSources, user);
+    };
+
+    addSource = async (newSource) => {
+        await lock.acquire("SourcesThread");
+        try {
+            const sources = await this._read();
+            if (newSource.id === undefined) {
+                newSource.id = newSource.name;
+            }
+            if (Object.keys(sources).includes(newSource.id)) {
+                throw Error("Source already exists, try updating it.");
+            }
+            sources[newSource.id] = newSource;
+            await this._write(sources);
+        } finally {
+            lock.release("SourcesThread");
+        }
     };
 }
 

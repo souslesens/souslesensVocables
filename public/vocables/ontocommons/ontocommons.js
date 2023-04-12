@@ -2,7 +2,8 @@ var Config = {};
 var Ontocommons = (function () {
     var self = {};
     var apiKey = "019adb70-1d64-41b7-8f6e-8f7e5eb54942";
-    var sourcesJsonFile = "ontocommonsSources.json";
+   // var sourcesJsonFile = "ontocommonsSources.json";
+    var sourcesJsonFile = "sources.json";
     self.currentSource = null;
     self.init = function () {
         self.listPortalOntologies();
@@ -94,6 +95,7 @@ var Ontocommons = (function () {
                 options: {
                     metadata: metadata,
                     sourcesJsonFile: sourcesJsonFile,
+
                     reload: reload,
                     editable: editable,
                     graphUri: metadata.URI || null,
@@ -102,7 +104,7 @@ var Ontocommons = (function () {
 
             var payload = {
                 url: "_default",
-                body: JSON.stringify(body),
+                body: body,
                 POST: true,
             };
 
@@ -173,6 +175,7 @@ var Ontocommons = (function () {
                 myFrame.html("<html>"+data.uriRoots+"</html>");*/
                 //   $("#resultDiv").html(data.uriRoots)
                 alert(data.uriRoots);
+                $("#slsv_iframe").html(data.uriRoots)
             },
             error(err) {
                 alert(err.responseText);

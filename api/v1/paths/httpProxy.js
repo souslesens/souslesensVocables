@@ -1,8 +1,6 @@
 const { processResponse } = require("./utils");
 const httpProxy = require("../../../bin/httpProxy.");
-const GraphTraversal = require("../../../bin/graphTraversal.");
-const ExportGraph = require("../../../bin/exportGraph.");
-const SourceIntegrator = require("../../../bin/sourceIntegrator.");
+
 
 module.exports = function () {
     let operations = {
@@ -12,7 +10,7 @@ module.exports = function () {
 
     async function POST(req, res, next) {
         try {
-            httpProxy.setProxyForServerDomain(req.headers.host);
+
 
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);

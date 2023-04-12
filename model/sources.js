@@ -1,10 +1,11 @@
 const fs = require("fs");
-const { configSourcesPath } = require("./config");
-const { profileModel } = require("./profiles");
+const { config, configSourcesPath, configProfilesPath } = require("./config");
+const { ProfileModel } = require("./profiles");
 
 class SourceModel {
-    constructor(path) {
-        this.configSourcesPath = path;
+    constructor(sourcesPath, profilesPath) {
+        this.configSourcesPath = sourcesPath;
+        this.profileModel = new ProfileModel(profilesPath);
     }
 
     _read = async () => {
@@ -14,6 +15,7 @@ class SourceModel {
     _write = async (sources) => {
         await fs.promises.writeFile(this.configSourcesPath, JSON.stringify(sources, null, 2));
     };
+
     _addReadWriteToSources = async (sources) => {
         return Object.fromEntries(
             Object.entries(sources).map(([id, s]) => {
@@ -22,6 +24,7 @@ class SourceModel {
             })
         );
     };
+
     _sortSources = async (sources) => {
         return Object.fromEntries(
             Object.entries(sources).sort((a, b) => {
@@ -29,13 +32,90 @@ class SourceModel {
             })
         );
     };
+
     _getAdminSources = async (sources) => {
         const adminSources = await this._addReadWriteToSources(sources);
         const sortedAdminSources = await this._sortSources(adminSources);
         return sortedAdminSources;
     };
-    _getAllowedSources = async (user, sources, profiles) => {
-        // not implemented yet
+
+    _getAllowedSources = async (sources, user) => {
+        const profiles = await this.profileModel._read();
+        // convert objects to lists
+        const profilesList = Object.entries(profiles);
+        const sourcesList = Object.entries(sources);
+        // get profiles of user
+        const userProfilesList = profilesList.filter(([profileName, profile]) => {
+            if (user.groups.includes(profileName)) {
+                return [profileName, profile];
+            }
+        });
+        // get [[<sourceName>, <accessControl>]] list
+        const allAccessControl = userProfilesList.flatMap(([_k, profile]) => {
+            const sourcesAccessControl = profile.sourcesAccessControl;
+            const allowedSourceSchemas = profile.allowedSourceSchemas;
+            return sourcesList
+                .filter(([sourceName, source]) => {
+                    if (allowedSourceSchemas.includes(source.schemaType)) {
+                        return [sourceName, source];
+                    }
+                })
+                .map(([sourceName, source]) => {
+                    const schemaType = source.schemaType;
+                    const group = source.group;
+                    const treeStr = [schemaType, group, sourceName].join("/");
+                    // find the closest parent accessControl
+                    const closestParent = Object.entries(sourcesAccessControl)
+                        .filter(([k, v]) => {
+                            if (treeStr === k || treeStr.startsWith(`${k}/`)) {
+                                return [k, v];
+                            }
+                        })
+                        .reduce((acc, current) => (acc[0].length >= current[0].length ? acc : current), ["", ""]);
+                    return [sourceName, closestParent[1]];
+                });
+        });
+
+        // get read and readwrite sources only. add formalOntologySourceLabel with read
+        const allowedSources = allAccessControl
+            .filter(([sourceName, acl]) => {
+                if (["read", "readwrite"].includes(acl)) {
+                    return sourceName;
+                }
+            })
+            .concat([[config.formalOntologySourceLabel, "read"]]);
+        // sort and uniq. If a source have read and readwrite, keep readwrite
+        // to keep readwrite, sort read first. fromEntries will keep the last
+        const sortedAndReducedAllowedSources = Object.fromEntries(
+            allowedSources
+                .sort((s1, s2) => {
+                    if (s1[0] < s2[0]) {
+                        return -1;
+                    }
+                    if (s1[0] > s2[0]) {
+                        return 1;
+                    }
+                    return 0;
+                })
+                .sort((s1, s2) => {
+                    if (s1[1] < s2[1]) {
+                        return -1;
+                    }
+                    if (s1[1] > s2[1]) {
+                        return 1;
+                    }
+                    return 0;
+                })
+        );
+
+        // filter sources with sortedAndReducedAllowedSources
+        const filterSourcesList = sourcesList.filter(([sourceName, source]) => {
+            if (sourceName in sortedAndReducedAllowedSources) {
+                source["accessControl"] = sortedAndReducedAllowedSources[sourceName];
+                return [sourceName, source];
+            }
+        });
+        return await this._sortSources(Object.fromEntries(filterSourcesList));
     };
 
     getUserSources = async (user) => {
@@ -43,11 +123,10 @@ class SourceModel {
         if (user.login === "admin" || user.groups.includes("admin")) {
             return await this._getAdminSources(allSources);
         }
-        const profiles = profileModel._read();
-        return await this._getAllowedSources(allSources, profiles);
+        return await this._getAllowedSources(allSources, user);
     };
 }
 
-const sourceModel = new SourceModel(configSourcesPath);
+const sourceModel = new SourceModel(configSourcesPath, configProfilesPath);
 
 module.exports = { SourceModel, sourceModel };

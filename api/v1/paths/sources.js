@@ -1,9 +1,8 @@
 const path = require("path");
 const fs = require("fs");
-const { configPath, config } = require("../../../model/config");
 
-const ConfigManager = require("../../../bin/configManager.");
-
+const { configPath, configProfilesPath } = require("../../../model/config");
+const { sourceModel, SourceModel } = require("../../../model/sources");
 const sourcesJSON = path.resolve(configPath + "/sources.json");
 const profilesJSON = path.resolve(configPath + "/profiles.json");
 const util = require("util");
@@ -21,37 +20,22 @@ module.exports = function () {
     async function GET(req, res, next) {
         try {
             const userInfo = await userManager.getUser(req.user);
-            var sourcesFile = sourcesJSON;
+            let localSourceModel;
+
             if (req.query.sourcesFile) {
-                sourcesFile = path.resolve(configPath + "/" + req.query.sourcesFile);
-                if (!sourcesFile.startsWith(path.resolve(configPath))) {
+                configSourcesPathFromUrlParams = path.resolve(configPath + "/" + req.query.sourcesFile);
+                if (!configSourcesPath.startsWith(path.resolve(configPath))) {
                     return res.status(403).json({ done: false, message: "forbidden path" });
                 }
-            }
-            //  const sources = await read(sourcesJSON);
-            const sources = await read(sourcesFile);
-            const parsedSources = JSON.parse(sources);
-            // return all sources if user is admin
-            let filteredSources;
-            if (!userInfo.user.groups.includes("admin")) {
-                // return filtered sources if user is not admin
-                const profiles = await read(profilesJSON);
-                const parsedProfiles = JSON.parse(profiles);
-                const allowedSources = getAllowedSources(userInfo.user, parsedProfiles, parsedSources, config.formalOntologySourceLabel);
-                filteredSources = filterSources(allowedSources, parsedSources);
+                localSourceModel = new SourceModel(configSourcesPathFromUrlParams, configProfilesPath);
             } else {
-                // admin, return all sources with readwrite right
-                filteredSources = Object.fromEntries(
-                    Object.entries(parsedSources).map(([id, s]) => {
-                        s["accessControl"] = "readwrite";
-                        return [id, s];
-                    })
-                );
+                localSourceModel = sourceModel;
             }
-            // sort
-            const sortedSources = sortObjectByKey(filteredSources);
+
+            const userSources = await localSourceModel.getUserSources(userInfo.user);
+
             // return
-            resourceFetched(res, sortedSources);
+            resourceFetched(res, userSources);
         } catch (err) {
             next(err);
         }

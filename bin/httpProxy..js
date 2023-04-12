@@ -17,7 +17,6 @@ var proxy = null;
 var httpProxy = {
     host: null,
 
-
     get: function (url, options, callback) {
         if (!options.headers) {
             options.headers = {};

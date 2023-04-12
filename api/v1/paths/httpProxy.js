@@ -1,7 +1,6 @@
 const { processResponse } = require("./utils");
 const httpProxy = require("../../../bin/httpProxy.");
 
-
 module.exports = function () {
     let operations = {
         POST,
@@ -10,8 +9,6 @@ module.exports = function () {
 
     async function POST(req, res, next) {
         try {
-
-
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);
                 httpProxy.post(req.body.url, body.headers, body.params, function (err, result) {

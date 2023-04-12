@@ -68,10 +68,9 @@ var SourceIntegrator = {
         headers["Content-Type"] = "application/x-www-form-urlencoded";
         var sparqlUrl = sparqlServerUrl + "?query=";
 
-        var options={
+        var options = {
             query: strInsert,
-
-        }
+        };
 
         if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
             options.auth = {
@@ -80,10 +79,6 @@ var SourceIntegrator = {
                 sendImmediately: false,
             };
         }
-
-
-
-
 
         httpProxy.post(sparqlUrl, headers, options, function (err, result) {
             if (err) {
@@ -126,7 +121,7 @@ var SourceIntegrator = {
         headers["Content-Type"] = "application/x-www-form-urlencoded";
         var sparqlUrl = sparqlServerUrl + "?query=";
 
-        var options={ query: strClear }
+        var options = { query: strClear };
         if (ConfigManager.config && sparqlUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
             options.auth = {
                 user: ConfigManager.config.sparql_server.user,
@@ -135,7 +130,7 @@ var SourceIntegrator = {
             };
         }
 
-        httpProxy.post(sparqlUrl, headers,options , function (err, result) {
+        httpProxy.post(sparqlUrl, headers, options, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -163,7 +158,7 @@ var SourceIntegrator = {
 
             triplesArray.forEach(function (item, index) {
                 if (fetchCount++ < fechSize) {
-                    tripleSlice +=item.subject+" "+item.predicate+" "+item.object+ ".\n";
+                    tripleSlice += item.subject + " " + item.predicate + " " + item.object + ".\n";
                 } else {
                     tripleSlices.push("" + tripleSlice);
                     tripleSlice = "";
@@ -219,7 +214,6 @@ var SourceIntegrator = {
     },
 
     importSourceFromTurtle: function (ontologyUrl, sourceName, options, callback) {
-
         var Config;
         var documentStr = "";
         var graphUri = null;
@@ -264,7 +258,7 @@ var SourceIntegrator = {
 
                 //if (options.reload) clear graph
                 function (callbackSeries) {
-                    if (options.reload!="true") {
+                    if (options.reload != "true") {
                         return callbackSeries();
                     }
                     SourceIntegrator.clearGraph(sparqlServerUrl, graphUri, function (err, result) {
@@ -273,7 +267,7 @@ var SourceIntegrator = {
                 },
 
                 //clear graph (if exists and reload)
-              /*  function (callbackSeries) {
+                /*  function (callbackSeries) {
                     if (!options.clear) {
                         return callbackSeries();
                     }
@@ -284,7 +278,6 @@ var SourceIntegrator = {
 
                 //check if ontology already exist (with graphUri)
                 function (callbackSeries) {
-
                     var sourcesArray = Object.keys(sources);
                     if (sourcesArray.indexOf(sourceName) > -1) {
                         sourceStatus.exists = true;
@@ -303,9 +296,8 @@ var SourceIntegrator = {
 
                 //parse and write triples
                 function (callbackSeries) {
-                    if (sourceStatus.exists && options.reload!="true") {
+                    if (sourceStatus.exists && options.reload != "true") {
                         return callbackSeries();
-
                     }
                     console.log("----------importing " + sourceName);
                     SourceIntegrator.ontologyUrl2tripleStore(ontologyUrl, sparqlServerUrl, graphUri, format, options, function (err, result) {

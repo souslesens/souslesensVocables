@@ -186,30 +186,6 @@ var SourceBrowser = (function () {
                 },
             };
 
-            /*   items.graphNodeNeighborhood = {
-          label: "graph node neighborhood ",
-          action: false,
-          submenu: {
-              graphNodeNeighborhood_incoming: {
-                  label: "incoming",
-                  action: function () {
-                      Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, "incoming");
-                  },
-              },
-              graphNodeNeighborhood_outcoming: {
-                  label: "outcoming",
-                  action: function () {
-                      Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, "outcoming");
-                  },
-              },
-              graphNodeNeighborhood_ranges: {
-                  label: "ranges",
-                  action: function () {
-                      Lineage_classes.graphNodeNeighborhood(self.currentTreeNode.data, "ranges");
-                  },
-              },
-          },
-      };*/
             items.relations = {
                 label: "Relations...",
                 action: function (e) {
@@ -249,30 +225,16 @@ var SourceBrowser = (function () {
                         });
                     },
                 };
-                /*   items.editNode = {
-label: "Edit node",
-action: function(_obj, _sss, _cc) {
-SourceEditor.editNode("DialogDiv", self.currentSource, self.currentTreeNode.data.id, "OWL", false);
-}
-};
-items.deleteClass = {
-label: "delete Class",
-action: function(_e) {
-// pb avec source
-
-Lineage_common.deleteNode(self.currentTreeNode, self.currentTargetDiv);
-}
-};*/
             }
 
-            if (MainController.currentSource && Config.sources[MainController.currentSource].protegeFilePath) {
+            /*   if (MainController.currentSource && Config.sources[MainController.currentSource].protegeFilePath) {
                 items.uploadOntologyFromOwlFile = {
                     label: "upload Ontology FromOwl File",
                     action: function (_e) {
                         SourceBrowser.uploadOntologyFromOwlFile();
                     },
                 };
-            }
+            }*/
         }
 
         /*    items.toDataTable = {
@@ -551,6 +513,8 @@ searchedSources = searchedSources.concat(importedSources);*/
                 if (_err) {
                     return alert(_err);
                 }
+                if (Object.keys(result[0].matches).length == 0) return $("#" + (options.jstreeDiv || self.currentTargetDiv)).html("<b>No matches found</b>");
+
                 self.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
                     if (err) {
                         return alert(err);
@@ -965,12 +929,15 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
         if (!sourceLabel) {
             sourceLabel = "_defaultSource";
         }
+
         self.newProperties = null;
         self.currentNodeId = null;
         self.currentNode = null;
         if (typeof node == "object") {
             self.currentNode = node;
             if (node.data) {
+                if (node.data.type && node.data.type.indexOf("literal") > -1) return;
+
                 //  if (node.data.propertyId) self.currentNodeId = node.data.propertyId;
                 if (node.data.propertyId && !node.data.id) {
                     //when  a property in a restriction
@@ -1072,7 +1039,7 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
             options = {};
         }
         var str = "<div>";
-        if (Lineage_sources.isSourceEditable(self.currentSource) && !options.hideModifyButtons) {
+        if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             str +=
                 "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
                 "onclick='CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, SourceBrowser.configureEditPredicateWidget)'>  Add Predicate </button>";
@@ -1092,7 +1059,7 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
 
         $("#" + self.currentNodeIdInfosDivId).prepend(str);
 
-        if (Lineage_sources.isSourceEditable(self.currentSource) && !options.hideModifyButtons) {
+        if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             $("#sourceBrowser_addPropertyDiv").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
                 $("#editPredicate_controlsDiv").css("display", "block");
             });
@@ -1184,7 +1151,7 @@ value = item.valueLabel.value;*/
                     CommonUIwidgets.predicatesSelectorWidget.predicatesIdsMap[predicateId] = { item: item };
 
                     // dont manage lang clustering when source is editable
-                    if (!Lineage_sources.isSourceEditable(sourceLabel) && item.value && item.value["xml:lang"]) {
+                    if (!Lineage_sources.isSourceEditableForUser(sourceLabel) && item.value && item.value["xml:lang"]) {
                         if (!self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]]) {
                             self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]] = [];
                         }
@@ -1193,7 +1160,7 @@ value = item.valueLabel.value;*/
                         if (!self.propertiesMap.properties[propName].value) {
                             self.propertiesMap.properties[propName].value = [];
                         }
-                        if (Lineage_sources.isSourceEditable(sourceLabel) && item.value && item.value["xml:lang"]) {
+                        if (Lineage_sources.isSourceEditableForUser(sourceLabel) && item.value && item.value["xml:lang"]) {
                             value += "@" + item.value["xml:lang"];
                         }
                         self.propertiesMap.properties[propName].value.push({ value: value, predicateId: predicateId });
@@ -1224,13 +1191,30 @@ defaultLang = 'en';*/
                 }
 
                 var str = "<div style='max-height:800px;overflow: auto'>" + "<table class='infosTable'>";
-                str += "<tr><td class='detailsCellName'>UUID</td><td><a target='" + self.getUriTarget(nodeId) + "' href='" + nodeId + "'>" + nodeId + "</a></td></tr>";
-                str += "<tr><td class='detailsCellName'>GRAPH</td><td>" + graphUri + "</td></tr>";
+                str +=
+                    "<tr><td class='detailsCellName'>UUID</td><td><a target='" +
+                    self.getUriTarget(nodeId) +
+                    "' href='" +
+                    nodeId +
+                    "'>" +
+                    nodeId +
+                    "</a>" +
+                    "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' SourceBrowser.copyUri(\"" +
+                    nodeId +
+                    "\",$(this))'>copy</button>";
+                ("</td></tr>");
+                str +=
+                    "<tr><td class='detailsCellName'>GRAPH</td><td>" +
+                    graphUri +
+                    "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' SourceBrowser.copyUri(\"" +
+                    graphUri +
+                    "\",$(this))'>copy</button>";
+                ("</td></tr>");
                 str += "<tr><td>&nbsp;</td><td>&nbsp;</td></tr>";
 
                 function getOptionalStr(key, predicateId) {
                     var optionalStr = "";
-                    if (Lineage_sources.isSourceEditable(sourceLabel) && !_options.hideModifyButtons) {
+                    if (Lineage_sources.isSourceEditableForUser(sourceLabel) && !_options.hideModifyButtons) {
                         //  if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1 && !_options.hideModifyButtons) {
                         var propUri = self.propertiesMap.properties[key].propUri;
 
@@ -1891,6 +1875,12 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     };
     self.hideAddPredicateDiv = function () {
         $("#sourceBrowser_addPropertyDiv").css("display", "none");
+    };
+
+    self.copyUri = function (text, caller) {
+        common.copyTextToClipboard(text, function () {
+            caller.css("border-width", "3px");
+        });
     };
 
     return self;

@@ -99,7 +99,7 @@ var exportRDF = {
 module.exports = exportRDF;
 /*
  * var graphUri = "http://data.total.com/quantum/vocab/";
-var sparql_url = "http://51.178.139.80:8890/sparql";
+
 var filePath = "D:\\NLP\\ontologies\\quantum\\export.nt";
 */
 /*
@@ -120,7 +120,7 @@ var filePath = "D:\\NLP\\ontologies\\quantum\\export.nt";
 };*/
 /*
 if (false) {
-    var sparql_url = "http://51.178.139.80:8890/sparql";
+
     async.eachSeries(
         Object.keys(map),
         function (source, callbackEach) {

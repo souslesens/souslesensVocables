@@ -14,104 +14,71 @@ const request = require("request");
 const ConfigManager = require("./configManager.");
 const async = require("async");
 const { Client } = require("@elastic/elasticsearch");
+const util = require("./util.");
 
 // elasticdump       --input=cfihos_data_index.json --output=http://opeppa-updtlb03:9200/cfihos --type=data
 
 var elasticRestProxy = {
     elasticUrl: null,
+    auth: null,
     getElasticUrl: function () {
-        if (elasticRestProxy.elasticUrl) return elasticRestProxy.elasticUrl;
-        else {
+        if (elasticRestProxy.elasticUrl) {
+            return elasticRestProxy.elasticUrl;
+        } else {
             var mainConfig = ConfigManager.getGeneralConfig();
-            if (mainConfig) elasticRestProxy.elasticUrl = mainConfig.ElasticSearch.url;
+            if (mainConfig) {
+                elasticRestProxy.elasticUrl = mainConfig.ElasticSearch.url;
+                if (mainConfig.ElasticSearch.user) {
+                    elasticRestProxy.auth = {
+                        user: mainConfig.ElasticSearch.user,
+                        password: mainConfig.ElasticSearch.password,
+                    };
+                }
+            }
             return elasticRestProxy.elasticUrl;
         }
     },
 
-    executeGaiaQuery: function (query, indexes, options, callback) {
-        const client = new Client({
-            cloud: { id: "SSE_Sandbox:ZXVyb3BlLXdlc3QxLmdjcC5jbG91ZC5lcy5pbzo0NDMkNTNjOTRlY2NlMGRkNDcyNDg1ZmU3MjE5N2Y2YTRjNzQkYTViOGIyNGZlOTA0NDI1YmJjMTVlZTAxZTBkY2E1YjE=" },
-            auth: {
-                username: "elastic",
-                password: "iusGlDD0NMdfUsu0dLclh9hx",
-            },
-        });
-
-        /*  client.search({
-        size: 0,
-        index: "gaia_onto_v2",
-        body: {
-          "aggs": {
-            "Basin": {
-              "terms": { "field": "Concepts.Basin.instances.keyword", "size": 1000, "min_doc_count": 10 }
-
-            },
-
-            "Fluid": {
-              "terms": { "field": "Concepts.Fluid.instances.keyword", "size": 1000, "min_doc_count": 10 }
-
+    sendAuthRequest: function (options, callback) {
+        if (ConfigManager.config.ElasticSearch) {
+            if (options.method == "POST") {
+                options.auth = {
+                    user: ConfigManager.config.ElasticSearch.user,
+                    password: ConfigManager.config.ElasticSearch.password,
+                };
+            } else {
+                var token = Buffer.from(ConfigManager.config.ElasticSearch.user + ":" + ConfigManager.config.ElasticSearch.password).toString("base64");
+                options.headers.Authorization = "Basic " + token;
             }
-
-
-          }
         }
-      }).then(function(resp) {
-        console.log("Successful query!");
-        console.log(JSON.stringify(resp, null, 4));
-      }, function(err) {
-        console.trace(err.message);
-      });
-      return;*/
-
-        if (Array.isArray(indexes)) indexes = indexes.toString();
-        var size = 10000;
-        if (query.aggs) size = 0;
-        client
-            .search({
-                size: size,
-                index: indexes,
-                body: query,
-            })
-            .then(
-                function (res) {
-                    callback(null, res);
-                },
-                function (err) {
-                    callback(err);
-                }
-            );
-        return;
-
-        const query_doc = async function () {
-            var searchResult = {};
-            try {
-                searchResult = await client.search({
-                    index: indexes,
-                    size: 2000,
-                    query: query,
-                });
-            } catch (e) {
-                callback(e);
-            }
-            callback(null, searchResult);
-        };
-        query_doc();
+        process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+        request(options, function (error, response, body) {
+            return callback(error, response, body);
+        });
     },
 
     executePostQuery: function (urlPath, query, indexes, callback) {
-        if (urlPath.toLowerCase().trim().indexOf("http") < 0) var indexesStr = "";
+        if (urlPath.toLowerCase().trim().indexOf("http") < 0) {
+            var indexesStr = "";
+        }
         if (Array.isArray(indexes)) {
             indexes.forEach(function (index, p) {
-                if (p > 0) indexesStr += ",";
+                if (p > 0) {
+                    indexesStr += ",";
+                }
                 indexesStr += index;
             });
-        } else indexesStr = indexes;
-        if (indexesStr != "") indexesStr += "/";
+        } else {
+            indexesStr = indexes;
+        }
+        if (indexesStr != "") {
+            indexesStr += "/";
+        }
         var elasticUrl = ConfigManager.config.ElasticSearch.url;
         var url = elasticUrl + indexesStr + urlPath;
         var method = "POST";
         /* if(urlPath.indexOf("_delete_by_query")>-1)
-            method="DELETE"*/
+        method="DELETE"*/
 
         var options = {
             method: method,
@@ -122,19 +89,27 @@ var elasticRestProxy = {
             url: url,
         };
 
-        //   if (true) console.log(JSON.stringify(query, null, 2));
-        request(options, function (error, response, body) {
-            if (error) return callback(error);
+        elasticRestProxy.sendAuthRequest(options, function (error, response, body) {
+            //  request(options, function(error, response, body) {
+            if (error) {
+                return callback(error);
+            }
 
             if (url.indexOf("_bulk") > -1) {
                 elasticRestProxy.checkBulkQueryResponse.checkBulkQueryResponse(body, function (err, result) {
-                    if (err) return callback(err);
+                    if (err) {
+                        return callback(err);
+                    }
                     var message = "indexed " + result.length + " records ";
-                    if (elasticRestProxy.socket) elasticRestProxy.socket.message(message);
+                    if (elasticRestProxy.socket) {
+                        elasticRestProxy.socket.message(message);
+                    }
                     return callback(null, result);
                 });
             } else {
-                if (typeof body == "object") return callback(null, body);
+                if (typeof body == "object") {
+                    return callback(null, body);
+                }
                 callback(null, JSON.parse(body));
             }
         });
@@ -152,7 +127,8 @@ var elasticRestProxy = {
         };
 
         //   console.log(ndjson);
-        request(options, function (error, response, _body) {
+        elasticRestProxy.sendAuthRequest(options, function (error, response, _body) {
+            //  request(options, function(error, response, _body) {
             if (error) {
                 return callback(error, null);
             }
@@ -163,11 +139,11 @@ var elasticRestProxy = {
             var responses = json.responses;
             /*  responses.forEach(function (response, responseIndex) {
 
-            var hits = response.hits.hits;
-            hits.forEach(function (hit) {
+      var hits = response.hits.hits;
+      hits.forEach(function (hit) {
 
-            })
-        })*/
+      })
+  })*/
             return callback(null, responses);
         });
     },
@@ -175,24 +151,34 @@ var elasticRestProxy = {
     checkBulkQueryResponse: function (responseBody, callback) {
         var body;
         //  if (typeof responseBody != "object")
-        if (Buffer.isBuffer(responseBody))
+        if (Buffer.isBuffer(responseBody)) {
             try {
                 body = JSON.parse(responseBody.toString());
             } catch (e) {
                 return callback(e + " : " + responseBody.toString());
             }
-        else body = responseBody;
+        } else {
+            body = responseBody;
+        }
         var errors = [];
         if (body.error) {
-            if (body.error.reason) return callback(body.error.reason);
+            if (body.error.reason) {
+                return callback(body.error.reason);
+            }
             return callback(body.error);
         }
 
-        if (!body.items) return callback(null, "done");
+        if (!body.items) {
+            return callback(null, "done");
+        }
         body.items.forEach(function (item) {
-            if (item.index && item.index.error) errors.push(item.index.error);
-            else if (item.update && item.update.error) errors.push(item.update.error);
-            else if (item.delete && item.delete.error) errors.push(item.delete.error);
+            if (item.index && item.index.error) {
+                errors.push(item.index.error);
+            } else if (item.update && item.update.error) {
+                errors.push(item.update.error);
+            } else if (item.delete && item.delete.error) {
+                errors.push(item.delete.error);
+            }
         });
 
         if (errors.length > 0) {
@@ -211,8 +197,8 @@ var elasticRestProxy = {
             },
             url: config.indexation.elasticUrl + config.general.indexName + "/_refresh",
         };
-
-        request(options, function (error, _response, _body) {
+        elasticRestProxy.sendAuthRequest(options, function (error, _response, _body) {
+            // request(options, function(error, _response, _body) {
             if (error) {
                 return callback(error);
             }
@@ -235,8 +221,8 @@ var elasticRestProxy = {
             json: json,
             url: elasticUrl + "_analyze",
         };
-
-        request(options, function (error, response, body) {
+        elasticRestProxy.sendAuthRequest(options, function (error, response, body) {
+            // request(options, function(error, response, body) {
             if (error) {
                 return callback(error);
             }
@@ -257,16 +243,23 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + indexName + "/",
                     };
-                    request(options, function (error, response, _body) {
-                        if (error) return callbackSeries(error);
-                        if (response.statusCode == 200) indexExists = true;
+                    elasticRestProxy.sendAuthRequest(options, function (error, response, _body) {
+                        //  request(options, function(error, response, _body) {
+                        if (error) {
+                            return callbackSeries(error);
+                        }
+                        if (response.statusCode == 200) {
+                            indexExists = true;
+                        }
                         callbackSeries();
                     });
                 },
 
                 //******deleteIndex*************
                 function (callbackSeries) {
-                    if (!indexExists) return callbackSeries();
+                    if (!indexExists) {
+                        return callbackSeries();
+                    }
 
                     var options = {
                         method: "DELETE",
@@ -275,8 +268,11 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + indexName,
                     };
-                    request(options, function (error, _response, _body) {
-                        if (error) return callbackSeries(error);
+                    elasticRestProxy.sendAuthRequest(options, function (error, _response, _body) {
+                        //  request(options, function(error, _response, _body) {
+                        if (error) {
+                            return callbackSeries(error);
+                        }
                         // var message = "delete index :" + indexName;
                         callbackSeries();
                     });
@@ -296,8 +292,17 @@ var elasticRestProxy = {
             url: elasticUrl + "_cat/indices?format=json",
         };
 
-        request(options, function (error, response, body) {
-            if (error) return callback(error);
+        if (ConfigManager.config.ElasticSearch) {
+            options.auth = {
+                user: ConfigManager.config.ElasticSearch.user,
+                password: ConfigManager.config.ElasticSearch.password,
+            };
+        }
+        elasticRestProxy.sendAuthRequest(options, function (error, response, body) {
+            // request(options, function(error, response, body) {
+            if (error) {
+                return callback(error);
+            }
             var json = JSON.parse(body);
             var indexes = [];
             json.forEach(function (item) {
@@ -305,6 +310,195 @@ var elasticRestProxy = {
             });
             callback(null, indexes);
         });
+    },
+
+    indexSource: function (indexName, data, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        var elasticUrl;
+        var elasticVersion;
+        async.series(
+            [
+                //prepare payload
+                function (callbackSeries) {
+                    ConfigManager.getGeneralConfig(function (err, config) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        elasticUrl = config.ElasticSearch.url;
+                        callbackSeries();
+                    });
+                },
+
+                //delete index
+                function (callbackSeries) {
+                    if (!options.replaceIndex) {
+                        return callbackSeries();
+                    }
+                    elasticRestProxy.deleteIndex(elasticUrl, indexName, function (err, _result) {
+                        callbackSeries(err);
+                    });
+                },
+
+                //set mappings
+                function (callbackSeries) {
+                    if (!options.replaceIndex) {
+                        return callbackSeries();
+                    }
+
+                    var mappings = {
+                        settings: {
+                            analysis: {
+                                normalizer: {
+                                    lowercase_normalizer: {
+                                        type: "custom",
+                                        char_filter: [],
+                                        filter: ["lowercase", "asciifolding"],
+                                    },
+                                },
+                            },
+                        },
+                        mappings: {
+                            [indexName]: {
+                                properties: {
+                                    label: {
+                                        type: "text",
+                                        fielddata: true,
+                                        fields: {
+                                            keyword: {
+                                                type: "keyword",
+                                                ignore_above: 256,
+                                                normalizer: "lowercase_normalizer",
+                                            },
+                                        },
+                                    },
+                                    skoslabels: {
+                                        type: "text",
+                                        fields: {
+                                            keyword: {
+                                                type: "keyword",
+                                                ignore_above: 256,
+                                            },
+                                        },
+                                    },
+
+                                    id: {
+                                        type: "text",
+                                        fielddata: true,
+                                        fields: {
+                                            keyword: {
+                                                type: "keyword",
+                                                ignore_above: 256,
+                                            },
+                                        },
+                                    },
+                                    parents: {
+                                        type: "text",
+                                        fields: {
+                                            keyword: {
+                                                type: "keyword",
+                                                ignore_above: 256,
+                                            },
+                                        },
+                                    },
+                                    owlType: {
+                                        type: "keyword",
+                                    },
+                                },
+                            },
+                        },
+                    };
+                    var requestOptions = {
+                        method: "PUT",
+                        json: mappings,
+                        encoding: null,
+                        timeout: 1000 * 3600 * 24 * 3, //3 days //Set your timeout value in milliseconds or 0 for unlimited
+                        headers: {
+                            "content-type": "application/json",
+                        },
+                        url: elasticUrl + indexName,
+                    };
+                    elasticRestProxy.sendAuthRequest(requestOptions, function (error, _response, _body) {
+                        //  request(requestOptions, function (error, _response, _body) {
+                        if (error) {
+                            return callbackSeries(error);
+                        }
+                        return callbackSeries();
+                    });
+                },
+
+                //check version
+                function (callbackSeries) {
+                    if (elasticVersion) return callbackSeries();
+                    var requestOptions = {
+                        method: "GET",
+                        headers: {
+                            "content-type": "application/json",
+                        },
+                        url: elasticUrl,
+                    };
+                    elasticRestProxy.sendAuthRequest(requestOptions, function (error, _response, _body) {
+                        //  request(requestOptions, function (error, _response, _body) {
+                        if (error) {
+                            return callbackSeries(error);
+                        }
+                        var json = JSON.parse(_body);
+                        var versionStr = json.version.number;
+                        elasticVersion = parseInt(versionStr.split(".")[0]);
+                        return callbackSeries();
+                    });
+                },
+
+                function (callbackSeries) {
+                    var bulkStr = "";
+
+                    data.forEach(function (item, _indexedLine) {
+                        if (options.owlType) {
+                            item.owlType = options.owlType;
+                        }
+                        var id = "R" + util.getRandomHexaId(10);
+                        if (elasticVersion < 8) {
+                            bulkStr += JSON.stringify({ index: { _index: indexName, _type: indexName, _id: id } }) + "\r\n";
+                        } else {
+                            bulkStr += JSON.stringify({ index: { _index: indexName, _id: id } }) + "\r\n";
+                        }
+
+                        bulkStr += JSON.stringify(item) + "\r\n";
+                    });
+
+                    const requestOptions = {
+                        method: "POST",
+                        body: bulkStr,
+                        encoding: null,
+                        timeout: 1000 * 3600 * 24 * 3, //3 days //Set your timeout value in milliseconds or 0 for unlimited
+                        headers: {
+                            "content-type": "application/json",
+                        },
+                        url: elasticUrl + "_bulk?refresh=wait_for",
+                    };
+                    elasticRestProxy.sendAuthRequest(requestOptions, function (error, response, body) {
+                        // request(requestOptions, function (error, response, body) {
+                        if (error) {
+                            return callbackSeries(error);
+                        }
+                        elasticRestProxy.checkBulkQueryResponse(body, function (err, _result) {
+                            if (err) {
+                                return callbackSeries(err);
+                            }
+                            callbackSeries();
+                        });
+                    });
+                },
+            ],
+
+            function (err) {
+                if (err) {
+                    return callback(err);
+                }
+                callback(null, "done");
+            }
+        );
     },
 };
 

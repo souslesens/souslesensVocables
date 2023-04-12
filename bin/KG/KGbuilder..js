@@ -564,11 +564,6 @@ if (false) {
     if (false) {
         // AFtwin UK
 
-        var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
-        var rdlGraphUri = "http://data.total.com/resource/one-model/quantum-rdl/";
-        var oneModelGraphUri = "http://data.total.com/resource/one-model/ontology/0.2/";
-        var adlGraphUri = "http://data.total.com/resource/one-model/assets/aftwin-uk/0.1/";
-        var mappingFilePaths = ["MDM_2.3_AFTWIN_adl.tblModel.json", "MDM_2.3_AFTWIN_adl.tblModelAttribute.json"];
 
         var replaceGraph = true;
     }

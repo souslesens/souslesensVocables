@@ -7,6 +7,7 @@ var httpProxy = require("../httpProxy.");
 var sqlServerProxy = require("./SQLserverConnector.");
 
 var ConfigManager = require("../configManager.");
+const socket = require("../socketManager.");
 
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 
@@ -526,7 +527,7 @@ var CsvTripleBuilder = {
                                                     }
                                                 });
                                                 triples = triples.concat(metaDataTriples);
-
+                                                // socket.message("KGbuild", "loading ONE MODEL superClasses ");
                                                 console.log("writing triples:" + triples.length);
                                                 var slices = util.sliceArray(triples, 200);
                                                 triples = [];

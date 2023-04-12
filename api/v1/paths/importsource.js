@@ -6,7 +6,7 @@ module.exports = function () {
         POST,
     };
     async function POST(req, res, next) {
-        const body = req.body;
+        const body = req.body.body;
         SourceIntegrator.importSourceFromTurtle(body.sourceUrl, body.sourceName, body.options, function (err, result) {
             processResponse(res, err, result);
         });

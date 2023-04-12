@@ -2,7 +2,11 @@ CommonUIwidgets = (function () {
     var self = {};
 
     self.fillObjectTypeOptionsOnPromptFilter = function (type, selectId, source) {
-        var term = prompt("Individual contains...");
+        if (Config.selectListsCache[type]) {
+            return common.fillSelectOptions(selectId, Config.selectListsCache[type], true, "label", "id");
+        }
+
+        var term = prompt(" filter values ...");
         if (term === null) {
             return;
         }
@@ -12,6 +16,7 @@ CommonUIwidgets = (function () {
             type: type,
             filter: term ? " FILTER ( regex(?label,'" + term + "','i'))" : "",
             limit: Config.maxSelectListSize,
+            withoutImports: true,
         };
         if (!source) {
             source = Lineage_sources.activeSource || KGcreator.currentSlsvSource;
@@ -26,6 +31,7 @@ CommonUIwidgets = (function () {
                     return;
                 }
             }
+
             var objs = [];
             result.forEach(function (item) {
                 objs.push({
@@ -42,6 +48,10 @@ CommonUIwidgets = (function () {
                 }
                 return 0;
             });
+            if (result.length <= Config.minSelectListSize) {
+                Config.selectListsCache[type] = objs;
+            }
+
             common.fillSelectOptions(selectId, objs, true, "label", "id");
         });
     };

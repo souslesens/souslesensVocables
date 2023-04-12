@@ -6,16 +6,16 @@ module.exports = function () {
         POST,
     };
     async function POST(req, res, next) {
-        const body = req.body;
+        const body = req.body.body;
         SourceIntegrator.getOntologyRootUris(body.sourceUrl, body.options, function (err, result) {
             processResponse(res, err, result);
         });
     }
 
     POST.apiDoc = {
-        summary: "Get the shortest path between two node",
+        summary: "Get the common parts of uris",
         security: [{ loginScheme: [] }],
-        operationId: "getShortestPath",
+        operationId: "getOntologyRootUris",
         parameters: [
             {
                 name: "body",

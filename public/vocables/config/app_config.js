@@ -14,6 +14,11 @@ var Config = (function () {
 
     self.apiUrl = "/api/v1";
 
+    self.logSparqlQueries = false;
+    if (location.hostname == "localhost") {
+        self.logSparqlQueries = true;
+    }
+
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/";
 
     self.defaultNewUriRoot = "http://souslesens.org/resource/";
@@ -31,6 +36,7 @@ var Config = (function () {
     self.searchLimit = 500;
     self.searchDepth = 6;
     self.maxSelectListSize = 500;
+    self.minSelectListSize = 200;
     self.whiteBoardMaxLabelLength = 20;
 
     self.dataTableOutputLimit = 500;
@@ -128,6 +134,8 @@ var Config = (function () {
             cfihos: "CFIHOS-ISO",
         },
     };
+
+    self.selectListsCache = {};
 
     self.Lineage = {
         showSourceNodesInGraph: false,

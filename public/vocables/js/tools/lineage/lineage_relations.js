@@ -3,10 +3,13 @@ Lineage_relations = (function () {
     var self = {};
     self.showDrawRelationsDialog = function (caller) {
         self.drawRelationCurrentCaller = caller;
+
         $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").load("snippets/lineage/relationsDialog.html", function () {
             $("#lineageRelations_history_previousBtn").css("display", self.previousQuery ? "inline" : "none");
             $("#lineageRelations_history_deleteBtn").css("display", "none");
+            Lineage_relationFilter.showAddFilterDiv(true);
+
             //$("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)
             $("#LineageRelations_searchJsTreeInput").keypress(function (e) {
                 if (e.which == 13 || e.which == 9) {
@@ -173,7 +176,7 @@ Lineage_relations = (function () {
         domainValue = valueStr;
     };
 
-    self.onshowDrawRelationsDialogValidate = function (action) {
+    self.onshowDrawRelationsDialogValidate = function (action, _type) {
         if (action == "clear") {
             var properties = $("#lineageRelations_propertiesJstreeDiv").jstree().get_checked(true);
             var edges = visjsGraph.data.edges.get();
@@ -215,6 +218,7 @@ Lineage_relations = (function () {
                     options.data = Lineage_classes.currentTreeNode.data.id;
                 }
             } else if (selection == "visible") {
+                Lineage_sources.fromAllWhiteboardSources = true;
                 if (!visjsGraph.isGraphNotEmpty()) {
                     options.data = null;
                 } else {
@@ -228,6 +232,7 @@ Lineage_relations = (function () {
                     options.data = data;
                 }
             } else if (selection == "all") {
+                // Lineage_sources.fromAllWhiteboardSources = false;
                 options.data = "allSourceNodes";
             }
 
@@ -259,6 +264,7 @@ Lineage_relations = (function () {
             if (direction == "both") {
                 direction = null;
             }
+            if (_type) type = _type;
 
             self.previousQuery = {
                 propIds: propIds,
@@ -273,7 +279,7 @@ Lineage_relations = (function () {
         if (!options) {
             options = {};
         }
-
+        options.skipLiterals = true;
         var source = null;
         var data = null;
         if (!options.data) {
@@ -475,9 +481,12 @@ Lineage_relations = (function () {
         }
         $("#lineageRelations_propertiesJstreeDiv").jstree().uncheck_all();
         $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(self.previousQuery.propIds);
+        $("#Lineage_relation_filterText").css("display", "block");
+        $("#lineageQuery_addFilterButton").removeProp("disabled");
 
         if (self.previousQuery.propFilter) {
-            Lineage_relationFilter.showAddFilterDiv(true);
+            //  Lineage_relationFilter.showAddFilterDiv(true);
+            $("#Lineage_relation_filterText").css("display", "block");
             $("#Lineage_relation_filterText").val(self.previousQuery.propFilter);
         }
     };
@@ -490,9 +499,11 @@ Lineage_relations = (function () {
             if (err) return alert(err.responseText);
             $("#lineageRelations_propertiesJstreeDiv").jstree().uncheck_all();
             $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(result.propIds);
+            $("#Lineage_relation_filterText").css("display", "block");
+            $("#lineageQuery_addFilterButton").removeProp("disabled");
 
             if (result.propFilter) {
-                Lineage_relationFilter.showAddFilterDiv(true);
+                //  Lineage_relationFilter.showAddFilterDiv(true);
                 $("#Lineage_relation_filterText").val(result.propFilter);
             }
         });

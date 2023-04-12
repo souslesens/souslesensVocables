@@ -39,6 +39,7 @@ Lineage_sources = (function () {
     };
 
     self.resetAll = function (showDialog) {
+        OntologyModels.unRegisterSourceModel();
         self.init(showDialog);
     };
 
@@ -126,7 +127,7 @@ Lineage_sources = (function () {
         }
 
         if (true) {
-            $("#Lineage_Tabs").tabs("disable", 3);
+            // $("#Lineage_Tabs").tabs("disable", 3);
             $("#lineage_classes_showLinkedDataButton").prop("disabled", true);
         }
 
@@ -215,7 +216,7 @@ return;
             visjsGraph.network.disableEditMode();
             $(".vis-edit-mode").css("display", "none");
         }
-        var isNodeEditable = Lineage_sources.isSourceEditable(source);
+        var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
         if (isNodeEditable) {
             visjsGraph.network.enableEditMode();
             $(".vis-edit-mode").css("display", "block");
@@ -328,7 +329,7 @@ return;
             if (indexedSources.indexOf(source) < 0) {
                 MainController.UI.message("indexing source " + source);
                 $("#waitImg").css("display", "block");
-                SearchUtil.generateElasticIndex(source, { indexProperties: 1 }, function (err, _result) {
+                SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
                     if (err) {
                         return MainController.UI.message(err, true);
                     }
@@ -668,20 +669,25 @@ sourceDivId +
         $("#lineage_classes_whiteboardSelect").val("");
     };
 
-    self.isSourceEditable = function (source) {
+    self.isSourceEditableForUser = function (source) {
         if (!Config.sources[source]) {
-            console.log("no source " + source);
-            return false;
+            return; // console.log("no source " + source);
         }
         const groups = authentication.currentUser.groupes;
-        if (groups.includes("admin") && Config.sources[source].editable) {
-            return true;
-        }
+        const currentAccessControls = groups.map((group) => {
+            const defaultAccessControl = Config.profiles[group].defaultSourceAccessControl;
+            const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
+            return sourcesAccessControl.hasOwnProperty(source) ? sourcesAccessControl[source] : defaultAccessControl;
+        });
+        if (groups.indexOf("admin") > -1) return true;
 
-        if (Config.sources[source].editable && Config.sources[source].accessControl == "readwrite") {
+        self.realAccessControl = currentAccessControls.includes("readwrite") ? "readwrite" : currentAccessControls.includes("read") ? "read" : "forbidden";
+
+        if (self.realAccessControl === "readwrite" && Config.sources[source].editable) {
             return true;
+        } else {
+            return false;
         }
-        return false;
     };
 
     self.clearSource = function (source) {

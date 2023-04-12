@@ -20,11 +20,11 @@ var SPARQL_endpoint = (function () {
         localStorage.clear();
         $("#graphDiv").html("");
         $("#graphDiv").load("snippets/SPARQLendpoint.html", function () {
-            self.initYasGuy();
+            self.initYasGui();
         });
     };
 
-    self.initYasGuy = function () {
+    self.initYasGui = function () {
         /*  var sourceObj = Config.sources[SPARQL_endpoint.currentSource];
         var url = sourceObj.sparql_server.url;
         var method = sourceObj.sparql_server.method;
@@ -35,7 +35,7 @@ var SPARQL_endpoint = (function () {
         var graphUri = "";
 
         if (!method) method = "POST";
-        var url2 = `${Config.apiUrl}/sparqlQuery?url=${url}&graphUri=${graphUri}&method=${method}&t=${new Date().getTime()}`;
+        var url2 = `${Config.apiUrl}/yasguiQuery?url=${url}&graphUri=${graphUri}&method=${method}&t=${new Date().getTime()}`;
 
         new Yasgui(document.getElementById("yasgui"), {
             requestConfig: { endpoint: url2 },

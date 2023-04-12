@@ -49,7 +49,7 @@
  */
 
 /**
- * @mui/lab v5.0.0-alpha.121
+ * @mui/lab v5.0.0-alpha.123
  *
  * @license MIT
  * This source code is licensed under the MIT license found in the
@@ -57,7 +57,7 @@
  */
 
 /**
- * @mui/material v5.11.11
+ * @mui/material v5.11.13
  *
  * @license MIT
  * This source code is licensed under the MIT license found in the

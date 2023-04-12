@@ -259,7 +259,7 @@ g.addEdge("D", "C", 3);*/
 return;
 //GraphTraversal.getShortestPath(
 GraphTraversal.getAllShortestPath(
-    "http://51.178.139.80:8890/sparql",
+    "",
     "http://data.total.com/resource/tsf/ontology/gaia-test/",
     "http://data.total.com/resource/tsf/ontology/gaia-test/abc685bd46",
     "http://data.total.com/resource/tsf/ontology/gaia-test/cc7b582c0f",

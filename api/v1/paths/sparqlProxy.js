@@ -14,7 +14,7 @@ module.exports = function () {
 
     async function POST(req, res, next) {
         try {
-            httpProxy.setProxyForServerDomain(req.headers.host);
+
 
             if (req.body.POST) {
                 var body = JSON.parse(req.body.body);

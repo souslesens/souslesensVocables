@@ -1,0 +1,36 @@
+@prefix rr: http://www.w3.org/ns/r2rml# .
+@prefix rml: http://semweb.mmlab.be/ns/rml# .
+@prefix ql: http://semweb.mmlab.be/ns/ql# .
+@prefix xsd: http://www.w3.org/2001/XMLSchema# .
+@prefix xs: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix iso14224: <http://data.total.com/resource/tsf/iso_14224#> .
+@prefix req: <https://w3id.org/requirement-ontology/rdl/> .
+@prefix part14: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix iso81346: <http://data.total.com/resource/tsf/IEC_ISO_81346/> .
+@prefix slsv: <http://souslesens.org/resource/vocabulary/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+<#> rr:BaseTable "TSF_GAIA_TEST" ;
+  rr:tableName "TSF_GAIA_TEST" .
+
+<#ville> rr:subjectMap [
+  rr:template "ville" ;
+] ;
+
+<#rdfs:subClassOf> rr:predicateObjectMap [
+  rr:predicate rdfs:subClassOf ;
+  rr:objectMap [
+    rr:column "rdfs:subClassOf" ;
+    rr:datatype xsd:string
+  ]
+] .
+
+<#prenom> rr:objectMap [
+  rr:column "prenom" ;
+  rr:datatype xsd:string
+] .
+

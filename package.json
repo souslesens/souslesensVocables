@@ -4,7 +4,7 @@
     "private": true,
     "scripts": {
         "build:app": "cd mainapp && npm run build",
-        "start": "DEBUG=cypress:* node ./bin/www",
+        "start": " node ./bin/www",
         "devserver": "nodemon ./bin/www & (cd mainapp && npm run build:watch)",
         "typecheck": "tsc",
         "lint": "eslint .",
@@ -69,6 +69,7 @@
         "passport-local": "^1.0.0",
         "pug": "^3.0.2",
         "rdf-parse": "^2.3.1",
+        "rdflib": "^2.2.31",
         "rdfxml-streaming-parser": "^2.2.1",
         "readline": "^1.3.0",
         "request": "^2.88.2",

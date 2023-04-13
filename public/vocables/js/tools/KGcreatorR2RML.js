@@ -90,7 +90,6 @@ var KGcreator = (function () {
         ["System", "FunctionalObject", "hasFunctionalPart"],
     ];
 
-
     self.mappingFiles = {};
     self.onLoaded = function () {
         $("#actionDivContolPanelDiv").load("snippets/KGcreator/leftPanel.html", function () {
@@ -567,7 +566,7 @@ var KGcreator = (function () {
     self.saveFile = function () {
         if (!confirm("Save modified file?")) {
             return;
-        }   
+        }
         $("#KGcreator_saveFileButton").css("display", "none");
         var str = $("#KGcreator_dataSampleDiv").val();
 
@@ -718,185 +717,7 @@ var KGcreator = (function () {
         $("#KGcreator_subjectInput").val(column);
     };
 
-    // R2RML 
-    self.generateR2RML = function () {
-        
-    r2rmlPrefixes = {
-        rr: "http://www.w3.org/ns/r2rml#",
-        rml: "http://semweb.mmlab.be/ns/rml#",
-        ql: "http://semweb.mmlab.be/ns/ql#",
-        xsd: "http://www.w3.org/2001/XMLSchema#",
-        xs: "<http://www.w3.org/2001/XMLSchema#>",
-        rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
-        rdfs: "<http://www.w3.org/2000/01/rdf-schema#>",
-        owl: "<http://www.w3.org/2002/07/owl#>",
-        skos: "<http://www.w3.org/2004/02/skos/core#>",
-        iso14224: "<http://data.total.com/resource/tsf/iso_14224#>",
-        req: "<https://w3id.org/requirement-ontology/rdl/>",
-        part14: "<http://rds.posccaesar.org/ontology/lis14/rdl/>",
-        iso81346: "<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
-        slsv: "<http://souslesens.org/resource/vocabulary/>",
-        dcterms: "<http://purl.org/dc/terms/>",
-      } ;
-        $("#KGcreator_tripleMessageDiv").html("");
-        var subject = $("#KGcreator_subjectInput").val();
-   
-
-        var predicate = $("#editPredicate_propertyValue").val();
-        var object = $("#editPredicate_objectValue").val();
-
-        var isObjectString = $("#KGcreator_isObjectStringCBX").prop("checked");
-
-        var subjectLookupName = $("#KGcreator_subjectLookupName").val();
-        var objectLookupName = $("#KGcreator_objectLookupName").val();
-        var isRestrictionCBX = $("#KGcreator_isRestrictionCBX").prop("checked");
-        var isSpecificPredicate = $("#KGcreator_isSpecificPredicateCBX").prop("checked");
-
-        $("#KGcreator_objectSelect").val("");
-        $("#KGcreator_predicateSelect").val("");
-
-
-        if (!subject) {
-            return alert("missing subject");
-        }
-        if (!predicate) {
-            return alert("missing predicate");
-        }
-        if (!object) {
-            return alert("missing object");
-        }
-        var r2rml = "";
-
-     
-        for (var key in r2rmlPrefixes) {
-            r2rml += "@prefix " + key + ": " + r2rmlPrefixes[key] + " .\n";
-          }
-        r2rml += "\n";
-            
-         // Define the base table
-        r2rml += "<#> rr:BaseTable \"" +   self.currentSource  + "\" ;\n";
-        r2rml += "  rr:tableName \"" +   self.currentSource .replace(".txt", "") + "\" .\n\n";
-
-        // Define the subject map
-        r2rml += "<#" + subject + "> rr:subjectMap [\n";
-        r2rml += "  rr:template \"" + subject + "\" ;\n";
-///     r2rml += "  rr:termType <http://www.w3.org/ns/r2rml#IRI>\n";
-        r2rml += "] ;\n\n";
-
-        // Define the predicate object map
-        r2rml += "<#" + predicate + "> rr:predicateObjectMap [\n";
-        r2rml += "  rr:predicate "  + predicate + " ;\n";
-        r2rml += "  rr:objectMap [\n";
-        r2rml += "    rr:column \"" + predicate + "\" ;\n";
-        r2rml += "    rr:datatype xsd:string\n";
-        r2rml += "  ]\n";
-        r2rml += "] .\n\n";
-
-       // Define the object map
-        r2rml += "<#" + object + "> rr:objectMap [\n";
-        r2rml += "  rr:column \"" + object + "\" ;\n";
-        r2rml += "  rr:datatype xsd:string\n";
-        r2rml += "] .\n\n";
-
-        // Display the generated R2RML mapping file in the textarea
-        var r2rmlTextarea = document.getElementById("r2rmlTextarea");
-        if (r2rmlTextarea) {
-          r2rmlTextarea.value = r2rml;
-        }
-        
-
-}
-// Save R2RML 
-self.saveR2RMLFile = function () {
-    if (!confirm("Save modified file?")) {
-        return;
-    }
-    $("#KGcreator_saveFileButton");
-    var r2rml = $("#r2rmlTextarea").val();
-
-    payload = {
-        dir: "R2RML/", // Update the directory path to where you want to save the R2RML mapping file
-        fileName: self.currentTreeNode.data.id + ".ttl", // Update the file name with the .ttl extension
-        data: r2rml,
-    };
-
-    $.ajax({
-        type: "POST",
-        url: `${Config.apiUrl}/data/file`,
-        data: payload,
-        dataType: "json",
-        success: function (_result, _textStatus, _jqXHR) {
-            MainController.UI.message("File saved");
-        },
-        error(err) {
-            return alert(err.responseText);
-        },
-    });
-};
-
-//Create RDF tripels
-
-// self.generateRDFDataFromR2RML = function (r2rmlMapping) {
-//     // Validate R2RML mapping using rdflib
-//     var $rdf = require('rdflib');
-
-//     var rdfGraph = $rdf.graph();
-//     var rdfData = "";
-//     try {
-//         $rdf.parse(r2rmlMapping, store, "<baseURI>", "text/turtle");
-//         // If the parsing is successful, the R2RML mapping is valid
-//     } catch (error) {
-//         // If the parsing fails, the R2RML mapping is invalid
-//         console.error("Error validating R2RML mapping:", error);
-//         return null; // You can return null or throw an error as per your preference
-//     }
-       
-
-//         // Parse the R2RML mapping as RDF using rdflib
-//         $rdf.parse(r2rmlMapping, rdfGraph, '', 'text/turtle');
-    
-//         // Serialize the RDF graph to RDF/XML format
-//         var rdfData = $rdf.serialize(null, rdfGraph, '', 'application/rdf+xml');
-    
-//         // Return the generated RDF data
-//         return rdfData;
-
- 
-// };
-// self.generateRDF = function() {
-//     // Get the R2RML mapping file from the textarea
-//     var r2rmlMapping = document.getElementById("r2rmlTextarea").value;
-
-//     // Generate RDF data from the R2RML mapping
-//     rdfData = self.generateRDFDataFromR2RML(r2rmlMapping);
-
-//     // Save the RDF data as a file
-//     saveRDFDataAsFile(rdfData);
-// }
-
-// self.saveRDFDataAsFile = function (rdfData) {
-//     // Convert the RDF data to a Blob
-//     var blob = new Blob([rdfData], { type: 'application/rdf+xml' });
-
-//     // Create a download link element
-//     var downloadLink = document.createElement('a');
-//     downloadLink.href = URL.createObjectURL(blob);
-//     downloadLink.download = 'rdf_data.rdf'; // Set the file name
-//     downloadLink.click(); // Trigger the download link
-
-//     // Clean up the download link
-//     setTimeout(function() {
-//         URL.revokeObjectURL(downloadLink.href);
-//         document.body.removeChild(downloadLink);
-//     }, 0);
-// }
-
-    
-    
-
-
-self.addTripleToTA = function () {
-        return self.generateR2RML();
+    self.addTripleToTA = function () {
         $("#KGcreator_tripleMessageDiv").html("");
         var subject = $("#KGcreator_subjectInput").val();
         //  var predicate = $("#KGcreator_predicateInput").val();
@@ -1160,11 +981,6 @@ self.saveMappings({classId:classId})
             }
         } else {
             currentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromPrefix(Object.keys(self.currentJsonObject.prefixes)[0]);
-            // Generate R2RML prefix based on selected top-level ontology
-            var r2rmlPrefix = currentTopLevelOntology.prefix + ": <" + currentTopLevelOntology.prefixtarget + ">";
-               
-            // Add generated R2RML prefix to the r2rmlprefix list
-            $("#r2rmlprefix").append(r2rmlPrefixes);
             $("#KGcreator_topLevelOntologiesSelect").val(currentTopLevelOntology);
         }
     };
@@ -1248,42 +1064,6 @@ self.saveMappings({classId:classId})
         }
     };
     self.createTriples = function (test, _options) {
-        var payload;
-        if (self.currentSourceType == "CSV") {
-            payload = {
-                dir: "CSV/" + self.currentCsvDir,
-                fileName: self.currentSource + "_" + "xxxxx" + ".json",
-                options: JSON.stringify(options),
-            };
-        } else if (self.currentSourceType == "DATABASE") {
-            payload = {
-                dir: "CSV/" + self.currentSlsvSource,
-                fileName: self.currentDbName + "_" + self.currentJsonObject.fileName + ".json",
-                options: JSON.stringify(options),
-            };
-        }
-
-        $.ajax({
-            type: "POST",
-            url: `${Config.apiUrl}/kg/csv/triples`,
-            data: payload,
-            dataType: "json",
-            success: function (result, _textStatus, _jqXHR) {
-                if (test) {
-                    var str = JSON.stringify(result, null, 2);
-
-                    $("#KGcreator_dataSampleDiv").val(str);
-                    MainController.UI.message("", true);
-                } else {
-                    $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
-                    MainController.UI.message("triples created", true);
-                }
-            },
-            error(err) {
-                return alert(err.responseText);
-            },
-        });
-        return 
         MainController.UI.message("creating triples...");
         $("#KGcreator_dataSampleDiv").val("creating triples...");
         if (!self.currentJsonObject) {

@@ -14,7 +14,8 @@
     "Standardizer",
     "KGcreator",
     "admin",
-    "ConfigEditor"
+    "ConfigEditor", 
+    "KGcreatorR2RML",
   ],
   "keycloak": {
     "realm": "master",

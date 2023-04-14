@@ -165,13 +165,13 @@ var UserRequestFiltering = {
         for (var source in userSourcesMap) {
             indicesMap[source.toLowerCase()] = { source: source, acl: source.accessControl == "readwrite" ? "w" : "r" };
         }
-        var error=null
+        var error = null;
         indices.forEach(function (indexName) {
             if (!indicesMap[indexName]) {
-                error=("DATA PROTECTION : index  " + indexName + " not allowed to current user");
+                error = "DATA PROTECTION : index  " + indexName + " not allowed to current user";
             } else {
                 if (acl == "w" && indicesMap[indexName].acl != acl) {
-                    error=("DATA PROTECTION : user cannot write to index  " + indexName);
+                    error = "DATA PROTECTION : user cannot write to index  " + indexName;
                 }
             }
         });

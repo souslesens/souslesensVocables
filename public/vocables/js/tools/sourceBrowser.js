@@ -227,24 +227,10 @@ var SourceBrowser = (function () {
                 };
             }
 
-            /*   if (MainController.currentSource && Config.sources[MainController.currentSource].protegeFilePath) {
-                items.uploadOntologyFromOwlFile = {
-                    label: "upload Ontology FromOwl File",
-                    action: function (_e) {
-                        SourceBrowser.uploadOntologyFromOwlFile();
-                    },
-                };
-            }*/
+
         }
 
-        /*    items.toDataTable = {
-label: "export to Table",
-action: function (e) {// pb avec source
-Export.exportTreeToDataTable()
 
-}
-
-}*/
 
         items.exportAllDescendants = {
             label: "Export all descendants",
@@ -892,31 +878,7 @@ jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
         }
     };
 
-    self.uploadOntologyFromOwlFile = function () {
-        var graphUri;
-        if (Array.isArray(Config.sources[Lineage_sources.activeSource].graphUri)) {
-            graphUri = Config.sources[Lineage_sources.activeSource].graphUri[0];
-        } else {
-            graphUri = Config.sources[Lineage_sources.activeSource].graphUri;
-        }
-        var payload = {
-            graphUri: graphUri,
-            filePath: Config.sources[Lineage_sources.activeSource].protegeFilePath,
-        };
-        $.ajax({
-            type: "POST",
-            url: `${Config.apiUrl}/uploadGraph`,
-            data: payload,
-            dataType: "json",
 
-            success: function (_data, _textStatus, _jqXHR) {
-                alert("Ontology updated");
-            },
-            error: function (err) {
-                alert(err);
-            },
-        });
-    };
 
     self.exportSearchResult = function () {
         if (!self.currentFoundIds || self.currentFoundIds.length == 0) {

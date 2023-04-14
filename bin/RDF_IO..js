@@ -76,7 +76,7 @@ var RDF_IO = {
             writer.end((error, result) => {
                 result = result.replace(/ a /g, " rdf:type ");
                 callback(null, result);
-                //  console.log(result)
+             
             });
         });
     },
@@ -180,11 +180,4 @@ var RDF_IO = {
 
 module.exports = RDF_IO;
 
-//RDF_IO.uploadOntologyFromOwlFile("http://data.total.com/resource/one-model/ontology/0.2/","D:\\NLP\\ontologies\\ONE MODEL\\TOTAL_OneModel4.ttl2.owl")
-//RDF_IO.uploadOntologyFromOwlFile("http://data.total.com/resource/sil/ontology/0.1/","D:\\NLP\\ontologies\\OntoSIL\\SIL.owl-ttl.owl")
 
-//RDF_IO.getOntology("http://data.total.com/resource/one-model/ontology/0.2/> from <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",function(err, result){
-/*RDF_IO.getOntology("http://data.total.com/resource/one-model/ontology/0.2/", function (err, result) {
-
-})*/
-//RDF_IO.getGraphUri("ISO_15926-part-14")

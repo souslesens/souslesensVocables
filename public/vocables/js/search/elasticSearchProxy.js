@@ -89,28 +89,6 @@ var ElasticSearchProxy = (function () {
         });
     };
 
-    self.analyzeSentence = function (sentence, callback) {
-        var payload = {
-            analyzeSentence: sentence,
-        };
-        $.ajax({
-            type: "POST",
-            url: Config.apiUrl + "/analyzesentence",
-            data: payload,
-            dataType: "json",
-            success: function (data, _textStatus, _jqXHR) {
-                callback(null, data);
-            },
-            error: function (err) {
-                // eslint-disable-next-line no-console
-                console.log(err.responseText);
-                if (callback) {
-                    return callback(err);
-                }
-                return err;
-            },
-        });
-    };
 
     self.searchPlainText = function (options, callback) {
         if (!options) options = {};

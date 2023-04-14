@@ -1774,21 +1774,7 @@ sortMethod: "hubsize",
             }
         );
 
-        /*  ElasticSearchProxy.analyzeSentence(text, function (err, result) {
-if (err)
-    return alert(err)
-var str = ""
-result.tokens.forEach(function (item) {
 
-    var word = item.token
-    if (word.length > 4) {
-        str += word + "\n"
-    }
-})
-$("#Standardizer_wordsTA").val(str)
-
-
-}) */
     };
 
     self.selectAsFuzzyMatch = function (source, itemId) {

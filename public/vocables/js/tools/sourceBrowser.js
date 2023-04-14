@@ -829,39 +829,7 @@ return*/
                     }
                 },
             };
-            /*   if (_options.selectTreeNodeFn) {
-jstreeOptions.selectTreeNodeFn = _options.selectTreeNodeFn(event, obj);
-}
-else if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) {
-jstreeOptions.selectTreeNodeFn = Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
-}
-else {
-;// jstreeOptions.selectTreeNodeFn= self.editThesaurusConceptInfos(obj.node.data.source, obj.node);
-}
 
-
-if (_options.contextMenuFn) {
-jstreeOptions.contextMenu = _options.contextMenuFn();
-}
-else if (_options.contextMenuFn) {
-jstreeOptions.contextMenu = _options.contextMenuFn();
-}
-else {
-jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
-}
-
-if (_options.contextMenuFn) {
-jstreeOptions.contextMenu = _options.contextMenuFn();
-}
-else if (_options.contextMenu) {
-jstreeOptions.contextMenu = _options.contextMenu;
-}
-else if (Config.tools[MainController.currentTool].controller.contextMenuFn) {
-jstreeOptions.contextMenu = Config.tools[MainController.currentTool].controller.contextMenuFn;
-}
-else {
-jstreeOptions.contextMenu = self.getJstreeConceptsContextMenu();
-}*/
 
             common.jstree.loadJsTree(targetDiv, jstreeData, jstreeOptions);
             setTimeout(function () {

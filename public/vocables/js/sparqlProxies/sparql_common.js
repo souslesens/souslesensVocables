@@ -119,6 +119,8 @@ var Sparql_common = (function () {
                     }
                 }
             } else if (ids) {
+                if(!Array.isArray)
+                    return;
                 if (!Array.isArray(ids)) {
                     ids = [ids];
                 }
@@ -130,7 +132,7 @@ var Sparql_common = (function () {
 
                 var uriIds = [];
                 ids.forEach(function (id, _index) {
-                    if (id.indexOf(":") > -1)
+                    if ((""+id).indexOf(":") > -1)
                         // literal
                         uriIds.push(id);
                 });

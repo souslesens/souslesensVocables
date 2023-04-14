@@ -21,7 +21,7 @@ var Lineage_graphTraversal = (function () {
         };
 
         var payload = {
-            body: JSON.stringify(body),
+            body: body,
         };
         $.ajax({
             type: "POST",
@@ -166,7 +166,7 @@ var Lineage_graphTraversal = (function () {
             exactMatch: exactMatch,
             jstreeDiv: "lineage_shorterstPath_searchJsTreeDiv",
             selectTreeNodeFn: Lineage_graphTraversal.selectTreeNodeFn,
-            contextMenuFn: Lineage_graphTraversal.contextMenufn,
+            contextMenu: Lineage_graphTraversal.contextMenufn,
         };
 
         SourceBrowser.searchAllSourcesTerm(options);
@@ -246,6 +246,7 @@ var Lineage_graphTraversal = (function () {
         var existingIdsMap = visjsGraph.getExistingIdsMap();
 
         var shape = Lineage_classes.defaultShape;
+        var source=Lineage_sources.activeSource
         var color = Lineage_classes.getSourceColor(Lineage_sources.activeSource);
         relations.forEach(function (relation, index) {
             if (!existingIdsMap[relation.from]) {
@@ -353,6 +354,15 @@ var Lineage_graphTraversal = (function () {
     self.clearPathList = function () {
         $("#lineage_shorterstPathListDiv").html("");
     };
+
+    self.clearNodes=function(){
+        self.pathFromUri = null
+        $("#lineage_shorterstPathFromUri").html("");
+
+        self.pathToUri = null
+        $("#lineage_shorterstPathToUri").html("");
+        self.clearPathList();
+    }
 
     return self;
 })();

@@ -26,18 +26,14 @@ var GraphTraversal = {
             " }" +
             "} limit 10000";
 
-        /*  var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
 
-"SELECT ?s ?o FROM   <" + grahUri + ">  WHERE {\n" +
-" ?s ?p ?o\n" +
-"  filter(isUri(?o) && ?p not in (rdfs:member) && ?o not in (owl:Class, owl:NamedIndividual, owl:Restriction,owl:ObjectProperty ,<http://souslesens.org/resource/vocabulary/TopConcept> ))}";
-*/
         var headers = {};
         headers["Accept"] = "application/sparql-results+json";
         headers["Content-Type"] = "application/x-www-form-urlencoded";
-        var params = { query: query };
+        var params = { query: query , auth:options.auth};
         var url = serverUrl + "?query=&format=json";
         var viscinityArray = [];
+
 
         httpProxy.post(url, headers, params, function (err, result) {
             if (err) return callback(err);
@@ -124,8 +120,9 @@ var GraphTraversal = {
     },
     getShortestPath: function (sparqlServerUrl, graphUri, fromNodeId, toNodeId, options, callback) {
         if (!options) options = {};
-        GraphTraversal.getViscinityArray(sparqlServerUrl, graphUri, {}, function (err, viscinityArray) {
-            if (err) return callback(err);
+        GraphTraversal.getViscinityArray(sparqlServerUrl, graphUri, options, function (err, viscinityArray) {
+            if (err)
+                return callback(err);
             var graph = new GraphTraversal.path.Graph();
 
             viscinityArray.forEach(function (edge) {

@@ -91,8 +91,7 @@ var Sparql_proxy = (function () {
      * @param {Function} callback - Function called to process the result of the query
      */
     self.querySPARQL_GET_proxy = function (url, query, queryOptions, options, callback) {
-
-       // query=query.replace(/[\n\r]/g," ")
+        // query=query.replace(/[\n\r]/g," ")
 
         if (url.indexOf("_default") == 0) url = Config.default_sparql_url;
         var sourceParams;
@@ -147,8 +146,6 @@ var Sparql_proxy = (function () {
             payload.body = JSON.stringify(body);
             payload.url = url + queryOptions;
         }
-
-
 
         $.ajax({
             type: "POST",

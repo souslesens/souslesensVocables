@@ -890,8 +890,8 @@ Lineage_styles.showDialog(self.currentContainer.data);
             var query =
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                'SELECT distinct ?member ?memberLabel ?parent ?parentLabel' +
-              ' (GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes) ' +
+                "SELECT distinct ?member ?memberLabel ?parent ?parentLabel" +
+                ' (GROUP_CONCAT( distinct ?memberType;separator=",") as ?memberTypes) ' +
                 fromStr +
                 " WHERE {\n" +
                 "?parent0  rdfs:member" +

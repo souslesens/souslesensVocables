@@ -511,13 +511,13 @@ searchedSources = searchedSources.concat(importedSources);*/
         if (true || schemaType == "OWL") {
             SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
                 if (_err) {
-                    return alert(_err);
+                    return alert(_err.responseText);
                 }
                 if (Object.keys(result[0].matches).length == 0) return $("#" + (options.jstreeDiv || self.currentTargetDiv)).html("<b>No matches found</b>");
 
                 self.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
                     if (err) {
-                        return alert(err);
+                        return alert(err.responseText);
                     }
                 });
             });

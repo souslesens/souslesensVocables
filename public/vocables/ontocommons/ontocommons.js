@@ -15,7 +15,7 @@ var Ontocommons = (function () {
         });
     };
 
-    self.listPortalOntologies = function () {
+    self.listPortalOntologies = function (callback) {
         self.apiUrl = "/api/v1";
         var payload = {
             url: "http://data.industryportal.enit.fr/ontologies?apikey=" + apiKey,
@@ -35,6 +35,7 @@ var Ontocommons = (function () {
                 });
 
                 var acronyms = Object.keys(self.ontologiesMap);
+
                 acronyms.sort();
                 common.fillSelectOptions("ontocommons_ontologiesSelect", acronyms, true);
             },
@@ -79,7 +80,9 @@ var Ontocommons = (function () {
         }
 
         self.getOntologyMetaData(ontologyId, function (err, metadata) {
-            if (err) return alert(err.responseText);
+            if (err) {
+                return alert(err.responseText);
+            }
 
             $("#slsv_iframe").attr("src", null);
             // var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
@@ -130,6 +133,7 @@ var Ontocommons = (function () {
             });
         });
     };
+
     self.message = function (message) {
         $("#messageDiv").html(message);
     };
@@ -152,7 +156,7 @@ var Ontocommons = (function () {
         });
     };
 
-    self.getOntologyRootUris = function (ontologyId) {
+    self.getOntologyRootUris = function (ontologyId, callback) {
         $("#TA").val("");
         var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
 
@@ -167,25 +171,98 @@ var Ontocommons = (function () {
             POST: true,
         };
 
-        self.message("processing ontology ...");
+        self.message("processing ontology " + ontologyId + "...");
         $.ajax({
             type: "POST",
             url: `${self.apiUrl}/getOntologyRootUris`,
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
+                if (callback) {
+                    return callback(null, data);
+                }
                 var myFrame = $("#slsv_iframe").contents().find("body");
 
                 $(myFrame).addClass("iframeDiv");
                 myFrame.html("<textarea id='TA' style='width:500px;height: 600px'>" + ontologyId + "\n" + data.uriRoots + "</textarea>");
-                // $("TA").val(data.uriRoots);
-                // alert(data.uriRoots);
-                //  $("#slsv_iframe").html(data.uriRoots)
             },
             error(err) {
+                if (callback) {
+                    return callback(err);
+                }
                 alert(err.responseText);
             },
         });
+    };
+
+    self.getAllRootUris = function () {
+        var allUris = {};
+
+        var ontologyIds = [];
+        var ontologiesInfos = [];
+        var synthesis;
+        async.series(
+            [
+                function (callbackSeries) {
+                    ontologyIds = Object.keys(self.ontologiesMap);
+                    //  ontologyIds = ontologyIds.slice(0, 5);
+                    callbackSeries();
+                },
+                function (callbackSeries) {
+                    async.eachSeries(
+                        ontologyIds,
+                        function (ontologyId, callbackEach) {
+                            console.log(ontologiesInfos.length + "  " + ontologyId);
+                            var obj = { id: ontologyId };
+                            self.getOntologyRootUris(ontologyId, function (err, result) {
+                                if (err) {
+                                    obj.error = err.responseText;
+                                    ontologiesInfos.push(obj);
+                                    return callbackEach();
+                                }
+                                obj.triplesCount = result.triplesCount;
+                                obj.rootUris = result.uriRoots;
+                                ontologiesInfos.push(obj);
+                                result.uriRoots.forEach(function (uri) {
+                                    if (!allUris[uri]) {
+                                        allUris[uri] = [];
+                                    }
+                                    allUris[uri].push(ontologyId);
+                                });
+
+                                callbackEach();
+                            });
+                        },
+                        function (err) {
+                            synthesis = {
+                                allUris: allUris,
+                                ontologiesInfos: ontologiesInfos,
+                            };
+
+                            callbackSeries(err);
+                        }
+                    );
+                },
+                function (callbackSeries) {
+                    var str = "";
+                    for (var key in synthesis.allUris) {
+                        var ids = synthesis.allUris[key];
+                        str += key + JSON.stringify(ids) + "\n";
+                    }
+                    console.log(str);
+                    console.log("-----------");
+                    var str2 = "";
+                    synthesis.ontologiesInfos.forEach(function (ontology) {
+                        str2 += ontology.id + "," + (ontology.triplesCount || "") + "," + (ontology.error || "") + "\n";
+                    });
+                    console.log(str2);
+                    callbackSeries();
+                },
+            ],
+            function (err) {
+                console.log("DONE");
+            }
+        );
     };
 
     return self;

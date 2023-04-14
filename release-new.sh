@@ -11,4 +11,6 @@ release=$(npm version --json | jq .souslesensvocables | sed 's/"//g')
 
 git commit package* -m "release ${release}"
 git tag ${release}
-echo "Release ${release} created. Push with \`git push && git push --tags\`"
+echo "Release ${release} created. Push with:"
+echo ""
+echo "git push && git push --tags"

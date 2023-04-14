@@ -2,24 +2,37 @@ var Lineage_relationFilter = (function () {
     var self = {};
     var restrictions = null;
     var constraints = null;
-    self.showAddFilterDiv = function () {
+    self.showAddFilterDiv = function (clear) {
+        if (clear) {
+            self.currentProperty = null;
+        }
         $("#Lineage_relation_constraints").html("");
         //  $("#lineage_relation_filterRoleSelect").val("");
         $("#Lineage_relation_filterTypeSelect").val("");
         $("#Lineage_relation_filterVocabularySelect").val("");
         $("#lineageQuery_uriValueDiv").css("display", "none");
         $("#lineageQuery_literalValueDiv").css("display", "none");
-
+        $("#Lineage_relation_filterText").css("display", "none");
+        $("#lineageQuery_addFilterButton").prop("disabled", true);
         var propStr = "";
         ("");
         if (self.currentProperty) {
             propStr = self.currentProperty.vocabulary + "." + self.currentProperty.label + "<br>";
+        } else {
         }
+        $("#lineageQuery_value").keypress(function (e) {
+            if (e.which == 13) {
+                var str = $("#lineageQuery_value").val();
+                if (str.length > 0) {
+                    Lineage_relationFilter.addFilter();
+                }
+            }
+        });
 
         $("#lineageRelations_filterDiv").css("display", "flex");
 
         /* $("#mainDialogDiv").dialog("open");
-         $("#mainDialogDiv").load("snippets/lineage/relationsDialogFilter.html", function() {*/
+     $("#mainDialogDiv").load("snippets/lineage/relationsDialogFilter.html", function() {*/
 
         self.domainValue = "";
         self.rangeValue = "";
@@ -40,9 +53,13 @@ var Lineage_relationFilter = (function () {
         };
 
         function getHtmlLink(label, uri) {
-            if (label == "any") return label;
+            if (label == "any") {
+                return label;
+            }
             var target = "";
-            if (!Config.basicVocabularies[self.currentProperty.vocabulary]) target = "_slsvCallback";
+            if (!Config.basicVocabularies[self.currentProperty.vocabulary]) {
+                target = "_slsvCallback";
+            }
             return "<a href='" + uri + "' target='" + target + "'>" + label + "</a>";
         }
 
@@ -100,7 +117,9 @@ var Lineage_relationFilter = (function () {
         self.currentFilterRole = role;
         $("#lineage_relation_filterRole").html(role);
 
-        if (!self.currentProperty) return common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap["any"], true);
+        if (!self.currentProperty) {
+            return common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap["any"], false);
+        }
 
         var types = Object.keys(self.ObjectsTypesMap);
 
@@ -108,16 +127,16 @@ var Lineage_relationFilter = (function () {
 
         if (restrictions[self.currentProperty.id]) {
             type = "Resource";
-            common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap[type], true);
+            common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap[type], false);
         } else {
             for (var type in self.ObjectsTypesMap) {
                 if ((role == "subject" && self.domain && self.domain.indexOf(type) > -1) || (role == "object" && self.range && self.range.indexOf(type) > -1)) {
                     ok = true;
-                    common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap[type], true);
+                    common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap[type], false);
                 }
             }
             if (!ok) {
-                common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap["any"], true);
+                common.fillSelectOptions("Lineage_relation_filterTypeSelect", self.ObjectsTypesMap["any"], false);
             }
         }
     };
@@ -126,6 +145,10 @@ var Lineage_relationFilter = (function () {
         var role = self.currentFilterRole;
         $("#lineageQuery_value").datepicker("destroy");
         $("#lineageQuery_value").val("");
+
+        $("#lineageQuery_literalValueDiv").css("display", "none");
+        $("#lineageQuery_literalValueDiv").css("display", "none");
+        $("#lineageQuery_addFilterButton").removeProp("disabled");
 
         if (type == "String") {
             $("#lineageQuery_literalValueDiv").css("display", "block");
@@ -143,15 +166,12 @@ var Lineage_relationFilter = (function () {
         } else if (self.currentProperty && restrictions[self.currentProperty.id]) {
             $("#lineageQuery_uriValueDiv").css("display", "block");
             common.fillSelectOptions("Lineage_relation_filterVocabularySelect", [], false);
-            if (role == "subject") {
-                common.fillSelectOptions("Lineage_relation_filterResourcesSelect", self.domain, true, "label", "id");
-            } else if (role == "object") {
-                common.fillSelectOptions("Lineage_relation_filterResourcesSelect", self.range, true, "label", "id");
-            }
+
+            common.fillSelectOptions("Lineage_relation_filterResourcesSelect", self.domain, true, "label", "id");
         } else {
             $("#lineageQuery_uriValueDiv").css("display", "block");
             var scopes = [];
-            if (visjsGraph.isGraphNotEmpty) {
+            if (visjsGraph.isGraphNotEmpty()) {
                 scopes.push("whiteBoardNodes");
             }
             scopes.push(Lineage_sources.activeSource);
@@ -159,11 +179,8 @@ var Lineage_relationFilter = (function () {
             if (imports) {
                 scopes = scopes.concat(imports);
             }
-            if (role == "subject") {
-                common.fillSelectOptions("Lineage_relation_filterVocabularySelect", scopes, true);
-            } else if (role == "object") {
-                common.fillSelectOptions("Lineage_relation_rangesVocabularySelect", scopes, true);
-            }
+
+            common.fillSelectOptions("Lineage_relation_filterVocabularySelect", scopes, true);
         }
     };
 
@@ -173,7 +190,7 @@ var Lineage_relationFilter = (function () {
         if (type == "whiteBoardNodes") {
         } else {
             //  if (resourceType == "owl:Class") {
-            CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter("owl:Class", "Lineage_relation_filterResourcesSelect", type);
+            CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter(null, "Lineage_relation_filterResourcesSelect", type);
             //  }
         }
     };
@@ -189,7 +206,7 @@ var Lineage_relationFilter = (function () {
         }
     };
 
-    self.attachFilterToProperty = function () {
+    self.addFilter = function () {
         function getLiteralValueFilter() {
             var filterIndex = "";
             var operator = $("#lineageQuery_operator").val();
@@ -198,7 +215,7 @@ var Lineage_relationFilter = (function () {
             var objectFilterStr = "";
             if (type == "String") {
                 if (operator == "contains") {
-                    objectFilterStr += " Filter(regex(str(?object" + filterIndex + "),'" + value + "','i')).";
+                    objectFilterStr += "?object ?p ?q. Filter(regex(str(?q" + filterIndex + "),'" + value + "','i')).";
                 } else if (operator == "not contains") {
                     objectFilterStr += "Filter( ! regex(str(?object" + filterIndex + "),'" + value + "','i')).";
                 } else {
@@ -239,14 +256,16 @@ var Lineage_relationFilter = (function () {
                 filter.filterStr = getLiteralValueFilter();
             } else {
                 if (role == "subject") {
-                    filter.filterStr = " ?subject rdf:type " + resourceType + ". ";
-                    if (resource) {
-                        filter.filterStr += " VALUES ?subject {<" + resource + ">} ";
+                    if (!resource) {
+                        filter.filterStr = " ?subject rdf:type " + resourceType + ". ";
+                    } else {
+                        filter.filterStr = " ?subject rdf:type|rdfs:subClassOf <" + resource + "> ";
                     }
                 } else if (role == "object") {
-                    filter.filterStr = " ?object rdf:type " + resourceType + ". ";
-                    if (resource) {
-                        filter.filterStr += " VALUES ?object {<" + resource + ">} ";
+                    if (!resource) {
+                        filter.filterStr = " ?object rdf:type " + resourceType + ". ";
+                    } else {
+                        filter.filterStr = " ?object rdf:type|rdfs:subClassOf <" + resource + "> ";
                     }
                 }
             }
@@ -254,7 +273,8 @@ var Lineage_relationFilter = (function () {
 
         Lineage_relations.filter = filter.filterStr;
         var text = $("#Lineage_relation_filterText").val();
-        $("#Lineage_relation_filterText").val(text + "\n" + filter.filterStr);
+        $("#Lineage_relation_filterText").css("display", "block");
+        $("#Lineage_relation_filterText").val(text + filter.filterStr + "\n");
     };
 
     return self;

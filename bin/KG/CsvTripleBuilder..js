@@ -7,8 +7,9 @@ var httpProxy = require("../httpProxy.");
 var sqlServerProxy = require("./SQLserverConnector.");
 
 var ConfigManager = require("../configManager.");
-var socketIo = require("../socketManager.");
-var channelName = "KGcreator";
+
+const socketIo = require("../socketManager.");
+const channelName = "KGcreator";
 
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 /*
@@ -548,6 +549,9 @@ var CsvTripleBuilder = {
 
                                                 //send message to Client-Side
                                                 CsvTripleBuilder.socket.message(channelName, "Writing triples:" + triples.length);
+
+                                                // socket.message("KGbuild", "loading ONE MODEL superClasses ");
+                                                console.log("writing triples:" + triples.length);
 
                                                 var slices = util.sliceArray(triples, 200);
                                                 triples = [];

@@ -1,5 +1,9 @@
 const path = require("path");
 const elasticRestProxy = require(path.resolve("bin/elasticRestProxy..js"));
+const ConfigManager = require("../../../../bin/configManager.");
+const UserRequestFiltering = require("../../../../bin/userRequestFiltering.");
+
+const { processResponse } = require("../utils");
 
 module.exports = function () {
     let operations = {
@@ -7,12 +11,27 @@ module.exports = function () {
     };
 
     function POST(req, res, _next) {
-        elasticRestProxy.executeMsearch(req.body.ndjson, function (err, result) {
-            if (err) {
-                return res.status(400).json({ error: err });
-            }
-            return res.status(200).json(result);
-        });
+        if (ConfigManager.config) {
+            ConfigManager.getUserSources(req, res, function (err, userSources) {
+                UserRequestFiltering.validateElasticSearchIndices(null, req.body.indexes, userSources, "r", function (parsingError, filteredQuery) {
+                    if (parsingError) return processResponse(res, parsingError, null);
+
+                    elasticRestProxy.executeMsearch(req.body.ndjson, function (err, result) {
+                        if (err) {
+                            return res.status(400).json({ error: err });
+                        }
+                        return res.status(200).json(result);
+                    });
+                });
+            });
+        } else {
+            elasticRestProxy.executeMsearch(req.body.ndjson, function (err, result) {
+                if (err) {
+                    return res.status(400).json({ error: err });
+                }
+                return res.status(200).json(result);
+            });
+        }
     }
 
     POST.apiDoc = {
@@ -30,6 +49,9 @@ module.exports = function () {
                     properties: {
                         ndjson: {
                             type: "string",
+                        },
+                        indexes: {
+                            type: "array",
                         },
                     },
                 },

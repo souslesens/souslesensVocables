@@ -629,6 +629,7 @@ var KGcreator = (function () {
                             CommonUIwidgets.predicatesSelectorWidget.onSelectPropertyFn = function (value) {};
                         });
 
+                        $("#editPredicate_customPredicateContentDiv").html("<div> <input type='checkbox' id='KGcreator_isRestrictionCBX' />is Restriction</div>");
                         var html =
                             ' is String<input type="checkbox" id="KGcreator_isObjectStringCBX" /> ' +
                             "lookup <input id=\"KGcreator_objectLookupName\" style='width:100px'/>" +

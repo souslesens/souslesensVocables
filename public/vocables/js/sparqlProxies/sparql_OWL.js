@@ -115,6 +115,7 @@ var Sparql_OWL = (function () {
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "prefix owl: <http://www.w3.org/2002/07/owl#>" +
+            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
             "select   distinct ?topConcept  ?topConceptLabel  ?subjectGraph  " +
             fromStr +
             "  where {";
@@ -312,7 +313,7 @@ var Sparql_OWL = (function () {
 
         fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
 
-        var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " + "select * " + fromStr + " where {";
+        var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " + "select distinct * " + fromStr + " where {";
         if (options.selectGraph && Config.sources[sourceLabel].graphUri) {
             query += "graph ?g ";
         }
@@ -1315,7 +1316,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         if (!Config.sources[sourceLabel].graphUri) {
             options.selectGraph = false;
         }
-        var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
+        var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports);
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -1342,13 +1343,14 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         if (options.type) {
             typeFilterStr = "FILTER (?type =" + options.type + ")";
         } else {
-            typeFilterStr = "FILTER (?type in(owl:Class, owl:NamedIndividual))";
+            typeFilterStr = "";
         }
         query += "{ ?id rdf:type ?type. " + typeFilterStr + " OPTIONAL {?id rdfs:label ?label " + langFilter + "}" + filter + " }}";
 
         var allData = [];
         var resultSize = 1;
         var limitSize = 2000;
+        if (options.processorFectchSize) limitSize = options.processorFectchSize;
         var totalLimit = options.limit || Config.queryLimit;
         var offset = 0;
         async.whilst(

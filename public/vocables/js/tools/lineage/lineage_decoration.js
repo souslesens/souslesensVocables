@@ -9,17 +9,17 @@ var Lineage_decoration = (function () {
 
     /*  self.init = function () {
 
-        self.operationsMap = {
-            colorNodesByType: self.colorGraphNodesByType,
-            colorNodesByTopLevelOntologyTopType: self.colorNodesByTopLevelOntologyTopType,
-        };
-        var operations = Object.keys(self.operationsMap);
+      self.operationsMap = {
+          colorNodesByType: self.colorGraphNodesByType,
+          colorNodesByTopLevelOntologyTopType: self.colorNodesByTopLevelOntologyTopType,
+      };
+      var operations = Object.keys(self.operationsMap);
 
-        common.fillSelectOptions("Lineage_classes_graphDecoration_operationSelect", operations, true);
-        self.currentVisjGraphNodesMap = {};
-        self.legendMap = {};
-        self.currentLegendDJstreedata = {};
-    };*/
+      common.fillSelectOptions("Lineage_classes_graphDecoration_operationSelect", operations, true);
+      self.currentVisjGraphNodesMap = {};
+      self.legendMap = {};
+      self.currentLegendDJstreedata = {};
+  };*/
     self.run = function (operation) {
         $("#Lineage_classes_graphDecoration_operationSelect").val("");
         self.operationsMap[operation]();
@@ -46,7 +46,7 @@ var Lineage_decoration = (function () {
             return callback(null, self.currentTopOntologyClassesMap);
         }
         self.currentTopOntologyClassesMap = {};
-        Sparql_generic.getSourceTaxonomy(Config.currentTopLevelOntology, { lang: Config.default_lang }, function (err, result) {
+        Sparql_generic.getSourceTaxonomy(Config.currentTopLevelOntology, { lang: Config.default_lang, skipCurrentQuery: true }, function (err, result) {
             if (err) {
                 return callback(null, {});
             }
@@ -54,7 +54,9 @@ var Lineage_decoration = (function () {
             self.currentTopOntologyClassesMap = result.classesMap;
             var countColors = 0;
             for (var topClass in self.currentTopOntologyClassesMap) {
-                if (!self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology]) return callback(null, []);
+                if (!self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology]) {
+                    return callback(null, []);
+                }
                 var color = null;
                 if (self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][topClass]) {
                     //predifined color
@@ -101,47 +103,23 @@ var Lineage_decoration = (function () {
         async.eachSeries(
             slices,
             function (slice, callbackEach) {
+                if (!slice) {
+                    return callback(null, []);
+                }
                 var filter = Sparql_common.setFilter("x", slice);
                 if (filter.indexOf("?x in( )") > -1) {
                     return callbackEach();
                 }
 
-                /*  var query =
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                    "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
-                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                    "  SELECT distinct ?x ?type ?g ?label" +
-                    strFrom;
-
-                var whereClass =
-                    " {GRAPH ?g{" +
-                    "    ?x  rdf:type owl:Class. " +
-                    "OPTIONAL {?x rdfs:label ?label}" +
-                    " ?x   rdfs:subClassOf* ?type.  filter(regex(str(?type),'" +
-                    uriPattern +
-                    "'))" +
-                    filter +
-                    "}}";
-
-                var whereNamedIndividual =
-                    " {GRAPH ?g{" +
-                    "    ?x  rdf:type owl:NamedIndividual. " +
-                    "    ?x  rdf:type ?y. " +
-                    "OPTIONAL {?x rdfs:label ?label}" +
-                    " ?y   rdfs:subClassOf* ?type.  filter(regex(str(?type),'" +
-                    uriPattern +
-                    "'))" +
-                    filter +
-                    "}}";
-
-                query += " WHERE {" + whereClass + " UNION" + whereNamedIndividual + "}";x*/
+                var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource);
 
                 var query =
                     "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
                     "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
                     "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
-                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>  SELECT distinct ?type ?sLabel ?x   WHERE {\n" +
+                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>  SELECT distinct ?type ?sLabel ?x " +
+                    fromStr +
+                    "  WHERE {\n" +
                     "GRAPH <" +
                     Config.sources[Config.currentTopLevelOntology].graphUri +
                     ">{\n" +

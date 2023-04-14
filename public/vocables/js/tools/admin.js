@@ -36,7 +36,7 @@ var Admin = (function () {
             function (source, callbackEach) {
                 if (!Config.sources[source] || !Config.sources[source].schemaType) return callbackEach();
                 $("#waitImg").css("display", "block");
-                SearchUtil.generateElasticIndex(source, { indexProperties: 1 }, function (err, _result) {
+                SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
                     MainController.UI.message("DONE " + source, true);
                     callbackEach(err);
                 });
@@ -249,7 +249,6 @@ var Admin = (function () {
         var toEndPointConfig = { sparql_server: { url: toEndPointUrl } };
         var clearEndpointGraph = true;
         var body = {
-            copyGraphToEndPoint: 1,
             source: source,
             toEndPointConfig: toEndPointConfig,
             options: { clearEndpointGraph: clearEndpointGraph },
@@ -263,7 +262,7 @@ var Admin = (function () {
         MainController.UI.message("copying source " + source);
         $.ajax({
             type: "POST",
-            url: `${Config.apiUrl}/httpProxy`,
+            url: `${Config.apiUrl}/copygraph`,
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {

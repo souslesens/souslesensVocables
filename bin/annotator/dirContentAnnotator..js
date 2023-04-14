@@ -730,7 +730,7 @@ var sources = {
         editable: false,
         controller: "Sparql_SKOS",
         sparql_server: {
-            url: "http://51.178.139.80:8890/sparql",
+            url: "",
         },
         graphUri: "http://data.total.com/resource/thesaurus/ctg2/",
         schemaType: "SKOS",

@@ -1,6 +1,6 @@
 {
     "name": "souslesensvocables",
-    "version": "1.32.0",
+    "version": "1.33.0",
     "private": true,
     "scripts": {
         "build:app": "cd mainapp && npm run build",
@@ -73,6 +73,7 @@
         "readline": "^1.3.0",
         "request": "^2.88.2",
         "socket.io": "^4.6.1",
+        "sparqljs": "^3.6.2",
         "superagent": "^8.0.9",
         "superagent-proxy": "^3.0.0",
         "swagger-ui-express": "^4.6.2",

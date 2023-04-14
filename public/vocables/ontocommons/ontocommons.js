@@ -2,7 +2,8 @@ var Config = {};
 var Ontocommons = (function () {
     var self = {};
     var apiKey = "019adb70-1d64-41b7-8f6e-8f7e5eb54942";
-    var sourcesJsonFile = "ontocommonsSources.json";
+    // var sourcesJsonFile = "ontocommonsSources.json";
+    var sourcesJsonFile = "sources.json";
     self.currentSource = null;
     self.init = function () {
         self.listPortalOntologies();
@@ -88,13 +89,13 @@ var Ontocommons = (function () {
             var editable = $("#editableCBX").prop("checked");
 
             var body = {
-                importSourceFromUrl: 1,
                 sourceUrl: sourceUrl,
                 sourceName: ontologyId,
 
                 options: {
                     metadata: metadata,
                     sourcesJsonFile: sourcesJsonFile,
+
                     reload: reload,
                     editable: editable,
                     graphUri: metadata.URI || null,
@@ -103,7 +104,7 @@ var Ontocommons = (function () {
 
             var payload = {
                 url: "_default",
-                body: JSON.stringify(body),
+                body: body,
                 POST: true,
             };
 
@@ -111,7 +112,7 @@ var Ontocommons = (function () {
             self.message("loading ontology and imports...");
             $.ajax({
                 type: "POST",
-                url: `${self.apiUrl}/httpProxy`,
+                url: `${self.apiUrl}/importsource`,
                 data: payload,
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
@@ -151,30 +152,35 @@ var Ontocommons = (function () {
         });
     };
 
-    self.getOntologyRootUris = function (url) {
+    self.getOntologyRootUris = function (ontologyId) {
+        $("#TA").val("");
+        var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
+
         var body = {
-            getOntologyRootUris: 1,
-            sourceUrl: url,
+            sourceUrl: sourceUrl,
             options: {},
         };
 
         var payload = {
             url: "_default",
-            body: JSON.stringify(body),
+            body: body,
             POST: true,
         };
 
-        self.message("proecessing ontology ...");
+        self.message("processing ontology ...");
         $.ajax({
             type: "POST",
-            url: `${self.apiUrl}/httpProxy`,
+            url: `${self.apiUrl}/getOntologyRootUris`,
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-                /*  var myFrame = $("#slsv_iframe").contents().find('body');
-                myFrame.html("<html>"+data.uriRoots+"</html>");*/
-                //   $("#resultDiv").html(data.uriRoots)
-                alert(data.uriRoots);
+                var myFrame = $("#slsv_iframe").contents().find("body");
+
+                $(myFrame).addClass("iframeDiv");
+                myFrame.html("<textarea id='TA' style='width:500px;height: 600px'>" + ontologyId + "\n" + data.uriRoots + "</textarea>");
+                // $("TA").val(data.uriRoots);
+                // alert(data.uriRoots);
+                //  $("#slsv_iframe").html(data.uriRoots)
             },
             error(err) {
                 alert(err.responseText);

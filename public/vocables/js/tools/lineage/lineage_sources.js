@@ -39,6 +39,7 @@ Lineage_sources = (function () {
     };
 
     self.resetAll = function (showDialog) {
+        OntologyModels.unRegisterSourceModel();
         self.init(showDialog);
     };
 
@@ -77,7 +78,7 @@ Lineage_sources = (function () {
                 //if checkbox
 
                 var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
-                sources.length > 0;
+
                 self.loadSources(sources);
             }
         );
@@ -90,10 +91,12 @@ Lineage_sources = (function () {
         if (!Array.isArray(sources)) {
             sources = [sources];
         }
+
         var firstSource = null;
         async.eachSeries(
             sources,
             function (source, callbackEach) {
+                if (self.loadedSources[source]) return callbackEach();
                 self.initSource(source, function (err, result) {
                     if (!err) {
                         firstSource = source;
@@ -124,7 +127,7 @@ Lineage_sources = (function () {
         }
 
         if (true) {
-            $("#Lineage_Tabs").tabs("disable", 3);
+            // $("#Lineage_Tabs").tabs("disable", 3);
             $("#lineage_classes_showLinkedDataButton").prop("disabled", true);
         }
 
@@ -213,7 +216,7 @@ return;
             visjsGraph.network.disableEditMode();
             $(".vis-edit-mode").css("display", "none");
         }
-        var isNodeEditable = Lineage_sources.isSourceEditable(source);
+        var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
         if (isNodeEditable) {
             visjsGraph.network.enableEditMode();
             $(".vis-edit-mode").css("display", "block");
@@ -326,7 +329,7 @@ return;
             if (indexedSources.indexOf(source) < 0) {
                 MainController.UI.message("indexing source " + source);
                 $("#waitImg").css("display", "block");
-                SearchUtil.generateElasticIndex(source, { indexProperties: 1 }, function (err, _result) {
+                SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
                     if (err) {
                         return MainController.UI.message(err, true);
                     }
@@ -666,9 +669,9 @@ sourceDivId +
         $("#lineage_classes_whiteboardSelect").val("");
     };
 
-    self.isSourceEditable = function (source) {
+    self.isSourceEditableForUser = function (source) {
         if (!Config.sources[source]) {
-            return console.log("no source " + source);
+            return; // console.log("no source " + source);
         }
         const groups = authentication.currentUser.groupes;
         const currentAccessControls = groups.map((group) => {
@@ -676,6 +679,7 @@ sourceDivId +
             const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
             return sourcesAccessControl.hasOwnProperty(source) ? sourcesAccessControl[source] : defaultAccessControl;
         });
+        if (groups.indexOf("admin") > -1) return true;
 
         self.realAccessControl = currentAccessControls.includes("readwrite") ? "readwrite" : currentAccessControls.includes("read") ? "read" : "forbidden";
 

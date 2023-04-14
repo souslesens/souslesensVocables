@@ -139,7 +139,7 @@ var annotatorLive = {
         var source = {
             name: "TULSA",
             controller: "Sparql_generic",
-            sparql_url: "http://51.178.139.80:8890/sparql",
+            sparql_url: "",
             graphIri: "http://souslesens.org/oil-gas/upstream/",
             sourceSchema: "SKOS",
             predicates: {

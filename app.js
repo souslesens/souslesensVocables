@@ -122,12 +122,10 @@ app.use(
     })
 );
 
-// legacy routes
-
 // Home (redirect to /vocables)
 app.get("/", function (req, res, next) {
     const query = querystring.stringify(req.query);
-    const redirect = query ? `vocables?${query}` : "vocables";
+    const redirect = query ? `vocables?${query}` : "/vocables";
     res.redirect(redirect);
 });
 
@@ -142,11 +140,11 @@ if (config.auth !== "disabled") {
         });
     } else {
         app.get("/login", function (req, res, next) {
-            const redirect = req.query.redirect;
+            const redirect = formatRedirectPath(req.query.redirect);
             res.render("login", { title: "souslesensVocables - Login", redirect: redirect });
         });
         app.post("/auth/login", function (req, res, next) {
-            const redirect = req.query.redirect;
+            const redirect = formatRedirectPath(req.query.redirect);
             passport.authenticate("local", { successRedirect: redirect, failureRedirect: "/login", failureMessage: true })(req, res, next);
         });
     }
@@ -192,5 +190,15 @@ app.use(function (err, req, res, _next) {
     res.status(err.status || 500);
     res.render("error");
 });
+
+function formatRedirectPath(path) {
+    if (!path) {
+        return "/vocables";
+    }
+    if (!path.startsWith("/")) {
+        return `/${path}`;
+    }
+    return path;
+}
 
 module.exports = app;

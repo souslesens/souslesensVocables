@@ -66,17 +66,14 @@ var Sparql_CRUD = (function () {
         });
     };
 
-    self.loadItem = function (uri, options) {
+    self.loadItem = function (uri, options, callback) {
         var filter = "FILTER (?s =<" + uri + ">) ";
         var options = {
             filter: filter,
         };
         Sparql_OWL.getTriples(self.currentSourceLabel, options, function (err, result) {
             if (err) {
-                return self.loadItemCallback(err.responseText);
-            }
-            if (false && !options.content) {
-                return self.loadItemCallback(null, result);
+                return callback(err.responseText);
             }
 
             var contentPredicate = self.currentSourceObj.graphUri + self.contentPredicate;
@@ -85,12 +82,13 @@ var Sparql_CRUD = (function () {
                 var predicate = triple.p.value;
                 if (predicate == contentPredicate) {
                     var content = JSON.parse(atob(triple.o.value));
-                    return self.loadItemCallback(null, content);
+                    return callback(null, content);
                 }
             });
         });
     };
-    self.save = function (CRUDsource, dataSource, data, scope) {
+
+    self.save = function (CRUDsource, dataSource, data, scope, callback) {
         self.initCRUDsource(CRUDsource);
         var triples = [];
 
@@ -122,7 +120,7 @@ var Sparql_CRUD = (function () {
         triples.push({
             subject: queryUri,
             predicate: "rdf:type",
-            object: "slsv:" + self.currentSourceObj.type,
+            object: self.currentSourceObj.type,
         });
         triples.push({
             subject: queryUri,
@@ -145,10 +143,18 @@ var Sparql_CRUD = (function () {
         };
         Sparql_generic.insertTriples(CRUDsource, triples, options, function (err, result) {
             if (err) {
+                if (callback) return callback(err);
                 return alert(err.responseText);
             }
-            $("#sparql_CRUD_itemsSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
+            if (callback) return callback(null, { id: queryUri, label: label });
+            // $("#sparql_CRUD_itemsSelect").append("<option value='" + queryUri + "'>" + label + "</option>");
         });
+    };
+
+    self.delete = function (CRUDsource, uri, callback) {
+        CRUDsource = CRUDsource || self.currentSourceLabel;
+        self.initCRUDsource(CRUDsource);
+        Sparql_generic.deleteTriples(CRUDsource, uri, null, null, callback);
     };
 
     return self;

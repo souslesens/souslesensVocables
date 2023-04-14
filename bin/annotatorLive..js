@@ -11,8 +11,7 @@
  */
 var httpProxy = require("../bin/httpProxy.");
 var async = require("async");
-//var spacyServerUrl = "http://vps475829.ovh.net/spacy/pos"
-var spacyServerUrl = "http://51.178.39.209:8000/pos";
+var spacyServerUrl = "";
 var Inflector = require("inflected");
 const util = require("../bin/util.");
 

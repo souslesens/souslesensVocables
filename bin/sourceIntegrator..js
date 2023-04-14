@@ -36,6 +36,7 @@ var SourceIntegrator = {
             try {
                 var json = JSON.parse(stdout);
             } catch (e) {
+                console.log(stdout)
                 var x = stdout;
                 return callback(e);
             }
@@ -105,6 +106,8 @@ var SourceIntegrator = {
 
         var distinctUriRoots = [];
         triples.forEach(function (triple) {
+            if(!triple.subject )
+                return;
             var root = getUriRoot(triple.subject);
             if (root && distinctUriRoots.indexOf(root) < 0) {
                 distinctUriRoots.push(root);
@@ -137,6 +140,7 @@ var SourceIntegrator = {
             return callback();
         });
     },
+
     ontologyUrl2tripleStore: function (url, sparqlServerUrl, graphUri, format, options, callback) {
         var totalTriples = 0;
         var fechSize = 200;
@@ -454,6 +458,10 @@ var SourceIntegrator = {
     },
     getOntologyRootUris: function (ontologyUrl, options, callback) {
         SourceIntegrator.jenaParse(ontologyUrl, { extractUriRoots: 1 }, function (err, result) {
+            if(err)
+ return callback(err)
+            result.triplesCount= result.triples.length
+            result.triples=[]
             callback(err, result);
         });
     },

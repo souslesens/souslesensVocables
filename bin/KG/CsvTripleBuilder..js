@@ -938,13 +938,4 @@ var CsvTripleBuilder = {
 
 module.exports = CsvTripleBuilder;
 
-//if (true) {
-//    CsvTripleBuilder.addAllPredefinedPart14PredicatesTriples("http://data.total.com/resource/tsf/unik/", "http://51.178.139.80:8890/sparql", {}, function (err, result) {});
-//
-//    /* var options = {
-//        deleteOldGraph: true,
-//        sampleSize: 500,
-//    };
-//    CsvTripleBuilder.createTriplesFromCsv("D:\\webstorm\\souslesensVocables\\data\\CSV\\CFIHOS_V1.5_RDL", "CFIHOS tag class v1.5.csv.json", options, function (err, result) {
-//    });*/
-//}
+

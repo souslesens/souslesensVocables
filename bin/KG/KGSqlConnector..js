@@ -14,9 +14,9 @@ const async = require("async");
 var KGSqlConnector = {
     connection: {
         // host: "localhost",
-        host: "51.178.39.209",
-        user: "souslesens",
-        password: "vocables",
+        host: "xxx",
+        user: "xx",
+        password: "xx",
     },
 
     queries: {

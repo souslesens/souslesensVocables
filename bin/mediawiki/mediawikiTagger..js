@@ -1009,14 +1009,14 @@ if (false) {
         wikiUrl = "https://wiki.aapg.org";
         startMark = '<table class="mw-allpages-table-chunk"';
         endMark = "</table>";
-        elasticUrl = "http://vps254642.ovh.net:2009/";
+        elasticUrl = "xxxx";
         indexName = "mediawiki-pages-aapg";
     }
     if (false) {
         wikiUrl = "https://petrowiki.spe.org";
         startMark = null;
         endMark = null;
-        elasticUrl = "http://vps254642.ovh.net:2009/";
+        elasticUrl = "xxxx";
         indexName = "mediawiki-pages-spe";
     }
 
@@ -1024,7 +1024,7 @@ if (false) {
         wikiUrl = "https://wiki.seg.org";
         startMark = null;
         endMark = null;
-        elasticUrl = "http://vps254642.ovh.net:2009/";
+        elasticUrl = "xxxx";
         indexName = "mediawiki-pages-seg";
     }
     mediaWikiTagger.indexWikiPages(wikiUrl, startMark, endMark, elasticUrl, indexName);
@@ -1046,7 +1046,7 @@ if (false) {
     wikiUrl = "https://petrowiki.spe.org/";
     indexName = "mediawiki-pages-spe";
 
-    elasticUrl = "http://vps254642.ovh.net:2009/";
+    elasticUrl = "xxxx";
     thesaurusGraphUris = ["http://souslesens.org/oil-gas/upstream/"]; //, "http://www.eionet.europa.eu/gemet/", "http://data.total.com/resource/thesaurus/ctg/", "https://www2.usgs.gov/science/USGSThesaurus/"]
 
     //  thesaurusGraphUris = ["http://data.total.com/resource/dictionary/gaia/"];
@@ -1072,12 +1072,12 @@ if (false) {
 }
 
 if (false) {
-    elasticUrl = "http://vps254642.ovh.net:2009/";
+    elasticUrl = "xxxx";
     indexName = "mediawiki-pages-aapg";
     mediaWikiTagger.listIndexCategories(elasticUrl, indexName);
 }
 if (false) {
-    elasticUrl = "http://vps254642.ovh.net:2009/";
+    elasticUrl = "xxxx";
     indexName = "mediawiki-pages-aapg";
     wikiUrl = "https://wiki.aapg.org/";
 
@@ -1094,7 +1094,7 @@ if (false) {
     mediaWikiTagger.setTulsaSchemes(graphUri);
 }
 if (false) {
-    elasticUrl = "http://vps254642.ovh.net:2009/";
+    elasticUrl = "xxxx";
     indexName = "mediawiki-pages-aapg";
     indexName = "mediawiki-pages-spe";
     indexName = "mediawiki-pages-seg";

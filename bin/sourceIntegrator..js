@@ -12,7 +12,7 @@ var exec = require("child_process").exec;
 
 var SourceIntegrator = {
     jenaParse: function (filePath, options, callback) {
-        var jenaPath = path.join(__dirname, "../jena/");
+        var jenaPath = path.join(__dirname, "../java/jena/");
         var cmd;
         if (process.platform === "win32") {
             // my dev env

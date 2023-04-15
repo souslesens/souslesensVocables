@@ -1,3 +1,15 @@
+import KGcreator from "../../KGcreator.js"
+import visjsGraph from "../../visjsGraph2.js"
+import Lineage_classes from "../lineage_classes.js"
+import common from "../../../common.js"
+import Sparql_common from "../../sparql_common.js"
+import Sparql_generic from "../../sparql_generic.js"
+import Sparql_proxy from "../../sparql_proxy.js"
+import Sparql_OWL from "../../sparql_OWL.js"
+import SourceBrowser from "../../sourceBrowser.js"
+
+
+
 //www.nstauthority.co.uk/data-centre/data-downloads-and-publications/well-data/
 
 var Lineage_linkedData_mappings = (function () {
@@ -969,3 +981,7 @@ self.graphTable(KGcreator.currentTreeNode);
 
     return self;
 })();
+
+
+
+export default Lineage_linkedData_mappings

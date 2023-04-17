@@ -607,6 +607,14 @@ var CsvTripleBuilder = {
         var query = CsvTripleBuilder.getSparqlPrefixesStr();
         query += "DELETE DATA {  GRAPH <" + graphUri + "> {  " + insertTriplesStr + " }  } ";
         var params = { query: query };
+        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+            params.auth = {
+                user: ConfigManager.config.sparql_server.user,
+                pass: ConfigManager.config.sparql_server.password,
+                sendImmediately: false,
+            };
+
+        }
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
@@ -637,6 +645,15 @@ var CsvTripleBuilder = {
 
                     var params = { query: query };
 
+                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                        params.auth = {
+                            user: ConfigManager.config.sparql_server.user,
+                            pass: ConfigManager.config.sparql_server.password,
+                            sendImmediately: false,
+                        };
+
+                    }
+
                     httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                         if (err) {
                             return callbackSeries(err);
@@ -664,6 +681,15 @@ var CsvTripleBuilder = {
 
                     var params = { query: query };
 
+                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                        params.auth = {
+                            user: ConfigManager.config.sparql_server.user,
+                            pass: ConfigManager.config.sparql_server.password,
+                            sendImmediately: false,
+                        };
+
+                    }
+
                     httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                         if (err) {
                             return callbackSeries(err);
@@ -676,6 +702,15 @@ var CsvTripleBuilder = {
                 function (callbackSeries) {
                     var query = "clear Graph  <" + tempGraphUri + "> ";
                     var params = { query: query };
+
+                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                        params.auth = {
+                            user: ConfigManager.config.sparql_server.user,
+                            pass: ConfigManager.config.sparql_server.password,
+                            sendImmediately: false,
+                        };
+
+                    }
 
                     httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                         if (err) {
@@ -796,6 +831,15 @@ var CsvTripleBuilder = {
                 function (_callbackSeries) {
                     var query = "clear graph   <" + graphUri + ">";
                     var params = { query: query };
+
+                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                        params.auth = {
+                            user: ConfigManager.config.sparql_server.user,
+                            pass: ConfigManager.config.sparql_server.password,
+                            sendImmediately: false,
+                        };
+
+                    }
 
                     httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
                         if (err) {

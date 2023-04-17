@@ -1,4 +1,4 @@
-import visjsGraph from "./visjsGraph2.js"
+import visjsGraph from "./../graph/visjsGraph2.js"
 
 
 

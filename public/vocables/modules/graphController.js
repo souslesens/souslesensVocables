@@ -17,7 +17,7 @@ import Lineage_classes from "./tools/lineage/lineage_classes.js"
 var GraphController = (function () {
     var self = {};
     self.defaultNodeColor = "blue";
-    defaultNodeShape = "dot";
+    var defaultNodeShape = "dot";
 
     self.toVisjsData = function (visjsData, data, parentNodeId, fromVar, toVar, visjOptions, _fromLevel) {
         self.defaultNodeColor = visjsGraph.globalOptions.nodes.color || self.defaultNodeColor;

@@ -1,10 +1,10 @@
-import SourceBrowser from "../sourceBrowser.js"
-import Sparql_OWL from "../sparql_OWL.js"
-import visjsGraph from "../visjsGraph2.js"
-import Sparql_common from "../sparql_common.js"
+import SourceBrowser from "./../sourceBrowser.js"
+import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js"
+import visjsGraph from "./../../graph/visjsGraph2.js"
+import Sparql_common from "./../../sparqlProxies/sparql_common.js"
 import Lineage_classes from "./lineage_classes.js"
-import common from "../../common.js"
-import Export from "../../export.js"
+import common from "./../../common.js"
+import Export from "./../../export.js"
 
 
 
@@ -18,9 +18,9 @@ import Export from "../../export.js"
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-Lineage_properties = (function () {
+var Lineage_properties = (function () {
     var self = {};
-    sourceColors = {};
+    var sourceColors = {};
     self.defaultShape = "triangle";
     self.defaultEdgeArrowType = "triangle";
     self.defaultShape = "dot";

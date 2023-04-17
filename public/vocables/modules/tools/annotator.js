@@ -1,5 +1,5 @@
-import Clipboard from "../clipboard.js"
-import Sparql_generic from "./sparql_generic.js"
+import Clipboard from "./../clipboard.js"
+import Sparql_generic from "./../sparqlProxies/sparql_generic.js"
 import SourceBrowser from "./sourceBrowser.js"
 
 

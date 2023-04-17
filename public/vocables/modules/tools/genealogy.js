@@ -1,7 +1,7 @@
-import Sparql_generic from "./sparql_generic.js"
-import visjsGraph from "./visjsGraph2.js"
-import GraphController from "../graphController.js"
-import Clipboard from "../clipboard.js"
+import Sparql_generic from "./../sparqlProxies/sparql_generic.js"
+import visjsGraph from "./../graph/visjsGraph2.js"
+import GraphController from "./../graphController.js"
+import Clipboard from "./../clipboard.js"
 
 
 

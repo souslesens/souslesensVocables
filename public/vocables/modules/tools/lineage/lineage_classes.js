@@ -1,20 +1,20 @@
-import common from "../../common.js"
-import KGcreator from "../KGcreator.js"
+import common from "./../../common.js"
+import KGcreator from "./../KGcreator.js"
 import Lineage_sets from "./lineage_sets.js"
 import Lineage_linkedData_mappings from "./linkedData/lineage_linkedData_mappings.js"
-import SourceBrowser from "../sourceBrowser.js"
+import SourceBrowser from "./../sourceBrowser.js"
 import Lineage_graphTraversal from "./lineage_graphTraversal.js"
 import Lineage_selection from "./lineage_selection.js"
 import KGquery from "./assetQuery.js"
-import visjsGraph from "../visjsGraph2.js"
+import visjsGraph from "./../../graph/visjsGraph2.js"
 import Lineage_decoration from "./lineage_decoration.js"
-import Sparql_common from "../sparql_common.js"
-import Sparql_generic from "../sparql_generic.js"
+import Sparql_common from "./../../sparqlProxies/sparql_common.js"
+import Sparql_generic from "./../../sparqlProxies/sparql_generic.js"
 import Lineage_containers from "./lineage_containers.js"
-import SearchUtil from "../searchUtil.js"
-import Sparql_OWL from "../sparql_OWL.js"
-import Sparql_proxy from "../sparql_proxy.js"
-import CustomPluginController from "../../customPluginController.js"
+import SearchUtil from "./../../search/searchUtil.js"
+import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js"
+import Sparql_proxy from "./../../sparqlProxies/sparql_proxy.js"
+import CustomPluginController from "./../../customPluginController.js"
 
 
 
@@ -3000,3 +3000,5 @@ attrs.color=self.getSourceColor(superClassValue)
 
 
 export default Lineage_classes
+
+window.Lineage_classes=Lineage_classes

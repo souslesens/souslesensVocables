@@ -1,8 +1,8 @@
-import common from "../../common.js"
-import Sparql_common from "../sparql_common.js"
-import Sparql_generic from "../sparql_generic.js"
-import Sparql_OWL from "../sparql_OWL.js"
-import visjsGraph from "../visjsGraph2.js"
+import common from "./../../common.js"
+import Sparql_common from "./../../sparqlProxies/sparql_common.js"
+import Sparql_generic from "./../../sparqlProxies/sparql_generic.js"
+import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js"
+import visjsGraph from "./../../graph/visjsGraph2.js"
 import Lineage_classes from "./lineage_classes.js"
 
 

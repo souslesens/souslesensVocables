@@ -1,8 +1,8 @@
-import SourceBrowser from "../sourceBrowser.js"
-import TreeController from "../../treeController.js"
-import Sparql_generic from "../sparql_generic.js"
+import SourceBrowser from "./../sourceBrowser.js"
+import TreeController from "./../../treeController.js"
+import Sparql_generic from "./../../sparqlProxies/sparql_generic.js"
 import Blender from "./blender.js"
-import common from "../../common.js"
+import common from "./../../common.js"
 
 
 

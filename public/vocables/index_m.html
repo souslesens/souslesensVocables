@@ -30,7 +30,7 @@
         <script type="module" src="modules/graph/SVGexport.js"></script>
         <script type="module" src="modules/graph/graphMLexport.js"></script>
 
-        <script  src="modules/mainController.js"></script>
+        <script type="module" src="modules/mainController.js"></script>
 
 
 
@@ -100,9 +100,10 @@
         <script src="config/app_config.js"></script>
         <!--    <script src="config/app_config_draft_tools.js"></script>-->
 
-        <script src="config/tools.js"></script>
 
-        <script  src="modules/authentification.js"></script>
+
+        <script  type="module" src="modules/authentification.js"></script>
+
 
         <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
@@ -116,7 +117,7 @@
 
 
         <script type="module" src="modules/search/searchUtil.js"></script>
-        <script type="module" src="modules/tools/ontologyUtil.js"></script>
+      <!--  <script type="module" src="modules/tools/ontologyUtil.js"></script>-->
 
 
 
@@ -127,7 +128,7 @@
         <script type="module" src="modules/search/elasticSearchProxy.js"></script>
 
 
-
+        <script src="config/tools.js"></script>
 
 
 
@@ -189,8 +190,7 @@
 
             $(function () {
 
-                import MainController from './modules/mainController.js';
-                import authentication from './modules/authentification.js';
+
 
 
                 MainController.initConfig(function (err) {

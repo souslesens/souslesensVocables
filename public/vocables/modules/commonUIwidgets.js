@@ -4,7 +4,7 @@ import Sparql_OWL from "./sparqlProxies/sparql_OWL.js"
 
 
 
-CommonUIwidgets = (function () {
+var CommonUIwidgets = (function () {
     var self = {};
 
     self.fillObjectTypeOptionsOnPromptFilter = function (type, selectId, source) {

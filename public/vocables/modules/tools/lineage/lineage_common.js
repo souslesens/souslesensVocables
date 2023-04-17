@@ -1,5 +1,5 @@
-import common from "../../common.js"
-import Sparql_generic from "../sparql_generic.js"
+import common from "./../../common.js"
+import Sparql_generic from "./../../sparqlProxies/sparql_generic.js"
 
 
 
@@ -13,7 +13,7 @@ import Sparql_generic from "../sparql_generic.js"
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 // eslint-disable-next-line no-global-assign
-Lineage_common = (function () {
+var Lineage_common = (function () {
     var self = {};
     self.currentSource = null;
     self.copyNodeToClipboard = function (nodeData) {

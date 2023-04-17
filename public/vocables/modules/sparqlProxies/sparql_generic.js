@@ -1,6 +1,6 @@
 import Sparql_common from "./sparql_common.js"
 import Sparql_proxy from "./sparql_proxy.js"
-import common from "../common.js"
+import common from "./../common.js"
 import Sparql_OWL from "./sparql_OWL.js"
 
 

@@ -1,5 +1,5 @@
-import Sparql_common from "../sparql_common.js"
-import Sparql_OWL from "../sparql_OWL.js"
+import Sparql_common from "./../../sparqlProxies/sparql_common.js"
+import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js"
 
 
 

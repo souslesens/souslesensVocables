@@ -1,7 +1,7 @@
-import common from "../common.js"
+import common from "./../common.js"
 import Sparql_OWL from "./sparql_OWL.js"
 import Sparql_generic from "./sparql_generic.js"
-import Lineage_blend from "./D:/webstorm/souslesensVocables/public/vocables/js/tools/lineage/lineage_blend.js"
+import Lineage_blend from "./../tools/lineage/lineage_blend.js"
 
 
 

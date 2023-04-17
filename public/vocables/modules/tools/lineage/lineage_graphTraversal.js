@@ -1,9 +1,9 @@
-import Sparql_common from "../sparql_common.js"
-import Sparql_proxy from "../sparql_proxy.js"
-import Sparql_OWL from "../sparql_OWL.js"
-import SourceBrowser from "../sourceBrowser.js"
-import common from "../../common.js"
-import visjsGraph from "../visjsGraph2.js"
+import Sparql_common from "./../../sparqlProxies/sparql_common.js"
+import Sparql_proxy from "./../../sparqlProxies/sparql_proxy.js"
+import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js"
+import SourceBrowser from "./../sourceBrowser.js"
+import common from "./../../common.js"
+import visjsGraph from "./../../graph/visjsGraph2.js"
 import Lineage_classes from "./lineage_classes.js"
 
 

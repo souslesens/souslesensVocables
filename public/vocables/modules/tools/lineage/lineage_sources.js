@@ -1,18 +1,18 @@
-import OntologyModels from "../../ontologyModels.js"
+import OntologyModels from "./../../ontologyModels.js"
 import Lineage_classes from "./lineage_classes.js"
-import SourceBrowser from "../sourceBrowser.js"
+import SourceBrowser from "./../sourceBrowser.js"
 import Lineage_decoration from "./lineage_decoration.js"
-import common from "../../common.js"
-import visjsGraph from "../visjsGraph2.js"
-import SearchUtil from "../searchUtil.js"
+import common from "./../../common.js"
+import visjsGraph from "./../../graph/visjsGraph2.js"
+import SearchUtil from "./../../search/searchUtil.js"
 import Lineage_combine from "./lineage_combine.js"
 import Lineage_selection from "./lineage_selection.js"
-import Sparql_OWL from "../sparql_OWL.js"
+import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js"
 import Lineage_3D from "./lineage_3d.js"
 
 
 
-Lineage_sources = (function () {
+var Lineage_sources = (function () {
     var self = {};
     self.activeSource = null;
     self.loadedSources = {};

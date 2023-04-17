@@ -1,8 +1,8 @@
-import Sparql_generic from "./sparql_generic.js"
+import Sparql_generic from "./../sparqlProxies/sparql_generic.js"
 import SourceBrowser from "./sourceBrowser.js"
-import Sparql_proxy from "./sparql_proxy.js"
-import Sparql_common from "./sparql_common.js"
-import Sparql_OWL from "./sparql_OWL.js"
+import Sparql_proxy from "./../sparqlProxies/sparql_proxy.js"
+import Sparql_common from "./../sparqlProxies/sparql_common.js"
+import Sparql_OWL from "./../sparqlProxies/sparql_OWL.js"
 
 
 

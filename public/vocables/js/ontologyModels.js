@@ -278,5 +278,12 @@ var OntologyModels = (function () {
         );
     };
 
+    self.unRegisterSourceModel = function () {
+        var basicsSources = Object.keys(Config.basicVocabularies);
+        for (var source in Config.ontologiesVocabularyModels) {
+            if (basicsSources.indexOf(source) < 0) delete Config.ontologiesVocabularyModels[source];
+        }
+    };
+
     return self;
 })();

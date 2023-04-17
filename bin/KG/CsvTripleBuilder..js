@@ -7,6 +7,7 @@ var httpProxy = require("../httpProxy.");
 var sqlServerProxy = require("./SQLserverConnector.");
 
 var ConfigManager = require("../configManager.");
+const socket = require("../socketManager.");
 
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 
@@ -526,7 +527,7 @@ var CsvTripleBuilder = {
                                                     }
                                                 });
                                                 triples = triples.concat(metaDataTriples);
-
+                                                // socket.message("KGbuild", "loading ONE MODEL superClasses ");
                                                 console.log("writing triples:" + triples.length);
                                                 var slices = util.sliceArray(triples, 200);
                                                 triples = [];
@@ -936,14 +937,3 @@ var CsvTripleBuilder = {
 };
 
 module.exports = CsvTripleBuilder;
-
-//if (true) {
-//    CsvTripleBuilder.addAllPredefinedPart14PredicatesTriples("http://data.total.com/resource/tsf/unik/", "http://51.178.139.80:8890/sparql", {}, function (err, result) {});
-//
-//    /* var options = {
-//        deleteOldGraph: true,
-//        sampleSize: 500,
-//    };
-//    CsvTripleBuilder.createTriplesFromCsv("D:\\webstorm\\souslesensVocables\\data\\CSV\\CFIHOS_V1.5_RDL", "CFIHOS tag class v1.5.csv.json", options, function (err, result) {
-//    });*/
-//}

@@ -34,7 +34,7 @@ var YasguyOutput = (function () {
             " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> PREFIX  rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#> PREFIX  skos:<http://www.w3.org/2004/02/skos/core#>  select  distinct *  FROM   <http://souslesens.org/resource/stratigraphie/>    WHERE {    ?collection skos:member* ?acollection. filter( ?collection=<http://souslesens.org/resource/stratigraphie/00001f4b56>).?acollection rdf:type skos:Collection.    ?collection skos:prefLabel ?collectionLabel.   ?acollection skos:prefLabel ?acollectionLabel. \n" +
             "?acollection skos:member ?collSubject. ?subject skos:broader* ?collSubject. ?subject skos:prefLabel ?subjectLabel\n" +
             "} limit 10000";
-        var url = "http://51.178.139.80:8890/sparql?format=json&query=";
+        var url = "xxx/sparql?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: "stratigraphie" }, function (err) {
             if (err) {
                 return callback(err);

@@ -2,7 +2,6 @@
     "souslesensUrl": "http://localhost:3011",
     "listenPort": "3011",
     "default_sparql_url": "http://localhost:8899/sparql",
-    "datalab_sparql_url": "http://opeppa-updtlb03.main.glb.corp.local:8890/sparql",
     "auth": "local",
     "defaultGroups": [],
     "logDir": "logs",

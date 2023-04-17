@@ -274,7 +274,7 @@ indexes.push(source.toLowerCase());
                         str += JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
                     });
                     MainController.UI.message("getting labels " + allHits.length + " ...");
-                    ElasticSearchProxy.executeMsearch(str, function (err, result) {
+                    ElasticSearchProxy.executeMsearch(str, [index], function (err, result) {
                         if (err) {
                             return callbackEach(err);
                         }
@@ -417,7 +417,7 @@ indexes.push(source.toLowerCase());
                     var wordQuery = self.getWordBulkQuery(word, mode, indexes);
                     bulQueryStr += wordQuery;
                 });
-                ElasticSearchProxy.executeMsearch(bulQueryStr, function (err, result) {
+                ElasticSearchProxy.executeMsearch(bulQueryStr, indexes, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -475,6 +475,7 @@ indexes.push(source.toLowerCase());
             sources,
             function (sourceLabel, callbackEachSource) {
                 var totalLines = 0;
+                var taxonomyClasses = [];
                 async.series(
                     [
                         // index nodes hierarchy
@@ -489,6 +490,7 @@ indexes.push(source.toLowerCase());
                                     classesArray.push(result.classesMap[key]);
                                 }
                                 var slices = common.array.slice(classesArray, 50);
+                                taxonomyClasses = classesArray;
                                 async.eachSeries(
                                     slices,
                                     function (data, callbackEach) {
@@ -518,38 +520,108 @@ indexes.push(source.toLowerCase());
                             });
                         },
 
+                        // indexNamedIndividuals
+                        function (callbackSeries) {
+                            if (true || !options.indexNamedIndividuals) {
+                                return callbackSeries();
+                            }
+
+                            var taxonomyClassesIdsMap = {};
+                            taxonomyClasses.forEach(function (item) {
+                                taxonomyClassesIdsMap[item.id] = item;
+                            });
+
+                            var totalLines = 0;
+                            MainController.UI.message("indexing namedIndividuals");
+
+                            var processor = function (data, callbackProcessor) {
+                                var individualsToIndex = [];
+                                data.forEach(function (item) {
+                                    var parent;
+                                    var parents;
+
+                                    if (taxonomyClassesIdsMap[item.type2.value]) {
+                                        parent = item.type2.value;
+                                        parents = taxonomyClassesIdsMap[item.type2.value].parents;
+                                    } else {
+                                        parent = item.type2.value;
+                                        parents = [item.type2.value, sourceLabel];
+                                    }
+
+                                    individualsToIndex.push({
+                                        id: item.id.value,
+                                        label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value),
+                                        skoslabels: [],
+                                        parent: parent,
+                                        parents: parents,
+                                        type: item.type2.value,
+                                    });
+                                });
+
+                                self.indexData(sourceLabel.toLowerCase(), individualsToIndex, false, function (err, result) {
+                                    if (err) {
+                                        return callbackEach(err);
+                                    }
+                                    if (!result) {
+                                        return callbackSeries();
+                                    }
+
+                                    totalLines += result.length;
+                                    totalLinesAllsources += totalLines;
+
+                                    MainController.UI.message("indexed " + totalLines + " namedIndividuals in index " + sourceLabel.toLowerCase());
+
+                                    callbackProcessor(err);
+                                });
+                            };
+
+                            var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
+                            Sparql_OWL.getDictionary(sourceLabel, { filter: filter, processorFectchSize: 100 }, processor, function (err, result) {
+                                return callbackSeries(err);
+                            });
+                        },
                         // index properties
                         function (callbackSeries) {
                             if (!options.indexProperties) {
                                 return callbackSeries();
                             }
                             MainController.UI.message("indexing properties");
-
+                            totalLines = 0;
                             Sparql_OWL.getObjectProperties(sourceLabel, {}, function (err, result) {
                                 if (err) {
                                     return callback(err);
                                 }
-                                var data = [];
+                                var allData = [];
                                 result.forEach(function (item) {
-                                    data.push({
+                                    allData.push({
                                         id: item.property.value,
                                         label: item.propertyLabel.value,
                                         type: "property",
                                         owltype: "ObjectProperty",
                                     });
                                 });
-                                self.indexData(sourceLabel.toLowerCase(), data, false, function (err, result) {
-                                    if (err) {
+
+                                var slices = common.array.slice(allData, 50);
+                                async.eachSeries(
+                                    slices,
+                                    function (data, callbackEach) {
+                                        self.indexData(sourceLabel.toLowerCase(), data, false, function (err, result) {
+                                            if (err) {
+                                                return callbackEach(err);
+                                            }
+                                            if (!result) {
+                                                return callbackSeries();
+                                            }
+                                            totalLines += result.length;
+                                            totalLinesAllsources += totalLines;
+                                            MainController.UI.message("indexed " + totalLines + " objectProperties in index " + sourceLabel.toLowerCase());
+                                            callbackEach();
+                                        });
+                                    },
+                                    function (err) {
                                         return callbackSeries(err);
                                     }
-                                    if (!result) {
-                                        return callbackSeries();
-                                    }
-                                    totalLines += result.length;
-                                    totalLinesAllsources += totalLines;
-                                    MainController.UI.message("indexed " + totalLines + " in index " + sourceLabel.toLowerCase());
-                                    callbackSeries();
-                                });
+                                );
                             });
                         },
                     ],

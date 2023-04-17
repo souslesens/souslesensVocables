@@ -17,6 +17,8 @@ var async = require("async");
 var fs = require("fs");
 
 const { configPath, config } = require("../model/config");
+//const { getAllowedSources, filterSources, sortObjectByKey, resourceFetched } = require("../api/v1/paths/utils");
+//const util = require("util");
 
 var ConfigManager = {
     // TODO move to model/config
@@ -149,6 +151,65 @@ var ConfigManager = {
         jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, message) {
             callback(err, message);
         });
+    },
+
+    getUser: async function (req, res, next) {
+        const userManager = require(path.resolve("bin/user."));
+        try {
+            const userInfo = await userManager.getUser(req.user || null);
+            next(null, userInfo);
+        } catch (err) {
+            next(err);
+        }
+    },
+
+    getUserSources: async function (req, res, next) {
+        const { configPath, config } = require("../model/config");
+        const sourcesJSON = path.resolve(configPath + "/sources.json");
+        const profilesJSON = path.resolve(configPath + "/profiles.json");
+        const util = require("util");
+        const { readResource, writeResource, resourceCreated, responseSchema, resourceFetched } = require("../api/v1/paths/utils");
+        const userManager = require(path.resolve("bin/user."));
+        const read = util.promisify(fs.readFile);
+        const { getAllowedSources, filterSources, sortObjectByKey } = require("../api/v1/paths/utils.js");
+        try {
+            const userInfo = await userManager.getUser(req.user || null);
+
+            var sourcesFile = sourcesJSON;
+            if (req.query.sourcesFile) {
+                sourcesFile = path.resolve(configPath + "/" + req.query.sourcesFile);
+                if (!sourcesFile.startsWith(path.resolve(configPath))) {
+                    return res.status(403).json({ done: false, message: "forbidden path" });
+                }
+            }
+            //  const sources = await read(sourcesJSON);
+            const sources = await read(sourcesFile);
+            const parsedSources = JSON.parse(sources);
+            // return all sources if user is admin
+            let filteredSources;
+            if (!userInfo.user.groups.includes("admin")) {
+                // return filtered sources if user is not admin
+                const profiles = await read(profilesJSON);
+                const parsedProfiles = JSON.parse(profiles);
+                const allowedSources = getAllowedSources(userInfo.user, parsedProfiles, parsedSources, config.formalOntologySourceLabel);
+                filteredSources = filterSources(allowedSources, parsedSources);
+            } else {
+                // admin, return all sources with readwrite right
+                filteredSources = Object.fromEntries(
+                    Object.entries(parsedSources).map(([id, s]) => {
+                        s["accessControl"] = "readwrite";
+                        return [id, s];
+                    })
+                );
+            }
+            // sort
+            const sortedSources = sortObjectByKey(filteredSources);
+            // return
+            next(null, sortedSources);
+            //  resourceFetched(res, sortedSources);
+        } catch (err) {
+            next(err);
+        }
     },
 };
 ConfigManager.getGeneralConfig();

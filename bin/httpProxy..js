@@ -16,20 +16,6 @@ var request = require("request");
 var proxy = null;
 var httpProxy = {
     host: null,
-    setProxyForServerDomain: function (host) {
-        if (!proxy) {
-            var domainWithProxy = "XXXmain.glb.corp.local";
-            var proxyUrl = "http:10.16.152.65:8080";
-            //console.log(" -----------setting up proxy---------"+proxyUrl)
-            if (proxyUrl && host && host.indexOf(domainWithProxy) > -1) {
-                /// proxy for request
-                process.env["http_proxy"] = proxyUrl;
-                process.env["https_proxy"] = proxyUrl;
-
-                proxy = proxyUrl;
-            }
-        }
-    },
 
     get: function (url, options, callback) {
         if (!options.headers) {
@@ -83,6 +69,9 @@ var httpProxy = {
 
             url: url,
         };
+
+        if (params.auth) options.auth = params.auth;
+
         if (headers) {
             options.headers = headers;
 
@@ -109,6 +98,8 @@ var httpProxy = {
                 //  console.log("HTTP_PROXY_ERROR"+JSON.stringify(error, null, 2))
                 return callback(error);
             }
+
+            if (response.statusCode != 200) return callback(response.statusMessage);
 
             if (headers && headers["Accept"].indexOf("json") < 0) return callback(null, body);
             if (typeof body === "string") {

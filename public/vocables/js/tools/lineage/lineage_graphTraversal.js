@@ -13,7 +13,6 @@ var Lineage_graphTraversal = (function () {
      */
     self.getShortestpathUris = function (source, fromNodeId, toNodeId, options, callback) {
         var body = {
-            getShortestPath: 1,
             sparqlServerUrl: Config.sources[source].sparql_server.url,
             graphUri: Config.sources[source].graphUri,
             fromNodeUri: fromNodeId,
@@ -22,13 +21,11 @@ var Lineage_graphTraversal = (function () {
         };
 
         var payload = {
-            url: Config.sources[source].sparql_server.url,
             body: JSON.stringify(body),
-            POST: true,
         };
         $.ajax({
             type: "POST",
-            url: `${Config.apiUrl}/httpProxy`,
+            url: `${Config.apiUrl}/shortestPath`,
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {

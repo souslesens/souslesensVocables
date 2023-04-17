@@ -713,7 +713,21 @@ var CsvTripleBuilder = {
         // console.log(query)
 
         //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
+
         var params = { query: queryGraph };
+
+        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+            params.auth = {
+                user: ConfigManager.config.sparql_server.user,
+                pass: ConfigManager.config.sparql_server.password,
+                sendImmediately: false,
+            };
+
+        }
+
+
+
+
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {

@@ -1,3 +1,6 @@
+
+/** @module myModule */
+
 import Sparql_common from "./sparql_common.js"
 import Sparql_generic from "./sparql_generic.js"
 import Sparql_proxy from "./sparql_proxy.js"
@@ -18,9 +21,9 @@ import Lineage_blend from "./../tools/lineage/lineage_blend.js"
 var Sparql_OWL = (function () {
     var self = {};
 
-    self.ancestorsDepth = 6;
+self.ancestorsDepth = 6;
 
-    /**
+    /** @function
      * @param source
      * @returns sparql (composed) predicate defining chilhood relation for a source depending on its natrue (OWL ,SKOS) and sourceConfig.taxonomyPredicates
      *
@@ -1912,7 +1915,6 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
 
     return self;
 })();
-
 
 
 export default Sparql_OWL

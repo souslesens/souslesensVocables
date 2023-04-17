@@ -28,6 +28,7 @@
     "password": "",
     "server": "",
     "database": ""
+    "trustServerCertificate": true
   },
   "ElasticSearch": {
     "url": "http://xxxx:9200/",

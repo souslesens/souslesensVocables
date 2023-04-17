@@ -3001,4 +3001,4 @@ attrs.color=self.getSourceColor(superClassValue)
 
 export default Lineage_classes
 
-window.Lineage_classes=Lineage_classes
+w

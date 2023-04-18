@@ -1,6 +1,9 @@
 import Sparql_common from "./sparqlProxies/sparql_common.js"
 import common from "./common.js"
 import OntologyModels from "./ontologyModels.js"
+import authentication from "./authentification.js"
+import Clipboard from "./clipboard.js";
+import Lineage_sources from "./tools/lineage/lineage_sources.js";
 
 
 
@@ -711,3 +714,4 @@ return;*/
 
 
 export default MainController
+window.MainController=MainController

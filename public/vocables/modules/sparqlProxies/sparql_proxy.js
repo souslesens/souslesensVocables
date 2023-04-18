@@ -1,4 +1,6 @@
-import common from "./../common.js"
+import common from "../common.js"
+import MainController from "../mainController.js";
+import authentication from "../authentification.js";
 
 
 

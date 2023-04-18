@@ -1,5 +1,5 @@
 
-
+import visjsGraph from "./graph/visjsGraph2.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com

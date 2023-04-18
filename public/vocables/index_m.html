@@ -128,7 +128,7 @@
         <script type="module" src="modules/search/elasticSearchProxy.js"></script>
 
 
-        <script src="config/tools.js"></script>
+        <script type="module" src="config/tools_m.js"></script>
 
 
 
@@ -174,7 +174,12 @@
         <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
         <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 
-        <script>
+        <script type="module">
+            import MainController from "./modules/mainController.js";
+            import authentication from "./modules/authentification.js"
+
+
+
             var leftPanelWidth = 400;
             var rightPanelWidth = 400;
             var w;

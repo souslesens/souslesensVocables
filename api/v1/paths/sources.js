@@ -1,14 +1,9 @@
 const path = require("path");
-const fs = require("fs");
 
 const { configPath, configProfilesPath } = require("../../../model/config");
 const { sourceModel, SourceModel } = require("../../../model/sources");
-const sourcesJSON = path.resolve(configPath + "/sources.json");
-const profilesJSON = path.resolve(configPath + "/profiles.json");
-const util = require("util");
-const { readResource, writeResource, resourceCreated, responseSchema, resourceFetched } = require("./utils");
+const { responseSchema } = require("./utils");
 const userManager = require(path.resolve("bin/user."));
-const read = util.promisify(fs.readFile);
 const { successfullyFetched, successfullyCreated } = require("./utils.js");
 module.exports = function () {
     let operations = {

@@ -125,6 +125,11 @@ class SourceModel {
         return await this._sortSources(await this._read());
     };
 
+    getOneUserSource = async (user, sourceName) => {
+        const userSources = await this.getUserSources(user);
+        return userSources[sourceName];
+    };
+
     getUserSources = async (user) => {
         const allSources = await this._read();
         if (user.login === "admin" || user.groups.includes("admin")) {

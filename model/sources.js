@@ -162,6 +162,22 @@ class SourceModel {
             lock.release("SourcesThread");
         }
     };
+
+    updateSource = async (source) => {
+        await lock.acquire("SourcesThread");
+        try {
+            const sources = await this._read();
+            if (!source.id in sources) {
+                return false;
+            }
+            const updatedSources = { ...sources };
+            updatedSources[source.id] = source;
+            await this._write(updatedSources);
+            return true;
+        } finally {
+            lock.release("SourcesThread");
+        }
+    };
 }
 
 const sourceModel = new SourceModel(configSourcesPath, configProfilesPath);

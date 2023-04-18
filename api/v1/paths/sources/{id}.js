@@ -50,23 +50,20 @@ module.exports = function () {
     }
 
     async function PUT(req, res, next) {
+        const updatedSource = req.body;
+        const sourceIdToUpdate = req.params.id;
+        if (sourceIdToUpdate != updatedSource.name) {
+            res.status(500).json({ message: "Id and name are different." });
+            return;
+        }
         try {
-            const updatedSource = req.body;
-            const oldSources = await readResource(sourcesJSON, res);
-            if (req.params.id in oldSources) {
-                if (req.params.id == updatedSource.name) {
-                    const updatedSources = { ...oldSources };
-                    updatedSources[req.params.id] = updatedSource;
-                    await writeFile(sourcesJSON, JSON.stringify(updatedSources, null, 2)).catch((_err) => {
-                        res.status(500).json({ message: "I couldn't write sources.json" });
-                    });
-                    resourceUpdated(res, updatedSource);
-                } else {
-                    res.status(400).json({ message: "Id and name are different." });
-                }
-            } else {
+            const sourceExists = await sourceModel.updateSource(updatedSource);
+            if (!sourceExists) {
                 res.status(400).json({ message: "Resource does not exist. If you want to create another resource, use POST instead." });
+                return;
             }
+            const sources = await sourceModel.getAllSources();
+            res.status(200).json({ message: `${sourceIdToUpdate} successfully updated`, resources: sources });
         } catch (err) {
             next(err);
         }

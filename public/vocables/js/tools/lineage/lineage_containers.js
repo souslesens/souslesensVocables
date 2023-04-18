@@ -78,7 +78,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
         return items;
     };
-    self.search = function () {
+    self.search = function (callback) {
         if ($("#lineage_containers_containersJstree").jstree) {
             $("#lineage_containers_containersJstree").empty();
         }
@@ -117,6 +117,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
             if (err) {
                 return alert(err.responseText);
             }
+            callback()
         });
     };
 
@@ -495,7 +496,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
         return callback(err, result);
       });
     };*/
-    self.listContainerResources = function (source, containerNode, options) {
+    self.listContainerResources = function (source, containerNode, options,callback) {
         var existingChildren = [];
 
         if (containerNode.children.length > 0) return;
@@ -556,6 +557,16 @@ Lineage_styles.showDialog(self.currentContainer.data);
             }
 
             common.jstree.addNodesToJstree("lineage_containers_containersJstree", containerJstreeId, jstreeData);
+            if (err) {
+                return alert(err.responseText);
+                if (callback) {
+                    return callback(err);
+                }
+            }
+            if (callback) {
+                return callback(jstreeData);
+            }
+
         });
     };
 

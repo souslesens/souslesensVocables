@@ -698,21 +698,30 @@ var CsvTripleBuilder = {
      * @param {Function} callback - Node-style async Function called to proccess result or handle error
      */
     writeTriples: function (triples, graphUri, sparqlServerUrl, callback) {
-        var insertTriplesStr = "";
-        var totalTriples = 0;
-        triples.forEach(function (triple) {
+             var insertTriplesStr = "";
+            var totalTriples = 0;
+            triples.forEach(function (triple) {
             var str = triple.s + " " + triple.p + " " + triple.o + ". ";
-            //   console.log(str)
+            // console.log(str)
             insertTriplesStr += str;
-        });
+            });
 
-        var queryGraph = CsvTripleBuilder.getSparqlPrefixesStr();
+            var queryGraph = CsvTripleBuilder.getSparqlPrefixesStr();
 
-        queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
-        // console.log(query)
+            queryGraph += " WITH GRAPH <" + graphUri + "> " + "INSERT DATA" + " {" + insertTriplesStr + " }";
+            // console.log(query)
 
-        //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
-        var params = { query: queryGraph };
+            // queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
+
+            var params = { query: queryGraph };
+
+            if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+            params.auth = {
+            user: ConfigManager.config.sparql_server.user,
+            pass: ConfigManager.config.sparql_server.password,
+            sendImmediately: false,
+            };
+        }
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {

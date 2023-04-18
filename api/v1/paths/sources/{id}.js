@@ -1,13 +1,5 @@
-const path = require("path");
-const fs = require("fs");
-const { configPath } = require("../../../../model/config");
 const { sourceModel } = require("../../../../model/sources");
-const sourcesJSON = path.resolve(configPath + "/sources.json");
 const userManager = require("../../../../bin/user.");
-const util = require("util");
-const { readResource, resourceUpdated, successfullyDeleted } = require("../utils");
-const readFile = util.promisify(fs.readFile);
-const writeFile = util.promisify(fs.writeFile);
 
 module.exports = function () {
     let operations = {

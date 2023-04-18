@@ -3,6 +3,7 @@ const fs = require("fs");
 const { configPath } = require("../../../../model/config");
 const { sourceModel } = require("../../../../model/sources");
 const sourcesJSON = path.resolve(configPath + "/sources.json");
+const userManager = require("../../../../bin/user.");
 const util = require("util");
 const { readResource, resourceUpdated, successfullyDeleted } = require("../utils");
 const readFile = util.promisify(fs.readFile);
@@ -15,21 +16,16 @@ module.exports = function () {
         PUT,
     };
 
-    function GET(req, res, _next) {
-        fs.readFile(sourcesJSON, "utf8", (err, data) => {
-            if (err) {
-                res.status(500).json({ message: "I couldn't read profiles.json" });
-            } else {
-                const sources = JSON.parse(data);
-                const source = sources[req.params.id];
-                req.params.id
-                    ? source
-                        ? res.status(200).json(sources[req.params.id])
-                        : res.status(400).json({ message: `Source with id ${req.params.id} not found` })
-                    : res.status(200).json(sources);
-            }
-        });
+    async function GET(req, res, _next) {
+        const userInfo = await userManager.getUser(req.user);
+        const source = await sourceModel.getOneUserSource(userInfo.user, req.params.id);
+        if (source) {
+            res.status(200).json(source);
+            return;
+        }
+        res.status(400).json({ message: `Source with id ${req.params.id} not found` });
     }
+
     async function DELETE(req, res, next) {
         if (!req.params.id) {
             res.status(500).json({ message: "I need a resource ID to perform this request" });

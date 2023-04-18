@@ -1,9 +1,10 @@
 const path = require("path");
 const fs = require("fs");
 const { configPath } = require("../../../../model/config");
+const { sourceModel } = require("../../../../model/sources");
 const sourcesJSON = path.resolve(configPath + "/sources.json");
 const util = require("util");
-const { readResource, resourceUpdated } = require("../utils");
+const { readResource, resourceUpdated, successfullyDeleted } = require("../utils");
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
 
@@ -29,29 +30,22 @@ module.exports = function () {
             }
         });
     }
-    async function DELETE(req, res, _next) {
-        const sources = await readFile(sourcesJSON).catch((err) => res.status(500).json(err));
-        const oldSources = JSON.parse(sources);
-        const { [req.params.id]: idToDelete, ...remainingSources } = oldSources;
-        const successfullyDeleted = JSON.stringify(remainingSources) !== JSON.stringify(oldSources);
-
-        if (req.params.id && successfullyDeleted) {
-            await writeFile(sourcesJSON, JSON.stringify(remainingSources, null, 2)).catch((err) =>
-                res.status(500).json({
-                    message: "I couldn't write sources.json",
-                    error: err,
-                })
-            );
-
-            const updatedSources = await readFile(sourcesJSON).catch((_err) => res.status(500).json({ message: "Couldn't read sources json" }));
-            res.status(200).json({
-                message: `${req.params.id} successfully deleted`,
-                resources: JSON.parse(updatedSources),
-            });
-        } else if (!req.params.id) {
+    async function DELETE(req, res, next) {
+        if (!req.params.id) {
             res.status(500).json({ message: "I need a resource ID to perform this request" });
-        } else {
-            res.status(500).json({ message: `I couldn't delete resource ${req.params.id}. Maybe it has been deleted already?` });
+            return;
+        }
+        try {
+            const sourceIdToDelete = req.params.id;
+            const sourceExists = await sourceModel.deleteSource(sourceIdToDelete);
+            if (!sourceExists) {
+                res.status(500).json({ message: `I couldn't delete resource ${sourceIdToDelete}. Maybe it has been deleted already?` });
+                return;
+            }
+            const sources = await sourceModel.getAllSources();
+            res.status(200).json({ message: `${sourceIdToDelete} successfully deleted`, resources: sources });
+        } catch (err) {
+            next(err);
         }
     }
 

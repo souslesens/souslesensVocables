@@ -137,14 +137,27 @@ class SourceModel {
         await lock.acquire("SourcesThread");
         try {
             const sources = await this._read();
-            if (newSource.id === undefined) {
-                newSource.id = newSource.name;
-            }
+            newSource.id = newSource.name;
             if (Object.keys(sources).includes(newSource.id)) {
                 throw Error("Source already exists, try updating it.");
             }
             sources[newSource.id] = newSource;
             await this._write(sources);
+        } finally {
+            lock.release("SourcesThread");
+        }
+    };
+
+    deleteSource = async (sourceName) => {
+        await lock.acquire("SourcesThread");
+        try {
+            const sources = await this._read();
+            const { [sourceName]: sourceToDelete, ...remainingSources } = sources;
+            if (!sourceToDelete) {
+                return false;
+            }
+            await this._write(remainingSources);
+            return true;
         } finally {
             lock.release("SourcesThread");
         }

@@ -402,3 +402,5 @@ var SourceEditor = (function () {
 
 
 export default SourceEditor
+
+window.SourceEditor=SourceEditor;

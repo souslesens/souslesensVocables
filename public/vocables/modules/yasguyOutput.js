@@ -55,3 +55,5 @@ var YasguyOutput = (function () {
 
 
 export default YasguyOutput
+
+window.YasguyOutput=YasguyOutput;

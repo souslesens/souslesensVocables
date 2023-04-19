@@ -520,3 +520,5 @@ var Lineage_selection = (function () {
 
 
 export default Lineage_selection
+
+window.Lineage_selection=Lineage_selection;

@@ -299,3 +299,5 @@ var Admin = (function () {
 
 
 export default Admin
+
+window.Admin=Admin;

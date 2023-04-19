@@ -1304,3 +1304,5 @@ var Blender = (function () {
 
 
 export default Blender
+
+window.Blender=Blender;

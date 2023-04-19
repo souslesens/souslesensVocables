@@ -99,3 +99,6 @@ var GraphMlExport = (function () {
 
 
 export default GraphMlExport
+
+window.GraphMlExport=GraphMlExport;
+window.GraphMlExport=GraphMlExport;

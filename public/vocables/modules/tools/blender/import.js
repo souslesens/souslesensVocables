@@ -95,3 +95,5 @@ var Import = (function () {
 
 
 export default Import
+
+window.Import=Import;

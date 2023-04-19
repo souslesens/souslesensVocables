@@ -197,3 +197,6 @@ var CommonUIwidgets = (function () {
 
 
 export default CommonUIwidgets
+
+window.CommonUIwidgets=CommonUIwidgets;
+window.CommonUIwidgets=CommonUIwidgets;

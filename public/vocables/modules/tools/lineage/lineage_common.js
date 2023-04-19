@@ -121,3 +121,5 @@ var Lineage_common = (function () {
 
 
 export default Lineage_common
+
+window.Lineage_common=Lineage_common;

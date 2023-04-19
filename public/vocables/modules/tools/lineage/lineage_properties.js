@@ -1281,3 +1281,5 @@ var Lineage_properties = (function () {
 
 
 export default Lineage_properties
+
+window.Lineage_properties=Lineage_properties;

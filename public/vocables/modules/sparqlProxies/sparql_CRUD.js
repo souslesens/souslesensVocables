@@ -170,3 +170,5 @@ var Sparql_CRUD = (function () {
 
 
 export default Sparql_CRUD
+
+window.Sparql_CRUD=Sparql_CRUD;

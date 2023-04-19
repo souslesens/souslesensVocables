@@ -342,3 +342,5 @@ var Collection = (function () {
 
 
 export default Collection
+
+window.Collection=Collection;

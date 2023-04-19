@@ -1320,3 +1320,5 @@ var Composer = (function () {
 
 
 export default Composer
+
+window.Composer=Composer;

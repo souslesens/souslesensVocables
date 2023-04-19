@@ -985,3 +985,5 @@ self.graphTable(KGcreator.currentTreeNode);
 
 
 export default Lineage_linkedData_mappings
+
+window.Lineage_linkedData_mappings=Lineage_linkedData_mappings;

@@ -212,3 +212,5 @@ var Lineage_sets = (function () {
 
 
 export default Lineage_sets
+
+window.Lineage_sets=Lineage_sets;

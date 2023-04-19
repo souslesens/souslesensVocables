@@ -544,3 +544,5 @@ var OwlEditor = (function () {
 
 
 export default OwlEditor
+
+window.OwlEditor=OwlEditor;

@@ -204,3 +204,6 @@ var GraphTraversal = (function () {
 
 
 export default GraphTraversal
+
+window.GraphTraversal=GraphTraversal;
+window.GraphTraversal=GraphTraversal;

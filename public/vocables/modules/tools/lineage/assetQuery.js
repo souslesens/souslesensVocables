@@ -715,3 +715,5 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
 
 export default KGquery
+
+window.KGquery=KGquery;

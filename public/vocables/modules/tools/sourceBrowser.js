@@ -1836,3 +1836,4 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
 
 export default SourceBrowser
 window.SourceBrowser=SourceBrowser
+window.SourceBrowser=SourceBrowser;

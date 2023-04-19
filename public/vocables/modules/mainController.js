@@ -717,3 +717,5 @@ return;*/
 
 export default MainController
 window.MainController=MainController
+window.MainController=MainController;
+window.MainController=MainController;

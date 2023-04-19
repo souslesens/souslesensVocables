@@ -871,3 +871,5 @@ target: Math.round(Math.random() * (id-1))
 
 
 export default Lineage_sources
+
+window.Lineage_sources=Lineage_sources;

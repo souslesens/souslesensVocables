@@ -291,3 +291,6 @@ var ElasticSearchProxy = (function () {
 
 
 export default ElasticSearchProxy
+
+window.ElasticSearchProxy=ElasticSearchProxy;
+window.ElasticSearchProxy=ElasticSearchProxy;

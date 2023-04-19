@@ -52,3 +52,5 @@ var SPARQL_endpoint = (function () {
 
 
 export default SPARQL_endpoint
+
+window.SPARQL_endpoint=SPARQL_endpoint;

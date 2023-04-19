@@ -556,3 +556,5 @@ var SourceMatcher = (function () {
 
 
 export default SourceMatcher
+
+window.SourceMatcher=SourceMatcher;

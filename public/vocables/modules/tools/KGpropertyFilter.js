@@ -970,3 +970,5 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
 
 export default KGpropertyFilter
+
+window.KGpropertyFilter=KGpropertyFilter;

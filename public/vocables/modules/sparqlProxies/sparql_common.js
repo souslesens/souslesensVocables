@@ -473,3 +473,5 @@ Sparql_common.replaceSparqlPrefixByUri(str,prefixes)
 
 
 export default Sparql_common
+
+window.Sparql_common=Sparql_common;

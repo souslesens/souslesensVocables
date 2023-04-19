@@ -288,3 +288,5 @@ var Lineage_relationFilter = (function () {
 
 
 export default Lineage_relationFilter
+
+window.Lineage_relationFilter=Lineage_relationFilter;

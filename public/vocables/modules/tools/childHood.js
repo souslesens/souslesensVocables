@@ -152,3 +152,5 @@ var ChildHood = (function () {
 
 
 export default ChildHood
+
+window.ChildHood=ChildHood;

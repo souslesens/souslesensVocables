@@ -1024,3 +1024,5 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
 
 export default Lineage_containers
+
+window.Lineage_containers=Lineage_containers;

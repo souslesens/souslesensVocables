@@ -1276,3 +1276,5 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
 
 export default Sparql_generic
+
+window.Sparql_generic=Sparql_generic;

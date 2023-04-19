@@ -79,3 +79,5 @@ var Lineage_projectedGraphs = (function () {
 
 
 export default Lineage_projectedGraphs
+
+window.Lineage_projectedGraphs=Lineage_projectedGraphs;

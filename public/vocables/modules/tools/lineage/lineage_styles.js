@@ -170,3 +170,5 @@ var Lineage_styles = (function () {
 
 
 export default Lineage_styles
+
+window.Lineage_styles=Lineage_styles;

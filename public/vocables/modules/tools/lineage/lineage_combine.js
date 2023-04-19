@@ -490,3 +490,5 @@ triples.push({})
 
 
 export default Lineage_combine
+
+window.Lineage_combine=Lineage_combine;

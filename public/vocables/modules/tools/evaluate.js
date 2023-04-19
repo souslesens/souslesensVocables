@@ -617,3 +617,5 @@ var Evaluate = (function () {
 
 
 export default Evaluate
+
+window.Evaluate=Evaluate;

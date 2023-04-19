@@ -571,3 +571,5 @@ var OntologyBrowser = (function () {
 
 
 export default OntologyBrowser
+
+window.OntologyBrowser=OntologyBrowser;

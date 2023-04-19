@@ -297,3 +297,6 @@ var OntologyModels = (function () {
 
 
 export default OntologyModels
+
+window.OntologyModels=OntologyModels;
+window.OntologyModels=OntologyModels;

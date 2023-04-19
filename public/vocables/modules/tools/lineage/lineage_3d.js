@@ -41,3 +41,5 @@ var Lineage_3D = (function () {
 
 
 export default Lineage_3D
+
+window.Lineage_3D=Lineage_3D;

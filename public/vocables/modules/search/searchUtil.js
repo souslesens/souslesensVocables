@@ -835,3 +835,6 @@ indexes.push(source.toLowerCase());
 
 
 export default SearchUtil
+
+window.SearchUtil=SearchUtil;
+window.SearchUtil=SearchUtil;

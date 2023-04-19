@@ -781,3 +781,5 @@ var Lineage_query = (function () {
 
 
 export default Lineage_query
+
+window.Lineage_query=Lineage_query;

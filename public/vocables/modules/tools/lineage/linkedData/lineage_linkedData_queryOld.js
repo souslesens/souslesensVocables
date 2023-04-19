@@ -348,3 +348,5 @@ var Lineage_linkedData_query = (function () {
 
 
 export default Lineage_linkedData_query
+
+window.Lineage_linkedData_query=Lineage_linkedData_query;

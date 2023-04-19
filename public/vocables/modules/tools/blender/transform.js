@@ -78,3 +78,5 @@ var Transform = (function () {
 
 
 export default Transform
+
+window.Transform=Transform;

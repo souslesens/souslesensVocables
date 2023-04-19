@@ -636,3 +636,5 @@ var Sparql_SKOS = (function () {
 
 
 export default Sparql_SKOS
+
+window.Sparql_SKOS=Sparql_SKOS;

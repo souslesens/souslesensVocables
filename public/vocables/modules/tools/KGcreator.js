@@ -1549,3 +1549,5 @@ self.saveMappings({classId:classId})
 
 
 export default KGcreator
+
+window.KGcreator=KGcreator;

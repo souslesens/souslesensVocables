@@ -1536,3 +1536,5 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
 
 
 export default Lineage_blend
+
+window.Lineage_blend=Lineage_blend;

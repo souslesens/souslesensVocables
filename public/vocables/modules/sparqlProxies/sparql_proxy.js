@@ -247,3 +247,5 @@ var Sparql_proxy = (function () {
 
 
 export default Sparql_proxy
+
+window.Sparql_proxy=Sparql_proxy;

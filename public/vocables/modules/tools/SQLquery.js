@@ -61,3 +61,5 @@ var SQLquery = (function () {
 
 
 export default SQLquery
+
+window.SQLquery=SQLquery;

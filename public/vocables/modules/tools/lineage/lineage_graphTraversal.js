@@ -399,3 +399,5 @@ console.log(path.toString());
 
 
 export default Lineage_graphTraversal
+
+window.Lineage_graphTraversal=Lineage_graphTraversal;

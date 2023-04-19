@@ -229,3 +229,5 @@ var OwlSchema = (function () {
 
 
 export default OwlSchema
+
+window.OwlSchema=OwlSchema;

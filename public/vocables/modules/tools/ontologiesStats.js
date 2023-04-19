@@ -329,3 +329,5 @@ var OntologiesStats = (function () {
 
 
 export default OntologiesStats
+
+window.OntologiesStats=OntologiesStats;

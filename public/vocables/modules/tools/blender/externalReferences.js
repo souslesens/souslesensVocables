@@ -187,3 +187,5 @@ var ExternalReferences = (function () {
 
 
 export default ExternalReferences
+
+window.ExternalReferences=ExternalReferences;

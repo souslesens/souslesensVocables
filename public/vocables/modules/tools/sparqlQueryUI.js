@@ -40,3 +40,5 @@ var SparqlQueryUI = (function () {
 
 
 export default SparqlQueryUI
+
+window.SparqlQueryUI=SparqlQueryUI;

@@ -942,3 +942,6 @@ var visjsGraph = (function () {
 
 
 export default visjsGraph
+
+window.visjsGraph=visjsGraph;
+window.visjsGraph=visjsGraph;

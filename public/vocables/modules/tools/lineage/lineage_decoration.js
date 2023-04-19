@@ -530,3 +530,5 @@ var Lineage_decoration = (function () {
 
 
 export default Lineage_decoration
+
+window.Lineage_decoration=Lineage_decoration;

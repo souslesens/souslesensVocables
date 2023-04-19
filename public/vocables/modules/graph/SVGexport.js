@@ -113,3 +113,6 @@ var SVGexport = (function () {
 
 
 export default SVGexport
+
+window.SVGexport=SVGexport;
+window.SVGexport=SVGexport;

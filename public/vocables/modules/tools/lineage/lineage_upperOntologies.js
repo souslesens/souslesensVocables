@@ -179,3 +179,5 @@ var Lineage_upperOntologies = (function () {
 
 
 export default Lineage_upperOntologies
+
+window.Lineage_upperOntologies=Lineage_upperOntologies;

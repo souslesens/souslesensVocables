@@ -44,3 +44,5 @@ var Lineage_filterBy = (function () {
 
 
 export default Lineage_filterBy
+
+window.Lineage_filterBy=Lineage_filterBy;

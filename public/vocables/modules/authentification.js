@@ -73,3 +73,5 @@ var authentication = (function () {
 
 
 export default authentication
+
+window.authentication=authentication;

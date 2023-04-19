@@ -1947,3 +1947,5 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
 
 
 export default Sparql_OWL
+
+window.Sparql_OWL=Sparql_OWL;

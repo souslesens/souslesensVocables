@@ -144,3 +144,6 @@ var GraphController = (function () {
 
 
 export default GraphController
+
+window.GraphController=GraphController;
+window.GraphController=GraphController;

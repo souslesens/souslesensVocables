@@ -619,3 +619,5 @@ query += " where { ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] +
 
 
 export default Lineage_dictionary
+
+window.Lineage_dictionary=Lineage_dictionary;

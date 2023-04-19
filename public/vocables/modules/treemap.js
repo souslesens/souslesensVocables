@@ -1887,3 +1887,5 @@ var TreeMap = (function () {
 
 
 export default TreeMap
+
+window.TreeMap=TreeMap;

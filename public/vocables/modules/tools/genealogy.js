@@ -294,3 +294,5 @@ var Genealogy = (function () {
 
 
 export default Genealogy
+
+window.Genealogy=Genealogy;

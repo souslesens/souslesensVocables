@@ -149,3 +149,5 @@ var Sunburst = (function () {
 
 
 export default Sunburst
+
+window.Sunburst=Sunburst;

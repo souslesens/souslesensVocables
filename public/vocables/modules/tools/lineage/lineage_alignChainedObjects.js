@@ -350,3 +350,5 @@ visjsGraph.data.nodes.update(newNodes);
 
 
 export default Lineage_alignChainedObjects
+
+window.Lineage_alignChainedObjects=Lineage_alignChainedObjects;

@@ -2030,3 +2030,5 @@ sortMethod: "hubsize",
 
 
 export default Standardizer
+
+window.Standardizer=Standardizer;

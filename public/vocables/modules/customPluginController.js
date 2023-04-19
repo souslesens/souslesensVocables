@@ -117,3 +117,6 @@ var CustomPluginController = (function () {
 
 
 export default CustomPluginController
+
+window.CustomPluginController=CustomPluginController;
+window.CustomPluginController=CustomPluginController;

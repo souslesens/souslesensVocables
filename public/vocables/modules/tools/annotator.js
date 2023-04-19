@@ -176,3 +176,5 @@ var Annotator = (function () {
 
 
 export default Annotator
+
+window.Annotator=Annotator;

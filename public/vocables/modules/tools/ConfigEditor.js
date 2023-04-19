@@ -27,3 +27,5 @@ var ConfigEditor = (function () {
 
 
 export default ConfigEditor
+
+window.ConfigEditor=ConfigEditor;

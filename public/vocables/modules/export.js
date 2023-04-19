@@ -383,3 +383,6 @@ var Export = (function () {
 
 
 export default Export
+
+window.Export=Export;
+window.Export=Export;

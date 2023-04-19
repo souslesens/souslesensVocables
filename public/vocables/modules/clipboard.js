@@ -92,3 +92,6 @@ var Clipboard = (function () {
 
 
 export default Clipboard
+
+window.Clipboard=Clipboard;
+window.Clipboard=Clipboard;

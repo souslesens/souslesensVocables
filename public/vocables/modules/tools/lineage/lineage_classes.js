@@ -97,7 +97,7 @@ var Lineage_classes = (function () {
         });
 
         // @ts-ignore
-        $("#actionDivContolPanelDiv").load("snippets/lineage/lineageLeftPanel_m.html", function () {
+        $("#actionDivContolPanelDiv").load("snippets/lineage/lineageLeftPanel.html", function () {
             Lineage_sources.init();
 
             // @ts-ignore
@@ -3007,3 +3007,5 @@ export default Lineage_classes
 
 
 
+
+window.Lineage_classes=Lineage_classes;

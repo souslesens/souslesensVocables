@@ -133,3 +133,5 @@ var TreeController = (function () {
 
 
 export default TreeController
+
+window.TreeController=TreeController;

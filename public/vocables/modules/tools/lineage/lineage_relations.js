@@ -259,6 +259,7 @@ var Lineage_relations = (function () {
             if (properties.length > 0) {
                 // if active source selected take all properties( ==no filter on props)
                 var filter = "";
+                var filterProp="";
                 if (properties.indexOf(Config.sources[Lineage_sources.activeSource].graphUri) < 0) {
                     filterProp = Sparql_common.setFilter("prop", properties);
                 }
@@ -552,3 +553,5 @@ var Lineage_relations = (function () {
 
 
 export default Lineage_relations
+
+window.Lineage_relations=Lineage_relations;

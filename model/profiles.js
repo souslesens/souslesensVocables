@@ -63,6 +63,11 @@ class ProfileModel {
         return await this._getAllowedProfiles(allProfiles, user);
     };
 
+    getOneUSerProfile = async (user, profileName) => {
+        const userProfiles = await this.getUserProfiles(user);
+        return userProfiles[profileName];
+    };
+
     addProfile = async (newProfile) => {
         await lock.acquire("ProfilesThread");
         try {

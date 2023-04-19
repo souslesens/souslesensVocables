@@ -68,6 +68,21 @@ class ProfileModel {
         return userProfiles[profileName];
     };
 
+    deleteProfile = async (profileName) => {
+        await lock.acquire("ProfilesThread");
+        try {
+            const profiles = await this._read();
+            const { [profileName]: profileToDelete, ...remainingProfiles } = profiles;
+            if (!profileToDelete) {
+                return false;
+            }
+            await this._write(remainingProfiles);
+            return true;
+        } finally {
+            lock.release("ProfilesThread");
+        }
+    };
+
     addProfile = async (newProfile) => {
         await lock.acquire("ProfilesThread");
         try {

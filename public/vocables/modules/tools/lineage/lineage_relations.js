@@ -245,7 +245,6 @@ var Lineage_relations = (function () {
                 // Lineage_sources.fromAllWhiteboardSources = false;
                 options.data = "allSourceNodes";
             }
-
             var propIds = $("#lineageRelations_propertiesJstreeDiv").jstree().get_checked(true);
             var properties = [];
             propIds.forEach(function (prop) {

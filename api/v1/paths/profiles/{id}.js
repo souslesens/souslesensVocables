@@ -3,7 +3,6 @@ const fs = require("fs");
 const { configPath } = require("../../../../model/config");
 const profilesJSON = path.resolve(configPath + "/profiles.json");
 const util = require("util");
-const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
 const { readResource, resourceUpdated } = require("../utils");
 const { profileModel } = require("../../../../model/profiles");
@@ -27,28 +26,21 @@ module.exports = function () {
     }
 
     async function DELETE(req, res, _next) {
-        const profiles = await readFile(profilesJSON).catch((_err) => res.status(500).json(_err));
-        const oldProfiles = JSON.parse(profiles);
-        const { [req.params.id]: idToDelete, ...remainingProfiles } = oldProfiles;
-        const successfullyDeleted = JSON.stringify(remainingProfiles) !== JSON.stringify(oldProfiles);
-
-        if (req.params.id && successfullyDeleted) {
-            await writeFile(profilesJSON, JSON.stringify(remainingProfiles, null, 2)).catch((err) =>
-                res.status(500).json({
-                    message: "I couldn't write profiles.json",
-                    error: err,
-                })
-            );
-
-            const updatedProfiles = await readFile(profilesJSON).catch((_err) => res.status(500).json({ message: "Couldn't read profiles json" }));
-            res.status(200).json({
-                message: `${req.params.id} successfully deleted`,
-                resources: JSON.parse(updatedProfiles),
-            });
-        } else if (!req.params.id) {
+        if (!req.params.id) {
             res.status(500).json({ message: "I need a resource ID to perform this request" });
-        } else {
-            res.status(500).json({ message: `I couldn't delete resource ${req.params.id}. Maybe it has been deleted already?` });
+            return;
+        }
+        try {
+            const profileIdToDelete = req.params.id;
+            const profileExists = await profileModel.deleteProfile(profileIdToDelete);
+            if (!profileExists) {
+                res.status(500).json({ message: `I couldn't delete resource ${profileIdToDelete}. Maybe it has been deleted already?` });
+                return;
+            }
+            const profiles = await profileModel.getAllProfiles();
+            res.status(200).json({ message: `${profileIdToDelete} successfully deleted`, resources: profiles });
+        } catch (err) {
+            next(err);
         }
     }
 

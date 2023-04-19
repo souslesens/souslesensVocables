@@ -1,6 +1,4 @@
-import common from "./../common.js"
-
-
+import common from "./../common.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -226,8 +224,6 @@ var OwlSchema = (function () {
     return self;
 })();
 
+export default OwlSchema;
 
-
-export default OwlSchema
-
-window.OwlSchema=OwlSchema;
+window.OwlSchema = OwlSchema;

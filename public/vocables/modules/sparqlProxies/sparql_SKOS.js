@@ -1,8 +1,6 @@
-import Sparql_common from "./sparql_common.js"
-import Sparql_generic from "./sparql_generic.js"
-import Sparql_proxy from "./sparql_proxy.js"
-
-
+import Sparql_common from "./sparql_common.js";
+import Sparql_generic from "./sparql_generic.js";
+import Sparql_proxy from "./sparql_proxy.js";
 
 //biblio
 //https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf
@@ -633,8 +631,6 @@ var Sparql_SKOS = (function () {
     return self;
 })();
 
+export default Sparql_SKOS;
 
-
-export default Sparql_SKOS
-
-window.Sparql_SKOS=Sparql_SKOS;
+window.Sparql_SKOS = Sparql_SKOS;

@@ -1,8 +1,6 @@
-import common from "./../common.js"
-import SVGexport from "./SVGexport.js"
-import GraphMlExport from "./graphMLexport.js"
-
-
+import common from "./../common.js";
+import SVGexport from "./SVGexport.js";
+import GraphMlExport from "./graphMLexport.js";
 
 /**
  The MIT License
@@ -939,9 +937,7 @@ var visjsGraph = (function () {
     return self;
 })();
 
+export default visjsGraph;
 
-
-export default visjsGraph
-
-window.visjsGraph=visjsGraph;
-window.visjsGraph=visjsGraph;
+window.visjsGraph = visjsGraph;
+window.visjsGraph = visjsGraph;

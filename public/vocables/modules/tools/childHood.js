@@ -1,7 +1,5 @@
-import Sparql_generic from "./../sparqlProxies/sparql_generic.js"
-import visjsGraph from "./../graph/visjsGraph2.js"
-
-
+import Sparql_generic from "./../sparqlProxies/sparql_generic.js";
+import visjsGraph from "./../graph/visjsGraph2.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -149,8 +147,6 @@ var ChildHood = (function () {
     return self;
 })();
 
+export default ChildHood;
 
-
-export default ChildHood
-
-window.ChildHood=ChildHood;
+window.ChildHood = ChildHood;

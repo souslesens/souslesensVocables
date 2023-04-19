@@ -1,13 +1,11 @@
-import Sparql_common from "./sparqlProxies/sparql_common.js"
-import common from "./common.js"
-import OntologyModels from "./ontologyModels.js"
-import authentication from "./authentification.js"
+import Sparql_common from "./sparqlProxies/sparql_common.js";
+import common from "./common.js";
+import OntologyModels from "./ontologyModels.js";
+import authentication from "./authentification.js";
 import Clipboard from "./clipboard.js";
 import Lineage_sources from "./tools/lineage/lineage_sources.js";
 import Sparql_OWL from "./sparqlProxies/sparql_OWL.js";
 import Sparql_SKOS from "./sparqlProxies/sparql_SKOS.js";
-
-
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -713,9 +711,7 @@ return;*/
     return self;
 })();
 
-
-
-export default MainController
-window.MainController=MainController
-window.MainController=MainController;
-window.MainController=MainController;
+export default MainController;
+window.MainController = MainController;
+window.MainController = MainController;
+window.MainController = MainController;

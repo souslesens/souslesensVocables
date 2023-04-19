@@ -1,6 +1,4 @@
-import common from "./../../common.js"
-
-
+import common from "./../../common.js";
 
 var Lineage_filterBy = (function () {
     var self = {};
@@ -41,8 +39,6 @@ var Lineage_filterBy = (function () {
     return self;
 })();
 
+export default Lineage_filterBy;
 
-
-export default Lineage_filterBy
-
-window.Lineage_filterBy=Lineage_filterBy;
+window.Lineage_filterBy = Lineage_filterBy;

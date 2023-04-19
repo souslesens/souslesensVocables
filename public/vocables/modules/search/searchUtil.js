@@ -1,10 +1,8 @@
-import Admin from "./../tools/admin.js"
-import ElasticSearchProxy from "./elasticSearchProxy.js"
-import Sparql_common from "./../sparqlProxies/sparql_common.js"
-import Sparql_generic from "./../sparqlProxies/sparql_generic.js"
-import Sparql_OWL from "./../sparqlProxies/sparql_OWL.js"
-
-
+import Admin from "./../tools/admin.js";
+import ElasticSearchProxy from "./elasticSearchProxy.js";
+import Sparql_common from "./../sparqlProxies/sparql_common.js";
+import Sparql_generic from "./../sparqlProxies/sparql_generic.js";
+import Sparql_OWL from "./../sparqlProxies/sparql_OWL.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var SearchUtil = (function () {
@@ -832,9 +830,7 @@ indexes.push(source.toLowerCase());
     return self;
 })();
 
+export default SearchUtil;
 
-
-export default SearchUtil
-
-window.SearchUtil=SearchUtil;
-window.SearchUtil=SearchUtil;
+window.SearchUtil = SearchUtil;
+window.SearchUtil = SearchUtil;

@@ -18,22 +18,19 @@ var GraphTraversal = {
             "  WHERE {{ ?s rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction." +
             " ?node owl:onProperty ?p . " +
             " ?node owl:allValuesFrom|owl:someValuesFrom|owl:aValueFrom ?o." +
-                 " } UNION " +
+            " } UNION " +
             "{?s ?p ?o." +
             " FILTER( ?p not in(rdf:type, rdfs:subClassOf,rdfs:member)) " +
             "filter (!isLiteral(?o)  && !isBlank(?s)) " +
-
             " }" +
             "} limit 10000";
-
 
         var headers = {};
         headers["Accept"] = "application/sparql-results+json";
         headers["Content-Type"] = "application/x-www-form-urlencoded";
-        var params = { query: query , auth:options.auth};
+        var params = { query: query, auth: options.auth };
         var url = serverUrl + "?query=&format=json";
         var viscinityArray = [];
-
 
         httpProxy.post(url, headers, params, function (err, result) {
             if (err) return callback(err);
@@ -121,8 +118,7 @@ var GraphTraversal = {
     getShortestPath: function (sparqlServerUrl, graphUri, fromNodeId, toNodeId, options, callback) {
         if (!options) options = {};
         GraphTraversal.getViscinityArray(sparqlServerUrl, graphUri, options, function (err, viscinityArray) {
-            if (err)
-                return callback(err);
+            if (err) return callback(err);
             var graph = new GraphTraversal.path.Graph();
 
             viscinityArray.forEach(function (edge) {

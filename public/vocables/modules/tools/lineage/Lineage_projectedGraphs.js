@@ -1,7 +1,5 @@
-import Sparql_common from "./../../sparqlProxies/sparql_common.js"
-import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js"
-
-
+import Sparql_common from "./../../sparqlProxies/sparql_common.js";
+import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js";
 
 var Lineage_projectedGraphs = (function () {
     var self = {};
@@ -76,8 +74,6 @@ var Lineage_projectedGraphs = (function () {
     return self;
 })();
 
+export default Lineage_projectedGraphs;
 
-
-export default Lineage_projectedGraphs
-
-window.Lineage_projectedGraphs=Lineage_projectedGraphs;
+window.Lineage_projectedGraphs = Lineage_projectedGraphs;

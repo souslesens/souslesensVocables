@@ -1,6 +1,3 @@
-
-
-
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
@@ -92,8 +89,6 @@ var Import = (function () {
     return self;
 })();
 
+export default Import;
 
-
-export default Import
-
-window.Import=Import;
+window.Import = Import;

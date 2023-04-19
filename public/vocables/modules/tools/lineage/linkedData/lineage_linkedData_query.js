@@ -1,11 +1,9 @@
-import Lineage_linkedData_mappings from "./lineage_linkedData_mappings.js"
-import common from "./../../../common.js"
-import KGcreator from "./../../KGcreator.js"
-import Export from "./../../../export.js"
-import visjsGraph from "./../../../graph/visjsGraph2.js"
-import Lineage_classes from "./../lineage_classes.js"
-
-
+import Lineage_linkedData_mappings from "./lineage_linkedData_mappings.js";
+import common from "./../../../common.js";
+import KGcreator from "./../../KGcreator.js";
+import Export from "./../../../export.js";
+import visjsGraph from "./../../../graph/visjsGraph2.js";
+import Lineage_classes from "./../lineage_classes.js";
 
 var Lineage_linkedData_query = (function () {
     var self = {};
@@ -585,8 +583,6 @@ var Lineage_linkedData_query = (function () {
     return self;
 })();
 
+export default Lineage_linkedData_query;
 
-
-export default Lineage_linkedData_query
-
-window.Lineage_linkedData_query=Lineage_linkedData_query;
+window.Lineage_linkedData_query = Lineage_linkedData_query;

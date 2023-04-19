@@ -1,8 +1,5 @@
-import common from "./../../common.js"
-import Sparql_generic from "./../../sparqlProxies/sparql_generic.js"
-
-
-
+import common from "./../../common.js";
+import Sparql_generic from "./../../sparqlProxies/sparql_generic.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -118,8 +115,6 @@ var Lineage_common = (function () {
     return self;
 })();
 
+export default Lineage_common;
 
-
-export default Lineage_common
-
-window.Lineage_common=Lineage_common;
+window.Lineage_common = Lineage_common;

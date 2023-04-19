@@ -1,6 +1,3 @@
-
-
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var GraphTraversal = (function () {
     var self = {};
@@ -201,9 +198,7 @@ var GraphTraversal = (function () {
     return self;
 })();
 
+export default GraphTraversal;
 
-
-export default GraphTraversal
-
-window.GraphTraversal=GraphTraversal;
-window.GraphTraversal=GraphTraversal;
+window.GraphTraversal = GraphTraversal;
+window.GraphTraversal = GraphTraversal;

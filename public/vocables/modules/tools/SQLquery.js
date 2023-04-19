@@ -1,6 +1,4 @@
-import common from "./../common.js"
-
-
+import common from "./../common.js";
 
 //eslint-disable-next-line @typescript-eslint/no-unused-vars
 var SQLquery = (function () {
@@ -58,8 +56,6 @@ var SQLquery = (function () {
     return self;
 })();
 
+export default SQLquery;
 
-
-export default SQLquery
-
-window.SQLquery=SQLquery;
+window.SQLquery = SQLquery;

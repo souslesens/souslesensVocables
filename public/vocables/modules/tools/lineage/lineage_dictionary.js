@@ -1,11 +1,9 @@
-import common from "./../../common.js"
-import Sparql_common from "./../../sparqlProxies/sparql_common.js"
-import Sparql_proxy from "./../../sparqlProxies/sparql_proxy.js"
-import Export from "./../../export.js"
-import SearchUtil from "./../../search/searchUtil.js"
-import Lineage_classes from "./lineage_classes.js"
-
-
+import common from "./../../common.js";
+import Sparql_common from "./../../sparqlProxies/sparql_common.js";
+import Sparql_proxy from "./../../sparqlProxies/sparql_proxy.js";
+import Export from "./../../export.js";
+import SearchUtil from "./../../search/searchUtil.js";
+import Lineage_classes from "./lineage_classes.js";
 
 var Lineage_dictionary = (function () {
     var self = {};
@@ -616,8 +614,6 @@ query += " where { ?node <" + Config.dictionaryMetaDataPropertiesMap["status"] +
     return self;
 })();
 
+export default Lineage_dictionary;
 
-
-export default Lineage_dictionary
-
-window.Lineage_dictionary=Lineage_dictionary;
+window.Lineage_dictionary = Lineage_dictionary;

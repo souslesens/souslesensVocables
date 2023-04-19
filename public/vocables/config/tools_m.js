@@ -1,16 +1,12 @@
-
-import Lineage_classes from "../modules/tools/lineage/lineage_classes.js"
-import KGcreator from "../modules/tools/KGcreator.js"
-import Standardizer from "../modules/tools/Standardizer.js"
-import Lineage_dictionary from "../modules/tools/lineage/lineage_dictionary.js"
-import SPARQL_endpoint from "../modules/tools/SPARQL_endpoint.js"
-import Admin from "../modules/tools/admin.js"
-import ConfigEditor from "../modules/tools/ConfigEditor.js"
-
-
+import Lineage_classes from "../modules/tools/lineage/lineage_classes.js";
+import KGcreator from "../modules/tools/KGcreator.js";
+import Standardizer from "../modules/tools/Standardizer.js";
+import Lineage_dictionary from "../modules/tools/lineage/lineage_dictionary.js";
+import SPARQL_endpoint from "../modules/tools/SPARQL_endpoint.js";
+import Admin from "../modules/tools/admin.js";
+import ConfigEditor from "../modules/tools/ConfigEditor.js";
 
 var Tools = {};
-
 
 Tools["lineage"] = { label: "Lineage", noSource: 0, controller: Lineage_classes, toolDescriptionImg: null }; //"images/taxonomy.png"}
 Tools["KGcreator"] = {
@@ -93,6 +89,6 @@ Tools["ConfigEditor"] = {
     toolDescriptionImg: null,
 };
 
-Config.tools =Tools;
+Config.tools = Tools;
 
-export default Tools
+export default Tools;

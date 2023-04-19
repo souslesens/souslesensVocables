@@ -1,12 +1,10 @@
-import SourceBrowser from "./../sourceBrowser.js"
-import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js"
-import visjsGraph from "./../../graph/visjsGraph2.js"
-import Sparql_common from "./../../sparqlProxies/sparql_common.js"
-import Lineage_classes from "./lineage_classes.js"
-import common from "./../../common.js"
-import Export from "./../../export.js"
-
-
+import SourceBrowser from "./../sourceBrowser.js";
+import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js";
+import visjsGraph from "./../../graph/visjsGraph2.js";
+import Sparql_common from "./../../sparqlProxies/sparql_common.js";
+import Lineage_classes from "./lineage_classes.js";
+import common from "./../../common.js";
+import Export from "./../../export.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -1278,8 +1276,6 @@ var Lineage_properties = (function () {
     return self;
 })();
 
+export default Lineage_properties;
 
-
-export default Lineage_properties
-
-window.Lineage_properties=Lineage_properties;
+window.Lineage_properties = Lineage_properties;

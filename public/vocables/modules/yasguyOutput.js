@@ -1,6 +1,4 @@
-import Sparql_proxy from "./sparqlProxies/sparql_proxy.js"
-
-
+import Sparql_proxy from "./sparqlProxies/sparql_proxy.js";
 
 /*exported module*/
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -52,8 +50,6 @@ var YasguyOutput = (function () {
     return self;
 })();
 
+export default YasguyOutput;
 
-
-export default YasguyOutput
-
-window.YasguyOutput=YasguyOutput;
+window.YasguyOutput = YasguyOutput;

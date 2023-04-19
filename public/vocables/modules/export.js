@@ -1,8 +1,6 @@
-import common from "./common.js"
-import SearchUtil from "./search/searchUtil.js"
-import Sparql_common from "./sparqlProxies/sparql_common.js"
-
-
+import common from "./common.js";
+import SearchUtil from "./search/searchUtil.js";
+import Sparql_common from "./sparqlProxies/sparql_common.js";
 
 var Export = (function () {
     var self = {};
@@ -380,9 +378,7 @@ var Export = (function () {
     return self;
 })();
 
+export default Export;
 
-
-export default Export
-
-window.Export=Export;
-window.Export=Export;
+window.Export = Export;
+window.Export = Export;

@@ -1,6 +1,4 @@
-import SourceBrowser from "./../sourceBrowser.js"
-
-
+import SourceBrowser from "./../sourceBrowser.js";
 
 var Lineage_selection = (function () {
     var self = {};
@@ -517,8 +515,6 @@ var Lineage_selection = (function () {
     return self;
 })();
 
+export default Lineage_selection;
 
-
-export default Lineage_selection
-
-window.Lineage_selection=Lineage_selection;
+window.Lineage_selection = Lineage_selection;

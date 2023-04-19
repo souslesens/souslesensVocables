@@ -89,7 +89,6 @@ var ElasticSearchProxy = (function () {
         });
     };
 
-
     self.searchPlainText = function (options, callback) {
         if (!options) options = {};
         var question = options.question || $("#questionInput").val();

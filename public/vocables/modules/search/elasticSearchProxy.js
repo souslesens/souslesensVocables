@@ -1,6 +1,3 @@
-
-
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 
 var ElasticSearchProxy = (function () {
@@ -91,7 +88,6 @@ var ElasticSearchProxy = (function () {
             },
         });
     };
-
 
     self.searchPlainText = function (options, callback) {
         if (!options) options = {};
@@ -288,9 +284,7 @@ var ElasticSearchProxy = (function () {
     return self;
 })();
 
+export default ElasticSearchProxy;
 
-
-export default ElasticSearchProxy
-
-window.ElasticSearchProxy=ElasticSearchProxy;
-window.ElasticSearchProxy=ElasticSearchProxy;
+window.ElasticSearchProxy = ElasticSearchProxy;
+window.ElasticSearchProxy = ElasticSearchProxy;

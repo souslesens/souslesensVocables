@@ -1,7 +1,5 @@
-import Sparql_common from "./../sparqlProxies/sparql_common.js"
-import Sparql_proxy from "./../sparqlProxies/sparql_proxy.js"
-
-
+import Sparql_common from "./../sparqlProxies/sparql_common.js";
+import Sparql_proxy from "./../sparqlProxies/sparql_proxy.js";
 
 var SparqlQueryUI = (function () {
     var self = {};
@@ -37,8 +35,6 @@ var SparqlQueryUI = (function () {
     return self;
 })();
 
+export default SparqlQueryUI;
 
-
-export default SparqlQueryUI
-
-window.SparqlQueryUI=SparqlQueryUI;
+window.SparqlQueryUI = SparqlQueryUI;

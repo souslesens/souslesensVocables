@@ -1,7 +1,5 @@
-import common from "./../../common.js"
-import visjsGraph from "./../../graph/visjsGraph2.js"
-
-
+import common from "./../../common.js";
+import visjsGraph from "./../../graph/visjsGraph2.js";
 
 var Lineage_relationFilter = (function () {
     var self = {};
@@ -285,8 +283,6 @@ var Lineage_relationFilter = (function () {
     return self;
 })();
 
+export default Lineage_relationFilter;
 
-
-export default Lineage_relationFilter
-
-window.Lineage_relationFilter=Lineage_relationFilter;
+window.Lineage_relationFilter = Lineage_relationFilter;

@@ -1,8 +1,7 @@
-import common from "./../common.js"
-import Sparql_OWL from "./sparql_OWL.js"
-import Sparql_proxy from "./sparql_proxy.js"
-import Lineage_sources from "../tools/lineage/lineage_sources.js"
-
+import common from "./../common.js";
+import Sparql_OWL from "./sparql_OWL.js";
+import Sparql_proxy from "./sparql_proxy.js";
+import Lineage_sources from "../tools/lineage/lineage_sources.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -125,8 +124,7 @@ var Sparql_common = (function () {
                     }
                 }
             } else if (ids) {
-                if(!Array.isArray)
-                    return;
+                if (!Array.isArray) return;
                 if (!Array.isArray(ids)) {
                     ids = [ids];
                 }
@@ -138,7 +136,7 @@ var Sparql_common = (function () {
 
                 var uriIds = [];
                 ids.forEach(function (id, _index) {
-                    if ((""+id).indexOf(":") > -1)
+                    if (("" + id).indexOf(":") > -1)
                         // literal
                         uriIds.push(id);
                 });
@@ -470,8 +468,6 @@ var prefixes={
 Sparql_common.replaceSparqlPrefixByUri(str,prefixes)
 */
 
+export default Sparql_common;
 
-
-export default Sparql_common
-
-window.Sparql_common=Sparql_common;
+window.Sparql_common = Sparql_common;

@@ -1,6 +1,3 @@
-
-
-
 // tentative , not working now
 
 var Lineage_alignChainedObjects = (function () {
@@ -347,8 +344,6 @@ visjsGraph.data.nodes.update(newNodes);
     };
 })();
 
+export default Lineage_alignChainedObjects;
 
-
-export default Lineage_alignChainedObjects
-
-window.Lineage_alignChainedObjects=Lineage_alignChainedObjects;
+window.Lineage_alignChainedObjects = Lineage_alignChainedObjects;

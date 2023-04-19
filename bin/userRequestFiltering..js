@@ -43,8 +43,6 @@ var UserRequestFiltering = {
         return userGraphUrisMap;
     },
 
-
-
     /**
      *
      *

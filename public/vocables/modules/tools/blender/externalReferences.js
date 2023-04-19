@@ -1,7 +1,5 @@
-import Clipboard from "./../../clipboard.js"
-import Sparql_generic from "./../../sparqlProxies/sparql_generic.js"
-
-
+import Clipboard from "./../../clipboard.js";
+import Sparql_generic from "./../../sparqlProxies/sparql_generic.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -184,8 +182,6 @@ var ExternalReferences = (function () {
     return self;
 })();
 
+export default ExternalReferences;
 
-
-export default ExternalReferences
-
-window.ExternalReferences=ExternalReferences;
+window.ExternalReferences = ExternalReferences;

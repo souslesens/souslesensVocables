@@ -226,11 +226,7 @@ var SourceBrowser = (function () {
                     },
                 };
             }
-
-
         }
-
-
 
         items.exportAllDescendants = {
             label: "Export all descendants",
@@ -830,7 +826,6 @@ return*/
                 },
             };
 
-
             common.jstree.loadJsTree(targetDiv, jstreeData, jstreeOptions);
             setTimeout(function () {
                 //  MainController.UI.updateActionDivLabel("Multi source search :" + term)
@@ -845,8 +840,6 @@ return*/
             return _callback(null, jstreeData);
         }
     };
-
-
 
     self.exportSearchResult = function () {
         if (!self.currentFoundIds || self.currentFoundIds.length == 0) {

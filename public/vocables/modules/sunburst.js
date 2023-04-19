@@ -1,6 +1,3 @@
-
-
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sunburst = (function () {
     var self = {};
@@ -146,8 +143,6 @@ var Sunburst = (function () {
     return self;
 })();
 
+export default Sunburst;
 
-
-export default Sunburst
-
-window.Sunburst=Sunburst;
+window.Sunburst = Sunburst;

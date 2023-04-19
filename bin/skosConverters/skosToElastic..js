@@ -17,7 +17,6 @@ var ndjson = require("ndjson");
 
 var elasticUrl = "http://localhost:9200/";
 
-
 var skosToElastic = {
     load: function (thesaurusPaths, callback) {
         options = {

@@ -5,7 +5,6 @@
         <title>SouslesensVocables</title>
         <link rel="icon" href="../icons/souslesensIcon.png" />
 
-
         <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
         <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -16,13 +15,8 @@
         <link href="js/external/visjs/vis-network.css" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
 
-        <script  src="js/external/graph.js"></script>
-        <script  src="js/external/download.js"></script>
-
-
-
-
-
+        <script src="js/external/graph.js"></script>
+        <script src="js/external/download.js"></script>
 
         <script type="module" src="modules/common.js" charset="utf-8"></script>
         <script type="module" src="modules/graph/visjsGraph2.js"></script>
@@ -32,14 +26,11 @@
 
         <script type="module" src="modules/mainController.js"></script>
 
-
-
         <script type="module" src="modules/graphController.js"></script>
         <script type="module" src="modules/treeController.js"></script>
         <script type="module" src="modules/clipboard.js"></script>
 
         <script type="module" src="modules/tools/sourceBrowser.js"></script>
-
 
         <script type="module" src="modules/tools/blender/blender.js"></script>
         <script type="module" src="modules/tools/blender/collection.js"></script>
@@ -76,8 +67,6 @@
 
         <script type="module" src="modules/tools/owlEditor.js"></script>
 
-
-
         <script type="module" src="modules/tools/Standardizer.js"></script>
 
         <script type="module" src="modules/tools/SQLquery.js"></script>
@@ -95,15 +84,10 @@
         <!-----------private tools--------------->
         <script type="module" src="modules/customPluginController.js"></script>
 
-
-
         <script src="config/app_config.js"></script>
         <!--    <script src="config/app_config_draft_tools.js"></script>-->
 
-
-
-        <script  type="module" src="modules/authentification.js"></script>
-
+        <script type="module" src="modules/authentification.js"></script>
 
         <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
@@ -115,23 +99,15 @@
         <!-- <script type="module" src="modules/sparqlProxies/sparql_schema.js"></script>-->
         <script type="module" src="modules/sparqlProxies/sparql_CRUD.js"></script>
 
-
         <script type="module" src="modules/search/searchUtil.js"></script>
-      <!--  <script type="module" src="modules/tools/ontologyUtil.js"></script>-->
-
-
-
+        <!--  <script type="module" src="modules/tools/ontologyUtil.js"></script>-->
 
         <script type="module" src="modules/export.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_graphTraversal.js"></script>
 
         <script type="module" src="modules/search/elasticSearchProxy.js"></script>
 
-
         <script type="module" src="config/tools_m.js"></script>
-
-
-
 
         <link
             rel="stylesheet"
@@ -174,15 +150,12 @@
         <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
         <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 
-
         <script type="module" src="modules/eventDispatcher.js"></script>
 
         <script type="module">
             import MainController from "./modules/mainController.js";
-            import authentication from "./modules/authentification.js"
-            import EventDispatcher  from "./modules/eventDispatcher.js"
-
-
+            import authentication from "./modules/authentification.js";
+            import EventDispatcher from "./modules/eventDispatcher.js";
 
             var leftPanelWidth = 400;
             var rightPanelWidth = 400;
@@ -198,10 +171,6 @@
             });
 
             $(function () {
-
-
-
-
                 MainController.initConfig(function (err) {
                     // sentry/glitchtip
                     if (Config.sentryDsnJsFront) {
@@ -257,7 +226,7 @@
                     });
 
                     MainController.UI.setCredits();
-                    EventDispatcher.bindEvents()
+                    EventDispatcher.bindEvents();
                 });
             });
         </script>

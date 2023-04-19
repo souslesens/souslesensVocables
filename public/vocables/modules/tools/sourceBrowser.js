@@ -1,18 +1,16 @@
-import Collection from "./blender/collection.js"
-import Clipboard from "./../clipboard.js"
-import TreeController from "./../treeController.js"
-import Sparql_generic from "./../sparqlProxies/sparql_generic.js"
-import common from "./../common.js"
-import Lineage_classes from "./lineage/lineage_classes.js"
-import Lineage_combine from "./lineage/lineage_combine.js"
-import Export from "./../export.js"
-import SearchUtil from "./../search/searchUtil.js"
-import Sparql_common from "./../sparqlProxies/sparql_common.js"
-import Sparql_OWL from "./../sparqlProxies/sparql_OWL.js"
-import Sparql_proxy from "./../sparqlProxies/sparql_proxy.js"
-import ElasticSearchProxy from "./../search/elasticSearchProxy.js"
-
-
+import Collection from "./blender/collection.js";
+import Clipboard from "./../clipboard.js";
+import TreeController from "./../treeController.js";
+import Sparql_generic from "./../sparqlProxies/sparql_generic.js";
+import common from "./../common.js";
+import Lineage_classes from "./lineage/lineage_classes.js";
+import Lineage_combine from "./lineage/lineage_combine.js";
+import Export from "./../export.js";
+import SearchUtil from "./../search/searchUtil.js";
+import Sparql_common from "./../sparqlProxies/sparql_common.js";
+import Sparql_OWL from "./../sparqlProxies/sparql_OWL.js";
+import Sparql_proxy from "./../sparqlProxies/sparql_proxy.js";
+import ElasticSearchProxy from "./../search/elasticSearchProxy.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -242,11 +240,7 @@ var SourceBrowser = (function () {
                     },
                 };
             }
-
-
         }
-
-
 
         items.exportAllDescendants = {
             label: "Export all descendants",
@@ -846,7 +840,6 @@ return*/
                 },
             };
 
-
             common.jstree.loadJsTree(targetDiv, jstreeData, jstreeOptions);
             setTimeout(function () {
                 //  MainController.UI.updateActionDivLabel("Multi source search :" + term)
@@ -861,8 +854,6 @@ return*/
             return _callback(null, jstreeData);
         }
     };
-
-
 
     self.exportSearchResult = function () {
         if (!self.currentFoundIds || self.currentFoundIds.length == 0) {
@@ -1832,8 +1823,6 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
     return self;
 })();
 
-
-
-export default SourceBrowser
-window.SourceBrowser=SourceBrowser
-window.SourceBrowser=SourceBrowser;
+export default SourceBrowser;
+window.SourceBrowser = SourceBrowser;
+window.SourceBrowser = SourceBrowser;

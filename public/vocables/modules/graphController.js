@@ -1,7 +1,5 @@
-import visjsGraph from "./graph/visjsGraph2.js"
-import Lineage_classes from "./tools/lineage/lineage_classes.js"
-
-
+import visjsGraph from "./graph/visjsGraph2.js";
+import Lineage_classes from "./tools/lineage/lineage_classes.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -141,9 +139,7 @@ var GraphController = (function () {
     return self;
 })();
 
+export default GraphController;
 
-
-export default GraphController
-
-window.GraphController=GraphController;
-window.GraphController=GraphController;
+window.GraphController = GraphController;
+window.GraphController = GraphController;

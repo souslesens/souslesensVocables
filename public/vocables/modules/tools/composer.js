@@ -1,15 +1,13 @@
-import common from "./../common.js"
-import Lineage_containers from "./lineage/lineage_containers.js"
-import SourceBrowser from "./sourceBrowser.js"
-import Lineage_classes from "./lineage/lineage_classes.js"
-import Export from "./../export.js"
-import visjsGraph from "./../graph/visjsGraph2.js"
-import Sparql_generic from "./../sparqlProxies/sparql_generic.js"
-import KGpropertyFilter from "./KGpropertyFilter.js"
-import Sparql_common from "./../sparqlProxies/sparql_common.js"
-import Sparql_proxy from "./../sparqlProxies/sparql_proxy.js"
-
-
+import common from "./../common.js";
+import Lineage_containers from "./lineage/lineage_containers.js";
+import SourceBrowser from "./sourceBrowser.js";
+import Lineage_classes from "./lineage/lineage_classes.js";
+import Export from "./../export.js";
+import visjsGraph from "./../graph/visjsGraph2.js";
+import Sparql_generic from "./../sparqlProxies/sparql_generic.js";
+import KGpropertyFilter from "./KGpropertyFilter.js";
+import Sparql_common from "./../sparqlProxies/sparql_common.js";
+import Sparql_proxy from "./../sparqlProxies/sparql_proxy.js";
 
 var Composer = (function () {
     var self = {};
@@ -1317,8 +1315,6 @@ var Composer = (function () {
     return self;
 })();
 
+export default Composer;
 
-
-export default Composer
-
-window.Composer=Composer;
+window.Composer = Composer;

@@ -1,6 +1,4 @@
-import Lineage_linkedData_query from "./lineage_linkedData_query.js"
-
-
+import Lineage_linkedData_query from "./lineage_linkedData_query.js";
 
 var Lineage_linkedData_query = (function () {
     var self = {};
@@ -345,8 +343,6 @@ var Lineage_linkedData_query = (function () {
     return self;
 })();
 
+export default Lineage_linkedData_query;
 
-
-export default Lineage_linkedData_query
-
-window.Lineage_linkedData_query=Lineage_linkedData_query;
+window.Lineage_linkedData_query = Lineage_linkedData_query;

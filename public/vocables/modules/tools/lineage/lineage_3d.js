@@ -1,6 +1,3 @@
-
-
-
 var Lineage_3D = (function () {
     var self = {};
     self.testThree = function () {
@@ -38,8 +35,6 @@ var Lineage_3D = (function () {
     return self;
 })();
 
+export default Lineage_3D;
 
-
-export default Lineage_3D
-
-window.Lineage_3D=Lineage_3D;
+window.Lineage_3D = Lineage_3D;

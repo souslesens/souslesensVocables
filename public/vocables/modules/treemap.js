@@ -1,6 +1,3 @@
-
-
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var TreeMap = (function () {
     var self = {};
@@ -1884,8 +1881,6 @@ var TreeMap = (function () {
     return self;
 })();
 
+export default TreeMap;
 
-
-export default TreeMap
-
-window.TreeMap=TreeMap;
+window.TreeMap = TreeMap;

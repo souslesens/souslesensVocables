@@ -1,8 +1,6 @@
-import common from "../common.js"
+import common from "../common.js";
 import MainController from "../mainController.js";
 import authentication from "../authentification.js";
-
-
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -244,8 +242,6 @@ var Sparql_proxy = (function () {
     return self;
 })();
 
+export default Sparql_proxy;
 
-
-export default Sparql_proxy
-
-window.Sparql_proxy=Sparql_proxy;
+window.Sparql_proxy = Sparql_proxy;

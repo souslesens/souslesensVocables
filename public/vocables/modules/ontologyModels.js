@@ -1,8 +1,6 @@
-import Sparql_common from "./sparqlProxies/sparql_common.js"
-import Sparql_OWL from "./sparqlProxies/sparql_OWL.js"
-import Sparql_proxy from "./sparqlProxies/sparql_proxy.js"
-
-
+import Sparql_common from "./sparqlProxies/sparql_common.js";
+import Sparql_OWL from "./sparqlProxies/sparql_OWL.js";
+import Sparql_proxy from "./sparqlProxies/sparql_proxy.js";
 
 // eslint-disable-next-line no-global-assign
 var OntologyModels = (function () {
@@ -294,9 +292,7 @@ var OntologyModels = (function () {
     return self;
 })();
 
+export default OntologyModels;
 
-
-export default OntologyModels
-
-window.OntologyModels=OntologyModels;
-window.OntologyModels=OntologyModels;
+window.OntologyModels = OntologyModels;
+window.OntologyModels = OntologyModels;

@@ -1,5 +1,3 @@
-
-
 var fs = require("fs");
 var path = require("path");
 var csvCrawler = require("../_csvCrawler.");
@@ -133,468 +131,468 @@ var CsvTripleBuilder = {
         var okLookups_o = 0;
         var okLookups_s = 0;
         async.eachSeries(
-          mappings,
-          function (mapping, callbackEachMapping) {
-              var lookUpMap = {};
-              var triples = [];
+            mappings,
+            function (mapping, callbackEachMapping) {
+                var lookUpMap = {};
+                var triples = [];
 
-              var csvData = [];
-              var dataSource = mapping.dataSource;
-              if (mapping.graphUri) graphUri = mapping.graphUri;
-              async.series(
-                [
-                    // load Lookups
-                    function (callbackSeries) {
-                        if (mapping.lookups.length == 0) return callbackSeries();
+                var csvData = [];
+                var dataSource = mapping.dataSource;
+                if (mapping.graphUri) graphUri = mapping.graphUri;
+                async.series(
+                    [
+                        // load Lookups
+                        function (callbackSeries) {
+                            if (mapping.lookups.length == 0) return callbackSeries();
 
-                        async.eachSeries(
-                          mapping.lookups,
-                          function (lookup, callbackEachLookup) {
-                              if (mapping.csvDataFilePath) {
-                                  var lookupFilePath = lookup.filePath;
+                            async.eachSeries(
+                                mapping.lookups,
+                                function (lookup, callbackEachLookup) {
+                                    if (mapping.csvDataFilePath) {
+                                        var lookupFilePath = lookup.filePath;
 
-                                  CsvTripleBuilder.readCsv(lookupFilePath, null, function (err, result) {
-                                      if (err) return callbackEachLookup(err);
-                                      var lookupLines = result.data[0];
-                                      lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
-                                      lookupLines.forEach(function (line, index) {
-                                          if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) return console.log("missing lookup line" + index + " " + lookupFilePath);
-                                          lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
-                                      });
+                                        CsvTripleBuilder.readCsv(lookupFilePath, null, function (err, result) {
+                                            if (err) return callbackEachLookup(err);
+                                            var lookupLines = result.data[0];
+                                            lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
+                                            lookupLines.forEach(function (line, index) {
+                                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) return console.log("missing lookup line" + index + " " + lookupFilePath);
+                                                lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
+                                            });
 
-                                      callbackEachLookup();
-                                  });
-                              } else if (mapping.databaseSource) {
-                                  var sqlQuery = "select distinct " + lookup.sourceColumn + "," + lookup.targetColumn + " from " + lookup.fileName;
-                                  sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
-                                      if (err) return callbackEachLookup(err);
-                                      var lookupLines = result;
-                                      lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
-                                      lookupLines.forEach(function (line, index) {
-                                          if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) return console.log("missing lookup line" + index + " " + lookupFilePath);
+                                            callbackEachLookup();
+                                        });
+                                    } else if (mapping.databaseSource) {
+                                        var sqlQuery = "select distinct " + lookup.sourceColumn + "," + lookup.targetColumn + " from " + lookup.fileName;
+                                        sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
+                                            if (err) return callbackEachLookup(err);
+                                            var lookupLines = result;
+                                            lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
+                                            lookupLines.forEach(function (line, index) {
+                                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) return console.log("missing lookup line" + index + " " + lookupFilePath);
 
-                                          // lookUpMap[lookup.name].dictionary[util.formatStringForTriple(line[lookup.sourceColumn],true)] =util.formatStringForTriple( line[lookup.targetColumn],true);
-                                          lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
-                                      });
+                                                // lookUpMap[lookup.name].dictionary[util.formatStringForTriple(line[lookup.sourceColumn],true)] =util.formatStringForTriple( line[lookup.targetColumn],true);
+                                                lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
+                                            });
 
-                                      callbackEachLookup();
-                                  });
-                              }
-                          },
-                          function (err) {
-                              callbackSeries(err);
-                          }
-                        );
-                    },
+                                            callbackEachLookup();
+                                        });
+                                    }
+                                },
+                                function (err) {
+                                    callbackSeries(err);
+                                }
+                            );
+                        },
 
-                    //load csv
-                    function (callbackSeries) {
-                        if (!mapping.csvDataFilePath) return callbackSeries();
+                        //load csv
+                        function (callbackSeries) {
+                            if (!mapping.csvDataFilePath) return callbackSeries();
 
-                        CsvTripleBuilder.readCsv(mapping.csvDataFilePath, options.sampleSize, function (err, result) {
-                            if (err) {
-                                console.log(err);
-                                return callbackSeries(err);
-                            }
+                            CsvTripleBuilder.readCsv(mapping.csvDataFilePath, options.sampleSize, function (err, result) {
+                                if (err) {
+                                    console.log(err);
+                                    return callbackSeries(err);
+                                }
 
-                            csvData = result.data;
-                            callbackSeries();
-                        });
-                    },
-
-                    //load SQL dataSource
-                    function (callbackSeries) {
-                        if (!mapping.databaseSource) return callbackSeries();
-                        var sqlQuery = "select * from " + mapping.fileName;
-                        sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
-                            if (err) return callbackSeries(err);
-                            csvData = [result];
-                            callbackSeries();
-                        });
-                    },
-                    //fileProcessing
-                    function (callbackSeries) {
-                        if (!mapping.dataProcessing) return callbackSeries();
-                        csvData.forEach(function (lines) {
-                            mapping.dataProcessing(lines, function (err, result) {
-                                if (err) return callbackSeries(err);
-                                lines = result;
+                                csvData = result.data;
                                 callbackSeries();
                             });
-                        });
-                    },
+                        },
 
-                    function (callbackSeries) {
-                        function getNewBlankNodeId() {
-                            return "<_:b" + util.getRandomHexaId(10) + ">";
-                        }
-
-                        function getLookupValue(lookupName, value, callback) {
-                            var lookupArray = lookupName.split("|");
-                            var target = null;
-                            lookupArray.forEach(function (lookup, index) {
-                                if (index > 0) var x = 3;
-                                if (target) return;
-                                target = lookUpMap[lookup].dictionary[value];
-                                if (target && lookUpMap[lookup].transformFn) {
-                                    try {
-                                        target = lookUpMap[lookup].transformFn(target);
-                                    } catch (e) {
-                                        return callback(e);
-                                    }
-                                }
+                        //load SQL dataSource
+                        function (callbackSeries) {
+                            if (!mapping.databaseSource) return callbackSeries();
+                            var sqlQuery = "select * from " + mapping.fileName;
+                            sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
+                                if (err) return callbackSeries(err);
+                                csvData = [result];
+                                callbackSeries();
                             });
-                            if (target == null) {
-                                var x = 3;
+                        },
+                        //fileProcessing
+                        function (callbackSeries) {
+                            if (!mapping.dataProcessing) return callbackSeries();
+                            csvData.forEach(function (lines) {
+                                mapping.dataProcessing(lines, function (err, result) {
+                                    if (err) return callbackSeries(err);
+                                    lines = result;
+                                    callbackSeries();
+                                });
+                            });
+                        },
+
+                        function (callbackSeries) {
+                            function getNewBlankNodeId() {
+                                return "<_:b" + util.getRandomHexaId(10) + ">";
                             }
-                            return target;
-                        }
 
-                        async.eachSeries(
-                          csvData,
-                          function (lines, callbackEachLines) {
-                              async.series(
-                                [
-                                    function (callbackSeries2) {
-                                        async.eachSeries(
-                                          lines,
-                                          function (line, callbackEachLines2) {
-                                              //   lines.forEach(function (line, _indexLine) {
-                                              //clean line content
+                            function getLookupValue(lookupName, value, callback) {
+                                var lookupArray = lookupName.split("|");
+                                var target = null;
+                                lookupArray.forEach(function (lookup, index) {
+                                    if (index > 0) var x = 3;
+                                    if (target) return;
+                                    target = lookUpMap[lookup].dictionary[value];
+                                    if (target && lookUpMap[lookup].transformFn) {
+                                        try {
+                                            target = lookUpMap[lookup].transformFn(target);
+                                        } catch (e) {
+                                            return callback(e);
+                                        }
+                                    }
+                                });
+                                if (target == null) {
+                                    var x = 3;
+                                }
+                                return target;
+                            }
 
-                                              var subjectStr = null;
-                                              var objectStr = null;
-                                              var currentBlankNode = null;
-                                              var lineError = "";
-                                              mapping.tripleModels.forEach(function (item) {
-                                                  for (var key in line) {
-                                                      line[key] = "" + line[key];
-                                                      if (line[key] && !CsvTripleBuilder.isUri(line[key])) line[key] = util.formatStringForTriple(line[key]);
-                                                  }
+                            async.eachSeries(
+                                csvData,
+                                function (lines, callbackEachLines) {
+                                    async.series(
+                                        [
+                                            function (callbackSeries2) {
+                                                async.eachSeries(
+                                                    lines,
+                                                    function (line, callbackEachLines2) {
+                                                        //   lines.forEach(function (line, _indexLine) {
+                                                        //clean line content
 
-                                                  subjectStr = null;
-                                                  objectStr = null;
+                                                        var subjectStr = null;
+                                                        var objectStr = null;
+                                                        var currentBlankNode = null;
+                                                        var lineError = "";
+                                                        mapping.tripleModels.forEach(function (item) {
+                                                            for (var key in line) {
+                                                                line[key] = "" + line[key];
+                                                                if (line[key] && !CsvTripleBuilder.isUri(line[key])) line[key] = util.formatStringForTriple(line[key]);
+                                                            }
 
-                                                  //get value for Subject
-                                                  {
-                                                      if (item.s_type == "fixed") subjectStr = item.s;
-                                                      else if (typeof item.s === "function") {
-                                                          try {
-                                                              subjectStr = item.s(line, item);
-                                                          } catch (e) {
-                                                              return (lineError = e);
-                                                          }
-                                                      } else if (item.s === "_blankNode") {
-                                                          currentBlankNode = currentBlankNode || getNewBlankNodeId();
-                                                          subjectStr = currentBlankNode;
-                                                      } else if (mapping.transform && line[item.s] && mapping.transform[item.s]) {
-                                                          try {
-                                                              subjectStr = mapping.transform[item.s](line[item.s], "s", item.p, line, item);
-                                                          } catch (e) {
-                                                              return (lineError = e + " " + item.s);
-                                                          }
-                                                      } else if (item.s.match(/.+:.+|http.+/)) {
-                                                          subjectStr = item.s;
-                                                      } else {
-                                                          subjectStr = line[item.s];
-                                                      }
+                                                            subjectStr = null;
+                                                            objectStr = null;
 
-                                                      if (item.lookup_s) {
-                                                          if (!lookUpMap[item.lookup_s]) return (lineError = "no lookup named " + item.lookup_s);
-                                                          var lookupValue = getLookupValue(item.lookup_s, subjectStr);
-                                                          if (!lookupValue) {
-                                                              missingLookups_s += 1;
-                                                          } else {
-                                                              subjectStr = lookupValue;
-                                                              okLookups_s += 1;
-                                                          }
-                                                      }
-                                                      if (!subjectStr) {
-                                                          return;
-                                                      }
-                                                  }
+                                                            //get value for Subject
+                                                            {
+                                                                if (item.s_type == "fixed") subjectStr = item.s;
+                                                                else if (typeof item.s === "function") {
+                                                                    try {
+                                                                        subjectStr = item.s(line, item);
+                                                                    } catch (e) {
+                                                                        return (lineError = e);
+                                                                    }
+                                                                } else if (item.s === "_blankNode") {
+                                                                    currentBlankNode = currentBlankNode || getNewBlankNodeId();
+                                                                    subjectStr = currentBlankNode;
+                                                                } else if (mapping.transform && line[item.s] && mapping.transform[item.s]) {
+                                                                    try {
+                                                                        subjectStr = mapping.transform[item.s](line[item.s], "s", item.p, line, item);
+                                                                    } catch (e) {
+                                                                        return (lineError = e + " " + item.s);
+                                                                    }
+                                                                } else if (item.s.match(/.+:.+|http.+/)) {
+                                                                    subjectStr = item.s;
+                                                                } else {
+                                                                    subjectStr = line[item.s];
+                                                                }
 
-                                                  //get value for Object
-                                                  {
-                                                      if (item.o_type == "fixed") {
-                                                          objectStr = item.o;
-                                                      } else if (item.dataType) {
-                                                          item.p = "owl:hasValue";
-                                                          var str = line[item.o];
-                                                          if (!str) return;
-                                                          objectStr = "'" + str + "'^^" + item.dataType;
-                                                      } else if (typeof item.o === "function") {
-                                                          try {
-                                                              objectStr = item.o(line, item);
-                                                          } catch (e) {
-                                                              return (lineError = e);
-                                                          }
-                                                      } else if (item.o === "_blankNode") {
-                                                          currentBlankNode = currentBlankNode || getNewBlankNodeId();
-                                                          objectStr = currentBlankNode;
-                                                      } else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
-                                                          try {
-                                                              objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line, item);
-                                                          } catch (e) {
-                                                              return (lineError = e + " " + item.o);
-                                                          }
-                                                      } else if (item.o.match(/http.+/)) {
-                                                          objectStr = "<" + item.o + ">";
-                                                      } else if (item.o.match(/.+:.+/)) {
-                                                          objectStr = item.o;
-                                                      } else objectStr = line[item.o];
+                                                                if (item.lookup_s) {
+                                                                    if (!lookUpMap[item.lookup_s]) return (lineError = "no lookup named " + item.lookup_s);
+                                                                    var lookupValue = getLookupValue(item.lookup_s, subjectStr);
+                                                                    if (!lookupValue) {
+                                                                        missingLookups_s += 1;
+                                                                    } else {
+                                                                        subjectStr = lookupValue;
+                                                                        okLookups_s += 1;
+                                                                    }
+                                                                }
+                                                                if (!subjectStr) {
+                                                                    return;
+                                                                }
+                                                            }
 
-                                                      if (item.lookup_o) {
-                                                          if (!lookUpMap[item.lookup_o]) return (lineError = "no lookup named " + item.lookup_o);
-                                                          var lookupValue = getLookupValue(item.lookup_o, objectStr);
-                                                          if (!lookupValue) {
-                                                              missingLookups_o += 1; // console.log("missing lookup_o: " + line[item.o]);
-                                                          } else {
-                                                              okLookups_o += 1;
-                                                              objectStr = lookupValue;
-                                                          }
-                                                      }
-                                                  }
-                                                  if (!objectStr) {
-                                                      // console.log(line[item.o]);
-                                                      return;
-                                                  }
+                                                            //get value for Object
+                                                            {
+                                                                if (item.o_type == "fixed") {
+                                                                    objectStr = item.o;
+                                                                } else if (item.dataType) {
+                                                                    item.p = "owl:hasValue";
+                                                                    var str = line[item.o];
+                                                                    if (!str) return;
+                                                                    objectStr = "'" + str + "'^^" + item.dataType;
+                                                                } else if (typeof item.o === "function") {
+                                                                    try {
+                                                                        objectStr = item.o(line, item);
+                                                                    } catch (e) {
+                                                                        return (lineError = e);
+                                                                    }
+                                                                } else if (item.o === "_blankNode") {
+                                                                    currentBlankNode = currentBlankNode || getNewBlankNodeId();
+                                                                    objectStr = currentBlankNode;
+                                                                } else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
+                                                                    try {
+                                                                        objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line, item);
+                                                                    } catch (e) {
+                                                                        return (lineError = e + " " + item.o);
+                                                                    }
+                                                                } else if (item.o.match(/http.+/)) {
+                                                                    objectStr = "<" + item.o + ">";
+                                                                } else if (item.o.match(/.+:.+/)) {
+                                                                    objectStr = item.o;
+                                                                } else objectStr = line[item.o];
 
-                                                  //format subject
-                                                  {
-                                                      subjectStr = subjectStr.trim();
+                                                                if (item.lookup_o) {
+                                                                    if (!lookUpMap[item.lookup_o]) return (lineError = "no lookup named " + item.lookup_o);
+                                                                    var lookupValue = getLookupValue(item.lookup_o, objectStr);
+                                                                    if (!lookupValue) {
+                                                                        missingLookups_o += 1; // console.log("missing lookup_o: " + line[item.o]);
+                                                                    } else {
+                                                                        okLookups_o += 1;
+                                                                        objectStr = lookupValue;
+                                                                    }
+                                                                }
+                                                            }
+                                                            if (!objectStr) {
+                                                                // console.log(line[item.o]);
+                                                                return;
+                                                            }
 
-                                                      if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) subjectStr = "<" + subjectStr + ">";
-                                                      else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1) {
-                                                          //pass
-                                                      } else subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
-                                                  }
+                                                            //format subject
+                                                            {
+                                                                subjectStr = subjectStr.trim();
 
-                                                  //format object
-                                                  {
-                                                      objectStr = objectStr.trim();
-                                                      if (objectStr.indexOf && objectStr.indexOf("http") == 0) objectStr = "<" + objectStr + ">";
-                                                      else if (item.datatype) {
-                                                          //pass
-                                                      } else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
-                                                          // pass
-                                                      } else if (item.isString) {
-                                                          objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
-                                                      } else if (propertiesTypeMap[item.p] == "string") {
-                                                          if (objectStr.indexOf("xsd:") < 0) objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
-                                                      } else if (objectStr.indexOf("xsd:") > -1) {
-                                                          //pass
-                                                      } else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
-                                                  }
+                                                                if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) subjectStr = "<" + subjectStr + ">";
+                                                                else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1) {
+                                                                    //pass
+                                                                } else subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+                                                            }
 
-                                                  if (item.isRestriction) {
-                                                      var propStr = item.p;
-                                                      if (typeof item.p === "function") {
-                                                          try {
-                                                              propStr = item.p(line, item);
-                                                          } catch (e) {
-                                                              return (lineError = e);
-                                                          }
-                                                      }
+                                                            //format object
+                                                            {
+                                                                objectStr = objectStr.trim();
+                                                                if (objectStr.indexOf && objectStr.indexOf("http") == 0) objectStr = "<" + objectStr + ">";
+                                                                else if (item.datatype) {
+                                                                    //pass
+                                                                } else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
+                                                                    // pass
+                                                                } else if (item.isString) {
+                                                                    objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
+                                                                } else if (propertiesTypeMap[item.p] == "string") {
+                                                                    if (objectStr.indexOf("xsd:") < 0) objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
+                                                                } else if (objectStr.indexOf("xsd:") > -1) {
+                                                                    //pass
+                                                                } else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
+                                                            }
 
-                                                      var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
-                                                      var prop = propStr;
-                                                      if (prop.indexOf("$") == 0) prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
-                                                      if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
+                                                            if (item.isRestriction) {
+                                                                var propStr = item.p;
+                                                                if (typeof item.p === "function") {
+                                                                    try {
+                                                                        propStr = item.p(line, item);
+                                                                    } catch (e) {
+                                                                        return (lineError = e);
+                                                                    }
+                                                                }
 
-                                                      if (!existingNodes[subjectStr + "_" + prop + "_" + objectStr]) {
-                                                          existingNodes[subjectStr + "_" + prop + "_" + objectStr] = 1;
-                                                          triples.push({
-                                                              s: blankNode,
-                                                              p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
-                                                              o: "<http://www.w3.org/2002/07/owl#Restriction>",
-                                                          });
-                                                          triples.push({
-                                                              s: blankNode,
-                                                              p: "<http://www.w3.org/2002/07/owl#onProperty>",
-                                                              o: prop,
-                                                          });
-                                                          if (objectStr) {
-                                                              triples.push({
-                                                                  s: blankNode,
-                                                                  p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
-                                                                  o: objectStr,
-                                                              });
-                                                          }
-                                                          triples.push({
-                                                              s: subjectStr,
-                                                              p: "rdfs:subClassOf",
-                                                              o: blankNode,
-                                                          });
+                                                                var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
+                                                                var prop = propStr;
+                                                                if (prop.indexOf("$") == 0) prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
+                                                                if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
 
-                                                          if (item.inverseRestrictionProperty) {
-                                                              propStr = item.inverseRestrictionProperty;
+                                                                if (!existingNodes[subjectStr + "_" + prop + "_" + objectStr]) {
+                                                                    existingNodes[subjectStr + "_" + prop + "_" + objectStr] = 1;
+                                                                    triples.push({
+                                                                        s: blankNode,
+                                                                        p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
+                                                                        o: "<http://www.w3.org/2002/07/owl#Restriction>",
+                                                                    });
+                                                                    triples.push({
+                                                                        s: blankNode,
+                                                                        p: "<http://www.w3.org/2002/07/owl#onProperty>",
+                                                                        o: prop,
+                                                                    });
+                                                                    if (objectStr) {
+                                                                        triples.push({
+                                                                            s: blankNode,
+                                                                            p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
+                                                                            o: objectStr,
+                                                                        });
+                                                                    }
+                                                                    triples.push({
+                                                                        s: subjectStr,
+                                                                        p: "rdfs:subClassOf",
+                                                                        o: blankNode,
+                                                                    });
 
-                                                              // blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
-                                                              blankNode = getNewBlankNodeId();
-                                                              prop = propStr;
-                                                              if (prop.indexOf("$") == 0) prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
-                                                              if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
+                                                                    if (item.inverseRestrictionProperty) {
+                                                                        propStr = item.inverseRestrictionProperty;
 
-                                                              if (!existingNodes[objectStr + "_" + prop + "_" + subjectStr]) {
-                                                                  existingNodes[subjectStr + "_" + prop + "_" + objectStr] = 1;
+                                                                        // blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
+                                                                        blankNode = getNewBlankNodeId();
+                                                                        prop = propStr;
+                                                                        if (prop.indexOf("$") == 0) prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
+                                                                        if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
 
-                                                                  triples.push({
-                                                                      s: blankNode,
-                                                                      p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
-                                                                      o: "<http://www.w3.org/2002/07/owl#Restriction>",
-                                                                  });
-                                                                  triples.push({
-                                                                      s: blankNode,
-                                                                      p: "<http://www.w3.org/2002/07/owl#onProperty>",
-                                                                      o: prop,
-                                                                  });
-                                                                  if (objectStr) {
-                                                                      triples.push({
-                                                                          s: blankNode,
-                                                                          p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
-                                                                          o: subjectStr,
-                                                                      });
-                                                                  }
-                                                                  triples.push({
-                                                                      s: objectStr,
-                                                                      p: "rdfs:subClassOf",
-                                                                      o: blankNode,
-                                                                  });
-                                                              }
-                                                          }
-                                                      }
+                                                                        if (!existingNodes[objectStr + "_" + prop + "_" + subjectStr]) {
+                                                                            existingNodes[subjectStr + "_" + prop + "_" + objectStr] = 1;
 
-                                                      return;
-                                                  }
+                                                                            triples.push({
+                                                                                s: blankNode,
+                                                                                p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
+                                                                                o: "<http://www.w3.org/2002/07/owl#Restriction>",
+                                                                            });
+                                                                            triples.push({
+                                                                                s: blankNode,
+                                                                                p: "<http://www.w3.org/2002/07/owl#onProperty>",
+                                                                                o: prop,
+                                                                            });
+                                                                            if (objectStr) {
+                                                                                triples.push({
+                                                                                    s: blankNode,
+                                                                                    p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
+                                                                                    o: subjectStr,
+                                                                                });
+                                                                            }
+                                                                            triples.push({
+                                                                                s: objectStr,
+                                                                                p: "rdfs:subClassOf",
+                                                                                o: blankNode,
+                                                                            });
+                                                                        }
+                                                                    }
+                                                                }
 
-                                                  //not restriction
-                                                  else {
-                                                      // get value for property
-                                                      var propertyStr = item.p;
+                                                                return;
+                                                            }
 
-                                                      /*  if (item.isSpecificPredicate) {
+                                                            //not restriction
+                                                            else {
+                                                                // get value for property
+                                                                var propertyStr = item.p;
+
+                                                                /*  if (item.isSpecificPredicate) {
                                                           propertyStr = line[item.p];
                                                       } else*/
-                                                      if (typeof item.p === "function") {
-                                                          try {
-                                                              propertyStr = item.p(line, item);
-                                                          } catch (e) {
-                                                              return (lineError = e);
-                                                          }
-                                                      } else if (item.p.indexOf("$") == 0) {
-                                                          propertyStr = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
-                                                      }
-                                                      if (!propertyStr) {
-                                                          var x = 3;
-                                                          return;
-                                                      }
-                                                      if (propertyStr.indexOf("http") == 0) propertyStr = "<" + propertyStr + ">";
-                                                      if (subjectStr && objectStr) {
-                                                          if (true || !item.datatype) {
-                                                              // return console.log("missing type " + item.p)
-                                                              if (!existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr]) {
-                                                                  existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
-                                                                  triples.push({
-                                                                      s: subjectStr,
-                                                                      p: propertyStr,
-                                                                      o: objectStr,
-                                                                  });
-                                                              }
-                                                          }
-                                                      }
-                                                  }
-                                              });
-                                              return callbackEachLines2(lineError);
-                                          },
-                                          function (err) {
-                                              callbackSeries2(err);
-                                          }
-                                        );
-                                    },
-                                    //write triples
-                                    function (callbackSeries2) {
-                                        if (options.sampleSize) {
-                                            var sampleTriples = triples.slice(0, options.sampleSize);
-                                            // return callbackSeries2("sample", sampleTriples);
-                                            return callback(null, sampleTriples);
+                                                                if (typeof item.p === "function") {
+                                                                    try {
+                                                                        propertyStr = item.p(line, item);
+                                                                    } catch (e) {
+                                                                        return (lineError = e);
+                                                                    }
+                                                                } else if (item.p.indexOf("$") == 0) {
+                                                                    propertyStr = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
+                                                                }
+                                                                if (!propertyStr) {
+                                                                    var x = 3;
+                                                                    return;
+                                                                }
+                                                                if (propertyStr.indexOf("http") == 0) propertyStr = "<" + propertyStr + ">";
+                                                                if (subjectStr && objectStr) {
+                                                                    if (true || !item.datatype) {
+                                                                        // return console.log("missing type " + item.p)
+                                                                        if (!existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr]) {
+                                                                            existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
+                                                                            triples.push({
+                                                                                s: subjectStr,
+                                                                                p: propertyStr,
+                                                                                o: objectStr,
+                                                                            });
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        });
+                                                        return callbackEachLines2(lineError);
+                                                    },
+                                                    function (err) {
+                                                        callbackSeries2(err);
+                                                    }
+                                                );
+                                            },
+                                            //write triples
+                                            function (callbackSeries2) {
+                                                if (options.sampleSize) {
+                                                    var sampleTriples = triples.slice(0, options.sampleSize);
+                                                    // return callbackSeries2("sample", sampleTriples);
+                                                    return callback(null, sampleTriples);
+                                                }
+
+                                                var uniqueSubjects = {};
+                                                var metaDataTriples = [];
+                                                triples.forEach(function (triple) {
+                                                    if (!uniqueSubjects[triple.s]) {
+                                                        uniqueSubjects[triple.s] = 1;
+                                                        metaDataTriples = metaDataTriples.concat(CsvTripleBuilder.getMetaDataTriples(triple.s, options));
+                                                    }
+                                                });
+                                                triples = triples.concat(metaDataTriples);
+                                                // socket.message("KGbuild", "loading ONE MODEL superClasses ");
+                                                console.log("writing triples:" + triples.length);
+                                                var slices = util.sliceArray(triples, 200);
+                                                triples = [];
+                                                var sliceIndex = 0;
+                                                async.eachSeries(
+                                                    slices,
+                                                    function (slice, callbackEach) {
+                                                        if (options.deleteTriples) {
+                                                            CsvTripleBuilder.deleteTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
+                                                                if (err) {
+                                                                    errors += err + " slice " + sliceIndex + "\n";
+                                                                    return callbackEach(err);
+                                                                }
+                                                                sliceIndex += 1;
+                                                                totalTriples += result;
+
+                                                                callbackEach();
+                                                            });
+                                                        } else {
+                                                            CsvTripleBuilder.writeUniqueTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
+                                                                if (err) {
+                                                                    errors += err + " slice " + sliceIndex + "\n";
+                                                                    return callbackEach(err);
+                                                                }
+                                                                sliceIndex += 1;
+                                                                totalTriples += result;
+
+                                                                callbackEach();
+                                                            });
+                                                        }
+                                                    },
+                                                    function (_err) {
+                                                        console.log("total triples writen:" + totalTriples);
+                                                        callbackSeries2();
+                                                    }
+                                                );
+                                            },
+                                        ],
+                                        function (err) {
+                                            callbackEachLines(err);
                                         }
-
-                                        var uniqueSubjects = {};
-                                        var metaDataTriples = [];
-                                        triples.forEach(function (triple) {
-                                            if (!uniqueSubjects[triple.s]) {
-                                                uniqueSubjects[triple.s] = 1;
-                                                metaDataTriples = metaDataTriples.concat(CsvTripleBuilder.getMetaDataTriples(triple.s, options));
-                                            }
-                                        });
-                                        triples = triples.concat(metaDataTriples);
-                                        // socket.message("KGbuild", "loading ONE MODEL superClasses ");
-                                        console.log("writing triples:" + triples.length);
-                                        var slices = util.sliceArray(triples, 200);
-                                        triples = [];
-                                        var sliceIndex = 0;
-                                        async.eachSeries(
-                                          slices,
-                                          function (slice, callbackEach) {
-                                              if (options.deleteTriples) {
-                                                  CsvTripleBuilder.deleteTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
-                                                      if (err) {
-                                                          errors += err + " slice " + sliceIndex + "\n";
-                                                          return callbackEach(err);
-                                                      }
-                                                      sliceIndex += 1;
-                                                      totalTriples += result;
-
-                                                      callbackEach();
-                                                  });
-                                              } else {
-                                                  CsvTripleBuilder.writeUniqueTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
-                                                      if (err) {
-                                                          errors += err + " slice " + sliceIndex + "\n";
-                                                          return callbackEach(err);
-                                                      }
-                                                      sliceIndex += 1;
-                                                      totalTriples += result;
-
-                                                      callbackEach();
-                                                  });
-                                              }
-                                          },
-                                          function (_err) {
-                                              console.log("total triples writen:" + totalTriples);
-                                              callbackSeries2();
-                                          }
-                                        );
-                                    },
-                                ],
+                                    );
+                                },
                                 function (err) {
-                                    callbackEachLines(err);
+                                    callbackSeries(err);
                                 }
-                              );
-                          },
-                          function (err) {
-                              callbackSeries(err);
-                          }
-                        );
-                    },
-                ],
+                            );
+                        },
+                    ],
 
-                function (_err) {
+                    function (_err) {
+                        var message = "------------ created triples " + totalTriples;
+                        if (options.deleteTriples) message = "------------ deleted triples " + totalTriples;
+                        console.log(message);
+                        callbackEachMapping(_err);
+                    }
+                );
+            },
+            function (_err) {
+                if (callback) {
                     var message = "------------ created triples " + totalTriples;
                     if (options.deleteTriples) message = "------------ deleted triples " + totalTriples;
-                    console.log(message);
-                    callbackEachMapping(_err);
+                    return callback(_err, message);
                 }
-              );
-          },
-          function (_err) {
-              if (callback) {
-                  var message = "------------ created triples " + totalTriples;
-                  if (options.deleteTriples) message = "------------ deleted triples " + totalTriples;
-                  return callback(_err, message);
-              }
-          }
+            }
         );
     },
 
@@ -615,7 +613,6 @@ var CsvTripleBuilder = {
                 pass: ConfigManager.config.sparql_server.password,
                 sendImmediately: false,
             };
-
         }
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
@@ -632,99 +629,96 @@ var CsvTripleBuilder = {
         var tempGraphUri = graphUri + "temp/";
 
         async.series(
-          [
-              //insert triple into tempoary graph
-              function (callbackSeries) {
-                  CsvTripleBuilder.writeTriples(triples, tempGraphUri, sparqlServerUrl, function (err, result) {
-                      return callbackSeries(err);
-                      callbackSeries();
-                  });
-              },
+            [
+                //insert triple into tempoary graph
+                function (callbackSeries) {
+                    CsvTripleBuilder.writeTriples(triples, tempGraphUri, sparqlServerUrl, function (err, result) {
+                        return callbackSeries(err);
+                        callbackSeries();
+                    });
+                },
 
-              //getDifference
-              function (callbackSeries) {
-                  var query = "" + "select count distinct *  " + "WHERE {" + "  GRAPH <" + tempGraphUri + "> { ?s ?p ?o }" + "  FILTER NOT EXISTS { GRAPH <" + graphUri + "> { ?s ?p ?o } }" + "}";
+                //getDifference
+                function (callbackSeries) {
+                    var query = "" + "select count distinct *  " + "WHERE {" + "  GRAPH <" + tempGraphUri + "> { ?s ?p ?o }" + "  FILTER NOT EXISTS { GRAPH <" + graphUri + "> { ?s ?p ?o } }" + "}";
 
-                  var params = { query: query };
+                    var params = { query: query };
 
-                  if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
-                      params.auth = {
-                          user: ConfigManager.config.sparql_server.user,
-                          pass: ConfigManager.config.sparql_server.password,
-                          sendImmediately: false,
-                      };
+                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                        params.auth = {
+                            user: ConfigManager.config.sparql_server.user,
+                            pass: ConfigManager.config.sparql_server.password,
+                            sendImmediately: false,
+                        };
+                    }
 
-                  }
+                    httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        callbackSeries();
+                    });
+                },
 
-                  httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
-                      if (err) {
-                          return callbackSeries(err);
-                      }
-                      callbackSeries();
-                  });
-              },
+                //writeDifference
+                function (callbackSeries) {
+                    var query =
+                        "" +
+                        // "WITH <" +graphUri+"> "+
+                        "insert {GRAPH <" +
+                        graphUri +
+                        "> {?s ?p ?o}} " +
+                        "WHERE {" +
+                        "  GRAPH <" +
+                        tempGraphUri +
+                        "> { ?s ?p ?o }" +
+                        "  FILTER NOT EXISTS { GRAPH <" +
+                        graphUri +
+                        "> { ?s ?p ?o } }" +
+                        "}";
 
-              //writeDifference
-              function (callbackSeries) {
-                  var query =
-                    "" +
-                    // "WITH <" +graphUri+"> "+
-                    "insert {GRAPH <" +
-                    graphUri +
-                    "> {?s ?p ?o}} " +
-                    "WHERE {" +
-                    "  GRAPH <" +
-                    tempGraphUri +
-                    "> { ?s ?p ?o }" +
-                    "  FILTER NOT EXISTS { GRAPH <" +
-                    graphUri +
-                    "> { ?s ?p ?o } }" +
-                    "}";
+                    var params = { query: query };
 
-                  var params = { query: query };
+                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                        params.auth = {
+                            user: ConfigManager.config.sparql_server.user,
+                            pass: ConfigManager.config.sparql_server.password,
+                            sendImmediately: false,
+                        };
+                    }
 
-                  if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
-                      params.auth = {
-                          user: ConfigManager.config.sparql_server.user,
-                          pass: ConfigManager.config.sparql_server.password,
-                          sendImmediately: false,
-                      };
+                    httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        callbackSeries();
+                    });
+                },
 
-                  }
+                // delete tempGraph
+                function (callbackSeries) {
+                    var query = "clear Graph  <" + tempGraphUri + "> ";
+                    var params = { query: query };
 
-                  httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
-                      if (err) {
-                          return callbackSeries(err);
-                      }
-                      callbackSeries();
-                  });
-              },
+                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                        params.auth = {
+                            user: ConfigManager.config.sparql_server.user,
+                            pass: ConfigManager.config.sparql_server.password,
+                            sendImmediately: false,
+                        };
+                    }
 
-              // delete tempGraph
-              function (callbackSeries) {
-                  var query = "clear Graph  <" + tempGraphUri + "> ";
-                  var params = { query: query };
-
-                  if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
-                      params.auth = {
-                          user: ConfigManager.config.sparql_server.user,
-                          pass: ConfigManager.config.sparql_server.password,
-                          sendImmediately: false,
-                      };
-
-                  }
-
-                  httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
-                      if (err) {
-                          return callback(err);
-                      }
-                      callbackSeries();
-                  });
-              },
-          ],
-          function (err) {
-              return callback(err, triples.length);
-          }
+                    httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
+                        if (err) {
+                            return callback(err);
+                        }
+                        callbackSeries();
+                    });
+                },
+            ],
+            function (err) {
+                return callback(err, triples.length);
+            }
         );
     },
     /**
@@ -759,13 +753,7 @@ var CsvTripleBuilder = {
                 pass: ConfigManager.config.sparql_server.password,
                 sendImmediately: false,
             };
-
         }
-
-
-
-
-
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
@@ -819,42 +807,41 @@ var CsvTripleBuilder = {
      */
     clearGraph: function (graphUri, sparqlServerUrl, callback) {
         async.series(
-          [
-              function (callbackSeries) {
-                  if (sparqlServerUrl) {
-                      return callbackSeries();
-                  }
-                  ConfigManager.getGeneralConfig(function (err, result) {
-                      if (err) return callbackSeries(err);
-                      sparqlServerUrl = result.default_sparql_url;
-                      callbackSeries();
-                  });
-              },
-              function (_callbackSeries) {
-                  var query = "clear graph   <" + graphUri + ">";
-                  var params = { query: query };
+            [
+                function (callbackSeries) {
+                    if (sparqlServerUrl) {
+                        return callbackSeries();
+                    }
+                    ConfigManager.getGeneralConfig(function (err, result) {
+                        if (err) return callbackSeries(err);
+                        sparqlServerUrl = result.default_sparql_url;
+                        callbackSeries();
+                    });
+                },
+                function (_callbackSeries) {
+                    var query = "clear graph   <" + graphUri + ">";
+                    var params = { query: query };
 
-                  if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
-                      params.auth = {
-                          user: ConfigManager.config.sparql_server.user,
-                          pass: ConfigManager.config.sparql_server.password,
-                          sendImmediately: false,
-                      };
+                    if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+                        params.auth = {
+                            user: ConfigManager.config.sparql_server.user,
+                            pass: ConfigManager.config.sparql_server.password,
+                            sendImmediately: false,
+                        };
+                    }
 
-                  }
+                    httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
+                        if (err) {
+                            return callback(err);
+                        }
 
-                  httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
-                      if (err) {
-                          return callback(err);
-                      }
-
-                      return callback(null);
-                  });
-              },
-          ],
-          function (err) {
-              return callback(err, "graph cleared");
-          }
+                        return callback(null);
+                    });
+                },
+            ],
+            function (err) {
+                return callback(err, "graph cleared");
+            }
         );
     },
 
@@ -870,121 +857,121 @@ var CsvTripleBuilder = {
         var sparqlServerUrl;
         var output = "";
         async.series(
-          [
-              // set sparql server
-              function (callbackSeries) {
-                  if (options.sparqlServerUrl) {
-                      sparqlServerUrl = options.sparqlServerUrl;
-                      return callbackSeries();
-                  }
-                  ConfigManager.getGeneralConfig(function (err, result) {
-                      if (err) return callbackSeries(err);
-                      sparqlServerUrl = result.default_sparql_url;
-                      callbackSeries();
-                  });
-              },
-              // delete old graph (optional)
-              function (callbackSeries) {
-                  if (!options.deleteOldGraph) {
-                      return callbackSeries();
-                  }
-                  CsvTripleBuilder.clearGraph(options.graphUri, sparqlServerUrl, function (err, _result) {
-                      if (err) return callbackSeries(err);
-                      console.log("graph deleted");
-                      callbackSeries();
-                  });
-              },
-              // read mapping file and prepare mappings
-              function (callbackSeries) {
-                  var mappingsFilePath = path.join(__dirname, "../../data/" + dirName + "/" + mappingFileName);
-                  var mappings = "" + fs.readFileSync(mappingsFilePath);
-                  mappings = JSON.parse(mappings);
-                  if (typeof options.dataLocation == "string") mappings.csvDataFilePath = path.join(__dirname, "../../data/" + dirName + "/" + options.dataLocation);
-                  else mappings.datasource = options.dataLocation;
+            [
+                // set sparql server
+                function (callbackSeries) {
+                    if (options.sparqlServerUrl) {
+                        sparqlServerUrl = options.sparqlServerUrl;
+                        return callbackSeries();
+                    }
+                    ConfigManager.getGeneralConfig(function (err, result) {
+                        if (err) return callbackSeries(err);
+                        sparqlServerUrl = result.default_sparql_url;
+                        callbackSeries();
+                    });
+                },
+                // delete old graph (optional)
+                function (callbackSeries) {
+                    if (!options.deleteOldGraph) {
+                        return callbackSeries();
+                    }
+                    CsvTripleBuilder.clearGraph(options.graphUri, sparqlServerUrl, function (err, _result) {
+                        if (err) return callbackSeries(err);
+                        console.log("graph deleted");
+                        callbackSeries();
+                    });
+                },
+                // read mapping file and prepare mappings
+                function (callbackSeries) {
+                    var mappingsFilePath = path.join(__dirname, "../../data/" + dirName + "/" + mappingFileName);
+                    var mappings = "" + fs.readFileSync(mappingsFilePath);
+                    mappings = JSON.parse(mappings);
+                    if (typeof options.dataLocation == "string") mappings.csvDataFilePath = path.join(__dirname, "../../data/" + dirName + "/" + options.dataLocation);
+                    else mappings.datasource = options.dataLocation;
 
-                  function getFunction(argsArray, fnStr, callback) {
-                      try {
-                          fnStr = fnStr.replace(/[/r/n/t]gm/, "");
-                          var array = /\{(?<body>.*)\}/.exec(fnStr);
-                          if (!array) {
-                              return callbackSeries("cannot parse object function " + JSON.stringify(item) + " missing enclosing body into 'function{..}'");
-                          }
-                          var fnBody = array.groups["body"];
-                          fnBody = "try{" + fnBody + "}catch(e){\rreturn console.log(e)\r}";
-                          var fn = new Function(argsArray, fnBody);
-                          return callback(null, fn);
-                      } catch (err) {
-                          return callback("error in object function " + fnStr + "\n" + err);
-                      }
-                  }
+                    function getFunction(argsArray, fnStr, callback) {
+                        try {
+                            fnStr = fnStr.replace(/[/r/n/t]gm/, "");
+                            var array = /\{(?<body>.*)\}/.exec(fnStr);
+                            if (!array) {
+                                return callbackSeries("cannot parse object function " + JSON.stringify(item) + " missing enclosing body into 'function{..}'");
+                            }
+                            var fnBody = array.groups["body"];
+                            fnBody = "try{" + fnBody + "}catch(e){\rreturn console.log(e)\r}";
+                            var fn = new Function(argsArray, fnBody);
+                            return callback(null, fn);
+                        } catch (err) {
+                            return callback("error in object function " + fnStr + "\n" + err);
+                        }
+                    }
 
-                  // format functions
-                  mappings.tripleModels.forEach(function (item) {
-                      if (item.s.indexOf("function{") > -1) {
-                          getFunction(["row", "mapping"], item.s, function (err, fn) {
-                              if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
-                              item.s = fn;
-                          });
-                      }
-                      if (item.o.indexOf("function{") > -1) {
-                          getFunction(["row", "mapping"], item.o, function (err, fn) {
-                              if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                    // format functions
+                    mappings.tripleModels.forEach(function (item) {
+                        if (item.s.indexOf("function{") > -1) {
+                            getFunction(["row", "mapping"], item.s, function (err, fn) {
+                                if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                item.s = fn;
+                            });
+                        }
+                        if (item.o.indexOf("function{") > -1) {
+                            getFunction(["row", "mapping"], item.o, function (err, fn) {
+                                if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
 
-                              item.o = fn;
-                          });
-                      }
+                                item.o = fn;
+                            });
+                        }
 
-                      if (item.p.indexOf("function{") > -1) {
-                          getFunction(["row", "mapping"], item.p, function (err, fn) {
-                              if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                        if (item.p.indexOf("function{") > -1) {
+                            getFunction(["row", "mapping"], item.p, function (err, fn) {
+                                if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
 
-                              item.p = fn;
-                          });
-                      }
-                  });
-                  for (var key in mappings.transform) {
-                      var fnStr = mappings.transform[key];
-                      if (fnStr.indexOf("function{") > -1) {
-                          getFunction(["value", "role", "prop", "row", "mapping"], fnStr, function (err, fn) {
-                              if (err) return callbackSeries(err + " in mapping" + JSON.stringify(fnStr));
-                              mappings.transform[key] = fn;
-                          });
-                      }
-                  }
+                                item.p = fn;
+                            });
+                        }
+                    });
+                    for (var key in mappings.transform) {
+                        var fnStr = mappings.transform[key];
+                        if (fnStr.indexOf("function{") > -1) {
+                            getFunction(["value", "role", "prop", "row", "mapping"], fnStr, function (err, fn) {
+                                if (err) return callbackSeries(err + " in mapping" + JSON.stringify(fnStr));
+                                mappings.transform[key] = fn;
+                            });
+                        }
+                    }
 
-                  // format lookups
-                  mappings.lookups.forEach(function (item) {
-                      var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
-                      item.filePath = lookupFilePath;
-                      if (item.transformFn) {
-                          getFunction(["value", "role", "prop", "row", "mapping"], item.transformFn, function (err, fn) {
-                              if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
-                              item.transformFn = fn;
-                          });
-                      }
-                  });
+                    // format lookups
+                    mappings.lookups.forEach(function (item) {
+                        var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
+                        item.filePath = lookupFilePath;
+                        if (item.transformFn) {
+                            getFunction(["value", "role", "prop", "row", "mapping"], item.transformFn, function (err, fn) {
+                                if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                item.transformFn = fn;
+                            });
+                        }
+                    });
 
-                  // add prefixes (for upper ontology)
-                  if (mappings.prefixes) {
-                      for (var prefix in mappings.prefixes) CsvTripleBuilder.sparqlPrefixes[prefix] = "<" + mappings.prefixes[prefix] + ">";
-                  }
+                    // add prefixes (for upper ontology)
+                    if (mappings.prefixes) {
+                        for (var prefix in mappings.prefixes) CsvTripleBuilder.sparqlPrefixes[prefix] = "<" + mappings.prefixes[prefix] + ">";
+                    }
 
-                  var mappingsMap = { [mappings.csvDataFilePath]: mappings };
+                    var mappingsMap = { [mappings.csvDataFilePath]: mappings };
 
-                  CsvTripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function (err, result) {
-                      if (err) return callbackSeries(err);
-                      if (options.sampleSize) {
-                          output = result;
-                          return callback(err, output);
-                      } else output = { countCreatedTriples: result };
-                      callbackSeries();
-                  });
-              },
-          ],
-          function (err) {
-              if (err == "sample") err = null;
-              return callback(err, output);
-          }
+                    CsvTripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function (err, result) {
+                        if (err) return callbackSeries(err);
+                        if (options.sampleSize) {
+                            output = result;
+                            return callback(err, output);
+                        } else output = { countCreatedTriples: result };
+                        callbackSeries();
+                    });
+                },
+            ],
+            function (err) {
+                if (err == "sample") err = null;
+                return callback(err, output);
+            }
         );
     },
     getUserPredicateUri: function (predicate, line, graphUri) {
@@ -998,6 +985,3 @@ var CsvTripleBuilder = {
 };
 
 module.exports = CsvTripleBuilder;
-
-
-

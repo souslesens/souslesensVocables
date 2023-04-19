@@ -1,6 +1,4 @@
-import MainController from "./mainController.js"
-
-
+import MainController from "./mainController.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -70,8 +68,6 @@ var authentication = (function () {
     return self;
 })();
 
+export default authentication;
 
-
-export default authentication
-
-window.authentication=authentication;
+window.authentication = authentication;

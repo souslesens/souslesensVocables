@@ -1,6 +1,4 @@
-import common from "./common.js"
-
-
+import common from "./common.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -130,8 +128,6 @@ var TreeController = (function () {
     return self;
 })();
 
+export default TreeController;
 
-
-export default TreeController
-
-window.TreeController=TreeController;
+window.TreeController = TreeController;

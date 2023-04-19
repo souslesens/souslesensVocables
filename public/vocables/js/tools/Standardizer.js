@@ -1773,8 +1773,6 @@ sortMethod: "hubsize",
                 $("#Standardizer_wordsTA").val(str);
             }
         );
-
-
     };
 
     self.selectAsFuzzyMatch = function (source, itemId) {

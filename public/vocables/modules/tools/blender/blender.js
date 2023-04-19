@@ -1,12 +1,10 @@
-import common from "./../../common.js"
-import TreeController from "./../../treeController.js"
-import Sparql_generic from "./../../sparqlProxies/sparql_generic.js"
-import OwlSchema from "./../owlSchema.js"
-import Collection from "./collection.js"
-import Clipboard from "./../../clipboard.js"
-import SourceBrowser from "./../sourceBrowser.js"
-
-
+import common from "./../../common.js";
+import TreeController from "./../../treeController.js";
+import Sparql_generic from "./../../sparqlProxies/sparql_generic.js";
+import OwlSchema from "./../owlSchema.js";
+import Collection from "./collection.js";
+import Clipboard from "./../../clipboard.js";
+import SourceBrowser from "./../sourceBrowser.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -1301,8 +1299,6 @@ var Blender = (function () {
     return self;
 })();
 
+export default Blender;
 
-
-export default Blender
-
-window.Blender=Blender;
+window.Blender = Blender;

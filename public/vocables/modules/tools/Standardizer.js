@@ -1,17 +1,15 @@
-import SourceBrowser from "./sourceBrowser.js"
-import common from "./../common.js"
-import SearchUtil from "./../search/searchUtil.js"
-import ElasticSearchProxy from "./../search/elasticSearchProxy.js"
-import Sparql_common from "./../sparqlProxies/sparql_common.js"
-import Lineage_dictionary from "./lineage/lineage_dictionary.js"
-import Sparql_OWL from "./../sparqlProxies/sparql_OWL.js"
-import Sunburst from "./../sunburst.js"
-import visjsGraph from "./../graph/visjsGraph2.js"
-import Lineage_classes from "./lineage/lineage_classes.js"
-import Export from "./../export.js"
-import Lineage_blend from "./lineage/lineage_blend.js"
-
-
+import SourceBrowser from "./sourceBrowser.js";
+import common from "./../common.js";
+import SearchUtil from "./../search/searchUtil.js";
+import ElasticSearchProxy from "./../search/elasticSearchProxy.js";
+import Sparql_common from "./../sparqlProxies/sparql_common.js";
+import Lineage_dictionary from "./lineage/lineage_dictionary.js";
+import Sparql_OWL from "./../sparqlProxies/sparql_OWL.js";
+import Sunburst from "./../sunburst.js";
+import visjsGraph from "./../graph/visjsGraph2.js";
+import Lineage_classes from "./lineage/lineage_classes.js";
+import Export from "./../export.js";
+import Lineage_blend from "./lineage/lineage_blend.js";
 
 var Standardizer = (function () {
     var self = {};
@@ -1788,8 +1786,6 @@ sortMethod: "hubsize",
                 $("#Standardizer_wordsTA").val(str);
             }
         );
-
-
     };
 
     self.selectAsFuzzyMatch = function (source, itemId) {
@@ -2027,8 +2023,6 @@ sortMethod: "hubsize",
     return self;
 })();
 
+export default Standardizer;
 
-
-export default Standardizer
-
-window.Standardizer=Standardizer;
+window.Standardizer = Standardizer;

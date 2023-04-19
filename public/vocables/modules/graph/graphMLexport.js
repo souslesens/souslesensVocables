@@ -1,6 +1,3 @@
-
-
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var GraphMlExport = (function () {
     var self = {};
@@ -96,9 +93,7 @@ var GraphMlExport = (function () {
     return self;
 })();
 
+export default GraphMlExport;
 
-
-export default GraphMlExport
-
-window.GraphMlExport=GraphMlExport;
-window.GraphMlExport=GraphMlExport;
+window.GraphMlExport = GraphMlExport;
+window.GraphMlExport = GraphMlExport;

@@ -1,6 +1,3 @@
-
-
-
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
@@ -49,8 +46,6 @@ var SPARQL_endpoint = (function () {
     return self;
 })();
 
+export default SPARQL_endpoint;
 
-
-export default SPARQL_endpoint
-
-window.SPARQL_endpoint=SPARQL_endpoint;
+window.SPARQL_endpoint = SPARQL_endpoint;

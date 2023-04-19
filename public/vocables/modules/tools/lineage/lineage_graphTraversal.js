@@ -1,12 +1,10 @@
-import Sparql_common from "./../../sparqlProxies/sparql_common.js"
-import Sparql_proxy from "./../../sparqlProxies/sparql_proxy.js"
-import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js"
-import SourceBrowser from "./../sourceBrowser.js"
-import common from "./../../common.js"
-import visjsGraph from "./../../graph/visjsGraph2.js"
-import Lineage_classes from "./lineage_classes.js"
-
-
+import Sparql_common from "./../../sparqlProxies/sparql_common.js";
+import Sparql_proxy from "./../../sparqlProxies/sparql_proxy.js";
+import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js";
+import SourceBrowser from "./../sourceBrowser.js";
+import common from "./../../common.js";
+import visjsGraph from "./../../graph/visjsGraph2.js";
+import Lineage_classes from "./lineage_classes.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Lineage_graphTraversal = (function () {
@@ -256,7 +254,7 @@ var Lineage_graphTraversal = (function () {
         var existingIdsMap = visjsGraph.getExistingIdsMap();
 
         var shape = Lineage_classes.defaultShape;
-        var source=Lineage_sources.activeSource
+        var source = Lineage_sources.activeSource;
         var color = Lineage_classes.getSourceColor(Lineage_sources.activeSource);
         relations.forEach(function (relation, index) {
             if (!existingIdsMap[relation.from]) {
@@ -365,14 +363,14 @@ var Lineage_graphTraversal = (function () {
         $("#lineage_shorterstPathListDiv").html("");
     };
 
-    self.clearNodes=function(){
-        self.pathFromUri = null
+    self.clearNodes = function () {
+        self.pathFromUri = null;
         $("#lineage_shorterstPathFromUri").html("");
 
-        self.pathToUri = null
+        self.pathToUri = null;
         $("#lineage_shorterstPathToUri").html("");
         self.clearPathList();
-    }
+    };
 
     return self;
 })();
@@ -396,8 +394,6 @@ console.log(path.toString());
 
  */
 
+export default Lineage_graphTraversal;
 
-
-export default Lineage_graphTraversal
-
-window.Lineage_graphTraversal=Lineage_graphTraversal;
+window.Lineage_graphTraversal = Lineage_graphTraversal;

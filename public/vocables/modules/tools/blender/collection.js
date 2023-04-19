@@ -1,10 +1,8 @@
-import SourceBrowser from "./../sourceBrowser.js"
-import TreeController from "./../../treeController.js"
-import Sparql_generic from "./../../sparqlProxies/sparql_generic.js"
-import Blender from "./blender.js"
-import common from "./../../common.js"
-
-
+import SourceBrowser from "./../sourceBrowser.js";
+import TreeController from "./../../treeController.js";
+import Sparql_generic from "./../../sparqlProxies/sparql_generic.js";
+import Blender from "./blender.js";
+import common from "./../../common.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -339,8 +337,6 @@ var Collection = (function () {
     return self;
 })();
 
+export default Collection;
 
-
-export default Collection
-
-window.Collection=Collection;
+window.Collection = Collection;

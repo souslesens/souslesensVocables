@@ -1,6 +1,3 @@
-
-
-
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
@@ -1234,9 +1231,7 @@ if (callback) return callback(err);
     return self;
 })();
 
+export default common;
 
-
-export default common
-
-window.common=common;
-window.common=common;
+window.common = common;
+window.common = common;

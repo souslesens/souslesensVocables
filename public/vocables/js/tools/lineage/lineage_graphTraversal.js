@@ -246,7 +246,7 @@ var Lineage_graphTraversal = (function () {
         var existingIdsMap = visjsGraph.getExistingIdsMap();
 
         var shape = Lineage_classes.defaultShape;
-        var source=Lineage_sources.activeSource
+        var source = Lineage_sources.activeSource;
         var color = Lineage_classes.getSourceColor(Lineage_sources.activeSource);
         relations.forEach(function (relation, index) {
             if (!existingIdsMap[relation.from]) {
@@ -355,14 +355,14 @@ var Lineage_graphTraversal = (function () {
         $("#lineage_shorterstPathListDiv").html("");
     };
 
-    self.clearNodes=function(){
-        self.pathFromUri = null
+    self.clearNodes = function () {
+        self.pathFromUri = null;
         $("#lineage_shorterstPathFromUri").html("");
 
-        self.pathToUri = null
+        self.pathToUri = null;
         $("#lineage_shorterstPathToUri").html("");
         self.clearPathList();
-    }
+    };
 
     return self;
 })();

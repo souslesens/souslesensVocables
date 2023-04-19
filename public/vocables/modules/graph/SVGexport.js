@@ -1,6 +1,4 @@
-import common from "./../common.js"
-
-
+import common from "./../common.js";
 
 //https://github.com/justinharrell/vis-svg
 
@@ -110,9 +108,7 @@ var SVGexport = (function () {
     return self;
 })();
 
+export default SVGexport;
 
-
-export default SVGexport
-
-window.SVGexport=SVGexport;
-window.SVGexport=SVGexport;
+window.SVGexport = SVGexport;
+window.SVGexport = SVGexport;

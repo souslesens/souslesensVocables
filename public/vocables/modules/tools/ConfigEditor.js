@@ -1,6 +1,3 @@
-
-
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var ConfigEditor = (function () {
     var self = {};
@@ -24,8 +21,6 @@ var ConfigEditor = (function () {
     return self;
 })();
 
+export default ConfigEditor;
 
-
-export default ConfigEditor
-
-window.ConfigEditor=ConfigEditor;
+window.ConfigEditor = ConfigEditor;

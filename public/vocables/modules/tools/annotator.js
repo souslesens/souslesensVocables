@@ -1,8 +1,6 @@
-import Clipboard from "./../clipboard.js"
-import Sparql_generic from "./../sparqlProxies/sparql_generic.js"
-import SourceBrowser from "./sourceBrowser.js"
-
-
+import Clipboard from "./../clipboard.js";
+import Sparql_generic from "./../sparqlProxies/sparql_generic.js";
+import SourceBrowser from "./sourceBrowser.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -173,8 +171,6 @@ var Annotator = (function () {
     return self;
 })();
 
+export default Annotator;
 
-
-export default Annotator
-
-window.Annotator=Annotator;
+window.Annotator = Annotator;

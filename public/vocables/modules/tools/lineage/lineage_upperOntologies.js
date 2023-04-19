@@ -1,7 +1,5 @@
-import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js"
-import Sparql_common from "./../../sparqlProxies/sparql_common.js"
-
-
+import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js";
+import Sparql_common from "./../../sparqlProxies/sparql_common.js";
 
 var Lineage_upperOntologies = (function () {
     var self = {};
@@ -176,8 +174,6 @@ var Lineage_upperOntologies = (function () {
     return self;
 })();
 
+export default Lineage_upperOntologies;
 
-
-export default Lineage_upperOntologies
-
-window.Lineage_upperOntologies=Lineage_upperOntologies;
+window.Lineage_upperOntologies = Lineage_upperOntologies;

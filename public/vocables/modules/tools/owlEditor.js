@@ -1,9 +1,7 @@
-import common from "./../common.js"
-import Sparql_OWL from "./../sparqlProxies/sparql_OWL.js"
-import Sparql_generic from "./../sparqlProxies/sparql_generic.js"
-import Sparql_proxy from "./../sparqlProxies/sparql_proxy.js"
-
-
+import common from "./../common.js";
+import Sparql_OWL from "./../sparqlProxies/sparql_OWL.js";
+import Sparql_generic from "./../sparqlProxies/sparql_generic.js";
+import Sparql_proxy from "./../sparqlProxies/sparql_proxy.js";
 
 var OwlEditor = (function () {
     var self = {};
@@ -541,8 +539,6 @@ var OwlEditor = (function () {
     return self;
 })();
 
+export default OwlEditor;
 
-
-export default OwlEditor
-
-window.OwlEditor=OwlEditor;
+window.OwlEditor = OwlEditor;

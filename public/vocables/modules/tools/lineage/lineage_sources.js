@@ -1,17 +1,15 @@
-import OntologyModels from "./../../ontologyModels.js"
-import Lineage_classes from "./lineage_classes.js"
-import SourceBrowser from "./../sourceBrowser.js"
-import Lineage_decoration from "./lineage_decoration.js"
-import common from "./../../common.js"
-import visjsGraph from "./../../graph/visjsGraph2.js"
-import SearchUtil from "./../../search/searchUtil.js"
-import Lineage_combine from "./lineage_combine.js"
-import Lineage_selection from "./lineage_selection.js"
-import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js"
-import Lineage_3D from "./lineage_3d.js"
+import OntologyModels from "./../../ontologyModels.js";
+import Lineage_classes from "./lineage_classes.js";
+import SourceBrowser from "./../sourceBrowser.js";
+import Lineage_decoration from "./lineage_decoration.js";
+import common from "./../../common.js";
+import visjsGraph from "./../../graph/visjsGraph2.js";
+import SearchUtil from "./../../search/searchUtil.js";
+import Lineage_combine from "./lineage_combine.js";
+import Lineage_selection from "./lineage_selection.js";
+import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js";
+import Lineage_3D from "./lineage_3d.js";
 import authentication from "../../authentification.js";
-
-
 
 var Lineage_sources = (function () {
     var self = {};
@@ -868,8 +866,6 @@ target: Math.round(Math.random() * (id-1))
     return self;
 })();
 
+export default Lineage_sources;
 
-
-export default Lineage_sources
-
-window.Lineage_sources=Lineage_sources;
+window.Lineage_sources = Lineage_sources;

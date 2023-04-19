@@ -1,8 +1,6 @@
-import visjsGraph from "./../graph/visjsGraph2.js"
-import Sparql_common from "./../sparqlProxies/sparql_common.js"
-import OwlSchema from "./owlSchema.js"
-
-
+import visjsGraph from "./../graph/visjsGraph2.js";
+import Sparql_common from "./../sparqlProxies/sparql_common.js";
+import OwlSchema from "./owlSchema.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -568,8 +566,6 @@ var OntologyBrowser = (function () {
     return self;
 })();
 
+export default OntologyBrowser;
 
-
-export default OntologyBrowser
-
-window.OntologyBrowser=OntologyBrowser;
+window.OntologyBrowser = OntologyBrowser;

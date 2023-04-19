@@ -1,9 +1,7 @@
-import Sparql_generic from "./../sparqlProxies/sparql_generic.js"
-import visjsGraph from "./../graph/visjsGraph2.js"
-import GraphController from "./../graphController.js"
-import Clipboard from "./../clipboard.js"
-
-
+import Sparql_generic from "./../sparqlProxies/sparql_generic.js";
+import visjsGraph from "./../graph/visjsGraph2.js";
+import GraphController from "./../graphController.js";
+import Clipboard from "./../clipboard.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -291,8 +289,6 @@ var Genealogy = (function () {
     return self;
 })();
 
+export default Genealogy;
 
-
-export default Genealogy
-
-window.Genealogy=Genealogy;
+window.Genealogy = Genealogy;

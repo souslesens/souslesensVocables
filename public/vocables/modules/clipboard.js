@@ -1,4 +1,3 @@
-
 import visjsGraph from "./graph/visjsGraph2.js";
 
 /** The MIT License
@@ -89,9 +88,7 @@ var Clipboard = (function () {
     return self;
 })();
 
+export default Clipboard;
 
-
-export default Clipboard
-
-window.Clipboard=Clipboard;
-window.Clipboard=Clipboard;
+window.Clipboard = Clipboard;
+window.Clipboard = Clipboard;

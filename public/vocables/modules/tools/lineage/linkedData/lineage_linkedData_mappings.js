@@ -1,14 +1,12 @@
-import KGcreator from "./../../KGcreator.js"
-import visjsGraph from "./../../../graph/visjsGraph2.js"
-import Lineage_classes from "./../lineage_classes.js"
-import common from "./../../../common.js"
-import Sparql_common from "./../../../sparqlProxies/sparql_common.js"
-import Sparql_generic from "./../../../sparqlProxies/sparql_generic.js"
-import Sparql_proxy from "./../../../sparqlProxies/sparql_proxy.js"
-import Sparql_OWL from "./../../../sparqlProxies/sparql_OWL.js"
-import SourceBrowser from "./../../sourceBrowser.js"
-
-
+import KGcreator from "./../../KGcreator.js";
+import visjsGraph from "./../../../graph/visjsGraph2.js";
+import Lineage_classes from "./../lineage_classes.js";
+import common from "./../../../common.js";
+import Sparql_common from "./../../../sparqlProxies/sparql_common.js";
+import Sparql_generic from "./../../../sparqlProxies/sparql_generic.js";
+import Sparql_proxy from "./../../../sparqlProxies/sparql_proxy.js";
+import Sparql_OWL from "./../../../sparqlProxies/sparql_OWL.js";
+import SourceBrowser from "./../../sourceBrowser.js";
 
 //www.nstauthority.co.uk/data-centre/data-downloads-and-publications/well-data/
 
@@ -982,8 +980,6 @@ self.graphTable(KGcreator.currentTreeNode);
     return self;
 })();
 
+export default Lineage_linkedData_mappings;
 
-
-export default Lineage_linkedData_mappings
-
-window.Lineage_linkedData_mappings=Lineage_linkedData_mappings;
+window.Lineage_linkedData_mappings = Lineage_linkedData_mappings;

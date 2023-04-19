@@ -1,6 +1,4 @@
-import Sparql_OWL from "./sparqlProxies/sparql_OWL.js"
-
-
+import Sparql_OWL from "./sparqlProxies/sparql_OWL.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var CustomPluginController = (function () {
@@ -114,9 +112,7 @@ var CustomPluginController = (function () {
     return self;
 })();
 
+export default CustomPluginController;
 
-
-export default CustomPluginController
-
-window.CustomPluginController=CustomPluginController;
-window.CustomPluginController=CustomPluginController;
+window.CustomPluginController = CustomPluginController;
+window.CustomPluginController = CustomPluginController;

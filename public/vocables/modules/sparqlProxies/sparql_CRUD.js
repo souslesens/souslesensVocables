@@ -1,9 +1,7 @@
-import common from "./../common.js"
-import Sparql_OWL from "./sparql_OWL.js"
-import Sparql_generic from "./sparql_generic.js"
-import Lineage_blend from "./../tools/lineage/lineage_blend.js"
-
-
+import common from "./../common.js";
+import Sparql_OWL from "./sparql_OWL.js";
+import Sparql_generic from "./sparql_generic.js";
+import Lineage_blend from "./../tools/lineage/lineage_blend.js";
 
 var Sparql_CRUD = (function () {
     var self = {};
@@ -167,8 +165,6 @@ var Sparql_CRUD = (function () {
     return self;
 })();
 
+export default Sparql_CRUD;
 
-
-export default Sparql_CRUD
-
-window.Sparql_CRUD=Sparql_CRUD;
+window.Sparql_CRUD = Sparql_CRUD;

@@ -76,7 +76,6 @@ var RDF_IO = {
             writer.end((error, result) => {
                 result = result.replace(/ a /g, " rdf:type ");
                 callback(null, result);
-             
             });
         });
     },
@@ -179,5 +178,3 @@ var RDF_IO = {
 };
 
 module.exports = RDF_IO;
-
-

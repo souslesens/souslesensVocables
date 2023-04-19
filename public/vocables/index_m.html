@@ -150,12 +150,12 @@
         <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
         <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 
-        <script type="module" src="modules/eventDispatcher.js"></script>
+
 
         <script type="module">
             import MainController from "./modules/mainController.js";
             import authentication from "./modules/authentification.js";
-            import EventDispatcher from "./modules/eventDispatcher.js";
+
 
             var leftPanelWidth = 400;
             var rightPanelWidth = 400;
@@ -226,7 +226,7 @@
                     });
 
                     MainController.UI.setCredits();
-                    EventDispatcher.bindEvents();
+
                 });
             });
         </script>

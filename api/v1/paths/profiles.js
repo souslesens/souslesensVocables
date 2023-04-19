@@ -32,18 +32,15 @@ module.exports = function () {
 
     ///// POST api/v1/profiles
     async function POST(req, res, next) {
-        const profileToAdd = req.body;
-        //        const successfullyCreated = newProfiles[req.params.id]
         try {
-            const oldProfiles = await readResource(profilesJSON, res);
-            const profileDoesntExist = !Object.keys(oldProfiles).includes(Object.keys(profileToAdd)[0]);
-            const newProfiles = { ...oldProfiles, ...profileToAdd };
-            if (profileDoesntExist) {
-                const saved = await writeResource(profilesJSON, newProfiles, res);
-                resourceCreated(res, saved);
-            } else {
-                res.status(400).json({ message: "Resource already exists. If you want to update an existing resource, use PUT instead." });
-            }
+            const newProfile = req.body;
+            await Promise.all(
+                Object.entries(newProfile).map(async ([_k, profile]) => {
+                    await profileModel.addProfile(profile);
+                })
+            );
+            const profiles = await profileModel.getAllProfiles();
+            resourceCreated(res, profiles);
         } catch (err) {
             next(err);
         }

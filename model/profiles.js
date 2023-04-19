@@ -1,5 +1,8 @@
 const fs = require("fs");
+const { Lock } = require("async-await-mutex-lock");
 const { configProfilesPath } = require("./config");
+
+const lock = new Lock();
 
 class ProfileModel {
     constructor(path) {
@@ -58,6 +61,21 @@ class ProfileModel {
             return await this._getAdminProfiles(allProfiles);
         }
         return await this._getAllowedProfiles(allProfiles, user);
+    };
+
+    addProfile = async (newProfile) => {
+        await lock.acquire("ProfilesThread");
+        try {
+            const profiles = await this._read();
+            newProfile.id = newProfile.name;
+            if (Object.keys(profiles).includes(newProfile.id)) {
+                throw Error("Profile already exists, try updating it.");
+            }
+            profiles[newProfile.id] = newProfile;
+            await this._write(profiles);
+        } finally {
+            lock.release("ProfilesThread");
+        }
     };
 }
 

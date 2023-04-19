@@ -55,16 +55,3 @@ module.exports = function () {
 
     return operations;
 };
-
-function _sanitizeDB(profiles) {
-    const sanitized = Object.entries(profiles).map(([key, val]) => {
-        let id = ulid();
-        if (!val.id) {
-            ({ [id]: { ...val, id: id } });
-        } else {
-            [key, val];
-        }
-    });
-    console.log("DATA SANITIZED", sanitized);
-    return sanitized;
-}

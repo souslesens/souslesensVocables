@@ -17,6 +17,7 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js"
 import CustomPluginController from "../../customPluginController.js"
 import Lineage_sources from "./lineage_sources.js"
 import MainController  from "../../mainController.js";
+import authentication from "../../authentification.js";
 
 
 
@@ -96,7 +97,7 @@ var Lineage_classes = (function () {
         });
 
         // @ts-ignore
-        $("#actionDivContolPanelDiv").load("snippets/lineage/lineageLeftPanel.html", function () {
+        $("#actionDivContolPanelDiv").load("snippets/lineage/lineageLeftPanel_m.html", function () {
             Lineage_sources.init();
 
             // @ts-ignore
@@ -3004,5 +3005,5 @@ attrs.color=self.getSourceColor(superClassValue)
 
 export default Lineage_classes
 
-window.Lineage_classes=Lineage_classes
+
 

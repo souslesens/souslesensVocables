@@ -2,6 +2,8 @@ import Sparql_generic from "./../../sparqlProxies/sparql_generic.js"
 import Sparql_common from "./../../sparqlProxies/sparql_common.js"
 import Sparql_proxy from "./../../sparqlProxies/sparql_proxy.js"
 import Lineage_sources from "./lineage_sources.js"
+import common from "../../common.js";
+import visjsGraph from "../../graph/visjsGraph2.js";
 
 
 

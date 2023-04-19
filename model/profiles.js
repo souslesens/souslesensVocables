@@ -83,6 +83,22 @@ class ProfileModel {
         }
     };
 
+    updateProfile = async (profile) => {
+        await lock.acquire("ProfilesThread");
+        try {
+            const profiles = await this._read();
+            if (!profile.id in profiles) {
+                return false;
+            }
+            const updatedProfiles = { ...profiles };
+            updatedProfiles[profile.id] = profile;
+            await this._write(updatedProfiles);
+            return true;
+        } finally {
+            lock.release("ProfilesThread");
+        }
+    };
+
     addProfile = async (newProfile) => {
         await lock.acquire("ProfilesThread");
         try {

@@ -22,7 +22,6 @@ import {
     OutlinedInput,
 } from "@mui/material";
 
-import TableSortLabel from "@mui/material/TableSortLabel";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 import { useModel } from "../Admin";
@@ -38,14 +37,6 @@ import CsvDownloader from "react-csv-downloader";
 const UsersTable = () => {
     const { model, updateModel } = useModel();
     const [filteringChars, setFilteringChars] = React.useState("");
-    const [orderBy, setOrderBy] = React.useState<keyof User>("login");
-    const [order, setOrder] = React.useState<Order>("asc");
-    type Order = "asc" | "desc";
-    function handleRequestSort(property: keyof User) {
-        const isAsc = orderBy === property && order === "asc";
-        setOrder(isAsc ? "desc" : "asc");
-        setOrderBy(property);
-    }
 
     const renderUsers = SRD.match(
         {
@@ -61,11 +52,6 @@ const UsersTable = () => {
                 </Box>
             ),
             success: (gotUsers: User[]) => {
-                const sortedUsers: User[] = gotUsers.slice().sort((a: User, b: User) => {
-                    const left: string = a[orderBy] as string;
-                    const right: string = b[orderBy] as string;
-                    return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
-                });
                 const datas = gotUsers.map((user) => {
                     const { groups, _type, password, ...restOfProperties } = user;
                     const data = {
@@ -95,17 +81,13 @@ const UsersTable = () => {
                                         <TableHead>
                                             <TableRow style={{ fontWeight: "bold" }}>
                                                 <TableCell style={{ fontWeight: "bold" }}>Source</TableCell>
-                                                <TableCell style={{ fontWeight: "bold" }}>
-                                                    <TableSortLabel active={orderBy === "login"} direction={order} onClick={() => handleRequestSort("login")}>
-                                                        Name
-                                                    </TableSortLabel>
-                                                </TableCell>
+                                                <TableCell style={{ fontWeight: "bold" }}>Name</TableCell>
                                                 <TableCell style={{ fontWeight: "bold" }}>groups</TableCell>
                                                 <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody sx={{ width: "100%", overflow: "visible" }}>
-                                            {sortedUsers
+                                            {gotUsers
                                                 .filter((user) => user.login.includes(filteringChars))
                                                 .map((user) => {
                                                     return (

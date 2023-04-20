@@ -34,7 +34,6 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useZorm, createCustomIssues } from "react-zorm";
 import { ZodIssue } from "zod";
-import TableSortLabel from "@mui/material/TableSortLabel";
 
 import { useModel } from "../Admin";
 import * as React from "react";
@@ -52,14 +51,6 @@ import { errorMessage } from "./errorMessage";
 const ProfilesTable = () => {
     const { model, updateModel } = useModel();
     const [filteringChars, setFilteringChars] = React.useState("");
-    const [orderBy, setOrderBy] = React.useState<keyof Profile>("name");
-    const [order, setOrder] = React.useState<Order>("asc");
-    type Order = "asc" | "desc";
-    function handleRequestSort(property: keyof Profile) {
-        const isAsc = orderBy === property && order === "asc";
-        setOrder(isAsc ? "desc" : "asc");
-        setOrderBy(property);
-    }
     const renderProfiles = SRD.match(
         {
             // eslint-disable-next-line react/no-unescaped-entities
@@ -94,11 +85,6 @@ const ProfilesTable = () => {
                     );
                     return { ...dataWithoutCarriageReturns };
                 });
-                const sortedProfiles: Profile[] = gotProfiles.slice().sort((a: Profile, b: Profile) => {
-                    const left: string = a[orderBy] as string;
-                    const right: string = b[orderBy] as string;
-                    return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
-                });
                 return (
                     <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                         <Stack>
@@ -118,17 +104,13 @@ const ProfilesTable = () => {
                                     <Table>
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell style={{ fontWeight: "bold" }}>
-                                                    <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
-                                                        Name
-                                                    </TableSortLabel>
-                                                </TableCell>
+                                                <TableCell style={{ fontWeight: "bold" }}>Name</TableCell>
                                                 <TableCell style={{ fontWeight: "bold" }}>Allowed Sources</TableCell>
                                                 <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody sx={{ width: "100%", overflow: "visible" }}>
-                                            {sortedProfiles
+                                            {gotProfiles
                                                 .filter((profile) => profile.name.includes(filteringChars))
                                                 .map((profile) => {
                                                     return (

@@ -10,6 +10,7 @@ import Lineage_selection from "./lineage_selection.js";
 import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js";
 import Lineage_3D from "./lineage_3d.js";
 import authentication from "../../authentification.js";
+import CommonUIwidgets from "../../commonUIwidgets.js";
 
 var Lineage_sources = (function () {
     var self = {};
@@ -191,7 +192,7 @@ var Lineage_sources = (function () {
         } else if (scope == "whiteboardSources") {
             self.fromAllWhiteboardSources = false;
         } else {
-            common.fillSelectOptions("GenericTools_searchAllClassSelect", [], true);
+            //  common.fillSelectOptions("GenericTools_searchAllClassSelect", [], true);
         }
 
         self.getSourcesClasses(self.activeSource, function (err, result) {
@@ -199,8 +200,11 @@ var Lineage_sources = (function () {
                 return alert(err);
             }
 
-            common.fillSelectOptions("GenericTools_searchAllClassSelect", result, true, "label", "id");
+            //  common.fillSelectOptions("GenericTools_searchAllClassSelect", result, true, "label", "id");
         });
+    };
+    self.onSearchClass = function () {
+        CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter("owl:Class", "GenericTools_searchAllClassSelect", self.activeSource);
     };
 
     self.showHideLineageLeftPanels = function () {

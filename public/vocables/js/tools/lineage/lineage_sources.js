@@ -1,3 +1,5 @@
+import CommonUIwidgets from "../../../modules/commonUIwidgets";
+
 Lineage_sources = (function () {
     var self = {};
     self.activeSource = null;
@@ -178,7 +180,7 @@ Lineage_sources = (function () {
         } else if (scope == "whiteboardSources") {
             self.fromAllWhiteboardSources = false;
         } else {
-            common.fillSelectOptions("GenericTools_searchAllClassSelect", [], true);
+            //  common.fillSelectOptions("GenericTools_searchAllClassSelect", [], true);
         }
 
         self.getSourcesClasses(self.activeSource, function (err, result) {
@@ -186,8 +188,11 @@ Lineage_sources = (function () {
                 return alert(err);
             }
 
-            common.fillSelectOptions("GenericTools_searchAllClassSelect", result, true, "label", "id");
+            //  common.fillSelectOptions("GenericTools_searchAllClassSelect", result, true, "label", "id");
         });
+    };
+    self.onSearchClass = function () {
+        CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter("owl:Class", "GenericTools_searchAllClassSelect", self.activeSource);
     };
 
     self.showHideLineageLeftPanels = function () {

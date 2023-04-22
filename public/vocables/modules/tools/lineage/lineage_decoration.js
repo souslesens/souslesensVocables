@@ -4,6 +4,7 @@ import Sparql_proxy from "./../../sparqlProxies/sparql_proxy.js";
 import Lineage_sources from "./lineage_sources.js";
 import common from "../../common.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 //@typescript-eslint/no-unused-vars
 var Lineage_decoration = (function () {
@@ -521,6 +522,40 @@ var Lineage_decoration = (function () {
 
         self.drawLegend(newJstreeData);
     };
+
+    (self.showDecorateDialog = function () {
+        $("#smallDialogDiv").dialog("open");
+        $("#smallDialogDiv").load("snippets/lineage/lineage_decorateDialog.html", function () {
+            $("#lineage_decorate_applyButton").bind("click", Lineage_decoration.decorateNodes);
+            common.fillSelectWithColorPalette("lineage_decorate_colorSelect");
+            var shapes = ["dot", "square", "box", "text", "diamond", "star", "triangle", "ellipse", "circle", "database", "triangleDown", "hexagon"];
+            common.fillSelectOptions("lineage_decorate_shapeSelect", shapes, true);
+        });
+    }),
+        (self.decorateNodes = function () {
+            var selection = $("#lineage_decorate_selectionSelect").val();
+            var nodes;
+            if (selection == "Last added nodes") nodes = visjsGraph.lastAddedNodes;
+            else if (selection == "All nodes") nodes = visjsGraph.lastAddedNodes;
+            else if (selection == "Selected nodes") nodes = Lineage_selection.selectedNodes;
+
+            $("#smallDialogDiv").dialog("close");
+            var newIds = [];
+
+            var color = $("#lineage_decorate_colorSelect").val();
+            var shape = $("#lineage_decorate_shapeSelect").val();
+            var size = $("#lineage_decorate_sizeInput").val();
+            nodes.forEach(function (node) {
+                if (!node.data) return;
+                var obj = { id: node.id };
+                if (color) obj.color = color;
+                if (shape) obj.shape = shape;
+                if (size) obj.size = parseInt(size);
+                newIds.push(obj);
+            });
+
+            visjsGraph.data.nodes.update(newIds);
+        });
 
     return self;
 })();

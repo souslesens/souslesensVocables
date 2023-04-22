@@ -99,8 +99,6 @@ var httpProxy = {
                 return callback(error);
             }
 
-            if (response.statusCode != 200) return callback(response.statusMessage);
-
             if (headers && headers["Accept"].indexOf("json") < 0) return callback(null, body);
             if (typeof body === "string") {
                 body = body.trim();
@@ -126,6 +124,7 @@ var httpProxy = {
                     return callback(err, body);
                 }
             } else {
+                if (response.statusCode != 200) return callback(response.statusMessage);
                 return callback(null, body);
             }
         });

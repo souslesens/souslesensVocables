@@ -214,13 +214,9 @@
         <div class="lineage_actionDiv" style="display: flex; flex-direction: column; width: 45%">
             <div class="lineage_button_group">
                 Find
-                <input
-                    style="width: 100px"
-                    id="visjsGraph_searchInput"
-                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9){visjsGraph.searchNode()
-}"
-                />
+                <input style="width: 100px" id="visjsGraph_searchInput" onkeyup="if (event.keyCode == 13 || event.keyCode == 9){visjsGraph.searchNode()}" />
 
+                <!--   <button id="" class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="visjsGraph.searchNode();">Search</button>-->
                 <!--   <button id="" class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="visjsGraph.searchNode();">Search</button>-->
             </div>
             <div class="lineage_button_group">
@@ -239,9 +235,13 @@
 
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Export.exportGraphToDataTable()">CSV</button>
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="visjsGraph.toSVG()">SVG</button>
+
                 <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showEdgesLegend()">legend</button>-->
 
                 <!-- <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.test3D()">3D</button>-->
+            </div>
+            <div class="lineage_button_group">
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_decoration.showDecorateDialog()">decorate nodes</button>
             </div>
         </div>
     </div>

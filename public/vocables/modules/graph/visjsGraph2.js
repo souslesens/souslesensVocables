@@ -62,11 +62,12 @@ var visjsGraph = (function () {
 
         var nodesDataSet = new vis.DataSet(visjsData.nodes);
         var edgesDataSet = new vis.DataSet(visjsData.edges);
+        self.lastAddedNodes = visjsData.nodes;
         nodesDataSet.on("*", function (/** @type {string} */ event, /** @type {{ items: any; }} */ properties, /** @type {any} */ senderId) {
             if (_options.onAddNodeToGraph) {
                 if (event == "add") _options.onAddNodeToGraph(properties, senderId);
             }
-            if (event == "add") self.lastAddedNodes = properties.items;
+            if (event == "add") self.lastAddedNodes = properties.data;
         });
 
         self.data = {

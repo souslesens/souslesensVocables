@@ -241,7 +241,7 @@ sourceLabels.sort();
     self.initUI = function (clearTree) {
         MainController.UI.message("");
         visjsGraph.clearGraph();
-
+        visjsGraph.lastAddedNodes = [];
         Lineage_decoration.clearLegend();
 
         if (clearTree) {
@@ -260,8 +260,7 @@ sourceLabels.sort();
         if (nodes && nodes.length > 0) {
             visjsGraph.data.nodes.remove(nodes);
         }
-
-        var xx = visjsGraph.network;
+        visjsGraph.lastAddedNodes = [];
     };
 
     self.showLastAddedNodesOnly = function () {

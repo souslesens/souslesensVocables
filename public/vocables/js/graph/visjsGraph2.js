@@ -56,6 +56,7 @@ var visjsGraph = (function () {
         self.legendLabels = self.legendLabels.concat(visjsData.labels);
         var container = document.getElementById(divId);
 
+        self.lastAddedNodes = visjsData.nodes;
         var nodesDataSet = new vis.DataSet(visjsData.nodes);
         var edgesDataSet = new vis.DataSet(visjsData.edges);
         nodesDataSet.on("*", function (/** @type {string} */ event, /** @type {{ items: any; }} */ properties, /** @type {any} */ senderId) {

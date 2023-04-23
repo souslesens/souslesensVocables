@@ -10,13 +10,43 @@ const fs = require("fs");
 var exec = require("child_process").exec;
 
 var GraphStore = {
-    exportGraph: function (graphUri, callback) {},
+    exportGraph: function (sparqlServerConnection,graphUri, callback) {
+//curl --verbose --url "http://example.com/sparql-graph-crud?graph-uri=urn:graph:update:test:get"
+
+        var url = sparqlServerConnection.url + "-graph-crud?";
+        var authStr = "";
+        if (sparqlServerConnection.auth) {
+            authStr = " --digest " + "--user " + sparqlServerConnection.auth.user + ":" + sparqlServerConnection.auth.pass;
+        }
+        var cmd = "curl " + authStr + " --verbose" + ' --url "' + url + "graph-uri=" + graphUri + '"' ;
+
+        exec(cmd, { maxBuffer: 1024 * 30000 }, function (err, stdout, stderr) {
+            if (err) {
+                console.log(err);
+                return callback(err);
+            }
+            if (stdout) {
+                console.log(stdout);
+                return callback(null);
+            }
+            if (stderr) {
+                console.log(stderr);
+                return callback(null,stdout);
+            }
+        });
+        return;
+
+
+
+
+
+
+    },
 
     importGraphFromFile: function (sparqlServerConnection, graphUri, filePath, callback) {
         //curl --digest --user dba:SlSv@51 --verbose --url "http://51.178.139.80:8890/sparql-graph-crud-auth?graph-uri=urn:graph:update:test:post" -X POST -T /tmp/bfo.owl
 
         var url = sparqlServerConnection.url + "-graph-crud?";
-        //
         var authStr = "";
         if (sparqlServerConnection.auth) {
             authStr = " --digest " + "--user " + sparqlServerConnection.auth.user + ":" + sparqlServerConnection.auth.pass;

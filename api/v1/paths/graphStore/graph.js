@@ -10,13 +10,26 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
-        GraphStore.importGraphFromUrl(req.query.graphUri, function (err, result) {
-            if (err) {
-                next(err);
-            } else {
-                return res.status(200).json(result);
+
+        if (ConfigManager.config) {
+            var sparqlServerConnection = { url: ConfigManager.config.default_sparql_url };
+            if (ConfigManager.config.sparql_server.user) {
+                sparqlServerConnection.auth = {
+                    user: ConfigManager.config.sparql_server.user,
+                    pass: ConfigManager.config.sparql_server.password,
+                    sendImmediately: false,
+                };
             }
-        });
+
+            GraphStore.exportGraph(sparqlServerConnection,req.query.graphUri, function(err, result) {
+                if (err) {
+                    next(err);
+                }
+                else {
+                    return res.status(200).json(result);
+                }
+            });
+        }
     }
 
     GET.apiDoc = {
@@ -50,14 +63,23 @@ module.exports = function () {
                 return res.status(400).json({ error: err });
             }
             if (userInfo.user.groups.indexOf("admin") < 0) return res.status(403);
-
-            GraphStore.importGraphFromUrl(req.body.url, req.body.graphUri, function (err, result) {
-                if (err) {
-                    next(err);
-                } else {
-                    return res.status(200).json(result);
+            if (ConfigManager.config) {
+                var sparqlServerConnection = { url: ConfigManager.config.default_sparql_url };
+                if (ConfigManager.config.sparql_server.user) {
+                    sparqlServerConnection.auth = {
+                        user: ConfigManager.config.sparql_server.user,
+                        pass: ConfigManager.config.sparql_server.password,
+                        sendImmediately: false,
+                    };
                 }
-            });
+
+                GraphStore.importGraphFromUrl(sparqlServerConnection, body.sourceUrl, body.graphUri, function(err, result) {
+                    processResponse(res, err, "DONE");
+
+                });
+            }
+
+
         });
     }
 

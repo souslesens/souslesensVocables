@@ -1,5 +1,5 @@
-import common from "./../../common.js";
-import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js";
+import common from "../../common.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com

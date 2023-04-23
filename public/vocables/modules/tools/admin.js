@@ -1,11 +1,11 @@
 import Lineage_dictionary from "./lineage/lineage_dictionary.js";
-import SearchUtil from "./../search/searchUtil.js";
-import Sparql_proxy from "./../sparqlProxies/sparql_proxy.js";
-import Sparql_generic from "./../sparqlProxies/sparql_generic.js";
-import MainController from "./../mainController.js";
-import Sparql_OWL from "./../sparqlProxies/sparql_OWL.js";
-import Export from "./../export.js";
-import Sparql_common from "./../sparqlProxies/sparql_common.js";
+import SearchUtil from "../search/searchUtil.js";
+import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
+import Sparql_generic from "../sparqlProxies/sparql_generic.js";
+import MainController from "../mainController.js";
+import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
+import Export from "../export.js";
+import Sparql_common from "../sparqlProxies/sparql_common.js";
 import SparqlQueryUI from "./sparqlQueryUI.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -94,14 +94,13 @@ var Ontocommons = (function () {
             var body = {
                 sourceUrl: sourceUrl,
                 sourceName: ontologyId,
-                graphUri: metadata.URI || "http://industryportal.enit.fr/ontologies/" + ontologyId + "#",
+                graphUri: metadata.URI || "http://industryportal.enit.fr/ontologies/" + ontologyId + "/",
                 options: {
                     metadata: metadata,
                     sourcesJsonFile: sourcesJsonFile,
-
+                    group: "ONTOCOMMONS",
                     reload: reload,
                     editable: editable,
-
                 },
             };
 

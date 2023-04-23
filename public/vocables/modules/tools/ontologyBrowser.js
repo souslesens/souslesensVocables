@@ -1,5 +1,5 @@
-import visjsGraph from "./../graph/visjsGraph2.js";
-import Sparql_common from "./../sparqlProxies/sparql_common.js";
+import visjsGraph from "../graph/visjsGraph2.js";
+import Sparql_common from "../sparqlProxies/sparql_common.js";
 import OwlSchema from "./owlSchema.js";
 
 /** The MIT License

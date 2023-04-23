@@ -1,7 +1,7 @@
-import OwlSchema from "./../owlSchema.js";
-import SourceBrowser from "./../sourceBrowser.js";
-import common from "./../../common.js";
-import Sparql_generic from "./../../sparqlProxies/sparql_generic.js";
+import OwlSchema from "../owlSchema.js";
+import SourceBrowser from "../sourceBrowser.js";
+import common from "../../common.js";
+import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com

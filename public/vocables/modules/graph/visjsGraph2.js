@@ -1,4 +1,4 @@
-import common from "./../common.js";
+import common from "../common.js";
 import SVGexport from "./SVGexport.js";
 import GraphMlExport from "./graphMLexport.js";
 

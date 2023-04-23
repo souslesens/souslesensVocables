@@ -1,4 +1,4 @@
-import common from "./../common.js";
+import common from "../common.js";
 
 //eslint-disable-next-line @typescript-eslint/no-unused-vars
 var SQLquery = (function () {

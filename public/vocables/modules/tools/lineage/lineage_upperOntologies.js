@@ -1,5 +1,5 @@
-import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js";
-import Sparql_common from "./../../sparqlProxies/sparql_common.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
 
 var Lineage_upperOntologies = (function () {
     var self = {};

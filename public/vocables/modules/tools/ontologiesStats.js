@@ -1,4 +1,4 @@
-import visjsGraph from "./../graph/visjsGraph2.js";
+import visjsGraph from "../graph/visjsGraph2.js";
 
 /* eslint-disable no-console */
 /** The MIT License

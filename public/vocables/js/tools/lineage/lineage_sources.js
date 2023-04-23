@@ -1,5 +1,3 @@
-import CommonUIwidgets from "../../../modules/commonUIwidgets";
-
 Lineage_sources = (function () {
     var self = {};
     self.activeSource = null;

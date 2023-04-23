@@ -2,141 +2,122 @@ const { processResponse } = require("../utils");
 const SourceIntegrator = require("../../../../bin/sourceIntegrator.");
 const ConfigManager = require("../../../../bin/configManager.");
 const GraphStore = require("../../../../bin/graphStore.");
-const async2=require("async")
+const async2 = require("async");
 
-module.exports = function() {
-  let operations = {
-    POST
-  };
+module.exports = function () {
+    let operations = {
+        POST,
+    };
 
-  async function POST(req, res, next) {
-    const body = req.body.body;
+    async function POST(req, res, next) {
+        const body = req.body.body;
 
-
-  ConfigManager.getUser(req, res, function(err, userInfo) {
-      if (err) {
-        return res.status(400).json({ error: err });
-      }
-      if (userInfo.user.groups.indexOf("admin") < 0) {
-        return res.status(403);
-      }
-
-      ConfigManager.getUserSources(req, res, function(err, userSources) {
-
-        if (ConfigManager.config) {
-          var sparqlServerConnection = { url: ConfigManager.config.default_sparql_url };
-          if (ConfigManager.config.sparql_server.user) {
-            sparqlServerConnection.auth = {
-              user: ConfigManager.config.sparql_server.user,
-              pass: ConfigManager.config.sparql_server.password,
-              sendImmediately: false
-            };
-          }
-          ;
-
-          body.options.allSources = userSources; //admin has all sources
-
-
-          var graphExists = false;
-          async2.series([
-
-            //create source if needed
-            function(callbackSeries) {
-              var sourceExists = userSources[body.sourceName];
-              if (sourceExists) {
-                return callbackSeries();
-              }
-
-              GraphStore.insertSourceInConfig(body.sourceName, body.sourceName, ConfigManager.config.default_sparql_url, [], function(err, result) {
-                return callbackSeries(err);
-              });
-
-
-            },
-            // check if graphExists
-            function(callbackSeries) {
-
-              GraphStore.graphExists(sparqlServerConnection, body.graphUri, function(err, result) {
-                graphExists = result;
-                return callbackSeries(err);
-              });
-            },
-
-            //clear graph  if reload
-            function(callbackSeries) {
-              if (!body.options.reload) {
-                return callbackSeries();
-              }
-              if (!graphExists) {
-                return callbackSeries();
-              }
-
-              GraphStore.clearGraph(sparqlServerConnection, body.graphUri, function(err, result) {
-                if(err)
-                  return callbackSeries(err);
-
-                graphExists = false;
-                return callbackSeries();
-              });
-            },
-            //import data into tripleStore
-            function(callbackSeries) {
-              if (graphExists) {
-                return callbackSeries();
-              }
-
-              GraphStore.importGraphFromUrl(sparqlServerConnection, body.sourceUrl, body.graphUri, function(err, result) {
-                processResponse(res, err, result);
-              });
+        ConfigManager.getUser(req, res, function (err, userInfo) {
+            if (err) {
+                return res.status(400).json({ error: err });
+            }
+            if (userInfo.user.groups.indexOf("admin") < 0) {
+                return res.status(403);
             }
 
-          ], function(err) {
-            processResponse(res, err, {});
-          });
+            if (ConfigManager.config) {
+                var sparqlServerConnection = { url: ConfigManager.config.default_sparql_url };
+                if (ConfigManager.config.sparql_server.user) {
+                    sparqlServerConnection.auth = {
+                        user: ConfigManager.config.sparql_server.user,
+                        pass: ConfigManager.config.sparql_server.password,
+                        sendImmediately: false,
+                    };
+                }
+                var graphExists = false;
+                async2.series(
+                    [
+                        // check if source name
+                        function (callbackSeries) {
+                            GraphStore.insertSourceInConfig(body.sourceName, body.graphUri, ConfigManager.config.default_sparql_url, body.options, function (err, result) {
+                                return callbackSeries(err);
+                            });
+                        },
 
+                        // check if graphExists
+                        function (callbackSeries) {
+                            GraphStore.graphExists(sparqlServerConnection, body.graphUri, function (err, result) {
+                                graphExists = result;
+                                return callbackSeries(err);
+                            });
+                        },
 
-        }
-        else {
-          return res.status(403);
-        }
-      });
-    });
-  }
+                        //clear graph  if reload
+                        function (callbackSeries) {
+                            if (!body.options.reload) {
+                                return callbackSeries();
+                            }
+                            if (!graphExists) {
+                                return callbackSeries();
+                            }
 
-  POST.apiDoc = {
-    summary: "Access to Graph Store",
-    security: [{ loginScheme: [] }],
-    operationId: "GraphStore",
-    parameters: [
-      {
-        name: "body",
-        description: "body",
-        in: "body",
-        schema: {
-          type: "object",
-          properties: {
-            sourceUrl: {
-              type: "string"
-            },
-            sourceName: {
-              type: "string"
-            },
-            graphUri: {
-              type: "string"
-            },
-            options: {
-              type: "object"
+                            GraphStore.clearGraph(sparqlServerConnection, body.graphUri, function (err, result) {
+                                if (err) return callbackSeries(err);
+
+                                graphExists = false;
+                                return callbackSeries();
+                            });
+                        },
+                        //import data into tripleStore
+                        function (callbackSeries) {
+                            if (graphExists) {
+                                return callbackSeries();
+                            }
+
+                            GraphStore.importGraphFromUrl(sparqlServerConnection, body.sourceUrl, body.graphUri, function (err, result) {
+                                return callbackSeries();
+                            });
+                        },
+                    ],
+                    function (err) {
+                        processResponse(res, err, "DONE");
+                    }
+                );
+            } else {
+                return res.status(403);
             }
-          }
-        }
-      }
-    ],
-    responses: {
-      default: {
-        description: "Response…"
-      }
+        });
     }
-  };
 
-  return operations;
+    POST.apiDoc = {
+        summary: "Access to Graph Store",
+        security: [{ loginScheme: [] }],
+        operationId: "GraphStore",
+        parameters: [
+            {
+                name: "body",
+                description: "body",
+                in: "body",
+                schema: {
+                    type: "object",
+                    properties: {
+                        sourceUrl: {
+                            type: "string",
+                        },
+                        sourceName: {
+                            type: "string",
+                        },
+                        graphUri: {
+                            type: "string",
+                        },
+                        options: {
+                            type: "object",
+                        },
+                    },
+                },
+            },
+        ],
+        responses: {
+            default: {
+                description: "Response…",
+            },
+        },
+    };
+
+    return operations;
 };

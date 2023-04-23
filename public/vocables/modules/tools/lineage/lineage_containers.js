@@ -1,11 +1,11 @@
-import SourceBrowser from "./../sourceBrowser.js";
+import SourceBrowser from "../sourceBrowser.js";
 import Lineage_classes from "./lineage_classes.js";
 import Lineage_styles from "./lineage_styles.js";
-import Sparql_common from "./../../sparqlProxies/sparql_common.js";
-import common from "./../../common.js";
-import Sparql_proxy from "./../../sparqlProxies/sparql_proxy.js";
-import Sparql_generic from "./../../sparqlProxies/sparql_generic.js";
-import visjsGraph from "./../../graph/visjsGraph2.js";
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import common from "../../common.js";
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
+import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
+import visjsGraph from "../../graph/visjsGraph2.js";
 
 var Lineage_containers = (function () {
     var self = {};

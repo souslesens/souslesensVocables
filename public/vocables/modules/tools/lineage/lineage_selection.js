@@ -1,4 +1,4 @@
-import SourceBrowser from "./../sourceBrowser.js";
+import SourceBrowser from "../sourceBrowser.js";
 
 var Lineage_selection = (function () {
     var self = {};

@@ -1,10 +1,10 @@
-import common from "./../common.js";
+import common from "../common.js";
 import SourceBrowser from "./sourceBrowser.js";
-import visjsGraph from "./../graph/visjsGraph2.js";
-import Sparql_common from "./../sparqlProxies/sparql_common.js";
-import Sparql_generic from "./../sparqlProxies/sparql_generic.js";
-import Sparql_proxy from "./../sparqlProxies/sparql_proxy.js";
-import Clipboard from "./../clipboard.js";
+import visjsGraph from "../graph/visjsGraph2.js";
+import Sparql_common from "../sparqlProxies/sparql_common.js";
+import Sparql_generic from "../sparqlProxies/sparql_generic.js";
+import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
+import Clipboard from "../clipboard.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com

@@ -1,10 +1,10 @@
 import SourceBrowser from "./sourceBrowser.js";
-import common from "./../common.js";
+import common from "../common.js";
 import Lineage_upperOntologies from "./lineage/lineage_upperOntologies.js";
-import SearchUtil from "./../search/searchUtil.js";
-import Sparql_generic from "./../sparqlProxies/sparql_generic.js";
-import visjsGraph from "./../graph/visjsGraph2.js";
-import Sparql_OWL from "./../sparqlProxies/sparql_OWL.js";
+import SearchUtil from "../search/searchUtil.js";
+import Sparql_generic from "../sparqlProxies/sparql_generic.js";
+import visjsGraph from "../graph/visjsGraph2.js";
+import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 
 //https://openbase.com/js/@json-editor/json-editor/documentation
 

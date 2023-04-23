@@ -9,56 +9,38 @@ const Util = require("./util.");
 const fs = require("fs");
 var exec = require("child_process").exec;
 
-
-
 var GraphStore = {
+    exportGraph: function (graphUri, callback) {},
 
+    importGraphFromFile: function (sparqlServerConnection, graphUri, filePath, callback) {
+        //curl --digest --user dba:SlSv@51 --verbose --url "http://51.178.139.80:8890/sparql-graph-crud-auth?graph-uri=urn:graph:update:test:post" -X POST -T /tmp/bfo.owl
 
+        var url = sparqlServerConnection.url + "-graph-crud?";
+        //
+        var authStr = "";
+        if (sparqlServerConnection.auth) {
+            authStr = " --digest " + "--user " + sparqlServerConnection.auth.user + ":" + sparqlServerConnection.auth.pass;
+        }
 
-  exportGraph: function(graphUri, callback) {
+        var cmd = "curl " + authStr + " --verbose" + ' --url "' + url + "graph-uri=" + graphUri + '"' + " -X POST" + " -T " + filePath;
 
-  },
+        exec(cmd, { maxBuffer: 1024 * 30000 }, function (err, stdout, stderr) {
+            if (err) {
+                console.log(err);
+                return callback(err);
+            }
+            if (stdout) {
+                console.log(stdout);
+                return callback(null);
+            }
+            if (stderr) {
+                console.log(stderr);
+                return callback(null);
+            }
+        });
+        return;
 
-  importGraphFromFile: function(sparqlServerConnection,graphUri, filePath, callback) {
-
-    //curl --digest --user dba:SlSv@51 --verbose --url "http://51.178.139.80:8890/sparql-graph-crud-auth?graph-uri=urn:graph:update:test:post" -X POST -T /tmp/bfo.owl
-
-    var url=sparqlServerConnection.url+"-graph-crud-auth?"
-    //
-    var authStr="";
-    if(sparqlServerConnection.auth){
-
-      authStr= " --digest " +
-      "--user "+sparqlServerConnection.auth.user+":"+sparqlServerConnection.auth.pass
-
-    }
-
-
-    var cmd = "curl "+authStr+
-      " --verbose" +
-      " --url \"" +url+
-      "graph-uri=" + graphUri + "\"" +
-      " -X POST" +
-      " -T " + filePath;
-
-
-    exec(cmd, { maxBuffer: 1024 * 30000 }, function(err, stdout, stderr) {
-      if (err) {
-        console.log(err);
-        return callback(err);
-      }
-      if (stdout) {
-        console.log(stdout);
-        return callback(null);
-      }
-      if (stderr) {
-        console.log(stderr);
-        return callback(null);
-      }
-    });
-    return;
-
-    /*    var Curl = require('node-libcurl').Curl;
+        /*    var Curl = require('node-libcurl').Curl;
        var curl = new Curl();
 
        var x=Curl.option
@@ -120,234 +102,223 @@ var GraphStore = {
     });
     curl.perform();
 */
-  }
-  ,
+    },
+    importGraphFromUrl: function (sparqlServerConnection, graphUrl, graphUri, callback) {
+        var filePath;
+        var id = Util.getRandomHexaId(10);
+        if (path.sep == "/") {
+            filePath = "/temp/" + id + ".rdf";
+        } else {
+            filePath = "C:\\temp\\" + id + ".rdf";
+        }
 
-  importGraphFromUrl: function(sparqlServerConnection,graphUrl,graphUri, callback) {
-    var filePath;
-    var id = Util.getRandomHexaId(10);
-    if (path.sep == "/") {
-      filePath = "/temp/" + id + ".rdf";
-    }
-    else {
-      filePath = "C:\\temp\\" + id + ".rdf";
-    }
+        let fileStream = fs.createWriteStream(filePath);
+        fileStream
+            .on("error", function (err) {
+                return callback(err);
+            })
+            .on("close", function (err) {
+                GraphStore.importGraphFromFile(sparqlServerConnection, graphUri, filePath, function (err, data) {
+                    // fs.rmSync(filePath)
+                    callback(err, "done");
+                });
+            });
 
-    let fileStream = fs.createWriteStream(filePath);
-    fileStream
-      .on("error", function(err) {
-        return callback(err);
-      })
-      .on("close", function(err) {
-        GraphStore.importGraphFromFile(sparqlServerConnection,graphUri, filePath, function(err, data) {
-         // fs.rmSync(filePath)
-          callback(err,"done")
+        request(graphUrl)
+            .on("error", function (err) {
+                return callback(err);
+            })
+            .pipe(fileStream);
+    },
 
+    extractDistinctUriRoots: function (triples) {
+        function getUriRoot(uri) {
+            if (uri.indexOf("http") != 1) {
+                return null;
+            }
+            var p = "" + uri.lastIndexOf("#");
+            if (p < 0) {
+                p = "" + uri.lastIndexOf("/");
+            }
+            if (p > -1) {
+                return uri.substring(0, p);
+            }
+            return null;
+        }
+
+        var distinctUriRoots = [];
+        triples.forEach(function (triple) {
+            if (!triple.subject) {
+                return;
+            }
+            var root = getUriRoot(triple.subject);
+            if (root && distinctUriRoots.indexOf(root) < 0) {
+                distinctUriRoots.push(root);
+            }
         });
-      });
+        return distinctUriRoots;
+    },
 
-    request(graphUrl)
-      .on("error", function(err) {
-        return callback(err);
-      })
-      .pipe(fileStream);
-  },
+    clearGraph: function (sparqlServerConnection, graphUri, callback) {
+        var strClear = "CLEAR GRAPH <" + graphUri + "> ";
 
+        var headers = {};
+        headers["Accept"] = "application/sparql-results+json";
+        headers["Content-Type"] = "application/x-www-form-urlencoded";
+        var sparqlUrl = sparqlServerConnection.url + "?query=";
 
-  extractDistinctUriRoots: function(triples) {
-    function getUriRoot(uri) {
-      if (uri.indexOf("http") != 1) {
-        return null;
-      }
-      var p = "" + uri.lastIndexOf("#");
-      if (p < 0) {
-        p = "" + uri.lastIndexOf("/");
-      }
-      if (p > -1) {
-        return uri.substring(0, p);
-      }
-      return null;
-    }
+        var options = { query: strClear };
+        options.auth = sparqlServerConnection.auth;
 
-    var distinctUriRoots = [];
-    triples.forEach(function(triple) {
-      if (!triple.subject) {
-        return;
-      }
-      var root = getUriRoot(triple.subject);
-      if (root && distinctUriRoots.indexOf(root) < 0) {
-        distinctUriRoots.push(root);
-      }
-    });
-    return distinctUriRoots;
-  }
+        httpProxy.post(sparqlUrl, headers, options, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            return callback();
+        });
+    },
+    graphExists: function (sparqlServerConnection, graphUri, callback) {
+        var query = " Select * from <" + graphUri + "> where {?s ?p ?o} limit 10";
 
-  ,
+        var headers = {};
+        headers["Accept"] = "application/sparql-results+json";
+        headers["Content-Type"] = "application/x-www-form-urlencoded";
+        var sparqlUrl = sparqlServerConnection.url + "?query=";
 
-  clearGraph: function(sparqlServerConnection, graphUri, callback) {
-    var strClear = "CLEAR GRAPH <" + graphUri + "> ";
+        var options = { query: query };
+        options.auth = sparqlServerConnection.auth;
 
-    var headers = {};
-    headers["Accept"] = "application/sparql-results+json";
-    headers["Content-Type"] = "application/x-www-form-urlencoded";
-    var sparqlUrl = sparqlServerConnection.url + "?query=";
+        httpProxy.post(sparqlUrl, headers, options, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            return callback(null, result.results.bindings.length > 0);
+        });
+    },
+    insertSourceInConfig: function (sourceName, graphUri, sparqlServerUrl, options, callback) {
+        var sourcesPath = path.join(__dirname, "../" + "config/" + options.sourcesJsonFile);
+        jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
+            if (err) {
+                return callback(err);
+            }
+            if (sources[sourceName]) {
+                return callback();
+            }
 
-    var options = { query: strClear };
-      options.auth = sparqlServerConnection.auth
+            var id = Util.getRandomHexaId(10);
+            var newSource = {
+                name: sourceName,
+                _type: "source",
+                id: id,
+                type: "",
+                graphUri: graphUri,
+                sparql_server: {
+                    url: sparqlServerUrl,
+                    method: "Post",
+                    headers: [],
+                },
+                editable: options.editable,
+                controller: "Sparql_OWL",
+                topClassFilter: "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+                schemaType: "OWL",
+                allowIndividuals: options.allowIndividuals,
+                predicates: {
+                    broaderPredicate: "",
+                    lang: "",
+                },
+                group: options.group,
+                imports: options.imports || [],
+                taxonomyPredicates: ["rdfs:subClassOf", "rdf:type"],
+            };
 
-    httpProxy.post(sparqlUrl, headers, options, function(err, result) {
-      if (err) {
-        return callback(err);
-      }
-      return callback();
-    });
-  }
-  ,
-  graphExists: function(sparqlServerConnection, graphUri, callback) {
-    var  query=" Select * from <"+graphUri+"> where {?s ?p ?o} limit 10"
+            sources[sourceName] = newSource;
+            jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
 
-    var headers = {};
-    headers["Accept"] = "application/sparql-results+json";
-    headers["Content-Type"] = "application/x-www-form-urlencoded";
-    var sparqlUrl = sparqlServerConnection.url + "?query=";
+                return callback();
+            });
+        });
+    },
 
-    var options = { query: query };
-    options.auth = sparqlServerConnection.auth
+    importSourceFromUrl: function (ontologyUrl, sourceName, options, callback) {
+        var Config;
+        var documentStr = "";
+        var graphUri = null;
+        var sparqlInsertStr = null;
+        var sources = null;
+        var Config = null;
+        var sourceStatus = {};
+        var sparqlServerUrl = null;
+        var importUris = [];
+        var importsSources = [];
+        var format = null;
+        var journal = "";
+        var allSources = options.allSources;
+        async.series(
+            [
+                //init connection
+                function (callbackSeries) {
+                    GraphStore.connection = {
+                        sparqlServerUrl: options.sparql_serverUrl,
+                        auth: options.auth,
+                    };
+                    callbackSeries();
+                },
 
-    httpProxy.post(sparqlUrl, headers, options, function(err, result) {
-      if (err) {
-        return callback(err);
-      }
-      return callback(null,result.results.bindings.length>0);
+                //check if source exists if not create it
+                function (callbackSeries) {
+                    if (allSources[sourceName]) {
+                        return callbackSeries();
+                    }
 
-    });
-  }
-  ,
+                    var imports = [];
+                    graphStore.insertSourceInConfig(sourceName, graphUri, connection.sparqlServerUrl, imports, function (err, result) {
+                        return callbackSeries(err);
+                    });
+                },
 
-  insertSourceInConfig:function (sourceName, graphUri,sparqlServerUrl,imports, callback){
+                //getConfig
+                function (callbackSeries) {
+                    if (options.graphUri) {
+                        graphUri = options.graphUri;
+                    } else {
+                        graphUri = "http://industryportal.enit.fr/ontologies/" + sourceName + "#";
+                    }
+                    configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
+                    jsonFileStorage.retrieve(path.resolve(configPath), function (err, _config) {
+                        Config = _config;
+                        sparqlServerUrl = options.sparqlServerUrl || Config.default_sparql_url;
+                        return callbackSeries();
+                    });
+                },
 
-    var id = Util.getRandomHexaId(10);
-    var newSource = {
-      name: sourceName,
-      _type: "source",
-      id: id,
-      type: "",
-      graphUri: graphUri,
-      sparql_server: {
-        url: sparqlServerUrl,
-        method: "Post",
-        headers: []
-      },
-      editable: options.editable,
-      controller: "Sparql_OWL",
-      topClassFilter: "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
-      schemaType: "OWL",
-      allowIndividuals: options.allowIndividuals,
-      predicates: {
-        broaderPredicate: "",
-        lang: ""
-      },
-      group: "ONTOCOMMONS",
-      imports: imports,
-      taxonomyPredicates: ["rdfs:subClassOf", "rdf:type"]
-    };
+                //get sources
+                function (callbackSeries) {
+                    if (options.sources) {
+                        sources = options.sources;
+                        return callbackSeries();
+                    }
+                    var sourcesPath = path.join(__dirname, "../" + "config/" + options.sourcesJsonFile);
+                    jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, _sources) {
+                        sources = _sources;
+                        return callbackSeries();
+                    });
+                },
 
-    sources[sourceName] = newSource;
-    var sourcesPath = path.join(__dirname, "../" + "config/" + options.sourcesJsonFile);
-    jsonFileStorage.store(path.resolve(sourcesPath), sources, function(err, result) {
-      if (err) {
-        return callback(err);
-      }
+                //if (options.reload) clear graph
+                function (callbackSeries) {
+                    if (options.reload != "true") {
+                        return callbackSeries();
+                    }
+                    SourceIntegrator.clearGraph(sparqlServerUrl, graphUri, function (err, result) {
+                        return callbackSeries(err);
+                    });
+                },
 
-      return callback();
-    });
-
-  },
-
-
-
-  importSourceFromUrl: function(ontologyUrl, sourceName, options, callback) {
-    var Config;
-    var documentStr = "";
-    var graphUri = null;
-    var sparqlInsertStr = null;
-    var sources = null;
-    var Config = null;
-    var sourceStatus = {};
-    var sparqlServerUrl = null;
-    var importUris = [];
-    var importsSources = [];
-    var format = null;
-    var journal = "";
-    var allSources=options.allSources
-    async.series(
-      [
-        //init connection
-        function(callbackSeries) {
-          GraphStore.connection = {
-            sparqlServerUrl: options.sparql_serverUrl,
-            auth: options.auth
-          };
-          callbackSeries();
-        },
-
-        //check if source exists if not create it
-        function(callbackSeries) {
-         if(allSources[sourceName])
-          return callbackSeries();
-
-         var imports=[]
-          graphStore.insertSourceInConfig(sourceName, graphUri,connection.sparqlServerUrl,imports, function(err,result){
-
-            return callbackSeries(err)
-        })
-        },
-
-
-
-
-
-        //getConfig
-        function(callbackSeries) {
-          if (options.graphUri) {
-            graphUri = options.graphUri;
-          }
-          else {
-            graphUri = "http://industryportal.enit.fr/ontologies/" + sourceName + "#";
-          }
-          configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
-          jsonFileStorage.retrieve(path.resolve(configPath), function(err, _config) {
-            Config = _config;
-            sparqlServerUrl = options.sparqlServerUrl || Config.default_sparql_url;
-            return callbackSeries();
-          });
-        },
-
-        //get sources
-        function(callbackSeries) {
-          if (options.sources) {
-            sources = options.sources;
-            return callbackSeries();
-          }
-          var sourcesPath = path.join(__dirname, "../" + "config/" + options.sourcesJsonFile);
-          jsonFileStorage.retrieve(path.resolve(sourcesPath), function(err, _sources) {
-            sources = _sources;
-            return callbackSeries();
-          });
-        },
-
-        //if (options.reload) clear graph
-        function(callbackSeries) {
-          if (options.reload != "true") {
-            return callbackSeries();
-          }
-          SourceIntegrator.clearGraph(sparqlServerUrl, graphUri, function(err, result) {
-            return callbackSeries(err);
-          });
-        },
-
-        //clear graph (if exists and reload)
-        /*  function (callbackSeries) {
+                //clear graph (if exists and reload)
+                /*  function (callbackSeries) {
             if (!options.clear) {
                 return callbackSeries();
             }
@@ -356,158 +327,151 @@ var GraphStore = {
             });
         },*/
 
-        //check if ontology already exist (with graphUri)
-        function(callbackSeries) {
-          var sourcesArray = Object.keys(sources);
-          if (sourcesArray.indexOf(sourceName) > -1) {
-            sourceStatus.exists = true;
-            return callbackSeries();
-          }
+                //check if ontology already exist (with graphUri)
+                function (callbackSeries) {
+                    var sourcesArray = Object.keys(sources);
+                    if (sourcesArray.indexOf(sourceName) > -1) {
+                        sourceStatus.exists = true;
+                        return callbackSeries();
+                    }
 
-          for (var source in sources) {
-            if (sources[source].graphUri == graphUri) {
-              sourceStatus.exists = source;
+                    for (var source in sources) {
+                        if (sources[source].graphUri == graphUri) {
+                            sourceStatus.exists = source;
+                        } else {
+                            sourceStatus.exists = false;
+                        }
+                    }
+                    return callbackSeries();
+                },
+
+                //parse and write triples
+                function (callbackSeries) {
+                    if (sourceStatus.exists && options.reload != "true") {
+                        return callbackSeries();
+                    }
+                    console.log("----------importing " + sourceName);
+                    SourceIntegrator.ontologyUrl2tripleStore(ontologyUrl, sparqlServerUrl, graphUri, format, options, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        graphUri = result.graphUri;
+                        sparqlInsertStr = result.sparqlInsertStr;
+                        importUris = result.imports;
+                        journal += "     " + result.totalTriples + "triples  imported  in graph " + graphUri + "\n";
+                        return callbackSeries();
+                    });
+                },
+
+                // get imports sources
+                function (callbackSeries) {
+                    if (!importUris || importUris.length == 0) {
+                        return callbackSeries();
+                    }
+
+                    importUris.forEach(function (importUri) {
+                        if (importsSourcesMap[importUri]) {
+                            importsSources.push(importsSourcesMap[importUri]);
+                        } else {
+                            console.log(importUri);
+                        }
+                    });
+
+                    return callbackSeries();
+                },
+
+                //manage Imports : create a source and create triples  if not exist for each import
+                function (callbackSeries) {
+                    return callbackSeries();
+
+                    if (options.reload && options.metadata && options.metadata.imports && options.metadata.imports.length > 0) {
+                        importsSources = [];
+                        async.eachSeries(
+                            options.metadata.imports,
+                            function (importUri, callbackEach) {
+                                var p = importUri.lastIndexOf("/");
+                                if ((p = importUri.length - 1)) {
+                                    p = importUri.substring(0, p).lastIndexOf("/");
+                                }
+                                if (p < 0) {
+                                    journal += "wrong importUri" + importUri;
+                                    return callbackEach();
+                                }
+                                var sourceLabel = importUri.substring(p + 1);
+
+                                console.log("create import source " + sourceLabel + " from uri" + importUri);
+
+                                SourceIntegrator.importSourceFromTurtle(importUri, sourceLabel, { graphUri: importUri, sources: sources }, function (err, result) {
+                                    if (err) {
+                                        journal += "******************error in import " + importUri + " " + result + "\n";
+                                    } else {
+                                        importsSources.push(sourceLabel);
+                                    }
+
+                                    return callbackEach();
+                                });
+                            },
+                            function (err) {
+                                return callbackSeries(err);
+                            }
+                        );
+                    } else {
+                        return callbackSeries();
+                    }
+                },
+
+                //register source if not exists
+                function (callbackSeries) {
+                    if (sourceStatus.exists) {
+                        return callbackSeries();
+                    }
+
+                    var id = Util.getRandomHexaId(10);
+                    var newSource = {
+                        name: sourceName,
+                        _type: "source",
+                        id: id,
+                        type: "",
+                        graphUri: graphUri,
+                        sparql_server: {
+                            url: sparqlServerUrl,
+                            method: "Post",
+                            headers: [],
+                        },
+                        editable: options.editable,
+                        controller: "Sparql_OWL",
+                        topClassFilter: "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
+                        schemaType: "OWL",
+                        allowIndividuals: options.allowIndividuals,
+                        predicates: {
+                            broaderPredicate: "",
+                            lang: "",
+                        },
+                        group: "ONTOCOMMONS",
+                        imports: importsSources,
+                        taxonomyPredicates: ["rdfs:subClassOf", "rdf:type"],
+                    };
+
+                    sources[sourceName] = newSource;
+                    var sourcesPath = path.join(__dirname, "../" + "config/" + options.sourcesJsonFile);
+                    jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        sourceStatus.exists = true;
+                        return callbackSeries();
+                    });
+                },
+            ],
+
+            function (err) {
+                journal += "DONE";
+
+                console.log(journal);
+                return callback(err, journal);
             }
-            else {
-              sourceStatus.exists = false;
-            }
-          }
-          return callbackSeries();
-        },
-
-        //parse and write triples
-        function(callbackSeries) {
-          if (sourceStatus.exists && options.reload != "true") {
-            return callbackSeries();
-          }
-          console.log("----------importing " + sourceName);
-          SourceIntegrator.ontologyUrl2tripleStore(ontologyUrl, sparqlServerUrl, graphUri, format, options, function(err, result) {
-            if (err) {
-              return callbackSeries(err);
-            }
-            graphUri = result.graphUri;
-            sparqlInsertStr = result.sparqlInsertStr;
-            importUris = result.imports;
-            journal += "     " + result.totalTriples + "triples  imported  in graph " + graphUri + "\n";
-            return callbackSeries();
-          });
-        },
-
-        // get imports sources
-        function(callbackSeries) {
-          if (!importUris || importUris.length == 0) {
-            return callbackSeries();
-          }
-
-          importUris.forEach(function(importUri) {
-            if (importsSourcesMap[importUri]) {
-              importsSources.push(importsSourcesMap[importUri]);
-            }
-            else {
-              console.log(importUri);
-            }
-          });
-
-          return callbackSeries();
-        },
-
-        //manage Imports : create a source and create triples  if not exist for each import
-        function(callbackSeries) {
-          return callbackSeries();
-
-          if (options.reload && options.metadata && options.metadata.imports && options.metadata.imports.length > 0) {
-            importsSources = [];
-            async.eachSeries(
-              options.metadata.imports,
-              function(importUri, callbackEach) {
-                var p = importUri.lastIndexOf("/");
-                if ((p = importUri.length - 1)) {
-                  p = importUri.substring(0, p).lastIndexOf("/");
-                }
-                if (p < 0) {
-                  journal += "wrong importUri" + importUri;
-                  return callbackEach();
-                }
-                var sourceLabel = importUri.substring(p + 1);
-
-                console.log("create import source " + sourceLabel + " from uri" + importUri);
-
-                SourceIntegrator.importSourceFromTurtle(importUri, sourceLabel, { graphUri: importUri, sources: sources }, function(err, result) {
-                  if (err) {
-                    journal += "******************error in import " + importUri + " " + result + "\n";
-                  }
-                  else {
-                    importsSources.push(sourceLabel);
-                  }
-
-                  return callbackEach();
-                });
-              },
-              function(err) {
-                return callbackSeries(err);
-              }
-            );
-          }
-          else {
-            return callbackSeries();
-          }
-        },
-
-        //register source if not exists
-        function(callbackSeries) {
-          if (sourceStatus.exists) {
-            return callbackSeries();
-          }
-
-          var id = Util.getRandomHexaId(10);
-          var newSource = {
-            name: sourceName,
-            _type: "source",
-            id: id,
-            type: "",
-            graphUri: graphUri,
-            sparql_server: {
-              url: sparqlServerUrl,
-              method: "Post",
-              headers: []
-            },
-            editable: options.editable,
-            controller: "Sparql_OWL",
-            topClassFilter: "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
-            schemaType: "OWL",
-            allowIndividuals: options.allowIndividuals,
-            predicates: {
-              broaderPredicate: "",
-              lang: ""
-            },
-            group: "ONTOCOMMONS",
-            imports: importsSources,
-            taxonomyPredicates: ["rdfs:subClassOf", "rdf:type"]
-          };
-
-          sources[sourceName] = newSource;
-          var sourcesPath = path.join(__dirname, "../" + "config/" + options.sourcesJsonFile);
-          jsonFileStorage.store(path.resolve(sourcesPath), sources, function(err, result) {
-            if (err) {
-              return callbackSeries(err);
-            }
-            sourceStatus.exists = true;
-            return callbackSeries();
-          });
-        }
-      ],
-
-      function(err) {
-        journal += "DONE";
-
-        console.log(journal);
-        return callback(err, journal);
-      }
-    );
-  }
+        );
+    },
 };
 
-
 module.exports = GraphStore;
-
-

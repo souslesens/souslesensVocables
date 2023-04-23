@@ -1,7 +1,7 @@
-import Sparql_proxy from "./../../sparqlProxies/sparql_proxy.js";
-import Sparql_OWL from "./../../sparqlProxies/sparql_OWL.js";
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_classes from "./lineage_classes.js";
-import Sparql_generic from "./../../sparqlProxies/sparql_generic.js";
+import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Lineage_blend from "./lineage_blend.js";
 import Lineage_combine from "./lineage_combine.js";
 

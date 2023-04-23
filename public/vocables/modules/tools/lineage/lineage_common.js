@@ -1,5 +1,5 @@
-import common from "./../../common.js";
-import Sparql_generic from "./../../sparqlProxies/sparql_generic.js";
+import common from "../../common.js";
+import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com

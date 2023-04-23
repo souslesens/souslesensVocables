@@ -1,8 +1,7 @@
 const { processResponse } = require("../utils");
 const SourceIntegrator = require("../../../../bin/sourceIntegrator.");
 const ConfigManager = require("../../../../bin/configManager.");
-const GraphStore=require("../../../../bin/graphStore.")
-
+const GraphStore = require("../../../../bin/graphStore.");
 
 module.exports = function () {
     let operations = {
@@ -11,7 +10,6 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
-
         GraphStore.importGraphFromUrl(req.query.graphUri, function (err, result) {
             if (err) {
                 next(err);
@@ -19,8 +17,6 @@ module.exports = function () {
                 return res.status(200).json(result);
             }
         });
-
-
     }
 
     GET.apiDoc = {
@@ -35,8 +31,7 @@ module.exports = function () {
                 type: "string",
                 in: "query",
                 required: true,
-            }
-
+            },
         ],
 
         responses: {
@@ -54,27 +49,23 @@ module.exports = function () {
             if (err) {
                 return res.status(400).json({ error: err });
             }
-            if (userInfo.user.groups.indexOf("admin") < 0)
-                return res.status(403);
+            if (userInfo.user.groups.indexOf("admin") < 0) return res.status(403);
 
-
-            GraphStore.importGraphFromUrl(req.body.url, req.body.graphUri, function(err, result) {
+            GraphStore.importGraphFromUrl(req.body.url, req.body.graphUri, function (err, result) {
                 if (err) {
                     next(err);
-                }
-                else {
+                } else {
                     return res.status(200).json(result);
                 }
             });
-        })
-
+        });
     }
 
     POST.apiDoc = {
         security: [{ loginScheme: [] }],
         summary: "Save rdf url to SLSV graph store",
-        description:  "Save rdf file or url to SLSV graph store",
-        operationId:  "Save rdf file or url to SLSV graph store",
+        description: "Save rdf file or url to SLSV graph store",
+        operationId: "Save rdf file or url to SLSV graph store",
         parameters: [
             {
                 name: "body",
@@ -89,7 +80,6 @@ module.exports = function () {
                         graphUri: {
                             type: "string",
                         },
-
                     },
                 },
             },

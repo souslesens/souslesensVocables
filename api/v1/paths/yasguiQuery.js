@@ -20,7 +20,6 @@ module.exports = function () {
 
                 var params = { query: query };
 
-
                 if (ConfigManager.config && req.query.url.indexOf(ConfigManager.config.default_sparql_url) == 0) {
                     params.auth = {
                         user: ConfigManager.config.sparql_server.user,
@@ -28,36 +27,30 @@ module.exports = function () {
                         sendImmediately: false,
                     };
 
-                        ConfigManager.getUserSources(req, res, function(err, userSources) {
+                    ConfigManager.getUserSources(req, res, function (err, userSources) {
+                        if (err) {
+                            return processResponse(res, err, userSources);
+                        }
+                        ConfigManager.getUser(req, res, function (err, userInfo) {
                             if (err) {
-                                return processResponse(res, err, userSources);
+                                return res.status(400).json({ error: err });
                             }
-                            ConfigManager.getUser(req, res, function(err, userInfo) {
-                                if (err) {
-                                    return res.status(400).json({ error: err });
-                                }
-                                if (userInfo.user.groups.includes("admin")) {
-                                    httpProxy.post(req.query.url, headers, params, function(err, result) {
+                            if (userInfo.user.groups.includes("admin")) {
+                                httpProxy.post(req.query.url, headers, params, function (err, result) {
+                                    processResponse(res, err, result);
+                                });
+                            } else {
+                                UserRequestFiltering.filterSparqlRequest(req.body.query, userSources, function (parsingError, filteredQuery) {
+                                    if (parsingError) {
+                                        return processResponse(res, parsingError, null);
+                                    }
+                                    httpProxy.post(req.query.url, headers, params, function (err, result) {
                                         processResponse(res, err, result);
                                     });
-                                }
-                                else {
-
-                                    UserRequestFiltering.filterSparqlRequest(req.body.query, userSources, function(parsingError, filteredQuery) {
-                                        if (parsingError) {
-                                            return processResponse(res, parsingError, null);
-                                        }
-                                        httpProxy.post(req.query.url, headers, params, function(err, result) {
-                                            processResponse(res, err, result);
-                                        });
-                                    });
-                                }
-
-                            });
-
-                        })
-
-
+                                });
+                            }
+                        });
+                    });
                 }
             } else if (req.query.method == "GET") {
                 headers["Accept"] = "application/sparql-results+json";

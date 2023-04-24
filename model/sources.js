@@ -3,45 +3,65 @@ const { Lock } = require("async-await-mutex-lock");
 const { config, configSourcesPath, configProfilesPath } = require("./config");
 const { ProfileModel } = require("./profiles");
 
+/**
+ * @typedef {import("./UserTypes").UserAccount} UserAccount
+ * @typedef {import("./SourceTypes").Source} Source
+ * @typedef {import("./SourceTypes").SourceWithAccessControl} SourceWithAccessControl
+ */
+
 const lock = new Lock();
 
 class SourceModel {
+    /**
+     * @param {string} sourcesPath - path of the sources.json file
+     * @param {string} profilesPath - path of the profiles.json file
+     */
     constructor(sourcesPath, profilesPath) {
         this.configSourcesPath = sourcesPath;
         this.profileModel = new ProfileModel(profilesPath);
     }
 
+    /**
+     * @returns {Promise<Record<string, Source>>} a collection of sources
+     */
     _read = async () => {
         return fs.promises.readFile(this.configSourcesPath).then((data) => JSON.parse(data.toString()));
     };
 
+    /**
+     * @param {Record<string, Source>} sources - a collection of sources
+     */
     _write = async (sources) => {
         await fs.promises.writeFile(this.configSourcesPath, JSON.stringify(sources, null, 2));
     };
 
+    /**
+     * @param {Record<string, Source>} sources -  a collection of sources
+     * @returns {Promise<Record<string, SourceWithAccessControl>>} a collection of sources
+     */
     _addReadWriteToSources = async (sources) => {
         return Object.fromEntries(
             Object.entries(sources).map(([id, s]) => {
-                s.accessControl = "readwrite";
-                return [id, s];
+                const newSource = { ...s, accessControl: "readwrite" };
+                return [id, newSource];
             })
         );
     };
 
-    _sortSources = async (sources) => {
-        return Object.fromEntries(
-            Object.entries(sources).sort((a, b) => {
-                return a[0].localeCompare(b[0]);
-            })
-        );
-    };
-
+    /**
+     * @param {Record<string, Source>} sources -  a collection of sources
+     * @returns {Promise<Record<string, SourceWithAccessControl>>} a collection of sources
+     */
     _getAdminSources = async (sources) => {
         const adminSources = await this._addReadWriteToSources(sources);
-        const sortedAdminSources = await this._sortSources(adminSources);
-        return sortedAdminSources;
+        return adminSources;
     };
 
+    /**
+     * @param {Record<string, Source>} sources -  a collection of sources
+     * @param {UserAccount} user -  a user account
+     * @returns {Promise<Record<string, SourceWithAccessControl>>} a collection of sources
+     */
     _getAllowedSources = async (sources, user) => {
         const profiles = await this.profileModel._read();
         // convert objects to lists
@@ -112,24 +132,39 @@ class SourceModel {
         );
 
         // filter sources with sortedAndReducedAllowedSources
-        const filterSourcesList = sourcesList.filter(([sourceName, source]) => {
-            if (sourceName in sortedAndReducedAllowedSources) {
-                source["accessControl"] = sortedAndReducedAllowedSources[sourceName];
-                return [sourceName, source];
-            }
-        });
-        return await this._sortSources(Object.fromEntries(filterSourcesList));
+        const filterSourcesList = sourcesList
+            .filter(([sourceName, source]) => {
+                if (sourceName in sortedAndReducedAllowedSources) {
+                    return [sourceName, source];
+                }
+            })
+            .map(([sourceName, source]) => {
+                return [sourceName, { ...source, accessControl: sortedAndReducedAllowedSources[sourceName] }];
+            });
+        return Object.fromEntries(filterSourcesList);
     };
 
+    /**
+     * @returns {Promise<Record<string, Source>>} a collection of sources
+     */
     getAllSources = async () => {
-        return await this._sortSources(await this._read());
+        return await this._read();
     };
 
+    /**
+     * @param {UserAccount} user -  a user account
+     * @param {string} sourceName -  a source name
+     * @returns {Promise<Source>} a collection of sources
+     */
     getOneUserSource = async (user, sourceName) => {
         const userSources = await this.getUserSources(user);
         return userSources[sourceName];
     };
 
+    /**
+     * @param {UserAccount} user -  a user account
+     * @returns {Promise<Record<string, SourceWithAccessControl>>} a collection of sources
+     */
     getUserSources = async (user) => {
         const allSources = await this._read();
         if (user.login === "admin" || user.groups.includes("admin")) {
@@ -138,6 +173,9 @@ class SourceModel {
         return await this._getAllowedSources(allSources, user);
     };
 
+    /**
+     * @param {Source} newSource -  a source
+     */
     addSource = async (newSource) => {
         await lock.acquire("SourcesThread");
         try {
@@ -153,6 +191,10 @@ class SourceModel {
         }
     };
 
+    /**
+     * @param {string} sourceName -  a source name
+     * @returns {Promise<boolean>} - true if the source exists
+     */
     deleteSource = async (sourceName) => {
         await lock.acquire("SourcesThread");
         try {
@@ -168,11 +210,15 @@ class SourceModel {
         }
     };
 
+    /**
+     * @param {Source} source - a source
+     * @returns {Promise<boolean>} - true if the source exists
+     */
     updateSource = async (source) => {
         await lock.acquire("SourcesThread");
         try {
             const sources = await this._read();
-            if (!source.id in sources) {
+            if (!(source.id in sources)) {
                 return false;
             }
             const updatedSources = { ...sources };

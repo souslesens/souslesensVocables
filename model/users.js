@@ -40,6 +40,7 @@ class UserModel {
 
     /**
      * @param {string} login
+     * @returns {Promise<UserAccount | undefined>} a user account
      */
     findUserAccount = async (login) => {
         const userAccount = await this._readOne(login);
@@ -82,15 +83,17 @@ class UserModel {
     };
 
     /**
-     * @param {UserAccount} newUserAccount
+     * @param {UserAccountWithPassword} newUserAccount
      */
     addUserAccount = async (newUserAccount) => {
         await lock.acquire("UsersThread");
         try {
             const userAccounts = await this._read();
             if (newUserAccount.id === undefined) newUserAccount.id = newUserAccount.login;
-            // hash password
-            newUserAccount.password = bcrypt.hashSync(newUserAccount.password, 10);
+            if (newUserAccount.password) {
+                // hash password
+                newUserAccount.password = bcrypt.hashSync(newUserAccount.password, 10);
+            }
             if (Object.keys(userAccounts).includes(newUserAccount.id)) {
                 throw Error("UserAccount exists already, try updating it.");
             }

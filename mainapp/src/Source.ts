@@ -21,9 +21,22 @@ export async function putSources(body: ServerSource[]): Promise<ServerSource[]> 
     const json = (await response.json()) as Response;
     return mapSources(json.resources);
 }
+
 function mapSources(resources: ServerSource[]) {
     const sources = Object.entries(resources);
-    const mapped_sources = sources.map(([key, val]) => decodeSource(key, val));
+    const mapped_sources = sources
+        .map(([key, val]) => decodeSource(key, val))
+        .sort((source1: ServerSource, source2: ServerSource) => {
+            const name1 = source1.name.toUpperCase();
+            const name2 = source2.name.toUpperCase();
+            if (name1 < name2) {
+                return -1;
+            }
+            if (name1 > name2) {
+                return 1;
+            }
+            return 0;
+        });
     return mapped_sources;
 }
 

@@ -15,11 +15,23 @@ async function getProfiles(): Promise<Profile[]> {
 
 function mapProfiles(resources: ProfileJson[]) {
     const profiles: [string, ProfileJson][] = Object.entries(resources);
-    const mapped_users = profiles.map(([key, val]) => {
-        return decodeProfile(key, val);
-    });
+    const mapped_profiles = profiles
+        .map(([key, val]) => {
+            return decodeProfile(key, val);
+        })
+        .sort((profile1: Profile, profile2: Profile) => {
+            const name1 = profile1.name.toUpperCase();
+            const name2 = profile2.name.toUpperCase();
+            if (name1 < name2) {
+                return -1;
+            }
+            if (name1 > name2) {
+                return 1;
+            }
+            return 0;
+        });
 
-    return mapped_users;
+    return mapped_profiles;
 }
 
 export async function saveProfile(body: Profile, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {

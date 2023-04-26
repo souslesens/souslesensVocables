@@ -6,11 +6,7 @@ import * as React from "react";
 import { SRD } from "srd";
 import { Log } from "../Log";
 import CsvDownloader from "react-csv-downloader";
-import { Logger } from "n3";
 
-function onlyUnique(value, index, array) {
-    return array.indexOf(value) === index;
-}
 export const LogsTable = () => {
     const { model } = useModel();
 

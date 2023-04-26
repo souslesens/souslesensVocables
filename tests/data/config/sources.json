@@ -1,39 +1,80 @@
 {
-    "BFO": {
-        "name": "BFO",
+    "SOURCE_1": {
+        "name": "SOURCE_1",
         "_type": "source",
-        "id": "01G22MJFKCFFJVYDX0RV2C75D8",
+        "id": "01GJCQXBE47BGBP2QSGZN9XA4V",
         "type": "",
-        "graphUri": "http://purl.obolibrary.org/obo/bfo.owl",
+        "graphUri": "http://data.exemple.org/source_1",
         "sparql_server": {
-            "url": "_default",
-            "method": "GET"
+            "url": "_default"
         },
-        "editable": true,
         "controller": "Sparql_OWL",
-        "topClassFilter": "?any rdfs:subClassOf ?topConcept",
+        "topClassFilter": " ?topConcept rdfs:subClassOf owl:Class",
         "schemaType": "OWL",
         "dataSource": null,
         "schema": null,
-        "color": "",
         "isDraft": false,
+        "editable": true,
+        "allowIndividuals": true,
+        "color": "#bcbd22",
         "predicates": {
             "broaderPredicate": "",
             "lang": ""
         },
-        "group": "",
-        "imports": []
+        "group": "FOLDER_1/SUBFOLDER_1",
+        "imports": [],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
     },
-    "ISO_15926-part-14_PCA": {
-        "color": "#bcbd22",
-        "controller": "Sparql_OWL",
-        "graphUri": "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/",
-        "group": "STANDARDS/ABSTRACT ONTOLOGIES",
-        "schema": null,
-        "schemaType": "OWL",
+    "SOURCE_2": {
+        "name": "SOURCE_2",
+        "_type": "source",
+        "id": "01GJCQXBE47BGBP2QSGZN9XA4W",
+        "type": "",
+        "graphUri": "http://data.exemple.org/source_2",
         "sparql_server": {
             "url": "_default"
         },
-        "topClassFilter": " ?topConcept rdf:type <http://www.w3.org/2002/07/owl#Class>  filter (NOT exists {?topConcept rdfs:subClassOf ?y} &&  (!isBlank(?topConcept))  )"
+        "controller": "Sparql_OWL",
+        "topClassFilter": " ?topConcept rdfs:subClassOf owl:Class",
+        "schemaType": "OWL",
+        "dataSource": null,
+        "schema": null,
+        "isDraft": false,
+        "editable": false,
+        "allowIndividuals": true,
+        "color": "#bcbd22",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "FOLDER_1/SUBFOLDER_2",
+        "imports": ["SOURCE_1"],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
+    },
+    "SOURCE_3": {
+        "name": "SOURCE_3",
+        "_type": "source",
+        "id": "01GJCQXBE47BGBP2QSGZN9XA4X",
+        "type": "",
+        "graphUri": "http://data.exemple.org/source_3",
+        "sparql_server": {
+            "url": "_default"
+        },
+        "controller": "Sparql_OWL",
+        "topClassFilter": " ?topConcept rdfs:subClassOf owl:Class",
+        "schemaType": "OWL",
+        "dataSource": null,
+        "schema": null,
+        "isDraft": false,
+        "editable": true,
+        "allowIndividuals": true,
+        "color": "#bcbd22",
+        "predicates": {
+            "broaderPredicate": "",
+            "lang": ""
+        },
+        "group": "FOLDER_2/SUBFOLDER_1",
+        "imports": ["SOURCE_1"],
+        "taxonomyPredicates": ["rdfs:subClassOf", "rdf:type"]
     }
 }

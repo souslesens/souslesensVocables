@@ -3,30 +3,44 @@ import { Mode, Type, Msg_ } from "./Component/SourcesTable";
 import { failure, success } from "srd";
 import { Msg } from "./Admin";
 import React from "react";
+import * as z from "zod";
 
 const endpoint = "/api/v1/sources";
 
-type Response = { message: string; resources: SourceJson[] };
+type Response = { message: string; resources: ServerSource[] };
 
-async function getSources(): Promise<Source[]> {
+async function getSources(): Promise<ServerSource[]> {
     const response = await fetch(endpoint);
     const json = (await response.json()) as Response;
     return mapSources(json.resources);
 }
 
-export async function putSources(body: Source[]): Promise<Source[]> {
+export async function putSources(body: ServerSource[]): Promise<ServerSource[]> {
     const sourcesToObject = body.reduce((obj, item) => ({ ...obj, [item.name]: item }), {});
     const response = await fetch("/sources", { method: "put", body: JSON.stringify(sourcesToObject, null, "\t"), headers: { "Content-Type": "application/json" } });
     const json = (await response.json()) as Response;
     return mapSources(json.resources);
 }
-function mapSources(resources: SourceJson[]) {
-    const sources: [string, SourceJson][] = Object.entries(resources);
-    const mapped_users = sources.map(([key, val]) => decodeSource(key, val));
-    return mapped_users;
+
+function mapSources(resources: ServerSource[]) {
+    const sources = Object.entries(resources);
+    const mapped_sources = sources
+        .map(([key, val]) => decodeSource(key, val))
+        .sort((source1: ServerSource, source2: ServerSource) => {
+            const name1 = source1.name.toUpperCase();
+            const name2 = source2.name.toUpperCase();
+            if (name1 < name2) {
+                return -1;
+            }
+            if (name1 > name2) {
+                return 1;
+            }
+            return 0;
+        });
+    return mapped_sources;
 }
 
-export async function saveSource(body: Source, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
+export async function saveSource(body: InputSource, mode: Mode, updateModel: React.Dispatch<Msg>, updateLocal: React.Dispatch<Msg_>) {
     try {
         let response = null;
         if (mode === Mode.Edition) {
@@ -45,7 +59,7 @@ export async function saveSource(body: Source, mode: Mode, updateModel: React.Di
         const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
             if (mode === Mode.Edition) {
-                const sources = await getSources();
+                const sources: ServerSource[] = await getSources();
                 updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(sources)) });
             } else {
                 updateModel({ type: "ServerRespondedWithSources", payload: success(mapSources(resources)) });
@@ -61,7 +75,7 @@ export async function saveSource(body: Source, mode: Mode, updateModel: React.Di
     }
 }
 
-export async function deleteSource(source: Source, updateModel: React.Dispatch<Msg>) {
+export async function deleteSource(source: InputSource, updateModel: React.Dispatch<Msg>) {
     try {
         const response = await fetch(`${endpoint}/${source.name}`, { method: "delete" });
         const { message, resources } = (await response.json()) as Response;
@@ -76,29 +90,8 @@ export async function deleteSource(source: Source, updateModel: React.Dispatch<M
     }
 }
 
-const decodeSource = (key: string, source: SourceJson): Source => {
-    const decodedSource = {
-        name: source.name ? source.name : key,
-        _type: "source",
-        id: source.id ? source.id : ulid(),
-        type: source.type ? source.type : "missing type",
-        graphUri: source.graphUri ? source.graphUri : "",
-        sparql_server: source.sparql_server ? source.sparql_server : defaultSource("").sparql_server,
-        controller: source.controller ? source.controller : controllerDefault(source.schemaType),
-        topClassFilter: source.topClassFilter ? source.topClassFilter : "missing topClassFilter",
-        schemaType: source.schemaType ? source.schemaType : "missing schema type",
-        dataSource: source.dataSource ? source.dataSource : null,
-        schema: source.schema ? source.schema : null,
-        isDraft: source.isDraft ? source.isDraft : false,
-        editable: source.editable ? source.editable : false,
-        allowIndividuals: source.allowIndividuals ? source.allowIndividuals : false,
-        color: source.color ? source.color : "default color",
-        predicates: source.predicates ? source.predicates : defaultSource(ulid()).predicates,
-        group: source.group ? source.group : "",
-        imports: source.imports ? source.imports : [],
-        taxonomyPredicates: source.taxonomyPredicates ? source.taxonomyPredicates : [],
-    };
-    return decodedSource;
+const decodeSource = (key: string, source: ServerSource): ServerSource => {
+    return ServerSourceSchema.parse({ name: source.name ?? key });
 };
 
 function controllerDefault(schemaType: string | undefined): string {
@@ -111,71 +104,112 @@ function controllerDefault(schemaType: string | undefined): string {
     }
 }
 
-export type Source = {
-    id: string;
-    name: string;
-    _type: string;
-    type: string;
-    graphUri: string;
-    sparql_server: SparqlServer;
-    controller: string;
-    topClassFilter: string;
-    schemaType: string;
-    dataSource: null | DataSource;
-    schema: null;
-    editable: boolean;
-    color: string;
-    isDraft: boolean;
-    allowIndividuals: boolean;
-    predicates: { broaderPredicate: string; lang: string };
-    group: string;
-    imports: string[];
-    taxonomyPredicates: string[];
+export type ServerSource = z.infer<typeof ServerSourceSchema>;
+export type InputSource = z.infer<typeof InputSourceSchema>;
+type SparqlServer = z.infer<typeof SparqlServerSchema>;
+
+export const SparqlServerSchema = z
+    .object({
+        url: z.string().default("_default"),
+        method: z.string().default("GET"),
+        headers: z.array(z.string()).default([]),
+    })
+    .default({ url: "", method: "", headers: [] });
+
+const SourcePredicatesSchema = z
+    .object({
+        broaderPredicate: z.string().default(""),
+        lang: z.string().default(""),
+    })
+    .default({ broaderPredicate: "", lang: "" });
+
+const LocalDictionarySchema = z.object({
+    table: z.string().default(""),
+    idColumn: z.string().default(""),
+    labelColumn: z.string().default(""),
+});
+export type LocalDictionary = z.infer<typeof LocalDictionarySchema>;
+
+const defaultDataSource: DataSource = {
+    type: [],
+    connection: "_default",
+    dbName: "",
+    table_schema: "",
+    local_dictionary: { table: "", idColumn: "", labelColumn: "" },
 };
 
-export const defaultSource = (id: string): Source => {
-    return {
-        name: "",
+const dataSourceSchema = z
+    .object({
+        type: z.array(z.string()).default([]),
+        connection: z.string().default("_default"),
+        dbName: z.string().default(""),
+        table_schema: z.string().default(""),
+        local_dictionary: LocalDictionarySchema,
+    })
+    .default(defaultDataSource);
+
+export const ServerSourceSchema = z.object({
+    id: z.string().default(ulid()),
+    name: z.string().default(""),
+    _type: z.string().optional(),
+    type: z.string().default(""),
+    graphUri: z.string().default(""),
+    sparql_server: SparqlServerSchema,
+    controller: z.string().default("Sparql_OWL"),
+    topClassFilter: z.string().default("?topConcept rdf:type owl:Class ."),
+    schemaType: z.string().default("OWL"),
+    dataSource: dataSourceSchema.nullable(),
+    schema: z.unknown().nullable(),
+    editable: z.boolean().default(true),
+    color: z.string().default(""),
+    isDraft: z.boolean().default(false),
+    allowIndividuals: z.boolean().default(false),
+    predicates: SourcePredicatesSchema,
+    group: z.string().default(""),
+    imports: z.array(z.string()).default([]),
+    taxonomyPredicates: z.array(z.string()).default([]),
+});
+
+export const InputSourceSchema = z.object({
+    id: z.string().default(ulid()),
+    name: z
+        .string()
+        .nonempty({ message: "Required" })
+        .refine((val) => val !== "admin", { message: "Name can't be admin" })
+        .refine((val) => val.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i), { message: "Name can only contain alphanumeric characters" }),
+
+    _type: z.string().optional(),
+    type: z.string().default(""),
+    graphUri: z.string().nonempty({ message: "Required" }),
+    sparql_server: SparqlServerSchema,
+    controller: z.string().optional(),
+    topClassFilter: z.string().optional(),
+    schemaType: z.string().optional(),
+    dataSource: dataSourceSchema.nullable(),
+    schema: z.unknown().nullable(),
+    editable: z.boolean().optional(),
+    color: z.string().default(""),
+    isDraft: z.boolean().default(false),
+    allowIndividuals: z.boolean().default(false),
+    predicates: SourcePredicatesSchema,
+    group: z.string().default(""),
+    imports: z.array(z.string()).default([]),
+    taxonomyPredicates: z.array(z.string()).default([]),
+});
+
+export const defaultSource = (id: string): ServerSource => {
+    return ServerSourceSchema.parse({
         _type: "source",
         id: id,
-        type: "",
-        graphUri: "",
-        sparql_server: { url: "_default", method: "Post", headers: [] },
-        editable: true,
-        controller: "",
-        topClassFilter: "?topConcept rdf:type owl:Class .",
-        schemaType: "",
-        dataSource: null,
-        schema: null,
-        color: "",
-        isDraft: false,
-        allowIndividuals: false,
-        predicates: { broaderPredicate: "", lang: "" },
-        group: "",
-        imports: [],
-        taxonomyPredicates: [],
-    };
+    });
 };
 
-interface SourceJson {
-    id?: string;
-    name?: string;
-    type?: string;
-    graphUri?: string;
-    sparql_server?: SparqlServer;
-    controller?: string;
-    topClassFilter?: string;
-    schemaType?: string;
-    editable?: boolean;
-    isDraft?: boolean;
-    allowIndividuals?: boolean;
-    dataSource?: null | DataSource;
-    schema?: null;
-    color?: string;
-    predicates?: { broaderPredicate: string; lang: string };
-    group?: string;
-    imports?: string[];
-    taxonomyPredicates?: string[];
+export interface DataSource {
+    type: string[];
+    connection: string;
+    dbName: string;
+    table_schema: string;
+    local_dictionary: LocalDictionary;
 }
 
 interface CommonSource {
@@ -200,33 +234,5 @@ export type Knowledge_GraphSource = CommonSource & DataSource;
 export type SkosSource = CommonSource & SkosSpecificSource;
 
 export type _Source = Knowledge_GraphSource | SkosSource;
-
-export interface DataSource {
-    type: string[];
-    connection: string;
-    dbName: string;
-    table_schema: string;
-    local_dictionary: LocalDictionary;
-}
-
-const defaultDataSource: DataSource = {
-    type: [],
-    connection: "_default",
-    dbName: "",
-    table_schema: "",
-    local_dictionary: { table: "", idColumn: "", labelColumn: "" },
-};
-
-interface LocalDictionary {
-    table: string;
-    idColumn: string;
-    labelColumn: string;
-}
-
-interface SparqlServer {
-    url: string;
-    method: string;
-    headers: string[];
-}
 
 export { getSources, defaultDataSource };

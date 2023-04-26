@@ -18,7 +18,8 @@ var GraphStore = {
         if (sparqlServerConnection.auth) {
             authStr = " --digest " + "--user " + sparqlServerConnection.auth.user + ":" + sparqlServerConnection.auth.pass;
         }
-        var cmd = "curl " + authStr + " --verbose" + ' --url "' + url + "graph-uri=" + graphUri + '"' ;
+      //  var cmd = "curl " + authStr + " --verbose" + ' --url "' + url + "graph-uri=" + graphUri + '"' ;
+        var cmd = "curl " + authStr  + ' --url "' + url + "graph-uri=" + graphUri + '"' ;
 
         exec(cmd, { maxBuffer: 1024 * 30000 }, function (err, stdout, stderr) {
             if (err) {
@@ -27,11 +28,11 @@ var GraphStore = {
             }
             if (stdout) {
                 console.log(stdout);
-                return callback(null);
+                return callback(null,stdout);
             }
             if (stderr) {
                 console.log(stderr);
-                return callback(null,stdout);
+                return callback(stderr);
             }
         });
         return;
@@ -231,7 +232,7 @@ var GraphStore = {
             if (err) {
                 return callback(err);
             }
-            if (sources[sourceName]) {
+            if (options.reload!=="true" && sources[sourceName]) {
                 return callback();
             }
 
@@ -247,7 +248,7 @@ var GraphStore = {
                     method: "Post",
                     headers: [],
                 },
-                editable: options.editable,
+                editable: (options.editable==="true"),
                 controller: "Sparql_OWL",
                 topClassFilter: "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
                 schemaType: "OWL",
@@ -505,3 +506,4 @@ var GraphStore = {
 };
 
 module.exports = GraphStore;
+

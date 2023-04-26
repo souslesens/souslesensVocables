@@ -645,13 +645,39 @@ sourceDivId +
             visjsGraph.data.nodes.remove(source);
         },
         exportOWL: function (source) {
-            Sparql_OWL.generateOWL(source, {}, function (err, result) {
+
+
+            var payload = {
+                graphUri: Config.sources[source].graphUri,
+            };
+            $.ajax({
+                type: "GET",
+                url: Config.apiUrl + "/graphStore/graph",
+                data: payload,
+                dataType: "json",
+                success: function(data, _textStatus, _jqXHR) {
+                    common.copyTextToClipboard(data);
+                }
+                , error: function(err) {
+                    alert(err.responseText)
+
+                }
+            })
+
+
+
+
+
+
+
+
+       /*     Sparql_OWL.generateOWL(source, {}, function (err, result) {
                 if (err) {
                     return console.log(err);
                 }
 
                 common.copyTextToClipboard(result);
-            });
+            });*/
         },
     };
 

@@ -1,7 +1,15 @@
 const HttpProxy = require("../../../../bin/httpProxy.");
 const ConfigManager = require("../../../../bin/configManager.");
-const async=require("async");
+const GraphStore = require("../../../../bin/graphStore.");
+const Util = require("../../../../bin/util.");
+const fs = require("fs");
 const { processResponse } = require("../utils");
+const request = require("request");
+
+
+//https://jena.apache.org/documentation/inference/
+
+
 module.exports = function() {
   let operations = {
     GET
@@ -13,50 +21,71 @@ module.exports = function() {
       options = JSON.parse(req.query.options);
     }
 
-    var url=null;
-    var result=null
-    async.series([
 
-      function(callbackSeries){
-      if(req.query.type=="url"){
-return callbackSeries()
-      }
-       else if(req.query.type=="SLSVsource"){
+    var jowlConfig = ConfigManager.config.jowlServer;
 
+    if (req.query.type == "externalUrl") {
+
+      var url = jowlConfig.url + "reasoner/" + req.query.operation + "?filePath=" + req.query.url;
+      HttpProxy.post(jowlConfig.url, {}, function(err, result) {
+        if (err) {
+          next(err);
         }
-       else{
-        return res.status(400).json({ error: "type not supported" });
+        else {
+          return processResponse(res, err, JSON.parse(result));
+        }
+      });
+    }
+
+
+    else if (req.query.type == "internalGraphUri" && ConfigManager.config) {
+
+      var ontologyContent = "";
+      var sparqlServerConnection = { url: ConfigManager.config.default_sparql_url };
+      if (ConfigManager.config.sparql_server.user) {
+        sparqlServerConnection.auth = {
+          user: ConfigManager.config.sparql_server.user,
+          pass: ConfigManager.config.sparql_server.password,
+          sendImmediately: false
+        };
       }
+      var graphUri = req.query.url;
 
-      },
-      function(callbackSeries){
-
-      }
-
-
-
-
-
-    ],function(err){
-      return processResponse(res, parsingError, result);
-
-    })
-
-      var jowlConfig=ConfigManager.config.jowlServer
-if(req.query.type=url)
-
-    var url=
-      jowlConfig.url+"reasoner/"+operation+"?filePath="+url+"&operation=computeinference"
+      var ontologyContent = null;
+      GraphStore.exportGraph(sparqlServerConnection, graphUri, function(err, result) {
+        if (err) {
+          return res.status(400).json({ error: err });
+        }
 
 
-      HttpProxy.get(jowlConfig.url,null,function(err, response) {
-      if (err) {
-        next(err);
-      }
-      else {
-        return res.status(200).json(result);
-      }
-    });
+        var ontologyContentEncoded64 = Buffer.from(result).toString("base64");
+
+
+        var payload={
+          ontologyContentEncoded64: ontologyContentEncoded64,
+
+        };
+
+
+        var options = {
+          method: "POST",
+          json: payload,
+          headers: {
+            "content-type": "application/json"
+          },
+         url: jowlConfig.url + "reasoner/" + req.query.operation
+
+
+        };
+        request(options, function(error, response, body) {
+          return processResponse(res, error, body);
+        });
+
+
+      });
+
+
+    }
   }
 
   GET.apiDoc = {
@@ -74,14 +103,14 @@ if(req.query.type=url)
       },
       {
         name: "type",
-        description: "type  sourceName or url",
+        description: "externalUrl/ internalGraphUri",
         in: "query",
         type: "string",
         required: true
       },
       {
-        name: "name",
-        description: "source name or url",
+        name: "url",
+        description: "source graphUri or url",
         in: "query",
         type: "string",
         required: true

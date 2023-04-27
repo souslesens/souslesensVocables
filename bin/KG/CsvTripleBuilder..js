@@ -613,7 +613,6 @@ var CsvTripleBuilder = {
                 pass: ConfigManager.config.sparql_server.password,
                 sendImmediately: false,
             };
-
         }
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
@@ -651,7 +650,6 @@ var CsvTripleBuilder = {
                             pass: ConfigManager.config.sparql_server.password,
                             sendImmediately: false,
                         };
-
                     }
 
                     httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
@@ -687,7 +685,6 @@ var CsvTripleBuilder = {
                             pass: ConfigManager.config.sparql_server.password,
                             sendImmediately: false,
                         };
-
                     }
 
                     httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
@@ -709,7 +706,6 @@ var CsvTripleBuilder = {
                             pass: ConfigManager.config.sparql_server.password,
                             sendImmediately: false,
                         };
-
                     }
 
                     httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
@@ -757,13 +753,7 @@ var CsvTripleBuilder = {
                 pass: ConfigManager.config.sparql_server.password,
                 sendImmediately: false,
             };
-
         }
-
-
-
-
-
 
         httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
@@ -838,7 +828,6 @@ var CsvTripleBuilder = {
                             pass: ConfigManager.config.sparql_server.password,
                             sendImmediately: false,
                         };
-
                     }
 
                     httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {

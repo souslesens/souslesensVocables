@@ -117,7 +117,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
             if (err) {
                 return alert(err.responseText);
             }
-            callback()
+            callback();
         });
     };
 
@@ -496,7 +496,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
         return callback(err, result);
       });
     };*/
-    self.listContainerResources = function (source, containerNode, options,callback) {
+    self.listContainerResources = function (source, containerNode, options, callback) {
         var existingChildren = [];
 
         if (containerNode.children.length > 0) return;
@@ -566,7 +566,6 @@ Lineage_styles.showDialog(self.currentContainer.data);
             if (callback) {
                 return callback(jstreeData);
             }
-
         });
     };
 

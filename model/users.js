@@ -155,15 +155,13 @@ class UserModelJson extends UserModel {
             .find((user) => {
                 user.login === login});
         */
-        var ok =false;
-        for(var key in users){
-            if (users[key].login===login){
-                ok=users[key]
+        var ok = false;
+        for (var key in users) {
+            if (users[key].login === login) {
+                ok = users[key];
             }
-            
-
-        }  
-        return(ok)       
+        }
+        return ok;
     };
 
     /**

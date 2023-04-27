@@ -70,7 +70,8 @@ if (config.auth == "keycloak") {
                     return cb(null, false, { message: "Incorrect username or password." });
                 }
                 userModel.findUserAccount(username).then((userAccount) => {
-                    cb(null, userAccount)});
+                    cb(null, userAccount);
+                });
             });
         })
     );

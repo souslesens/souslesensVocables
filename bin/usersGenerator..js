@@ -1,4 +1,3 @@
-
 var csvCrawler = require("./_csvCrawler.");
 var filePath = "D:\\Total\\2021\\JeanCharles\\users.csv";
 

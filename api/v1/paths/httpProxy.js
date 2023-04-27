@@ -1,11 +1,11 @@
 const { processResponse } = require("./utils");
 const httpProxy = require("../../../bin/httpProxy.");
 
-module.exports = function() {
-let operations = {
-POST,
-GET
-};
+module.exports = function () {
+    let operations = {
+        POST,
+        GET,
+    };
 
     async function POST(req, res, next) {
         try {
@@ -41,15 +41,15 @@ GET
         },
     };
 
-function GET(req, res, next) {
-try {
-httpProxy.get(req.query, function(err, result) {
-processResponse(res, err, result);
-});
-} catch (e) {
-next(e);
-}
-}
+    function GET(req, res, next) {
+        try {
+            httpProxy.get(req.query, function (err, result) {
+                processResponse(res, err, result);
+            });
+        } catch (e) {
+            next(e);
+        }
+    }
 
-return operations;
+    return operations;
 };

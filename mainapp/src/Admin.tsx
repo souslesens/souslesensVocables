@@ -170,7 +170,6 @@ const Admin = () => {
                     value={editionTabToNumber(model.currentEditionTab)}
                     centered
                 >
-                    <div>New thing thing</div>
                     <Tab label="Users" />
                     <Tab label="Profiles" />
                     <Tab label="Sources" />

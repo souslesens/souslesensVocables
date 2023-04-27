@@ -1,5 +1,9 @@
 const path = require("path");
-const dictionariesManager = require(path.resolve("bin/KG/dictionariesManager."));
+const elasticRestProxy = require(path.resolve("bin/elasticRestProxy..js"));
+const ConfigManager = require("../../../../bin/configManager.");
+const UserRequestFiltering = require("../../../../bin/userRequestFiltering.");
+const { processResponse } = require("../utils");
+const userManager = require("../../../../bin/user..js");
 
 module.exports = function () {
     let operations = {
@@ -7,12 +11,35 @@ module.exports = function () {
     };
 
     function POST(req, res, _next) {
-        dictionariesManager.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, result) {
-            if (err) {
-                return res.status(400).json({ error: err });
-            }
-            return res.status(200).json(result);
-        });
+        if (ConfigManager.config) {
+            ConfigManager.getUserSources(req, res, function (err, userSources) {
+                ConfigManager.getUser(req, res, function (err, userInfo) {
+                    if (err) {
+                        return res.status(400).json({ error: err });
+                    }
+
+                    UserRequestFiltering.validateElasticSearchIndices(userInfo.user.groups, [req.body.indexName], userSources, "w", function (parsingError, filteredQuery) {
+                        if (parsingError) {
+                            return processResponse(res, parsingError, null);
+                        }
+
+                        elasticRestProxy.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, result) {
+                            if (err) {
+                                return res.status(400).json({ error: err });
+                            }
+                            return res.status(200).json(result);
+                        });
+                    });
+                });
+            });
+        } else {
+            elasticRestProxy.indexSource(req.body.indexName, req.body.data, req.body.options, function (err, result) {
+                if (err) {
+                    return res.status(400).json({ error: err });
+                }
+                return res.status(200).json(result);
+            });
+        }
     }
 
     POST.apiDoc = {

@@ -244,8 +244,7 @@ return;
 var toEndPointConfig = {
     sparql_server: {
         url: "https://virtuo.souslesens.enit.fr/sparql",
-        // "url":  "http://51.178.39.209:8888/",
-        //  "url":"http://51.178.139.80:8890//sparql",
+
         method: "Post",
         headers: [],
     },

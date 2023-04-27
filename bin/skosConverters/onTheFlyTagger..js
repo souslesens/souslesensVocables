@@ -252,7 +252,7 @@ var onTheFlyTagger = {
         "www.onepetro.org",
         "yes",
     ],
-    sparqlUrl: "http://51.178.139.80:8890/sparql/",
+    sparqlUrl: "",
     pageWordsMap: {},
     getPageWords: function (pageUri, callback) {
         var pageText = "";

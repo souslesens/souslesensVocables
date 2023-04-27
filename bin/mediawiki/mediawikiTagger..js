@@ -17,7 +17,7 @@ var fs = require("fs");
 var async = require("async");
 var thesauriiConcepts = {};
 var mediaWikiTagger = {
-    sparqlUrl: "http://51.178.139.80:8890/sparql/",
+    sparqlUrl: "",
 
     indexPage: function (wikiUri, pageName, elasticUrl, indexName, callback) {
         var rawPageText = "";

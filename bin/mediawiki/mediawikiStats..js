@@ -14,7 +14,7 @@ var httpProxy = require("../../httpProxy.");
 var fs = require("fs");
 var async = require("async");
 var mediawikiStats = {
-    sparqlUrl: "http://51.178.139.80:8890/sparql/",
+    sparqlUrl: "",
 
     generateCatWords: function (categoryWord, thesaurusWord, _callback) {
         mediawikiStats.getCatWordsTriples(categoryWord, thesaurusWord, function (err, bindings) {

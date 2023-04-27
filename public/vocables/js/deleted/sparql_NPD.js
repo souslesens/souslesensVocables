@@ -13,7 +13,7 @@ var Sparql_NPD = (function () {
     var self = {};
 
     self.ancestorsDepth = 6;
-    self.sparql_url = "http://51.178.139.80:8890/sparql";
+    self.sparql_url = "";
 
     self.getTopConcepts = function (sourceLabel, options, callback) {
         self.graphUri = Config.sources[sourceLabel].graphUri;

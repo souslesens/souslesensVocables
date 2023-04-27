@@ -14,9 +14,9 @@ var async = require("async");
 var acceptedExtensions = ["ttl", "doc", "docx", "xls", "xslx", "pdf", "odt", "ods", "ppt", "pptx", "html", "htm", "txt", "csv"];
 var base64Extensions = ["doc", "docx", "xls", "xslx", "pdf", "odt", "ods", "ppt", "pptx"];
 var maxDocSize = 20 * 1000 * 1000;
-//var tikaServerUrl = 'http://vps475829.ovh.net:9998';
+//var tikaServerUrl = '';
 //const tikaServerUrl = "127.0.0.1:41000";
-const spacyServerUrl = "http://51.178.39.209:8000/pos";
+const spacyServerUrl = "";
 
 var parsedDocumentsHomeDir = null; //"../../data/annotator/parsedDocuments"
 var uploadDirPath = null; //"../../data/annotator/temp"
@@ -730,7 +730,7 @@ var sources = {
         editable: false,
         controller: "Sparql_SKOS",
         sparql_server: {
-            url: "http://51.178.139.80:8890/sparql",
+            url: "",
         },
         graphUri: "http://data.total.com/resource/thesaurus/ctg2/",
         schemaType: "SKOS",

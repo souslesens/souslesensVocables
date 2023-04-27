@@ -4,7 +4,7 @@ var httpProxy = require("../bin/httpProxy.");
 
 var SPARQLutil = {
     generateTriples: function (graphUri, triples, replaceGraph, callback) {
-        var sparqlServerUrl = "http://51.178.139.80:8890/sparql";
+        var sparqlServerUrl = "";
         var slicedTriples = util.sliceArray(triples, 1000);
         var totalTriples = 0;
         var uniqueTriples = {};

@@ -81,4 +81,11 @@ self.tools["ConfigEditor"] = {
     toolDescriptionImg: null,
 };
 
+self.tools["IDCP"] = {
+    label: "IDCP",
+    noSource: 1,
+    controller: Idcp,
+    toolDescriptionImg: null,
+};
+
 Config.tools = self.tools;

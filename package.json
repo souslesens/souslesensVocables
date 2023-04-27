@@ -6,6 +6,7 @@
         "build:app": "cd mainapp && npm run build",
         "start": "DEBUG=cypress:* node ./bin/www",
         "devserver": "nodemon ./bin/www & (cd mainapp && npm run build:watch)",
+        "dev:configEditor": "nodemon ./bin/www & (cd mainapp && npm run dev)",
         "typecheck": "tsc",
         "lint": "eslint .",
         "prettier": "prettier --check .",

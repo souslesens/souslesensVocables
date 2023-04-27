@@ -65,7 +65,7 @@ const initialModel: Model = {
     logs: loading(),
     config: loading(),
     isModalOpen: false,
-    currentEditionTab: "SourcesEdition",
+    currentEditionTab: "UsersEdition",
 };
 
 const ModelContext = React.createContext<{ model: Model; updateModel: React.Dispatch<Msg> } | null>(null);
@@ -170,6 +170,7 @@ const Admin = () => {
                     value={editionTabToNumber(model.currentEditionTab)}
                     centered
                 >
+                    <div>New thing thing</div>
                     <Tab label="Users" />
                     <Tab label="Profiles" />
                     <Tab label="Sources" />

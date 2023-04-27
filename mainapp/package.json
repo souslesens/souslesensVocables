@@ -2,12 +2,18 @@
     "name": "souslesens-webapp",
     "version": "0.0.0",
     "description": "Webapp for the Souslesens application",
-    "main": "index.js",
+    "source": "index.html",
+    "targets": {
+        "default": {
+            "distDir": "./static"
+        }
+    },
     "scripts": {
         "format": "prettier ./src/**/*.{jsx,tsx,ts,js,css}",
         "lint": "eslint src",
-        "build": "webpack --config webpack.config.js",
-        "build:watch": "npm run build -- --watch --mode=development",
+        "build": "parcel build",
+        "build:watch": "parcel watch --no-hmr",
+        "dev": "parcel",
         "cypress:open": "cypress open",
         "ncu": "ncu"
     },
@@ -48,12 +54,13 @@
         "@mui/x-data-grid": "^6.2.1",
         "@types/react": "^18.2.0",
         "bootstrap": "^5.2.3",
-        "npm-check-updates": "^16.10.9",
-        "react": "^18.2.0",
-        "react-bootstrap": "^2.7.4",
-        "react-csv-downloader": "^2.9.1",
-        "react-dom": "^18.2.0",
-        "react-zorm": "0.9.0",
+        "clsx": "1.2.1",
+        "npm-check-updates": "^16.7.13",
+        "react": "18.2.0",
+        "react-bootstrap": "^2.7.2",
+        "react-csv-downloader": "^2.9.0",
+        "react-dom": "18.2.0",
+        "react-zorm": "0.6.2",
         "srd": "^1.0.5",
         "ulid": "^2.3.0",
         "zod": "3.21.4"

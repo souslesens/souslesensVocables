@@ -14,7 +14,7 @@ var ConfigEditor = (function () {
             $("#graphDiv").html(`
                     <div id="mount-app-here"></div>
                 `);
-            $.getScript("/mainapp.js");
+            $.getScript("/index.cf33dd14.js");
         }, 200);
     };
 

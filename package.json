@@ -2,11 +2,16 @@
     "name": "souslesensvocables",
     "version": "1.34.1",
     "private": true,
+    "workspaces": [
+        "mainapp"
+    ],
     "scripts": {
-        "build:app": "cd mainapp && npm run build",
+        "build:app": "parcel build mainapp",
         "start": "DEBUG=cypress:* node ./bin/www",
-        "devserver": "nodemon ./bin/www & (cd mainapp && npm run build:watch)",
-        "dev:configEditor": "nodemon ./bin/www & (cd mainapp && npm run dev)",
+        "predev": "nodemon ./bin/www",
+        "dev:server": "parcel watch mainapp --watch-for-stdin",
+        "dev:configEditor": "parcel mainapp --watch-for-stdin",
+        "postdev": "if kill $(lsof -t -i :3010); then echo 'Process killed'; fi",
         "typecheck": "tsc",
         "lint": "eslint .",
         "prettier": "prettier --check .",

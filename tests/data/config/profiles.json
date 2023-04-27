@@ -1,47 +1,45 @@
 {
-    "admin": {
-        "name": "admin",
+    "all_forbidden": {
+        "name": "all_forbidden",
         "_type": "profile",
-        "id": "admin",
-        "allowedSourceSchemas": ["SKOS", "OWL", "INDIVIDUAL"],
-        "allowedTools": "ALL",
-        "forbiddenTools": [],
-        "blender": {
-            "contextMenuActionStartLevel": 0
-        },
-        "defaultSourceAccessControl": "read",
-        "sourcesAccessControl": {
-            "Dbpedia": "forbidden"
-        }
-    },
-    "owl_only": {
-        "name": "owl_only",
-        "_type": "profile",
-        "id": "owl_only",
+        "id": "all_forbidden",
         "allowedSourceSchemas": ["OWL"],
         "allowedTools": "ALL",
         "forbiddenTools": [],
         "blender": {
             "contextMenuActionStartLevel": 0
         },
-        "defaultSourceAccessControl": "read",
-        "sourcesAccessControl": {
-            "Dbpedia": "forbidden"
-        }
+        "defaultSourceAccessControl": "forbidden",
+        "sourcesAccessControl": {}
     },
-    "skos_only": {
-        "name": "skos_only",
+    "read_folder_1": {
+        "name": "read_folder_1",
         "_type": "profile",
-        "id": "skos_only",
-        "allowedSourceSchemas": ["SKOS"],
+        "id": "read_folder_1",
+        "allowedSourceSchemas": ["OWL"],
         "allowedTools": "ALL",
         "forbiddenTools": [],
         "blender": {
             "contextMenuActionStartLevel": 0
         },
-        "defaultSourceAccessControl": "read",
+        "defaultSourceAccessControl": "forbidden",
         "sourcesAccessControl": {
-            "Dbpedia": "forbidden"
+            "OWL/FOLDER_1": "read"
+        }
+    },
+    "readwrite_folder_1": {
+        "name": "readwrite_folder_1",
+        "_type": "profile",
+        "id": "readwrite_folder_1",
+        "allowedSourceSchemas": ["OWL"],
+        "allowedTools": "ALL",
+        "forbiddenTools": [],
+        "blender": {
+            "contextMenuActionStartLevel": 0
+        },
+        "defaultSourceAccessControl": "forbidden",
+        "sourcesAccessControl": {
+            "OWL/FOLDER_1": "readwrite"
         }
     }
 }

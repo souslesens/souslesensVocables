@@ -23,16 +23,29 @@ import {
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
-import { Source, saveSource, defaultSource, deleteSource } from "../Source";
+import { ServerSource, saveSource, defaultSource, deleteSource, InputSourceSchema } from "../Source";
 import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
+import TableSortLabel from "@mui/material/TableSortLabel";
 import Autocomplete from "@mui/material/Autocomplete";
 import CsvDownloader from "react-csv-downloader";
+import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
+import { useZorm, createCustomIssues } from "react-zorm";
+import { errorMessage } from "./errorMessage";
+import { ZodCustomIssueWithMessage } from "react-zorm/dist/types";
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
 
     const [filteringChars, setFilteringChars] = React.useState("");
+    const [orderBy, setOrderBy] = React.useState<keyof ServerSource>("name");
+    const [order, setOrder] = React.useState<Order>("asc");
+    type Order = "asc" | "desc";
+    function handleRequestSort(property: keyof ServerSource) {
+        const isAsc = orderBy === property && order === "asc";
+        setOrder(isAsc ? "desc" : "asc");
+        setOrderBy(property);
+    }
 
     const renderSources = SRD.match(
         {
@@ -47,7 +60,7 @@ const SourcesTable = () => {
                     ,<p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
                 </Box>
             ),
-            success: (gotSources: Source[]) => {
+            success: (gotSources: ServerSource[]) => {
                 const datas = gotSources.map((source) => {
                     const { sparql_server, dataSource, predicates, imports, taxonomyPredicates, isDraft, editable, allowIndividuals, ...restOfProperties } = source;
                     const processedData = {
@@ -58,6 +71,7 @@ const SourcesTable = () => {
                         imports: joinWhenArray(imports),
                         taxonomyPredicates: joinWhenArray(taxonomyPredicates),
                     };
+
                     const dataWithoutCarriageReturns = Object.fromEntries(
                         Object.entries(processedData).map(([key, value]) => {
                             if (typeof value === "string") {
@@ -69,10 +83,15 @@ const SourcesTable = () => {
 
                     return { ...dataWithoutCarriageReturns };
                 });
+                const sortedSources: ServerSource[] = gotSources.slice().sort((a: ServerSource, b: ServerSource) => {
+                    const left: string = a[orderBy] as string;
+                    const right: string = b[orderBy] as string;
+                    return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
+                });
                 return (
                     <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                         <Stack>
-                            <CsvDownloader separator="&#9;" filename="sources" extension=".tsv" datas={datas} />
+                            <CsvDownloader separator="&#9;" filename="sources" extension=".tsv" datas={datas as Datas} />
                             <Autocomplete
                                 disablePortal
                                 id="search-sources"
@@ -88,13 +107,17 @@ const SourcesTable = () => {
                                     <Table>
                                         <TableHead>
                                             <TableRow>
-                                                <TableCell style={{ fontWeight: "bold" }}>Name</TableCell>
+                                                <TableCell style={{ fontWeight: "bold" }}>
+                                                    <TableSortLabel active={orderBy === "name"} direction={order} onClick={() => handleRequestSort("name")}>
+                                                        Name
+                                                    </TableSortLabel>
+                                                </TableCell>
                                                 <TableCell style={{ fontWeight: "bold" }}>graphUri</TableCell>
                                                 <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody sx={{ width: "100%", overflow: "visible" }}>
-                                            {gotSources
+                                            {sortedSources
                                                 .filter((source) => source.name.includes(filteringChars))
                                                 .map((source) => {
                                                     return (
@@ -128,7 +151,7 @@ const SourcesTable = () => {
     return renderSources;
 };
 
-type SourceEditionState = { modal: boolean; sourceForm: Source };
+type SourceEditionState = { modal: boolean; sourceForm: ServerSource };
 
 const enum Type {
     UserClickedModal,
@@ -210,17 +233,21 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
 };
 
 type SourceFormProps = {
-    source?: Source;
+    source?: ServerSource;
     create?: boolean;
 };
 
 const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFormProps) => {
     const { model, updateModel } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
+    const sources = React.useMemo(() => unwrappedSources, [unwrappedSources]);
 
     const [sourceModel, update] = React.useReducer(updateSource, { modal: false, sourceForm: source });
-    const schemaTypes = [...new Set(unwrappedSources.map((source) => source.schemaType))];
+    const [issues, setIssues] = React.useState<ZodCustomIssueWithMessage[]>([]);
+    const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
 
+    const zo = useZorm("source-form", InputSourceSchema, { setupListeners: false, customIssues: issues });
+    const [isAfterSubmission, setIsAfterSubmission] = React.useState<boolean>(false);
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,19 +270,54 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
 
     const knownTaxonomyPredicates = [
         ...new Set(
-            unwrappedSources.flatMap((source) => {
+            sources.flatMap((source) => {
                 return source.taxonomyPredicates;
             })
         ),
     ];
+    function validateSourceName(sourceName: string) {
+        const issues = createCustomIssues(InputSourceSchema);
 
+        if (sources.reduce((acc, s) => (acc ||= s.name === sourceName), false)) {
+            issues.name(`Source's name ${sourceName} is already in use`);
+        }
+
+        return {
+            issues: issues.toArray(),
+        };
+    }
+    const saveSources = () => {
+        void saveSource(sourceModel.sourceForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
+    };
+    const createIssues = (issue: ZodCustomIssueWithMessage[]) => setIssues(issue);
+    const validateAfterSubmission = () => {
+        if (isAfterSubmission) {
+            zo.validate();
+        }
+    };
     return (
         <>
             <Button color="primary" variant="contained" onClick={handleOpen}>
                 {create ? "Create Source" : "Edit"}
             </Button>
             <Modal onClose={handleClose} open={sourceModel.modal}>
-                <Box component="form" sx={style}>
+                <Box
+                    component="form"
+                    ref={zo.ref}
+                    onSubmit={(e) => {
+                        const validation = zo.validate();
+                        if (!validation.success) {
+                            e.preventDefault();
+                            console.error("error", e);
+                            setIsAfterSubmission(true);
+                            return;
+                        }
+                        e.preventDefault();
+                        saveSources();
+                        setIsAfterSubmission(false);
+                    }}
+                    sx={style}
+                >
                     <Grid container spacing={4}>
                         <Grid item xs={3}>
                             <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.editable} onChange={handleCheckbox("editable")} />} label="Is this source editable?" />
@@ -267,10 +329,34 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                             <FormControlLabel control={<Checkbox checked={sourceModel.sourceForm.allowIndividuals} onChange={handleCheckbox("allowIndividuals")} />} label="Allow individuals?" />
                         </Grid>
                         <Grid item xs={6}>
-                            <TextField fullWidth onChange={handleFieldUpdate("name")} value={sourceModel.sourceForm.name} id={`name`} label={"Name"} variant="standard" />
+                            <TextField
+                                name={zo.fields.name()}
+                                helperText={errorMessage(zo.errors.name)}
+                                onBlur={() => {
+                                    const isUniq = validateSourceName(sourceModel.sourceForm.name);
+                                    createIssues(isUniq.issues);
+                                    validateAfterSubmission();
+                                }}
+                                fullWidth
+                                onChange={handleFieldUpdate("name")}
+                                value={sourceModel.sourceForm.name}
+                                id={`name`}
+                                label={"Name"}
+                                variant="standard"
+                            />
                         </Grid>
                         <Grid item xs={6}>
-                            <TextField fullWidth onChange={_handleFieldUpdate} value={sourceModel.sourceForm.graphUri} id={`graphUris`} label={"graph' Uris"} variant="standard" />
+                            <TextField
+                                fullWidth
+                                helperText={errorMessage(zo.errors.graphUri)}
+                                name={zo.fields.graphUri()}
+                                onBlur={validateAfterSubmission}
+                                onChange={_handleFieldUpdate}
+                                value={sourceModel.sourceForm.graphUri}
+                                id={`graphUris`}
+                                label={"graph' Uris"}
+                                variant="standard"
+                            />
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
@@ -354,7 +440,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                     renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                     onChange={handleFieldUpdate("imports")}
                                 >
-                                    {unwrappedSources.map((source) => (
+                                    {sources.map((source) => (
                                         <MenuItem key={source.name} value={source.name}>
                                             <Checkbox checked={sourceModel.sourceForm.imports.indexOf(source.name) > -1} />
                                             {source.name}
@@ -403,7 +489,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         <FormGivenSchemaType update={update} model={sourceModel} />
 
                         <Grid item xs={12} style={{ textAlign: "center" }}>
-                            <Button color="primary" variant="contained" onClick={() => saveSource(sourceModel.sourceForm, create ? Mode.Creation : Mode.Edition, updateModel, update)}>
+                            <Button disabled={zo.validation?.success === false || zo.customIssues.length > 0} color="primary" type="submit" variant="contained">
                                 Save Source
                             </Button>
                         </Grid>

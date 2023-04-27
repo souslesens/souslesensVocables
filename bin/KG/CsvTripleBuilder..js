@@ -7,10 +7,15 @@ var httpProxy = require("../httpProxy.");
 var sqlServerProxy = require("./SQLserverConnector.");
 
 var ConfigManager = require("../configManager.");
-const socket = require("../socketManager.");
+
+const socketIo = require("../socketManager.");
+const channelName = "KGcreator";
 
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
-
+/*
+ * KGcreator module/Tools named CsvTripleBuilder is server side
+ * Name needs to be changed
+ */
 var CsvTripleBuilder = {
     predefinedPart14Relations: [
         ["Location", "Location", "hasSubLocation"],
@@ -68,7 +73,8 @@ var CsvTripleBuilder = {
             if (err) return callback(err);
             var data = result.data;
             var headers = result.headers;
-            console.log(filePath);
+            console.log("Read CSV file: " + filePath);
+
             return callback(null, { headers: headers, data: data });
         });
     },
@@ -82,6 +88,13 @@ var CsvTripleBuilder = {
             fs.writeFileSync(filePath.replace(".txt", "description.json"), JSON.stringify(descriptionMap, null, 2));
             //  console.log(JSON.stringify(descriptionMap,null,2))
         });
+    },
+
+    socket: {
+        message: function (channel, text) {
+            socketIo.message(channel, text);
+            console.log(text);
+        },
     },
 
     /**
@@ -156,7 +169,9 @@ var CsvTripleBuilder = {
                                             var lookupLines = result.data[0];
                                             lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
                                             lookupLines.forEach(function (line, index) {
-                                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) return console.log("missing lookup line" + index + " " + lookupFilePath);
+                                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
+                                                    return CsvTripleBuilder.socket.message(channelName, "Missing lookup line" + index + " " + lookupFilePath);
+                                                }
                                                 lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
                                             });
 
@@ -169,7 +184,9 @@ var CsvTripleBuilder = {
                                             var lookupLines = result;
                                             lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
                                             lookupLines.forEach(function (line, index) {
-                                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) return console.log("missing lookup line" + index + " " + lookupFilePath);
+                                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
+                                                    return CsvTripleBuilder.socket.message(channelName, "Missing lookup line" + index + " " + lookupFilePath);
+                                                }
 
                                                 // lookUpMap[lookup.name].dictionary[util.formatStringForTriple(line[lookup.sourceColumn],true)] =util.formatStringForTriple( line[lookup.targetColumn],true);
                                                 lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
@@ -191,7 +208,7 @@ var CsvTripleBuilder = {
 
                             CsvTripleBuilder.readCsv(mapping.csvDataFilePath, options.sampleSize, function (err, result) {
                                 if (err) {
-                                    console.log(err);
+                                    CsvTripleBuilder.socket.message(channelName, "Error to load csv file :" + err);
                                     return callbackSeries(err);
                                 }
 
@@ -400,8 +417,9 @@ var CsvTripleBuilder = {
                                                                 if (prop.indexOf("$") == 0) prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
                                                                 if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
 
-                                                                if (!existingNodes[subjectStr + "_" + prop + "_" + objectStr]) {
-                                                                    existingNodes[subjectStr + "_" + prop + "_" + objectStr] = 1;
+                                                                const nodeCheck = subjectStr + "_" + prop + "_" + objectStr;
+                                                                if (!existingNodes[nodeCheck]) {
+                                                                    existingNodes[nodeCheck] = 1;
                                                                     triples.push({
                                                                         s: blankNode,
                                                                         p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
@@ -434,9 +452,9 @@ var CsvTripleBuilder = {
                                                                         if (prop.indexOf("$") == 0) prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
                                                                         if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
 
+                                                                        //inverse Restriction Property (subjectStr/objectStr)
                                                                         if (!existingNodes[objectStr + "_" + prop + "_" + subjectStr]) {
                                                                             existingNodes[subjectStr + "_" + prop + "_" + objectStr] = 1;
-
                                                                             triples.push({
                                                                                 s: blankNode,
                                                                                 p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
@@ -491,8 +509,9 @@ var CsvTripleBuilder = {
                                                                 if (subjectStr && objectStr) {
                                                                     if (true || !item.datatype) {
                                                                         // return console.log("missing type " + item.p)
-                                                                        if (!existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr]) {
-                                                                            existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
+                                                                        const nodeCheck = subjectStr + "_" + propertyStr + "_" + objectStr;
+                                                                        if (!existingNodes[nodeCheck]) {
+                                                                            existingNodes[nodeCheck] = 1;
                                                                             triples.push({
                                                                                 s: subjectStr,
                                                                                 p: propertyStr,
@@ -527,8 +546,13 @@ var CsvTripleBuilder = {
                                                     }
                                                 });
                                                 triples = triples.concat(metaDataTriples);
+
+                                                //send message to Client-Side
+                                                CsvTripleBuilder.socket.message(channelName, "Writing triples:" + triples.length);
+
                                                 // socket.message("KGbuild", "loading ONE MODEL superClasses ");
                                                 console.log("writing triples:" + triples.length);
+
                                                 var slices = util.sliceArray(triples, 200);
                                                 triples = [];
                                                 var sliceIndex = 0;
@@ -554,14 +578,13 @@ var CsvTripleBuilder = {
                                                                 }
                                                                 sliceIndex += 1;
                                                                 totalTriples += result;
-
+                                                                CsvTripleBuilder.socket.message(channelName, "Total triples writen:" + totalTriples);
                                                                 callbackEach();
                                                             });
                                                         }
                                                     },
                                                     function (_err) {
-                                                        console.log("total triples writen:" + totalTriples);
-                                                        callbackSeries2();
+                                                        callbackSeries2(_err);
                                                     }
                                                 );
                                             },
@@ -579,8 +602,8 @@ var CsvTripleBuilder = {
                     ],
 
                     function (_err) {
-                        var message = "------------ created triples " + totalTriples;
-                        if (options.deleteTriples) message = "------------ deleted triples " + totalTriples;
+                        var message = "------------ Created triples " + totalTriples + "\n";
+                        if (options.deleteTriples) message = "------------ Deleted triples " + totalTriples;
                         console.log(message);
                         callbackEachMapping(_err);
                     }
@@ -588,8 +611,8 @@ var CsvTripleBuilder = {
             },
             function (_err) {
                 if (callback) {
-                    var message = "------------ created triples " + totalTriples;
-                    if (options.deleteTriples) message = "------------ deleted triples " + totalTriples;
+                    var message = "------------ Created triples " + totalTriples + "\n";
+                    if (options.deleteTriples) message = "------------ Deleted triples " + totalTriples;
                     return callback(_err, message);
                 }
             }
@@ -829,7 +852,7 @@ var CsvTripleBuilder = {
                     }
                     CsvTripleBuilder.clearGraph(options.graphUri, sparqlServerUrl, function (err, _result) {
                         if (err) return callbackSeries(err);
-                        console.log("graph deleted");
+                        CsvTripleBuilder.socket.message(channelName, "Graph deleted");
                         callbackSeries();
                     });
                 },

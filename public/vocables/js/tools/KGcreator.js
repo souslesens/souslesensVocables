@@ -1533,5 +1533,13 @@ self.saveMappings({classId:classId})
             }
         );
     };
+
+    self.serverMessage = function (data) {
+        MainController.UI.message(data);
+        console.log(data);
+        //$("#KGcreator_dataSampleDiv").val("Create triples in graph " + data);
+        $("#KGcreator_dataSampleDiv").val(data);
+    };
+
     return self;
 })();

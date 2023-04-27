@@ -107,7 +107,7 @@ module.exports = function () {
                             type: "string",
                         },
                     },
-                    required: ["query"],
+                    //required: ["query"],
                 },
             },
         ],

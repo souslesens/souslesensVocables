@@ -84,8 +84,10 @@ var UserRequestFiltering = {
             error = "DATA PROTECTION : no operation";
         } else {
             var graphUri = null;
-            var graphRegex = /(INTO|GRAPH) +<(.*)>/gim;
+            //var graphRegex = /(INTO|GRAPH) +<(.*)>/gim;
+            var graphRegex = /(INTO|GRAPH|WITH) +<([^>]*)>/gim;
             var array = graphRegex.exec(query);
+            
             if (array && array.length == 3) {
                 graphUri = array[2].trim();
             }
@@ -98,6 +100,7 @@ var UserRequestFiltering = {
                     if (userGraphUrisMap[graphUri].acl != "w") error = " DATA PROTECTION : current  user cannot execute " + operation + " on graph " + graphUri + "\n";
                 }
             }
+            
         }
 
         return callback(error, query);

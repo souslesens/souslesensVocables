@@ -27,7 +27,7 @@ var GraphStore = {
                 return callback(err);
             }
             if (stdout) {
-                console.log(stdout);
+              //  console.log(stdout);
                 return callback(null,stdout);
             }
             if (stderr) {

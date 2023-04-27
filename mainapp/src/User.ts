@@ -12,7 +12,19 @@ async function getUsers(): Promise<User[]> {
 }
 function mapUsers(resources: User[]) {
     const users: [string, UserJSON][] = Object.entries(resources);
-    const mapped_users = users.map(([, val]) => decodeUser(val));
+    const mapped_users = users
+        .map(([, val]) => decodeUser(val))
+        .sort((user1: User, user2: User) => {
+            const name1 = user1.login.toUpperCase();
+            const name2 = user2.login.toUpperCase();
+            if (name1 < name2) {
+                return -1;
+            }
+            if (name1 > name2) {
+                return 1;
+            }
+            return 0;
+        });
     return mapped_users;
 }
 

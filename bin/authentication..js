@@ -35,31 +35,30 @@ if (config.auth == "keycloak") {
                 authServerURL: config.keycloak.authServerURL,
                 callbackURL: "/login/callback",
             },
-            function (accessToken, refreshToken, profile, done) {
-                userModel.findUserAccount(profile.username).then((userAccount) => {
-                    // if no local UserAccount, create one
-                    if (!userAccount) {
-                        userAccount = {
-                            id: ULID.ulid(),
-                            login: profile.username,
-                            password: "",
-                            source: "keycloak",
-                            _type: "user",
-                            groups: config.defaultGroups ? config.defaultGroups : [],
-                        };
-                        userModel.addUserAccount(userAccount);
-                    }
+            async function (accessToken, refreshToken, profile, done) {
+                const userAccount = await userModel.findUserAccount(profile.username);
+                const userAccountToAdd = {
+                    id: ULID.ulid(),
+                    login: profile.username,
+                    password: "",
+                    source: "keycloak",
+                    _type: "user",
+                    groups: config.defaultGroups ? config.defaultGroups : [],
+                };
+                const user = userAccount ? userAccount : userAccountToAdd;
+
+                // if no local UserAccount, create one
+                if (!userAccount) {
+                    await userModel.addUserAccount(userAccountToAdd);
+                } else if (user.source != "keycloak") {
                     // make sure source is keycloak and password is empty
-                    if (userAccount.source != "keycloak") {
-                        userAccount.source = "keycloak";
-                        userAccount.password = "";
-                        userModel.updateUserAccount(userAccount);
-                    }
-                    // do not disclose password and _type
-                    delete userAccount["password"];
-                    delete userAccount["_type"];
-                    done(null, userAccount);
-                });
+                    const userAccountWithPassword = { ...userAccount, password: "", source: "keycloak" };
+                    userModel.updateUserAccount(userAccountWithPassword);
+                }
+                // do not disclose _type
+                const { _type, ...userAccountWithoutType } = user;
+                done(null, userAccountWithoutType);
+                // });
             }
         )
     );

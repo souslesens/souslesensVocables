@@ -1,11 +1,5 @@
-const path = require("path");
-const fs = require("fs");
-const { configPath, config } = require("../../../../model/config");
-const profilesJSON = path.resolve(configPath + "/profiles.json");
-const util = require("util");
-const readFile = util.promisify(fs.readFile);
-const writeFile = util.promisify(fs.writeFile);
-const { readResource, resourceUpdated } = require("../utils");
+const { profileModel } = require("../../../../model/profiles");
+const userManager = require("../../../../bin/user.");
 
 module.exports = function () {
     let operations = {
@@ -14,65 +8,50 @@ module.exports = function () {
         PUT,
     };
 
-    function GET(req, res, _next) {
-        fs.readFile(profilesJSON, "utf8", (err, data) => {
-            if (err) {
-                res.status(500).json({ message: "I couldn't read profiles.json" });
-            } else {
-                const profiles = JSON.parse(data);
-                const profile = profiles[req.params.id];
-                req.params.id
-                    ? profile
-                        ? res.status(200).json(profiles[req.params.id])
-                        : res.status(400).json({ message: `Profile with id ${req.params.id} not found` })
-                    : res.status(200).json(profiles);
-            }
-        });
+    async function GET(req, res, _next) {
+        const userInfo = await userManager.getUser(req.user);
+        const profile = await profileModel.getOneUSerProfile(userInfo.user, req.params.id);
+        if (profile) {
+            res.status(200).json(profile);
+            return;
+        }
+        res.status(400).json({ message: `Profile with id ${req.params.id} not found` });
     }
+
     async function DELETE(req, res, _next) {
-        const profiles = await readFile(profilesJSON).catch((_err) => res.status(500).json(_err));
-        const oldProfiles = JSON.parse(profiles);
-        const { [req.params.id]: idToDelete, ...remainingProfiles } = oldProfiles;
-        const successfullyDeleted = JSON.stringify(remainingProfiles) !== JSON.stringify(oldProfiles);
-
-        if (req.params.id && successfullyDeleted) {
-            await writeFile(profilesJSON, JSON.stringify(remainingProfiles, null, 2)).catch((err) =>
-                res.status(500).json({
-                    message: "I couldn't write profiles.json",
-                    error: err,
-                })
-            );
-
-            const updatedProfiles = await readFile(profilesJSON).catch((_err) => res.status(500).json({ message: "Couldn't read profiles json" }));
-            res.status(200).json({
-                message: `${req.params.id} successfully deleted`,
-                resources: JSON.parse(updatedProfiles),
-            });
-        } else if (!req.params.id) {
+        if (!req.params.id) {
             res.status(500).json({ message: "I need a resource ID to perform this request" });
-        } else {
-            res.status(500).json({ message: `I couldn't delete resource ${req.params.id}. Maybe it has been deleted already?` });
+            return;
+        }
+        try {
+            const profileIdToDelete = req.params.id;
+            const profileExists = await profileModel.deleteProfile(profileIdToDelete);
+            if (!profileExists) {
+                res.status(500).json({ message: `I couldn't delete resource ${profileIdToDelete}. Maybe it has been deleted already?` });
+                return;
+            }
+            const profiles = await profileModel.getAllProfiles();
+            res.status(200).json({ message: `${profileIdToDelete} successfully deleted`, resources: profiles });
+        } catch (err) {
+            next(err);
         }
     }
 
     async function PUT(req, res, next) {
+        const updatedProfile = req.body;
+        const profileIdToUpdate = req.params.id;
+        if (profileIdToUpdate != updatedProfile.name) {
+            res.status(500).json({ message: "Id and name are different." });
+            return;
+        }
         try {
-            const updatedProfile = req.body;
-            const oldProfiles = await readResource(profilesJSON, res);
-            if (req.params.id in oldProfiles) {
-                if (req.params.id == updatedProfile.name) {
-                    const updatedProfiles = { ...oldProfiles };
-                    updatedProfiles[req.params.id] = updatedProfile;
-                    await writeFile(profilesJSON, JSON.stringify(updatedProfiles, null, 2)).catch((_err) => {
-                        res.status(500).json({ message: "I couldn't write profiles.json" });
-                    });
-                    resourceUpdated(res, updatedProfiles);
-                } else {
-                    res.status(400).json({ message: "Id and name are different." });
-                }
-            } else {
-                res.status(400).json({ message: "Resource does not exist. If you want to create another resource, use POST instead." });
+            const profileExists = await profileModel.updateProfile(updatedProfile);
+            if (!profileExists) {
+                res.status(400).json({ message: "Resource does not exist. If you want to create another reprofile, use POST instead." });
+                return;
             }
+            const profiles = await profileModel.getAllProfiles();
+            res.status(200).json({ message: `${profileIdToUpdate} successfully updated`, reprofiles: profiles });
         } catch (err) {
             next(err);
         }

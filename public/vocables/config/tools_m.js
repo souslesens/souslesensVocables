@@ -5,6 +5,7 @@ import Lineage_dictionary from "../modules/tools/lineage/lineage_dictionary.js";
 import SPARQL_endpoint from "../modules/tools/SPARQL_endpoint.js";
 import Admin from "../modules/tools/admin.js";
 import ConfigEditor from "../modules/tools/ConfigEditor.js";
+import Idcp from "../modules/tools/TSF_plugins/IDCP.js";
 
 var Tools = {};
 
@@ -86,6 +87,12 @@ Tools["ConfigEditor"] = {
     label: "ConfigEditor",
     noSource: 1,
     controller: ConfigEditor,
+    toolDescriptionImg: null,
+};
+Tools["IDCP"] = {
+    label: "IDCP",
+    noSource: 1,
+    controller: Idcp,
     toolDescriptionImg: null,
 };
 

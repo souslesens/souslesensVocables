@@ -682,6 +682,7 @@ return;*/
     self.parseUrlParam = function (callback) {
         var paramsMap = common.getUrlParamsMap();
 
+        
         if (paramsMap.tool) {
             var tool = paramsMap["tool"];
 

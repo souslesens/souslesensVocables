@@ -1,40 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Title</title>
-</head>
-<body>
-<div style="display: flex;flex-direction: row">
-  <div>
-    Operation type
-    <select id="lineage_reasoner_operationSelect">
-      <option></option>
-      <option>Consistency</option>
-      <option>Unsatisfiable</option>
-      <option>Inference</option>
-    </select>
-  </div>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Title</title>
+    </head>
+    <body>
+        <div style="display: flex; flex-direction: row">
+            <div>
+                Operation type
+                <select id="lineage_reasoner_operationSelect">
+                    <option></option>
+                    <option>Consistency</option>
+                    <option>Unsatisfiable</option>
+                    <option>Inference</option>
+                </select>
+            </div>
+        </div>
 
+        <button onclick="Lineage_reasoner.runOperation()">Run</button>
 
-</div>
+        <div id="lineage_reasoner_infosDiv"></div>
 
-
-<button onclick="Lineage_reasoner.runOperation()">Run</button>
-
-<div  id="lineage_reasoner_infosDiv"></div>
-
-<div id="lineage_reasoner_outputDiv">
-  choose  Output
-  <select id="lineage_reasoner_outputSelect" onchange="Lineage_reasoner.displayResult($(this).val())">
-    <option></option>
-    <option>Graph</option>
-    <option>Table</option>
-    <option>Export</option>
-  </select>
-
-
-</div>
-
-</body>
+        <div id="lineage_reasoner_outputDiv">
+            choose Output
+            <select id="lineage_reasoner_outputSelect" onchange="Lineage_reasoner.displayResult($(this).val())">
+                <option></option>
+                <option>Graph</option>
+                <option>Table</option>
+                <option>Export</option>
+            </select>
+        </div>
+    </body>
 </html>

@@ -645,8 +645,6 @@ sourceDivId +
             visjsGraph.data.nodes.remove(source);
         },
         exportOWL: function (source) {
-
-
             var payload = {
                 graphUri: Config.sources[source].graphUri,
             };
@@ -655,23 +653,15 @@ sourceDivId +
                 url: Config.apiUrl + "/graphStore/graph",
                 data: payload,
                 dataType: "json",
-                success: function(data, _textStatus, _jqXHR) {
+                success: function (data, _textStatus, _jqXHR) {
                     common.copyTextToClipboard(data);
-                }
-                , error: function(err) {
-                    alert(err.responseText)
+                },
+                error: function (err) {
+                    alert(err.responseText);
+                },
+            });
 
-                }
-            })
-
-
-
-
-
-
-
-
-       /*     Sparql_OWL.generateOWL(source, {}, function (err, result) {
+            /*     Sparql_OWL.generateOWL(source, {}, function (err, result) {
                 if (err) {
                     return console.log(err);
                 }

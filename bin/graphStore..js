@@ -10,16 +10,16 @@ const fs = require("fs");
 var exec = require("child_process").exec;
 
 var GraphStore = {
-    exportGraph: function (sparqlServerConnection,graphUri, callback) {
-//curl --verbose --url "http://example.com/sparql-graph-crud?graph-uri=urn:graph:update:test:get"
+    exportGraph: function (sparqlServerConnection, graphUri, callback) {
+        //curl --verbose --url "http://example.com/sparql-graph-crud?graph-uri=urn:graph:update:test:get"
 
         var url = sparqlServerConnection.url + "-graph-crud?";
         var authStr = "";
         if (sparqlServerConnection.auth) {
             authStr = " --digest " + "--user " + sparqlServerConnection.auth.user + ":" + sparqlServerConnection.auth.pass;
         }
-      //  var cmd = "curl " + authStr + " --verbose" + ' --url "' + url + "graph-uri=" + graphUri + '"' ;
-        var cmd = "curl " + authStr  + ' --url "' + url + "graph-uri=" + graphUri + '"' ;
+        //  var cmd = "curl " + authStr + " --verbose" + ' --url "' + url + "graph-uri=" + graphUri + '"' ;
+        var cmd = "curl " + authStr + ' --url "' + url + "graph-uri=" + graphUri + '"';
 
         exec(cmd, { maxBuffer: 1024 * 30000 }, function (err, stdout, stderr) {
             if (err) {
@@ -27,8 +27,8 @@ var GraphStore = {
                 return callback(err);
             }
             if (stdout) {
-              //  console.log(stdout);
-                return callback(null,stdout);
+                //  console.log(stdout);
+                return callback(null, stdout);
             }
             if (stderr) {
                 console.log(stderr);
@@ -36,12 +36,6 @@ var GraphStore = {
             }
         });
         return;
-
-
-
-
-
-
     },
 
     importGraphFromFile: function (sparqlServerConnection, graphUri, filePath, callback) {
@@ -61,7 +55,7 @@ var GraphStore = {
                 return callback(err);
             }
             if (stdout) {
-               // console.log(stdout);
+                // console.log(stdout);
                 return callback(null);
             }
             if (stderr) {
@@ -232,7 +226,7 @@ var GraphStore = {
             if (err) {
                 return callback(err);
             }
-            if (options.reload!=="true" && sources[sourceName]) {
+            if (options.reload !== "true" && sources[sourceName]) {
                 return callback();
             }
 
@@ -248,7 +242,7 @@ var GraphStore = {
                     method: "Post",
                     headers: [],
                 },
-                editable: (options.editable==="true"),
+                editable: options.editable === "true",
                 controller: "Sparql_OWL",
                 topClassFilter: "?topConcept rdf:type owl:Class .?topConcept rdfs:label|skos:prefLabel ?XX.",
                 schemaType: "OWL",
@@ -506,4 +500,3 @@ var GraphStore = {
 };
 
 module.exports = GraphStore;
-

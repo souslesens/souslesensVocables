@@ -132,7 +132,7 @@ var GraphStore = {
         var filePath;
         var id = Util.getRandomHexaId(10);
         if (path.sep == "/") {
-            filePath = "/temp/" + id + ".rdf";
+            filePath = "/tmp/" + id + ".rdf";
         } else {
             filePath = "C:\\temp\\" + id + ".rdf";
         }

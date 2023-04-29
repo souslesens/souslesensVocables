@@ -143,7 +143,7 @@ var Lineage_relations = (function () {
                             show_only_matches: true,
                         },
                     };
-                    common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv", jstreeData, options, function () {
+                    JstreeWidget.loadJsTree("lineageRelations_propertiesJstreeDiv", jstreeData, options, function () {
                         //  $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(Lineage_sources.activeSource);
                     });
                 },

@@ -533,7 +533,7 @@ source: specificSourceLabel
                                                 },
                                             ];
 
-                                            common.jstree.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
+                                            JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
                                         });
                                     },
                                 },
@@ -547,7 +547,7 @@ source: specificSourceLabel
                             };
 
                             options.doNotAdjustDimensions = 1;
-                            common.jstree.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options, function (err) {});
+                            JstreeWidget.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options, function (err) {});
                             callbackSeries();
                         },
                     ],
@@ -928,7 +928,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                 }
             });
 
-            common.jstree.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", "#", jstreeData, { positionLast: 1 });
+            JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", "#", jstreeData, { positionLast: 1 });
         },
         createRelationFromGraph: function (inSource, sourceNode, targetNode, propId, options, callback) {
             if (!confirm("create Relation " + sourceNode.label + "-" + Sparql_common.getLabelFromURI(propId) + "->" + targetNode.label + " in Graph " + inSource)) {

@@ -384,7 +384,7 @@ var KGcreator = (function () {
                 }
             }
 
-            common.jstree.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
+            JstreeWidget.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
         });
     };
 
@@ -434,7 +434,7 @@ var KGcreator = (function () {
                             data: { id: col, sample: result.data[0] },
                         });
                     });
-                    common.jstree.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData);
+                    JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData);
                 },
                 error: function (err) {
                     // alert(err.responseText);

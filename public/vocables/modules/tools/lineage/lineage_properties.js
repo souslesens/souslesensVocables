@@ -71,7 +71,7 @@ var Lineage_properties = (function () {
                     action: function (_e) {
                         // pb avec source
 
-                        Lineage_common.jstree.deleteNode(self.currentTreeNode, "Lineage_propertiesTree");
+                        Lineage_JstreeWidget.deleteNode(self.currentTreeNode, "Lineage_propertiesTree");
                     },
                 };
             }
@@ -123,7 +123,7 @@ var Lineage_properties = (function () {
                     });
                 }
             });
-            common.jstree.addNodesToJstree("Lineage_propertiesTree", node.id, jstreeData);
+            JstreeWidget.addNodesToJstree("Lineage_propertiesTree", node.id, jstreeData);
             MainController.UI.message("", true);
         });
     };
@@ -1113,7 +1113,7 @@ var Lineage_properties = (function () {
                 };
                 options.contextMenu = self.jstreeContextMenu();
 
-                common.jstree.loadJsTree("Lineage_propertiesTree", jstreeData, options);
+                JstreeWidget.loadJsTree("Lineage_propertiesTree", jstreeData, options);
             }
         );
     };

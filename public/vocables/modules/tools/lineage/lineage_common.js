@@ -99,7 +99,7 @@ var Lineage_common = (function () {
                                 data: nodeData,
                             },
                         ];
-                        common.jstree.addNodesToJstree(treeDiv, parentNode.id, jstreeData);
+                        JstreeWidget.addNodesToJstree(treeDiv, parentNode.id, jstreeData);
                     });
                 }
             } catch (e) {

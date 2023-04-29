@@ -101,7 +101,7 @@ var Lineage_linkedData_query = (function () {
             selectTreeNodeFn: Lineage_linkedData_query.onColumnSelect,
             openAll: true,
         };
-        common.jstree.loadJsTree("LineageLinkedDataQueryParams_SQL_columnsTree", jstreeData, options);
+        JstreeWidget.loadJsTree("LineageLinkedDataQueryParams_SQL_columnsTree", jstreeData, options);
     };
 
     self.onColumnSelect = function () {

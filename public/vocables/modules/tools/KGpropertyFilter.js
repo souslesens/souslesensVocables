@@ -333,7 +333,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     show_only_matches: true,
                 },
             };
-            common.jstree.loadJsTree(treeConfig.jstreeDiv, jstreeData, treeConfig.options.jstreeOptions || jstreeOptions);
+            JstreeWidget.loadJsTree(treeConfig.jstreeDiv, jstreeData, treeConfig.options.jstreeOptions || jstreeOptions);
 
             $("#waitImg").css("display", "none");
             callback();

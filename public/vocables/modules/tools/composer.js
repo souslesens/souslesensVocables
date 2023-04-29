@@ -170,7 +170,7 @@ var Composer = (function () {
                     }
                 });
 
-                common.jstree.addNodesToJstree(jstreeDiv, self.currentTreeNode.id, jstreeData);
+                JstreeWidget.addNodesToJstree(jstreeDiv, self.currentTreeNode.id, jstreeData);
             });
         }
     };
@@ -683,7 +683,7 @@ var Composer = (function () {
                     show_only_matches: true,
                 },
             };
-            common.jstree.loadJsTree(treeConfig.jstreeDiv, jstreeData, treeConfig.options.jstreeOptions || jstreeOptions);
+            JstreeWidget.loadJsTree(treeConfig.jstreeDiv, jstreeData, treeConfig.options.jstreeOptions || jstreeOptions);
 
             $("#waitImg").css("display", "none");
             callback();

@@ -59,7 +59,7 @@ var ExternalReferences = (function () {
                     data: { type: "externalReferenceTopConcept" },
                 });
             });
-            if (newTreeNodes.length > 0) common.jstree.addNodesToJstree("Blender_conceptTreeDiv", node.id, newTreeNodes);
+            if (newTreeNodes.length > 0) JstreeWidget.addNodesToJstree("Blender_conceptTreeDiv", node.id, newTreeNodes);
         });
     }),
         /**
@@ -98,7 +98,7 @@ var ExternalReferences = (function () {
                 },
                 function (err) {
                     if (err) return MainController.UI.message(err);
-                    common.jstree.addNodesToJstree("Blender_conceptTreeDiv", Blender.currentTreeNode.data.id, newTreeNodes);
+                    JstreeWidget.addNodesToJstree("Blender_conceptTreeDiv", Blender.currentTreeNode.data.id, newTreeNodes);
                     Clipboard.clear();
                 }
             );

@@ -144,7 +144,7 @@ var Lineage_combine = (function () {
                 withCheckboxes: true,
                 openAll: true,
             };
-            common.jstree.loadJsTree("LineageMerge_nodesJsTreeDiv", jstreeData, options, function (err, result) {
+            JstreeWidget.loadJsTree("LineageMerge_nodesJsTreeDiv", jstreeData, options, function (err, result) {
                 $("#LineageMerge_nodesJsTreeDiv").jstree().check_all();
             });
         });

@@ -77,7 +77,7 @@ var Import = (function () {
                 });
             });
 
-            common.jstree.addNodesToJstree(treeDivId, parentNode, jsTreeData, {});
+            JstreeWidget.addNodesToJstree(treeDivId, parentNode, jsTreeData, {});
         });
         self.clearImportNodesDialog();
     }),

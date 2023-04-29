@@ -437,7 +437,7 @@ var Lineage_decoration = (function () {
         };
         $("#Lineage_classes_graphDecoration_legendDiv").jstree("destroy").empty();
         $("#Lineage_classes_graphDecoration_legendDiv").html("<div  class='jstreeContainer' style='height: 350px;width:90%'><div id='Lineage_classes_graphDecoration_legendTreeDiv'></div></div>");
-        common.jstree.loadJsTree("Lineage_classes_graphDecoration_legendTreeDiv", jstreeData, options, function () {
+        JstreeWidget.loadJsTree("Lineage_classes_graphDecoration_legendTreeDiv", jstreeData, options, function () {
             $("#Lineage_classes_graphDecoration_legendTreeDiv").jstree(true).check_all();
         });
     };

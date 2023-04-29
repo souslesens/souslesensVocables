@@ -151,7 +151,7 @@ var Lineage_sources = (function () {
         }
 
         self.activeSource = source;
-        common.jstree.clear("lineage_containers_containersJstree");
+        JstreeWidget.clear("lineage_containers_containersJstree");
         //new source to load
         if (!self.loadedSources[source]) {
             self.initSource(source, function (err, sourceDivId) {

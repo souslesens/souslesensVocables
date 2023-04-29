@@ -256,7 +256,7 @@ var TE_AssetConfigurator = (function () {
         var code = node.data.code;
         if (!code || code == "ex") {
             // example
-            var parent = common.jstree.getjsTreeNodeObj("TE_AssetConfigurator_81346TreeDiv", node.parent);
+            var parent = JstreeWidget.getjsTreeNodeObj("TE_AssetConfigurator_81346TreeDiv", node.parent);
             code = parent.data.code;
         }
 
@@ -635,7 +635,7 @@ var TE_AssetConfigurator = (function () {
     self.setTreeSystemNodesInfos = function (topNode) {
         setTimeout(function () {
             if (!topNode) topNode = "#";
-            var treeNodes = common.jstree.getjsTreeNodes("TE_AssetConfigurator_81346TreeDiv", false, "#");
+            var treeNodes = JstreeWidget.getjsTreeNodes("TE_AssetConfigurator_81346TreeDiv", false, "#");
             var ids = [];
             treeNodes.forEach(function (item) {
                 ids.push(item.data.id);
@@ -929,7 +929,7 @@ var TE_AssetConfigurator = (function () {
                     });
                     var options = self.getJstreeOptions();
                     if (word) options.openAll = true;
-                    common.jstree.loadJsTree("TE_AssetConfigurator_81346TreeDiv", jstreeData, options);
+                    JstreeWidget.loadJsTree("TE_AssetConfigurator_81346TreeDiv", jstreeData, options);
                 },
             ],
 

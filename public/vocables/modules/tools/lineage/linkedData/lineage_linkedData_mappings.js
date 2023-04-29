@@ -955,7 +955,7 @@ self.graphTable(KGcreator.currentTreeNode);
                         self.currentMappingNode = obj.node;
                     },
                 };
-                common.jstree.loadJsTree("Lineage_mappingsTreeDiv", jstreeData, options);
+                JstreeWidget.loadJsTree("Lineage_mappingsTreeDiv", jstreeData, options);
             });
         });
     };

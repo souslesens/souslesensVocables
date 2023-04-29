@@ -191,7 +191,7 @@ var Export = (function () {
         if (!jstreeDiv) jstreeDiv = SourceBrowser.currentTargetDiv;
         if (!nodeId) nodeId = SourceBrowser.currentTreeNode ? SourceBrowser.currentTreeNode.id : "#";
         if (!nodeId) nodeId = "#";
-        //  var data = common.jstree.toTableData(jstreeDiv,nodeId)
+        //  var data = JstreeWidget.toTableData(jstreeDiv,nodeId)
 
         var tree = $("#" + jstreeDiv)
             .jstree(true)

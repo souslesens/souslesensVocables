@@ -62,7 +62,7 @@ var Lineage_selection = (function () {
         };
         $("#mainDialogDiv").load("snippets/lineage/selection/lineageSelectionDialog.html", function () {
             $("#mainDialogDiv").dialog("open");
-            common.jstree.loadJsTree("lineage_selection_selectedNodesTreeDiv", jstreeData, options, function (err, result) {});
+            JstreeWidget.loadJsTree("lineage_selection_selectedNodesTreeDiv", jstreeData, options, function (err, result) {});
         });
     };
 

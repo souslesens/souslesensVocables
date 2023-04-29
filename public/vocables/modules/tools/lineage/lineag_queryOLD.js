@@ -402,7 +402,7 @@ var Lineage_query = (function () {
                     open_all: true,
                 };
                 $("#lineageQuery_listResultDiv").html("<div style='width:600px;height:300px;overflow: auto'><div id='lineageQuery_listResultDivTree'></div>");
-                common.jstree.loadJsTree("lineageQuery_listResultDivTree", jstreeData, options, function () {});
+                JstreeWidget.loadJsTree("lineageQuery_listResultDivTree", jstreeData, options, function () {});
             }
         });
     };

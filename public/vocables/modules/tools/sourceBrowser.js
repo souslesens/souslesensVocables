@@ -267,7 +267,7 @@ var SourceBrowser = (function () {
             if (!options.reopen) {
                 return;
             } else {
-                common.jstree.deleteBranch(divId, node.id);
+                JstreeWidget.deleteBranch(divId, node.id);
             }
         }
         var descendantsDepth = 1;
@@ -354,7 +354,7 @@ SourceEditor.showNodeInfos("graphDiv", "en", node.data.id, result)
                 $("#waitImg").css("display", "none");
                 return $("#" + self.currentTargetDiv).html("No data found");
             }
-            common.jstree.loadJsTree(self.currentTargetDiv, jstreeData, {
+            JstreeWidget.loadJsTree(self.currentTargetDiv, jstreeData, {
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {
                     if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) {
@@ -602,7 +602,7 @@ searchedSources = searchedSources.concat(importedSources);*/
                     };
 
                     var jstreeDiv = options.jstreeDiv || self.currentTargetDiv;
-                    common.jstree.loadJsTree(jstreeDiv, jstreeData, jstreeOptions);
+                    JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions);
                     setTimeout(function () {
                         MainController.UI.updateActionDivLabel("Multi source search :" + term);
                         MainController.UI.message("");
@@ -840,7 +840,7 @@ return*/
                 },
             };
 
-            common.jstree.loadJsTree(targetDiv, jstreeData, jstreeOptions);
+            JstreeWidget.loadJsTree(targetDiv, jstreeData, jstreeOptions);
             setTimeout(function () {
                 //  MainController.UI.updateActionDivLabel("Multi source search :" + term)
                 MainController.UI.message("");
@@ -1608,12 +1608,12 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                     //update trees
                     function (callbackSeries) {
                         if (self.currentNodeId.from) {
-                            var jstreeNode = common.jstree.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNodeId);
+                            var jstreeNode = JstreeWidget.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNodeId);
                             if (jstreeNode) {
                                 $("#Lineage_propertiesTree").jstree().delete_node(jstreeNode);
                             }
                         } else {
-                            var jstreeNode = common.jstree.getNodeByDataField("LineageNodesJsTreeDiv", "id", self.currentNodeId);
+                            var jstreeNode = JstreeWidget.getNodeByDataField("LineageNodesJsTreeDiv", "id", self.currentNodeId);
                             if (jstreeNode) {
                                 $("#LineageNodesJsTreeDiv").jstree().delete_node(jstreeNode);
                             }
@@ -1776,14 +1776,14 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
                 }
                 if (self.currentEditingItem.item.prop.value.indexOf("label") > -1) {
                     if (self.currentNodeId.from) {
-                        var jstreeNode = common.jstree.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNode.data.id);
+                        var jstreeNode = JstreeWidget.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNode.data.id);
                         if (jstreeNode) {
                             $("#Lineage_propertiesTree").jstree().rename_node(jstreeNode, newValue);
                         }
                         visjsGraph.data.edges.update({ id: self.currentNodeId, label: newValue });
                     } else {
                         visjsGraph.data.nodes.update({ id: self.currentNodeId, label: newValue });
-                        var jstreeNode = common.jstree.getNodeByDataField("LineageNodesJsTreeDiv", "id", self.currentNode.data.id);
+                        var jstreeNode = JstreeWidget.getNodeByDataField("LineageNodesJsTreeDiv", "id", self.currentNode.data.id);
                         if (jstreeNode) {
                             $("#LineageNodesJsTreeDiv").jstree().rename_node(jstreeNode, newValue);
                         }

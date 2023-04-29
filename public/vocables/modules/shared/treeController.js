@@ -62,9 +62,9 @@ var TreeController = (function () {
         });
 
         if (parentNodeId == "#") {
-            common.jstree.loadJsTree(treeDivId, jstreeData, jsTreeOptions, callback);
+            JstreeWidget.loadJsTree(treeDivId, jstreeData, jsTreeOptions, callback);
         } else {
-            common.jstree.addNodesToJstree(treeDivId, parentNodeId, jstreeData, jsTreeOptions);
+            JstreeWidget.addNodesToJstree(treeDivId, parentNodeId, jstreeData, jsTreeOptions);
         }
         $("#waitImg").css("display", "none");
     };

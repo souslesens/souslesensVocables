@@ -1485,8 +1485,8 @@ sortMethod: "hubsize",
                         selectTreeNodeFn: Standardizer.bestMatches.onTreeNodeClick,
                     };
 
-                    common.jstree.loadJsTree(treeDivId, jstreeData, options, function (_err) {
-                        common.jstree.openNodeDescendants(treeDivId, "#", 8);
+                    JstreeWidget.loadJsTree(treeDivId, jstreeData, options, function (_err) {
+                        JstreeWidget.openNodeDescendants(treeDivId, "#", 8);
                     });
                     callbackSeries();
                 },

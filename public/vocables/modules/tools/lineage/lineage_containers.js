@@ -214,7 +214,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 };
             }
 
-            common.jstree.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
+            JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
                 $("#" + jstreeDiv)
                     .jstree()
                     .open_node("#");
@@ -357,7 +357,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 });
             });
             if ($("#lineage_containers_containersJstree").jstree) {
-                common.jstree.addNodesToJstree("lineage_containers_containersJstree", container.id, jstreeData);
+                JstreeWidget.addNodesToJstree("lineage_containers_containersJstree", container.id, jstreeData);
             }
 
             if (drawMembershipEdge) {
@@ -460,7 +460,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
       if (options.allDescendants) {
         //  $("#lineage_containers_containersJstree").jstree().open_all()
-        var descendantObjs = common.jstree.getNodeDescendants("lineage_containers_containersJstree", firstContainer, null);
+        var descendantObjs = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", firstContainer, null);
         var descendantIds = [];
         descendantObjs.forEach(function(item) {
           if (item.data.type == "container") {
@@ -517,7 +517,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
             var existingNodes = {};
             if (containerNode) {
                 // existingNodes=$("#lineage_containers_containersJstree").jstree().get_node(containerNode.id).children;
-                var jstreeChildren = common.jstree.getNodeDescendants("lineage_containers_containersJstree", containerNode.id, 2);
+                var jstreeChildren = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", containerNode.id, 2);
                 jstreeChildren.forEach(function (item) {
                     existingNodes[item.data.id] = 1;
                 });
@@ -564,7 +564,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 }
             }
 
-            common.jstree.addNodesToJstree("lineage_containers_containersJstree", containerJstreeId, jstreeData);
+            JstreeWidget.addNodesToJstree("lineage_containers_containersJstree", containerJstreeId, jstreeData);
         });
     };
 

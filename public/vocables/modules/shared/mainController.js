@@ -439,7 +439,7 @@ return;*/
                 show_only_matches: true,
             };
 
-            common.jstree.loadJsTree(treeDiv, treeData, options, function () {
+            JstreeWidget.loadJsTree(treeDiv, treeData, options, function () {
                 var openedTypes = Config.preferredSchemaType;
                 //    if (types) openedTypes = types;
                 //  $("#" + treeDiv).jstree(true).open_all(openedTypes);
@@ -481,7 +481,7 @@ return;*/
                 }
             }
             //})
-            common.jstree.loadJsTree(treeDiv, treeData, {
+            JstreeWidget.loadJsTree(treeDiv, treeData, {
                 selectTreeNodeFn: function (evt, obj) {
                     self.UI.initTool(obj.node.id);
                 },

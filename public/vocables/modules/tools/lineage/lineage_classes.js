@@ -747,7 +747,7 @@ addNode:false
             contextMenu: SourceBrowser.getJstreeConceptsContextMenu(),
         };
 
-        common.jstree.loadJsTree(SourceBrowser.currentTargetDiv, jstreeData, jstreeOptions);
+        JstreeWidget.loadJsTree(SourceBrowser.currentTargetDiv, jstreeData, jstreeOptions);
     };
 
     self.openCluster = function (/** @type {{ data: { cluster: any[]; source: any; }; id: any; }} */ clusterNode) {
@@ -922,7 +922,7 @@ addNode:false
                     parent: graphPrefix,
                 });
             });
-            common.jstree.loadJsTree("lineage_linkedDataPropertiesTree", jstreeData, { openAll: true });
+            JstreeWidget.loadJsTree("lineage_linkedDataPropertiesTree", jstreeData, { openAll: true });
         }
     };
 

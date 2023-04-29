@@ -213,7 +213,7 @@ var Blender = (function () {
             // Blender.currentDNDstartNodeParentId=Blender.currentTreeNode.parent
             Blender.currentDNDstartNodeId = element.data.nodes[0];
 
-            Blender.currentDNDstartNode = common.jstree.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeId);
+            Blender.currentDNDstartNode = JstreeWidget.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeId);
             Blender.currentDNDstartNodeParentId = Blender.currentDNDstartNode.parent;
 
             return true;
@@ -408,7 +408,7 @@ var Blender = (function () {
 
             var newParentData = Blender.currentDNDoperation.parent.data;
             var nodeData = Blender.currentDNDoperation.node.data;
-            var oldParentData = common.jstree.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeParentId).data;
+            var oldParentData = JstreeWidget.getjsTreeNodeObj("Blender_conceptTreeDiv", Blender.currentDNDstartNodeParentId).data;
             //   var oldParentData = Blender.currentTreeNode.data;
             /**
              * @type {string}
@@ -581,7 +581,7 @@ var Blender = (function () {
                         },
                         function (/** @type {() => void} */ callbackSeries) {
                             // delete from tree
-                            common.jstree.deleteNode(treeDivId, node.id);
+                            JstreeWidget.deleteNode(treeDivId, node.id);
                             if (type == "subject") {
                                 self.currentTreeNode = null;
                             } else if (type == "collection") {
@@ -1006,7 +1006,7 @@ var Blender = (function () {
                         },
                     ];
 
-                    common.jstree.addNodesToJstree(treeDiv, parentNode, jsTreeData, {});
+                    JstreeWidget.addNodesToJstree(treeDiv, parentNode, jsTreeData, {});
                 } else {
                     if (editingObject.nodeLabel) {
                         var nodeJstreeId = $("#" + treeDiv)
@@ -1017,7 +1017,7 @@ var Blender = (function () {
                             .jstree(true)
                             .rename_node(nodeJstreeId, editingObject.nodeLabel);
 
-                        common.jstree.setTreeAppearance();
+                        JstreeWidget.setTreeAppearance();
                     }
                 }
                 $("#Blender_PopupEditDiv").dialog("close");
@@ -1179,7 +1179,7 @@ var Blender = (function () {
                 //   console.log(JSON.stringify(jstreeData, null, 2))
                 var jsTreeOptions = self.getConceptJstreeOptions(false);
                 jsTreeOptions.openAll = true;
-                common.jstree.loadJsTree("Blender_conceptTreeDiv", jstreeData, jsTreeOptions, function () {
+                JstreeWidget.loadJsTree("Blender_conceptTreeDiv", jstreeData, jsTreeOptions, function () {
                     if (jstreeData.length < 5000) $("#Blender_conceptTreeDiv").jstree().open_all();
                 });
                 $("#Blender_tabs").tabs("option", "active", 0);
@@ -1284,7 +1284,7 @@ var Blender = (function () {
                         success: function (_data, _textStatus, _jqXHR) {
                             $('#Blender_SourcesSelect option[value="' + source + '"]').remove();
 
-                            common.jstree.clear("Blender_conceptTreeDiv");
+                            JstreeWidget.clear("Blender_conceptTreeDiv");
                         },
                         error: function (err) {
                             alert("cannot delete source");

@@ -141,7 +141,7 @@ var Collection = (function () {
             $("#waitImg").css("display", "none");
             if (err) return MainController.UI.message(err);
 
-            //  common.jstree.addNodesToJstree("Blender_collectionTreeDiv", Collection.currentTreeNode.data.id, newTreeNodes)
+            //  JstreeWidget.addNodesToJstree("Blender_collectionTreeDiv", Collection.currentTreeNode.data.id, newTreeNodes)
             MainController.UI.message("node " + self.currentCandidateNode.data.label + " assigned to collection " + Collection.currentTreeNode.data.label);
             return (self.currentCandidateNode = null);
         });

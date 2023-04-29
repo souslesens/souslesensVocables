@@ -18,17 +18,17 @@
         <script src="js/external/graph.js"></script>
         <script src="js/external/download.js"></script>
 
-        <script type="module" src="modules/common.js" charset="utf-8"></script>
+        <script type="module" src="modules/shared/common.js" charset="utf-8"></script>
         <script type="module" src="modules/graph/visjsGraph2.js"></script>
         <script type="module" src="modules/graph/canvas2svg.js"></script>
         <script type="module" src="modules/graph/SVGexport.js"></script>
         <script type="module" src="modules/graph/graphMLexport.js"></script>
 
-        <script type="module" src="modules/mainController.js"></script>
+        <script type="module" src="modules/shared/mainController.js"></script>
 
-        <script type="module" src="modules/graphController.js"></script>
-        <script type="module" src="modules/treeController.js"></script>
-        <script type="module" src="modules/clipboard.js"></script>
+        <script type="module" src="modules/shared/graphController.js"></script>
+        <script type="module" src="modules/shared/treeController.js"></script>
+        <script type="module" src="modules/shared/clipboard.js"></script>
 
         <script type="module" src="modules/tools/sourceBrowser.js"></script>
 
@@ -61,9 +61,9 @@
         <script type="module" src="modules/tools/lineage/lineage_styles.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_relationFilter.js"></script>
 
-        <script type="module" src="modules/ontologyModels.js"></script>
+        <script type="module" src="modules/shared/ontologyModels.js"></script>
 
-        <script type="module" src="modules/commonUIwidgets.js"></script>
+        <script type="module" src="modules/shared/commonUIwidgets.js"></script>
 
         <script type="module" src="modules/tools/owlEditor.js"></script>
 
@@ -81,13 +81,12 @@
 
         <script type="module" src="modules/tools/ontologiesStats.js"></script>
 
-        <!-----------private tools--------------->
-        <script type="module" src="modules/customPluginController.js"></script>
+
 
         <script src="config/app_config.js"></script>
         <!--    <script src="config/app_config_draft_tools.js"></script>-->
 
-        <script type="module" src="modules/authentification.js"></script>
+        <script type="module" src="modules/shared/authentification.js"></script>
 
         <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
@@ -102,7 +101,7 @@
         <script type="module" src="modules/search/searchUtil.js"></script>
         <!--  <script type="module" src="modules/tools/ontologyUtil.js"></script>-->
 
-        <script type="module" src="modules/export.js"></script>
+        <script type="module" src="modules/shared/export.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_graphTraversal.js"></script>
 
         <script type="module" src="modules/search/elasticSearchProxy.js"></script>
@@ -155,8 +154,8 @@
         <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 
         <script type="module">
-            import MainController from "./modules/mainController.js";
-            import authentication from "./modules/authentification.js";
+            import MainController from "./modules/shared/mainController.js";
+            import authentication from "./modules/shared/authentification.js";
 
             var leftPanelWidth = 400;
             var rightPanelWidth = 400;

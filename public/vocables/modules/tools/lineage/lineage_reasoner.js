@@ -1,4 +1,4 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import visjsGraph from "../../graph/visjsGraph2.js";

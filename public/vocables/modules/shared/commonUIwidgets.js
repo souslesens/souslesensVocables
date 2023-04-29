@@ -1,6 +1,6 @@
 import common from "./common.js";
-import Sparql_common from "./sparqlProxies/sparql_common.js";
-import Sparql_OWL from "./sparqlProxies/sparql_OWL.js";
+import Sparql_common from "../sparqlProxies/sparql_common.js";
+import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 
 var CommonUIwidgets = (function () {
     var self = {};

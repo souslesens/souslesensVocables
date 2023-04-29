@@ -3,8 +3,8 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Lineage_classes from "./lineage_classes.js";
-import common from "../../common.js";
-import Export from "../../export.js";
+import common from "../../shared/common.js";
+import Export from "../../shared/export.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com

@@ -1,4 +1,4 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 
 /** The MIT License

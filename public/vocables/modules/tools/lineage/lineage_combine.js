@@ -1,14 +1,14 @@
 import SourceBrowser from "../sourceBrowser.js";
 import Lineage_classes from "./lineage_classes.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import Lineage_selection from "./lineage_selection.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
-import MainController from "../../mainController.js";
+import MainController from "../../shared/mainController.js";
 
 var Lineage_combine = (function () {
     var self = {};

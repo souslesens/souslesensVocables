@@ -1,10 +1,10 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_relationFilter from "./lineage_relationFilter.js";
 import SourceBrowser from "../sourceBrowser.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import Export from "../../export.js";
+import Export from "../../shared/export.js";
 import Lineage_classes from "./lineage_classes.js";
 import Sparql_CRUD from "../../sparqlProxies/sparql_CRUD.js";
 

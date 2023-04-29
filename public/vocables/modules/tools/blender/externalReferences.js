@@ -1,4 +1,4 @@
-import Clipboard from "../../clipboard.js";
+import Clipboard from "../../shared/clipboard.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 
 /** The MIT License

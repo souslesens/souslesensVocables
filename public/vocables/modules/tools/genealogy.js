@@ -1,7 +1,7 @@
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 import GraphController from "../graphController.js";
-import Clipboard from "../clipboard.js";
+import Clipboard from "../shared/clipboard.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com

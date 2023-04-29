@@ -209,14 +209,7 @@ var MainController = (function () {
                             callbackSeries(_err);
                         });
                     },
-                    function (callbackSeries) {
-                        if (!Config.currentProfile.customPlugins) {
-                            return callbackSeries();
-                        }
-                        CustomPluginController.init(Config.currentProfile.customPlugins, function (_err, _result) {
-                            callbackSeries();
-                        });
-                    },
+
                     function (callbackSeries) {
                         MainController.UI.showToolsList("toolsTreeDiv");
                         callbackSeries();

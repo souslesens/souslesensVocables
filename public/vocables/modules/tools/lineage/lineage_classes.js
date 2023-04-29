@@ -1,4 +1,4 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import KGcreator from "../KGcreator.js";
 import Lineage_sets from "./lineage_sets.js";
 import Lineage_linkedData_mappings from "./linkedData/lineage_linkedData_mappings.js";
@@ -14,10 +14,9 @@ import Lineage_containers from "./lineage_containers.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
-import CustomPluginController from "../../customPluginController.js";
 import Lineage_sources from "./lineage_sources.js";
-import MainController from "../../mainController.js";
-import authentication from "../../authentification.js";
+import MainController from "../../shared/mainController.js";
+import authentication from "../../shared/authentification.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -2164,7 +2163,7 @@ addNode:false
                     visjsGraph.data.edges.add(visjsData.edges);
                     visjsGraph.network.fit();
                 }
-                CustomPluginController.setGraphNodesIcons();
+
 
                 $("#waitImg").css("display", "none");
 

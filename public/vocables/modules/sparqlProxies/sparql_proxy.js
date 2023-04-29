@@ -1,6 +1,6 @@
-import common from "../common.js";
-import MainController from "../mainController.js";
-import authentication from "../authentification.js";
+import common from "../shared/common.js";
+import MainController from "../shared/mainController.js";
+import authentication from "../shared/authentification.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com

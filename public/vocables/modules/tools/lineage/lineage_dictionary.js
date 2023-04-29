@@ -1,7 +1,7 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
-import Export from "../../export.js";
+import Export from "../../shared/export.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Lineage_classes from "./lineage_classes.js";
 

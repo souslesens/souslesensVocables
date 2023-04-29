@@ -1,5 +1,5 @@
 import SourceBrowser from "./sourceBrowser.js";
-import common from "../common.js";
+import common from "../shared/common.js";
 import Lineage_upperOntologies from "./lineage/lineage_upperOntologies.js";
 import SearchUtil from "../search/searchUtil.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";

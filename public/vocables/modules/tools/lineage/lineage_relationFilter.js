@@ -1,4 +1,4 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 
 var Lineage_relationFilter = (function () {

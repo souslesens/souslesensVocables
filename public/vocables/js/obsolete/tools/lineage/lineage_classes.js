@@ -2143,7 +2143,7 @@ addNode:false
                     visjsGraph.data.edges.add(visjsData.edges);
                     visjsGraph.network.fit();
                 }
-                CustomPluginController.setGraphNodesIcons();
+
 
                 $("#waitImg").css("display", "none");
 

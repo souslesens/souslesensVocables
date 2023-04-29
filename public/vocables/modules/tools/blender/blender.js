@@ -1,9 +1,9 @@
-import common from "../../common.js";
-import TreeController from "../../treeController.js";
+import common from "../../shared/common.js";
+import TreeController from "../../shared/treeController.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import OwlSchema from "../owlSchema.js";
 import Collection from "./collection.js";
-import Clipboard from "../../clipboard.js";
+import Clipboard from "../../shared/clipboard.js";
 import SourceBrowser from "../sourceBrowser.js";
 
 /** The MIT License

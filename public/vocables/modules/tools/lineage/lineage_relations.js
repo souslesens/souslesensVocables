@@ -158,7 +158,7 @@ var Lineage_relations = (function () {
             label: "PropertyInfos",
             action: function (_e) {
                 $("#LineagePopup").dialog("open");
-                SourceBrowser.showNodeInfos(self.curentPropertiesJstreeNode.parent, self.curentPropertiesJstreeNode, "LineagePopup");
+               NodeInfosWidget.showNodeInfos(self.curentPropertiesJstreeNode.parent, self.curentPropertiesJstreeNode, "LineagePopup");
             },
         };
         return items;

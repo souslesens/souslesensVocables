@@ -541,7 +541,7 @@ source: specificSourceLabel
                                     label: "Node infos",
                                     action: function (_e) {
                                         // pb avec source
-                                        SourceBrowser.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv");
+                                       NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv");
                                     },
                                 },
                             };

@@ -41,7 +41,7 @@ var Lineage_properties = (function () {
                 action: function (_e) {
                     // pb avec source
 
-                    SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv", { resetVisited: 1 }, function (_err, _result) {
+                   NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv", { resetVisited: 1 }, function (_err, _result) {
                         // pass
                     });
                 },
@@ -1023,7 +1023,7 @@ var Lineage_properties = (function () {
             self.drawGraph(node);
         },
         showNodeInfos: function () {
-            SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
+           NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
         },
     };
 

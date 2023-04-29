@@ -32,12 +32,7 @@
 
         <script type="module" src="modules/tools/sourceBrowser.js"></script>
 
-        <script type="module" src="modules/tools/blender/blender.js"></script>
-        <script type="module" src="modules/tools/blender/collection.js"></script>
-        <script type="module" src="modules/tools/blender/sourceEditor.js"></script>
-        <script type="module" src="modules/tools/blender/import.js"></script>
-        <script type="module" src="modules/tools/blender/externalReferences.js"></script>
-        <script type="module" src="modules/tools/blender/transform.js"></script>
+
         <script type="module" src="modules/tools/SPARQL_endpoint.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_classes.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_sources.js"></script>
@@ -69,6 +64,7 @@
         <script type="module" src="modules/uiWidgets/promptedSelectWidget.js"></script>
         <script type="module" src="modules/uiWidgets/sourceSelectorWidget.js"></script>
         <script type="module" src="modules/uiWidgets/jstreeWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/nodeInfosWidget.js"></script>
 
 
 
@@ -230,7 +226,7 @@
                         if (target == "_slsvCallback") {
                             var id = $(this).attr("href");
                             event.preventDefault();
-                            SourceBrowser.showNodeInfos(null, id, "mainDialogDiv");
+                           NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
                         }
                     });
 

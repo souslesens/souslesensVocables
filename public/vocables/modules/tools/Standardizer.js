@@ -1581,7 +1581,7 @@ sortMethod: "hubsize",
             if ((node.data.type = "orphan") /* probably a problem with the single '=' here */) {
                 // orphans
                 $("#Standardizer_searchEntitiesInput").val(node.data.text);
-            } else SourceBrowser.showNodeInfos(source, node, "mainDialogDiv");
+            } elseNodeInfosWidget.showNodeInfos(source, node, "mainDialogDiv");
         },
     };
 
@@ -1650,7 +1650,7 @@ sortMethod: "hubsize",
                             title: "action",
                             render: function (datum, type, row) {
                                 return (
-                                    "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='  SourceBrowser.showNodeInfos (\"" +
+                                    "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick=' NodeInfosWidget.showNodeInfos (\"" +
                                     row[0] +
                                     '","' +
                                     row[2] +

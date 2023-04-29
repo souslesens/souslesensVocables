@@ -965,7 +965,7 @@ self.graphTable(KGcreator.currentTreeNode);
         items.nodeInfos = {
             label: "Node infos",
             action: function (_e) {
-                SourceBrowser.showNodeInfos(self.mappingSourceLabel, self.currentMappingNode.id, "mainDialogDiv");
+               NodeInfosWidget.showNodeInfos(self.mappingSourceLabel, self.currentMappingNode.id, "mainDialogDiv");
             },
         };
         items.deleteNode = {

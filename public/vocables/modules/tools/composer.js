@@ -115,7 +115,7 @@ var Composer = (function () {
         items["NodeInfos"] = {
             label: "Node infos",
             action: function (_e) {
-                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+               NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
             },
         };
         items["GraphNode"] = {
@@ -897,7 +897,7 @@ var Composer = (function () {
                     action: function (_e) {
                         // pb avec source
                         $("#mainDialogDiv").dialog("open");
-                        SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+                       NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
                     },
                 };
             }

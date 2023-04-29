@@ -547,7 +547,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     action: function (_e) {
                         // pb avec source
                         $("#mainDialogDiv").dialog("open");
-                        SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+                       NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
                     },
                 };
             }

@@ -15,7 +15,7 @@ var Lineage_containers = (function () {
         items["NodeInfos"] = {
             label: "Node infos",
             action: function (_e) {
-                SourceBrowser.showNodeInfos(Lineage_sources.activeSource, self.currentContainer, "mainDialogDiv");
+               NodeInfosWidget.showNodeInfos(Lineage_sources.activeSource, self.currentContainer, "mainDialogDiv");
             },
         };
         items["GraphNode"] = {

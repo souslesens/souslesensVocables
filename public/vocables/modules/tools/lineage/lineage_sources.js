@@ -863,7 +863,7 @@ target: Math.round(Math.random() * (id-1))
             })
 
             .onNodeClick(function (node, event) {
-                SourceBrowser.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
+               NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
             })
             // .nodeAutoColorBy('group')
             .onNodeDragEnd((node) => {

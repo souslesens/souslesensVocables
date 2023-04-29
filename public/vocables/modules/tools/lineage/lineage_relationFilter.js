@@ -1,5 +1,6 @@
 import common from "../../shared/common.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
+import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 
 var Lineage_relationFilter = (function () {
     var self = {};
@@ -193,7 +194,7 @@ var Lineage_relationFilter = (function () {
         if (type == "whiteBoardNodes") {
         } else {
             //  if (resourceType == "owl:Class") {
-            CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter(null, "Lineage_relation_filterResourcesSelect", type);
+            PromptedSelectWidget.prompt(null, "Lineage_relation_filterResourcesSelect", type);
             //  }
         }
     };

@@ -2164,7 +2164,6 @@ addNode:false
                     visjsGraph.network.fit();
                 }
 
-
                 $("#waitImg").css("display", "none");
 
                 if (options.processorFn) {

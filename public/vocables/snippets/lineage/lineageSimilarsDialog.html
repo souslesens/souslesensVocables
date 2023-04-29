@@ -1,26 +1,23 @@
-
 <div style="display: flex; align-content: stretch; flex-direction: row; align-items: center">
-  <div style="display: flex; flex-direction: row">
-    <div class="lineageSimilars_div">
-    <select onchange="Lineage_similars.onChangeSelection($(this).val())">
-      <option></option>
-      <option value="whiteboard">Whiteboard nodes</option>
-      <option value="chooseSource">Select source</option>
-
-    </select>
-
+    <div style="display: flex; flex-direction: row">
+        <div class="lineageSimilars_div">
+            <select onchange="Lineage_similars.onChangeSelection($(this).val())">
+                <option></option>
+                <option value="whiteboard">Whiteboard nodes</option>
+                <option value="chooseSource">Select source</option>
+            </select>
+        </div>
     </div>
-  </div>
 
-  <div id="lineageSimilars_sourcesTreeContainer" style="width:400px;height: 500px">
-
-
-    <div id="lineageSimilars_sourcesTreeDiv"></div>
-
-  </div>
-
+    <div id="lineageSimilars_sourcesTreeContainer" style="width: 400px; height: 500px">
+        <div id="lineageSimilars_sourcesTreeDiv"></div>
+    </div>
 </div>
 
-<button onclick="
+<button
+    onclick="
 
-Lineage_similars.drawSimilars()"> OK</button>
+Lineage_similars.drawSimilars()"
+>
+    OK
+</button>

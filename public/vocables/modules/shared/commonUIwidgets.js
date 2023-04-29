@@ -70,13 +70,13 @@ var CommonUIwidgets = (function () {
             $("#editPredicate_vocabularySelect").prop("disabled", false);
             $("#editPredicate_propertyValue").prop("disabled", false);
 
-            CommonUIwidgets.predicatesSelectorWidget.setVocabulariesSelect(source);
-            CommonUIwidgets.predicatesSelectorWidget.setCurrentVocabClassesSelect("usual", "editPredicate_objectSelect");
-            CommonUIwidgets.predicatesSelectorWidget.setCurrentVocabPropertiesSelect("usual", "editPredicate_currentVocabPredicateSelect");
+           PredicatesSelectorWidget.setVocabulariesSelect(source);
+           PredicatesSelectorWidget.setCurrentVocabClassesSelect("usual", "editPredicate_objectSelect");
+           PredicatesSelectorWidget.setCurrentVocabPropertiesSelect("usual", "editPredicate_currentVocabPredicateSelect");
 
             // var properties = Config.Lineage.basicObjectProperties;
 
-            CommonUIwidgets.predicatesSelectorWidget.configure(configureFn);
+           PredicatesSelectorWidget.configure(configureFn);
         },
 
         configure: function (configureFn) {
@@ -134,7 +134,7 @@ var CommonUIwidgets = (function () {
 
         onSelectCurrentVocabObject: function (value) {
             if (value == "_search") {
-                return CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter(null, "editPredicate_objectSelect", self.predicatesSelectorWidget.currentVocabulary);
+                return PromptedSelectWidget.prompt(null, "editPredicate_objectSelect", self.predicatesSelectorWidget.currentVocabulary);
             }
             $("#editPredicate_objectValue").val(value);
             if (self.predicatesSelectorWidget.onSelectObjectFn) {
@@ -184,7 +184,7 @@ var CommonUIwidgets = (function () {
                 classes = common.array.sort(classes, "label");
                 common.fillSelectOptions(selectId, classes, true, "label", "id");
             } else {
-                return CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter(null, "editPredicate_objectSelect", vocabulary);
+                return PromptedSelectWidget.prompt(null, "editPredicate_objectSelect", vocabulary);
             }
         },
     };

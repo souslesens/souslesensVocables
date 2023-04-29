@@ -23,12 +23,12 @@
         <select
             id="editPredicate_vocabularySelect"
             style="min-width: 100px; background-color: #ddd"
-            onchange="CommonUIwidgets.predicatesSelectorWidget.setCurrentVocabPropertiesSelect($(this).val(),'editPredicate_currentVocabPredicateSelect')"
+            onchange="PredicatesSelectorWidget.setCurrentVocabPropertiesSelect($(this).val(),'editPredicate_currentVocabPredicateSelect')"
         ></select>
         <select
             id="editPredicate_currentVocabPredicateSelect"
             style="min-width: 200px; background-color: #ddd"
-            onchange="CommonUIwidgets.predicatesSelectorWidget.onSelectPredicateProperty($(this).val())"
+            onchange="PredicatesSelectorWidget.onSelectPredicateProperty($(this).val())"
         ></select>
     </div>
     <input id="editPredicate_propertyValue" style="width: 95%" /><br />
@@ -41,17 +41,17 @@
         <b>Object</b> &nbsp;<button class="btn btn-sm my-1 py-0 btn-outline-primary" id="editPredicate_savePredicateButton">
             <b>Save</b>
         </button>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="CommonUIwidgets.predicatesSelectorWidget.rowser.hideAddPredicateDiv()"><b>cancel</b></button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="PredicatesSelectorWidget.rowser.hideAddPredicateDiv()"><b>cancel</b></button>
     </div>
     <div>
         <select
             id="editPredicate_vocabularySelect2"
             style="min-width: 100px; background-color: #ddd"
-            onchange="CommonUIwidgets.predicatesSelectorWidget.setCurrentVocabClassesSelect($(this).val(),'editPredicate_objectSelect')"
+            onchange="PredicatesSelectorWidget.setCurrentVocabClassesSelect($(this).val(),'editPredicate_objectSelect')"
         ></select
         >&nbsp;
 
-        <select id="editPredicate_objectSelect" style="min-width: 200px; background-color: #ddd" onchange="CommonUIwidgets.predicatesSelectorWidget.onSelectCurrentVocabObject($(this).val())"></select>
+        <select id="editPredicate_objectSelect" style="min-width: 200px; background-color: #ddd" onchange="PredicatesSelectorWidget.onSelectCurrentVocabObject($(this).val())"></select>
     </div>
     <div></div>
     <textarea id="editPredicate_objectValue" style="width: 95%"></textarea>

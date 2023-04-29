@@ -10,7 +10,7 @@ import Lineage_selection from "./lineage_selection.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_3D from "./lineage_3d.js";
 import authentication from "../../shared/authentification.js";
-import CommonUIwidgets from "../../shared/commonUIwidgets.js";
+import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 
 var Lineage_sources = (function () {
     var self = {};
@@ -204,7 +204,7 @@ var Lineage_sources = (function () {
         });
     };
     self.onSearchClass = function () {
-        CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter("owl:Class", "GenericTools_searchAllClassSelect", self.activeSource);
+        PromptedSelectWidget.prompt("owl:Class", "GenericTools_searchAllClassSelect", self.activeSource);
     };
 
     self.showHideLineageLeftPanels = function () {

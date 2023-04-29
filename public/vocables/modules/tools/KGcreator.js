@@ -632,9 +632,9 @@ var KGcreator = (function () {
                 },
                 function (callbackSeries) {
                     $("#sharedPredicatesPanel").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
-                        CommonUIwidgets.predicatesSelectorWidget.init(KGcreator.currentSlsvSource, function () {
-                            CommonUIwidgets.predicatesSelectorWidget.onSelectObjectFn = function (value) {};
-                            CommonUIwidgets.predicatesSelectorWidget.onSelectPropertyFn = function (value) {};
+                       PredicatesSelectorWidget.init(KGcreator.currentSlsvSource, function () {
+                           PredicatesSelectorWidget.onSelectObjectFn = function (value) {};
+                           PredicatesSelectorWidget.onSelectPropertyFn = function (value) {};
                         });
 
                         $("#editPredicate_customPredicateContentDiv").html("<div> <input type='checkbox' id='KGcreator_isRestrictionCBX' />is Restriction</div>");

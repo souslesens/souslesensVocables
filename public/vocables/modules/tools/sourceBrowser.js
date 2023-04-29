@@ -979,7 +979,7 @@ return*/
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             str +=
                 "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
-                "onclick='CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, SourceBrowser.configureEditPredicateWidget)'>  Add Predicate </button>";
+                "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, SourceBrowser.configureEditPredicateWidget)'>  Add Predicate </button>";
             if (true || Config.sources[source].editable) {
                 str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.deleteNode()'> Delete </button>";
             }
@@ -1085,7 +1085,7 @@ value = item.valueLabel.value;*/
                         };
                     }
                     var predicateId = common.getRandomHexaId(5);
-                    CommonUIwidgets.predicatesSelectorWidget.predicatesIdsMap[predicateId] = { item: item };
+                   PredicatesSelectorWidget.predicatesIdsMap[predicateId] = { item: item };
 
                     // dont manage lang clustering when source is editable
                     if (!Lineage_sources.isSourceEditableForUser(sourceLabel) && item.value && item.value["xml:lang"]) {
@@ -1529,7 +1529,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
     };
 
     self.deletePredicate = function (predicateId) {
-        var currentEditingItem = CommonUIwidgets.predicatesSelectorWidget.predicatesIdsMap[predicateId];
+        var currentEditingItem =PredicatesSelectorWidget.predicatesIdsMap[predicateId];
         var property = currentEditingItem.item.prop.value;
         if (confirm("delete predicate")) {
             var result = "";
@@ -1793,19 +1793,19 @@ $("#searchAll_sourcesTree").jstree().uncheck_all();*/
         });
     };
     self.showModifyPredicateDialog = function (predicateId) {
-        CommonUIwidgets.predicatesSelectorWidget.currentEditingItem = CommonUIwidgets.predicatesSelectorWidget.predicatesIdsMap[predicateId];
-        if (!CommonUIwidgets.predicatesSelectorWidget.currentEditingItem) {
+       PredicatesSelectorWidget.currentEditingItem =PredicatesSelectorWidget.predicatesIdsMap[predicateId];
+        if (!PredicatesSelectorWidget.currentEditingItem) {
             return alert("error");
         }
-        CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
+       PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
             $("#editPredicate_savePredicateButton").click(function () {
                 SourceBrowser.addPredicate();
             });
         });
 
-        $("#editPredicate_propertyValue").val(CommonUIwidgets.predicatesSelectorWidget.currentEditingItem.item.prop.value);
-        $("#editPredicate_objectValue").val(CommonUIwidgets.predicatesSelectorWidget.currentEditingItem.item.value.value);
-        var h = Math.max((CommonUIwidgets.predicatesSelectorWidget.currentEditingItem.item.value.value.length / 80) * 30, 50);
+        $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
+        $("#editPredicate_objectValue").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
+        var h = Math.max((PredicatesSelectorWidget.currentEditingItem.item.value.value.length / 80) * 30, 50);
         $("#editPredicate_objectValue").css("height", h + "px");
 
         $("#editPredicate_objectValue").focus();

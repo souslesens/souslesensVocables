@@ -145,7 +145,7 @@ var OntologyBrowser = (function () {
                         if (!existingVisjsIds[classId]) {
                             existingVisjsIds[classId] = 1;
                             visjsData.nodes.push({
-                                id: SourceBrowser.currentTreeNode.data.id,
+                                id: SearchWidget.currentTreeNode.data.id,
                                 label: Sparql_common.getLabelFromURI(classId),
                                 shape: "box",
                             });
@@ -215,8 +215,8 @@ var OntologyBrowser = (function () {
 
         if (!classId) {
             self.queryClassPath = {};
-            classId = SourceBrowser.currentTreeNode.data.id;
-            classLabel = SourceBrowser.currentTreeNode.data.label;
+            classId = SearchWidget.currentTreeNode.data.id;
+            classLabel = SearchWidget.currentTreeNode.data.label;
             self.init(function () {
                 execute(classId, classLabel);
             });

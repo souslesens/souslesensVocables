@@ -1,7 +1,7 @@
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-import SourceBrowser from "../sourceBrowser.js";
+
 import common from "../../shared/common.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 import Lineage_classes from "./lineage_classes.js";
@@ -177,7 +177,7 @@ var Lineage_graphTraversal = (function () {
             contextMenu: Lineage_graphTraversal.contextMenufn,
         };
 
-        SourceBrowser.searchAllSourcesTerm(options);
+        SearchWidget.searchTerm(options);
     };
 
     self.contextMenufn = function () {

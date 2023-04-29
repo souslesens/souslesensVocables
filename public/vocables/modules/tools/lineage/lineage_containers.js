@@ -1,4 +1,4 @@
-import SourceBrowser from "../sourceBrowser.js";
+
 import Lineage_classes from "./lineage_classes.js";
 import Lineage_styles from "./lineage_styles.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
@@ -39,7 +39,7 @@ var Lineage_containers = (function () {
             label: "Copy Node(s)",
             action: function (e) {
                 // pb avec source
-                SourceBrowser.copyNode(e);
+                LineageClasses.copyNode(e);
                 var selectedNodes = $("#lineage_containers_containersJstree").jstree().get_selected(true);
                 Lineage_common.copyNodeToClipboard(selectedNodes);
             },

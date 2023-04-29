@@ -517,7 +517,7 @@ return;*/
             }
 
             self.UI.updateActionDivLabel();
-            SourceBrowser.targetDiv = "currentSourceTreeDiv";
+            SearchWidget.targetDiv = "currentSourceTreeDiv";
             if (toolObj.noSource) {
                 MainController.currentSource = null;
                 MainController.UI.onSourceSelect();

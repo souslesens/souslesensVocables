@@ -1,4 +1,4 @@
-import SourceBrowser from "../sourceBrowser.js";
+
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";

@@ -6,7 +6,7 @@ import Sparql_common from "../../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../../sparqlProxies/sparql_generic.js";
 import Sparql_proxy from "../../../sparqlProxies/sparql_proxy.js";
 import Sparql_OWL from "../../../sparqlProxies/sparql_OWL.js";
-import SourceBrowser from "../../sourceBrowser.js";
+
 
 //www.nstauthority.co.uk/data-centre/data-downloads-and-publications/well-data/
 

@@ -900,7 +900,7 @@ var TE_14224_browser = (function () {
                         selectTreeNodeFn: function (event, obj) {
                             self.currentOntologyTreeNode = obj.node;
 
-                            SourceBrowser.openTreeNode("TE_14224_browser_ontologyPanelDiv", obj.node.data.source, obj.node, {
+                            SearchWidget.openTreeNode("TE_14224_browser_ontologyPanelDiv", obj.node.data.source, obj.node, {
                                 ctrlKey: obj.event.ctrlKey,
                                 beforeDrawingFn: function (sparqlResult) {
                                     sparqlResult.forEach(function (item) {

@@ -1,6 +1,6 @@
 import common from "../shared/common.js";
 import Lineage_containers from "./lineage/lineage_containers.js";
-import SourceBrowser from "./sourceBrowser.js";
+
 import Lineage_classes from "./lineage/lineage_classes.js";
 import Export from "../shared/export.js";
 import visjsGraph from "../graph/visjsGraph2.js";
@@ -959,7 +959,7 @@ var Composer = (function () {
                     return;
                 },
             };
-            SourceBrowser.searchAllSourcesTerm(options);
+            SearchWidget.searchTerm(options);
         },
 
         showAttributesParentsDialog: function () {

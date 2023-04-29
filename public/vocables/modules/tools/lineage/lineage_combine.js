@@ -1,4 +1,4 @@
-import SourceBrowser from "../sourceBrowser.js";
+
 import Lineage_classes from "./lineage_classes.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 import common from "../../shared/common.js";
@@ -14,7 +14,7 @@ var Lineage_combine = (function () {
     var self = {};
     self.currentSources = [];
     self.showSourcesDialog = function () {
-        SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], null, Lineage_combine.addSelectedSourcesToGraph);
+        SourceSelectorWidget.showDialog(["OWL", "SKOS"], null, Lineage_combine.addSelectedSourcesToGraph);
     };
 
     self.init = function () {
@@ -45,7 +45,7 @@ var Lineage_combine = (function () {
 
                     callbackEach();
 
-                    //  SourceBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineageNodesJsTreeDiv" });
+                    //  SearchWidget.showTopConcepts(sourceLabel, { targetDiv: "LineageNodesJsTreeDiv" });
                 });
             },
             function (err) {

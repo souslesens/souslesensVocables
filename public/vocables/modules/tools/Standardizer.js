@@ -1,4 +1,4 @@
-import SourceBrowser from "./sourceBrowser.js";
+
 import common from "../shared/common.js";
 import SearchUtil from "../search/searchUtil.js";
 import ElasticSearchProxy from "../search/elasticSearchProxy.js";
@@ -26,13 +26,13 @@ var Standardizer = (function () {
     };
 
     self.searchInSourcesTree = function (event) {
-        SourceBrowser.searchInSourcesTree(event, "Standardizer_sourcesTree");
+       SearchWidget.searchInSourcesTree(event, "Standardizer_sourcesTree");
     };
 
     self.onLoaded = function (callback) {
         $("#actionDiv").html("");
         $("#graphDiv").html("");
-        SourceBrowser.searchableSourcesTreeIsInitialized = false;
+        SearchWidget.searchableSourcesTreeIsInitialized = false;
         $("#graphDiv").load("snippets/standardizer/standardizer_central.html", function () {
             $("#standardizerCentral_tabs").tabs({});
             $("#standardizerRightPanel").load("snippets/standardizer/standardizer_right.html", function () {
@@ -326,11 +326,11 @@ setTimeout(function () {
                 targetDiv: "Standardizer_filterClassesTree",
                 selectTreeNodeFn: function (evt, obj) {
                     var node = obj.node;
-                    SourceBrowser.openTreeNode("Standardizer_filterClassesTree", self.currentSource, node);
+                    SearchWidget.openTreeNode("Standardizer_filterClassesTree", self.currentSource, node);
                 },
                 selectGraph: true,
             };
-            SourceBrowser.showThesaurusTopConcepts(self.currentSource, options);
+            SearchWidget.showTopConcepts(self.currentSource, options);
         }
     };
     self.compare = function () {
@@ -562,7 +562,7 @@ setTimeout(function () {
             "onkeyup=\"if (event.keyCode == 13 || event.keyCode == 9)Standardizer.searchFuzzyMatches($(this).val(),null,'Standardizer_searchResulDiv2')\">" +
             "<br><input type='checkbox'  id='Standardizer_fuzzySearchAllsourcesCBX'>All sources" +
             "<button onclick='Standardizer.clearFuzzyMatch()'>Clear fuzzyMatch</button>";
-        //"<button onclick='SourceBrowser.showSearchableSourcesTreeDialog()'> filter Sources</button>"
+        //"<button onclick='SourceSelectorWidget.showDialog()'> filter Sources</button>"
         html += '<div id="Standardizer_searchResulDiv2" style="height: 600px; overflow: auto"></div>';
         $("#Standardizer_fuzzySearchDivDiv").html(html);
         setTimeout(function () {

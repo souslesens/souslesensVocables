@@ -1,4 +1,4 @@
-import SourceBrowser from "./sourceBrowser.js";
+
 import common from "../shared/common.js";
 import Lineage_upperOntologies from "./lineage/lineage_upperOntologies.js";
 import SearchUtil from "../search/searchUtil.js";
@@ -137,9 +137,10 @@ var KGcreator = (function () {
 
         var options = {
             includeSourcesWithoutSearchIndex: true,
-            sourcesSelectionDialogdiv: "mainDialogDiv",
+            targetDiv: "mainDialogDiv",
+            openTargetDialogDiv:true
         };
-        SourceBrowser.showSearchableSourcesTreeDialog(["OWL"], options, function () {
+        SourceSelectorWidget.showDialog(["OWL"], options, function () {
             $("#mainDialogDiv").dialog("close");
             var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
             self.initSource(source, callback);

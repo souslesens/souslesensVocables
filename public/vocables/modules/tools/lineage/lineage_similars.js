@@ -1,4 +1,4 @@
-import SourceBrowser from "../sourceBrowser.js";
+
 
 var Lineage_similars = (function () {
     var self = {};
@@ -17,12 +17,14 @@ var Lineage_similars = (function () {
     };
 
     self.showSourcesTree = function () {
-        SourceBrowser.showSearchableSourcesTreeDialog(
+        SourceSelectorWidget.showDialog(
             ["OWL", "SKOS"],
             {
                 includeSourcesWithoutSearchIndex: false,
                 withCheckboxes: true,
-                sourcesSelectionDialogdiv: "lineageSimilars_sourcesTreeDiv",
+
+                targetDiv: "lineageSimilars_sourcesTreeDiv",
+                openTargetDialogDiv:true,
                 // dontTie_selection: false,
                 onOpenNodeFn: function () {},
             },

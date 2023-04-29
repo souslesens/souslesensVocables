@@ -894,6 +894,21 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
     });
   };
 
+  self.onNodeDetailsLangChange = function (property, lang) {
+    try {
+      $(".detailsLangDiv_" + property).css("display", "none");
+      if (!lang) {
+        lang = $("#detailsLangSelect_" + property).val();
+      }
+      if ($("#detailsLangDiv_" + property + "_" + lang).html()) {
+        $("#detailsLangDiv_" + property + "_" + lang).css("display", "block");
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log(err);
+    }
+  };
+
   return self;
 
 })()

@@ -609,7 +609,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     return;
                 },
             };
-            SourceBrowser.searchAllSourcesTerm(options);
+            SearchWidget.searchTerm(options);
         },
 
         showAttributesParentsDialog: function () {

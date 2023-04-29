@@ -1,6 +1,5 @@
 import OntologyModels from "../../shared/ontologyModels.js";
 import Lineage_classes from "./lineage_classes.js";
-import SourceBrowser from "../sourceBrowser.js";
 import Lineage_decoration from "./lineage_decoration.js";
 import common from "../../shared/common.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
@@ -67,11 +66,13 @@ var Lineage_sources = (function () {
             return self.loadSources(Config.tools["lineage"].urlParam_source);
         }
 
-        SourceBrowser.showSearchableSourcesTreeDialog(
+        SourceSelectorWidget.showDialog(
             ["OWL", "SKOS"],
             {
                 includeSourcesWithoutSearchIndex: true,
                 withCheckboxes: true,
+                targetDiv:null,
+                openTargetDialogDiv:true,
                 // dontTie_selection: false,
                 onOpenNodeFn: function () {
                     $("#Lineage_classes_SearchSourceInput").blur();

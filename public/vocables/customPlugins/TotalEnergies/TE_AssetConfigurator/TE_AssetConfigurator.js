@@ -138,12 +138,12 @@ var TE_AssetConfigurator = (function () {
             selectTreeNodeFn: function (evt, obj) {
                 var node = obj.node;
                 self.currentTreeNode = node;
-                SourceBrowser.openTreeNode("TE_AssetConfigurator_81346TreeDiv", self.currentSource, node);
+                SearchWidget.openTreeNode("TE_AssetConfigurator_81346TreeDiv", self.currentSource, node);
             },
 
             contextMenu: TE_AssetConfigurator.getSystemsTreeContextMenu(),
         };
-        SourceBrowser.showThesaurusTopConcepts(self.currentSource, options);
+        SearchWidget.showTopConcepts(self.currentSource, options);
     };
 
     self.getSystemsTreeContextMenu = function () {
@@ -213,7 +213,7 @@ var TE_AssetConfigurator = (function () {
                     optionalData: { systemType: node.data.systemType },
                     reopen: true,
                 };
-                SourceBrowser.openTreeNode("TE_AssetConfigurator_81346TreeDiv", self.currentSource, node, options);
+                SearchWidget.openTreeNode("TE_AssetConfigurator_81346TreeDiv", self.currentSource, node, options);
                 self.setTreeSystemNodesInfos(obj.node.id);
             },
             contextMenu: TE_AssetConfigurator.getSystemsTreeContextMenu(),

@@ -188,8 +188,8 @@ var Export = (function () {
     };
 
     self.exportTreeToDataTable = function (jstreeDiv, nodeId) {
-        if (!jstreeDiv) jstreeDiv = SourceBrowser.currentTargetDiv;
-        if (!nodeId) nodeId = SourceBrowser.currentTreeNode ? SourceBrowser.currentTreeNode.id : "#";
+        if (!jstreeDiv) jstreeDiv = SearchWidget.currentTargetDiv;
+        if (!nodeId) nodeId = SearchWidget.currentTreeNode ? SearchWidget.currentTreeNode.id : "#";
         if (!nodeId) nodeId = "#";
         //  var data = JstreeWidget.toTableData(jstreeDiv,nodeId)
 

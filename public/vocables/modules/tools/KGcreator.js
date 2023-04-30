@@ -118,18 +118,15 @@ var KGcreator = (function () {
     };
 
     self.showSourcesDialog = function (callback) {
-
-
-        var options={
-            withCheckboxes:false
-        }
-        var selectTreeNodeFn=function () {
+        var options = {
+            withCheckboxes: false,
+        };
+        var selectTreeNodeFn = function () {
             $("#mainDialogDiv").dialog("close");
-            var source =SourceSelectorWidget.getSelectedSource()[0];
+            var source = SourceSelectorWidget.getSelectedSource()[0];
             self.initSource(source, callback);
         };
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
-
     };
 
     self.initSource = function (source, callback) {

@@ -6,6 +6,7 @@ import Clipboard from "./clipboard.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_SKOS from "../sparqlProxies/sparql_SKOS.js";
+import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -279,8 +280,6 @@ return;*/
             }
         },
 
-
-
         showSources: function (treeDiv, withCBX, sources, types, options, callback) {
             if (!options) {
                 options = {};
@@ -524,7 +523,12 @@ return;*/
                 MainController.currentSource = null;
                 MainController.UI.onSourceSelect();
             } else {
-                MainController.UI.showSources("sourcesTreeDiv", toolObj.multiSources);
+                var options = {
+                    withCheckboxes: toolObj.multiSources,
+                };
+                SourceSelectorWidget.initWidget(null, "sourcesTreeDiv", false, null, null, options);
+
+                // MainController.UI.showSources("sourcesTreeDiv", toolObj.multiSources);
                 if (Config.tools[self.currentTool].multiSources) {
                     self.writeUserLog(authentication.currentUser, self.currentTool, "multiSources");
                     if (controller.onSourceSelect) {

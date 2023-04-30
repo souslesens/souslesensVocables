@@ -4,11 +4,11 @@ import ElasticSearchProxy from "../search/elasticSearchProxy.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Lineage_dictionary from "./lineage/lineage_dictionary.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
-import Sunburst from "../shared/sunburst.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 import Lineage_classes from "./lineage/lineage_classes.js";
 import Export from "../shared/export.js";
 import Lineage_blend from "./lineage/lineage_blend.js";
+import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 
 var Standardizer = (function () {
     var self = {};
@@ -56,14 +56,16 @@ var Standardizer = (function () {
 
         SearchUtil.initSourcesIndexesList(null, function (err, sources) {
             if (err) return MainController.UI.message(err);
-
+            sources.sort();
             var options = {
                 contextMenu: Standardizer.getSourcesJstreeContextMenu(),
                 selectTreeNodeFn: Standardizer.onselectSourcesTreeNodeFn,
-                tie_selection: false,
+                withCheckboxes: true,
             };
-            MainController.UI.showSources("Standardizer_sourcesTree", true, sources, ["OWL", "KNOWLEDGE_GRAPH", "SKOS"], options);
-            sources.sort();
+
+            SourceSelectorWidget.initWidget(["OWL", "KNOWLEDGE_GRAPH", "SKOS"], "Standardizer_sourcesTree", false, Standardizer.onselectSourcesTreeNodeFn, null, options);
+
+            // MainController.UI.showSources("Standardizer_sourcesTree", true, sources, ["OWL", "KNOWLEDGE_GRAPH", "SKOS"], options);
 
             var candidateEntities = sources;
             candidateEntities.splice(0, 0, "all");
@@ -137,7 +139,8 @@ setTimeout(function () {
     };
 
     self.getSelectedIndexes = function (excludeCurrentSource) {
-        var sources = $("#Standardizer_sourcesTree").jstree(true).get_checked();
+        var sources = SourceSelectorWidget.getCheckedSources();
+        // var sources = $("#Standardizer_sourcesTree").jstree(true).get_checked();
         var indexes = [];
         //  var sourceIndex = $("#Standardizer_sourcesSelect").val();
         var sourceIndex = self.currentSource;

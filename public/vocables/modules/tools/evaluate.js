@@ -4,6 +4,7 @@ import visjsGraph from "../graph/visjsGraph2.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import Lineage_classes from "./lineage/lineage_classes.js";
 import Clipboard from "../shared/clipboard.js";
+import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget";
 
 var Evaluate = (function () {
     var self = {};
@@ -63,15 +64,22 @@ var Evaluate = (function () {
                 // Pass
             },
         };
-        setTimeout(function () {
-            MainController.UI.showSources("annotate_resourcesTreeDiv", true, null, null, options, function () {
+        //  setTimeout(function () {
+        var options = {
+            withCheckboxes: true,
+            openAll: true,
+        };
+        SourceSelectorWidget.initWidget(null, "annotate_resourcesTreeDiv", false, null, null, options);
+
+        /* MainController.UI.showSources("annotate_resourcesTreeDiv", true, null, null, options, function () {
                 $("#annotate_resourcesTreeDiv").jstree(true).open_all();
             });
-        }, 200);
+        }, 200);*/
     };
 
     self.execAnnotate = function () {
-        var sourceNodes = $("#annotate_resourcesTreeDiv").jstree(true).get_checked();
+        //  var sourceNodes = $("#annotate_resourcesTreeDiv").jstree(true).get_checked();
+        var sourceNodes = SourceSelectorWidget.getCheckedSources();
         var sources = {};
         sourceNodes.forEach(function (sourceLabel) {
             if (!Config.sources[sourceLabel].color) Config.sources[sourceLabel].color = common.palette[Object.keys(sourceLabel).length];

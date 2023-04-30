@@ -117,7 +117,7 @@ var JstreeWidget = (function () {
                 dnd: options.dnd,
                 search: options.searchPlugin,
                 checkbox: {
-                    tie_selection: options.tie_selection,
+                    tie_selection: options.tie_selection === true,
                     whole_node: false,
                 },
                 types: JstreeWidget.types,

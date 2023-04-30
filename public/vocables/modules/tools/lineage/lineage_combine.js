@@ -67,64 +67,6 @@ var Lineage_combine = (function () {
         $("#graphPopupDiv").html(html);
     };
 
-    self.getSimilars = function (output) {
-        var commonNodes = [];
-        var existingNodes = visjsGraph.getExistingIdsMap();
-        var nodes = visjsGraph.data.nodes.get();
-        nodes.forEach(function (node1) {
-            if (!node1.data && !node1.data.label) return;
-            nodes.forEach(function (node2) {
-                if (!node2.data && !node2.data.label) return;
-                if (node1.data.id == node2.data.id && node1.data.source == node2.data.source) return;
-                if (node1.data.label.toLowerCase().replace(/ /g, "") == node2.data.label.toLowerCase().replace(/ /g, "")) {
-                    commonNodes.push({ fromNode: node1, toNode: node2 });
-                }
-                if (node1.label == node2.label) {
-                    commonNodes.push({ fromNode: node1, toNode: node2 });
-                }
-            });
-        });
-
-        if (output == "graph") {
-            var visjsData = { nodes: [], edges: [] };
-            commonNodes.forEach(function (item) {
-                var edgeId = item.fromNode.id + "_" + item.toNode.id;
-                var inverseEdgeId = item.toNode.id + "_" + item.fromNode.id;
-                if (!existingNodes[edgeId] && !existingNodes[inverseEdgeId]) {
-                    existingNodes[edgeId] = 1;
-
-                    visjsData.edges.push({
-                        id: edgeId,
-                        from: item.fromNode.id,
-                        to: item.toNode.id,
-                        data: {
-                            source: Lineage_sources.activeSource,
-                            label: "sameLabel",
-                        },
-                        arrows: {
-                            to: {
-                                enabled: true,
-                                type: "solid",
-                                scaleFactor: 0.5,
-                            },
-
-                            from: {
-                                enabled: true,
-                                type: "solid",
-                                scaleFactor: 0.5,
-                            },
-                        },
-
-                        dashes: true,
-                        color: "green",
-                        width: 2,
-                    });
-                }
-            });
-            visjsGraph.data.edges.update(visjsData.edges);
-        }
-    };
-
     self.showMergeNodesDialog = function (fromNode, toNode) {
         if (fromNode) {
             Lineage_selection.clearNodesSelection();

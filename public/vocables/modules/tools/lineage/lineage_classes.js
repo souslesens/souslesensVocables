@@ -107,8 +107,6 @@ var Lineage_classes = (function () {
 
                 SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
 
-
-
                 $("#LineagePopup").dialog({
                     autoOpen: false,
                     height: 700,

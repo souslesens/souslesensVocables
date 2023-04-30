@@ -67,36 +67,33 @@ var Lineage_sources = (function () {
             return self.loadSources(Config.tools["lineage"].urlParam_source);
         }
 
-        var options={
+        var options = {
             includeSourcesWithoutSearchIndex: true,
             withCheckboxes: true,
-        }
-        var selectTreeNodeFn=function () {
+        };
+        var selectTreeNodeFn = function () {
             $("#mainDialogDiv").dialog("close");
-            var searchSource =SourceSelectorWidget.getSelectedSource()[0];
+            var checkedSource = SourceSelectorWidget.getCheckedSources();
 
-            if (!searchSource) {
+            if (checkedSource.length > 0) {
                 return;
             }
-            var source = SourceSelectorWidget.getCheckedSources()[0];
+            var source = SourceSelectorWidget.getSelectedSource()[0];
+
             self.setCurrentSource(source);
             $("#sourcesSelectionDialogdiv").dialog("close");
             $("#lineage_allActions").css("visibility", "visible");
             MainController.UI.showHideRightPanel();
         };
 
-        var validateButtonFn=function(){
-            var sources =SourceSelectorWidget.getCheckedSources();
+        var validateButtonFn = function () {
+            var sources = SourceSelectorWidget.getCheckedSources();
             self.loadSources(sources);
-        }
+        };
 
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, validateButtonFn, options);
 
-
-
-
-
-        return
+        return;
         SourceSelectorWidget.showDialog(
             ["OWL", "SKOS"],
             {
@@ -170,6 +167,10 @@ var Lineage_sources = (function () {
     self.setCurrentSource = function (source) {
         if (!source) {
             return;
+        }
+
+        if (!Config.sources[source]) {
+            return alert("source" + source + "not found");
         }
 
         if (true) {
@@ -382,7 +383,7 @@ var Lineage_sources = (function () {
 
     self.registerSource = function (sourceLabel, callback) {
         if (self.loadedSources[sourceLabel]) {
-            return;
+            return callback();
         }
 
         OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
@@ -703,7 +704,7 @@ sourceDivId +
         },
     };
 
-    self.initWhiteboardActions = function () {
+    /* self.initWhiteboardActions = function () {
         self.whiteboardActions = {
             "Clear all": Lineage_classes.clearLastAddedNodesAndEdges,
             "Show Last only": Lineage_classes.showLastAddedNodesOnly,
@@ -724,7 +725,7 @@ sourceDivId +
             fn();
         }
         $("#lineage_classes_whiteboardSelect").val("");
-    };
+    };*/
 
     self.isSourceEditableForUser = function (source) {
         if (!Config.sources[source]) {

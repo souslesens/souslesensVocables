@@ -143,6 +143,3 @@ var Sunburst = (function () {
     return self;
 })();
 
-export default Sunburst;
-
-window.Sunburst = Sunburst;

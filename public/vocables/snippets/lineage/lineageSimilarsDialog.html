@@ -1,27 +1,38 @@
 <div style="display: flex; align-content: stretch; flex-direction: row; align-items: center">
     <div style="display: flex; flex-direction: row">
-        <div class="lineageSimilars_div">
-            <select onchange="Lineage_similars.onChangeSelection($(this).val())">
-                <option></option>
-                <option value="whiteboard">Whiteboard nodes</option>
-                <option value="chooseSource">Select source</option>
-            </select>
+        <div>
+            Similars
+            <div class="lineageSimilars_div">
+                Of <br /><select id="lineageSimilars_fromSelect" size="3">
+                    <option value="All whiteboard nodes">All whiteboard nodes</option>
+                    <option value="Active source">Active source</option>
+                    <option value="Current sources">Current sources</option>
+                </select>
+            </div>
+
+            <div class="lineageSimilars_div">
+                In <br />
+                <select onchange="Lineage_similars.onChangeSelection($(this).val())" size="3">
+                    <option></option>
+                    <option value="whiteboard">Whiteboard nodes</option>
+                    <option value="chooseSource">Select source</option>
+                </select>
+            </div>
+            <div>
+                <div>
+                    output<br />
+                    <select size="3">
+                        <option>graph</option>
+                        <!--   <option>table</option>
+               <option>clipboard</option>-->
+                    </select>
+                </div>
+                <button onclick="Lineage_similars.drawSimilars()">Draw</button>
+            </div>
+        </div>
+
+        <div id="lineageSimilars_sourcesTreeContainer" style="width: 400px; height: 500px">
+            <div id="lineageSimilars_sourcesTreeDiv"></div>
         </div>
     </div>
-
-    <div id="lineageSimilars_sourcesTreeContainer" style="width: 400px; height: 500px">
-        <div id="lineageSimilars_sourcesTreeDiv"></div>
-    </div>
-    <div >
-      <div>  output
-        <select>
-            <option>graph</option>
-            <option>table</option>
-            <option>clipboard</option>
-        </select>
-      </div>
-        <button onclick="Lineage_similars.drawSimilars()"> Draw</button>
-    </div>
-
-
 </div>

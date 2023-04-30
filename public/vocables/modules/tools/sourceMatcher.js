@@ -544,7 +544,7 @@ var SourceMatcher = (function () {
         if (event && event.ctrlKey) {
             Clipboard.copy({ type: "node", source: node.data.source, id: node.id, label: node.label }, "_visjsNode", event);
         } else {
-           NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv");
+            NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv");
         }
     };
 

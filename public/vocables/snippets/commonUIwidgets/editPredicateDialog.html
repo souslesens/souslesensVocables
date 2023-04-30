@@ -25,11 +25,7 @@
             style="min-width: 100px; background-color: #ddd"
             onchange="PredicatesSelectorWidget.setCurrentVocabPropertiesSelect($(this).val(),'editPredicate_currentVocabPredicateSelect')"
         ></select>
-        <select
-            id="editPredicate_currentVocabPredicateSelect"
-            style="min-width: 200px; background-color: #ddd"
-            onchange="PredicatesSelectorWidget.onSelectPredicateProperty($(this).val())"
-        ></select>
+        <select id="editPredicate_currentVocabPredicateSelect" style="min-width: 200px; background-color: #ddd" onchange="PredicatesSelectorWidget.onSelectPredicateProperty($(this).val())"></select>
     </div>
     <input id="editPredicate_propertyValue" style="width: 95%" /><br />
     <div id="editPredicate_customPredicateContentDiv"></div>
@@ -41,7 +37,7 @@
         <b>Object</b> &nbsp;<button class="btn btn-sm my-1 py-0 btn-outline-primary" id="editPredicate_savePredicateButton">
             <b>Save</b>
         </button>
-     <!--   <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="PredicatesSelectorWidget.hideAddPredicateDiv()"><b>cancel</b></button>-->
+        <!--   <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="PredicatesSelectorWidget.hideAddPredicateDiv()"><b>cancel</b></button>-->
     </div>
     <div>
         <select

@@ -268,7 +268,7 @@ var Genealogy = (function () {
             else return "dot";
         },
         showDetails: function (_defaultLang) {
-           NodeInfosWidget.showNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode, "Genealogy_nodeInfosDialogDiv");
+            NodeInfosWidget.showNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode, "Genealogy_nodeInfosDialogDiv");
             /*   Sparql_generic.getNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, null, function (err, result) {
                    if (err) {
                        return MainController.UI.message(err);

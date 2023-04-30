@@ -1,4 +1,3 @@
-
 import Lineage_classes from "./lineage_classes.js";
 import Lineage_styles from "./lineage_styles.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
@@ -15,7 +14,7 @@ var Lineage_containers = (function () {
         items["NodeInfos"] = {
             label: "Node infos",
             action: function (_e) {
-               NodeInfosWidget.showNodeInfos(Lineage_sources.activeSource, self.currentContainer, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(Lineage_sources.activeSource, self.currentContainer, "mainDialogDiv");
             },
         };
         items["GraphNode"] = {

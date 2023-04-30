@@ -10,6 +10,7 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_3D from "./lineage_3d.js";
 import authentication from "../../shared/authentification.js";
 import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
+import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 
 var Lineage_sources = (function () {
     var self = {};
@@ -66,13 +67,43 @@ var Lineage_sources = (function () {
             return self.loadSources(Config.tools["lineage"].urlParam_source);
         }
 
+        var options={
+            includeSourcesWithoutSearchIndex: true,
+            withCheckboxes: true,
+        }
+        var selectTreeNodeFn=function () {
+            $("#mainDialogDiv").dialog("close");
+            var searchSource =SourceSelectorWidget.getSelectedSource()[0];
+
+            if (!searchSource) {
+                return;
+            }
+            var source = SourceSelectorWidget.getCheckedSources()[0];
+            self.setCurrentSource(source);
+            $("#sourcesSelectionDialogdiv").dialog("close");
+            $("#lineage_allActions").css("visibility", "visible");
+            MainController.UI.showHideRightPanel();
+        };
+
+        var validateButtonFn=function(){
+            var sources =SourceSelectorWidget.getCheckedSources();
+            self.loadSources(sources);
+        }
+
+        SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, validateButtonFn, options);
+
+
+
+
+
+        return
         SourceSelectorWidget.showDialog(
             ["OWL", "SKOS"],
             {
                 includeSourcesWithoutSearchIndex: true,
                 withCheckboxes: true,
-                targetDiv:null,
-                openTargetDialogDiv:true,
+                targetDiv: null,
+                openTargetDialogDiv: true,
                 // dontTie_selection: false,
                 onOpenNodeFn: function () {
                     $("#Lineage_classes_SearchSourceInput").blur();
@@ -864,7 +895,7 @@ target: Math.round(Math.random() * (id-1))
             })
 
             .onNodeClick(function (node, event) {
-               NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
+                NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
             })
             // .nodeAutoColorBy('group')
             .onNodeDragEnd((node) => {

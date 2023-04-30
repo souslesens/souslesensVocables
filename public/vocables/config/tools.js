@@ -8,8 +8,6 @@ self.tools["KGcreator"] = {
     toolDescriptionImg: null,
 };
 
-
-
 self.tools["Standardizer"] = {
     label: "Standardizer",
     multiSources: 0,

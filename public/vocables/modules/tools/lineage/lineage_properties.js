@@ -1,4 +1,3 @@
-
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
@@ -41,7 +40,7 @@ var Lineage_properties = (function () {
                 action: function (_e) {
                     // pb avec source
 
-                   NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv", { resetVisited: 1 }, function (_err, _result) {
+                    NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv", { resetVisited: 1 }, function (_err, _result) {
                         // pass
                     });
                 },
@@ -1023,7 +1022,7 @@ var Lineage_properties = (function () {
             self.drawGraph(node);
         },
         showNodeInfos: function () {
-           NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
+            NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
         },
     };
 

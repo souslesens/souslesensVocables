@@ -1,4 +1,3 @@
-
 import Lineage_classes from "./lineage_classes.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 import common from "../../shared/common.js";

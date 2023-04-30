@@ -416,7 +416,7 @@ var Lineage_query = (function () {
         items["NodeInfos"] = {
             label: "Node infos",
             action: function (_e) {
-               NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
             },
         };
         items.graphNode = {

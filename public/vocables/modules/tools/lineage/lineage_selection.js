@@ -1,5 +1,3 @@
-
-
 var Lineage_selection = (function () {
     var self = {};
     self.selectedNodes = [];
@@ -77,7 +75,7 @@ var Lineage_selection = (function () {
     self.onSelectedNodeTreeclick = function (event, obj) {
         var node = obj.node;
         if (node.parent == "#") return;
-       NodeInfosWidget.showNodeInfos(node.data.source, node, "lineage_selection_rightPanel");
+        NodeInfosWidget.showNodeInfos(node.data.source, node, "lineage_selection_rightPanel");
     };
 
     self.onSelectionExecuteAction = function (action) {

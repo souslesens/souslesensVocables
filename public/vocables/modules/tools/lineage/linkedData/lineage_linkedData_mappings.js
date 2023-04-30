@@ -7,7 +7,6 @@ import Sparql_generic from "../../../sparqlProxies/sparql_generic.js";
 import Sparql_proxy from "../../../sparqlProxies/sparql_proxy.js";
 import Sparql_OWL from "../../../sparqlProxies/sparql_OWL.js";
 
-
 //www.nstauthority.co.uk/data-centre/data-downloads-and-publications/well-data/
 
 var Lineage_linkedData_mappings = (function () {
@@ -965,7 +964,7 @@ self.graphTable(KGcreator.currentTreeNode);
         items.nodeInfos = {
             label: "Node infos",
             action: function (_e) {
-               NodeInfosWidget.showNodeInfos(self.mappingSourceLabel, self.currentMappingNode.id, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.mappingSourceLabel, self.currentMappingNode.id, "mainDialogDiv");
             },
         };
         items.deleteNode = {

@@ -1,4 +1,3 @@
-
 import common from "../shared/common.js";
 import SearchUtil from "../search/searchUtil.js";
 import ElasticSearchProxy from "../search/elasticSearchProxy.js";
@@ -26,7 +25,7 @@ var Standardizer = (function () {
     };
 
     self.searchInSourcesTree = function (event) {
-       SearchWidget.searchInSourcesTree(event, "Standardizer_sourcesTree");
+        SearchWidget.searchInSourcesTree(event, "Standardizer_sourcesTree");
     };
 
     self.onLoaded = function (callback) {
@@ -1581,7 +1580,8 @@ sortMethod: "hubsize",
             if ((node.data.type = "orphan") /* probably a problem with the single '=' here */) {
                 // orphans
                 $("#Standardizer_searchEntitiesInput").val(node.data.text);
-            } elseNodeInfosWidget.showNodeInfos(source, node, "mainDialogDiv");
+            }
+            elseNodeInfosWidget.showNodeInfos(source, node, "mainDialogDiv");
         },
     };
 

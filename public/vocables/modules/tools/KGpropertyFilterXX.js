@@ -248,7 +248,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             label: "Node infos",
             action: function (_e) {
                 // pb avec source
-               NodeInfosWidget.showNodeInfos(self.currentSource, self.currentClassOrPropertyNode, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.currentSource, self.currentClassOrPropertyNode, "mainDialogDiv");
             },
         };
         items.viewFilters = {

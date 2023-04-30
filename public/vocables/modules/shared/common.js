@@ -11,8 +11,6 @@
 var common = (function () {
     var self = {};
 
-
-
     self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField, selectedValue) {
         $("#" + selectId)
             .find("option")
@@ -778,10 +776,6 @@ if (callback) return callback(err);
         $("#" + inputId).datepicker({});
         $("#" + inputId).datepicker("option", "dateFormat", "yy-mm-dd");
     };
-
-
-
-
 
     return self;
 })();

@@ -76,8 +76,6 @@
             <script src="js/tools/lineage/lineage_styles.js"></script>
             <script src="js/tools/lineage/lineage_relationFilter.js"></script>
 
-
-
             <script src="js/tools/owlEditor.js"></script>
 
             <!-- <script src="js/tools/lineage/KGquery.js"></script>-->
@@ -356,7 +354,7 @@
                     Config.sources[hit.source].controller = eval(Config.sources[hit.source].controller);
                 }
                 var node = { data: { id: hit.id } };
-               NodeInfosWidget.showNodeInfos(hit.source, node, "Browse_nodeInfosDiv", { hideModifyButtons: true });
+                NodeInfosWidget.showNodeInfos(hit.source, node, "Browse_nodeInfosDiv", { hideModifyButtons: true });
 
                 $("#Browse_hitDetailsDiv").html(html);
             };

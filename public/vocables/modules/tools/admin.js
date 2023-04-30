@@ -7,6 +7,7 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Export from "../shared/export.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import SparqlQueryUI from "./sparqlQueryUI.js";
+import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Admin = (function () {
@@ -14,7 +15,12 @@ var Admin = (function () {
 
     self.onLoaded = function () {
         $("#toolPanelDiv").load("snippets/admin.html", function () {
-            MainController.UI.showSources("sourcesTreeDiv", true, null, null, {});
+           // MainController.UI.showSources("sourcesTreeDiv", true, null, null, {});
+           var options={
+                withCheckboxes:true
+            }
+            SourceSelectorWidget.initWidget(null, "sourcesTreeDiv", false, null, null, options);
+
         });
         /*   var html =
             " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showTSFdictionary()'>TSF Dictionary</button>" +
@@ -37,7 +43,7 @@ var Admin = (function () {
         Lineage_dictionary.showTSFdictionaryDialog("Lineage_dictionary");
     };
     self.refreshIndexes = function () {
-        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        var sources =SourceSelectorWidget.getCheckedSources();
         if (!sources || sources.length == 0) return alert(" no source selected");
         if (!confirm("refresh selected indexes")) return;
 
@@ -60,8 +66,8 @@ var Admin = (function () {
     };
 
     self.exportNT = function () {
-        //   var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
-        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        //   var sources =SourceSelectorWidget.getCheckedSources();
+        var sources =SourceSelectorWidget.getCheckedSources();
         if (sources.length != 1) return alert("select a single source");
 
         $("#waitImg").css("display", "block");
@@ -81,8 +87,8 @@ var Admin = (function () {
         });
     };
     self.exportTTL = function () {
-        //   var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
-        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        //   var sources =SourceSelectorWidget.getCheckedSources();
+        var sources =SourceSelectorWidget.getCheckedSources();
         if (sources.length != 1) return alert("select a single source");
 
         $("#waitImg").css("display", "block");
@@ -90,8 +96,8 @@ var Admin = (function () {
         Sparql_proxy.exportGraph(sources[0]);
     };
     self.getClassesLineage = function () {
-        //   var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
-        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        //   var sources =SourceSelectorWidget.getCheckedSources();
+        var sources =SourceSelectorWidget.getCheckedSources();
         if (sources.length != 1) return alert("select a single source");
 
         Sparql_generic.getSourceTaxonomy(sources[0], null, function (_err, _result) {
@@ -148,7 +154,7 @@ var Admin = (function () {
     };
 
     self.generateInverseRestrictionsDialog = function () {
-        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        var sources =SourceSelectorWidget.getCheckedSources();
         if (sources.length != 1) return alert("select a single source");
         var html = "<table>";
         html += "<tr><td>propId</td><td><input id='admin_propId' style='width:400px'></td></tr>";
@@ -161,7 +167,7 @@ var Admin = (function () {
     };
 
     self.generateInverseRestrictions = function () {
-        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        var sources =SourceSelectorWidget.getCheckedSources();
         if (sources.length != 1) return alert("select a single source");
         var source = sources[0];
         var propId = $("#admin_propId").val();
@@ -175,7 +181,7 @@ var Admin = (function () {
     };
 
     self.exportTaxonomyToCsv = function (_rootUri) {
-        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        var sources =SourceSelectorWidget.getCheckedSources();
         if (sources.length != 1) return alert("select a single source");
 
         var sourceLabel = sources[0];
@@ -230,7 +236,7 @@ var Admin = (function () {
     };
 
     self.createDecapitalizedLabelTriples = function () {
-        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        var sources =SourceSelectorWidget.getCheckedSources();
         if (sources.length != 1) return alert("select a single source");
 
         var sourceLabel = sources[0];
@@ -243,14 +249,14 @@ var Admin = (function () {
     };
 
     self.drawPropsRangeAndDomainMatrix = function () {
-        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        var sources =SourceSelectorWidget.getCheckedSources();
         if (sources.length != 1) return alert("select a single source");
         var sourceLabel = sources[0];
         Lineage_properties.drawPropsRangeAndDomainMatrix(sourceLabel);
     };
 
     self.copyGraphToEndPoint = function () {
-        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        var sources =SourceSelectorWidget.getCheckedSources();
         if (sources.length != 1) return alert("select a single source");
         var source = sources[0];
 
@@ -286,7 +292,7 @@ var Admin = (function () {
     };
 
     self.sparqlQuery = function () {
-        var sources = $("#sourcesTreeDiv").jstree(true).get_checked();
+        var sources =SourceSelectorWidget.getCheckedSources();
         if (sources.length == 0) return alert("select at least one  source");
         SparqlQueryUI.init(sources);
     };

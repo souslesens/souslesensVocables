@@ -107,15 +107,7 @@ var Lineage_classes = (function () {
 
                 SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
 
-                /*    var sourceLabels = [];
 
-MainController.UI.showSources("sourcesTreeDiv", false);
-
-for (var key in Config.sources) {
-if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[key].schemaType) > -1) sourceLabels.push(key);
-}
-sourceLabels.sort();
-//  common.fillSelectOptions("Lineage_toSource", sourceLabels, true)*/
 
                 $("#LineagePopup").dialog({
                     autoOpen: false,
@@ -2703,13 +2695,13 @@ addNode:false
 
         showNodeInfos: function () {
             if (self.currentGraphNode) {
-               NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
             } else if (self.currentGraphEdge) {
-               NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv");
             }
         },
         showPropertyInfos: function (hideModifyButtons) {
-           NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv", { hideModifyButtons: hideModifyButtons });
+            NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv", { hideModifyButtons: hideModifyButtons });
         },
 
         expandIndividual: function () {
@@ -2883,8 +2875,6 @@ addNode:false
             //Lineage_classes.drawNamedLinkedData([self.currentGraphNode.id]);
         },
 
-       
-
         hideShowOthers: function () {
             var node0 = self.currentGraphNode.id;
             var nodes = visjsGraph.data.nodes.getIds();
@@ -2977,7 +2967,7 @@ attrs.color=self.getSourceColor(superClassValue)
         var wikiUrl = Config.wiki.url + "Source " + sourceLabel;
         window.open(wikiUrl, "_slsvWiki");
     };
-    
+
     self.showEdgesLegend = function () {
         var edges = visjsGraph.data.edges.get();
         var newEdges = [];
@@ -3014,19 +3004,17 @@ attrs.color=self.getSourceColor(superClassValue)
 
         self.currentCopiedNode = node;
         Clipboard.copy(
-          {
-              type: "node",
-              id: node.data.id,
-              label: node.data.label,
-              source: node.data.source,
-              data: node.data,
-          },
-          self.currentTreeNode.id + "_anchor",
-          event
+            {
+                type: "node",
+                id: node.data.id,
+                label: node.data.label,
+                source: node.data.source,
+                data: node.data,
+            },
+            self.currentTreeNode.id + "_anchor",
+            event
         );
     };
-
-
 
     return self;
 })();

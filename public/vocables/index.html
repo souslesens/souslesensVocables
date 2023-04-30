@@ -30,8 +30,7 @@
         <script type="module" src="modules/shared/treeController.js"></script>
         <script type="module" src="modules/shared/clipboard.js"></script>
 
-       <!-- <script type="module" src="modules/tools/sourceBrowser.js"></script>-->
-
+        <!-- <script type="module" src="modules/tools/sourceBrowser.js"></script>-->
 
         <script type="module" src="modules/tools/SPARQL_endpoint.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_classes.js"></script>
@@ -58,16 +57,12 @@
 
         <script type="module" src="modules/shared/ontologyModels.js"></script>
 
-
-
         <script type="module" src="modules/uiWidgets/predicatesSelectorWidget.js"></script>
         <script type="module" src="modules/uiWidgets/promptedSelectWidget.js"></script>
         <script type="module" src="modules/uiWidgets/sourceSelectorWidget.js"></script>
         <script type="module" src="modules/uiWidgets/jstreeWidget.js"></script>
         <script type="module" src="modules/uiWidgets/nodeInfosWidget.js"></script>
         <script type="module" src="modules/uiWidgets/searchWidget.js"></script>
-
-
 
         <script type="module" src="modules/tools/owlEditor.js"></script>
 
@@ -227,7 +222,7 @@
                         if (target == "_slsvCallback") {
                             var id = $(this).attr("href");
                             event.preventDefault();
-                           NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
+                            NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
                         }
                     });
 

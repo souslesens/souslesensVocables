@@ -1,56 +1,47 @@
+import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 
+var Lineage_similars = (function() {
+  var self = {};
 
-var Lineage_similars = (function () {
-    var self = {};
+  self.showDialog = function() {
+    $("#mainDialogDiv").dialog("open");
+    $("#mainDialogDiv").load("snippets/lineage/lineageSimilarsDialog.html");
+  };
 
-    self.showDialog = function () {
-        $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").load("snippets/lineage/lineageSimilarsDialog.html");
+  self.onChangeSelection = function(value) {
+    if (value == "chooseSource") {
+      self.showSourcesTree();
+    }
+    else {
+      $("#lineageSimilars_sourcesTreeDiv").html("");
+    }
+  };
+
+  self.showSourcesTree = function() {
+    var options = {
+      withCheckboxes:false
     };
 
-    self.onChangeSelection = function (value) {
-        if (value == "chooseSource") {
-            self.showSourcesTree();
-        } else {
-            $("#lineageSimilars_sourcesTreeDiv").html("");
-        }
-    };
+    SourceSelectorWidget.initWidget(["OWL"], "lineageSimilars_sourcesTreeDiv", false, Lineage_similars.onSourceSelected, Lineage_similars.onValidateSources, options);
 
-    self.showSourcesTree = function () {
-        SourceSelectorWidget.showDialog(
-            ["OWL", "SKOS"],
-            {
-                includeSourcesWithoutSearchIndex: false,
-                withCheckboxes: true,
 
-                targetDiv: "lineageSimilars_sourcesTreeDiv",
-                openTargetDialogDiv:true,
-                // dontTie_selection: false,
-                onOpenNodeFn: function () {},
-            },
+  };
 
-            function () {
-                var searchSource = $("#Lineage_classes_SearchSourceInput").val();
-                if (!searchSource) {
-                    return;
-                }
-                var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
-            },
-            function () {
-                //if checkbox
 
-                var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
+  self.onSourceSelected = function(evt,obj) {
+    var source=obj.node
 
-                self.loadSources(sources);
-            }
-        );
-    };
+    self.drawSimilars(source)
+  };
+  self.onValidateSources =function(){
+  };
 
-    self.drawSimilars = function () {
-        //Lineage_combine.getSimilars('graph')
-    };
 
-    return self;
+  self.drawSimilars = function() {
+    //Lineage_combine.getSimilars('graph')
+  };
+
+  return self;
 })();
 
 export default Lineage_similars;

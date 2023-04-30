@@ -19,7 +19,7 @@ var Lineage_blend = (function () {
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
                 $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
                     $("#LineageBlend_commonPredicateObjectDiv").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
-                       PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
+                        PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
                             $("#editPredicate_propertyDiv").css("display", "none");
                         });
                     });
@@ -541,7 +541,7 @@ source: specificSourceLabel
                                     label: "Node infos",
                                     action: function (_e) {
                                         // pb avec source
-                                       NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv");
+                                        NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv");
                                     },
                                 },
                             };
@@ -595,10 +595,10 @@ source: specificSourceLabel
 
             if (type == "NamedIndividual") {
                 $("#LineageBlend_creatingNodeParentTypeSpan").html("rdf:type");
-               PredicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_curentSourceAndImports");
+                PredicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_curentSourceAndImports");
             } else {
                 $("#LineageBlend_creatingNodeParentTypeSpan").html("owl:subClassOf");
-               PredicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_all");
+                PredicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_all");
             }
 
             $("#LineageBlend_creatingNodeClassDiv").css("display", "block");

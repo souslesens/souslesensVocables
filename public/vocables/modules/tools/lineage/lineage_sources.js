@@ -603,7 +603,7 @@ sourceDivId +
             if (source) {
                 self.activeSource = source;
             }
-            if (visjsGraph.isGraphNotEmpty) {
+            if (visjsGraph.isGraphNotEmpty()) {
                 var nodes = visjsGraph.data.nodes.get();
                 var nodesToRemove = [];
                 nodes.forEach(function (node) {
@@ -681,6 +681,22 @@ sourceDivId +
             visjsGraph.data.nodes.remove(source);
         },
         exportOWL: function (source) {
+
+            Sparql_OWL.generateOWL(source, {}, function (err, result) {
+                if (err) {
+                    return console.log(err);
+                }
+
+                common.copyTextToClipboard(result);
+            })
+
+            return
+
+
+
+
+
+
             var payload = {
                 graphUri: Config.sources[source].graphUri,
             };
@@ -697,7 +713,7 @@ sourceDivId +
                 },
             });
 
-            /*     Sparql_OWL.generateOWL(source, {}, function (err, result) {
+         /*  Sparql_OWL.generateOWL(source, {}, function (err, result) {
                 if (err) {
                     return console.log(err);
                 }

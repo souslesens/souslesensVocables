@@ -7,10 +7,23 @@ const jsonFileStorage = require("./jsonFileStorage");
 const request = require("request");
 const Util = require("./util.");
 const fs = require("fs");
+const { processResponse } = require("../api/v1/paths/utils");
+const ConfigManager = require("./configManager.");
 var exec = require("child_process").exec;
 
 var GraphStore = {
+
+
+
+
+
+
+
+
     exportGraph: function (sparqlServerConnection, graphUri, callback) {
+
+
+
         //curl --verbose --url "http://example.com/sparql-graph-crud?graph-uri=urn:graph:update:test:get"
 
         var url = sparqlServerConnection.url + "-graph-crud?";

@@ -8,7 +8,7 @@
         <div style="display: flex; flex-direction: row">
             <div>
                 Operation type
-                <select id="lineage_reasoner_operationSelect">
+                <select id="lineage_reasoner_operationSelect" onchange="Lineage_reasoner.runOperation($(this).val())">
                     <option></option>
                     <option>Consistency</option>
                     <option>Unsatisfiable</option>
@@ -17,18 +17,19 @@
             </div>
         </div>
 
-        <button onclick="Lineage_reasoner.runOperation()">Run</button>
 
-        <div id="lineage_reasoner_infosDiv"></div>
 
-        <div id="lineage_reasoner_outputDiv">
-            choose Output
+        <div id="lineage_reasoner_infosDiv" style="width: 280px;height: 350px; overflow: auto"></div>
+
+        <div id="lineage_reasoner_outputDiv" >
+            Output
             <select id="lineage_reasoner_outputSelect" onchange="Lineage_reasoner.displayResult($(this).val())">
-                <option></option>
                 <option>Graph</option>
                 <option>Table</option>
                 <option>Export</option>
             </select>
+           Color <select id="lineage_reasoner_colorSelect"></select>
+            <button onclick="Lineage_reasoner.displayResult()">Display</button>
         </div>
     </body>
 </html>

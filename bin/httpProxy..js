@@ -24,7 +24,12 @@ var httpProxy = {
                     "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.106 Safari/537.36"}*/
         }
 
+
+
+
         var request = superagent.get(url);
+
+
         if (proxy) {
             request.proxy(proxy);
             console.log(" GET-----------USING  proxy---------" + proxy);
@@ -70,6 +75,9 @@ var httpProxy = {
             url: url,
         };
 
+        if(params.GET)
+            options.method="GET"
+
         if (params.auth) options.auth = params.auth;
 
         if (headers) {
@@ -99,7 +107,7 @@ var httpProxy = {
                 return callback(error);
             }
 
-            if (headers && headers["Accept"].indexOf("json") < 0) return callback(null, body);
+            if (headers && headers["Accept"] &&  headers["Accept"].indexOf("json") < 0) return callback(null, body);
             if (typeof body === "string") {
                 body = body.trim();
                 var p = body.toLowerCase().indexOf("bindings");

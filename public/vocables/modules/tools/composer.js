@@ -505,7 +505,7 @@ var Composer = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    $("#GenericTools_searchAllSourcesTermInput").bind("keyup", null, Composer.searchInPropertiesTree);
+                    $("#searchWidget_searchTermInput").bind("keyup", null, Composer.searchInPropertiesTree);
 
                     return callbackSeries();
                 },
@@ -781,7 +781,7 @@ var Composer = (function () {
             }
 
             var term = self.currentDataContainer.data.label;
-            $("#GenericTools_searchAllSourcesTermInput").val(term);
+            $("#searchWidget_searchTermInput").val(term);
             $("#Compose_rightPanelTabs").tabs("option", "active", 4);
             Composer.rightPanelsActions.searchBusinessObjects();
         },

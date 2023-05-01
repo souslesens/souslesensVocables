@@ -11,6 +11,51 @@ import Export from "../shared/export.js";
 var SearchWidget = (function () {
     var self = {};
 
+
+    self.searchTermXXX = function (sourceLabel, term, rootId, callback) {
+        if (!term) {
+            term = $("#searchWidget_searchTermInput").val();
+        }
+
+        var exactMatch = $("#GenericTools_exactMatchSearchCBX").prop("checked");
+        if (!term || term == "") {
+            return alert(" enter a word ");
+        }
+        if (term.indexOf("*") > -1) {
+            $("#GenericTools_exactMatchSearchCBX").removeProp("checked");
+        }
+        if (!term || term == "") {
+            return;
+        }
+        var options = {
+            term: term,
+            rootId: rootId,
+            exactMatch: exactMatch,
+            limit: Config.searchLimit,
+        };
+        self.getFilteredNodesJstreeData(sourceLabel, options, function (err, jstreeData) {
+            if (callback) {
+                return err, jstreeData;
+            }
+            MainController.UI.message("");
+            if (jstreeData.length == 0) {
+                $("#waitImg").css("display", "none");
+                return $("#" + self.currentTargetDiv).html("No data found");
+            }
+            common.jstree.loadJsTree(self.currentTargetDiv, jstreeData, {
+                openAll: true,
+                selectTreeNodeFn: function (event, obj) {
+                    if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) {
+                        return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
+                    }
+                    self.editThesaurusConceptInfos(MainController.currentSource);
+                },
+                contextMenu: self.getJstreeConceptsContextMenu(),
+            });
+        });
+    };
+
+
     /**
      *
      * show in jstree hierarchy of terms found in elestic search  from research UI or options if any
@@ -39,7 +84,7 @@ var SearchWidget = (function () {
         if (options.term) {
             term = options.term;
         } else {
-            term = $("#GenericTools_searchAllSourcesTermInput").val();
+            term = $("#searchWidget_searchTermInput").val();
         }
         if (!term) {
             if (!classFilter) {
@@ -565,7 +610,7 @@ return*/
 
             TreeController.drawOrUpdateTree(self.currentTargetDiv, result, "#", "topConcept", jsTreeOptions);
 
-            $("#GenericTools_searchAllSourcesTermInput").val("");
+            $("#searchWidget_searchTermInput").val("");
             /* Collection.Sparql.getCollections(sourceLabel, options, function (err, result) {
 
 })*/
@@ -681,7 +726,7 @@ return*/
         if (options.depth) {
             descendantsDepth = options.depth;
         }
-        options.filterCollections = Collection.currentCollectionFilter;
+       // options.filterCollections = Collection.currentCollectionFilter;
         Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, descendantsDepth, options, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);

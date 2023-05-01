@@ -155,7 +155,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     });
                 },
                 function (callbackSeries) {
-                    $("#GenericTools_searchAllSourcesTermInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
+                    $("#searchWidget_searchTermInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
 
                     return callbackSeries();
                 },
@@ -431,7 +431,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             }
 
             var term = self.currentDataContainer.data.label;
-            $("#GenericTools_searchAllSourcesTermInput").val(term);
+            $("#searchWidget_searchTermInput").val(term);
             $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 4);
             KGpropertyFilter.rightPanelsActions.searchBusinessObjects();
         },

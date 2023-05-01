@@ -25,7 +25,7 @@ var Lineage_combine = (function () {
     self.addSelectedSourcesToGraph = function () {
         $("#sourcesSelectionDialogdiv").dialog("close");
 
-        var term = $("#GenericTools_searchAllSourcesTermInput").val();
+        var term = $("#searchWidget_searchTermInput").val();
         var selectedSources = [];
         if ($("#searchAll_sourcesTree").jstree(true)) {
             selectedSources = $("#searchAll_sourcesTree").jstree(true).get_checked();

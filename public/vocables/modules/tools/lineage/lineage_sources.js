@@ -196,7 +196,7 @@ var Lineage_sources = (function () {
 
                 Lineage_classes.initWhiteBoard(false);
 
-                self.initWhiteboardActions();
+                // self.initWhiteboardActions();
                 self.showHideLineageLeftPanels();
             });
         } else {
@@ -382,8 +382,7 @@ var Lineage_sources = (function () {
     };
 
     self.registerSource = function (sourceLabel, callback) {
-        if(!callback)
-            callback=function(){}
+        if (!callback) callback = function () {};
 
         if (self.loadedSources[sourceLabel]) {
             return callback();
@@ -681,21 +680,15 @@ sourceDivId +
             visjsGraph.data.nodes.remove(source);
         },
         exportOWL: function (source) {
-
             Sparql_OWL.generateOWL(source, {}, function (err, result) {
                 if (err) {
                     return console.log(err);
                 }
 
                 common.copyTextToClipboard(result);
-            })
+            });
 
-            return
-
-
-
-
-
+            return;
 
             var payload = {
                 graphUri: Config.sources[source].graphUri,
@@ -713,7 +706,7 @@ sourceDivId +
                 },
             });
 
-         /*  Sparql_OWL.generateOWL(source, {}, function (err, result) {
+            /*  Sparql_OWL.generateOWL(source, {}, function (err, result) {
                 if (err) {
                     return console.log(err);
                 }

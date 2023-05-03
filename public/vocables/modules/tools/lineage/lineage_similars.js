@@ -16,9 +16,11 @@ var Lineage_similars = (function () {
     self.onChangeSelection = function (value) {
         if (value == "chooseSource") {
             self.showSourcesTree();
+            self.mode = "source";
         } else {
+            self.mode = "whiteboard";
             $("#mainDialogDiv").dialog("close");
-            self.getWhiteBoardSimilars("graph");
+            //  self.getWhiteBoardSimilars("graph");
             $("#lineageSimilars_sourcesTreeDiv").html("");
         }
     };
@@ -32,10 +34,15 @@ var Lineage_similars = (function () {
     };
 
     self.onSourceSelected = function (evt, obj) {
-        var source = obj.node.id;
-        self.drawSourceSimilars(source);
+        self.currentSource = obj.node.id;
+        // self.drawSourceSimilars(source);
     };
     self.onValidateSources = function () {};
+
+    self.drawSimilars = function () {
+        if ((self.mode = "source")) self.drawSourceSimilars(self.currentSource);
+        else self.drawWhiteBoardSimilars();
+    };
 
     self.drawSourceSimilars = function (source) {
         Lineage_sources.registerSource(source, function (err, result) {
@@ -139,7 +146,7 @@ var Lineage_similars = (function () {
         });
     };
 
-    self.getWhiteBoardSimilars = function (output) {
+    self.drawWhiteBoardSimilars = function (output) {
         var commonNodes = [];
         var existingNodes = visjsGraph.getExistingIdsMap();
         var nodes = visjsGraph.data.nodes.get();

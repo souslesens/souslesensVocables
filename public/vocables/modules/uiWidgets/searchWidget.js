@@ -11,7 +11,6 @@ import Export from "../shared/export.js";
 var SearchWidget = (function () {
     var self = {};
 
-
     self.searchTermXXX = function (sourceLabel, term, rootId, callback) {
         if (!term) {
             term = $("#searchWidget_searchTermInput").val();
@@ -54,7 +53,6 @@ var SearchWidget = (function () {
             });
         });
     };
-
 
     /**
      *
@@ -726,7 +724,7 @@ return*/
         if (options.depth) {
             descendantsDepth = options.depth;
         }
-       // options.filterCollections = Collection.currentCollectionFilter;
+        // options.filterCollections = Collection.currentCollectionFilter;
         Sparql_generic.getNodeChildren(sourceLabel, null, node.data.id, descendantsDepth, options, function (err, result) {
             if (err) {
                 return MainController.UI.message(err);

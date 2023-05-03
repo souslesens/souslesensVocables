@@ -12,18 +12,7 @@ const ConfigManager = require("./configManager.");
 var exec = require("child_process").exec;
 
 var GraphStore = {
-
-
-
-
-
-
-
-
     exportGraph: function (sparqlServerConnection, graphUri, callback) {
-
-
-
         //curl --verbose --url "http://example.com/sparql-graph-crud?graph-uri=urn:graph:update:test:get"
 
         var url = sparqlServerConnection.url + "-graph-crud?";

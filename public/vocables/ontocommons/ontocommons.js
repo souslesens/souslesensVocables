@@ -94,14 +94,13 @@ var Ontocommons = (function () {
             var body = {
                 sourceUrl: sourceUrl,
                 sourceName: ontologyId,
-
+                graphUri: metadata.URI || "http://industryportal.enit.fr/ontologies/" + ontologyId + "/",
                 options: {
                     metadata: metadata,
                     sourcesJsonFile: sourcesJsonFile,
-
+                    group: "ONTOCOMMONS",
                     reload: reload,
                     editable: editable,
-                    graphUri: metadata.URI || null,
                 },
             };
 
@@ -115,7 +114,7 @@ var Ontocommons = (function () {
             self.message("loading ontology and imports...");
             $.ajax({
                 type: "POST",
-                url: `${self.apiUrl}/importsource`,
+                url: `${self.apiUrl}/graphStore/importSource`,
                 data: payload,
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
@@ -124,8 +123,10 @@ var Ontocommons = (function () {
                     if (data.result != "DONE") {
                         alert(data.result);
                     }
+                    var sourcesFile = "ontocommonsSources.json";
+                    sourcesFile = "";
 
-                    $("#slsv_iframe").attr("src", window.location.origin + "/vocables/?sourcesFile=ontocommonsSources.json&tool=lineage&source=" + ontologyId);
+                    $("#slsv_iframe").attr("src", window.location.origin + "/vocables/index.html?" + sourcesFile + "tool=lineage&source=" + ontologyId);
                 },
                 error(err) {
                     alert(err.responseText);

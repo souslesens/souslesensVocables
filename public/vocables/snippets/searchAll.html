@@ -11,20 +11,18 @@
             <option value="all_IndividualsSources">All Individuals sources</option>-->
             <option value="all_Sources">All Sources</option>
         </select>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary GenericTools_searchAllOptional" onclick="SourceBrowser.showSearchableSourcesTreeDialog(['OWL'],SourceBrowser.searchAllSourcesTerm)">
-            +
-        </button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary GenericTools_searchAllOptional" onclick="SourceSelectorWidget.showDialog(['OWL'],null,SearchWidget.searchAllSourcesTerm)">+</button>
     </div>
     <div>
         Class
-        <select id="GenericTools_searchAllClassSelect"></select>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.onSearchClass()">?</button>
+        <select id="GenericTools_searchAllClassSelect" style="min-width: 100px"></select>
     </div>
     <div>
-        <input id="GenericTools_searchAllSourcesTermInput" style="width: 150px" value="" />
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="GenericTools_onSearchAllInput" onclick="SourceBrowser.searchAllSourcesTerm()">Search</button>
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="SourceBrowser.showThesaurusTopConcepts();">reset</button>
+        <input id="searchWidget_searchTermInput" style="width: 150px" value="" />
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="GenericTools_onSearchAllInput" onclick="SearchWidget.searchAllSourcesTerm()">Search</button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="SearchWidget.showTopConcepts();">reset</button>
         <button class="btn btn-sm my-1 py-0 btn-outline-primary GenericTools_searchAllOptional" onclick="Export.exportTreeToDataTable(null,'#')">toTable</button>
-        <!--   <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="SourceBrowser.exportSearchResult()">CSV</button>-->
     </div>
 </div>
 <div id="sourcesSelectionDialogdiv" style="margin-bottom: 10px">
@@ -39,9 +37,9 @@
 </div>
 
 <script>
-    $("#GenericTools_searchAllSourcesTermInput").keypress(function (e) {
+    $("#searchWidget_searchTermInput").keypress(function (e) {
         if (e.which == 13) {
-            SourceBrowser.searchAllSourcesTerm();
+            SearchWidget.searchAllSourcesTerm();
         }
     });
     $("#sourcesSelectionDialogdiv").dialog({

@@ -16,7 +16,6 @@ var indexer = require("../backoffice/indexer.");
 var ndjson = require("ndjson");
 
 var elasticUrl = "http://localhost:9200/";
-//  var elasticUrl="http://vps254642.ovh.net:2009/";
 
 var skosToElastic = {
     load: function (thesaurusPaths, callback) {

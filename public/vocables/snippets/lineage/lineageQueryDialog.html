@@ -44,7 +44,7 @@
                     vocabulary<select
                         id="lineageQuery_vocabularySelect"
                         style="min-width: 100px; background-color: #ddd"
-                        onchange="SourceBrowser.setCurrentVocabPropertiesSelect($(this).val(),'lineageQuery_currentVocabPropertySelect')"
+                        onchange="SearchWidget.setCurrentVocabPropertiesSelect($(this).val(),'lineageQuery_currentVocabPropertySelect')"
                     ></select>
 
                     <select id="lineageQuery_currentVocabPropertySelect" style="min-width: 200px; background-color: #ddd" onchange="Lineage_relationFilter.onSelectCurrentVocabProperty($(this).val())">
@@ -74,7 +74,7 @@
                     vocabulary<select
                         id="lineageQuery_vocabularySelect2"
                         style="min-width: 100px; background-color: #ddd"
-                        onchange="SourceBrowser.setCurrentVocabClassesSelect($(this).val(),'lineageQuery_currentVocabObjectSelect')"
+                        onchange="SearchWidget.setCurrentVocabClassesSelect($(this).val(),'lineageQuery_currentVocabObjectSelect')"
                     >
                         <option value=""></option>
                         <option value="usual">usual</option>

@@ -1,9 +1,9 @@
 var fs = require("fs");
 var path = require("path");
 
-var TikaClient = require("@futpib/tika-server-client");
-var tika = new TikaClient("http://localhost:41000");
-const TikaServer = require("tika-server");
+//var TikaClient = require("@futpib/tika-server-client");
+//var tika = new TikaClient("http://localhost:41000");
+//const TikaServer = require("tika-server");
 var util = require("../util.");
 var httpProxy = require("../httpProxy.");
 var socket = require("../socketManager.");

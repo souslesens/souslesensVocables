@@ -11,8 +11,19 @@ const ConfigManager = require("./configManager.");
 var exec = require("child_process").exec;
 
 var SourceIntegrator = {
+    creatTriplesFromUrl: function (ontologyUrl, callback) {
+        " curl " + "--digest" + " --user dba:dba" + " --verbose" + ' --url "http://example.com/sparql-graph-crud-auth?graph-uri=urn:graph:update:test:put" ' + "/ -T books.ttl";
+
+        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+            params.auth = {
+                user: ConfigManager.config.sparql_server.user,
+                pass: ConfigManager.config.sparql_server.password,
+                sendImmediately: false,
+            };
+        }
+    },
     jenaParse: function (filePath, options, callback) {
-        var jenaPath = path.join(__dirname, "../jena/");
+        var jenaPath = path.join(__dirname, "../java/jena/");
         var cmd;
         if (process.platform === "win32") {
             // my dev env

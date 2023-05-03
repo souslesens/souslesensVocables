@@ -56,9 +56,9 @@ cd /home/debian/backups/
 sudo docker cp 75d81c946c51:/home/debian/backups /home/debian/backupsSQLserver
 zip -r backupsSQLserverSept2021.zip backups/backupsSQLserver/
 
-scp backupsSQLserverSept2021.zip  root@vps254642.ovh.net:/var/lib/nodejs/souslesensVocables/public/dumps
+scp backupsSQLserverSept2021.zip  xxx/var/lib/nodejs/souslesensVocables/public/dumps
 sur serveur datalab
-wget http://vps254642.ovh.net:3010/dumps/backupsSQLserverSept2021.zip
+wget xxx/dumps/backupsSQLserverSept2021.zip
 
 
 docker exec -t -i e775dc13f609 /bin/bash

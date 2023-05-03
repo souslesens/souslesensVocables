@@ -80,7 +80,7 @@ var TE_AssetDataManager = (function () {
 
                     contextMenu: TE_AssetDataManager.getAssetJstreeContextMenu(),
                 };
-                common.jstree.loadJsTree("TE_AssetConfigurator_assetPanelTreeDiv", allJstreeData, options);
+                JstreeWidget.loadJsTree("TE_AssetConfigurator_assetPanelTreeDiv", allJstreeData, options);
             }
         );
     };
@@ -133,7 +133,7 @@ var TE_AssetDataManager = (function () {
     self.openAssetTreeNode = function (node, _level, _callback) {
         TE_SqlTojstreeConnectors.getChildrenNodesJsTreeData(self.currentDbName, node, coloredNodesMap, function (err, jstreeData) {
             if (err) return alert(err);
-            if (jstreeData.length > 0) common.jstree.addNodesToJstree("TE_AssetConfigurator_assetPanelTreeDiv", node.id, jstreeData);
+            if (jstreeData.length > 0) JstreeWidget.addNodesToJstree("TE_AssetConfigurator_assetPanelTreeDiv", node.id, jstreeData);
         });
     };
 

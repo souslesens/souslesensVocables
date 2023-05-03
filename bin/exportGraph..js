@@ -241,15 +241,3 @@ var ExportGraph = {
 module.exports = ExportGraph;
 
 return;
-var toEndPointConfig = {
-    sparql_server: {
-        url: "https://virtuo.souslesens.enit.fr/sparql",
-
-        method: "Post",
-        headers: [],
-    },
-};
-
-ExportGraph.copyGraphToEndPoint("TSF_GAIA_TEST", toEndPointConfig, {}, function (er, result) {
-    console.log(result + " triples imported");
-});

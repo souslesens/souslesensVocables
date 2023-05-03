@@ -76,8 +76,6 @@
             <script src="js/tools/lineage/lineage_styles.js"></script>
             <script src="js/tools/lineage/lineage_relationFilter.js"></script>
 
-            <script src="js/commonUIwidgets.js"></script>
-
             <script src="js/tools/owlEditor.js"></script>
 
             <!-- <script src="js/tools/lineage/KGquery.js"></script>-->
@@ -114,14 +112,6 @@
             <script src="js/tools/sparqlQueryUI.js"></script>
 
             <script src="js/tools/ontologiesStats.js"></script>
-
-            <!-----------private tools--------------->
-            <script src="js/customPluginController.js"></script>
-
-            <script src="customPlugins/TotalEnergies/TE_14224_browser/TE_14224_browser.js"></script>
-            <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_AssetConfigurator.js"></script>
-            <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_AssetDataManager.js"></script>
-            <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_SqlTojstreeConnectors.js"></script>
 
             <script src="config/app_config.js"></script>
             <!--    <script src="config/app_config_draft_tools.js"></script>-->
@@ -174,16 +164,6 @@
             <script src="js/external/download.js"></script>
 
             <script src="js/search/elasticSearchProxy.js"></script>
-
-            <!--  <script src="js/external/d3/d3.v3.min.js"></script>
-            <script src="js/sunburst.js"></script>-->
-
-            <!--   <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
-            <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>-->
-
-            <!--  <script src="js/authentification.js"></script>-->
-
-            <!--  <script src="js/authentification.js"></script>-->
 
             <link
                 rel="stylesheet"
@@ -374,7 +354,7 @@
                     Config.sources[hit.source].controller = eval(Config.sources[hit.source].controller);
                 }
                 var node = { data: { id: hit.id } };
-                SourceBrowser.showNodeInfos(hit.source, node, "Browse_nodeInfosDiv", { hideModifyButtons: true });
+                NodeInfosWidget.showNodeInfos(hit.source, node, "Browse_nodeInfosDiv", { hideModifyButtons: true });
 
                 $("#Browse_hitDetailsDiv").html(html);
             };

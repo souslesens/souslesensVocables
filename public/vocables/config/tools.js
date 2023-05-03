@@ -8,13 +8,6 @@ self.tools["KGcreator"] = {
     toolDescriptionImg: null,
 };
 
-self.tools["sourceBrowser"] = {
-    label: "Browse",
-    multiSources: 0,
-    controller: SourceBrowser,
-    toolDescriptionImg: null,
-};
-
 self.tools["Standardizer"] = {
     label: "Standardizer",
     multiSources: 0,

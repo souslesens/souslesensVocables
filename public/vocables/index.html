@@ -5,182 +5,111 @@
         <title>SouslesensVocables</title>
         <link rel="icon" href="../icons/souslesensIcon.png" />
 
-        <!--   <script src="./js/external/jquery/jquery.min.js"></script>
-<script src="./js/external/jquery/jquery-ui.min.js"></script>
-<link href="./js/external/jquery/jquery-ui.min.css" rel="stylesheet" type="text/css"/>-->
-
         <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
         <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
         <script src="./js/external/async.js" charset="utf-8"></script>
-
-        <script src="js/common.js" charset="utf-8"></script>
-
         <script src="./js/external/jsTree/jstree.js" charset="utf-8"></script>
-        <!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>-->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
-
         <script type="text/javascript" src="./js/external/visjs/vis-network.min.js"></script>
         <link href="js/external/visjs/vis-network.css" rel="stylesheet" type="text/css" />
-        <script src="js/graph/visjsGraph2.js"></script>
-        <script src="js/graph/canvas2svg.js"></script>
-        <script src="js/graph/SVGexport.js"></script>
-        <script src="js/graph/graphMLexport.js"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
 
-        <script src="js/mainController.js"></script>
-        <script src="js/graphController.js"></script>
-        <script src="js/treeController.js"></script>
-        <script src="js/clipboard.js"></script>
+        <script src="js/external/graph.js"></script>
+        <script src="js/external/download.js"></script>
+        <script src="js/external/sunburst.js"></script>
+        <script src="js/external/d3/d3.js"></script>
 
-        <script src="js/tools/sourceBrowser.js"></script>
+        <script type="module" src="modules/shared/common.js" charset="utf-8"></script>
+        <script type="module" src="modules/graph/visjsGraph2.js"></script>
+        <script type="module" src="modules/graph/canvas2svg.js"></script>
+        <script type="module" src="modules/graph/SVGexport.js"></script>
+        <script type="module" src="modules/graph/graphMLexport.js"></script>
 
-        <!--
-            <script src="js/tools/sourceMatcher.js"></script>
-           <script src="js/tools/evaluate.js"></script>
-           <script src="js/tools/evaluate.js"></script>
-           <script src="js/tools/genealogy.js"></script>
-           <script src="js/tools/owlSchema.js"></script>
-           <script src="js/tools/annotator.js"></script>
-           <script src="js/tools/childHood.js"></script>
-           <script src="js/tools/importCSV.js"></script>-->
+        <script type="module" src="modules/shared/mainController.js"></script>
 
-        <script src="js/tools/blender/blender.js"></script>
-        <script src="js/tools/blender/collection.js"></script>
-        <script src="js/tools/blender/sourceEditor.js"></script>
-        <script src="js/tools/blender/import.js"></script>
-        <script src="js/tools/blender/externalReferences.js"></script>
-        <script src="js/tools/blender/transform.js"></script>
-        <script src="js/tools/SPARQL_endpoint.js"></script>
-        <script src="js/tools/lineage/lineage_classes.js"></script>
-        <script src="js/tools/lineage/lineage_sources.js"></script>
-        <script src="js/tools/lineage/lineage_properties.js"></script>
-        <script src="js/tools/lineage/lineage_common.js"></script>
-        <script src="js/tools/lineage/lineage_blend.js"></script>
-        <script src="js/tools/lineage/lineage_relations.js"></script>
-        <script src="js/tools/lineage/lineage_dictionary.js"></script>
-        <script src="js/tools/lineage/lineage_combine.js"></script>
+        <script type="module" src="modules/shared/graphController.js"></script>
+        <script type="module" src="modules/shared/treeController.js"></script>
+        <script type="module" src="modules/shared/clipboard.js"></script>
 
-        <script src="js/tools/lineage/lineage_decoration.js"></script>
-        <script src="js/tools/lineage/linkedData/lineage_linkedData_mappings.js"></script>
-        <script src="js/tools/lineage/linkedData/lineage_linkedData_query.js"></script>
+        <!-- <script type="module" src="modules/tools/sourceBrowser.js"></script>-->
 
-        <script src="js/tools/lineage/lineage_upperOntologies.js"></script>
+        <script type="module" src="modules/tools/SPARQL_endpoint.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_classes.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_sources.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_properties.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_common.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_blend.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_relations.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_dictionary.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_combine.js"></script>
 
-        <script src="js/tools/lineage/lineage_containers.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_decoration.js"></script>
+        <script type="module" src="modules/tools/lineage/linkedData/lineage_linkedData_mappings.js"></script>
+        <script type="module" src="modules/tools/lineage/linkedData/lineage_linkedData_query.js"></script>
 
-        <script src="js/tools/lineage/lineage_selection.js"></script>
-        <script src="js/tools/lineage/lineage_filterBy.js"></script>
-        <script src="js/tools/lineage/lineage_styles.js"></script>
-        <script src="js/tools/lineage/lineage_relationFilter.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_upperOntologies.js"></script>
 
-        <script src="js/ontologyModels.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_containers.js"></script>
 
-        <script src="js/commonUIwidgets.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_selection.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_filterBy.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_styles.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_relationFilter.js"></script>
 
-        <script src="js/tools/owlEditor.js"></script>
+        <script type="module" src="modules/shared/ontologyModels.js"></script>
 
-        <!-- <script src="js/tools/lineage/KGquery.js"></script>-->
+        <script type="module" src="modules/uiWidgets/predicatesSelectorWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/promptedSelectWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/sourceSelectorWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/jstreeWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/nodeInfosWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/searchWidget.js"></script>
 
-        <!--     <script src="js/tools/KG/mappings/KGmappings.js"></script>
-        <script src="js/tools/KG/mappings/KGmappingGraph.js"></script>
-        <script src="js/tools/KG/mappings/KGmappingData.js"></script>
-        <script src="js/tools/KG/mappings/KGadvancedMapping.js"></script>
-        <script src="js/tools/KG/KGassetGraph.js"></script>
-        <script src="js/tools/KG/mappings/KGbuild.js"></script>-->
+        <script type="module" src="modules/tools/owlEditor.js"></script>
 
-        <!--   <script src="js/tools/KG/TextAnnotator.js"></script>-->
+        <script type="module" src="modules/tools/Standardizer.js"></script>
 
-        <!--   <script src="js/tools/KG/KGcommon.js"></script>
-        <script src="js/tools/KG/browser/KGbrowserGraph.js"></script>
-        <script src="js/tools/KG/browser/KGbrowserQuery.js"></script>
-         <script src="js/tools/KG/browser/KGbrowserQueryNew.js"></script>
-        <script src="js/tools/KG/browser/KGbrowser.js"></script>
-        <script src="js/tools/KG/browser/KGbrowser_2.js"></script>
-        <script src="js/tools/KG/browser/KGbrowserBI.js"></script>
-        <script src="js/tools/KG/browser/KGbrowserDataTable.js"></script>
-        <script src="js/tools/KG/browser/KGbrowserCustom.js"></script>-->
+        <script type="module" src="modules/tools/SQLquery.js"></script>
 
-        <script src="js/tools/Standardizer.js"></script>
+        <script type="module" src="modules/tools/admin.js"></script>
+        <script type="module" src="modules/tools/ConfigEditor.js"></script>
 
-        <script src="js/tools/SQLquery.js"></script>
+        <script type="module" src="modules/tools/KGcreator.js"></script>
+        <script type="module" src="modules/tools/KGpropertyFilter.js"></script>
+        <script type="module" src="modules/tools/composer.js"></script>
+        <script type="module" src="modules/tools/sparqlQueryUI.js"></script>
 
-        <script src="js/tools/admin.js"></script>
-        <script src="js/tools/ConfigEditor.js"></script>
-
-        <script src="js/tools/KGcreator.js"></script>
-        <script src="js/tools/KGpropertyFilter.js"></script>
-        <script src="js/tools/composer.js"></script>
-        <script src="js/tools/sparqlQueryUI.js"></script>
-
-        <script src="js/tools/ontologiesStats.js"></script>
-
-        <!-----------private tools--------------->
-        <script src="js/customPluginController.js"></script>
-
-        <script src="customPlugins/TotalEnergies/TE_14224_browser/TE_14224_browser.js"></script>
-        <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_AssetConfigurator.js"></script>
-        <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_AssetDataManager.js"></script>
-        <script src="customPlugins/TotalEnergies/TE_AssetConfigurator/TE_SqlTojstreeConnectors.js"></script>
+        <script type="module" src="modules/tools/ontologiesStats.js"></script>
 
         <script src="config/app_config.js"></script>
         <!--    <script src="config/app_config_draft_tools.js"></script>-->
 
-        <script src="config/tools.js"></script>
+        <script type="module" src="modules/shared/authentification.js"></script>
 
-        <script src="js/authentification.js"></script>
+        <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
+        <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
+        <script type="module" src="modules/sparqlProxies/sparql_SKOS.js"></script>
+        <script type="module" src="modules/sparqlProxies/sparql_OWL.js"></script>
+        <!--   <script type="module" src="modules/sparqlProxies/sparql_INDIVIDUALS.js"></script>-->
 
-        <script src="js/sparqlProxies/sparql_proxy.js"></script>
-        <script src="js/sparqlProxies/sparql_generic.js"></script>
-        <script src="js/sparqlProxies/sparql_SKOS.js"></script>
-        <script src="js/sparqlProxies/sparql_OWL.js"></script>
-        <!--   <script src="js/sparqlProxies/sparql_INDIVIDUALS.js"></script>-->
+        <script type="module" src="modules/sparqlProxies/sparql_common.js"></script>
+        <!-- <script type="module" src="modules/sparqlProxies/sparql_schema.js"></script>-->
+        <script type="module" src="modules/sparqlProxies/sparql_CRUD.js"></script>
 
-        <script src="js/sparqlProxies/sparql_common.js"></script>
-        <!-- <script src="js/sparqlProxies/sparql_schema.js"></script>-->
-        <script src="js/sparqlProxies/sparql_CRUD.js"></script>
+        <script type="module" src="modules/search/searchUtil.js"></script>
+        <!--  <script type="module" src="modules/tools/ontologyUtil.js"></script>-->
 
-        <!--specific-->
-        <!--      <script src="js/sparqlProxies/sparql_WORDNET.js"></script>
-        <script src="js/sparqlProxies/sparql_ISO_15926.js"></script>
-        <script src="js/sparqlProxies/sparql_ISO_15926_part4.js"></script>
-        <script src="js/sparqlProxies/sparql_NPD.js"></script>
-        <script src="js/tools/orchestrator.js"></script>-->
-        <script src="js/search/searchUtil.js"></script>
-        <script src="js/tools/ontologyUtil.js"></script>
+        <script type="module" src="modules/shared/export.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_graphTraversal.js"></script>
 
-        <!--    <script src="//unpkg.com/3d-force-graph"></script>
-          <script src="//unpkg.com/three"></script>
-          <script src="//unpkg.com/three-spritetext"></script>-->
+        <script type="module" src="modules/search/elasticSearchProxy.js"></script>
 
-        <!--   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r99/three.min.js"></script>
-        <script src="js/tools/lineage/lineage_3d.js"></script>-->
+        <script type="module" src="modules/tools/lineage/lineage_reasoner.js"></script>
 
-        <!--
-  <script src="js/external/socket.io.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_similars.js"></script>
 
-  <script src="/socket.io/socket.io.js"></script>
-
-
-  <script>
-      const socket = io();
-  </script>
-
-  <script src="js/socketProxy.js"></script>
-
-  -->
-
-        <script src="js/export.js"></script>
-        <script src="js/tools/lineage/lineage_graphTraversal.js"></script>
-        <script src="js/external/graph.js"></script>
-        <script src="js/external/download.js"></script>
-
-        <script src="js/search/elasticSearchProxy.js"></script>
-
-        <!--  <script src="js/external/d3/d3.v3.min.js"></script>
-        <script src="js/sunburst.js"></script>-->
-
-        <!--  <script src="js/authentification.js"></script>-->
+        <script type="module" src="config/tools_m.js"></script>
 
         <link
             rel="stylesheet"
@@ -223,11 +152,16 @@
         <link href="https://unpkg.com/@triply/yasgui/build/yasgui.min.css" rel="stylesheet" type="text/css" />
         <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 
-        <script>
+        <script type="module">
+            import MainController from "./modules/shared/mainController.js";
+            import authentication from "./modules/shared/authentification.js";
+
             var leftPanelWidth = 400;
             var rightPanelWidth = 400;
             var w;
             var h;
+            window.leftPanelWidth = leftPanelWidth;
+            window.rightPanelWidth = rightPanelWidth;
 
             // Redirect 401 to login page
             $(document).ajaxError(function (e, xhr, settings) {
@@ -252,7 +186,9 @@
 
                     //  SocketProxy.init()
 
-                    if (err) return console.error(err);
+                    if (err) {
+                        return console.error(err);
+                    }
 
                     w = $(document).width() - leftPanelWidth - 30;
                     h = $(document).height() - 30;
@@ -278,8 +214,8 @@
 
                     $("#smallDialogDiv").dialog({
                         autoOpen: false,
-                        height: 200,
-                        width: 200,
+                        height: 500,
+                        width: 400,
                         modal: true,
                     });
 
@@ -288,7 +224,7 @@
                         if (target == "_slsvCallback") {
                             var id = $(this).attr("href");
                             event.preventDefault();
-                            SourceBrowser.showNodeInfos(null, id, "mainDialogDiv");
+                            NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
                         }
                     });
 
@@ -305,7 +241,7 @@
 
             .jstreeContainer {
                 width: 100%;
-                //height: 100%;
+            / / height: 100 %;
                 min-height: 500px;
                 overflow: auto;
             }
@@ -549,13 +485,13 @@
                         </div>
 
                         <!--    <h3><span class="title">Sources </span></h3>
-                        <div id="sourcesPanel" style="margin: 5px" class="max-height">
-                            <div id="sourceDivControlPanelDiv" style="min-height: 50px; margin-left: 10px"></div>
-                            <div>Search : <input id="Lineage_SearchSourceInput" value="" style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" /></div>
-                            <div id="sourcesTreeDivContainer" style="overflow: auto" class="jstreeContainer XXXmax-height">
-                                <div id="sourcesTreeDiv"></div>
-                            </div>
-                        </div>-->
+        <div id="sourcesPanel" style="margin: 5px" class="max-height">
+            <div id="sourceDivControlPanelDiv" style="min-height: 50px; margin-left: 10px"></div>
+            <div>Search : <input id="Lineage_SearchSourceInput" value="" style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" /></div>
+            <div id="sourcesTreeDivContainer" style="overflow: auto" class="jstreeContainer XXXmax-height">
+                <div id="sourcesTreeDiv"></div>
+            </div>
+        </div>-->
 
                         <h3><span class="title" id="toolPanelLabel"> </span></h3>
                         <div id="toolPanelDiv" style="margin: 5px; height: 900px !important; overflow: auto" class="max-height">
@@ -585,7 +521,8 @@
                 login<input id="loginInput" /> password<input
                     type="password"
                     id="passwordInput"
-                    onkeydown="if (event.keyCode == 13 || event.keyCode == 9) document.getElementById('loginButton').click()"
+                    onkeydown="if (event.keyCode == 13 || event.keyCode == 9){document.getElementById('loginButton').click()
+}"
                 />
                 <button id="loginButton" onclick="authentication.doLogin(MainController.onAfterLogin)">OK</button>
 

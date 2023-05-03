@@ -25,6 +25,7 @@ var httpProxy = {
         }
 
         var request = superagent.get(url);
+
         if (proxy) {
             request.proxy(proxy);
             console.log(" GET-----------USING  proxy---------" + proxy);
@@ -70,6 +71,8 @@ var httpProxy = {
             url: url,
         };
 
+        if (params.GET) options.method = "GET";
+
         if (params.auth) options.auth = params.auth;
 
         if (headers) {
@@ -99,9 +102,7 @@ var httpProxy = {
                 return callback(error);
             }
 
-            if (response.statusCode != 200) return callback(response.statusMessage);
-
-            if (headers && headers["Accept"].indexOf("json") < 0) return callback(null, body);
+            if (headers && headers["Accept"] && headers["Accept"].indexOf("json") < 0) return callback(null, body);
             if (typeof body === "string") {
                 body = body.trim();
                 var p = body.toLowerCase().indexOf("bindings");
@@ -126,6 +127,7 @@ var httpProxy = {
                     return callback(err, body);
                 }
             } else {
+                if (response.statusCode != 200) return callback(response.statusMessage);
                 return callback(null, body);
             }
         });

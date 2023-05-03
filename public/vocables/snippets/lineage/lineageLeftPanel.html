@@ -179,11 +179,13 @@
         <div class="lineage_actionDiv" style="display: flex; flex-wrap: wrap; width: 100%; justify-content: space-evenly; gap: 5px 5px">
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.clearSource()">Clear</button>
 
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_combine.getSimilars('graph')">Similars</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_similars.showDialog()">Similars</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_relations.drawRelations(null,'dictionary')">Equiv Class</button>
 
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_graphTraversal.showShortestPathDialog()">Pathes</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_linkedData_query.showLinkedDataDialog()" id="lineage_classes_showLinkedDataButton">Linked Data</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_reasoner.showReasonerDialog()">Reasoner</button>
+
             <!-- <div>   <input type="checkbox" id="Lineage_classes_allWhiteBoardSourcesCBX" onchange="Lineage_sources.setAllWhiteBoardSources($(this).prop('checked'))">-->
         </div>
     </div>
@@ -214,13 +216,9 @@
         <div class="lineage_actionDiv" style="display: flex; flex-direction: column; width: 45%">
             <div class="lineage_button_group">
                 Find
-                <input
-                    style="width: 100px"
-                    id="visjsGraph_searchInput"
-                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9){visjsGraph.searchNode()
-}"
-                />
+                <input style="width: 100px" id="visjsGraph_searchInput" onkeyup="if (event.keyCode == 13 || event.keyCode == 9){visjsGraph.searchNode()}" />
 
+                <!--   <button id="" class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="visjsGraph.searchNode();">Search</button>-->
                 <!--   <button id="" class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="visjsGraph.searchNode();">Search</button>-->
             </div>
             <div class="lineage_button_group">
@@ -239,9 +237,13 @@
 
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Export.exportGraphToDataTable()">CSV</button>
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="visjsGraph.toSVG()">SVG</button>
+
                 <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showEdgesLegend()">legend</button>-->
 
                 <!-- <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.test3D()">3D</button>-->
+            </div>
+            <div class="lineage_button_group">
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_decoration.showDecorateDialog()">decorate nodes</button>
             </div>
         </div>
     </div>

@@ -173,7 +173,7 @@ var Lineage_sources = (function () {
             return alert("source" + source + "not found");
         }
 
-        if (true) {
+        if (false) {
             // $("#Lineage_Tabs").tabs("disable", 3);
             $("#lineage_classes_showLinkedDataButton").prop("disabled", true);
         }

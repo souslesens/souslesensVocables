@@ -98,9 +98,10 @@ var Lineage_reasoner = (function () {
 
             success: function (data, _textStatus, _jqXHR) {
                 $("#lineage_reasoner_outputDiv").css("display", "block");
-
-                self.inferenceData = self.FunctionalStyleSyntaxToJson(data.inference);
-
+                self.inferenceData = [];
+                for (var key in data) {
+                    self.inferenceData = self.inferenceData.concat(self.FunctionalStyleSyntaxToJson(data[key]));
+                }
                 var predicatesMap = {};
                 self.inferenceData.forEach(function (item) {
                     if (item.object == "owl:Thing") {

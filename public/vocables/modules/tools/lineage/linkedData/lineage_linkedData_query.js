@@ -385,7 +385,7 @@ var Lineage_linkedData_query = (function () {
         var cols = [];
 
         if (true) {
-            allSelectColumns = [];
+            var allSelectColumns = [];
             for (var column in data[0]) {
                 if (allSelectColumns.indexOf(column) < 0) {
                     cols.push({ title: column, defaultContent: "" });

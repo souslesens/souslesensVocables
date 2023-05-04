@@ -115,7 +115,7 @@ var Lineage_decoration = (function () {
                     return callback(null, []);
                 }
                 var filter = Sparql_common.setFilter("x", slice);
-                if (filter.indexOf("?x in( )") > -1) {
+                if (!filter || filter.indexOf("?x in( )") > -1) {
                     return callbackEach();
                 }
 

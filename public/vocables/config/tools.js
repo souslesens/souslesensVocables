@@ -1,3 +1,4 @@
+
 self.tools = {};
 
 self.tools["lineage"] = { label: "Lineage", noSource: 0, controller: Lineage_classes, toolDescriptionImg: null }; //"images/taxonomy.png"}
@@ -7,6 +8,13 @@ self.tools["KGcreator"] = {
     controller: KGcreator,
     toolDescriptionImg: null,
 };
+self.tools["KGcreatorRML"] = {
+    label: "KGcreatorRML",
+    noSource: 1,
+    controller: KGcreatorRML,
+    toolDescriptionImg: null,
+};
+
 
 self.tools["Standardizer"] = {
     label: "Standardizer",

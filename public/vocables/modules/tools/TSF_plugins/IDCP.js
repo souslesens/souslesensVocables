@@ -10,11 +10,15 @@ var Idcp = (function () {
     // units
     self.units_available = {};
 
+    //Last clicked of tree IDCP keep in memory when it's ecrased on self.current container trough the second tree
+
+    self.last_IDCP_container=null;
+
     //URI required
     self.datacontainerUri = "http://datalenergies.total.com/resource/tsf/idcp_v2/DataContainer";
     self.datablockURI = "http://datalenergies.total.com/resource/tsf/idcp_v2/DataBloc";
     self.parameterUri = "http://datalenergies.total.com/resource/tsf/idcp_v2/Parameter";
-    self.proprieteUri = "http://datalenergies.total.com/resource/tsf/idcp_v2/Propriete";
+    self.proprieteUri = "http://datalenergies.total.com/resource/tsf/idcp_v2/properties";
     self.studyscenarioUri = "http://datalenergies.total.com/resource/tsf/idcp_v2/Template";
     self.disciplineUri = "http://datalenergies.total.com/resource/tsf/idcp_v2/Discipline";
     self.viewpointuri = "http://datalenergies.total.com/resource/tsf/idcp_v2/bag/IDCP";
@@ -36,8 +40,8 @@ var Idcp = (function () {
     self.keys_DatacontainersForDataUsers = ["NodeInfos", "GraphContainerDescendantAndLeaves", "copy", "delete from bag"];
     self.keys_DatablockForDataOwners = ["NodeInfos", "GraphContainerDescendantAndLeaves", "copy", "AddParameter", "DeleteContainer"];
     self.keys_DatablockForDataUsers = ["NodeInfos", "GraphContainerDescendantAndLeaves", "copy"];
-    self.keys_ParameterForDataUsers = ["NodeInfos", "delete from bag", "AddParameter"];
-    self.keys_ParameterForDataOwners = ["NodeInfos", "delete from bag", "AddParameter"];
+    self.keys_ParameterForDataUsers = ["NodeInfos", "delete from bag", "AddParameter","GraphContainerDescendantAndLeaves"];
+    self.keys_ParameterForDataOwners = ["NodeInfos", "delete from bag", "AddParameter","GraphContainerDescendantAndLeaves"];
     self.keys_viewpointForDataUsers = ["NodeInfos", "GraphContainerDescendantAndLeaves", "paste", "Create Object"];
     self.keys_viewpointForDataOwners = ["NodeInfos", "GraphContainerDescendantAndLeaves", "paste", "Create Object"];
     self.keys_studyscenarioForDataOwners = ["NodeInfos", "GraphContainerDescendantAndLeaves", "paste", "Create Object", "DeleteContainer"];
@@ -392,6 +396,9 @@ var Idcp = (function () {
     self.onSelectedNodeTreeclick = function (event, obj) {
         Lineage_containers.currentContainer = obj.node;
         //! from right click
+        if (Lineage_containers.currentContainer.data.source == self.source) {
+            self.last_IDCP_container=Lineage_containers.currentContainer;
+        }
         if (obj.event.button != 2) {
             if (Lineage_containers.currentContainer.data.source == self.source) {
                 Lineage_containers.listContainerResources(Lineage_sources.activeSource, Lineage_containers.currentContainer, { onlyOneLevel: true, leaves: true }, function (nodes_added) {
@@ -452,7 +459,7 @@ var Idcp = (function () {
                         var filtred_contextmenu = self.IDCP_filtredkeysmenu(self.keys_DatablockForDataUsers);
                         $("#lineage_containers_containersJstree").jstree().settings.contextmenu.items = filtred_contextmenu;
                     }
-                } else if (types.includes(self.proprieteUri)) {
+                } else if (types.includes(self.parameterUri)) {
                     if (self.isDataOwner) {
                         var filtred_contextmenu = self.IDCP_filtredkeysmenu(self.keys_ParameterForDataOwners);
                         $("#lineage_containers_containersJstree").jstree().settings.contextmenu.items = filtred_contextmenu;
@@ -727,6 +734,7 @@ var Idcp = (function () {
                         id: item.jstreeId,
                         text: item.memberLabel.value,
                         parent: parent,
+                        
 
                         data: {
                             source: self.BO_source,
@@ -769,7 +777,7 @@ var Idcp = (function () {
         });
     };
     self.IDCPsearch = function () {
-        Lineage_containers.search(self.IDCP_fillJstreeTypes);
+        Lineage_containers.search(null,self.IDCP_fillJstreeTypes);
     };
     self.IDCP_delete_from_bag = function () {
         var uri = Lineage_containers.currentContainer.data.id;
@@ -865,7 +873,7 @@ var Idcp = (function () {
                     });
                 });
             },
-            height: 1200,
+            height: 1000,
             width: 1500,
             title: "Renseign your parameter",
             close: function () {
@@ -1046,7 +1054,7 @@ var Idcp = (function () {
             "flex-direction": "row",
         });
 
-        if (data["rdf:types"].includes(self.proprieteUri)) {
+        if (data["rdf:types"].includes(self.parameterUri)) {
             var balise_id = dialog.context.id;
             var split = balise_id.split("-");
             var title_number = parseInt(split[split.length - 1]) + 1;
@@ -1093,39 +1101,281 @@ var Idcp = (function () {
         var label_node = Lineage_blend.graphModification.creatingNodeTriples[0]["object"];
         var node = { source: self.source, label: label_node, id: uri };
 
-        // Add the definition as triple to the new node
+        // Def
         var definition = $("#LineageBlend_creatingNodeNewClassDefinition").val();
         var definition_triple = {};
         definition_triple["subject"] = uri;
         definition_triple["predicate"] = "rdfs:isDefinedBy";
         definition_triple["object"] = definition;
+        Lineage_blend.graphModification.creatingNodeTriples.push(definition_triple);
+        // Unity
+
+
+        var unit = $("#unit_of_mesure").val();
+        var unit_triple = {};
+        unit_triple["subject"] = uri;
+        unit_triple["predicate"] = "http://rds.posccaesar.org/ontology/lis14/rdl/representedIn";
+        unit_triple["object"] = unit;
+        Lineage_blend.graphModification.creatingNodeTriples.push(unit_triple);
+
+        //is a class
+
+        var class_triple = {};
+        class_triple["subject"] = uri;
+        class_triple["predicate"] = "rdf:type" ;
+        class_triple["object"] ="owl:Class";
+        Lineage_blend.graphModification.creatingNodeTriples.push(class_triple);   
+
+         // is member of 
+         var member_triple = {};
+         member_triple["subject"] = self.last_IDCP_container.data.id;
+         member_triple["predicate"] = "rdfs:member" ;
+         member_triple["object"] =uri;
+         Lineage_blend.graphModification.creatingNodeTriples.push(member_triple);
+        
         
         //check if is not none --> if is it create it 
-        var bo = $("#bo_uri").val();
-        var bo_triple = {};
-        bo_triple["subject"] = uri;
-        bo_triple["predicate"] = "rdfs:subClassOf";
-        bo_triple["object"] = bo;
-
-        if($("#property_uri").val()){
+       
+        var prop=$("#property_uri").val();
+        if(prop){
 
             //check if is not none --> if is it create it 
-            //member of parameter
-            //member 
+            
 
-            //is a class
+             //is a property
+             var subclass_triple = {};
+             subclass_triple["subject"] = uri;
+             subclass_triple["predicate"] = "rdfs:subClassOf" ;
+             subclass_triple["object"] =self.proprieteUri;
+             Lineage_blend.graphModification.creatingNodeTriples.push(subclass_triple);
+
+             
+            // Parameter describes property
+             var link_pp_triple = {};
+             link_pp_triple["subject"] = self.last_IDCP_container.data.id;
+             link_pp_triple["predicate"] = "http://datalenergies.total.com/resource/tsf/idcp_v2/describes" ;
+             link_pp_triple["object"] =uri;
+             Lineage_blend.graphModification.creatingNodeTriples.push(link_pp_triple);
+
+
+
+
+
+
+
+            if(prop.startsWith('http://datalenergies.total.com/resource/tsf/gidea-raw/')){
+                //Is uri
+                 //  Similar in gidea
+            
+                var parameter_triple = {};
+                parameter_triple["subject"] = uri;
+                parameter_triple["predicate"] = "http://www.w3.org/2002/07/owl#equivalentClass";
+                parameter_triple["object"] = prop;
+                Lineage_blend.graphModification.creatingNodeTriples.push(parameter_triple);
+            }
+            var parameter = $("#parameter_uri").val();
+
+            if(parameter.startsWith('http://datalenergies.total.com/resource/tsf/gidea-raw/')){
+                //Is uri
+                 //  Similar in gidea between parameter IDCP (container clicked )
+            
+                var parameter_triple = {};
+                parameter_triple["subject"] = self.last_IDCP_container.data.id;
+                parameter_triple["predicate"] = "http://www.w3.org/2002/07/owl#equivalentClass";
+                parameter_triple["object"] = parameter;
+                Lineage_blend.graphModification.creatingNodeTriples.push(parameter_triple);
+            }
+
+            var bo = $("#bo_uri").val();
+
+
+            if(bo.startsWith('http://datalenergies.total.com/resource/tsf/')){
+                // Association with BO 
+
+                var bo_triple = {};
+                bo_triple["subject"] = uri;
+                bo_triple["predicate"] = "http://datalenergies.total.com/resource/tsf/idcp_v2/hasBO";
+                bo_triple["object"] = bo;
+                Lineage_blend.graphModification.creatingNodeTriples.push(bo_triple);
+
+            }
+            else{
+               
+               // get uri
+               var bo_uri = Lineage_blend.graphModification.getURI(bo);
+
+               //checkpoint
+               /*
+               var current_cretaing_triples=Lineage_blend.graphModification.creatingNodeTriples;
+
+               
+               
+               Lineage_blend.graphModification.creatingNodeTriples=[];
+              */
+
+
+                // Create IDCP BO 
+               var triple_creator_bo=Lineage_blend.graphModification.creatingNodeTriples[1];
+               triple_creator_bo.subject=bo_uri;
+               Lineage_blend.graphModification.creatingNodeTriples.push(triple_creator_bo);
+
+                var bo_label = {};
+                bo_label["subject"] = bo_uri;
+                bo_label["predicate"] = "rdfs:label";
+                bo_label["object"] = bo;
+                Lineage_blend.graphModification.creatingNodeTriples.push(bo_label);
+
+                var bo_class_triple = {};
+                bo_class_triple["subject"] = bo_uri;
+                bo_class_triple["predicate"] = "rdf:type" ;
+                bo_class_triple["object"] ="owl:Class";
+                Lineage_blend.graphModification.creatingNodeTriples.push(bo_class_triple);   
+
+                var subclass_triple = {};
+                subclass_triple["subject"] = bo_uri;
+                subclass_triple["predicate"] = "rdfs:subClassOf" ;
+                subclass_triple["object"] ="http://datalenergies.total.com/resource/tsf/idcp_v2/Business_Objects";
+                Lineage_blend.graphModification.creatingNodeTriples.push(subclass_triple);
+    
+                Lineage_blend.graphModification.createNode();
+               
+                /*
+               // resume checkpoint
+
+               Lineage_blend.graphModification.creatingNodeTriples=current_cretaing_triples;
+                */
+
+               //Associate with it
+
+               var bo_triple = {};
+                bo_triple["subject"] = uri;
+                bo_triple["predicate"] = "http://datalenergies.total.com/resource/tsf/idcp_v2/hasBO";
+                bo_triple["object"] = bo_uri;
+                Lineage_blend.graphModification.creatingNodeTriples.push(bo_triple);
+
+            }
+           
+
+            
             
         }else{
             
-            var parameter = $("#parameter_uri").val();
-            var parameter_triple = {};
-            parameter_triple["subject"] = uri;
-            parameter_triple["predicate"] = "equivclass";
-            parameter_triple["object"] = parameter;
-
+        // Is a parameter 
+            //Classics
             //is a bag
 
-            //is a class
+            
+            var bag_triple = {};
+            bag_triple["subject"] = uri;
+            bag_triple["predicate"] = "rdf:type" ;
+            bag_triple["object"] ="rdf:Bag";
+            Lineage_blend.graphModification.creatingNodeTriples.push(bag_triple);
+
+           
+
+            //is a parameter
+            var subclass_triple = {};
+            subclass_triple["subject"] = uri;
+            subclass_triple["predicate"] = "rdfs:subClassOf" ;
+            subclass_triple["object"] =self.parameterUri;
+            Lineage_blend.graphModification.creatingNodeTriples.push(subclass_triple);
+
+
+            //BO value
+            
+            var bo = $("#bo_uri").val();
+
+            if(bo.startsWith('http://datalenergies.total.com/resource/tsf/')){
+                // Association with BO 
+
+                var bo_triple = {};
+                bo_triple["subject"] = uri;
+                bo_triple["predicate"] = "http://datalenergies.total.com/resource/tsf/idcp_v2/hasBO";
+                bo_triple["object"] = bo;
+                Lineage_blend.graphModification.creatingNodeTriples.push(bo_triple);
+
+            }
+            else{
+               
+               // get uri
+               var bo_uri = Lineage_blend.graphModification.getURI(bo);
+
+               //checkpoint
+               /*
+               var current_cretaing_triples=Lineage_blend.graphModification.creatingNodeTriples;
+
+               
+               
+               Lineage_blend.graphModification.creatingNodeTriples=[];
+              */
+
+
+                // Create IDCP BO 
+               var triple_creator_bo=Lineage_blend.graphModification.creatingNodeTriples[1];
+               triple_creator_bo.subject=bo_uri;
+               Lineage_blend.graphModification.creatingNodeTriples.push(triple_creator_bo);
+
+                var bo_label = {};
+                bo_label["subject"] = bo_uri;
+                bo_label["predicate"] = "rdfs:label";
+                bo_label["object"] = bo;
+                Lineage_blend.graphModification.creatingNodeTriples.push(bo_label);
+
+                var bo_class_triple = {};
+                bo_class_triple["subject"] = bo_uri;
+                bo_class_triple["predicate"] = "rdf:type" ;
+                bo_class_triple["object"] ="owl:Class";
+                Lineage_blend.graphModification.creatingNodeTriples.push(bo_class_triple);   
+
+                var subclass_triple = {};
+                subclass_triple["subject"] = bo_uri;
+                subclass_triple["predicate"] = "rdfs:subClassOf" ;
+                subclass_triple["object"] ="http://datalenergies.total.com/resource/tsf/idcp_v2/Business_Objects";
+                Lineage_blend.graphModification.creatingNodeTriples.push(subclass_triple);
+    
+                Lineage_blend.graphModification.createNode();
+               
+                /*
+               // resume checkpoint
+
+               Lineage_blend.graphModification.creatingNodeTriples=current_cretaing_triples;
+                */
+
+               //Associate with it
+
+               var bo_triple = {};
+                bo_triple["subject"] = uri;
+                bo_triple["predicate"] = "http://datalenergies.total.com/resource/tsf/idcp_v2/hasBO";
+                bo_triple["object"] = bo_uri;
+                Lineage_blend.graphModification.creatingNodeTriples.push(bo_triple);
+
+            }
+
+            //Parameter value
+            var parameter = $("#parameter_uri").val();
+
+            if(parameter.startsWith('http://datalenergies.total.com/resource/tsf/gidea-raw/')){
+                //Is uri
+                 //  Similar in gidea
+            
+                var parameter_triple = {};
+                parameter_triple["subject"] = uri;
+                parameter_triple["predicate"] = "http://www.w3.org/2002/07/owl#equivalentClass";
+                parameter_triple["object"] = parameter;
+                Lineage_blend.graphModification.creatingNodeTriples.push(parameter_triple);
+            }
+            else {
+                //Is == None
+                //Do nothing more
+
+
+
+            }
+            
+           
+            
+
+            
         
 
         }
@@ -1133,19 +1383,19 @@ var Idcp = (function () {
 
 
 
-        Lineage_blend.graphModification.creatingNodeTriples.push(definition_triple);
-        Lineage_blend.graphModification.creatingNodeTriples.push(bo_triple);
+        
+        
 
 
 
 
         Lineage_blend.graphModification.createNode();
         //Add new node to the desired container
-        Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, Lineage_containers.currentContainer, node);
+        Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, self.last_IDCP_container, node);
 
         //Display new parameter and the button clear all
         $(document).ready(function () {
-            Lineage_containers.graphResources(Lineage_sources.activeSource, Lineage_containers.currentContainer.data, { leaves: true }, function () {
+            Lineage_containers.graphResources(Lineage_sources.activeSource, self.last_IDCP_container.data, { leaves: true }, function () {
                 $(".vis-manipulation").remove();
                 $(".vis-close").remove();
                 if (!self.loadedGraphDisplay) {
@@ -1210,6 +1460,27 @@ var Idcp = (function () {
             //Initialize Jstree
             //Lineage_containers.search(self.IDCP_fillJstreeTypes);
             self.IDCPsearch();
+            // Load images
+            common.jstree.types["datacontainer"]= {
+                icon: "../icons/datacontainer.png",
+            };
+            common.jstree.types["datablock"]= {
+                icon: "../icons/datablock.png",
+            };
+            common.jstree.types["parameter"]=  {
+                icon: "../icons/Parameter.png",
+            };
+            common.jstree.types["properties"]=  {
+                icon: "../icons/properties.png",
+            };
+            common.jstree.types["disciplines"]=  {
+                icon: "../icons/disciplines.png",
+            };
+
+
+
+
+
             //self.IDCP_fillJstreeTypes();
 
             $("#graphDiv").text("");

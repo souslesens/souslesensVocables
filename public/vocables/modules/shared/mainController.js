@@ -7,6 +7,7 @@ import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_SKOS from "../sparqlProxies/sparql_SKOS.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
+import GraphLoader from "./graphLoader.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -694,6 +695,26 @@ return;*/
             var tool = paramsMap["tool"];
 
             if (tool) {
+                var rdfUrl = paramsMap["rdfUrl"];
+                if (rdfUrl) {
+                    var source = paramsMap["source"];
+                    rdfUrl = decodeURIComponent(rdfUrl);
+                    var reload = paramsMap["reload"];
+                    var editable = paramsMap["editable"];
+                    var options = {};
+                    GraphLoader.loadGraphFromUrl(source, rdfUrl, reload, editable, options, function (err, result) {
+                        if (err) return alert(err);
+
+                        var source = paramsMap["source"];
+                        if (source) {
+                            Config.tools[tool].urlParam_source = source;
+                        }
+                        self.UI.initTool(tool, function () {
+                            callback();
+                        });
+                    });
+                    return;
+                }
                 var source = paramsMap["source"];
                 if (source) {
                     Config.tools[tool].urlParam_source = source;

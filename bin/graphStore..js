@@ -130,7 +130,7 @@ var GraphStore = {
     curl.perform();
 */
     },
-    importGraphFromUrl: function (sparqlServerConnection, graphUrl, graphUri, callback) {
+    importGraphFromUrl: function (sparqlServerConnection, rdfUrl, graphUri, callback) {
         var filePath;
         var id = Util.getRandomHexaId(10);
         if (path.sep == "/") {
@@ -151,7 +151,7 @@ var GraphStore = {
                 });
             });
 
-        request(graphUrl)
+        request(rdfUrl)
             .on("error", function (err) {
                 return callback(err);
             })

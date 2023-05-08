@@ -16,20 +16,25 @@ var SourceSelectorWidget = (function () {
 
         $("#" + targetDivId).load("snippets/sourceSelector.html", function (err) {
             self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
-            $("#sourceSelector_SearchSourceInput");
+            //  $("#sourceSelector_SearchSourceInput");
+            $("#sourceSelector_validateButton").bind("click", function () {
+                okButtonValidateFn();
+                if (isDialog) {
+                    $("#" + targetDivId).dialog("close");
+                }
+            });
+
+            if (options.withCheckboxes) {
+                $(".sourceSelector_buttons").css("display", "block");
+            } else {
+                $(".sourceSelector_buttons").css("display", "none");
+            }
+
+            if (isDialog) {
+                $("#" + targetDivId).dialog("open");
+            } else {
+            }
         });
-
-        if (options.withCheckboxes) {
-            $(".sourceSelector_buttons").css("display", "block");
-        } else {
-            $(".sourceSelector_buttons").css("display", "none");
-        }
-
-        if (isDialog) {
-            $("#" + targetDivId).dialog("open");
-        } else {
-            $("#sourceSelector_validateButton").on("click", okButtonValidateFn);
-        }
     };
 
     self.getSourcesJstreeData = function (types, sourcesSelection) {

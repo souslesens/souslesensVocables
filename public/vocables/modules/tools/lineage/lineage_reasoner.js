@@ -8,12 +8,16 @@ import Lineage_sources from "./lineage_sources.js";
 var Lineage_reasoner = (function () {
     var self = {};
     self.inferenceTriples = [];
-
+    self.loaded = false;
     self.showReasonerDialog = function () {
         $("#smallDialogDiv").dialog("open");
+
         $("#smallDialogDiv").load("snippets/lineage/lineage_reasoner.html", function () {
-            $("#lineage_reasoner_outputDiv").css("display", "none");
-            common.fillSelectWithColorPalette("lineage_reasoner_colorSelect");
+            if (!self.loaded) {
+                self.loaded = true;
+                $("#lineage_reasoner_outputDiv").css("display", "none");
+                common.fillSelectWithColorPalette("lineage_reasoner_colorSelect");
+            }
         });
     };
 
@@ -80,6 +84,25 @@ var Lineage_reasoner = (function () {
     };
 
     self.runInference = function () {
+        if (false) {
+            self.inferenceData = {
+                EquivalentClasses: [
+                    "EquivalentClasses(<http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalArtefact> ObjectIntersectionOf(<http://rds.posccaesar.org/ontology/lis14/rdl/Artefact> <http://rds.posccaesar.org/ontology/lis14/rdl/InanimatePhysicalObject>) )",
+                    "EquivalentClasses(<http://rds.posccaesar.org/ontology/lis14/rdl/InstalledObject> ObjectIntersectionOf(<http://rds.posccaesar.org/ontology/lis14/rdl/ActualEntity> <http://rds.posccaesar.org/ontology/lis14/rdl/Object>) )",
+                    "EquivalentClasses(<http://rds.posccaesar.org/ontology/lis14/rdl/SoftwareArtefact> ObjectIntersectionOf(<http://rds.posccaesar.org/ontology/lis14/rdl/Artefact> <http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject>) )",
+                    "EquivalentClasses(<http://rds.posccaesar.org/ontology/lis14/rdl/SpecificationObject> ObjectIntersectionOf(<http://rds.posccaesar.org/ontology/lis14/rdl/Object> <http://rds.posccaesar.org/ontology/lis14/rdl/SpecificationEntity>) )",
+                ],
+            };
+            var html = "<select id='lineage_reasoner_inferencePredicateSelect' size='15' style='width:250px' multiple='multiple'>";
+            for (var key in self.inferenceData) {
+                self.inferenceData[key] = self.FunctionalStyleSyntaxToJson(self.inferenceData[key]);
+                html += "<option value='" + key + "'>" + key + " : " + self.inferenceData[key].length + "</option>";
+            }
+            $("#lineage_reasoner_outputDiv").css("display", "block");
+            html += "</select>";
+            $("#lineage_reasoner_infosDiv").html(html);
+            return;
+        }
         var operation = $("#lineage_reasoner_operationSelect").val();
 
         var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
@@ -90,6 +113,7 @@ var Lineage_reasoner = (function () {
             type: "internalGraphUri",
             describeSparqlQuery: describeQuery,
         });
+
         $("#lineage_reasoner_infosDiv").html("Processing " + Lineage_sources.activeSource + "...");
         $.ajax({
             type: "GET",
@@ -98,28 +122,14 @@ var Lineage_reasoner = (function () {
 
             success: function (data, _textStatus, _jqXHR) {
                 $("#lineage_reasoner_outputDiv").css("display", "block");
-                self.inferenceData = [];
-                for (var key in data) {
-                    self.inferenceData = self.inferenceData.concat(self.FunctionalStyleSyntaxToJson(data[key]));
-                }
-                var predicatesMap = {};
-                self.inferenceData.forEach(function (item) {
-                    if (item.object == "owl:Thing") {
-                        return;
-                    }
-                    if (item.subject == "owl:Thing") {
-                        return;
-                    }
-                    if (!predicatesMap[item.predicate]) {
-                        predicatesMap[item.predicate] = [];
-                    }
-                    predicatesMap[item.predicate].push(item);
-                });
 
+                self.inferenceData = {};
                 var html = "<select id='lineage_reasoner_inferencePredicateSelect' size='15' style='width:250px' multiple='multiple'>";
-                for (var pred in predicatesMap) {
-                    html += "<option value='" + pred + "'>" + pred + " : " + predicatesMap[pred].length + "</option>";
+                for (var pred in data) {
+                    self.inferenceData[pred] = self.FunctionalStyleSyntaxToJson(data[pred]);
+                    html += "<option value='" + pred + "'>" + pred + " : " + self.inferenceData[pred].length + "</option>";
                 }
+
                 html += "</select>";
                 $("#lineage_reasoner_infosDiv").html(html);
             },
@@ -157,66 +167,71 @@ var Lineage_reasoner = (function () {
             var inferencePredicates = $("#lineage_reasoner_inferencePredicateSelect").val();
             var filteredData = [];
 
-            if (!inferencePredicates) {
-                filteredData = self.inferenceData;
-            } else {
-                self.inferenceData.forEach(function (item) {
-                    if (inferencePredicates.indexOf(item.predicate) > -1) {
+            for (var pred in self.inferenceData) {
+                if (!inferencePredicates || inferencePredicates.indexOf(pred) > -1) {
+                    self.inferenceData[pred].forEach(function (item) {
                         filteredData.push(item);
-                    }
-                });
+                    });
+                }
             }
 
+            var visjsData = { nodes: [], edges: [] };
+            var existingNodes = visjsGraph.getExistingIdsMap();
             filteredData.forEach(function (item) {
                 var uri = item.subject;
                 if (!urisMap[uri]) {
-                    urisMap[uri] = 1;
+                    urisMap[uri] = "";
                 }
                 var uri = item.object;
                 if (!urisMap[uri]) {
-                    urisMap[uri] = 1;
+                    urisMap[uri] = "";
                 }
             });
             var filter = Sparql_common.setFilter("id", Object.keys(urisMap), null);
+
+            var edgeColor = $("#lineage_reasoner_colorSelect").val();
+
             Sparql_OWL.getDictionary(Lineage_sources.activeSource, { filter: filter }, null, function (err, result) {
                 result.forEach(function (item) {
                     urisMap[item.id.value] = item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value);
                 });
-                var visjsData = { nodes: [], edges: [] };
-                var existingNodes = visjsGraph.getExistingIdsMap();
-
-                var edgeColor = $("#lineage_reasoner_colorSelect").val();
 
                 filteredData.forEach(function (item) {
                     var uri = item.subject;
-                    if (urisMap[uri] && !existingNodes[uri]) {
+                    var label = urisMap[uri] || Sparql_common.getLabelFromURI(uri);
+
+                    if (!existingNodes[uri]) {
                         existingNodes[uri] = 1;
                         visjsData.nodes.push({
                             id: uri,
-                            label: urisMap[uri],
+                            label: label,
                             shape: "square",
                             color: "grey",
                             size: Lineage_classes.defaultShapeSize,
                             data: {
                                 id: uri,
-                                label: urisMap[uri],
+                                label: label,
                                 source: Lineage_sources.activeSource,
                             },
                         });
                     }
 
                     var uri2 = item.object;
-                    if (urisMap[uri] && !existingNodes[uri2]) {
+
+                    var shape = Config.Lineage.logicalOperatorsMap[item.predicate] || "square";
+
+                    var label2 = urisMap[uri2] || Sparql_common.getLabelFromURI(uri2);
+                    if (!existingNodes[uri2]) {
                         existingNodes[uri2] = 1;
                         visjsData.nodes.push({
                             id: uri2,
-                            label: urisMap[uri2],
-                            shape: "square",
+                            label: label2,
+                            shape: shape,
                             color: "grey",
                             size: Lineage_classes.defaultShapeSize,
                             data: {
                                 id: uri2,
-                                label: urisMap[uri2],
+                                label: label2,
                                 source: Lineage_sources.activeSource,
                             },
                         });
@@ -246,7 +261,7 @@ var Lineage_reasoner = (function () {
         }
     };
 
-    self.FunctionalStyleSyntaxToJson = function (functionalStyleStr) {
+    self.FunctionalStyleSyntaxToJson = function (functionalStyleStrArray) {
         function getUri(str) {
             if (!str) {
                 return null;
@@ -254,23 +269,41 @@ var Lineage_reasoner = (function () {
             return str.replace(/[<>]/g, "");
         }
 
-        var regex = /([A-z]+)\(([^\)]+)\)/gm;
+        /*    var regex = /([A-z]+)\(([^\)]+)\)/gm;
 
-        var regex2 = /([A-z]+)\(([^ ]+) ([^)]+)/gm;
+   var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
+
+
+    //  var regexNested = /([^<]+)\(<([^>]+)> <([^>]+)>\)/*/
+
+        var regex = /([A-z]+)\(([^\)]+)\)/gm;
+        var regexNested = /([^\(^"]+)\(<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/; //nested expression
 
         var array = [];
         var json = [];
-        while ((array = regex.exec(functionalStyleStr)) != null) {
-            var predicate = array[1];
-            var expr = array[2];
-            var array2 = expr.split(" ");
-            if (array2.length == 2) {
-                var object = getUri(array2[0]);
-                var subject = getUri(array2[1]);
-            }
-            json.push({ subject: subject, predicate: predicate, object: object });
-        }
 
+        functionalStyleStrArray.forEach(function (functionalStyleStr) {
+            if ((array = regexNested.exec(functionalStyleStr)) != null) {
+                //nested expression
+                var subject = array[2];
+                var predicate = array[3];
+                var object1 = array[4];
+                var object2 = array[5];
+
+                var bNode = "_:" + common.getRandomHexaId(8);
+                json.push({ subject: subject, predicate: predicate, object: bNode });
+                json.push({ subject: bNode, predicate: "owl:first", object: object1 });
+                json.push({ subject: bNode, predicate: "owl:rest", object: object2 });
+            } else if ((array = regex.exec(functionalStyleStr)) != null) {
+                var array2 = array[2].split(" ");
+                if (array2.length == 2) {
+                    var object = getUri(array2[0]);
+                    var subject = getUri(array2[1]);
+
+                    json.push({ subject: subject, predicate: array[1], object: object });
+                }
+            }
+        });
         return json;
     };
 

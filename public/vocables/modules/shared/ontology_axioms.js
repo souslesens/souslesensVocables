@@ -1,11 +1,16 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
+import Lineage_sources from "../tools/lineage/lineage_sources.js";
 
 var Ontology_axioms = (function () {
     var self = {};
+    Lineage_sources;
 
     self.getAllAxioms = function (sourceLabel) {
+        if (!sourceLabel) sourceLabel = Lineage_sources.activeSource;
+
+        var fromStr = Sparql_common.getFromStr(sourceLabel);
         var query =
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -29,6 +34,17 @@ var Ontology_axioms = (function () {
             "  " +
             " " +
             "}order by ?X ";
+
+        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept", { type: "http://www.w3.org/2002/07/owl#Class" });
+
+            return callback(null, result.results.bindings);
+        });
     };
 
     return self;

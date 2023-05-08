@@ -85,7 +85,7 @@ var Ontocommons = (function () {
             }
 
             $("#slsv_iframe").attr("src", null);
-            // var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
+
             var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
             self.currentSource = ontologyId;
             var reload = $("#reloadOntologyCBX").prop("checked");
@@ -112,6 +112,7 @@ var Ontocommons = (function () {
 
             $("#waitImg").css("display", "block");
             self.message("loading ontology and imports...");
+
             $.ajax({
                 type: "POST",
                 url: `${self.apiUrl}/graphStore/importSource`,
@@ -133,6 +134,18 @@ var Ontocommons = (function () {
                 },
             });
         });
+    };
+
+    self.showOntologyInSLSV_iFrame = function (ontologyId) {
+        if (!ontologyId) {
+            return;
+        }
+        var rdfUrlUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
+        var rdfUrlEncoded = encodeURIComponent(rdfUrlUrl);
+        var slsvUrl = "http://localhost:3010/";
+
+        var targetUrl = slsvUrl + "?tool=lineage&source=" + ontologyId + "&rdfUrl=" + rdfUrlEncoded + "&reload=true";
+        $("#slsv_iframe").attr("src", targetUrl);
     };
 
     self.message = function (message) {

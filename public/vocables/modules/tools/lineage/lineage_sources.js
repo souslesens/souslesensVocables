@@ -94,37 +94,6 @@ var Lineage_sources = (function () {
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, validateButtonFn, options);
 
         return;
-        SourceSelectorWidget.showDialog(
-            ["OWL", "SKOS"],
-            {
-                includeSourcesWithoutSearchIndex: true,
-                withCheckboxes: true,
-                targetDiv: null,
-                openTargetDialogDiv: true,
-                // dontTie_selection: false,
-                onOpenNodeFn: function () {
-                    $("#Lineage_classes_SearchSourceInput").blur();
-                },
-            },
-            function () {
-                var searchSource = $("#Lineage_classes_SearchSourceInput").val();
-                if (!searchSource) {
-                    return;
-                }
-                var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
-                self.setCurrentSource(source);
-                $("#sourcesSelectionDialogdiv").dialog("close");
-                $("#lineage_allActions").css("visibility", "visible");
-                MainController.UI.showHideRightPanel();
-            },
-            function () {
-                //if checkbox
-
-                var sources = $("#searchAll_sourcesTree").jstree(true).get_checked();
-
-                self.loadSources(sources);
-            }
-        );
     };
 
     self.loadSources = function (sources) {

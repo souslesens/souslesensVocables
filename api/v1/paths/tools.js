@@ -1,8 +1,6 @@
 const { successfullyFetched } = require("./utils.js");
 const { profileModel } = require("../../../model/profiles");
-const { userModel } = require("../../../model/users");
-const path = require("path");
-const fs = require("fs");
+const userManager = require("../../../bin/user.");
 
 module.exports = function () {
     let operations = {
@@ -11,8 +9,8 @@ module.exports = function () {
 
     async function GET(req, res, next) {
         try {
-            const user = await userModel.findUserAccount(req.user.login);
-            const userTools = await profileModel.getUserTools(user);
+            const userInfo = await userManager.getUser(req.user);
+            const userTools = await profileModel.getUserTools(userInfo.user);
             res.status(200).json(successfullyFetched(userTools));
         } catch (err) {
             console.log(err);

@@ -99,7 +99,12 @@ class ProfileModel {
             const forbiddenTools = new Set(Object.entries(userProfiles).reduce((acc, [k, v]) => acc.concat(v.forbiddenTools), []));
             const allowedTools = allowedToolsOrAll.has("ALL") ? allTools : allowedToolsOrAll;
             const userTools = new Set([...allowedTools].filter((x) => !forbiddenTools.has(x)));
-            const plugins = fs.readdirSync(path.join(process.cwd(), "/plugins"));
+            let plugins = new Array();
+            try {
+                plugins = fs.readdirSync(path.join(process.cwd(), "/plugins"));
+            } catch {
+                console.warn("No plugins directory");
+            }
             const toolsFromNames = (tools) => [...tools].map((tool) => ({ name: tool, type: plugins.includes(tool) ? "plugin" : "tool" }));
 
             if (user.login === "admin" || user?.groups.includes("admin")) {

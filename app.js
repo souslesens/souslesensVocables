@@ -82,8 +82,8 @@ async function loggedIn(req, _res, next) {
 function isPluginAllowed(tool) {
     return async (req, res, next) => {
         try {
-            const user = await userModel.findUserAccount(req.user.login);
-            const userTools = await profileModel.getUserTools(user);
+            const userInfo = await userManager.getUser(req.user);
+            const userTools = await profileModel.getUserTools(userInfo.user);
 
             if (userTools.map((i) => i.name).includes(tool)) {
                 next();
@@ -100,10 +100,14 @@ function isPluginAllowed(tool) {
 }
 
 const pluginDir = path.join(__dirname, "plugins");
-const dirs = fs.readdirSync(pluginDir);
-dirs.forEach((plugin) => {
-    app.use(`/plugins/${plugin}`, loggedIn, isPluginAllowed(plugin), express.static(path.join(__dirname, `plugins/${plugin}/public`)));
-});
+try {
+    const dirs = fs.readdirSync(pluginDir);
+    dirs.forEach((plugin) => {
+        app.use(`/plugins/${plugin}`, loggedIn, isPluginAllowed(plugin), express.static(path.join(__dirname, `plugins/${plugin}/public`)));
+    });
+} catch {
+    console.warn("No plugins directory available");
+}
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));

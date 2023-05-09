@@ -177,8 +177,13 @@ var Lineage_reasoner = (function () {
 
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = visjsGraph.getExistingIdsMap();
+
+            function cleanJenaUris(uri) {
+                return uri.replace("file:/", "_:");
+            }
+
             filteredData.forEach(function (item) {
-                var uri = item.subject;
+                var uri = cleanJenaUris(item.subject);
                 if (!urisMap[uri]) {
                     urisMap[uri] = "";
                 }
@@ -197,7 +202,7 @@ var Lineage_reasoner = (function () {
                 });
 
                 filteredData.forEach(function (item) {
-                    var uri = item.subject;
+                    var uri = cleanJenaUris(item.subject);
                     var label = urisMap[uri] || Sparql_common.getLabelFromURI(uri);
 
                     if (!existingNodes[uri]) {
@@ -216,18 +221,26 @@ var Lineage_reasoner = (function () {
                         });
                     }
 
-                    var uri2 = item.object;
+                    var uri2 = cleanJenaUris(item.object);
 
-                    var shape = Config.Lineage.logicalOperatorsMap[item.predicate] || "square";
+                    var label2, shape, color;
+                    if (Config.Lineage.logicalOperatorsMap[item.predicate]) {
+                        shape = "circle";
+                        label2 = Config.Lineage.logicalOperatorsMap[item.predicate];
+                        color = "#eee";
+                    } else {
+                        label2 = urisMap[uri2] || Sparql_common.getLabelFromURI(uri2);
+                        shape = "square";
+                        color = "grey";
+                    }
 
-                    var label2 = urisMap[uri2] || Sparql_common.getLabelFromURI(uri2);
                     if (!existingNodes[uri2]) {
                         existingNodes[uri2] = 1;
                         visjsData.nodes.push({
                             id: uri2,
                             label: label2,
                             shape: shape,
-                            color: "grey",
+                            color: color,
                             size: Lineage_classes.defaultShapeSize,
                             data: {
                                 id: uri2,
@@ -246,6 +259,14 @@ var Lineage_reasoner = (function () {
                             to: uri2,
                             label: item.predicate,
                             color: edgeColor || "red",
+                            font: { size: 10 },
+                            arrows: {
+                                to: {
+                                    enabled: true,
+                                    type: Lineage_classes.defaultEdgeArrowType,
+                                    scaleFactor: 0.5,
+                                },
+                            },
                         });
                     }
                 });
@@ -271,10 +292,10 @@ var Lineage_reasoner = (function () {
 
         /*    var regex = /([A-z]+)\(([^\)]+)\)/gm;
 
-   var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
+var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
 
 
-    //  var regexNested = /([^<]+)\(<([^>]+)> <([^>]+)>\)/*/
+//  var regexNested = /([^<]+)\(<([^>]+)> <([^>]+)>\)/*/
 
         var regex = /([A-z]+)\(([^\)]+)\)/gm;
         var regexNested = /([^\(^"]+)\(<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/; //nested expression

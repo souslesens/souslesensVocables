@@ -63,6 +63,7 @@ if (config.auth !== "disabled") {
 // Static content
 app.use("/vocables", express.static(path.join(__dirname, "public/vocables/dist")));
 app.use("/assets", express.static(path.join(__dirname, "public/vocables/dist/assets")));
+app.use("/vocables/browse.html", express.static(path.join(__dirname, "public/vocables/browse.html")));
 app.use("/mainapp/assets", express.static(path.join(__dirname, "mainapp/static/assets")));
 app.use("/vocables/images", express.static(path.join(__dirname, "public/vocables/images")));
 app.use("/vocables/snippets", express.static(path.join(__dirname, "public/vocables/snippets")));

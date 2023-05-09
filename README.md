@@ -299,3 +299,32 @@ git push --tags
 ```
 
 GitHub releases and docker images are created on tags with GitHub Actions.
+
+### Plugins system
+
+In root create a plugins folder
+
+`mkdir plugins`
+
+Each directory is named after the plugin we want to add.
+
+```
+plugins/
+└── MyPlugin
+    └── public
+        └── MyPlugin.js
+```
+
+The plugin's directory must contain a public directory with the source code within it.
+
+MyPlugin.js must export a single IIFE function.
+
+```
+const Toto = (function () {
+    return { name: "toto" };
+})();
+export default Toto;
+```
+
+Once it done, don't forget to add the plugin's name to `mainConfig.tools_available`.
+If you still don't see the plugin in the jsTree, check that your user's profile allows to see this plugin.

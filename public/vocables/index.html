@@ -83,9 +83,17 @@
         <script type="module" src="modules/tools/ontologiesStats.js"></script>
 
         <script src="config/app_config.js"></script>
-        <!--    <script src="config/app_config_draft_tools.js"></script>-->
 
         <script type="module" src="modules/shared/authentification.js"></script>
+        <script type="module">
+            import { allTools, loadToolsAndPlugins } from "./config/tools.js";
+
+            try {
+                await loadToolsAndPlugins();
+            } catch (error) {
+                console.error("Failed to load tools and plugins", error);
+            }
+        </script>
 
         <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>

@@ -140,11 +140,14 @@ var Ontocommons = (function () {
         if (!ontologyId) {
             return;
         }
+        var reload = $("#reloadOntologyCBX").prop("checked");
+        var editable = $("#editableCBX").prop("checked");
+
         var rdfUrlUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
         var rdfUrlEncoded = encodeURIComponent(rdfUrlUrl);
         var slsvUrl = "http://localhost:3010/";
 
-        var targetUrl = slsvUrl + "?tool=lineage&source=" + ontologyId + "&rdfUrl=" + rdfUrlEncoded + "&reload=true";
+        var targetUrl = slsvUrl + "?tool=lineage&source=" + ontologyId + "&rdfUrl=" + rdfUrlEncoded + "&reload=" + reload + "&editable=" + editable;
         $("#slsv_iframe").attr("src", targetUrl);
     };
 

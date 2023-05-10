@@ -11,9 +11,8 @@ env:
 
 jobs:
     cypress-run:
-        runs-on: self-hosted
+        runs-on: sirius
         timeout-minutes: 10
-        if: ${{ false }}
 
         steps:
             - name: Checkout
@@ -26,11 +25,13 @@ jobs:
               run: |
                   sudo apt-get update
                   sudo apt install -y docker-compose
-            - name: Deploy containers & load data
+            - name: Deploy containers
               run: |
                   sudo docker-compose -f docker-compose.test.yaml up -d
                   sleep 1m
-                  bash tests/load_data.sh
+            - name: Load data
+              run: |
+                  sudo bash tests/load_data.sh
                   sleep 30s
             - name: Build mainapp
               working-directory: ./mainapp
@@ -58,9 +59,8 @@ jobs:
                       cypress/e2e/SQLquery.cy.js
                   runTests: true
     cleanup:
-        runs-on: self-hosted
+        runs-on: sirius
         needs: cypress-run
-        if: ${{ false }}
         steps:
             - name: Cleanup
               run: sudo docker-compose -f docker-compose.test.yaml down

@@ -29,7 +29,7 @@ var GraphLoader = (function () {
 
         $.ajax({
             type: "POST",
-            url: `${Config.apiUrl}/graphStore/importSource`,
+            url: `${Config.apiUrl}/jowl/importSource`,
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {

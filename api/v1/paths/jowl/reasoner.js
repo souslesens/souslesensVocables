@@ -91,6 +91,7 @@ module.exports = function () {
 
                     var payload = {
                         ontologyContentEncoded64: ontologyContentEncoded64,
+                        //assertions:["eee","eeee"]
                     };
 
                     var options = {

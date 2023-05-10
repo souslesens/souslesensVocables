@@ -115,7 +115,7 @@ var Ontocommons = (function () {
 
             $.ajax({
                 type: "POST",
-                url: `${self.apiUrl}/graphStore/importSource`,
+                url: `${self.apiUrl}/jowl/importSource`,
                 data: payload,
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
@@ -145,7 +145,7 @@ var Ontocommons = (function () {
 
         var rdfUrlUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
         var rdfUrlEncoded = encodeURIComponent(rdfUrlUrl);
-        var slsvUrl = "http://localhost:3010/";
+        var slsvUrl = window.location.protocol + "//" + window.location.host;
 
         var targetUrl = slsvUrl + "?tool=lineage&source=" + ontologyId + "&rdfUrl=" + rdfUrlEncoded + "&reload=" + reload + "&editable=" + editable;
         $("#slsv_iframe").attr("src", targetUrl);

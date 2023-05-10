@@ -28,11 +28,13 @@
     "password": "",
     "server": "",
     "database": ""
+    "trustServerCertificate": true
   },
   "ElasticSearch": {
     "url": "http://xxxx:9200/",
     "other_servers": [
-
+    "user": "xxx",
+    "password": "xxx",
     ]
   },
   "annotator": {

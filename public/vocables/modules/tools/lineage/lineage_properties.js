@@ -303,7 +303,9 @@ var Lineage_properties = (function () {
                                 color = "#EEE";
                             }*/
                         }
-                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.subject.value, label,{shape:shape}) );
+
+                        var incomingPredicateUri=options.inversePredicate?item.prop.value:null;
+                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.subject.value, label,incomingPredicateUri,{shape:shape}) );
                       /*  visjsData.nodes.push({
                             id: item.subject.value,
                             label: label,
@@ -352,7 +354,10 @@ var Lineage_properties = (function () {
                             font = "12px arial #3c8fe1";
                         }
 
-                        visjsData.nodes.push({
+                        var incomingPredicateUri=options.inversePredicate?null:item.prop.value;
+                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.object.value, label,incomingPredicateUri,{shape:shape}) );
+
+                    /*   visjsData.nodes.push({
                             id: item.object.value,
                             label: label,
                             shape: shape,
@@ -365,7 +370,7 @@ var Lineage_properties = (function () {
                                 label: item.objectLabel.value,
                                 type: item.object.type,
                             },
-                        });
+                        });*/
                     }
                     var edgeId = item.subject.value + "_" + item.prop.value + "_" + item.object.value;
                     if (!existingNodes[edgeId]) {
@@ -390,6 +395,7 @@ var Lineage_properties = (function () {
                             dashes = [6, 2, 3];
                         }
 
+
                         visjsData.edges.push({
                             id: edgeId,
                             from: item.subject.value,
@@ -407,7 +413,12 @@ var Lineage_properties = (function () {
                             font: { edgeColor },
                             arrows: {
                                 to: {
-                                    enabled: true,
+                                    enabled: !options.inversePredicate,
+                                    type: "solid",
+                                    scaleFactor: 0.5,
+                                },
+                                from: {
+                                    enabled: options.inversePredicate,
                                     type: "solid",
                                     scaleFactor: 0.5,
                                 },

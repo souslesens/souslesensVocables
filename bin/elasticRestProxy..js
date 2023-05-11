@@ -286,6 +286,7 @@ var elasticRestProxy = {
         );
     },
     listIndexes: function (elasticUrl, callback) {
+        console.log("listIndexes1")
         var options = {
             method: "GET",
             headers: {
@@ -293,13 +294,14 @@ var elasticRestProxy = {
             },
             url: elasticUrl + "_cat/indices?format=json",
         };
-
+        console.log("listIndexes2")
         if (ConfigManager.config.ElasticSearch) {
             options.auth = {
                 user: ConfigManager.config.ElasticSearch.user,
                 password: ConfigManager.config.ElasticSearch.password,
             };
         }
+        console.log("listIndexes3")
         console.log("beforeSendAuthRequest")
         elasticRestProxy.sendAuthRequest(options, function (error, response, body) {
             // request(options, function(error, response, body) {

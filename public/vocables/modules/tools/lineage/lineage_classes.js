@@ -2006,7 +2006,7 @@ addNode:false
                         var incomingPredicateUri=options.inverse?null:item.prop.value;
 
 
-                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.subject.value, item.subjectLabel.value,item.prop.value) );
+                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.subject.value, item.subjectLabel.value,incomingPredicateUri) );
 
 
 
@@ -2074,11 +2074,8 @@ var color;
 
                         existingNodes[item.value.value] = 1;
 
-                       var incomingPredicateUri=null;
-                        if(options.inverse)
-                            incomingPredicateUri=item.prop.value
 
-
+                        var incomingPredicateUri=options.inverse?item.prop.value:null;
                         visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.value.value, item.valueLabel.value,incomingPredicateUri) );
 
                    /*     visjsData.nodes.push({

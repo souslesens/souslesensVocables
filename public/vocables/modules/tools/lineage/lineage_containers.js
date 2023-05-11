@@ -7,6 +7,7 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 
+
 var Lineage_containers = (function () {
     var self = {};
 
@@ -88,48 +89,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
         return items;
     };
 
-    /*
-    self.search = function (callback) {
-        if ($("#lineage_containers_containersJstree").jstree) {
-            $("#lineage_containers_containersJstree").empty();
-        }
-
-        self.currentContainer = null;
-        var term = $("#Lineage_containers_searchInput").val();
-        var searchWhat = $("#Lineage_containers_searchWhatInput").val();
-        var source = Lineage_sources.activeSource;
-
-        var filter = "";
-        if (term) {
-            filter = "FILTER (" + Sparql_common.setFilter("member", null, term) + ")";
-        }
-        var memberType;
-        if (searchWhat == "bags") {
-            memberType = " in (rdf:Bag,rdf:List)";
-        }
-        if (searchWhat == "classes") {
-            memberType = "=owl:Class";
-        }
-        if (searchWhat == "individuals") {
-            memberType = "=owl:NamedIndividual";
-        } else if (searchWhat == "any") {
-            memberType = " in (owl:Class,owl:NamedIndividual,rdf:Bag,rdf:List)";
-        }
-
-        if (searchWhat != "bags" && !term) {
-            return alert("enter a term to search for");
-        }
-      
-
-        self.drawContainerJstree(source, filter, "lineage_containers_containersJstree", memberType, {}, function (err, result) {
-            if (err) {
-                return alert(err.responseText);
-            }
-            callback();
-        });
-    };
-
-    */
+  
 
     self.search = function (memberType,callback) {
        
@@ -161,7 +121,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
         var search_on_container=""
        
-        if (searchWhat == "Current container") {
+        if (searchWhat == "current") {
             search_on_container=self.currentContainer.data.id;
         }
         
@@ -280,7 +240,64 @@ Lineage_styles.showDialog(self.currentContainer.data);
         });
     };
     
+    self.orderResults=function(results){
 
+        var new_results=[]
+        results.forEach(function (item) {
+
+            var current_child=item.member.value;
+            var path_uri_order=[];
+            var label_uri_order=[];
+            var distinct_uris=[];
+            var type_uri_order=[];
+
+            if(item.all.value){
+                var all_results=item.all.value.split(';;');
+                for (let i =0; i <all_results.length ; i++) {
+                    var result=JSON.parse(all_results[i]);
+                    all_results[i]=result;
+                    if(!distinct_uris.includes(result.parentUri)){
+                        distinct_uris.push(result.parentUri);
+                    }
+                }
+                distinct_uris.forEach(function (distinct) {
+                    for (let i =0; i <all_results.length ; i++) {
+                        if(all_results[i].parentChild==current_child){
+                            if(!path_uri_order.includes(all_results[i].parentUri)){
+                                path_uri_order.push(all_results[i].parentUri);
+                                label_uri_order.push(all_results[i].parentLabel);
+                                type_uri_order.push(all_results[i].parentType);
+                                current_child=all_results[i].parentUri;
+
+                            }
+                            
+                        }
+                    }
+                    
+
+                });
+                path_uri_order=path_uri_order.reverse();
+                item.allparents={value:''};
+                item.allparents.value=path_uri_order.toString().replaceAll(',',';;');
+                label_uri_order=label_uri_order.reverse();
+                item.allparentslabel={value:''};
+                item.allparentslabel.value=label_uri_order.toString().replaceAll(',',';;');
+                type_uri_order=type_uri_order.reverse();
+                item.types={value:''};
+                item.types.value=type_uri_order.toString().replaceAll(',',';;');
+                new_results.push(item);
+               
+            }
+            
+           
+            
+
+
+        });
+
+        return (new_results)
+
+    };
 
 
     self.drawContainerJstree = function (source, filter, jstreeDiv,search_on_container, memberType, options, callback) {
@@ -326,53 +343,279 @@ Lineage_styles.showDialog(self.currentContainer.data);
         self.reset_tree(source,filter,jstreeDiv,memberTypefilter,options,callback);
        }
        else{
-
-        var query = `
-            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-            select distinct *    ${fromStr}
-            
-            where {
-
-                ${values}
-                
-                ?member rdfs:label ?memberLabel.
-                ?member rdf:type ?memberType.
-            
-                ${descendants_clause}
-                ${memberTypefilter}
-                
-                ${filter}
-                
-
-                
-                
-                
-                OPTIONAL{?member rdfs:subClassOf ?subclasstype.}
-                {
-                SELECT distinct ?member  (GROUP_CONCAT( distinct ?parentContainer; separator=";;") as ?allparents)  (GROUP_CONCAT( distinct  ?parentContainerLabel; separator=";;") as ?allparentslabel)  (GROUP_CONCAT(  ?type; separator=";;") as ?types) ${fromStr}
-                WHERE{
+      
 
 
-                    OPTIONAL{
-                        ?member ^rdfs:member+ ?parentContainer.
+        var query=`
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+        SELECT distinct ?member ?memberLabel ?memberType ?subclasstype (GROUP_CONCAT(distinct ?allprop ; separator=";;")  as ?all)  ${fromStr}
+        WHERE{
+        
+        
+                        ?member ^rdfs:member* ?parentContainer.
+                        ?parentContainer rdfs:member ?child.
+                        ?parentContainer rdfs:label ?parentContainerLabel.
                         ?parentContainer rdf:type ?type.
                         filter (?type in (rdf:Bag,rdf:List)).
-                        ?parentContainer rdfs:label ?parentContainerLabel
-
-                    }
-                    
-
-                }group by ?member 
-                }
-               
+                        BIND( concat('{','"parentUri":"',str(?parentContainer),'","parentType":"',str(?type),'","parentLabel":"',str(?parentContainerLabel),'","parentChild":"',str(?child),'"}')  AS ?allprop).
+                        ${values}        
+        
+                            
+          
+          
+                {
+          
+                          select distinct *  ${fromStr} where {
+        
+                        
+                        
+                        ?member rdfs:label ?memberLabel.
+                        ?member rdf:type ?memberType.
+                        ${descendants_clause}
+                        ${memberTypefilter}
+                        ${filter}
+                        OPTIONAL{?member rdfs:subClassOf ?subclasstype.}
+                            
+                        }group by ?member ?memberLabel ?memberType ?subclasstype
+                        LIMIT 100
+                        OFFSET 0
+        
+                }	
         }
+        
         
         `
 
+        var offset=0;
+        var resultSize = 100;
+    
+        async.whilst(
+            
+            function (_test) {
+                return resultSize>0;
+            },
+
+            function differ(callbackWhilst){
+                //iterate
+                var sparql_url = Config.sources[source].sparql_server.url;
+                var url = sparql_url + "?format=json&query=";
+                var query_split=query.split('OFFSET');
+                var query2 = query_split[0]+ " OFFSET " + query_split[1].replace(/(\d+)/,offset);
+                
+
+                Sparql_proxy.querySPARQL_GET_proxy(url, query2, null, { source: source }, function (err, result) {
+                    if (err){
+                        return callbackWhilst(err);
 
 
+                    } 
+                    
+                    resultSize=result.results.bindings.length;
+                    var nodesMap = {};
 
+                    var ordered_results=self.orderResults( result.results.bindings);
+
+                
+                    result.results.bindings.forEach(function (item) {
+                        
+                        var node_in_tree=false;
+                        
+                       
+                        
+                        
+                        if(!nodesMap[item.member.value]){
+                            if(offset>0){
+                                var node_in_tree=common.getNodeByURI(jstreeDiv,item.member.value);
+                                
+                            }
+                            var jstreeId = "_" + common.getRandomHexaId(5);
+                            if(node_in_tree!=false){
+                                jstreeId=node_in_tree.id;
+                            }
+                            
+                            var node={"id" : item.member.value,"jstreeid":jstreeId,"label" : item.memberLabel.value,"types":[],"subclass":[],parent:'#'}
+                            if(item.memberType){
+                                node.types.push(item.memberType.value);
+                            }
+                            if(item.subclasstype){
+                                node.subclass.push(item.subclasstype.value);
+                            }
+
+                            nodesMap[item.member.value]=node;
+                           
+
+                            
+
+                        }else{
+                            
+                            if(item.memberType){
+                                if(!(nodesMap[item.member.value].types.includes(item.memberType.value))){
+                                    nodesMap[item.member.value].types.push(item.memberType.value);
+                                }
+                                
+
+                            }
+                            if(item.subclasstype){
+                                if(!(nodesMap[item.member.value].subclass.includes(item.subclasstype.value))){
+                                    nodesMap[item.member.value].subclass.push(item.subclasstype.value);
+                                }
+                            }
+                        }
+                    
+                        
+                        
+                        if(item.allparents){
+                            var parents_iris=item.allparents.value.split(';;');
+                            var parents_labels=item.allparentslabel.value.split(';;');
+                            var parents_types=item.types.value.split(';;');
+
+                            for (let i = parents_iris.length-1; i >=0 ; i--) {
+
+
+                                if( !nodesMap[parents_iris[i]]){
+                                    
+                                    var jstreeId = "_" + common.getRandomHexaId(5);
+                                    if(offset>0){
+                                        var node_in_tree=common.getNodeByURI(jstreeDiv,parents_iris[i]);
+                                        
+                                    }
+                                    if(node_in_tree!=false){
+                                        jstreeId=node_in_tree.id;
+                                    }
+                                    
+
+                                    var node={"id" : parents_iris[i],"jstreeid":jstreeId,"label" : parents_labels[i],"types":[parents_types[i]],"subclass":[],parent:'#'};
+                                    
+                                    
+
+
+                                }
+                                else{
+                                    var node=nodesMap[parents_iris[i]];
+                                    if(!(node.types.includes(parents_types[i]))){
+
+                                        node.types.push(parents_types[i]);
+
+                                    }   
+
+                                }
+
+
+                                if(i!=0){
+                                    if(node.id!=parents_iris[i-1]){
+                                        node['parent']= parents_iris[i-1];
+                                    }
+                                    
+                                }
+
+                                nodesMap[parents_iris[i]]=node;
+
+                                if(i==parents_iris.length-1){
+                                    
+                                nodesMap[item.member.value].parent= parents_iris[i];
+                                    
+                                }
+        
+
+                            }
+
+                        }
+
+                    });
+
+                
+                    
+                    var jstreeData = [];
+
+                    for (var nodeId in nodesMap) {
+                        var item = nodesMap[nodeId];
+                        var parent='#';
+                        if(!(item.parent=='#')){
+                            
+                            var parent=nodesMap[item.parent].jstreeid;
+                            
+                        }
+                        
+                        
+
+                        var node = {
+                                id: item.jstreeid,
+                                text: item.label,
+                                parent: parent,
+                                type: item.types,
+                                data: {
+                                    type: item.types,
+                                    source: source,
+                                    id: item.id,
+                                    label: item.label,
+                                    currentParent: parent,
+                                    tabId: options.tabId,
+                                },
+                        };
+                            
+                        jstreeData.push(node);
+                    }
+                    
+
+                    var jstreeOptions;
+                    if (options.jstreeOptions) {
+                        jstreeOptions = options.jstreeOptions;
+                    } else {
+                        jstreeOptions = {
+                            openAll: false,
+                            contextMenu: Lineage_containers.getContextJstreeMenu(),
+                            selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
+                            dnd: {
+                                drag_stop: function (data, element, helper, event) {
+                                    self.onMoveContainer(data, element, helper, event);
+                                },
+                                drag_start: function (data, element, helper, event) {
+                                    var sourceNodeId = element.data.nodes[0];
+                                    self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
+                                },
+                            },
+                        };
+                    }
+                     
+                    
+                    if(offset==0){
+                        common.jstree.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
+                            $("#" + jstreeDiv).jstree().open_node("#");
+                            $("#" +jstreeDiv).jstree('open_all');
+                            
+                        });
+                       
+                    }
+                   
+                   else{
+                        
+                        common.jstree.addNodesToJstree(jstreeDiv, null, jstreeData, jstreeOptions);
+                   
+                    }
+                    
+                    offset += result.results.bindings.length;
+                    callbackWhilst(null, result);
+                
+                
+                
+                });
+                
+              
+            },
+            
+
+            function (err,result) {
+                
+                callback(null);
+                $("#" +jstreeDiv).jstree('open_all');
+            
+
+                
+            }
+        );
+
+        /*
         var sparql_url = Config.sources[source].sparql_server.url;
         var url = sparql_url + "?format=json&query=";
 
@@ -382,6 +625,8 @@ Lineage_styles.showDialog(self.currentContainer.data);
             }
 
             var nodesMap = {};
+
+            var ordered_results=self.orderResults( result.results.bindings);
 
            
             result.results.bindings.forEach(function (item) {
@@ -455,22 +700,18 @@ Lineage_styles.showDialog(self.currentContainer.data);
                                
                         }
 
-
                         nodesMap[parents_iris[i]]=node;
 
-                        
-                       
-                        
-                       
+                        if(i==parents_iris.length-1){
+                            
+                           nodesMap[item.member.value].parent= parents_iris[i];
+                            
+                        }
+ 
 
                     }
 
-                    
-                    
                 }
-    
-                
-
 
             });
 
@@ -531,13 +772,15 @@ Lineage_styles.showDialog(self.currentContainer.data);
                     .jstree()
                     .open_node("#");
                 callback(null);
+                $("#" +jstreeDiv).jstree('open_all');
             });
         
         
         
         });
-
+        */
         }
+        
     };
 
     self.addContainer = function (source) {

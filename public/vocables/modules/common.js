@@ -253,35 +253,43 @@ var common = (function () {
             if (options.positionLast) {
                 position = "last";
             }
+            self.orderJstreeDataForCreation(jstreeDiv,jstreeData);           
             jstreeData.forEach(function (node) {
-                var parentNodeId = parentNodeId_;
+                var Jstree_id=$("#" + jstreeDiv).jstree(true).get_node(node.id);
+                if(Jstree_id==false){
 
-                if (!parentNodeId_) {
-                    parentNodeId = node.parent;
-                }
 
-                if (!parentNodeId) {
-                    return;
-                }
+                    var parentNodeId = parentNodeId_;
 
-                if (parentNodeId == node.id) {
-                    return console.error("  Error jstree parent == childNode : " + parentNodeId);
-                }
-
-                var parentNodeObj = $("#" + jstreeDiv)
-                    .jstree(true)
-                    .get_node(parentNodeId);
-                if (parentNodeObj.children.indexOf(node) > -1) {
-                    return;
-                }
-                $("#" + jstreeDiv)
-                    .jstree(true)
-                    .create_node(parentNodeId, node, position, function () {
-                        self.jstree.setTreeAppearance();
-                        $("#" + jstreeDiv)
-                            .jstree(true)
-                            .open_node(parentNodeId, null, 500);
+                    if (!parentNodeId_) {
+                        parentNodeId = node.parent;
+                    }
+    
+                    if (!parentNodeId) {
+                        return;
+                    }
+    
+                    if (parentNodeId == node.id) {
+                        return console.error("  Error jstree parent == childNode : " + parentNodeId);
+                    }
+    
+                    var parentNodeObj = $("#" + jstreeDiv).jstree(true).get_node(parentNodeId);
+                     if (parentNodeObj.children.indexOf(node) > -1) {
+                            return;
+                     }
+    
+                    
+                   
+                    // parent exists and have children
+                    
+                    //Create node
+                    $("#" + jstreeDiv).jstree(true).create_node(parentNodeId, node, position, function () {
+                            self.jstree.setTreeAppearance();
+                            $("#" + jstreeDiv).jstree(true).open_node(parentNodeId, null, 500);
                     });
+
+                }
+               
             });
             /*    setTimeout(function() {
         $("#" + jstreeDiv)
@@ -338,6 +346,7 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
             }
         },
 
+        
         getjsTreeNodeObj: function (jstreeDiv, id) {
             return $("#" + jstreeDiv)
                 .jstree(true)
@@ -461,7 +470,76 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                 .open_node(nodeId);
         },
     };
+    self.getNodeByURI=function (jstreeDiv, id) {
+        var data=$("#" + jstreeDiv).jstree()._model.data;
+        var node_finded= false;
+        for (var key in data) {
+            var node=data[key];
+            if(key!='#'){
+                if(node.data.id==id){
+                    node_finded=node;
+                }
+            }
+            
+        };
+        return node_finded;
 
+
+    },
+    self.orderJstreeDataForCreation=function(jstreeDiv,JstreeData){
+        var length=JstreeData.length
+        var n=0;
+        while (n < length) {
+            
+          var node= JstreeData[n];
+          var parentNodeId=node.parent;
+          var parentNodeObj = $("#" + jstreeDiv).jstree(true).get_node(parentNodeId);
+          n++;
+          // parent not exist in tree
+          if (parentNodeObj==false){
+                var indexfinded=self.checkinJstreeData(JstreeData,parentNodeId);
+                if(indexfinded>n-1){
+                    //pass jstreeData[i] to jstreeData[0]
+                    var node_finded=JstreeData[indexfinded];
+                    JstreeData.splice(indexfinded, 1);
+                    JstreeData.splice(0, 0, node_finded);
+        
+                    n=0;
+                }
+
+                
+           }  
+
+          
+        }
+          
+        
+       
+                
+            
+    },
+    
+    self.checkinJstreeData=function(jstreeData,id){
+        var node_finded=null;
+        var i=0;
+        var index_finded=null;
+        
+        jstreeData.forEach(function (node) {
+
+            if(node.id==id){
+                node_finded= node;
+                index_finded=i;
+                
+            }
+            i++;
+        });
+        
+        
+
+        return(index_finded);
+
+    },
+    
     self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField, selectedValue) {
         $("#" + selectId)
             .find("option")

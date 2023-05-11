@@ -7,9 +7,13 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Lancer le programme",
-            "skipFiles": ["<node_internals>/**"],
+            "name": "Launch Program",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
             "program": "${workspaceFolder}\\bin\\www"
+            
         }
+       
     ]
 }

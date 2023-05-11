@@ -52,7 +52,9 @@ var elasticRestProxy = {
             }
         }
         process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
+        console.log("beforeSendAuthRequest2")
         request(options, function (error, response, body) {
+            console.log("SendAuthRequestError :reponse "+error+"\nreponse "+response+"\nbody "+body)
             return callback(error, response, body);
         });
     },
@@ -298,11 +300,14 @@ var elasticRestProxy = {
                 password: ConfigManager.config.ElasticSearch.password,
             };
         }
+        console.log("beforeSendAuthRequest")
         elasticRestProxy.sendAuthRequest(options, function (error, response, body) {
             // request(options, function(error, response, body) {
             if (error) {
+                console.log("SendAuthRequestERROR")
                 return callback(error);
             }
+            console.log("tryParseBody")
             var json = JSON.parse(body);
             var indexes = [];
             json.forEach(function (item) {

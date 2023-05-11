@@ -49,26 +49,6 @@ var MainController = (function () {
         });
     };
 
-    /* self.loadSourcesMappings = function (callback) {
-      $.ajax({
-          type: "GET",
-          url: `${Config.apiUrl}/data/file?dir=mappings&name=sourcesLinkedMappings.json`,
-          dataType: "json",
-
-          success: function (data_, _textStatus, _jqXHR) {
-              try {
-                  var json = JSON.parse(data_);
-              } catch (e) {
-                  callback(e);
-              }
-              callback(null, json);
-          },
-          error(err) {
-              callback(err);
-          },
-      });
-  };*/
-
     self.loadSources = function (sourcesFile, callback) {
         var _payload = {
             getSources: 1,
@@ -134,16 +114,6 @@ var MainController = (function () {
                 }
             },
         });
-        /*   $.getJSON("config/sources.json", function (json) {
-       Config.sources = json;
-      for(var sourceLabel in Config.sources){
-           if(Config.sources[sourceLabel].sparql_server && Config.sources[sourceLabel].sparql_server.url=="_default")
-               Config.sources[sourceLabel].sparql_server.url=Config.default_sparql_url
-       }
-       if (callback)
-           return callback()
-
-   });*/
     };
     self.loadProfiles = function (callback) {
         $.ajax({
@@ -198,7 +168,6 @@ var MainController = (function () {
         var groups = authentication.currentUser.groupes;
 
         MainController.loadProfiles(function (_err, _result) {
-            //  Config.currentProfile=Config.profiles["reader_all"]
             groups.forEach(function (group) {
                 if (groupWithinCurrentProfile(group).length) {
                     return (Config.currentProfile = groupWithinCurrentProfile(group)[0][1]);
@@ -264,10 +233,6 @@ var MainController = (function () {
     self.UI = {
         test: function () {
             Lineage_combine.testMerge();
-            //  Orchestrator.createTab()
-            // broadcastChannel.postMessage("eeee")
-            /*   broadcastChannel.postMessage({ from: MainController.currentTool, to: "Lineage" });
-return;*/
         },
 
         initialGraphDivWitdh: 0,
@@ -442,8 +407,6 @@ return;*/
 
             JstreeWidget.loadJsTree(treeDiv, treeData, options, function () {
                 var openedTypes = Config.preferredSchemaType;
-                //    if (types) openedTypes = types;
-                //  $("#" + treeDiv).jstree(true).open_all(openedTypes);
                 $("#" + treeDiv)
                     .jstree(true)
                     .open_node(openedTypes);
@@ -580,8 +543,7 @@ return;*/
         },
 
         setCredits: function () {
-            var html = "<div>" + " " + " <img  src=\"images/souslesensVocables.png\" style='display: block; margin-left: auto; margin-right: auto width: 50%;margin: auto;'>" + "</div>";
-            $("#graphDiv").html(html);
+            $("#graphDiv").html("<sls-credit-image></sls-credit-image>");
         },
 
         updateActionDivLabel: function (html) {
@@ -711,6 +673,4 @@ return;*/
 })();
 
 export default MainController;
-window.MainController = MainController;
-window.MainController = MainController;
 window.MainController = MainController;

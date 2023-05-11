@@ -156,6 +156,10 @@
         <script type="module" src="component/sls-errors.ts"></script>
         <script type="module" src="component/sls-header.ts"></script>
         <script type="module" src="component/sls-userAccountDropdown.ts"></script>
+        <script type="module" src="component/sls-leftPanel.ts"></script>
+        <script type="module" src="component/sls-centralPanel.ts"></script>
+        <script type="module" src="component/sls-rightPanel.ts"></script>
+        <script type="module" src="component/sls-credits.ts"></script>
         <script type="module">
             import { errors } from "./store/errors.ts";
             import Toastify from "toastify-js";
@@ -215,18 +219,7 @@
                         return console.error(err);
                     }
 
-                    w = $(document).width() - leftPanelWidth - 30;
-                    h = $(document).height() - 30;
-
-                    h = Math.min(h, 1000);
-
-                    $("#graphDiv").width(w);
-                    MainController.UI.initialGraphDivWitdh = w;
-                    $("#graphDiv").height(h - 50);
-
-                    $("#accordion").accordion({
-                        heightStyle: "fill",
-                    });
+                    $("#accordion").accordion();
                     $("#accordion").accordion("option", { active: 0 });
                     $("#accordion").on("accordionbeforeactivate", function (event, ui) {});
                     $("#accordion").on("accordionactivate", function (event, ui) {});
@@ -303,11 +296,6 @@
             .ui-accordion-content-active {
                 margin-left: -5px !important;
                 overflow: hidden;
-            }
-
-            #graphDiv {
-                margin: 3px;
-                border: 2px solid #ddd;
             }
 
             #graphPopupDiv {

@@ -1,7 +1,6 @@
 import Lineage_classes from "../modules/tools/lineage/lineage_classes.js";
 import KGcreator from "../modules/tools/KGcreator.js";
-import KGcreatorRML from "../modules/tools/KGcreatorRML.js";
-
+import KGcreatorOld from "../modules/tools/KGcreatorOld.js"
 import Standardizer from "../modules/tools/Standardizer.js";
 import Lineage_dictionary from "../modules/tools/lineage/lineage_dictionary.js";
 import SPARQL_endpoint from "../modules/tools/SPARQL_endpoint.js";
@@ -12,17 +11,17 @@ var Tools = {};
 
 Tools["lineage"] = { label: "Lineage", noSource: 0, controller: Lineage_classes, toolDescriptionImg: null }; //"images/taxonomy.png"}
 
+Tools["KGcreatorOld"] = {
+    label: "KGcreatorOld",
+    noSource: 1,
+    controller: KGcreatorOld,
+    toolDescriptionImg: null,
+};
+
 Tools["KGcreator"] = {
     label: "KGcreator",
     noSource: 1,
     controller: KGcreator,
-    toolDescriptionImg: null,
-};
-
-Tools["KGcreatorRML"] = {
-    label: "KGcreatorRML",
-    noSource: 1,
-    controller: KGcreatorRML,
     toolDescriptionImg: null,
 };
 

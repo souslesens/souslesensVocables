@@ -1,3 +1,4 @@
+
 <style>
     .KGcreator_tripleInput {
         width: 240px;
@@ -21,6 +22,11 @@
     .KGcreator_fileWithMappings {
         color: #0000ff;
     }
+
+    .container {
+            background-color: rgb(255, 255, 255);
+            padding: 20px;
+        }
     #rmlTextarea {
             background-color: #19191a;
             color: white;
@@ -29,7 +35,6 @@
             border: none;
             resize: none;
         }
-     
 </style>
 <div style="display: flex; flex-direction: row">
     <div style="display: flex; flex-direction: column; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
@@ -41,18 +46,17 @@
                 lookup name<input id="KGcreator_subjectLookupName" />
             </div>
 
-            <div class="KGcreator_tripleDivXX" id="sharedPredicatesPanel" style="display: flex; flex-direction: row">
-
-            </div>            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreatorRML.generateRML()">Add</button>
-
+            <div class="KGcreator_tripleDivXX" id="sharedPredicatesPanel" style="display: flex; flex-direction: row"></div>
 
             <div></div>
         </div>
-      
+
         <div style="width: 100%; display: flex; flex-direction: column; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
-            <h6>RML mapping file  :</h6>
+            <div class="container">                    
+                <h6>RML file </h6>
                 <textarea id="rmlTextarea" rows="10" cols="50"></textarea>
-      
+                </div>
+                
         </div>
     </div>
 

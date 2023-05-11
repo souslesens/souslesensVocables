@@ -1,5 +1,6 @@
 import common from "../../shared/common.js";
-import KGcreator from "../KGcreator.js";
+//import KGcreator from "../KGcreator.js/index.js";
+import KGcreator from "../KGcreator.js"
 import Lineage_sets from "./lineage_sets.js";
 import Lineage_linkedData_mappings from "./linkedData/lineage_linkedData_mappings.js";
 

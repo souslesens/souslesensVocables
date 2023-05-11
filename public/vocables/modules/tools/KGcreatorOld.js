@@ -8,7 +8,7 @@ import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 
 //https://openbase.com/js/@json-editor/json-editor/documentation
 
-var KGcreatorRML = (function () {
+var KGcreatorOld = (function () {
     var self = {};
     self.mainJsonEditor = null;
     self.currentSource = null;
@@ -106,7 +106,7 @@ var KGcreatorRML = (function () {
                 if (err) {
                     return alert(err.responseText);
                 }
-                $("#graphDiv").load("snippets/KGcreatorRML/centralPanel.html", function () {
+                $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {
                     self.initCentralPanel();
                 });
                 $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function () {
@@ -709,128 +709,7 @@ var KGcreatorRML = (function () {
         $("#KGcreator_subjectInput").val(column);
     };
 
-    //RML Mapping file generator 
-
-    self.generateRML = function () {
-
-        self.rmlPrefixes = {
-            rml: "http://semweb.mmlab.be/ns/rml#",
-            rr: "http://www.w3.org/ns/r2rml#",
-            ql: "http://semweb.mmlab.be/ns/ql#",
-            rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-            rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-            xsd: "http://www.w3.org/2001/XMLSchema#",
-            // Add other necessary prefixes here
-        };
-    
-        $("#KGcreator_tripleMessageDiv").html("");
-        var subject = $("#KGcreator_subjectInput").val();
-    
-        var predicate = $("#editPredicate_propertyValue").val();
-        var object = $("#editPredicate_objectValue").val();
-    
-        var isObjectString = $("#KGcreator_isObjectStringCBX").prop("checked");
-    
-        var subjectLookupName = $("#KGcreator_subjectLookupName").val();
-        var objectLookupName = $("#KGcreator_objectLookupName").val();
-        var isRestrictionCBX = $("#KGcreator_isRestrictionCBX").prop("checked");
-        var isSpecificPredicate = $("#KGcreator_isSpecificPredicateCBX").prop("checked");
-    
-        $("#KGcreator_objectSelect").val("");
-        $("#KGcreator_predicateSelect").val("");
-    
-        // Ensure that self.currentGraphUri is set using the previous code snippet
-    
-    
-        if (!subject) {
-            return alert("missing subject");
-        }
-        if (!predicate) {
-            return alert("missing predicate");
-        }
-        if (!object) {
-            return alert("missing object");
-        }
-    
-        var tripleObj = { s: subject, p: predicate, o: object };
-    
-    
-        if (predicate.indexOf("xsd:") == 0) {
-            tripleObj.dataType = predicate;
-        }
-        if (isObjectString) {
-            tripleObj.isString = true;
-        } else if (predicate.toLowerCase().indexOf("label") > -1) {
-            tripleObj.isString = true;
-        } else if (predicate.toLowerCase().indexOf("definedby") > -1) {
-            tripleObj.isString = true;
-        } else if (predicate.toLowerCase().indexOf("comment") > -1) {
-            tripleObj.isString = true;
-        } else if (predicate.toLowerCase().indexOf("example") > -1) {
-            tripleObj.isString = true;
-        }
-    
-        if (!self.currentGraphUri) {
-            var graphUri = "";
-            if (self.currentGraphUri) {
-                graphUri = self.currentGraphUri;
-            }
-            graphUri = prompt("enter graphUri", graphUri);
-            if (!graphUri) {
-                return;
-            }
-            self.currentGraphUri = graphUri;
-            self.currentJsonObject = self.mainJsonEditor.get();
-            self.currentJsonObject.graphUri = graphUri;
-            self.mainJsonEditor.load(self.currentJsonObject);
-        } else {
-        var rml = "";
-    
-        for (var key in self.rmlPrefixes) {
-            rml += "@prefix " + key + ": <" + self.rmlPrefixes[key] + "> .\n";
-        }
-        
-    // Add the @base statement
-        rml += "@base <" + self.currentGraphUri + "> .\n\n";
-        rml += "\n";
-    
-        // Define the logical source
-        rml += "<#LogicalSource> rml:source \"" + self.currentSource + "\" ;\n";
-        rml += "  rml:referenceFormulation ql:CSV .\n\n";
-    
-        // Define the subject map
-        rml += "<#TriplesMap> rml:logicalSource <#LogicalSource> ;\n";
-        rml += "  rr:subjectMap [\n";
-        rml += "    rml:reference \"" + subject + "\" ;\n";
-        rml += "    rr:termType rr:IRI\n";
-        rml += "  ] ;\n\n";
-    
-        // Define the predicate object map
-        rml += "  rr:predicateObjectMap [\n";
-        rml += "    rr:predicate " + predicate + " ;\n";
-        rml += "    rr:objectMap [\n";
-        rml += "      rml:reference \"" + object + "\" ;\n";
-        if (isObjectString) {
-            rml += "      rr:datatype xsd:string\n";
-        } else {
-            rml += "      rr:termType rr:IRI\n";
-        }
-        if (tripleObj.isString) {
-            rml += "    rr:datatype xsd:string\n";
-        } 
-        rml += "    ]\n";
-        rml += "  ] .\n\n";
-    
-        // Display the generated RML mapping file in the textarea
-        var rmlTextarea = document.getElementById("rmlTextarea");
-        if (rmlTextarea) {
-            rmlTextarea.value = rml;
-        }
-    }
-    }
-
     self.addTripleToTA = function () {
-        
         $("#KGcreator_tripleMessageDiv").html("");
         var subject = $("#KGcreator_subjectInput").val();
         //  var predicate = $("#KGcreator_predicateInput").val();
@@ -1648,6 +1527,6 @@ self.saveMappings({classId:classId})
     return self;
 })();
 
-export default KGcreatorRML;
+export default KGcreatorOld;
 
-window.KGcreatorRML = KGcreatorRML;
+window.KGcreatorOld = KGcreatorOld;

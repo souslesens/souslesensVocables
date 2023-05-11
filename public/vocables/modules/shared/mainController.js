@@ -215,21 +215,24 @@ var MainController = (function () {
                         }
                         callbackSeries();
                     },
+
+
+
                     function (callbackSeries) {
                         MainController.loadSources(null, function (_err, _result) {
                             callbackSeries(_err);
                         });
-                    },
-
-                    function (callbackSeries) {
-                        MainController.UI.showToolsList("toolsTreeDiv");
-                        callbackSeries();
                     },
                     function (callbackSeries) {
                         MainController.parseUrlParam(function () {
                             callbackSeries();
                         });
                     },
+                    function (callbackSeries) {
+                        MainController.UI.showToolsList("toolsTreeDiv");
+                        callbackSeries();
+                    },
+
                     function (callbackSeries) {
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
 
@@ -706,7 +709,8 @@ return;*/
                     MainController.UI.message("loading ontology ...")
                     GraphLoader.loadGraphFromUrl(source, rdfUrl, reload, editable, options, function (err, result) {
                         if (err) {
-                            return alert(err)
+                             alert(err);
+                             callback(err);
                         };
 
                             Config.tools[tool].urlParam_source = source;

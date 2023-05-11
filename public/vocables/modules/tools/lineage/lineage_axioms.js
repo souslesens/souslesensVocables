@@ -2,7 +2,7 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_sources from "./lineage_sources.js";
-import TriplesToVisjs from "../../shared/triplesToVisjs.js";
+import VisjsUtil from "../../graph/visjsUtil.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 import Lineage_classes from "./lineage_classes.js";
 
@@ -170,11 +170,11 @@ var Lineage_axioms = (function () {
 
             for(var key in  axiomsTriples) {
                 var triples=axiomsTriples[key]
-               var visjsData = TriplesToVisjs.getVisjsData(sourceLabel, triples);
+               var visjsData = VisjsUtil.getVisjsData(sourceLabel, triples);
                 concatVisjsdata(visjsData);
 
             }
-            TriplesToVisjs.drawVisjsData(allVisjsData)
+            VisjsUtil.drawVisjsData(allVisjsData)
 
 
 

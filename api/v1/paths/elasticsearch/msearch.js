@@ -15,16 +15,16 @@ module.exports = function () {
         if (ConfigManager.config) {
             ConfigManager.getUser(req, res, function (err, userInfo) {
                 if (err) {
-                    return res.status(400).json({ error: err });
+                    return res.status(400).json({ error: "error 1 "+err });
                 }
 
                 ConfigManager.getUserSources(req, res, function (err, userSources) {
                     UserRequestFiltering.validateElasticSearchIndices(userInfo.user.groups, req.body.indexes, userSources, "r", function (parsingError, filteredQuery) {
-                        if (parsingError) return processResponse(res, parsingError, null);
+                        if (parsingError) return processResponse(res, "error 2 "+parsingError, null);
 
                         elasticRestProxy.executeMsearch(req.body.ndjson, function (err, result) {
                             if (err) {
-                                return res.status(400).json({ error: err });
+                                return res.status(400).json({ error: "error 3 "+err });
                             }
                             return res.status(200).json(result);
                         });

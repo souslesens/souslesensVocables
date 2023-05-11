@@ -2002,7 +2002,14 @@ addNode:false
                 ) {
                     if (!existingNodes[item.subject.value]) {
                         existingNodes[item.subject.value] = 1;
-                        var color = self.getSourceColor(source);
+
+
+                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.subject.value, item.subjectLabel.value,item.prop.value) );
+
+
+
+
+                      /*  var color = self.getSourceColor(source);
 
                         var size = Lineage_classes.defaultShapeSize;
                         if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
@@ -2025,10 +2032,10 @@ addNode:false
                                 label: item.subjectLabel.value,
                                 varName: "value",
                             },
-                        });
+                        });*/
                     }
-
-                    size = self.defaultShapeSize;
+var color;
+                   var  size = self.defaultShapeSize;
                     if (!item.value) {
                         color = "#ddd";
                         item.value = { value: "?_" + item.prop.value };
@@ -2062,8 +2069,12 @@ addNode:false
                     }
 
                     if (!existingNodes[item.value.value]) {
+
                         existingNodes[item.value.value] = 1;
-                        visjsData.nodes.push({
+
+                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.value.value, item.valueLabel.value) );
+
+                   /*     visjsData.nodes.push({
                             id: item.value.value,
                             label: label,
                             shadow: self.nodeShadow,
@@ -2079,7 +2090,7 @@ addNode:false
                                 varName: "value",
                                 type: item.value.type,
                             },
-                        });
+                        });*/
                     }
                     var edgeId = item.node.value; //item.value.value + "_" + item.subject.value + "_" + item.prop.value;
                     if (!existingNodes[edgeId]) {

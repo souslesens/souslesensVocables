@@ -297,13 +297,14 @@ var Lineage_properties = (function () {
                                 size = 2;
                             }
 
-                            if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
+                          /*  if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
                                 label = Config.Lineage.logicalOperatorsMap[item.prop.value];
                                 shape = "circle";
                                 color = "#EEE";
-                            }
+                            }*/
                         }
-                        visjsData.nodes.push({
+                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.subject.value, label,{shape:shape}) );
+                      /*  visjsData.nodes.push({
                             id: item.subject.value,
                             label: label,
                             shape: shape,
@@ -314,7 +315,7 @@ var Lineage_properties = (function () {
                                 id: item.subject.value,
                                 label: item.subjectLabel.value,
                             },
-                        });
+                        });*/
                     }
                     if (options.skipLiterals && item.object.type && item.object.type.indexOf("literal") > -1) return;
                     if (!existingNodes[item.object.value]) {
@@ -337,11 +338,11 @@ var Lineage_properties = (function () {
                                 size = 2;
                             }
 
-                            if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
+                          /*  if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
                                 label = Config.Lineage.logicalOperatorsMap[item.prop.value] || "";
                                 shape = "hexagon";
                                 color = "#EEE";
-                            }
+                            }*/
                         }
                         var font = null;
                         if (item.object.type == "literal") {

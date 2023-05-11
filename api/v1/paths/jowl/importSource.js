@@ -33,7 +33,7 @@ module.exports = function () {
 
             var graphExists = false;
             var allTriples = [];
-            var totalImportedTriples = 0;
+            var totalImportedTriples = -1;
             async2.series(
                 [
                     // check if source name
@@ -92,6 +92,11 @@ module.exports = function () {
                             if (error) {
                                 return callbackSeries(error);
                             }
+                              if(!body) {
+                                  return callbackSeries("Cannot import ontology file");
+                              } if(!Array.isArray(body)){
+                                return callbackSeries(body);
+                            }
                             allTriples = body;
                             if (allTriples.length == 0) {
                                 return callbackSeries("no triples generated for url " + body.rdfUrl);
@@ -107,7 +112,7 @@ module.exports = function () {
                         }
 
                         var slices = Util.sliceArray(allTriples, 200);
-
+                        totalImportedTriples = -1;
                         async2.eachSeries(
                             slices,
                             function (triples, callbackEach) {
@@ -120,9 +125,7 @@ module.exports = function () {
                                             return b + "'" + c;
                                         });
                                     }
-                                    //  item.object=item.object.substring(0,p-1)*/
                                     var str = triple.subject + " " + triple.predicate + " " + triple.object + ". ";
-                                    //   console.log(str)
                                     insertTriplesStr += str;
                                 });
 
@@ -158,7 +161,7 @@ module.exports = function () {
                     },
                 ],
                 function (err) {
-                    processResponse(res, err, "DONE imported " + totalImportedTriples + " triples");
+                    processResponse(res, err,  {result:totalImportedTriples} );
                 }
             );
         });

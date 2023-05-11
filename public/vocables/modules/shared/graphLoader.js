@@ -33,12 +33,11 @@ var GraphLoader = (function () {
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-                MainController.UI.message("");
-
-                if (data.result != "DONE") {
-                    callback(data.result);
-                }
-                callback(null, data.result);
+                var message=""
+                if(data.result>-1)
+                    message="imported "+data.result+" triples"
+                MainController.UI.message(message,true);
+                callback(null, message);
             },
             error(err) {
                 callback(err.responseText);

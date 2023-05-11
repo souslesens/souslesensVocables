@@ -3,10 +3,11 @@ import Lineage_classes from "../tools/lineage/lineage_classes.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 
+
 var TriplesToVisjs = (function () {
     var self = {};
 
-    self.drawTriples = function (source, triples, options) {
+    self.getVisjsData = function (source, triples, options) {
         if (!options) {
             options = {};
         }
@@ -69,6 +70,22 @@ var TriplesToVisjs = (function () {
             }
         });
 
+
+            return visjsData
+
+
+    };
+
+    self.drawTriples = function (source, triples, options) {
+
+        var visjsData = self.getVisjsData(source, triples, options)
+        self.drawVisjsData(visjsData)
+
+
+
+    }
+
+    self.drawVisjsData=function(visjsData){
         if (!visjsGraph.isGraphNotEmpty()) {
             Lineage_classes.drawNewGraph(visjsData);
         }
@@ -76,7 +93,7 @@ var TriplesToVisjs = (function () {
         visjsGraph.data.edges.add(visjsData.edges);
         visjsGraph.network.fit();
         $("#waitImg").css("display", "none");
-    };
+    }
 
     return self;
 })();

@@ -136,7 +136,7 @@ var Sparql_common = (function () {
 
                 var uriIds = [];
                 ids.forEach(function (id, _index) {
-                    if (("" + id).indexOf(":") > -1)
+                    if (true || ("" + id).indexOf(":") > -1)
                         // literal
                         uriIds.push(id);
                 });

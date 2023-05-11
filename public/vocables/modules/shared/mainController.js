@@ -702,26 +702,29 @@ return;*/
                     var reload = paramsMap["reload"];
                     var editable = paramsMap["editable"];
                     var options = {};
+                    $("#waitImg").css("display","block")
+                    MainController.UI.message("loading ontology ...")
                     GraphLoader.loadGraphFromUrl(source, rdfUrl, reload, editable, options, function (err, result) {
-                        if (err) return alert(err);
+                        if (err) {
+                            return alert(err)
+                        };
 
-                        var source = paramsMap["source"];
-                        if (source) {
                             Config.tools[tool].urlParam_source = source;
-                        }
                         self.UI.initTool(tool, function () {
-                            callback();
+                         //   MainController.UI.message("loading ontology ...")
+                          return  callback();
                         });
                     });
-                    return;
+
+                }else {
+                    var source = paramsMap["source"];
+                    if (source) {
+                        Config.tools[tool].urlParam_source = source;
+                    }
+                    self.UI.initTool(tool, function() {
+                        callback();
+                    });
                 }
-                var source = paramsMap["source"];
-                if (source) {
-                    Config.tools[tool].urlParam_source = source;
-                }
-                self.UI.initTool(tool, function () {
-                    callback();
-                });
             }
         } else {
             callback();

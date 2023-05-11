@@ -3,6 +3,11 @@ import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_sources from "./lineage_sources.js";
 import TriplesToVisjs from "../../shared/triplesToVisjs.js";
+import visjsGraph from "../../graph/visjsGraph2.js";
+import Lineage_classes from "./lineage_classes.js";
+
+
+
 
 var Lineage_axioms = (function () {
     var self = {};
@@ -17,7 +22,7 @@ var Lineage_axioms = (function () {
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "SELECT distinct * from <https://purl.industrialontologies.org/ontology/core/Core>  from <https://purl.industrialontologies.org/ontology/core/Core> WHERE {" +
+            "SELECT distinct * "+fromStr+" WHERE {" +
             "  ?X ?p_x ?x ." +
             "  { select ?x ?p_iu ?iu ?p_y ?y ?p_bn ?bn ?p_bny ?bny from <https://purl.industrialontologies.org/ontology/core/Core>  from <https://purl.industrialontologies.org/ontology/core/Core> where{" +
             "  ?x  (owl:intersectionOf|owl:union) ?iu." +
@@ -86,6 +91,8 @@ var Lineage_axioms = (function () {
 
             var nodes = ["https://purl.industrialontologies.org/ontology/core/Core/MaterialArtifact"];
 
+            var nodes = Object.keys(allNodesMap)
+
             var axiomsTriples = {};
 
             nodes.forEach(function (X) {
@@ -137,10 +144,40 @@ var Lineage_axioms = (function () {
 
                 axiomsTriples[X] = triples;
 
-                TriplesToVisjs.drawTriples(sourceLabel, triples);
+
             });
 
-            var x = axiomsTriples;
+            var allVisjsData = { nodes: [], edges: [] };
+            var existingNodes = visjsGraph.getExistingIdsMap();
+            function concatVisjsdata(visjsData) {
+                if (!visjsData.nodes || !visjsData.edges) {
+                    return;
+                }
+                visjsData.nodes.forEach(function (item) {
+                    if (!existingNodes[item.id]) {
+                        existingNodes[item.id] = 1;
+                        allVisjsData.nodes.push(item);
+                    }
+                });
+                visjsData.edges.forEach(function (item) {
+                    if (!existingNodes[item.id]) {
+                        existingNodes[item.id] = 1;
+                        allVisjsData.edges.push(item);
+                    }
+                });
+            }
+
+
+            for(var key in  axiomsTriples) {
+                var triples=axiomsTriples[key]
+               var visjsData = TriplesToVisjs.getVisjsData(sourceLabel, triples);
+                concatVisjsdata(visjsData);
+
+            }
+            TriplesToVisjs.drawVisjsData(allVisjsData)
+
+
+
         });
     };
 

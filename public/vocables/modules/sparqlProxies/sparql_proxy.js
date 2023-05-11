@@ -1,6 +1,7 @@
 import common from "../shared/common.js";
 import MainController from "../shared/mainController.js";
 import authentication from "../shared/authentification.js";
+import { addError } from "../../store/errors";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -71,12 +72,13 @@ var Sparql_proxy = (function () {
                         offset += limit;
                     },
                     error: function (err) {
-                        $("#messageDiv").html(err.responseText);
-                        $("#waitImg").css("display", "none");
-                        // eslint-disable-next-line no-console
-                        console.log(JSON.stringify(err));
-                        // eslint-disable-next-line no-console
-                        console.log(JSON.stringify(query));
+                        console.log("J'ai recu un erreur", err.responseText);
+                        addError(err.responseText);
+                        // $("#waitImg").css("display", "none");
+                        // // eslint-disable-next-line no-console
+                        // console.log(JSON.stringify(err));
+                        // // eslint-disable-next-line no-console
+                        // console.log(JSON.stringify(query));
                         return callbackWhilst(err);
                     },
                 });
@@ -177,7 +179,7 @@ var Sparql_proxy = (function () {
                     //Virtuoso 42000 The estimated execution time
                     alert(err.responseText.substring(0, err.responseText.indexOf(".")) + "\n select more detailed data");
                 } else {
-                    console.log(err.responseText);
+                    addError(err.responseText);
                     MainController.UI.message("error in sparql query");
                 }
 

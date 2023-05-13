@@ -69,7 +69,7 @@ var SearchWidget = (function () {
      *  -contextMenufn
      *
      */
-    self.searchAllSourcesTerm = function (options) {
+    self.searchTermInSources = function (options) {
         if (!options) {
             options = {};
         }

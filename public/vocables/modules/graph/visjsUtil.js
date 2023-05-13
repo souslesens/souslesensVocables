@@ -8,34 +8,72 @@ var VisjsUtil = (function() {
   var self = {};
 
 
-  self.getVisjsNode = function(source, id, label, incomingPredicateUri, options) {
+  self.getVisjsNodeAttributes = function(source,label, predicateUri, options) {
     if (!options) {
       options = {};
     }
-      var shape, color;
-    var str
-      if ( str=Config.Lineage.logicalOperatorsMap[incomingPredicateUri]) {
-        shape = "circle";
-        label = str;
-        color = "#eee";
+    var shape, color,lab;
+    var size = Lineage_classes.defaultShapeSize;
+    var str;
+    if (false && (str = Config.Lineage.logicalOperatorsMap[predicateUri])) {
+      shape = "circle";
+      label = str;
+      color = "#eee";
+    }
+    else {
+      shape = options.shape || Lineage_classes.defaultShape;
+      color = options.color || Lineage_classes.getSourceColor(source);
+      var regex = /[0-9a-f]{3}/;  //blank nodes
+      if (label.indexOf("http")<0 && label.match(regex)) {
+        shape = "hexagon";
+        label = null;
+        color = "#bbb";
+        size = 5;
       }
-      else {
-        shape = options.shape || Lineage_classes.defaultShape;
-        color = options.color || Lineage_classes.getSourceColor(source);
-      }
-      var node={
+
+    }
+    var attrs = {
+      label: label,
+      shape: shape,
+      color: color,
+      size: size
+
+    };
+    return attrs;
+  };
+
+  self.setVisjsNodeAttributes = function(source,node, label, predicateUri, options) {
+
+    var attrs = self.getVisjsNodeAttributes(source,label, predicateUri, options);
+    if(!attrs)
+      return node;
+    node.label = attrs.label;
+    node.shape = attrs.shape;
+    node.color = attrs.color;
+    node.size = attrs.size;
+    return node;
+  };
+
+  self.getVisjsNode = function(source, id, label, predicateUri, options) {
+    if (!options) {
+      options = {};
+    }
+    var attrs = self.getVisjsNodeAttributes(source,label, predicateUri, options);
+
+
+    var node = {
+      id: id,
+      label: attrs.label,
+      shape: attrs.shape,
+      color: attrs.color,
+      size: attrs.size,
+      data: {
         id: id,
         label: label,
-        shape: shape,
-        color: color,
-        size: Lineage_classes.defaultShapeSize,
-        data: {
-          id: id,
-          label: label,
-          source: source,
-          type:options.type
-        }
-      };
+        source: source,
+        type: options.type
+      }
+    };
     return node;
   };
 
@@ -79,12 +117,12 @@ var VisjsUtil = (function() {
       var label = item.subjectLabel || Sparql_common.getLabelFromURI(item.subject);
       if (!existingNodes[item.subject]) {
         existingNodes[item.subject] = 1;
-        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject, label, item.predicate))
+        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject, label, item.predicate));
       }
       if (!existingNodes[item.object]) {
         existingNodes[item.object] = 1;
         var label = item.objectLabel || Sparql_common.getLabelFromURI(item.object);
-        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.object, label))
+        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.object, label));
       }
 
 

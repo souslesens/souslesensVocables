@@ -18,6 +18,7 @@ var Lineage_relations = (function () {
         $("#mainDialogDiv").load("snippets/lineage/relationsDialog.html", function () {
             $("#lineageRelations_history_previousBtn").css("display", self.previousQuery ? "inline" : "none");
             $("#lineageRelations_history_deleteBtn").css("display", "none");
+            $("#LineageRelations_searchJsTreeInput").focus()
             Lineage_relationFilter.showAddFilterDiv(true);
 
             //$("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)

@@ -276,6 +276,8 @@ var Lineage_properties = (function () {
                 var existingNodes = options.output == "table" ? {} : visjsGraph.getExistingIdsMap();
                 var color = Lineage_classes.getSourceColor(source);
 
+                var toNodesMap=[]
+
                 result2.forEach(function (item) {
                     if (!existingNodes[item.subject.value]) {
                         existingNodes[item.subject.value] = 1;
@@ -304,8 +306,8 @@ var Lineage_properties = (function () {
                             }*/
                         }
 
-                        var incomingPredicateUri=options.inversePredicate?item.prop.value:null;
-                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.subject.value, label,incomingPredicateUri,{shape:shape}) );
+                        var predicateUri=options.inversePredicate?null:item.prop.value;
+                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.subject.value, label,predicateUri,{shape:shape}) );
                       /*  visjsData.nodes.push({
                             id: item.subject.value,
                             label: label,
@@ -354,8 +356,8 @@ var Lineage_properties = (function () {
                             font = "12px arial #3c8fe1";
                         }
 
-                        var incomingPredicateUri=options.inversePredicate?null:item.prop.value;
-                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.object.value, label,incomingPredicateUri,{shape:shape}) );
+                        var predicateUri=options.inversePredicate?item.prop.value:null;
+                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.object.value, label,predicateUri,{shape:shape}) );
 
                     /*   visjsData.nodes.push({
                             id: item.object.value,
@@ -428,6 +430,42 @@ var Lineage_properties = (function () {
                         });
                     }
                 });
+
+
+
+            /*    var fromNodesMap={}
+                var leafNodesMap={}
+                visjsData.edges.forEach(function(item){
+                    fromNodesMap[item.from]=1
+
+                })
+
+                var leafNodes=[]
+                visjsData.edges.forEach(function(item){
+                    if(!fromNodesMap[item.to]){
+                        var shape,label,color;
+                        var str=""
+                        if ( item.id.indexOf("union")>-1  || item.id.indexOf("intersection")>-1){
+                            shape = "circle";
+                            label = "V";
+                            color = "#eee";
+                            leafNodesMap[item.to]={shape:shape,label:label,color:color}
+
+                        }
+
+                    }
+                })
+
+                visjsData.nodes.forEach(function(item,index){
+                    if(leafNodesMap[item.id]){
+                        visjsData.nodes[index].shape=leafNodesMap[item.id].shape;
+                        visjsData.nodes[index].color=leafNodesMap[item.id].color;
+                        visjsData.nodes[index].label=leafNodesMap[item.id].label;
+                    }
+
+                })*/
+
+
                 if (callback && options.returnVisjsData) {
                     return callback(null, visjsData);
                 }
@@ -1038,8 +1076,8 @@ var Lineage_properties = (function () {
         },
     };
 
-    self.searchAllSourcesTerm = function () {
-        var term = $("#LineageProperties_searchAllSourcesTermInput").val();
+    self.searchTermInSources = function () {
+        var term = $("#LineageProperties_searchTermInSourcesInput").val();
         var exactMatch = $("#LineageProperties_allExactMatchSearchCBX").prop("checked");
         var searchAllSources = $("#LineageProperties_searchInAllSources").prop("checked");
         var searchType = $("#LineageProperties_searchAllType").val();

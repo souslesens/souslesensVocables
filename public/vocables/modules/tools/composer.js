@@ -959,7 +959,7 @@ var Composer = (function () {
                     return;
                 },
             };
-            SearchWidget.searchTerm(options);
+            SearchWidget.searchTermInSources(options);
         },
 
         showAttributesParentsDialog: function () {

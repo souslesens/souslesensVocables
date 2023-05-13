@@ -5,6 +5,7 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import common from "../../shared/common.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 import Lineage_classes from "./lineage_classes.js";
+import SearchWidget from "../../uiWidgets/searchWidget.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Lineage_graphTraversal = (function () {
@@ -45,7 +46,7 @@ var Lineage_graphTraversal = (function () {
         });
     };
 
-    self.getShortestpathObjects = function (source, fromNodeId, toNodeId, options, callback) {
+    self.getShortestPathObjects = function (source, fromNodeId, toNodeId, options, callback) {
         var path = [];
         var relations = [];
         var labelsMap = {};
@@ -104,13 +105,13 @@ var Lineage_graphTraversal = (function () {
                     path.forEach(function (item) {
                         var relation = {
                             from: item[0],
-                            fromLabel: labelsMap[item[0]],
+                            fromLabel: labelsMap[item[0]|| Sparql_common.getLabelFromURI( item[0])],
 
                             prop: item[2],
-                            propLabel: labelsMap[item[2]],
+                            propLabel: labelsMap[item[2]|| Sparql_common.getLabelFromURI( item[2])],
 
                             to: item[1],
-                            toLabel: labelsMap[item[1]],
+                            toLabel: labelsMap[item[1]|| Sparql_common.getLabelFromURI( item[1])],
                         };
                         relations.push(relation);
                     });
@@ -177,7 +178,7 @@ var Lineage_graphTraversal = (function () {
             contextMenu: Lineage_graphTraversal.contextMenufn,
         };
 
-        SearchWidget.searchTerm(options);
+        SearchWidget.searchTermInSources(options);
     };
 
     self.contextMenufn = function () {
@@ -221,7 +222,7 @@ var Lineage_graphTraversal = (function () {
         if (!toUri) toUri = self.pathToUri;
         if (fromUri == toUri) return alert(" from node and to node must be different");
 
-        self.getShortestpathObjects(source, fromUri, toUri, {}, function (err, relations) {
+        self.getShortestPathObjects(source, fromUri, toUri, {}, function (err, relations) {
             if (err) return alert(err.responseText);
 
             var html = "";
@@ -338,7 +339,7 @@ var Lineage_graphTraversal = (function () {
         if (!toUri) toUri = self.pathToUri;
         if (!numberOfPathes) numberOfPathes = parseInt($("#Lineage_graphTraversal_numberOfPathes").val());
 
-        self.getShortestpathObjects(source, fromUri, toUri, { numberOfPathes: numberOfPathes }, function (err, relations) {
+        self.getShortestPathObjects(source, fromUri, toUri, { numberOfPathes: numberOfPathes }, function (err, relations) {
             if (err) return alert(err.responseText);
             self.drawPathesOnWhiteboard(relations);
             $("#mainDialogDiv").dialog("close");
@@ -352,7 +353,7 @@ var Lineage_graphTraversal = (function () {
 
         if (fromUri == toUri) return alert(" from node and to node must be different");
 
-        self.getShortestpathObjects(source, fromUri, toUri, {}, function (err, relations) {
+        self.getShortestPathObjects(source, fromUri, toUri, {}, function (err, relations) {
             if (err) return alert(err.responseText);
             self.drawPathesOnWhiteboard(relations);
             $("#mainDialogDiv").dialog("close");

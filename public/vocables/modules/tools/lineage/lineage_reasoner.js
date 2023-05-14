@@ -4,6 +4,7 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 import Lineage_classes from "./lineage_classes.js";
 import Lineage_sources from "./lineage_sources.js";
+import sparql_common from "../../sparqlProxies/sparql_common.js";
 
 var Lineage_reasoner = (function() {
   var self = {};
@@ -24,7 +25,7 @@ var Lineage_reasoner = (function() {
 
   self.runOperation = function(operation) {
     self.currentOperation = operation;
- //  $("#lineage_reasoner_outputDiv").css("display", "none");
+    //  $("#lineage_reasoner_outputDiv").css("display", "none");
     $("#lineage_reasoner_operationSelect").val("");
     // $("#lineage_reasoner_outputDiv").css("display", "none");
 
@@ -98,7 +99,8 @@ var Lineage_reasoner = (function() {
 
       success: function(data, _textStatus, _jqXHR) {
         $("#lineage_reasoner_outputDiv").css("display", "block");
-        common.fillSelectWithColorPalette("lineage_reasoner_colorSelect");   common.fillSelectWithColorPalette("lineage_reasoner_colorSelect");
+        common.fillSelectWithColorPalette("lineage_reasoner_colorSelect");
+        common.fillSelectWithColorPalette("lineage_reasoner_colorSelect");
         var jstreeData = [];
         for (var key in data) {
           jstreeData.push({
@@ -127,7 +129,7 @@ var Lineage_reasoner = (function() {
 
     var operation = $("#lineage_reasoner_operationSelect").val();
 
-    var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
+    var fromStr = Sparql_common.getFromStr(self.currentSource, false, false);
     var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
 
     const params = new URLSearchParams({
@@ -137,20 +139,29 @@ var Lineage_reasoner = (function() {
       describeSparqlQuery: describeQuery
     });
 
-    $("#lineage_reasoner_infosDiv").html("Processing " + Lineage_sources.activeSource + "...");
+    $("#lineage_reasoner_infosDiv").html("Processing " + self.currentSource + "...");
     $.ajax({
       type: "GET",
       url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
       dataType: "json",
 
       success: function(data, _textStatus, _jqXHR) {
-
+        var totalTriples=0
         for (var key in data) {
           data[key] = self.FunctionalStyleSyntaxToJson(data[key]);
-
+          totalTriples+= data[key].length
         }
+        if(totalTriples==0)
+          return   $("#lineage_reasoner_infosDiv").html("No results");
 
-        callback(null, data);
+        self.setInferenceTripleLabels(self.currentSource, data, function(err, result) {
+          if (err) {
+            return callback(err);
+          }
+          callback(null, data);
+        })
+
+        ;
 
       },
       error(err) {
@@ -162,7 +173,7 @@ var Lineage_reasoner = (function() {
     });
   };
 
-  self.displayResult = function() {
+  self.execute = function() {
     $("#lineage_reasoner_outputDiv").css("display", "block");
     if (self.currentOperation == "Inference") {
       var predicates = $("#reasonerTreeContainerDiv").jstree().get_checked();
@@ -171,7 +182,8 @@ var Lineage_reasoner = (function() {
           return alert(err);
         }
         self.inferenceData = result;
-        self.displayInference(result);
+        self.listInferenceSubjects();
+        // self.displayInference();
       });
 
     }
@@ -189,18 +201,53 @@ var Lineage_reasoner = (function() {
   self.displayUnsatisfiable = function() {
   };
 
+
+  self.listInferenceSubjects = function() {
+    var uniqueSubjects = {};
+    var jstreeData = [];
+    for (var pred in self.inferenceData) {
+
+      self.inferenceData[pred].forEach(function(item) {
+        if (!uniqueSubjects[item.subject]) {
+          uniqueSubjects[item.subject] = 1;
+
+
+          jstreeData.push({
+            id: item.subject,
+            text: item.subjectLabel || sparql_common.getLabelFromURI(item.subject),
+            parent: "#"
+          });
+        }
+
+      });
+    }
+    var options = {
+      openAll: true,
+      withCheckboxes: true
+    };
+
+    $("#lineage_reasoner_infosDiv").html("<div id='reasonerSubjectsDiv', style=width:300px;height:500px'>");
+    JstreeWidget.loadJsTree("reasonerSubjectsDiv", jstreeData, options);
+
+
+  };
+
   self.displayInference = function() {
     var output = $("#lineage_reasoner_outputSelect").val();
+
+
+
+
 
     if (output == "Table") {
       $("#lineage_reasoner_infosDiv").html(JSON.stringify(self.inferenceData));
     }
+
+
     else if (output == "Graph") {
-      var urisMap = {};
 
       var inferencePredicates = $("#lineage_reasoner_inferencePredicateSelect").val();
       var filteredData = [];
-
       for (var pred in self.inferenceData) {
         if (!inferencePredicates || inferencePredicates.indexOf(pred) > -1) {
           self.inferenceData[pred].forEach(function(item) {
@@ -211,93 +258,120 @@ var Lineage_reasoner = (function() {
 
       var visjsData = { nodes: [], edges: [] };
       var existingNodes = visjsGraph.getExistingIdsMap();
-
-
+      var edgeColor = $("#lineage_reasoner_colorSelect").val();
+      var nodes={}
       filteredData.forEach(function(item) {
 
-        if (!urisMap[item.subject]) {
-          urisMap[item.subject] = "";
+        var label = item.subjectLabel || Sparql_common.getLabelFromURI(item.subject);
+        if (!existingNodes[item.subject]) {
+          existingNodes[item.subject] = 1;
+          var node = VisjsUtil.getVisjsNode(self.currentSource, item.subject, label, item.predicate, { shape: "square" });
+          nodes[item.subject] = node;
+
+        }
+        else {
+          if (nodes[item.subject]) {
+            nodes[item.subject] = VisjsUtil.setVisjsNodeAttributes(self.currentSource, nodes[item.subject], label, null, { shape: "square" });
+          }
         }
 
-        if (!urisMap[item.object]) {
-          urisMap[item.object] = "";
+
+        var label2, shape, color;
+        label2 = item.objectLabel || Sparql_common.getLabelFromURI(item.object);
+        if (!existingNodes[item.object]) {
+          existingNodes[item.object] = 1;
+          var node = VisjsUtil.getVisjsNode(self.currentSource, item.object, label2, null, { shape: "square" });
+          nodes[item.object] = node;
+
         }
-      });
-      var filter = Sparql_common.setFilter("id", Object.keys(urisMap), null);
-
-      var edgeColor = $("#lineage_reasoner_colorSelect").val();
-
-      Sparql_OWL.getDictionary(Lineage_sources.activeSource, { filter: filter }, null, function(err, result) {
-        var nodes={}
-        result.forEach(function(item) {
-          urisMap[item.id.value] = item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value);
-        });
-
-        filteredData.forEach(function(item) {
 
 
-          var label = urisMap[item.subject] || Sparql_common.getLabelFromURI(item.subject);
-          if (!existingNodes[item.subject]) {
-            existingNodes[item.subject] = 1;
-            var node = VisjsUtil.getVisjsNode(self.currentSource, item.subject, label, item.predicate, { shape: "square" });
-            nodes[item.subject] = node;
-
-          }else{
-            if( nodes[item.subject])
-            nodes[item.subject]= VisjsUtil.setVisjsNodeAttributes( self.currentSource,nodes[item.subject],label, null, { shape: "square" })
-          }
-
-
-
-
-          var label2, shape, color;
-          label2 = urisMap[item.object] || Sparql_common.getLabelFromURI(item.object);
-          if (!existingNodes[item.object]) {
-            existingNodes[item.object] = 1;
-            var node = VisjsUtil.getVisjsNode(self.currentSource, item.object, label2, null, { shape: "square" });
-            nodes[item.object] = node;
-
-          }
-
-
-          if (item.subject && item.object) {
-            var edgeId = item.subject + "_" + item.object;
-            if (!existingNodes[edgeId]) {
-              existingNodes[edgeId] = 1;
-              visjsData.edges.push({
-                id: edgeId,
-                from: item.subject,
-                to: item.object,
-                label: item.predicate,
-                color: edgeColor || "red",
-                font: { size: 10 },
-                arrows: {
-                  to: {
-                    enabled: true,
-                    type: Lineage_classes.defaultEdgeArrowType,
-                    scaleFactor: 0.5
-                  }
+        if (item.subject && item.object) {
+          var edgeId = item.subject + "_" + item.object;
+          if (!existingNodes[edgeId]) {
+            existingNodes[edgeId] = 1;
+            visjsData.edges.push({
+              id: edgeId,
+              from: item.subject,
+              to: item.object,
+              label: item.predicate,
+              color: edgeColor || "red",
+              font: { size: 10 },
+              arrows: {
+                to: {
+                  enabled: true,
+                  type: Lineage_classes.defaultEdgeArrowType,
+                  scaleFactor: 0.5
                 }
-              });
-            }
+              }
+            });
           }
-        });
-
-        for(var nodeId in nodes){
-          visjsData.nodes.push(nodes[nodeId]);
         }
-
-
-        if (!visjsGraph.isGraphNotEmpty()) {
-          Lineage_classes.drawNewGraph(visjsData);
-        }
-        visjsGraph.data.nodes.add(visjsData.nodes);
-        visjsGraph.data.edges.add(visjsData.edges);
-        visjsGraph.network.fit();
-        $("#waitImg").css("display", "none");
       });
+
+      for (var nodeId in nodes) {
+        visjsData.nodes.push(nodes[nodeId]);
+      }
+
+      var predicates = $("#reasonerSubjectsDiv").jstree().get_checked();
+      if(predicates)
+        visjsData=self.filterVisjsDataPath(predicates,visjsData)
+
+
+      if (!visjsGraph.isGraphNotEmpty()) {
+        Lineage_classes.drawNewGraph(visjsData);
+      }
+      visjsGraph.data.nodes.add(visjsData.nodes);
+      visjsGraph.data.edges.add(visjsData.edges);
+      visjsGraph.network.fit();
+      $("#waitImg").css("display", "none");
+
     }
   };
+
+
+  self.filterVisjsDataPath=function(nodeIds,visjsData){
+
+    var path=[]
+    var visited={}
+    function recurse(nodeId) {
+      if(!visited[nodeId]) {
+        visited[nodeId] = 1
+        visjsData.edges.forEach(function(edge) {
+          if (edge.from == nodeId) {
+            path.push(edge)
+            recurse(edge.to)
+          }
+
+      })
+      }
+    }
+    nodeIds.forEach(function(nodeId){
+    recurse(nodeId)
+    })
+
+    var visjsData2={nodes:[],edges:path}
+    var uniqueNodes=visjsGraph.getExistingIdsMap()
+    path.forEach(function(edge){
+      visjsData.nodes.forEach(function(node) {
+          if(  edge.from == node.id || edge.to == node.id) {
+            if (!uniqueNodes[node.id]) {
+              uniqueNodes[node.id]=1
+              visjsData2.nodes.push(node)
+            }
+          }
+      })
+    })
+
+
+
+    return visjsData2
+
+
+  }
+
+
+
 
   self.FunctionalStyleSyntaxToJson = function(functionalStyleStrArray) {
     function getUri(str) {
@@ -325,6 +399,7 @@ var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
       //  return uri.replace("file:/", "_:");
     }
 
+    self.subjects = [];
     functionalStyleStrArray.forEach(function(functionalStyleStr) {
       if ((array = regexNested.exec(functionalStyleStr)) != null) {
         //nested expression
@@ -334,23 +409,68 @@ var regexNested = /<([^>]+)> ([^\(]+)\(<([^>]+)> <([^>]+)>/gm;
         var object2 = cleanJenaUris(array[5]);
 
 
-
         var bNode = "_:" + common.getRandomHexaId(8);
         json.push({ subject: subject, predicate: predicate, object: bNode });
         json.push({ subject: bNode, predicate: "owl:first", object: object1 });
         json.push({ subject: bNode, predicate: "owl:rest", object: object2 });
+
       }
       else if ((array = regex.exec(functionalStyleStr)) != null) {
         var array2 = array[2].trim().split(" ");
         if (array2.length == 2) {
-          var object =  cleanJenaUris(getUri(array2[0]));
-          var subject =  cleanJenaUris(getUri(array2[1]));
+          var object = cleanJenaUris(getUri(array2[0]));
+          var subject = cleanJenaUris(getUri(array2[1]));
 
           json.push({ subject: subject, predicate: array[1], object: object });
         }
       }
     });
     return json;
+  };
+
+  self.setInferenceTripleLabels = function(source, inferencesMap, callback) {
+    for (var pred in inferencesMap) {
+
+      var urisMap = {};
+      inferencesMap[pred].forEach(function(item) {
+        if (!urisMap[item.subject]) {
+          urisMap[item.subject] = "";
+        }
+
+        if (!urisMap[item.object]) {
+          urisMap[item.object] = "";
+        }
+      });
+    }
+    var filter = Sparql_common.setFilter("id", Object.keys(urisMap), null);
+
+    Sparql_OWL.getDictionary(source, { filter: filter }, null, function(err, result) {
+      if (err) {
+        return callback(err);
+      }
+      var nodes = {};
+      result.forEach(function(item) {
+        if (item.label) {
+          urisMap[item.id.value] = item.label.value;
+
+        }
+      });
+
+      for (var pred in inferencesMap) {
+        inferencesMap[pred].forEach(function(item, index) {
+          if (urisMap[item.subject]) {
+            item.subjectLabel = urisMap[item.subject];
+          }
+          if (urisMap[item.object]) {
+            item.objectLabel = urisMap[item.object];
+          }
+
+        });
+
+
+      }
+      return callback(null, inferencesMap);
+    });
   };
 
   return self;

@@ -713,15 +713,25 @@ var KGcreator = (function () {
 
     //RML Mapping file generator 
 
+    var subjects = {}
+
+    window.onload = function() {
+        subjects = {};
+    };
+
+
+
     self.generateRML = function () {
 
         self.rmlPrefixes = {
             rml: "http://semweb.mmlab.be/ns/rml#",
             rr: "http://www.w3.org/ns/r2rml#",
             ql: "http://semweb.mmlab.be/ns/ql#",
+            foaf: "<http://xmlns.com/foaf/0.1/>",
+            schema: "<http://schema.org/>",
+            xsd: "<http://www.w3.org/2001/XMLSchema#>",
             rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
             rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-            xsd: "http://www.w3.org/2001/XMLSchema#",
             // Add other necessary prefixes here
         };
     
@@ -753,6 +763,18 @@ var KGcreator = (function () {
         if (!object) {
             return alert("missing object");
         }
+
+        if (!subjects[subject]) {  // If the subject doesn't exist
+            subjects[subject] = {};  // Add it to the dictionary
+        }
+
+        if (!subjects[subject][predicate]) {  // If the predicate for this subject doesn't exist
+            subjects[subject][predicate] = [];  // Add it to the subject's dictionary
+             subjects[subject][predicate].push(object);  // Add the object to the predicate's array
+        }else {
+            alert("This predicate-object pair already exists for the subject.");
+        }
+    
     
         var tripleObj = { s: subject, p: predicate, o: object };
 
@@ -797,39 +819,59 @@ var KGcreator = (function () {
     // Add the @base statement
         rml += "@base <" + self.currentGraphUri + "> .\n\n";
         rml += "\n";
+
+        for (var subject in subjects) {
     
-        // Define the logical source
-        rml += "<#LogicalSource> rml:source \"" + self.currentJsonObject.fileName + ".csv" + "\" ;\n";
-        rml += "  rml:referenceFormulation ql:CSV .\n\n";
+            // Define the logical source
+            rml += "<#"+subject+"Mapping>" + "a rr:TriplesMap;\n"
+            rml += "  rml:logicalSource [\n"
+            rml += "  rml:source \""+ self.currentJsonObject.fileName+"\" ;\n"
+            rml += "        rml:referenceFormulation ql:CSV .\n";
+            rml += "  ] ;\n\n";
+        
+            // Define the subject map
     
-        // Define the subject map
-        rml += "<#TriplesMap> rml:logicalSource <#LogicalSource> ;\n";
-        rml += "  rr:subjectMap [\n";
-        if (subject === "_blankNode") {
-            rml += "    rr:termType rr:BlankNode ;\n";
-            rml += "    rr:column \"" + subject + "\"\n";
-        }else {
-            rml += "    rml:reference \"" + subject + "\" ;\n";
-            rml += "    rr:termType rr:IRI\n";
+            rml += "  rr:subjectMap [\n";
+            if (subject === "_blankNode") {
+                rml += "    rr:termType rr:BlankNode ;\n";
+            }else {
+                rml += "    rr:template \""+ self.currentGraphUri+"{@id}\" ;\n"
+            //   rml += "    rr:termType rr:IRI\n";
+            }
+            rml += "  ] ;\n\n";
+
+            var predicates = Object.keys(subjects[subject]);
+            for (var i = 0; i < predicates.length; i++) {
+                var predicate = predicates[i];
+                for (var j = 0; j < subjects[subject][predicate].length; j++) {
+                    var object = subjects[subject][predicate][j];
+    
+
+        
+            // Define the predicate object map
+                    rml += "  rr:predicateObjectMap [\n";
+                    rml += "    rr:predicate " + predicate + " ;\n";
+                    rml += "    rr:objectMap [\n";
+                    rml += "      rml:reference \"" + object + "\" ;\n";
+                    if (isObjectString) {
+                        rml += "      rr:datatype xsd:string\n";
+                    } else {
+                        rml += "      rr:termType rr:IRI\n";
+                    }
+                    if (tripleObj.isString) {
+                        rml += "    rr:datatype xsd:string\n";
+                    } 
+                    rml += "    ]\n";
+
+                    if (i === predicates.length - 1 && j === subjects[subject][predicate].length - 1) {
+                        rml += "  ] .\n\n";  // Write ']' for the last predicate-object pair of the subject
+                    } else {
+                        rml += "  ] ;\n\n";  // Write '];' for other predicate-object pairs
+                    }
+                }
+            } 
+           
         }
-        rml += "  ] ;\n\n";
-    
-        // Define the predicate object map
-        rml += "  rr:predicateObjectMap [\n";
-        rml += "    rr:predicate " + predicate + " ;\n";
-        rml += "    rr:objectMap [\n";
-        rml += "      rml:reference \"" + object + "\" ;\n";
-        if (isObjectString) {
-            rml += "      rr:datatype xsd:string\n";
-        } else {
-            rml += "      rr:termType rr:IRI\n";
-        }
-        if (tripleObj.isString) {
-            rml += "    rr:datatype xsd:string\n";
-        } 
-        rml += "    ]\n";
-        rml += "  ] .\n\n";
-    
         // Display the generated RML mapping file in the textarea
         var rmlTextarea = document.getElementById("rmlTextarea");
         if (rmlTextarea) {

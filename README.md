@@ -59,16 +59,18 @@ Edit the `.env` file:
 
 The `DATA_ROOT_DIR` is defined by default to `/tmp`, change it for data persistance.
 
-| variable                       | description                                                          |
-| ------------------------------ | -------------------------------------------------------------------- |
-| `TAG`                          | souslesensVocable release. Same as you checkout at the previous step |
-| `VOCABLES_LISTEN_PORT`         | Port of souslesensVocable that will be exposed outside               |
-| `VIRTUOSO_LISTEN_PORT`         | Port of virtuoso that will be exposed outside                        |
-| `DATA_ROOT_DIR`                | Where the data will be written                                       |
-| `USER_PASSWORD`                | Password of the `admin` user automatically created at first start    |
-| `SA_PASSWORD`                  | Password of the sql server                                           |
-| `DBA_PASSWORD`                 | Password of the virtuoso server                                      |
-| `FORMAL_ONTOLOGY_SOURCE_LABEL` |                                                                      |
+| variable                       | description                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------- |
+| `TAG`                          | souslesensVocable release. Same as you checkout at the previous step            |
+| `VOCABLES_LISTEN_PORT`         | Port of souslesensVocable that will be exposed outside                          |
+| `VIRTUOSO_LISTEN_PORT`         | Port of virtuoso that will be exposed outside                                   |
+| `JOWL_LISTEN_PORT`             | Port of [jowl](https://github.com/souslesens/jowl) that will be exposed outside |
+| `JOWL_PATH`                    | Path of the [jowl](https://github.com/souslesens/jowl) repository               |
+| `DATA_ROOT_DIR`                | Where the data will be written                                                  |
+| `USER_PASSWORD`                | Password of the `admin` user automatically created at first start               |
+| `SA_PASSWORD`                  | Password of the sql server                                                      |
+| `DBA_PASSWORD`                 | Password of the virtuoso server                                                 |
+| `FORMAL_ONTOLOGY_SOURCE_LABEL` |                                                                                 |
 
 ### Advanced configuration
 
@@ -299,3 +301,32 @@ git push --tags
 ```
 
 GitHub releases and docker images are created on tags with GitHub Actions.
+
+### Plugins system
+
+In root create a plugins folder
+
+`mkdir plugins`
+
+Each directory is named after the plugin we want to add.
+
+```
+plugins/
+└── MyPlugin
+    └── public
+        └── MyPlugin.js
+```
+
+The plugin's directory must contain a public directory with the source code within it.
+
+MyPlugin.js must export a single IIFE function.
+
+```
+const Toto = (function () {
+    return { name: "toto" };
+})();
+export default Toto;
+```
+
+Once it done, don't forget to add the plugin's name to `mainConfig.tools_available`.
+If you still don't see the plugin in the jsTree, check that your user's profile allows to see this plugin.

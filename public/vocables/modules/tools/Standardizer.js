@@ -1,15 +1,14 @@
-import SourceBrowser from "./sourceBrowser.js";
-import common from "../common.js";
+import common from "../shared/common.js";
 import SearchUtil from "../search/searchUtil.js";
 import ElasticSearchProxy from "../search/elasticSearchProxy.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Lineage_dictionary from "./lineage/lineage_dictionary.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
-import Sunburst from "../sunburst.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 import Lineage_classes from "./lineage/lineage_classes.js";
-import Export from "../export.js";
+import Export from "../shared/export.js";
 import Lineage_blend from "./lineage/lineage_blend.js";
+import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 
 var Standardizer = (function () {
     var self = {};
@@ -26,13 +25,13 @@ var Standardizer = (function () {
     };
 
     self.searchInSourcesTree = function (event) {
-        SourceBrowser.searchInSourcesTree(event, "Standardizer_sourcesTree");
+        SearchWidget.searchInSourcesTree(event, "Standardizer_sourcesTree");
     };
 
     self.onLoaded = function (callback) {
         $("#actionDiv").html("");
         $("#graphDiv").html("");
-        SourceBrowser.searchableSourcesTreeIsInitialized = false;
+        SearchWidget.searchableSourcesTreeIsInitialized = false;
         $("#graphDiv").load("snippets/standardizer/standardizer_central.html", function () {
             $("#standardizerCentral_tabs").tabs({});
             $("#standardizerRightPanel").load("snippets/standardizer/standardizer_right.html", function () {
@@ -57,14 +56,16 @@ var Standardizer = (function () {
 
         SearchUtil.initSourcesIndexesList(null, function (err, sources) {
             if (err) return MainController.UI.message(err);
-
+            sources.sort();
             var options = {
                 contextMenu: Standardizer.getSourcesJstreeContextMenu(),
                 selectTreeNodeFn: Standardizer.onselectSourcesTreeNodeFn,
-                tie_selection: false,
+                withCheckboxes: true,
             };
-            MainController.UI.showSources("Standardizer_sourcesTree", true, sources, ["OWL", "KNOWLEDGE_GRAPH", "SKOS"], options);
-            sources.sort();
+
+            SourceSelectorWidget.initWidget(["OWL", "KNOWLEDGE_GRAPH", "SKOS"], "Standardizer_sourcesTree", false, Standardizer.onselectSourcesTreeNodeFn, null, options);
+
+            // MainController.UI.showSources("Standardizer_sourcesTree", true, sources, ["OWL", "KNOWLEDGE_GRAPH", "SKOS"], options);
 
             var candidateEntities = sources;
             candidateEntities.splice(0, 0, "all");
@@ -138,7 +139,8 @@ setTimeout(function () {
     };
 
     self.getSelectedIndexes = function (excludeCurrentSource) {
-        var sources = $("#Standardizer_sourcesTree").jstree(true).get_checked();
+        var sources = SourceSelectorWidget.getCheckedSources();
+        // var sources = $("#Standardizer_sourcesTree").jstree(true).get_checked();
         var indexes = [];
         //  var sourceIndex = $("#Standardizer_sourcesSelect").val();
         var sourceIndex = self.currentSource;
@@ -326,11 +328,11 @@ setTimeout(function () {
                 targetDiv: "Standardizer_filterClassesTree",
                 selectTreeNodeFn: function (evt, obj) {
                     var node = obj.node;
-                    SourceBrowser.openTreeNode("Standardizer_filterClassesTree", self.currentSource, node);
+                    SearchWidget.openTreeNode("Standardizer_filterClassesTree", self.currentSource, node);
                 },
                 selectGraph: true,
             };
-            SourceBrowser.showThesaurusTopConcepts(self.currentSource, options);
+            SearchWidget.showTopConcepts(self.currentSource, options);
         }
     };
     self.compare = function () {
@@ -562,7 +564,7 @@ setTimeout(function () {
             "onkeyup=\"if (event.keyCode == 13 || event.keyCode == 9)Standardizer.searchFuzzyMatches($(this).val(),null,'Standardizer_searchResulDiv2')\">" +
             "<br><input type='checkbox'  id='Standardizer_fuzzySearchAllsourcesCBX'>All sources" +
             "<button onclick='Standardizer.clearFuzzyMatch()'>Clear fuzzyMatch</button>";
-        //"<button onclick='SourceBrowser.showSearchableSourcesTreeDialog()'> filter Sources</button>"
+        //"<button onclick='SourceSelectorWidget.showDialog()'> filter Sources</button>"
         html += '<div id="Standardizer_searchResulDiv2" style="height: 600px; overflow: auto"></div>';
         $("#Standardizer_fuzzySearchDivDiv").html(html);
         setTimeout(function () {
@@ -1485,8 +1487,8 @@ sortMethod: "hubsize",
                         selectTreeNodeFn: Standardizer.bestMatches.onTreeNodeClick,
                     };
 
-                    common.jstree.loadJsTree(treeDivId, jstreeData, options, function (_err) {
-                        common.jstree.openNodeDescendants(treeDivId, "#", 8);
+                    JstreeWidget.loadJsTree(treeDivId, jstreeData, options, function (_err) {
+                        JstreeWidget.openNodeDescendants(treeDivId, "#", 8);
                     });
                     callbackSeries();
                 },
@@ -1581,7 +1583,8 @@ sortMethod: "hubsize",
             if ((node.data.type = "orphan") /* probably a problem with the single '=' here */) {
                 // orphans
                 $("#Standardizer_searchEntitiesInput").val(node.data.text);
-            } else SourceBrowser.showNodeInfos(source, node, "mainDialogDiv");
+            }
+            elseNodeInfosWidget.showNodeInfos(source, node, "mainDialogDiv");
         },
     };
 
@@ -1650,7 +1653,7 @@ sortMethod: "hubsize",
                             title: "action",
                             render: function (datum, type, row) {
                                 return (
-                                    "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='  SourceBrowser.showNodeInfos (\"" +
+                                    "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick=' NodeInfosWidget.showNodeInfos (\"" +
                                     row[0] +
                                     '","' +
                                     row[2] +

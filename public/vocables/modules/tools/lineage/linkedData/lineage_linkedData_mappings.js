@@ -1,12 +1,11 @@
 import KGcreator from "../../KGcreator.js";
 import visjsGraph from "../../../graph/visjsGraph2.js";
 import Lineage_classes from "../lineage_classes.js";
-import common from "../../../common.js";
+import common from "../../../shared/common.js";
 import Sparql_common from "../../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../../sparqlProxies/sparql_generic.js";
 import Sparql_proxy from "../../../sparqlProxies/sparql_proxy.js";
 import Sparql_OWL from "../../../sparqlProxies/sparql_OWL.js";
-import SourceBrowser from "../../sourceBrowser.js";
 
 //www.nstauthority.co.uk/data-centre/data-downloads-and-publications/well-data/
 
@@ -955,7 +954,7 @@ self.graphTable(KGcreator.currentTreeNode);
                         self.currentMappingNode = obj.node;
                     },
                 };
-                common.jstree.loadJsTree("Lineage_mappingsTreeDiv", jstreeData, options);
+                JstreeWidget.loadJsTree("Lineage_mappingsTreeDiv", jstreeData, options);
             });
         });
     };
@@ -965,7 +964,7 @@ self.graphTable(KGcreator.currentTreeNode);
         items.nodeInfos = {
             label: "Node infos",
             action: function (_e) {
-                SourceBrowser.showNodeInfos(self.mappingSourceLabel, self.currentMappingNode.id, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.mappingSourceLabel, self.currentMappingNode.id, "mainDialogDiv");
             },
         };
         items.deleteNode = {

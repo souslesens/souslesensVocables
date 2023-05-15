@@ -1,4 +1,4 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 
 /** The MIT License
@@ -99,7 +99,7 @@ var Lineage_common = (function () {
                                 data: nodeData,
                             },
                         ];
-                        common.jstree.addNodesToJstree(treeDiv, parentNode.id, jstreeData);
+                        JstreeWidget.addNodesToJstree(treeDiv, parentNode.id, jstreeData);
                     });
                 }
             } catch (e) {

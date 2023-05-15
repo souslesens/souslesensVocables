@@ -1,11 +1,11 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_classes from "./lineage_classes.js";
-import SourceBrowser from "../sourceBrowser.js";
+
 import visjsGraph from "../../graph/visjsGraph2.js";
-import Export from "../../export.js";
+import Export from "../../shared/export.js";
 
 var Lineage_query = (function () {
     var self = {};
@@ -402,7 +402,7 @@ var Lineage_query = (function () {
                     open_all: true,
                 };
                 $("#lineageQuery_listResultDiv").html("<div style='width:600px;height:300px;overflow: auto'><div id='lineageQuery_listResultDivTree'></div>");
-                common.jstree.loadJsTree("lineageQuery_listResultDivTree", jstreeData, options, function () {});
+                JstreeWidget.loadJsTree("lineageQuery_listResultDivTree", jstreeData, options, function () {});
             }
         });
     };
@@ -416,7 +416,7 @@ var Lineage_query = (function () {
         items["NodeInfos"] = {
             label: "Node infos",
             action: function (_e) {
-                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
             },
         };
         items.graphNode = {

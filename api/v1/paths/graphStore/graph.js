@@ -10,7 +10,6 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
-
         if (ConfigManager.config) {
             var sparqlServerConnection = { url: ConfigManager.config.default_sparql_url };
             if (ConfigManager.config.sparql_server.user) {
@@ -21,11 +20,10 @@ module.exports = function () {
                 };
             }
 
-            GraphStore.exportGraph(sparqlServerConnection,req.query.graphUri, function(err, result) {
+            GraphStore.exportGraph(sparqlServerConnection, req.query.graphUri, function (err, result) {
                 if (err) {
                     next(err);
-                }
-                else {
+                } else {
                     return res.status(200).json(result);
                 }
             });
@@ -73,13 +71,10 @@ module.exports = function () {
                     };
                 }
 
-                GraphStore.importGraphFromUrl(sparqlServerConnection, body.sourceUrl, body.graphUri, function(err, result) {
+                GraphStore.importGraphFromUrl(sparqlServerConnection, body.sourceUrl, body.graphUri, function (err, result) {
                     processResponse(res, err, "DONE");
-
                 });
             }
-
-
         });
     }
 

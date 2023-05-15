@@ -1,4 +1,4 @@
-import common from "../common.js";
+import common from "../shared/common.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com

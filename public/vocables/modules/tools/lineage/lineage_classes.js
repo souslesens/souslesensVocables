@@ -1,8 +1,8 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import KGcreator from "../KGcreator.js";
 import Lineage_sets from "./lineage_sets.js";
 import Lineage_linkedData_mappings from "./linkedData/lineage_linkedData_mappings.js";
-import SourceBrowser from "../sourceBrowser.js";
+
 import Lineage_graphTraversal from "./lineage_graphTraversal.js";
 import Lineage_selection from "./lineage_selection.js";
 import KGquery from "./assetQuery.js";
@@ -14,10 +14,10 @@ import Lineage_containers from "./lineage_containers.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
-import CustomPluginController from "../../customPluginController.js";
 import Lineage_sources from "./lineage_sources.js";
-import MainController from "../../mainController.js";
-import authentication from "../../authentification.js";
+import MainController from "../../shared/mainController.js";
+import authentication from "../../shared/authentification.js";
+import Clipboard from "../../shared/clipboard.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -105,17 +105,7 @@ var Lineage_classes = (function () {
                     $("#lineage_allActions").css("visibility", "hidden");
                 }
 
-                SourceBrowser.currentTargetDiv = "LineageNodesJsTreeDiv";
-
-                /*    var sourceLabels = [];
-
-MainController.UI.showSources("sourcesTreeDiv", false);
-
-for (var key in Config.sources) {
-if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[key].schemaType) > -1) sourceLabels.push(key);
-}
-sourceLabels.sort();
-//  common.fillSelectOptions("Lineage_toSource", sourceLabels, true)*/
+                SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
 
                 $("#LineagePopup").dialog({
                     autoOpen: false,
@@ -207,9 +197,9 @@ sourceLabels.sort();
         } else if (nodeEvent.ctrlKey && nodeEvent.altKey) {
             Lineage_selection.addNodeToSelection(node);
         } else if (nodeEvent.ctrlKey) {
-            SourceBrowser.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
+            NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
         } else if (nodeEvent.altKey && options.callee == "Tree") {
-            SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, node.data.source, node, { reopen: true });
+            SearchWidget.openTreeNode(SearchWidget.currentTargetDiv, node.data.source, node, { reopen: true });
         } else {
             return nodeEvent;
         }
@@ -232,7 +222,7 @@ sourceLabels.sort();
                 label: "Wiki page",
                 action: function (/** @type {any} */ _e) {
                     var source = $("#sourcesTreeDiv").jstree().get_selected()[0];
-                    SourceBrowser.showWikiPage(source);
+                    Lineage_classes.showWikiPage(source);
                 },
             };
         }
@@ -241,7 +231,7 @@ sourceLabels.sort();
     };
 
     self.selectTreeNodeFn = function (/** @type {{ which: number; }} */ event, /** @type {{ node: { data: any; }; event: { ctrlKey: any; }; }} */ propertiesMap) {
-        SourceBrowser.currentTreeNode = propertiesMap.node;
+        SearchWidget.currentTreeNode = propertiesMap.node;
         self.currentTreeNode = propertiesMap.node;
         var data = propertiesMap.node.data;
         if (event.which == 3) {
@@ -249,13 +239,13 @@ sourceLabels.sort();
         }
         if (self.onGraphOrTreeNodeClick(self.currentTreeNode, propertiesMap.event, { callee: "Tree" }) != null) {
             if (Config.sources[data.source].schemaType == "INDIVIDUAL") {
-                return KGquery.showJstreeNodeChildren(SourceBrowser.currentTargetDiv, propertiesMap.node);
+                return KGquery.showJstreeNodeChildren(SearchWidget.currentTargetDiv, propertiesMap.node);
             } else {
                 setTimeout(function () {
-                    SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, data.source, propertiesMap.node, { ctrlKey: propertiesMap.event.ctrlKey });
+                    SearchWidget.openTreeNode(SearchWidget.currentTargetDiv, data.source, propertiesMap.node, { ctrlKey: propertiesMap.event.ctrlKey });
                 }, 200);
             }
-            // return SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
+            // returnNodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
         }
     };
 
@@ -271,7 +261,7 @@ sourceLabels.sort();
 
             if (Lineage_sources.activeSource) {
                 Lineage_sources.registerSourceImports(Lineage_sources.activeSource);
-                SourceBrowser.showThesaurusTopConcepts(Lineage_sources.activeSource);
+                SearchWidget.showTopConcepts(Lineage_sources.activeSource);
             }
         }
     };
@@ -745,10 +735,10 @@ addNode:false
             selectTreeNodeFn: function (/** @type {any} */ event, /** @type {any} */ propertiesMap) {
                 return Lineage_classes.selectTreeNodeFn(event, propertiesMap);
             },
-            contextMenu: SourceBrowser.getJstreeConceptsContextMenu(),
+            contextMenu: SearchWidget.getJstreeConceptsContextMenu(),
         };
 
-        common.jstree.loadJsTree(SourceBrowser.currentTargetDiv, jstreeData, jstreeOptions);
+        JstreeWidget.loadJsTree(SearchWidget.currentTargetDiv, jstreeData, jstreeOptions);
     };
 
     self.openCluster = function (/** @type {{ data: { cluster: any[]; source: any; }; id: any; }} */ clusterNode) {
@@ -923,7 +913,7 @@ addNode:false
                     parent: graphPrefix,
                 });
             });
-            common.jstree.loadJsTree("lineage_linkedDataPropertiesTree", jstreeData, { openAll: true });
+            JstreeWidget.loadJsTree("lineage_linkedDataPropertiesTree", jstreeData, { openAll: true });
         }
     };
 
@@ -2164,7 +2154,6 @@ addNode:false
                     visjsGraph.data.edges.add(visjsData.edges);
                     visjsGraph.network.fit();
                 }
-                CustomPluginController.setGraphNodesIcons();
 
                 $("#waitImg").css("display", "none");
 
@@ -2611,7 +2600,7 @@ addNode:false
                     self.setGraphPopupMenus(node, event);
                     MainController.UI.showPopup(point, "graphPopupDiv");
                 }
-                // SourceBrowser.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge.data.propertyId, "mainDialogDiv", { resetVisited: 1 });
+                //NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge.data.propertyId, "mainDialogDiv", { resetVisited: 1 });
             } else {
                 self.setGraphPopupMenus(node, event);
                 self.currentGraphNode = node;
@@ -2704,13 +2693,13 @@ addNode:false
 
         showNodeInfos: function () {
             if (self.currentGraphNode) {
-                SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
             } else if (self.currentGraphEdge) {
-                SourceBrowser.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv");
             }
         },
         showPropertyInfos: function (hideModifyButtons) {
-            SourceBrowser.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv", { hideModifyButtons: hideModifyButtons });
+            NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge, "mainDialogDiv", { hideModifyButtons: hideModifyButtons });
         },
 
         expandIndividual: function () {
@@ -2972,6 +2961,11 @@ attrs.color=self.getSourceColor(superClassValue)
         }
     };
 
+    self.showWikiPage = function (sourceLabel) {
+        var wikiUrl = Config.wiki.url + "Source " + sourceLabel;
+        window.open(wikiUrl, "_slsvWiki");
+    };
+
     self.showEdgesLegend = function () {
         var edges = visjsGraph.data.edges.get();
         var newEdges = [];
@@ -2994,6 +2988,32 @@ attrs.color=self.getSourceColor(superClassValue)
 
         $(".vis-manipulation").html(html);
     };
+
+    self.copyNode = function (event, node) {
+        if (!node) {
+            node = self.currentTreeNode;
+        }
+        if (!node) {
+            node = self.currentGraphNode;
+        }
+        if (!node) {
+            return;
+        }
+
+        self.currentCopiedNode = node;
+        Clipboard.copy(
+            {
+                type: "node",
+                id: node.data.id,
+                label: node.data.label,
+                source: node.data.source,
+                data: node.data,
+            },
+            self.currentTreeNode.id + "_anchor",
+            event
+        );
+    };
+
     return self;
 })();
 

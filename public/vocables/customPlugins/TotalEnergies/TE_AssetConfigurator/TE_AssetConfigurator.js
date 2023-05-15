@@ -138,12 +138,12 @@ var TE_AssetConfigurator = (function () {
             selectTreeNodeFn: function (evt, obj) {
                 var node = obj.node;
                 self.currentTreeNode = node;
-                SourceBrowser.openTreeNode("TE_AssetConfigurator_81346TreeDiv", self.currentSource, node);
+                SearchWidget.openTreeNode("TE_AssetConfigurator_81346TreeDiv", self.currentSource, node);
             },
 
             contextMenu: TE_AssetConfigurator.getSystemsTreeContextMenu(),
         };
-        SourceBrowser.showThesaurusTopConcepts(self.currentSource, options);
+        SearchWidget.showTopConcepts(self.currentSource, options);
     };
 
     self.getSystemsTreeContextMenu = function () {
@@ -161,7 +161,7 @@ var TE_AssetConfigurator = (function () {
             label: "Node infos",
             action: function (_e) {
                 // pb avec source
-                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
             },
         };
 
@@ -213,7 +213,7 @@ var TE_AssetConfigurator = (function () {
                     optionalData: { systemType: node.data.systemType },
                     reopen: true,
                 };
-                SourceBrowser.openTreeNode("TE_AssetConfigurator_81346TreeDiv", self.currentSource, node, options);
+                SearchWidget.openTreeNode("TE_AssetConfigurator_81346TreeDiv", self.currentSource, node, options);
                 self.setTreeSystemNodesInfos(obj.node.id);
             },
             contextMenu: TE_AssetConfigurator.getSystemsTreeContextMenu(),
@@ -256,7 +256,7 @@ var TE_AssetConfigurator = (function () {
         var code = node.data.code;
         if (!code || code == "ex") {
             // example
-            var parent = common.jstree.getjsTreeNodeObj("TE_AssetConfigurator_81346TreeDiv", node.parent);
+            var parent = JstreeWidget.getjsTreeNodeObj("TE_AssetConfigurator_81346TreeDiv", node.parent);
             code = parent.data.code;
         }
 
@@ -635,7 +635,7 @@ var TE_AssetConfigurator = (function () {
     self.setTreeSystemNodesInfos = function (topNode) {
         setTimeout(function () {
             if (!topNode) topNode = "#";
-            var treeNodes = common.jstree.getjsTreeNodes("TE_AssetConfigurator_81346TreeDiv", false, "#");
+            var treeNodes = JstreeWidget.getjsTreeNodes("TE_AssetConfigurator_81346TreeDiv", false, "#");
             var ids = [];
             treeNodes.forEach(function (item) {
                 ids.push(item.data.id);
@@ -929,7 +929,7 @@ var TE_AssetConfigurator = (function () {
                     });
                     var options = self.getJstreeOptions();
                     if (word) options.openAll = true;
-                    common.jstree.loadJsTree("TE_AssetConfigurator_81346TreeDiv", jstreeData, options);
+                    JstreeWidget.loadJsTree("TE_AssetConfigurator_81346TreeDiv", jstreeData, options);
                 },
             ],
 

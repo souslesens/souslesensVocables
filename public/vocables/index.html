@@ -15,33 +15,25 @@
         <link href="js/external/visjs/vis-network.css" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
 
-        <script src="js/mainController.js"></script>
-        <script src="js/graphController.js"></script>
-        <script src="js/treeController.js"></script>
-        <script src="js/clipboard.js"></script>
+        <script src="js/external/graph.js"></script>
+        <script src="js/external/download.js"></script>
+        <script src="js/external/sunburst.js"></script>
+        <script src="js/external/d3/d3.js"></script>
 
-        <!--    Tools imports sections -->
-
-        <script type="module" src="modules/common.js" charset="utf-8"></script>
+        <script type="module" src="modules/shared/common.js" charset="utf-8"></script>
         <script type="module" src="modules/graph/visjsGraph2.js"></script>
         <script type="module" src="modules/graph/canvas2svg.js"></script>
         <script type="module" src="modules/graph/SVGexport.js"></script>
         <script type="module" src="modules/graph/graphMLexport.js"></script>
 
-        <script type="module" src="modules/mainController.js"></script>
+        <script type="module" src="modules/shared/mainController.js"></script>
 
-        <script type="module" src="modules/graphController.js"></script>
-        <script type="module" src="modules/treeController.js"></script>
-        <script type="module" src="modules/clipboard.js"></script>
+        <script type="module" src="modules/shared/graphController.js"></script>
+        <script type="module" src="modules/shared/treeController.js"></script>
+        <script type="module" src="modules/shared/clipboard.js"></script>
 
-        <script type="module" src="modules/tools/sourceBrowser.js"></script>
+        <!-- <script type="module" src="modules/tools/sourceBrowser.js"></script>-->
 
-        <script type="module" src="modules/tools/blender/blender.js"></script>
-        <script type="module" src="modules/tools/blender/collection.js"></script>
-        <script type="module" src="modules/tools/blender/sourceEditor.js"></script>
-        <script type="module" src="modules/tools/blender/import.js"></script>
-        <script type="module" src="modules/tools/blender/externalReferences.js"></script>
-        <script type="module" src="modules/tools/blender/transform.js"></script>
         <script type="module" src="modules/tools/SPARQL_endpoint.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_classes.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_sources.js"></script>
@@ -65,9 +57,14 @@
         <script type="module" src="modules/tools/lineage/lineage_styles.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_relationFilter.js"></script>
 
-        <script type="module" src="modules/ontologyModels.js"></script>
+        <script type="module" src="modules/shared/ontologyModels.js"></script>
 
-        <script type="module" src="modules/commonUIwidgets.js"></script>
+        <script type="module" src="modules/uiWidgets/predicatesSelectorWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/promptedSelectWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/sourceSelectorWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/jstreeWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/nodeInfosWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/searchWidget.js"></script>
 
         <script type="module" src="modules/tools/owlEditor.js"></script>
 
@@ -83,25 +80,20 @@
         <script type="module" src="modules/tools/composer.js"></script>
         <script type="module" src="modules/tools/sparqlQueryUI.js"></script>
 
-        <script src="js/tools/admin.js"></script>
-        <script src="js/tools/ConfigEditor.js"></script>
-
-        <script src="js/tools/KGcreator.js"></script>
-        <script src="js/tools/KGpropertyFilter.js"></script>
-        <script src="js/tools/composer.js"></script>
-        <script src="js/tools/sparqlQueryUI.js"></script>
-
-        <script src="js/tools/ontologiesStats.js"></script>
-        <!-----------TSF plugins tools--------------->
-        <script type="module" src="modules/tools/TSF_plugins/IDCP.js"></script>
-
-        <!-----------private tools--------------->
-        <script type="module" src="modules/customPluginController.js"></script>
+        <script type="module" src="modules/tools/ontologiesStats.js"></script>
 
         <script src="config/app_config.js"></script>
-        <!--    <script src="config/app_config_draft_tools.js"></script>-->
 
-        <script type="module" src="modules/authentification.js"></script>
+        <script type="module" src="modules/shared/authentification.js"></script>
+        <script type="module">
+            import { allTools, loadToolsAndPlugins } from "./config/tools.js";
+
+            try {
+                await loadToolsAndPlugins();
+            } catch (error) {
+                console.error("Failed to load tools and plugins", error);
+            }
+        </script>
 
         <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
@@ -116,16 +108,14 @@
         <script type="module" src="modules/search/searchUtil.js"></script>
         <!--  <script type="module" src="modules/tools/ontologyUtil.js"></script>-->
 
-        <script type="module" src="modules/export.js"></script>
+        <script type="module" src="modules/shared/export.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_graphTraversal.js"></script>
 
         <script type="module" src="modules/search/elasticSearchProxy.js"></script>
 
         <script type="module" src="modules/tools/lineage/lineage_reasoner.js"></script>
 
-
-        <script type="module" src="config/tools_m.js"></script>
-
+        <script type="module" src="modules/tools/lineage/lineage_similars.js"></script>
 
         <link
             rel="stylesheet"
@@ -169,8 +159,8 @@
         <script src="https://unpkg.com/@triply/yasgui/build/yasgui.min.js"></script>
 
         <script type="module">
-            import MainController from "./modules/mainController.js";
-            import authentication from "./modules/authentification.js";
+            import MainController from "./modules/shared/mainController.js";
+            import authentication from "./modules/shared/authentification.js";
 
             var leftPanelWidth = 400;
             var rightPanelWidth = 400;
@@ -240,7 +230,7 @@
                         if (target == "_slsvCallback") {
                             var id = $(this).attr("href");
                             event.preventDefault();
-                            SourceBrowser.showNodeInfos(null, id, "mainDialogDiv");
+                            NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
                         }
                     });
 

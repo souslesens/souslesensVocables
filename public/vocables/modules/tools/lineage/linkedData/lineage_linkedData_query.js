@@ -1,7 +1,7 @@
 import Lineage_linkedData_mappings from "./lineage_linkedData_mappings.js";
-import common from "../../../common.js";
+import common from "../../../shared/common.js";
 import KGcreator from "../../KGcreator.js";
-import Export from "../../../export.js";
+import Export from "../../../shared/export.js";
 import visjsGraph from "../../../graph/visjsGraph2.js";
 import Lineage_classes from "../lineage_classes.js";
 
@@ -125,7 +125,7 @@ var Lineage_linkedData_query = (function () {
                     selectTreeNodeFn: Lineage_linkedData_query.onColumnSelect,
                     openAll: false,
                 };
-                common.jstree.loadJsTree("LineageLinkedDataQueryParams_SQL_columnsTree", jstreeData, options);
+                JstreeWidget.loadJsTree("LineageLinkedDataQueryParams_SQL_columnsTree", jstreeData, options);
             });
         }
 

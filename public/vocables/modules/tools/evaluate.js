@@ -1,9 +1,10 @@
-import common from "../common.js";
-import MainController from "../mainController.js";
+import common from "../shared/common.js";
+import MainController from "../shared/mainController.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import Lineage_classes from "./lineage/lineage_classes.js";
-import Clipboard from "../clipboard.js";
+import Clipboard from "../shared/clipboard.js";
+import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget";
 
 var Evaluate = (function () {
     var self = {};
@@ -63,15 +64,22 @@ var Evaluate = (function () {
                 // Pass
             },
         };
-        setTimeout(function () {
-            MainController.UI.showSources("annotate_resourcesTreeDiv", true, null, null, options, function () {
+        //  setTimeout(function () {
+        var options = {
+            withCheckboxes: true,
+            openAll: true,
+        };
+        SourceSelectorWidget.initWidget(null, "annotate_resourcesTreeDiv", false, null, null, options);
+
+        /* MainController.UI.showSources("annotate_resourcesTreeDiv", true, null, null, options, function () {
                 $("#annotate_resourcesTreeDiv").jstree(true).open_all();
             });
-        }, 200);
+        }, 200);*/
     };
 
     self.execAnnotate = function () {
-        var sourceNodes = $("#annotate_resourcesTreeDiv").jstree(true).get_checked();
+        //  var sourceNodes = $("#annotate_resourcesTreeDiv").jstree(true).get_checked();
+        var sourceNodes = SourceSelectorWidget.getCheckedSources();
         var sources = {};
         sourceNodes.forEach(function (sourceLabel) {
             if (!Config.sources[sourceLabel].color) Config.sources[sourceLabel].color = common.palette[Object.keys(sourceLabel).length];
@@ -220,8 +228,8 @@ var Evaluate = (function () {
             success: function (data, _textStatus, _jqXHR) {
                 self.currentCorpusData = data;
 
-                common.jstree.loadJsTree(self.categoriesTreeId, data.jstreeData, { selectTreeNodeFn: Evaluate.onTreeClickNode }, function (_err, _result) {
-                    common.jstree.openNode(self.categoriesTreeId, data.jstreeData[0].id);
+                JstreeWidget.loadJsTree(self.categoriesTreeId, data.jstreeData, { selectTreeNodeFn: Evaluate.onTreeClickNode }, function (_err, _result) {
+                    JstreeWidget.openNode(self.categoriesTreeId, data.jstreeData[0].id);
                 });
 
                 self.showCorpusSources(data.sources);
@@ -251,7 +259,7 @@ var Evaluate = (function () {
 
     self.getSubjectGraphData = function (jstreeNode, callback) {
         MainController.UI.message("processing data");
-        var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, jstreeNode.id);
+        var descendants = JstreeWidget.getNodeDescendants(self.categoriesTreeId, jstreeNode.id);
         var ancestorsDepth = 3;
 
         var selectedSources = $("#Evaluate_rightPanel_sourcesTreeDiv").jstree().get_checked();
@@ -415,7 +423,7 @@ var Evaluate = (function () {
     };
 
     self.showMissingWords = function (_jstreeNode) {
-        var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, self.currentTreeNode.id);
+        var descendants = JstreeWidget.getNodeDescendants(self.categoriesTreeId, self.currentTreeNode.id);
 
         var sourceMissingWords = [];
         descendants.forEach(function (node) {
@@ -464,7 +472,7 @@ var Evaluate = (function () {
             word +
             '","altLabel")\'>Copy as AltLabel</button>' +
             "<br><ul>";
-        var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, self.currentTreeNode.id);
+        var descendants = JstreeWidget.getNodeDescendants(self.categoriesTreeId, self.currentTreeNode.id);
 
         descendants.forEach(function (node) {
             if (!node.data.files) return;
@@ -505,7 +513,7 @@ var Evaluate = (function () {
 
     self.showUnderlinedEntities = function (jstreeNode) {
         MainController.UI.message("processing data");
-        var descendants = common.jstree.getNodeDescendants(self.categoriesTreeId, jstreeNode.id);
+        var descendants = JstreeWidget.getNodeDescendants(self.categoriesTreeId, jstreeNode.id);
 
         var selectedSources = $("#Evaluate_rightPanel_sourcesTreeDiv").jstree().get_checked();
         var sources = {};
@@ -558,7 +566,7 @@ var Evaluate = (function () {
                 parent: "#",
             });
         });
-        common.jstree.loadJsTree(
+        JstreeWidget.loadJsTree(
             "Evaluate_rightPanel_sourcesTreeDiv",
             jstreeData,
             {
@@ -566,7 +574,7 @@ var Evaluate = (function () {
                 openAll: true,
             },
             function (_err, _result) {
-                common.jstree.checkAll("Evaluate_rightPanel_sourcesTreeDiv");
+                JstreeWidget.checkAll("Evaluate_rightPanel_sourcesTreeDiv");
             }
         );
     };

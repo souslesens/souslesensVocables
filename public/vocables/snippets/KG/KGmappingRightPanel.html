@@ -43,7 +43,7 @@
     $("#GenericTools_searchAllDiv").load("./snippets/searchAll.html", function () {
         $("#GenericTools_searchInAllSources").prop("checked", true);
         MainController.currentSource = Config.KG.mappingAlternativeSource;
-        SourceBrowser.currentTargetDiv = "KGmappingsjsOtherOntologiesTreeDiv";
+        SearchWidget.currentTargetDiv = "KGmappingsjsOtherOntologiesTreeDiv";
         $("#GenericTools_searchSchemaType").val("OWL");
     });
 

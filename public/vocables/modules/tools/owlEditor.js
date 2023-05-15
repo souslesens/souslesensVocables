@@ -1,4 +1,4 @@
-import common from "../common.js";
+import common from "../shared/common.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
@@ -223,12 +223,12 @@ var OwlEditor = (function () {
 
                     var options = { selectTreeNodeFn: OwlEditor.onSelectTreeNode };
 
-                    common.jstree.loadJsTree(jstreeDivId, jstreeData, options, function (_err, _result) {
+                    JstreeWidget.loadJsTree(jstreeDivId, jstreeData, options, function (_err, _result) {
                         if (jstreeData.length < 300)
                             $("#" + jstreeDivId)
                                 .jstree()
                                 .open_all();
-                        common.jstree.openNodeDescendants(jstreeDivId, "owl:ObjectProperty");
+                        JstreeWidget.openNodeDescendants(jstreeDivId, "owl:ObjectProperty");
                     });
 
                     callbackSeries();
@@ -530,7 +530,7 @@ var OwlEditor = (function () {
                     },
                 };
             }
-            common.jstree.addNodesToJstree("owlEditor_jstreeDiv", subjectData.parent, jstreeData);
+            JstreeWidget.addNodesToJstree("owlEditor_jstreeDiv", subjectData.parent, jstreeData);
 
             return;
         });

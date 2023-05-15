@@ -1,10 +1,10 @@
-import common from "../common.js";
-import SourceBrowser from "./sourceBrowser.js";
+import common from "../shared/common.js";
+
 import visjsGraph from "../graph/visjsGraph2.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
-import Clipboard from "../clipboard.js";
+import Clipboard from "../shared/clipboard.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -23,9 +23,9 @@ var SourceMatcher = (function () {
     self.maxSourceDescendants = 500;
     self.onSourceSelect = function (sourceLabel) {
         //  $("#actionDivContolPanelDiv").html("<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceMatcher.showcompareWithDialog()'>Compare with...</button>")
-        // $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SourceBrowser.searchTerm()'>Search</button>")
+        // $("#actionDivContolPanelDiv").html("<input id='GenericTools_searchTermInput'> <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='SearchWidget.searchTerm()'>Search</button>")
         $("#accordion").accordion("option", { active: 2 });
-        SourceBrowser.showThesaurusTopConcepts(sourceLabel);
+        SearchWidget.showTopConcepts(sourceLabel);
 
         $("#actionDivContolPanelDiv").load(
             "snippets/sourceMatcher.html",
@@ -39,8 +39,8 @@ var SourceMatcher = (function () {
     };
     self.selectTreeNodeFn = function (event, propertiesMap) {
         $("#SourceMatcher_actionDiv").css("display", "block");
-        SourceBrowser.openTreeNode(SourceBrowser.currentTargetDiv, propertiesMap.node.data.source, propertiesMap.node);
-        SourceBrowser.currentTreeNode = propertiesMap.node;
+        SearchWidget.openTreeNode(SearchWidget.currentTargetDiv, propertiesMap.node.data.source, propertiesMap.node);
+        SearchWidget.currentTreeNode = propertiesMap.node;
     };
 
     self.compareConcepts = function (compareAll, output, rdfType, fromSourceId, toSourceId, callback) {
@@ -57,7 +57,7 @@ var SourceMatcher = (function () {
 
         if (!compareAll) compareAll = $("#SourceMatcher_compareAllCBX").prop("checked");
 
-        if (!SourceBrowser.currentTreeNode) {
+        if (!SearchWidget.currentTreeNode) {
             if (!compareAll) {
                 if (confirm("compare all  items")) {
                     $("#showOlderGenealogyOnlyCBX").prop("checked", "checked");
@@ -68,7 +68,7 @@ var SourceMatcher = (function () {
                 }
             }
         } else {
-            sourceNodeId = SourceBrowser.currentTreeNode.data.id;
+            sourceNodeId = SearchWidget.currentTreeNode.data.id;
 
             if (!sourceNodeId || sourceNodeId.length == 0) {
                 $("#waitImg").css("display", "none");
@@ -544,7 +544,7 @@ var SourceMatcher = (function () {
         if (event && event.ctrlKey) {
             Clipboard.copy({ type: "node", source: node.data.source, id: node.id, label: node.label }, "_visjsNode", event);
         } else {
-            SourceBrowser.showNodeInfos(node.data.source, node, "mainDialogDiv");
+            NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv");
         }
     };
 

@@ -1,10 +1,10 @@
-import SourceBrowser from "./sourceBrowser.js";
-import common from "../common.js";
+import common from "../shared/common.js";
 import Lineage_upperOntologies from "./lineage/lineage_upperOntologies.js";
 import SearchUtil from "../search/searchUtil.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
+import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 
 //https://openbase.com/js/@json-editor/json-editor/documentation
 
@@ -118,32 +118,15 @@ var KGcreator = (function () {
     };
 
     self.showSourcesDialog = function (callback) {
-        if (Config.tools["KGcreator"].urlParam_source) {
-            return self.initSource(Config.tools["KGcreator"].urlParam_source, callback);
-        }
-
-        var html =
-            ' <div id="sourcesSelectionDialogdiv" style="margin-bottom: 10px">\n' +
-            "            <button className=\"btn btn-sm my-1 py-0 btn-outline-primary\" onClick=\"$('#sourcesSelectionDialogdiv').dialog('close')\">Cancel</button>\n" +
-            '            <button className="btn btn-sm my-1 py-0 btn-outline-primary" id="searchAllValidateButton">OK</button>\n' +
-            '            <div>Search : <input id="Lineage_classes_SearchSourceInput" value="" style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" /></div>\n' +
-            '            <div id="sourcesTreeDivContainer" style="overflow: auto" className="jstreeContainerXX XXXmax-height">\n' +
-            '                <div className="jstreeContainer" style="width: 360px; height: 600px; overflow: auto; margin-top: 5px">\n' +
-            '                    <div id="searchAll_sourcesTree"></div>\n' +
-            "                </div>\n" +
-            "            </div>\n" +
-            "        </div>";
-        $("#mainDialogDiv").html(html);
-
         var options = {
-            includeSourcesWithoutSearchIndex: true,
-            sourcesSelectionDialogdiv: "mainDialogDiv",
+            withCheckboxes: false,
         };
-        SourceBrowser.showSearchableSourcesTreeDialog(["OWL"], options, function () {
+        var selectTreeNodeFn = function () {
             $("#mainDialogDiv").dialog("close");
-            var source = $("#searchAll_sourcesTree").jstree(true).get_selected()[0];
+            var source = SourceSelectorWidget.getSelectedSource()[0];
             self.initSource(source, callback);
-        });
+        };
+        SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
     };
 
     self.initSource = function (source, callback) {
@@ -384,7 +367,7 @@ var KGcreator = (function () {
                 }
             }
 
-            common.jstree.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
+            JstreeWidget.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
         });
     };
 
@@ -434,7 +417,7 @@ var KGcreator = (function () {
                             data: { id: col, sample: result.data[0] },
                         });
                     });
-                    common.jstree.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData);
+                    JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData);
                 },
                 error: function (err) {
                     // alert(err.responseText);
@@ -632,9 +615,9 @@ var KGcreator = (function () {
                 },
                 function (callbackSeries) {
                     $("#sharedPredicatesPanel").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
-                        CommonUIwidgets.predicatesSelectorWidget.init(KGcreator.currentSlsvSource, function () {
-                            CommonUIwidgets.predicatesSelectorWidget.onSelectObjectFn = function (value) {};
-                            CommonUIwidgets.predicatesSelectorWidget.onSelectPropertyFn = function (value) {};
+                        PredicatesSelectorWidget.init(KGcreator.currentSlsvSource, function () {
+                            PredicatesSelectorWidget.onSelectObjectFn = function (value) {};
+                            PredicatesSelectorWidget.onSelectPropertyFn = function (value) {};
                         });
 
                         $("#editPredicate_customPredicateContentDiv").html("<div> <input type='checkbox' id='KGcreator_isRestrictionCBX' />is Restriction</div>");

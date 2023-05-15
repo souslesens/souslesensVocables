@@ -49,7 +49,7 @@ module.exports = function () {
 
                         //clear graph  if reload
                         function (callbackSeries) {
-                            if (body.options.reload!=="true") {
+                            if (body.options.reload !== "true") {
                                 return callbackSeries();
                             }
                             if (!graphExists) {

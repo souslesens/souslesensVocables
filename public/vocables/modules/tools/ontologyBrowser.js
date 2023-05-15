@@ -145,7 +145,7 @@ var OntologyBrowser = (function () {
                         if (!existingVisjsIds[classId]) {
                             existingVisjsIds[classId] = 1;
                             visjsData.nodes.push({
-                                id: SourceBrowser.currentTreeNode.data.id,
+                                id: SearchWidget.currentTreeNode.data.id,
                                 label: Sparql_common.getLabelFromURI(classId),
                                 shape: "box",
                             });
@@ -215,8 +215,8 @@ var OntologyBrowser = (function () {
 
         if (!classId) {
             self.queryClassPath = {};
-            classId = SourceBrowser.currentTreeNode.data.id;
-            classLabel = SourceBrowser.currentTreeNode.data.label;
+            classId = SearchWidget.currentTreeNode.data.id;
+            classLabel = SearchWidget.currentTreeNode.data.label;
             self.init(function () {
                 execute(classId, classLabel);
             });
@@ -326,7 +326,7 @@ var OntologyBrowser = (function () {
             var id = $(div).attr("id");
             var isNewTree = $("#OntologyBrowser_queryTreeDiv").is(":empty");
             var existingNodes = [];
-            if (!isNewTree) existingNodes = common.jstree.getjsTreeNodes("OntologyBrowser_queryTreeDiv", true);
+            if (!isNewTree) existingNodes = JstreeWidget.getjsTreeNodes("OntologyBrowser_queryTreeDiv", true);
             var jstreeData = [];
 
             if (existingNodes.indexOf(OntologyBrowser.currentNode.id) < 0) {
@@ -340,7 +340,7 @@ var OntologyBrowser = (function () {
                     },
                 });
                 if (!isNewTree) {
-                    common.jstree.addNodesToJstree("OntologyBrowser_queryTreeDiv", "#", jstreeData);
+                    JstreeWidget.addNodesToJstree("OntologyBrowser_queryTreeDiv", "#", jstreeData);
                     jstreeData = [];
                 }
             }
@@ -365,9 +365,9 @@ var OntologyBrowser = (function () {
                     //  jsTreeOptions.onCheckNodeFn = OntologyBrowser.checkTreeNodeFn;
                     //  jsTreeOptions.withCheckboxes=true
 
-                    common.jstree.loadJsTree("OntologyBrowser_queryTreeDiv", jstreeData, jsTreeOptions);
+                    JstreeWidget.loadJsTree("OntologyBrowser_queryTreeDiv", jstreeData, jsTreeOptions);
                 } else {
-                    common.jstree.addNodesToJstree("OntologyBrowser_queryTreeDiv", OntologyBrowser.currentNode.id, jstreeData);
+                    JstreeWidget.addNodesToJstree("OntologyBrowser_queryTreeDiv", OntologyBrowser.currentNode.id, jstreeData);
                 }
             }
         },
@@ -376,7 +376,7 @@ var OntologyBrowser = (function () {
         },
 
         showNodeInfo: function () {
-            SourceBrowser.showNodeInfos(MainController.currentSource, OntologyBrowser.currentNode, "mainDialogDiv");
+            NodeInfosWidget.showNodeInfos(MainController.currentSource, OntologyBrowser.currentNode, "mainDialogDiv");
         },
     };
 
@@ -416,7 +416,7 @@ var OntologyBrowser = (function () {
                 },
             });
 
-            common.jstree.addNodesToJstree("OntologyBrowser_queryTreeDiv", node.id, jstreeData);
+            JstreeWidget.addNodesToJstree("OntologyBrowser_queryTreeDiv", node.id, jstreeData);
         },
         cancelFilterDialog: function () {
             $("#OntologyBrowser_dataPropertyFilterDialog").dialog("close");
@@ -434,13 +434,13 @@ var OntologyBrowser = (function () {
         },
 
         executeQuery: function () {
-            var nodes = common.jstree.getjsTreeNodes("OntologyBrowser_queryTreeDiv");
+            var nodes = JstreeWidget.getjsTreeNodes("OntologyBrowser_queryTreeDiv");
             var nodesMap = {};
             nodes.forEach(function (item) {
                 nodesMap[item.id] = item;
             });
 
-            var classNodeIds = common.jstree.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", "#").children;
+            var classNodeIds = JstreeWidget.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", "#").children;
 
             var selectStr = " * ";
             var showIds = $("OntologyBrowser_queryShowItemsIdsCBX").prop("checked");
@@ -449,7 +449,7 @@ var OntologyBrowser = (function () {
             classNodeIds.forEach(function (classNodeId, index) {
                 // Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema,classNodeId ,function(err,result){
 
-                var classNode = common.jstree.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [classNodeId]);
+                var classNode = JstreeWidget.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [classNodeId]);
 
                 if (index > 0) {
                     // join classes
@@ -484,7 +484,7 @@ var OntologyBrowser = (function () {
 
                 query += "?" + classNode.text + " rdf:type <" + classNode.id + "> . ";
                 classNode.children.forEach(function (propertyNodeId) {
-                    var propertyNode = common.jstree.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [propertyNodeId]);
+                    var propertyNode = JstreeWidget.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [propertyNodeId]);
                     if (propertyNode.data.optional) {
                         query += "OPTIONAL {";
                         propertyNode.text = propertyNode.text.replace(" (OPTIONAL)", "");
@@ -493,7 +493,7 @@ var OntologyBrowser = (function () {
 
                     query += "?" + classNode.text + " <" + propertyNode.data.propId + "> ?" + propertyNode.text + " . ";
                     propertyNode.children.forEach(function (filterNodeId) {
-                        var filterNode = common.jstree.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [filterNodeId]);
+                        var filterNode = JstreeWidget.getjsTreeNodeObj("OntologyBrowser_queryTreeDiv", [filterNodeId]);
                         var operator = filterNode.data.operator;
                         var value = filterNode.data.value;
                         var range = propertyNode.data.range.value;

@@ -1,8 +1,8 @@
-import common from "../common.js";
+import common from "../shared/common.js";
 import Lineage_containers from "./lineage/lineage_containers.js";
-import SourceBrowser from "./sourceBrowser.js";
+
 import Lineage_classes from "./lineage/lineage_classes.js";
-import Export from "../export.js";
+import Export from "../shared/export.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import KGpropertyFilter from "./KGpropertyFilter.js";
@@ -115,7 +115,7 @@ var Composer = (function () {
         items["NodeInfos"] = {
             label: "Node infos",
             action: function (_e) {
-                SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
             },
         };
         items["GraphNode"] = {
@@ -170,7 +170,7 @@ var Composer = (function () {
                     }
                 });
 
-                common.jstree.addNodesToJstree(jstreeDiv, self.currentTreeNode.id, jstreeData);
+                JstreeWidget.addNodesToJstree(jstreeDiv, self.currentTreeNode.id, jstreeData);
             });
         }
     };
@@ -505,7 +505,7 @@ var Composer = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    $("#GenericTools_searchAllSourcesTermInput").bind("keyup", null, Composer.searchInPropertiesTree);
+                    $("#searchWidget_searchTermInput").bind("keyup", null, Composer.searchInPropertiesTree);
 
                     return callbackSeries();
                 },
@@ -683,7 +683,7 @@ var Composer = (function () {
                     show_only_matches: true,
                 },
             };
-            common.jstree.loadJsTree(treeConfig.jstreeDiv, jstreeData, treeConfig.options.jstreeOptions || jstreeOptions);
+            JstreeWidget.loadJsTree(treeConfig.jstreeDiv, jstreeData, treeConfig.options.jstreeOptions || jstreeOptions);
 
             $("#waitImg").css("display", "none");
             callback();
@@ -781,7 +781,7 @@ var Composer = (function () {
             }
 
             var term = self.currentDataContainer.data.label;
-            $("#GenericTools_searchAllSourcesTermInput").val(term);
+            $("#searchWidget_searchTermInput").val(term);
             $("#Compose_rightPanelTabs").tabs("option", "active", 4);
             Composer.rightPanelsActions.searchBusinessObjects();
         },
@@ -897,7 +897,7 @@ var Composer = (function () {
                     action: function (_e) {
                         // pb avec source
                         $("#mainDialogDiv").dialog("open");
-                        SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+                        NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
                     },
                 };
             }
@@ -959,7 +959,7 @@ var Composer = (function () {
                     return;
                 },
             };
-            SourceBrowser.searchAllSourcesTerm(options);
+            SearchWidget.searchTerm(options);
         },
 
         showAttributesParentsDialog: function () {

@@ -63,7 +63,7 @@ var Lineage_sets = (function () {
                 },
                 contextMenu: Lineage_sets.getJstreeSetsContextMenu(),
             };
-            common.jstree.loadJsTree("LineageSets_mainTree", jstreeData, options);
+            JstreeWidget.loadJsTree("LineageSets_mainTree", jstreeData, options);
         });
     };
 

@@ -1,16 +1,16 @@
-import OntologyModels from "../../ontologyModels.js";
+import OntologyModels from "../../shared/ontologyModels.js";
 import Lineage_classes from "./lineage_classes.js";
-import SourceBrowser from "../sourceBrowser.js";
 import Lineage_decoration from "./lineage_decoration.js";
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Lineage_combine from "./lineage_combine.js";
 import Lineage_selection from "./lineage_selection.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_3D from "./lineage_3d.js";
-import authentication from "../../authentification.js";
-import CommonUIwidgets from "../../commonUIwidgets.js";
+import authentication from "../../shared/authentification.js";
+import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
+import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 
 var Lineage_sources = (function () {
     var self = {};
@@ -67,11 +67,40 @@ var Lineage_sources = (function () {
             return self.loadSources(Config.tools["lineage"].urlParam_source);
         }
 
-        SourceBrowser.showSearchableSourcesTreeDialog(
+        var options = {
+            includeSourcesWithoutSearchIndex: true,
+            withCheckboxes: true,
+        };
+        var selectTreeNodeFn = function () {
+            $("#mainDialogDiv").dialog("close");
+            var checkedSource = SourceSelectorWidget.getCheckedSources();
+
+            if (checkedSource.length > 0) {
+                return;
+            }
+            var source = SourceSelectorWidget.getSelectedSource()[0];
+
+            self.setCurrentSource(source);
+            $("#sourcesSelectionDialogdiv").dialog("close");
+            $("#lineage_allActions").css("visibility", "visible");
+            MainController.UI.showHideRightPanel();
+        };
+
+        var validateButtonFn = function () {
+            var sources = SourceSelectorWidget.getCheckedSources();
+            self.loadSources(sources);
+        };
+
+        SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, validateButtonFn, options);
+
+        return;
+        SourceSelectorWidget.showDialog(
             ["OWL", "SKOS"],
             {
                 includeSourcesWithoutSearchIndex: true,
                 withCheckboxes: true,
+                targetDiv: null,
+                openTargetDialogDiv: true,
                 // dontTie_selection: false,
                 onOpenNodeFn: function () {
                     $("#Lineage_classes_SearchSourceInput").blur();
@@ -140,6 +169,10 @@ var Lineage_sources = (function () {
             return;
         }
 
+        if (!Config.sources[source]) {
+            return alert("source" + source + "not found");
+        }
+
         if (true) {
             // $("#Lineage_Tabs").tabs("disable", 3);
             $("#lineage_classes_showLinkedDataButton").prop("disabled", true);
@@ -151,7 +184,7 @@ var Lineage_sources = (function () {
         }
 
         self.activeSource = source;
-        common.jstree.clear("lineage_containers_containersJstree");
+        JstreeWidget.clear("lineage_containers_containersJstree");
         //new source to load
         if (!self.loadedSources[source]) {
             self.initSource(source, function (err, sourceDivId) {
@@ -163,7 +196,7 @@ var Lineage_sources = (function () {
 
                 Lineage_classes.initWhiteBoard(false);
 
-                self.initWhiteboardActions();
+                // self.initWhiteboardActions();
                 self.showHideLineageLeftPanels();
             });
         } else {
@@ -204,7 +237,7 @@ var Lineage_sources = (function () {
         });
     };
     self.onSearchClass = function () {
-        CommonUIwidgets.fillObjectTypeOptionsOnPromptFilter("owl:Class", "GenericTools_searchAllClassSelect", self.activeSource);
+        PromptedSelectWidget.prompt("owl:Class", "GenericTools_searchAllClassSelect", self.activeSource);
     };
 
     self.showHideLineageLeftPanels = function () {
@@ -349,8 +382,10 @@ var Lineage_sources = (function () {
     };
 
     self.registerSource = function (sourceLabel, callback) {
+        if (!callback) callback = function () {};
+
         if (self.loadedSources[sourceLabel]) {
-            return;
+            return callback();
         }
 
         OntologyModels.registerSourcesModel(sourceLabel, function (err, result) {
@@ -567,7 +602,7 @@ sourceDivId +
             if (source) {
                 self.activeSource = source;
             }
-            if (visjsGraph.isGraphNotEmpty) {
+            if (visjsGraph.isGraphNotEmpty()) {
                 var nodes = visjsGraph.data.nodes.get();
                 var nodesToRemove = [];
                 nodes.forEach(function (node) {
@@ -645,7 +680,15 @@ sourceDivId +
             visjsGraph.data.nodes.remove(source);
         },
         exportOWL: function (source) {
+            Sparql_OWL.generateOWL(source, {}, function (err, result) {
+                if (err) {
+                    return console.log(err);
+                }
 
+                common.copyTextToClipboard(result);
+            });
+
+            return;
 
             var payload = {
                 graphUri: Config.sources[source].graphUri,
@@ -655,23 +698,15 @@ sourceDivId +
                 url: Config.apiUrl + "/graphStore/graph",
                 data: payload,
                 dataType: "json",
-                success: function(data, _textStatus, _jqXHR) {
+                success: function (data, _textStatus, _jqXHR) {
                     common.copyTextToClipboard(data);
-                }
-                , error: function(err) {
-                    alert(err.responseText)
+                },
+                error: function (err) {
+                    alert(err.responseText);
+                },
+            });
 
-                }
-            })
-
-
-
-
-
-
-
-
-       /*     Sparql_OWL.generateOWL(source, {}, function (err, result) {
+            /*  Sparql_OWL.generateOWL(source, {}, function (err, result) {
                 if (err) {
                     return console.log(err);
                 }
@@ -681,7 +716,7 @@ sourceDivId +
         },
     };
 
-    self.initWhiteboardActions = function () {
+    /* self.initWhiteboardActions = function () {
         self.whiteboardActions = {
             "Clear all": Lineage_classes.clearLastAddedNodesAndEdges,
             "Show Last only": Lineage_classes.showLastAddedNodesOnly,
@@ -702,7 +737,7 @@ sourceDivId +
             fn();
         }
         $("#lineage_classes_whiteboardSelect").val("");
-    };
+    };*/
 
     self.isSourceEditableForUser = function (source) {
         if (!Config.sources[source]) {
@@ -873,7 +908,7 @@ target: Math.round(Math.random() * (id-1))
             })
 
             .onNodeClick(function (node, event) {
-                SourceBrowser.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
+                NodeInfosWidget.showNodeInfos(node.data.source, node, "mainDialogDiv", { resetVisited: 1 });
             })
             // .nodeAutoColorBy('group')
             .onNodeDragEnd((node) => {

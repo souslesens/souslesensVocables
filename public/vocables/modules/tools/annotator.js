@@ -1,6 +1,5 @@
-import Clipboard from "../clipboard.js";
+import Clipboard from "../shared/clipboard.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
-import SourceBrowser from "./sourceBrowser.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -135,7 +134,7 @@ var Annotator = (function () {
         var array = id.split("|");
         var source = array[1];
         id = array[2];
-        SourceBrowser.showNodeInfos(source, id, "Annotator_EntityDetailsDiv");
+        NodeInfosWidget.showNodeInfos(source, id, "Annotator_EntityDetailsDiv");
         Sparql_generic.getSingleNodeAllGenealogy(source, e.target, function (err, result) {
             if (err) return MainController.UI.message(err);
 

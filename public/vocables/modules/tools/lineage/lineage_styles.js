@@ -1,4 +1,4 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Lineage_blend from "./lineage_blend.js";

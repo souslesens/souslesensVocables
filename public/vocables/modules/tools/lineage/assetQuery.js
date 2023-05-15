@@ -1,4 +1,4 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 /** The MIT License
@@ -55,7 +55,7 @@ var KGquery = (function () {
                     });
                 }
             });
-            common.jstree.addNodesToJstree(jstreeTargetDiv, node.data.id, jstreeData);
+            JstreeWidget.addNodesToJstree(jstreeTargetDiv, node.data.id, jstreeData);
 
             /*         var propsMap = {}
             result.forEach(function (item) {
@@ -78,7 +78,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     data: item
                 })
 
-                common.jstree.addNodesToJstree(jstreeTargetDiv, node.data.id, jstreeData)
+                JstreeWidget.addNodesToJstree(jstreeTargetDiv, node.data.id, jstreeData)
 
            jstreeData = []
                 item.domains.forEach(function (item) {
@@ -99,7 +99,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     })
                 })
 
-                common.jstree.addNodesToJstree(jstreeTargetDiv, propId, jstreeData)
+                JstreeWidget.addNodesToJstree(jstreeTargetDiv, propId, jstreeData)
             }*/
         });
     };
@@ -339,7 +339,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
             var isNewTree = $("#KGquery_queryTreeDiv").is(":empty");
             var existingNodes = [];
-            if (!isNewTree) existingNodes = common.jstree.getjsTreeNodes("KGquery_queryTreeDiv", true);
+            if (!isNewTree) existingNodes = JstreeWidget.getjsTreeNodes("KGquery_queryTreeDiv", true);
             var jstreeData = [];
 
             if (existingNodes.indexOf(KGquery.currentNode.id) < 0) {
@@ -354,7 +354,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     },
                 });
                 if (!isNewTree) {
-                    common.jstree.addNodesToJstree("KGquery_queryTreeDiv", "#", jstreeData);
+                    JstreeWidget.addNodesToJstree("KGquery_queryTreeDiv", "#", jstreeData);
                     jstreeData = [];
                 }
             }
@@ -382,13 +382,13 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 //  jsTreeOptions.onCheckNodeFn = KGquery.checkTreeNodeFn;
                 //  jsTreeOptions.withCheckboxes=true
 
-                common.jstree.loadJsTree("KGquery_queryTreeDiv", jstreeData, jsTreeOptions);
+                JstreeWidget.loadJsTree("KGquery_queryTreeDiv", jstreeData, jsTreeOptions);
             } else {
-                common.jstree.addNodesToJstree("KGquery_queryTreeDiv", KGquery.currentNode.id, jstreeData);
+                JstreeWidget.addNodesToJstree("KGquery_queryTreeDiv", KGquery.currentNode.id, jstreeData);
             }
         },
         showNodeInfo: function () {
-            SourceBrowser.showNodeInfos(MainController.currentSource, KGquery.currentProperty, "mainDialogDiv");
+            NodeInfosWidget.showNodeInfos(MainController.currentSource, KGquery.currentProperty, "mainDialogDiv");
         },
     };
     (self.getMatchingLabels = function (sourceData, targetSource, callback) {
@@ -470,7 +470,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     },
                 });
 
-                common.jstree.addNodesToJstree("KGquery_queryTreeDiv", node.id, jstreeData);
+                JstreeWidget.addNodesToJstree("KGquery_queryTreeDiv", node.id, jstreeData);
             },
             cancelFilterDialog: function () {
                 $("#KGquery_dataPropertyFilterDialog").dialog("close");
@@ -493,13 +493,13 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
             },
 
             executeOntologyIndividualsQuery: function () {
-                var nodes = common.jstree.getjsTreeNodes("KGquery_queryTreeDiv");
+                var nodes = JstreeWidget.getjsTreeNodes("KGquery_queryTreeDiv");
                 var nodesMap = {};
                 nodes.forEach(function (item) {
                     nodesMap[item.id] = item;
                 });
 
-                var classNodeIds = common.jstree.getjsTreeNodeObj("KGquery_queryTreeDiv", "#").children;
+                var classNodeIds = JstreeWidget.getjsTreeNodeObj("KGquery_queryTreeDiv", "#").children;
 
                 var selectStr = " * ";
                 var showIds = $("KGquery_queryShowItemsIdsCBX").prop("checked");
@@ -508,7 +508,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 classNodeIds.forEach(function (classNodeId, index) {
                     // Sparql_schema.getClassPropertiesAndRanges(OwlSchema.currentSourceSchema,classNodeId ,function(err,result){
 
-                    var classNode = common.jstree.getjsTreeNodeObj("KGquery_queryTreeDiv", [classNodeId]);
+                    var classNode = JstreeWidget.getjsTreeNodeObj("KGquery_queryTreeDiv", [classNodeId]);
 
                     if (index > 0) {
                         // join classes
@@ -543,7 +543,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                     query += "?" + classNode.text + " rdf:type <" + classNode.id + "> . ";
                     classNode.children.forEach(function (propertyNodeId) {
-                        var propertyNode = common.jstree.getjsTreeNodeObj("KGquery_queryTreeDiv", [propertyNodeId]);
+                        var propertyNode = JstreeWidget.getjsTreeNodeObj("KGquery_queryTreeDiv", [propertyNodeId]);
                         if (propertyNode.data.optional) {
                             query += "OPTIONAL {";
                             propertyNode.text = propertyNode.text.replace(" (OPTIONAL)", "");
@@ -552,7 +552,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
 
                         query += "?" + classNode.text + " <" + propertyNode.data.propId + "> ?" + propertyNode.text + " . ";
                         propertyNode.children.forEach(function (filterNodeId) {
-                            var filterNode = common.jstree.getjsTreeNodeObj("KGquery_queryTreeDiv", [filterNodeId]);
+                            var filterNode = JstreeWidget.getjsTreeNodeObj("KGquery_queryTreeDiv", [filterNodeId]);
                             var operator = filterNode.data.operator;
                             var value = filterNode.data.value;
                             var range = propertyNode.data.range.value;
@@ -612,7 +612,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 if (isNewTree) {
                     //query only class (not properties)
                 } else {
-                    var nodes = common.jstree.getjsTreeNodes("KGquery_queryTreeDiv");
+                    var nodes = JstreeWidget.getjsTreeNodes("KGquery_queryTreeDiv");
                     var nodesMap = {};
                     nodes.forEach(function (item) {
                         nodesMap[item.id] = item;
@@ -621,7 +621,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     var classNodeIds = $("#KGquery_queryTreeDiv").jstree(true).get_node("#").children;
 
                     classNodeIds.forEach(function (classNodeId, _index) {
-                        var props = common.jstree.getjsTreeNodes("KGquery_queryTreeDiv", false, [classNodeId]);
+                        var props = JstreeWidget.getjsTreeNodes("KGquery_queryTreeDiv", false, [classNodeId]);
 
                         props.forEach(function (prop) {
                             if (prop.data.existsInRemoteSource) {

@@ -1,10 +1,9 @@
-import SourceBrowser from "../sourceBrowser.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Lineage_classes from "./lineage_classes.js";
-import common from "../../common.js";
-import Export from "../../export.js";
+import common from "../../shared/common.js";
+import Export from "../../shared/export.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -41,7 +40,7 @@ var Lineage_properties = (function () {
                 action: function (_e) {
                     // pb avec source
 
-                    SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv", { resetVisited: 1 }, function (_err, _result) {
+                    NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv", { resetVisited: 1 }, function (_err, _result) {
                         // pass
                     });
                 },
@@ -71,7 +70,7 @@ var Lineage_properties = (function () {
                     action: function (_e) {
                         // pb avec source
 
-                        Lineage_common.jstree.deleteNode(self.currentTreeNode, "Lineage_propertiesTree");
+                        Lineage_JstreeWidget.deleteNode(self.currentTreeNode, "Lineage_propertiesTree");
                     },
                 };
             }
@@ -123,7 +122,7 @@ var Lineage_properties = (function () {
                     });
                 }
             });
-            common.jstree.addNodesToJstree("Lineage_propertiesTree", node.id, jstreeData);
+            JstreeWidget.addNodesToJstree("Lineage_propertiesTree", node.id, jstreeData);
             MainController.UI.message("", true);
         });
     };
@@ -1023,7 +1022,7 @@ var Lineage_properties = (function () {
             self.drawGraph(node);
         },
         showNodeInfos: function () {
-            SourceBrowser.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
+            NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
         },
     };
 
@@ -1113,7 +1112,7 @@ var Lineage_properties = (function () {
                 };
                 options.contextMenu = self.jstreeContextMenu();
 
-                common.jstree.loadJsTree("Lineage_propertiesTree", jstreeData, options);
+                JstreeWidget.loadJsTree("Lineage_propertiesTree", jstreeData, options);
             }
         );
     };

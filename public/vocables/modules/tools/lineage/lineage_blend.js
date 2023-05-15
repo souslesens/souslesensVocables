@@ -1,4 +1,4 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
@@ -19,7 +19,7 @@ var Lineage_blend = (function () {
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
                 $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
                     $("#LineageBlend_commonPredicateObjectDiv").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
-                        CommonUIwidgets.predicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
+                        PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
                             $("#editPredicate_propertyDiv").css("display", "none");
                         });
                     });
@@ -533,7 +533,7 @@ source: specificSourceLabel
                                                 },
                                             ];
 
-                                            common.jstree.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
+                                            JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
                                         });
                                     },
                                 },
@@ -541,13 +541,13 @@ source: specificSourceLabel
                                     label: "Node infos",
                                     action: function (_e) {
                                         // pb avec source
-                                        SourceBrowser.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv");
+                                        NodeInfosWidget.showNodeInfos(self.currentPropertiesTreeNode.data.source, self.currentPropertiesTreeNode, "mainDialogDiv");
                                     },
                                 },
                             };
 
                             options.doNotAdjustDimensions = 1;
-                            common.jstree.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options, function (err) {});
+                            JstreeWidget.loadJsTree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", jstreeData, options, function (err) {});
                             callbackSeries();
                         },
                     ],
@@ -595,10 +595,10 @@ source: specificSourceLabel
 
             if (type == "NamedIndividual") {
                 $("#LineageBlend_creatingNodeParentTypeSpan").html("rdf:type");
-                CommonUIwidgets.predicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_curentSourceAndImports");
+                PredicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_curentSourceAndImports");
             } else {
                 $("#LineageBlend_creatingNodeParentTypeSpan").html("owl:subClassOf");
-                CommonUIwidgets.predicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_all");
+                PredicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_all");
             }
 
             $("#LineageBlend_creatingNodeClassDiv").css("display", "block");
@@ -928,7 +928,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                 }
             });
 
-            common.jstree.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", "#", jstreeData, { positionLast: 1 });
+            JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", "#", jstreeData, { positionLast: 1 });
         },
         createRelationFromGraph: function (inSource, sourceNode, targetNode, propId, options, callback) {
             if (!confirm("create Relation " + sourceNode.label + "-" + Sparql_common.getLabelFromURI(propId) + "->" + targetNode.label + " in Graph " + inSource)) {

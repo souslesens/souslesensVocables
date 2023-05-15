@@ -1,8 +1,8 @@
-import common from "../common.js";
+import common from "../shared/common.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
-import Export from "../export.js";
+import Export from "../shared/export.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 import Lineage_classes from "./lineage/lineage_classes.js";
 import Lineage_containers from "./lineage/lineage_containers.js";
@@ -155,7 +155,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     });
                 },
                 function (callbackSeries) {
-                    $("#GenericTools_searchAllSourcesTermInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
+                    $("#searchWidget_searchTermInput").bind("keyup", null, KGpropertyFilter.searchInPropertiesTree);
 
                     return callbackSeries();
                 },
@@ -333,7 +333,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     show_only_matches: true,
                 },
             };
-            common.jstree.loadJsTree(treeConfig.jstreeDiv, jstreeData, treeConfig.options.jstreeOptions || jstreeOptions);
+            JstreeWidget.loadJsTree(treeConfig.jstreeDiv, jstreeData, treeConfig.options.jstreeOptions || jstreeOptions);
 
             $("#waitImg").css("display", "none");
             callback();
@@ -431,7 +431,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
             }
 
             var term = self.currentDataContainer.data.label;
-            $("#GenericTools_searchAllSourcesTermInput").val(term);
+            $("#searchWidget_searchTermInput").val(term);
             $("#KGpropertyFilter_rightPanelTabs").tabs("option", "active", 4);
             KGpropertyFilter.rightPanelsActions.searchBusinessObjects();
         },
@@ -547,7 +547,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     action: function (_e) {
                         // pb avec source
                         $("#mainDialogDiv").dialog("open");
-                        SourceBrowser.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
+                        NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv");
                     },
                 };
             }
@@ -609,7 +609,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     return;
                 },
             };
-            SourceBrowser.searchAllSourcesTerm(options);
+            SearchWidget.searchTerm(options);
         },
 
         showAttributesParentsDialog: function () {

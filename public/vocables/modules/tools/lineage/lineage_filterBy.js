@@ -1,4 +1,4 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 
 var Lineage_filterBy = (function () {
     var self = {};

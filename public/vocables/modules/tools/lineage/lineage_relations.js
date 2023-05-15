@@ -1,10 +1,10 @@
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_relationFilter from "./lineage_relationFilter.js";
-import SourceBrowser from "../sourceBrowser.js";
+
 import visjsGraph from "../../graph/visjsGraph2.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import Export from "../../export.js";
+import Export from "../../shared/export.js";
 import Lineage_classes from "./lineage_classes.js";
 import Sparql_CRUD from "../../sparqlProxies/sparql_CRUD.js";
 
@@ -143,7 +143,7 @@ var Lineage_relations = (function () {
                             show_only_matches: true,
                         },
                     };
-                    common.jstree.loadJsTree("lineageRelations_propertiesJstreeDiv", jstreeData, options, function () {
+                    JstreeWidget.loadJsTree("lineageRelations_propertiesJstreeDiv", jstreeData, options, function () {
                         //  $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(Lineage_sources.activeSource);
                     });
                 },
@@ -158,7 +158,7 @@ var Lineage_relations = (function () {
             label: "PropertyInfos",
             action: function (_e) {
                 $("#LineagePopup").dialog("open");
-                SourceBrowser.showNodeInfos(self.curentPropertiesJstreeNode.parent, self.curentPropertiesJstreeNode, "LineagePopup");
+                NodeInfosWidget.showNodeInfos(self.curentPropertiesJstreeNode.parent, self.curentPropertiesJstreeNode, "LineagePopup");
             },
         };
         return items;

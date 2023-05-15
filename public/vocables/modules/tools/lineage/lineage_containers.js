@@ -1,8 +1,7 @@
-import SourceBrowser from "../sourceBrowser.js";
 import Lineage_classes from "./lineage_classes.js";
 import Lineage_styles from "./lineage_styles.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
@@ -18,7 +17,7 @@ var Lineage_containers = (function () {
         items["NodeInfos"] = {
             label: "Node infos",
             action: function (_e) {
-                SourceBrowser.showNodeInfos(Lineage_sources.activeSource, self.currentContainer, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(Lineage_sources.activeSource, self.currentContainer, "mainDialogDiv");
             },
         };
         items["GraphNode"] = {
@@ -42,7 +41,7 @@ var Lineage_containers = (function () {
             label: "Copy Node(s)",
             action: function (e) {
                 // pb avec source
-                SourceBrowser.copyNode(e);
+                LineageClasses.copyNode(e);
                 var selectedNodes = $("#lineage_containers_containersJstree").jstree().get_selected(true);
                 Lineage_common.copyNodeToClipboard(selectedNodes);
             },
@@ -241,13 +240,20 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 };
             }
 
-            common.jstree.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
+            JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
                 $("#" + jstreeDiv)
                     .jstree()
                     .open_node("#");
                 callback(null);
+                $("#" +jstreeDiv).jstree('open_all');
             });
+        
+        
+        
         });
+        */
+        }
+        
     };
     
     self.orderResults=function(results){
@@ -944,7 +950,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 });
             });
             if ($("#lineage_containers_containersJstree").jstree) {
-                common.jstree.addNodesToJstree("lineage_containers_containersJstree", container.id, jstreeData);
+                JstreeWidget.addNodesToJstree("lineage_containers_containersJstree", container.id, jstreeData);
             }
 
             if (drawMembershipEdge) {
@@ -1047,7 +1053,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
       if (options.allDescendants) {
         //  $("#lineage_containers_containersJstree").jstree().open_all()
-        var descendantObjs = common.jstree.getNodeDescendants("lineage_containers_containersJstree", firstContainer, null);
+        var descendantObjs = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", firstContainer, null);
         var descendantIds = [];
         descendantObjs.forEach(function(item) {
           if (item.data.type == "container") {
@@ -1104,7 +1110,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
             var existingNodes = {};
             if (containerNode) {
                 // existingNodes=$("#lineage_containers_containersJstree").jstree().get_node(containerNode.id).children;
-                var jstreeChildren = common.jstree.getNodeDescendants("lineage_containers_containersJstree", containerNode.id, 2);
+                var jstreeChildren = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", containerNode.id, 2);
                 jstreeChildren.forEach(function (item) {
                     existingNodes[item.data.id] = 1;
                 });
@@ -1152,16 +1158,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 }
             }
 
-            common.jstree.addNodesToJstree("lineage_containers_containersJstree", containerJstreeId, jstreeData);
-            if (err) { 
-                return alert(err.responseText);
-                if (callback) {
-                    return callback(err);
-                }
-            }
-            if (callback) {
-                return callback(jstreeData);
-            }
+            JstreeWidget.addNodesToJstree("lineage_containers_containersJstree", containerJstreeId, jstreeData);
         });
     };
 

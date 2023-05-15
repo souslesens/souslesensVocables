@@ -1,5 +1,3 @@
-import SourceBrowser from "../sourceBrowser.js";
-
 var Lineage_selection = (function () {
     var self = {};
     self.selectedNodes = [];
@@ -62,7 +60,7 @@ var Lineage_selection = (function () {
         };
         $("#mainDialogDiv").load("snippets/lineage/selection/lineageSelectionDialog.html", function () {
             $("#mainDialogDiv").dialog("open");
-            common.jstree.loadJsTree("lineage_selection_selectedNodesTreeDiv", jstreeData, options, function (err, result) {});
+            JstreeWidget.loadJsTree("lineage_selection_selectedNodesTreeDiv", jstreeData, options, function (err, result) {});
         });
     };
 
@@ -77,7 +75,7 @@ var Lineage_selection = (function () {
     self.onSelectedNodeTreeclick = function (event, obj) {
         var node = obj.node;
         if (node.parent == "#") return;
-        SourceBrowser.showNodeInfos(node.data.source, node, "lineage_selection_rightPanel");
+        NodeInfosWidget.showNodeInfos(node.data.source, node, "lineage_selection_rightPanel");
     };
 
     self.onSelectionExecuteAction = function (action) {

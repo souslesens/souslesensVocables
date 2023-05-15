@@ -1,20 +1,19 @@
-import SourceBrowser from "../sourceBrowser.js";
 import Lineage_classes from "./lineage_classes.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
-import common from "../../common.js";
+import common from "../../shared/common.js";
 import Lineage_selection from "./lineage_selection.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
-import MainController from "../../mainController.js";
+import MainController from "../../shared/mainController.js";
 
 var Lineage_combine = (function () {
     var self = {};
     self.currentSources = [];
     self.showSourcesDialog = function () {
-        SourceBrowser.showSearchableSourcesTreeDialog(["OWL", "SKOS"], null, Lineage_combine.addSelectedSourcesToGraph);
+        SourceSelectorWidget.showDialog(["OWL", "SKOS"], null, Lineage_combine.addSelectedSourcesToGraph);
     };
 
     self.init = function () {
@@ -26,7 +25,7 @@ var Lineage_combine = (function () {
     self.addSelectedSourcesToGraph = function () {
         $("#sourcesSelectionDialogdiv").dialog("close");
 
-        var term = $("#GenericTools_searchAllSourcesTermInput").val();
+        var term = $("#searchWidget_searchTermInput").val();
         var selectedSources = [];
         if ($("#searchAll_sourcesTree").jstree(true)) {
             selectedSources = $("#searchAll_sourcesTree").jstree(true).get_checked();
@@ -45,7 +44,7 @@ var Lineage_combine = (function () {
 
                     callbackEach();
 
-                    //  SourceBrowser.showThesaurusTopConcepts(sourceLabel, { targetDiv: "LineageNodesJsTreeDiv" });
+                    //  SearchWidget.showTopConcepts(sourceLabel, { targetDiv: "LineageNodesJsTreeDiv" });
                 });
             },
             function (err) {
@@ -68,64 +67,6 @@ var Lineage_combine = (function () {
         $("#graphPopupDiv").html(html);
     };
 
-    self.getSimilars = function (output) {
-        var commonNodes = [];
-        var existingNodes = visjsGraph.getExistingIdsMap();
-        var nodes = visjsGraph.data.nodes.get();
-        nodes.forEach(function (node1) {
-            if (!node1.data && !node1.data.label) return;
-            nodes.forEach(function (node2) {
-                if (!node2.data && !node2.data.label) return;
-                if (node1.data.id == node2.data.id && node1.data.source == node2.data.source) return;
-                if (node1.data.label.toLowerCase().replace(/ /g, "") == node2.data.label.toLowerCase().replace(/ /g, "")) {
-                    commonNodes.push({ fromNode: node1, toNode: node2 });
-                }
-                if (node1.label == node2.label) {
-                    commonNodes.push({ fromNode: node1, toNode: node2 });
-                }
-            });
-        });
-
-        if (output == "graph") {
-            var visjsData = { nodes: [], edges: [] };
-            commonNodes.forEach(function (item) {
-                var edgeId = item.fromNode.id + "_" + item.toNode.id;
-                var inverseEdgeId = item.toNode.id + "_" + item.fromNode.id;
-                if (!existingNodes[edgeId] && !existingNodes[inverseEdgeId]) {
-                    existingNodes[edgeId] = 1;
-
-                    visjsData.edges.push({
-                        id: edgeId,
-                        from: item.fromNode.id,
-                        to: item.toNode.id,
-                        data: {
-                            source: Lineage_sources.activeSource,
-                            label: "sameLabel",
-                        },
-                        arrows: {
-                            to: {
-                                enabled: true,
-                                type: "solid",
-                                scaleFactor: 0.5,
-                            },
-
-                            from: {
-                                enabled: true,
-                                type: "solid",
-                                scaleFactor: 0.5,
-                            },
-                        },
-
-                        dashes: true,
-                        color: "green",
-                        width: 2,
-                    });
-                }
-            });
-            visjsGraph.data.edges.update(visjsData.edges);
-        }
-    };
-
     self.showMergeNodesDialog = function (fromNode, toNode) {
         if (fromNode) {
             Lineage_selection.clearNodesSelection();
@@ -144,7 +85,7 @@ var Lineage_combine = (function () {
                 withCheckboxes: true,
                 openAll: true,
             };
-            common.jstree.loadJsTree("LineageMerge_nodesJsTreeDiv", jstreeData, options, function (err, result) {
+            JstreeWidget.loadJsTree("LineageMerge_nodesJsTreeDiv", jstreeData, options, function (err, result) {
                 $("#LineageMerge_nodesJsTreeDiv").jstree().check_all();
             });
         });

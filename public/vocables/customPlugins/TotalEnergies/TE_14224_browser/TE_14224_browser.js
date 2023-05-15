@@ -160,7 +160,7 @@ var TE_14224_browser = (function () {
 
                 contextMenu: TE_14224_browser.getAssetJstreeContextMenu(),
             };
-            common.jstree.loadJsTree("TE_114224_browser_assetPanelTreeDiv", jstreeData, options);
+            JstreeWidget.loadJsTree("TE_114224_browser_assetPanelTreeDiv", jstreeData, options);
         });
     };
 
@@ -199,7 +199,7 @@ var TE_14224_browser = (function () {
                     });
                 }
             });
-            common.jstree.addNodesToJstree("TE_114224_browser_assetPanelTreeDiv", node.id, jstreeData);
+            JstreeWidget.addNodesToJstree("TE_114224_browser_assetPanelTreeDiv", node.id, jstreeData);
         });
     };
 
@@ -601,7 +601,7 @@ var TE_14224_browser = (function () {
         items.nodeInfos = {
             label: "Node Infos",
             action: function (_e) {
-                SourceBrowser.showNodeInfos(self.referenceOntologySource, self.currentOntologyTreeNode, "mainDialogDiv");
+                NodeInfosWidget.showNodeInfos(self.referenceOntologySource, self.currentOntologyTreeNode, "mainDialogDiv");
             },
         };
 
@@ -817,7 +817,7 @@ var TE_14224_browser = (function () {
 
             var jstreeData = [];
             var existingNodes = {};
-            common.jstree.types["isoAssetTreeNode"] = {
+            JstreeWidget.types["isoAssetTreeNode"] = {
                 li_attr: { style: "color:#daf" },
                 icon: "../icons/externalObject.png",
             };
@@ -900,7 +900,7 @@ var TE_14224_browser = (function () {
                         selectTreeNodeFn: function (event, obj) {
                             self.currentOntologyTreeNode = obj.node;
 
-                            SourceBrowser.openTreeNode("TE_14224_browser_ontologyPanelDiv", obj.node.data.source, obj.node, {
+                            SearchWidget.openTreeNode("TE_14224_browser_ontologyPanelDiv", obj.node.data.source, obj.node, {
                                 ctrlKey: obj.event.ctrlKey,
                                 beforeDrawingFn: function (sparqlResult) {
                                     sparqlResult.forEach(function (item) {
@@ -928,7 +928,7 @@ var TE_14224_browser = (function () {
                             node.data.countAssetNodes = count;
                         }
                     });
-                    common.jstree.loadJsTree("TE_14224_browser_ontologyPanelDiv", jstreeData, options, function () {
+                    JstreeWidget.loadJsTree("TE_14224_browser_ontologyPanelDiv", jstreeData, options, function () {
                         /*        $("#TE_14224_browser_ontologyPanelDiv").jstree().get
 
                                  set_type (obj, type)*/

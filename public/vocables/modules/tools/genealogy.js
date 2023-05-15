@@ -1,7 +1,7 @@
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 import GraphController from "../graphController.js";
-import Clipboard from "../clipboard.js";
+import Clipboard from "../shared/clipboard.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -21,7 +21,7 @@ var Genealogy = (function () {
 
     self.onSourceSelect = function () {
         var html = "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Genealogy.showActionPanel()'>OK</button>";
-        html += "&nbsp;<input type='checkbox' id='allConceptsCbx' onchange=\"common.jstree.onAllTreeCbxChange($(this),'sourcesTreeDiv')\"> All";
+        html += "&nbsp;<input type='checkbox' id='allConceptsCbx' onchange=\"JstreeWidget.onAllTreeCbxChange($(this),'sourcesTreeDiv')\"> All";
         $("#sourceDivControlPanelDiv").html(html);
     };
 
@@ -268,7 +268,7 @@ var Genealogy = (function () {
             else return "dot";
         },
         showDetails: function (_defaultLang) {
-            SourceBrowser.showNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode, "Genealogy_nodeInfosDialogDiv");
+            NodeInfosWidget.showNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode, "Genealogy_nodeInfosDialogDiv");
             /*   Sparql_generic.getNodeInfos(self.graphActions.currentNode.data.source, self.graphActions.currentNode.id, null, function (err, result) {
                    if (err) {
                        return MainController.UI.message(err);

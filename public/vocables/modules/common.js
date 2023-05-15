@@ -73,6 +73,21 @@ var common = (function () {
                 li_attr: { style: "color:black" },
                 icon: "../icons/property.png",
             },
+            
+            // @ts-ignore
+            container: {
+                icon: "../icons/containers.png",
+            },
+            
+            individual: {
+                icon: "../icons/individual.png",
+            },
+            "http://www.w3.org/2002/07/owl#NamedIndividual": {
+                icon: "../icons/individual.png",
+            }
+
+
+
         },
         loadJsTree: function (jstreeDiv, jstreeData, options, callback) {
             var jstreeData2 = [];
@@ -470,6 +485,64 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
                 .open_node(nodeId);
         },
     };
+    
+    self.sleep=function (delay) {
+        var start = new Date().getTime();
+        while (new Date().getTime() < start + delay);
+    }
+    self.selectTypeForIconsJstree=function(types,callback){
+        var uri_class="http://www.w3.org/2002/07/owl#Class"
+        var uri_bag="http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag"
+        var uri_named="http://www.w3.org/2002/07/owl#NamedIndividual"
+        var type=null;
+        //if un truck différent des 3 prendre ca
+        //else
+        //Bag>Class
+        //Bag>namedindividual
+        var types_without_basics=types.filter(function(item) {
+            return (item !== uri_class && item !== uri_bag && uri_named)
+        })
+        if(types_without_basics.length>0){
+            types=types_without_basics;
+        }
+        else{
+            if(types.includes(uri_bag)){
+                type="container"
+            }else{
+                if(types.includes(uri_named)){
+                    type="individual"
+                }   
+                if(types.includes(uri_class)){
+                    type="class"
+                }
+
+            }
+        }
+        
+
+
+        if(callback){
+            callback();
+        }
+
+        if(!type){
+            // last which have icon available for multitypes objects
+            var types_available=common.jstree.types;
+            type="default"
+            types.forEach(function(item) {
+                if(types_available[item]){
+                    type=item;
+                }
+            });
+            
+        }
+        return(type);
+
+
+    };
+
+
+
     self.getNodeByURI=function (jstreeDiv, id) {
         var data=$("#" + jstreeDiv).jstree()._model.data;
         var node_finded= false;

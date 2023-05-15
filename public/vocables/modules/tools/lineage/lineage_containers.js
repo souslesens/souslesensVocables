@@ -10,6 +10,8 @@ import visjsGraph from "../../graph/visjsGraph2.js";
 
 var Lineage_containers = (function () {
     var self = {};
+    self.nbOfancestors_tree_search=0;
+    self.ancestors_tree_search_areRunning=[false,false,false];
 
     self.getContextJstreeMenu = function () {
         var items = {};
@@ -132,6 +134,9 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
       return;*/
 
+        
+
+        
         self.drawContainerJstree(source, filter, "lineage_containers_containersJstree", search_on_container, memberType, {}, function (err, result) {
             if (err) {
                 return alert(err.responseText);
@@ -141,7 +146,9 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
 
 
-        };
+
+
+    };
 
 
 
@@ -150,6 +157,8 @@ Lineage_styles.showDialog(self.currentContainer.data);
         if (!options) {
             options = {};
         }
+
+
         var fromStr = Sparql_common.getFromStr(source, null, true);
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
@@ -165,6 +174,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
             "}";
         var sparql_url = Config.sources[source].sparql_server.url;
         var url = sparql_url + "?format=json&query=";
+        
 
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
             if (err) {
@@ -389,14 +399,27 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
         var offset=0;
         var resultSize = 100;
-    
+        
+        self.nbOfancestors_tree_search+=1;
+        if(self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search]==true){
+            self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search]=false;
+            self.nbOfancestors_tree_search-=1;
+            
+
+        }
+        if(self.nbOfancestors_tree_search>1){
+            self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search-1]=false;
+        }
+        self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search]=true;
+        var search_number=self.nbOfancestors_tree_search;
         async.whilst(
             
             function (_test) {
-                return resultSize>0;
+                return resultSize>0 && self.ancestors_tree_search_areRunning[search_number];
             },
 
             function differ(callbackWhilst){
+                
                 //iterate
                 var sparql_url = Config.sources[source].sparql_server.url;
                 var url = sparql_url + "?format=json&query=";
@@ -537,13 +560,13 @@ Lineage_styles.showDialog(self.currentContainer.data);
                             
                         }
                         
-                        
-
+                        var type_icon=common.selectTypeForIconsJstree(item.types,null);
+                       
                         var node = {
                                 id: item.jstreeid,
                                 text: item.label,
                                 parent: parent,
-                                type: item.types,
+                                type: type_icon,
                                 data: {
                                     type: item.types,
                                     source: source,
@@ -596,7 +619,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                     
                     offset += result.results.bindings.length;
                     callbackWhilst(null, result);
-                
+                    
                 
                 
                 });
@@ -609,7 +632,11 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 
                 callback(null);
                 $("#" +jstreeDiv).jstree('open_all');
-            
+                self.ancestors_tree_search_areRunning[search_number]=false;
+                if(!(self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search]==true && self.nbOfancestors_tree_search==1) ){
+                    self.nbOfancestors_tree_search-=1;
+                }
+                
 
                 
             }
@@ -1105,17 +1132,18 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 var parent = item.parent.value == continerDataId ? containerJstreeId : nodesMap[item.parent.value] ? nodesMap[item.parent.value].jstreeId : "#";
                 if (!existingNodes[item.member.value]) {
                     existingNodes[item.member.value] = 1;
-                    var type = "class";
-                    if (item.memberTypes.value.indexOf("Bag") > -1 || item.memberTypes.value.indexOf("List") > -1) {
-                        type = "container";
-                    }
+                    
+                    
+                    var types=item.memberTypes.value.split(',');
+                    var type_icon=common.selectTypeForIconsJstree(types,null);
+
                     jstreeData.push({
                         id: item.jstreeId,
                         text: item.memberLabel.value,
                         parent: parent,
-                        type: type,
+                        type: type_icon,
                         data: {
-                            type: type,
+                            type: types,
                             source: source,
                             id: item.member.value,
                             label: item.memberLabel.value,

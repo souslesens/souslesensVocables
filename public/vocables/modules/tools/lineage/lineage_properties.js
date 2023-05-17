@@ -415,15 +415,11 @@ var Lineage_properties = (function () {
                             font: { edgeColor },
                             arrows: {
                                 to: {
-                                    enabled: !options.inversePredicate,
+                                    enabled:true,
                                     type: "solid",
                                     scaleFactor: 0.5,
                                 },
-                                from: {
-                                    enabled: options.inversePredicate,
-                                    type: "solid",
-                                    scaleFactor: 0.5,
-                                },
+
                             },
                             dashes: dashes,
                             color: edgeColor,

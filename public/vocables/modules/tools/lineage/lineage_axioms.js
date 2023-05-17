@@ -10,233 +10,302 @@ import Lineage_classes from "./lineage_classes.js";
 var Lineage_axioms = (function() {
   var self = {};
 
-  self.getAllBasicAxioms = function(sourceLabel, callback) {
-    if (!sourceLabel) {
-      sourceLabel = Lineage_sources.activeSource;
-    }
-
-    var fromStr = Sparql_common.getFromStr(sourceLabel);
-    var query =
-      "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-      "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-      "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-      "SELECT distinct * " + fromStr + " WHERE {" +
-      "  ?X ?p_x ?x ." +
-      "  { select ?x ?p_iu ?iu ?p_y ?y ?p_bn ?bn ?p_bny ?bny from <https://purl.industrialontologies.org/ontology/core/Core>  from <https://purl.industrialontologies.org/ontology/core/Core> where{" +
-      "  ?x  (owl:intersectionOf|owl:union) ?iu." +
-      "     ?x  ?p_iu ?iu." +
-      "optional{ ?iu ?p_y ?y." +
-      "  filter (!isBlank(?y))}" +
-      "  " +
-      "  optional{ ?iu ?p_bn ?bn." +
-      "  filter (isBlank(?bn))" +
-      "?bn  ?p_bny ?bny" +
-      "  " +
-      "      }" +
-      "    }" +
-      "  " +
-      "  }" +
-      "  " +
-      " " +
-      "}order by ?X ";
-
-    var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-
-    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
-      if (err) {
-        return callback(err);
-      }
-      result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept", { type: "http://www.w3.org/2002/07/owl#Class" });
-
-      return callback(null, result.results.bindings);
-    });
-  };
-
-  self.getMergedBasicAxioms = function(sourceLabel, callback) {
-    self.getAllBasicAxioms(sourceLabel, function(err, result) {
-      if (err) {
-        return callback(err);
+  /*  self.getAllBasicAxioms = function(sourceLabel, callback) {
+      if (!sourceLabel) {
+        sourceLabel = Lineage_sources.activeSource;
       }
 
-      var allNodesMap = {};
-      result.forEach(function(item) {
-        item.axioms = {};
-        allNodesMap[item.X.value] = item;
+      var fromStr = Sparql_common.getFromStr(sourceLabel);
+      var query =
+        "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+        "SELECT distinct * " + fromStr + " WHERE {" +
+        "  ?X ?p_x ?x ." +
+        "  { select ?x ?p_iu ?iu ?p_y ?y ?p_bn ?bn ?p_bny ?bny from <https://purl.industrialontologies.org/ontology/core/Core>  from <https://purl.industrialontologies.org/ontology/core/Core> where{" +
+        "  ?x  (owl:intersectionOf|owl:union) ?iu." +
+        "     ?x  ?p_iu ?iu." +
+        "optional{ ?iu ?p_y ?y." +
+        "  filter (!isBlank(?y))}" +
+        "  " +
+        "  optional{ ?iu ?p_bn ?bn." +
+        "  filter (isBlank(?bn))" +
+        "?bn  ?p_bny ?bny" +
+        "  " +
+        "      }" +
+        "    }" +
+        "  " +
+        "  }" +
+        "  " +
+        " " +
+        "}order by ?X ";
+
+      var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+
+      Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
+        if (err) {
+          return callback(err);
+        }
+        result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept", { type: "http://www.w3.org/2002/07/owl#Class" });
+
+        return callback(null, result.results.bindings);
       });
+    };
 
-      result.forEach(function(item) {
-        for (var key in item) {
-          if (key != "X" && item[key].type == "bnode") {
-            if (allNodesMap[item[key].value]) {
-              allNodesMap[item.X.value].axioms[item[key].value] = allNodesMap[item[key].value];
+    self.getMergedBasicAxioms = function(sourceLabel, callback) {
+      self.getAllBasicAxioms(sourceLabel, function(err, result) {
+        if (err) {
+          return callback(err);
+        }
+
+        var allNodesMap = {};
+        result.forEach(function(item) {
+          item.axioms = {};
+          allNodesMap[item.X.value] = item;
+        });
+
+        result.forEach(function(item) {
+          for (var key in item) {
+            if (key != "X" && item[key].type == "bnode") {
+              if (allNodesMap[item[key].value]) {
+                allNodesMap[item.X.value].axioms[item[key].value] = allNodesMap[item[key].value];
+              }
             }
           }
+        });
+
+        callback(null, allNodesMap);
+      });
+    };
+
+
+    self.getAxiomsWithBlankNodes = function(sourceLabel, ids, callback) {
+      var fromStr = Sparql_common.getFromStr(sourceLabel);
+
+      var filter = Sparql_common.setFilter("X", ids);
+      var query =
+        "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+        "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
+        "SELECT distinct * " + fromStr + " WHERE {" +
+        "  ?X ?p ?o . " + filter +
+        "  ?X ?q ?b . " + "filter (isblank(?b))" +
+        " optional{?o rdf:type ?oType}" +
+        "optional{?o rdfs:label|skos:prefLabel ?oLabel}" +
+        "filter (isUri(?o) || isBlank(?o))  " +
+        " }limit 100";
+      var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+
+      Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
+        if (err) {
+          return callback(err);
         }
+        result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept", { type: "http://www.w3.org/2002/07/owl#Class" });
+
+        return callback(null, result.results.bindings);
       });
 
-      callback(null, allNodesMap);
-    });
-  };
+    };
 
 
-  self.getAxiomsWithBlankNodes = function(sourceLabel, ids, callback) {
+    self.getNodePredicates = function(sourceLabel, nodeIds, callback) {
+      var fromStr = Sparql_common.getFromStr(sourceLabel);
+
+      var filterStr = Sparql_common.setFilter("x", nodeIds);
+      var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+        "SELECT distinct * " + fromStr +
+        "where{  ?x ?p0 ?iu. \n" + filterStr+
+      "    ?x  ?p_iu ?iu.\n" +"  ?x  ?p_iu ?iu.filter (!isBlank(?iu) && isUri(?iu) )"+
+      "    optional{ ?iu ?p_y ?y. ?y rdf:type owl:Class.  filter (!isBlank(?y) && isUri(?y) )}  \n" +
+      "    optional{ ?iu ?p_bn ?bn.  filter (isBlank(?bn))     } \n" +
+      "  \n" +
+      "  \n" +
+      "       }order by ?X limit 100";
+
+      var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+      Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
+        if (err) {
+          return callback(err);
+        }
+        result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept", { type: "http://www.w3.org/2002/07/owl#Class" });
+
+        return callback(null, result.results.bindings);
+      });
+    };*/
+
+  self.getNodeAxiomsTree = function(sourceLabel, nodeId, depth, callback) {
     var fromStr = Sparql_common.getFromStr(sourceLabel);
 
-    var filter = Sparql_common.setFilter("X", ids);
-    var query =
-      "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-      "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-      "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-      "PREFIX  skos:<http://www.w3.org/2004/02/skos/core#> " +
-      "SELECT distinct * " + fromStr + " WHERE {" +
-      "  ?X ?p ?o . " +filter+
-      "  ?X ?q ?b . " + "filter (isblank(?b))"+
-      " optional{?o rdf:type ?oType}" +
-      "optional{?o rdfs:label|skos:prefLabel ?oLabel}" +
-      "filter (isUri(?o) || isBlank(?o))  "+
-    " }limit 100";
-    var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+    var filterStr = "";// Sparql_common.setFilter("x", nodeIds);
 
+    var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+      "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+
+      "select  ?s ?p ?o ?sLabel ?oLabel ?pLabel " + fromStr + " where {" +
+      " ?s ?p ?o. filter (?p !=rdf:type) " +
+      /* " values ?p {rdf:first\n" +
+       "rdf:rest\n" +
+       "rdfs:domain\n" +
+       "rdf:rest\n" +
+       "rdfs:domain\n" +
+       "rdfs:range\n" +
+       "rdfs:subClassOf\n" +
+       "rdfs:subPropertyOf\n" +
+       "owl:allValuesFrom\n" +
+       "owl:disjointWith\n" +
+       "owl:equivalentClass\n" +
+       "owl:intersectionOf\n" +
+       "owl:inverseOf\n" +
+       "owl:onProperty\n" +
+       "owl:propertyChainAxiom\n" +
+       "owl:someValuesFrom\n" +
+       "owl:unionOf\n" +
+       "  }"+*/
+      "  optional {?s rdfs:label ?sLabel}\n" +
+      "        optional {?o rdfs:label ?oLabel}\n" +
+      "      optional {?p rdfs:label ?pLabel}" +
+      " {SELECT distinct ?o " + fromStr + "  WHERE {" +
+      "<" + nodeId + "> (<>|!<>){1," + depth + "} ?o filter (isIri(?o))}}}";
+
+
+    var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
       if (err) {
         return callback(err);
       }
-      result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, "topConcept", { type: "http://www.w3.org/2002/07/owl#Class" });
 
       return callback(null, result.results.bindings);
     });
 
   };
 
-  self.processAxioms = function(sourceLabel, nodes, callback) {
+
+  self.processAxioms = function(sourceLabel, nodeId, callback) {
+
+
+    var nodeId = "https://purl.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess";
+
     var sourceLabel = Lineage_sources.activeSource;
-    var maxIterations = 3;
-    var iterationIndex = 0;
-    var done = false;
-    var nodes=["https://purl.industrialontologies.org/ontology/core/Core/MaterialResource"]
-    async.whilst(
-      function(_test) {
-        iterationIndex++;
-        return ((iterationIndex < maxIterations) || done);
-      },
-      function(callbackWhilst) {
-        self.getAxiomsWithBlankNodes(sourceLabel, nodes, function(err, result) {
-          if (err) {
-            callbackWhilst(err);
-          }
-          done=false;
 
-          callbackWhilst();
-        });
-      }, function(err) {
-
-      });
-  };
-
-
-  self.processAxiomsXX = function(sourceLabel, nodes, callback) {
-    var sourceLabel = Lineage_sources.activeSource;
-    self.getAllBasicAxioms(sourceLabel, function(err, result) {
-      var allNodesMap = {};
-      result.forEach(function(item) {
-        item.axioms = {};
-        allNodesMap[item.X.value] = item;
-      });
-
-      var nodes = ["https://purl.industrialontologies.org/ontology/core/Core/MaterialArtifact"];
-
-      var nodes = Object.keys(allNodesMap);
+    self.getNodeAxiomsTree(sourceLabel, nodeId, 6, function(err, result) {
 
       var axiomsTriples = {};
 
-      nodes.forEach(function(X) {
-        var triples = [];
 
-        function recurse(nodeId) {
-          var nodeBasicAxioms = allNodesMap[nodeId];
-          if (!nodeBasicAxioms) {
-            return;
+      var existingNodes = visjsGraph.getExistingIdsMap();
+      var visjsData = { nodes: [], edges: [] };
+
+
+      var nodesMap = {};
+      var nodesToMap = {};
+      var startingNodes = {};
+      result.forEach(function(item) {
+        if (!nodesMap[item.s.value]) {
+          item.children=[]
+          nodesMap[item.s.value]=item
+
           }
+          nodesMap[item.s.value].children.push(item.o.value)
 
-          triples.push({
-            subject: nodeBasicAxioms.X.value,
-            predicate: nodeBasicAxioms.p_x.value,
-            object: nodeBasicAxioms.x.value
-          });
-          triples.push({
-            subject: nodeBasicAxioms.x.value,
-            predicate: nodeBasicAxioms.p_iu.value,
-            object: nodeBasicAxioms.iu.value
-          });
-          if (nodeBasicAxioms.y) {
-            triples.push({
-              subject: nodeBasicAxioms.iu.value,
-              predicate: nodeBasicAxioms.p_y.value,
-              object: nodeBasicAxioms.y.value
-            });
-          }
-          if (nodeBasicAxioms.bn) {
-            triples.push({
-              subject: nodeBasicAxioms.iu.value,
-              predicate: nodeBasicAxioms.p_bn.value,
-              object: nodeBasicAxioms.bn.value
-            });
-            recurse(nodeBasicAxioms.bn.value);
-          }
-
-          if (nodeBasicAxioms.bny) {
-            triples.push({
-              subject: nodeBasicAxioms.bn.value,
-              predicate: nodeBasicAxioms.p_bny.value,
-              object: nodeBasicAxioms.bny.value
-            });
-            recurse(nodeBasicAxioms.bny.value);
-          }
-        }
-
-        recurse(X);
-
-        axiomsTriples[X] = triples;
 
 
       });
+      var data=[];
 
-      var allVisjsData = { nodes: [], edges: [] };
-      var existingNodes = visjsGraph.getExistingIdsMap();
+      function recurse(nodeId) {
+        var item= nodesMap[nodeId]
 
-      function concatVisjsdata(visjsData) {
-        if (!visjsData.nodes || !visjsData.edges) {
-          return;
-        }
-        visjsData.nodes.forEach(function(item) {
-          if (!existingNodes[item.id]) {
-            existingNodes[item.id] = 1;
-            allVisjsData.nodes.push(item);
+        item.children.forEach(function(child) {
+
+          var targetItem= nodesMap[child];
+          if( !targetItem)
+            return;
+
+          if (!existingNodes[item.s.value]) {
+            existingNodes[item.s.value] = 1;
+            visjsData.nodes.push(VisjsUtil.getVisjsNode(sourceLabel, item.s.value, item.sLabel ? item.sLabel.value : Sparql_common.getLabelFromURI(item.s.value)));
           }
-        });
-        visjsData.edges.forEach(function(item) {
-          if (!existingNodes[item.id]) {
-            existingNodes[item.id] = 1;
-            allVisjsData.edges.push(item);
+          if (!existingNodes[targetItem.o.value]) {
+            existingNodes[targetItem.s.value] = 1;
+            visjsData.nodes.push(VisjsUtil.getVisjsNode(sourceLabel, targetItem.s.value, targetItem.sLabel ? targetItem.sLabel.value : Sparql_common.getLabelFromURI(targetItem.s.value)));
           }
-        });
+          var edgeId = item.s.value + "_" + targetItem.s.value;
+
+          if (!existingNodes[edgeId]) {
+            existingNodes[edgeId] = 1;
+            visjsData.edges.push({
+              id: edgeId,
+              from: item.s.value,
+              to: targetItem.s.value,
+              label: Sparql_common.getLabelFromURI(item.p.value),
+              arrows: {
+                to: {
+                  enabled: true,
+                  type: "solid",
+                  scaleFactor: 0.5
+                }
+              }
+            });
+          }
+
+          recurse(targetItem.s.value)
+
+        })
       }
 
 
-      for (var key in axiomsTriples) {
-        var triples = axiomsTriples[key];
-        var visjsData = VisjsUtil.getVisjsData(sourceLabel, triples);
-        concatVisjsdata(visjsData);
-
-      }
-      VisjsUtil.drawVisjsData(allVisjsData);
 
 
-    });
-  };
+         recurse(nodeId);
+
+
+
+
+
+      /* result.forEach(function(item) {
+
+          if (!existingNodes[item.s.value]) {
+            existingNodes[item.s.value] = 1;
+            visjsData.nodes.push(VisjsUtil.getVisjsNode(sourceLabel, item.s.value, item.sLabel ? item.sLabel.value : Sparql_common.getLabelFromURI(item.s.value)));
+          }
+          if (!existingNodes[item.o.value]) {
+            existingNodes[item.o.value] = 1;
+            visjsData.nodes.push(VisjsUtil.getVisjsNode(sourceLabel, item.o.value, item.oLabel ? item.oLabel.value : Sparql_common.getLabelFromURI(item.o.value)));
+          }
+
+          var edgeId = item.s.value + "_" + item.o.value;
+
+          if (!existingNodes[edgeId]) {
+            existingNodes[edgeId] = 1;
+            visjsData.edges.push({
+              id: edgeId,
+              from: item.s.value,
+              to: item.o.value,
+              label: Sparql_common.getLabelFromURI(item.p.value),
+              arrows: {
+                to: {
+                  enabled: true,
+                  type: "solid",
+                  scaleFactor: 0.5
+                }
+              }
+            });
+          }
+        });*/
+
+
+        VisjsUtil.drawVisjsData(visjsData);
+
+      });
+
+
+  }
 
   return self;
-})();
+  })()
 
 export default Lineage_axioms;
 window.Lineage_axioms = Lineage_axioms;

@@ -190,7 +190,7 @@ var Lineage_axioms = (function() {
 
     var sourceLabel = Lineage_sources.activeSource;
 
-    self.getNodeAxiomsTree(sourceLabel, nodeId, 6, function(err, result) {
+    self.getNodeAxiomsTree(sourceLabel, nodeId, 5, function(err, result) {
 
       var axiomsTriples = {};
 
@@ -214,8 +214,12 @@ var Lineage_axioms = (function() {
 
       });
       var data=[];
+      var uniqueIds={}
 
-      function recurse(nodeId) {
+      function recurse(nodeId,level) {
+        if(uniqueIds[nodeId])
+          return;
+          uniqueIds[nodeId]=1
         var item= nodesMap[nodeId]
 
         item.children.forEach(function(child) {
@@ -226,11 +230,11 @@ var Lineage_axioms = (function() {
 
           if (!existingNodes[item.s.value]) {
             existingNodes[item.s.value] = 1;
-            visjsData.nodes.push(VisjsUtil.getVisjsNode(sourceLabel, item.s.value, item.sLabel ? item.sLabel.value : Sparql_common.getLabelFromURI(item.s.value)));
+            visjsData.nodes.push(VisjsUtil.getVisjsNode(sourceLabel, item.s.value, item.sLabel ? item.sLabel.value : Sparql_common.getLabelFromURI(item.s.value),null,{level:level}));
           }
-          if (!existingNodes[targetItem.o.value]) {
+          if (!existingNodes[targetItem.s.value]) {
             existingNodes[targetItem.s.value] = 1;
-            visjsData.nodes.push(VisjsUtil.getVisjsNode(sourceLabel, targetItem.s.value, targetItem.sLabel ? targetItem.sLabel.value : Sparql_common.getLabelFromURI(targetItem.s.value)));
+            visjsData.nodes.push(VisjsUtil.getVisjsNode(sourceLabel, targetItem.s.value, targetItem.sLabel ? targetItem.sLabel.value : Sparql_common.getLabelFromURI(targetItem.s.value),null,{level:level+1}));
           }
           var edgeId = item.s.value + "_" + targetItem.s.value;
 
@@ -251,7 +255,7 @@ var Lineage_axioms = (function() {
             });
           }
 
-          recurse(targetItem.s.value)
+          recurse(targetItem.s.value,level+1)
 
         })
       }
@@ -259,7 +263,7 @@ var Lineage_axioms = (function() {
 
 
 
-         recurse(nodeId);
+         recurse(nodeId,1);
 
 
 
@@ -295,9 +299,22 @@ var Lineage_axioms = (function() {
             });
           }
         });*/
+      var options= {
+        layoutHierarchical :{
+          direction: "LR",
+          sortMethod: "hubsize",
+          //  sortMethod:"directed",
+          //    shakeTowards:"roots",
+          //  sortMethod:"directed",
+          levelSeparation: 200,
+          //   parentCentralization: true,
+          //  shakeTowards:true
 
+          //   nodeSpacing:25,
+        }
+      }
 
-        VisjsUtil.drawVisjsData(visjsData);
+        VisjsUtil.drawVisjsData(visjsData,options);
 
       });
 

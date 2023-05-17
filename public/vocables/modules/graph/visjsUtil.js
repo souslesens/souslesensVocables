@@ -74,6 +74,9 @@ var VisjsUtil = (function() {
         type: options.type
       }
     };
+    for(var key in options){
+      node[key]=options[key]
+    }
     return node;
   };
 
@@ -162,9 +165,11 @@ var VisjsUtil = (function() {
 
   };
 
-  self.drawVisjsData = function(visjsData) {
+  self.drawVisjsData = function(visjsData,options) {
+
+
     if (!visjsGraph.isGraphNotEmpty()) {
-      Lineage_classes.drawNewGraph(visjsData);
+      Lineage_classes.drawNewGraph(visjsData,null,options);
     }
     visjsGraph.data.nodes.add(visjsData.nodes);
     visjsGraph.data.edges.add(visjsData.edges);

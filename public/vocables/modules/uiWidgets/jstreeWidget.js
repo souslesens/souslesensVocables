@@ -106,9 +106,6 @@ var JstreeWidget = (function () {
         }
         $("#" + jstreeDiv)
             .jstree({
-                /* "checkbox": {
-"keep_selected_style": false
-},*/
                 plugins: plugins,
                 core: {
                     data: jstreeData,
@@ -125,7 +122,6 @@ var JstreeWidget = (function () {
                 contextmenu: { items: options.contextMenu },
             })
             .on("loaded.jstree", function () {
-                //  setTimeout(function () {
                 if (options.openAll) {
                     $("#" + jstreeDiv)
                         .jstree(true)
@@ -139,7 +135,6 @@ var JstreeWidget = (function () {
                 if (callback) {
                     callback();
                 }
-                //   }, 500)
             })
             .on("select_node.jstree", function (evt, obj) {
                 if (options.selectTreeNodeFn) {

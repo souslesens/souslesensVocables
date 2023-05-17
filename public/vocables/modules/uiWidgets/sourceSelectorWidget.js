@@ -1,6 +1,7 @@
 import MainController from "../shared/mainController.js";
-import SearchUtil from "../search/searchUtil.js";
 import common from "../shared/common.js";
+import JstreeWidget from "./jstreeWidget.js";
+import { html, render } from "lit-html";
 
 var SourceSelectorWidget = (function () {
     var self = {};
@@ -13,11 +14,10 @@ var SourceSelectorWidget = (function () {
         }
         var jsTreeOptions = options;
         jsTreeOptions.selectTreeNodeFn = selectTreeNodeFn;
-
-        $("#" + targetDivId).load("snippets/sourceSelector.html", function (err) {
-            self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
-            $("#sourceSelector_SearchSourceInput");
-        });
+        const data = SourceSelectorWidget.getSourcesJstreeData();
+        const tree = html`<sls-select-source .jsTreeOptions="${jsTreeOptions}"></sls-select-source>`;
+        const target = document.getElementById(targetDivId);
+        render(tree, target);
 
         if (options.withCheckboxes) {
             $(".sourceSelector_buttons").css("display", "block");
@@ -137,11 +137,7 @@ var SourceSelectorWidget = (function () {
      * @param validateFn
      * @param okButtonValidateFn
      */
-    self.loadSourcesTreeDiv = function (treeDiv, jstreeOptions, callback) {
-        if (!jstreeOptions) {
-            optiojstreeOptionsns = {};
-        }
-
+    self.loadSourcesTreeDiv = function (treeDiv, jstreeOptions = {}, callback) {
         var treeData = self.getSourcesJstreeData();
 
         if (!jstreeOptions.contextMenu) {

@@ -184,8 +184,11 @@ var Lineage_axioms = (function() {
 
   };
 
+ /* self.processAxiomsPlus = function(sourceLabel, nodeId, divId,
+  Lineage_axioms.processAxioms(Lineage_sources.activeSource,NodeInfosWidget.currentNodeId,"nodeInfosWidget_AxiomsTabDiv"*/
 
-  self.processAxioms = function(sourceLabel, nodeId, callback) {
+
+  self.processAxioms = function(sourceLabel, nodeId, divId,depth) {
 
 
   if(!nodeId)
@@ -193,7 +196,7 @@ var Lineage_axioms = (function() {
 
     var sourceLabel = Lineage_sources.activeSource;
 
-    self.getNodeAxiomsTree(sourceLabel, nodeId, 5, function(err, result) {
+    self.getNodeAxiomsTree(sourceLabel, nodeId, depth|| 5, function(err, result) {
 
       var axiomsTriples = {};
 
@@ -347,8 +350,9 @@ var Lineage_axioms = (function() {
 
 
 
-      $("#mainDialogDiv").dialog("open")
-      $("#mainDialogDiv").html("<div id='axiomsGraphDiv' style='width:1000px;height:800px'></div>")
+
+
+      $("#divId").html("<div id='axiomsGraphDiv' style='width:1000px;height:800px'></div>")
 
       Lineage_classes.drawNewGraph(visjsData,'axiomsGraphDiv',options);
 

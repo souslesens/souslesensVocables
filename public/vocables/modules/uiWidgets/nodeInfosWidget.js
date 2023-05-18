@@ -74,12 +74,23 @@ var NodeInfosWidget = (function () {
 
         self.currentNodeIdInfosSource = sourceLabel;
         self.currentNodeIdInfosDivId = divId;
+        $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
+        $("#" + divId).dialog("open");
+        $("#"+divId).load("snippets/nodeInfosWidget.html",function(){
+            $("#nodeInfosWidget_tabsDiv").tabs({
+                activate: function( event, ui ) {
+                 if(ui.newPanel.selector=="#nodeInfosWidget_AxiomsTabDiv"){
+                     Lineage_axioms.processAxioms(self.currentSource,self.currentNodeId)
+                 }
+                }
+            })
 
-        var type;
+
+            var type;
         async.series(
             [
                 function (callbackSeries) {
-                    self.drawCommonInfos(sourceLabel, nodeId, divId, options, function (_err, result) {
+                    self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function (_err, result) {
                         type = result.type;
                         callbackSeries();
                     });
@@ -104,7 +115,7 @@ var NodeInfosWidget = (function () {
                     if (type != "http://www.w3.org/2002/07/owl#ObjectProperty") {
                         return callbackSeries();
                     }
-                    self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, divId, function (_err, _result) {
+                    self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfosWidget_InfosTabDiv", function (_err, _result) {
                         callbackSeries();
                     });
                 },
@@ -119,6 +130,7 @@ var NodeInfosWidget = (function () {
                 }
             }
         );
+        })
     };
     self.showNodeInfosToolbar = function (options) {
         if (!options) {
@@ -181,8 +193,7 @@ var NodeInfosWidget = (function () {
                     $("#" + divId).on("dialogbeforeclose", function (_event, _ui) {
                         self.indexObjectIfNew();
                     });
-                    $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
-                    $("#" + divId).dialog("open");
+
                 }
 
                 var type = null;
@@ -420,7 +431,7 @@ defaultLang = 'en';*/
                     "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
                     "</div>";
 
-                $("#" + divId).html(str);
+                $("#nodeInfosWidget_InfosTabDiv").html(str);
 
                 return callback(null, { type: type, blankNodes: blankNodes });
             }

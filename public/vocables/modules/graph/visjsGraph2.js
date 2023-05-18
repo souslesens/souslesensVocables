@@ -43,6 +43,9 @@ var visjsGraph = (function () {
         self.draw(self.currentContext.divId, visjsData, self.currentContext.options, self.currentContext.callback);
     };
     self.currentKeyboardEventy = null;
+
+
+
     self.draw = function (
         /** @type {string} */ divId,
         /** @type {{ labels: any; nodes: any; edges: any; }} */ visjsData,
@@ -102,6 +105,7 @@ var visjsGraph = (function () {
             options.layout = {
                 hierarchical: _options.layoutHierarchical,
             };
+          options.physics= { enabled:false }
         } else {
             $("#visjsGraph_layoutSelect").val("");
         }

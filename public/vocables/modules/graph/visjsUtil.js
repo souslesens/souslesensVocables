@@ -7,6 +7,19 @@ import visjsGraph from "../graph/visjsGraph2.js";
 var VisjsUtil = (function() {
   var self = {};
 
+self.setNodeSymbol=function(node,symbol){
+  if(!symbol)
+    return node;
+  node.shape = "circle";
+  node.label = symbol;
+  node.color = "#eee";
+ // node.font="bold"
+  return node;
+
+}
+
+
+
 
   self.getVisjsNodeAttributes = function(source,label, predicateUri, options) {
     if (!options) {
@@ -15,9 +28,9 @@ var VisjsUtil = (function() {
     var shape, color,lab;
     var size = Lineage_classes.defaultShapeSize;
     var str;
-    if (false && (str = Config.Lineage.logicalOperatorsMap[predicateUri])) {
+    if (options.symbol) {
       shape = "circle";
-      label = str;
+      label = options.symbol;
       color = "#eee";
     }
     else {
@@ -165,11 +178,11 @@ var VisjsUtil = (function() {
 
   };
 
-  self.drawVisjsData = function(visjsData,options) {
+  self.drawVisjsData = function(visjsData,graphDiv,options) {
 
 
     if (!visjsGraph.isGraphNotEmpty()) {
-      Lineage_classes.drawNewGraph(visjsData,null,options);
+      Lineage_classes.drawNewGraph(visjsData,graphDiv,options);
     }
     visjsGraph.data.nodes.add(visjsData.nodes);
     visjsGraph.data.edges.add(visjsData.edges);

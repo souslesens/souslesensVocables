@@ -293,9 +293,11 @@ var Lineage_relations = (function () {
         options.skipLiterals = true;
         var source = null;
         var data = null;
+        var levelsMap={}
         if (!options.data) {
             if (caller == "Graph") {
                 data = Lineage_classes.currentGraphNode.data.id;
+                levelsMap[Lineage_classes.currentGraphNode.data.id]=Lineage_classes.currentGraphNode.level
             } else if (caller == "Tree") {
                 data = Lineage_classes.currentTreeNode.data.id;
             } else if (caller == "both") {
@@ -305,6 +307,7 @@ var Lineage_relations = (function () {
                 nodes.forEach(function (node) {
                     if (node.data && (!node.data.type || node.data.type != "literal")) {
                         data.push(node.id);
+                        levelsMap[node.id]=node.level
                     }
                 });
             }

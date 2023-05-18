@@ -566,6 +566,9 @@ var Lineage_classes = (function () {
         if (_options.layout) {
             options.layout = _options.layout;
         }
+        if (_options.layoutHierarchical) {
+            options.layoutHierarchical = _options.layoutHierarchical;
+        }
 
         if (_options.physics) {
             options.physics = _options.physics;

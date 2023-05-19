@@ -88,6 +88,9 @@ self.setNodeSymbol=function(node,symbol){
       }
     };
     for(var key in options){
+    if(key=="color" && node.color=="#bbb")
+      ;
+    else
       node[key]=options[key]
     }
     return node;

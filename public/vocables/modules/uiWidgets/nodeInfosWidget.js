@@ -76,62 +76,87 @@ var NodeInfosWidget = (function () {
         self.currentNodeIdInfosDivId = divId;
         $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
         $("#" + divId).dialog("open");
-        $("#"+divId).load("snippets/nodeInfosWidget.html",function(){
+        $("#"+divId).load("snippets/nodeInfosWidget.html",function() {
             $("#nodeInfosWidget_tabsDiv").tabs({
-                activate: function( event, ui ) {
-                 if(ui.newPanel.selector=="#nodeInfosWidget_AxiomsTabDiv"){
-                     Lineage_axioms.processAxioms(self.currentSource,self.currentNodeId)
-                 }
+                active: options.showAxioms?1:0,
+                activate: function(event, ui) {
+                    if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv" || options.showAxioms ) {
+                     setTimeout(function(){
+                        Lineage_axioms.processAxioms(self.currentSource, self.currentNodeId)
+                     },1000)
+                    }
+
                 }
+
             })
 
+            if(true || !options.showAxioms){
 
-            var type;
-        async.series(
-            [
-                function (callbackSeries) {
-                    self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function (_err, result) {
-                        type = result.type;
-                        callbackSeries();
-                    });
-                },
-                function (callbackSeries) {
-                    var source = self.currentNodeRealSource;
-                    self.showNodeInfosToolbar(options);
-                    callbackSeries();
-                },
-                function (callbackSeries) {
-                    self.showTypeOfResources(self.currentNodeRealSource, nodeId, function (err) {
-                        callbackSeries(err);
-                    });
-                },
-                function (callbackSeries) {
-                    self.showClassRestrictions(self.currentNodeRealSource, [nodeId], options, function (err) {
-                        callbackSeries(err);
-                    });
-                },
+                self.drawAllInfos(sourceLabel, nodeId, options, function(err, result) {
 
-                function (callbackSeries) {
-                    if (type != "http://www.w3.org/2002/07/owl#ObjectProperty") {
-                        return callbackSeries();
+                    common.getStackTrace();
+                    if (callback) {
+                        callback(err);
                     }
-                    self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfosWidget_InfosTabDiv", function (_err, _result) {
-                        callbackSeries();
-                    });
-                },
-            ],
-            function (err) {
-                common.getStackTrace();
-                if (callback) {
-                    callback(err);
-                }
-                if (err) {
-                    return alert(err);
-                }
+                    if (err) {
+                        return alert(err);
+                    }
+
+                    self.showNodeInfosToolbar(options);
+
+
+                })
             }
-        );
         })
+
     };
+
+    self.drawAllInfos=function(sourceLabel, nodeId,options,callback){
+
+        var type;
+        async.series(
+          [
+              function (callbackSeries) {
+                  self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function (_err, result) {
+                      type = result.type;
+                      callbackSeries();
+                  });
+              },
+
+              function (callbackSeries) {
+                  self.showTypeOfResources(self.currentNodeRealSource, nodeId, function (err) {
+                      callbackSeries(err);
+                  });
+              },
+              function (callbackSeries) {
+                  self.showClassRestrictions(self.currentNodeRealSource, [nodeId], options, function (err) {
+                      callbackSeries(err);
+                  });
+              },
+
+              function (callbackSeries) {
+                  if (type != "http://www.w3.org/2002/07/owl#ObjectProperty") {
+                      return callbackSeries();
+                  }
+                  self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfosWidget_InfosTabDiv", function (_err, _result) {
+                      callbackSeries();
+                  });
+              },
+          ],
+          function (err) {
+
+              if (callback) {
+                  callback(err);
+              }
+              if (err) {
+                  return alert(err);
+              }
+          });
+
+};
+
+
+
     self.showNodeInfosToolbar = function (options) {
         if (!options) {
             options = {};

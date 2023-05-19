@@ -666,14 +666,14 @@ return*/
                     Lineage_common.copyNodeToClipboard(self.currentTreeNode);
                 },
             };
-            items.axioms = {
+          /*  items.axioms = {
                 label: "graph axioms",
                 action: function (e) {
 
+                    NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv",{showAxioms:1});
 
-                  Lineage_axioms.processAxioms(self.currentSource,self.currentTreeNode.data.id )
                 },
-            };
+            };*/
 
             if (self.currentSource && Config.sources[self.currentSource].editable) {
                 items.pasteNode = {

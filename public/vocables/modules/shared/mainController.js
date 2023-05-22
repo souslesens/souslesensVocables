@@ -649,8 +649,6 @@ return;*/
             var left = $("#rightPanelDiv").position().left;
             var w = $(window).width();
 
-            
-
             if (show || w - left < 100) {
                 var lw = $("#rightPanelDiv").width();
                 if (lw < 100) {
@@ -692,7 +690,6 @@ return;*/
     self.parseUrlParam = function (callback) {
         var paramsMap = common.getUrlParamsMap();
 
-        
         if (paramsMap.tool) {
             var tool = paramsMap["tool"];
 

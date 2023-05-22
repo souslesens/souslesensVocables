@@ -747,7 +747,8 @@ sourceDivId +
         const currentAccessControls = groups.map((group) => {
             const defaultAccessControl = Config.profiles[group].defaultSourceAccessControl;
             const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
-            return sourcesAccessControl.hasOwnProperty(source) ? sourcesAccessControl[source] : defaultAccessControl;
+            const path_of_source = Config.sources[source].schemaType + "/" + Config.sources[source].group + "/" + source;
+            return sourcesAccessControl.hasOwnProperty(path_of_source) ? sourcesAccessControl[path_of_source] : defaultAccessControl;
         });
         if (groups.indexOf("admin") > -1) return true;
 

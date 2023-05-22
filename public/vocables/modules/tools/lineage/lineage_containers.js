@@ -6,11 +6,20 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import visjsGraph from "../../graph/visjsGraph2.js";
 
-
 var Lineage_containers = (function () {
     var self = {};
-    self.nbOfancestors_tree_search=0;
-    self.ancestors_tree_search_areRunning=[false,false,false];
+    self.nbOfancestors_tree_search = 0;
+    self.ancestors_tree_search_areRunning = [false, false, false];
+    self.flag_search = false;
+    self.flag_search_launch_search = false;
+    self.flag_function = function () {
+        self.flag_search = false;
+        if (self.flag_search_launch_search == true) {
+            Lineage_containers.search();
+            self.flag_search_launch_search = false;
+        }
+    };
+    self.add_supplementary_layer_for_types_icon = null;
 
     self.getContextJstreeMenu = function () {
         var items = {};
@@ -90,27 +99,20 @@ Lineage_styles.showDialog(self.currentContainer.data);
         return items;
     };
 
-  
-
-    self.search = function (memberType,callback) {
-       
+    self.search = function (memberType, callback) {
         if (!callback) {
-            callback=function(){};
+            callback = function () {};
         }
-        
-
 
         if ($("#lineage_containers_containersJstree").jstree) {
             $("#lineage_containers_containersJstree").empty();
         }
 
-        
         var term = $("#Lineage_containers_searchInput").val();
         var searchWhat = $("#Lineage_containers_searchWhatInput").val();
         var source = Lineage_sources.activeSource;
-       
-        if (!memberType){
-            
+
+        if (!memberType) {
             memberType = "";
         }
 
@@ -118,14 +120,15 @@ Lineage_styles.showDialog(self.currentContainer.data);
         if (term) {
             filter = "FILTER (" + Sparql_common.setFilter("member", null, term) + ")";
         }
-        
 
-        var search_on_container=""
-       
+        var search_on_container = "";
+
         if (searchWhat == "current") {
-            search_on_container=self.currentContainer.data.id;
+            if (!self.currentContainer) {
+                alert("no selected container");
+            }
+            search_on_container = self.currentContainer.data.id;
         }
-        
 
         self.currentContainer = null;
         /*  self.listContainerResources(source, null, { filter:filter })
@@ -133,30 +136,22 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
       return;*/
 
-        
-
-        
-        self.drawContainerJstree(source, filter, "lineage_containers_containersJstree", search_on_container, memberType, {}, function (err, result) {
-            if (err) {
-                return alert(err.responseText);
-            }
-            callback();
-        });
-
-
-
-
-
+        if (self.flag_search == false) {
+            self.drawContainerJstree(source, filter, "lineage_containers_containersJstree", search_on_container, memberType, {}, function (err, result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+                callback();
+            });
+        } else {
+            self.flag_search_launch_search = true;
+        }
     };
 
-
-
-    
     self.reset_tree = function (source, filter, jstreeDiv, memberType, options, callback) {
         if (!options) {
             options = {};
         }
-
 
         var fromStr = Sparql_common.getFromStr(source, null, true);
         var query =
@@ -164,16 +159,14 @@ Lineage_styles.showDialog(self.currentContainer.data);
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "select distinct * " +
             fromStr +
-            "where {?member rdfs:label ?memberLabel.?member rdf:type ?memberType  filter(?memberType" +
+            "where {?member rdfs:label ?memberLabel.?member rdf:type ?memberType." +
             memberType +
-            ")" +
             " OPTIONAL {?member ^rdfs:member ?parentContainer.?parentContainer rdf:type ?type.filter (?type in (rdf:Bag,rdf:List)).?parentContainer rdfs:label ?parentContainerLabel}" +
             " " +
             filter +
             "}";
         var sparql_url = Config.sources[source].sparql_server.url;
         var url = sparql_url + "?format=json&query=";
-        
 
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
             if (err) {
@@ -202,6 +195,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 parent = item.parentContainer && nodesMap[item.parentContainer.value] ? nodesMap[item.parentContainer.value].jstreeId : "#";
                 if (!uniqueNodes[item.jstreeId]) {
                     uniqueNodes[item.jstreeId] = 1;
+
                     var node = {
                         id: item.jstreeId,
                         text: item.memberLabel.value,
@@ -245,124 +239,91 @@ Lineage_styles.showDialog(self.currentContainer.data);
                     .jstree()
                     .open_node("#");
                 callback(null);
-                $("#" +jstreeDiv).jstree('open_all');
+                $("#" + jstreeDiv).jstree("open_all");
             });
-        
-        
-        
         });
-        */
-        }
-        
     };
-    
-    self.orderResults=function(results){
 
-        var new_results=[]
+    self.orderResults = function (results) {
+        var new_results = [];
         results.forEach(function (item) {
+            var current_child = item.member.value;
+            var path_uri_order = [];
+            var label_uri_order = [];
+            var distinct_uris = [];
+            var type_uri_order = [];
 
-            var current_child=item.member.value;
-            var path_uri_order=[];
-            var label_uri_order=[];
-            var distinct_uris=[];
-            var type_uri_order=[];
-
-            if(item.all.value){
-                var all_results=item.all.value.split(';;');
-                for (let i =0; i <all_results.length ; i++) {
-                    var result=JSON.parse(all_results[i]);
-                    all_results[i]=result;
-                    if(!distinct_uris.includes(result.parentUri)){
+            if (item.all.value) {
+                var all_results = item.all.value.split(";;");
+                for (let i = 0; i < all_results.length; i++) {
+                    var result = JSON.parse(all_results[i]);
+                    all_results[i] = result;
+                    if (!distinct_uris.includes(result.parentUri)) {
                         distinct_uris.push(result.parentUri);
                     }
                 }
                 distinct_uris.forEach(function (distinct) {
-                    for (let i =0; i <all_results.length ; i++) {
-                        if(all_results[i].parentChild==current_child){
-                            if(!path_uri_order.includes(all_results[i].parentUri)){
+                    for (let i = 0; i < all_results.length; i++) {
+                        if (all_results[i].parentChild == current_child) {
+                            if (!path_uri_order.includes(all_results[i].parentUri)) {
                                 path_uri_order.push(all_results[i].parentUri);
                                 label_uri_order.push(all_results[i].parentLabel);
                                 type_uri_order.push(all_results[i].parentType);
-                                current_child=all_results[i].parentUri;
-
+                                current_child = all_results[i].parentUri;
                             }
-                            
                         }
                     }
-                    
-
                 });
-                path_uri_order=path_uri_order.reverse();
-                item.allparents={value:''};
-                item.allparents.value=path_uri_order.toString().replaceAll(',',';;');
-                label_uri_order=label_uri_order.reverse();
-                item.allparentslabel={value:''};
-                item.allparentslabel.value=label_uri_order.toString().replaceAll(',',';;');
-                type_uri_order=type_uri_order.reverse();
-                item.types={value:''};
-                item.types.value=type_uri_order.toString().replaceAll(',',';;');
+                path_uri_order = path_uri_order.reverse();
+                item.allparents = { value: "" };
+                item.allparents.value = path_uri_order.toString().replaceAll(",", ";;");
+                label_uri_order = label_uri_order.reverse();
+                item.allparentslabel = { value: "" };
+                item.allparentslabel.value = label_uri_order.toString().replaceAll(",", ";;");
+                type_uri_order = type_uri_order.reverse();
+                item.types = { value: "" };
+                item.types.value = type_uri_order.toString().replaceAll(",", ";;");
                 new_results.push(item);
-               
             }
-            
-           
-            
-
-
         });
 
-        return (new_results)
-
+        return new_results;
     };
-
-
-    self.drawContainerJstree = function (source, filter, jstreeDiv,search_on_container, memberType, options, callback) {
+    // filter is a clause SPARQL clause filter like FILTER (regex(?memberLabel, "flu", "i"))
+    //search_container is an URI chracter chain to indicates the search focus on this container
+    //membertype is a list like  in (rdf:Bag,rdf:List) to indicates where type are filtered on the search, he is prefixed at (rdf:Bag,rdf:List) for not filtered clauses
+    self.drawContainerJstree = function (source, filter, jstreeDiv, search_on_container, memberType, options, callback) {
         if (!options) {
             options = {};
         }
         var fromStr = Sparql_common.getFromStr(source, null, true);
 
-
-        var values="";
-        var descendants_clause ="";
-        if(search_on_container!=""){
-
-            var values=`VALUES (?o) {
+        var values = "";
+        var descendants_clause = "";
+        if (search_on_container != "") {
+            var values = `VALUES (?o) {
                 (<${search_on_container}>)
                 
                 
-            }`
-            var descendants_clause="?member ^rdfs:member*  ?o.";
-
+            }`;
+            var descendants_clause = "?member ^rdfs:member*  ?o.";
         }
-       
-       var memberTypefilter='';
-       if(memberType){
-            if(memberType!=""){
-                memberTypefilter=`filter(?memberType ${memberType} ).`
+
+        var memberTypefilter = "";
+        if (memberType) {
+            if (memberType != "") {
+                memberTypefilter = `filter(str(?memberType) ${memberType} ).`;
             }
-            
-       }
-       else{
-            if(filter==""){
-
-                memberTypefilter=` in (rdf:Bag,rdf:List)`  
-
-
-
-
+        } else {
+            if (filter == "") {
+                memberTypefilter = `filter(?memberType in (rdf:Bag,rdf:List) ).`;
             }
-       }
+        }
 
-
-       if(filter==""){
-        self.reset_tree(source,filter,jstreeDiv,memberTypefilter,options,callback);
-       }
-       else{
-      
-
-
-        var query=`
+        if (filter == "") {
+            self.reset_tree(source, filter, jstreeDiv, memberTypefilter, options, callback);
+        } else {
+            var query = `
         PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
         PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
         SELECT distinct ?member ?memberLabel ?memberType ?subclasstype (GROUP_CONCAT(distinct ?allprop ; separator=";;")  as ?all)  ${fromStr}
@@ -382,18 +343,20 @@ Lineage_styles.showDialog(self.currentContainer.data);
           
                 {
           
-                          select distinct *  ${fromStr} where {
+                          select distinct *   where {
         
                         
                         
                         ?member rdfs:label ?memberLabel.
                         ?member rdf:type ?memberType.
                         ${descendants_clause}
-                        ${memberTypefilter}
+                       
                         ${filter}
                         OPTIONAL{?member rdfs:subClassOf ?subclasstype.}
+                        ${memberTypefilter}
                             
-                        }group by ?member ?memberLabel ?memberType ?subclasstype
+                        }
+                        
                         LIMIT 100
                         OFFSET 0
         
@@ -401,174 +364,128 @@ Lineage_styles.showDialog(self.currentContainer.data);
         }
         
         
-        `
+        `;
 
-        var offset=0;
-        var resultSize = 100;
-        
-        self.nbOfancestors_tree_search+=1;
-        if(self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search]==true){
-            self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search]=false;
-            self.nbOfancestors_tree_search-=1;
-            
+            var offset = 0;
+            var resultSize = 100;
 
-        }
-        if(self.nbOfancestors_tree_search>1){
-            self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search-1]=false;
-        }
-        self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search]=true;
-        var search_number=self.nbOfancestors_tree_search;
-        async.whilst(
-            
-            function (_test) {
-                return resultSize>0 && self.ancestors_tree_search_areRunning[search_number];
-            },
+            self.nbOfancestors_tree_search += 1;
+            if (self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search] == true) {
+                self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search] = false;
+                self.nbOfancestors_tree_search -= 1;
+            }
+            if (self.nbOfancestors_tree_search > 1) {
+                self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search - 1] = false;
+            }
+            self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search] = true;
+            var search_number = self.nbOfancestors_tree_search;
+            async.whilst(
+                function (_test) {
+                    return resultSize > 0 && self.ancestors_tree_search_areRunning[search_number];
+                },
 
-            function differ(callbackWhilst){
-                
-                //iterate
-                var sparql_url = Config.sources[source].sparql_server.url;
-                var url = sparql_url + "?format=json&query=";
-                var query_split=query.split('OFFSET');
-                var query2 = query_split[0]+ " OFFSET " + query_split[1].replace(/(\d+)/,offset);
-                
+                function differ(callbackWhilst) {
+                    self.flag_search = true;
+                    //iterate
+                    var sparql_url = Config.sources[source].sparql_server.url;
+                    var url = sparql_url + "?format=json&query=";
+                    var query_split = query.split("OFFSET");
+                    var query2 = query_split[0] + " OFFSET " + query_split[1].replace(/(\d+)/, offset);
 
-                Sparql_proxy.querySPARQL_GET_proxy(url, query2, null, { source: source }, function (err, result) {
-                    if (err){
-                        return callbackWhilst(err);
-
-
-                    } 
-                    
-                    resultSize=result.results.bindings.length;
-                    var nodesMap = {};
-
-                    var ordered_results=self.orderResults( result.results.bindings);
-
-                
-                    result.results.bindings.forEach(function (item) {
-                        
-                        var node_in_tree=false;
-                        
-                       
-                        
-                        
-                        if(!nodesMap[item.member.value]){
-                            if(offset>0){
-                                var node_in_tree=common.getNodeByURI(jstreeDiv,item.member.value);
-                                
-                            }
-                            var jstreeId = "_" + common.getRandomHexaId(5);
-                            if(node_in_tree!=false){
-                                jstreeId=node_in_tree.id;
-                            }
-                            
-                            var node={"id" : item.member.value,"jstreeid":jstreeId,"label" : item.memberLabel.value,"types":[],"subclass":[],parent:'#'}
-                            if(item.memberType){
-                                node.types.push(item.memberType.value);
-                            }
-                            if(item.subclasstype){
-                                node.subclass.push(item.subclasstype.value);
-                            }
-
-                            nodesMap[item.member.value]=node;
-                           
-
-                            
-
-                        }else{
-                            
-                            if(item.memberType){
-                                if(!(nodesMap[item.member.value].types.includes(item.memberType.value))){
-                                    nodesMap[item.member.value].types.push(item.memberType.value);
-                                }
-                                
-
-                            }
-                            if(item.subclasstype){
-                                if(!(nodesMap[item.member.value].subclass.includes(item.subclasstype.value))){
-                                    nodesMap[item.member.value].subclass.push(item.subclasstype.value);
-                                }
-                            }
-                        }
-                    
-                        
-                        
-                        if(item.allparents){
-                            var parents_iris=item.allparents.value.split(';;');
-                            var parents_labels=item.allparentslabel.value.split(';;');
-                            var parents_types=item.types.value.split(';;');
-
-                            for (let i = parents_iris.length-1; i >=0 ; i--) {
-
-
-                                if( !nodesMap[parents_iris[i]]){
-                                    
-                                    var jstreeId = "_" + common.getRandomHexaId(5);
-                                    if(offset>0){
-                                        var node_in_tree=common.getNodeByURI(jstreeDiv,parents_iris[i]);
-                                        
-                                    }
-                                    if(node_in_tree!=false){
-                                        jstreeId=node_in_tree.id;
-                                    }
-                                    
-
-                                    var node={"id" : parents_iris[i],"jstreeid":jstreeId,"label" : parents_labels[i],"types":[parents_types[i]],"subclass":[],parent:'#'};
-                                    
-                                    
-
-
-                                }
-                                else{
-                                    var node=nodesMap[parents_iris[i]];
-                                    if(!(node.types.includes(parents_types[i]))){
-
-                                        node.types.push(parents_types[i]);
-
-                                    }   
-
-                                }
-
-
-                                if(i!=0){
-                                    if(node.id!=parents_iris[i-1]){
-                                        node['parent']= parents_iris[i-1];
-                                    }
-                                    
-                                }
-
-                                nodesMap[parents_iris[i]]=node;
-
-                                if(i==parents_iris.length-1){
-                                    
-                                nodesMap[item.member.value].parent= parents_iris[i];
-                                    
-                                }
-        
-
-                            }
-
+                    Sparql_proxy.querySPARQL_GET_proxy(url, query2, null, { source: source }, function (err, result) {
+                        if (err) {
+                            return callbackWhilst(err);
                         }
 
-                    });
+                        resultSize = result.results.bindings.length;
+                        var nodesMap = {};
 
-                
-                    
-                    var jstreeData = [];
+                        var ordered_results = self.orderResults(result.results.bindings);
 
-                    for (var nodeId in nodesMap) {
-                        var item = nodesMap[nodeId];
-                        var parent='#';
-                        if(!(item.parent=='#')){
-                            
-                            var parent=nodesMap[item.parent].jstreeid;
-                            
-                        }
-                        
-                        var type_icon=common.selectTypeForIconsJstree(item.types,null);
-                       
-                        var node = {
+                        result.results.bindings.forEach(function (item) {
+                            var node_in_tree = false;
+
+                            if (!nodesMap[item.member.value]) {
+                                if (offset > 0) {
+                                    var node_in_tree = JstreeWidget.getNodeByURI(jstreeDiv, item.member.value);
+                                }
+                                var jstreeId = "_" + common.getRandomHexaId(5);
+                                if (node_in_tree != false) {
+                                    jstreeId = node_in_tree.id;
+                                }
+
+                                var node = { id: item.member.value, jstreeid: jstreeId, label: item.memberLabel.value, types: [], subclass: [], parent: "#" };
+                                if (item.memberType) {
+                                    node.types.push(item.memberType.value);
+                                }
+                                if (item.subclasstype) {
+                                    node.subclass.push(item.subclasstype.value);
+                                }
+
+                                nodesMap[item.member.value] = node;
+                            } else {
+                                if (item.memberType) {
+                                    if (!nodesMap[item.member.value].types.includes(item.memberType.value)) {
+                                        nodesMap[item.member.value].types.push(item.memberType.value);
+                                    }
+                                }
+                                if (item.subclasstype) {
+                                    if (!nodesMap[item.member.value].subclass.includes(item.subclasstype.value)) {
+                                        nodesMap[item.member.value].subclass.push(item.subclasstype.value);
+                                    }
+                                }
+                            }
+
+                            if (item.allparents) {
+                                var parents_iris = item.allparents.value.split(";;");
+                                var parents_labels = item.allparentslabel.value.split(";;");
+                                var parents_types = item.types.value.split(";;");
+
+                                for (let i = parents_iris.length - 1; i >= 0; i--) {
+                                    if (!nodesMap[parents_iris[i]]) {
+                                        var jstreeId = "_" + common.getRandomHexaId(5);
+                                        if (offset > 0) {
+                                            var node_in_tree = JstreeWidget.getNodeByURI(jstreeDiv, parents_iris[i]);
+                                        }
+                                        if (node_in_tree != false) {
+                                            jstreeId = node_in_tree.id;
+                                        }
+
+                                        var node = { id: parents_iris[i], jstreeid: jstreeId, label: parents_labels[i], types: [parents_types[i]], subclass: [], parent: "#" };
+                                    } else {
+                                        var node = nodesMap[parents_iris[i]];
+                                        if (!node.types.includes(parents_types[i])) {
+                                            node.types.push(parents_types[i]);
+                                        }
+                                    }
+
+                                    if (i != 0) {
+                                        if (node.id != parents_iris[i - 1]) {
+                                            node["parent"] = parents_iris[i - 1];
+                                        }
+                                    }
+
+                                    nodesMap[parents_iris[i]] = node;
+
+                                    if (i == parents_iris.length - 1) {
+                                        nodesMap[item.member.value].parent = parents_iris[i];
+                                    }
+                                }
+                            }
+                        });
+
+                        var jstreeData = [];
+
+                        for (var nodeId in nodesMap) {
+                            var item = nodesMap[nodeId];
+                            var parent = "#";
+                            if (!(item.parent == "#")) {
+                                var parent = nodesMap[item.parent].jstreeid;
+                            }
+
+                            var type_icon = JstreeWidget.selectTypeForIconsJstree(item.types, self.add_supplementary_layer_for_types_icon);
+
+                            var node = {
                                 id: item.jstreeid,
                                 text: item.label,
                                 parent: parent,
@@ -581,239 +498,62 @@ Lineage_styles.showDialog(self.currentContainer.data);
                                     currentParent: parent,
                                     tabId: options.tabId,
                                 },
-                        };
-                            
-                        jstreeData.push(node);
-                    }
-                    
+                            };
 
-                    var jstreeOptions;
-                    if (options.jstreeOptions) {
-                        jstreeOptions = options.jstreeOptions;
-                    } else {
-                        jstreeOptions = {
-                            openAll: false,
-                            contextMenu: Lineage_containers.getContextJstreeMenu(),
-                            selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
-                            dnd: {
-                                drag_stop: function (data, element, helper, event) {
-                                    self.onMoveContainer(data, element, helper, event);
+                            jstreeData.push(node);
+                        }
+
+                        var jstreeOptions;
+                        if (options.jstreeOptions) {
+                            jstreeOptions = options.jstreeOptions;
+                        } else {
+                            jstreeOptions = {
+                                openAll: false,
+                                contextMenu: Lineage_containers.getContextJstreeMenu(),
+                                selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
+                                dnd: {
+                                    drag_stop: function (data, element, helper, event) {
+                                        self.onMoveContainer(data, element, helper, event);
+                                    },
+                                    drag_start: function (data, element, helper, event) {
+                                        var sourceNodeId = element.data.nodes[0];
+                                        self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
+                                    },
                                 },
-                                drag_start: function (data, element, helper, event) {
-                                    var sourceNodeId = element.data.nodes[0];
-                                    self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
-                                },
-                            },
-                        };
-                    }
-                     
-                    
-                    if(offset==0){
-                        common.jstree.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
-                            $("#" + jstreeDiv).jstree().open_node("#");
-                            $("#" +jstreeDiv).jstree('open_all');
-                            
-                        });
-                       
-                    }
-                   
-                   else{
-                        
-                        common.jstree.addNodesToJstree(jstreeDiv, null, jstreeData, jstreeOptions);
-                   
-                    }
-                    
-                    offset += result.results.bindings.length;
-                    callbackWhilst(null, result);
-                    
-                
-                
-                });
-                
-              
-            },
-            
-
-            function (err,result) {
-                
-                callback(null);
-                $("#" +jstreeDiv).jstree('open_all');
-                self.ancestors_tree_search_areRunning[search_number]=false;
-                if(!(self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search]==true && self.nbOfancestors_tree_search==1) ){
-                    self.nbOfancestors_tree_search-=1;
-                }
-                
-
-                
-            }
-        );
-
-        /*
-        var sparql_url = Config.sources[source].sparql_server.url;
-        var url = sparql_url + "?format=json&query=";
-
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-
-            var nodesMap = {};
-
-            var ordered_results=self.orderResults( result.results.bindings);
-
-           
-            result.results.bindings.forEach(function (item) {
-                
-
-
-                if(!nodesMap[item.member.value]){
-                    var jstreeId = "_" + common.getRandomHexaId(5);
-                    var node={"id" : item.member.value,"jstreeid":jstreeId,"label" : item.memberLabel.value,"types":[],"subclass":[],parent:'#'}
-                    if(item.memberType){
-                        node.types.push(item.memberType.value);
-                    }
-                    if(item.subclasstype){
-                        node.subclass.push(item.subclasstype.value);
-                    }
-
-                    nodesMap[item.member.value]=node;
-
-                    
-
-                }else{
-                    
-                    if(item.memberType){
-                        if(!(nodesMap[item.member.value].types.includes(item.memberType.value))){
-                            nodesMap[item.member.value].types.push(item.memberType.value);
+                            };
                         }
-                        
 
-                    }
-                    if(item.subclasstype){
-                        if(!(nodesMap[item.member.value].subclass.includes(item.subclasstype.value))){
-                            nodesMap[item.member.value].subclass.push(item.subclasstype.value);
+                        if (offset == 0) {
+                            JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
+                                $("#" + jstreeDiv)
+                                    .jstree()
+                                    .open_node("#");
+                                $("#" + jstreeDiv).jstree("open_all");
+                                self.flag_function();
+                            });
+                        } else {
+                            JstreeWidget.addNodesToJstree(jstreeDiv, null, jstreeData, jstreeOptions, self.flag_function);
                         }
+
+                        offset += result.results.bindings.length;
+                        callbackWhilst(null, result);
+                    });
+                },
+
+                function (err, result) {
+                    callback(null);
+                    $("#" + jstreeDiv).jstree("open_all");
+                    self.ancestors_tree_search_areRunning[search_number] = false;
+                    if (!(self.ancestors_tree_search_areRunning[self.nbOfancestors_tree_search] == true && self.nbOfancestors_tree_search == 1)) {
+                        self.nbOfancestors_tree_search -= 1;
+                    }
+                    if (offset == 0) {
+                        $("#" + jstreeDiv).text("No matches");
+                        self.flag_search = false;
                     }
                 }
-               
-                
-                
-                if(item.allparents){
-                    var parents_iris=item.allparents.value.split(';;');
-                    var parents_labels=item.allparentslabel.value.split(';;');
-                    var parents_types=item.types.value.split(';;');
-
-                    for (let i = parents_iris.length-1; i >=0 ; i--) {
-
-
-                        if( !nodesMap[parents_iris[i]]){
-                            
-                            var jstreeId = "_" + common.getRandomHexaId(5);
-                            var node={"id" : parents_iris[i],"jstreeid":jstreeId,"label" : parents_labels[i],"types":[parents_types[i]],"subclass":[],parent:'#'};
-                            
-                            
-
-
-                        }
-                        else{
-                            var node=nodesMap[parents_iris[i]];
-                            if(!(node.types.includes(parents_types[i]))){
-
-                                node.types.push(parents_types[i]);
-
-                            }   
-
-                        }
-
-
-                        if(i!=0){
-                               if(node.id!=parents_iris[i-1]){
-                                node['parent']= parents_iris[i-1];
-                               }
-                               
-                        }
-
-                        nodesMap[parents_iris[i]]=node;
-
-                        if(i==parents_iris.length-1){
-                            
-                           nodesMap[item.member.value].parent= parents_iris[i];
-                            
-                        }
- 
-
-                    }
-
-                }
-
-            });
-
-           
-            
-            var jstreeData = [];
-
-            for (var nodeId in nodesMap) {
-                var item = nodesMap[nodeId];
-                var parent='#';
-                if(!(item.parent=='#')){
-                    var parent=nodesMap[item.parent].jstreeid;
-                }
-                
-                
-
-                var node = {
-                        id: item.jstreeid,
-                        text: item.label,
-                        parent: parent,
-                        type: item.types,
-                        data: {
-                            type: item.types,
-                            source: source,
-                            id: item.id,
-                            label: item.label,
-                            currentParent: parent,
-                            tabId: options.tabId,
-                        },
-                };
-                    
-                jstreeData.push(node);
-            }
-            
-
-            var jstreeOptions;
-            if (options.jstreeOptions) {
-                jstreeOptions = options.jstreeOptions;
-            } else {
-                jstreeOptions = {
-                    openAll: false,
-                    contextMenu: Lineage_containers.getContextJstreeMenu(),
-                    selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
-                    dnd: {
-                        drag_stop: function (data, element, helper, event) {
-                            self.onMoveContainer(data, element, helper, event);
-                        },
-                        drag_start: function (data, element, helper, event) {
-                            var sourceNodeId = element.data.nodes[0];
-                            self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
-                        },
-                    },
-                };
-            }
-
-            common.jstree.loadJsTree(jstreeDiv, jstreeData, jstreeOptions, function () {
-                $("#" + jstreeDiv)
-                    .jstree()
-                    .open_node("#");
-                callback(null);
-                $("#" +jstreeDiv).jstree('open_all');
-            });
-        
-        
-        
-        });
-        */
+            );
         }
-        
     };
 
     self.addContainer = function (source) {
@@ -897,7 +637,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
      * @param drawMembershipEdge add the edge (and the node) on the vizGraph
      */
     self.addResourcesToContainer = function (source, container, nodesData, drawMembershipEdge, callback) {
-        if (container.data.type != "container") {
+        if (!(container.data.type.includes("http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag") || container.data.type == "container")) {
             return alert("can only add resources to containers");
         }
         // self.currentContainer=null;
@@ -950,7 +690,11 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 });
             });
             if ($("#lineage_containers_containersJstree").jstree) {
-                JstreeWidget.addNodesToJstree("lineage_containers_containersJstree", container.id, jstreeData);
+                if (callback) {
+                    JstreeWidget.addNodesToJstree("lineage_containers_containersJstree", container.id, jstreeData, null, callback);
+                } else {
+                    JstreeWidget.addNodesToJstree("lineage_containers_containersJstree", container.id, jstreeData);
+                }
             }
 
             if (drawMembershipEdge) {
@@ -979,6 +723,9 @@ Lineage_styles.showDialog(self.currentContainer.data);
             }
             if (callback) {
                 return callback(null);
+                if (jstreeData) {
+                    callback(jstreeData);
+                }
             }
         });
     };
@@ -1097,10 +844,14 @@ Lineage_styles.showDialog(self.currentContainer.data);
         return callback(err, result);
       });
     };*/
-    self.listContainerResources = function (source, containerNode, options,callback){
+    self.listContainerResources = function (source, containerNode, options, callback, JstreeDiv) {
         var existingChildren = [];
+        if (!JstreeDiv) {
+            var JstreeDiv = "lineage_containers_containersJstree";
+        }
 
-        if (containerNode.children.length > 0) return;
+        //Do not execute the descendants request if he already has children?
+        //if (containerNode.children.length > 0) return;
 
         self.sparql_queries.getContainerDescendants(source, containerNode ? containerNode.data.id : null, options, function (err, result) {
             if (err) {
@@ -1110,7 +861,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
             var existingNodes = {};
             if (containerNode) {
                 // existingNodes=$("#lineage_containers_containersJstree").jstree().get_node(containerNode.id).children;
-                var jstreeChildren = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", containerNode.id, 2);
+                var jstreeChildren = JstreeWidget.getNodeDescendants(JstreeDiv, containerNode.id, 2);
                 jstreeChildren.forEach(function (item) {
                     existingNodes[item.data.id] = 1;
                 });
@@ -1138,10 +889,9 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 var parent = item.parent.value == continerDataId ? containerJstreeId : nodesMap[item.parent.value] ? nodesMap[item.parent.value].jstreeId : "#";
                 if (!existingNodes[item.member.value]) {
                     existingNodes[item.member.value] = 1;
-                    
-                    
-                    var types=item.memberTypes.value.split(',');
-                    var type_icon=common.selectTypeForIconsJstree(types,null);
+
+                    var types = item.memberTypes.value.split(",");
+                    var type_icon = JstreeWidget.selectTypeForIconsJstree(types, self.add_supplementary_layer_for_types_icon);
 
                     jstreeData.push({
                         id: item.jstreeId,
@@ -1157,8 +907,12 @@ Lineage_styles.showDialog(self.currentContainer.data);
                     });
                 }
             }
-
-            JstreeWidget.addNodesToJstree("lineage_containers_containersJstree", containerJstreeId, jstreeData);
+            if (jstreeData.length > 0) {
+                JstreeWidget.addNodesToJstree(JstreeDiv, containerJstreeId, jstreeData);
+                if (callback) {
+                    callback(jstreeData);
+                }
+            }
         });
     };
 
@@ -1440,6 +1194,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
     self.onSelectedNodeTreeclick = function (event, obj) {
         self.currentContainer = obj.node;
+        console.log(obj.event);
         if (obj.event.button != 2) {
             self.listContainerResources(Lineage_sources.activeSource, self.currentContainer, { onlyOneLevel: true, leaves: true });
         }

@@ -542,10 +542,6 @@ var MainController = (function () {
             }
         },
 
-        setCredits: function () {
-            $("#graphDiv").html("<sls-credit-image></sls-credit-image>");
-        },
-
         updateActionDivLabel: function (html) {
             if (html) {
                 $("#toolPanelLabel").html(html);

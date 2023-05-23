@@ -160,6 +160,9 @@
         <script type="module" src="component/sls-centralPanel.ts"></script>
         <script type="module" src="component/sls-rightPanel.ts"></script>
         <script type="module" src="component/sls-credits.ts"></script>
+        <script type="module" src="component/sls-select-source.ts"></script>
+        <script type="module" src="component/sls-tree.ts"></script>
+        <script type="module" src="component/sls-counter.ts"></script>
         <script type="module">
             import { errors } from "./store/errors.ts";
             import Toastify from "toastify-js";
@@ -172,7 +175,7 @@
                     newWindow: true,
                     close: true,
                     gravity: "bottom",
-                    position: "right",
+                    position: "left",
                     stopOnFocus: true,
                     style: {
                         background: "linear-gradient(to right, var(--bs-warning), var(--bs-danger))",
@@ -245,8 +248,6 @@
                             NodeInfosWidget.showNodeInfos(null, id, "mainDialogDiv");
                         }
                     });
-
-                    MainController.UI.setCredits();
                 });
             });
         </script>

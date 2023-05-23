@@ -1,6 +1,10 @@
-import { html, component } from "haunted";
+import { component, html } from "haunted";
+import { useStore } from "@nanostores/preact";
+import { state } from "../store/state";
 
 function CentralPanel() {
+    const value = useStore(state);
+
     return html`
         <style>
             #centralPanelDiv {
@@ -15,9 +19,8 @@ function CentralPanel() {
             }
         </style>
         <div id="centralPanelDiv">
-            <div id="graphDiv"></div>
+            <div id="graphDiv">${value === "Init" && html`<sls-credit-image></sls-credit-image>`}</div>
         </div>
     `;
 }
-
 customElements.define("sls-central-panel", component(CentralPanel, { useShadowDOM: false }));

@@ -577,7 +577,7 @@ var Lineage_classes = (function () {
             options.edges = _options.edges;
         }
 
-        if (true || Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
+        if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
             // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
             options.manipulation = {
                 enabled: true,

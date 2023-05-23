@@ -718,7 +718,7 @@ sourceDivId +
             const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
             return sourcesAccessControl.hasOwnProperty(source) ? sourcesAccessControl[source] : defaultAccessControl;
         });
-        if (groups.indexOf("admin") > -1) return true;
+        if (groups.indexOf("admin")  && Config.sources[source].editable > -1) return true;
 
         self.realAccessControl = currentAccessControls.includes("readwrite") ? "readwrite" : currentAccessControls.includes("read") ? "read" : "forbidden";
 

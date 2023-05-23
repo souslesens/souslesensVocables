@@ -1,3 +1,22 @@
+<style>
+    #nodeInfosWidget_HoverDiv {
+        width: 547px;
+        height: 230px;
+        overflow: auto;
+        display: none;
+        z-index: 100;
+        position: absolute;
+        background-color: #f5efdd;
+        border: #6c757d;
+        border-radius: 10px;
+        padding: 5px;
+    }
+
+</style>
+
+
+
+
 <div id="nodeInfosWidget_modifyDiv"></div>
 
 <div id="nodeInfosWidget_tabsDiv">
@@ -7,7 +26,9 @@
   </ul>
   <div id="nodeInfosWidget_InfosTabDiv"></div>
   <div id="nodeInfosWidget_AxiomsTabDiv">
-   <div> depth <button onclick="Lineage_axioms.changeDepth(1)">+</button>  <button onclick="Lineage_axioms.changeDepth(-1)">-</button> </div>
+   <div> depth <span id="nodeInfosWidget_depthSpan"></span><button onclick="Lineage_axioms.changeDepth(1)">+</button>  <button onclick="Lineage_axioms.changeDepth(-1)">-</button> </div>
     <div id="axiomsGraphDiv" style="width:1000px;height:800px"></div>
   </div>
 </div>
+
+<div id="nodeInfosWidget_HoverDiv"></div>

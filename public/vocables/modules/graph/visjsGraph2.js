@@ -13,7 +13,7 @@ import GraphMlExport from "./graphMLexport.js";
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-var visjsGraph = (function () {
+const visjsGraph = (function () {
     /**
      * @type {{ network: null | string; simulationTimeOut?: number; data?: any; legendLabels?: string[]; context?: any; currentScale?: any; simulationOn?: any; globalOptions?: any; defaultTextSize?: number; defaultNodeSize?: number; showNodesLabelMinScale?: any; currentContext?: any; drawingDone?: any; redraw?: any; draw?: any; lastAddedNodes?: any; canvasDimension?: any; processClicks?: any; onScaleChange?: any; lastMovedNode?: any; listSavedGraphs?: any; setLayout?: any; exportGraph?: any; importGraph?: any; clearGraph?: any; drawLegend?: any; removeNodes?: any; removeOtherNodesFromGraph?: any; defaultNodeShape?: any; labelsVisible?: any; getExistingIdsMap?: any; isGraphNotEmpty?: any; graphCsvToClipBoard?: any; toCsv?: any; getNodeDescendantIds?: any; getNodeDescendants?: any; getNodesPosition?: any; collapseNode?: any; focusOnNode?: any; setNodesProperty?: any; hideShowNodes?: any; toSVG?: any; toGraphMl?: any; searchNode?: any; saveGraph?: any; message?: any; loadGraph?: any; showGraphConfig?: any; }}
      */

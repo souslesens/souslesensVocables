@@ -4,6 +4,9 @@ const serverAdress = "http://localhost:3010";
 export default defineConfig({
     plugins: [],
     build: {},
+    optimizeDeps: {
+        include: ["jquery"],
+    },
     server: {
         proxy: {
             "/api": serverAdress,

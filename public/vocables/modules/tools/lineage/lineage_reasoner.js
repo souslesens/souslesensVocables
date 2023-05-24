@@ -1,7 +1,7 @@
 import common from "../../shared/common.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import visjsGraph from "../../graph/visjsGraph2.js";
+self.lineageVisjsGraph
 import Lineage_classes from "./lineage_classes.js";
 import Lineage_sources from "./lineage_sources.js";
 import sparql_common from "../../sparqlProxies/sparql_common.js";
@@ -257,7 +257,7 @@ var Lineage_reasoner = (function() {
       }
 
       var visjsData = { nodes: [], edges: [] };
-      var existingNodes = visjsGraph.getExistingIdsMap();
+      var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
       var edgeColor = $("#lineage_reasoner_colorSelect").val();
       var nodes={}
       filteredData.forEach(function(item) {
@@ -318,12 +318,12 @@ var Lineage_reasoner = (function() {
         visjsData=self.filterVisjsDataPath(predicates,visjsData)
 
 
-      if (!visjsGraph.isGraphNotEmpty()) {
+      if (!Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
         Lineage_classes.drawNewGraph(visjsData);
       }
-      visjsGraph.data.nodes.add(visjsData.nodes);
-      visjsGraph.data.edges.add(visjsData.edges);
-      visjsGraph.network.fit();
+      Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+      Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
+      Lineage_classes.lineageVisjsGraph.network.fit();
       $("#waitImg").css("display", "none");
 
     }
@@ -351,7 +351,7 @@ var Lineage_reasoner = (function() {
     })
 
     var visjsData2={nodes:[],edges:path}
-    var uniqueNodes=visjsGraph.getExistingIdsMap()
+    var uniqueNodes=Lineage_classes.lineageVisjsGraph.getExistingIdsMap()
     path.forEach(function(edge){
       visjsData.nodes.forEach(function(node) {
           if(  edge.from == node.id || edge.to == node.id) {

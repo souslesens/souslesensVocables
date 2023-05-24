@@ -5,7 +5,7 @@ var Lineage_selection = (function () {
     self.addNodeToSelection = function (node) {
         Lineage_selection.selectedNodes.push(node);
         $("#Lineageclasses_selectedNodesCount").html(Lineage_selection.selectedNodes.length);
-        visjsGraph.data.nodes.update({ id: node.data.id, borderWidth: 6 });
+        Lineage_classes.lineageVisjsGraph.data.nodes.update({ id: node.data.id, borderWidth: 6 });
         $("#Lineage_combine_mergeNodesDialogButton").css("display", "block");
     };
 
@@ -17,7 +17,7 @@ var Lineage_selection = (function () {
             if (!ids || ids.indexOf(node.data.id) > -1) newNodes.push({ id: node.data.id, borderWidth: 1 });
             if (ids && ids.indexOf(node.data.id) < 0) newSelection.push(node);
         });
-        visjsGraph.data.nodes.update(newNodes);
+        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
         Lineage_selection.selectedNodes = newSelection;
         $("#Lineageclasses_selectedNodesCount").html(Lineage_selection.selectedNodes.length);
         $("#Lineage_combine_mergeNodesDialogButton").css("display", "none");
@@ -48,9 +48,9 @@ var Lineage_selection = (function () {
     };
 
     self.listNodesSelection = function (allGraphNodes) {
-        if (allGraphNodes) Lineage_selection.selectedNodes = visjsGraph.data.nodes.get();
+        if (allGraphNodes) Lineage_selection.selectedNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
 
-        if (Lineage_selection.selectedNodes.length == 0) Lineage_selection.selectedNodes = visjsGraph.data.nodes.get();
+        if (Lineage_selection.selectedNodes.length == 0) Lineage_selection.selectedNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
         var jstreeData = Lineage_selection.getSelectedNodesTree();
         var options = {
             openAll: true,
@@ -432,7 +432,7 @@ var Lineage_selection = (function () {
             });
 
             $("#mainDialogDiv").dialog("close");
-            visjsGraph.data.nodes.update(newIds);
+            Lineage_classes.lineageVisjsGraph.data.nodes.update(newIds);
         },
     };
 

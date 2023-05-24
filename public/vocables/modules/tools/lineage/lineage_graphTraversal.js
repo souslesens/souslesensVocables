@@ -3,7 +3,7 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 import common from "../../shared/common.js";
-import visjsGraph from "../../graph/visjsGraph2.js";
+self.lineageVisjsGraph
 import Lineage_classes from "./lineage_classes.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
 
@@ -135,7 +135,7 @@ var Lineage_graphTraversal = (function () {
 
     self.initVisjsPathMode = function () {
         self.inPathMode = true;
-        visjsGraph.network.addEdgeMode();
+        Lineage_classes.lineageVisjsGraph.network.addEdgeMode();
         $("#mainDialogDiv").dialog("close");
     };
 
@@ -252,7 +252,7 @@ var Lineage_graphTraversal = (function () {
 
     self.drawPathesOnWhiteboard = function draw(relations) {
         var visjsData = { nodes: [], edges: [] };
-        var existingIdsMap = visjsGraph.getExistingIdsMap();
+        var existingIdsMap = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
 
         var shape = Lineage_classes.defaultShape;
         var source = Lineage_sources.activeSource;
@@ -318,16 +318,16 @@ var Lineage_graphTraversal = (function () {
             }
         });
 
-        var oldEdges = visjsGraph.data.edges.get();
+        var oldEdges = Lineage_classes.lineageVisjsGraph.data.edges.get();
         var toDelete = [];
         oldEdges.forEach(function (edge) {
             if (edge.type == "path") toDelete.push(edge.id);
         });
-        visjsGraph.data.edges.remove(toDelete);
+        Lineage_classes.lineageVisjsGraph.data.edges.remove(toDelete);
 
-        if (visjsGraph.isGraphNotEmpty()) {
-            visjsGraph.data.nodes.add(visjsData.nodes);
-            visjsGraph.data.edges.add(visjsData.edges);
+        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
+            Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+            Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
         } else {
             Lineage_classes.drawNewGraph(visjsData);
         }

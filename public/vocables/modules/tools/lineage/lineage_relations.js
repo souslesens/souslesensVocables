@@ -2,7 +2,7 @@ import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_relationFilter from "./lineage_relationFilter.js";
 
-import visjsGraph from "../../graph/visjsGraph2.js";
+self.lineageVisjsGraph
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Export from "../../shared/export.js";
 import Lineage_classes from "./lineage_classes.js";
@@ -39,7 +39,7 @@ var Lineage_relations = (function () {
             if (caller == "Graph" || caller == "Tree") {
                 cbxValue = "selected";
             } else {
-                if (!visjsGraph.data || visjsGraph.data.nodes.get().length == 0) {
+                if (!Lineage_classes.lineageVisjsGraph.data || Lineage_classes.lineageVisjsGraph.data.nodes.get().length == 0) {
                     cbxValue = "all";
                 } else {
                     cbxValue = "visible";
@@ -190,7 +190,7 @@ var Lineage_relations = (function () {
     self.onshowDrawRelationsDialogValidate = function (action, _type) {
         if (action == "clear") {
             var properties = $("#lineageRelations_propertiesJstreeDiv").jstree().get_checked(true);
-            var edges = visjsGraph.data.edges.get();
+            var edges = Lineage_classes.lineageVisjsGraph.data.edges.get();
             var edgesToClear = [];
             edges.forEach(function (edge) {
                 if (properties.length > 0) {
@@ -206,7 +206,7 @@ var Lineage_relations = (function () {
                 }
             });
 
-            visjsGraph.data.edges.remove(edgesToClear);
+            Lineage_classes.lineageVisjsGraph.data.edges.remove(edgesToClear);
         } else {
             //draw
             var x = $("input[name='lineageRelations_selection']");
@@ -230,11 +230,11 @@ var Lineage_relations = (function () {
                 }
             } else if (selection == "visible") {
                 Lineage_sources.fromAllWhiteboardSources = true;
-                if (!visjsGraph.isGraphNotEmpty()) {
+                if (!Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
                     options.data = null;
                 } else {
                     var data = [];
-                    var nodes = visjsGraph.data.nodes.get();
+                    var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
                     nodes.forEach(function (node) {
                         if (node.data && (!node.data.type || node.data.type != "literal")) {
                             data.push(node.id);
@@ -303,7 +303,7 @@ var Lineage_relations = (function () {
             } else if (caller == "both") {
                 data = null;
             } else if (caller == "leftPanel" || type == "dictionary") {
-                var nodes = visjsGraph.data.nodes.get();
+                var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
                 nodes.forEach(function (node) {
                     if (node.data && (!node.data.type || node.data.type != "literal")) {
                         data.push(node.id);
@@ -318,7 +318,7 @@ var Lineage_relations = (function () {
         }
         // manage drawing at the end off all visjs query
         options.returnVisjsData = true;
-        var existingNodes = options.output == "table" ? {} : visjsGraph.getExistingIdsMap();
+        var existingNodes = options.output == "table" ? {} : Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
         var allVisjsData = { nodes: [], edges: [] };
 
         function concatVisjsdata(visjsData) {
@@ -350,7 +350,7 @@ var Lineage_relations = (function () {
                     source = Config.dictionarySource;
                     options.includeSources = Config.dictionarySource;
 
-                    data = visjsGraph.data.nodes.getIds();
+                    data = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
                     options.filter = "FILTER (?prop in (owl:sameAs,owl:equivalentClass))";
                     Lineage_sources.registerSource(Config.dictionarySource);
 
@@ -473,9 +473,9 @@ var Lineage_relations = (function () {
                 }
                 if (!options.output || options.output == "graph") {
                     MainController.UI.message("drawing " + allVisjsData.nodes.length + "nodes and " + allVisjsData.edges.length + " edges...", true);
-                    if (visjsGraph.isGraphNotEmpty()) {
-                        visjsGraph.data.nodes.add(allVisjsData.nodes);
-                        visjsGraph.data.edges.add(allVisjsData.edges);
+                    if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
+                        Lineage_classes.lineageVisjsGraph.data.nodes.add(allVisjsData.nodes);
+                        Lineage_classes.lineageVisjsGraph.data.edges.add(allVisjsData.edges);
                     } else {
                         Lineage_classes.drawNewGraph(allVisjsData);
                     }

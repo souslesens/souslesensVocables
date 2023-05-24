@@ -3,8 +3,9 @@ import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_sources from "./lineage_sources.js";
 import VisjsUtil from "../../graph/visjsUtil.js";
-import visjsGraph from "../../graph/visjsGraph2.js";
+self.lineageVisjsGraph
 import Lineage_classes from "./lineage_classes.js";
+import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 
 
 var Lineage_axioms = (function() {
@@ -66,7 +67,7 @@ var Lineage_axioms = (function() {
       var axiomsTriples = {};
 
 
-      var existingNodes = {}; // visjsGraph.getExistingIdsMap();
+      var existingNodes = {}; // Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
       var visjsData = { nodes: [], edges: [] };
 
 
@@ -148,12 +149,14 @@ var Lineage_axioms = (function() {
             options.size = 10;
             if (item.sType && item.sType.value.indexOf("roperty") > -1) {
               options.shape = "triangle";
+              options.size = 5;
             }
             if (item.sType && item.sType.value.indexOf("Restriction") > -1) {
               options.shape = "ellipse";
               // options.label="∀"
               options.color = "#cb9801";
               options.label = "R";//"∀";
+              options.size = 5;
             }else{
               options.color=Lineage_classes.getSourceColor(sourceLabel)
             }
@@ -191,11 +194,13 @@ var Lineage_axioms = (function() {
               if (targetItem.sType && targetItem.sType.value.indexOf("roperty") > -1) {
                 options.shape = "triangle";
                 options.color = "#70ac47";
+                options.size = 5;
               }
               if (targetItem.sType && targetItem.sType.value.indexOf("Restriction") > -1) {
                 options.shape = "ellipse";
                 options.label = "R";//"∀";
                 options.color = "#cb9801";
+                options.size = 5;
               }
               options.symbol = Config.Lineage.logicalOperatorsMap[targetItem.s.value];
 
@@ -271,14 +276,17 @@ var Lineage_axioms = (function() {
         };
 
 
-      var graphDiv = "axiomsGraphDiv";
+  var graphDiv = "axiomsGraphDiv";
       $("#divId").html("<div id='" + graphDiv + "' style='width:800px;height:600px'></div>");
-      //  visjsGraph.clearGraph();
+      //  Lineage_classes.lineageVisjsGraph.clearGraph();
+      var axiomsVisjsGraph=new VisjsGraphClass(graphDiv, visjsData, options);
+      axiomsVisjsGraph. draw(function () {
 
-      var axiomsVisjsGraph = Object.create(visjsGraph);
+      })
+   /*   var axiomsVisjsGraph = Object.create(Lineage_classes.lineageVisjsGraph);
       axiomsVisjsGraph.draw(graphDiv, visjsData, options, function() {
 
-      });
+      });*/
 
 
     });

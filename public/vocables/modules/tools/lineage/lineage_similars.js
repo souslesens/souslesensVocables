@@ -1,7 +1,7 @@
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import common from "../../shared/common.js";
 import SearchUtil from "../../search/searchUtil.js";
-import visjsGraph from "../../graph/visjsGraph2.js";
+self.lineageVisjsGraph
 import Lineage_classes from "./lineage_classes.js";
 import Lineage_sources from "./lineage_sources.js";
 
@@ -46,7 +46,7 @@ var Lineage_similars = (function () {
 
     self.drawSourceSimilars = function (source) {
         Lineage_sources.registerSource(source, function (err, result) {
-            var nodes = visjsGraph.data.nodes.get();
+            var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
 
             var whiteboardLabelsMap = {};
             nodes.forEach(function (node) {
@@ -83,7 +83,7 @@ var Lineage_similars = (function () {
                 },
                 function (err) {
                     if (err) return alert(err.reason);
-                    var existingNodes = visjsGraph.getExistingIdsMap();
+                    var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
 
                     var visjsData = { nodes: [], edges: [] };
                     for (var label in whiteboardLabelsMap) {
@@ -139,8 +139,10 @@ var Lineage_similars = (function () {
                             }
                         });
                     }
-                    visjsGraph.data.nodes.update(visjsData.nodes);
-                    visjsGraph.data.edges.update(visjsData.edges);
+                    if( visjsData.nodes.length==0)
+                        return alert ("no similars found in source "+source)
+                    Lineage_classes.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
+                    Lineage_classes.lineageVisjsGraph.data.edges.update(visjsData.edges);
                 }
             );
         });
@@ -148,8 +150,8 @@ var Lineage_similars = (function () {
 
     self.drawWhiteBoardSimilars = function (output) {
         var commonNodes = [];
-        var existingNodes = visjsGraph.getExistingIdsMap();
-        var nodes = visjsGraph.data.nodes.get();
+        var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+        var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
         nodes.forEach(function (node1) {
             if (!node1.data && !node1.data.label) {
                 return;
@@ -206,7 +208,7 @@ var Lineage_similars = (function () {
                     });
                 }
             });
-            visjsGraph.data.edges.update(visjsData.edges);
+            Lineage_classes.lineageVisjsGraph.data.edges.update(visjsData.edges);
         }
     };
 

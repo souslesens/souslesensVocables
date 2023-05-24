@@ -4,7 +4,7 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import common from "../../shared/common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
-import visjsGraph from "../../graph/visjsGraph2.js";
+self.lineageVisjsGraph
 
 var Lineage_containers = (function () {
     var self = {};
@@ -360,7 +360,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
             }
 
             if (drawMembershipEdge) {
-                var existingNodes = visjsGraph.getExistingIdsMap();
+                var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
                 var edges = [];
                 nodesData.forEach(function (nodeData) {
                     var edgeId = container.id + "_" + "member" + "_" + nodeData.id;
@@ -381,7 +381,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                     }
                 });
 
-                visjsGraph.data.edges.add(edges);
+                Lineage_classes.lineageVisjsGraph.data.edges.add(edges);
             }
             if (callback) {
                 return callback(null);
@@ -631,7 +631,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 function (callbackSeries) {
                     var color = Lineage_classes.getSourceColor(source);
                     var opacity = 1.0;
-                    var existingNodes = visjsGraph.getExistingIdsMap();
+                    var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
                     visjsData = { nodes: [], edges: [] };
                     var objectProperties = [];
 
@@ -808,13 +808,13 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
                     setNodesLevel(visjsData);
 
-                    if (!visjsGraph.isGraphNotEmpty()) {
+                    if (!Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
                         Lineage_classes.drawNewGraph(visjsData);
                     } else {
-                        visjsGraph.data.nodes.add(visjsData.nodes);
-                        visjsGraph.data.edges.add(visjsData.edges);
+                        Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                        Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
                     }
-                    visjsGraph.network.fit();
+                    Lineage_classes.lineageVisjsGraph.network.fit();
                     $("#waitImg").css("display", "none");
                     if (objectProperties.length > 0) {
                         source = Lineage_sources.activeSource;
@@ -939,7 +939,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
         }
         var fromStr = Sparql_common.getFromStr(source, false, true);
         if (!ids) {
-            ids = visjsGraph.data.nodes.getIds();
+            ids = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
         }
         var filter = Sparql_common.setFilter("node", ids);
         var query =
@@ -961,7 +961,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 }
                 return alert(err);
             }
-            var existingNodes = visjsGraph.getExistingIdsMap();
+            var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
             var visjsData = { nodes: [], edges: [] };
 
             result.results.bindings.forEach(function (item) {
@@ -1004,10 +1004,10 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 }
             });
 
-            visjsGraph.data.nodes.add(visjsData.nodes);
-            visjsGraph.data.edges.add(visjsData.edges);
+            Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+            Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
 
-            visjsGraph.network.fit();
+            Lineage_classes.lineageVisjsGraph.network.fit();
             $("#waitImg").css("display", "none");
             if (callback) {
                 return callback(null, visjsData);

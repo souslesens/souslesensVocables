@@ -247,7 +247,7 @@ var Lineage_dictionary = (function () {
                     filters = self.getDictionaryFilters();
                     var mode = $("#LineageDictionary_nodesSelectionSelect").val();
                     if (mode == "currentGraphNodes") {
-                        var nodes = visjsGraph.data.nodes.getIds();
+                        var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
                         filters += Sparql_common.setFilter("domain", nodes);
                     }
                     $("#LineageDictionary_Tabs").tabs("option", "active", 1);
@@ -466,7 +466,7 @@ targets: [0]
         if (rangeSourceLabel) filter += "  FILTER (?rangeSourceLabel ='" + rangeSourceLabel + "')";
         var nodes = null;
         var mode = $("#LineageDictionary_nodesSelectionSelect").val();
-        if (mode == "currentGraphNodes") nodes = visjsGraph.data.nodes.getIds();
+        if (mode == "currentGraphNodes") nodes = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
         var options = {
             // processorFn: processMetadata,
             filter: filter,
@@ -474,7 +474,7 @@ targets: [0]
         };
         Lineage_classes.drawRestrictions(Config.dictionarySource, nodes, false, false, options, function (err) {
             if (err) return alert(err.responseText);
-            var nodes = visjsGraph.data.nodes.getIds();
+            var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
             $("#mainDialogDiv").dialog("close");
             var distinctSources = [];
             SearchUtil.getSourceLabels(null, nodes, null, null, function (err, result) {
@@ -496,7 +496,7 @@ targets: [0]
                         },
                     });
                 });
-                visjsGraph.data.nodes.update(newNodes);
+                Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
 
                 newSources.forEach(function (source) {
                     Lineage_sources.registerSource(source);

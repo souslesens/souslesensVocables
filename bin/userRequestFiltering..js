@@ -97,7 +97,9 @@ var UserRequestFiltering = {
                 if (!userGraphUrisMap[graphUri]) {
                     error = " DATA PROTECTION : graphUri not allowed for user  " + graphUri + "\n";
                 } else {
-                    if (userGraphUrisMap[graphUri].acl != "w") error = " DATA PROTECTION : current  user cannot execute " + operation + " on graph " + graphUri + "\n";
+                    if (userGraphUrisMap[graphUri].acl != "w") {
+                        error = " DATA PROTECTION : current  user cannot execute " + operation + " on graph " + graphUri + "\n";
+                    }
                 }
             }
         }
@@ -165,7 +167,7 @@ var UserRequestFiltering = {
 
         var indicesMap = {};
         for (var source in userSourcesMap) {
-            indicesMap[source.toLowerCase()] = { source: source, acl: source.accessControl == "readwrite" ? "w" : "r" };
+            indicesMap[source.toLowerCase()] = { source: source, acl: userSourcesMap[source].accessControl == "readwrite" ? "w" : "r" };
         }
         var error = null;
         indices.forEach(function (indexName) {

@@ -851,7 +851,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
         }
 
         //Do not execute the descendants request if he already has children?
-        //if (containerNode.children.length > 0) return;
+        if (containerNode.children.length > 1) return;
 
         self.sparql_queries.getContainerDescendants(source, containerNode ? containerNode.data.id : null, options, function (err, result) {
             if (err) {

@@ -1,5 +1,7 @@
 //import Lineage_classes from "../../../public/vocables/modules/tools/lineage/lineage_classes.js";
 
+//import Sparql_generic from "../../../public/vocables/modules/sparqlProxies/sparql_generic";
+
 //import JstreeWidget from "../../../public/vocables/modules/uiWidgets/jstreeWidget";
 
 //import Lineage_containers from "../../../public/vocables/modules/tools/lineage/lineage_containers";
@@ -12,7 +14,7 @@ var Idcp = (function () {
     self.source = "IDCP_V2";
     self.BO_source = "GIDEA-RAW-2";
     self.isDataOwner = null;
-
+    self.isAssociating = false;
     // units
     self.units_available = {};
 
@@ -39,17 +41,17 @@ var Idcp = (function () {
     self.buttonIDCPClearAll = '<button id="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Idcp.idcpClearAll()">Clear all</button>';
 
     //Available buttons for differents clicks
-    //["NodeInfos","GraphContainerDescendantAndLeaves" ,"AddParameter" ,"DeleteContainer" ,"copy" ,"paste" ,"delete from bag","Create Object"]
+    //["NodeInfos","GraphContainerDescendantAndLeaves" ,"AddParameter" ,"DeleteContainer" ,"copy" ,"paste" ,"delete from bag","Create Object","Link to ..."]
     self.keys_DataContainercaseForDataOwners = [];
     self.keys_viewpointcaseForDataOwners = [];
     self.keys_DatacontainersForDataOwners = ["NodeInfos", "GraphContainerDescendantAndLeaves", "Create Object", "DeleteContainer", "copy", "delete from bag"];
     self.keys_DatacontainersForDataUsers = ["NodeInfos", "GraphContainerDescendantAndLeaves", "copy", "delete from bag"];
     self.keys_DatablockForDataOwners = ["NodeInfos", "GraphContainerDescendantAndLeaves", "copy", "AddParameter", "DeleteContainer", "delete from bag"];
     self.keys_DatablockForDataUsers = ["NodeInfos", "GraphContainerDescendantAndLeaves", "copy"];
-    self.keys_ParameterForDataUsers = ["NodeInfos", "AddParameter", "GraphContainerDescendantAndLeaves"];
-    self.keys_ParameterForDataOwners = ["NodeInfos", "delete from bag", "AddParameter", "GraphContainerDescendantAndLeaves", "DeleteContainer"];
-    self.keys_PropertiesForDataUsers = ["NodeInfos", "GraphContainerDescendantAndLeaves", ""];
-    self.keys_PropertiesForDataOwners = ["NodeInfos", "delete from bag", "copy", "GraphContainerDescendantAndLeaves", "DeleteContainer"];
+    self.keys_ParameterForDataUsers = ["NodeInfos", "AddParameter", "GraphContainerDescendantAndLeaves", "copy", "Associate"];
+    self.keys_ParameterForDataOwners = ["NodeInfos", "delete from bag", "AddParameter", "GraphContainerDescendantAndLeaves", "DeleteContainer", "copy", "Associate"];
+    self.keys_PropertiesForDataUsers = ["NodeInfos", "GraphContainerDescendantAndLeaves", "Associate"];
+    self.keys_PropertiesForDataOwners = ["NodeInfos", "delete from bag", "copy", "GraphContainerDescendantAndLeaves", "DeleteContainer", "Associate"];
     self.keys_viewpointForDataUsers = ["NodeInfos", "GraphContainerDescendantAndLeaves", "paste", "Create Object"];
     self.keys_viewpointForDataOwners = ["NodeInfos", "GraphContainerDescendantAndLeaves", "paste", "Create Object"];
     self.keys_studyscenarioForDataOwners = ["NodeInfos", "GraphContainerDescendantAndLeaves", "paste", "Create Object", "DeleteContainer"];
@@ -127,12 +129,149 @@ var Idcp = (function () {
         Associate: {
             label: "Associate",
             action: function (_e) {
-                self.associate();
+                self.associate(_e);
             },
         },
     };
+    self.validateAssociation = function (dialog, source) {
+        var input_available = $("#bo_uri").parent().find("input");
+        var Field_completed = false;
+        var nb_fields_completed = 0;
+        input_available.each(function (index, element) {
+            if (element.value != "" && element.value != "fill it to search" && element.value != "fill it with the tree") {
+                nb_fields_completed += 1;
+            }
+        });
+        if (nb_fields_completed == input_available.length) {
+            Field_completed = true;
+        }
+        if ($("#unit_of_mesure").length > 0) {
+            if (!$("#unit_of_mesure").val()) {
+                Field_completed = false;
+            }
+        }
+        if ($("#LineageBlend_creatingNodeNewClassDefinition").length > 0) {
+            if (!$("#LineageBlend_creatingNodeNewClassDefinition").val()) {
+                Field_completed = false;
+            }
+        }
 
-    self.associate = function (dialogdiv, source) {};
+        if (!Field_completed) {
+            alert("You need to complete all fields before validating,use the tree by linking an item for the last fields, use none items are relevants if you don't find a good one");
+        } else {
+            var triples = [];
+
+            if ($("#unit_of_mesure").length > 0) {
+                triples.push({
+                    subject: self.last_IDCP_container.data.id,
+                    predicate: "http://rds.posccaesar.org/ontology/lis14/rdl/representedIn",
+                    object: $("#unit_of_mesure").val(),
+                });
+            }
+            if ($("#LineageBlend_creatingNodeNewClassDefinition").length > 0) {
+                triples.push({
+                    subject: self.last_IDCP_container.data.id,
+                    predicate: "http://www.w3.org/2000/01/rdf-schema#isDefinedBy",
+                    object: $("#LineageBlend_creatingNodeNewClassDefinition").val(),
+                });
+            }
+
+            triples.push({
+                subject: self.last_IDCP_container.data.id,
+                predicate: "http://datalenergies.total.com/resource/tsf/idcp_v2/hasBO",
+                object: $("#bo_uri").val(),
+            });
+            // if parameter equivclass with parameter.val
+            // if property equivclass between parent and equivclass bewteen property
+
+            if ($("#property_uri").val()) {
+                //property
+                triples.push({
+                    subject: $("#lineage_containers_containersJstree").jstree()._model.data[self.last_IDCP_container.parent].data.id,
+                    predicate: "http://www.w3.org/2002/07/owl#equivalentClass",
+                    object: $("#parameter_uri").val(),
+                });
+                triples.push({
+                    subject: self.last_IDCP_container.data.id,
+                    predicate: "http://www.w3.org/2002/07/owl#equivalentClass",
+                    object: $("#property_uri").val(),
+                });
+            } else {
+                triples.push({
+                    subject: self.last_IDCP_container.data.id,
+                    predicate: "http://www.w3.org/2002/07/owl#equivalentClass",
+                    object: $("#parameter_uri").val(),
+                });
+            }
+
+            Sparql_generic.insertTriples(source, triples, null, function (err, result) {});
+        }
+    };
+
+    self.associate = function (e) {
+        self.isAssociating = true;
+
+        var key_id = e.reference.prevObject.selector.replace("#", "");
+        var source = self.identify_source(e);
+        var nodeId = $("#lineage_containers_containersJstree").jstree()._model.data[key_id].data.id;
+        Sparql_generic.getNodeInfos(
+            source,
+            nodeId,
+            {
+                getValuesLabels: true,
+                selectGraph: true,
+            },
+            function (err, data) {
+                var hasDefinition = false;
+                data.forEach((result) => {
+                    if (result.prop.value == "http://www.w3.org/2000/01/rdf-schema#isDefinedBy") {
+                        hasDefinition = true;
+                    }
+                });
+                var hasUnit = false;
+                data.forEach((result) => {
+                    if (result.prop.value == "http://rds.posccaesar.org/ontology/lis14/rdl/representedIn") {
+                        hasUnit = true;
+                    }
+                });
+
+                $("<div>").dialog({
+                    modal: true,
+                    open: function () {
+                        var dialog = $(this);
+                        $(this).load("snippets/lineage/lineageAddNodeDialog.html #LineageBlend_creatingNodeSingleTab", function () {
+                            self.adding_parameter_hide();
+                            $("#LineageBlend_creatingNodeClassDiv").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
+                                PredicatesSelectorWidget.init(source, function () {
+                                    PredicatesSelectorWidget.setVocabulariesSelect(source, "_curentSourceAndImports");
+                                    self.widget_preselection_and_hide(dialog, e, hasDefinition, hasUnit);
+
+                                    $("#button_Class_to_creatingNodeMenu").removeAttr("onclick");
+                                    $("#button_Class_to_creatingNodeMenu").attr("onclick", `Idcp.validateAssociation('${dialog.get(0).id}','${source}');`);
+                                    $("#unit_of_mesure").append(`<option id='blank_unit'></option>`);
+                                    self.units_available.forEach((unit) => {
+                                        var unit_uri = unit[0];
+                                        var unit_name = unit[1];
+                                        $("#unit_of_mesure").append(`<option id=${unit_uri}>${unit_name}</option>`);
+                                    });
+                                });
+                            });
+                        });
+                    },
+                    height: 800,
+                    width: 1500,
+                    title: "Renseign your parameter",
+                    close: function () {
+                        $("#rightPanelDiv").empty();
+                        $("#centralPanelDiv").parent().append($("#rightPanelDiv"));
+                        $(this).dialog("close");
+                        $(this).remove();
+                        self.isAssociating = false;
+                    },
+                });
+            }
+        );
+    };
 
     self.add_supplementary_layer_for_types_icon = function (types) {
         //property>parameter>Datablock> disciplines>datacontainer
@@ -733,7 +872,7 @@ var Idcp = (function () {
                     }
                 });
 
-                Lineage_containers.addResourcesToContainer(source, Lineage_containers.currentContainer, nodesData);
+                Lineage_containers.addResourcesToContainer(source, Lineage_containers.currentContainer, nodesData, null, self.IDCP_fillJstreeTypes);
             } catch (e) {
                 console.log("wrong clipboard content");
             }
@@ -754,7 +893,12 @@ var Idcp = (function () {
     };
     self.IDCP_restrainednodeinfo_andmodification = function (e) {
         var source = self.identify_source(e);
-        NodeInfosWidget.showNodeInfos(source, Lineage_containers.currentContainer, "mainDialogDiv");
+        if (self.isDataOwner) {
+            NodeInfosWidget.showNodeInfos(source, Lineage_containers.currentContainer, "mainDialogDiv");
+        } else {
+            NodeInfosWidget.showNodeInfos(source, Lineage_containers.currentContainer, "mainDialogDiv", { hideModifyButtons: true });
+        }
+
         /*
         if(!(Lineage_sources.isSourceEditable(self.source))){
             
@@ -789,7 +933,7 @@ var Idcp = (function () {
                     });
                 });
             },
-            height: 1000,
+            height: 800,
             width: 1500,
             title: "Renseign your parameter",
             close: function () {
@@ -928,7 +1072,13 @@ var Idcp = (function () {
         $("#LineageBlend_creatingNodeParentTypeSpan").hide();
     };
 
-    self.widget_preselection_and_hide = function (dialog, e) {
+    self.widget_preselection_and_hide = function (dialog, e, hasDefinition, hasUnit) {
+        if (!hasDefinition) {
+            hasDefinition = false;
+        }
+        if (!hasUnit) {
+            hasUnit = false;
+        }
         // Preselect widget options and hide
         var key_id = e.reference.prevObject.selector.replace("#", "");
         var source = self.identify_source(e);
@@ -952,14 +1102,30 @@ var Idcp = (function () {
         $("#LineageBlend_creatingNodeSingleTab").append($("#rightPanelDiv"));
         self.loadBOtree();
         $("#Lineage_containers_searchInput_BO").remove();
+        if (!hasUnit) {
+            label_parent.append('<br><br>Unit of mesure <select name="unit" id="unit_of_mesure" ></select>');
+        }
 
-        label_parent.append('<br><br>Unit of mesure <select name="unit" id="unit_of_mesure" ></select>');
-        label_parent.append('<br><br>Definition : <br><textarea style="width: 528px" style="margin: 10px" id="LineageBlend_creatingNodeNewClassDefinition"></textarea><br>');
+        if (!hasDefinition) {
+            label_parent.append('<br><br>Definition : <br><textarea style="width: 528px" style="margin: 10px" id="LineageBlend_creatingNodeNewClassDefinition"></textarea><br>');
+        }
 
-        if (data["rdf:types"].includes(self.datablockURI)) {
+        if (data["rdf:subclass"]) {
+            var types = data["rdf:types"].concat(data["rdf:subclass"]);
+        } else {
+            var types = data["rdf:types"];
+        }
+
+        if (types.includes(self.datablockURI) && self.isAssociating == false) {
             label_parent.append('<br><br>Business Object : <input id="bo_uri" value="fill it with the tree"  readonly>');
             label_parent.append('<br><br>Parameter : <input id="parameter_uri" value="fill it with the tree"  readonly><br><br>');
             label_parent.html(label_parent.html().replace("rdfs:label", "Name of the new Parameter"));
+            $("#LineageBlend_creatingNodeNewClassLabel").attr("onchange", "Idcp.fieldBOsearch(this,'param');");
+        }
+        if (types.includes(self.parameterUri) && self.isAssociating) {
+            label_parent.append('<br><br>Business Object : <input id="bo_uri" value="fill it with the tree"  readonly>');
+            label_parent.append('<br><br>Parameter : <input id="parameter_uri" value="fill it with the tree"  readonly><br><br>');
+            label_parent.html(label_parent.html().replace("rdfs:label", "Name of associating  Parameter"));
             $("#LineageBlend_creatingNodeNewClassLabel").attr("onchange", "Idcp.fieldBOsearch(this,'param');");
         }
 
@@ -970,7 +1136,7 @@ var Idcp = (function () {
             "flex-direction": "row",
         });
 
-        if (data["rdf:types"].includes(self.parameterUri)) {
+        if (types.includes(self.parameterUri) && self.isAssociating == false) {
             var balise_id = dialog.context.id;
             var split = balise_id.split("-");
             var title_number = parseInt(split[split.length - 1]) + 1;
@@ -981,6 +1147,19 @@ var Idcp = (function () {
             label_parent.append('<br><br>Parameter : <input id="parameter_uri" value="fill it with the tree"   readonly>');
             label_parent.append('<br><br>Property : <input id="property_uri" value="fill it with the tree"  readonly><br><br>');
             label_parent.html(label_parent.html().replace("rdfs:label", "Name of the new Property"));
+            $("#LineageBlend_creatingNodeNewClassLabel").attr("onchange", "Idcp.fieldBOsearch(this,'prop');");
+        }
+        if (types.includes(self.proprieteUri) && self.isAssociating) {
+            var balise_id = dialog.context.id;
+            var split = balise_id.split("-");
+            var title_number = parseInt(split[split.length - 1]) + 1;
+            var title_id = split[0] + "-" + split[1] + "-" + title_number;
+            $("#" + title_id).text("Reseign your property");
+
+            label_parent.append('<br><br>Business Object : <input id="bo_uri" value="fill it with the tree"  readonly>');
+            label_parent.append('<br><br>Parameter : <input id="parameter_uri" value="fill it with the tree"   readonly>');
+            label_parent.append('<br><br>Property : <input id="property_uri" value="fill it with the tree"  readonly><br><br>');
+            label_parent.html(label_parent.html().replace("rdfs:label", "Name of associating Property"));
             $("#LineageBlend_creatingNodeNewClassLabel").attr("onchange", "Idcp.fieldBOsearch(this,'prop');");
         }
         label_parent.append('<br><br><button id="None_are_relevant" class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Idcp.nocorresponding(1)">None items are relevant</button><br><br>');
@@ -1361,8 +1540,8 @@ var Idcp = (function () {
                 //result.o.value}
                 self.units_available = units;
             });
-
-            if (Lineage_sources.isSourceEditableForUser(self.source)) {
+            const groups = authentication.currentUser.groupes;
+            if (groups.includes("IDCPDataowner")) {
                 $("#Lineage_addContainer_button").removeAttr("onclick");
 
                 $("#Lineage_addContainer_button").attr("onclick", "Idcp.idcp_addDataContainer();");

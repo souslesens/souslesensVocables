@@ -58,6 +58,7 @@
         "@futpib/tika-server-client": "0.0.5",
         "@nanostores/lit": "0.1.4",
         "@nanostores/preact": "0.4.1",
+        "@nanostores/query": "0.1.1",
         "@sentry/node": "^7.49.0",
         "async": "^3.2.4",
         "async-await-mutex-lock": "^1.0.10",

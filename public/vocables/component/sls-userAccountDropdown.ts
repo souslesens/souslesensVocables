@@ -1,8 +1,11 @@
 import { html, component } from "haunted";
+import { useStore } from "@nanostores/preact";
+import { $currentUser } from "../store/user";
 
 function SlsUserAccountDropdown() {
+    const { data, loading } = useStore($currentUser);
     return html` <a class="btn btn-sm py-0 btn-outline-primary dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="fas fa-user"></i><span id="user-username">...</span>
+            <i class="fas fa-user"></i><span>${loading ? "..." : data?.user.login}</span>
         </a>
 
         <ul id="user-account-dropdown" class="dropdown-menu" aria-labelledby="dropdownMenuLink">
@@ -12,5 +15,4 @@ function SlsUserAccountDropdown() {
             </li>
         </ul>`;
 }
-
 customElements.define("sls-user-account-dropdown", component(SlsUserAccountDropdown, { useShadowDOM: false }));

@@ -176,8 +176,12 @@ var Config = (function () {
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#allValuesFrom": "∀",
             "https://www.w3.org/1999/02/22-rdf-syntax-ns#allValuesFrom": "∀",
 
+            "http://www.w3.org/2002/07/owl#onProperty": "∃",
+
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#first": "V",
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest": "V",
+
+             "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil":"∅",
 
 
 

@@ -82,7 +82,7 @@ var NodeInfosWidget = (function () {
                 activate: function(event, ui) {
                     if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv" || options.showAxioms ) {
                      setTimeout(function(){
-                        Lineage_axioms.processAxioms(self.currentSource, self.currentNodeId)
+                        Lineage_axioms.drawNodeAxioms(self.currentSource, self.currentNodeId)
                      },1000)
                     }
 

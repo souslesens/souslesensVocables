@@ -43,11 +43,11 @@ var Lineage_axioms = (function() {
   };
 
 
-  self.processAxioms = function(sourceLabel, nodeId, divId, depth) {
+  self.drawNodeAxioms = function(sourceLabel, nodeId, divId, depth) {
     if (!depth) {
       depth = 5;
     }
-$("#nodeInfosWidget_depthSpan").val(""+depth)
+    $("#nodeInfosWidget_depthSpan").html("" + depth);
     self.context = {
       sourceLabel: sourceLabel,
       nodeId: nodeId,
@@ -90,9 +90,10 @@ $("#nodeInfosWidget_depthSpan").val(""+depth)
       for (var key in nodesMap) {
         var item = nodesMap[key];
         item.children.forEach(function(child) {
-          if( nodesMap[child.obj] && nodesMap[child.obj].parents.indexOf(item.s.value)<0)
-          nodesMap[child.obj].parents.push(item.s.value)
-        })
+          if (nodesMap[child.obj] && nodesMap[child.obj].parents.indexOf(item.s.value) < 0) {
+            nodesMap[child.obj].parents.push(item.s.value);
+          }
+        });
       }
 
 
@@ -104,30 +105,28 @@ $("#nodeInfosWidget_depthSpan").val(""+depth)
           var item = nodesMap[key];
 
 
-            item.parents.forEach(function(parentId) {
-              var parent = nodesMap[parentId];
-              if (parent && (parent.p.value.indexOf("intersectionOf") > -1 || parent.p.value.indexOf("unionOf") > -1)) {
+          item.parents.forEach(function(parentId) {
+            var parent = nodesMap[parentId];
+            if (parent && (parent.p.value.indexOf("intersectionOf") > -1 || parent.p.value.indexOf("unionOf") > -1)) {
 
 
-              nodesMap[parentId].children=item.children
+              nodesMap[parentId].children = item.children;
               nodesMap[parentId].symbol = Config.Lineage.logicalOperatorsMap[parent.p.value];
               delete nodesMap[key];
 
-              }
-            });
+            }
+          });
 
 
         }
       }
 
 
-
-
       var data = [];
       var uniqueIds = {};
 
       function recurse(nodeId, level) {
-        if ( uniqueIds[nodeId]) {
+        if (uniqueIds[nodeId]) {
           return;
         }
         uniqueIds[nodeId] = 1;
@@ -136,10 +135,11 @@ $("#nodeInfosWidget_depthSpan").val(""+depth)
         item.children.forEach(function(child) {
 
           var targetItem = nodesMap[child.obj];
-          if (!targetItem) {
-            return;
-          }
 
+
+          if (item.s.value == "eb32302a-be06-400c-af64-12175d47b315") {
+            var x = 3;
+          }
 
           if (!existingNodes[item.s.value]) {
 
@@ -154,12 +154,14 @@ $("#nodeInfosWidget_depthSpan").val(""+depth)
               // options.label="∀"
               options.color = "#cb9801";
               options.label = "R";//"∀";
+            }else{
+              options.color=Lineage_classes.getSourceColor(sourceLabel)
             }
 
 
             var node = VisjsUtil.getVisjsNode(sourceLabel, item.s.value, item.sLabel ? item.sLabel.value : Sparql_common.getLabelFromURI(item.s.value), null, options);
             existingNodes[item.s.value] = node;
-            node.data.infos=nodesMap[item.s.value]
+            node.data.infos = nodesMap[item.s.value];
             visjsData.nodes.push(node);
           }
           else {
@@ -168,29 +170,47 @@ $("#nodeInfosWidget_depthSpan").val(""+depth)
               VisjsUtil.setNodeSymbol(node2, item.symbol);
             }
           }
-          if (!existingNodes[targetItem.s.value]) {
-            var options = { level: level + 1 };
-            options.size = 10;
-            options.color = "#00afef";
-            if (targetItem.sType && targetItem.sType.value.indexOf("roperty") > -1) {
-              options.shape =  "triangle";
-              options.color = "#70ac47";
-            }
-            if (targetItem.sType && targetItem.sType.value.indexOf("Restriction") > -1) {
-              options.shape = "ellipse";
-              options.label = "R";//"∀";
-              options.color = "#cb9801";
+          if (!targetItem) {
+            return;
+            if(false) {
+              var symbol = Config.Lineage.logicalOperatorsMap["http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"];
+
+              var id = "_nil" + common.getRandomHexaId(5);
+              var node = VisjsUtil.getVisjsNode(sourceLabel, id, "", null, { level: level + 1, color: "#eee", shape: "text", label: "" });
+
+              visjsData.nodes.push(node);
+              targetItem = { s: { value: id } };
             }
 
-            var node = VisjsUtil.getVisjsNode(sourceLabel, targetItem.s.value, targetItem.sLabel ? targetItem.sLabel.value : Sparql_common.getLabelFromURI(targetItem.s.value), null, options);
-            existingNodes[targetItem.s.value] = node;
-            node.data.infos=nodesMap[targetItem.s.value]
-            visjsData.nodes.push(node);
+          }
+          else {
+            if (!existingNodes[targetItem.s.value]) {
+              var options = { level: level + 1 };
+              options.size = 10;
+              options.color = "#00afef";
+              if (targetItem.sType && targetItem.sType.value.indexOf("roperty") > -1) {
+                options.shape = "triangle";
+                options.color = "#70ac47";
+              }
+              if (targetItem.sType && targetItem.sType.value.indexOf("Restriction") > -1) {
+                options.shape = "ellipse";
+                options.label = "R";//"∀";
+                options.color = "#cb9801";
+              }
+              options.symbol = Config.Lineage.logicalOperatorsMap[targetItem.s.value];
+
+              var node = VisjsUtil.getVisjsNode(sourceLabel, targetItem.s.value, targetItem.sLabel ? targetItem.sLabel.value : Sparql_common.getLabelFromURI(targetItem.s.value), null, options);
+              existingNodes[targetItem.s.value] = node;
+              node.data.infos = nodesMap[targetItem.s.value];
+              visjsData.nodes.push(node);
+            }
+
+            recurse(targetItem.s.value, level + 1);
           }
           var edgeId = item.s.value + "_" + targetItem.s.value;
 
-          if(item.s.value=="nodeID://b1690054")
-            var x=3
+          var edgeLabel = Config.Lineage.logicalOperatorsMap[child.pred];
+
 
           if (!existingNodes[edgeId]) {
             existingNodes[edgeId] = 1;
@@ -198,7 +218,7 @@ $("#nodeInfosWidget_depthSpan").val(""+depth)
               id: edgeId,
               from: item.s.value,
               to: targetItem.s.value,
-              //  label: Sparql_common.getLabelFromURI(child.pred),
+              label: edgeLabel,
               arrows: {
                 to: {
                   enabled: true,
@@ -209,7 +229,6 @@ $("#nodeInfosWidget_depthSpan").val(""+depth)
             });
           }
 
-          recurse(targetItem.s.value, level + 1);
 
         });
       }
@@ -220,6 +239,9 @@ $("#nodeInfosWidget_depthSpan").val(""+depth)
 
       var options =
         {
+          keepNodePositionOnDrag: true,
+         /* physics: {
+            enabled:true},*/
           layoutHierarchical: {
             direction: "LR",
             sortMethod: "hubsize",
@@ -229,12 +251,14 @@ $("#nodeInfosWidget_depthSpan").val(""+depth)
             levelSeparation: 130,
             parentCentralization: true,
             shakeTowards: true,
+            blockShifting:true,
 
             nodeSpacing: 60
           }
           , edges: {
             smooth: {
-              type: "cubicBezier",
+              // type: "cubicBezier",
+              type: "diagonalCross",
               forceDirection: "horizontal",
 
               roundness: 0.4
@@ -249,9 +273,9 @@ $("#nodeInfosWidget_depthSpan").val(""+depth)
 
       var graphDiv = "axiomsGraphDiv";
       $("#divId").html("<div id='" + graphDiv + "' style='width:800px;height:600px'></div>");
-    //  visjsGraph.clearGraph();
+      //  visjsGraph.clearGraph();
 
-      var axiomsVisjsGraph=Object.create(visjsGraph)
+      var axiomsVisjsGraph = Object.create(visjsGraph);
       axiomsVisjsGraph.draw(graphDiv, visjsData, options, function() {
 
       });
@@ -263,11 +287,11 @@ $("#nodeInfosWidget_depthSpan").val(""+depth)
   };
 
   self.onNodeClick = function(node, point, options) {
-  /*  $("#nodeInfosWidget_tabsDiv").tabs("option", "active", 0);
-    NodeInfosWidget.drawAllInfos(node.data.source, node.data.id);*/
-if(!node){
-  return $('#nodeInfosWidget_HoverDiv').css('display', 'none')
-}
+    /*  $("#nodeInfosWidget_tabsDiv").tabs("option", "active", 0);
+      NodeInfosWidget.drawAllInfos(node.data.source, node.data.id);*/
+    if (!node) {
+      return $("#nodeInfosWidget_HoverDiv").css("display", "none");
+    }
 
     self.showNodeInfos(node, point, options);
 
@@ -276,57 +300,58 @@ if(!node){
 
   };
 
-  self.selectNodesOnHover=function(node, point, options){
+  self.selectNodesOnHover = function(node, point, options) {
 
 
-
-  }
-
-
-  self.showNodeInfos=function(node, point, options){
-    var html="<table >"
-
-    var infos=node.data.infos
-
-    html+="<tr><td>uri</td><td>" +infos.s.value+"</td></tr>"
-    html+="<tr><td>label</td><td>" +infos.sLabel.value+"</td></tr>"
-    html+="<tr><td>type</td><td>" +infos.sType.value+"</td></tr>"
-
-    html+="<tr style='border: #0e0e0e 1px solid'><td>children</td><td>"
-
-    /*    infos.parents.forEach(function(item,index){
-          if(index>0)
-            html+="<br>"
-            html+=item
-
-        })
-        html+="</td</tr>"
+  };
 
 
-      html+="<tr><td>children</td><td>"*/
+  self.showNodeInfos = function(node, point, options) {
+    var html = "<table >";
 
-    infos.children.forEach(function(item,index){
-      if(index>0)
-        html+="<br>"
-      html+=item.pred+"->"+item.obj
+    var infos = node.data.infos;
 
-    })
-    html+="</td</tr>"
-
-    html+="</table>"
-
-    $("#nodeInfosWidget_HoverDiv").css("top",point.y)
-    $("#nodeInfosWidget_HoverDiv").css("left",point.x)
-    $("#nodeInfosWidget_HoverDiv").html(html)
-    $("#nodeInfosWidget_HoverDiv").css("display","block")
-  }
+    html += "<tr><td>uri</td><td>" + infos.s.value + "</td></tr>";
+    if (infos.sLabel) {
+      html += "<tr><td>label</td><td>" + infos.sLabel.value + "</td></tr>";
+    }
+    if (infos.sType) {
+      html += "<tr><td>type</td><td>" + infos.sType.value + "</td></tr>";
+    }
 
 
+    html += "<tr style='border: #0e0e0e 1px solid'><td>children</td><td>";
+    infos.children.forEach(function(item, index) {
+      if (index > 0) {
+        html += "<br>";
+      }
+      html += item.pred + "<b>-></b>" + item.obj;
 
+    });
+    html += "</td</tr>";
+
+
+    html += "<tr style='border: #0e0e0e 1px solid'><td>ancestors</td><td>";
+    infos.parents.forEach(function(item, index) {
+      if (index > 0) {
+        html += "<br>";
+      }
+      html += item;
+    });
+    html += "</td</tr>";
+
+
+    html += "</table>";
+
+    $("#nodeInfosWidget_HoverDiv").css("top", point.y);
+    $("#nodeInfosWidget_HoverDiv").css("left", point.x);
+    $("#nodeInfosWidget_HoverDiv").html(html);
+    $("#nodeInfosWidget_HoverDiv").css("display", "block");
+  };
 
 
   self.changeDepth = function(depth) {
-    self.processAxioms(self.context.sourceLabel, self.context.nodeId, self.context.divId, self.context.depth + depth);
+    self.drawNodeAxioms(self.context.sourceLabel, self.context.nodeId, self.context.divId, self.context.depth + depth);
   };
 
   return self;

@@ -21,7 +21,7 @@ self.setNodeSymbol=function(node,symbol){
 
 
 
-  self.getVisjsNodeAttributes = function(source,label, predicateUri, options) {
+  self.getVisjsNodeAttributes = function(source,uri,label, predicateUri, options) {
     if (!options) {
       options = {};
     }
@@ -36,8 +36,9 @@ self.setNodeSymbol=function(node,symbol){
     else {
       shape = options.shape || Lineage_classes.defaultShape;
       color = options.color || Lineage_classes.getSourceColor(source);
-      var regex = /[0-9a-f]{3}/;  //blank nodes
-      if (label.indexOf("http")<0 && label.match(regex)) {
+    var regex = /[0-9a-f]{3}/;  //blank nodes
+     if (uri.indexOf("http")<0 && label.match(regex)) {
+
         shape = "hexagon";
         label = null;
         color = "#bbb";
@@ -57,7 +58,7 @@ self.setNodeSymbol=function(node,symbol){
 
   self.setVisjsNodeAttributes = function(source,node, label, predicateUri, options) {
 
-    var attrs = self.getVisjsNodeAttributes(source,label, predicateUri, options);
+    var attrs = self.getVisjsNodeAttributes(source,node.id,label, predicateUri, options);
     if(!attrs)
       return node;
     node.label = attrs.label;
@@ -71,7 +72,7 @@ self.setNodeSymbol=function(node,symbol){
     if (!options) {
       options = {};
     }
-    var attrs = self.getVisjsNodeAttributes(source,label, predicateUri, options);
+    var attrs = self.getVisjsNodeAttributes(source,id,label, predicateUri, options);
 
 
     var node = {

@@ -138,6 +138,7 @@ var Config = (function () {
     self.selectListsCache = {};
 
     self.Lineage = {
+        numberOfContainersLevel: 3,
         showSourceNodesInGraph: false,
         basicObjectProperties: [
             { id: "http://www.w3.org/2002/07/owl#sameAs", label: "owl:sameAs", type: "ObjectProperty" },

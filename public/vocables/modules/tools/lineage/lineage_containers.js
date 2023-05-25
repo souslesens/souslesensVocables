@@ -50,7 +50,7 @@ var Lineage_containers = (function () {
             label: "Copy Node(s)",
             action: function (e) {
                 // pb avec source
-                LineageClasses.copyNode(e);
+                Lineage_classes.copyNode(e);
                 var selectedNodes = $("#lineage_containers_containersJstree").jstree().get_selected(true);
                 Lineage_common.copyNodeToClipboard(selectedNodes);
             },
@@ -104,10 +104,6 @@ Lineage_styles.showDialog(self.currentContainer.data);
             callback = function () {};
         }
 
-        if ($("#lineage_containers_containersJstree").jstree) {
-            $("#lineage_containers_containersJstree").empty();
-        }
-
         var term = $("#Lineage_containers_searchInput").val();
         var searchWhat = $("#Lineage_containers_searchWhatInput").val();
         var source = Lineage_sources.activeSource;
@@ -126,16 +122,23 @@ Lineage_styles.showDialog(self.currentContainer.data);
         if (searchWhat == "current") {
             if (!self.currentContainer) {
                 alert("no selected container");
+                return;
             }
             search_on_container = self.currentContainer.data.id;
+            if (!(self.currentContainer.data.type == "container" || self.currentContainer.data.type.includes("http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag"))) {
+                alert("not a bag");
+                return;
+            }
         }
 
         self.currentContainer = null;
         /*  self.listContainerResources(source, null, { filter:filter })
 
-
+        
       return;*/
-
+        if ($("#lineage_containers_containersJstree").jstree) {
+            $("#lineage_containers_containersJstree").empty();
+        }
         if (self.flag_search == false) {
             self.drawContainerJstree(source, filter, "lineage_containers_containersJstree", search_on_container, memberType, {}, function (err, result) {
                 if (err) {
@@ -154,6 +157,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
         }
 
         var fromStr = Sparql_common.getFromStr(source, null, true);
+        /*
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -165,6 +169,36 @@ Lineage_styles.showDialog(self.currentContainer.data);
             " " +
             filter +
             "}";
+        */
+
+        var query = `
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            select distinct *   ${fromStr} where {
+              ?firstLevel rdfs:label ?firstLevelLabel.
+              ?firstLevel rdf:type ?firstLevelType.
+              FILTER NOT EXISTS{?firstLevel ^rdfs:member ?noAscendance.}
+              filter(?firstLevelType in (rdf:Bag,rdf:List) ). 
+              ?firstLevel rdfs:member{0, ${Config.Lineage.numberOfContainersLevel} } ?member.
+              ?member rdfs:label ?memberLabel.
+              ?member rdf:type ?memberType.
+              filter (?memberType in (rdf:Bag,rdf:List)).
+                OPTIONAL {
+                ?member ^rdfs:member ?parentContainer.
+                
+                 
+                ?parentContainer rdf:type ?type.
+                filter (?type in (rdf:Bag,rdf:List)).
+                ?parentContainer rdfs:label ?parentContainerLabel
+                
+
+                }
+             
+                
+              
+            }
+
+            `;
         var sparql_url = Config.sources[source].sparql_server.url;
         var url = sparql_url + "?format=json&query=";
 
@@ -177,40 +211,82 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
             result.results.bindings.forEach(function (item) {
                 //  var nodeId=item.parent+"_"+item.member.value
-
-                item.jstreeId = "_" + common.getRandomHexaId(5);
-                nodesMap[item.member.value] = item;
+                if (!nodesMap[item.member.value]) {
+                    item.jstreeId = "_" + common.getRandomHexaId(5);
+                    nodesMap[item.member.value] = item;
+                } else {
+                    if (item.parentContainer.value) {
+                        if (Array.isArray(nodesMap[item.member.value].parentContainer.value)) {
+                            nodesMap[item.member.value].parentContainer.value.push(item.parentContainer.value);
+                        } else {
+                            nodesMap[item.member.value].parentContainer.value = [nodesMap[item.member.value].parentContainer.value, item.parentContainer.value];
+                        }
+                    }
+                }
             });
 
             var uniqueNodes = {};
 
             var jstreeData = [];
-
+            var multiple_parents = [];
             for (var nodeId in nodesMap) {
                 var item = nodesMap[nodeId];
                 var parent = "#";
 
                 var memberType = "container";
+                var multiple_skip = false;
+                if (item.parentContainer) {
+                    if (Array.isArray(item.parentContainer.value)) {
+                        multiple_parents.push(item);
+                        multiple_skip = true;
+                    }
+                }
 
-                parent = item.parentContainer && nodesMap[item.parentContainer.value] ? nodesMap[item.parentContainer.value].jstreeId : "#";
-                if (!uniqueNodes[item.jstreeId]) {
-                    uniqueNodes[item.jstreeId] = 1;
+                if (!multiple_skip) {
+                    parent = item.parentContainer && nodesMap[item.parentContainer.value] ? nodesMap[item.parentContainer.value].jstreeId : "#";
+                    if (!uniqueNodes[item.jstreeId]) {
+                        uniqueNodes[item.jstreeId] = 1;
 
-                    var node = {
-                        id: item.jstreeId,
-                        text: item.memberLabel.value,
-                        parent: parent,
-                        type: memberType,
-                        data: {
+                        var node = {
+                            id: item.jstreeId,
+                            text: item.memberLabel.value,
+                            parent: parent,
                             type: memberType,
-                            source: source,
-                            id: item.member.value,
-                            label: item.memberLabel.value,
-                            currentParent: parent,
-                            tabId: options.tabId,
-                        },
-                    };
-                    jstreeData.push(node);
+                            data: {
+                                type: memberType,
+                                source: source,
+                                id: item.member.value,
+                                label: item.memberLabel.value,
+                                currentParent: parent,
+                                tabId: options.tabId,
+                            },
+                        };
+                        jstreeData.push(node);
+                    }
+                }
+            }
+            for (var nodeId in multiple_parents) {
+                var item = multiple_parents[nodeId];
+
+                for (var parentId in item.parentContainer.value) {
+                    var parent = item.parentContainer.value[parentId];
+                    if (nodesMap[parent]) {
+                        var node = {
+                            id: "_" + common.getRandomHexaId(5),
+                            text: item.memberLabel.value,
+                            parent: parent,
+                            type: "container",
+                            data: {
+                                type: "container",
+                                source: source,
+                                id: item.member.value,
+                                label: item.memberLabel.value,
+                                currentParent: parent,
+                                tabId: options.tabId,
+                            },
+                        };
+                        jstreeData.push(node);
+                    }
                 }
             }
 
@@ -239,7 +315,6 @@ Lineage_styles.showDialog(self.currentContainer.data);
                     .jstree()
                     .open_node("#");
                 callback(null);
-                $("#" + jstreeDiv).jstree("open_all");
             });
         });
     };

@@ -72,8 +72,7 @@ var OntologyModels = (function () {
                         },
                         // set model classes (if source not  declared in sources.json)
                         function (callbackSeries) {
-                            if (!Config.sources[source] || !Config.topLevelOntologies[source]) {
-                                // dont take relations  declared in sources.json
+                            if ( !Config.basicVocabularies[source] && !Config.topLevelOntologies[source]){
                                 return callbackSeries();
                             }
                             var query =

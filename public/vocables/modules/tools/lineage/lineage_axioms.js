@@ -3,19 +3,23 @@ import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_sources from "./lineage_sources.js";
 import VisjsUtil from "../../graph/visjsUtil.js";
-self.lineageVisjsGraph
+
 import Lineage_classes from "./lineage_classes.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
+import common from "../../shared/common.js";
+
 
 
 var Lineage_axioms = (function() {
   var self = {};
+  self.currentSource = null;
+  self.defaultGraphDiv = "axiomsGraphDiv";
 
 
   self.getNodeAxiomsTree = function(sourceLabel, nodeId, depth, callback) {
     var fromStr = Sparql_common.getFromStr(sourceLabel);
 
-    var filterStr = "";// Sparql_common.setFilter("x", nodeIds);
+    var filterStr = "";
 
     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
       "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
@@ -74,6 +78,12 @@ var Lineage_axioms = (function() {
       var nodesMap = {};
       var nodesToMap = {};
       var startingNodes = {};
+      if (result.length == 0) {
+
+        return self.drawNodeWithoutAxioms(sourceLabel, nodeId);
+      }
+
+
       result.forEach(function(item) {
         if (!nodesMap[item.s.value]) {
           item.children = [];
@@ -145,7 +155,7 @@ var Lineage_axioms = (function() {
           if (!existingNodes[item.s.value]) {
 
 
-            var options = { level: level };
+            var options = { level: level,type:item.sType?item.sType.value:null };
             options.size = 10;
             if (item.sType && item.sType.value.indexOf("roperty") > -1) {
               options.shape = "triangle";
@@ -157,8 +167,9 @@ var Lineage_axioms = (function() {
               options.color = "#cb9801";
               options.label = "R";//"∀";
               options.size = 5;
-            }else{
-              options.color=Lineage_classes.getSourceColor(sourceLabel)
+            }
+            else {
+              options.color = Lineage_classes.getSourceColor(sourceLabel);
             }
 
 
@@ -175,7 +186,7 @@ var Lineage_axioms = (function() {
           }
           if (!targetItem) {
             return;
-            if(false) {
+            if (false) {
               var symbol = Config.Lineage.logicalOperatorsMap["http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"];
 
               var id = "_nil" + common.getRandomHexaId(5);
@@ -188,7 +199,7 @@ var Lineage_axioms = (function() {
           }
           else {
             if (!existingNodes[targetItem.s.value]) {
-              var options = { level: level + 1 };
+              var options = { level: level + 1,type:targetItem.sType?targetItem.sType.value:null  };
               options.size = 10;
               options.color = "#00afef";
               if (targetItem.sType && targetItem.sType.value.indexOf("roperty") > -1) {
@@ -242,51 +253,7 @@ var Lineage_axioms = (function() {
       recurse(nodeId, 1);
 
 
-      var options =
-        {
-          keepNodePositionOnDrag: true,
-         /* physics: {
-            enabled:true},*/
-          layoutHierarchical: {
-            direction: "LR",
-            sortMethod: "hubsize",
-            //  sortMethod:"directed",
-            //    shakeTowards:"roots",
-            //  sortMethod:"directed",
-            levelSeparation: 130,
-            parentCentralization: true,
-            shakeTowards: true,
-            blockShifting:true,
-
-            nodeSpacing: 60
-          }
-          , edges: {
-            smooth: {
-              // type: "cubicBezier",
-              type: "diagonalCross",
-              forceDirection: "horizontal",
-
-              roundness: 0.4
-            }
-          },
-          onclickFn: Lineage_axioms.onNodeClick,
-          onRightClickFn: Lineage_axioms.showGraphPopupMenu,
-          onHoverNodeFn: Lineage_axioms.selectNodesOnHover
-
-        };
-
-
-  var graphDiv = "axiomsGraphDiv";
-      $("#divId").html("<div id='" + graphDiv + "' style='width:800px;height:600px'></div>");
-      //  Lineage_classes.lineageVisjsGraph.clearGraph();
-      var axiomsVisjsGraph=new VisjsGraphClass(graphDiv, visjsData, options);
-      axiomsVisjsGraph. draw(function () {
-
-      })
-   /*   var axiomsVisjsGraph = Object.create(Lineage_classes.lineageVisjsGraph);
-      axiomsVisjsGraph.draw(graphDiv, visjsData, options, function() {
-
-      });*/
+      self.drawGraph(visjsData);
 
 
     });
@@ -294,9 +261,55 @@ var Lineage_axioms = (function() {
 
   };
 
+  self.drawGraph = function(visjsData) {
+
+    var options =
+      {
+        keepNodePositionOnDrag: true,
+        /* physics: {
+           enabled:true},*/
+        layoutHierarchical: {
+          direction: "LR",
+          sortMethod: "hubsize",
+          //  sortMethod:"directed",
+          //    shakeTowards:"roots",
+          //  sortMethod:"directed",
+          levelSeparation: 130,
+          parentCentralization: true,
+          shakeTowards: true,
+          blockShifting: true,
+
+          nodeSpacing: 60
+        }
+        , edges: {
+          smooth: {
+            // type: "cubicBezier",
+            type: "diagonalCross",
+            forceDirection: "horizontal",
+
+            roundness: 0.4
+          }
+        },
+        onclickFn: Lineage_axioms.onNodeClick,
+        onRightClickFn: Lineage_axioms.showGraphPopupMenu,
+        onHoverNodeFn: Lineage_axioms.selectNodesOnHover
+
+      };
+
+
+    var graphDivContainer = "axiomsGraphDivContainer";
+    $("#" + graphDivContainer).html("<div id='axiomsGraphDiv' style='width:800px;height:600px'></div>");
+    var axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv", visjsData, options);
+    axiomsVisjsGraph.draw(function() {
+
+    });
+  };
+
   self.onNodeClick = function(node, point, options) {
     /*  $("#nodeInfosWidget_tabsDiv").tabs("option", "active", 0);
       NodeInfosWidget.drawAllInfos(node.data.source, node.data.id);*/
+
+    self.currentGraphNode=node;
     if (!node) {
       return $("#nodeInfosWidget_HoverDiv").css("display", "none");
     }
@@ -305,6 +318,11 @@ var Lineage_axioms = (function() {
 
   };
   self.showGraphPopupMenu = function(node, point, options) {
+
+    $("#axioms_predicatesDiv").dialog("open");
+    var html = " <span class=\"popupMenuItem\" onclick=\"Lineage_axioms.addAxiomDialog();\"> Add Axiom</span>";
+    $("#axioms_predicatesDiv").html(html);
+
 
   };
 
@@ -361,6 +379,159 @@ var Lineage_axioms = (function() {
   self.changeDepth = function(depth) {
     self.drawNodeAxioms(self.context.sourceLabel, self.context.nodeId, self.context.divId, self.context.depth + depth);
   };
+
+
+  self.drawNodeWithoutAxioms = function(sourceLabel, nodeId) {
+
+
+    Sparql_OWL.getAllTriples(sourceLabel, "subject", [nodeId], {}, function(err, result) {
+      if (err) {
+        return alert(err.responseText);
+      }
+      var visjsData = { nodes: [], edges: [] };
+      var nodeLabel = "";
+      var nodeTypes = [];
+      result.forEach(function(item) {
+        if (item.predicate.value.indexOf("label") > -1) {
+          nodeLabel = item.object.value;
+        }
+        if (item.predicate.value.indexOf("type") > -1) {
+          nodeTypes.push( item.object.value);
+        }
+      });
+      var options = {
+        level: 1,
+        type: nodeTypes
+      };
+      var node = VisjsUtil.getVisjsNode(sourceLabel, nodeId, nodeLabel || Sparql_common.getLabelFromURI(nodeId), null,options);
+
+      visjsData.nodes.push(node);
+
+      self.drawGraph(visjsData);
+    });
+
+  };
+
+  self.showCreateEntityDialog = function() {
+
+    $("#axioms_predicatesDiv").dialog("open");
+    var html = "rdfs:label <input style='width:200px' id='axioms_newPredicateLabel'/>" +
+      "<br></br>" +
+      "rdf:type <select id='axioms_newPredicateSelect'></select>" +
+      "<button onclick='Lineage_axioms.onCreateEntityOK()'>OK</button>";
+
+
+    $("#axioms_predicatesDiv").html(html);
+    var declarations = self.owl2Vocabulary.Declarations;
+    common.fillSelectOptions("axioms_newPredicateSelect", declarations, true);
+
+
+  };
+
+  self.onCreateEntityOK = function() {
+    var label = $("#axioms_newPredicateLabel").val();
+    var object = $("#axioms_newPredicateSelect").val();
+    if (!object) {
+      return alert(" rdf:type missing");
+    }
+    var id = label;
+    if (!id) {
+      id = common.getRandomHexaId(5);
+    }
+    var proposedUri = Config.sources[self.currentSource].graphUri + id;
+    proposedUri = prompt("Confirm or modify node uri and create entity", proposedUri);
+    if (!proposedUri) {
+      return;
+    }
+    var triples = [];
+    triples.push({
+      subject: proposedUri,
+      predicate: "rdf:type",
+      object: object
+    });
+    if (label) {
+      triples.push({
+        subject: proposedUri,
+        predicate: "rdfs:label",
+        object: label
+      });
+    }
+
+
+    Sparql_generic.insertTriples(self.currentSource, triples, {}, function(err, result) {
+      if (err) {
+        alert(err.responseText);
+      }
+      self.drawNodeWithoutAxioms(self.currentSource, proposedUri, label);
+      self.context = {
+        sourceLabel: self.currentSource,
+        nodeId: proposedUri,
+        divId: "axiomsGraphDivContainer",
+        depth: 1
+      };
+      $("#axioms_predicatesDiv").dialog("close");
+
+    });
+
+  };
+
+  self.addAxiomDialog = function() {
+    var types=self.currentGraphNode.data.type;
+    var owlConstraints = Config.ontologiesVocabularyModels["owl"].constraints;
+    var rdfsConstraints = Config.ontologiesVocabularyModels["rdfs"].constraints;
+
+
+    var possiblePredicates= {  }
+    for (var key in owlConstraints){
+      if(types.indexOf(owlConstraints[key].domain)>-1){
+        possiblePredicates[key]=owlConstraints[key]
+      }
+    }
+    for (var key in rdfsConstraints){
+      if(types.indexOf(rdfsConstraints[key].domain)>-1){
+        possiblePredicates[key]=rdfsConstraints[key]
+      }
+    }
+
+   var html= "predicate <select id='axioms_predicateSelect'></select>" +
+    "<button onclick=''>OK</button>";
+
+
+    $("#axioms_predicatesDiv").html(html);
+   common.fillSelectOptions("axioms_predicateSelect",Object.keys(possiblePredicates),true)
+
+  };
+
+
+  self.owl2Vocabulary =
+    {
+      Declarations: ["rdfs:Datatype",
+        "owl:Class",
+        "owl:ObjectProperty",
+        "owl:DatatypeProperty",
+        "owl:AnnotationProperty",
+        "owl:NamedIndividual"],
+      Boolean_Connectives: [
+        "owl:intersectionOf",
+        "owl:unionOf",
+        "owl:complementOf",
+        "owl:enumeration"
+      ],
+
+
+      Object_Property_Restrictions: [
+        "owl:allValues",
+        "owl:someValuesFrom",
+        "owl:hasValue"
+      ],
+      Class_Expressions: [
+        "rdfs:subClassOf",
+        "owl:equivalentClass",
+        "owl:disjointWith",
+        "owl:disjointUnionOf"
+      ]
+    };
+
 
   return self;
 })();

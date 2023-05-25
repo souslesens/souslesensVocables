@@ -26,9 +26,15 @@
   </ul>
   <div id="nodeInfosWidget_InfosTabDiv"></div>
   <div id="nodeInfosWidget_AxiomsTabDiv">
-   <div> depth <span id="nodeInfosWidget_depthSpan"></span><button onclick="Lineage_axioms.changeDepth(1)">+</button>  <button onclick="Lineage_axioms.changeDepth(-1)">-</button> </div>
-    <div id="axiomsGraphDiv" style="width:1000px;height:800px"></div>
+   <div> depth <span id="nodeInfosWidget_depthSpan"></span>
+     <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_axioms.changeDepth(1)">+</button>
+     <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_axioms.changeDepth(-1)">-</button>
+   <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Lineage_axioms.showCreateEntityDialog()'> New Entity</button>
+   </div>
+    <div id="axiomsGraphDivContainer" style="width:1000px;height:800px"></div>
   </div>
 </div>
+
+<div id="axioms_predicatesDiv"></div>
 
 <div id="nodeInfosWidget_HoverDiv"></div>

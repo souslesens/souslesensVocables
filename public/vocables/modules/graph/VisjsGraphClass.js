@@ -2,11 +2,11 @@ import common from "../shared/common.js";
 import SVGexport from "./SVGexport.js";
 import GraphMlExport from "./graphMLexport.js";
 
-const VisjsGraphClass=function(graphDiv,data,options){
-  this.graphDiv=graphDiv;
-  this.data=data;
-  this.options=options;
-  var self=this;
+const VisjsGraphClass = function(graphDiv, data, options) {
+  this.graphDiv = graphDiv;
+  this.data = data;
+  this.options = options;
+  var self = this;
   self.network = null;
   self.simulationTimeOut = 3000;
   self.data;
@@ -26,24 +26,19 @@ const VisjsGraphClass=function(graphDiv,data,options){
   var dbleClickIntervalDuration = 500;
 
 
+  self.draw = function(callback) {
 
-
-
-
-
-
-  self. draw = function (callback)
-  {
-
-    var divId= self.graphDiv;
-    var visjsData= self.data;
-    var _options= self.options;
+    var divId = self.graphDiv;
+    var visjsData = self.data;
+    var _options = self.options;
 
     self.drawingDone = false;
     self.currentContext = { divId: divId, options: _options, callback: callback };
-    if (!_options) _options = {};
+    if (!_options) {
+      _options = {};
+    }
 
-    $("#" + divId).keydown(function (event) {
+    $("#" + divId).keydown(function(event) {
       self.currentKeyboardEventy = event;
     });
 
@@ -53,20 +48,24 @@ const VisjsGraphClass=function(graphDiv,data,options){
     var nodesDataSet = new vis.DataSet(visjsData.nodes);
     var edgesDataSet = new vis.DataSet(visjsData.edges);
     self.lastAddedNodes = visjsData.nodes;
-    nodesDataSet.on("*", function (/** @type {string} */ event, /** @type {{ items: any; }} */ properties, /** @type {any} */ senderId) {
+    nodesDataSet.on("*", function(/** @type {string} */ event, /** @type {{ items: any; }} */ properties, /** @type {any} */ senderId) {
       if (_options.onAddNodeToGraph) {
-        if (event == "add") _options.onAddNodeToGraph(properties, senderId);
+        if (event == "add") {
+          _options.onAddNodeToGraph(properties, senderId);
+        }
       }
-      if (event == "add") self.lastAddedNodes = properties.data;
+      if (event == "add") {
+        self.lastAddedNodes = properties.data;
+      }
     });
 
     self.data = {
       nodes: nodesDataSet,
-      edges: edgesDataSet,
+      edges: edgesDataSet
     };
     self.canvasDimension = {
       w: $("#" + divId).width(),
-      h: $("#" + divId).height() - 50,
+      h: $("#" + divId).height() - 50
     };
     var options = {
       interaction: { hover: true },
@@ -75,13 +74,13 @@ const VisjsGraphClass=function(graphDiv,data,options){
       nodes: {
         shape: "dot",
         size: 12,
-        chosen: { node: true },
+        chosen: { node: true }
         // scaling:{min:6,max:20}
       },
       edges: {
         //  scaling:{min:1,max:8}
       },
-      layout: { improvedLayout: false },
+      layout: { improvedLayout: false }
     };
 
     for (var key in _options) {
@@ -90,14 +89,17 @@ const VisjsGraphClass=function(graphDiv,data,options){
 
     if (_options.layoutHierarchical) {
       options.layout = {
-        hierarchical: _options.layoutHierarchical,
+        hierarchical: _options.layoutHierarchical
       };
-      options.physics= { enabled:false }
-    } else {
+      options.physics = { enabled: false };
+    }
+    else {
       $("#visjsGraph_layoutSelect").val("");
     }
 
-    if (_options.skipColorGraphNodesByType) self.skipColorGraphNodesByType = true;
+    if (_options.skipColorGraphNodesByType) {
+      self.skipColorGraphNodesByType = true;
+    }
 
     self.globalOptions = options;
     self.network = new vis.Network(container, self.data, options);
@@ -116,11 +118,11 @@ const VisjsGraphClass=function(graphDiv,data,options){
         // }
     }, self.simulationTimeOut);*/
 
-    self.network.on("afterDrawing", function (/** @type {any} */ _params) {
+    self.network.on("afterDrawing", function(/** @type {any} */ _params) {
       self.drawingDone = true;
     });
 
-    self.network.on("oncontext", function (/** @type {{ event: { preventDefault: () => void; which: number; }; pointer: { DOM: any; }; }} */ params) {
+    self.network.on("oncontext", function(/** @type {{ event: { preventDefault: () => void; which: number; }; pointer: { DOM: any; }; }} */ params) {
       params.event.preventDefault();
       if (params.event.which == 3) {
         if (_options.onRightClickFn) {
@@ -128,31 +130,38 @@ const VisjsGraphClass=function(graphDiv,data,options){
           var objId = self.network.getNodeAt(params.pointer.DOM);
           if (objId) {
             var obj = self.data.nodes.get(objId);
-            if (obj) _options.onRightClickFn(obj, point, params.event);
-          } else {
+            if (obj) {
+              _options.onRightClickFn(obj, point, params.event);
+            }
+          }
+          else {
             objId = self.network.getEdgeAt(params.pointer.DOM);
             obj = self.data.edges.get(objId);
-            if (obj) _options.onRightClickFn(obj, point, params.event);
+            if (obj) {
+              _options.onRightClickFn(obj, point, params.event);
+            }
           }
         }
       } //rigth click
     });
 
-    self.network.on("doubleClick", function (/** @type {any} */ params) {
+    self.network.on("doubleClick", function(/** @type {any} */ params) {
       self.processClicks(params, _options, true);
     });
 
     self.network
-      .on("click", function (/** @type {{ pointer: { DOM: { x: any; y: any; }; }; }} */ params) {
+      .on("click", function(/** @type {{ pointer: { DOM: { x: any; y: any; }; }; }} */ params) {
         // eslint-disable-next-line no-console
         console.log(self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y));
         self.processClicks(params, _options);
       })
-      .on("hoverNode", function (/** @type {{ node: any; pointer: { DOM: any; }; }} */ params) {
+      .on("hoverNode", function(/** @type {{ node: any; pointer: { DOM: any; }; }} */ params) {
         var nodeId = params.node;
         var node = self.data.nodes.get(nodeId);
         // eslint-disable-next-line no-console
-        if (!node) return console.log("hoverNode :no node ");
+        if (!node) {
+          return console.log("hoverNode :no node ");
+        }
         node._graphPosition = params.pointer.DOM;
         var point = params.pointer.DOM;
         self.context.currentNode = node;
@@ -162,33 +171,41 @@ const VisjsGraphClass=function(graphDiv,data,options){
           var options = {
             ctrlKey: params.event.ctrlKey ? 1 : 0,
             altKey: params.event.altKey ? 1 : 0,
-            shiftKey: params.event.shiftKey ? 1 : 0,
+            shiftKey: params.event.shiftKey ? 1 : 0
           };
         }
-        if (_options.onHoverNodeFn) _options.onHoverNodeFn(node, point, options);
+        if (_options.onHoverNodeFn) {
+          _options.onHoverNodeFn(node, point, options);
+        }
       })
-      .on("blurNode", function (/** @type {any} */ _params) {
+      .on("blurNode", function(/** @type {any} */ _params) {
         // $("#graphPopupDiv").css("display", "none")
       })
-      .on("zoom", function (/** @type {any} */ _params) {
+      .on("zoom", function(/** @type {any} */ _params) {
         self.onScaleChange();
       })
-      .on("hoverEdge", function (/** @type {{ edge: any; }} */ params) {
-        if (!self.data || !self.data.edges) return;
+      .on("hoverEdge", function(/** @type {{ edge: any; }} */ params) {
+        if (!self.data || !self.data.edges) {
+          return;
+        }
         var edgeId = params.edge;
         var edge = self.data.edges.get(edgeId);
-        if (!edge) return;
+        if (!edge) {
+          return;
+        }
         edge.fromNode = self.data.nodes.get(edge.from);
         edge.toNode = self.data.nodes.get(edge.to);
         //   sinequaResultVis.onEdgeHover(edge, point)
       })
-      .on("blurEdge", function (/** @type {any} */ _params) {
+      .on("blurEdge", function(/** @type {any} */ _params) {
         //  sinequaResultVis.onEdgeBlur()
       })
 
-      .on("dragStart", function (/** @type {{ nodes: any[]; }} */ params) {
+      .on("dragStart", function(/** @type {{ nodes: any[]; }} */ params) {
         var nodeId = params.nodes[0];
-        if (!nodeId) return;
+        if (!nodeId) {
+          return;
+        }
         //   var nodes = self.data.nodes.getIds();
         var newNodes = [];
         var fixed = false;
@@ -197,18 +214,20 @@ const VisjsGraphClass=function(graphDiv,data,options){
         newNodes.push({ id: nodeId, fixed: fixed });
         self.data.nodes.update(newNodes);
       })
-      .on("controlNodeDragging", function (params) {
+      .on("controlNodeDragging", function(params) {
         self.currentDraggingMousePosition = params.pointer.DOM;
       })
-      .on("dragging", function (_params) {
+      .on("dragging", function(_params) {
         /* if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
 return false;
 }*/
       })
-      .on("dragEnd", function (/** @type {{ event: { srcEvent: { ctrlKey: any; altKey: any; }; }; pointer: { DOM: any; }; nodes: string | any[]; }} */ params) {
+      .on("dragEnd", function(/** @type {{ event: { srcEvent: { ctrlKey: any; altKey: any; }; }; pointer: { DOM: any; }; nodes: string | any[]; }} */ params) {
         if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
           var dropCtrlNodeId = self.network.getNodeAt(params.pointer.DOM);
-          if (!dropCtrlNodeId) return;
+          if (!dropCtrlNodeId) {
+            return;
+          }
           var startNode = self.data.nodes.get(params.nodes[0]);
           var endNode = self.data.nodes.get(dropCtrlNodeId);
 
@@ -221,21 +240,29 @@ return false;
 
           var nodeId = params.nodes[0];
 
+          var node = self.data.nodes.get(nodeId);
+
+
           self.lastMovedNode = nodeId;
           //   var nodes = self.data.nodes.getIds();
           var newNodes = [];
           var fixed = true;
-          if (params.event.srcEvent.altKey) fixed = false;
+          if (params.event.srcEvent.altKey) {
+            fixed = false;
+          }
           var newNode = { id: nodeId, fixed: fixed };
-          newNodes.push(newNode);
 
-          self.data.nodes.update(newNodes);
+
+          newNodes.push(newNode);
+          if (!self.currentContext.options["layoutHierarchical"]) {
+            self.data.nodes.update(newNodes);
+          }
         }
       });
 
     if (callback) {
       var intervalIncrement = 0;
-      var interval = setInterval(function () {
+      var interval = setInterval(function() {
         if (self.drawingDone || intervalIncrement > 100) {
           clearInterval(interval);
           return callback();
@@ -245,30 +272,31 @@ return false;
     }
   };
 
-  self.setLayout = function (/** @type {string} */ layout) {
+  self.setLayout = function(/** @type {string} */ layout) {
     if (layout == "hierarchical vertical") {
       self.currentContext.options.layoutHierarchical = {
         direction: "UD",
-        sortMethod: "hubsize",
+        sortMethod: "hubsize"
       };
       self.currentContext.options.edges = {
         smooth: {
           type: "cubicBezier",
           forceDirection: "vertical",
-          roundness: 0.1,
-        },
+          roundness: 0.1
+        }
       };
       self.currentContext.simulationTimeOut = 10000;
 
       self.redraw();
-    } else if (layout == "hierarchical horizontal") {
+    }
+    else if (layout == "hierarchical horizontal") {
       self.currentContext.options.layoutHierarchical = {
         direction: "LR",
         sortMethod: "hubsize",
         //  sortMethod:"directed",
         //    shakeTowards:"roots",
         //  sortMethod:"directed",
-        levelSeparation: 200,
+        levelSeparation: 200
         //   parentCentralization: true,
         //  shakeTowards:true
 
@@ -279,25 +307,26 @@ return false;
           type: "cubicBezier",
           forceDirection: "horizontal",
 
-          roundness: 0.4,
-        },
+          roundness: 0.4
+        }
       };
 
       self.redraw();
-    } else {
+    }
+    else {
       self.currentContext.options = {};
       self.redraw();
     }
   };
 
-  self.exportGraph = function () {
+  self.exportGraph = function() {
     var nodes = self.data.nodes.get();
     var edges = self.data.edges.get();
     var nodesMap = {};
-    nodes.forEach(function (/** @type {{ id: string | number; }} */ node) {
+    nodes.forEach(function(/** @type {{ id: string | number; }} */ node) {
       nodesMap[node.id] = node;
     });
-    edges.forEach(function (/** @type {{ fromNode: any; from: string | number; toNode: any; to: string | number; }} */ edge) {
+    edges.forEach(function(/** @type {{ fromNode: any; from: string | number; toNode: any; to: string | number; }} */ edge) {
       edge.fromNode = nodesMap[edge.from];
       edge.toNode = nodesMap[edge.to];
     });
@@ -305,14 +334,14 @@ return false;
     common.copyTextToClipboard(str);
   };
 
-  self.importGraph = function (/** @type {string} */ str) {
+  self.importGraph = function(/** @type {string} */ str) {
     var nodes = self.data.nodes.get();
     var edges = self.data.edges.get();
     var nodesMap = {};
-    nodes.forEach(function (/** @type {{ id: string | number; }} */ node) {
+    nodes.forEach(function(/** @type {{ id: string | number; }} */ node) {
       nodesMap[node.id] = node;
     });
-    edges.forEach(function (/** @type {{ fromNode: any; from: string | number; toNode: any; to: string | number; }} */ edge) {
+    edges.forEach(function(/** @type {{ fromNode: any; from: string | number; toNode: any; to: string | number; }} */ edge) {
       edge.fromNode = nodesMap[edge.from];
       edge.toNode = nodesMap[edge.to];
     });
@@ -320,7 +349,7 @@ return false;
     common.copyTextToClipboard(str);
   };
 
-  self.clearGraph = function () {
+  self.clearGraph = function() {
     // comment ca marche  bad doc???
 
     if (self.data && self.data.nodes) {
@@ -335,18 +364,20 @@ return false;
     self.data = null;
   };
 
-  self.drawLegend = function () {
+  self.drawLegend = function() {
     // Pass
   };
 
-  self.removeNodes = function (/** @type {string | number} */ key, /** @type {any} */ value, /** @type {any} */ removeEdges) {
+  self.removeNodes = function(/** @type {string | number} */ key, /** @type {any} */ value, /** @type {any} */ removeEdges) {
     /**
      * @type {any[]}
      */
     var nodeIds = [];
     var nodes = self.data.nodes.get();
-    nodes.forEach(function (/** @type {{ [x: string]: any; id: any; }} */ node) {
-      if (node[key] == value) nodeIds.push(node.id);
+    nodes.forEach(function(/** @type {{ [x: string]: any; id: any; }} */ node) {
+      if (node[key] == value) {
+        nodeIds.push(node.id);
+      }
     });
     self.data.nodes.remove(nodeIds);
 
@@ -356,21 +387,25 @@ return false;
        */
       var edgeIds = [];
       var edges = self.data.edges.get();
-      edges.forEach(function (/** @type {{ [x: string]: any; id: any; }} */ edge) {
-        if (edge[key] == value) edgeIds.push(edge.id);
+      edges.forEach(function(/** @type {{ [x: string]: any; id: any; }} */ edge) {
+        if (edge[key] == value) {
+          edgeIds.push(edge.id);
+        }
       });
       self.data.edges.remove(edgeIds);
     }
   };
 
-  (self.removeOtherNodesFromGraph = function (/** @type {any} */ nodeId) {
+  (self.removeOtherNodesFromGraph = function(/** @type {any} */ nodeId) {
     var nodes = self.data.nodes.get();
     /**
      * @type {any[]}
      */
     var nodeIds = [];
-    nodes.forEach(function (/** @type {{ id: any; }} */ node) {
-      if (node.id != nodeId) nodeIds.push(node.id);
+    nodes.forEach(function(/** @type {{ id: any; }} */ node) {
+      if (node.id != nodeId) {
+        nodeIds.push(node.id);
+      }
     });
     self.data.nodes.remove(nodeIds);
     var edges = self.data.edges.get();
@@ -378,12 +413,14 @@ return false;
      * @type {any[]}
      */
     var edgesIds = [];
-    edges.forEach(function (/** @type {{ from: any; to: any; id: any; }} */ edge) {
-      if (nodeIds.indexOf(edge.from) > -1 || nodeIds.indexOf(edge.to) > -1) edgesIds.push(edge.id);
+    edges.forEach(function(/** @type {{ from: any; to: any; id: any; }} */ edge) {
+      if (nodeIds.indexOf(edge.from) > -1 || nodeIds.indexOf(edge.to) > -1) {
+        edgesIds.push(edge.id);
+      }
     });
     self.data.edges.remove(edgesIds);
   }),
-    (self.onScaleChange = function () {
+    (self.onScaleChange = function() {
       // return;
       var scale = self.network.getScale();
       if (!self.currentScale || Math.abs(scale - self.currentScale) > 0.01) {
@@ -391,26 +428,36 @@ return false;
 
         var size = self.defaultNodeSize / scaleCoef;
         var fontSize = self.defaultTextSize / scaleCoef;
-        if (scale < 1) fontSize = self.defaultTextSize / 1;
-        //fontSize = (self.defaultTextSize / (scaleCoef * 0.8));
-        else fontSize = self.defaultTextSize / (scaleCoef * 1.3);
+        if (scale < 1) {
+          fontSize = self.defaultTextSize / 1;
+        }//fontSize = (self.defaultTextSize / (scaleCoef * 0.8));
+        else {
+          fontSize = self.defaultTextSize / (scaleCoef * 1.3);
+        }
 
         var nodes = self.data.nodes.get();
-        nodes.forEach(function (/** @type {{ size: number; originalSize: number; hiddenLabel: any; label: null; shape: any; font: { size: number; }; }} */ node) {
+        nodes.forEach(function(/** @type {{ size: number; originalSize: number; hiddenLabel: any; label: null; shape: any; font: { size: number; }; }} */ node) {
           if (node.size) {
-            if (!node.originalSize) node.originalSize = node.size;
+            if (!node.originalSize) {
+              node.originalSize = node.size;
+            }
             size = node.originalSize * scaleCoef;
           }
-          if (!node.hiddenLabel) node.hiddenLabel = node.label;
+          if (!node.hiddenLabel) {
+            node.hiddenLabel = node.label;
+          }
           var shape = node.shape;
-          if (!shape) shape = self.defaultNodeShape;
+          if (!shape) {
+            shape = self.defaultNodeShape;
+          }
           if (shape != "box") {
             if (scale > self.showNodesLabelMinScale) {
               node.label = node.hiddenLabel;
               node.size = size;
               node.font = { size: fontSize };
               self.labelsVisible = true;
-            } else {
+            }
+            else {
               node.label = null;
               node.size = size;
               node.font = { size: fontSize };
@@ -423,33 +470,41 @@ return false;
       }
       self.currentScale = scale;
     });
-  self.getExistingIdsMap = function (/** @type {any} */ nodesOnly) {
+  self.getExistingIdsMap = function(/** @type {any} */ nodesOnly) {
     var existingVisjsIds = {};
-    if (!self.data || !self.data.nodes) return {};
+    if (!self.data || !self.data.nodes) {
+      return {};
+    }
     var oldIds = self.data.nodes.getIds();
-    if (!nodesOnly) oldIds = oldIds.concat(self.data.edges.getIds());
-    oldIds.forEach(function (/** @type {string | number} */ id) {
+    if (!nodesOnly) {
+      oldIds = oldIds.concat(self.data.edges.getIds());
+    }
+    oldIds.forEach(function(/** @type {string | number} */ id) {
       existingVisjsIds[id] = 1;
     });
     return existingVisjsIds;
   };
 
-  self.isGraphNotEmpty = function () {
+  self.isGraphNotEmpty = function() {
     // if(self.isGraphNotEmpty()){
     return Object.keys(self.getExistingIdsMap()).length > 0;
   };
 
-  self.graphCsvToClipBoard = function () {
+  self.graphCsvToClipBoard = function() {
     var csv = self.toCsv();
-    common.copyTextToClipboard(csv, function (/** @type {any} */ err, /** @type {any} */ _result) {
-      if (err) MainController.UI.message(err);
+    common.copyTextToClipboard(csv, function(/** @type {any} */ err, /** @type {any} */ _result) {
+      if (err) {
+        MainController.UI.message(err);
+      }
       MainController.UI.message("csv copied in system clipboard");
     });
   };
 
-  self.toCsv = function (/** @type {any[]} */ dataFields) {
+  self.toCsv = function(/** @type {any[]} */ dataFields) {
     var sep = ",";
-    if (dataFields && !Array.isArray(dataFields)) dataFields = [dataFields];
+    if (dataFields && !Array.isArray(dataFields)) {
+      dataFields = [dataFields];
+    }
 
     var nodes = self.data.nodes.get();
     var edges = self.data.edges.get();
@@ -460,10 +515,12 @@ return false;
      * @param {{ id: string; label: string; data: { [x: string]: string; }; }} node
      */
     function getNodeStr(node) {
-      if (node) var str = node.id + sep + node.label;
+      if (node) {
+        var str = node.id + sep + node.label;
+      }
       if (dataFields && node.data) {
         sep +
-        dataFields.forEach(function (/** @type {string | number} */ field) {
+        dataFields.forEach(function(/** @type {string | number} */ field) {
           str += node.data[field];
         });
       }
@@ -471,29 +528,39 @@ return false;
       return str;
     }
 
-    nodes.forEach(function (/** @type {{ id: string | number; }} */ node) {
+    nodes.forEach(function(/** @type {{ id: string | number; }} */ node) {
       nodesMap[node.id] = node;
       if (edges.length == 0) {
         csvStr += getNodeStr(node) + "\n";
       }
     });
-    edges.sort(function (/** @type {{ from: number; }} */ a, /** @type {{ from: number; }} */ b) {
-      if (a.from > b.from) return 1;
-      if (a.from < b.from) return -1;
+    edges.sort(function(/** @type {{ from: number; }} */ a, /** @type {{ from: number; }} */ b) {
+      if (a.from > b.from) {
+        return 1;
+      }
+      if (a.from < b.from) {
+        return -1;
+      }
       return 0;
     });
-    edges.forEach(function (/** @type {{ label: string; from: string | number; to: string | number; }} */ edge) {
+    edges.forEach(function(/** @type {{ label: string; from: string | number; to: string | number; }} */ edge) {
       var edgeLabel = "->";
-      if (edge.label) edgeLabel = edge.label;
+      if (edge.label) {
+        edgeLabel = edge.label;
+      }
       csvStr += getNodeStr(nodesMap[edge.from]) + sep + edgeLabel + sep + getNodeStr(nodesMap[edge.to]) + "\n";
     });
 
     return csvStr;
   };
-  self.getNodeDescendantIds = function (/** @type {any[]} */ nodeIds, /** @type {any} */ includeParents) {
-    if (!Array.isArray(nodeIds)) nodeIds = [nodeIds];
+  self.getNodeDescendantIds = function(/** @type {any[]} */ nodeIds, /** @type {any} */ includeParents) {
+    if (!Array.isArray(nodeIds)) {
+      nodeIds = [nodeIds];
+    }
     var nodes = [];
-    if (includeParents) nodes = nodeIds;
+    if (includeParents) {
+      nodes = nodeIds;
+    }
     var allEdges = self.data.edges.get();
     var allNodes = {};
 
@@ -501,7 +568,7 @@ return false;
      * @param {any} nodeId
      */
     function recurse(nodeId) {
-      allEdges.forEach(function (/** @type {{ from: any; to: string | number; }} */ edge) {
+      allEdges.forEach(function(/** @type {{ from: any; to: string | number; }} */ edge) {
         if (edge.from == nodeId) {
           if (!allNodes[edge.to]) {
             allNodes[edge.to] = 1;
@@ -516,33 +583,35 @@ return false;
       });
     }
 
-    nodeIds.forEach(function (/** @type {any} */ parentId) {
+    nodeIds.forEach(function(/** @type {any} */ parentId) {
       recurse(parentId);
     });
     return nodes;
   };
 
-  self.getNodeDescendants = function (/** @type {any} */ nodeIds, /** @type {any} */ includeParents) {
+  self.getNodeDescendants = function(/** @type {any} */ nodeIds, /** @type {any} */ includeParents) {
     nodeIds = self.getNodeDescendantIds(nodeIds, includeParents);
     return self.data.nodes.get(nodeIds);
   };
 
-  self.getNodesPosition = function () {
+  self.getNodesPosition = function() {
     var positions = self.network.getPositions();
     return positions;
   };
 
-  self.getNodeEdges = function (sourceNodeId, targetNodeId) {
+  self.getNodeEdges = function(sourceNodeId, targetNodeId) {
     var connectedEdges = [];
     var sourceNodeEdges = self.network.getConnectedEdges(sourceNodeId);
-    sourceNodeEdges.forEach(function (edgeId) {
+    sourceNodeEdges.forEach(function(edgeId) {
       var edge = self.data.edges.get(edgeId);
-      if (edge.to == targetNodeId || edge.from == targetNodeId) connectedEdges.push(edge);
+      if (edge.to == targetNodeId || edge.from == targetNodeId) {
+        connectedEdges.push(edge);
+      }
     });
     return connectedEdges;
   };
 
-  self.processClicks = function (
+  self.processClicks = function(
     /** @type {{ edges: string | any[]; nodes: string | any[]; event: { srcEvent: { ctrlKey: any; altKey: any; shiftKey: any; }; }; pointer: { DOM: any; }; }} */ params,
     /** @type {{ fixedLayout: any; onclickFn: (arg0: null, arg1: any, arg2: { dbleClick?: any; ctrlKey?: number; altKey?: number; shiftKey?: number; }) => void; onClusterClickFn: (arg0: any, arg1: any, arg2: { dbleClick: any; ctrlKey: number; altKey: number; shiftKey: number; }) => any; }} */ _options,
     /** @type {any} */ isDbleClick
@@ -556,13 +625,17 @@ return false;
     if (params.edges.length == 0 && params.nodes.length == 0) {
       //simple click stop animation
 
-      if (self.simulationOn || _options.fixedLayout) self.network.stopSimulation();
+      if (self.simulationOn || _options.fixedLayout) {
+        self.network.stopSimulation();
+      }
       else {
         self.network.startSimulation();
       }
       self.simulationOn = !self.simulationOn;
       // graphController.hideNodePopover();
-      if (_options.onclickFn) _options.onclickFn(null, point, {});
+      if (_options.onclickFn) {
+        _options.onclickFn(null, point, {});
+      }
     }
 
     // select node
@@ -571,20 +644,24 @@ return false;
         dbleClick: isDbleClick,
         ctrlKey: params.event.srcEvent.ctrlKey ? 1 : 0,
         altKey: params.event.srcEvent.altKey ? 1 : 0,
-        shiftKey: params.event.srcEvent.shiftKey ? 1 : 0,
+        shiftKey: params.event.srcEvent.shiftKey ? 1 : 0
       };
       var point = params.pointer.DOM;
       var nodeId = params.nodes[0];
       var node = self.data.nodes.get(nodeId);
       if (!node && self.network.isCluster(nodeId)) {
-        if (_options.onClusterClickFn) return _options.onClusterClickFn(nodeId, point, options);
+        if (_options.onClusterClickFn) {
+          return _options.onClusterClickFn(nodeId, point, options);
+        }
       }
 
       node._graphPosition = params.pointer.DOM;
 
       self.context.currentNode = node;
 
-      if (_options.onclickFn) _options.onclickFn(node, point, options);
+      if (_options.onclickFn) {
+        _options.onclickFn(node, point, options);
+      }
     }
 
     //select edge{
@@ -598,13 +675,15 @@ return false;
         dbleClick: isDbleClick,
         ctrlKey: params.event.srcEvent.ctrlKey ? 1 : 0,
         altKey: params.event.srcEvent.altKey ? 1 : 0,
-        shiftKey: params.event.srcEvent.shiftKey ? 1 : 0,
+        shiftKey: params.event.srcEvent.shiftKey ? 1 : 0
       };
-      if (_options.onclickFn) _options.onclickFn(edge, point, options);
+      if (_options.onclickFn) {
+        _options.onclickFn(edge, point, options);
+      }
     }
   };
 
-  self.collapseNode = function (/** @type {any} */ nodeId) {
+  self.collapseNode = function(/** @type {any} */ nodeId) {
     var nodeEdges = self.data.edges.get();
     /**
      * @type {any[]}
@@ -614,23 +693,25 @@ return false;
      * @type {any[]}
      */
     var targetNodes = [];
-    nodeEdges.forEach(function (/** @type {{ from: any; id: any; to: any; }} */ edge) {
+    nodeEdges.forEach(function(/** @type {{ from: any; id: any; to: any; }} */ edge) {
       if (edge.from == nodeId) {
         targetEdges.push(edge.id);
-        if (targetNodes.indexOf(edge.to) < 0) targetNodes.push(edge.to);
+        if (targetNodes.indexOf(edge.to) < 0) {
+          targetNodes.push(edge.to);
+        }
       }
     });
     self.data.edges.remove(targetEdges);
     self.data.nodes.remove(targetNodes);
   };
 
-  self.focusOnNode = function (/** @type {any} */ id, /** @type {any} */ _label) {
+  self.focusOnNode = function(/** @type {any} */ id, /** @type {any} */ _label) {
     if (id) {
       /**
        * @type {{ id: any; shape: string; size: any; }[]}
        */
       var newNodes = [];
-      self.data.nodes.getIds().forEach(function (/** @type {any} */ nodeId) {
+      self.data.nodes.getIds().forEach(function(/** @type {any} */ nodeId) {
         var shape = "dot";
         var size = self.defaultNodeSize;
         if (nodeId == id) {
@@ -641,22 +722,22 @@ return false;
       });
       self.data.nodes.update(newNodes);
 
-      setTimeout(function () {
+      setTimeout(function() {
         self.network.focus(id, {
           scale: 1,
-          animation: true,
+          animation: true
         });
       }, 100);
     }
   };
 
-  self.setNodesProperty = function (/** @type {{ [x: string]: any; }} */ conditions, /** @type {any} */ hide) {
+  self.setNodesProperty = function(/** @type {{ [x: string]: any; }} */ conditions, /** @type {any} */ hide) {
     var nodes = self.data.nodes.get();
     /**
      * @type {{ id: any; hidden: any; }[]}
      */
     var newNodes = [];
-    nodes.forEach(function (/** @type {{ data: { [x: string]: any; }; id: any; }} */ node) {
+    nodes.forEach(function(/** @type {{ data: { [x: string]: any; }; id: any; }} */ node) {
       for (var key in conditions) {
         if (node.data[key] == conditions[key]) {
           newNodes.push({ id: node.id, hidden: hide });
@@ -666,13 +747,13 @@ return false;
     self.data.nodes.update(newNodes);
   };
 
-  self.hideShowNodes = function (/** @type {{ [x: string]: any; }} */ conditions, /** @type {any} */ hide) {
+  self.hideShowNodes = function(/** @type {{ [x: string]: any; }} */ conditions, /** @type {any} */ hide) {
     var nodes = self.data.nodes.get();
     /**
      * @type {{ id: any; hidden: any; }[]}
      */
     var newNodes = [];
-    nodes.forEach(function (/** @type {{ data: { [x: string]: any; }; id: any; }} */ node) {
+    nodes.forEach(function(/** @type {{ data: { [x: string]: any; }; id: any; }} */ node) {
       for (var key in conditions) {
         if (node.data[key] == conditions[key]) {
           newNodes.push({ id: node.id, hidden: hide });
@@ -681,26 +762,28 @@ return false;
     });
     self.data.nodes.update(newNodes);
   };
-  self.toSVG = function () {
+  self.toSVG = function() {
     SVGexport.toSVG(self.network);
     self.redraw();
   };
 
-  self.toGraphMl = function () {
+  self.toGraphMl = function() {
     var visjsData = {
       nodes: self.data.nodes.get(),
-      edges: self.data.edges.get(),
+      edges: self.data.edges.get()
     };
     var xmlStr = GraphMlExport.VisjsDataToGraphMl(visjsData);
     common.copyTextToClipboard(xmlStr);
   };
 
-  self.searchNode = function (/** @type {any} */ id, /** @type {string | number | string[] | undefined} */ word) {
+  self.searchNode = function(/** @type {any} */ id, /** @type {string | number | string[] | undefined} */ word) {
     /*   if (word === null && !id)
     return;*/
     if (!word || word == "") {
       word = $("#visjsGraph_searchInput").val();
-      if (word == "") return;
+      if (word == "") {
+        return;
+      }
     }
 
     var nodes = self.data.nodes.get();
@@ -712,7 +795,7 @@ return false;
      * @type {{ id: any; shape: string; size: any; }[]}
      */
     var newNodes = [];
-    nodes.forEach(function (/** @type {{ data: { label: string; }; id: any; }} */ node) {
+    nodes.forEach(function(/** @type {{ data: { label: string; }; id: any; }} */ node) {
       var shape = "dot";
       var size = self.defaultNodeSize;
       var ok = false;
@@ -730,23 +813,25 @@ return false;
       newNodes.push({ id: node.id, shape: shape, size: size });
     });
     self.data.nodes.update(newNodes);
-    matches.forEach(function (match, index) {
+    matches.forEach(function(match, index) {
       if (index == 0) {
-        setTimeout(function () {
+        setTimeout(function() {
           self.network.focus(match, {
             scale: 1,
-            animation: true,
+            animation: true
           });
         }, 500);
       }
     });
   };
 
-  self.saveGraph = function (
+  self.saveGraph = function(
     /** @type {string | number | boolean | string[] | ((this: HTMLElement, index: number, attr: string) => string | number | void | undefined) | ((this: HTMLElement, index: number, text: string) => string | number | boolean) | null} */ fileName,
     /** @type {any} */ raw
   ) {
-    if (!self.currentContext) return;
+    if (!self.currentContext) {
+      return;
+    }
     var positions = self.network.getPositions();
 
     if (!raw) {
@@ -760,14 +845,20 @@ return false;
       nodes: self.data.nodes.get(),
       edges: self.data.edges.get(),
       context: self.currentContext,
-      positions: positions,
+      positions: positions
     };
-    if (!fileName) fileName = prompt("graph name");
-    if (!fileName || fileName == "") return;
-    if (fileName.indexOf(".json") < 0) fileName = fileName + ".json";
+    if (!fileName) {
+      fileName = prompt("graph name");
+    }
+    if (!fileName || fileName == "") {
+      return;
+    }
+    if (fileName.indexOf(".json") < 0) {
+      fileName = fileName + ".json";
+    }
     var payload = {
       fileName: fileName,
-      data: data,
+      data: data
     };
 
     $.ajax({
@@ -775,42 +866,48 @@ return false;
       url: Config.apiUrl + "/data",
       data: payload,
       dataType: "json",
-      success: function (_result, _textStatus, _jqXHR) {
+      success: function(_result, _textStatus, _jqXHR) {
         $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
         MainController.UI.message("graph saved");
       },
       error(err) {
         return alert(err);
-      },
+      }
     });
   };
 
-  self.message = function (/** @type {string | JQuery.Node | ((this: HTMLElement, index: number, oldhtml: string) => string | JQuery.Node)} */ message) {
+  self.message = function(/** @type {string | JQuery.Node | ((this: HTMLElement, index: number, oldhtml: string) => string | JQuery.Node)} */ message) {
     $("#VisJsGraph_message").html(message);
   };
 
-  self.loadGraph = function (
+  self.loadGraph = function(
     /** @type {string | number | string[] | undefined} */ fileName,
     /** @type {any} */ add,
     /** @type {(arg0: null, arg1: { nodes: never[]; edges: never[]; }) => void} */ callback
   ) {
-    if (!fileName) fileName = $("#visjsGraph_savedGraphsSelect").val();
+    if (!fileName) {
+      fileName = $("#visjsGraph_savedGraphsSelect").val();
+    }
     var addToCurrentGraph = $("#visjsGraph_addToCurrentGraphCBX").prop("checked");
-    if (!fileName || fileName == "") return;
+    if (!fileName || fileName == "") {
+      return;
+    }
 
     self.message("Loading Graph...");
     $.ajax({
       type: "GET",
       url: `${Config.apiUrl}/data/file?dir=graphs&name=${fileName}`,
       dataType: "json",
-      success: function (result, _textStatus, _jqXHR) {
+      success: function(result, _textStatus, _jqXHR) {
         var data = JSON.parse(result);
         var positions = data.positions;
         var options = data.context.options;
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = {};
-        if (addToCurrentGraph) existingNodes = self.getExistingIdsMap();
-        data.nodes.forEach(function (/** @type {{ id: string | number; fixed: { x: boolean; y: boolean; }; x: any; y: any; }} */ node) {
+        if (addToCurrentGraph) {
+          existingNodes = self.getExistingIdsMap();
+        }
+        data.nodes.forEach(function(/** @type {{ id: string | number; fixed: { x: boolean; y: boolean; }; x: any; y: any; }} */ node) {
           if (!existingNodes[node.id]) {
             existingNodes[node.id] = 1;
             if ((node.fixed && positions[node.id]) || options.nodes.fixed) {
@@ -822,20 +919,23 @@ return false;
           }
         });
 
-        data.edges.forEach(function (/** @type {{ id: string | number; }} */ edge) {
+        data.edges.forEach(function(/** @type {{ id: string | number; }} */ edge) {
           if (!existingNodes[edge.id]) {
             existingNodes[edge.id] = 1;
             visjsData.edges.push(edge);
           }
         });
 
-        if (callback) return callback(null, visjsData);
+        if (callback) {
+          return callback(null, visjsData);
+        }
 
         if (add || (addToCurrentGraph && self.data.nodes && self.data.nodes.getIds().length > 0)) {
           self.data.nodes.add(visjsData.nodes);
           self.data.edges.add(visjsData.edges);
           self.message("");
-        } else {
+        }
+        else {
           //functions
           var context = JSON.parse(JSON.stringify(data.context).replace(/self./g, "Lineage_classes."));
           //  var context = data.context
@@ -845,11 +945,14 @@ return false;
               context.options[key] = eval(key + "=" + context.options[key]);
             }
           }
-          if (context.callback) callback = context.callback;
+          if (context.callback) {
+            callback = context.callback;
+          }
           if (self.isGraphNotEmpty()) {
             self.data.edges.add(visjsData.edges);
             self.data.nodes.add(visjsData.nodes);
-          } else {
+          }
+          else {
             self.draw(context.divId, visjsData, context.options, callback);
           }
           self.message("");
@@ -857,7 +960,7 @@ return false;
       },
       error(err) {
         return alert(err);
-      },
+      }
     });
   };
   /**
@@ -871,24 +974,28 @@ return false;
    * @todo Can't find the place where visjsGraph_savedGraphsSelect is
    * declared in HTML files.
    */
-  self.listSavedGraphs = function (callback) {
+  self.listSavedGraphs = function(callback) {
     $.ajax({
       type: "GET",
       url: Config.apiUrl + "/data/files",
       data: { dir: "graphs" },
       dataType: "json",
-      success: function (result, _textStatus, _jqXHR) {
-        if (callback) return callback(null, result);
+      success: function(result, _textStatus, _jqXHR) {
+        if (callback) {
+          return callback(null, result);
+        }
         common.fillSelectOptions("visjsGraph_savedGraphsSelect", result, true);
       },
       error(_jqXHR, _status, err) {
-        if (callback) return callback(err);
+        if (callback) {
+          return callback(err);
+        }
         return alert(err);
-      },
+      }
     });
   };
 
-  self.showGraphConfig = function () {
+  self.showGraphConfig = function() {
     $("#visjsConfigureDiv").dialog({
       //   autoOpen: false,
       height: 700,
@@ -900,7 +1007,7 @@ return false;
 
     //    $('#graphConfigDiv').dialog("open")
 
-    setTimeout(function () {
+    setTimeout(function() {
       // these are all options in full.
       var options = {
         configure: {
@@ -914,7 +1021,7 @@ return false;
 
       self.network.setOptions(options);
 
-      setTimeout(function () {
+      setTimeout(function() {
         $("#graphDisplay_theme").remove();
         $("#visjsConfigureDiv").prepend(
           "<div id='graphDisplay_theme' class='div.vis-configuration.vis-config-item '>theme" +
@@ -926,9 +1033,7 @@ return false;
       }, 500);
     }, 500);
   };
-  
-  
-  
+
 
 }
 

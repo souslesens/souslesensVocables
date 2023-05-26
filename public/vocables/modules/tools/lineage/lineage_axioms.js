@@ -7,7 +7,8 @@ import VisjsUtil from "../../graph/visjsUtil.js";
 import Lineage_classes from "./lineage_classes.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import common from "../../shared/common.js";
-
+import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 
 
 var Lineage_axioms = (function() {
@@ -50,7 +51,7 @@ var Lineage_axioms = (function() {
 
   self.drawNodeAxioms = function(sourceLabel, nodeId, divId, depth) {
     if (!depth) {
-      depth = 5;
+      depth = 3;
     }
     $("#nodeInfosWidget_depthSpan").html("" + depth);
     self.context = {
@@ -155,7 +156,7 @@ var Lineage_axioms = (function() {
           if (!existingNodes[item.s.value]) {
 
 
-            var options = { level: level,type:item.sType?item.sType.value:null };
+            var options = { level: level, type: item.sType ? item.sType.value : null };
             options.size = 10;
             if (item.sType && item.sType.value.indexOf("roperty") > -1) {
               options.shape = "triangle";
@@ -199,7 +200,7 @@ var Lineage_axioms = (function() {
           }
           else {
             if (!existingNodes[targetItem.s.value]) {
-              var options = { level: level + 1,type:targetItem.sType?targetItem.sType.value:null  };
+              var options = { level: level + 1, type: targetItem.sType ? targetItem.sType.value : null };
               options.size = 10;
               options.color = "#00afef";
               if (targetItem.sType && targetItem.sType.value.indexOf("roperty") > -1) {
@@ -298,7 +299,7 @@ var Lineage_axioms = (function() {
 
 
     var graphDivContainer = "axiomsGraphDivContainer";
-    $("#" + graphDivContainer).html("<div id='axiomsGraphDiv' style='width:800px;height:600px'></div>");
+    $("#" + graphDivContainer).html("<div id='axiomsGraphDiv' style='width:100%;height:100%'></div>");
     var axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv", visjsData, options);
     axiomsVisjsGraph.draw(function() {
 
@@ -309,16 +310,18 @@ var Lineage_axioms = (function() {
     /*  $("#nodeInfosWidget_tabsDiv").tabs("option", "active", 0);
       NodeInfosWidget.drawAllInfos(node.data.source, node.data.id);*/
 
-    self.currentGraphNode=node;
+    self.currentGraphNode = node;
     if (!node) {
       return $("#nodeInfosWidget_HoverDiv").css("display", "none");
-    }
+    }else{self.currentGraphNode = node;}
 
     self.showNodeInfos(node, point, options);
 
   };
   self.showGraphPopupMenu = function(node, point, options) {
 
+    if(node)
+      self.currentGraphNode = node
     $("#axioms_predicatesDiv").dialog("open");
     var html = " <span class=\"popupMenuItem\" onclick=\"Lineage_axioms.addAxiomDialog();\"> Add Axiom</span>";
     $("#axioms_predicatesDiv").html(html);
@@ -335,36 +338,36 @@ var Lineage_axioms = (function() {
   self.showNodeInfos = function(node, point, options) {
     var html = "<table >";
 
+
+    html += "<tr><td>uri</td><td>" + node.data.id + "</td></tr>";
+    if (node.data.label) {
+      html += "<tr><td>label</td><td>" + node.data.label + "</td></tr>";
+    }
+    if (node.data.type) {
+      html += "<tr><td>type</td><td>" + node.data.type + "</td></tr>";
+    }
     var infos = node.data.infos;
+    if (infos) {
+      html += "<tr style='border: #0e0e0e 1px solid'><td>children</td><td>";
+      infos.children.forEach(function(item, index) {
+        if (index > 0) {
+          html += "<br>";
+        }
+        html += item.pred + "<b>-></b>" + item.obj;
 
-    html += "<tr><td>uri</td><td>" + infos.s.value + "</td></tr>";
-    if (infos.sLabel) {
-      html += "<tr><td>label</td><td>" + infos.sLabel.value + "</td></tr>";
+      });
+      html += "</td</tr>";
+
+
+      html += "<tr style='border: #0e0e0e 1px solid'><td>ancestors</td><td>";
+      infos.parents.forEach(function(item, index) {
+        if (index > 0) {
+          html += "<br>";
+        }
+        html += item;
+      });
+      html += "</td</tr>";
     }
-    if (infos.sType) {
-      html += "<tr><td>type</td><td>" + infos.sType.value + "</td></tr>";
-    }
-
-
-    html += "<tr style='border: #0e0e0e 1px solid'><td>children</td><td>";
-    infos.children.forEach(function(item, index) {
-      if (index > 0) {
-        html += "<br>";
-      }
-      html += item.pred + "<b>-></b>" + item.obj;
-
-    });
-    html += "</td</tr>";
-
-
-    html += "<tr style='border: #0e0e0e 1px solid'><td>ancestors</td><td>";
-    infos.parents.forEach(function(item, index) {
-      if (index > 0) {
-        html += "<br>";
-      }
-      html += item;
-    });
-    html += "</td</tr>";
 
 
     html += "</table>";
@@ -396,14 +399,14 @@ var Lineage_axioms = (function() {
           nodeLabel = item.object.value;
         }
         if (item.predicate.value.indexOf("type") > -1) {
-          nodeTypes.push( item.object.value);
+          nodeTypes.push(item.object.value);
         }
       });
       var options = {
         level: 1,
         type: nodeTypes
       };
-      var node = VisjsUtil.getVisjsNode(sourceLabel, nodeId, nodeLabel || Sparql_common.getLabelFromURI(nodeId), null,options);
+      var node = VisjsUtil.getVisjsNode(sourceLabel, nodeId, nodeLabel || Sparql_common.getLabelFromURI(nodeId), null, options);
 
       visjsData.nodes.push(node);
 
@@ -476,32 +479,168 @@ var Lineage_axioms = (function() {
   };
 
   self.addAxiomDialog = function() {
-    var types=self.currentGraphNode.data.type;
+    var types = self.currentGraphNode.data.type;
+    if(!Array.isArray(types))
+      types=[types]
+
+
     var owlConstraints = Config.ontologiesVocabularyModels["owl"].constraints;
     var rdfsConstraints = Config.ontologiesVocabularyModels["rdfs"].constraints;
 
 
-    var possiblePredicates= {  }
-    for (var key in owlConstraints){
-      if(types.indexOf(owlConstraints[key].domain)>-1){
-        possiblePredicates[key]=owlConstraints[key]
+    Sparql_OWL.getNodesAncestors("owl", types, {}, function(err, result) {
+      if (err) {
+        return alert(err.responseText);
       }
-    }
-    for (var key in rdfsConstraints){
-      if(types.indexOf(rdfsConstraints[key].domain)>-1){
-        possiblePredicates[key]=rdfsConstraints[key]
+      result.forEach(function(item){
+        if(types.indexOf(item.superClass.value)<0)
+          types.push(item.superClass.value)
+      })
+
+      self.possiblePredicates = {};
+      for (var key in owlConstraints) {
+        if (types.indexOf(owlConstraints[key].domain) > -1) {
+          self.possiblePredicates[key] = owlConstraints[key];
+        }
       }
-    }
+      for (var key in rdfsConstraints) {
+        if (types.indexOf(rdfsConstraints[key].domain) > -1) {
+          self.possiblePredicates[key] = rdfsConstraints[key];
+        }
+      }
 
-   var html= "predicate <select id='axioms_predicateSelect'></select>" +
-    "<button onclick=''>OK</button>";
+      var html = "Predicate <br></br><select id='axioms_predicateTypeSelect' onchange='Lineage_axioms.onSelectPredicate($(this).val())'></select><br></br>" +
+    "Object rdf:type<select id='axioms_objectTypeSelect'></select><br>" +
+        "<div id='axioms_objectsDiv'></div>"
+        "<button onclick='Lineage_axioms.onCreatePredicateOK()'>OK</button>";
 
 
-    $("#axioms_predicatesDiv").html(html);
-   common.fillSelectOptions("axioms_predicateSelect",Object.keys(possiblePredicates),true)
+      $("#axioms_predicatesDiv").html(html);
+      common.fillSelectOptions("axioms_predicateTypeSelect", Object.keys( self.possiblePredicates), true);
+    });
 
   };
 
+  self.onSelectPredicate=function(predicateId){
+    var source=self.currentGraphNode.data.source
+    var constraint=self.possiblePredicates[predicateId];
+    var range=constraint.range
+    common.fillSelectOptions("axioms_objectTypeSelect", [range], true);
+    var html="";
+
+
+    if(range=="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"){
+      html+="rdf:first Type <select id='axioms_listFirstTypeSelect' onchange='Lineage_axioms.onSelectListFirstType($(this).val())'>" +
+        "<option></option>"+
+        "<option value='currentSourceClass'> Class from "+source+" </option>"+
+        "<option  value='currentSourceNew'>New Class from "+source+" </option>"+
+        "<option  value='axiom'>Axiom</option>"+
+        "</select>" +
+        "<br><br>"+
+        "<div id='axioms_conditionalPredicatesDiv'></div>"+
+        "<button onclick='Lineage_axioms.createListEntities()'>OK</button>"
+
+
+      $("#axioms_objectsDiv").append(html);
+
+
+    }
+
+
+
+
+  }
+
+  self.onSelectListFirstType=function(type){
+    $("#axioms_conditionalPredicatesDiv").html("")
+    var source=self.currentGraphNode.data.source
+    if(type=='currentSourceClass')
+    {
+      var html="Class <select id='axioms_predicateList_first'></select><br>"
+      $("#axioms_conditionalPredicatesDiv").append(html);
+      PromptedSelectWidget.prompt("owl:Class","axioms_predicateList_first",source)
+
+    }
+    else   if(type=='currentSourceNew')
+    {
+      var html="Entity <select id='axioms_predicateList_first'></select>"
+      $("#axioms_conditionalPredicatesDiv").append(html);
+      var declarations = self.owl2Vocabulary.Declarations;
+      common.fillSelectOptions("axioms_predicateList_first", declarations, true);
+      var label =prompt("New entity label(optional)");
+
+      var id = label;
+      if (!id) {
+        id = common.getRandomHexaId(5);
+      }
+      var proposedUri = Config.sources[source].graphUri + id;
+      proposedUri = prompt("Confirm or modify node uri and create entity", proposedUri);
+      var html="<input id='axioms_predicateList_first' value='"+proposedUri+" (+"+label+")'>"
+      $("#axioms_conditionalPredicatesDiv").append(html);
+    }
+    else   if(type=='axiom'){
+      var html="Axiom <select id='axioms_predicateList_first'></select>"
+      $("#axioms_conditionalPredicatesDiv").append(html);
+      var owlClasses=Config.ontologiesVocabularyModels["owl"].classes
+      common.fillSelectOptions("axioms_predicateList_first", Object.keys( owlClasses), true);
+    }
+  }
+
+
+  self.createListEntities=function(){
+
+  }
+
+
+
+
+  self.onCreatePredicateOK=function(){
+    var predicateType=$("#axioms_predicateTypeSelect").val();
+    var label = $("#axioms_objectLabel").val();
+    var objectType = $("#axioms_objectTypeSelect").val();
+    if (!predicateType || !objectType) {
+      return alert(" objectType or predicateType  missing");
+    }
+    var id = label;
+    if (!id) {
+      id = common.getRandomHexaId(5);
+    }
+    var proposedUri = Config.sources[self.currentGraphNode.data.source].graphUri + id;
+    proposedUri = prompt("Confirm or modify node uri and create entity", proposedUri);
+    if (!proposedUri) {
+      return;
+    }
+    var triples = [];
+    triples.push({
+      subject: proposedUri,
+      predicate: "rdf:type",
+      object: objectType
+    });
+    if (label) {
+      triples.push({
+        subject: proposedUri,
+        predicate: "rdfs:label",
+        object: label
+      });
+    }
+
+      triples.push({
+        subject: self.currentGraphNode.data.id,
+        predicate: predicateType,
+        object: proposedUri
+      });
+
+
+
+    Sparql_generic.insertTriples(self.currentGraphNode.data.source, triples, {}, function(err, result) {
+      if (err) {
+        alert(err.responseText);
+      }
+    self.drawNodeAxioms(self.currentGraphNode.data.source, self.currentGraphNode.data.id,self.context.divId, self.currentGraphNode.level+1)
+      $("#axioms_predicatesDiv").dialog("close");
+
+    });
+  }
 
   self.owl2Vocabulary =
     {

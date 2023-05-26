@@ -4,7 +4,7 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 
 var PromptedSelectWidget = (function () {
     var self = {};
-    self.prompt = function (type, selectId, source) {
+    self.prompt = function (type, selectId, source,options) {
         if (Config.selectListsCache[type]) {
             return common.fillSelectOptions(selectId, Config.selectListsCache[type], true, "label", "id");
         }

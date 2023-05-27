@@ -1,67 +1,72 @@
 <style>
 
 
-    #axiomsCreate_listAxiomDiv {
+    #axiomsCreate_listAxiomDivW {
         margin: 5px;
         padding: 5px;
         background-color: #ddd;
     }
+    .axioms_predicatesItemDiv{
+        display: flex;flex-direction: row;
+        with:400px;
+        height: 30px;
+        margin: 3px;
+        padding: 2px;
+        border-radius: 5px;
+        justify-content: space-evenly;
+        background-color: #ddd;
+
+    }
+
 
 </style>
 
-<div id="axioms_predicatesDiv" class="ui-dialog-content ui-widget-content">
-  <table>
+<div id="axioms_predicatesDiv" style="display: flex;flex-direction: column">
+  <div class="axioms_predicatesItemDiv">
+    Axiom type
 
-    <tr>
-      <td>Axiom type</td>
-      <td>
-        <select id="axioms_axiomTypeSelect"
-                onchange="Lineage_axioms_create.onAxiomTypeSelect($(this).val())">
+    <select id="axioms_axiomTypeSelect"
+            onchange="Lineage_axioms_create.onAxiomTypeSelect($(this).val())">
 
-        </select>
-      </td>
+    </select>
+  </div>
 
-    </tr>
-    <tr>
-      <td>Axiom Range</td>
-      <td>
-        <select id="axioms_axiomRangeSelect"
-                onchange="Lineage_axioms_create.onAxiomRangeSelect($(this).val())"></select>
-      </td>
-    </tr>
-  </table>
+  <div class="axioms_predicatesItemDiv">
+    Axiom Range
+    <select id="axioms_axiomRangeSelect"
+            onchange="Lineage_axioms_create.onAxiomRangeSelect($(this).val())"></select>
+  </div>
 
-  <div id="axiomsCreate_listAxiomDiv">
-    <b> First Entity of List</b><br>
-    <table>
-      <tr>
-        <td>entity origin</td>
-        <td>
-          <select id="axioms_create_entityOriginSelect"
-                  onchange="Lineage_axioms_create.onSelectEntityOrigin($(this).val())"></select>
+  <div id="axiomsCreate_listAxiomDiv" style="display: flex;flex-direction: column">
 
-          ></select>
-        </td>
-      </tr>
 
-      <tr>
-        <td>entity type</td>
-        <td>
-          <select id="axioms_create_entityTypeSelect"
-                  onchange="Lineage_axioms_create.onSelectEntityType($(this).val())"></select>
+    <div class="axioms_predicatesItemDiv" id="axioms_create_rangePropertyDiv">range property (if any)
+      <select id="axioms_create_rangePropertySelect"
+              onchange="Lineage_axioms_create.onSelectRangeProperty($(this).val())"></select>
 
-          </select>
-        </td>
-      </tr>
+    </div>
 
-      <tr>
-        <td>entity value</td>
-        <td>
-          <select id="axiomsCreate_entityValueSelect"></select>
-        </td>
-      </tr>
+    <div class="axioms_predicatesItemDiv" >
+      entity type
+      <select id="axioms_create_entityTypeSelect"
+              onchange="Lineage_axioms_create.onSelectEntityType($(this).val())"></select>
 
-    </table>
+      </select>
+    </div>
+
+
+    <div class="axioms_predicatesItemDiv">entity origin
+      <select id="axioms_create_entityOriginSelect"
+              onchange="Lineage_axioms_create.onSelectEntityOrigin($(this).val())"></select>
+
+    </div>
+
+
+    <div class="axioms_predicatesItemDiv">
+      entity value
+      <select id="axiomsCreate_entityValueSelect"></select>
+    </div>
+
   </div>
 
 

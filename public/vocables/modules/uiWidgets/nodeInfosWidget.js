@@ -8,6 +8,7 @@ import ElasticSearchProxy from "../search/elasticSearchProxy.js";
 import SearchUtil from "../search/searchUtil.js";
 import MainController from "../shared/mainController.js";
 import PredicatesSelectorWidget from "./predicatesSelectorWidget.js";
+import Lineage_axioms_draw from "../tools/lineage/lineage_axioms_draw.js";
 
 var NodeInfosWidget = (function() {
   var self = {};
@@ -21,7 +22,7 @@ var NodeInfosWidget = (function() {
         activate: function(event, ui) {
           if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
             setTimeout(function() {
-              Lineage_axioms.drawNodeAxioms(self.currentSource, self.currentNodeId);
+              Lineage_axioms_draw.drawNodeAxioms(self.currentSource, self.currentNodeId);
             }, 1000);
           }
 
@@ -61,7 +62,7 @@ var NodeInfosWidget = (function() {
 
     if (!node) {
       self.initDialog(sourceLabel, divId, function() {
-        Lineage_axioms.currentSource = sourceLabel;
+        Lineage_axioms_draw.currentSource = sourceLabel;
         //   self.showNodeInfosToolbar(options);
       });
 

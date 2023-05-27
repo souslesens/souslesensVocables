@@ -5,8 +5,10 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 var PromptedSelectWidget = (function () {
     var self = {};
     self.prompt = function (type, selectId, source,options) {
-        if (Config.selectListsCache[type]) {
-            return common.fillSelectOptions(selectId, Config.selectListsCache[type], true, "label", "id");
+        if(!options)
+            ooptions={}
+        if (!options.noCache && Config.selectListsCache[source+"_"+type]) {
+            return common.fillSelectOptions(selectId, Config.selectListsCache[source+"_"+type], true, "label", "id");
         }
 
         var term = prompt(" filter values ...");
@@ -51,8 +53,8 @@ var PromptedSelectWidget = (function () {
                 }
                 return 0;
             });
-            if (result.length <= Config.minSelectListSize) {
-                Config.selectListsCache[type] = objs;
+            if (!options.noCache && result.length <= Config.minSelectListSize) {
+                Config.selectListsCache[source+"_"+type] = objs;
             }
 
             common.fillSelectOptions(selectId, objs, true, "label", "id");

@@ -12,12 +12,16 @@ import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 import Lineage_axioms_draw from "./lineage_axioms_draw.js";
 
 
+
 var Lineage_axioms_create = (function() {
   var self = {};
+  self.dictionary = {};
+
+  self.currentTriples = {};
 
   self.showAdAxiomDialog = function(divId) {
 
-
+    self.context = Lineage_axioms_draw.context;
     $("#" + divId).load("snippets/lineage/lineage_axiomsCreateDialog.html", function() {
       self.currentGraphNode = Lineage_axioms_draw.currentGraphNode;
       if (!self.currentGraphNode || !self.currentGraphNode.data) {
@@ -33,8 +37,6 @@ var Lineage_axioms_create = (function() {
       }
 
 
-
-
       Sparql_OWL.getNodesAncestors("owl", types, {}, function(err, result) {
         if (err) {
           return alert(err.responseText);
@@ -47,12 +49,11 @@ var Lineage_axioms_create = (function() {
 
         self.possiblePredicates = {};
         types.forEach(function(type) {
-         var typePredicates= self.getEntityPossibleProperties(["owl", "rdf", "rdfs"], type, null)
-          for(var key in typePredicates) {
-            self.possiblePredicates[key] = typePredicates[key]
+          var typePredicates = self.getEntityPossibleProperties(["owl", "rdf", "rdfs"], type, null);
+          for (var key in typePredicates) {
+            self.possiblePredicates[key] = typePredicates[key];
           }
-        })
-
+        });
 
 
         common.fillSelectOptions("axioms_axiomTypeSelect", Object.keys(self.possiblePredicates), true);
@@ -82,8 +83,10 @@ var Lineage_axioms_create = (function() {
 
 
   self.onAxiomTypeSelect = function(axiomTypeId) {
-    if(!axiomTypeId)
+    if (!axiomTypeId) {
       return;
+    }
+
 
     common.fillSelectOptions("axioms_axiomRangeSelect", [], true);
     common.fillSelectOptions("axioms_create_entityTypeSelect", [], true);
@@ -112,36 +115,36 @@ var Lineage_axioms_create = (function() {
       common.fillSelectOptions("axioms_axiomRangeSelect", ranges, true);
       self.setSelectMostCommonOptionsColor("axioms_axiomRangeSelect");
 
-    });
+  });
 
   };
 
   self.onAxiomRangeSelect = function(range) {
-
+    self.currentDijonctionNode = null;
     common.fillSelectOptions("axioms_create_entityTypeSelect", [], true);
     common.fillSelectOptions("axioms_create_rangePropertySelect", [], true);
     common.fillSelectOptions("axiomsCreate_entityValueSelect", [], true);
 
-    if(!range)
+    if (!range) {
       return;
+    }
 
     if (range == "https://www.w3.org/2002/07/owl#Class") {
       return common.fillSelectOptions("axioms_create_entityTypeSelect", [range], true);
     }
 
 
-
-
-    self.rangePossibleProperties =self.getEntityPossibleProperties(["owl","rdf","rdfs"],range,null)
+    self.rangePossibleProperties = self.getEntityPossibleProperties(["owl", "rdf", "rdfs"], range, null);
     var rangePossiblePropertiesArray = Object.keys(self.rangePossibleProperties);
 
 
     if (rangePossiblePropertiesArray.length > 0) {
+
       common.fillSelectOptions("axioms_create_rangePropertySelect", rangePossiblePropertiesArray, true);
     }
 
-     var entityTypes=[range]
-      common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes, );
+    var entityTypes = [range];
+    common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes);
 
 
   };
@@ -156,17 +159,20 @@ var Lineage_axioms_create = (function() {
     var rangePropertyRanges = [self.rangePossibleProperties[rangeProperty].range];
 
 
-    var options = { specificPredicates: ["rdfs:subClassOf"] };
+    var options = { specificPredicates: ["rdfs:subClassOf"],includeSources:["rdf","rdfs"] };
     Sparql_OWL.getNodeChildren("owl", null, rangePropertyRanges, 1, options, function(err, result) {
       if (err) {
         return alert(err.responseText);
       }
+
       result.forEach(function(item) {
         if (rangePropertyRanges.indexOf(item.child1.value) < 0) {
           rangePropertyRanges.push(item.child1.value);
+
         }
       });
-
+if(rangePropertyRanges.indexOf("http://www.w3.org/2000/01/rdf-schema#Resource")>-1)
+  rangePropertyRanges.push("http://www.w3.org/2002/07/owl#Class")
       rangePropertyRanges.sort();
       common.fillSelectOptions("axioms_create_entityTypeSelect", rangePropertyRanges, true);
 
@@ -215,7 +221,8 @@ var Lineage_axioms_create = (function() {
 
     else {
 
-      PromptedSelectWidget.prompt("<"+type+">", "axiomsCreate_entityValueSelect", origin, { noCache: 1 });
+        PromptedSelectWidget.prompt("<" + type + ">", "axiomsCreate_entityValueSelect", origin, { noCache: 1 });
+
 
     }
 
@@ -224,6 +231,7 @@ var Lineage_axioms_create = (function() {
 
 
   self.showTriples = function() {
+
     var errorMessage = "";
     var axiomType = $("#axioms_axiomTypeSelect").val();
     var axiomRange = $("#axioms_axiomRangeSelect").val();
@@ -234,6 +242,12 @@ var Lineage_axioms_create = (function() {
     var entityLabel = $("#axiomsCreate_entityLabelInput").val();
 
 
+    self.dictionary[axiomType] = $("#axioms_axiomTypeSelect").text();
+    self.dictionary[axiomRange] = $("#axioms_axiomRangeSelect").text();
+    self.dictionary[axiomRangeProperty] = $("#axioms_create_rangePropertySelect").text();
+    self.dictionary[entityValue] = entityLabel || $("#axiomsCreate_entityLabelInput").text();
+
+
     if (entityOrigin == "_newOwlEntity" && !entityType) {
       errorMessage += "entity type is mandatory for new entity<br>";
     }
@@ -242,7 +256,6 @@ var Lineage_axioms_create = (function() {
     if (errorMessage) {
       return $("#axiomsCreate_infosDiv").html(errorMessage);
     }
-
 
 
     var triples = [];
@@ -270,9 +283,6 @@ var Lineage_axioms_create = (function() {
     }
 
 
-
-
-
     if (axiomRange == "http://www.w3.org/2002/07/owl#Class") {
       triples.push({
         subject: self.currentGraphNode.data.id,
@@ -295,57 +305,78 @@ var Lineage_axioms_create = (function() {
       }
     }
 
-    else if(axiomRange=="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"){
+    else if (axiomRange == "http://www.w3.org/1999/02/22-rdf-syntax-ns#List") {
 
-      var blankNode="<_:"+common.getRandomHexaId(10)+">"
+      var blankNode =self.currentDijonctionNode || "<_:" + common.getRandomHexaId(10) + ">";
+
+      if(!self.currentDijonctionNode) {
+        triples.push({
+          subject: self.currentGraphNode.data.id,
+          predicate: axiomType,
+          object: blankNode
+        });
+      }
       triples.push({
-        subject: self.currentGraphNode.data.id,
-        predicate: axiomType,
-        object: blankNode
-      });
-      triples.push({
-        subject:  blankNode,
+        subject: blankNode,
         predicate: axiomRangeProperty,
         object: entityValue
       });
+      self.currentDijonctionNode = blankNode;
 
+    }
+
+
+    function triplesToHtml(triples, divId) {
+
+      var index = Object.keys(self.currentTriples).length;
+      var triplesDivId = "TRIPLES_" + index;
+      self.currentTriples[triplesDivId] = triples;
+
+      function getLabel(uri) {
+        return Sparql_common.getLabelFromURI(uri);
+      }
+
+
+      var html = "";
+      html += "<div class='axioms_create_triples' id='" + triplesDivId + "' onClick='' >";
+      triples.forEach(function(triple, index) {
+        html += "<div class='axioms_create_triple'>" + getLabel(triple.subject) + "</div>";
+        html += "<div class='axioms_create_triple'>" + getLabel(triple.predicate) + "</div>";
+        html += "<div class='axioms_create_triple'>" + getLabel(triple.object) + "</div>";
+      });
+      html += "<button onclick='Lineage_axioms_create.removeEntityTriples(\""+ triplesDivId + "\")'>X</button>";
+      html += "</div>";
+      $("#" + divId).append(html);
 
 
     }
 
 
-
-
-
-
-    function triplesToHtml(triples,divId){
-
-      triples.forEach(function(triple,index){
-        var html=""
-        html += "<div class='axioms_create_triples' id='TRIPLE_" + index + "' onClick='' >";
-        html += "<div class='axioms_create_triple'>" + Sparql_common.getLabelFromURI(triple.subject) + "</div>";
-        html += "<div class='axioms_create_triple'>" +  Sparql_common.getLabelFromURI(triple.predicate) + "</div>";
-        html += "<div class='axioms_create_triple'>" +  Sparql_common.getLabelFromURI(triple.object) + "</div>";
-        html += "<button onclick='Lineage_axioms_create.removeEntityTriples(\"TRIPLE_" + index + "\")'>X</button>";
-        html += "</div>";
-        $("#"+divId).append(html)
-      })
-
-    }
-
-
-    triplesToHtml(triples,"axiomsCreate_triplesDiv")
-
+    triplesToHtml(triples, "axiomsCreate_triplesDiv");
 
 
   };
 
-  self.removeEntityTriples=function(tripleDivId){
-    $("#"+tripleDivId).remove()
-  }
+  self.removeEntityTriples = function(tripleDivId) {
+    $("#" + tripleDivId).remove();
+    delete self.currentTriples[tripleDivId];
+  };
 
   self.saveTriples = function() {
+    self.currentDijonctionNode = null;
+    var allTriples = [];
+    for (var key in self.currentTriples) {
+      allTriples = allTriples.concat(self.currentTriples[key]);
+    }
 
+    Sparql_generic.insertTriples(self.currentGraphNode.data.source, allTriples, {}, function(err, result) {
+      if (err) {
+        alert(err.responseText);
+      }
+            Lineage_axioms_draw.drawNodeAxioms(self.currentGraphNode.data.source, self.currentGraphNode.data.id, self.context.divId, self.currentGraphNode.level + 1);
+      $("#axioms_predicatesDiv").dialog("close");
+
+    });
   };
 
 
@@ -390,19 +421,21 @@ var Lineage_axioms_create = (function() {
       if (err) {
         alert(err.responseText);
       }
-      self.drawNodeAxioms(self.currentGraphNode.data.source, self.currentGraphNode.data.id, self.context.divId, self.currentGraphNode.level + 1);
+
+            Lineage_axioms_draw.drawNodeAxioms(self.currentGraphNode.data.source, self.currentGraphNode.data.id, self.context.divId, self.currentGraphNode.level + 1);
       $("#axioms_predicatesDiv").dialog("close");
 
     });
   };
 
 
-  self.showCreateEntityDialog = function() {
+  self.showCreateEntityDialog = function(source) {
+    self.currentSource =source;
     $("#axioms_predicatesDiv").dialog("open");
     var html = "rdfs:label <input style='width:200px' id='axioms_newPredicateLabel'/>" +
       "<br></br>" +
       "rdf:type <select id='axioms_newPredicateSelect'></select>" +
-      "<button onclick='Lineage_axioms.onCreateEntityOK()'>OK</button>";
+      "<button onclick='Lineage_axioms_create.createSingleEntity()'>OK</button>";
 
 
     $("#axioms_predicatesDiv").html(html);
@@ -412,7 +445,8 @@ var Lineage_axioms_create = (function() {
 
   };
 
-  self.onCreateEntityOK = function() {
+  self.createSingleEntity = function() {
+    var source=self.currentSource
     var label = $("#axioms_newPredicateLabel").val();
     var object = $("#axioms_newPredicateSelect").val();
     if (!object) {
@@ -422,7 +456,7 @@ var Lineage_axioms_create = (function() {
     if (!id) {
       id = common.getRandomHexaId(5);
     }
-    var proposedUri = Config.sources[self.currentSource].graphUri + id;
+    var proposedUri = Config.sources[source].graphUri + id;
     proposedUri = prompt("Confirm or modify node uri and create entity", proposedUri);
     if (!proposedUri) {
       return;
@@ -442,13 +476,13 @@ var Lineage_axioms_create = (function() {
     }
 
 
-    Sparql_generic.insertTriples(self.currentSource, triples, {}, function(err, result) {
+    Sparql_generic.insertTriples(source, triples, {}, function(err, result) {
       if (err) {
         alert(err.responseText);
       }
-      self.drawNodeWithoutAxioms(self.currentSource, proposedUri, label);
-      self.context = {
-        sourceLabel: self.currentSource,
+      Lineage_axioms_draw.drawNodeWithoutAxioms(source, proposedUri, label);
+      Lineage_axioms_draw.context = {
+        sourceLabel: source,
         nodeId: proposedUri,
         divId: "axiomsGraphDivContainer",
         depth: 1
@@ -458,6 +492,21 @@ var Lineage_axioms_create = (function() {
     });
 
   };
+  
+  self.deleteGraphSelectedAxiom=function(){
+    var node=Lineage_axioms_draw.currentGraphNode
+    if(confirm("delete selected entity")){
+      Sparql_generic.deleteTriples(node.data.source,node.data.id,null,null, function(err,result){
+        if(err)return alert(err.responseText)
+        Sparql_generic.deleteTriples(node.data.source,null,null,node.data.id, function(err,result){
+          if(err)return alert(err.responseText)
+
+        Lineage_axioms_draw.drawNodeAxioms(node.data.source, node.data.id, self.context.divId, self.context.depth);
+      })
+      })
+    }
+    
+  }
 
 
   self.setSelectMostCommonOptionsColor = function(SelectId) {
@@ -476,11 +525,11 @@ var Lineage_axioms_create = (function() {
 
   };
 
-  self.getEntityPossibleProperties=function(vocabularies,domain,range){
-   var possibleProperties = {};
+  self.getEntityPossibleProperties = function(vocabularies, domain, range) {
+    var possibleProperties = {};
 
     vocabularies.forEach(function(vocab) {
-      var constraints=Config.ontologiesVocabularyModels[vocab].constraints;
+      var constraints = Config.ontologiesVocabularyModels[vocab].constraints;
       for (var key in constraints) {
         if (domain && constraints[key].domain == domain) {
           possibleProperties[key] = constraints[key];
@@ -489,9 +538,9 @@ var Lineage_axioms_create = (function() {
           possibleProperties[key] = constraints[key];
         }
       }
-    })
+    });
     return possibleProperties;
-  }
+  };
 
   self.owl2Vocabulary =
     {

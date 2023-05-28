@@ -325,9 +325,12 @@ var Lineage_axioms_draw = (function() {
 
     if (node) {
       self.currentGraphNode = node;
-    }
+    }else
+      return $("#axioms_predicatesDiv").html("no entity selected")
+
     $("#axioms_predicatesDiv").dialog("open");
     var html = " <span class=\"popupMenuItem\" onclick=\"Lineage_axioms_create.showAdAxiomDialog ('axioms_predicatesDiv');\"> Add Axiom</span>";
+     html += " <span class=\"popupMenuItem\" onclick=\"Lineage_axioms_create.deleteGraphSelectedAxiom();\"> Delete Axiom</span>";
     $("#axioms_predicatesDiv").html(html);
 
 
@@ -428,4 +431,4 @@ var Lineage_axioms_draw = (function() {
 })();
 
 export default Lineage_axioms_draw;
-window.Lineage_axioms = Lineage_axioms_draw;
+window.Lineage_axioms_draw = Lineage_axioms_draw;

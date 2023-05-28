@@ -11,8 +11,11 @@ var PromptedSelectWidget = (function () {
             return common.fillSelectOptions(selectId, Config.selectListsCache[source+"_"+type], true, "label", "id");
         }
 
+
+
+
         var term = prompt(" filter values ...");
-        if (term === null) {
+        if (term === null && !Config.topLevelOntologies[source]) {
             return;
         }
         var options = {

@@ -9,6 +9,7 @@ import SearchUtil from "../search/searchUtil.js";
 import MainController from "../shared/mainController.js";
 import PredicatesSelectorWidget from "./predicatesSelectorWidget.js";
 import Lineage_axioms_draw from "../tools/lineage/lineage_axioms_draw.js";
+import Lineage_axioms_create from "../tools/lineage/lineage_axioms_create.js";
 
 var NodeInfosWidget = (function() {
   var self = {};
@@ -990,6 +991,11 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     }
   };
 
+
+  self.showCreateEntityDialog=function(){
+
+    Lineage_axioms_create.showCreateEntityDialog(self.currentSource)
+  }
 
   return self;
 })();

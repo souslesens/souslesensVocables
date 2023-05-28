@@ -31,8 +31,8 @@ var NodeInfosWidget = (function() {
       });
       $("#axioms_predicatesDiv").dialog({
         autoOpen: false,
-        height: 400,
-        width: 600,
+        height: 600,
+        width: 800,
         modal: false
       });
 

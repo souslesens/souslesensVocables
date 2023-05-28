@@ -18,6 +18,26 @@
 
     }
 
+    .axioms_commonOption{
+        background-color: #ddd;
+    }
+
+    .axioms_create_triples{
+        display: flex;flex-direction: row;
+        margin: 3px;
+        padding: 2px;
+
+        background-color: #ddd;
+
+    }
+    .axioms_create_triple{
+        font-size: 12px;
+        width:200px;
+        height: 30px;
+        margin: 3px;
+        padding: 2px;
+    }
+
 
 </style>
 
@@ -65,10 +85,14 @@
     <div class="axioms_predicatesItemDiv">
       entity value
       <select id="axiomsCreate_entityValueSelect"></select>
+      <input type="hidden" id="axiomsCreate_entityLabelInput"/>
     </div>
 
   </div>
+  <div id="axiomsCreate_triplesDiv"></div>
 
-
-  <button onclick="Lineage_axioms_create.createPredicates()">OK</button>
+ <div>
+   <div id="axiomsCreate_infosDiv"></div>
+   <button onclick="Lineage_axioms_create.showTriples()">OK</button>
+   <button onclick="Lineage_axioms_create.saveTriples()">Save</button></div>
 </div>

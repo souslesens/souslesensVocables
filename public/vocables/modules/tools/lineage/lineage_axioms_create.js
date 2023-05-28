@@ -16,13 +16,13 @@ var Lineage_axioms_create = (function() {
   var self = {};
 
   self.showAdAxiomDialog = function(divId) {
-    self.currentGraphNode = Lineage_axioms_draw.currentGraphNode;
-    if (!self.currentGraphNode || !self.currentGraphNode.data) {
-      return;
-    }
+
 
     $("#" + divId).load("snippets/lineage/lineage_axiomsCreateDialog.html", function() {
-
+      self.currentGraphNode = Lineage_axioms_draw.currentGraphNode;
+      if (!self.currentGraphNode || !self.currentGraphNode.data) {
+        return $("#axiomsCreate_infosDiv").html("no entity selected");
+      }
 
       /* var declarations = self.owl2Vocabulary.Declarations;
        common.fillSelectOptions("axiomsCreate_declarationsSelect", declarations, true);*/
@@ -33,8 +33,6 @@ var Lineage_axioms_create = (function() {
       }
 
 
-      var owlConstraints = Config.ontologiesVocabularyModels["owl"].constraints;
-      var rdfsConstraints = Config.ontologiesVocabularyModels["rdfs"].constraints;
 
 
       Sparql_OWL.getNodesAncestors("owl", types, {}, function(err, result) {
@@ -48,20 +46,17 @@ var Lineage_axioms_create = (function() {
         });
 
         self.possiblePredicates = {};
-        for (var key in owlConstraints) {
-          if (types.indexOf(owlConstraints[key].domain) > -1) {
-            self.possiblePredicates[key] = owlConstraints[key];
+        types.forEach(function(type) {
+         var typePredicates= self.getEntityPossibleProperties(["owl", "rdf", "rdfs"], type, null)
+          for(var key in typePredicates) {
+            self.possiblePredicates[key] = typePredicates[key]
           }
-        }
-        for (var key in rdfsConstraints) {
-          if (types.indexOf(rdfsConstraints[key].domain) > -1) {
-            self.possiblePredicates[key] = rdfsConstraints[key];
-          }
-        }
+        })
+
 
 
         common.fillSelectOptions("axioms_axiomTypeSelect", Object.keys(self.possiblePredicates), true);
-
+        self.setSelectMostCommonOptionsColor("axioms_axiomTypeSelect");
         var source = self.currentGraphNode.data.source;
         var predicateOrigin = [
           { id: "_newOwlEntity", label: "New entity" }
@@ -77,6 +72,7 @@ var Lineage_axioms_create = (function() {
 
 
         common.fillSelectOptions("axioms_create_entityOriginSelect", predicateOrigin, true, "label", "id");
+
       });
 
     });
@@ -86,105 +82,99 @@ var Lineage_axioms_create = (function() {
 
 
   self.onAxiomTypeSelect = function(axiomTypeId) {
+    if(!axiomTypeId)
+      return;
 
-      common.fillSelectOptions("axioms_axiomRangeSelect", [], true);
-      common.fillSelectOptions("axioms_create_entityTypeSelect", [], true);
-     common.fillSelectOptions("axioms_create_rangePropertySelect", [], true);
+    common.fillSelectOptions("axioms_axiomRangeSelect", [], true);
+    common.fillSelectOptions("axioms_create_entityTypeSelect", [], true);
+    common.fillSelectOptions("axioms_create_rangePropertySelect", [], true);
     common.fillSelectOptions("axiomsCreate_entityValueSelect", [], true);
-
-
-
-
-
 
 
     var source = self.currentGraphNode.data.source;
     var constraint = self.possiblePredicates[axiomTypeId];
     var range = constraint.range;
     var ranges = [range];
-    var options={specificPredicates:["rdfs:subClassOf", "rdf:type"]}
+    var options = { specificPredicates: ["rdfs:subClassOf", "rdf:type"] };
     Sparql_OWL.getNodeChildren("owl", null, ranges, 1, options, function(err, result) {
       if (err) {
         return alert(err.responseText);
       }
       result.forEach(function(item) {
 
-          if (ranges.indexOf(item.child1.value) < 0)
-            ranges.push(item.child1.value);
+        if (ranges.indexOf(item.child1.value) < 0) {
+          ranges.push(item.child1.value);
+        }
 
       });
 
-      ranges.sort()
+      ranges.sort();
       common.fillSelectOptions("axioms_axiomRangeSelect", ranges, true);
+      self.setSelectMostCommonOptionsColor("axioms_axiomRangeSelect");
 
     });
 
   };
 
   self.onAxiomRangeSelect = function(range) {
+
     common.fillSelectOptions("axioms_create_entityTypeSelect", [], true);
     common.fillSelectOptions("axioms_create_rangePropertySelect", [], true);
     common.fillSelectOptions("axiomsCreate_entityValueSelect", [], true);
 
+    if(!range)
+      return;
 
-
-    if(range=="https://www.w3.org/2002/07/owl#Class"){
-     return  common.fillSelectOptions("axioms_create_entityTypeSelect", [range], true);
-    }
-
-    var owlConstraints = Config.ontologiesVocabularyModels["owl"].constraints;
-
-    var rdfsConstraints = Config.ontologiesVocabularyModels["rdfs"].constraints;
-    self.rangePossibleProperties = {};
-    for (var key in owlConstraints) {
-      if (owlConstraints[key].domain==range) {
-        self.rangePossibleProperties[key] = owlConstraints[key];
-      }
-    }
-    for (var key in rdfsConstraints) {
-
-        if (rdfsConstraints[key].domain == range) {
-          if(!self.possiblePredicates[rdfsConstraints[key].domain]) {
-          self.rangePossibleProperties[key] = rdfsConstraints[key];
-        }
-      }
+    if (range == "https://www.w3.org/2002/07/owl#Class") {
+      return common.fillSelectOptions("axioms_create_entityTypeSelect", [range], true);
     }
 
 
-    common.fillSelectOptions("axioms_create_rangePropertySelect", Object.keys(self.rangePossibleProperties), true, );
 
 
+    self.rangePossibleProperties =self.getEntityPossibleProperties(["owl","rdf","rdfs"],range,null)
+    var rangePossiblePropertiesArray = Object.keys(self.rangePossibleProperties);
+
+
+    if (rangePossiblePropertiesArray.length > 0) {
+      common.fillSelectOptions("axioms_create_rangePropertySelect", rangePossiblePropertiesArray, true);
+    }
+
+     var entityTypes=[range]
+      common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes, );
 
 
   };
 
-  self.onSelectRangeProperty=function(rangeProperty){
+  self.onSelectRangeProperty = function(rangeProperty) {
 
     common.fillSelectOptions("axiomsCreate_entityValueSelect", [], true);
-    if(!rangeProperty)
+    if (!rangeProperty) {
       return rangeProperty;
+    }
 
-    var rangePropertyRanges=[self.rangePossibleProperties[rangeProperty].range]
+    var rangePropertyRanges = [self.rangePossibleProperties[rangeProperty].range];
 
 
-    var options={specificPredicates:["rdfs:subClassOf"]}
+    var options = { specificPredicates: ["rdfs:subClassOf"] };
     Sparql_OWL.getNodeChildren("owl", null, rangePropertyRanges, 1, options, function(err, result) {
       if (err) {
         return alert(err.responseText);
       }
       result.forEach(function(item) {
-        if (rangePropertyRanges.indexOf(item.child1.value) < 0)
+        if (rangePropertyRanges.indexOf(item.child1.value) < 0) {
           rangePropertyRanges.push(item.child1.value);
+        }
       });
 
-      rangePropertyRanges.sort()
+      rangePropertyRanges.sort();
       common.fillSelectOptions("axioms_create_entityTypeSelect", rangePropertyRanges, true);
 
-    })
-  }
+    });
+  };
 
-
-
+  self.onSelectEntityType = function(origin) {
+  };
 
   self.onSelectEntityOrigin = function(origin) {
 
@@ -197,7 +187,7 @@ var Lineage_axioms_create = (function() {
       return;
     }
 
-var type=$("#axioms_create_entityTypeSelect").val()
+    var type = $("#axioms_create_entityTypeSelect").val();
 
     if (type == "") {
       return;
@@ -214,6 +204,8 @@ var type=$("#axioms_create_entityTypeSelect").val()
       if (!id) {
         id = common.getRandomHexaId(5);
       }
+      $("#axiomsCreate_entityLabelInput").val(label || "");
+
       var proposedUri = Config.sources[source].graphUri + id;
       proposedUri = prompt("Confirm or modify node uri and create entity", proposedUri);
       common.fillSelectOptions("axiomsCreate_entityValueSelect", [proposedUri]);
@@ -223,7 +215,7 @@ var type=$("#axioms_create_entityTypeSelect").val()
 
     else {
 
-      PromptedSelectWidget.prompt(type, "axiomsCreate_entityValueSelect", origin, { noCache: 1 });
+      PromptedSelectWidget.prompt("<"+type+">", "axiomsCreate_entityValueSelect", origin, { noCache: 1 });
 
     }
 
@@ -231,7 +223,128 @@ var type=$("#axioms_create_entityTypeSelect").val()
   };
 
 
-  self.createPredicates = function() {
+  self.showTriples = function() {
+    var errorMessage = "";
+    var axiomType = $("#axioms_axiomTypeSelect").val();
+    var axiomRange = $("#axioms_axiomRangeSelect").val();
+    var axiomRangeProperty = $("#axioms_create_rangePropertySelect").val();
+    var entityType = $("#axioms_create_entityTypeSelect").val();
+    var entityOrigin = $("#axioms_create_entityOriginSelect").val();
+    var entityValue = $("#axiomsCreate_entityValueSelect").val();
+    var entityLabel = $("#axiomsCreate_entityLabelInput").val();
+
+
+    if (entityOrigin == "_newOwlEntity" && !entityType) {
+      errorMessage += "entity type is mandatory for new entity<br>";
+    }
+
+
+    if (errorMessage) {
+      return $("#axiomsCreate_infosDiv").html(errorMessage);
+    }
+
+
+
+    var triples = [];
+
+    if (axiomRange == "http://www.w3.org/2002/07/owl#Class") {
+      triples.push({
+        subject: self.currentGraphNode.data.id,
+        predicate: axiomType,
+        object: entityValue
+      });
+      if (entityOrigin == "_newOwlEntity") {
+        triples.push({
+          subject: entityValue,
+          predicate: "rdf:type",
+          object: entityType
+        });
+        if (entityLabel) {
+          triples.push({
+            subject: entityValue,
+            predicate: "rdfs:label",
+            object: entityLabel
+          });
+        }
+      }
+    }
+
+
+
+
+
+    if (axiomRange == "http://www.w3.org/2002/07/owl#Class") {
+      triples.push({
+        subject: self.currentGraphNode.data.id,
+        predicate: axiomType,
+        object: entityValue
+      });
+      if (entityOrigin == "_newOwlEntity") {
+        triples.push({
+          subject: entityValue,
+          predicate: "rdf:type",
+          object: entityType
+        });
+        if (entityLabel) {
+          triples.push({
+            subject: entityValue,
+            predicate: "rdfs:label",
+            object: entityLabel
+          });
+        }
+      }
+    }
+
+    else if(axiomRange=="http://www.w3.org/1999/02/22-rdf-syntax-ns#List"){
+
+      var blankNode="<_:"+common.getRandomHexaId(10)+">"
+      triples.push({
+        subject: self.currentGraphNode.data.id,
+        predicate: axiomType,
+        object: blankNode
+      });
+      triples.push({
+        subject:  blankNode,
+        predicate: axiomRangeProperty,
+        object: entityValue
+      });
+
+
+
+    }
+
+
+
+
+
+
+    function triplesToHtml(triples,divId){
+
+      triples.forEach(function(triple,index){
+        var html=""
+        html += "<div class='axioms_create_triples' id='TRIPLE_" + index + "' onClick='' >";
+        html += "<div class='axioms_create_triple'>" + Sparql_common.getLabelFromURI(triple.subject) + "</div>";
+        html += "<div class='axioms_create_triple'>" +  Sparql_common.getLabelFromURI(triple.predicate) + "</div>";
+        html += "<div class='axioms_create_triple'>" +  Sparql_common.getLabelFromURI(triple.object) + "</div>";
+        html += "<button onclick='Lineage_axioms_create.removeEntityTriples(\"TRIPLE_" + index + "\")'>X</button>";
+        html += "</div>";
+        $("#"+divId).append(html)
+      })
+
+    }
+
+
+    triplesToHtml(triples,"axiomsCreate_triplesDiv")
+
+
+
+  };
+
+  self.removeEntityTriples=function(tripleDivId){
+    $("#"+tripleDivId).remove()
+  }
+
+  self.saveTriples = function() {
 
   };
 
@@ -346,6 +459,39 @@ var type=$("#axioms_create_entityTypeSelect").val()
 
   };
 
+
+  self.setSelectMostCommonOptionsColor = function(SelectId) {
+    var commonEntities = ["owl#Class,owl#subClassOf", "owl#ObjectProperty"];
+    var color = "#ddd";
+    $("#" + SelectId).children().each(function(a) {
+      var option = $(this)[0];
+      commonEntities.forEach(function(str) {
+        if (option.label.indexOf(str) > -1) {
+          $(this).addClass("axioms_commonOption");
+        }
+      });
+
+    });
+
+
+  };
+
+  self.getEntityPossibleProperties=function(vocabularies,domain,range){
+   var possibleProperties = {};
+
+    vocabularies.forEach(function(vocab) {
+      var constraints=Config.ontologiesVocabularyModels[vocab].constraints;
+      for (var key in constraints) {
+        if (domain && constraints[key].domain == domain) {
+          possibleProperties[key] = constraints[key];
+        }
+        if (domain && constraints[key].range == range) {
+          possibleProperties[key] = constraints[key];
+        }
+      }
+    })
+    return possibleProperties;
+  }
 
   self.owl2Vocabulary =
     {

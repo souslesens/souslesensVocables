@@ -20,7 +20,7 @@ var Lineage_similars = (function () {
         } else {
             self.mode = "whiteboard";
             $("#mainDialogDiv").dialog("close");
-            //  self.getWhiteBoardSimilars("graph");
+           self.drawWhiteBoardSimilars("graph");
             $("#lineageSimilars_sourcesTreeDiv").html("");
         }
     };
@@ -139,7 +139,7 @@ var Lineage_similars = (function () {
                             }
                         });
                     }
-                    if( visjsData.nodes.length==0)
+                    if( visjsData.edges.length==0)
                         return alert ("no similars found in source "+source)
                     Lineage_classes.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
                     Lineage_classes.lineageVisjsGraph.data.edges.update(visjsData.edges);

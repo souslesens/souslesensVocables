@@ -87,7 +87,8 @@ var Lineage_axioms_create = (function() {
       return;
     }
 
-
+  //  common.fillSelectOptions("axioms_create_entityOriginSelect", [], true);
+    $("#axioms_create_entityOriginSelect").val("");
     common.fillSelectOptions("axioms_axiomRangeSelect", [], true);
     common.fillSelectOptions("axioms_create_entityTypeSelect", [], true);
     common.fillSelectOptions("axioms_create_rangePropertySelect", [], true);
@@ -121,6 +122,7 @@ var Lineage_axioms_create = (function() {
 
   self.onAxiomRangeSelect = function(range) {
     self.currentDijonctionNode = null;
+    $("#axioms_create_entityOriginSelect").val("");
     common.fillSelectOptions("axioms_create_entityTypeSelect", [], true);
     common.fillSelectOptions("axioms_create_rangePropertySelect", [], true);
     common.fillSelectOptions("axiomsCreate_entityValueSelect", [], true);
@@ -143,8 +145,8 @@ var Lineage_axioms_create = (function() {
       common.fillSelectOptions("axioms_create_rangePropertySelect", rangePossiblePropertiesArray, true);
     }
 
-    var entityTypes = [range];
-    common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes);
+ /*   var entityTypes = [range];
+    common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes);*/
 
 
   };
@@ -175,7 +177,7 @@ if(rangePropertyRanges.indexOf("http://www.w3.org/2000/01/rdf-schema#Resource")>
   rangePropertyRanges.push("http://www.w3.org/2002/07/owl#Class")
       rangePropertyRanges.sort();
       common.fillSelectOptions("axioms_create_entityTypeSelect", rangePropertyRanges, true);
-
+      self.setSelectMostCommonOptionsColor("axioms_create_entityTypeSelect");
     });
   };
 
@@ -195,12 +197,12 @@ if(rangePropertyRanges.indexOf("http://www.w3.org/2000/01/rdf-schema#Resource")>
 
     var type = $("#axioms_create_entityTypeSelect").val();
 
-    if (type == "") {
-      return;
-    }
-
-
     if (origin == "_newOwlEntity") {
+
+
+      if (type == "") {
+        return;
+      }
 
 
       var source = self.currentGraphNode.data.source;
@@ -221,7 +223,7 @@ if(rangePropertyRanges.indexOf("http://www.w3.org/2000/01/rdf-schema#Resource")>
 
     else {
 
-        PromptedSelectWidget.prompt("<" + type + ">", "axiomsCreate_entityValueSelect", origin, { noCache: 1 });
+        PromptedSelectWidget.prompt(type?("<" + type + ">"):null, "axiomsCreate_entityValueSelect", origin, { noCache: 1 });
 
 
     }
@@ -283,27 +285,8 @@ if(rangePropertyRanges.indexOf("http://www.w3.org/2000/01/rdf-schema#Resource")>
     }
 
 
-    if (axiomRange == "http://www.w3.org/2002/07/owl#Class") {
-      triples.push({
-        subject: self.currentGraphNode.data.id,
-        predicate: axiomType,
-        object: entityValue
-      });
-      if (entityOrigin == "_newOwlEntity") {
-        triples.push({
-          subject: entityValue,
-          predicate: "rdf:type",
-          object: entityType
-        });
-        if (entityLabel) {
-          triples.push({
-            subject: entityValue,
-            predicate: "rdfs:label",
-            object: entityLabel
-          });
-        }
-      }
-    }
+
+
 
     else if (axiomRange == "http://www.w3.org/1999/02/22-rdf-syntax-ns#List") {
 
@@ -323,6 +306,68 @@ if(rangePropertyRanges.indexOf("http://www.w3.org/2000/01/rdf-schema#Resource")>
       });
       self.currentDijonctionNode = blankNode;
 
+      if(axiomRangeProperty=="http://www.w3.org/1999/02/22-rdf-syntax-ns#first"){
+        var blankNodeRest = "<_:" + common.getRandomHexaId(10) + ">";
+        triples.push({
+          subject: blankNodeRest,
+          predicate:"rdf:type" ,
+          object: "http://www.w3.org/1999/02/22-rdf-syntax-ns#List"
+        });
+
+
+      triples.push({
+        subject: blankNode,
+        predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+        object: blankNodeRest
+      });
+
+      }
+
+    }
+    else if (axiomRange == "http://www.w3.org/2002/07/owl#Restriction") {
+
+        var blankNode =self.currentDijonctionNode || "<_:" + common.getRandomHexaId(10) + ">";
+
+        if(!self.currentDijonctionNode) {
+          triples.push({
+            subject: self.currentGraphNode.data.id,
+            predicate: axiomType,
+            object: blankNode
+          });
+
+          triples.push({
+            subject: blankNode,
+            predicate: "rdf:type",
+            object: axiomRange
+          });
+        }
+        self.currentDijonctionNode = blankNode;
+
+
+      if (entityOrigin == "_newOwlEntity") {
+        triples.push({
+          subject: entityValue,
+          predicate: "rdf:type",
+          object: entityType
+        });
+        if (entityLabel) {
+          triples.push({
+            subject: entityValue,
+            predicate: "rdfs:label",
+            object: entityLabel
+          });
+        }
+      }
+        triples.push({
+          subject:blankNode ,
+          predicate: axiomRangeProperty,
+          object: entityValue
+        });
+
+
+
+
+
     }
 
 
@@ -333,6 +378,7 @@ if(rangePropertyRanges.indexOf("http://www.w3.org/2000/01/rdf-schema#Resource")>
       self.currentTriples[triplesDivId] = triples;
 
       function getLabel(uri) {
+        return uri;
         return Sparql_common.getLabelFromURI(uri);
       }
 
@@ -340,11 +386,13 @@ if(rangePropertyRanges.indexOf("http://www.w3.org/2000/01/rdf-schema#Resource")>
       var html = "";
       html += "<div class='axioms_create_triples' id='" + triplesDivId + "' onClick='' >";
       triples.forEach(function(triple, index) {
-        html += "<div class='axioms_create_triple'>" + getLabel(triple.subject) + "</div>";
-        html += "<div class='axioms_create_triple'>" + getLabel(triple.predicate) + "</div>";
-        html += "<div class='axioms_create_triple'>" + getLabel(triple.object) + "</div>";
+        html += "<div class='axioms_create_triple'>"
+          + getLabel(triple.subject)
+          +"<b>-" + getLabel(triple.predicate)
+          + "-></b>"+ getLabel(triple.object)
+          + "</div>";
       });
-      html += "<button onclick='Lineage_axioms_create.removeEntityTriples(\""+ triplesDivId + "\")'>X</button>";
+      html += "<div><button onclick='Lineage_axioms_create.removeEntityTriples(\""+ triplesDivId + "\")'>X</button></div>";
       html += "</div>";
       $("#" + divId).append(html);
 
@@ -360,6 +408,7 @@ if(rangePropertyRanges.indexOf("http://www.w3.org/2000/01/rdf-schema#Resource")>
   self.removeEntityTriples = function(tripleDivId) {
     $("#" + tripleDivId).remove();
     delete self.currentTriples[tripleDivId];
+    self.currentDijonctionNode=null;
   };
 
   self.saveTriples = function() {
@@ -429,70 +478,8 @@ if(rangePropertyRanges.indexOf("http://www.w3.org/2000/01/rdf-schema#Resource")>
   };
 
 
-  self.showCreateEntityDialog = function(source) {
-    self.currentSource =source;
-    $("#axioms_predicatesDiv").dialog("open");
-    var html = "rdfs:label <input style='width:200px' id='axioms_newPredicateLabel'/>" +
-      "<br></br>" +
-      "rdf:type <select id='axioms_newPredicateSelect'></select>" +
-      "<button onclick='Lineage_axioms_create.createSingleEntity()'>OK</button>";
 
 
-    $("#axioms_predicatesDiv").html(html);
-    var declarations = self.owl2Vocabulary.Declarations;
-    common.fillSelectOptions("axioms_newPredicateSelect", declarations, true);
-
-
-  };
-
-  self.createSingleEntity = function() {
-    var source=self.currentSource
-    var label = $("#axioms_newPredicateLabel").val();
-    var object = $("#axioms_newPredicateSelect").val();
-    if (!object) {
-      return alert(" rdf:type missing");
-    }
-    var id = label;
-    if (!id) {
-      id = common.getRandomHexaId(5);
-    }
-    var proposedUri = Config.sources[source].graphUri + id;
-    proposedUri = prompt("Confirm or modify node uri and create entity", proposedUri);
-    if (!proposedUri) {
-      return;
-    }
-    var triples = [];
-    triples.push({
-      subject: proposedUri,
-      predicate: "rdf:type",
-      object: object
-    });
-    if (label) {
-      triples.push({
-        subject: proposedUri,
-        predicate: "rdfs:label",
-        object: label
-      });
-    }
-
-
-    Sparql_generic.insertTriples(source, triples, {}, function(err, result) {
-      if (err) {
-        alert(err.responseText);
-      }
-      Lineage_axioms_draw.drawNodeWithoutAxioms(source, proposedUri, label);
-      Lineage_axioms_draw.context = {
-        sourceLabel: source,
-        nodeId: proposedUri,
-        divId: "axiomsGraphDivContainer",
-        depth: 1
-      };
-      $("#axioms_predicatesDiv").dialog("close");
-
-    });
-
-  };
-  
   self.deleteGraphSelectedAxiom=function(){
     var node=Lineage_axioms_draw.currentGraphNode
     if(confirm("delete selected entity")){
@@ -505,18 +492,24 @@ if(rangePropertyRanges.indexOf("http://www.w3.org/2000/01/rdf-schema#Resource")>
       })
       })
     }
-    
+
   }
 
 
   self.setSelectMostCommonOptionsColor = function(SelectId) {
-    var commonEntities = ["owl#Class,owl#subClassOf", "owl#ObjectProperty"];
-    var color = "#ddd";
+    var commonEntities = ["http://www.w3.org/2002/07/owl#Class",
+      "http://www.w3.org/2002/07/owl#Restriction",
+      "http://www.w3.org/2000/01/rdf-schema#subClassOf",
+      "http://www.w3.org/2002/07/owl#ObjectProperty",
+      "http://www.w3.org/2002/07/owl#unionOf",
+      "http://www.w3.org/2002/07/owl#intersectionOf"
+    ];
+
     $("#" + SelectId).children().each(function(a) {
-      var option = $(this)[0];
+      var option = $(this);
       commonEntities.forEach(function(str) {
-        if (option.label.indexOf(str) > -1) {
-          $(this).addClass("axioms_commonOption");
+        if (option[0].label.indexOf(str) > -1) {
+          option.addClass("axioms_commonOption");
         }
       });
 

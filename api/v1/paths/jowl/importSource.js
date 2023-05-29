@@ -34,6 +34,7 @@ module.exports = function () {
             var graphExists = false;
             var allTriples = [];
             var totalImportedTriples = -1;
+            var ontologyContentEncoded64=null;
             async2.series(
                 [
                     // check if source name
@@ -70,6 +71,20 @@ module.exports = function () {
                         });
                     },
 
+
+                  function(callbackSeries){
+
+                      request( body.rdfUrl, {},function(error, request, body) {
+                          if(error)
+                              return callbackSeries()
+                         ontologyContentEncoded64 = Buffer.from(body).toString("base64");
+
+                          callbackSeries();
+                      });
+
+
+                  },
+
                     //get triples from jowl/jena/rdftriple
                     function (callbackSeries) {
                         if (graphExists) {
@@ -77,7 +92,8 @@ module.exports = function () {
                         }
 
                         var payload = {
-                            url: body.rdfUrl,
+
+                            ontologyContentEncoded64:ontologyContentEncoded64
                         };
 
                         var options = {

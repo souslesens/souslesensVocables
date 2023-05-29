@@ -17,7 +17,7 @@ var Lineage_axioms_draw = (function() {
   self.defaultGraphDiv = "axiomsGraphDiv";
 
 
-  self.getNodeAxiomsTree = function(sourceLabel, nodeId, depth, callback) {
+  self.getNodeAxioms = function(sourceLabel, nodeId, depth, callback) {
     var fromStr = Sparql_common.getFromStr(sourceLabel);
 
     var filterStr = "";
@@ -67,7 +67,7 @@ var Lineage_axioms_draw = (function() {
 
     var sourceLabel = Lineage_sources.activeSource;
 
-    self.getNodeAxiomsTree(sourceLabel, nodeId, depth, function(err, result) {
+    self.getNodeAxioms(sourceLabel, nodeId, depth, function(err, result) {
 
       var axiomsTriples = {};
 
@@ -119,9 +119,7 @@ var Lineage_axioms_draw = (function() {
 
           item.parents.forEach(function(parentId) {
             var parent = nodesMap[parentId];
-            if (parent && (parent.p.value.indexOf("intersectionOf") > -1 || parent.p.value.indexOf("unionOf") > -1)) {
-
-
+            if (parent && parent.s.value!=nodeId &&  (parent.p.value.indexOf("intersectionOf") > -1 || parent.p.value.indexOf("unionOf") > -1)) {
               nodesMap[parentId].children = item.children;
               nodesMap[parentId].symbol = Config.Lineage.logicalOperatorsMap[parent.p.value];
               delete nodesMap[key];
@@ -421,6 +419,12 @@ var Lineage_axioms_draw = (function() {
     });
 
   };
+
+  self.showNewAxiomDialog=function(){
+
+
+
+  }
 
 
 

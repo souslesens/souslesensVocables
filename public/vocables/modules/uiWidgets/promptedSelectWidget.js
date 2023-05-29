@@ -12,17 +12,20 @@ var PromptedSelectWidget = (function () {
         }
 
 
-
-
-        var term = prompt(" filter values ...");
-        if (term === null && !Config.topLevelOntologies[source]) {
-            return;
+        var filter=null;
+        if(!Config.topLevelOntologies[source]) {
+            var term = prompt(" filter values ...");
+            if (term === null ) {
+                return;
+            }
+            filter=  " FILTER ( regex(?label,'" + term + "','i'))";
         }
+
         var options = {
             selectGraph: true,
             lang: Config.default_lang,
             type: type,
-            filter: term ? " FILTER ( regex(?label,'" + term + "','i'))" : "",
+            filter: filter,
             limit: Config.maxSelectListSize,
             withoutImports: true,
         };

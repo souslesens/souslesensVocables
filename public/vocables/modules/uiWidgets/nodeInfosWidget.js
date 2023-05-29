@@ -10,11 +10,13 @@ import MainController from "../shared/mainController.js";
 import PredicatesSelectorWidget from "./predicatesSelectorWidget.js";
 import Lineage_axioms_draw from "../tools/lineage/lineage_axioms_draw.js";
 import Lineage_axioms_create from "../tools/lineage/lineage_axioms_create.js";
+import Lineage_sources from "../tools/lineage/lineage_sources.js";
 
 var NodeInfosWidget = (function() {
   var self = {};
 
   self.initDialog = function(sourceLabel, divId, callback) {
+    self.currentSource = sourceLabel;
     $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
     $("#" + divId).dialog("open");
     $("#" + divId).load("snippets/nodeInfosWidget.html", function() {
@@ -991,11 +993,77 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     }
   };
 
-
-  self.showCreateEntityDialog=function(){
-
-    Lineage_axioms_create.showCreateEntityDialog(self.currentSource)
+  self.showCreateEntityDialog= function(){
+    var divId="mainDialogDiv"
+    var sourceLabel=Lineage_sources.activeSource
+    $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
+    $("#" + divId).dialog("open");
+    self.getCreateEntityDialog(sourceLabel,divId)
   }
+
+  self.getCreateEntityDialog = function(source,divId) {
+    self.currentSource =source;
+    $("#"+divId).dialog("open");
+    var html = "rdfs:label <input style='width:200px' id='nodeInfosWidget_newEntityLabel'/>" +
+      "<br></br>" +
+      "rdf:type <select id='nodeInfosWidget_entityTypeSelect'></select>" +
+      "<button onclick='NodeInfosWidget.createSingleEntity(\""+divId+"\",\""+source+"\","+
+      "$(\"#nodeInfosWidget_newEntityLabel\").val(),$(\"#nodeInfosWidget_entityTypeSelect\").val())'>OK</button>";
+
+
+    $("#"+divId).html(html);
+    var declarations = Lineage_axioms_create.owl2Vocabulary.Declarations;
+    common.fillSelectOptions("nodeInfosWidget_entityTypeSelect", declarations, true);
+
+
+  };
+
+  self.createSingleEntity = function(divId,source,label,type) {
+
+    if (!type) {
+      return alert(" rdf:type missing");
+    }
+    var id = label;
+    if (!id) {
+      id = common.getRandomHexaId(5);
+    }
+    var proposedUri = Config.sources[source].graphUri + id;
+    proposedUri = prompt("Confirm or modify node uri and create entity", proposedUri);
+    if (!proposedUri) {
+      return;
+    }
+    var triples = [];
+    triples.push({
+      subject: proposedUri,
+      predicate: "rdf:type",
+      object: type
+    });
+    if (label) {
+      triples.push({
+        subject: proposedUri,
+        predicate: "rdfs:label",
+        object: label
+      });
+    }
+
+
+    Sparql_generic.insertTriples(source, triples, {}, function(err, result) {
+      if (err) {
+        alert(err.responseText);
+      }
+    /*  Lineage_axioms_draw.drawNodeWithoutAxioms(source, proposedUri, label);
+      Lineage_axioms_draw.context = {
+        sourceLabel: source,
+        nodeId: proposedUri,
+        divId: "axiomsGraphDivContainer",
+        depth: 1
+      };*/
+      $("#"+divId).dialog("close");
+      NodeInfosWidget.showNodeInfos(source,proposedUri)
+
+    });
+
+  };
 
   return self;
 })();

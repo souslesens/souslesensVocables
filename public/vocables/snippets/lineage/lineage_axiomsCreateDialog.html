@@ -19,24 +19,23 @@
     }
 
     .axioms_commonOption{
-        background-color: #ddd;
+        background-color: #92d3ec;
     }
 
     .axioms_create_triples{
-        display: flex;flex-direction: row;
+        display: flex;flex-direction: column;
         margin: 3px;
         padding: 2px;
 
-        background-color: #c4daec;
+
 
     }
     .axioms_create_triple{
-        //font-size: 12px;
-        font-weight: bold;
-        width:200px;
-        height: 30px;
+       font-size: 12px;
+        width:100%;
         margin: 3px;
         padding: 2px;
+        background-color: #c4daec;
     }
 
 
@@ -78,7 +77,7 @@
 
     <div class="axioms_predicatesItemDiv">entity origin
       <select id="axioms_create_entityOriginSelect"
-              onchange="Lineage_axioms_create.onSelectEntityOrigin($(this).val())"></select>
+              onclick="Lineage_axioms_create.onSelectEntityOrigin($(this).val())"></select>
 
     </div>
 

@@ -151,7 +151,12 @@ var JstreeWidget = (function () {
                     JstreeWidget.setTreeParentDivDimensions(jstreeDiv);
                 }
                 if (callback) {
-                    callback();
+                    if(jstreeData){
+                        callback(jstreeData);
+                    }else{
+                        callback();
+                    }
+                    
                 }
                 //   }, 500)
             })
@@ -292,9 +297,9 @@ var JstreeWidget = (function () {
             }
         });
         if (callback) {
-            if (jstreeData) {
-                callback(jstreeData);
-            }
+           
+            callback(jstreeData);
+            
         }
     };
 
@@ -479,10 +484,19 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         //else
         //Bag>Class
         //Bag>namedindividual
-        var types_without_basics = types.filter(function (item) {
-            return item !== uri_class && item !== uri_bag && item !== uri_named && item !== uri_bag2;
-        });
+        if(!types){
+            return("default");
+        }else{
+            if(!Array.isArray(types)){
+                types=[types];
+            }
+            var types_without_basics = types.filter(function (item) {
+                return item !== uri_class && item !== uri_bag && item !== uri_named && item !== uri_bag2;
+            });
+    
 
+        }
+        
         if (callback) {
             if (types_without_basics.length > 0) {
                 var adding_type = null;

@@ -605,7 +605,6 @@ Lineage_styles.showDialog(self.currentContainer.data);
                                     .open_node("#");
                                 $("#" + jstreeDiv).jstree("open_all");
                                 self.flag_function();
-                                
                             });
                         } else {
                             JstreeWidget.addNodesToJstree(jstreeDiv, null, jstreeData, jstreeOptions, self.flag_function);

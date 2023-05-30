@@ -15,6 +15,7 @@ var Lineage_relations = (function () {
         self.drawRelationCurrentCaller = caller;
 
         $("#mainDialogDiv").dialog("open");
+        $("#mainDialogDiv" ).dialog( "option", "title", "Query" );
         $("#mainDialogDiv").load("snippets/lineage/relationsDialog.html", function () {
             $("#lineageRelations_history_previousBtn").css("display", self.previousQuery ? "inline" : "none");
             $("#lineageRelations_history_deleteBtn").css("display", "none");

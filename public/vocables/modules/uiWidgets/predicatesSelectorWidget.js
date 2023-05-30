@@ -130,7 +130,7 @@ var PredicatesSelectorWidget = (function () {
             classes = common.array.sort(classes, "label");
             common.fillSelectOptions(selectId, classes, true, "label", "id");
         } else {
-            return self.fillObjectTypeOptionsOnPromptFilter(null, "editPredicate_objectSelect", vocabulary);
+            return PromptedSelectWidget.prompt(null, "editPredicate_objectSelect", vocabulary);
         }
     };
 

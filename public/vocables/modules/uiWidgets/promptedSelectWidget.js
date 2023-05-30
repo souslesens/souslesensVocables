@@ -6,7 +6,7 @@ var PromptedSelectWidget = (function () {
     var self = {};
     self.prompt = function (type, selectId, source,options) {
         if(!options)
-            ooptions={}
+            options={}
         if (!options.noCache && Config.selectListsCache[source+"_"+type]) {
             return common.fillSelectOptions(selectId, Config.selectListsCache[source+"_"+type], true, "label", "id");
         }

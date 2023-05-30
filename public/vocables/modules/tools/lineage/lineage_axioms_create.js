@@ -22,6 +22,7 @@ var Lineage_axioms_create = (function() {
   self.showAdAxiomDialog = function(divId) {
 
     self.context = Lineage_axioms_draw.context;
+    $("#" + divId).dialog( "option", "title", "New axiom" );
     $("#" + divId).load("snippets/lineage/lineage_axiomsCreateDialog.html", function() {
       self.currentGraphNode = Lineage_axioms_draw.currentGraphNode;
       if (!self.currentGraphNode || !self.currentGraphNode.data) {

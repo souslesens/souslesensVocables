@@ -1,11 +1,13 @@
-import { html, component, useState } from "haunted";
+import { html, component } from "haunted";
+import { useStore } from "@nanostores/preact";
+import { increment, counter } from "../store/counter";
 
 function Counter() {
-    const [count, setCount] = useState(0);
+    const value = useStore(counter);
 
     return html`
-        <div part="count">${count}</div>
-        <button part="button" @click=${() => setCount(count + 1)}>Increment</button>
+        <div part="count">${value}</div>
+        <button part="button" @click=${() => increment()}>Increment</button>
     `;
 }
 

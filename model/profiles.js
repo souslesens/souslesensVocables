@@ -1,6 +1,7 @@
 const fs = require("fs");
+const path = require("path");
 const { Lock } = require("async-await-mutex-lock");
-const { configProfilesPath } = require("./config");
+const { configProfilesPath, config } = require("./config");
 
 /**
  * @typedef {import("./UserTypes").UserAccount} UserAccount
@@ -88,7 +89,36 @@ class ProfileModel {
 
     /**
      * @param {UserAccount} user -  a user account
-     * @param {string} profileName -  a profile name
+     * @returns {Promise<Array<{name: string, type: string}>>} a list of tools' name
+     */
+    getUserTools = async (user) => {
+        try {
+            const userProfiles = await this.getUserProfiles(user);
+            const allTools = new Set(config.tools_available);
+            const allowedToolsOrAll = new Set(Object.entries(userProfiles).reduce((acc, [k, v]) => acc.concat(v.allowedTools), []));
+            const forbiddenTools = new Set(Object.entries(userProfiles).reduce((acc, [k, v]) => acc.concat(v.forbiddenTools), []));
+            const allowedTools = allowedToolsOrAll.has("ALL") ? allTools : allowedToolsOrAll;
+            const userTools = new Set([...allowedTools].filter((x) => !forbiddenTools.has(x)));
+            let plugins = new Array();
+            try {
+                plugins = fs.readdirSync(path.join(process.cwd(), "/plugins"));
+            } catch {
+                console.warn("No plugins directory");
+            }
+            const toolsFromNames = (tools) => [...tools].map((tool) => ({ name: tool, type: plugins.includes(tool) ? "plugin" : "tool" }));
+
+            if (user.login === "admin" || user?.groups.includes("admin")) {
+                return toolsFromNames(allTools);
+            }
+            return toolsFromNames(userTools);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    /**
+     * @param {UserAccount} user -  a user account
+     * @param {string} profileName -  a profile nameou
      * @returns {Promise<Profile>} a collection of profiles
      */
     getOneUSerProfile = async (user, profileName) => {

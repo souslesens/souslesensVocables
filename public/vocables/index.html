@@ -83,9 +83,17 @@
         <script type="module" src="modules/tools/ontologiesStats.js"></script>
 
         <script src="config/app_config.js"></script>
-        <!--    <script src="config/app_config_draft_tools.js"></script>-->
 
         <script type="module" src="modules/shared/authentification.js"></script>
+        <script type="module">
+            import { allTools, loadToolsAndPlugins } from "./config/tools.js";
+
+            try {
+                await loadToolsAndPlugins();
+            } catch (error) {
+                console.error("Failed to load tools and plugins", error);
+            }
+        </script>
 
         <script type="module" src="modules/sparqlProxies/sparql_proxy.js"></script>
         <script type="module" src="modules/sparqlProxies/sparql_generic.js"></script>
@@ -108,14 +116,8 @@
         <script type="module" src="modules/tools/lineage/lineage_reasoner.js"></script>
 
         <script type="module" src="modules/tools/lineage/lineage_similars.js"></script>
-        <script type="module" src="modules/tools/lineage/lineage_axioms_draw.js"></script>
-        <script type="module" src="modules/tools/lineage/lineage_axioms_create.js"></script>
 
         <script type="module" src="config/tools_m.js"></script>
-
-        <script type="module" src="modules/shared/graphLoader.js"></script>
-        <script type="module" src="modules/graph/visjsUtil.js"></script>
-        <script type="module" src="modules/graph/VisjsGraphClass.js"></script>
 
         <link
             rel="stylesheet"
@@ -222,7 +224,7 @@
                         autoOpen: false,
                         height: 500,
                         width: 400,
-                        modal: false,
+                        modal: true,
                     });
 
                     $(document).on("click", "a", function () {
@@ -461,8 +463,7 @@
                 <div class="col text-end" style="z-index: 20">
                     <button onclick=" window.open( './browse.html','_blank');" type="button" class="btn btn-sm py-0 btn-outline-primary" style="font-weight: bold">Search</button>
 
-                <!--    <button onclick="MainController.showPart14AxiomsImage()" type="button" class="btn btn-sm py-0 btn-outline-primary">Axioms</button>-->
-
+                    <button onclick="MainController.showPart14AxiomsImage()" type="button" class="btn btn-sm py-0 btn-outline-primary">Axioms</button>
                     <!--   <button onclick="OwlEditor.loadUI()" type="button" class="btn btn-sm py-0 btn-outline-primary">OntoEdit</button>-->
                     <!--  <button onclick="MainController.UI.test()" type="button" class="btn btn-sm py-0 btn-outline-primary">test</button>-->
 

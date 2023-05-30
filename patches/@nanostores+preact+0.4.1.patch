@@ -1,0 +1,10 @@
+diff --git a/node_modules/@nanostores/preact/index.js b/node_modules/@nanostores/preact/index.js
+index 91567be..f6a6b09 100644
+--- a/node_modules/@nanostores/preact/index.js
++++ b/node_modules/@nanostores/preact/index.js
+@@ -1,4 +1,4 @@
+-import { useState, useEffect } from 'preact/hooks'
++import { useState, useEffect } from 'haunted'
+ import { listenKeys } from 'nanostores'
+ 
+ export function useStore(store, opts = {}) {

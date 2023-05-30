@@ -75,17 +75,6 @@ services:
         ports:
             - ${JOWL_LISTEN_PORT:-8080}:8080
 
-
-    jowl:
-        image: jowl:latest
-        build:
-            context: ${JOWL_PATH}
-            dockerfile: Dockerfile
-        container_name: jowl
-        restart: always
-        ports:
-            - ${JOWL_LISTEN_PORT:-8080}:8080
-
 networks:
     backend:
         driver: "bridge"

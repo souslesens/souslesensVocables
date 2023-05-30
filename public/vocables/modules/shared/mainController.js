@@ -216,8 +216,6 @@ var MainController = (function () {
                         callbackSeries();
                     },
 
-
-
                     function (callbackSeries) {
                         MainController.loadSources(null, function (_err, _result) {
                             callbackSeries(_err);
@@ -705,27 +703,26 @@ return;*/
                     var reload = paramsMap["reload"];
                     var editable = paramsMap["editable"];
                     var options = {};
-                    $("#waitImg").css("display","block")
-                    MainController.UI.message("loading ontology ...")
+                    $("#waitImg").css("display", "block");
+                    MainController.UI.message("loading ontology ...");
                     GraphLoader.loadGraphFromUrl(source, rdfUrl, reload, editable, options, function (err, result) {
                         if (err) {
-                             alert(err);
-                             callback(err);
-                        };
+                            alert(err);
+                            callback(err);
+                        }
 
-                            Config.tools[tool].urlParam_source = source;
+                        Config.tools[tool].urlParam_source = source;
                         self.UI.initTool(tool, function () {
-                         //   MainController.UI.message("loading ontology ...")
-                          return  callback();
+                            //   MainController.UI.message("loading ontology ...")
+                            return callback();
                         });
                     });
-
-                }else {
+                } else {
                     var source = paramsMap["source"];
                     if (source) {
                         Config.tools[tool].urlParam_source = source;
                     }
-                    self.UI.initTool(tool, function() {
+                    self.UI.initTool(tool, function () {
                         callback();
                     });
                 }

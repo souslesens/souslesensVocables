@@ -1,5 +1,5 @@
 import common from "../../shared/common.js";
-self.lineageVisjsGraph
+self.lineageVisjsGraph;
 import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 
 var Lineage_relationFilter = (function () {

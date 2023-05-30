@@ -1,98 +1,79 @@
 <style>
-
-
     #axiomsCreate_listAxiomDivW {
         margin: 5px;
         padding: 5px;
         background-color: #ddd;
     }
-    .axioms_predicatesItemDiv{
-        display: flex;flex-direction: row;
-        with:400px;
+    .axioms_predicatesItemDiv {
+        display: flex;
+        flex-direction: row;
+        with: 400px;
         height: 30px;
         margin: 3px;
         padding: 2px;
         border-radius: 5px;
         justify-content: space-evenly;
         background-color: #ddd;
-
     }
 
-    .axioms_commonOption{
+    .axioms_commonOption {
         background-color: #92d3ec;
     }
 
-    .axioms_create_triples{
-        display: flex;flex-direction: column;
+    .axioms_create_triples {
+        display: flex;
+        flex-direction: column;
         margin: 3px;
         padding: 2px;
-
-
-
     }
-    .axioms_create_triple{
-       font-size: 12px;
-        width:100%;
+    .axioms_create_triple {
+        font-size: 12px;
+        width: 100%;
         margin: 3px;
         padding: 2px;
         background-color: #c4daec;
     }
-
-
 </style>
 
-<div id="axioms_predicatesDiv" style="display: flex;flex-direction: column">
-  <div class="axioms_predicatesItemDiv">
-    Axiom type
+<div id="axioms_predicatesDiv" style="display: flex; flex-direction: column">
+    <div class="axioms_predicatesItemDiv">
+        Axiom type
 
-    <select id="axioms_axiomTypeSelect"
-            onchange="Lineage_axioms_create.onAxiomTypeSelect($(this).val())">
-
-    </select>
-  </div>
-
-  <div class="axioms_predicatesItemDiv">
-    Axiom Range
-    <select id="axioms_axiomRangeSelect"
-            onchange="Lineage_axioms_create.onAxiomRangeSelect($(this).val())"></select>
-  </div>
-
-  <div id="axiomsCreate_listAxiomDiv" style="display: flex;flex-direction: column">
-
-
-    <div class="axioms_predicatesItemDiv" id="axioms_create_rangePropertyDiv">range property (if any)
-      <select id="axioms_create_rangePropertySelect"
-              onchange="Lineage_axioms_create.onSelectRangeProperty($(this).val())"></select>
-
+        <select id="axioms_axiomTypeSelect" onchange="Lineage_axioms_create.onAxiomTypeSelect($(this).val())"></select>
     </div>
-
-    <div class="axioms_predicatesItemDiv" >
-      entity type
-      <select id="axioms_create_entityTypeSelect"
-              onchange="Lineage_axioms_create.onSelectEntityType($(this).val())"></select>
-
-      </select>
-    </div>
-
-
-    <div class="axioms_predicatesItemDiv">entity origin
-      <select id="axioms_create_entityOriginSelect"
-              onclick="Lineage_axioms_create.onSelectEntityOrigin($(this).val())"></select>
-
-    </div>
-
 
     <div class="axioms_predicatesItemDiv">
-      entity value
-      <select id="axiomsCreate_entityValueSelect"></select>
-      <input type="hidden" id="axiomsCreate_entityLabelInput"/>
+        Axiom Range
+        <select id="axioms_axiomRangeSelect" onchange="Lineage_axioms_create.onAxiomRangeSelect($(this).val())"></select>
     </div>
 
-  </div>
-  <div id="axiomsCreate_triplesDiv"></div>
+    <div id="axiomsCreate_listAxiomDiv" style="display: flex; flex-direction: column">
+        <div class="axioms_predicatesItemDiv" id="axioms_create_rangePropertyDiv">
+            range property (if any)
+            <select id="axioms_create_rangePropertySelect" onchange="Lineage_axioms_create.onSelectRangeProperty($(this).val())"></select>
+        </div>
 
- <div>
-   <div id="axiomsCreate_infosDiv"></div>
-   <button onclick="Lineage_axioms_create.showTriples()">OK</button>
-   <button onclick="Lineage_axioms_create.saveTriples()">Save</button></div>
+        <div class="axioms_predicatesItemDiv">
+            entity type
+            <select id="axioms_create_entityTypeSelect" onchange="Lineage_axioms_create.onSelectEntityType($(this).val())"></select>
+        </div>
+
+        <div class="axioms_predicatesItemDiv">
+            entity origin
+            <select id="axioms_create_entityOriginSelect" onclick="Lineage_axioms_create.onSelectEntityOrigin($(this).val())"></select>
+        </div>
+
+        <div class="axioms_predicatesItemDiv">
+            entity value
+            <select id="axiomsCreate_entityValueSelect"></select>
+            <input type="hidden" id="axiomsCreate_entityLabelInput" />
+        </div>
+    </div>
+    <div id="axiomsCreate_triplesDiv"></div>
+
+    <div>
+        <div id="axiomsCreate_infosDiv"></div>
+        <button onclick="Lineage_axioms_create.showTriples()">OK</button>
+        <button onclick="Lineage_axioms_create.saveTriples()">Save</button>
+    </div>
 </div>

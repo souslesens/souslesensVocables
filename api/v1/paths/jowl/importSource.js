@@ -34,7 +34,7 @@ module.exports = function () {
             var graphExists = false;
             var allTriples = [];
             var totalImportedTriples = -1;
-            var ontologyContentEncoded64=null;
+            var ontologyContentEncoded64 = null;
             async2.series(
                 [
                     // check if source name
@@ -71,19 +71,14 @@ module.exports = function () {
                         });
                     },
 
+                    function (callbackSeries) {
+                        request(body.rdfUrl, {}, function (error, request, body) {
+                            if (error) return callbackSeries();
+                            ontologyContentEncoded64 = Buffer.from(body).toString("base64");
 
-                  function(callbackSeries){
-
-                      request( body.rdfUrl, {},function(error, request, body) {
-                          if(error)
-                              return callbackSeries()
-                         ontologyContentEncoded64 = Buffer.from(body).toString("base64");
-
-                          callbackSeries();
-                      });
-
-
-                  },
+                            callbackSeries();
+                        });
+                    },
 
                     //get triples from jowl/jena/rdftriple
                     function (callbackSeries) {
@@ -92,8 +87,7 @@ module.exports = function () {
                         }
 
                         var payload = {
-
-                            ontologyContentEncoded64:ontologyContentEncoded64
+                            ontologyContentEncoded64: ontologyContentEncoded64,
                         };
 
                         var options = {
@@ -108,9 +102,10 @@ module.exports = function () {
                             if (error) {
                                 return callbackSeries(error);
                             }
-                              if(!body) {
-                                  return callbackSeries("Cannot import ontology file");
-                              } if(!Array.isArray(body)){
+                            if (!body) {
+                                return callbackSeries("Cannot import ontology file");
+                            }
+                            if (!Array.isArray(body)) {
                                 return callbackSeries(body);
                             }
                             allTriples = body;
@@ -177,7 +172,7 @@ module.exports = function () {
                     },
                 ],
                 function (err) {
-                    processResponse(res, err,  {result:totalImportedTriples} );
+                    processResponse(res, err, { result: totalImportedTriples });
                 }
             );
         });

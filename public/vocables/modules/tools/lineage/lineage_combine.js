@@ -1,5 +1,5 @@
 import Lineage_classes from "./lineage_classes.js";
-self.lineageVisjsGraph
+self.lineageVisjsGraph;
 import common from "../../shared/common.js";
 import Lineage_selection from "./lineage_selection.js";
 import SearchUtil from "../../search/searchUtil.js";

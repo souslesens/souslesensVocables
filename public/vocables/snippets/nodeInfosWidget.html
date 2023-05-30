@@ -11,28 +11,25 @@
         border-radius: 10px;
         padding: 5px;
     }
-
 </style>
-
-
-
 
 <div id="nodeInfosWidget_modifyDiv"></div>
 
 <div id="nodeInfosWidget_tabsDiv">
-  <ul>
-    <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_InfosTabDiv">Infos</a></li>
-    <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_AxiomsTabDiv">Axioms</a></li>
-  </ul>
-  <div id="nodeInfosWidget_InfosTabDiv"></div>
-  <div id="nodeInfosWidget_AxiomsTabDiv">
-   <div> depth <span id="nodeInfosWidget_depthSpan"></span>
-     <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_axioms_draw.changeDepth(1)">+</button>
-     <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick="Lineage_axioms_draw.changeDepth(-1)">-</button>
-   <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.showCreateEntityDialog()'> New Entity</button>
-   </div>
-    <div id="axiomsGraphDivContainer" style="width:950px;height:650px"></div>
-  </div>
+    <ul>
+        <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_InfosTabDiv">Infos</a></li>
+        <li class="nodeInfosWidget_tabDiv"><a href="#nodeInfosWidget_AxiomsTabDiv">Axioms</a></li>
+    </ul>
+    <div id="nodeInfosWidget_InfosTabDiv"></div>
+    <div id="nodeInfosWidget_AxiomsTabDiv">
+        <div>
+            depth <span id="nodeInfosWidget_depthSpan"></span>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_axioms_draw.changeDepth(1)">+</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_axioms_draw.changeDepth(-1)">-</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="NodeInfosWidget.showCreateEntityDialog()">New Entity</button>
+        </div>
+        <div id="axiomsGraphDivContainer" style="width: 950px; height: 650px"></div>
+    </div>
 </div>
 
 <div id="axioms_predicatesDiv"></div>

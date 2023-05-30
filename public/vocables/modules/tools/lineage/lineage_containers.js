@@ -4,7 +4,7 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import common from "../../shared/common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
-self.lineageVisjsGraph
+self.lineageVisjsGraph;
 
 var Lineage_containers = (function () {
     var self = {};

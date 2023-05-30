@@ -1012,7 +1012,6 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
         async.series(
             [
                 function (callbackSeries) {
-
                     if (!options) {
                         options = {};
                     }
@@ -1025,33 +1024,30 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
                     if (schemaType == "OWL") {
                         var query =
-                          "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                          "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
-                          "SELECT distinct *  " + fromStr +
-                          "  WHERE {{  ?subject   rdfs:subClassOf   ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel \n" +
-                        "          ?skosAltLabel. } }" +
-                        " UNION " +
-                        "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  }" +
-                          "UNION  {" +
-                          "    ?subject rdf:type owl:Class.?subject rdfs:label ?subjectLabel." +
-                          "   filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))  OPTIONAL{?subject skos:altLabel  ?skosAltLabel}" +
-                          "  filter( not exists{  ?subject   rdfs:subClassOf   ?aParent.  ?aParent rdf:type owl:Class.  })}" +
-                          "}"
-
-
-                    }else {
-
-
+                            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
+                            "SELECT distinct *  " +
+                            fromStr +
+                            "  WHERE {{  ?subject   rdfs:subClassOf   ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel \n" +
+                            "          ?skosAltLabel. } }" +
+                            " UNION " +
+                            "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  }" +
+                            "UNION  {" +
+                            "    ?subject rdf:type owl:Class.?subject rdfs:label ?subjectLabel." +
+                            "   filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))  OPTIONAL{?subject skos:altLabel  ?skosAltLabel}" +
+                            "  filter( not exists{  ?subject   rdfs:subClassOf   ?aParent.  ?aParent rdf:type owl:Class.  })}" +
+                            "}";
+                    } else {
                         var query =
-                          "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                          "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
-                          "SELECT distinct * " +
-                          fromStr +
-                          " WHERE {";
+                            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
+                            "SELECT distinct * " +
+                            fromStr +
+                            " WHERE {";
                         var where = "  ?subject " + parentType + " ?firstParent." + Sparql_common.getVariableLangLabel("subject", false, true) + "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
                         if (options.filter) {
                             where += " " + options.filter + " ";
@@ -1175,7 +1171,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                 id: item.subject.value,
                                 label: conceptLabel,
                                 skoslabels: skosLabelsMap[item.subject.value],
-                                parent: item.firstParent?item.firstParent.value:null,
+                                parent: item.firstParent ? item.firstParent.value : null,
                                 parents: [],
                                 type: conceptType,
                             };

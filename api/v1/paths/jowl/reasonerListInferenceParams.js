@@ -3,48 +3,44 @@ const ConfigManager = require("../../../../bin/configManager.");
 const { processResponse } = require("../utils");
 const request = require("request");
 
-
-
-module.exports = function() {
-  let operations = {
-    GET
-  };
-
-  function GET(req, res, next) {
-    var jowlConfig = ConfigManager.config.jowlServer;
-    var options = {
-      method: "GET",
-      headers: {
-        "content-type": "application/json"
-      },
-      url: jowlConfig.url + "reasoner/parametres"
+module.exports = function () {
+    let operations = {
+        GET,
     };
-    request(options, function(error, response, body) {
-      if(error)
-        return processResponse(res, error, body);
-      var json=JSON.parse(body)
 
-      return processResponse(res, error, json);
-    });
+    function GET(req, res, next) {
+        var jowlConfig = ConfigManager.config.jowlServer;
+        var options = {
+            method: "GET",
+            headers: {
+                "content-type": "application/json",
+            },
+            url: jowlConfig.url + "reasoner/parametres",
+        };
+        request(options, function (error, response, body) {
+            if (error) return processResponse(res, error, body);
+            var json = JSON.parse(body);
 
-  }
-
-  GET.apiDoc = {
-    security: [{ loginScheme: [] }],
-    summary: "Query Jowl server to get inference parameters",
-    description: "Query Jowl server to get inference parameters",
-    operationId: "reasonerListInferenceParams",
-    parameters: [],
-
-    responses: {
-      200: {
-        description: "Results",
-        schema: {
-          type: "object"
-        }
-      }
+            return processResponse(res, error, json);
+        });
     }
-  };
 
-  return operations;
+    GET.apiDoc = {
+        security: [{ loginScheme: [] }],
+        summary: "Query Jowl server to get inference parameters",
+        description: "Query Jowl server to get inference parameters",
+        operationId: "reasonerListInferenceParams",
+        parameters: [],
+
+        responses: {
+            200: {
+                description: "Results",
+                schema: {
+                    type: "object",
+                },
+            },
+        },
+    };
+
+    return operations;
 };

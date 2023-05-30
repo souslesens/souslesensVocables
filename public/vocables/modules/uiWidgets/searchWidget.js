@@ -666,7 +666,7 @@ return*/
                     Lineage_common.copyNodeToClipboard(self.currentTreeNode);
                 },
             };
-          /*  items.axioms = {
+            /*  items.axioms = {
                 label: "graph axioms",
                 action: function (e) {
 

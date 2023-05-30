@@ -4,7 +4,7 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_classes from "./lineage_classes.js";
 
-self.lineageVisjsGraph
+self.lineageVisjsGraph;
 import Export from "../../shared/export.js";
 
 var Lineage_query = (function () {

@@ -33,16 +33,15 @@ var GraphLoader = (function () {
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-                var message=""
-                if(data.result>-1) {
-                    message = "imported " + data.result + " triples"
+                var message = "";
+                if (data.result > -1) {
+                    message = "imported " + data.result + " triples";
                     MainController.loadSources(null, function (_err, _result) {
-                        MainController.UI.message(message,true);
-                        callback(null, message)
-                    })
-
+                        MainController.UI.message(message, true);
+                        callback(null, message);
+                    });
                 }
-                MainController.UI.message(message,true);
+                MainController.UI.message(message, true);
                 callback(null, message);
             },
             error(err) {

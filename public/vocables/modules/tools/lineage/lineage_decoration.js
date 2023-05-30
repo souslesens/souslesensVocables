@@ -3,7 +3,7 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_sources from "./lineage_sources.js";
 import common from "../../shared/common.js";
-self.lineageVisjsGraph
+self.lineageVisjsGraph;
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 //@typescript-eslint/no-unused-vars

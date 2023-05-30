@@ -1,5 +1,5 @@
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-self.lineageVisjsGraph
+self.lineageVisjsGraph;
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Lineage_classes from "./lineage_classes.js";
 import common from "../../shared/common.js";
@@ -276,7 +276,7 @@ var Lineage_properties = (function () {
                 var existingNodes = options.output == "table" ? {} : Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
                 var color = Lineage_classes.getSourceColor(source);
 
-                var toNodesMap=[]
+                var toNodesMap = [];
 
                 result2.forEach(function (item) {
                     if (!existingNodes[item.subject.value]) {
@@ -299,16 +299,16 @@ var Lineage_properties = (function () {
                                 size = 2;
                             }
 
-                          /*  if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
+                            /*  if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
                                 label = Config.Lineage.logicalOperatorsMap[item.prop.value];
                                 shape = "circle";
                                 color = "#EEE";
                             }*/
                         }
 
-                        var predicateUri=options.inversePredicate?null:item.prop.value;
-                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.subject.value, label,predicateUri,{shape:shape}) );
-                      /*  visjsData.nodes.push({
+                        var predicateUri = options.inversePredicate ? null : item.prop.value;
+                        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject.value, label, predicateUri, { shape: shape }));
+                        /*  visjsData.nodes.push({
                             id: item.subject.value,
                             label: label,
                             shape: shape,
@@ -342,7 +342,7 @@ var Lineage_properties = (function () {
                                 size = 2;
                             }
 
-                          /*  if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
+                            /*  if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
                                 label = Config.Lineage.logicalOperatorsMap[item.prop.value] || "";
                                 shape = "hexagon";
                                 color = "#EEE";
@@ -356,10 +356,10 @@ var Lineage_properties = (function () {
                             font = "12px arial #3c8fe1";
                         }
 
-                        var predicateUri=options.inversePredicate?item.prop.value:null;
-                        visjsData.nodes.push( VisjsUtil.getVisjsNode (source, item.object.value, label,predicateUri,{shape:shape}) );
+                        var predicateUri = options.inversePredicate ? item.prop.value : null;
+                        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.object.value, label, predicateUri, { shape: shape }));
 
-                    /*   visjsData.nodes.push({
+                        /*   visjsData.nodes.push({
                             id: item.object.value,
                             label: label,
                             shape: shape,
@@ -397,7 +397,6 @@ var Lineage_properties = (function () {
                             dashes = [6, 2, 3];
                         }
 
-
                         visjsData.edges.push({
                             id: edgeId,
                             from: item.subject.value,
@@ -415,11 +414,10 @@ var Lineage_properties = (function () {
                             font: { edgeColor },
                             arrows: {
                                 to: {
-                                    enabled:true,
+                                    enabled: true,
                                     type: "solid",
                                     scaleFactor: 0.5,
                                 },
-
                             },
                             dashes: dashes,
                             color: edgeColor,
@@ -427,9 +425,7 @@ var Lineage_properties = (function () {
                     }
                 });
 
-
-
-            /*    var fromNodesMap={}
+                /*    var fromNodesMap={}
                 var leafNodesMap={}
                 visjsData.edges.forEach(function(item){
                     fromNodesMap[item.from]=1
@@ -460,7 +456,6 @@ var Lineage_properties = (function () {
                     }
 
                 })*/
-
 
                 if (callback && options.returnVisjsData) {
                     return callback(null, visjsData);

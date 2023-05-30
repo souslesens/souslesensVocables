@@ -2,7 +2,7 @@ import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_relationFilter from "./lineage_relationFilter.js";
 
-self.lineageVisjsGraph
+self.lineageVisjsGraph;
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Export from "../../shared/export.js";
 import Lineage_classes from "./lineage_classes.js";
@@ -15,11 +15,11 @@ var Lineage_relations = (function () {
         self.drawRelationCurrentCaller = caller;
 
         $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv" ).dialog( "option", "title", "Query" );
+        $("#mainDialogDiv").dialog("option", "title", "Query");
         $("#mainDialogDiv").load("snippets/lineage/relationsDialog.html", function () {
             $("#lineageRelations_history_previousBtn").css("display", self.previousQuery ? "inline" : "none");
             $("#lineageRelations_history_deleteBtn").css("display", "none");
-            $("#LineageRelations_searchJsTreeInput").focus()
+            $("#LineageRelations_searchJsTreeInput").focus();
             Lineage_relationFilter.showAddFilterDiv(true);
 
             //$("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)
@@ -294,11 +294,11 @@ var Lineage_relations = (function () {
         options.skipLiterals = true;
         var source = null;
         var data = null;
-        var levelsMap={}
+        var levelsMap = {};
         if (!options.data) {
             if (caller == "Graph") {
                 data = Lineage_classes.currentGraphNode.data.id;
-                levelsMap[Lineage_classes.currentGraphNode.data.id]=Lineage_classes.currentGraphNode.level
+                levelsMap[Lineage_classes.currentGraphNode.data.id] = Lineage_classes.currentGraphNode.level;
             } else if (caller == "Tree") {
                 data = Lineage_classes.currentTreeNode.data.id;
             } else if (caller == "both") {
@@ -308,7 +308,7 @@ var Lineage_relations = (function () {
                 nodes.forEach(function (node) {
                     if (node.data && (!node.data.type || node.data.type != "literal")) {
                         data.push(node.id);
-                        levelsMap[node.id]=node.level
+                        levelsMap[node.id] = node.level;
                     }
                 });
             }

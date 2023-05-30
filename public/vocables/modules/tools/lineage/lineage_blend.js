@@ -2,7 +2,7 @@ import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-self.lineageVisjsGraph
+self.lineageVisjsGraph;
 import Lineage_classes from "./lineage_classes.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -1,7 +1,7 @@
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import common from "../../shared/common.js";
 import SearchUtil from "../../search/searchUtil.js";
-self.lineageVisjsGraph
+self.lineageVisjsGraph;
 import Lineage_classes from "./lineage_classes.js";
 import Lineage_sources from "./lineage_sources.js";
 
@@ -20,7 +20,7 @@ var Lineage_similars = (function () {
         } else {
             self.mode = "whiteboard";
             $("#mainDialogDiv").dialog("close");
-           self.drawWhiteBoardSimilars("graph");
+            self.drawWhiteBoardSimilars("graph");
             $("#lineageSimilars_sourcesTreeDiv").html("");
         }
     };
@@ -139,8 +139,7 @@ var Lineage_similars = (function () {
                             }
                         });
                     }
-                    if( visjsData.edges.length==0)
-                        return alert ("no similars found in source "+source)
+                    if (visjsData.edges.length == 0) return alert("no similars found in source " + source);
                     Lineage_classes.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
                     Lineage_classes.lineageVisjsGraph.data.edges.update(visjsData.edges);
                 }

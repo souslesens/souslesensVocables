@@ -197,7 +197,7 @@ var Sparql_OWL = (function () {
             options.selectGraph = false;
         }
 
-        fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph,options.withoutImports,options);
+        fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports, options);
 
         var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "select   distinct * " + fromStr + " where {";
         if (options.selectGraph) {

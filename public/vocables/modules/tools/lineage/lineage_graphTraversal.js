@@ -3,7 +3,7 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 import common from "../../shared/common.js";
-self.lineageVisjsGraph
+self.lineageVisjsGraph;
 import Lineage_classes from "./lineage_classes.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
 
@@ -105,13 +105,13 @@ var Lineage_graphTraversal = (function () {
                     path.forEach(function (item) {
                         var relation = {
                             from: item[0],
-                            fromLabel: labelsMap[item[0]|| Sparql_common.getLabelFromURI( item[0])],
+                            fromLabel: labelsMap[item[0] || Sparql_common.getLabelFromURI(item[0])],
 
                             prop: item[2],
-                            propLabel: labelsMap[item[2]|| Sparql_common.getLabelFromURI( item[2])],
+                            propLabel: labelsMap[item[2] || Sparql_common.getLabelFromURI(item[2])],
 
                             to: item[1],
-                            toLabel: labelsMap[item[1]|| Sparql_common.getLabelFromURI( item[1])],
+                            toLabel: labelsMap[item[1] || Sparql_common.getLabelFromURI(item[1])],
                         };
                         relations.push(relation);
                     });

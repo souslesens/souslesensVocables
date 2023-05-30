@@ -4,21 +4,19 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 
 var PromptedSelectWidget = (function () {
     var self = {};
-    self.prompt = function (type, selectId, source,options) {
-        if(!options)
-            options={}
-        if (!options.noCache && Config.selectListsCache[source+"_"+type]) {
-            return common.fillSelectOptions(selectId, Config.selectListsCache[source+"_"+type], true, "label", "id");
+    self.prompt = function (type, selectId, source, options) {
+        if (!options) options = {};
+        if (!options.noCache && Config.selectListsCache[source + "_" + type]) {
+            return common.fillSelectOptions(selectId, Config.selectListsCache[source + "_" + type], true, "label", "id");
         }
 
-
-        var filter=null;
-        if(!Config.topLevelOntologies[source]) {
+        var filter = null;
+        if (!Config.topLevelOntologies[source]) {
             var term = prompt(" filter values ...");
-            if (term === null ) {
+            if (term === null) {
                 return;
             }
-            filter=  " FILTER ( regex(?label,'" + term + "','i'))";
+            filter = " FILTER ( regex(?label,'" + term + "','i'))";
         }
 
         var options = {
@@ -60,7 +58,7 @@ var PromptedSelectWidget = (function () {
                 return 0;
             });
             if (!options.noCache && result.length <= Config.minSelectListSize) {
-                Config.selectListsCache[source+"_"+type] = objs;
+                Config.selectListsCache[source + "_" + type] = objs;
             }
 
             common.fillSelectOptions(selectId, objs, true, "label", "id");

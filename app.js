@@ -73,6 +73,7 @@ app.use("/vocables/snippets", express.static(path.join(__dirname, "public/vocabl
 app.use("/icons", express.static(path.join(__dirname, "public/vocables/icons")));
 app.use("/vocables/icons", express.static(path.join(__dirname, "public/vocables/icons")));
 app.use("/vocables/scripts", express.static(path.join(__dirname, "public/vocables/js/external")));
+app.use("/vocables/plugins", express.static(path.join(__dirname, "plugins")));
 
 async function loggedIn(req, _res, next) {
     if (req.isAuthenticated || config.auth === "disabled") {

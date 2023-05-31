@@ -3,7 +3,8 @@ import { defineConfig } from "vite";
 const serverAdress = "http://localhost:3010";
 export default defineConfig({
     plugins: [],
-    build: {},
+    build: { target: "es2022" },
+    optimizeDeps: { esbuildOptions: { target: "es2022" } },
     server: {
         proxy: {
             "/api": serverAdress,

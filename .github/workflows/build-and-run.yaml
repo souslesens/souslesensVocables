@@ -22,7 +22,9 @@ jobs:
                   node-version: ${{ matrix.node-version }}
                   cache: "npm"
             - run: npm ci
+            - run: npm run build:app
+            - run: npm run build:vocables
             - run: |
-                  npm run preview & 
+                  npm run start & 
                   sleep 10s && 
                   curl http://localhost:3011

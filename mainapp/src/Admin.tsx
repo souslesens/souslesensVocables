@@ -65,7 +65,7 @@ const initialModel: Model = {
     logs: loading(),
     config: loading(),
     isModalOpen: false,
-    currentEditionTab: "SourcesEdition",
+    currentEditionTab: "UsersEdition",
 };
 
 const ModelContext = React.createContext<{ model: Model; updateModel: React.Dispatch<Msg> } | null>(null);

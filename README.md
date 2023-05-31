@@ -224,18 +224,30 @@ bash scripts/create_user_in_db.sh dev <login> <password>
 
 souslesensVocable is composed of a backend in node/express and a frontend in pure javascript
 and typescript/react.
+Mainapp and vocables are bundled using vite.
 
-```bash
-# Install the server
-npm ci
-# Install the front
-cd mainapp
-npm ci
-# Build Webpack files
-npm run build
-# Go back to root
-cd ..
-```
+To install npm packages run `npm ci` from root.
+
+if you want to develop ConfigEditor with HMR enabled :
+
+`npm run serve:configEditor`
+
+Vite will serve the app and proxy the requests to the node server.
+
+if you want to develop vocables with browser auto-reloading :
+
+`npm run serve:vocables`
+
+If you want to develop the backend part :
+`npm run dev:server`
+
+If you want to dev both the frontend and the backend at the same time (NB: autoreloading doesn't work with this setup for some reason):
+
+`npm run dev:fullstack`
+
+To preview the app:
+
+`npm run preview`
 
 ### Run souslesens server
 

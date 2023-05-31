@@ -16,7 +16,7 @@ async function loadToolsAndPlugins() {
 
     // We import plugins and register them in the window
     for (const element of plugins) {
-        const plugin = await import(`../../plugins/${element.name}/${element.name}.js`);
+        const plugin = await import(`/vocables/plugins/${element.name}/${element.name}.js`);
         window[element.name] = plugin.default;
     }
     // We mutate Config.tools with an object merging plugins and tools

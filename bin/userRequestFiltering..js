@@ -103,8 +103,11 @@ var UserRequestFiltering = {
         return callback(error, query);
     },
     checkSelectQuery: function (query, userGraphUrisMap, callback) {
+
         try {
-            var json = parser.parse(query);
+
+            var query2=query.replace(/\{\s*[0-9]\s*,\s*[1-9]*\s*\}/gm,"");// bug in  parser remove property path cardinality for parsing
+            var json = parser.parse(query2);
         } catch (e) {
             return callback(e);
         }

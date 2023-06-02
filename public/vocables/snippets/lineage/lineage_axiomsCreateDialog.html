@@ -25,17 +25,29 @@
         flex-direction: column;
         margin: 3px;
         padding: 2px;
+        background-color: #337ab7bd;
+        border-radius: 5px;
+        align-items: center;
     }
     .axioms_create_triple {
-        font-size: 12px;
-        width: 100%;
+        width: 95%;
         margin: 3px;
+        padding: 5px;
+        border-radius: 5px;
         padding: 2px;
+        padding-left: 15px;
+        padding-right: 15px;
+        display: flex;
         background-color: #c4daec;
+        justify-content: space-between;
+    }
+    }
+    .axioms_create_triplePredicate {
+        color: #1626d3;
     }
 </style>
 
-<div id="axioms_predicatesDiv" style="display: flex; flex-direction: column">
+<div id="axiomsDrawGraphDiv" style="display: flex; flex-direction: column">
     <div class="axioms_predicatesItemDiv">
         Axiom type
 
@@ -69,11 +81,12 @@
             <input type="hidden" id="axiomsCreate_entityLabelInput" />
         </div>
     </div>
-    <div id="axiomsCreate_triplesDiv"></div>
+    <div> <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_axioms_create.showTriples()">Show Triples</button></div>
+    <div id="axiomsCreate_triplesDiv" style="min-width: 200px"></div>
 
     <div>
         <div id="axiomsCreate_infosDiv"></div>
-        <button onclick="Lineage_axioms_create.showTriples()">OK</button>
-        <button onclick="Lineage_axioms_create.saveTriples()">Save</button>
+
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_axioms_create.saveTriples()">Save Triples</button>
     </div>
 </div>

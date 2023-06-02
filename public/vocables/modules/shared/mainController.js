@@ -79,7 +79,9 @@ var MainController = (function () {
         if (sourcesFile) {
             sourcesFileParam = "?sourcesFile=" + sourcesFile;
         } else if (Config.currentProfile.sourcesFile) {
-            sourcesFileParam = "?sourcesFile=" + Config.currentProfile.sourcesFile;
+            sourcesFileParam = Config.currentProfile.sourcesFile;
+        }else{
+           ;// sourcesFileParam = "?sourcesFile=" + "sources.json";
         }
         $.ajax({
             type: "GET",

@@ -203,42 +203,43 @@
             </div>
             <div class="lineage_button_group">
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showHideIndividuals()">Show/Hide Individuals</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_containers.graphWhiteboardNodesContainers()">show Containers</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_containers.graphWhiteboardNodesContainers()">Parent Containers</button>
             </div>
 
-            <div class="lineage_button_group">
+
+         <!--   <div class="lineage_button_group">
                 <span>selection</span>
                 <span title="To add nodes selection : Ctrl+Alt and click/hover nodes " style="font-weight: bold; color: blue" id="Lineageclasses_selectedNodesCount">0</span>
 
                 <button title="ctrl+alt click or hover" class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_selection.listNodesSelection()">Show</button>
 
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_selection.clearNodesSelection()">Clear</button>
-            </div>
+            </div>-->
         </div>
         <div class="lineage_actionDiv" style="display: flex; flex-direction: column; width: 45%">
             <div class="lineage_button_group">
                 Find
-                <input style="width: 100px" id="visjsGraph_searchInput" onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_Classes.graph.searchNode()}" />
+                <input style="width: 100px" id="visjsGraph_searchInput" onkeyup="if (event.keyCode == 13 || event.keyCode == 9){Lineage_classes.graph.searchNode()}" />
 
                 <!--   <button id="" class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="visjsGraph.searchNode();">Search</button>-->
                 <!--   <button id="" class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="visjsGraph.searchNode();">Search</button>-->
             </div>
-            <div class="lineage_button_group">
+         <!--   <div class="lineage_button_group">
                 Layout
-                <select id="visjsGraph_layoutSelect" style="width: 100px" onchange="Lineage_Classes.graph.setLayout($(this).val())">
+                <select id="visjsGraph_layoutSelect" style="width: 100px" onchange="Lineage_classes.graph.setLayout($(this).val())">
                     <option></option>
                     <option>standard</option>
                     <option>hierarchical vertical</option>
                     <option>hierarchical horizontal</option>
                 </select>
-            </div>
+            </div>-->
 
             <div class="lineage_button_group">
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_Classes.graph.showGraphConfig()">Display</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.graph.showGraphConfig()">Display</button>
                 <span id="visjsConfigureDiv">&nbsp;</span>
 
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Export.exportGraphToDataTable()">CSV</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_Classes.graph.toSVG()">SVG</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.graph.exportGraphToDataTable()">CSV</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.graph.toSVG()">SVG</button>
 
                 <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.showEdgesLegend()">legend</button>-->
 

@@ -25,15 +25,21 @@ var NodeInfosWidget = (function () {
                 activate: function (event, ui) {
                     if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                         setTimeout(function () {
-                            Lineage_axioms_draw.drawNodeAxioms(self.currentSource, self.currentNodeId);
+                            Lineage_axioms_draw.drawNodeAxioms(self.currentSource, self.currentNodeId,"axiomsDrawGraphDiv");
                         }, 1000);
                     }
                 },
             });
-            $("#axioms_predicatesDiv").dialog({
+            $("#axiomsDrawGraphDiv").dialog({
                 autoOpen: false,
-                height: 600,
-                width: 800,
+                height: 800,
+                width: 1000,
+                modal: false,
+            });
+            $("#axioms_dialogDiv").dialog({
+                autoOpen: false,
+                height: 800,
+                width: 1000,
                 modal: false,
             });
 
@@ -1021,8 +1027,19 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         divId: "axiomsGraphDivContainer",
         depth: 1
       };*/
-            $("#" + divId).dialog("close");
-            NodeInfosWidget.showNodeInfos(source, proposedUri);
+          //  $("#" + divId).dialog("close");
+            var node={
+                id:proposedUri,
+                label:label,
+                data: {
+                    id: proposedUri,
+                    label: label,
+                    type:type,
+                    source:source
+                }
+            }
+            NodeInfosWidget.showNodeInfos(source, node,"mainDialogDiv");
+            $("#nodeInfosWidget_tabsDiv").tabs("option","active",2)
         });
     };
 

@@ -9,10 +9,10 @@ var Export = (function () {
     self.currentSource = null;
     self.dataTable;
 
-    self.exportGraphToDataTable = function (nodes, edges) {
+    self.exportGraphToDataTable = function (graphInstance,divId,nodes, edges,) {
         if (!nodes && !edges) {
-            nodes = visjsGraph.data.nodes.get();
-            edges = visjsGraph.data.edges.get();
+            nodes = graphInstance.data.nodes.get();
+            edges = graphInstance.data.edges.get();
         }
 
         var nodesFromMap = {};
@@ -54,7 +54,7 @@ var Export = (function () {
             });
             MainController.UI.message("", true);
             var columnDefs = [{ width: 200, targets: [0, 1, 2] }];
-            Export.showDataTable(null, cols, dataset, null, { fixedColumns: 1, columnDefs: columnDefs });
+            Export.showDataTable(divId, cols, dataset, null, { fixedColumns: 1, columnDefs: columnDefs });
         } else {
             var str = header;
             nodesFromArray.forEach(function (nodeFromId, index) {
@@ -333,6 +333,7 @@ var Export = (function () {
             $("#mainDialogDiv").html("<table id='dataTableDivExport'></table>");
             div = "dataTableDiv";
         } else {
+            $("#" + div).dialog("open");
             $("#" + div).html("<table id='dataTableDivExport'></table>");
         }
 

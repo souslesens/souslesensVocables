@@ -108,7 +108,8 @@ var UserRequestFiltering = {
     },
     checkSelectQuery: function (query, userGraphUrisMap, callback) {
         try {
-            var json = parser.parse(query);
+            var query2 = query.replace(/\{\s*[0-9]\s*,\s*[1-9]*\s*\}/gm, "");
+            var json = parser.parse(query2);
         } catch (e) {
             return callback(e);
         }

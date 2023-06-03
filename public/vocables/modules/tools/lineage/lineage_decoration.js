@@ -315,7 +315,7 @@ var Lineage_decoration = (function () {
                                 self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyClass = item.x.value;
                                 self.currentVisjGraphNodesMap[item.x.value].color = self.currentTopOntologyClassesMap[item.x.value].color;
                                 self.currentVisjGraphNodesMap[item.x.value].type = item.x.value;
-                                if (self.currentTopOntologyClassesMap[item.type.value].parents) {
+                                if (self.currentTopOntologyClassesMap[item.type.value] && self.currentTopOntologyClassesMap[item.type.value].parents) {
                                     self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyNumberOfParents = self.currentTopOntologyClassesMap[item.type.value].parents.length;
                                 }
                             } else if (self.currentTopOntologyClassesMap[item.type.value]) {

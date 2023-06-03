@@ -51,8 +51,10 @@ var Lineage_axioms_create = (function() {
       self.setEntityOriginSelect();
 
 
-
       var types = self.currentGraphNode.data.type;
+
+      var typeStr=self.currentGraphNode.data.type || ""
+      $("#axioms_currentItemDiv").html( self.currentGraphNode.data.id +" "+typeStr);
 
       if (!types) {
         types = self.owl2Vocabulary.Declarations;
@@ -109,18 +111,19 @@ var Lineage_axioms_create = (function() {
     var constraint = self.possiblePredicates[axiomTypeId];
     var range = constraint.range;
     var ranges = [range];
-    var options = { specificPredicates: ["rdfs:subClassOf", "rdf:type"] };
-    Sparql_OWL.getNodesDescendants("owl",  ranges,  options, function(err, result) {
+    //var options = { specificPredicates: ["rdfs:subClassOf", "rdf:type"] };
+    var options = { specificPredicates: ["rdfs:subClassOf"], includeSources: ["rdf", "rdfs"] };
+    Sparql_OWL.getNodesDescendants("owl", ranges, options, function(err, result) {
 
-    //  Sparql_OWL.getNodeChildren("owl", null, ranges, 1, options, function(err, result) {
+      //  Sparql_OWL.getNodeChildren("owl", null, ranges, 1, options, function(err, result) {
       if (err) {
         return alert(err.responseText);
       }
       result.forEach(function(item) {
-        if(item.subject.value.indexOf("owl")>-1)
-        if (ranges.indexOf(item.subject.value) < 0) {
-          ranges.push(item.subject.value);
-        }
+        if (item.subject.value.indexOf("owl") > -1)
+          if (ranges.indexOf(item.subject.value) < 0) {
+            ranges.push(item.subject.value);
+          }
       });
 
 
@@ -141,7 +144,7 @@ var Lineage_axioms_create = (function() {
       return;
     }
 
-    if (range.indexOf("www.w3.org/2002/07/owl#Class")>-1) {
+    if (range.indexOf("www.w3.org/2002/07/owl#Class") > -1) {
       return common.fillSelectOptions("axioms_create_entityTypeSelect", [range], false);
     }
 
@@ -166,8 +169,8 @@ common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes);*/
 
     var options = { specificPredicates: ["rdfs:subClassOf"], includeSources: ["rdf", "rdfs"] };
 
-    Sparql_OWL.getNodesDescendants("owl",  rangePropertyRanges,  options, function(err, result) {
-   // Sparql_OWL.getNodeChildren("owl", null, rangePropertyRanges, 1, options, function(err, result) {
+    Sparql_OWL.getNodesDescendants("owl", rangePropertyRanges, options, function(err, result) {
+      // Sparql_OWL.getNodeChildren("owl", null, rangePropertyRanges, 1, options, function(err, result) {
       if (err) {
         return alert(err.responseText);
       }
@@ -175,14 +178,12 @@ common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes);*/
 
       result.forEach(function(item) {
         if (rangePropertyRanges.indexOf(item.subject.value) < 0) {
-          if(item.subject.value.indexOf("owl")>-1)
-          rangePropertyRanges.push(item.subject.value);
+          if (item.subject.value.indexOf("owl") > -1)
+            rangePropertyRanges.push(item.subject.value);
         }
 
 
       });
-
-
 
 
       if (rangePropertyRanges.indexOf("www.w3.org/2000/01/rdf-schema#Resource") > -1) {
@@ -192,7 +193,7 @@ common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes);*/
       common.fillSelectOptions("axioms_create_entityTypeSelect", rangePropertyRanges, true);
       self.setSelectMostCommonOptionsColor("axioms_create_entityTypeSelect");
 
-      });
+    });
   };
 
   self.onSelectEntityType = function(origin) {
@@ -257,6 +258,66 @@ common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes);*/
     var triples = [];
 
 
+
+
+
+    if (!axiomRangeProperty) {
+      triples.push({
+        subject: self.currentGraphNode.data.id,
+        predicate: axiomType,
+        object: entityValue
+      });
+    }
+    else {
+      var blankNode = self.currentDijonctionNode || "<_:" + common.getRandomHexaId(10) + ">";
+
+      triples.push({
+        subject: self.currentGraphNode.data.id,
+        predicate: axiomType,
+        object: blankNode
+      });
+
+
+
+      if (axiomRange != entityType) {
+        triples.push({
+          subject: blankNode,
+          predicate: "rdf:type",
+          object: axiomRange
+        });
+
+        triples.push({
+          subject: blankNode,
+          predicate: axiomRangeProperty,
+          object: entityValue
+        });
+
+
+
+        if (axiomRange.indexOf("www.w3.org/1999/02/22-rdf-syntax-ns#List") > -1) {
+
+          if (axiomRangeProperty.indexOf("www.w3.org/1999/02/22-rdf-syntax-ns#first") > -1) {
+            var blankNodeRest = "<_:" + common.getRandomHexaId(10) + ">";
+
+
+            triples.push({
+              subject: blankNode,
+              predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
+              object: blankNodeRest
+            });
+            triples.push({
+              subject: blankNodeRest,
+              predicate: "rdf:type",
+              object: "http://www.w3.org/1999/02/22-rdf-syntax-ns#List"
+            });
+
+
+          }
+
+
+        }
+      }
+    }
     if (entityOrigin == "_newOwlEntity") {
       triples.push({
         subject: entityValue,
@@ -274,72 +335,9 @@ common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes);*/
 
 
 
-    if (axiomRange.indexOf("//www.w3.org/2002/07/owl#Class")>-1) {
-      triples.push({
-        subject: self.currentGraphNode.data.id,
-        predicate: axiomType,
-        object: entityValue
-      });
-
-    }
-    else if (axiomRange.indexOf("www.w3.org/1999/02/22-rdf-syntax-ns#List")>-1) {
-      var blankNode = self.currentDijonctionNode || "<_:" + common.getRandomHexaId(10) + ">";
-
-      if (!self.currentDijonctionNode) {
-        triples.push({
-          subject: self.currentGraphNode.data.id,
-          predicate: axiomType,
-          object: blankNode
-        });
-      }
-      triples.push({
-        subject: blankNode,
-        predicate: axiomRangeProperty,
-        object: entityValue
-      });
-      self.currentDijonctionNode = blankNode;
-
-      if (axiomRangeProperty.indexOf("www.w3.org/1999/02/22-rdf-syntax-ns#first")>-1) {
-        var blankNodeRest = "<_:" + common.getRandomHexaId(10) + ">";
-        triples.push({
-          subject: blankNodeRest,
-          predicate: "rdf:type",
-          object: "http://www.w3.org/1999/02/22-rdf-syntax-ns#List"
-        });
-
-        triples.push({
-          subject: blankNode,
-          predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest",
-          object: blankNodeRest
-        });
-      }
-
-    }
-    else if (axiomRange.indexOf("www.w3.org/2002/07/owl#Restriction")>-1) {
-      var blankNode = self.currentDijonctionNode || "<_:" + common.getRandomHexaId(10) + ">";
-
-      if (!self.currentDijonctionNode) {
-        triples.push({
-          subject: self.currentGraphNode.data.id,
-          predicate: axiomType,
-          object: blankNode
-        });
-
-        triples.push({
-          subject: blankNode,
-          predicate: "rdf:type",
-          object: axiomRange
-        });
-      }
-      self.currentDijonctionNode = blankNode;
 
 
-      triples.push({
-        subject: blankNode,
-        predicate: axiomRangeProperty,
-        object: entityValue
-      });
-    }
+
 
     function triplesToHtml(triples, divId) {
       var index = Object.keys(self.currentTriples).length;
@@ -497,8 +495,9 @@ common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes);*/
     Class_Expressions: ["rdfs:subClassOf", "owl:equivalentClass", "owl:disjointWith", "owl:disjointUnionOf"]
   };
 
-  return self
-})();
+  return self;
+}
+)();
 
 export default Lineage_axioms_create;
 window.Lineage_axioms_create = Lineage_axioms_create;

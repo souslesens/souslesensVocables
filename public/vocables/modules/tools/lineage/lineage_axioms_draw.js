@@ -16,6 +16,8 @@ var Lineage_axioms_draw = (function() {
   var self = {};
   self.currentSource = null;
   self.defaultGraphDiv = "axiomsDrawGraphDiv";
+  self.defaultNodeColor="#ccc"
+  self.defaultNodeSize=7;
 
 
   var defaultDepth = 3;
@@ -34,8 +36,10 @@ var Lineage_axioms_draw = (function() {
 
     }
 
+    var graphUris=Config.sources[sourceLabel].imports.concat(sourceLabel)
+    var filterGraphStr=Sparql_common.setFilter(("g",graphUris))
 
-    var query =
+   /* var query =
       "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
       "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
       "select  ?s ?p ?o ?sLabel ?oLabel ?pLabel ?sType ?oType" +
@@ -54,7 +58,32 @@ var Lineage_axioms_draw = (function() {
       nodeId +
       "> (<>|!<>){1," +
       depth +
-      "} ?o filter (isIri(?o) || isBlank(?o))}}}";
+      "} ?o filter (isIri(?o) || isBlank(?o))}}}";*/
+
+    var query =
+      "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+      "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+      "select ?g ?s ?p ?o ?sLabel ?oLabel ?pLabel ?sType ?oType" +
+      fromStr +
+      " where {" +
+      " ?s ?p ?o. filter (?p !=rdf:type) " +
+      "  optional {?s rdfs:label ?sLabel}\n" +
+      "        optional {?o rdfs:label ?oLabel}\n" +
+      "   optional {?s rdf:type ?sType" + filterSubTypeStr + "}\n" +
+      "   optional {?o rdf:type ?oType" + filterObjTypeStr + "}\n" +
+      "      optional {?p rdfs:label ?pLabel} " +
+      "  {SELECT distinct ?g ?o " +
+      fromStr +
+     // "  WHERE {GRAPH ?g {" +
+      "  WHERE { {" +
+      "<" +
+      nodeId +
+      "> (<>|!<>){1," +
+      depth +
+      "} ?o filter (isIri(?o) || isBlank(?o))" +
+    //  filterGraphStr +
+      "}}}}";
+
 
     var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
@@ -158,6 +187,24 @@ var Lineage_axioms_draw = (function() {
       var data = [];
       var uniqueIds = {};
 
+      var edgeStyles = {
+
+        property: {
+          color: "#3a773a",
+          dashes:  [8, 2]
+        },
+        default: {
+          color: "#888",
+          dashes: false
+        },
+
+        restriction: {
+          color: "#cb6601",
+          dashes: [2, 2]
+        }
+
+      };
+
       function recurse(nodeId, level) {
 
         if (nodeId == "35ea6a40-2d87-4e9e-90d9-3e6c8de68d9c") {
@@ -178,23 +225,27 @@ var Lineage_axioms_draw = (function() {
         item.children.forEach(function(child) {
           var targetItem = nodesMap[child.obj];
 
-
+          var edgeStyle = "default";
           if (!existingNodes[item.s.value]) {
             var options = { level: level, type: item.sType ? item.sType.value : null };
             options.size = 10;
             if (item.sType && item.sType.value.indexOf("roperty") > -1) {
+              edgeStyle = "property";
               options.shape = "triangle";
-              options.size = 5;
+              options.size = self.defaultNodeSize;
             }
-            if (item.sType && item.sType.value.indexOf("Restriction") > -1) {
-              options.shape = "ellipse";
+           else if (item.sType && item.sType.value.indexOf("Restriction") > -1) {
+              edgeStyle = "restriction";
+              options.shape = "box";
               // options.label="∀"
               options.color = "#cb9801";
               options.label = "R"; //"∀";
-              options.size = 5;
+              options.size = self.defaultNodeSize;
             }
             else {
-              options.color = Lineage_classes.getSourceColor(sourceLabel);
+              options.color =  self.defaultNodeColor;
+              options.size = self.defaultNodeSize;
+             // options.color = Lineage_classes.getSourceColor(item.g.value || self.defaultNodeColor);
             }
 
             var node = VisjsUtil.getVisjsNode(sourceLabel, item.s.value, item.sLabel ? item.sLabel.value : Sparql_common.getLabelFromURI(item.s.value), null, options);
@@ -210,12 +261,12 @@ var Lineage_axioms_draw = (function() {
           }
           if (!targetItem) {
             //for leaves
-              targetItem = {
-                s: { value: item.o.value },
-                sType: item.oType?({ value: item.oType.value }):null,
-                sLabel: item.oLabel ? ({ value: item.oLabel.value }) : null
+            targetItem = {
+              s: { value: item.o.value },
+              sType: item.oType ? ({ value: item.oType.value }) : null,
+              sLabel: item.oLabel ? ({ value: item.oLabel.value }) : null
 
-              };
+            };
           }
 
           {
@@ -230,23 +281,32 @@ var Lineage_axioms_draw = (function() {
               targetItem = { s: { value: id } };
               // return;
             }
+            edgeStyle = "default";
             if (!existingNodes[targetItem.s.value]) {
               var options = { level: level + 1, type: targetItem.sType ? targetItem.sType.value : null };
               options.size = 10;
               options.color = "#00afef";
               if (targetItem.sType && targetItem.sType.value.indexOf("roperty") > -1) {
+                edgeStyle = "property";
                 options.shape = "triangle";
                 options.color = "#70ac47";
-                options.size = 5;
+                options.size = self.defaultNodeSize;
               }
-              if (targetItem.sType && targetItem.sType.value.indexOf("Restriction") > -1) {
-                options.shape = "ellipse";
+              else if (targetItem.sType && targetItem.sType.value.indexOf("Restriction") > -1) {
+                edgeStyle = "restriction";
+                options.shape = "box";
                 options.label = "R"; //"∀";
                 options.color = "#cb9801";
-                options.size = 5;
+                options.size = self.defaultNodeSize;
               }
-              options.symbol = Config.Lineage.logicalOperatorsMap[targetItem.s.value];
+            else {
+                options.color =  self.defaultNodeColor;
+                options.size = self.defaultNodeSize;
+              //  options.color = Lineage_classes.getSourceColor(targetItem.g.value || self.defaultNodeColor);
+              }
 
+
+              options.symbol = Config.Lineage.logicalOperatorsMap[targetItem.s.value];
               var node = VisjsUtil.getVisjsNode(
                 sourceLabel,
                 targetItem.s.value,
@@ -254,6 +314,7 @@ var Lineage_axioms_draw = (function() {
                 null,
                 options
               );
+
               existingNodes[targetItem.s.value] = node;
               node.data.infos = nodesMap[targetItem.s.value];
               visjsData.nodes.push(node);
@@ -268,7 +329,8 @@ var Lineage_axioms_draw = (function() {
 
           if (!existingNodes[edgeId]) {
             existingNodes[edgeId] = 1;
-            visjsData.edges.push({
+
+            var edge = {
               id: edgeId,
               from: item.s.value,
               to: targetItem.s.value,
@@ -280,21 +342,78 @@ var Lineage_axioms_draw = (function() {
                   scaleFactor: 0.5
                 }
               }
-            });
+            };
+            for (var key in edgeStyles[edgeStyle]) {
+              edge[key] = edgeStyles[edgeStyle][key];
+            }
+            visjsData.edges.push(edge);
+
           }
         });
       }
 
       recurse(nodeId, options.level || 1);
-      if (options.addToGraph && self.axiomsVisjsGraph) {
-        self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
-        self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
 
-      }
-      else {
-        self.drawGraph(visjsData);
-      }
-    });
+
+      //get nodes SourceColor
+    var nodes = [];
+      visjsData.nodes.forEach(function(item) {
+        nodes.push(item.data.id);
+      });
+
+      var colorsMap = {};
+      var sources = [];
+      var otherSources = [];
+      Sparql_OWL.getNodesGraphUri(sourceLabel, nodes, null, function(err, result) {
+        if (err) {
+          return alert(err.repsonseText);
+        }
+        result.forEach(function(item) {
+          var nodeSource = Sparql_common.getSourceFromGraphUri(item.g.value);
+          if (nodeSource !=sourceLabel && Config.sources[sourceLabel].imports.indexOf(nodeSource) < 0) {
+            if(otherSources.indexOf(nodeSource)<0)
+            otherSources.push(nodeSource)
+            return;
+          }
+          if (nodeSource && sources.indexOf(nodeSource) < 0) {
+            sources.push(nodeSource);
+          }
+          var color = Lineage_classes.getSourceColor(nodeSource);
+          colorsMap[item.s.value] = color ;
+        });
+
+        visjsData.nodes.forEach(function(item, index) {
+          var color = colorsMap[item.data.id] || "#ddd";
+
+            visjsData.nodes[index].color = color;
+
+
+        });
+
+
+        if (options.addToGraph && self.axiomsVisjsGraph) {
+          self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
+          self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
+
+        }
+        else {
+          self.drawGraph(visjsData);
+        }
+
+        //draw Sources legend
+        var html = "";
+        sources.forEach(function(source) {
+          html += "<div  id='S_" + source + "' style='color: " + Lineage_classes.getSourceColor(source) +
+            "' class='Lineage_sourceLabelDiv'>" + source + "</div>";
+        });
+     /*   html+="other sources <select id='axiomsDraw_otherSourcesSelect'></select>"
+        common.fillSelectOptions("axiomsDraw_otherSourcesSelect",otherSources)*/
+        $("#axiomsGraphLegendDiv").html(html);
+
+      });
+
+
+   });
   };
 
   self.drawGraph = function(visjsData) {

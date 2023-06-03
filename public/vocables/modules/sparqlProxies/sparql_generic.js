@@ -413,6 +413,11 @@ var Sparql_generic = (function () {
         });
     };
 
+
+
+
+
+
     self.triplesObjectToString = function (item) {
         var allowedPrefixes = Object.keys(Config.defaultSparqlPrefixes);
 
@@ -422,6 +427,9 @@ var Sparql_generic = (function () {
                 return '"' + elt.substring(0, p) + '"' + elt.substring(p);
             }
             if (elt.indexOf("_:b") == 0) {
+                return "<" + elt + ">";
+            }
+            if (elt.indexOf("_:") == 0) {
                 return "<" + elt + ">";
             }
             if (elt.indexOf("http") == 0 || item.valueType == "uri") {
@@ -442,6 +450,7 @@ var Sparql_generic = (function () {
             }
 
             return '"' + elt.replace(/"/g, "'") + '"';
+
         }
 
         var subjectStr = setElementSyntax(item.subject);
@@ -1285,6 +1294,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             );
         });
     };
+
 
     return self;
 })();

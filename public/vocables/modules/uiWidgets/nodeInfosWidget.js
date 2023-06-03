@@ -963,7 +963,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     };
 
     self.showCreateEntityDialog = function () {
-        var divId = "mainDialogDiv";
+        var divId = "smallDialogDiv";
         var sourceLabel = Lineage_sources.activeSource;
         $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
         $("#" + divId).dialog("open");
@@ -1020,14 +1020,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             if (err) {
                 alert(err.responseText);
             }
-            /*  Lineage_axioms_draw.drawNodeWithoutAxioms(source, proposedUri, label);
-      Lineage_axioms_draw.context = {
-        sourceLabel: source,
-        nodeId: proposedUri,
-        divId: "axiomsGraphDivContainer",
-        depth: 1
-      };*/
-          //  $("#" + divId).dialog("close");
+
             var node={
                 id:proposedUri,
                 label:label,
@@ -1039,7 +1032,16 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 }
             }
             NodeInfosWidget.showNodeInfos(source, node,"mainDialogDiv");
-            $("#nodeInfosWidget_tabsDiv").tabs("option","active",2)
+            setTimeout(function(){
+                $("#nodeInfosWidget_tabsDiv").tabs("option","active",2)
+            ,500})
+            SearchUtil.generateElasticIndex(source, { ids: [proposedUri] }, function (err, result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+                MainController.UI.message("node Created and Indexed");
+            });
+
         });
     };
 

@@ -44,12 +44,18 @@
 
     .axioms_create_triplePredicate {
         color: #1626d3;
+        background-color: #f3d4af;
+        border: 1px #aaa solid;
+        align-self: center;
+        margin: 3px;
+        text-align: center;
+        border-radius: 3px;
     }
 </style>
 
 <div id="axiomsDrawGraphDiv" style="display: flex; flex-direction: column">
-    <div class="axioms_predicatesItemDiv" style="background-color: #ccc;font-weight: bold">
-       Add Axiom to <div id="axioms_currentItemDiv"></div>
+    <div class="axioms_predicatesItemDiv" style="background-color: #ccc">
+       <div id="axioms_currentItemDiv"></div>
 
 
     </div>
@@ -78,7 +84,7 @@
 
         <div class="axioms_predicatesItemDiv">
             entity origin
-            <select id="axioms_create_entityOriginSelect" onclick="Lineage_axioms_create.onSelectEntityOrigin($(this).val())"></select>
+            <select id="axioms_create_entityOriginSelect" onchange="Lineage_axioms_create.onSelectEntityOrigin($(this).val())"></select>
         </div>
 
         <div class="axioms_predicatesItemDiv">

@@ -96,6 +96,11 @@ var Lineage_axioms_draw = (function() {
   };
 
   self.drawNodeAxioms = function(sourceLabel, nodeId, divId, depth, options) {
+
+
+
+
+
     if (!options) {
       options = {};
     }
@@ -121,6 +126,13 @@ var Lineage_axioms_draw = (function() {
     var sourceLabel = Lineage_sources.activeSource;
 
     self.getNodeAxioms(sourceLabel, nodeId, depth, options, function(err, result) {
+
+      if (result.length==0) {//new resource
+
+        return self.drawNodeWithoutAxioms(sourceLabel, nodeId);
+      }
+
+
       var axiomsTriples = {};
 
       var existingNodes = {};
@@ -135,9 +147,6 @@ var Lineage_axioms_draw = (function() {
       var nodesMap = {};
       var nodesToMap = {};
       var startingNodes = {};
-      if (result.length == 0) {
-        return self.drawNodeWithoutAxioms(sourceLabel, nodeId);
-      }
 
       result.forEach(function(item) {
 
@@ -346,6 +355,11 @@ var Lineage_axioms_draw = (function() {
             for (var key in edgeStyles[edgeStyle]) {
               edge[key] = edgeStyles[edgeStyle][key];
             }
+            if(existingNodes[targetItem.s.value].level<= existingNodes[item.s.value].level) {
+              edge.color = "#6363f1"
+              edge.dashes = "[5,5]"
+            }
+
             visjsData.edges.push(edge);
 
           }
@@ -489,11 +503,12 @@ var Lineage_axioms_draw = (function() {
 
     var html = "<div style=\"display: flex;flex-direction: column\">";
     html += "  <span class=\"popupMenuItem\" onclick=\"Lineage_axioms_draw.showNodeInfos ();\"> Infos</span>";
+    html += "  <span class=\"popupMenuItem\" onclick=\"Lineage_axioms_draw.hideNode ();\"> Hide</span>";
 
     html += " <span class=\"popupMenuItem\" onclick=\"Lineage_axioms_draw.drawAxiomsFromNode();\"> Draw  from here</span>";
     //  html += ' <span class="popupMenuItem" onclick="Lineage_axioms_draw.showBranchOnly();"> ShowBranchOnly</span>'
     if (Lineage_sources.isSourceEditableForUser(self.currentGraphNode.data.source)) {
-      html += "  <span class=\"popupMenuItem\" onclick=\"Lineage_axioms_create.showAdAxiomDialog ('axioms_dialogDiv');\"> Add Axiom</span>";
+      html += "  <span class=\"popupMenuItem\" onclick=\"Lineage_axioms_create.showAdAxiomDialog ('axioms_dialogDiv');\"> <b>Add Axiom</b></span>";
       html += " <span class=\"popupMenuItem\" onclick=\"Lineage_axioms_create.deleteGraphSelectedAxiom();\"> Delete </span>";
     }
 
@@ -530,6 +545,13 @@ var Lineage_axioms_draw = (function() {
   };
   self.selectNodesOnHover = function(node, point, options) {
   };
+
+  self.hideNode=function(){
+    var id=self.currentGraphNode.id
+    if(!id)
+      return;
+    self.axiomsVisjsGraph.data.nodes.update({id:id,hidden:true})
+  }
 
   self.showNodeInfos = function(node, point, options) {
     if (!node) {

@@ -298,15 +298,16 @@ var Sparql_OWL = (function() {
 
   self.getNodesDescendants = function(sourceLabel, ids, options, callback) {
 
+
+
+    var predicateStr= Sparql_common.getSpecificPredicates(options) || "rdfs:subClassOf";
     var filterStr = Sparql_common.setFilter("parentClass", ids, null, { useFilterKeyWord: 1 });
     var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.selectGraph, options);
 
     var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
       "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
       "select   distinct ?subject " + fromStr +
-      " where {?subject  (rdfs:subClassOf)+ ?parentClass " + filterStr +
-      // " OPTIONAL {?subject rdfs:label ?subjectLabel.}\n" +
-      // "  OPTIONAL {?subject rdf:type ?subjectType.}\n" +
+      " where {?subject  ("+predicateStr+")+ ?parentClass " + filterStr +
       "} order by ?subject limit 10000";
 
     var url = self.sparql_url + "?format=json&query=";

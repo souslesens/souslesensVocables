@@ -3031,7 +3031,7 @@ attrs.color=self.getSourceColor(superClassValue)
         toSVG: function () {
             self.lineageVisjsGraph.toSVG();
         },
-        exportGraphToDataTable:function () {
+        exportGraphToDataTable: function () {
             Export.exportGraphToDataTable(self.lineageVisjsGraph);
         },
     };

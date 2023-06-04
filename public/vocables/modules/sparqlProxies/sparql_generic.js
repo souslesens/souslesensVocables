@@ -413,11 +413,6 @@ var Sparql_generic = (function () {
         });
     };
 
-
-
-
-
-
     self.triplesObjectToString = function (item) {
         var allowedPrefixes = Object.keys(Config.defaultSparqlPrefixes);
 
@@ -450,7 +445,6 @@ var Sparql_generic = (function () {
             }
 
             return '"' + elt.replace(/"/g, "'") + '"';
-
         }
 
         var subjectStr = setElementSyntax(item.subject);
@@ -1294,7 +1288,6 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
             );
         });
     };
-
 
     return self;
 })();

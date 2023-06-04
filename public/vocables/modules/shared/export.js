@@ -9,7 +9,7 @@ var Export = (function () {
     self.currentSource = null;
     self.dataTable;
 
-    self.exportGraphToDataTable = function (graphInstance,divId,nodes, edges,) {
+    self.exportGraphToDataTable = function (graphInstance, divId, nodes, edges) {
         if (!nodes && !edges) {
             nodes = graphInstance.data.nodes.get();
             edges = graphInstance.data.edges.get();

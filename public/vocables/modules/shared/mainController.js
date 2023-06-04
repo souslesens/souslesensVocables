@@ -80,8 +80,8 @@ var MainController = (function () {
             sourcesFileParam = "?sourcesFile=" + sourcesFile;
         } else if (Config.currentProfile.sourcesFile) {
             sourcesFileParam = Config.currentProfile.sourcesFile;
-        }else{
-           ;// sourcesFileParam = "?sourcesFile=" + "sources.json";
+        } else {
+            // sourcesFileParam = "?sourcesFile=" + "sources.json";
         }
         $.ajax({
             type: "GET",

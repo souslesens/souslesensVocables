@@ -25,7 +25,7 @@ var NodeInfosWidget = (function () {
                 activate: function (event, ui) {
                     if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                         setTimeout(function () {
-                            Lineage_axioms_draw.drawNodeAxioms(self.currentSource, self.currentNodeId,"axiomsDrawGraphDiv");
+                            Lineage_axioms_draw.drawNodeAxioms(self.currentSource, self.currentNodeId, "axiomsDrawGraphDiv");
                         }, 1000);
                     }
                 },
@@ -1021,27 +1021,26 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 alert(err.responseText);
             }
 
-            var node={
-                id:proposedUri,
-                label:label,
+            var node = {
+                id: proposedUri,
+                label: label,
                 data: {
                     id: proposedUri,
                     label: label,
-                    type:type,
-                    source:source
-                }
-            }
-            NodeInfosWidget.showNodeInfos(source, node,"mainDialogDiv");
-            setTimeout(function(){
-                $("#nodeInfosWidget_tabsDiv").tabs("option","active",2)
-            ,500})
+                    type: type,
+                    source: source,
+                },
+            };
+            NodeInfosWidget.showNodeInfos(source, node, "mainDialogDiv");
+            setTimeout(function () {
+                $("#nodeInfosWidget_tabsDiv").tabs("option", "active", 2), 500;
+            });
             SearchUtil.generateElasticIndex(source, { ids: [proposedUri] }, function (err, result) {
                 if (err) {
                     return alert(err.responseText);
                 }
                 MainController.UI.message("node Created and Indexed");
             });
-
         });
     };
 

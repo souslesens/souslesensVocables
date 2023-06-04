@@ -484,7 +484,7 @@ var Lineage_relations = (function () {
                         return alert(err);
                     }
                 } else if (options.output == "table") {
-                    Export.exportGraphToDataTable(self.lineageVisjsGraph,null,allVisjsData.nodes, allVisjsData.edges);
+                    Export.exportGraphToDataTable(self.lineageVisjsGraph, null, allVisjsData.nodes, allVisjsData.edges);
                 }
             }
         );

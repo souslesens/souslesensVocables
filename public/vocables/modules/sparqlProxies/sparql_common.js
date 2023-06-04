@@ -455,14 +455,14 @@ var Sparql_common = (function () {
         }
         return str;
     };
-    self.getSpecificPredicates=function(options){
+    self.getSpecificPredicates = function (options) {
         var str = " ";
 
         if (options.specificPredicates) {
             if (!Array.isArray(options.specificPredicates)) {
                 options.specificPredicates = [options.specificPredicates];
             }
-            options.specificPredicates.forEach(function(predicate, index) {
+            options.specificPredicates.forEach(function (predicate, index) {
                 if (index > 0) {
                     str += "|";
                 }
@@ -474,7 +474,7 @@ var Sparql_common = (function () {
             return str;
         }
         return null;
-    }
+    };
 
     return self;
 })();

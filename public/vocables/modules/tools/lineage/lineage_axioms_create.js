@@ -117,8 +117,8 @@ var Lineage_axioms_create = (function() {
       var constraint = self.possiblePredicates[axiomTypeId];
       var range = constraint.range;
       var ranges = [range];
-      var options = { specificPredicates: ["rdfs:subClassOf", "rdf:type"] };
-      //  var options = { specificPredicates: ["rdfs:subClassOf"], includeSources: ["rdf", "rdfs"] };
+    //  var options = { specificPredicates: ["rdfs:subClassOf", "rdf:type"] };
+       var options = { specificPredicates: ["rdfs:subClassOf",], includeSources: ["rdf", "rdfs"] };
       Sparql_OWL.getNodesDescendants("owl", ranges, options, function(err, result) {
 
         //  Sparql_OWL.getNodeChildren("owl", null, ranges, 1, options, function(err, result) {

@@ -109,6 +109,11 @@ var Lineage_classes = (function () {
                 }
 
                 SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
+                $("#Lineage_containers_searchInput").bind("keydown", null, function () {
+                    if (event.keyCode == 13) {
+                        Lineage_containers.search();
+                    }
+                });
 
                 $("#LineagePopup").dialog({
                     autoOpen: false,

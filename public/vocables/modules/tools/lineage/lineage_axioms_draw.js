@@ -143,7 +143,7 @@ var Lineage_axioms_draw = (function() {
       var startingNodes = {};
 
 
-      var allNodesMap={}
+      var allNodesMap = {};
       result.forEach(function(item) {
 
 
@@ -235,7 +235,7 @@ var Lineage_axioms_draw = (function() {
         }
 
 
-       {
+        {
 
 
           var edgeStyle = "default";
@@ -272,75 +272,75 @@ var Lineage_axioms_draw = (function() {
               VisjsUtil.setNodeSymbol(node2, item.symbol);
             }
           }
-          if( item.s.value=="_:c18ea687ea")
-            var x=3
+          if (item.s.value == "_:c18ea687ea") {
+            var x = 3;
+          }
           item.children.forEach(function(child) {
             var targetItem = nodesMap[child.obj];
-
 
 
             if (!targetItem) {
               var node = VisjsUtil.getVisjsNode(sourceLabel, child.obj, "", child.pred, { level: level + 1, color: "#eee", shape: "hexagon", label: "" });
               if (!existingNodes[child.obj]) {
-                existingNodes[child.obj]=node
-                  visjsData.nodes.push(node);
+                existingNodes[child.obj] = node;
+                visjsData.nodes.push(node);
               }
 
               targetItem = { s: { value: child.obj } };
 
             }
 
-else{
-            if (targetItem.s.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil") {
-              var symbol = Config.Lineage.logicalOperatorsMap["http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"];
+            else {
+              if (targetItem.s.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil") {
+                var symbol = Config.Lineage.logicalOperatorsMap["http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"];
 
-              var id = "_nil" + common.getRandomHexaId(5);
-              var node = VisjsUtil.getVisjsNode(sourceLabel, id, "", null, { level: level + 1, color: "#eee", shape: "text", label: "" });
+                var id = "_nil" + common.getRandomHexaId(5);
+                var node = VisjsUtil.getVisjsNode(sourceLabel, id, "", null, { level: level + 1, color: "#eee", shape: "text", label: "" });
 
-              visjsData.nodes.push(node);
-              targetItem = { s: { value: id } };
-              // return;
+                visjsData.nodes.push(node);
+                targetItem = { s: { value: id } };
+                // return;
+              }
+              edgeStyle = "default";
+              if (!existingNodes[targetItem.s.value]) {
+                var options = { level: level + 1, type: targetItem.sType ? targetItem.sType.value : null };
+                options.size = 10;
+                options.color = "#00afef";
+                if (targetItem.sType && targetItem.sType.value.indexOf("roperty") > -1) {
+                  edgeStyle = "property";
+                  options.shape = "triangle";
+                  options.color = "#70ac47";
+                  options.size = self.defaultNodeSize;
+                }
+                else if (targetItem.sType && targetItem.sType.value.indexOf("Restriction") > -1) {
+                  edgeStyle = "restriction";
+                  options.shape = "box";
+                  options.label = "R"; //"∀";
+                  options.color = "#cb9801";
+                  options.size = self.defaultNodeSize;
+                }
+                else {
+                  options.color = self.defaultNodeColor;
+                  options.size = self.defaultNodeSize;
+                  //  options.color = Lineage_classes.getSourceColor(targetItem.g.value || self.defaultNodeColor);
+                }
+
+                options.symbol = Config.Lineage.logicalOperatorsMap[targetItem.s.value];
+                var node = VisjsUtil.getVisjsNode(
+                  sourceLabel,
+                  targetItem.s.value,
+                  targetItem.sLabel ? targetItem.sLabel.value : Sparql_common.getLabelFromURI(targetItem.s.value),
+                  null,
+                  options
+                );
+
+                existingNodes[targetItem.s.value] = node;
+                node.data.infos = nodesMap[targetItem.s.value];
+                visjsData.nodes.push(node);
+              }
+              //  if (targetItem.children) {
+              recurse(targetItem.s.value, level + 1);
             }
-            edgeStyle = "default";
-            if (!existingNodes[targetItem.s.value]) {
-              var options = { level: level + 1, type: targetItem.sType ? targetItem.sType.value : null };
-              options.size = 10;
-              options.color = "#00afef";
-              if (targetItem.sType && targetItem.sType.value.indexOf("roperty") > -1) {
-                edgeStyle = "property";
-                options.shape = "triangle";
-                options.color = "#70ac47";
-                options.size = self.defaultNodeSize;
-              }
-              else if (targetItem.sType && targetItem.sType.value.indexOf("Restriction") > -1) {
-                edgeStyle = "restriction";
-                options.shape = "box";
-                options.label = "R"; //"∀";
-                options.color = "#cb9801";
-                options.size = self.defaultNodeSize;
-              }
-              else {
-                options.color = self.defaultNodeColor;
-                options.size = self.defaultNodeSize;
-                //  options.color = Lineage_classes.getSourceColor(targetItem.g.value || self.defaultNodeColor);
-              }
-
-              options.symbol = Config.Lineage.logicalOperatorsMap[targetItem.s.value];
-              var node = VisjsUtil.getVisjsNode(
-                sourceLabel,
-                targetItem.s.value,
-                targetItem.sLabel ? targetItem.sLabel.value : Sparql_common.getLabelFromURI(targetItem.s.value),
-                null,
-                options
-              );
-
-              existingNodes[targetItem.s.value] = node;
-              node.data.infos = nodesMap[targetItem.s.value];
-              visjsData.nodes.push(node);
-            }
-            //  if (targetItem.children) {
-            recurse(targetItem.s.value, level + 1);
-           }
 
             var edgeId = item.s.value + "_" + targetItem.s.value;
 
@@ -377,8 +377,6 @@ else{
 
         }
       }
-
-
 
 
       recurse(nodeId, options.level || 1);

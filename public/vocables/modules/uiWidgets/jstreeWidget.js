@@ -1,5 +1,6 @@
 var JstreeWidget = (function () {
     var self = {};
+
     self.types = {
         tool: {
             icon: "../icons/tool.png",
@@ -56,7 +57,20 @@ var JstreeWidget = (function () {
             li_attr: { style: "color:black" },
             icon: "../icons/property.png",
         },
+
+        // @ts-ignore
+        container: {
+            icon: "../icons/containers.png",
+        },
+
+        individual: {
+            icon: "../icons/individual.png",
+        },
+        "http://www.w3.org/2002/07/owl#NamedIndividual": {
+            icon: "../icons/individual.png",
+        },
     };
+
     self.loadJsTree = function (jstreeDiv, jstreeData, options, callback) {
         var jstreeData2 = [];
         jstreeData.forEach(function (item) {
@@ -137,7 +151,11 @@ var JstreeWidget = (function () {
                     JstreeWidget.setTreeParentDivDimensions(jstreeDiv);
                 }
                 if (callback) {
-                    callback();
+                    if (jstreeData) {
+                        callback(jstreeData);
+                    } else {
+                        callback();
+                    }
                 }
                 //   }, 500)
             })
@@ -229,49 +247,57 @@ var JstreeWidget = (function () {
             .empty();
     };
 
-    self.addNodesToJstree = function (jstreeDiv, parentNodeId_, jstreeData, options) {
+    self.addNodesToJstree = function (jstreeDiv, parentNodeId_, jstreeData, options, callback) {
         if (!options) {
             options = {};
+        }
+        if (!callback) {
+            callback = function () {};
         }
         var position = "first";
         if (options.positionLast) {
             position = "last";
         }
+        self.orderJstreeDataForCreation(jstreeDiv, jstreeData);
         jstreeData.forEach(function (node) {
-            var parentNodeId = parentNodeId_;
-
-            if (!parentNodeId_) {
-                parentNodeId = node.parent;
-            }
-
-            if (!parentNodeId) {
-                return;
-            }
-
-            if (parentNodeId == node.id) {
-                return console.error("  Error jstree parent == childNode : " + parentNodeId);
-            }
-
-            var parentNodeObj = $("#" + jstreeDiv)
+            var Jstree_id = $("#" + jstreeDiv)
                 .jstree(true)
-                .get_node(parentNodeId);
-            if (parentNodeObj.children.indexOf(node) > -1) {
-                return;
+                .get_node(node.id);
+            if (Jstree_id == false) {
+                var parentNodeId = parentNodeId_;
+
+                if (!parentNodeId_) {
+                    parentNodeId = node.parent;
+                }
+
+                if (!parentNodeId) {
+                    return;
+                }
+
+                if (parentNodeId == node.id) {
+                    return console.error("  Error jstree parent == childNode : " + parentNodeId);
+                }
+
+                var parentNodeObj = $("#" + jstreeDiv)
+                    .jstree(true)
+                    .get_node(parentNodeId);
+
+                // parent exists and have children
+
+                //Create node
+                $("#" + jstreeDiv)
+                    .jstree(true)
+                    .create_node(parentNodeId, node, position, function () {
+                        self.setTreeAppearance();
+                        $("#" + jstreeDiv)
+                            .jstree(true)
+                            .open_node(parentNodeId, null, 500);
+                    });
             }
-            $("#" + jstreeDiv)
-                .jstree(true)
-                .create_node(parentNodeId, node, position, function () {
-                    self.setTreeAppearance();
-                    $("#" + jstreeDiv)
-                        .jstree(true)
-                        .open_node(parentNodeId, null, 500);
-                });
         });
-        /*    setTimeout(function() {
-  $("#" + jstreeDiv)
-    .jstree(true)
-    .open_node(parentNodeId, null, 500);
-}, 500);*/
+        if (callback) {
+            callback(jstreeData);
+        }
     };
 
     self.deleteNode = function (jstreeDiv, nodeId) {
@@ -443,6 +469,117 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         $("#" + jstreeDiv)
             .jstree()
             .open_node(nodeId);
+    };
+
+    self.selectTypeForIconsJstree = function (types, callback) {
+        var uri_class = "http://www.w3.org/2002/07/owl#Class";
+        var uri_bag = "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag";
+        var uri_named = "http://www.w3.org/2002/07/owl#NamedIndividual";
+        var uri_bag2 = "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag";
+        var type = null;
+        //if un truck différent des 3 prendre ca
+        //else
+        //Bag>Class
+        //Bag>namedindividual
+        if (!types) {
+            return "default";
+        } else {
+            if (!Array.isArray(types)) {
+                types = [types];
+            }
+            var types_without_basics = types.filter(function (item) {
+                return item !== uri_class && item !== uri_bag && item !== uri_named && item !== uri_bag2;
+            });
+        }
+
+        if (callback) {
+            if (types_without_basics.length > 0) {
+                var adding_type = null;
+                adding_type = callback(types_without_basics);
+                if (adding_type) {
+                    type = adding_type;
+                }
+            }
+        }
+        if (!type) {
+            if (types.includes(uri_bag)) {
+                type = "container";
+            } else {
+                if (types.includes(uri_named)) {
+                    type = "individual";
+                }
+                if (types.includes(uri_class)) {
+                    type = "class";
+                }
+            }
+        }
+
+        if (!type) {
+            // last which have icon available for multitypes objects
+            var types_available = self.types;
+            type = "default";
+            types.forEach(function (item) {
+                if (types_available[item]) {
+                    type = item;
+                }
+            });
+        }
+        return type;
+    };
+
+    self.getNodeByURI = function (jstreeDiv, id) {
+        var data = $("#" + jstreeDiv).jstree()._model.data;
+        var node_finded = false;
+        for (var key in data) {
+            var node = data[key];
+            if (key != "#") {
+                if (node.data.id == id) {
+                    node_finded = node;
+                }
+            }
+        }
+        return node_finded;
+    };
+
+    self.orderJstreeDataForCreation = function (jstreeDiv, JstreeData) {
+        var length = JstreeData.length;
+        var n = 0;
+        while (n < length) {
+            var node = JstreeData[n];
+            var parentNodeId = node.parent;
+            var parentNodeObj = $("#" + jstreeDiv)
+                .jstree(true)
+                .get_node(parentNodeId);
+            n++;
+            // parent not exist in tree
+            if (parentNodeObj == false) {
+                var indexfinded = self.checkinJstreeData(JstreeData, parentNodeId);
+                if (indexfinded > n - 1) {
+                    //pass jstreeData[i] to jstreeData[0]
+                    var node_finded = JstreeData[indexfinded];
+                    JstreeData.splice(indexfinded, 1);
+                    JstreeData.splice(0, 0, node_finded);
+
+                    n = 0;
+                }
+            }
+        }
+    };
+
+    self.checkinJstreeData = function (jstreeData, id) {
+        var node_finded = null;
+        var i = 0;
+        var index_finded = null;
+
+        jstreeData.forEach(function (node) {
+            if (node.id == id) {
+                node_finded = node;
+                index_finded = i;
+            }
+            i++;
+        });
+
+        return index_finded;
     };
 
     return self;

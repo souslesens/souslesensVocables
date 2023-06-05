@@ -1,4 +1,5 @@
 import common from "../shared/common.js";
+import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import SVGexport from "./SVGexport.js";
 import GraphMlExport from "./graphMLexport.js";
 
@@ -111,8 +112,15 @@ var visjsGraph = (function () {
         if (_options.skipColorGraphNodesByType) self.skipColorGraphNodesByType = true;
 
         self.globalOptions = options;
+
         self.network = new vis.Network(container, self.data, options);
         self.simulationOn = true;
+        if (Lineage_sources.activeSource) {
+            if (!Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
+                visjsGraph.network.disableEditMode();
+                $(".vis-edit-mode").css("display", "none");
+            }
+        }
 
         // self.network.startSimulation()
 

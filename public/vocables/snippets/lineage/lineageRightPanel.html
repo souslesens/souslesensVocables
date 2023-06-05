@@ -74,10 +74,10 @@
                     id="LineageProperties_searchAllSourcesTermInput"
                     style="width: 200px"
                     value=""
-                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9)Lineage_properties.searchAllSourcesTerm()"
+                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9)Lineage_properties.searchTermInSources()"
                 />
 
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="LineageProperties_onSearchAllInput" onclick="Lineage_properties.searchAllSourcesTerm()">Search</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="LineageProperties_onSearchAllInput" onclick="Lineage_properties.searchTermInSources()">Search</button>
 
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Export.exportTreeToDataTable('Lineage_propertiesTree','#')">Export</button>
             </div>

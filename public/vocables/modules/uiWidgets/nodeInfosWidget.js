@@ -25,7 +25,9 @@ var NodeInfosWidget = (function () {
                 activate: function (event, ui) {
                     if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                         setTimeout(function () {
-                            Lineage_axioms_draw.drawNodeAxioms(self.currentSource, self.currentNodeId, "axiomsDrawGraphDiv");
+                            var source=self.currentSource;
+                            source=Lineage_sources.mainSource
+                            Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
                         }, 1000);
                     }
                 },

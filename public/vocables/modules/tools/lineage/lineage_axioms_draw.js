@@ -33,7 +33,17 @@ var Lineage_axioms_draw = (function() {
       filterObjTypeStr = " filter (?oType != owl:Restriction) ";
     }
 
-    var graphUris = Config.sources[sourceLabel].imports.concat(sourceLabel);
+    var sources = [sourceLabel];
+
+    if (Config.sources[sourceLabel].imports) {
+      sources = sources.concat(Config.sources[sourceLabel].imports);
+    }
+    sources.forEach(function(source) {
+      if (Config.sources[sourceLabel].graphUri) {
+        sources.push(Config.sources[sourceLabel].graphUri);
+      }
+    });
+    var graphUris = [];
     var filterGraphStr = Sparql_common.setFilter(("g", graphUris));
 
     /* var query =
@@ -73,6 +83,7 @@ var Lineage_axioms_draw = (function() {
       filterObjTypeStr +
       "}\n" +
       "      optional {?p rdfs:label ?pLabel} " +
+     // "  filter (regex(str(?p),\"rdf\"))" +
       "  {SELECT distinct ?g ?o " +
       fromStr +
       // "  WHERE {GRAPH ?g {" +
@@ -83,7 +94,7 @@ var Lineage_axioms_draw = (function() {
       depth +
       "} ?o filter (isIri(?o) || isBlank(?o))" +
       //  filterGraphStr +
-      "}}}}";
+      "}}}} limit "+Config.queryLimit;
 
     var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
     Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
@@ -127,6 +138,9 @@ var Lineage_axioms_draw = (function() {
         return self.drawNodeWithoutAxioms(sourceLabel, nodeId);
       }
 
+      if( result.length>=Config.queryLimit){
+        return alert ("too Many result > "+Config.queryLimit);
+      }
       var axiomsTriples = {};
 
       var existingNodes = {};
@@ -227,17 +241,23 @@ var Lineage_axioms_draw = (function() {
         if (uniqueIds[nodeId]) {
           return;
         }
-        uniqueIds[nodeId] = 1;
-        var item = nodesMap[nodeId];
-
         if (nodesToDelete.indexOf(nodeId) > -1) {
           return;
         }
 
+        uniqueIds[nodeId] = 1;
+        var item = nodesMap[nodeId];
 
-        {
 
 
+        if (!item ) {
+          return;
+        }
+
+
+
+
+// draw parentNode
           var edgeStyle = "default";
           if (!existingNodes[item.s.value]) {
             var options = { level: level, type: item.sType ? item.sType.value : null };
@@ -272,9 +292,11 @@ var Lineage_axioms_draw = (function() {
               VisjsUtil.setNodeSymbol(node2, item.symbol);
             }
           }
-          if (item.s.value == "_:c18ea687ea") {
-            var x = 3;
-          }
+
+
+
+        // draw children nodes
+
           item.children.forEach(function(child) {
             var targetItem = nodesMap[child.obj];
 
@@ -342,6 +364,10 @@ var Lineage_axioms_draw = (function() {
               recurse(targetItem.s.value, level + 1);
             }
 
+
+
+            // draw edge
+
             var edgeId = item.s.value + "_" + targetItem.s.value;
 
             var edgeLabel = Config.Lineage.logicalOperatorsMap[child.pred];
@@ -375,7 +401,7 @@ var Lineage_axioms_draw = (function() {
 
           });
 
-        }
+
       }
 
 
@@ -395,9 +421,12 @@ var Lineage_axioms_draw = (function() {
         if (err) {
           return alert(err.repsonseText);
         }
+        var imports=Config.sources[sourceLabel].imports
         result.forEach(function(item) {
+          if(nodes[item.s.value]<0)
+            return;
           var nodeSource = Sparql_common.getSourceFromGraphUri(item.g.value);
-          if (nodeSource != sourceLabel && Config.sources[sourceLabel].imports.indexOf(nodeSource) < 0) {
+          if (nodeSource != sourceLabel && imports &&  imports.indexOf(nodeSource) < 0) {
             if (otherSources.indexOf(nodeSource) < 0) {
               otherSources.push(nodeSource);
             }

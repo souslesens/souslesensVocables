@@ -1,0 +1,57 @@
+@prefix rml: <http://semweb.mmlab.be/ns/rml#> .
+@prefix rr: <http://www.w3.org/ns/r2rml#> .
+@prefix ql: <http://semweb.mmlab.be/ns/ql#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix schema: <http://schema.org/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@base <http://example.com/ns#>.  
+
+<#ActivityMapping>
+   a rr:TriplesMap;
+   rml:logicalSource [
+        rml:source "Production_Data-csv.csv" ;
+        rml:referenceFormulation ql:CSV 
+  ] ;
+
+   rr:subjectMap [
+        rr:termType rr:BlankNode ;
+        rr:class <http://example.com/ns#Activity> ;
+  ] ;
+
+   rr:predicateObjectMap [
+        rr:predicate rdfs:subClassOf ;
+        rr:objectMap [ 
+  rr:constant bfo:Process    ]
+  ] ;
+
+   rr:predicateObjectMap [
+        rr:predicate bfo:hasParticipant ;
+        rr:objectMap [ 
+               rr:parentTriplesMap <#ResourceMapping>;
+               rr:joinCondition [
+                      rr:child "Resource";
+                      rr:parent "Resource"
+               ]
+    ]
+  ] .
+
+<#ResourceMapping>
+   a rr:TriplesMap;
+   rml:logicalSource [
+        rml:source "Production_Data-csv.csv" ;
+        rml:referenceFormulation ql:CSV 
+  ] ;
+
+   rr:subjectMap [
+        rr:termType rr:BlankNode ;
+        rr:class <http://example.com/ns#Resource> ;
+  ] ;
+
+   rr:predicateObjectMap [
+        rr:predicate rdfs:subClassOf ;
+        rr:objectMap [ 
+  rr:constant iot-core:Machine    ]
+  ] .
+

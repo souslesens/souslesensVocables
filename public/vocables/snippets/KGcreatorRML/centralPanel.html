@@ -35,6 +35,74 @@
             border: none;
             resize: none;
         }
+   
+    
+        .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    position: relative;
+    margin: 10% auto;
+    max-width: 800px;
+    position: relative;
+
+}
+
+#closeButton {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    outline: none;
+    color: #888;
+}
+#subjectSelect {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-bottom: 50px;
+    margin-top: 50px;
+}
+
+#modalButton {
+    background-color: gray;
+    color: white;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    position: absolute;
+    bottom: 10px;
+    right: 20px;
+}
+
+#modalButton:hover {
+    background-color: darkgray;
+}
+
+#subjectSelect option {
+    padding: 8px;
+    background-color: #f2f2f2;
+    color: #333;
+}
 </style>
 <div style="display: flex; flex-direction: row">
     <div style="display: flex; flex-direction: column; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
@@ -44,9 +112,14 @@
                 <select id="KGcreator_subjectSelect" onchange="KGcreator.onTripleModelSelect('s',$(this).val())"></select>
                 <input id="KGcreator_subjectInput" class="KGcreator_tripleInput" />
                 lookup name<input id="KGcreator_subjectLookupName" />
+                    <!-- Options will be added here dynamically -->
+                </select>
             </div>
 
+
             <div class="KGcreator_tripleDivXX" id="sharedPredicatesPanel" style="display: flex; flex-direction: row"></div>
+         
+       
 
             <div></div>
         </div>
@@ -59,11 +132,24 @@
                 
         </div>
     </div>
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <button id="closeButton" onclick="KGcreator.closeModal()">&times;</button>
+            <select id="subjectSelect" name="subject">
+                <option value="">Select a subject</option>
+                <!-- The rest of the options go here -->
+            </select>
+            <button id="modalButton" onclick="KGcreator.generateRML()">Add</button>
+        </div>
+    </div>
+    
 
     <div class="lineage_actionDiv" style="display: flex; flex-direction: column">
         <div class="lineage_button_group" style="min-width: 300px">
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.graphMappings()">Graph mappings</button>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.saveMappings()">Save mappings</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.createRDFTriples()">Save mappings</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="KGcreator_saveFileButton" onclick="KGcreator.saveRMLMappings()">Save RML</button>
+
             <!--   <button onclick="KGcreator.saveMappings(true)">SaveClassmapping</button>-->
 
             <!--  <button onclick="KGcreator.copyMappings()">Copy</button>-->

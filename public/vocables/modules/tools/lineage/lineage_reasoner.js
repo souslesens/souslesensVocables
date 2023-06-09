@@ -31,7 +31,7 @@ var Lineage_reasoner = (function () {
         //  $("#lineage_reasoner_outputDiv").css("display", "none");
         $("#lineage_reasoner_operationSelect").val("");
         // $("#lineage_reasoner_outputDiv").css("display", "none");
-
+        $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
         if (operation == "Inference") {
             self.showInferencePredicates();
         } else if (operation == "Consistency") {
@@ -49,7 +49,8 @@ var Lineage_reasoner = (function () {
             type: "internalGraphUri",
             describeSparqlQuery: describeQuery,
         });
-        $("#lineage_reasoner_infosDiv").html("Processing " + Lineage_sources.activeSource + "...");
+        $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
+
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
@@ -73,7 +74,8 @@ var Lineage_reasoner = (function () {
             type: "internalGraphUri",
             describeSparqlQuery: describeQuery,
         });
-        $("#lineage_reasoner_infosDiv").html("Processing " + Lineage_sources.activeSource + "...");
+        $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
+
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
@@ -133,20 +135,25 @@ var Lineage_reasoner = (function () {
             predicates: JSON.stringify(predicates),
             describeSparqlQuery: describeQuery,
         });
+        $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
 
-        $("#lineage_reasoner_infosDiv").html("Processing " + self.currentSource + "...");
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {
+                if( data.result && data.result=="Error"){
+                    return alert( " JOWL error ")
+                }
                 var totalTriples = 0;
                 for (var key in data) {
                     data[key] = self.FunctionalStyleSyntaxToJson(data[key]);
                     totalTriples += data[key].length;
                 }
-                if (totalTriples == 0) return $("#lineage_reasoner_infosDiv").html("No results");
+                if (totalTriples == 0){
+                    return $("#lineage_reasoner_infosDiv").html("<span style='color:blue;font-weigth:bold'>No results</span>");
+                }
 
                 self.setInferenceTripleLabels(self.currentSource, data, function (err, result) {
                     if (err) {
@@ -168,6 +175,7 @@ var Lineage_reasoner = (function () {
         $("#lineage_reasoner_outputDiv").css("display", "block");
         if (self.currentOperation == "Inference") {
             var predicates = $("#reasonerTreeContainerDiv").jstree().get_checked();
+            self.currentInferencePredicates=predicates
             self.runInference(predicates, function (err, result) {
                 if (err) {
                     return alert(err);
@@ -189,7 +197,11 @@ var Lineage_reasoner = (function () {
 
     self.listInferenceSubjects = function () {
         var uniqueSubjects = {};
-        var jstreeData = [];
+        var jstreeData = [{
+            id: "root",
+            text: self.currentInferencePredicates,
+            parent: "#",
+        }];
         for (var pred in self.inferenceData) {
             self.inferenceData[pred].forEach(function (item) {
                 if (!uniqueSubjects[item.subject]) {
@@ -198,7 +210,7 @@ var Lineage_reasoner = (function () {
                     jstreeData.push({
                         id: item.subject,
                         text: item.subjectLabel || sparql_common.getLabelFromURI(item.subject),
-                        parent: "#",
+                        parent:"root",
                     });
                 }
             });
@@ -208,7 +220,7 @@ var Lineage_reasoner = (function () {
             withCheckboxes: true,
         };
 
-        $("#lineage_reasoner_infosDiv").html("<div id='reasonerSubjectsDiv', style=width:300px;height:500px'>");
+        $("#lineage_reasoner_infosDiv").html("<div id='reasonerSubjectsDiv' style=width:300px;height:500px'>");
         JstreeWidget.loadJsTree("reasonerSubjectsDiv", jstreeData, options);
     };
 

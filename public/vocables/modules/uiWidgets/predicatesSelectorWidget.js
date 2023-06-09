@@ -68,6 +68,7 @@ var PredicatesSelectorWidget = (function () {
             properties = Config.ontologiesVocabularyModels[vocabulary].properties;
             common.fillSelectOptions(selectId, properties, true, "label", "id");
         } else {
+            return PromptedSelectWidget.prompt("owl:ObjectProperty", "editPredicate_currentVocabPredicateSelect", vocabulary);
         }
     };
 
@@ -130,7 +131,7 @@ var PredicatesSelectorWidget = (function () {
             classes = common.array.sort(classes, "label");
             common.fillSelectOptions(selectId, classes, true, "label", "id");
         } else {
-            return PromptedSelectWidget.prompt(null, "editPredicate_objectSelect", vocabulary);
+            return PromptedSelectWidget.prompt("owl:Class", "editPredicate_objectSelect", vocabulary);
         }
     };
 

@@ -407,7 +407,6 @@ var Lineage_axioms_draw = (function() {
 
       recurse(nodeId, options.level || 1);
 
-
       //get nodes SourceColor
       var nodes = [];
       visjsData.nodes.forEach(function(item) {

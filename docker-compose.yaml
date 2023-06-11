@@ -73,7 +73,7 @@ services:
         container_name: jowl
         restart: always
         ports:
-            - ${JOWL_LISTEN_PORT:-8080}:8080
+            - ${JOWL_LISTEN_PORT:9170}:9170
 
 networks:
     backend:

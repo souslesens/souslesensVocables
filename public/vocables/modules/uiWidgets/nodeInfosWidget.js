@@ -25,8 +25,8 @@ var NodeInfosWidget = (function () {
                 activate: function (event, ui) {
                     if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
                         setTimeout(function () {
-                            var source=self.currentSource;
-                            source=Lineage_sources.mainSource
+                            var source = self.currentSource;
+                            source = Lineage_sources.mainSource;
                             Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
                         }, 1000);
                     }
@@ -704,7 +704,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
 
                 // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
                 self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "mainDialogDiv", {}, function (err, result) {
-                    self.showNodeInfosToolbar();
+                    //  self.showNodeInfosToolbar();
                     if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
                         visjsGraph.data.nodes.push({
                             id: self.currentNodeId,

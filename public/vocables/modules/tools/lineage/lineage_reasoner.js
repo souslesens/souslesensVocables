@@ -12,9 +12,6 @@ var Lineage_reasoner = (function () {
     self.loaded = false;
     self.currentSource;
     self.showReasonerDialog = function () {
-
-
-
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").dialog("option", "title", "Reasoner");
         self.currentSource = Lineage_sources.activeSource;
@@ -143,15 +140,15 @@ var Lineage_reasoner = (function () {
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {
-                if( data.result && data.result=="Error"){
-                    return alert( " JOWL error ")
+                if (data.result && data.result == "Error") {
+                    return alert(" JOWL error ");
                 }
                 var totalTriples = 0;
                 for (var key in data) {
                     data[key] = self.FunctionalStyleSyntaxToJson(data[key]);
                     totalTriples += data[key].length;
                 }
-                if (totalTriples == 0){
+                if (totalTriples == 0) {
                     return $("#lineage_reasoner_infosDiv").html("<span style='color:blue;font-weigth:bold'>No results</span>");
                 }
 
@@ -175,7 +172,7 @@ var Lineage_reasoner = (function () {
         $("#lineage_reasoner_outputDiv").css("display", "block");
         if (self.currentOperation == "Inference") {
             var predicates = $("#reasonerTreeContainerDiv").jstree().get_checked();
-            self.currentInferencePredicates=predicates
+            self.currentInferencePredicates = predicates;
             self.runInference(predicates, function (err, result) {
                 if (err) {
                     return alert(err);
@@ -197,11 +194,13 @@ var Lineage_reasoner = (function () {
 
     self.listInferenceSubjects = function () {
         var uniqueSubjects = {};
-        var jstreeData = [{
-            id: "root",
-            text: self.currentInferencePredicates,
-            parent: "#",
-        }];
+        var jstreeData = [
+            {
+                id: "root",
+                text: self.currentInferencePredicates,
+                parent: "#",
+            },
+        ];
         for (var pred in self.inferenceData) {
             self.inferenceData[pred].forEach(function (item) {
                 if (!uniqueSubjects[item.subject]) {
@@ -210,7 +209,7 @@ var Lineage_reasoner = (function () {
                     jstreeData.push({
                         id: item.subject,
                         text: item.subjectLabel || sparql_common.getLabelFromURI(item.subject),
-                        parent:"root",
+                        parent: "root",
                     });
                 }
             });

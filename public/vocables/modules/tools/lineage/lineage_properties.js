@@ -832,7 +832,7 @@ var Lineage_properties = (function () {
                 if (item.domain) {
                     if (!existingNodes[item.domain.value]) {
                         existingNodes[item.domain.value] = 1;
-                        shape = "text";
+                        var shape = "text";
                         if (item.domainType) {
                             if (item.domainType.value.indexOf("Class") > -1) {
                                 shape = Lineage_classes.defaultShape;

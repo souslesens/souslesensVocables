@@ -586,7 +586,7 @@ var Lineage_classes = (function () {
             options.edges = _options.edges;
         }
 
-        if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
+        
             // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
             options.manipulation = {
                 enabled: true,
@@ -639,33 +639,30 @@ var Lineage_classes = (function () {
                     navigationButtons: true,
                 };
             }
-
-            Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-        } else {
-            /* options.manipulation = {
-enabled: true,
-initiallyActive: false,
-deleteNode: false,
-deleteEdge: false,
-editNode: false,
-editEdge: false,
-addEdge:false,
-addNode:false
-}*/
-        }
+         
+            
+      
 
         options.skipColorGraphNodesByType = _options.skipColorGraphNodesByType;
 
         if (!graphDiv) {
             graphDiv = "graphDiv";
         }
-
+      
         self.lineageVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
         self.lineageVisjsGraph.draw(function () {
             MainController.UI.message("", true);
             if (!self.lineageVisjsGraph.skipColorGraphNodesByType) {
                 Lineage_decoration.colorGraphNodesByType();
             }
+            if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
+                
+                Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
+            }
+            else{
+                Lineage_sources.showHideEditButtons(Lineage_sources.activeSource,true);
+            }
+           
         });
         return;
 

@@ -162,6 +162,7 @@ var Lineage_sources = (function() {
       self.resetVisjsGraph();
     }
     else {
+      
       self.activeSource = source;
     }
 

@@ -238,12 +238,11 @@ var SourceSelectorWidget = (function () {
     };
 
     self.getCheckedSources = function () {
-        var checkedNodes=$("#sourceSelector_jstreeDiv").jstree().get_checked();
-        var sources=[]
-        checkedNodes.forEach(function(item){
-            if(Config.sources[item])
-                sources.push(item)
-        })
+        var checkedNodes = $("#sourceSelector_jstreeDiv").jstree().get_checked();
+        var sources = [];
+        checkedNodes.forEach(function (item) {
+            if (Config.sources[item]) sources.push(item);
+        });
         return sources;
     };
 

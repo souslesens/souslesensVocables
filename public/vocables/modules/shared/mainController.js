@@ -709,7 +709,7 @@ return;*/
                     var options = {};
                     $("#waitImg").css("display", "block");
                     MainController.UI.message("loading ontology ...");
-                    GraphLoader.loadGraphFromUrl(source, rdfUrl,graphUri, reload, editable,group, options, function (err, result) {
+                    GraphLoader.loadGraphFromUrl(source, rdfUrl, graphUri, reload, editable, group, options, function (err, result) {
                         if (err) {
                             alert(err);
                             callback(err);
@@ -741,4 +741,3 @@ return;*/
 
 export default MainController;
 window.MainController = MainController;
-

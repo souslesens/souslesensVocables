@@ -18,8 +18,7 @@ var OntologyModels = (function () {
             function (source, callbackEach) {
                 var graphUri;
                 if (!Config.ontologiesVocabularyModels[source]) {
-                    if(!Config.sources[source])
-                        return MainController.UI.message( "source "+source+" not allowed for user ")
+                    if (!Config.sources[source]) return MainController.UI.message("source " + source + " not allowed for user ");
                     graphUri = Config.sources[source].graphUri;
                     if (!graphUri) {
                         return callback();

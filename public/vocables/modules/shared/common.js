@@ -12,12 +12,19 @@ var common = (function () {
     var self = {};
 
     self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField, selectedValue) {
-        $("#" + selectId)
+        
+        if(selectId.includes("editPredicate_vocabularySelect")||selectId=="editPredicate_objectSelect"||selectId=="editPredicate_currentVocabPredicateSelect"){
+            var balise=$("#LineageBlend_creatingNodeClassParamsDiv").find("#" + selectId);
+        }else{
+            var balise=$("#" + selectId);
+        }
+        
+        balise
             .find("option")
             .remove()
             .end();
         if (withBlanckOption) {
-            $("#" + selectId).append(
+            balise.append(
                 $("<option>", {
                     text: "",
                     value: "",
@@ -44,7 +51,7 @@ var common = (function () {
                 if (selectedValue && value == selectedValue) {
                     selected = "selected";
                 }
-                $("#" + selectId).append(
+                balise.append(
                     $("<option>", {
                         text: text,
                         value: value,
@@ -55,7 +62,7 @@ var common = (function () {
         } else {
             for (var key in data) {
                 var item = data[key];
-                $("#" + selectId).append(
+                balise.append(
                     $("<option>", {
                         text: item[textfield] || item,
                         value: item[valueField] || item,

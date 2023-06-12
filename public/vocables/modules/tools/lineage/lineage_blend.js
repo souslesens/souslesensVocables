@@ -602,9 +602,11 @@ source: specificSourceLabel
             }
 
             $("#LineageBlend_creatingNodeClassDiv").css("display", "block");
-
             $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open");
             $("#LineageBlend_creatingNodeClassParamsDiv").tabs({});
+            $("#LineageBlend_creatingNodeClassParamsDiv").find("#editPredicate_propertyDiv").hide();
+            
+
             if (Lineage_classes.currentGraphNode && Lineage_classes.currentGraphNode.data) {
                 $("#LineageBlend_creatingNodeObjectsSelect").val(Lineage_classes.currentGraphNode.data.id);
             }
@@ -699,7 +701,7 @@ source: specificSourceLabel
             var type = $("#LineageBlend_creatingNodePredicatesSelect").val();
 
             if (self.graphModification.currentCreatingNodeType == "Class") {
-                var superClass = $("#editPredicate_objectSelect").val();
+                var superClass = $("#LineageBlend_creatingNodeClassParamsDiv").find("#editPredicate_objectSelect").val();
                 // var superClass =$("#LineageBlend_creatingNodeObjectsUpperSelect").val() || $("#LineageBlend_creatingNodeObjectsSelect").val() ;
                 if (!superClass) {
                     return alert("owl:Class is mandatory");
@@ -707,7 +709,7 @@ source: specificSourceLabel
                 self.graphModification.addTripleToCreatingNode("rdf:type", "owl:Class");
                 self.graphModification.addTripleToCreatingNode("rdfs:subClassOf", superClass);
             } else if (self.graphModification.currentCreatingNodeType == "NamedIndividual") {
-                var individualtypeClass = $("#editPredicate_objectSelect").val();
+                var individualtypeClass = $("#LineageBlend_creatingNodeClassParamsDiv").find("#editPredicate_objectSelect").val();
                 // var individualtypeClass =$("#LineageBlend_creatingNodeObjectsUpper2Select").val() || $("#LineageBlend_creatingNodeObjects2Select").val() ;
                 if (!individualtypeClass) {
                     return alert("owl:Class is mandatory");

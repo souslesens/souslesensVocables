@@ -73,7 +73,7 @@ var PredicatesSelectorWidget = (function () {
     };
 
     self.onSelectPredicateProperty = function (value) {
-        $("#editPredicate_propertyValue").val(value);
+        $("#LineageBlend_creatingNodeClassParamsDiv").find("#editPredicate_propertyValue").val(value);
         if (self.onSelectPropertyFn) {
             self.onSelectPropertyFn(value);
         }
@@ -83,7 +83,7 @@ var PredicatesSelectorWidget = (function () {
         if (value == "_search") {
             return PromptedSelectWidget.prompt(null, "editPredicate_objectSelect", self.currentVocabulary);
         }
-        $("#editPredicate_objectValue").val(value);
+        $("#LineageBlend_creatingNodeClassParamsDiv").find("#editPredicate_objectValue").val(value);
         if (self.onSelectObjectFn) {
             self.onSelectObjectFn(value);
         }

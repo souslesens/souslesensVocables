@@ -96,7 +96,8 @@ var Lineage_axioms_draw = (function () {
             fromStr +
             " where {" +
             " ?s ?p ?o." +
-            " filter (isIri(?o) || isBlank(?o))  filter (?o not in(<http://www.w3.org/2002/07/owl#NamedIndividual>, <http://www.w3.org/2002/07/owl#Class>)) " +
+            " filter (isIri(?o) || isBlank(?o))  filter (?o not in(<http://www.w3.org/2002/07/owl#NamedIndividual>," +
+          " <http://www.w3.org/2002/07/owl#Class>,<http://www.w3.org/2002/07/owl#ObjectProperty>,<http://www.w3.org/2002/07/owl#Restriction>)) " +
             filterTypePropertyStr +
             filterProps +
             "  optional {?s rdfs:label ?sLabel}\n" +
@@ -141,7 +142,7 @@ var Lineage_axioms_draw = (function () {
         if (!depth) {
             depth = defaultDepth;
         }
-        $("#axiomsDraw_depthSpan").html("" + depth);
+        $("#axiomsDraw_depthSpan").html("" + (depth+1));
         var excludeRestrictions = !$("#axiomsDraw_restrictionsCBX").prop("checked");
 
         options.excludeRestrictions = excludeRestrictions;

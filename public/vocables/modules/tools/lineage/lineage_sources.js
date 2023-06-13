@@ -157,12 +157,13 @@ var Lineage_sources = (function () {
             $("#" + self.loadedSources[source].sourceDivId).addClass("Lineage_selectedSourceDiv");
         }
 
-        if (!self.activeSource) {
-            self.activeSource = source;
-            self.resetVisjsGraph();
-        } else {
-            self.activeSource = source;
-        }
+    if (!self.activeSource) {
+      self.activeSource = source;
+      self.resetVisjsGraph();
+    }
+    else {
+      self.activeSource = source;
+    }
 
         JstreeWidget.clear("lineage_containers_containersJstree");
         var editable = Lineage_sources.isSourceEditableForUser(source);

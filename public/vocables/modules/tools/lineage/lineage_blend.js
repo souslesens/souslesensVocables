@@ -583,6 +583,7 @@ source: specificSourceLabel
         },
 
         showCreatingNodeClassOrNamedIndividualDialog: function (type) {
+            Config.selectListsCache[Lineage_sources.activeSource + "_" + type]=undefined;
             $("#LineageBlend_creatingNodeObjectsUpperSelect").val("");
             $("#LineageBlend_creatingNodeObjectsUpper2Select").val("");
             $("#LineageBlend_creatingNodeObjectsSelect").val("");

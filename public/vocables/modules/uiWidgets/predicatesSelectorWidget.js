@@ -81,6 +81,7 @@ var PredicatesSelectorWidget = (function () {
 
     self.onSelectCurrentVocabObject = function (value) {
         if (value == "_search") {
+            Config.selectListsCache[Lineage_sources.activeSource + "_" + null]=undefined;
             return PromptedSelectWidget.prompt(null, "editPredicate_objectSelect", self.currentVocabulary);
         }
         $("#LineageBlend_creatingNodeClassParamsDiv").find("#editPredicate_objectValue").val(value);

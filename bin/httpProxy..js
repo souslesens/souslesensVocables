@@ -88,7 +88,7 @@ var httpProxy = {
             options.form = params;
         }
 
-        // console.log("POST-URL    "+url)
+      console.log("POST-URL    "+url)
         if (proxy) {
             console.log(" POST-----------USING  proxy---------" + proxy);
         }

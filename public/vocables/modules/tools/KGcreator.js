@@ -637,8 +637,8 @@ var KGcreator = (function () {
                             "<div><input type='checkbox' id='KGcreator_isObjectBlankNodeCBX' />isBlankNode</div>" +
                             '<div> <input type="checkbox" id="KGcreator_isObjectStringCBX" /> is String' +
                             " lookup <input id=\"KGcreator_objectLookupName\" style='width:100px'/></div>" +
-                            ' <button onclick="KGcreator.addTripleToTA()">Add</button>' +
-                            ' <input type="checkbox" id="KGcreatorCBX">RML syntax</div>';
+                            ' <button onclick="KGcreator.addTripleToTA()">Add</button>'
+                          //   +' <input type="checkbox" id="KGcreatorCBX">RML syntax</div>';
                         $("#editPredicate_customContentDiv").html(html);
 
                         return callbackSeries();

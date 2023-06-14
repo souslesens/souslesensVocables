@@ -628,6 +628,7 @@ var CsvTripleBuilder = {
                                                                     return callbackEach(err);
                                                                 }
                                                                 sliceIndex += 1;
+                                                                console.log("writed triples:" + triples.result);
                                                                 totalTriples += result;
 
                                                                 callbackEach();

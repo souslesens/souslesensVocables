@@ -101,19 +101,19 @@ var Lineage_axioms_draw = (function() {
       " <http://www.w3.org/2002/07/owl#Class>,<http://www.w3.org/2002/07/owl#ObjectProperty>,<http://www.w3.org/2002/07/owl#Restriction>)) " +
       filterTypePropertyStr +
       filterProps +
-      "  optional {?s rdfs:label ?sLabel}\n" +
-      "        optional {?o rdfs:label ?oLabel}\n" +
+      "  optional {?s rdfs:label ?sLabel}" +
+      "        optional {?o rdfs:label ?oLabel}" +
 
       "   optional {?o rdf:type ?oType" +
       filterObjTypeStr +
-      "}\n" +
+      "}" +
       "      optional {?p rdfs:label ?pLabel} " +
-      "}\n" +
+      "}" +
 
 
-      "UNION {\n" +
+      "UNION {" +
       " ?s ?p ?o. filter (?p!= rdf:type)" +
-      "?s rdf:type ?sType filter (?sType != owl:Restriction)\n" +
+      "?s rdf:type ?sType filter (?sType != owl:Restriction)" +
       "}" +
 
 
@@ -150,14 +150,14 @@ var Lineage_axioms_draw = (function() {
       " <http://www.w3.org/2002/07/owl#Class>,<http://www.w3.org/2002/07/owl#ObjectProperty>,<http://www.w3.org/2002/07/owl#Restriction>)) " +
       filterTypePropertyStr +
       filterProps +
-      "  optional {?s rdfs:label ?sLabel}\n" +
-      "        optional {?o rdfs:label ?oLabel}\n" +
+      "  optional {?s rdfs:label ?sLabel}" +
+      "        optional {?o rdfs:label ?oLabel}" +
       "   optional {?s rdf:type ?sType" +
       filterSubTypeStr +
-      "}\n" +
+      "}" +
       "   optional {?o rdf:type ?oType" +
       filterObjTypeStr +
-      "}\n" +
+      "}" +
       "      optional {?p rdfs:label ?pLabel} " +
       "  {SELECT distinct  ?s " +
       fromStr +

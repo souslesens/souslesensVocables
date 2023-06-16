@@ -188,7 +188,7 @@ var NodeInfosWidget = (function () {
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             str +=
                 "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
-                "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
+                "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget,true)'>  Add Predicate </button>";
 
             str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
         }
@@ -206,6 +206,10 @@ var NodeInfosWidget = (function () {
 
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
             $("#sourceBrowser_addPropertyDiv").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
+                $("#sourceBrowser_addPropertyDiv").find("#editPredicate_vocabularySelect").attr("onchange","PredicatesSelectorWidget.setCurrentVocabPropertiesSelect($(this).val(),'editPredicate_currentVocabPredicateSelect',true)");
+                $("#sourceBrowser_addPropertyDiv").find("#editPredicate_vocabularySelect2").attr("onchange","PredicatesSelectorWidget.setCurrentVocabClassesSelect($(this).val(),'editPredicate_objectSelect',true)");
+                $("#sourceBrowser_addPropertyDiv").find("#editPredicate_currentVocabPredicateSelect").attr("onchange","PredicatesSelectorWidget.onSelectPredicateProperty($(this).val(),true);");
+                $("#sourceBrowser_addPropertyDiv").find("#editPredicate_objectSelect").attr("onchange","PredicatesSelectorWidget.onSelectCurrentVocabObject($(this).val(),true);");
                 $("#editPredicate_controlsDiv").css("display", "block");
             });
         }

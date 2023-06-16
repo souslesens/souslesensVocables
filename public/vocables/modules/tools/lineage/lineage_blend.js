@@ -596,17 +596,18 @@ source: specificSourceLabel
 
             if (type == "NamedIndividual") {
                 $("#LineageBlend_creatingNodeParentTypeSpan").html("rdf:type");
-                PredicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_curentSourceAndImports");
+                PredicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_curentSourceAndImports",false);
             } else {
                 $("#LineageBlend_creatingNodeParentTypeSpan").html("owl:subClassOf");
-                PredicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_all");
+                PredicatesSelectorWidget.setVocabulariesSelect(Lineage_sources.activeSource, "_all",false);
             }
 
             $("#LineageBlend_creatingNodeClassDiv").css("display", "block");
             $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open");
             $("#LineageBlend_creatingNodeClassParamsDiv").tabs({});
             $("#LineageBlend_creatingNodeClassParamsDiv").find("#editPredicate_propertyDiv").hide();
-            
+            $("#LineageBlend_creatingNodeClassParamsDiv").find("#editPredicate_vocabularySelect2").attr('onchange',"PredicatesSelectorWidget.setCurrentVocabClassesSelect($(this).val(),'editPredicate_objectSelect',false)");
+            $("#LineageBlend_creatingNodeClassParamsDiv").find("#editPredicate_objectSelect").attr('onchange',"PredicatesSelectorWidget.onSelectCurrentVocabObject($(this).val(),false)");
 
             if (Lineage_classes.currentGraphNode && Lineage_classes.currentGraphNode.data) {
                 $("#LineageBlend_creatingNodeObjectsSelect").val(Lineage_classes.currentGraphNode.data.id);

@@ -7,16 +7,16 @@ var PredicatesSelectorWidget = (function () {
 
     self.predicatesIdsMap = {};
 
-    self.init = function (source, configureFn) {
+    self.init = function (source, configureFn,addPredicate) {
         $("#sourceBrowser_addPropertyDiv").css("display", "flex");
 
         $("#editPredicate_currentVocabPredicateSelect").prop("disabled", false);
         $("#editPredicate_vocabularySelect").prop("disabled", false);
         $("#editPredicate_propertyValue").prop("disabled", false);
 
-        self.setVocabulariesSelect(source);
-        self.setCurrentVocabClassesSelect("usual", "editPredicate_objectSelect");
-        self.setCurrentVocabPropertiesSelect("usual", "editPredicate_currentVocabPredicateSelect");
+        self.setVocabulariesSelect(source,null,addPredicate);
+        self.setCurrentVocabClassesSelect("usual", "editPredicate_objectSelect",addPredicate);
+        self.setCurrentVocabPropertiesSelect("usual", "editPredicate_currentVocabPredicateSelect",addPredicate);
 
         // var properties = Config.Lineage.basicObjectProperties;
 
@@ -33,7 +33,7 @@ var PredicatesSelectorWidget = (function () {
         }
     };
 
-    self.setVocabulariesSelect = function (source, filter) {
+    self.setVocabulariesSelect = function (source, filter,addPredicate) {
         var vocabularies = [];
         if (!filter || filter == "_all") {
             vocabularies = ["usual", source];
@@ -51,11 +51,11 @@ var PredicatesSelectorWidget = (function () {
             if (!Array.isArray(filter)) filter = [filter];
             vocabularies = filter;
         }
-        common.fillSelectOptions("editPredicate_vocabularySelect", vocabularies, true);
-        common.fillSelectOptions("editPredicate_vocabularySelect2", vocabularies, true);
+        common.fillSelectOptions("editPredicate_vocabularySelect", vocabularies, true,null,null,null,addPredicate);
+        common.fillSelectOptions("editPredicate_vocabularySelect2", vocabularies, true,null,null,null,addPredicate);
     };
 
-    self.setCurrentVocabPropertiesSelect = function (vocabulary, selectId) {
+    self.setCurrentVocabPropertiesSelect = function (vocabulary, selectId,addPredicate) {
         var properties = [];
 
         if (vocabulary == "usual") {
@@ -63,34 +63,53 @@ var PredicatesSelectorWidget = (function () {
                 properties.push({ label: item, id: item });
             });
             properties.push({ label: "-------", id: "" });
-            common.fillSelectOptions(selectId, properties, true, "label", "id");
+            common.fillSelectOptions(selectId, properties, true, "label", "id",null,addPredicate);
         } else if (Config.ontologiesVocabularyModels[vocabulary]) {
             properties = Config.ontologiesVocabularyModels[vocabulary].properties;
-            common.fillSelectOptions(selectId, properties, true, "label", "id");
+            common.fillSelectOptions(selectId, properties, true, "label", "id",null,addPredicate);
         } else {
-            return PromptedSelectWidget.prompt("owl:ObjectProperty", "editPredicate_currentVocabPredicateSelect", vocabulary);
+            return PromptedSelectWidget.prompt("owl:ObjectProperty", "editPredicate_currentVocabPredicateSelect", vocabulary,null,addPredicate);
         }
     };
 
-    self.onSelectPredicateProperty = function (value) {
-        $("#LineageBlend_creatingNodeClassParamsDiv").find("#editPredicate_propertyValue").val(value);
+    self.onSelectPredicateProperty = function (value,addPredicate) {
+        if(addPredicate){
+            var balise=$("#sourceBrowser_addPropertyDiv").find("#editPredicate_propertyValue")
+        }
+        else if(addPredicate==false){
+            var balise=$("#LineageBlend_creatingNodeClassParamsDiv").find("#editPredicate_propertyValue")
+        }
+        else{
+            var balise=$("#editPredicate_propertyValue")
+        }
+       
+        balise.val(value);
         if (self.onSelectPropertyFn) {
             self.onSelectPropertyFn(value);
         }
     };
 
-    self.onSelectCurrentVocabObject = function (value) {
+    self.onSelectCurrentVocabObject = function (value,addPredicate) {
         if (value == "_search") {
             Config.selectListsCache[Lineage_sources.activeSource + "_" + null]=undefined;
-            return PromptedSelectWidget.prompt(null, "editPredicate_objectSelect", self.currentVocabulary);
+            return PromptedSelectWidget.prompt(null, "editPredicate_objectSelect", self.currentVocabulary,null,addPredicate);
         }
-        $("#LineageBlend_creatingNodeClassParamsDiv").find("#editPredicate_objectValue").val(value);
+        if(addPredicate){
+            var balise=$("#sourceBrowser_addPropertyDiv").find("#editPredicate_objectValue")
+        }
+        else if(addPredicate==false){
+            var balise=$("#LineageBlend_creatingNodeClassParamsDiv").find("#editPredicate_objectValue")
+        }
+        else{
+            var balise=$("#editPredicate_objectValue")
+        }
+        balise.val(value);
         if (self.onSelectObjectFn) {
             self.onSelectObjectFn(value);
         }
     };
 
-    self.setCurrentVocabClassesSelect = function (vocabulary, selectId) {
+    self.setCurrentVocabClassesSelect = function (vocabulary, selectId,addPredicate) {
         self.currentVocabulary = vocabulary;
         var classes = [];
 
@@ -101,7 +120,7 @@ var PredicatesSelectorWidget = (function () {
                     label: item,
                 });
             });
-            common.fillSelectOptions(selectId, classes, true, "label", "id");
+            common.fillSelectOptions(selectId, classes, true, "label", "id",null,addPredicate);
         } else if (Config.ontologiesVocabularyModels[vocabulary]) {
             var classes = [{ id: "_search", label: "search..." }];
 
@@ -130,9 +149,9 @@ var PredicatesSelectorWidget = (function () {
 
             classes = classes.concat(restrictionsRanges);
             classes = common.array.sort(classes, "label");
-            common.fillSelectOptions(selectId, classes, true, "label", "id");
+            common.fillSelectOptions(selectId, classes, true, "label", "id",null,addPredicate);
         } else {
-            return PromptedSelectWidget.prompt("owl:Class", "editPredicate_objectSelect", vocabulary);
+            return PromptedSelectWidget.prompt("owl:Class", "editPredicate_objectSelect", vocabulary,null,addPredicate);
         }
     };
 

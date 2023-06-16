@@ -11,10 +11,19 @@
 var common = (function () {
     var self = {};
 
-    self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField, selectedValue) {
+    self.fillSelectOptions = function (selectId, data, withBlanckOption, textfield, valueField, selectedValue,addPredicate) {
         
         if(selectId.includes("editPredicate_vocabularySelect")||selectId=="editPredicate_objectSelect"||selectId=="editPredicate_currentVocabPredicateSelect"){
-            var balise=$("#LineageBlend_creatingNodeClassParamsDiv").find("#" + selectId);
+            if(addPredicate){
+                var balise=$("#sourceBrowser_addPropertyDiv").find("#" + selectId);
+            }
+            else if(addPredicate==false){
+                var balise=$("#LineageBlend_creatingNodeClassParamsDiv").find("#" + selectId);
+            }
+            else{
+                var balise=$("#" + selectId);
+            }
+           
         }else{
             var balise=$("#" + selectId);
         }

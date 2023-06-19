@@ -15,6 +15,41 @@
         border-radius: 3px;
         background-color: #ddd;
     }
+    #KGcreator_subjectSelect,
+    #KGcreator_blankNodeSelect,
+    #KGcreator_blankNodeSelect_existingList,
+    #KGcreator_subjectInput,
+    #KGcreator_subjectLookupName,
+    #editPredicate_vocabularySelect,
+    #editPredicate_currentVocabPredicateSelect,
+    #editPredicate_propertyValue,
+    #editPredicate_vocabularySelect2,
+    #editPredicate_objectSelect,
+    #editPredicate_objectValue {
+        width: 100%; /* make the input fields take up the full width of their container */
+        height: 30px; /* Set the height */
+        padding: 5px; /* reduce padding */
+        margin: 3px 0; /* reduce margin */
+        border-radius: 5px;
+        border: 1px solid #ccc;
+    }
+
+    .editPredicatePanel {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        margin: 3px;
+        width: 300px;
+    }
+
+    .editPredicatePanel input {
+        width: 240px;
+        margin: 3px;
+        padding: 0px;
+        border: #6e2500 solid 1px;
+        border-radius: 3px;
+        background-color: #ddd;
+    }
 </style>
 
 <div class="editPredicatePanel" id="editPredicate_propertyDiv">

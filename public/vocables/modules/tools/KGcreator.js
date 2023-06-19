@@ -72,8 +72,9 @@ var KGcreator = (function () {
         "slsv:TopConcept",
         "_function",
         "_blankNode",
+        "_blankNodeSubjectTriple",
         "",
-        "Nested triples map",
+        
     ];
 
     self.columnDataList = [];
@@ -101,7 +102,7 @@ var KGcreator = (function () {
         ["System", "Activity", "participantIn"],
         ["System", "FunctionalObject", "hasFunctionalPart"],
     ];
-
+    self.csvHeaders = [];
     self.mappingFiles = {};
     self.onLoaded = function () {
         $("#actionDivContolPanelDiv").load("snippets/KGcreator/leftPanel.html", function () {
@@ -572,13 +573,26 @@ var KGcreator = (function () {
                             PredicatesSelectorWidget.onSelectPropertyFn = function (value) {};
                         });
 
-                        $("#editPredicate_customPredicateContentDiv").html("<div> <input type='checkbox' id='KGcreator_isRestrictionCBX' />is Restriction</div>");
+                        $("#editPredicate_customPredicateContentDiv").html(
+                            `<div style='margin-top: 10px;'>
+                                <input type='checkbox' id='KGcreator_isRestrictionCBX' style='height: 20px; width: 20px; border: 1px solid #6e2500; background-color: #ddd;'/>
+                                <span style='margin-left: 10px; font-size: 16px; '>Is Restriction</span>
+                            </div>`
+                        );
+                        
                         var html =
-                            ' is String<input type="checkbox" id="KGcreator_isObjectStringCBX" /> ' +
-                            "lookup <input id=\"KGcreator_objectLookupName\" style='width:100px'/>" +
-                            ' <button onclick="KGcreator.handleAddClick()">Add</button></div>';
+                            `<div style='margin-top: 10px;'>
+                                <input type='checkbox' id='KGcreator_isObjectStringCBX' style='height: 20px; width: 20px; border: 1px solid #6e2500; background-color: #ddd;'/> 
+                                <span style='margin-left: 10px; font-size: 16px; '>is String</span>
+                                <br/>
+                                <span style='margin-left: 10px;  font-weight: bold; '>Lookup</span>
+                                <input id='KGcreator_objectLookupName' style='width:100%;  height: 30px; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc;'/>
+                                <button style='margin-left: 10px; padding: 5px 10px; border-radius: 5px; border: none; background-color: gray; color: white; cursor: pointer;' onclick='KGcreator.handleAddClick()'>Add</button>
+                            </div>`;
+                        
                         $("#editPredicate_customContentDiv").html(html);
                         return callbackSeries();
+                        
                     });
                 },
 
@@ -700,6 +714,8 @@ var KGcreator = (function () {
                 success: function (result, _textStatus, _jqXHR) {
                   
                     var jstreeData = [];
+                    self.csvHeaders = result.headers;
+
 
                     result.headers.forEach(function (col) {
                         jstreeData.push({
@@ -712,8 +728,8 @@ var KGcreator = (function () {
                     
                     
                 // Convert the result into a string
-                var rowCount = result.data[0].length; // This gives you the number of objects within the inner array
-
+                var rowCount = result.data[0].length;
+                self.csvHeaders = 
 
 
                     JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData);
@@ -735,6 +751,13 @@ var KGcreator = (function () {
     var subjects = {}
     var subjectList = []; 
     var blankNodeMappings = [];
+    let counter = {};
+    let blankNodeList = [];
+    var blankNodeCounter = 1;
+    let blankNodeTemplates = {};
+    let usedTemplates = []; // Will be used to store used templates
+
+
 
 
  
@@ -745,15 +768,31 @@ var KGcreator = (function () {
         subjects = {};
         var subjectList = []; 
         blankNodeMappings = [];
+        counter = {};
+        blankNodeList = [];
+        usedTemplates = [];
       
            
         
     }
 
+    $(document).ready(function() {
+        $("#KGcreator_subjectSelect").change(function() {
+            var selectedOption = $(this).children("option:selected").val();
+            if (selectedOption == "_blankNode") {
+                // Show the new select input when "blankNode" is selected
+                $("#newSelect").show();
+            } else {
+                // Hide the new select input when "blankNode" is not selected
+                $("#newSelect").hide();
+            }
+        });
+    });
+    
+
 
       
 
-    var blankNodeCounter = 1;
     self.generateRML = function () {
 
 
@@ -804,13 +843,69 @@ var KGcreator = (function () {
         if (!object) {
             return alert("missing object");
         }
-        if (!subjectList.includes(subject)) {
-            // If not, add it.
-            subjectList.push(subject);
+        if (subject != '_blankNode'){
+            if (!subjectList.includes(subject)) {
+        
+                // If not '_blankNode', add it to subjectList
+                subjectList.push(subject);
+            
         }
 
-        // Get the select element
+        }else{
+            if(!blankNodeList.includes(subject)){
+                  // check if '_blankNode' is already a key in the counter object
+                  if (!counter.hasOwnProperty(subject)) {
+                    // if not, add it with a value of 1
+                    counter[subject] = 1;
+                } else {
+                    // if yes, increment the value
+                    counter[subject] += 1;
+                }
+                // add '_blankNode' with its counter to the blankNodeList
+                blankNodeList.push(subject + counter[subject]);
+            }
+        }
+        
+        let selectedBlankNode = $('#subjectSelect').val();
+        let template = $('#Selected_BlankNodeID').val(); 
+        // Check if the template already exists
+    let existingBlankNode = Object.keys(blankNodeTemplates).find(key => blankNodeTemplates[key] === template);
+    if (existingBlankNode) {
+        alert('The template ' + template + ' is already assigned to the blank node ' + existingBlankNode + '. Please enter a unique template.');
+        return;
+    }
 
+    // Assign template to the selected blank node
+    blankNodeTemplates[selectedBlankNode] = template;
+
+    console.log(blankNodeTemplates); // Print the updated templates to console
+        $('#Selected_BlankNodeID').val('');
+        
+        // Reset the subject select dropdown
+        $('#subjectSelect').val('');
+        
+        
+
+
+
+
+       
+
+            var blankNodeSelect = $("#KGcreator_blankNodeSelect_existingList");
+        
+            // Empty any existing options
+            blankNodeSelect.empty();
+        
+            // Iterate over the list of blank nodes
+            blankNodeList.forEach(function(blankNode) {
+                // Create a new option element for this blank node
+                var option = new Option(blankNode, blankNode);
+        
+                // Append the option to the select input
+                blankNodeSelect.append(option);
+            });
+        
+        
 
         if (!subjects[subject]) {  // If the subject doesn't exist
             subjects[subject] = {};  // Add it to the dictionary
@@ -848,7 +943,7 @@ var KGcreator = (function () {
     // Add the placeholder option to the select element
     subjectSelect.add(placeholderOption);
 
-    subjectList
+    blankNodeList
     .filter(function(sub) {
       return sub !== subject; // This line filters out the current subject from the list
     })
@@ -929,10 +1024,20 @@ var KGcreator = (function () {
         
             // Define the subject map
             if (subject.startsWith("_blankNode")) {
-                // If the subject is a blank node, don't write the rr:class statement
-                rml += "   rr:subjectMap [\n";
-                rml += "        rr:termType rr:BlankNode ;\n";
-                rml += "  ] ;\n\n";
+                    // If the subject is a blank node, don't write the rr:class statement
+                    rml += "   rr:subjectMap [\n";
+                    rml += "        rr:termType rr:BlankNode ;\n";
+
+                    // Check if the template for this blank node exists
+                    let template = blankNodeTemplates[subject];
+                    if (template) {
+                        // If a template exists, add it to the RML
+                        rml += "        rr:template \"" + template + "\";\n";
+                    }
+
+                    rml += "  ] ;\n\n";
+            
+
             } else {
     
             rml += "   rr:subjectMap [\n";
@@ -952,33 +1057,51 @@ var KGcreator = (function () {
                     rml += "   rr:predicateObjectMap [\n";
                     rml += "        rr:predicate " + predicate + " ;\n";
                     rml += "        rr:objectMap [ \n";
-                    if (object === "Nested triples map"){
-                        if (!TripleObject) {
-                            return alert("missing triple object");
+                    if (object === "_blankNodeSubjectTriple"){
+                        rml += "               rr:termType rr:BlankNode;\n";
+                        rml += "               rr:template \"" + template + "\";\n";
+                    } else if(self.columnDataList.includes(object)){
+                        if(subjectList.includes(object)){
+                            rml += "               rr:parentTriplesMap <#"+object+"Mapping>;\n";
+                            rml += "               rr:joinCondition [\n";
+                            rml += "                      rr:child \""+object+"\";\n"
+                            rml += "                      rr:parent \""+object+"\"\n"
+                            rml += "               ]\n"
+                                    
+                        }else {
+                            rml += "               rr:reference \"" + object + "\"\n";
                         }
-
-                    rml += "               rr:parentTriplesMap <#"+TripleObject+"Mapping>;\n";
-                    rml += "               rr:joinCondition [\n";
-                    rml += "                      rr:child \""+TripleObject+"\";\n"
-                    rml += "                      rr:parent \""+TripleObject+"\"\n"
-                    rml += "               ]\n"
-                              
-
-                    }else{
-                     
-                        if(self.columnDataList.includes(object)) {
-                            // If object is a column name in the data source
-                            rml += "  rr:reference \"" + object + "\"";
-                        } else {
-                            // If object is a fixed value
-                            rml += "  rr:constant " + object ;
-                        }
-
+                            
                     }
+                    else{
+                        rml += "               rr:constant " + object ;
+                    }
+
+
+                    // if (object === "_blankNodeSubjectTriple"){
+                    //     if (!TripleObject) {
+                    //         return alert("missing triple object");
+                    //     }
+
+                    
+
+                    // }else{
+                     
+                    //     if(self.columnDataList.includes(object)) {
+                    //         // If object is a column name in the data source
+                    //         rml += "  rr:reference \"" + object + "\"";
+                    //     } else {
+                    //         // If object is a fixed value
+                    //         rml += "  rr:constant " + object ;
+                    //     }
+
+                    // }
+
+                
                    
-                    if (tripleObj.isString) {
-                        rml += "      rr:datatype xsd:string\n";
-                    } 
+                    // if (tripleObj.isString) {
+                    //     rml += "      rr:datatype xsd:string\n";
+                    // } 
                     rml += "    ]\n";
 
                     if (i === predicates.length - 1 && j === subjects[subject][predicate].length - 1) {
@@ -1019,7 +1142,7 @@ var KGcreator = (function () {
         // Add the placeholder option to the select element
         subjectSelect.add(placeholderOption);
     
-        subjectList
+        blankNodeList
             .filter(function(sub) {
                 return sub !== subject; // This line filters out the current subject from the list
             })
@@ -1032,9 +1155,54 @@ var KGcreator = (function () {
                 // Add the option to the select element
                 subjectSelect.add(option);
             });
-    
+            $(document).ready(function() {
+                $("#subjectSelect").change(function() {
+                    var selectedOption = $(this).children("option:selected").val();
+                    if (selectedOption.startsWith("_blankNode")) {
+                        // Clear existing options
+                        $("#blankNodeID").empty();
+                        console.log("headers"+self.csvHeaders)
+            
+                        // Populate options from csvHeaders
+                        self.columnDataList.forEach(function(header) {
+                            $("#blankNodeID").append(new Option(header, header));
+                        });
+            
+                        // Add the special option at the end, with a special CSS class
+                        var specialOption = new Option("Generate an ID", "Generate an ID");
+                        $(specialOption).addClass('specialOption');
+                        $("#blankNodeID").append(specialOption);
+            
+                        // Show the select input
+                        $("#blankNodeID").show();
+                        $("#note").show();
+
+            
+                    } else {
+                        // Hide the select input and the input field
+                        $("#blankNodeID").hide();
+                        $("#Selected_BlankNodeID").hide();
+                        // Also hide the note
+                        $("#note").hide();
+                    }
+                });
+                // Handle change event for blankNodeID
+                $("#blankNodeID").change(function() {
+                    var selectedOption = $(this).children("option:selected").val();
+                    // Set the text of the input field according to the selected option
+                    $("#Selected_BlankNodeID").val("_yourkey_{" + selectedOption + "}");
+            
+                    // Show the input field
+                    $("#Selected_BlankNodeID").show();
+                });
+            });
+            
+            
+            
         // Enable the subjectSelect
         subjectSelect.disabled = false;
+        
+
     
         // Attach the onclick event to the button
         var modalButton = document.getElementById("modalButton");
@@ -1051,7 +1219,7 @@ var KGcreator = (function () {
     self.handleAddClick = function() {
         var object = $("#editPredicate_objectValue").val();
     
-        if (object.trim() === "Nested triples map") {
+        if (object.trim() === "_blankNodeSubjectTriple") {
             // Here you call the function that presents the modal
             // Let's assume it's called showModal()
             showModal();
@@ -1186,11 +1354,32 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
 
     self.onTripleModelSelect = function (role, value) {
         self.currentTripleModelRole = role;
-        if (value == "_function") {
-            return self.showFunctionDialog(role);
-        }
-
+   
         if (role == "s") {
+            if (value == "_blankNode"){
+                $("#KGcreator_blankNodeSelect").show();
+                  // Add a change handler for KGcreator_blankNodeSelect
+                $("#KGcreator_blankNodeSelect").change(function() {
+                    var selectedOption = $(this).children("option:selected").val();
+                    if (selectedOption == "_newBlankNode") {
+                        $("#KGcreator_blankNodeSelect_existingList").hide();
+                        $("#KGcreator_subjectInput").val(value);
+                    }else {
+                        $("#KGcreator_blankNodeSelect_existingList").show();
+                        var existingBlankNode_SelectedOption = $("#KGcreator_blankNodeSelect_existingList").children("option:selected").val();
+                        $("#KGcreator_subjectInput").val(existingBlankNode_SelectedOption);
+
+                    }
+                });
+                    
+            } else {
+                $("#KGcreator_blankNodeSelect").hide();
+            }
+            
+            if (value == "_function") {
+                return self.showFunctionDialog(role);
+            }
+    
             if (value == "_selectedColumn") {
                 $("#KGcreator_subjectInput").val(self.currentTreeNode.text);
             } else {
@@ -1677,6 +1866,7 @@ self.saveRMLMappings = function () {
                             str += key + "\t";
                         }
                 });
+       
                 str += "\n";
 
                 node.data.sample.forEach(function (item) {

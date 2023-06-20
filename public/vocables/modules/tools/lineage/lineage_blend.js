@@ -18,6 +18,7 @@ var Lineage_blend = (function () {
 
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
                 $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
+                    $("#editPredicate_mainDiv").remove()
                     $("#LineageBlend_commonPredicateObjectDiv").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
                         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
                             $("#editPredicate_propertyDiv").css("display", "none");

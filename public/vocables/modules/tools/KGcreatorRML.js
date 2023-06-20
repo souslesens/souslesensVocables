@@ -565,6 +565,7 @@ var KGcreator_RML = (function () {
                     return callbackSeries();
                 },
                 function (callbackSeries) {
+                    $("#editPredicate_mainDiv").remove()
                     $("#sharedPredicatesPanel").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
                         PredicatesSelectorWidget.init(KGcreator_RML.currentSlsvSource, function () {
                             PredicatesSelectorWidget.onSelectObjectFn = function (value) {};

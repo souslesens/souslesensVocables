@@ -320,7 +320,6 @@ var CsvTripleBuilder = {
                                                                     } catch (e) {
                                                                         return (lineError = e);
                                                                     }
-
                                                                 } else if (item.isSubjectBlankNode) {
                                                                     var blankNode = blankNode_cellMap[item.s];
                                                                     if (!blankNode) {

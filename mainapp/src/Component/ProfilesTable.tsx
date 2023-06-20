@@ -423,7 +423,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                     >
                                         <MenuItem value="forbidden">Forbidden</MenuItem>
                                         <MenuItem value="read">Read</MenuItem>
-                                        <MenuItem disabled={!source.source.editable} value="readwrite">
+                                            <MenuItem  value="readwrite">
                                             Read & Write
                                         </MenuItem>
                                     </Select>

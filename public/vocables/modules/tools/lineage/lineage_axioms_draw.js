@@ -45,7 +45,8 @@ var Lineage_axioms_draw = (function() {
     "<http://www.w3.org/1999/02/22-rdf-syntax-ns#first>",
     "<http://www.w3.org/1999/02/22-rdf-syntax-ns#rest>",
     "<http://www.w3.org/1999/02/22-rdf-syntax-ns#List>",
-    "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"
+    "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
+   // "rdfs:member"
   ];
   var defaultDepth = 3;
 

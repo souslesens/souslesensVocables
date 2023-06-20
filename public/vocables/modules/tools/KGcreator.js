@@ -104,6 +104,27 @@ var KGcreator = (function () {
     ];
     self.csvHeaders = [];
     self.mappingFiles = {};
+    self.subjects = {}
+    self.subjectList = [];
+    self.blankNodeList = [];
+    self.blankNodeCounter = 1;
+    self.blankNodeTemplates = {};
+    self.usedTemplates = []; // Will be used to store used templates
+    self.counter = {},
+
+    
+    self.rmlPrefixes = {
+        rml: "http://semweb.mmlab.be/ns/rml#",
+        rr: "http://www.w3.org/ns/r2rml#",
+        ql: "http://semweb.mmlab.be/ns/ql#",
+        foaf: "http://xmlns.com/foaf/0.1/",
+        schema: "http://schema.org/",
+        xsd: "http://www.w3.org/2001/XMLSchema#",
+        rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        rdfs: "http://www.w3.org/2000/01/rdf-schema#",
+        // Add other necessary prefixes here
+    };
+
     self.onLoaded = function () {
         $("#actionDivContolPanelDiv").load("snippets/KGcreator/leftPanel.html", function () {
             self.loadCsvDirs();
@@ -748,92 +769,21 @@ var KGcreator = (function () {
 
     //RML Mapping file generator 
 
-    var subjects = {}
-    var subjectList = []; 
-    var blankNodeMappings = [];
-    let counter = {};
-    let blankNodeList = [];
-    var blankNodeCounter = 1;
-    let blankNodeTemplates = {};
-    let usedTemplates = []; // Will be used to store used templates
-
-
-
-
- 
-    
-
-
-    window.onload = function() {
-        subjects = {};
-        var subjectList = []; 
-        blankNodeMappings = [];
-        counter = {};
-        blankNodeList = [];
-        usedTemplates = [];
-      
-           
-        
-    }
-
-    $(document).ready(function() {
-        $("#KGcreator_subjectSelect").change(function() {
-            var selectedOption = $(this).children("option:selected").val();
-            if (selectedOption == "_blankNode") {
-                // Show the new select input when "blankNode" is selected
-                $("#newSelect").show();
-            } else {
-                // Hide the new select input when "blankNode" is not selected
-                $("#newSelect").hide();
-            }
+    $(document).ready(() => {
+        $("#KGcreator_subjectSelect").change(() => {
+            $("#newSelect").toggle($(this).children("option:selected").val() === "_blankNode");
         });
     });
-    
 
-
-      
-
-    self.generateRML = function () {
-
-
-        self.rmlPrefixes = {
-            rml: "http://semweb.mmlab.be/ns/rml#",
-            rr: "http://www.w3.org/ns/r2rml#",
-            ql: "http://semweb.mmlab.be/ns/ql#",
-            foaf: "http://xmlns.com/foaf/0.1/",
-            schema: "http://schema.org/",
-            xsd: "http://www.w3.org/2001/XMLSchema#",
-            rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-            rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-            // Add other necessary prefixes here
-        };
+    self.initializeSubjectsData = function() {
+        self.subjects = {};
+        self.subjectList = [];
     
-        $("#KGcreator_tripleMessageDiv").html("");
-        var subject = $("#KGcreator_subjectInput").val();
-    
-        var predicate = $("#editPredicate_propertyValue").val();
-        var object = $("#editPredicate_objectValue").val();
-    
-        var isObjectString = $("#KGcreator_isObjectStringCBX").prop("checked");
-    
-        var subjectLookupName = $("#KGcreator_subjectLookupName").val();
-        var objectLookupName = $("#KGcreator_objectLookupName").val();
-        var isRestrictionCBX = $("#KGcreator_isRestrictionCBX").prop("checked");
-        var isSpecificPredicate = $("#KGcreator_isSpecificPredicateCBX").prop("checked");
+        self.blankNodeList = [];
+        self.usedTemplates = [];
+    }
 
-        var TripleObject = $("#subjectSelect").val();
-    
-
-    
-        $("#KGcreator_objectSelect").val("");
-        $("#KGcreator_predicateSelect").val("");
-    
-        // Ensure that self.currentGraphUri is set using the previous code snippet
-            console.log(self.columnDataList);
-            console.log(self.rowCount)
-          
-          
-
+    self.validateTripleElements = function(subject, predicate, object) {
         if (!subject) {
             return alert("missing subject");
         }
@@ -843,285 +793,211 @@ var KGcreator = (function () {
         if (!object) {
             return alert("missing object");
         }
-        if (subject != '_blankNode'){
-            if (!subjectList.includes(subject)) {
-        
-                // If not '_blankNode', add it to subjectList
-                subjectList.push(subject);
-            
-        }
-
-        }else{
-            if(!blankNodeList.includes(subject)){
-                  // check if '_blankNode' is already a key in the counter object
-                  if (!counter.hasOwnProperty(subject)) {
-                    // if not, add it with a value of 1
-                    counter[subject] = 1;
-                } else {
-                    // if yes, increment the value
-                    counter[subject] += 1;
-                }
-                // add '_blankNode' with its counter to the blankNodeList
-                blankNodeList.push(subject + counter[subject]);
-            }
-        }
-        
-        let selectedBlankNode = $('#subjectSelect').val();
-        let template = $('#Selected_BlankNodeID').val(); 
-        // Check if the template already exists
-    let existingBlankNode = Object.keys(blankNodeTemplates).find(key => blankNodeTemplates[key] === template);
-    if (existingBlankNode) {
-        alert('The template ' + template + ' is already assigned to the blank node ' + existingBlankNode + '. Please enter a unique template.');
-        return;
     }
 
-    // Assign template to the selected blank node
-    blankNodeTemplates[selectedBlankNode] = template;
+    self.handleBlankNode = function(subject) {
+        if(!self.blankNodeList.includes(subject)){
+                          // check if '_blankNode' is already a key in the counter object
+                          if (!self.counter.hasOwnProperty(subject)) {
+                            // if not, add it with a value of 1
+                            self.counter[subject] = 1;
+                        } else {
+                            // if yes, increment the value
+                            self.counter[subject] += 1;
+                        }
+                        // add '_blankNode' with its counter to the blankNodeList
+                        self.blankNodeList.push(subject + self.counter[subject]);
+                    }
+        return subject;
+    }
 
-    console.log(blankNodeTemplates); // Print the updated templates to console
+    self.handleBlankNodeTemplates = function() {
+        let selectedBlankNode = $('#subjectSelect').val();
+        let template = $('#Selected_BlankNodeID').val(); 
+
+        let existingBlankNode = Object.keys(self.blankNodeTemplates).find(key => self.blankNodeTemplates[key] === template);
+        if (existingBlankNode && existingBlankNode !== selectedBlankNode) {
+            alert(`The template ${template} is already assigned to the blank node ${existingBlankNode}. Please enter a unique template.`);
+            return;
+        }
+        self.blankNodeTemplates[selectedBlankNode] = template;
         $('#Selected_BlankNodeID').val('');
-        
-        // Reset the subject select dropdown
         $('#subjectSelect').val('');
-        
-        
+        $('#blankNodeID').val('');
 
+    }
 
+    self.populateBlankNodeSelect = function() {
+        var blankNodeSelect = $("#KGcreator_blankNodeSelect_existingList");
+        blankNodeSelect.empty();
+        self.blankNodeList.forEach(blankNode => blankNodeSelect.append(new Option(blankNode, blankNode)));
+    }
 
-
-       
-
-            var blankNodeSelect = $("#KGcreator_blankNodeSelect_existingList");
-        
-            // Empty any existing options
-            blankNodeSelect.empty();
-        
-            // Iterate over the list of blank nodes
-            blankNodeList.forEach(function(blankNode) {
-                // Create a new option element for this blank node
-                var option = new Option(blankNode, blankNode);
-        
-                // Append the option to the select input
-                blankNodeSelect.append(option);
-            });
-        
-        
-
-        if (!subjects[subject]) {  // If the subject doesn't exist
-            subjects[subject] = {};  // Add it to the dictionary
+    self.handleSubjects = function(subject, predicate, object) {
+        if (!self.subjects[subject]) {  // If the subject doesn't exist
+            self.subjects[subject] = {};  // Add it to the dictionary
         }
-
-        
-        if (!subjects[subject][predicate]) {  // If the predicate for this subject doesn't exist
-            subjects[subject][predicate] = [];  // Add it to the subject's dictionary
+        if (!self.subjects[subject][predicate]) {  // If the predicate for this subject doesn't exist
+            self.subjects[subject][predicate] = [];  // Add it to the subject's dictionary
         }
-        if (!subjects[subject][predicate].includes(object)) {  // If the object does not already exist for this predicate
-            subjects[subject][predicate].push(object);  // Add the object to the predicate's array
+        if (!self.subjects[subject][predicate].includes(object)) {  // If the object does not already exist for this predicate
+            self.subjects[subject][predicate].push(object);  // Add the object to the predicate's array
         } else {
             alert("This predicate-object pair already exists for the subject.");
         }
-        
+    }
 
-        console.log("topLevelOntologyPrefix is " + self.topLevelOntologyPrefix);
-        
-    
-    
-        var tripleObj = { s: subject, p: predicate, o: object };
+    self.refreshSubjectSelect = function(subject) {
+        let subjectSelect = document.getElementById('subjectSelect');
+        subjectSelect.innerHTML = '';
+        let placeholderOption = new Option('Select a subject');
+        placeholderOption.disabled = true;
+        placeholderOption.selected = true;
+        subjectSelect.add(placeholderOption);
+        self.blankNodeList.filter(sub => sub !== subject).forEach(sub => {
+            let option = new Option(sub, sub);
+            subjectSelect.add(option);
+        });
+    }
 
-        
-    var subjectSelect = document.getElementById('subjectSelect');
+    self.generateRML = function() {
+        $("#KGcreator_tripleMessageDiv").html("");
+        let subject = $("#KGcreator_subjectInput").val();
+        let predicate = $("#editPredicate_propertyValue").val();
+        let object = $("#editPredicate_objectValue").val();
+        let isObjectString = $("#KGcreator_isObjectStringCBX").prop("checked");
+        let subjectLookupName = $("#KGcreator_subjectLookupName").val();
+        let objectLookupName = $("#KGcreator_objectLookupName").val();
+        let isRestrictionCBX = $("#KGcreator_isRestrictionCBX").prop("checked");
+        let isSpecificPredicate = $("#KGcreator_isSpecificPredicateCBX").prop("checked");
+        let tripleObject = $("#subjectSelect").val();
+        let selectedBlankNode = $('#subjectSelect').val();
+        let template = $('#Selected_BlankNodeID').val(); 
 
-    subjectSelect.innerHTML = '';
-
-    // Create a new option for placeholder
-    var placeholderOption = document.createElement('option');
-    placeholderOption.value = '';
-    placeholderOption.text = 'Select a subject';
-    placeholderOption.selected = true; // This option will be selected by default
-    placeholderOption.disabled = true; // The user cannot select this option
-
-    // Add the placeholder option to the select element
-    subjectSelect.add(placeholderOption);
-
-    blankNodeList
-    .filter(function(sub) {
-      return sub !== subject; // This line filters out the current subject from the list
-    })
-    .forEach(function(sub) {
-      // Create a new option element
-      var option = document.createElement('option');
-      option.value = sub;
-      option.text = sub;
-  
-      // Add the option to the select element
-      subjectSelect.add(option);
-    });
-
-
-  
-        if (predicate.indexOf("xsd:") == 0) {
-            tripleObj.dataType = predicate;
-        }
-        if (isObjectString) {
-            tripleObj.isString = true;
-        } else if (predicate.toLowerCase().indexOf("label") > -1) {
-            tripleObj.isString = true;
-        } else if (predicate.toLowerCase().indexOf("definedby") > -1) {
-            tripleObj.isString = true;
-        } else if (predicate.toLowerCase().indexOf("comment") > -1) {
-            tripleObj.isString = true;
-        } else if (predicate.toLowerCase().indexOf("example") > -1) {
-            tripleObj.isString = true;
-        }
-    
-        if (!self.currentGraphUri) {
-            var graphUri = "";
-            if (self.currentGraphUri) {
-                graphUri = self.currentGraphUri;
-            }
-            graphUri = prompt("enter graphUri", graphUri);
-            if (!graphUri) {
-                return;
-            }
-            self.currentGraphUri = graphUri;
-            self.currentJsonObject = self.mainJsonEditor.get();
-            self.currentJsonObject.graphUri = graphUri;
-            self.mainJsonEditor.load(self.currentJsonObject);
-
-        } else {
-        var rml = "";
-    
-        for (var key in self.rmlPrefixes) {
-            rml += "@prefix " + key + ": <" + self.rmlPrefixes[key] + "> .\n";
-
-        }
        
-    // Add the @base statement
-    rml += "@base <http://example.com/ns#>.  \n";
-    rml += "\n";
-
-        for (var subject in subjects) {
-            if (subject === "_blankNode") {
-                // Assign a unique identifier to the blank node using the counter
-                var uniqueBlankNodeName = "_blankNode" + blankNodeCounter;
-                blankNodeCounter++;
-                           
-                // Rename the blank node in the subjects dictionary
-                Object.defineProperty(subjects, uniqueBlankNodeName, 
-                Object.getOwnPropertyDescriptor(subjects, subject));
-                delete subjects[subject];
-                subject = uniqueBlankNodeName;
-            } 
             
 
-            // Define the logical source
-            rml += "<#"+subject+"Mapping>\n"
-            rml += "   a rr:TriplesMap;\n"
-            rml += "   rml:logicalSource [\n"
-            rml += "        rml:source \""+ self.currentJsonObject.fileName+"\" ;\n"
-            rml += "        rml:referenceFormulation ql:CSV \n";
-            rml += "  ] ;\n\n";
-        
-            // Define the subject map
-            if (subject.startsWith("_blankNode")) {
-                    // If the subject is a blank node, don't write the rr:class statement
-                    rml += "   rr:subjectMap [\n";
-                    rml += "        rr:termType rr:BlankNode ;\n";
 
-                    // Check if the template for this blank node exists
-                    let template = blankNodeTemplates[subject];
-                    if (template) {
-                        // If a template exists, add it to the RML
-                        rml += "        rr:template \"" + template + "\";\n";
-                    }
+        self.validateTripleElements(subject, predicate, object);
 
-                    rml += "  ] ;\n\n";
-            
-
-            } else {
-    
-            rml += "   rr:subjectMap [\n";
-            rml += "        rr:termType rr:BlankNode ;\n";
-            rml += "        rr:class <http://example.com/ns#" + subject + "> ;\n"
-            rml += "  ] ;\n\n"; }
-
-            var predicates = Object.keys(subjects[subject]);
-            for (var i = 0; i < predicates.length; i++) {
-                var predicate = predicates[i];
-                for (var j = 0; j < subjects[subject][predicate].length; j++) {
-                    var object = subjects[subject][predicate][j];
-    
-
-        
-            // Define the predicate object map
-                    rml += "   rr:predicateObjectMap [\n";
-                    rml += "        rr:predicate " + predicate + " ;\n";
-                    rml += "        rr:objectMap [ \n";
-                    if (object === "_blankNodeSubjectTriple"){
-                        rml += "               rr:termType rr:BlankNode;\n";
-                        rml += "               rr:template \"" + template + "\";\n";
-                    } else if(self.columnDataList.includes(object)){
-                        if(subjectList.includes(object)){
-                            rml += "               rr:parentTriplesMap <#"+object+"Mapping>;\n";
-                            rml += "               rr:joinCondition [\n";
-                            rml += "                      rr:child \""+object+"\";\n"
-                            rml += "                      rr:parent \""+object+"\"\n"
-                            rml += "               ]\n"
-                                    
-                        }else {
-                            rml += "               rr:reference \"" + object + "\"\n";
-                        }
-                            
-                    }
-                    else{
-                        rml += "               rr:constant " + object ;
-                    }
-
-
-                    // if (object === "_blankNodeSubjectTriple"){
-                    //     if (!TripleObject) {
-                    //         return alert("missing triple object");
-                    //     }
-
-                    
-
-                    // }else{
-                     
-                    //     if(self.columnDataList.includes(object)) {
-                    //         // If object is a column name in the data source
-                    //         rml += "  rr:reference \"" + object + "\"";
-                    //     } else {
-                    //         // If object is a fixed value
-                    //         rml += "  rr:constant " + object ;
-                    //     }
-
-                    // }
-
-                
-                   
-                    // if (tripleObj.isString) {
-                    //     rml += "      rr:datatype xsd:string\n";
-                    // } 
-                    rml += "    ]\n";
-
-                    if (i === predicates.length - 1 && j === subjects[subject][predicate].length - 1) {
-                        rml += "  ] .\n\n";  // Write ']' for the last predicate-object pair of the subject
-                    } else {
-                        rml += "  ] ;\n\n";  // Write '];' for other predicate-object pairs
-                    }
-                }   
-            } 
-           
+        if (subject === "_blankNode") {
+            self.handleBlankNode(subject);
         }
-        // Display the generated RML mapping file in the textarea
+
+        self.handleBlankNodeTemplates();
+        self.populateBlankNodeSelect();
+
+       
+
+        if (subject !== "_blankNode") {
+            if (!self.subjectList.includes(subject)) {
+                self.subjectList.push(subject);
+            }
+        }
+
+        self.handleSubjects(subject, predicate, object);
+
+        let rml = "";
+
+        for (let key in self.rmlPrefixes) {
+            rml += `@prefix ${key}: <${self.rmlPrefixes[key]}>.\n`;
+        }
+
+        rml += "@base <http://example.com/ns#>.\n\n";
+
+        for (let subject in self.subjects) {
+            
+            if (subject === "_blankNode") {
+                let uniqueBlankNodeName = `_blankNode${self.blankNodeCounter}`;
+                self.blankNodeCounter++;
+                Object.defineProperty(self.subjects, uniqueBlankNodeName, Object.getOwnPropertyDescriptor(self.subjects, subject));
+                delete self.subjects[subject];
+                subject = uniqueBlankNodeName;
+            }
+
+            rml += `<#${subject}Mapping>\n`;
+            rml += "   a rr:TriplesMap;\n";
+            rml += "   rml:logicalSource [\n";
+            rml += `        rml:source "${self.currentJsonObject.fileName}";\n`;
+            rml += "        rml:referenceFormulation ql:CSV\n";
+            rml += "   ];\n\n";
+
+            if (subject.startsWith("_blankNode")) {
+                rml += "   rr:subjectMap [\n";
+                rml += "        rr:termType rr:BlankNode;\n";
+                
+                let template = self.blankNodeTemplates[subject];
+                if (template) {
+                    rml += `        rr:template "${template}";\n`;
+                }
+                rml += "   ];\n\n";
+            } else {
+                rml += `   rr:subjectMap [\n`;
+                rml += `        rr:termType rr:BlankNode;\n`;
+                rml += `        rr:class <http://example.com/ns#${subject}>;\n`;
+                rml += `   ];\n\n`;
+            }
+
+            let predicates = Object.keys(self.subjects[subject]);
+            for (let i = 0; i < predicates.length; i++) {
+                let predicate = predicates[i];
+                for (let j = 0; j < self.subjects[subject][predicate].length; j++) {
+                    let object = self.subjects[subject][predicate][j];
+
+                    rml += "   rr:predicateObjectMap [\n";
+                    rml += `        rr:predicate ${predicate};\n`;
+                    rml += "        rr:objectMap [\n";
+                    if (object === "_blankNodeSubjectTriple") {
+                        rml += `               rr:termType rr:BlankNode;\n`;
+                        rml += `               rr:template "${template}";\n`;
+                    } else if (self.columnDataList.includes(object)) {
+                        if (self.subjectList.includes(object)) {
+                            rml += `               rr:parentTriplesMap <#${object}Mapping>;\n`;
+                            rml += "               rr:joinCondition [\n";
+                            rml += `                      rr:child "${object}";\n`;
+                            rml += `                      rr:parent "${object}"\n`;
+                            rml += "               ];\n";
+                        } else {
+                            rml += `               rr:reference "${object}"\n`;
+                        }
+                    } else {
+                        rml += `               rr:constant ${object}`;
+                    }
+
+                    rml += "        ];\n";
+                    if (i === predicates.length - 1 && j === self.subjects[subject][predicate].length - 1) {
+                        rml += "   ].\n\n";
+                    } else {
+                        rml += "   ];\n\n";
+                    }
+                }
+            }
+        }
+
         var rmlTextarea = document.getElementById("rmlTextarea");
         if (rmlTextarea) {
             rmlTextarea.value = rml;
         }
     }
-    }
 
 
+window.onload = () => {
+    self.initializeSubjectsData();
+};
+
+
+
+
+
+
+
+ 
+    
+
+
+ 
+
+    
     function showModal() {
         var subject = $("#KGcreator_subjectInput").val();
         var modal = document.getElementById("myModal");
@@ -1142,7 +1018,7 @@ var KGcreator = (function () {
         // Add the placeholder option to the select element
         subjectSelect.add(placeholderOption);
     
-        blankNodeList
+        self.blankNodeList
             .filter(function(sub) {
                 return sub !== subject; // This line filters out the current subject from the list
             })
@@ -1572,8 +1448,8 @@ self.saveRMLMappings = function () {
     self.clearRML = function () {
         if (confirm("Clear RML textarea")) {
             $("#rmlTextarea").val("");
-            subjects = {};
-             subjectList = []; 
+            self.subjects = {};
+            self.subjectList = []; 
         }
     };
     

@@ -251,7 +251,7 @@ var Lineage_reasoner = (function () {
                     nodes[item.subject] = node;
                 } else {
                     if (nodes[item.subject]) {
-                        nodes[item.subject] = VisjsUtil.setVisjsNodeAttributes(self.currentSource, nodes[item.subject], label, null, { shape: "square" });
+                        nodes[item.subject] = VisjsUtil.setVisjsNodeAttributes(self.currentSource, nodes[item.subject], label, { shape: "square" });
                     }
                 }
 

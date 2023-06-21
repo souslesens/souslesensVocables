@@ -39,7 +39,7 @@ var OntologyModels = (function () {
                 var inversePropsMap = [];
                 async.series(
                     [
-                        // set propertie
+                        // set properties
                         function (callbackSeries) {
                             var query =
                                 queryP +
@@ -137,7 +137,7 @@ var OntologyModels = (function () {
                             });
                         },
 
-                        //setinverse Props constraints
+                        //set inverse Props constraints
                         function (callbackSeries) {
                             for (var propId in inversePropsMap) {
                                 var propConstraints = Config.ontologiesVocabularyModels[source].constraints[propId];
@@ -294,5 +294,4 @@ var OntologyModels = (function () {
 
 export default OntologyModels;
 
-window.OntologyModels = OntologyModels;
 window.OntologyModels = OntologyModels;

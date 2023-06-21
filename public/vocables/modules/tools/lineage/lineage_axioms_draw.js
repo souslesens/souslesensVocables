@@ -103,9 +103,18 @@ var Lineage_axioms_draw = (function () {
             filterProps +
             "  optional {?s rdfs:label ?sLabel}" +
             "        optional {?o rdfs:label ?oLabel}" +
+
+
             "   optional {?o rdf:type ?oType" +
             filterObjTypeStr +
             "}" +
+
+          "   optional {?s rdf:type ?sType" +
+          filterSubTypeStr +
+          "}" +
+
+
+
             "      optional {?p rdfs:label ?pLabel} " +
             "}" +
             "UNION {" +
@@ -132,42 +141,7 @@ var Lineage_axioms_draw = (function () {
 
         var filterProps = ""; //Sparql_common.setFilter("p",props)
 
-        var queryXX =
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            "select  ?s ?p ?o ?sLabel ?oLabel ?pLabel ?sType ?oType" +
-            fromStr +
-            " where {" +
-            " ?s ?p ?o." +
-            " filter (isIri(?o) || isBlank(?o))  filter (?o not in(<http://www.w3.org/2002/07/owl#NamedIndividual>," +
-            " <http://www.w3.org/2002/07/owl#Class>,<http://www.w3.org/2002/07/owl#ObjectProperty>,<http://www.w3.org/2002/07/owl#Restriction>)) " +
-            filterTypePropertyStr +
-            filterProps +
-            "  optional {?s rdfs:label ?sLabel}" +
-            "        optional {?o rdfs:label ?oLabel}" +
-            "   optional {?s rdf:type ?sType" +
-            filterSubTypeStr +
-            "}" +
-            "   optional {?o rdf:type ?oType" +
-            filterObjTypeStr +
-            "}" +
-            "      optional {?p rdfs:label ?pLabel} " +
-            "  {SELECT distinct  ?s " +
-            fromStr +
-            "  WHERE { {" +
-            "<" +
-            nodeId +
-            "> (<>|!<>){0," +
-            depth +
-            "}" +
-            " ?s filter (isIri(?s) || isBlank(?s))" +
-            "filter (?s!=<http://purl.obolibrary.org/obo/bfo.owl> ) " +
-            filterProps +
-            " }" +
-            includeIncomingTriplesStr +
-            "}}} limit " +
-            Config.queryLimit;
+
 
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
@@ -203,16 +177,12 @@ var Lineage_axioms_draw = (function () {
             depth: depth,
         };
 
-        if (!nodeId) {
-            nodeId = "https://purl.industrialontologies.org/ontology/core/Core/BuyingBusinessProcess";
-        }
 
         var sourceLabel = Lineage_sources.activeSource;
 
         self.getNodeAxioms(sourceLabel, nodeId, depth, options, function (err, result) {
-            if (result.length == 0) {
+            if (result.length< 2 ) {
                 //new resource
-
                 return self.drawNodeWithoutAxioms(sourceLabel, nodeId);
             }
 
@@ -245,6 +215,10 @@ var Lineage_axioms_draw = (function () {
                 }
                 if (!allNodesMap[item.s.value + item.p.value + item.o.value]) {
                     allNodesMap[item.s.value + item.p.value + item.o.value] = 1;
+                    if( item.p.value=="http://www.w3.org/1999/02/22-rdf-syntax-ns#type" && (item.o.value.indexOf("owl")>-1 || item.o.value.indexOf("rdf")>-1  )){
+                        return;
+                    }
+
                     nodesMap[item.s.value].children.push({ pred: item.p.value, obj: item.o.value });
                 }
             });
@@ -323,7 +297,19 @@ var Lineage_axioms_draw = (function () {
                         options.shape = "triangle";
                         options.color = "#70ac47";
                         options.size = self.defaultNodeSize;
-                    } else if (type.indexOf("Restriction") > -1) {
+                    }
+
+
+                    if (type.indexOf("List") > -1) {
+                     //   edgeStyle = "property";
+                        options.shape = "text";
+                        options.color = "#00afef";
+                        options.label = "L"; //"∀";
+                        options.size = self.defaultNodeSize;
+                    }
+
+
+                    else if (type.indexOf("Restriction") > -1) {
                         edgeStyle = "restriction";
                         options.shape = "box";
                         options.label = "R"; //"∀";
@@ -365,26 +351,6 @@ var Lineage_axioms_draw = (function () {
                     edgeStyle = nodeParams.edgeStyle;
                     options.level = level;
 
-                    /*    var options = { level: level, type: item.sType ? item.sType.value : null };
-    options.size = 10;
-    if (item.sType && item.sType.value.indexOf("roperty") > -1) {
-      edgeStyle = "property";
-      options.shape = "triangle";
-      options.size = self.defaultNodeSize;
-    }
-    else if (item.sType && item.sType.value.indexOf("Restriction") > -1) {
-      edgeStyle = "restriction";
-      options.shape = "box";
-      // options.label="∀"
-      options.color = "#cb9801";
-      options.label = "R"; //"∀";
-      options.size = self.defaultNodeSize;
-    }
-    else {
-      options.color = self.defaultNodeColor;
-      options.size = self.defaultNodeSize;
-      // options.color = Lineage_classes.getSourceColor(item.g.value || self.defaultNodeColor);
-    }*/
 
                     var node = VisjsUtil.getVisjsNode(sourceLabel, item.s.value, item.sLabel ? item.sLabel.value : Sparql_common.getLabelFromURI(item.s.value), null, options);
                     existingNodes[item.s.value] = node;
@@ -404,9 +370,12 @@ var Lineage_axioms_draw = (function () {
                 item.children.forEach(function (child) {
                     var targetItem = nodesMap[child.obj];
 
+                    if(child.obj=="_:7a13435ef7")
+                        var x=3
                     if (!targetItem) {
+
                         if (!finalNodes[child.obj]) {
-                            finalNodes[child.obj] = {};
+                            finalNodes[child.obj] = {predicate:child.pred};
                         }
 
                         var node = VisjsUtil.getVisjsNode(sourceLabel, child.obj, "", child.pred, { level: level + 1, color: "#eee", shape: "hexagon", label: "" });
@@ -417,6 +386,7 @@ var Lineage_axioms_draw = (function () {
 
                         targetItem = { s: { value: child.obj } };
                     } else {
+
                         if (targetItem.s.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil") {
                             var symbol = Config.Lineage.logicalOperatorsMap["http://www.w3.org/1999/02/22-rdf-syntax-ns#nil"];
 
@@ -427,6 +397,7 @@ var Lineage_axioms_draw = (function () {
                             targetItem = { s: { value: id } };
                             // return;
                         }
+
 
                         if (!existingNodes[targetItem.s.value]) {
                             var nodeParams = geNodeParams(targetItem.sTypes ? targetItem.sTypes.value : null);
@@ -505,7 +476,10 @@ var Lineage_axioms_draw = (function () {
                             if (err) {
                                 return callbackSeries(err);
                             }
+                            var nodesToRemove=[]
                             result.forEach(function (item) {
+
+
                                 finalNodes[item.subject.value] = {
                                     label: item.subjectLabel ? item.subjectLabel.value : "",
                                     type: item.subjectType ? item.subjectType.value : null,
@@ -524,6 +498,7 @@ var Lineage_axioms_draw = (function () {
                             callbackSeries();
                         });
                     },
+
 
                     //set color and legend
                     function (callbackSeries) {

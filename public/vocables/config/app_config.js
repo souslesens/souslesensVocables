@@ -179,8 +179,8 @@ var Config = (function () {
 
             "http://www.w3.org/2002/07/owl#onProperty": "∃",
 
-            "http://www.w3.org/1999/02/22-rdf-syntax-ns#first": "V",
-            "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest": "V",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#first": "f",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest": "r",
 
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil": "∅",
             "http://www.w3.org/2000/01/rdf-schema#domain": "d->",

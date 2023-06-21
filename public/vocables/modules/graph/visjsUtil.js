@@ -15,7 +15,7 @@ var VisjsUtil = (function () {
         return node;
     };
 
-    self.getVisjsNodeAttributes = function (source, uri, label, predicateUri, options) {
+    self.getVisjsNodeAttributes = function (source, uri, label, options) {
         if (!options) {
             options = {};
         }
@@ -46,8 +46,8 @@ var VisjsUtil = (function () {
         return attrs;
     };
 
-    self.setVisjsNodeAttributes = function (source, node, label, predicateUri, options) {
-        var attrs = self.getVisjsNodeAttributes(source, node.id, label, predicateUri, options);
+    self.setVisjsNodeAttributes = function (source, node, label, options) {
+        var attrs = self.getVisjsNodeAttributes(source, node.id, label, options);
         if (!attrs) return node;
         node.label = attrs.label;
         node.shape = attrs.shape;
@@ -60,7 +60,7 @@ var VisjsUtil = (function () {
         if (!options) {
             options = {};
         }
-        var attrs = self.getVisjsNodeAttributes(source, id, label, predicateUri, options);
+        var attrs = self.getVisjsNodeAttributes(source, id, label, options);
 
         var node = {
             id: id,

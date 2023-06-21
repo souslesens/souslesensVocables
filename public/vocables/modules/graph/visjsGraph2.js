@@ -1,4 +1,5 @@
 import common from "../shared/common.js";
+import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import SVGexport from "./SVGexport.js";
 import GraphMlExport from "./graphMLexport.js";
 
@@ -43,6 +44,7 @@ var visjsGraph = (function () {
         self.draw(self.currentContext.divId, visjsData, self.currentContext.options, self.currentContext.callback);
     };
     self.currentKeyboardEventy = null;
+
     self.draw = function (
         /** @type {string} */ divId,
         /** @type {{ labels: any; nodes: any; edges: any; }} */ visjsData,
@@ -102,6 +104,7 @@ var visjsGraph = (function () {
             options.layout = {
                 hierarchical: _options.layoutHierarchical,
             };
+            options.physics = { enabled: false };
         } else {
             $("#visjsGraph_layoutSelect").val("");
         }
@@ -109,8 +112,15 @@ var visjsGraph = (function () {
         if (_options.skipColorGraphNodesByType) self.skipColorGraphNodesByType = true;
 
         self.globalOptions = options;
+
         self.network = new vis.Network(container, self.data, options);
         self.simulationOn = true;
+        if (Lineage_sources.activeSource) {
+            if (!Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
+                visjsGraph.network.disableEditMode();
+                $(".vis-edit-mode").css("display", "none");
+            }
+        }
 
         // self.network.startSimulation()
 
@@ -940,5 +950,4 @@ var visjsGraph = (function () {
 
 export default visjsGraph;
 
-window.visjsGraph = visjsGraph;
 window.visjsGraph = visjsGraph;

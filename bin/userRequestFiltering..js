@@ -55,21 +55,21 @@ var UserRequestFiltering = {
      * @returns {string|*}
      */
     /*
-     3.1.1 INSERT DATA
-          3.1.2 DELETE DATA
-          3.1.3 DELETE/INSERT
-              3.1.3.1 DELETE (Informative)
-              3.1.3.2 INSERT (Informative)
-              3.1.3.3 DELETE WHERE
-          3.1.4 LOAD
-          3.1.5 CLEAR
-      3.2 Graph Management
-          3.2.1 CREATE
-          3.2.2 DROP
-          3.2.3 COPY
-          3.2.4 MOVE
-          3.2.5 ADD
-   */
+   3.1.1 INSERT DATA
+        3.1.2 DELETE DATA
+        3.1.3 DELETE/INSERT
+            3.1.3.1 DELETE (Informative)
+            3.1.3.2 INSERT (Informative)
+            3.1.3.3 DELETE WHERE
+        3.1.4 LOAD
+        3.1.5 CLEAR
+    3.2 Graph Management
+        3.2.1 CREATE
+        3.2.2 DROP
+        3.2.3 COPY
+        3.2.4 MOVE
+        3.2.5 ADD
+ */
 
     checkQueryByRegex: function (query, userGraphUrisMap, callback) {
         var error = "";
@@ -95,7 +95,9 @@ var UserRequestFiltering = {
                 if (!userGraphUrisMap[graphUri]) {
                     error = " DATA PROTECTION : graphUri not allowed for user  " + graphUri + "\n";
                 } else {
-                    if (userGraphUrisMap[graphUri].acl != "w") error = " DATA PROTECTION : current  user cannot execute " + operation + " on graph " + graphUri + "\n";
+                    if (userGraphUrisMap[graphUri].acl != "w") {
+                        error = " DATA PROTECTION : current  user cannot execute " + operation + " on graph " + graphUri + "\n";
+                    }
                 }
             }
         }
@@ -103,10 +105,18 @@ var UserRequestFiltering = {
         return callback(error, query);
     },
     checkSelectQuery: function (query, userGraphUrisMap, callback) {
-        try {
-            var json = parser.parse(query);
-        } catch (e) {
-            return callback(e);
+        var regex = /\{\s*[0-9]\s*,\s*[1-9]*\s*\}/gm;
+
+        if (query.match(/<>\|!<>/)) {
+            return callback(null, query);
+        } else {
+            var query2 = query;
+            try {
+                query2 = query.replace(regex, ""); // bug in  parser remove property path cardinality for parsing
+                var json = parser.parse(query2);
+            } catch (e) {
+                return callback(e);
+            }
         }
 
         var error = "";
@@ -147,19 +157,25 @@ var UserRequestFiltering = {
         var array = selectRegex.exec(query);
         if (array && array.length > 0) {
             UserRequestFiltering.checkSelectQuery(query, userGraphUrisMap, function (err, result) {
-                if (err) return callback(err);
+                if (err) {
+                    return callback(err);
+                }
                 callback(null, result);
             });
         } else {
             UserRequestFiltering.checkQueryByRegex(query, userGraphUrisMap, function (err, result) {
-                if (err) return callback(err);
+                if (err) {
+                    return callback(err);
+                }
                 callback(null, result);
             });
         }
     },
 
     validateElasticSearchIndices: function (userGroups, indices, userSourcesMap, acl, callback) {
-        if (userGroups && userGroups.indexOf("admin") > -1) return callback(null, indices);
+        if (userGroups && userGroups.indexOf("admin") > -1) {
+            return callback(null, indices);
+        }
 
         var indicesMap = {};
         for (var source in userSourcesMap) {

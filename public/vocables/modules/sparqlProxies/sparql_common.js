@@ -136,7 +136,7 @@ var Sparql_common = (function () {
 
                 var uriIds = [];
                 ids.forEach(function (id, _index) {
-                    if (("" + id).indexOf(":") > -1)
+                    if (true || ("" + id).indexOf(":") > -1)
                         // literal
                         uriIds.push(id);
                 });
@@ -454,6 +454,26 @@ var Sparql_common = (function () {
             });
         }
         return str;
+    };
+    self.getSpecificPredicates = function (options) {
+        var str = " ";
+
+        if (options.specificPredicates) {
+            if (!Array.isArray(options.specificPredicates)) {
+                options.specificPredicates = [options.specificPredicates];
+            }
+            options.specificPredicates.forEach(function (predicate, index) {
+                if (index > 0) {
+                    str += "|";
+                }
+                str += predicate;
+            });
+            if (options.memberPredicate) {
+                str += "|^rdfs:member";
+            }
+            return str;
+        }
+        return null;
     };
 
     return self;

@@ -4,10 +4,10 @@ var Lineage_alignChainedObjects = (function () {
     self.alignListMembers = function (containerId) {
         if (!containerId) containerId = self.currentContainer.id;
 
-        var containerPosition = visjsGraph.network.getPositions()[containerId];
+        var containerPosition = Lineage_classes.lineageVisjsGraph.network.getPositions()[containerId];
         containerPosition.index = 0;
-        var edges = visjsGraph.data.edges.get();
-        var nodes = visjsGraph.data.nodes.get();
+        var edges = Lineage_classes.lineageVisjsGraph.data.edges.get();
+        var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
 
         var listMembersFromMap = [];
         var listMembersToMap = [];
@@ -111,13 +111,13 @@ nodes.forEach(function(node) {
 
 
 
-visjsGraph.data.nodes.update(newNodes);
+Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
 
 **/
 
         if (false) {
             var sortedNodes = [];
-            visjsGraph.data.nodes.forEach(function (node) {
+            Lineage_classes.lineageVisjsGraph.data.nodes.forEach(function (node) {
                 if (node.data.next || node.data.previous) {
                     sortedNodes.push(node);
                 }
@@ -175,16 +175,16 @@ visjsGraph.data.nodes.update(newNodes);
                 }
             });
 
-            visjsGraph.data.nodes.update(newNodes);
-            visjsGraph.data.edges.add(newEdges);
+            Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
+            Lineage_classes.lineageVisjsGraph.data.edges.add(newEdges);
         }
 
         var nextEdges = [];
         var nodesMap = {};
-        visjsGraph.data.nodes.forEach(function (node) {
+        Lineage_classes.lineageVisjsGraph.data.nodes.forEach(function (node) {
             nodesMap[node.id] = node;
         });
-        visjsGraph.data.edges.forEach(function (edge) {
+        Lineage_classes.lineageVisjsGraph.data.edges.forEach(function (edge) {
             if (edge.data.type == "next") nextEdges.push(edge);
         });
 
@@ -199,7 +199,7 @@ visjsGraph.data.nodes.update(newNodes);
 
         var nextEdges = [];
         var nodesMap = {};
-        visjsGraph.data.nodes.forEach(function (node) {
+        Lineage_classes.lineageVisjsGraph.data.nodes.forEach(function (node) {
             if (node.data.next) {
                 if (!nodesMap[node.id]) nodesMap[node.id] = node;
 
@@ -249,8 +249,8 @@ visjsGraph.data.nodes.update(newNodes);
             });
         });
 
-        visjsGraph.data.nodes.update(newNodes);
-        visjsGraph.data.edges.update(nextEdges);
+        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
+        Lineage_classes.lineageVisjsGraph.data.edges.update(nextEdges);
 
         return;
         /*******************************************/
@@ -279,13 +279,13 @@ visjsGraph.data.nodes.update(newNodes);
             });
         });
 
-        visjsGraph.data.nodes.update(newNodes);
-        visjsGraph.data.edges.add(nextEdges);
+        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
+        Lineage_classes.lineageVisjsGraph.data.edges.add(nextEdges);
 
         return;
 
         var edgesFrom = [];
-        visjsGraph.data.edges.forEach(function (edge) {
+        Lineage_classes.lineageVisjsGraph.data.edges.forEach(function (edge) {
             var p = edgesFrom.indexOf(edge.from);
             if (p < 0) {
                 edgesFrom.splice(0, 0, edge.from);
@@ -337,8 +337,8 @@ visjsGraph.data.nodes.update(newNodes);
             newNodes = newNodesMap[id];
         }
 
-        visjsGraph.data.nodes.update(newNodes);
-        visjsGraph.data.edges.update(newEdges);
+        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
+        Lineage_classes.lineageVisjsGraph.data.edges.update(newEdges);
 
         return;
     };

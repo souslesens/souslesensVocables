@@ -19,7 +19,7 @@ module.exports = function () {
 
             if (req.query.sourcesFile) {
                 configSourcesPathFromUrlParams = path.resolve(configPath + "/" + req.query.sourcesFile);
-                if (!configSourcesPath.startsWith(path.resolve(configPath))) {
+                if (!configSourcesPathFromUrlParams.startsWith(path.resolve(configPath))) {
                     return res.status(403).json({ done: false, message: "forbidden path" });
                 }
                 localSourceModel = new SourceModel(configSourcesPathFromUrlParams, configProfilesPath);

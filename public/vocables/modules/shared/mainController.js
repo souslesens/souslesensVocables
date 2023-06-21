@@ -7,6 +7,7 @@ import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_SKOS from "../sparqlProxies/sparql_SKOS.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
+import GraphLoader from "./graphLoader.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -78,7 +79,9 @@ var MainController = (function () {
         if (sourcesFile) {
             sourcesFileParam = "?sourcesFile=" + sourcesFile;
         } else if (Config.currentProfile.sourcesFile) {
-            sourcesFileParam = "?sourcesFile=" + Config.currentProfile.sourcesFile;
+            sourcesFileParam = Config.currentProfile.sourcesFile;
+        } else {
+            // sourcesFileParam = "?sourcesFile=" + "sources.json";
         }
         $.ajax({
             type: "GET",
@@ -214,21 +217,22 @@ var MainController = (function () {
                         }
                         callbackSeries();
                     },
+
                     function (callbackSeries) {
                         MainController.loadSources(null, function (_err, _result) {
                             callbackSeries(_err);
                         });
-                    },
-
-                    function (callbackSeries) {
-                        MainController.UI.showToolsList("toolsTreeDiv");
-                        callbackSeries();
                     },
                     function (callbackSeries) {
                         MainController.parseUrlParam(function () {
                             callbackSeries();
                         });
                     },
+                    function (callbackSeries) {
+                        MainController.UI.showToolsList("toolsTreeDiv");
+                        callbackSeries();
+                    },
+
                     function (callbackSeries) {
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
 
@@ -694,13 +698,38 @@ return;*/
             var tool = paramsMap["tool"];
 
             if (tool) {
-                var source = paramsMap["source"];
-                if (source) {
-                    Config.tools[tool].urlParam_source = source;
+                var rdfUrl = paramsMap["rdfUrl"];
+                if (rdfUrl) {
+                    var source = paramsMap["source"];
+                    rdfUrl = decodeURIComponent(rdfUrl);
+                    var reload = paramsMap["reload"];
+                    var editable = paramsMap["editable"];
+                    var graphUri = paramsMap["graphUri"];
+                    var group = paramsMap["group"];
+                    var options = {};
+                    $("#waitImg").css("display", "block");
+                    MainController.UI.message("loading ontology ...");
+                    GraphLoader.loadGraphFromUrl(source, rdfUrl, graphUri, reload, editable, group, options, function (err, result) {
+                        if (err) {
+                            alert(err);
+                            callback(err);
+                        }
+
+                        Config.tools[tool].urlParam_source = source;
+                        self.UI.initTool(tool, function () {
+                            //   MainController.UI.message("loading ontology ...")
+                            return callback();
+                        });
+                    });
+                } else {
+                    var source = paramsMap["source"];
+                    if (source) {
+                        Config.tools[tool].urlParam_source = source;
+                    }
+                    self.UI.initTool(tool, function () {
+                        callback();
+                    });
                 }
-                self.UI.initTool(tool, function () {
-                    callback();
-                });
             }
         } else {
             callback();
@@ -711,6 +740,4 @@ return;*/
 })();
 
 export default MainController;
-window.MainController = MainController;
-window.MainController = MainController;
 window.MainController = MainController;

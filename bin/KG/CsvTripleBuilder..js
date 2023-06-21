@@ -53,19 +53,26 @@ var CsvTripleBuilder = {
         return str;
     },
     isUri: function (str) {
-        if (!str) return false;
+        if (!str) {
+            return false;
+        }
         var prefixesArray = Object.keys(CsvTripleBuilder.sparqlPrefixes);
         var array = str.split(":");
-        if (array.length == 0) return false;
-        else {
-            if (prefixesArray.indexOf(array[0]) > -1 || array[0].indexOf("http") == 0) return true;
+        if (array.length == 0) {
+            return false;
+        } else {
+            if (prefixesArray.indexOf(array[0]) > -1 || array[0].indexOf("http") == 0) {
+                return true;
+            }
             return false;
         }
     },
 
     readCsv: function (filePath, maxLines, callback) {
         csvCrawler.readCsv({ filePath: filePath }, maxLines, function (err, result) {
-            if (err) return callback(err);
+            if (err) {
+                return callback(err);
+            }
             var data = result.data;
             var headers = result.headers;
             console.log(filePath);
@@ -130,6 +137,7 @@ var CsvTripleBuilder = {
         var missingLookups_o = 0;
         var okLookups_o = 0;
         var okLookups_s = 0;
+
         async.eachSeries(
             mappings,
             function (mapping, callbackEachMapping) {
@@ -138,12 +146,16 @@ var CsvTripleBuilder = {
 
                 var csvData = [];
                 var dataSource = mapping.dataSource;
-                if (mapping.graphUri) graphUri = mapping.graphUri;
+                if (mapping.graphUri) {
+                    graphUri = mapping.graphUri;
+                }
                 async.series(
                     [
                         // load Lookups
                         function (callbackSeries) {
-                            if (mapping.lookups.length == 0) return callbackSeries();
+                            if (mapping.lookups.length == 0) {
+                                return callbackSeries();
+                            }
 
                             async.eachSeries(
                                 mapping.lookups,
@@ -152,11 +164,15 @@ var CsvTripleBuilder = {
                                         var lookupFilePath = lookup.filePath;
 
                                         CsvTripleBuilder.readCsv(lookupFilePath, null, function (err, result) {
-                                            if (err) return callbackEachLookup(err);
+                                            if (err) {
+                                                return callbackEachLookup(err);
+                                            }
                                             var lookupLines = result.data[0];
                                             lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
                                             lookupLines.forEach(function (line, index) {
-                                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) return console.log("missing lookup line" + index + " " + lookupFilePath);
+                                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
+                                                    return console.log("missing lookup line" + index + " " + lookupFilePath);
+                                                }
                                                 lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
                                             });
 
@@ -165,11 +181,15 @@ var CsvTripleBuilder = {
                                     } else if (mapping.databaseSource) {
                                         var sqlQuery = "select distinct " + lookup.sourceColumn + "," + lookup.targetColumn + " from " + lookup.fileName;
                                         sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
-                                            if (err) return callbackEachLookup(err);
+                                            if (err) {
+                                                return callbackEachLookup(err);
+                                            }
                                             var lookupLines = result;
                                             lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
                                             lookupLines.forEach(function (line, index) {
-                                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) return console.log("missing lookup line" + index + " " + lookupFilePath);
+                                                if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
+                                                    return console.log("missing lookup line" + index + " " + lookupFilePath);
+                                                }
 
                                                 // lookUpMap[lookup.name].dictionary[util.formatStringForTriple(line[lookup.sourceColumn],true)] =util.formatStringForTriple( line[lookup.targetColumn],true);
                                                 lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
@@ -187,7 +207,9 @@ var CsvTripleBuilder = {
 
                         //load csv
                         function (callbackSeries) {
-                            if (!mapping.csvDataFilePath) return callbackSeries();
+                            if (!mapping.csvDataFilePath) {
+                                return callbackSeries();
+                            }
 
                             CsvTripleBuilder.readCsv(mapping.csvDataFilePath, options.sampleSize, function (err, result) {
                                 if (err) {
@@ -202,20 +224,28 @@ var CsvTripleBuilder = {
 
                         //load SQL dataSource
                         function (callbackSeries) {
-                            if (!mapping.databaseSource) return callbackSeries();
+                            if (!mapping.databaseSource) {
+                                return callbackSeries();
+                            }
                             var sqlQuery = "select * from " + mapping.fileName;
                             sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
-                                if (err) return callbackSeries(err);
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
                                 csvData = [result];
                                 callbackSeries();
                             });
                         },
                         //fileProcessing
                         function (callbackSeries) {
-                            if (!mapping.dataProcessing) return callbackSeries();
+                            if (!mapping.dataProcessing) {
+                                return callbackSeries();
+                            }
                             csvData.forEach(function (lines) {
                                 mapping.dataProcessing(lines, function (err, result) {
-                                    if (err) return callbackSeries(err);
+                                    if (err) {
+                                        return callbackSeries(err);
+                                    }
                                     lines = result;
                                     callbackSeries();
                                 });
@@ -231,8 +261,12 @@ var CsvTripleBuilder = {
                                 var lookupArray = lookupName.split("|");
                                 var target = null;
                                 lookupArray.forEach(function (lookup, index) {
-                                    if (index > 0) var x = 3;
-                                    if (target) return;
+                                    if (index > 0) {
+                                        var x = 3;
+                                    }
+                                    if (target) {
+                                        return;
+                                    }
                                     target = lookUpMap[lookup].dictionary[value];
                                     if (target && lookUpMap[lookup].transformFn) {
                                         try {
@@ -264,10 +298,13 @@ var CsvTripleBuilder = {
                                                         var objectStr = null;
                                                         var currentBlankNode = null;
                                                         var lineError = "";
+                                                        var blankNode_cellMap = {};
                                                         mapping.tripleModels.forEach(function (item) {
                                                             for (var key in line) {
                                                                 line[key] = "" + line[key];
-                                                                if (line[key] && !CsvTripleBuilder.isUri(line[key])) line[key] = util.formatStringForTriple(line[key]);
+                                                                if (line[key] && !CsvTripleBuilder.isUri(line[key])) {
+                                                                    line[key] = util.formatStringForTriple(line[key]);
+                                                                }
                                                             }
 
                                                             subjectStr = null;
@@ -275,13 +312,28 @@ var CsvTripleBuilder = {
 
                                                             //get value for Subject
                                                             {
-                                                                if (item.s_type == "fixed") subjectStr = item.s;
-                                                                else if (typeof item.s === "function") {
+                                                                if (item.s_type == "fixed") {
+                                                                    subjectStr = item.s;
+                                                                } else if (typeof item.s === "function") {
                                                                     try {
                                                                         subjectStr = item.s(line, item);
                                                                     } catch (e) {
                                                                         return (lineError = e);
                                                                     }
+                                                                } else if (item.isSubjectBlankNode) {
+                                                                    var blankNode = blankNode_cellMap[item.s];
+                                                                    if (!blankNode) {
+                                                                        blankNode = getNewBlankNodeId();
+                                                                        blankNode_cellMap[item.s] = blankNode;
+                                                                    }
+                                                                    subjectStr = blankNode;
+                                                                } else if (item.s === "_rowIndex") {
+                                                                    var blankNode = blankNode_cellMap["_rowIndex"];
+                                                                    if (!blankNode) {
+                                                                        blankNode = getNewBlankNodeId();
+                                                                        blankNode_cellMap["_rowIndex"] = blankNode;
+                                                                    }
+                                                                    subjectStr = blankNode;
                                                                 } else if (item.s === "_blankNode") {
                                                                     currentBlankNode = currentBlankNode || getNewBlankNodeId();
                                                                     subjectStr = currentBlankNode;
@@ -298,7 +350,9 @@ var CsvTripleBuilder = {
                                                                 }
 
                                                                 if (item.lookup_s) {
-                                                                    if (!lookUpMap[item.lookup_s]) return (lineError = "no lookup named " + item.lookup_s);
+                                                                    if (!lookUpMap[item.lookup_s]) {
+                                                                        return (lineError = "no lookup named " + item.lookup_s);
+                                                                    }
                                                                     var lookupValue = getLookupValue(item.lookup_s, subjectStr);
                                                                     if (!lookupValue) {
                                                                         missingLookups_s += 1;
@@ -316,10 +370,19 @@ var CsvTripleBuilder = {
                                                             {
                                                                 if (item.o_type == "fixed") {
                                                                     objectStr = item.o;
+                                                                } else if (item.isObjectBlankNode) {
+                                                                    var blankNode = blankNode_cellMap[item.o];
+                                                                    if (!blankNode) {
+                                                                        blankNode = getNewBlankNodeId();
+                                                                        blankNode_cellMap[item.o] = blankNode;
+                                                                    }
+                                                                    objectStr = blankNode;
                                                                 } else if (item.dataType) {
                                                                     item.p = "owl:hasValue";
                                                                     var str = line[item.o];
-                                                                    if (!str) return;
+                                                                    if (!str) {
+                                                                        return;
+                                                                    }
                                                                     objectStr = "'" + str + "'^^" + item.dataType;
                                                                 } else if (typeof item.o === "function") {
                                                                     try {
@@ -340,10 +403,14 @@ var CsvTripleBuilder = {
                                                                     objectStr = "<" + item.o + ">";
                                                                 } else if (item.o.match(/.+:.+/)) {
                                                                     objectStr = item.o;
-                                                                } else objectStr = line[item.o];
+                                                                } else {
+                                                                    objectStr = line[item.o];
+                                                                }
 
                                                                 if (item.lookup_o) {
-                                                                    if (!lookUpMap[item.lookup_o]) return (lineError = "no lookup named " + item.lookup_o);
+                                                                    if (!lookUpMap[item.lookup_o]) {
+                                                                        return (lineError = "no lookup named " + item.lookup_o);
+                                                                    }
                                                                     var lookupValue = getLookupValue(item.lookup_o, objectStr);
                                                                     if (!lookupValue) {
                                                                         missingLookups_o += 1; // console.log("missing lookup_o: " + line[item.o]);
@@ -362,27 +429,35 @@ var CsvTripleBuilder = {
                                                             {
                                                                 subjectStr = subjectStr.trim();
 
-                                                                if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) subjectStr = "<" + subjectStr + ">";
-                                                                else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1) {
+                                                                if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) {
+                                                                    subjectStr = "<" + subjectStr + ">";
+                                                                } else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1) {
                                                                     //pass
-                                                                } else subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+                                                                } else {
+                                                                    subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
+                                                                }
                                                             }
 
                                                             //format object
                                                             {
                                                                 objectStr = objectStr.trim();
-                                                                if (objectStr.indexOf && objectStr.indexOf("http") == 0) objectStr = "<" + objectStr + ">";
-                                                                else if (item.datatype) {
+                                                                if (objectStr.indexOf && objectStr.indexOf("http") == 0) {
+                                                                    objectStr = "<" + objectStr + ">";
+                                                                } else if (item.datatype) {
                                                                     //pass
                                                                 } else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
                                                                     // pass
                                                                 } else if (item.isString) {
                                                                     objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
                                                                 } else if (propertiesTypeMap[item.p] == "string") {
-                                                                    if (objectStr.indexOf("xsd:") < 0) objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
+                                                                    if (objectStr.indexOf("xsd:") < 0) {
+                                                                        objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
+                                                                    }
                                                                 } else if (objectStr.indexOf("xsd:") > -1) {
                                                                     //pass
-                                                                } else objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
+                                                                } else {
+                                                                    objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
+                                                                }
                                                             }
 
                                                             if (item.isRestriction) {
@@ -397,8 +472,12 @@ var CsvTripleBuilder = {
 
                                                                 var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
                                                                 var prop = propStr;
-                                                                if (prop.indexOf("$") == 0) prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
-                                                                if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
+                                                                if (prop.indexOf("$") == 0) {
+                                                                    prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
+                                                                }
+                                                                if (prop.indexOf("http") == 0) {
+                                                                    prop = "<" + prop + ">";
+                                                                }
 
                                                                 if (!existingNodes[subjectStr + "_" + prop + "_" + objectStr]) {
                                                                     existingNodes[subjectStr + "_" + prop + "_" + objectStr] = 1;
@@ -431,8 +510,12 @@ var CsvTripleBuilder = {
                                                                         // blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
                                                                         blankNode = getNewBlankNodeId();
                                                                         prop = propStr;
-                                                                        if (prop.indexOf("$") == 0) prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
-                                                                        if (prop.indexOf("http") == 0) prop = "<" + prop + ">";
+                                                                        if (prop.indexOf("$") == 0) {
+                                                                            prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
+                                                                        }
+                                                                        if (prop.indexOf("http") == 0) {
+                                                                            prop = "<" + prop + ">";
+                                                                        }
 
                                                                         if (!existingNodes[objectStr + "_" + prop + "_" + subjectStr]) {
                                                                             existingNodes[subjectStr + "_" + prop + "_" + objectStr] = 1;
@@ -472,8 +555,8 @@ var CsvTripleBuilder = {
                                                                 var propertyStr = item.p;
 
                                                                 /*  if (item.isSpecificPredicate) {
-                                                          propertyStr = line[item.p];
-                                                      } else*/
+                          propertyStr = line[item.p];
+                      } else*/
                                                                 if (typeof item.p === "function") {
                                                                     try {
                                                                         propertyStr = item.p(line, item);
@@ -487,7 +570,9 @@ var CsvTripleBuilder = {
                                                                     var x = 3;
                                                                     return;
                                                                 }
-                                                                if (propertyStr.indexOf("http") == 0) propertyStr = "<" + propertyStr + ">";
+                                                                if (propertyStr.indexOf("http") == 0) {
+                                                                    propertyStr = "<" + propertyStr + ">";
+                                                                }
                                                                 if (subjectStr && objectStr) {
                                                                     if (true || !item.datatype) {
                                                                         // return console.log("missing type " + item.p)
@@ -542,6 +627,7 @@ var CsvTripleBuilder = {
                                                                     return callbackEach(err);
                                                                 }
                                                                 sliceIndex += 1;
+                                                                console.log("writed triples:" + triples.result);
                                                                 totalTriples += result;
 
                                                                 callbackEach();
@@ -580,7 +666,9 @@ var CsvTripleBuilder = {
 
                     function (_err) {
                         var message = "------------ created triples " + totalTriples;
-                        if (options.deleteTriples) message = "------------ deleted triples " + totalTriples;
+                        if (options.deleteTriples) {
+                            message = "------------ deleted triples " + totalTriples;
+                        }
                         console.log(message);
                         callbackEachMapping(_err);
                     }
@@ -589,7 +677,9 @@ var CsvTripleBuilder = {
             function (_err) {
                 if (callback) {
                     var message = "------------ created triples " + totalTriples;
-                    if (options.deleteTriples) message = "------------ deleted triples " + totalTriples;
+                    if (options.deleteTriples) {
+                        message = "------------ deleted triples " + totalTriples;
+                    }
                     return callback(_err, message);
                 }
             }
@@ -771,7 +861,9 @@ var CsvTripleBuilder = {
         var creator = "KGcreator";
         var dateTime = "'" + util.dateToRDFString(new Date()) + "'^^xsd:dateTime";
 
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
         var metaDataTriples = [];
         metaDataTriples.push({
             s: subjectUri,
@@ -813,7 +905,9 @@ var CsvTripleBuilder = {
                         return callbackSeries();
                     }
                     ConfigManager.getGeneralConfig(function (err, result) {
-                        if (err) return callbackSeries(err);
+                        if (err) {
+                            return callbackSeries(err);
+                        }
                         sparqlServerUrl = result.default_sparql_url;
                         callbackSeries();
                     });
@@ -865,7 +959,9 @@ var CsvTripleBuilder = {
                         return callbackSeries();
                     }
                     ConfigManager.getGeneralConfig(function (err, result) {
-                        if (err) return callbackSeries(err);
+                        if (err) {
+                            return callbackSeries(err);
+                        }
                         sparqlServerUrl = result.default_sparql_url;
                         callbackSeries();
                     });
@@ -876,7 +972,9 @@ var CsvTripleBuilder = {
                         return callbackSeries();
                     }
                     CsvTripleBuilder.clearGraph(options.graphUri, sparqlServerUrl, function (err, _result) {
-                        if (err) return callbackSeries(err);
+                        if (err) {
+                            return callbackSeries(err);
+                        }
                         console.log("graph deleted");
                         callbackSeries();
                     });
@@ -886,8 +984,11 @@ var CsvTripleBuilder = {
                     var mappingsFilePath = path.join(__dirname, "../../data/" + dirName + "/" + mappingFileName);
                     var mappings = "" + fs.readFileSync(mappingsFilePath);
                     mappings = JSON.parse(mappings);
-                    if (typeof options.dataLocation == "string") mappings.csvDataFilePath = path.join(__dirname, "../../data/" + dirName + "/" + options.dataLocation);
-                    else mappings.datasource = options.dataLocation;
+                    if (typeof options.dataLocation == "string") {
+                        mappings.csvDataFilePath = path.join(__dirname, "../../data/" + dirName + "/" + options.dataLocation);
+                    } else {
+                        mappings.datasource = options.dataLocation;
+                    }
 
                     function getFunction(argsArray, fnStr, callback) {
                         try {
@@ -909,13 +1010,17 @@ var CsvTripleBuilder = {
                     mappings.tripleModels.forEach(function (item) {
                         if (item.s.indexOf("function{") > -1) {
                             getFunction(["row", "mapping"], item.s, function (err, fn) {
-                                if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                if (err) {
+                                    return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                }
                                 item.s = fn;
                             });
                         }
                         if (item.o.indexOf("function{") > -1) {
                             getFunction(["row", "mapping"], item.o, function (err, fn) {
-                                if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                if (err) {
+                                    return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                }
 
                                 item.o = fn;
                             });
@@ -923,7 +1028,9 @@ var CsvTripleBuilder = {
 
                         if (item.p.indexOf("function{") > -1) {
                             getFunction(["row", "mapping"], item.p, function (err, fn) {
-                                if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                if (err) {
+                                    return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                }
 
                                 item.p = fn;
                             });
@@ -933,7 +1040,9 @@ var CsvTripleBuilder = {
                         var fnStr = mappings.transform[key];
                         if (fnStr.indexOf("function{") > -1) {
                             getFunction(["value", "role", "prop", "row", "mapping"], fnStr, function (err, fn) {
-                                if (err) return callbackSeries(err + " in mapping" + JSON.stringify(fnStr));
+                                if (err) {
+                                    return callbackSeries(err + " in mapping" + JSON.stringify(fnStr));
+                                }
                                 mappings.transform[key] = fn;
                             });
                         }
@@ -945,7 +1054,9 @@ var CsvTripleBuilder = {
                         item.filePath = lookupFilePath;
                         if (item.transformFn) {
                             getFunction(["value", "role", "prop", "row", "mapping"], item.transformFn, function (err, fn) {
-                                if (err) return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                if (err) {
+                                    return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                }
                                 item.transformFn = fn;
                             });
                         }
@@ -959,25 +1070,34 @@ var CsvTripleBuilder = {
                     var mappingsMap = { [mappings.csvDataFilePath]: mappings };
 
                     CsvTripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function (err, result) {
-                        if (err) return callbackSeries(err);
+                        if (err) {
+                            return callbackSeries(err);
+                        }
                         if (options.sampleSize) {
                             output = result;
                             return callback(err, output);
-                        } else output = { countCreatedTriples: result };
+                        } else {
+                            output = { countCreatedTriples: result };
+                        }
                         callbackSeries();
                     });
                 },
             ],
             function (err) {
-                if (err == "sample") err = null;
+                if (err == "sample") {
+                    err = null;
+                }
                 return callback(err, output);
             }
         );
     },
     getUserPredicateUri: function (predicate, line, graphUri) {
         if (predicate.indexOf("$") == 0) {
-            if (predicate.indexOf("http") < 0 && predicate.indexOf(":") < 0) return graphUri + util.formatStringForTriple(line[predicate.substring(1)], true);
-            else return line[predicate.substring(1)];
+            if (predicate.indexOf("http") < 0 && predicate.indexOf(":") < 0) {
+                return graphUri + util.formatStringForTriple(line[predicate.substring(1)], true);
+            } else {
+                return line[predicate.substring(1)];
+            }
         } else {
             return predicate;
         }

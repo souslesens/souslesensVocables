@@ -1,0 +1,32 @@
+<style></style>
+
+Import new source from url
+<table>
+    <tr>
+        <td>sourceName</td>
+        <td><input style="width: 250px" id="importSource_sourceNameInput" /></td>
+    </tr>
+
+    <tr>
+        <td>source Url</td>
+        <td><input style="width: 250px" id="importSource_sourceUrlInput" /></td>
+    </tr>
+    <tr>
+        <td>graphUri</td>
+        <td><input style="width: 250px" id="importSource_graphUriInput" /></td>
+    </tr>
+    <tr></tr>
+    <tr>
+        <td>group</td>
+        <td><input style="width: 250px" id="importSource_groupInput" /></td>
+    </tr>
+    <tr>
+        <td>reload</td>
+        <td><input type="checkbox" id="importSource_reloadCBX" /></td>
+    </tr>
+    <tr>
+        <td>editable</td>
+        <td><input type="checkbox" id="importSource_editableCBX" /></td>
+    </tr>
+</table>
+<button onclick="GraphLoader.onImportGraphFromUriDialogValidate()">OK</button>

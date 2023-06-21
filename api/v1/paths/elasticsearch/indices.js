@@ -13,14 +13,16 @@ module.exports = function () {
         if (ConfigManager.config) {
             ConfigManager.getUserSources(req, res, function (err, userSources) {
                 if (err) {
+                    console.log("userSourcesError");
                     return res.status(400).json({ error: err });
                 }
-
+                console.log("userSourcesOK");
                 elasticRestProxy.listIndexes(ConfigManager.config.ElasticSearch.url, function (err, result) {
                     if (err) {
+                        console.log("listIndexesError");
                         return res.status(400).json({ error: err });
                     }
-
+                    console.log("listIndexesOK");
                     //filter indices for user
                     var userIndices = {};
                     for (var source in userSources) {
@@ -35,6 +37,7 @@ module.exports = function () {
                 });
             });
         } else {
+            console.log("noConfigError");
             return res.status(400).json({ error: "config missing" });
             /*  elasticRestProxy.listIndexes(function(err, result) {
                 if (err) {

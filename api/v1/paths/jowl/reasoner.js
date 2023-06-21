@@ -91,6 +91,7 @@ module.exports = function () {
 
                     var payload = {
                         ontologyContentEncoded64: ontologyContentEncoded64,
+                        predicates: JSON.parse(req.query.predicates),
                     };
 
                     var options = {
@@ -143,6 +144,14 @@ module.exports = function () {
                 type: "string",
                 required: false,
             },
+            {
+                name: "predicates",
+                description: "predicates array ",
+                in: "query",
+                type: "string",
+                required: false,
+            },
+
             {
                 name: "options",
                 description: "JSON ",

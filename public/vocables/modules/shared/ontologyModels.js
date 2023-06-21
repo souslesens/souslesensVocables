@@ -18,6 +18,7 @@ var OntologyModels = (function () {
             function (source, callbackEach) {
                 var graphUri;
                 if (!Config.ontologiesVocabularyModels[source]) {
+                    if (!Config.sources[source]) return MainController.UI.message("source " + source + " not allowed for user ");
                     graphUri = Config.sources[source].graphUri;
                     if (!graphUri) {
                         return callback();
@@ -38,7 +39,7 @@ var OntologyModels = (function () {
                 var inversePropsMap = [];
                 async.series(
                     [
-                        // set propertie
+                        // set properties
                         function (callbackSeries) {
                             var query =
                                 queryP +
@@ -72,8 +73,7 @@ var OntologyModels = (function () {
                         },
                         // set model classes (if source not  declared in sources.json)
                         function (callbackSeries) {
-                            if (!Config.sources[source] || !Config.topLevelOntologies[source]) {
-                                // dont take relations  declared in sources.json
+                            if (!Config.basicVocabularies[source] && !Config.topLevelOntologies[source]) {
                                 return callbackSeries();
                             }
                             var query =
@@ -81,7 +81,7 @@ var OntologyModels = (function () {
                                 " select distinct ?sub ?subLabel FROM <" +
                                 graphUri +
                                 "> where{" +
-                                " ?sub rdf:type ?class. OPTIONAL{ ?sub rdfs:label ?subLabel} VALUES ?Class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))}";
+                                " ?sub rdf:type ?class. OPTIONAL{ ?sub rdfs:label ?subLabel} VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -137,7 +137,7 @@ var OntologyModels = (function () {
                             });
                         },
 
-                        //setinverse Props constraints
+                        //set inverse Props constraints
                         function (callbackSeries) {
                             for (var propId in inversePropsMap) {
                                 var propConstraints = Config.ontologiesVocabularyModels[source].constraints[propId];
@@ -294,5 +294,4 @@ var OntologyModels = (function () {
 
 export default OntologyModels;
 
-window.OntologyModels = OntologyModels;
 window.OntologyModels = OntologyModels;

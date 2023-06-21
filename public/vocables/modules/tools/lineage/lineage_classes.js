@@ -6,7 +6,7 @@ import Lineage_linkedData_mappings from "./linkedData/lineage_linkedData_mapping
 import Lineage_graphTraversal from "./lineage_graphTraversal.js";
 import Lineage_selection from "./lineage_selection.js";
 import KGquery from "./assetQuery.js";
-import visjsGraph from "../../graph/visjsGraph2.js";
+//import self.lineageVisjsGraph from "../../graph/visjsGraph2.js";
 import Lineage_decoration from "./lineage_decoration.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
@@ -18,6 +18,8 @@ import Lineage_sources from "./lineage_sources.js";
 import MainController from "../../shared/mainController.js";
 import authentication from "../../shared/authentification.js";
 import Clipboard from "../../shared/clipboard.js";
+
+import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -33,6 +35,7 @@ var Lineage_classes = (function () {
     var sourceColors = {};
 
     var self = {};
+    self.lineageVisjsGraph = {};
     self.showLimit = 1000;
 
     var graphContext = {};
@@ -106,6 +109,11 @@ var Lineage_classes = (function () {
                 }
 
                 SearchWidget.currentTargetDiv = "LineageNodesJsTreeDiv";
+                $("#Lineage_containers_searchInput").bind("keydown", null, function () {
+                    if (event.keyCode == 13) {
+                        Lineage_containers.search();
+                    }
+                });
 
                 $("#LineagePopup").dialog({
                     autoOpen: false,
@@ -251,7 +259,7 @@ var Lineage_classes = (function () {
 
     self.initUI = function (clearTree) {
         MainController.UI.message("");
-        visjsGraph.clearGraph();
+        self.lineageVisjsGraph.clearGraph();
 
         Lineage_decoration.clearLegend();
 
@@ -267,27 +275,27 @@ var Lineage_classes = (function () {
     };
 
     self.clearLastAddedNodesAndEdges = function () {
-        var nodes = visjsGraph.lastAddedNodes;
+        var nodes = self.lineageVisjsGraph.lastAddedNodes;
         if (nodes && nodes.length > 0) {
-            visjsGraph.data.nodes.remove(nodes);
+            self.lineageVisjsGraph.data.nodes.remove(nodes);
         }
 
-        var xx = visjsGraph.network;
+        var xx = self.lineageVisjsGraph.network;
     };
 
     self.showLastAddedNodesOnly = function () {
-        if (!visjsGraph.lastAddedNodes || visjsGraph.lastAddedNodes.length == 0) {
+        if (!self.lineageVisjsGraph.lastAddedNodes || self.lineageVisjsGraph.lastAddedNodes.length == 0) {
             return;
         }
-        var allNodes = visjsGraph.data.nodes.getIds();
+        var allNodes = self.lineageVisjsGraph.data.nodes.getIds();
         var nodesToRemove = [];
         allNodes.forEach(function (nodeId) {
-            if (visjsGraph.lastAddedNodes.indexOf(nodeId) < 0) {
+            if (self.lineageVisjsGraph.lastAddedNodes.indexOf(nodeId) < 0) {
                 nodesToRemove.push(nodeId);
             }
         });
         if (nodesToRemove.length > 0) {
-            visjsGraph.data.nodes.remove(nodesToRemove);
+            self.lineageVisjsGraph.data.nodes.remove(nodesToRemove);
         }
     };
 
@@ -299,7 +307,7 @@ var Lineage_classes = (function () {
         } else {
             self.individualsShowing = false;
         }
-        var allNodes = visjsGraph.data.nodes.get();
+        var allNodes = self.lineageVisjsGraph.data.nodes.get();
         var nodesToHide = [];
         allNodes.forEach(function (node) {
             if (node.shape == self.namedIndividualShape) {
@@ -307,7 +315,7 @@ var Lineage_classes = (function () {
             }
         });
 
-        visjsGraph.data.nodes.update(nodesToHide);
+        self.lineageVisjsGraph.data.nodes.update(nodesToHide);
     };
 
     self.drawTopConcepts = function (/** @type {string} */ source, /** @type {(arg0: string | undefined) => any} */ callback) {
@@ -333,7 +341,7 @@ var Lineage_classes = (function () {
         var allSources = [];
 
         var visjsData = { nodes: [], edges: [] };
-        var existingNodes = visjsGraph.getExistingIdsMap();
+        var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
         var imports = Config.sources[source].imports;
         var importGraphUrisMap = {};
 
@@ -479,12 +487,12 @@ var Lineage_classes = (function () {
                 }
                 //   MainController.UI.message("", true)
                 //  self.drawNewGraph(visjsData);
-                if (!visjsGraph.isGraphNotEmpty()) {
+                if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
                     self.drawNewGraph(visjsData);
                 } else {
-                    visjsGraph.data.nodes.add(visjsData.nodes);
-                    visjsGraph.data.edges.add(visjsData.edges);
-                    visjsGraph.network.fit();
+                    self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                    self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                    self.lineageVisjsGraph.network.fit();
                 }
                 MainController.UI.message("", true);
 
@@ -508,7 +516,7 @@ var Lineage_classes = (function () {
     };
 
     self.initWhiteBoard = function (force) {
-        if (!visjsGraph.isGraphNotEmpty() || force) {
+        if (!self.lineageVisjsGraph.isGraphNotEmpty() || force) {
             self.drawNewGraph({ nodes: [], edges: [] });
         }
     };
@@ -517,6 +525,7 @@ var Lineage_classes = (function () {
         if (!_options) {
             _options = {};
         }
+
         graphContext = {};
         var options = {
             keepNodePositionOnDrag: true,
@@ -552,11 +561,11 @@ var Lineage_classes = (function () {
             onAddNodeToGraph: function (/** @type {any} */ _properties, /** @type {any} */ _senderId) {
                 if (_properties.items.length > 0) {
                     if (!Lineage_sources.activeSource) {
-                        var node = visjsGraph.data.nodes.get(_properties.items[0]);
+                        var node = self.lineageVisjsGraph.data.nodes.get(_properties.items[0]);
                         Lineage_sources.activeSource = node.data.source;
                     }
-                    if (!visjsGraph.skipColorGraphNodesByType) {
-                        var nodes = visjsGraph.data.nodes.get(_properties.items);
+                    if (!self.lineageVisjsGraph.skipColorGraphNodesByType) {
+                        var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
                         Lineage_decoration.colorGraphNodesByType(nodes);
                     }
                 }
@@ -566,6 +575,9 @@ var Lineage_classes = (function () {
         if (_options.layout) {
             options.layout = _options.layout;
         }
+        if (_options.layoutHierarchical) {
+            options.layoutHierarchical = _options.layoutHierarchical;
+        }
 
         if (_options.physics) {
             options.physics = _options.physics;
@@ -574,7 +586,7 @@ var Lineage_classes = (function () {
             options.edges = _options.edges;
         }
 
-        if (true || Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
+        if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
             // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
             options.manipulation = {
                 enabled: true,
@@ -585,8 +597,8 @@ var Lineage_classes = (function () {
                 editEdge: false,
 
                 addEdge: function (edgeData, callback) {
-                    var sourceNode = visjsGraph.data.nodes.get(edgeData.from);
-                    var targetNode = visjsGraph.data.nodes.get(edgeData.to);
+                    var sourceNode = self.lineageVisjsGraph.data.nodes.get(edgeData.from);
+                    var targetNode = self.lineageVisjsGraph.data.nodes.get(edgeData.to);
 
                     if (sourceNode.data && sourceNode.data.type != "container" && targetNode.data && targetNode.data.type == "container") {
                         return Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, targetNode.data, sourceNode.data, true);
@@ -648,39 +660,28 @@ addNode:false
             graphDiv = "graphDiv";
         }
 
-        visjsGraph.draw(graphDiv, visjsData, options, function () {
+        self.lineageVisjsGraph = new VisjsGraphClass(graphDiv, visjsData, options);
+        self.lineageVisjsGraph.draw(function () {
             MainController.UI.message("", true);
-            if (!visjsGraph.skipColorGraphNodesByType) {
+            if (!self.lineageVisjsGraph.skipColorGraphNodesByType) {
                 Lineage_decoration.colorGraphNodesByType();
             }
         });
+        return;
 
-        if (false) {
-            var sliceSize = 50;
-            var nodesSlices = common.array.slice(visjsData.nodes, sliceSize);
-
-            nodesSlices.forEach(function (nodes, sliceIndex) {
-                if (sliceIndex == 0) {
-                    var visjsDataSlice = { nodes: nodes, edges: [] };
-                    visjsGraph.draw(graphDiv, visjsDataSlice, options, function () {
-                        MainController.UI.message("", true);
-                        if (!visjsGraph.skipColorGraphNodesByType) {
-                            Lineage_decoration.colorGraphNodesByType();
-                        }
-                    });
-                } else {
-                    visjsGraph.data.nodes.add(nodes);
-                }
-            });
-            visjsGraph.data.edges.add(visjsData.edges);
-        }
+        /*   self.lineageVisjsGraph.draw(graphDiv, visjsData, options, function () {
+           MainController.UI.message("", true);
+           if (!self.lineageVisjsGraph.skipColorGraphNodesByType) {
+               Lineage_decoration.colorGraphNodesByType();
+           }
+       });*/
     };
 
     self.getGraphIdsFromSource = function (/** @type {any} */ source) {
-        if (!visjsGraph.isGraphNotEmpty()) {
+        if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
             return null;
         }
-        var existingNodes = visjsGraph.data.nodes.get();
+        var existingNodes = self.lineageVisjsGraph.data.nodes.get();
         /**
          * @type {any[]}
          */
@@ -751,7 +752,7 @@ addNode:false
         var color = self.getSourceColor(clusterNode.data.source);
         var attrs = self.getNodeVisjAttrs(item.child1.type, item.subject, clusterNode.data.source);
         var visjsData = { nodes: [], edges: [] };
-        var existingNodes = visjsGraph.getExistingIdsMap();
+        var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
         clusterNode.data.cluster.forEach(function (/** @type {{ child1: string; child1Label: any; concept: string; }} */ item) {
             if (!existingNodes[item.child1]) {
                 existingNodes[item.child1] = 1;
@@ -778,10 +779,10 @@ addNode:false
             }
         });
 
-        visjsGraph.data.nodes.add(visjsData.nodes);
-        visjsGraph.data.edges.add(visjsData.edges);
-        visjsGraph.network.fit();
-        visjsGraph.data.nodes.remove(clusterNode.id);
+        self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+        self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+        self.lineageVisjsGraph.network.fit();
+        self.lineageVisjsGraph.data.nodes.remove(clusterNode.id);
         $("#waitImg").css("display", "none");
         MainController.UI.message("");
     };
@@ -789,10 +790,10 @@ addNode:false
     self.drawSimilarsNodes = function (/** @type {any} */ _similarType, /** @type {any} */ _node, /** @type {any} */ _sources, /** @type {any} */ _descendantsAlso) {
         var toSource = $("#sourcesTreeDiv").jstree().get_selected()[0];
         var fromSource = Lineage_sources.activeSource;
-        if (!visjsGraph.isGraphNotEmpty()) {
+        if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
             return;
         }
-        var nodes = visjsGraph.data.nodes.get();
+        var nodes = self.lineageVisjsGraph.data.nodes.get();
         /**
          * @type {any[]}
          */
@@ -811,7 +812,7 @@ addNode:false
                 return alert(err);
             }
 
-            var existingNodes = visjsGraph.getExistingIdsMap();
+            var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
             var visjsData = { nodes: [], edges: [] };
             result.forEach(function (/** @type {{ label: string | number; matches: { [x: string]: any[]; }; }} */ item) {
                 var sourceNode = labelsMap[item.label];
@@ -872,8 +873,8 @@ addNode:false
             });
             if (visjsData.edges.length > 0) {
                 $("#transformSameLabelsEdgesIntoSameAsRelationsButton").css("display", "block");
-                visjsGraph.data.nodes.update(visjsData.nodes);
-                visjsGraph.data.edges.update(visjsData.edges);
+                self.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
+                self.lineageVisjsGraph.data.edges.update(visjsData.edges);
                 $("#accordion").accordion("option", { active: 2 });
                 Lineage_sources.registerSource(toSource);
             }
@@ -928,7 +929,7 @@ addNode:false
                 return MainController.UI.message(" no  data found");
             }
             var visjsData = { nodes: [], edges: [] };
-            var existingIds = visjsGraph.getExistingIdsMap();
+            var existingIds = self.lineageVisjsGraph.getExistingIdsMap();
             var hasProperties = false;
             var labelStr = "<b>" + nodeData.label + "</b>\n";
             result.forEach(function (/** @type {{ propLabel: { value: any; }; prop: { value: any; }; rangeLabel: { value: any; }; range: { value: any; }; }} */ item) {
@@ -1000,8 +1001,8 @@ addNode:false
                     },
                 });
             }
-            visjsGraph.data.nodes.add(visjsData.nodes);
-            visjsGraph.data.edges.add(visjsData.edges);
+            self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+            self.lineageVisjsGraph.data.edges.add(visjsData.edges);
         });
     };
     self.graphNodeNeighborhood = function (nodeData, propFilter, callback) {
@@ -1011,7 +1012,7 @@ addNode:false
         }
         var ids;
         if (!nodeData) {
-            ids = visjsGraph.data.nodes.getIds();
+            ids = self.lineageVisjsGraph.data.nodes.getIds();
         } else {
             ids = [nodeData.id];
         }
@@ -1060,7 +1061,7 @@ addNode:false
                                 }
 
                                 var visjsData = { nodes: [], edges: [] };
-                                var existingIds = visjsGraph.getExistingIdsMap();
+                                var existingIds = self.lineageVisjsGraph.getExistingIdsMap();
                                 data.forEach(function (item) {
                                     if (!existingIds[item.subject.value]) {
                                         existingIds[item.subject.value] = 1;
@@ -1169,9 +1170,9 @@ addNode:false
                                     }
                                 });
 
-                                if (visjsGraph.isGraphNotEmpty()) {
-                                    visjsGraph.data.nodes.update(visjsData.nodes);
-                                    visjsGraph.data.edges.update(visjsData.edges);
+                                if (self.lineageVisjsGraph.isGraphNotEmpty()) {
+                                    self.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
+                                    self.lineageVisjsGraph.data.edges.update(visjsData.edges);
                                 } else {
                                     Lineage_classes.drawNewGraph(visjsData);
                                 }
@@ -1237,7 +1238,7 @@ addNode:false
                         return callbackEach(null);
                     }
 
-                    var existingNodes = visjsGraph.getExistingIdsMap();
+                    var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
 
                     var shape = self.defaultShape;
 
@@ -1313,9 +1314,9 @@ addNode:false
                         }
                     });
 
-                    if (visjsGraph.isGraphNotEmpty()) {
-                        visjsGraph.data.nodes.add(visjsData.nodes);
-                        visjsGraph.data.edges.add(visjsData.edges);
+                    if (self.lineageVisjsGraph.isGraphNotEmpty()) {
+                        self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                        self.lineageVisjsGraph.data.edges.add(visjsData.edges);
                     } else {
                         Lineage_classes.drawNewGraph(visjsData);
                     }
@@ -1330,7 +1331,7 @@ addNode:false
                     }
                     return MainController.UI.message("No data found");
                 }
-                visjsGraph.network.fit();
+                self.lineageVisjsGraph.network.fit();
                 if (callback) {
                     callback(null, visjsData);
                 }
@@ -1351,7 +1352,7 @@ addNode:false
             parentIds = nodeIds;
         } else {
             parentIds = [];
-            var nodes = visjsGraph.data.nodes.get();
+            var nodes = self.lineageVisjsGraph.data.nodes.get();
             nodes.forEach(function (/** @type {{ data: { source: any; id: any; }; }} */ node) {
                 if ((source == Lineage_sources.activeSource || (node.data && node.data.source == source)) && node.data.id && node.data.id != source) {
                     parentIds.push(node.data.id);
@@ -1413,7 +1414,7 @@ addNode:false
                 }
             });
 
-            var existingNodes = visjsGraph.getExistingIdsMap(true);
+            var existingNodes = self.lineageVisjsGraph.getExistingIdsMap(true);
             var visjsDataClusters = { nodes: [], edges: [] };
             self.currentExpandLevel += 1;
             var expandedLevel = [];
@@ -1468,7 +1469,7 @@ addNode:false
             }
 
             //process non cluster nodes
-            var existingIds = visjsGraph.getExistingIdsMap();
+            var existingIds = self.lineageVisjsGraph.getExistingIdsMap();
             var visjsData2 = { nodes: [], edges: [] };
 
             for (var parentConcept in parentsMap) {
@@ -1564,9 +1565,9 @@ addNode:false
             };
 
             visjsData.nodes = common.removeDuplicatesFromArray(visjsData.nodes, "id");
-            visjsGraph.data.nodes.add(visjsData.nodes);
-            visjsGraph.data.edges.add(visjsData.edges);
-            visjsGraph.network.fit();
+            self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+            self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+            self.lineageVisjsGraph.network.fit();
 
             $("#waitImg").css("display", "none");
             if (callback) {
@@ -1588,17 +1589,17 @@ addNode:false
             arrows: arrows,
             data: { source: source },
         });
-        visjsGraph.data.edges.add(visjsData.edges);
+        self.lineageVisjsGraph.data.edges.add(visjsData.edges);
     };
 
     self.deleteEdge = function (from, to, predicate) {
         var id = from + "_" + to;
-        visjsGraph.data.edges.remove(id);
+        self.lineageVisjsGraph.data.edges.remove(id);
     };
 
     self.setEdgesDecoration = function (edges) {
         if (!edges) {
-            edges = visjsGraph.data.edges.get();
+            edges = self.lineageVisjsGraph.data.edges.get();
         }
         if (!Array.isArray(edges)) {
             edges = [edges];
@@ -1619,7 +1620,7 @@ addNode:false
             }
             newEdges.push({ id: edge.id, color: color, arrow: arrowType });
         });
-        visjsGraph.data.edges.update(newEdges);
+        self.lineageVisjsGraph.data.edges.update(newEdges);
     };
 
     self.drawLinkedDataProperties = function (/** @type {any} */ propertyId, /** @type {any} */ classIds, /** @type {{ inverse?: any; }} */ options) {
@@ -1654,8 +1655,8 @@ addNode:false
         Sparql_OWL.getFilteredTriples(source, subjects, [propertyId], objects, null, function (/** @type {any} */ err, /** @type {any[]} */ result) {
             if ($("#lineage_clearLinkedDataPropertiesCBX").prop("checked")) {
                 var oldIds = Object.keys(self.currentLinkedDataProperties);
-                visjsGraph.data.nodes.remove(oldIds);
-                visjsGraph.data.edges.remove(oldIds);
+                self.lineageVisjsGraph.data.nodes.remove(oldIds);
+                self.lineageVisjsGraph.data.edges.remove(oldIds);
             }
 
             if (err) {
@@ -1667,7 +1668,7 @@ addNode:false
                 return MainController.UI.message("No data found");
             }
             var visjsData = { nodes: [], edges: [] };
-            var existingNodes = visjsGraph.getExistingIdsMap();
+            var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
             var color = self.getPropertyColor(propertyId);
 
             result.forEach(function (item) {
@@ -1737,13 +1738,13 @@ addNode:false
                 }
             });
             self.currentLinkedDataProperties = existingNodes;
-            if (!visjsGraph.isGraphNotEmpty()) {
+            if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
                 self.drawNewGraph(visjsData);
             } else {
-                visjsGraph.data.nodes.add(visjsData.nodes);
-                visjsGraph.data.edges.add(visjsData.edges);
+                self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                self.lineageVisjsGraph.data.edges.add(visjsData.edges);
             }
-            visjsGraph.network.fit();
+            self.lineageVisjsGraph.network.fit();
             $("#waitImg").css("display", "none");
 
             //   $("#lineage_clearLinkedDataPropertiesCBX").prop("checked",true)
@@ -1752,7 +1753,7 @@ addNode:false
 
     self.drawProperties = function (sparqlResults) {
         var visjsData = { nodes: [], edges: [] };
-        var existingNodes = visjsGraph.getExistingIdsMap();
+        var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
         self.currentExpandLevel += 1;
         sparqlResults.forEach(function (
             /** @type {{ range: { value?: any; range?: string; }; prop: { value: string; }; rangeLabel: { value: any; }; domain: { value: any; }; propLabel: { value: string; }; }} */ item
@@ -1820,12 +1821,12 @@ addNode:false
                 }
             }
         });
-        if (!visjsGraph.isGraphNotEmpty()) {
+        if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
             self.drawNewGraph(visjsData);
         }
-        visjsGraph.data.nodes.add(visjsData.nodes);
-        visjsGraph.data.edges.add(visjsData.edges);
-        visjsGraph.network.fit();
+        self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+        self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+        self.lineageVisjsGraph.network.fit();
         $("#waitImg").css("display", "none");
     };
 
@@ -1901,7 +1902,7 @@ addNode:false
         if (mode == "excludeRelations") {
             physics = false;
         }
-        var edges = visjsGraph.data.edges.get();
+        var edges = self.lineageVisjsGraph.data.edges.get();
         var newEdges = [];
         edges.forEach(function (edge) {
             if (edge.color == Lineage_classes.restrictionColor) {
@@ -1909,7 +1910,7 @@ addNode:false
             }
         });
 
-        visjsGraph.data.edges.update(newEdges);
+        self.lineageVisjsGraph.data.edges.update(newEdges);
     };
 
     self.drawRestrictions = function (source, classIds, descendants, withoutImports, options, callback) {
@@ -1988,13 +1989,13 @@ addNode:false
                     result = Lineage_classes.truncateResultToVisGraphLimit(result);
                 }
                 var visjsData = { nodes: [], edges: [] };
-                var existingNodes = options.output == "table" ? {} : visjsGraph.getExistingIdsMap();
+                var existingNodes = options.output == "table" ? {} : self.lineageVisjsGraph.getExistingIdsMap();
                 self.currentExpandLevel += 1;
 
                 var restrictionSource = source;
                 /*  if (!Config.sources[source].editable) {
-      restrictionSource = Config.predicatesSource;
-  }*/
+restrictionSource = Config.predicatesSource;
+}*/
 
                 var shape = Lineage_classes.defaultShape;
                 result.forEach(function (
@@ -2002,33 +2003,38 @@ addNode:false
                 ) {
                     if (!existingNodes[item.subject.value]) {
                         existingNodes[item.subject.value] = 1;
-                        var color = self.getSourceColor(source);
 
-                        var size = Lineage_classes.defaultShapeSize;
-                        if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
-                            label = Config.Lineage.logicalOperatorsMap[item.prop.value];
-                            shape = "hegagon";
-                            color = "#EEE";
-                        }
-                        visjsData.nodes.push({
-                            id: item.subject.value,
-                            label: item.subjectLabel.value,
-                            shadow: self.nodeShadow,
-                            shape: shape,
-                            size: size,
+                        var predicateUri = options.inverse ? null : item.prop.value;
 
-                            color: color,
-                            level: self.currentExpandLevel,
-                            data: {
-                                source: source,
-                                id: item.subject.value,
-                                label: item.subjectLabel.value,
-                                varName: "value",
-                            },
-                        });
+                        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject.value, item.subjectLabel.value, predicateUri));
+
+                        /*  var color = self.getSourceColor(source);
+
+              var size = Lineage_classes.defaultShapeSize;
+              if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
+                  label = Config.Lineage.logicalOperatorsMap[item.prop.value];
+                  shape = "hegagon";
+                  color = "#EEE";
+              }
+              visjsData.nodes.push({
+                  id: item.subject.value,
+                  label: item.subjectLabel.value,
+                  shadow: self.nodeShadow,
+                  shape: shape,
+                  size: size,
+
+                  color: color,
+                  level: self.currentExpandLevel,
+                  data: {
+                      source: source,
+                      id: item.subject.value,
+                      label: item.subjectLabel.value,
+                      varName: "value",
+                  },
+              });*/
                     }
-
-                    size = self.defaultShapeSize;
+                    var color;
+                    var size = self.defaultShapeSize;
                     if (!item.value) {
                         color = "#ddd";
                         item.value = { value: "?_" + item.prop.value };
@@ -2063,23 +2069,27 @@ addNode:false
 
                     if (!existingNodes[item.value.value]) {
                         existingNodes[item.value.value] = 1;
-                        visjsData.nodes.push({
-                            id: item.value.value,
-                            label: label,
-                            shadow: self.nodeShadow,
-                            shape: shape,
-                            size: size,
 
-                            color: color,
-                            level: self.currentExpandLevel,
-                            data: {
-                                source: source,
-                                id: item.value.value,
-                                label: item.valueLabel.value,
-                                varName: "value",
-                                type: item.value.type,
-                            },
-                        });
+                        var predicateUri = options.inverse ? item.prop.value : null;
+                        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.value.value, item.valueLabel.value, predicateUri));
+
+                        /*     visjsData.nodes.push({
+                     id: item.value.value,
+                     label: label,
+                     shadow: self.nodeShadow,
+                     shape: shape,
+                     size: size,
+
+                     color: color,
+                     level: self.currentExpandLevel,
+                     data: {
+                         source: source,
+                         id: item.value.value,
+                         label: item.valueLabel.value,
+                         varName: "value",
+                         type: item.value.type,
+                     },
+                 });*/
                     }
                     var edgeId = item.node.value; //item.value.value + "_" + item.subject.value + "_" + item.prop.value;
                     if (!existingNodes[edgeId]) {
@@ -2147,12 +2157,12 @@ addNode:false
                 if (callback && options.returnVisjsData) {
                     return callback(null, visjsData);
                 }
-                if (!visjsGraph.isGraphNotEmpty()) {
+                if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
                     self.drawNewGraph(visjsData);
                 } else {
-                    visjsGraph.data.nodes.add(visjsData.nodes);
-                    visjsGraph.data.edges.add(visjsData.edges);
-                    visjsGraph.network.fit();
+                    self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                    self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                    self.lineageVisjsGraph.network.fit();
                 }
 
                 $("#waitImg").css("display", "none");
@@ -2179,7 +2189,7 @@ addNode:false
             });
         }
 
-        var existingNodes = visjsGraph.data.nodes.getIds();
+        var existingNodes = self.lineageVisjsGraph.data.nodes.getIds();
         var options = {
             processorFn: processMetadata,
             filter: " FILTER (?prop in <http://www.w3.org/2002/07/owl#sameAs>) ",
@@ -2206,7 +2216,7 @@ addNode:false
                 return MainController.UI.message("No data found");
             }
             var visjsData = { nodes: [], edges: [] };
-            var existingNodes = visjsGraph.getExistingIdsMap();
+            var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
             var color = self.getSourceColor(source);
             //  console.log(JSON.stringify(result, null, 2))
 
@@ -2270,17 +2280,17 @@ addNode:false
                 }
             });
 
-            visjsGraph.data.nodes.add(visjsData.nodes);
-            visjsGraph.data.edges.add(visjsData.edges);
-            visjsGraph.network.fit();
+            self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+            self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+            self.lineageVisjsGraph.network.fit();
             $("#waitImg").css("display", "none");
         });
     };
 
     self.collapseNode = function (/** @type {any} */ nodeId) {
         if (nodeId) {
-            var children = visjsGraph.network.getConnectedNodes(nodeId, "from");
-            visjsGraph.data.nodes.remove(children);
+            var children = self.lineageVisjsGraph.network.getConnectedNodes(nodeId, "from");
+            self.lineageVisjsGraph.data.nodes.remove(children);
         }
     };
 
@@ -2341,11 +2351,11 @@ addNode:false
     };
 
     self.zoomGraphOnNode = function (/** @type {any} */ nodeId, changeSise) {
-        var nodes = visjsGraph.data.nodes.getIds();
+        var nodes = self.lineageVisjsGraph.data.nodes.getIds();
         if (nodes.indexOf(nodeId) < 0) {
             return;
         }
-        visjsGraph.network.focus(nodeId, {
+        self.lineageVisjsGraph.network.focus(nodeId, {
             scale: 1,
             locked: false,
             animation: true,
@@ -2355,7 +2365,7 @@ addNode:false
          * @type {{ id: any; size: any; shadow: any; shape: any; font: { color: string; }; }[]}
          */
         var newNodes = [];
-        nodes = visjsGraph.data.nodes.get();
+        nodes = self.lineageVisjsGraph.data.nodes.get();
         nodes.forEach(function (/** @type {{ data: { initialParams: { size: any; shape: any; shadow?: any; }; }; shape: any; size: any; id: any; }} */ node) {
             if (!node.data) {
                 return;
@@ -2380,7 +2390,7 @@ addNode:false
             newNodes.push({ id: node.id, size: size, shadow: self.nodeShadow, font: font });
             newNodes.push({ id: node.id, opacity: 1 });
         });
-        visjsGraph.data.nodes.update(newNodes);
+        self.lineageVisjsGraph.data.nodes.update(newNodes);
     };
     /**
      * draws nodes and parents
@@ -2402,7 +2412,7 @@ addNode:false
             nodeIds.push(node.data.id);
         });
 
-        var existingNodes = visjsGraph.getExistingIdsMap();
+        var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
         if (existingNodes[nodes[0].data.id]) {
             return self.zoomGraphOnNode(nodes[0].data.id);
         }
@@ -2442,7 +2452,7 @@ addNode:false
             var color = self.getSourceColor(source);
             var newNodeIds = [];
 
-            var existingNodes = visjsGraph.getExistingIdsMap();
+            var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
 
             var conceptType = "Class";
             result.forEach(function (item) {
@@ -2556,7 +2566,7 @@ addNode:false
                 }
             });
 
-            existingNodes = visjsGraph.getExistingIdsMap();
+            existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
             if (!existingNodes[source]) {
                 visjsData.nodes.forEach(function (_item) {
                     // pass
@@ -2573,16 +2583,16 @@ addNode:false
 
             Lineage_sources.registerSource(source);
 
-            if (!visjsGraph.isGraphNotEmpty()) {
+            if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
                 self.drawNewGraph(visjsData);
             } else {
-                visjsGraph.data.nodes.add(visjsData.nodes);
-                visjsGraph.data.edges.add(visjsData.edges);
+                self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                self.lineageVisjsGraph.data.edges.add(visjsData.edges);
             }
 
             /*  setTimeout(function () {
-      self.zoomGraphOnNode(node.data[0].id, false);
-  }, 500);*/
+self.zoomGraphOnNode(node.data[0].id, false);
+}, 500);*/
             MainController.UI.message("", true);
             if (callback) {
                 return callback(null, visjsData);
@@ -2709,7 +2719,7 @@ addNode:false
                 if (err) {
                     return MainController.UI.message(err.responseText);
                 }
-                var existingNodes = visjsGraph.getExistingIdsMap();
+                var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
                 var visjsData = { nodes: [], edges: [] };
                 var color = self.getSourceColor(source);
                 result.forEach(function (item) {
@@ -2758,8 +2768,8 @@ addNode:false
                     }
                 });
 
-                visjsGraph.data.nodes.add(visjsData.nodes);
-                visjsGraph.data.edges.add(visjsData.edges);
+                self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                self.lineageVisjsGraph.data.edges.add(visjsData.edges);
             });
         },
         graphNodeNeighborhood: function (/** @type {any} */ filter) {
@@ -2776,13 +2786,13 @@ addNode:false
             }, 100);
         },
         removeFromGraph: function () {
-            visjsGraph.removeNodes("id", Lineage_classes.currentGraphNode.id, true);
+            self.lineageVisjsGraph.removeNodes("id", Lineage_classes.currentGraphNode.id, true);
         },
         removeOthersFromGraph: function () {
             if (!Lineage_classes.currentGraphNode.id) {
                 return;
             }
-            visjsGraph.removeOtherNodesFromGraph(Lineage_classes.currentGraphNode.id);
+            self.lineageVisjsGraph.removeOtherNodesFromGraph(Lineage_classes.currentGraphNode.id);
         },
         showObjectProperties: function () {
             var descendantsAlso = graphContext.clickOptions.ctrlKey && graphContext.clickOptions.shiftKey;
@@ -2801,7 +2811,7 @@ addNode:false
                         if (err) {
                             return alert(err.responseText);
                         }
-                        visjsGraph.data.edges.remove(edge.id);
+                        self.lineageVisjsGraph.data.edges.remove(edge.id);
                     });
                 }
             }
@@ -2814,7 +2824,7 @@ addNode:false
                     if (err) {
                         return alert(err.responseText);
                     }
-                    visjsGraph.data.edges.remove(edge.id);
+                    self.lineageVisjsGraph.data.edges.remove(edge.id);
                 });
             }
         },
@@ -2833,8 +2843,8 @@ addNode:false
                     }
 
                     var subPropertyId = result.uri;
-                    var sourceVisjsNode = visjsGraph.data.nodes.get(edge.to);
-                    var targetVisjsNode = visjsGraph.data.nodes.get(edge.from);
+                    var sourceVisjsNode = self.lineageVisjsGraph.data.nodes.get(edge.to);
+                    var targetVisjsNode = self.lineageVisjsGraph.data.nodes.get(edge.from);
                     var sourceNode = { id: sourceVisjsNode.data.id, source: sourceVisjsNode.data.source };
                     var targetNode = { id: targetVisjsNode.data.id, source: targetVisjsNode.data.source };
 
@@ -2859,13 +2869,13 @@ addNode:false
                             }
                         });
                         MainController.UI.message("relation replaced", true);
-                        visjsGraph.data.edges.remove(edge.id);
+                        self.lineageVisjsGraph.data.edges.remove(edge.id);
                     });
                 });
             } else {
                 //simple predicate
-                var sourceVisjsNode = visjsGraph.data.nodes.get(edge.from);
-                var targetVisjsNode = visjsGraph.data.nodes.get(edge.to);
+                var sourceVisjsNode = self.lineageVisjsGraph.data.nodes.get(edge.from);
+                var targetVisjsNode = self.lineageVisjsGraph.data.nodes.get(edge.to);
             }
         },
         showLinkedData: function () {
@@ -2875,7 +2885,7 @@ addNode:false
 
         hideShowOthers: function () {
             var node0 = self.currentGraphNode.id;
-            var nodes = visjsGraph.data.nodes.getIds();
+            var nodes = self.lineageVisjsGraph.data.nodes.getIds();
             var newNodes = [];
             if (!self.hideOthers) {
                 self.hideOthers = true;
@@ -2891,7 +2901,7 @@ addNode:false
                     newNodes.push({ id: nodeId, hidden: false });
                 });
             }
-            visjsGraph.data.nodes.update(newNodes);
+            self.lineageVisjsGraph.data.nodes.update(newNodes);
         },
     };
 
@@ -2967,7 +2977,7 @@ attrs.color=self.getSourceColor(superClassValue)
     };
 
     self.showEdgesLegend = function () {
-        var edges = visjsGraph.data.edges.get();
+        var edges = self.lineageVisjsGraph.data.edges.get();
         var newEdges = [];
         var distinctEdgeLabels = {};
         edges.forEach(function (edge) {
@@ -2984,7 +2994,7 @@ attrs.color=self.getSourceColor(superClassValue)
         for (var key in distinctEdgeLabels) {
             html += "&nbsp;<span style='color:" + distinctEdgeLabels[key].color + "'>" + key + "</span>";
         }
-        visjsGraph.data.edges.update(newEdges);
+        self.lineageVisjsGraph.data.edges.update(newEdges);
 
         $(".vis-manipulation").html(html);
     };
@@ -3009,9 +3019,26 @@ attrs.color=self.getSourceColor(superClassValue)
                 source: node.data.source,
                 data: node.data,
             },
-            self.currentTreeNode.id + "_anchor",
-            event
+            self.currentTreeNode.id + "_anchor"
         );
+    };
+
+    self.graph = {
+        searchNode: function () {
+            self.lineageVisjsGraph.searchNode();
+        },
+        setLayout: function (layout) {
+            self.lineageVisjsGraph.setLayout();
+        },
+        showGraphConfig: function () {
+            self.lineageVisjsGraph.showGraphConfig();
+        },
+        toSVG: function () {
+            self.lineageVisjsGraph.toSVG();
+        },
+        exportGraphToDataTable: function () {
+            Export.exportGraphToDataTable(self.lineageVisjsGraph);
+        },
     };
 
     return self;

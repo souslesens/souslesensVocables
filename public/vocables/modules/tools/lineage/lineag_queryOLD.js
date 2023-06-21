@@ -4,7 +4,7 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_classes from "./lineage_classes.js";
 
-import visjsGraph from "../../graph/visjsGraph2.js";
+self.lineageVisjsGraph;
 import Export from "../../shared/export.js";
 
 var Lineage_query = (function () {
@@ -233,10 +233,10 @@ var Lineage_query = (function () {
                 var filter = getFilter([Lineage_classes.currentGraphNode]);
                 return callback(null, filter);
             } else if (type == "_whiteBoardNodes") {
-                if (!visjsGraph.data) {
+                if (!Lineage_classes.lineageVisjsGraph.data) {
                     return callback("no nodes on witheboard");
                 }
-                var filter = getFilter(visjsGraph.data.nodes);
+                var filter = getFilter(Lineage_classes.lineageVisjsGraph.data.nodes);
                 return callback(null, filter);
             }
             return "";
@@ -449,7 +449,7 @@ var Lineage_query = (function () {
     };
 
     self.showDecorateGraphDialog = function () {
-        var existingNodes = visjsGraph.getExistingIdsMap();
+        var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
         if (Object.keys(existingNodes).length == 0) {
             return alert("draw nodes first");
         }
@@ -479,7 +479,7 @@ var Lineage_query = (function () {
             var color = $("#lineage_selection_decorate_colorSelect").val();
             var shape = $("#lineage_selection_decorate_shapeSelect").val();
             var size = $("#lineage_selection_decorate_sizeInput").val();
-            var existingNodes = visjsGraph.getExistingIdsMap();
+            var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
             nodes.forEach(function (nodeId) {
                 if (!existingNodes[nodeId]) {
                     return;
@@ -497,7 +497,7 @@ var Lineage_query = (function () {
                 newIds.push(obj);
             });
             $("#LineagePopup").dialog("close");
-            visjsGraph.data.nodes.update(newIds);
+            Lineage_classes.lineageVisjsGraph.data.nodes.update(newIds);
         }
 
         var selectedNodes = $("#lineageQuery_listResultDivTree").jstree().get_selected(true);
@@ -605,7 +605,7 @@ var Lineage_query = (function () {
         var toClass = self.databasesMap[currentDatabase].toClass;
 
         var visjsData = { nodes: [], edges: [] };
-        var existingNodes = visjsGraph.getExistingIdsMap();
+        var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
 
         if (!existingNodes[fromClass.classId]) {
             existingNodes[fromClass.classId] = 1;
@@ -745,12 +745,12 @@ var Lineage_query = (function () {
             }
         });
 
-        if (!visjsGraph.data || !visjsGraph.data.nodes) {
+        if (!Lineage_classes.lineageVisjsGraph.data || !Lineage_classes.lineageVisjsGraph.data.nodes) {
             self.drawNewGraph(visjsData);
         }
-        visjsGraph.data.nodes.add(visjsData.nodes);
-        visjsGraph.data.edges.add(visjsData.edges);
-        visjsGraph.network.fit();
+        Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+        Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
+        Lineage_classes.lineageVisjsGraph.network.fit();
         $("#waitImg").css("display", "none");
     };
 

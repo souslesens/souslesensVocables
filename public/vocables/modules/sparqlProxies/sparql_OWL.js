@@ -197,7 +197,7 @@ var Sparql_OWL = (function () {
             options.selectGraph = false;
         }
 
-        fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph);
+        fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.withoutImports, options);
 
         var query = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>" + "select   distinct * " + fromStr + " where {";
         if (options.selectGraph) {
@@ -286,6 +286,58 @@ var Sparql_OWL = (function () {
                 return callback(err);
             }
             result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["subject", "child"]);
+            return callback(null, result.results.bindings);
+        });
+    };
+
+    self.getNodesDescendants = function (sourceLabel, ids, options, callback) {
+        var predicateStr = Sparql_common.getSpecificPredicates(options) || "rdfs:subClassOf";
+        var filterStr = Sparql_common.setFilter("parentClass", ids, null, { useFilterKeyWord: 1 });
+        var fromStr = Sparql_common.getFromStr(sourceLabel, options.selectGraph, options.selectGraph, options);
+
+        var query =
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "select   distinct ?subject " +
+            fromStr +
+            " where {?subject  (" +
+            predicateStr +
+            ")+ ?parentClass " +
+            filterStr +
+            "} order by ?subject limit 10000";
+
+        var url = self.sparql_url + "?format=json&query=";
+        self.graphUri = Config.sources[sourceLabel].graphUri;
+        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+        self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
+        if (self.no_params) {
+            url = self.sparql_url;
+        }
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+
+            return callback(null, result.results.bindings);
+        });
+    };
+
+    self.getNodesGraphUri = function (sourceLabel, ids, options, callback) {
+        var filterStr = Sparql_common.setFilter("s", ids, null, {});
+
+        var query = " SELECT distinct ?g ?s WHERE {" + " Graph ?g {?s ?p ?o} " + filterStr + "} LIMIT  10000";
+        var url = self.sparql_url + "?format=json&query=";
+        self.graphUri = Config.sources[sourceLabel].graphUri;
+        self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
+        self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
+        if (self.no_params) {
+            url = self.sparql_url;
+        }
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+
             return callback(null, result.results.bindings);
         });
     };
@@ -629,8 +681,8 @@ var Sparql_OWL = (function () {
                 Sparql_common.getVariableLangLabel("subject", true) +
                 Sparql_common.getVariableLangLabel("object", true);
             /* "OPTIONAL{?prop rdfs:label ?propertyLabel.}  " +
-" OPTIONAL{?subject rdfs:label ?subjectLabel.}  " +
-" OPTIONAL{?object rdfs:label ?objectLabel.}  ";*/
+    " OPTIONAL{?subject rdfs:label ?subjectLabel.}  " +
+    " OPTIONAL{?object rdfs:label ?objectLabel.}  ";*/
             if (options.onlyObjectProperties) {
                 (" ?prop rdf:type owl:ObjectProperty.");
             }
@@ -641,7 +693,7 @@ var Sparql_OWL = (function () {
                 query += " filter (!isLiteral(?object) )";
 
                 /*   query += " filter (?subjectType in (owl:NamedIndividual, owl:Class))";
-query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
+    query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
             }
             query += " } order by ?propLabel ";
             var limit = options.limit || Config.queryLimit;
@@ -1299,6 +1351,44 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
             }
             result.results.bindings = Sparql_generic.setMissingLabels(result.results.bindings, ["prop", "subProp", "sourceClass", "targetClass"]);
             return callback(null, result.results.bindings);
+        });
+    };
+
+    self.getNodesLabelTypeAndGraph = self.getTriples = function (sourceLabel, ids, options, callback) {
+        var filterStr = Sparql_common.setFilter("subject", ids, null);
+        if (!options) {
+            options = {};
+        }
+
+        var fromStr = (fromStr = Sparql_common.getFromStr(sourceLabel));
+
+        var query =
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "SELECT  ?subject ?subjectLabel ?subjectType ?g" +
+            fromStr +
+            " WHERE { ?subject ?p ?o." +
+            filterStr +
+            "optional{?subject rdf:type ?subjectType}" +
+            "optional{GRAPH ?g{?subject rdfs:label ?subjectLabel}}";
+
+        query += "}";
+        if (options.orderBy) {
+            query += " ORDER BY " + options.orderBy;
+        } else {
+            query += " ORDER BY ?subjectLabel";
+        }
+        query += " LIMIT 10000";
+
+        var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+            if (err) {
+                return callback(err);
+            }
+            // _result.results.bindings=   Sparql_generic.setBindingsOptionalProperties(_result.results.bindings, ["subject"]);
+
+            callback(null, _result.results.bindings);
         });
     };
 

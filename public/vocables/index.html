@@ -116,6 +116,7 @@
         <script type="module" src="modules/tools/lineage/lineage_reasoner.js"></script>
 
         <script type="module" src="modules/tools/lineage/lineage_similars.js"></script>
+        <script type="module" src="modules/shared/graphLoader.js"></script>
 
         <link
             rel="stylesheet"
@@ -214,7 +215,7 @@
                     $("#mainDialogDiv").dialog({
                         autoOpen: false,
                         height: 800,
-                        width: 1000,
+                        width: $(document).width() * 0.85,
                         modal: false,
                     });
 

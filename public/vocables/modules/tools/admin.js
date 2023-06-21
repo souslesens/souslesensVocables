@@ -8,6 +8,7 @@ import Export from "../shared/export.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import SparqlQueryUI from "./sparqlQueryUI.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
+import GraphLoader from "../shared/graphLoader.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Admin = (function () {
@@ -22,16 +23,16 @@ var Admin = (function () {
             SourceSelectorWidget.initWidget(null, "sourcesTreeDiv", false, null, null, options);
         });
         /*   var html =
-            " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showTSFdictionary()'>TSF Dictionary</button>" +
-            "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.refreshIndexes()'>refreshIndexes </button>&nbsp;<input type='checkbox'  id='admin_refreshIndexWithImportCBX' > Imports also<br>" +
-            " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportTaxonomyToCsv()'>export Taxonomy To Csv </button>" +
-            " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportTTL()'>export TTL </button>" +
-            " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.getClassesLineage()'>getLineage </button>" +
-            " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showUserSources()'>showUserSources </button>" +
-            " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.generateInverseRestrictionsDialog()'>generateInverseRestrictions </button>" +
-            " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.drawPropsRangeAndDomainMatrix()'>drawPropsRangeAndDomainMatrix </button>" +
-            " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.createDecapitalizedLabelTriples()'>createDecapitalizedLabelTriples </button>";
-        $("#sourceDivControlPanelDiv").html(html);*/
+        " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showTSFdictionary()'>TSF Dictionary</button>" +
+        "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.refreshIndexes()'>refreshIndexes </button>&nbsp;<input type='checkbox'  id='admin_refreshIndexWithImportCBX' > Imports also<br>" +
+        " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportTaxonomyToCsv()'>export Taxonomy To Csv </button>" +
+        " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportTTL()'>export TTL </button>" +
+        " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.getClassesLineage()'>getLineage </button>" +
+        " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showUserSources()'>showUserSources </button>" +
+        " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.generateInverseRestrictionsDialog()'>generateInverseRestrictions </button>" +
+        " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.drawPropsRangeAndDomainMatrix()'>drawPropsRangeAndDomainMatrix </button>" +
+        " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.createDecapitalizedLabelTriples()'>createDecapitalizedLabelTriples </button>";
+    $("#sourceDivControlPanelDiv").html(html);*/
     };
 
     self.onSourceSelect = function () {
@@ -43,13 +44,19 @@ var Admin = (function () {
     };
     self.refreshIndexes = function () {
         var sources = SourceSelectorWidget.getCheckedSources();
-        if (!sources || sources.length == 0) return alert(" no source selected");
-        if (!confirm("refresh selected indexes")) return;
+        if (!sources || sources.length == 0) {
+            return alert(" no source selected");
+        }
+        if (!confirm("refresh selected indexes")) {
+            return;
+        }
 
         async.eachSeries(
             sources,
             function (source, callbackEach) {
-                if (!Config.sources[source] || !Config.sources[source].schemaType) return callbackEach();
+                if (!Config.sources[source] || !Config.sources[source].schemaType) {
+                    return callbackEach();
+                }
                 $("#waitImg").css("display", "block");
                 SearchUtil.generateElasticIndex(source, { indexProperties: 1, indexNamedIndividuals: 1 }, function (err, _result) {
                     MainController.UI.message("DONE " + source, true);
@@ -57,7 +64,9 @@ var Admin = (function () {
                 });
             },
             function (err) {
-                if (err) return MainController.UI.message(err, true);
+                if (err) {
+                    return MainController.UI.message(err, true);
+                }
                 MainController.UI.message("ALL DONE", true);
                 $("#sourcesTreeDiv").jstree(true).uncheck_all();
             }
@@ -67,7 +76,9 @@ var Admin = (function () {
     self.exportNT = function () {
         //   var sources =SourceSelectorWidget.getCheckedSources();
         var sources = SourceSelectorWidget.getCheckedSources();
-        if (sources.length != 1) return alert("select a single source");
+        if (sources.length != 1) {
+            return alert("select a single source");
+        }
 
         $("#waitImg").css("display", "block");
         MainController.UI.message(sources[0] + " processing...");
@@ -88,7 +99,9 @@ var Admin = (function () {
     self.exportTTL = function () {
         //   var sources =SourceSelectorWidget.getCheckedSources();
         var sources = SourceSelectorWidget.getCheckedSources();
-        if (sources.length != 1) return alert("select a single source");
+        if (sources.length != 1) {
+            return alert("select a single source");
+        }
 
         $("#waitImg").css("display", "block");
         // MainController.UI.message(sources[0] + " processing...");
@@ -97,7 +110,9 @@ var Admin = (function () {
     self.getClassesLineage = function () {
         //   var sources =SourceSelectorWidget.getCheckedSources();
         var sources = SourceSelectorWidget.getCheckedSources();
-        if (sources.length != 1) return alert("select a single source");
+        if (sources.length != 1) {
+            return alert("select a single source");
+        }
 
         Sparql_generic.getSourceTaxonomy(sources[0], null, function (_err, _result) {
             // Pass
@@ -110,9 +125,15 @@ var Admin = (function () {
             .sort()
             .forEach(function (sourceLabel, _index) {
                 MainController.initControllers();
-                if (sourcesSelection && sourcesSelection.indexOf(sourceLabel) < 0) return;
-                if (Config.sources[sourceLabel].isDraft) return;
-                if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) return;
+                if (sourcesSelection && sourcesSelection.indexOf(sourceLabel) < 0) {
+                    return;
+                }
+                if (Config.sources[sourceLabel].isDraft) {
+                    return;
+                }
+                if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) {
+                    return;
+                }
                 sources.push(sourceLabel);
             });
         return sources;
@@ -131,7 +152,9 @@ var Admin = (function () {
         Object.keys(Config.sources)
             .sort()
             .forEach(function (sourceLabel, _index) {
-                if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) return;
+                if (Config.currentProfile.allowedSourceSchemas.indexOf(Config.sources[sourceLabel].schemaType) < 0) {
+                    return;
+                }
                 str +=
                     "<tr><td>" +
                     sourceLabel +
@@ -147,14 +170,18 @@ var Admin = (function () {
                 sources.push(sourceLabel);
             });
 
-        if (callback) return callback(sources);
+        if (callback) {
+            return callback(sources);
+        }
         var html = "<div style='width: 800px;height: 800px ; overflow: auto'><table>" + str + "</table></div>";
         $("#graphDiv").html(html);
     };
 
     self.generateInverseRestrictionsDialog = function () {
         var sources = SourceSelectorWidget.getCheckedSources();
-        if (sources.length != 1) return alert("select a single source");
+        if (sources.length != 1) {
+            return alert("select a single source");
+        }
         var html = "<table>";
         html += "<tr><td>propId</td><td><input id='admin_propId' style='width:400px'></td></tr>";
         html += "<tr><td>inverse propId</td><td><input id='admin_inversePropId'  style='width:400px'></td></tr>";
@@ -167,21 +194,29 @@ var Admin = (function () {
 
     self.generateInverseRestrictions = function () {
         var sources = SourceSelectorWidget.getCheckedSources();
-        if (sources.length != 1) return alert("select a single source");
+        if (sources.length != 1) {
+            return alert("select a single source");
+        }
         var source = sources[0];
         var propId = $("#admin_propId").val();
         var inversePropId = $("#admin_inversePropId").val();
         if (propId && inversePropId) {
             Sparql_OWL.generateInverseRestrictions(source, propId, inversePropId, function (err, result) {
-                if (err) return alert(err);
+                if (err) {
+                    return alert(err);
+                }
                 MainController.UI.message(result + " restrictions created");
             });
-        } else alert("missing propId or inversePropId");
+        } else {
+            alert("missing propId or inversePropId");
+        }
     };
 
     self.exportTaxonomyToCsv = function (_rootUri) {
         var sources = SourceSelectorWidget.getCheckedSources();
-        if (sources.length != 1) return alert("select a single source");
+        if (sources.length != 1) {
+            return alert("select a single source");
+        }
 
         var sourceLabel = sources[0];
         var matrix = [];
@@ -200,12 +235,18 @@ var Admin = (function () {
                         for (var key in result.classesMap) {
                             var line = [];
                             var obj = result.classesMap[key];
-                            if (!obj.parents) return;
+                            if (!obj.parents) {
+                                return;
+                            }
                             var parents = obj.parents; //;.split("|")
                             maxLevels = Math.max(maxLevels, parents.length);
-                            if (!parents.forEach) return;
+                            if (!parents.forEach) {
+                                return;
+                            }
                             parents.forEach(function (parent, index) {
-                                if (index == 0) return;
+                                if (index == 0) {
+                                    return;
+                                }
 
                                 var label = labels[parent] || Sparql_common.getLabelFromURI(parent);
                                 line.push(label);
@@ -236,7 +277,9 @@ var Admin = (function () {
 
     self.createDecapitalizedLabelTriples = function () {
         var sources = SourceSelectorWidget.getCheckedSources();
-        if (sources.length != 1) return alert("select a single source");
+        if (sources.length != 1) {
+            return alert("select a single source");
+        }
 
         var sourceLabel = sources[0];
         Sparql_generic.createDecapitalizedLabelTriples(sourceLabel, function (err, result) {
@@ -249,18 +292,24 @@ var Admin = (function () {
 
     self.drawPropsRangeAndDomainMatrix = function () {
         var sources = SourceSelectorWidget.getCheckedSources();
-        if (sources.length != 1) return alert("select a single source");
+        if (sources.length != 1) {
+            return alert("select a single source");
+        }
         var sourceLabel = sources[0];
         Lineage_properties.drawPropsRangeAndDomainMatrix(sourceLabel);
     };
 
     self.copyGraphToEndPoint = function () {
         var sources = SourceSelectorWidget.getCheckedSources();
-        if (sources.length != 1) return alert("select a single source");
+        if (sources.length != 1) {
+            return alert("select a single source");
+        }
         var source = sources[0];
 
         var toEndPointUrl = prompt("enter toEndPointUrl");
-        if (!toEndPointUrl) return;
+        if (!toEndPointUrl) {
+            return;
+        }
         var toEndPointConfig = { sparql_server: { url: toEndPointUrl } };
         var clearEndpointGraph = true;
         var body = {
@@ -292,8 +341,42 @@ var Admin = (function () {
 
     self.sparqlQuery = function () {
         var sources = SourceSelectorWidget.getCheckedSources();
-        if (sources.length == 0) return alert("select at least one  source");
+        if (sources.length == 0) {
+            return alert("select at least one  source");
+        }
         SparqlQueryUI.init(sources);
+    };
+
+    self.clearGraph = function () {
+        var sources = SourceSelectorWidget.getCheckedSources();
+        if (sources.length != 1) {
+            return alert("select a single source");
+        }
+
+        var source = sources[0];
+        if (!Config.sources[source]) {
+            return alert("source does not not exist");
+        }
+        var graphUri = Config.sources[source].graphUri;
+        if (!confirm("Do you really want to clear  source " + source + " , graph " + graphUri)) {
+            return;
+        }
+        if (!confirm("CONFIRM : clear  source " + source + " , graph " + graphUri)) {
+            return;
+        }
+        const payload = { graphUri: graphUri };
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/kg/clearGraph`,
+            data: payload,
+            dataType: "json",
+            success: function (_result, _textStatus, _jqXHR) {
+                return MainController.UI.message("graph source " + source + " cleared ", true);
+            },
+            error(err) {
+                return MainController.UI.message(err);
+            },
+        });
     };
 
     return self;

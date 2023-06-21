@@ -74,10 +74,10 @@
                     id="LineageProperties_searchAllSourcesTermInput"
                     style="width: 200px"
                     value=""
-                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9)Lineage_properties.searchAllSourcesTerm()"
+                    onkeyup="if (event.keyCode == 13 || event.keyCode == 9)Lineage_properties.searchTermInSources()"
                 />
 
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="LineageProperties_onSearchAllInput" onclick="Lineage_properties.searchAllSourcesTerm()">Search</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="LineageProperties_onSearchAllInput" onclick="Lineage_properties.searchTermInSources()">Search</button>
 
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Export.exportTreeToDataTable('Lineage_propertiesTree','#')">Export</button>
             </div>
@@ -127,16 +127,14 @@
         <div class="" id="LineageContainersTab" style="display: flex; flex-direction: column">
             <div class="lineage_button_groupXX">
                 <input id="Lineage_containers_searchInput" onkeyup="" />
-                <button onclick="Lineage_containers.addContainer()">+</button>
+                <button id="Lineage_addContainer_button" onclick="Lineage_containers.addContainer()">+</button>
             </div>
             <div class="lineage_button_groupXX">
                 <select id="Lineage_containers_searchWhatInput">
-                    <option value="bags">Containers</option>
-                    <option value="classes">Classes</option>
-                    <option value="individuals">Individuals</option>
-                    <option value="any">Any</option>
+                    <option value="all">All</option>
+                    <option value="current">Current container</option>
                 </select>
-                <button onclick="Lineage_containers.search()">Search</button>
+                <button id="search_button_container" onclick="Lineage_containers.search()">Search</button>
                 <!-- <button onclick="Lineage_containers.alignListMembers()">Align</button>-->
             </div>
             <div class="" style="width: 375px; height: 700px; overflow: auto">

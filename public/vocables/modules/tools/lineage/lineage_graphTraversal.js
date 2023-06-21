@@ -3,8 +3,9 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 import common from "../../shared/common.js";
-import visjsGraph from "../../graph/visjsGraph2.js";
+self.lineageVisjsGraph;
 import Lineage_classes from "./lineage_classes.js";
+import SearchWidget from "../../uiWidgets/searchWidget.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Lineage_graphTraversal = (function () {
@@ -45,7 +46,7 @@ var Lineage_graphTraversal = (function () {
         });
     };
 
-    self.getShortestpathObjects = function (source, fromNodeId, toNodeId, options, callback) {
+    self.getShortestPathObjects = function (source, fromNodeId, toNodeId, options, callback) {
         var path = [];
         var relations = [];
         var labelsMap = {};
@@ -104,13 +105,13 @@ var Lineage_graphTraversal = (function () {
                     path.forEach(function (item) {
                         var relation = {
                             from: item[0],
-                            fromLabel: labelsMap[item[0]],
+                            fromLabel: labelsMap[item[0] || Sparql_common.getLabelFromURI(item[0])],
 
                             prop: item[2],
-                            propLabel: labelsMap[item[2]],
+                            propLabel: labelsMap[item[2] || Sparql_common.getLabelFromURI(item[2])],
 
                             to: item[1],
-                            toLabel: labelsMap[item[1]],
+                            toLabel: labelsMap[item[1] || Sparql_common.getLabelFromURI(item[1])],
                         };
                         relations.push(relation);
                     });
@@ -134,7 +135,7 @@ var Lineage_graphTraversal = (function () {
 
     self.initVisjsPathMode = function () {
         self.inPathMode = true;
-        visjsGraph.network.addEdgeMode();
+        Lineage_classes.lineageVisjsGraph.network.addEdgeMode();
         $("#mainDialogDiv").dialog("close");
     };
 
@@ -177,7 +178,7 @@ var Lineage_graphTraversal = (function () {
             contextMenu: Lineage_graphTraversal.contextMenufn,
         };
 
-        SearchWidget.searchTerm(options);
+        SearchWidget.searchTermInSources(options);
     };
 
     self.contextMenufn = function () {
@@ -221,7 +222,7 @@ var Lineage_graphTraversal = (function () {
         if (!toUri) toUri = self.pathToUri;
         if (fromUri == toUri) return alert(" from node and to node must be different");
 
-        self.getShortestpathObjects(source, fromUri, toUri, {}, function (err, relations) {
+        self.getShortestPathObjects(source, fromUri, toUri, {}, function (err, relations) {
             if (err) return alert(err.responseText);
 
             var html = "";
@@ -251,7 +252,7 @@ var Lineage_graphTraversal = (function () {
 
     self.drawPathesOnWhiteboard = function draw(relations) {
         var visjsData = { nodes: [], edges: [] };
-        var existingIdsMap = visjsGraph.getExistingIdsMap();
+        var existingIdsMap = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
 
         var shape = Lineage_classes.defaultShape;
         var source = Lineage_sources.activeSource;
@@ -317,16 +318,16 @@ var Lineage_graphTraversal = (function () {
             }
         });
 
-        var oldEdges = visjsGraph.data.edges.get();
+        var oldEdges = Lineage_classes.lineageVisjsGraph.data.edges.get();
         var toDelete = [];
         oldEdges.forEach(function (edge) {
             if (edge.type == "path") toDelete.push(edge.id);
         });
-        visjsGraph.data.edges.remove(toDelete);
+        Lineage_classes.lineageVisjsGraph.data.edges.remove(toDelete);
 
-        if (visjsGraph.isGraphNotEmpty()) {
-            visjsGraph.data.nodes.add(visjsData.nodes);
-            visjsGraph.data.edges.add(visjsData.edges);
+        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
+            Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+            Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
         } else {
             Lineage_classes.drawNewGraph(visjsData);
         }
@@ -338,7 +339,7 @@ var Lineage_graphTraversal = (function () {
         if (!toUri) toUri = self.pathToUri;
         if (!numberOfPathes) numberOfPathes = parseInt($("#Lineage_graphTraversal_numberOfPathes").val());
 
-        self.getShortestpathObjects(source, fromUri, toUri, { numberOfPathes: numberOfPathes }, function (err, relations) {
+        self.getShortestPathObjects(source, fromUri, toUri, { numberOfPathes: numberOfPathes }, function (err, relations) {
             if (err) return alert(err.responseText);
             self.drawPathesOnWhiteboard(relations);
             $("#mainDialogDiv").dialog("close");
@@ -352,7 +353,7 @@ var Lineage_graphTraversal = (function () {
 
         if (fromUri == toUri) return alert(" from node and to node must be different");
 
-        self.getShortestpathObjects(source, fromUri, toUri, {}, function (err, relations) {
+        self.getShortestPathObjects(source, fromUri, toUri, {}, function (err, relations) {
             if (err) return alert(err.responseText);
             self.drawPathesOnWhiteboard(relations);
             $("#mainDialogDiv").dialog("close");

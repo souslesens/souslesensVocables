@@ -2,7 +2,7 @@ import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-import visjsGraph from "../../graph/visjsGraph2.js";
+self.lineageVisjsGraph;
 import Lineage_classes from "./lineage_classes.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -18,6 +18,7 @@ var Lineage_blend = (function () {
 
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
                 $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
+                    $("#editPredicate_mainDiv").remove();
                     $("#LineageBlend_commonPredicateObjectDiv").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
                         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
                             $("#editPredicate_propertyDiv").css("display", "none");
@@ -53,8 +54,8 @@ var Lineage_blend = (function () {
             $("#LineagePopup").dialog("open");
             $("#LineagePopup").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
             $("#LineagePopup").load("snippets/lineage/lineageAddEdgeDialog.html", function () {
-                self.sourceNode = visjsGraph.data.nodes.get(edgeData.from).data;
-                self.targetNode = visjsGraph.data.nodes.get(edgeData.to).data;
+                self.sourceNode = Lineage_classes.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
+                self.targetNode = Lineage_classes.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 
                 let options = {
                     openAll: true,
@@ -966,7 +967,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                     return callback(null, { type: "ObjectProperty", id: sourceNode.id + "_" + propId + "_" + targetNode.id });
                 });
             } else {
-                var oldRelations = visjsGraph.getNodeEdges(sourceNode.id, targetNode.id);
+                var oldRelations = Lineage_classes.lineageVisjsGraph.getNodeEdges(sourceNode.id, targetNode.id);
                 self.createRelation(inSource, propId, sourceNode, targetNode, true, true, {}, function (err, blankNodeId) {
                     if (err) {
                         return callback(err);
@@ -1065,7 +1066,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                 };
             }
 
-            visjsGraph.data.edges.add([newEdge]);
+            Lineage_classes.lineageVisjsGraph.data.edges.add([newEdge]);
         });
     };
 
@@ -1314,8 +1315,8 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                     },
                 ],
                 function (_err) {
-                    visjsGraph.data.edges.remove(restrictionNode.id);
-                    visjsGraph.data.edges.remove(inverseRestriction);
+                    Lineage_classes.lineageVisjsGraph.data.edges.remove(restrictionNode.id);
+                    Lineage_classes.lineageVisjsGraph.data.edges.remove(inverseRestriction);
                     MainController.UI.message("restriction removed", true);
                     if (callback) {
                         return callback(_err);
@@ -1381,7 +1382,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
         var sourceNode = self.currentAssociation[0];
         var targetNode = self.currentAssociation[1];
 
-        var existingNodes = visjsGraph.getExistingIdsMap();
+        var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
         var visjsData = { nodes: [], edges: [] };
 
         if (!existingNodes[sourceNode.id]) {
@@ -1440,9 +1441,9 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                 color: Lineage_classes.objectPropertyColor,
             });
         }
-        visjsGraph.data.nodes.add(visjsData.nodes);
-        visjsGraph.data.edges.add(visjsData.edges);
-        visjsGraph.network.fit();
+        Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+        Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
+        Lineage_classes.lineageVisjsGraph.network.fit();
         $("#waitImg").css("display", "none");
     };
 

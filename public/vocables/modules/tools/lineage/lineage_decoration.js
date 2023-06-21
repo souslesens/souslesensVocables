@@ -3,7 +3,7 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_sources from "./lineage_sources.js";
 import common from "../../shared/common.js";
-import visjsGraph from "../../graph/visjsGraph2.js";
+self.lineageVisjsGraph;
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 //@typescript-eslint/no-unused-vars
@@ -115,7 +115,7 @@ var Lineage_decoration = (function () {
                     return callback(null, []);
                 }
                 var filter = Sparql_common.setFilter("x", slice);
-                if (filter.indexOf("?x in( )") > -1) {
+                if (!filter || filter.indexOf("?x in( )") > -1) {
                     return callbackEach();
                 }
 
@@ -246,7 +246,7 @@ var Lineage_decoration = (function () {
         var topLevelOntologynodeIds = [];
         var individualNodes = {};
         if (!visjsNodes) {
-            visjsNodes = visjsGraph.data.nodes.get();
+            visjsNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
         }
 
         if (visjsNodes.length == 0) {
@@ -271,7 +271,7 @@ var Lineage_decoration = (function () {
                             }
                         }
                     });
-                    visjsGraph.data.nodes.update(topLevelOntologynodeIds);
+                    Lineage_classes.lineageVisjsGraph.data.nodes.update(topLevelOntologynodeIds);
                     callbackSeries();
                 },
                 //get individuals class and add it to nonTopLevelOntologynodeIds
@@ -315,7 +315,7 @@ var Lineage_decoration = (function () {
                                 self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyClass = item.x.value;
                                 self.currentVisjGraphNodesMap[item.x.value].color = self.currentTopOntologyClassesMap[item.x.value].color;
                                 self.currentVisjGraphNodesMap[item.x.value].type = item.x.value;
-                                if (self.currentTopOntologyClassesMap[item.type.value].parents) {
+                                if (self.currentTopOntologyClassesMap[item.type.value] && self.currentTopOntologyClassesMap[item.type.value].parents) {
                                     self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyNumberOfParents = self.currentTopOntologyClassesMap[item.type.value].parents.length;
                                 }
                             } else if (self.currentTopOntologyClassesMap[item.type.value]) {
@@ -371,8 +371,8 @@ var Lineage_decoration = (function () {
                         }
                     }
 
-                    if (visjsGraph.data && visjsGraph.data.nodes) {
-                        visjsGraph.data.nodes.update(newNodes);
+                    if (Lineage_classes.lineageVisjsGraph.data && Lineage_classes.lineageVisjsGraph.data.nodes) {
+                        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
                     }
 
                     callbackSeries();
@@ -447,7 +447,7 @@ var Lineage_decoration = (function () {
     self.onLegendCheckBoxes = function () {
         var checkdeTopClassesIds = $("#Lineage_classes_graphDecoration_legendTreeDiv").jstree(true).get_checked();
 
-        var allNodes = visjsGraph.data.nodes.get();
+        var allNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
         var newNodes = [];
         allNodes.forEach(function (node) {
             var hidden = true;
@@ -460,7 +460,7 @@ var Lineage_decoration = (function () {
                 hidden: hidden,
             });
         });
-        visjsGraph.data.nodes.update(newNodes);
+        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
     };
 
     self.onlegendTypeDivClick = function (div, type) {
@@ -485,7 +485,7 @@ var Lineage_decoration = (function () {
         } else {
             self.currentLegendObject.div.removeClass("Lineage_legendTypeDivHidden");
         }
-        var allNodes = visjsGraph.data.nodes.get();
+        var allNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
         var newNodes = [];
         var hidden = hide ? true : false;
         allNodes.forEach(function (node) {
@@ -507,7 +507,7 @@ var Lineage_decoration = (function () {
                 }
             }
         });
-        visjsGraph.data.nodes.update(newNodes);
+        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
     };
 
     self.refreshLegend = function (source) {
@@ -538,9 +538,9 @@ var Lineage_decoration = (function () {
             var selection = $("#lineage_decorate_selectionSelect").val();
             var nodes;
             if (selection == "Last added nodes") {
-                nodes = visjsGraph.lastAddedNodes;
+                nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
             } else if (selection == "All nodes") {
-                nodes = visjsGraph.lastAddedNodes;
+                nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
             } else if (selection == "Selected nodes") {
                 nodes = Lineage_selection.selectedNodes;
             }
@@ -568,7 +568,7 @@ var Lineage_decoration = (function () {
                 newIds.push(obj);
             });
 
-            visjsGraph.data.nodes.update(newIds);
+            Lineage_classes.lineageVisjsGraph.data.nodes.update(newIds);
         });
 
     return self;

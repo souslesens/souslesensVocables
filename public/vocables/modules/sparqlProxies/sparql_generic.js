@@ -424,6 +424,9 @@ var Sparql_generic = (function () {
             if (elt.indexOf("_:b") == 0) {
                 return "<" + elt + ">";
             }
+            if (elt.indexOf("_:") == 0) {
+                return "<" + elt + ">";
+            }
             if (elt.indexOf("http") == 0 || item.valueType == "uri") {
                 return "<" + elt + ">";
             }
@@ -1012,7 +1015,6 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
         async.series(
             [
                 function (callbackSeries) {
-                    //get raw data subclasses
                     if (!options) {
                         options = {};
                     }
@@ -1023,30 +1025,49 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
                     var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
 
-                    var query =
-                        "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
-                        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                        "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
-                        "SELECT distinct * " +
-                        fromStr +
-                        " WHERE {";
-                    var where = "  ?subject " + parentType + " ?firstParent." + Sparql_common.getVariableLangLabel("subject", false, true) + "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
-                    if (options.filter) {
-                        where += " " + options.filter + " ";
-                    }
-
-                    //  where += "filter (?firstParent not in (owl:Restriction, owl:Class))";
-                    //  where += " FILTER NOT EXISTS {?firstParent rdf:type owl:Restriction}";
-                    where += "  filter (!regex(str(?firstParent),'http://www.w3.org/2002/07/owl#'))";
-                    // make two queries and union them to solve timeout problem
                     if (schemaType == "OWL") {
-                        var where1 = where.replace("|<http://www.w3.org/2004/02/skos/core#prefLabel>", "");
-                        var where2 = where.replace("?subject rdfs:label|", "?subject ");
-                        where = "{" + where1 + "}\n UNION \n{" + where2 + "}";
+                        var query =
+                            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
+                            "SELECT distinct *  " +
+                            fromStr +
+                            "  WHERE {{  ?subject   rdfs:subClassOf   ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel \n" +
+                            "          ?skosAltLabel. } }" +
+                            " UNION " +
+                            "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  }" +
+                            "UNION  {" +
+                            "    ?subject rdf:type owl:Class.?subject rdfs:label ?subjectLabel." +
+                            "   filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))  OPTIONAL{?subject skos:altLabel  ?skosAltLabel}" +
+                            "  filter( not exists{  ?subject   rdfs:subClassOf   ?aParent.  ?aParent rdf:type owl:Class.  })}" +
+                            "}";
+                    } else {
+                        var query =
+                            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+                            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+                            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+                            "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
+                            "SELECT distinct * " +
+                            fromStr +
+                            " WHERE {";
+                        var where = "  ?subject " + parentType + " ?firstParent." + Sparql_common.getVariableLangLabel("subject", false, true) + "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
+                        if (options.filter) {
+                            where += " " + options.filter + " ";
+                        }
+
+                        //  where += "filter (?firstParent not in (owl:Restriction, owl:Class))";
+                        //  where += " FILTER NOT EXISTS {?firstParent rdf:type owl:Restriction}";
+                        where += "  filter (!regex(str(?firstParent),'http://www.w3.org/2002/07/owl#'))";
+                        // make two queries and union them to solve timeout problem
+                        if (schemaType == "OWL") {
+                            var where1 = where.replace("|<http://www.w3.org/2004/02/skos/core#prefLabel>", "");
+                            var where2 = where.replace("?subject rdfs:label|", "?subject ");
+                            where = "{" + where1 + "}\n UNION \n{" + where2 + "}";
+                        }
+                        query += where;
+                        query += "}";
                     }
-                    query += where;
-                    query += "}";
 
                     async.whilst(
                         function (_test) {
@@ -1153,7 +1174,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                                 id: item.subject.value,
                                 label: conceptLabel,
                                 skoslabels: skosLabelsMap[item.subject.value],
-                                parent: item.firstParent.value,
+                                parent: item.firstParent ? item.firstParent.value : null,
                                 parents: [],
                                 type: conceptType,
                             };

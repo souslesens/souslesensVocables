@@ -8,22 +8,77 @@ import ElasticSearchProxy from "../search/elasticSearchProxy.js";
 import SearchUtil from "../search/searchUtil.js";
 import MainController from "../shared/mainController.js";
 import PredicatesSelectorWidget from "./predicatesSelectorWidget.js";
+import Lineage_axioms_draw from "../tools/lineage/lineage_axioms_draw.js";
+import Lineage_axioms_create from "../tools/lineage/lineage_axioms_create.js";
+import Lineage_sources from "../tools/lineage/lineage_sources.js";
 
 var NodeInfosWidget = (function () {
     var self = {};
 
+    self.initDialog = function (sourceLabel, divId, callback) {
+        self.currentSource = sourceLabel;
+        $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
+        $("#" + divId).dialog("open");
+        $("#" + divId).load("snippets/nodeInfosWidget.html", function () {
+            $("#nodeInfosWidget_tabsDiv").tabs({
+                //  active: options.showAxioms ? 1 : 0,
+                activate: function (event, ui) {
+                    if (ui.newPanel.selector == "#nodeInfosWidget_AxiomsTabDiv") {
+                        setTimeout(function () {
+                            var source = self.currentSource;
+                            source = Lineage_sources.mainSource;
+                            Lineage_axioms_draw.drawNodeAxioms(source, self.currentNodeId, "axiomsDrawGraphDiv");
+                        }, 1000);
+                    }
+                },
+            });
+            $("#axiomsDrawGraphDiv").dialog({
+                autoOpen: false,
+                height: 800,
+                width: 1000,
+                modal: false,
+            });
+            $("#axioms_dialogDiv").dialog({
+                autoOpen: false,
+                height: 800,
+                width: 1000,
+                modal: false,
+            });
+
+            callback();
+        });
+    };
+
     self.showNodeInfos = function (sourceLabel, node, divId, options, callback) {
-        if (!sourceLabel) {
-            sourceLabel = "_defaultSource";
-        }
+        self.currentNodeIdInfosSource = sourceLabel;
+        self.currentNodeIdInfosDivId = divId;
 
         self.newProperties = null;
         self.currentNodeId = null;
         self.currentNode = null;
+        self.visitedNodes = [];
+
+        if (!sourceLabel) {
+            sourceLabel = self.currentSource;
+        } else {
+            self.currentSource = sourceLabel;
+        }
+
+        if (!node) {
+            self.initDialog(sourceLabel, divId, function () {
+                Lineage_axioms_draw.currentSource = sourceLabel;
+                //   self.showNodeInfosToolbar(options);
+            });
+
+            return;
+        }
+
         if (typeof node == "object") {
             self.currentNode = node;
             if (node.data) {
-                if (node.data.type && node.data.type.indexOf("literal") > -1) return;
+                if (node.data.type && node.data.type.indexOf("literal") > -1) {
+                    return;
+                }
 
                 if (node.data.propertyId && !node.data.id) {
                     //when  a property in a restriction
@@ -47,12 +102,6 @@ var NodeInfosWidget = (function () {
         }
         var nodeId = self.currentNodeId;
 
-        if (!sourceLabel) {
-            sourceLabel = self.currentSource;
-        } else {
-            self.currentSource = sourceLabel;
-        }
-
         self.currentNodeRealSource = self.currentSource;
         self.divId = divId;
         if (!options) {
@@ -72,23 +121,34 @@ var NodeInfosWidget = (function () {
             self.visitedNodes.currentIndex = index;
         }
 
-        self.currentNodeIdInfosSource = sourceLabel;
-        self.currentNodeIdInfosDivId = divId;
+        self.initDialog(sourceLabel, divId, function () {
+            if (true || !options.showAxioms) {
+                self.drawAllInfos(sourceLabel, nodeId, options, function (err, result) {
+                    common.getStackTrace();
+                    if (callback) {
+                        callback(err);
+                    }
+                    if (err) {
+                        return alert(err);
+                    }
 
+                    self.showNodeInfosToolbar(options);
+                });
+            }
+        });
+    };
+
+    self.drawAllInfos = function (sourceLabel, nodeId, options, callback) {
         var type;
         async.series(
             [
                 function (callbackSeries) {
-                    self.drawCommonInfos(sourceLabel, nodeId, divId, options, function (_err, result) {
+                    self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function (_err, result) {
                         type = result.type;
                         callbackSeries();
                     });
                 },
-                function (callbackSeries) {
-                    var source = self.currentNodeRealSource;
-                    self.showNodeInfosToolbar(options);
-                    callbackSeries();
-                },
+
                 function (callbackSeries) {
                     self.showTypeOfResources(self.currentNodeRealSource, nodeId, function (err) {
                         callbackSeries(err);
@@ -104,13 +164,12 @@ var NodeInfosWidget = (function () {
                     if (type != "http://www.w3.org/2002/07/owl#ObjectProperty") {
                         return callbackSeries();
                     }
-                    self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, divId, function (_err, _result) {
+                    self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfosWidget_InfosTabDiv", function (_err, _result) {
                         callbackSeries();
                     });
                 },
             ],
             function (err) {
-                common.getStackTrace();
                 if (callback) {
                     callback(err);
                 }
@@ -120,6 +179,7 @@ var NodeInfosWidget = (function () {
             }
         );
     };
+
     self.showNodeInfosToolbar = function (options) {
         if (!options) {
             options = {};
@@ -129,9 +189,8 @@ var NodeInfosWidget = (function () {
             str +=
                 "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
                 "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
-            if (true || Config.sources[source].editable) {
-                str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
-            }
+
+            str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
         }
         str += "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;background-color: #e1ddd1;padding:5px';display:flex;>";
 
@@ -181,8 +240,6 @@ var NodeInfosWidget = (function () {
                     $("#" + divId).on("dialogbeforeclose", function (_event, _ui) {
                         self.indexObjectIfNew();
                     });
-                    $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
-                    $("#" + divId).dialog("open");
                 }
 
                 var type = null;
@@ -190,7 +247,9 @@ var NodeInfosWidget = (function () {
                 var uniqueTriples = {};
                 data.forEach(function (item) {
                     var key = item.prop.value + "_" + item.value.value + item.value["xml:lang"];
-                    if (uniqueTriples[key]) return;
+                    if (uniqueTriples[key]) {
+                        return;
+                    }
                     uniqueTriples[key] = 1;
 
                     if (item.g) {
@@ -368,10 +427,10 @@ defaultLang = 'en';*/
                                 selected = "selected";
                             }
                             propNameSelect += "<option " + selected + ">" + lang + "</option> ";
-                            valuesStr = "";
+                            var valuesStr = "";
                             values.forEach(function (valueObject, index) {
                                 var optionalStr = getOptionalStr(key, valueObject.predicateId);
-                                value = valueObject.value;
+                                var value = valueObject.value;
                                 if (value.indexOf("http") == 0) {
                                     if (valueLabelsMap[value]) {
                                         value = "<a target='" + NodeInfosWidget.getUriTarget(nodeId) + "' href='" + value + "'>" + valueLabelsMap[value] + "</a>";
@@ -420,7 +479,7 @@ defaultLang = 'en';*/
                     "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
                     "</div>";
 
-                $("#" + divId).html(str);
+                $("#nodeInfosWidget_InfosTabDiv").html(str);
 
                 return callback(null, { type: type, blankNodes: blankNodes });
             }
@@ -645,7 +704,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
 
                 // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
                 self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "mainDialogDiv", {}, function (err, result) {
-                    self.showNodeInfosToolbar();
+                    //  self.showNodeInfosToolbar();
                     if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
                         visjsGraph.data.nodes.push({
                             id: self.currentNodeId,
@@ -684,7 +743,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                         if (currentEditingItem.item.value.type == "literal") {
                             object = { isString: true, value: currentEditingItem.item.value.value, lang: currentEditingItem.item.value["xml:lang"] };
                             /*   if(currentEditingItem.item.value["xml:lang"])
-  object+="@"+currentEditingItem.item.value["xml:lang"]*/
+object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         }
                         Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, currentEditingItem.item.prop.value, object, function (err, _result) {
                             if (err) {
@@ -903,6 +962,88 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             // eslint-disable-next-line no-console
             console.log(err);
         }
+    };
+
+    self.showCreateEntityDialog = function () {
+        var divId = "smallDialogDiv";
+        var sourceLabel = Lineage_sources.activeSource;
+        $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
+        $("#" + divId).dialog("open");
+        self.getCreateEntityDialog(sourceLabel, divId);
+    };
+
+    self.getCreateEntityDialog = function (source, divId) {
+        self.currentSource = source;
+        $("#" + divId).dialog("open");
+        var html =
+            "rdfs:label <input style='width:200px' id='nodeInfosWidget_newEntityLabel'/>" +
+            "<br></br>" +
+            "rdf:type <select id='nodeInfosWidget_entityTypeSelect'></select>" +
+            "<button onclick='NodeInfosWidget.createSingleEntity(\"" +
+            divId +
+            '","' +
+            source +
+            '",' +
+            '$("#nodeInfosWidget_newEntityLabel").val(),$("#nodeInfosWidget_entityTypeSelect").val())\'>OK</button>';
+
+        $("#" + divId).html(html);
+        var declarations = Lineage_axioms_create.owl2Vocabulary.Declarations;
+        common.fillSelectOptions("nodeInfosWidget_entityTypeSelect", declarations, true);
+    };
+
+    self.createSingleEntity = function (divId, source, label, type) {
+        if (!type) {
+            return alert(" rdf:type missing");
+        }
+        var id = label;
+        if (!id) {
+            id = common.getRandomHexaId(5);
+        }
+        var proposedUri = Config.sources[source].graphUri + id;
+        proposedUri = prompt("Confirm or modify node uri and create entity", proposedUri);
+        if (!proposedUri) {
+            return;
+        }
+        var triples = [];
+        triples.push({
+            subject: proposedUri,
+            predicate: "rdf:type",
+            object: type,
+        });
+        if (label) {
+            triples.push({
+                subject: proposedUri,
+                predicate: "rdfs:label",
+                object: label,
+            });
+        }
+
+        Sparql_generic.insertTriples(source, triples, {}, function (err, result) {
+            if (err) {
+                alert(err.responseText);
+            }
+
+            var node = {
+                id: proposedUri,
+                label: label,
+                data: {
+                    id: proposedUri,
+                    label: label,
+                    type: type,
+                    source: source,
+                },
+            };
+            NodeInfosWidget.showNodeInfos(source, node, "mainDialogDiv");
+            setTimeout(function () {
+                $("#nodeInfosWidget_tabsDiv").tabs("option", "active", 2), 500;
+            });
+            SearchUtil.generateElasticIndex(source, { ids: [proposedUri] }, function (err, result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+                MainController.UI.message("node Created and Indexed");
+            });
+        });
     };
 
     return self;

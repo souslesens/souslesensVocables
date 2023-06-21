@@ -138,6 +138,7 @@ var Config = (function () {
     self.selectListsCache = {};
 
     self.Lineage = {
+        numberOfContainersLevel: 3,
         showSourceNodesInGraph: false,
         basicObjectProperties: [
             { id: "http://www.w3.org/2002/07/owl#sameAs", label: "owl:sameAs", type: "ObjectProperty" },
@@ -176,6 +177,16 @@ var Config = (function () {
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#allValuesFrom": "∀",
             "https://www.w3.org/1999/02/22-rdf-syntax-ns#allValuesFrom": "∀",
 
+            "http://www.w3.org/2002/07/owl#onProperty": "∃",
+
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#first": "f",
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#rest": "r",
+
+            "http://www.w3.org/1999/02/22-rdf-syntax-ns#nil": "∅",
+            "http://www.w3.org/2000/01/rdf-schema#domain": "d->",
+            "http://www.w3.org/2000/01/rdf-schema#range": "->r",
+            "http://www.w3.org/2002/07/owl#inverseOf": "f-1",
+
             // Owl Axioms
             "http://www.w3.org/2002/07/owl#subClassOf": "⊑",
             "https://www.w3.org/2002/07/owl#subClassOf": "⊑",
@@ -208,6 +219,8 @@ var Config = (function () {
             "https://www.w3.org/2002/07/owl#equivalentProperty": "≡",
             "http://www.w3.org/1999/02/22-rdf-syntax-ns#equivalentProperty": "≡",
             "https://www.w3.org/1999/02/22-rdf-syntax-ns#equivalentProperty": "≡",
+
+            ObjectIntersectionOf: "⊓",
             //End of Logicial operators/
         },
     };

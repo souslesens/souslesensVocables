@@ -69,7 +69,7 @@ module.exports = function () {
                                 return callbackSeries();
                             }
 
-                            GraphStore.importGraphFromUrl(sparqlServerConnection, body.sourceUrl, body.graphUri, function (err, result) {
+                            GraphStore.importGraphFromUrl(sparqlServerConnection, body.rdfUrl, body.graphUri, function (err, result) {
                                 return callbackSeries();
                             });
                         },

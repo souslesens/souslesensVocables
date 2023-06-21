@@ -37,9 +37,14 @@ var SPARQL_endpoint = (function () {
         if (!method) method = "POST";
         var url2 = `${Config.apiUrl}/yasguiQuery?url=${url}&graphUri=${graphUri}&method=${method}&t=${new Date().getTime()}`;
 
-        new Yasgui(document.getElementById("yasgui"), {
+        var yasgui = new Yasgui(document.getElementById("yasgui"), {
             requestConfig: { endpoint: url2 },
             copyEndpointOnNewTab: false,
+        });
+
+        yasgui.on("queryResponse", (Yasgui, tab) => {
+            $(".yasr").css("overflow", "scroll");
+            $(".yasr").css("height", "500px");
         });
     };
 

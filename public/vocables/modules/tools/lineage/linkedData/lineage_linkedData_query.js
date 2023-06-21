@@ -2,7 +2,7 @@ import Lineage_linkedData_mappings from "./lineage_linkedData_mappings.js";
 import common from "../../../shared/common.js";
 import KGcreator from "../../KGcreator.js";
 import Export from "../../../shared/export.js";
-import visjsGraph from "../../../graph/visjsGraph2.js";
+
 import Lineage_classes from "../lineage_classes.js";
 
 var Lineage_linkedData_query = (function () {
@@ -385,7 +385,7 @@ var Lineage_linkedData_query = (function () {
         var cols = [];
 
         if (true) {
-            allSelectColumns = [];
+            var allSelectColumns = [];
             for (var column in data[0]) {
                 if (allSelectColumns.indexOf(column) < 0) {
                     cols.push({ title: column, defaultContent: "" });
@@ -412,7 +412,7 @@ var Lineage_linkedData_query = (function () {
         var toClass = self.databasesMap[currentDatabase].toClass;
 
         var visjsData = { nodes: [], edges: [] };
-        var existingNodes = visjsGraph.getExistingIdsMap();
+        var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
 
         if (!existingNodes[fromClass.classId]) {
             existingNodes[fromClass.classId] = 1;
@@ -552,12 +552,12 @@ var Lineage_linkedData_query = (function () {
             }
         });
 
-        if (!visjsGraph.isGraphNotEmpty()) {
+        if (!Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
             self.drawNewGraph(visjsData);
         }
-        visjsGraph.data.nodes.add(visjsData.nodes);
-        visjsGraph.data.edges.add(visjsData.edges);
-        visjsGraph.network.fit();
+        Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+        Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
+        Lineage_classes.lineageVisjsGraph.network.fit();
         $("#waitImg").css("display", "none");
     };
 

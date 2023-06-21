@@ -1,5 +1,5 @@
 import KGcreator from "../../KGcreator.js";
-import visjsGraph from "../../../graph/visjsGraph2.js";
+
 import Lineage_classes from "../lineage_classes.js";
 import common from "../../../shared/common.js";
 import Sparql_common from "../../../sparqlProxies/sparql_common.js";
@@ -77,7 +77,7 @@ self.graphTable(KGcreator.currentTreeNode);
     };
 
     self.showSampledata = function (table, column, targetDiv) {
-        var node = { parent: table.parent == "#" ? table.id : table.parent, data: {} };
+        var node = { parent: table };
         var allColumns = true;
         if (column) {
             allColumns = false;
@@ -91,7 +91,7 @@ self.graphTable(KGcreator.currentTreeNode);
             result = result.replace(/\n/g, "</td><tr><td>");
             result = result.replace(/\t/g, "</td><td>");
             var html = "<table><tr><td>" + result + "</tr></table>";
-            $("#" + targetDiv).dialog("open");
+            //   $("#" + targetDiv).dialog("open");
             $("#" + targetDiv).html(html);
         });
     };
@@ -101,8 +101,8 @@ self.graphTable(KGcreator.currentTreeNode);
     };
 
     self.onAddEdgeDropped = function (edgeData) {
-        var sourceNode = visjsGraph.data.nodes.get(edgeData.from).data;
-        var targetNode = visjsGraph.data.nodes.get(edgeData.to).data;
+        var sourceNode = Lineage_classes.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
+        var targetNode = Lineage_classes.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 
         // link join beetwen tables
         if (sourceNode.context == self.context && targetNode.context == self.context) {
@@ -125,7 +125,7 @@ self.graphTable(KGcreator.currentTreeNode);
         var graphNode = Lineage_classes.currentGraphNode;
         if (!graphNode || graphNode.from || !graphNode.data.source) return alert(" select a class or an individual node");
 
-        columnObj = {
+        var columnObj = {
             column: jstreeNode.data.id,
             table: jstreeNode.parent,
             database: KGcreator.currentCsvDir || KGcreator.currentDbName,
@@ -134,11 +134,11 @@ self.graphTable(KGcreator.currentTreeNode);
         };
 
         if (confirm("link " + columnObj.table + "." + columnObj.column + " to node" + graphNode.data.label))
-            self.writeColumnMapping(graphNode.data.source, graphNode.data.id, columnObj, function (err, result) {
+            self.writeColumnMapping(graphNode.data, columnObj, function (err, result) {
                 if (err) return alert(err.responseText);
                 var columnUri = result.columnUri;
                 var visjsData = { nodes: [], edges: [] };
-                var existingNodes = visjsGraph.getExistingIdsMap();
+                var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
                 if (!existingNodes[columnUri]) {
                     var color = Lineage_classes.getSourceColor(columnObj.database);
                     existingNodes[columnUri] = 1;
@@ -172,9 +172,9 @@ self.graphTable(KGcreator.currentTreeNode);
                         color: color,
                     });
                 }
-                if (visjsGraph.isGraphNotEmpty()) {
-                    visjsGraph.data.nodes.add(visjsData.nodes);
-                    visjsGraph.data.edges.add(visjsData.edges);
+                if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
+                    Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                    Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
                 } else {
                     Lineage_classes.drawNewGraph(visjsData);
                 }
@@ -361,7 +361,7 @@ self.graphTable(KGcreator.currentTreeNode);
                 alert("Join OK, found joins : " + count);
             },
             error(err) {
-                return alert(err, responseText);
+                return alert(err.responseText);
             },
         });
     };
@@ -446,7 +446,7 @@ self.graphTable(KGcreator.currentTreeNode);
         });
     };
 
-    self.writeColumnMapping = function (graphNodeSource, entityUri, columnDesc, callback) {
+    self.writeColumnMapping = function (graphNodeData, columnDesc, callback) {
         var columnUri = Config.linkedData_mappings_graphUri + common.getRandomHexaId(10);
         var triples = [];
         triples.push({
@@ -486,12 +486,12 @@ self.graphTable(KGcreator.currentTreeNode);
 
             var triples = [
                 {
-                    subject: entityUri,
+                    subject: graphNodeData.id,
                     predicate: "<" + Config.linkedData_mappings_graphUri + "hasColumnMapping>",
                     object: columnUri,
                 },
             ];
-            Sparql_generic.insertTriples(graphNodeSource, triples, null, function (err, result) {
+            Sparql_generic.insertTriples(graphNodeData.source, triples, null, function (err, result) {
                 return callback(err, { columnUri: columnUri });
             });
         });
@@ -527,8 +527,8 @@ self.graphTable(KGcreator.currentTreeNode);
             result.results.bindings.forEach(function (item) {
                 if (!columns[item.column.value])
                     columns[item.column.value] = {
-                        concept: item.subject.value,
-                        conceptLabel: item.subject ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value),
+                        subject: item.subject.value,
+                        subjectLabel: item.subject ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value),
                     };
                 if (item.prop.value == "http://souslesens.org/resource/linkedData_mappings/database") columns[item.column.value].database = item.value.value;
                 if (item.prop.value == "http://souslesens.org/resource/linkedData_mappings/table") columns[item.column.value].table = item.value.value;
@@ -614,7 +614,7 @@ self.graphTable(KGcreator.currentTreeNode);
     self.graphRelations = function () {
         self.getSourceJoinsMappings(Lineage_sources.activeSource, { withoutSqlDescription: true }, function (err, joinsMap) {
             var edges = [];
-            var existingNodes = visjsGraph.getExistingIdsMap();
+            var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
             for (var joinId in joinsMap) {
                 var join = joinsMap[joinId];
                 var edgeId = join.bNode;
@@ -644,12 +644,12 @@ self.graphTable(KGcreator.currentTreeNode);
                     });
                 }
             }
-            visjsGraph.data.edges.add(edges);
+            Lineage_classes.lineageVisjsGraph.data.edges.add(edges);
         });
     };
 
     self.graphColumns = function (columns) {
-        var existingNodes = visjsGraph.getExistingIdsMap();
+        var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
 
         var visjsData = { nodes: [], edges: [] };
 
@@ -806,9 +806,9 @@ self.graphTable(KGcreator.currentTreeNode);
             }
         }
 
-        if (visjsGraph.isGraphNotEmpty()) {
-            visjsGraph.data.nodes.add(visjsData.nodes);
-            visjsGraph.data.edges.add(visjsData.edges);
+        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
+            Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+            Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
         } else {
             Lineage_classes.drawNewGraph(visjsData);
         }

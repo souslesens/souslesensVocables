@@ -85,14 +85,14 @@ var Ontocommons = (function () {
             }
 
             $("#slsv_iframe").attr("src", null);
-            // var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/submissions/1/download?apikey=" + apiKey;
+
             var sourceUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
             self.currentSource = ontologyId;
             var reload = $("#reloadOntologyCBX").prop("checked");
             var editable = $("#editableCBX").prop("checked");
 
             var body = {
-                sourceUrl: sourceUrl,
+                rdfUrl: sourceUrl,
                 sourceName: ontologyId,
                 graphUri: metadata.URI || "http://industryportal.enit.fr/ontologies/" + ontologyId + "/",
                 options: {
@@ -112,9 +112,10 @@ var Ontocommons = (function () {
 
             $("#waitImg").css("display", "block");
             self.message("loading ontology and imports...");
+
             $.ajax({
                 type: "POST",
-                url: `${self.apiUrl}/graphStore/importSource`,
+                url: `${self.apiUrl}/jowl/importSource`,
                 data: payload,
                 dataType: "json",
                 success: function (data, _textStatus, _jqXHR) {
@@ -133,6 +134,23 @@ var Ontocommons = (function () {
                 },
             });
         });
+    };
+
+    self.showOntologyInSLSV_iFrame = function (ontologyId, rdfUrlUrl) {
+        if (!ontologyId) {
+            return;
+        }
+        var reload = $("#reloadOntologyCBX").prop("checked");
+        var editable = $("#editableCBX").prop("checked");
+
+        if (!rdfUrlUrl) {
+            rdfUrlUrl = "http://data.industryportal.enit.fr/ontologies/" + ontologyId + "/download?apikey=" + apiKey + "&download_format=rdf";
+        }
+        var rdfUrlEncoded = encodeURIComponent(rdfUrlUrl);
+        var slsvUrl = window.location.protocol + "//" + window.location.host;
+
+        var targetUrl = slsvUrl + "?tool=lineage&source=" + ontologyId + "&rdfUrl=" + rdfUrlEncoded + "&reload=" + reload + "&editable=" + editable;
+        $("#slsv_iframe").attr("src", targetUrl);
     };
 
     self.message = function (message) {
@@ -264,6 +282,17 @@ var Ontocommons = (function () {
                 console.log("DONE");
             }
         );
+    };
+    self.importOntologyFromURL = function () {
+        var sourceName = prompt("enter a SLSV source name");
+        if (!sourceName) {
+            return;
+        }
+        var url = prompt("enter ontology URL");
+        if (!url) {
+            return;
+        }
+        self.showOntologyInSLSV_iFrame(sourceName, url);
     };
 
     return self;

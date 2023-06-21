@@ -1,5 +1,5 @@
 import common from "../../shared/common.js";
-import visjsGraph from "../../graph/visjsGraph2.js";
+self.lineageVisjsGraph;
 import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 
 var Lineage_relationFilter = (function () {
@@ -175,7 +175,7 @@ var Lineage_relationFilter = (function () {
         } else {
             $("#lineageQuery_uriValueDiv").css("display", "block");
             var scopes = [];
-            if (visjsGraph.isGraphNotEmpty()) {
+            if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
                 scopes.push("whiteBoardNodes");
             }
             scopes.push(Lineage_sources.activeSource);
@@ -243,7 +243,7 @@ var Lineage_relationFilter = (function () {
             return alert("no filter defined");
         }
         if (resourceType == "whiteBoardNodes") {
-            var nodeIds = visjsGraph.data.nodes.getIds();
+            var nodeIds = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
             if (role == "subject") {
                 filter.filterStr = " ?subject rdf:type " + resourceType + ". ";
                 filter.subjectIds = nodeIds;

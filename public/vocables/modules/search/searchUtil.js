@@ -528,9 +528,9 @@ indexes.push(source.toLowerCase());
 
                         // indexNamedIndividuals
                         function (callbackSeries) {
-                            if (true || !options.indexNamedIndividuals) {
+                            /*   if (true || !options.indexNamedIndividuals) {
                                 return callbackSeries();
-                            }
+                            }*/
 
                             var taxonomyClassesIdsMap = {};
                             taxonomyClasses.forEach(function (item) {

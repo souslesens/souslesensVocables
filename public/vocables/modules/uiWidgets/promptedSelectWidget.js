@@ -4,20 +4,26 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 
 var PromptedSelectWidget = (function () {
     var self = {};
-    self.prompt = function (type, selectId, source) {
-        if (Config.selectListsCache[type]) {
-            return common.fillSelectOptions(selectId, Config.selectListsCache[type], true, "label", "id");
+    self.prompt = function (type, selectId, source, options) {
+        if (!options) options = {};
+        if (!options.noCache && Config.selectListsCache[source + "_" + type]) {
+            return common.fillSelectOptions(selectId, Config.selectListsCache[source + "_" + type], true, "label", "id");
         }
 
-        var term = prompt(" filter values ...");
-        if (term === null) {
-            return;
+        var filter = null;
+        if (!Config.topLevelOntologies[source]) {
+            var term = prompt(" filter values ...");
+            if (term === null) {
+                return;
+            }
+            filter = " FILTER ( regex(?label,'" + term + "','i'))";
         }
+
         var options = {
             selectGraph: true,
             lang: Config.default_lang,
             type: type,
-            filter: term ? " FILTER ( regex(?label,'" + term + "','i'))" : "",
+            filter: filter,
             limit: Config.maxSelectListSize,
             withoutImports: true,
         };
@@ -51,8 +57,8 @@ var PromptedSelectWidget = (function () {
                 }
                 return 0;
             });
-            if (result.length <= Config.minSelectListSize) {
-                Config.selectListsCache[type] = objs;
+            if (!options.noCache && result.length <= Config.minSelectListSize) {
+                Config.selectListsCache[source + "_" + type] = objs;
             }
 
             common.fillSelectOptions(selectId, objs, true, "label", "id");

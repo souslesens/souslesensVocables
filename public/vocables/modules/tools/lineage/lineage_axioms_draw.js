@@ -145,7 +145,7 @@ var Lineage_axioms_draw = (function () {
         });
     };
 
-    self.drawNodeAxioms = function (sourceLabel, nodeId, divId, depth, options) {
+    self.drawNodeAxioms = function (sourceLabel, nodeId, divId, depth, options,callback) {
         if (!options) {
             options = {};
         }
@@ -172,13 +172,25 @@ var Lineage_axioms_draw = (function () {
         var sourceLabel = Lineage_sources.activeSource;
 
         self.getNodeAxioms(sourceLabel, nodeId, depth, options, function (err, result) {
+            if(err){
+                if(callback){
+                    return callback(err)
+                }
+                return alert(err)
+            }
             if (result.length < 2) {
+                if(callback){
+                    return callback("no result")
+                }
                 //new resource
                 return self.drawNodeWithoutAxioms(sourceLabel, nodeId);
             }
 
             if (result.length >= Config.queryLimit) {
-                return alert("too Many result > " + Config.queryLimit);
+                if(callback){
+                    return callback("too Many result ")
+                }
+                return alert("too Many result  " + Config.queryLimit);
             }
             var axiomsTriples = {};
 
@@ -454,7 +466,7 @@ var Lineage_axioms_draw = (function () {
                             return callbackSeries();
                         }
 
-                        Sparql_OWL.getNodesLabelTypeAndGraph(sourceLabel, Object.keys(finalNodes), null, function (err, result) {
+                        Sparql_OWL.getNodesLabelTypesAndGraph(sourceLabel, Object.keys(finalNodes), null, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
@@ -462,7 +474,7 @@ var Lineage_axioms_draw = (function () {
                             result.forEach(function (item) {
                                 finalNodes[item.subject.value] = {
                                     label: item.subjectLabel ? item.subjectLabel.value : "",
-                                    type: item.subjectType ? item.subjectType.value : null,
+                                    types: item.sTypes ? item.sTypes.value : null,
                                 };
                                 visjsData.nodes.forEach(function (item, index) {
                                     if (finalNodes[item.data.id]) {
@@ -527,6 +539,9 @@ common.fillSelectOptions("axiomsDraw_otherSourcesSelect",otherSources)*/
                     },
                 ],
                 function (err) {
+                    if(callback){
+                        return callback(null, visjsData)
+                    }
                     //draw graph
                     if (options.addToGraph && self.axiomsVisjsGraph) {
                         self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);

@@ -57,6 +57,14 @@ var Lineage_blend = (function () {
                 self.sourceNode = Lineage_classes.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
                 self.targetNode = Lineage_classes.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 
+                OntologyModels.getAllowedPropertiesBetweenNodes(Lineage_sources.activeSource,self.sourceNode.id, self.targetNode.id, function(err, result){
+
+                })
+
+
+
+
+
                 let options = {
                     openAll: true,
                     selectTreeNodeFn: Lineage_blend.OnSelectAuthorizedPredicatesTreeDiv,

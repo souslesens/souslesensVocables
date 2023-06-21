@@ -462,8 +462,9 @@ var Sparql_OWL = (function () {
             if (i == 1) {
                 //  query += "  OPTIONAL{?subject " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + "  ?broader" + i + ".";
                 query += "  ?subject " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel, options) + "  ?broader" + i + ".";
-                query += "  OPTIONAL{ ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} ";
-                query += Sparql_common.getVariableLangLabel("broader" + i);
+                query += "  OPTIONAL{ ?broader1 rdf:type ?broaderType. filter(?broaderType !=owl:Restriction)} " +
+                  "filter (?broader1 !=owl:Class)" ;
+                query += Sparql_common.getVariableLangLabel("broader" + i,true);
                 // query += " OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label.}";
             } else {
                 query += "OPTIONAL { ?broader" + (i - 1) + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel, options) + " ?broader" + i + ".";
@@ -471,7 +472,7 @@ var Sparql_OWL = (function () {
                 query += " ?broader" + i + " rdf:type ?broaderType" + i + ". filter(?broaderType" + i + " !=owl:Restriction) ";
                 // query += "OPTIONAL{?broader" + i + " rdfs:label ?broader" + i + "Label."
                 // + Sparql_common.getLangFilter(sourceLabel, "broader" + i + "Label") + "}";
-                query += Sparql_common.getVariableLangLabel("broader" + i);
+                query += Sparql_common.getVariableLangLabel("broader" + i,true);
             }
         }
 
@@ -506,20 +507,23 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.getClassAncestorsArray = function (sourceLabel, id, options, callback) {
+    self.getEntityAncestorsArray = function (sourceLabel, id, options, callback) {
         if (!options) {
             options = {};
         }
 
         var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
 
+        var typePredicate="";
+        if(options.individuals)
+            typePredicate="|rdf:type*"
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "select distinct *  " +
             fromStr +
-            "WHERE {?subject rdfs:subClassOf* ?ancestor ." +
+            "WHERE {?subject rdfs:subClassOf*"+typePredicate+" ?ancestor ." +
             "FILTER (?subject=<" +
             id +
             ">) " +
@@ -1354,7 +1358,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-    self.getNodesLabelTypeAndGraph = self.getTriples = function (sourceLabel, ids, options, callback) {
+    self.getNodesLabelTypesAndGraph = self.getTriples = function (sourceLabel, ids, options, callback) {
         var filterStr = Sparql_common.setFilter("subject", ids, null);
         if (!options) {
             options = {};
@@ -1366,7 +1370,7 @@ var Sparql_OWL = (function () {
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "SELECT  ?subject ?subjectLabel ?subjectType ?g" +
+            "SELECT  ?subject ?subjectLabel ?g (GROUP_CONCAT( distinct ?subjectType;separator=\",\") as ?sTypes)" +
             fromStr +
             " WHERE { ?subject ?p ?o." +
             filterStr +

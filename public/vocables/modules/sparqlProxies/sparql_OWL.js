@@ -1012,10 +1012,13 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
     });
   };
 
+
+
   self.getObjectSubProperties = function(sourceLabel, propertyIds, options, callback) {
     if (!options) {
       options = {};
     }
+
     var filterStr = "";
 
     if (!Config.sources[sourceLabel].graphUri) {

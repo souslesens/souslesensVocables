@@ -502,6 +502,7 @@ var Lineage_axioms_draw = (function () {
                                                    source=importedSource;
                                                    var color = Lineage_classes.getSourceColor(source);
                                                    visjsData.nodes[index].color = color
+                                                   visjsData.nodes[index].data.source = source
                                                    if(! sourcesMap[source]) {
                                                        sourcesMap[source] = color
                                                    }
@@ -512,6 +513,7 @@ var Lineage_axioms_draw = (function () {
                                           if(labelsMap[item.data.id].graphs.value.indexOf( Config.sources[sourceLabel].graphUri)>-1){
                                               var color = Lineage_classes.getSourceColor(sourceLabel);
                                               visjsData.nodes[index].color = color
+                                              visjsData.nodes[index].data.source = sourceLabel
                                               if(! sourcesMap[sourceLabel]) {
                                                   sourcesMap[sourceLabel] = color
                                               }

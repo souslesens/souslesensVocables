@@ -47,11 +47,12 @@ var OntologyModels = (function() {
             function(callbackSeries) {
               var query =
                 queryP +
-                " SELECT distinct ?prop ?propLabel ?inverseProp from <" +
+                " SELECT distinct ?prop ?propLabel ?inverseProp ?superProperty from <" +
                 graphUri +
                 ">  WHERE {\n" +
                 "  ?prop ?p ?o optional{?prop rdfs:label ?propLabel}" +
                 "optional{?prop owl:inverseOf ?inverseProp}" +
+                "optional{?prop rdfs:subPropertyOf ?superProperty}" +
                 " VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty owl:AnnotationProperty} }";
               Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
                 if (err) {
@@ -59,17 +60,22 @@ var OntologyModels = (function() {
                 }
 
                 result.results.bindings.forEach(function(item) {
+                  if( item.superProperty)
+                    var x=3
                   if (!uniqueProperties[item.prop.value]) {
                     uniqueProperties[item.prop.value] = 1;
                     Config.ontologiesVocabularyModels[source].properties.push({
                       id: item.prop.value,
                       label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
-                      inversProp: item.inverseProp ? item.inverseProp.value : null
+                      inverseProp: item.inverseProp ? item.inverseProp.value : null,
+                      superProp: item.superProperty ? item.superProperty.value : null
                     });
                   }
                   if (item.inverseProp) {
                     inversePropsMap[item.prop.value] = item.inverseProp.value;
                   }
+
+
                 });
 
                 callbackSeries();
@@ -267,11 +273,14 @@ var OntologyModels = (function() {
               });
             },
 
-            // set constraints prop label
+            // set constraints prop label and superProp
             function(callbackSeries) {
               Config.ontologiesVocabularyModels[source].properties.forEach(function(property) {
                 if (Config.ontologiesVocabularyModels[source].constraints[property.id]) {
                   Config.ontologiesVocabularyModels[source].constraints[property.id].label = property.label;
+
+                  Config.ontologiesVocabularyModels[source].constraints[property.id].superProp = property.superProp
+                  ;
                 }
               });
               return callbackSeries();
@@ -294,8 +303,8 @@ var OntologyModels = (function() {
                   classes.push(constraint.range);
                 }
               }
-              var filter=Sparql_common.setFilter("id",classes)
-              Sparql_OWL.getDictionary(source, { lang:Config.default_lang,filter:filter }, null, function(err, result) {
+              var filter = Sparql_common.setFilter("id", classes);
+              Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, null, function(err, result) {
                 if (err) {
                   return callbackSeries(err);
                 }
@@ -355,6 +364,7 @@ var OntologyModels = (function() {
 
   self.getAllowedPropertiesBetweenNodes = function(source, startNodeId, endNodeId, callback) {
 
+    var levels = 0;
 
     function extractClassHierarchyFromAxiomsVisjData(visjsData) {
       var classHierarchy = [];
@@ -375,14 +385,8 @@ var OntologyModels = (function() {
       return classHierarchy;
     }
 
-
-    var properties = {
-      noConstaints: {},
-      domain: {},
-      range: {},
-      both: {}
-    };
-
+    var properties = {};
+    var propertiesByLevel = [];
 
     var startNode = {
       id: startNodeId,
@@ -447,29 +451,67 @@ var OntologyModels = (function() {
             if (Config.ontologiesVocabularyModels[classSource] && Config.ontologiesVocabularyModels[classSource].constraints) {
               for (var key in Config.ontologiesVocabularyModels[classSource].constraints) {
                 var constraint = Config.ontologiesVocabularyModels[classSource].constraints[key];
+
                 constraint.source = classSource;
+                constraint.level = node.level;
+                levels = Math.max(levels, node.level);
                 if (!constraint.domain) {
                   if (!constraint.range) {
-                    properties.noConstaints[key] = constraint;
+                    constraint.group = "noConstaints";
+
                   }
                   else if (endNode.classHierarchy.indexOf(constraint.range) > -1) {
-                    properties.range[key] = constraint;
+                    constraint.group = "range";
                   }
                 }
                 else if (constraint.domain == classId) {
-
                   if (endNode.classHierarchy.indexOf(constraint.range) > -1) {
-                    properties.both[key] = constraint;
+                    constraint.group = "both";
                   }
                   else {
-                    properties.domain[key] = constraint;
+                    constraint.group = "domain";
                   }
                 }
+
+                if (constraint.group) {
+                  properties[key] = constraint;
+                }
+
+
               }
             }
 
 
           });
+
+
+          return callbackSeries();
+        },
+//set superProperty
+        function(callbackSeries) {
+
+          return callbackSeries();
+        },
+
+
+          //sort and reduce properties to  lowest constraints only (specialisation)
+        function(callbackSeries) {
+
+
+
+
+          for (var level = 0; level <= levels; level++) {
+            propertiesByLevel.push({});
+            for (var propId in properties) {
+              var property = properties[propId];
+              if (property.level == level) {
+                propertiesByLevel[level][propId]=property;
+
+              }
+
+            }
+          }
+
 
           return callbackSeries();
         }
@@ -480,7 +522,7 @@ var OntologyModels = (function() {
         if (err) {
           return callback(err);
         }
-        return callback(null, properties);
+        return callback(null, propertiesByLevel);
       }
     );
 

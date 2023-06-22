@@ -188,27 +188,53 @@ var Lineage_blend = (function() {
 
 
             function(callbackSeries) {
-              for (var group in authorizedProps) {
-                var propertyGroup = authorizedProps[group];
+            var allProps=[]
+              authorizedProps.forEach(function(levelProps, index) {
+                  for (var propId in levelProps) {
+                    allProps.push(propId)
+                  }
+              })
 
-                for (var propId in propertyGroup) {
-                  var property = propertyGroup[propId];
-
-                  var label = (property.domainLabel || "any") + "<b>-" + property.source+"."+property.label + "-></b>" + (property.rangeLabel || "any");
-                  var cssClass = propStatusCssClassMap[group];
-                jstreeData.push({
-                  id: propId,
-                  text: "<span class='" + cssClass + "'>" + label + "</span>",
+              authorizedProps.forEach(function(levelProps, index) {
+                if (Object.keys(levelProps).length == 0)
+                  return
+              jstreeData.push({
+                  id: "_level " + index,
+                  text: "level " + index,
                   parent: "#",
                   data: {
-                    id: propId,
-                    label: label,
-                    source: property.source
+                    id: "_level " + index,
+                    text: "level " + index,
+
                   }
                 });
-              }
 
-              }
+                for (var propId in levelProps) {
+                  var property = levelProps[propId];
+
+                  var label = (property.domainLabel || "any") + "<b>-" + property.source + "." + property.label + "-></b>" + (property.rangeLabel || "any");
+                  var group = property.group
+                  var cssClass = propStatusCssClassMap[group];
+                  var parent="_level " + index
+                  if(false && property.superProp) {
+                    if (allProps[property.superProp])
+                      parent = property.superProp
+                  }
+                  jstreeData.push({
+                    id: propId,
+                    text: "<span class='" + cssClass + "'>" + label + "</span>",
+                    parent: parent,//"_level " + index,
+                    data: {
+                      id: propId,
+                      label: label,
+                      source: property.source
+                    }
+                  });
+                }
+              })
+
+
+
 
  return callbackSeries()
             },

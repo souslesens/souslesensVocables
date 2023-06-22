@@ -221,6 +221,8 @@ var Lineage_axioms_draw = (function () {
                     if (item.p.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" && (item.o.value.indexOf("owl") > -1 || item.o.value.indexOf("rdf") > -1)) {
                         return;
                     }
+                    if(item.o.value=="http://www.w3.org/2002/07/owl#Ontology")
+                        return;
 
                     nodesMap[item.s.value].children.push({ pred: item.p.value, obj: item.o.value });
                 }
@@ -368,7 +370,7 @@ var Lineage_axioms_draw = (function () {
                 item.children.forEach(function (child) {
                     var targetItem = nodesMap[child.obj];
 
-                    if (child.obj == "_:7a13435ef7") var x = 3;
+
                     if (!targetItem) {
                         if (!finalNodes[child.obj]) {
                             finalNodes[child.obj] = { predicate: child.pred };
@@ -454,45 +456,95 @@ var Lineage_axioms_draw = (function () {
             }
 
             recurse(nodeId, options.level || 1);
-
+            var sourcesMap={}
             async.series(
                 [
-                    // set finalnodes
+                // set nodes label color and shape
                     function (callbackSeries) {
-                        //  return callbackSeries();
 
-                        var nodes = Object.keys(finalNodes);
+                       var nodes=[];
+                        visjsData.nodes.forEach(function(node){
+                            nodes.push(node.data.id)
+                        })
+
                         if (nodes.length == 0) {
                             return callbackSeries();
                         }
 
-                        Sparql_OWL.getNodesLabelTypesAndGraph(sourceLabel, Object.keys(finalNodes), null, function (err, result) {
+                        Sparql_OWL.getNodesLabelTypesAndGraph(sourceLabel, nodes, { }, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
-                            var nodesToRemove = [];
-                            result.forEach(function (item) {
-                                finalNodes[item.subject.value] = {
-                                    label: item.subjectLabel ? item.subjectLabel.value : "",
-                                    types: item.sTypes ? item.sTypes.value : null,
-                                };
-                                visjsData.nodes.forEach(function (item, index) {
-                                    if (finalNodes[item.data.id]) {
-                                        var options = geNodeParams(finalNodes[item.data.id].types).options;
+                            var labelsMap = {}
 
-                                        // visjsData.nodes[index].color = options.color;
-                                        visjsData.nodes[index].shape = options.shape;
-                                        visjsData.nodes[index].size = options.size;
-                                        visjsData.nodes[index].label = finalNodes[item.data.id].label;
+                            result.forEach(function(item) {
+                                labelsMap[item.subject.value] = item
+
+
+                            })
+
+
+                            visjsData.nodes.forEach(function(item, index) {
+                                if (labelsMap[item.data.id]) {
+                                    var options = geNodeParams(labelsMap[item.data.id].sTypes.value).options
+
+                                    visjsData.nodes[index].shape = options.shape;
+                                    visjsData.nodes[index].size = options.size;
+                                    if(labelsMap[item.data.id].subjectLabel)
+                                    visjsData.nodes[index].label = labelsMap[item.data.id].subjectLabel.value;
+                                    if(  Config.sources[sourceLabel] && labelsMap[item.data.id].graphs) {
+
+                                        var imports = Config.sources[sourceLabel].imports
+                                        var source=null;
+                                        if(imports){
+                                            imports.forEach(function(importedSource){
+                                               if(labelsMap[item.data.id].graphs.value.indexOf( Config.sources[importedSource].graphUri)>-1){
+                                                   source=importedSource;
+                                                   var color = Lineage_classes.getSourceColor(source);
+                                                   visjsData.nodes[index].color = color
+                                                   if(! sourcesMap[source]) {
+                                                       sourcesMap[source] = color
+                                                   }
+                                            }
+
+                                        })
+                                        }
+                                          if(labelsMap[item.data.id].graphs.value.indexOf( Config.sources[sourceLabel].graphUri)>-1){
+                                              var color = Lineage_classes.getSourceColor(sourceLabel);
+                                              visjsData.nodes[index].color = color
+                                              if(! sourcesMap[sourceLabel]) {
+                                                  sourcesMap[sourceLabel] = color
+                                              }
+
+
+
+
+                                        }
                                     }
-                                });
-                            });
-                            callbackSeries();
-                        });
+                                }
+
+                            })
+                            return callbackSeries()
+
+                        })
+
+
+
                     },
 
                     //set color and legend
                     function (callbackSeries) {
+                        var html = "";
+                        for( var source in sourcesMap){
+                            html += "<div  id='S_" + source + "' style='color: " +sourcesMap[source] + "' class='Lineage_sourceLabelDiv'>" + source + "</div>";
+                        };
+
+                        $("#axiomsGraphLegendDiv").html(html);
+
+
+
+
+                      return callbackSeries();
                         //get nodes SourceColor
                         var nodes = [];
                         visjsData.nodes.forEach(function (item) {

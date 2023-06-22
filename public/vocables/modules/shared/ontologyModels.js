@@ -266,6 +266,62 @@ var OntologyModels = (function() {
                 return callbackSeries();
               });
             },
+
+            // set constraints prop label
+            function(callbackSeries) {
+              Config.ontologiesVocabularyModels[source].properties.forEach(function(property) {
+                if (Config.ontologiesVocabularyModels[source].constraints[property.id]) {
+                  Config.ontologiesVocabularyModels[source].constraints[property.id].label = property.label;
+                }
+              });
+              return callbackSeries();
+            },
+
+
+            // set transSourceRangeAndDomainLabels
+            function(callbackSeries) {
+
+              if (!Config.sources[source]) {
+                return callbackSeries();
+              }
+              var classes = [];
+              for (var propId in Config.ontologiesVocabularyModels[source].constraints) {
+                var constraint = Config.ontologiesVocabularyModels[source].constraints[propId];
+                if (constraint.domain && classes.indexOf(constraint.domain) < 0) {
+                  classes.push(constraint.domain);
+                }
+                if (constraint.range && classes.indexOf(constraint.range) < 0) {
+                  classes.push(constraint.range);
+                }
+              }
+              var filter=Sparql_common.setFilter("id",classes)
+              Sparql_OWL.getDictionary(source, { lang:Config.default_lang,filter:filter }, null, function(err, result) {
+                if (err) {
+                  return callbackSeries(err);
+                }
+                var labelsMap = {};
+                result.forEach(function(item) {
+                  if (item.label) {
+                    labelsMap[item.id.value] = item.label.value;
+                  }
+
+                });
+                for (var propId in Config.ontologiesVocabularyModels[source].constraints) {
+                  var constraint = Config.ontologiesVocabularyModels[source].constraints[propId];
+                  if (labelsMap[constraint.domain]) {
+                    Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = labelsMap[constraint.domain];
+                  }
+                  if (labelsMap[constraint.range]) {
+                    Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = labelsMap[constraint.range];
+                  }
+                }
+
+                return callbackSeries();
+              });
+
+            },
+
+
             //register source in Config.sources
             function(callbackSeries) {
               if (!Config.sources[source]) {
@@ -316,98 +372,120 @@ var OntologyModels = (function() {
           }
         }
       });
-      return classHierarchy
+      return classHierarchy;
     }
 
 
-  var startNode = {
-    id: startNodeId,
-    axioms: {},
-    classHierarchy:[],
-    objectProperties:[]
-  };
-
-  var endNode = {
-    id: endNodeId,
-    axioms: {},
-    classHierarchy:[],
-    objectProperties:[]
-  };
-
-  async.series(
-    [
+    var properties = {
+      noConstaints: {},
+      domain: {},
+      range: {},
+      both: {}
+    };
 
 
-      //get startNodeAxioms
-      function(callbackSeries) {
-        Lineage_axioms_draw.drawNodeAxioms(source, startNodeId, null, 4, {}, function(err, result) {
-          if (err) {
-            return callbackSeries(err);
-          }
-          startNode.axioms = result;
-          startNode.classHierarchy=extractClassHierarchyFromAxiomsVisjData(result)
-          return callbackSeries();
+    var startNode = {
+      id: startNodeId,
+      axioms: {},
+      classHierarchy: [],
+      objectProperties: []
+    };
 
-        });
-      },
-      //get endNodeAxioms
-      function(callbackSeries) {
+    var endNode = {
+      id: endNodeId,
+      axioms: {},
+      classHierarchy: [],
+      objectProperties: []
+    };
 
-
-        Lineage_axioms_draw.drawNodeAxioms(source, endNodeId, null, 4, {}, function(err, result) {
-          if (err) {
-            return callbackSeries(err);
-          }
-          endNode.axioms = result;
-          endNode.classHierarchy=extractClassHierarchyFromAxiomsVisjData(result)
-          return callbackSeries();
+    async.series(
+      [
 
 
-        })
-      }
-          ,
+        //get startNodeAxioms
+        function(callbackSeries) {
+          Lineage_axioms_draw.drawNodeAxioms(source, startNodeId, null, 4, {}, function(err, result) {
+            if (err) {
+              return callbackSeries(err);
+            }
+            startNode.axioms = result;
+            startNode.classHierarchy = extractClassHierarchyFromAxiomsVisjData(result);
+            return callbackSeries();
 
-      function(callbackSeries) {
-      var nodesMap={}
-        startNode.axioms.nodes.forEach(function(node) {
-          if (node.data.type == "http://www.w3.org/2002/07/owl#Class") {
-            nodesMap[node.id] = node;
-          }
-        })
-      startNode.classHierarchy.forEach(function(classId){
-        var node=nodesMap[classId]
-        var classSource=node.data.source;
-        if(Config.ontologiesVocabularyModels[classSource] && Config.ontologiesVocabularyModels[classSource].constraints){
-         for (var key in  Config.ontologiesVocabularyModels[classSource].constraints){
+          });
+        },
+        //get endNodeAxioms
+        function(callbackSeries) {
 
-         }
+
+          Lineage_axioms_draw.drawNodeAxioms(source, endNodeId, null, 4, {}, function(err, result) {
+            if (err) {
+              return callbackSeries(err);
+            }
+            endNode.axioms = result;
+            endNode.classHierarchy = extractClassHierarchyFromAxiomsVisjData(result);
+            return callbackSeries();
+
+
+          });
         }
+        ,
+
+        function(callbackSeries) {
+          var nodesMap = {};
+          startNode.axioms.nodes.forEach(function(node) {
+            if (node.data.type == "http://www.w3.org/2002/07/owl#Class") {
+              nodesMap[node.id] = node;
+            }
+          });
+
+          startNode.classHierarchy.forEach(function(classId) {
+
+            var node = nodesMap[classId];
+            var classSource = node.data.source;
+
+            if (Config.ontologiesVocabularyModels[classSource] && Config.ontologiesVocabularyModels[classSource].constraints) {
+              for (var key in Config.ontologiesVocabularyModels[classSource].constraints) {
+                var constraint = Config.ontologiesVocabularyModels[classSource].constraints[key];
+                constraint.source = classSource;
+                if (!constraint.domain) {
+                  if (!constraint.range) {
+                    properties.noConstaints[key] = constraint;
+                  }
+                  else if (endNode.classHierarchy.indexOf(constraint.range) > -1) {
+                    properties.range[key] = constraint;
+                  }
+                }
+                else if (constraint.domain == classId) {
+
+                  if (endNode.classHierarchy.indexOf(constraint.range) > -1) {
+                    properties.both[key] = constraint;
+                  }
+                  else {
+                    properties.domain[key] = constraint;
+                  }
+                }
+              }
+            }
 
 
-      })
+          });
 
-        return callbackSeries();
-      }
+          return callbackSeries();
+        }
 
       ],
 
-        function(err) {
-          if (err) {
-            return callback(err);
-          }
-
-          if (edgeData.from === edgeData.to) {
-            return callback(null);
-          }
-          else {
-            return callback(null);
-          }
+      function(err) {
+        if (err) {
+          return callback(err);
         }
-
-      )
-
-
+        return callback(null, properties);
       }
+    );
+
+
+  };
 
 
   return self;

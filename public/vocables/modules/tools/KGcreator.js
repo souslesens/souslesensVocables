@@ -103,6 +103,7 @@ var KGcreator = (function () {
         ["System", "FunctionalObject", "hasFunctionalPart"],
     ];
     self.csvHeaders = [];
+    self.csvData = [];
     self.mappingFiles = {};
     self.subjects = {}
     self.subjectList = [];
@@ -735,7 +736,9 @@ var KGcreator = (function () {
                 success: function (result, _textStatus, _jqXHR) {
                   
                     var jstreeData = [];
-                    self.csvHeaders = result.headers;
+                    self.csvData = result.data;
+                    self.csvHeaders = result.headers;  // save headers
+
 
 
                     result.headers.forEach(function (col) {
@@ -850,7 +853,7 @@ var KGcreator = (function () {
     self.refreshSubjectSelect = function(subject) {
         let subjectSelect = document.getElementById('subjectSelect');
         subjectSelect.innerHTML = '';
-        let placeholderOption = new Option('Select a subject');
+        let placeholderOption = new Option('Select a _blankNode');
         placeholderOption.disabled = true;
         placeholderOption.selected = true;
         subjectSelect.add(placeholderOption);
@@ -1011,7 +1014,7 @@ window.onload = () => {
         // Create a new option for placeholder
         var placeholderOption = document.createElement('option');
         placeholderOption.value = '';
-        placeholderOption.text = 'Select a subject';
+        placeholderOption.text = 'Select a _blankNode';
         placeholderOption.selected = true; // This option will be selected by default
         placeholderOption.disabled = true; // The user cannot select this option
     
@@ -1104,45 +1107,60 @@ window.onload = () => {
         }
     }
 
-    self.createRDFTriples = function () {
-        var formData = new FormData();
-      
-        // Read the RML file
-        var rmlFile = new File([], 'C:/Users/user/Desktop/KGcreator/mapping.rml', { type: 'text/plain' });
-        var rmlReader = new FileReader();
-        rmlReader.onload = function (event) {
-          rmlFile = new File([event.target.result], 'C:/Users/user/Desktop/KGcreator/mapping.rml', { type: 'text/plain' });
-          formData.append('rml', rmlFile);
-      
-          // Read the data file
-          var dataFile = new File([], 'C:/Users/user/Desktop/KGcreator/data.csv', { type: 'text/csv' });
-          var dataReader = new FileReader();
-          dataReader.onload = function (event) {
-            dataFile = new File([event.target.result], 'C:/Users/user/Desktop/KGcreator/data.csv', { type: 'text/csv' });
-            formData.append('data', dataFile);
+        self.createRDFTriples = function () {
+
+            var rmlString = $('#rmlTextarea').val();  
+            var fileName = self.currentJsonObject.fileName;  
+        
+        
+            var csvHeaders = self.columnDataList ;
+        
+
+            console.log("Headers:", csvHeaders);
+            console.log("First row of original data:", self.csvData[0]);
             
-            // Set the format
-            formData.append('format', 'csv');
-      
-            // Send the AJAX request
-            $.ajax({
-              url: 'http://localhost:9090/api/mapping',
-              type: 'POST',
-              data: formData,
-              contentType: false,
-              processData: false,
-              success: function(data) {
-                console.log(data);
-              },
-              error: function(error) {
-                console.error('Error:', error);
-              }
+            var csvData = self.csvData.map(row => {
+              var newRow = csvHeaders.map(header => {
+                if (row[header] === undefined) {
+                  console.log(`No property '${header}' in row`, row);
+                }
+                return row[header];
+              });
+              return newRow;
             });
-          };
-          dataReader.readAsText(dataFile);
+            
+            console.log(csvData)
+
+
+            
+            
+        
+            var data = {
+                rml: rmlString,
+                sources: [{
+                    fileName: fileName,
+                    csvHeaders: csvHeaders,
+                    csvData: csvData
+                }]
+            };
+
+            console.log(data)
+
+
+            $.ajax({
+                url: 'http://localhost:9090/api/mapping',  // replace with your actual Spring Boot app URL
+                method: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function(responseData) {
+                    $('#KGcreator_dataSampleDiv').val(responseData);  // replace with your actual output textarea id
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    alert('Error during the RML mapping process: ' + errorThrown);
+                }
+            });
+
         };
-        rmlReader.readAsText(rmlFile);
-      };
       
       
 

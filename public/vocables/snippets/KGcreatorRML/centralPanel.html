@@ -201,6 +201,7 @@
 
 
             <button id="modalButton" onclick="KGcreator.generateRML()">Add</button>
+
         </div>
     </div>
     
@@ -217,7 +218,7 @@
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearMappings()">Clear mappings</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.createTriples(true)">View Sample triples</button>
             <!--  <input type="checkbox" id="KGcreator_addAllPredefinedPart14PredicatesTriples" />addPredefinedPart14Triples-->
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.createTriples()">Create triples</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.createRDFTriples()">Create triples</button>
             <!--  <input type="checkbox" id="KGcreator_onlySelectionCBX"/>only selection-->
         </div>
         <div class="lineage_button_group" style="width: 600px">
@@ -225,6 +226,7 @@
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.deleteKGcreatorTriples()">delete current file triples</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearGraph()" style="background-color: #fbcb09 !important">Clear entire graph</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.indexGraph()">Index graph</button>
+
 
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="display: none" id="KGcreator_saveFileButton" onclick="KGcreator.saveFile()">Save file</button>
         </div>

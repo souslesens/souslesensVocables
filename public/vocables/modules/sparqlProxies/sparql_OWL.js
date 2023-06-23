@@ -599,20 +599,23 @@ var Sparql_OWL = (function() {
     var query =
       "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
       "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-      "SELECT * " +
+      "SELECT distinct ?class ?type ?classLabel ?subClass ?subClassType ?subClassLabel ?superClass ?superClassType  ?superClassLabel " +
       fromStr +
       " WHERE {" +
-      "?class rdf:type ?type. ?class (rdf:type|rdfs:subClassOf)" +
-      modifier +
-      " ?superClass." +
-      " optional {?superClass rdf:type ?superClassType}";
-    ("filter (isIRI(?superClass) && ?superClassType!= <http://www.w3.org/2002/07/owl#Restriction>) ");
+
+      " ?class rdf:type ?type." +
+      " ?class rdfs:subClassOf+ ?superClass." +
+      " ?superClass ^rdfs:subClassOf ?subClass." +
+      " ?subClass rdf:type ?subClassType. ?superClass rdf:type ?superClassType" +
+      filterStr+
+      " filter (?superClassType !=owl:Restriction)"
+
 
     if (options.withLabels) {
-      query += "OPTIONAL {?class rdfs: label classLabel } OPTIONAL {?superClass rdfs: label superClassLabel }";
+      query += "OPTIONAL {?class rdfs: label classLabel }OPTIONAL {?subClass rdfs: label subClassLabel } OPTIONAL {?superClass rdfs: label superClassLabel }";
     }
     query += filterStr;
-    query += "} LIMIT 100";
+    query += "} LIMIT 1000";
 
     var url = self.sparql_url + "?format=json&query=";
     self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
@@ -623,9 +626,40 @@ var Sparql_OWL = (function() {
       if (err) {
         return callback(err);
       }
-      result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass"]);
 
-      return callback(null, result.results.bindings);
+      result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass","subClass"]);
+
+      var map={}
+      result.results.bindings.forEach(function(item){
+        map[item.subClass.value]=item
+
+      })
+      var hierarchyArray=[]
+
+      function recurse(array,itemId){
+       if( map[itemId] && array.indexOf(itemId)<0){
+         array.push(itemId);
+         if(map[itemId].superClass && map[itemId].superClass.value)
+           recurse(array,map[itemId].superClass.value)
+       }
+      }
+
+      var hierarchies={}
+      classIds.forEach(function(id){
+        hierarchies[id]=[]
+        recurse( hierarchies[id],id)
+
+      })
+      for(var key in hierarchies){
+        hierarchies[key].forEach(function(item,index){
+          hierarchies[key][index]=map[item]
+        })
+      }
+
+
+
+      return callback(null, {hierarchies:hierarchies,rawResult: result.results.bindings});
+
     });
   };
 
@@ -1385,7 +1419,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
     });
   };
 
-  self.getNodesLabelTypesAndGraph = self.getTriples = function(sourceLabel, ids, options, callback) {
+  self.getNodesLabelTypesAndGraph= function(sourceLabel, ids, options, callback) {
     var filterStr = Sparql_common.setFilter("subject", ids, null);
     if (!options) {
       options = {};

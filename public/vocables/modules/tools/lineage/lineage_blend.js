@@ -188,42 +188,52 @@ var Lineage_blend = (function() {
 
 
             function(callbackSeries) {
-            var allProps=[]
-              authorizedProps.forEach(function(levelProps, index) {
-                  for (var propId in levelProps) {
-                    allProps.push(propId)
+              /*   var allProps=[]
+             authorizedProps.forEach(function(levelProps, index) {
+                 for (var propId in levelProps) {
+                   allProps.push(propId)
+                 }
+             })
+
+       authorizedProps.forEach(function(levelProps, index) {
+               if (Object.keys(levelProps).length == 0)
+                 return
+             jstreeData.push({
+                 id: "_level " + index,
+                 text: "level " + index,
+                 parent: "#",
+                 data: {
+                   id: "_level " + index,
+                   text: "level " + index,
+
+                 }
+               });*/
+var uniqueSources={}
+                for (var propId in authorizedProps) {
+                  var property = authorizedProps[propId];
+
+                  if(!uniqueSources[property.source] ) {
+                    uniqueSources[property.source] = 1
+                    jstreeData.push({
+                      id: property.source,
+                      text: property.source,
+                      parent: "#",
+                      data: {
+                        id: property.source,
+                        text: property.source,
+                      }
+                      })
+
                   }
-              })
-
-              authorizedProps.forEach(function(levelProps, index) {
-                if (Object.keys(levelProps).length == 0)
-                  return
-              jstreeData.push({
-                  id: "_level " + index,
-                  text: "level " + index,
-                  parent: "#",
-                  data: {
-                    id: "_level " + index,
-                    text: "level " + index,
-
-                  }
-                });
-
-                for (var propId in levelProps) {
-                  var property = levelProps[propId];
-
-                  var label = (property.domainLabel || "any") + "<b>-" + property.source + "." + property.label + "-></b>" + (property.rangeLabel || "any");
+                  var label = (property.domainLabel || "any") + "<b>-" +  property.label + "-></b>" + (property.rangeLabel || "any");
                   var group = property.group
                   var cssClass = propStatusCssClassMap[group];
-                  var parent="_level " + index
-                  if(false && property.superProp) {
-                    if (allProps[property.superProp])
-                      parent = property.superProp
-                  }
+                  var parent=property.source
+
                   jstreeData.push({
                     id: propId,
                     text: "<span class='" + cssClass + "'>" + label + "</span>",
-                    parent: parent,//"_level " + index,
+                    parent: parent,
                     data: {
                       id: propId,
                       label: label,
@@ -231,7 +241,7 @@ var Lineage_blend = (function() {
                     }
                   });
                 }
-              })
+            //  })
 
 
 

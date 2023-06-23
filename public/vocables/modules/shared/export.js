@@ -323,17 +323,22 @@ var Export = (function () {
         return { cols: cols, dataSet: dataSet };
     };
 
-    self.showDataTable = function (div, cols, dataSet, buttons, options) {
+    self.showDataTable = function (div, cols, dataSet, buttons, options,additionalbuttons,callback) {
         if (self.dataTable) {
             self.dataTable.destroy();
             $("#dataTableDiv").html("");
         }
         if (!div) {
-            $("#mainDialogDiv").dialog("open");
-            $("#mainDialogDiv").html("<table id='dataTableDivExport'></table>");
+            if(!options.notDialog){
+                $("#mainDialogDiv").dialog("open");
+            }
+            
+            $("#" +div).html("<table id='dataTableDivExport'></table>");
             div = "dataTableDiv";
         } else {
+            if(!options.notDialog){
             $("#" + div).dialog("open");
+            }
             $("#" + div).html("<table id='dataTableDivExport'></table>");
         }
 
@@ -354,7 +359,7 @@ var Export = (function () {
                         fieldSeparator: ";",
                     },
                     "copy",
-                ],
+                ].concat(additionalbuttons),
 
                 paging: false,
                 /*  columnDefs: [
@@ -373,6 +378,7 @@ var Export = (function () {
             }
 
             self.dataTable = $("#dataTableDivExport").DataTable(params);
+            callback();
         }, 200);
     };
 
@@ -382,4 +388,4 @@ var Export = (function () {
 export default Export;
 
 window.Export = Export;
-window.Export = Export;
+

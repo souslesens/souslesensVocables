@@ -14,7 +14,6 @@ import Lineage_sources from "../tools/lineage/lineage_sources.js";
 
 var NodeInfosWidget = (function () {
     var self = {};
-
     self.initDialog = function (sourceLabel, divId, callback) {
         self.currentSource = sourceLabel;
         $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
@@ -660,12 +659,18 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             return alert("enter property and value");
         }
 
-        if ($("#sourceBrowser_addPropertyObjectSelect").val() == "xsd:dateTime") {
+        if (property == "xsd:dateTime") {
             if (!value.match(/\d\d\d\d-\d\d-\d\d/)) {
                 return alert("wrong date format (need yyy-mm-dd");
             }
             value = value + "^^xsd:dateTime";
             $("#editPredicate_objectValue").datepicker("destroy");
+        }
+        if (property.startsWith("xsd:") ){
+           
+            value = value + "^^"+property;
+            property='owl:hasValue'
+            
         }
 
         $("#sourceBrowser_addPropertyDiv").css("display", "none");
@@ -922,15 +927,18 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     };
     self.showModifyPredicateDialog = function (predicateId) {
         PredicatesSelectorWidget.currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
+        PredicatesSelectorWidget.currentEditingProperty= predicateId;
         if (!PredicatesSelectorWidget.currentEditingItem) {
             return alert("error");
         }
         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
             $("#editPredicate_savePredicateButton").click(function () {
                 self.addPredicate();
+                //Delete
+                self.deletePredicate(PredicatesSelectorWidget.currentEditingProperty);
             });
         });
-
+         
         $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
         $("#editPredicate_objectValue").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
         var h = Math.max((PredicatesSelectorWidget.currentEditingItem.item.value.value.length / 80) * 30, 50);

@@ -9,6 +9,7 @@ module.exports = function () {
 
     ///// GET api/v1/health
     async function GET(req, res, next) {
+        const enabledServices = config.health_enabled_services ? config.health_enabled_services : ["virtuoso", "elasticsearch", "spacyserver", "sqlserver"];
         const sparqlUrl = `${config.default_sparql_url}/?default-graph-uri=&query=SELECT+*%0D%0AWHERE+%7B%3Fs+%3Fp+%3Fo%7D%0D%0ALIMIT+10&format=application%2Fsparql-results%2Bjson`;
         const elasticSearchUrl = `${config.ElasticSearch.url}/_cat/health`;
         const spacyServerUrl = `${config.annotator.spacyServerUrl}/health_check`.replace("/pos", "");
@@ -29,11 +30,17 @@ module.exports = function () {
                 .catch((e) => ({ name: "sqlserver", health: false }));
             const results = await Promise.all([fetchVirtuoso, fetchElasticSearch, fetchSpacyServer, connectSqlServer].map((p) => p.catch((e) => e)));
             const health = Object.fromEntries(
-                results.map((res) => {
-                    return [res.name, res.health];
-                })
+                results
+                    .map((res) => {
+                        return [res.name, res.health];
+                    })
+                    .filter(([svc, _health]) => {
+                        return enabledServices.includes(svc) ? true : false;
+                    })
             );
-            const globalHealth = results.map((res) => res.health).reduce((acc, curr) => acc && curr);
+            const globalHealth = Object.values(health)
+                .map((health) => health)
+                .reduce((acc, curr) => acc && curr);
             res.status(globalHealth ? 200 : 500).json({ health: health });
         } catch (error) {
             res.status(500).json({ health: "error" });

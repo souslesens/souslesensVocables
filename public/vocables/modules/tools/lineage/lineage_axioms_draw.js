@@ -145,7 +145,7 @@ var Lineage_axioms_draw = (function () {
         });
     };
 
-    self.drawNodeAxioms = function (sourceLabel, nodeId, divId, depth, options,callback) {
+    self.drawNodeAxioms = function (sourceLabel, nodeId, divId, depth, options, callback) {
         if (!options) {
             options = {};
         }
@@ -172,23 +172,23 @@ var Lineage_axioms_draw = (function () {
         var sourceLabel = Lineage_sources.activeSource;
 
         self.getNodeAxioms(sourceLabel, nodeId, depth, options, function (err, result) {
-            if(err){
-                if(callback){
-                    return callback(err)
+            if (err) {
+                if (callback) {
+                    return callback(err);
                 }
-                return alert(err)
+                return alert(err);
             }
             if (result.length < 2) {
-                if(callback){
-                    return callback("no result")
+                if (callback) {
+                    return callback("no result");
                 }
                 //new resource
                 return self.drawNodeWithoutAxioms(sourceLabel, nodeId);
             }
 
             if (result.length >= Config.queryLimit) {
-                if(callback){
-                    return callback("too Many result ")
+                if (callback) {
+                    return callback("too Many result ");
                 }
                 return alert("too Many result  " + Config.queryLimit);
             }
@@ -221,8 +221,7 @@ var Lineage_axioms_draw = (function () {
                     if (item.p.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" && (item.o.value.indexOf("owl") > -1 || item.o.value.indexOf("rdf") > -1)) {
                         return;
                     }
-                    if(item.o.value=="http://www.w3.org/2002/07/owl#Ontology")
-                        return;
+                    if (item.o.value == "http://www.w3.org/2002/07/owl#Ontology") return;
 
                     nodesMap[item.s.value].children.push({ pred: item.p.value, obj: item.o.value });
                 }
@@ -370,7 +369,6 @@ var Lineage_axioms_draw = (function () {
                 item.children.forEach(function (child) {
                     var targetItem = nodesMap[child.obj];
 
-
                     if (!targetItem) {
                         if (!finalNodes[child.obj]) {
                             finalNodes[child.obj] = { predicate: child.pred };
@@ -456,97 +454,78 @@ var Lineage_axioms_draw = (function () {
             }
 
             recurse(nodeId, options.level || 1);
-            var sourcesMap={}
+            var sourcesMap = {};
             async.series(
                 [
-                // set nodes label color and shape
+                    // set nodes label color and shape
                     function (callbackSeries) {
-
-                       var nodes=[];
-                        visjsData.nodes.forEach(function(node){
-                            nodes.push(node.data.id)
-                        })
+                        var nodes = [];
+                        visjsData.nodes.forEach(function (node) {
+                            nodes.push(node.data.id);
+                        });
 
                         if (nodes.length == 0) {
                             return callbackSeries();
                         }
 
-                        Sparql_OWL.getNodesLabelTypesAndGraph(sourceLabel, nodes, { }, function (err, result) {
+                        Sparql_OWL.getNodesLabelTypesAndGraph(sourceLabel, nodes, {}, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
-                            var labelsMap = {}
+                            var labelsMap = {};
 
-                            result.forEach(function(item) {
-                                labelsMap[item.subject.value] = item
+                            result.forEach(function (item) {
+                                labelsMap[item.subject.value] = item;
+                            });
 
-
-                            })
-
-
-                            visjsData.nodes.forEach(function(item, index) {
+                            visjsData.nodes.forEach(function (item, index) {
                                 if (labelsMap[item.data.id]) {
-                                    var options = geNodeParams(labelsMap[item.data.id].sTypes.value).options
+                                    var options = geNodeParams(labelsMap[item.data.id].sTypes.value).options;
 
                                     visjsData.nodes[index].shape = options.shape;
                                     visjsData.nodes[index].size = options.size;
-                                    if(labelsMap[item.data.id].subjectLabel)
-                                    visjsData.nodes[index].label = labelsMap[item.data.id].subjectLabel.value;
-                                    if(  Config.sources[sourceLabel] && labelsMap[item.data.id].graphs) {
-
-                                        var imports = Config.sources[sourceLabel].imports
-                                        var source=null;
-                                        if(imports){
-                                            imports.forEach(function(importedSource){
-                                               if(labelsMap[item.data.id].graphs.value.indexOf( Config.sources[importedSource].graphUri)>-1){
-                                                   source=importedSource;
-                                                   var color = Lineage_classes.getSourceColor(source);
-                                                   visjsData.nodes[index].color = color
-                                                   visjsData.nodes[index].data.source = source
-                                                   if(! sourcesMap[source]) {
-                                                       sourcesMap[source] = color
-                                                   }
-                                            }
-
-                                        })
+                                    if (labelsMap[item.data.id].subjectLabel) visjsData.nodes[index].label = labelsMap[item.data.id].subjectLabel.value;
+                                    if (Config.sources[sourceLabel] && labelsMap[item.data.id].graphs) {
+                                        var imports = Config.sources[sourceLabel].imports;
+                                        var source = null;
+                                        if (imports) {
+                                            imports.forEach(function (importedSource) {
+                                                if (labelsMap[item.data.id].graphs.value.indexOf(Config.sources[importedSource].graphUri) > -1) {
+                                                    source = importedSource;
+                                                    var color = Lineage_classes.getSourceColor(source);
+                                                    visjsData.nodes[index].color = color;
+                                                    visjsData.nodes[index].data.source = source;
+                                                    if (!sourcesMap[source]) {
+                                                        sourcesMap[source] = color;
+                                                    }
+                                                }
+                                            });
                                         }
-                                          if(labelsMap[item.data.id].graphs.value.indexOf( Config.sources[sourceLabel].graphUri)>-1){
-                                              var color = Lineage_classes.getSourceColor(sourceLabel);
-                                              visjsData.nodes[index].color = color
-                                              visjsData.nodes[index].data.source = sourceLabel
-                                              if(! sourcesMap[sourceLabel]) {
-                                                  sourcesMap[sourceLabel] = color
-                                              }
-
-
-
-
+                                        if (labelsMap[item.data.id].graphs.value.indexOf(Config.sources[sourceLabel].graphUri) > -1) {
+                                            var color = Lineage_classes.getSourceColor(sourceLabel);
+                                            visjsData.nodes[index].color = color;
+                                            visjsData.nodes[index].data.source = sourceLabel;
+                                            if (!sourcesMap[sourceLabel]) {
+                                                sourcesMap[sourceLabel] = color;
+                                            }
                                         }
                                     }
                                 }
-
-                            })
-                            return callbackSeries()
-
-                        })
-
-
-
+                            });
+                            return callbackSeries();
+                        });
                     },
 
                     //set color and legend
                     function (callbackSeries) {
                         var html = "";
-                        for( var source in sourcesMap){
-                            html += "<div  id='S_" + source + "' style='color: " +sourcesMap[source] + "' class='Lineage_sourceLabelDiv'>" + source + "</div>";
-                        };
+                        for (var source in sourcesMap) {
+                            html += "<div  id='S_" + source + "' style='color: " + sourcesMap[source] + "' class='Lineage_sourceLabelDiv'>" + source + "</div>";
+                        }
 
                         $("#axiomsGraphLegendDiv").html(html);
 
-
-
-
-                      return callbackSeries();
+                        return callbackSeries();
                         //get nodes SourceColor
                         var nodes = [];
                         visjsData.nodes.forEach(function (item) {
@@ -593,8 +572,8 @@ common.fillSelectOptions("axiomsDraw_otherSourcesSelect",otherSources)*/
                     },
                 ],
                 function (err) {
-                    if(callback){
-                        return callback(null, visjsData)
+                    if (callback) {
+                        return callback(null, visjsData);
                     }
                     //draw graph
                     if (options.addToGraph && self.axiomsVisjsGraph) {

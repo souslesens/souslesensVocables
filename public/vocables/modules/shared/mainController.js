@@ -50,8 +50,6 @@ var MainController = (function () {
         });
     };
 
-
-
     self.loadSources = function (sourcesFile, callback) {
         var _payload = {
             getSources: 1,

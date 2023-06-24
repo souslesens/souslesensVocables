@@ -50,25 +50,7 @@ var MainController = (function () {
         });
     };
 
-    /* self.loadSourcesMappings = function (callback) {
-      $.ajax({
-          type: "GET",
-          url: `${Config.apiUrl}/data/file?dir=mappings&name=sourcesLinkedMappings.json`,
-          dataType: "json",
 
-          success: function (data_, _textStatus, _jqXHR) {
-              try {
-                  var json = JSON.parse(data_);
-              } catch (e) {
-                  callback(e);
-              }
-              callback(null, json);
-          },
-          error(err) {
-              callback(err);
-          },
-      });
-  };*/
 
     self.loadSources = function (sourcesFile, callback) {
         var _payload = {

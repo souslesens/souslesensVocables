@@ -58,6 +58,7 @@ var Lineage_blend = (function() {
         self.sourceNode = Lineage_classes.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
         self.targetNode = Lineage_classes.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 
+        var source = Lineage_sources.activeSource;
 
         let options = {
           openAll: true,
@@ -68,16 +69,10 @@ var Lineage_blend = (function() {
         var authorizedProps = {};
 
         let inSource = Config.currentTopLevelOntology;
-        var propStatusCssClassMap = {
-          noConstaints: "lineageAddEdgeDialog_topLevelOntologyGenericProp",
-          both: "lineageAddEdgeDialog_topLevelOntologyProp",
-          domain: "lineageAddEdgeDialog_topLevelOntologySemiGenericProp",
-         range: "lineageAddEdgeDialog_topLevelOntologySemiGenericProp",
-        //  domain: "lineageAddEdgeDialog_domainOntologyProp"
-        };
 
-        if (!Config.sources[Lineage_sources.activeSource].editable) {
-          $("#lineageAddEdgeDialog_Title").html("source " + Lineage_sources.activeSource + " is not editable");
+
+        if (!Config.sources[source].editable) {
+          $("#lineageAddEdgeDialog_Title").html("source " + source + " is not editable");
           return;
         }
         else {
@@ -95,7 +90,7 @@ var Lineage_blend = (function() {
           self.targetNode.rdfType = self.targetNode.type;
         }
 
-        var source = Lineage_sources.activeSource;
+        var source = source;
 
         async.series(
           [
@@ -143,30 +138,30 @@ var Lineage_blend = (function() {
                   parent: "#",
                   data: {
                     id: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type",
-                    inSource: Lineage_sources.activeSource
+                    inSource: source
                   }
                 });
               }
 
-              if (Config.sources[Lineage_sources.activeSource].schemaType == "OWL" && self.sourceNode.rdfType != "NamedIndividual") {
+              if (Config.sources[source].schemaType == "OWL" && self.sourceNode.rdfType != "NamedIndividual") {
                 jstreeData.push({
                   id: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
                   text: "rdfs:subClassOf",
                   parent: "#",
                   data: {
                     id: "http://www.w3.org/2000/01/rdf-schema#subClassOf",
-                    inSource: Lineage_sources.activeSource
+                    inSource: source
                   }
                 });
               }
-              if (Config.sources[Lineage_sources.activeSource].schemaType == "OWL") {
+              if (Config.sources[source].schemaType == "OWL") {
                 jstreeData.push({
                   id: "http://www.w3.org/2000/01/rdf-schema#member",
                   text: "rdfs:member",
                   parent: "#",
                   data: {
                     id: "http://www.w3.org/2000/01/rdf-schema#member",
-                    inSource: Lineage_sources.activeSource
+                    inSource: source
                   }
                 });
               }
@@ -175,7 +170,7 @@ var Lineage_blend = (function() {
             },
 
             function(callbackSeries) {
-              OntologyModels.getAllowedPropertiesBetweenNodes(Lineage_sources.activeSource, self.sourceNode.id, self.targetNode.id, function(err, result) {
+              OntologyModels.getAllowedPropertiesBetweenNodes(source, self.sourceNode.id, self.targetNode.id, function(err, result) {
                 if (err) {
                   return callbackSeries(err);
                 }
@@ -188,71 +183,67 @@ var Lineage_blend = (function() {
 
 
             function(callbackSeries) {
-              /*   var allProps=[]
-             authorizedProps.forEach(function(levelProps, index) {
-                 for (var propId in levelProps) {
-                   allProps.push(propId)
-                 }
-             })
 
-       authorizedProps.forEach(function(levelProps, index) {
-               if (Object.keys(levelProps).length == 0)
-                 return
-             jstreeData.push({
-                 id: "_level " + index,
-                 text: "level " + index,
-                 parent: "#",
-                 data: {
-                   id: "_level " + index,
-                   text: "level " + index,
+              var sources = [source];
+              var imports = Config.sources[source].imports;
+              if (imports) {
+                sources = sources.concat(imports);
+              }
 
-                 }
-               });*/
-var uniqueSources={}
+
+              var propStatusCssClassMap = {
+                noConstraints: "lineageAddEdgeDialog_topLevelOntologyGenericProp",
+                both: "lineageAddEdgeDialog_topLevelOntologyProp",
+                domain: "lineageAddEdgeDialog_topLevelOntologySemiGenericProp",
+                range: "lineageAddEdgeDialog_topLevelOntologySemiGenericProp"
+                //  domain: "lineageAddEdgeDialog_domainOntologyProp"
+              };
+
+
+              var uniqueProps = {};
+              sources.forEach(function(_source) {
+
+                jstreeData.push({
+                  id: _source,
+                  text: _source,
+                  parent: "#",
+                  data: {
+                    id: _source,
+                    text: _source
+                  }
+                });
+
                 for (var propId in authorizedProps) {
                   var property = authorizedProps[propId];
+                  if (property.source == _source) {
 
-                  if(!uniqueSources[property.source] ) {
-                    uniqueSources[property.source] = 1
-                    jstreeData.push({
-                      id: property.source,
-                      text: property.source,
-                      parent: "#",
-                      data: {
-                        id: property.source,
-                        text: property.source,
-                      }
-                      })
+                    if (!uniqueProps[propId]) {
+                      uniqueProps[propId] = 1;
+                      var propertyLabel = property.label || Sparql_common.getLabelFromURI(propId);
+                      var label = (property.domainLabel || "any") + "<b>-" + propertyLabel + "-></b>" + (property.rangeLabel || "any");
+                      var group = property.group;
+                      var cssClass = propStatusCssClassMap[group];
+                      var parent = property.source;
 
-                  }
-                  var label = (property.domainLabel || "any") + "<b>-" +  property.label + "-></b>" + (property.rangeLabel || "any");
-                  var group = property.group
-                  var cssClass = propStatusCssClassMap[group];
-                  var parent=property.source
-
-                  jstreeData.push({
-                    id: propId,
-                    text: "<span class='" + cssClass + "'>" + label + "</span>",
-                    parent: parent,
-                    data: {
-                      id: propId,
-                      label: label,
-                      source: property.source
+                      jstreeData.push({
+                        id: propId,
+                        text: "<span class='" + cssClass + "'>" + label + "</span>",
+                        parent: parent,
+                        data: {
+                          id: propId,
+                          label: label,
+                          source: property.source
+                        }
+                      });
                     }
-                  });
+                  }
                 }
-            //  })
+              });
+              //  })
 
 
-
-
- return callbackSeries()
+              return callbackSeries();
             },
-
-
-
-
-
 
 
             function(callbackSeries) {
@@ -334,7 +325,8 @@ var uniqueSources={}
               return callback(null);
             }
           }
-        );
+        )
+        ;
       });
     },
 
@@ -351,7 +343,9 @@ var uniqueSources={}
         });
         return callback(null, individuals);
       });
-    },
+    }
+
+    ,
 
     showCreatingNodeClassOrNamedIndividualDialog: function(type) {
       $("#LineageBlend_creatingNodeObjectsUpperSelect").val("");
@@ -380,13 +374,15 @@ var uniqueSources={}
       if (Lineage_classes.currentGraphNode && Lineage_classes.currentGraphNode.data) {
         $("#LineageBlend_creatingNodeObjectsSelect").val(Lineage_classes.currentGraphNode.data.id);
       }
-    },
+    }
+    ,
 
     openCreatNodeDialogOpen: function(type) {
       if (type == "owl:Class") {
         $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open");
       }
-    },
+    }
+    ,
     getURI: function(label, source, uriType) {
       var uri = null;
       if (!uriType) {
@@ -414,7 +410,8 @@ var uniqueSources={}
         }
       }
       return uri;
-    },
+    }
+    ,
     addTripleToCreatingNode: function(predicate, object) {
       if (!self.graphModification.creatingsourceUri) {
         var uri = self.graphModification.getURI(object);
@@ -460,7 +457,8 @@ var uniqueSources={}
         num +
         ")'>X</button></div>"
       );
-    },
+    }
+    ,
 
     addClassOrIndividualTriples: function() {
       $("#LineageBlend_creatingNodeTiplesDiv").html("");
@@ -500,7 +498,8 @@ var uniqueSources={}
       metaDataTriples.forEach(function(triple) {
         self.graphModification.addTripleToCreatingNode(triple.predicate, triple.object);
       });
-    },
+    }
+    ,
 
     addClassesOrIndividualsTriples: function() {
       var str = $("#LineageBlend_creatingNode_nodeListTA").val();
@@ -643,12 +642,14 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
           });
         }
       }
-    },
+    }
+    ,
 
     removeTriple: function(index) {
       self.graphModification.creatingNodeTriples.splice(index, 1);
       $("#triple_" + index).remove();
-    },
+    }
+    ,
 
     createNode: function() {
       if (!self.graphModification.creatingNodeTriples) {
@@ -689,10 +690,12 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
           });
         });
       }
-    },
+    }
+    ,
 
     execAddEdgeFromGraph: function() {
-    },
+    }
+    ,
     addGenericPredicatesToPredicatesTree: function() {
       var jstreeData = [];
       Lineage_upperOntologies.objectPropertiesMap[Config.currentTopLevelOntology].forEach(function(item) {
@@ -713,7 +716,8 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
       });
 
       JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", "#", jstreeData, { positionLast: 1 });
-    },
+    }
+    ,
     createRelationFromGraph: function(inSource, sourceNode, targetNode, propId, options, callback) {
       if (!confirm("create Relation " + sourceNode.label + "-" + Sparql_common.getLabelFromURI(propId) + "->" + targetNode.label + " in Graph " + inSource)) {
         return;
@@ -771,7 +775,8 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
           return callback(null, { type: "Restriction", id: blankNodeId });
         });
       }
-    },
+    }
+    ,
 
     onselectNodeUriType: function(uryType) {
       var display = uriType == "specific" ? "block" : "none";
@@ -1317,7 +1322,8 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
   };
 
   return self;
-})();
+})
+();
 
 export default Lineage_blend;
 

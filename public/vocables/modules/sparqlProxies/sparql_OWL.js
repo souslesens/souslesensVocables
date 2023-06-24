@@ -607,8 +607,8 @@ var Sparql_OWL = (function() {
       " ?class rdfs:subClassOf+ ?superClass." +
       " ?superClass ^rdfs:subClassOf ?subClass." +
       " ?subClass rdf:type ?subClassType. ?superClass rdf:type ?superClassType" +
-      filterStr+
-      " filter (?superClassType !=owl:Restriction)"
+      filterStr +
+      " filter (?superClassType !=owl:Restriction)";
 
 
     if (options.withLabels) {
@@ -627,38 +627,38 @@ var Sparql_OWL = (function() {
         return callback(err);
       }
 
-      result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass","subClass"]);
+      result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["class", "superClass", "subClass"]);
 
-      var map={}
-      result.results.bindings.forEach(function(item){
-        map[item.subClass.value]=item
+      var map = {};
+      result.results.bindings.forEach(function(item) {
+        map[item.subClass.value] = item;
 
-      })
-      var hierarchyArray=[]
+      });
+      var hierarchyArray = [];
 
-      function recurse(array,itemId){
-       if( map[itemId] && array.indexOf(itemId)<0){
-         array.push(itemId);
-         if(map[itemId].superClass && map[itemId].superClass.value)
-           recurse(array,map[itemId].superClass.value)
-       }
+      function recurse(array, itemId) {
+        if (map[itemId] && array.indexOf(itemId) < 0) {
+          array.push(itemId);
+          if (map[itemId].superClass && map[itemId].superClass.value) {
+            recurse(array, map[itemId].superClass.value);
+          }
+        }
       }
 
-      var hierarchies={}
-      classIds.forEach(function(id){
-        hierarchies[id]=[]
-        recurse( hierarchies[id],id)
+      var hierarchies = {};
+      classIds.forEach(function(id) {
+        hierarchies[id] = [];
+        recurse(hierarchies[id], id);
 
-      })
-      for(var key in hierarchies){
-        hierarchies[key].forEach(function(item,index){
-          hierarchies[key][index]=map[item]
-        })
+      });
+      for (var key in hierarchies) {
+        hierarchies[key].forEach(function(item, index) {
+          hierarchies[key][index] = map[item];
+        });
       }
 
 
-
-      return callback(null, {hierarchies:hierarchies,rawResult: result.results.bindings});
+      return callback(null, { hierarchies: hierarchies, rawResult: result.results.bindings });
 
     });
   };
@@ -1047,7 +1047,6 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
   };
 
 
-
   self.getObjectSubProperties = function(sourceLabel, propertyIds, options, callback) {
     if (!options) {
       options = {};
@@ -1419,7 +1418,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
     });
   };
 
-  self.getNodesLabelTypesAndGraph= function(sourceLabel, ids, options, callback) {
+  self.getNodesLabelTypesAndGraph = function(sourceLabel, ids, options, callback) {
     var filterStr = Sparql_common.setFilter("subject", ids, null);
     if (!options) {
       options = {};
@@ -1432,7 +1431,7 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
       "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
       "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
       "SELECT distinct ?subject ?subjectLabel  (GROUP_CONCAT( distinct ?subjectType;separator=\",\") as ?sTypes)" +
-      "(GROUP_CONCAT( distinct ?g;separator=\", \") as ?graphs)"+
+      "(GROUP_CONCAT( distinct ?g;separator=\", \") as ?graphs)" +
 
       fromStr +
       " WHERE {GRAPH ?g{" +
@@ -1686,8 +1685,13 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
       " UNION " +
       "{?prop0 rdfs:subPropertyOf+ ?prop . ?prop rdfs:range ?range }" + //optional {?range rdfs:label ?rangeLabel}"+ filterProps+"}"+
       "} LIMIT 10000";
-
-    var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+    var url;
+    if (!Config.sources[sourceLabel]) {
+      url = Config.default_sparql_url+ "?format=json&query=";
+    }
+    else {
+      url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+    }
     Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function(err, result) {
       if (err) {
         return callback(err);

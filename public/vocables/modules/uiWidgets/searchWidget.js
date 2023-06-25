@@ -500,6 +500,7 @@ return*/
         });
 
         if (targetDiv) {
+
             var jstreeOptions = {
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {
@@ -518,7 +519,7 @@ return*/
                     if (_options.contextMenu) {
                         return _options.contextMenu;
                     } else if (_options.contextMenuFn) {
-                        return _options.contextMenuFn;
+                        return _options.contextMenuFn();
                     } else if (Config.tools[MainController.currentTool].controller.contextMenuFn) {
                         return Config.tools[MainController.currentTool].controller.contextMenuFn;
                     } else {

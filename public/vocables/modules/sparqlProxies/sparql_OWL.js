@@ -723,7 +723,7 @@ var Sparql_OWL = (function () {
             if (options.filter) {
                 query += " " + options.filter;
             }
-            if (!options.filter && !options.filter.indexOf("?object") < 0) {
+            if (!(options.filter && options.filter.indexOf("?object") < 0)) {
                 query += " filter (!isLiteral(?object) )";
 
                 /*   query += " filter (?subjectType in (owl:NamedIndividual, owl:Class))";
@@ -1478,7 +1478,11 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         } else {
             typeFilterStr = "";
         }
-        query += "{ ?id rdf:type ?type. " + typeFilterStr + " OPTIONAL {?id rdfs:label ?label " + langFilter + "}" + filter + " }}";
+
+        var optionalLabel="OPTIONAL";
+        if(options.filter && options.filter.indexOf("?label")> -1)
+            optionalLabel="";
+        query += "{ ?id rdf:type ?type. " + typeFilterStr + " "+ optionalLabel+ " {?id rdfs:label ?label " + langFilter + "}" + filter + " }}";
 
         var allData = [];
         var resultSize = 1;

@@ -1,102 +1,108 @@
 <style>
-    #axiomsCreate_listAxiomDivW {
-        margin: 5px;
-        padding: 5px;
-        background-color: #ddd;
+    .lineage_rulesUri {
+        font-weight: bold;
+        color: #0067bb;
+        min-width: 100px;
     }
-    .axioms_predicatesItemDiv {
+
+    .lineage_rules_predicate {
         display: flex;
         flex-direction: row;
-        with: 400px;
-        height: 30px;
-        margin: 3px;
-        padding: 2px;
-        border-radius: 5px;
-        justify-content: space-evenly;
+        margin: 5px;
+        padding: 3px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        display: flex;
+        justify-content: center;
         background-color: #ddd;
     }
 
-    .axioms_commonOption {
-        background-color: #92d3ec;
+    .lineage_rules_subject {
+        background-color: #ceeeb8;
+        border-radius: 4px;
+        margin: 3px;
+        padding: 3px;
     }
 
-    .axioms_create_triples {
-        display: flex;
-        flex-direction: column;
+    .lineage_rules_property {
+        background-color: #eccbab;
+        border-radius: 4px;
         margin: 3px;
-        padding: 2px;
-        background-color: #337ab7bd;
-        border-radius: 5px;
-        align-items: center;
-    }
-    .axioms_create_triple {
-        width: 95%;
-        margin: 3px;
-        padding: 5px;
-        border-radius: 5px;
-        padding: 2px;
-        padding-left: 15px;
-        padding-right: 15px;
-        display: flex;
-        background-color: #c4daec;
-        justify-content: space-between;
+        padding: 3px;
     }
 
-    .axioms_create_triplePredicate {
-        color: #1626d3;
-        background-color: #f3d4af;
-        border: 1px #aaa solid;
-        align-self: center;
+    .lineage_rules_object {
+        background-color: rgba(178, 198, 229, 0.5);
+        border-radius: 4px;
         margin: 3px;
-        text-align: center;
-        border-radius: 3px;
+        padding: 3px;
+    }
+
+
+    .lineage_rules_premise {
+
+        border-radius: 4px;
+        margin: 3px;
+        padding: 3px;
+    }
+
+    .lineage_rules_premise_class {
+        background-color: #ddddaa;
+    }
+
+    .lineage_rules_premise_property {
+        background-color: #70ac47;
     }
 </style>
 
-<div id="axiomsDrawGraphDiv" style="display: flex; flex-direction: column">
-    <div class="axioms_predicatesItemDiv" style="background-color: #ccc">
-        <div id="axioms_currentItemDiv"></div>
+Rules
+<!--<button onclick="Lineage_rules.initVisjsPathMode()">Select on Whiteboard</button>-->
+<button onclick="Lineage_rules.clearNodes()">Clear</button>
+
+<div style="display: flex; flex-direction: row; margin: 5px; margin-top: 15px">
+
+  <div>
+    <div>search Class &nbsp;<input id="lineage_rules_searchClassInput" /></div>
+    <div> search Property &nbsp;<input id="lineage_rules_searchPropertyInput" /></div>
+    <div style="width: 400px; height: 700px; overflow: auto">
+      <div id="lineage_rules_searchJsTreeDiv"></div>
     </div>
 
-    <div class="axioms_predicatesItemDiv">
-        Axiom type
 
-        <select id="axioms_axiomTypeSelect" onchange="Lineage_axioms_create.onAxiomTypeSelect($(this).val())"></select>
+  </div>
+
+
+
+    <div style="display: flex;flex-direction: column; background-color: #ddd;border-radius: 5px;margin: 5px;padding: 5px">
+      Premises
+      <div id="lineage_rules_premisesDiv" style="width: 250px;height: 400px;overflow: auto"></div>
     </div>
 
-    <div class="axioms_predicatesItemDiv">
-        Axiom Range
-        <select id="axioms_axiomRangeSelect" onchange="Lineage_axioms_create.onAxiomRangeSelect($(this).val())"></select>
-    </div>
 
-    <div id="axiomsCreate_listAxiomDiv" style="display: flex; flex-direction: column">
-        <div class="axioms_predicatesItemDiv" id="axioms_create_rangePropertyDiv">
-            range property (if any)
-            <select id="axioms_create_rangePropertySelect" onchange="Lineage_axioms_create.onSelectRangeProperty($(this).val())"></select>
+    <div style="display: flex;flex-direction: column;  background-color: #ddd;border-radius: 5px;margin: 5px;padding: 5px">
+      Conclusion
+      <div id="lineage_rules_conclusionDiv" style="width:300px;overflow: auto">
+
+        <div> TYPE <select id="lineage_rules_conclusionTypeSelect">
+          <option>owl:Class</option>
+          <option>owl:ObjectProperty</option>
+        </select>
         </div>
-
-        <div class="axioms_predicatesItemDiv">
-            entity type
-            <select id="axioms_create_entityTypeSelect" onchange="Lineage_axioms_create.onSelectEntityType($(this).val())"></select>
-        </div>
-
-        <div class="axioms_predicatesItemDiv">
-            entity origin
-            <select id="axioms_create_entityOriginSelect" onchange="Lineage_axioms_create.onSelectEntityOrigin($(this).val())"></select>
-        </div>
-
-        <div class="axioms_predicatesItemDiv">
-            entity value
-            <select id="axiomsCreate_entityValueSelect"></select>
-            <input type="hidden" id="axiomsCreate_entityLabelInput" />
-        </div>
+        <!--  <div> URI <input id="lineage_rules_conclusionUri" style="width:250px"/></div>-->
+      </div>
+      Label <input id="lineage_rules_conclusionLabel" style="width:200px" />
+      <div>
+        <select id="lineage_rules_outputTypeSelect">
+          <option>list</option>
+          <option>createTriples</option>
+        </select>
+        <button onclick="Lineage_rules.execRule">Execute</button>
+      </div>
     </div>
-    <div><button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_axioms_create.showTriples()">Show Triples</button></div>
-    <div id="axiomsCreate_triplesDiv" style="min-width: 200px"></div>
+  </div>
 
-    <div>
-        <div id="axiomsCreate_infosDiv"></div>
 
-        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_axioms_create.saveTriples()">Save Triples</button>
-    </div>
+
 </div>
+

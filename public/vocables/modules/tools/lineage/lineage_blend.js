@@ -74,7 +74,8 @@ var Lineage_blend = (function () {
                     $("#lineageAddEdgeDialog_Title").html("source " + source + " is not editable");
                     return;
                 } else {
-                    $("#lineageAddEdgeDialog_Title").html("upper ontology : <b>" + Config.currentTopLevelOntology + "</b><br>" + self.sourceNode.label + " -> " + self.targetNode.label);
+                    $("#lineageAddEdgeDialog_Title").html("upper ontology : <b>" + Config.currentTopLevelOntology +
+                      "</b><br><span onclick='Lineage_blend.showNodeInfos(\"start\")'>"+self.sourceNode.label + "</span> -><span onclick='Lineage_blend.showNodeInfos(\"end\")'> " + self.targetNode.label)+"</span>";
                     //  $("#lineageAddEdgeDialog_Title").append("<button onclick='Lineage_blend.reverseAddEdgesNodes()'>reverse</button>");
                 }
 
@@ -1277,6 +1278,22 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
 
         return triples;
     };
+    self.showNodeInfos=function(role){
+        var node=null;
+
+        if(role=='start')
+      var  nodeData=self.sourceNode
+        else  if(role=='end')
+            nodeData=self.targetNode
+        if( nodeData) {
+            var node={
+                id:nodeData.id,
+                data:nodeData
+            }
+            NodeInfosWidget.showNodeInfos(nodeData.source, node,"mainDialogDiv")
+        }
+
+    }
 
     return self;
 })();

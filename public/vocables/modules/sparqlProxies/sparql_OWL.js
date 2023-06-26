@@ -1479,10 +1479,9 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
             typeFilterStr = "";
         }
 
-        var optionalLabel="OPTIONAL";
-        if(options.filter && options.filter.indexOf("?label")> -1)
-            optionalLabel="";
-        query += "{ ?id rdf:type ?type. " + typeFilterStr + " "+ optionalLabel+ " {?id rdfs:label ?label " + langFilter + "}" + filter + " }}";
+        var optionalLabel = "OPTIONAL";
+        if (options.filter && options.filter.indexOf("?label") > -1) optionalLabel = "";
+        query += "{ ?id rdf:type ?type. " + typeFilterStr + " " + optionalLabel + " {?id rdfs:label ?label " + langFilter + "}" + filter + " }}";
 
         var allData = [];
         var resultSize = 1;

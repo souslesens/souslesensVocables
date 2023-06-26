@@ -500,7 +500,6 @@ return*/
         });
 
         if (targetDiv) {
-
             var jstreeOptions = {
                 openAll: true,
                 selectTreeNodeFn: function (event, obj) {

@@ -3,146 +3,139 @@ import SearchWidget from "../../uiWidgets/searchWidget.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
+var Lineage_rules = (function () {
+    var self = {};
 
-var Lineage_rules = (function() {
-  var self = {};
+    self.premiseDivs = {};
 
-  self.premiseDivs = {};
-
-  self.showRulesDialog = function() {
-    $("#mainDialogDiv").dialog("open");
-    $("#mainDialogDiv").load("snippets/lineage/lineage_rulesDialog.html", function() {
-      $("#lineage_rules_searchClassInput").bind("keydown", null, Lineage_rules.onSearchClassKeyDown);
-      $("#lineage_rules_searchPropertyInput").bind("keydown", null, Lineage_rules.onSearchPropertyKeyDown);
-    });
-  };
-  self.onSearchClassKeyDown = function(event) {
-    if (event.keyCode != 13 && event.keyCode != 9) {
-      return;
-    }
-    var term = $("#lineage_rules_searchClassInput").val();
-    self.searchItem(term, "Class");
-  };
-
-  self.onSearchPropertyKeyDown = function(event) {
-    if (event.keyCode != 13 && event.keyCode != 9) {
-      return;
-    }
-    var term = $("#lineage_rules_searchClassInput").val();
-    self.searchItem(term, "ObjectProperty");
-  };
-
-  self.searchItem = function(term, type) {
-    term = term.replace("*", "");
-    var filter = "filter (regex(?label,'" + term + "','i')";
-    if (type == "Class") {
-      filter += "  && ?type=owl:Class)";
-    }
-    else if (type = "ObjectProperty") {
-      filter += "  && ?type=owl:ObjectProperty)";
-    }
-    Sparql_OWL.getDictionary(Lineage_sources.activeSource, { filter: filter, selectGraph: 1 }, null, function(err, result) {
-      if (err) {
-        return alert(err.responseText);
-      }
-      var jstreeData = [];
-      result.forEach(function(item) {
-        jstreeData.push({
-          id: item.id.value,
-          text: item.label.value,
-          parent: "#",
-          data: {
-            id: item.id.value,
-            label: item.label.value,
-            source: Sparql_common.getSourceFromGraphUri(item.g.value),
-            type: type
-          }
-
+    self.showRulesDialog = function () {
+        $("#mainDialogDiv").dialog("open");
+        $("#mainDialogDiv").load("snippets/lineage/lineage_rulesDialog.html", function () {
+            $("#lineage_rules_searchClassInput").bind("keydown", null, Lineage_rules.onSearchClassKeyDown);
+            $("#lineage_rules_searchPropertyInput").bind("keydown", null, Lineage_rules.onSearchPropertyKeyDown);
         });
-      });
-
-
-      var options = {
-        selectTreeNodeFn: Lineage_rules.selectTreeNodeFn,
-        contextMenu: Lineage_rules.getContextMenu()
-      };
-      JstreeWidget.loadJsTree("lineage_rules_searchJsTreeDiv", jstreeData, options);
-
-    });
-
-  };
-
-  self.getContextMenu = function() {
-    var items = {};
-
-
-    items.AddPremise = {
-      label: "Add Premise",
-      action: function(_e, _xx) {
-        self.addPremise(self.currentTreeNode);
-      }
     };
-    /*   items.seToNode = {
+    self.onSearchClassKeyDown = function (event) {
+        if (event.keyCode != 13 && event.keyCode != 9) {
+            return;
+        }
+        var term = $("#lineage_rules_searchClassInput").val();
+        self.searchItem(term, "Class");
+    };
+
+    self.onSearchPropertyKeyDown = function (event) {
+        if (event.keyCode != 13 && event.keyCode != 9) {
+            return;
+        }
+        var term = $("#lineage_rules_searchClassInput").val();
+        self.searchItem(term, "ObjectProperty");
+    };
+
+    self.searchItem = function (term, type) {
+        term = term.replace("*", "");
+        var filter = "filter (regex(?label,'" + term + "','i')";
+        if (type == "Class") {
+            filter += "  && ?type=owl:Class)";
+        } else if ((type = "ObjectProperty")) {
+            filter += "  && ?type=owl:ObjectProperty)";
+        }
+        Sparql_OWL.getDictionary(Lineage_sources.activeSource, { filter: filter, selectGraph: 1 }, null, function (err, result) {
+            if (err) {
+                return alert(err.responseText);
+            }
+            var jstreeData = [];
+            result.forEach(function (item) {
+                jstreeData.push({
+                    id: item.id.value,
+                    text: item.label.value,
+                    parent: "#",
+                    data: {
+                        id: item.id.value,
+                        label: item.label.value,
+                        source: Sparql_common.getSourceFromGraphUri(item.g.value),
+                        type: type,
+                    },
+                });
+            });
+
+            var options = {
+                selectTreeNodeFn: Lineage_rules.selectTreeNodeFn,
+                contextMenu: Lineage_rules.getContextMenu(),
+            };
+            JstreeWidget.loadJsTree("lineage_rules_searchJsTreeDiv", jstreeData, options);
+        });
+    };
+
+    self.getContextMenu = function () {
+        var items = {};
+
+        items.AddPremise = {
+            label: "Add Premise",
+            action: function (_e, _xx) {
+                self.addPremise(self.currentTreeNode);
+            },
+        };
+        /*   items.seToNode = {
          label: "List  properties",
          action: function(_e, _xx) {
            self.addPropertiesToTree(self.currentTreeNode);
          }
        };*/
 
-    return items;
-  };
-  self.selectTreeNodeFn = function(event, obj) {
-    self.currentTreeNode = obj.node;
-    self.addPremise(self.currentTreeNode);
+        return items;
+    };
+    self.selectTreeNodeFn = function (event, obj) {
+        self.currentTreeNode = obj.node;
+        self.addPremise(self.currentTreeNode);
+    };
 
+    self.addPremise = function (node) {
+        var premiseDivId = "premise_" + common.getRandomHexaId(5);
+        self.premiseDivs[premiseDivId] = node.data;
+        var label = node.data.type + " : " + node.data.label;
+        var html =
+            "<div class='lineage_rules_premise lineage_rules_premise_" +
+            node.data.type +
+            "' id='" +
+            premiseDivId +
+            "'>" +
+            "<span>" +
+            label +
+            " </span>" +
+            "<button onclick='Lineage_rules.clearPremise(\"" +
+            premiseDivId +
+            "\")'>X</bbutton>";
+        $("#lineage_rules_premisesDiv").append(html);
+    };
 
-  };
+    self.clearPremise = function (div) {
+        delete self.premiseDivs[div];
+        $("#" + div).remove();
+    };
 
-
-  self.addPremise = function(node) {
-
-    var premiseDivId = "premise_" + common.getRandomHexaId(5);
-    self.premiseDivs[premiseDivId] = node.data;
-    var label = node.data.type + " : " + node.data.label;
-    var html = "<div class='lineage_rules_premise lineage_rules_premise_" + node.data.type + "' id='" + premiseDivId + "'>" +
-      "<span>" + label + " </span>" +
-      "<button onclick='Lineage_rules.clearPremise(\"" + premiseDivId + "\")'>X</bbutton>";
-    $("#lineage_rules_premisesDiv").append(html);
-  };
-
-  self.clearPremise = function(div) {
-    delete self.premiseDivs[div];
-    $("#" + div).remove();
-
-  };
-
-
-  self.addPropertiesToTree = function(node) {
-    Sparql_OWL.getFilteredTriples(node.data.source, node.data.id, null, null, null, function(err, result) {
-      if (err) {
-        alert(err.responseText);
-      }
-      var jstreeData = [];
-      result.forEach(function(item) {
-        var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.propValue);
-        jstreeData.push({
-          id: item.prop.value,
-          text: propLabel,
-          parent: node.id,
-          data: {
-            id: item.prop.value,
-            data: propLabel,
-            source: self.currentTreeNode.data.source
-          }
-
+    self.addPropertiesToTree = function (node) {
+        Sparql_OWL.getFilteredTriples(node.data.source, node.data.id, null, null, null, function (err, result) {
+            if (err) {
+                alert(err.responseText);
+            }
+            var jstreeData = [];
+            result.forEach(function (item) {
+                var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.propValue);
+                jstreeData.push({
+                    id: item.prop.value,
+                    text: propLabel,
+                    parent: node.id,
+                    data: {
+                        id: item.prop.value,
+                        data: propLabel,
+                        source: self.currentTreeNode.data.source,
+                    },
+                });
+                JstreeWidget.addNodesToJstree("lineage_rules_searchJsTreeDiv", node.id, jstreeData);
+            });
         });
-        JstreeWidget.addNodesToJstree("lineage_rules_searchJsTreeDiv", node.id, jstreeData);
-
-      });
-
-    });
-  };
-  /*
+    };
+    /*
   "premise":[
       {
           "type": "owl:Class",
@@ -187,117 +180,107 @@ var Lineage_rules = (function() {
 
    */
 
-  self.execRule = function() {
+    self.execRule = function () {
+        var operation;
+        var classes = [];
+        var objectProperties = [];
+        var premisesDivs = $("#lineage_rules_premisesDiv")
+            .children()
+            .each(function () {
+                var divId = $(this).attr("id");
+                var premiseData = self.premiseDivs[divId];
+                if (premiseData.type == "Class") {
+                    classes.push(premiseData);
+                } else if (premiseData.type == "ObjectProperty") {
+                    objectProperties.push(premiseData);
+                }
+            });
 
-    var operation
-    var classes = [];
-    var objectProperties = [];
-    var premisesDivs = $("#lineage_rules_premisesDiv").children().each(function() {
-      var divId = $(this).attr("id");
-      var premiseData = self.premiseDivs[divId];
-      if (premiseData.type == "Class") {
-        classes.push(premiseData);
-      }
-      else if (premiseData.type == "ObjectProperty") {
-        objectProperties.push(premiseData);
-      }
-    });
-
-    if (classes.length == 0) {
-      return alert("no Class premise");
-    }
-    //insertRuleReclassification
-    else if (classes.length == 1) {
-      operation = "insertRuleReclassification";
-      var conclusion = prompt("Conclusion Class name");
-      var payload = {
-        "premise": [classes[0].id],
-        "conclusion": [conclusion]
-      };
-    }
-    else if (classes.length == 2) {
-      if (objectProperties.length != 1) {
-        return alert(" one and only one ObjectProperty is needed ");
-      }
-      var conclusion = prompt("Conclusion Property name");
-       var operation = "insertRulePropertyVA";
-     var  classeArray = [];
-     var  propertyClasses = [];
-      classes.forEach(function(item, index) {
-        var varName = Sparql_common.formatStringForTriple(item.label,true);
-        propertyClasses.push(varName);
-        classeArray.push({
-          "name": item.id,
-          "var": [varName]
-        });
-      });
-      var payload = {
-
-        "premise": [{
-          "type": "owl:Class",
-          "entities": classeArray
-        },
-          {
-            "type": "owl:ObjectProperty",
-            "entities": {
-              "name": objectProperties[0].id,
-              "var": propertyClasses
-
-            }
-          }
-        ],
-        "conclusion": [
-          {
-            "type": "owl:ObjectProperty",
-            "entities": [
-              {
-                "name": conclusion,
-                "var": propertyClasses
-              }
-            ]
-          }
-        ]
-      };
-    }
-    else {
-      return alert("case not implemented yet");
-    }
-
-    var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
-    var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
-
-
-    const params = new URLSearchParams({
-      operation: operation,
-      type: "internalGraphUri",
-      payload: JSON.stringify(payload),
-      url: Config.sources[Lineage_sources.activeSource].graphUri,
-      describeQuery:describeQuery
-    });
-  //  $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
-
-    $.ajax({
-      type: "GET",
-      url: Config.apiUrl + "/jowl/rules?" + params.toString(),
-      dataType: "json",
-
-      success: function (data, _textStatus, _jqXHR) {
-
-
-      },
-      error(err) {
-        return alert(err.responseText);
-        if (callback) {
-          return callback(err);
+        if (classes.length == 0) {
+            return alert("no Class premise");
         }
-      },
-    });
+        //insertRuleReclassification
+        else if (classes.length == 1) {
+            operation = "insertRuleReclassification";
+            var conclusion = prompt("Conclusion Class name");
+            var payload = {
+                premise: [classes[0].id],
+                conclusion: [conclusion],
+            };
+        } else if (classes.length == 2) {
+            if (objectProperties.length != 1) {
+                return alert(" one and only one ObjectProperty is needed ");
+            }
+            var conclusion = prompt("Conclusion Property name");
+            var operation = "insertRulePropertyVA";
+            var classeArray = [];
+            var propertyClasses = [];
+            classes.forEach(function (item, index) {
+                var varName = Sparql_common.formatStringForTriple(item.label, true);
+                propertyClasses.push(varName);
+                classeArray.push({
+                    name: item.id,
+                    var: [varName],
+                });
+            });
+            var payload = {
+                premise: [
+                    {
+                        type: "owl:Class",
+                        entities: classeArray,
+                    },
+                    {
+                        type: "owl:ObjectProperty",
+                        entities: {
+                            name: objectProperties[0].id,
+                            var: propertyClasses,
+                        },
+                    },
+                ],
+                conclusion: [
+                    {
+                        type: "owl:ObjectProperty",
+                        entities: [
+                            {
+                                name: conclusion,
+                                var: propertyClasses,
+                            },
+                        ],
+                    },
+                ],
+            };
+        } else {
+            return alert("case not implemented yet");
+        }
 
+        var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
+        var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
 
-  };
+        const params = new URLSearchParams({
+            operation: operation,
+            type: "internalGraphUri",
+            payload: JSON.stringify(payload),
+            url: Config.sources[Lineage_sources.activeSource].graphUri,
+            describeQuery: describeQuery,
+        });
+        //  $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
 
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/jowl/rules?" + params.toString(),
+            dataType: "json",
 
-  /*
+            success: function (data, _textStatus, _jqXHR) {},
+            error(err) {
+                return alert(err.responseText);
+                if (callback) {
+                    return callback(err);
+                }
+            },
+        });
+    };
+
+    /*
 
     self.addNodeToGraph=function(){
 
@@ -373,9 +356,7 @@ var Lineage_rules = (function() {
 
   */
 
-
-  return self;
-})
-();
+    return self;
+})();
 export default Lineage_rules;
 window.Lineage_rules = Lineage_rules;

@@ -74,8 +74,14 @@ var Lineage_blend = (function () {
                     $("#lineageAddEdgeDialog_Title").html("source " + source + " is not editable");
                     return;
                 } else {
-                    $("#lineageAddEdgeDialog_Title").html("upper ontology : <b>" + Config.currentTopLevelOntology +
-                      "</b><br><span onclick='Lineage_blend.showNodeInfos(\"start\")'>"+self.sourceNode.label + "</span> -><span onclick='Lineage_blend.showNodeInfos(\"end\")'> " + self.targetNode.label)+"</span>";
+                    $("#lineageAddEdgeDialog_Title").html(
+                        "upper ontology : <b>" +
+                            Config.currentTopLevelOntology +
+                            "</b><br><span onclick='Lineage_blend.showNodeInfos(\"start\")'>" +
+                            self.sourceNode.label +
+                            "</span> -><span onclick='Lineage_blend.showNodeInfos(\"end\")'> " +
+                            self.targetNode.label
+                    ) + "</span>";
                     //  $("#lineageAddEdgeDialog_Title").append("<button onclick='Lineage_blend.reverseAddEdgesNodes()'>reverse</button>");
                 }
 
@@ -212,15 +218,10 @@ var Lineage_blend = (function () {
                                             var propertyLabel = property.label || Sparql_common.getLabelFromURI(propId);
                                             var label = (property.domainLabel || "any") + "<b>-" + propertyLabel + "-></b>" + (property.rangeLabel || "any");
                                             var group = null;
-                                            if(property.domain && property.range)
-                                                group="both";
-                                            else if(property.domain )
-                                                group="domain";
-                                            else if(property.range )
-                                                group="range";
-                                            else
-                                                group="noConstraints";
-
+                                            if (property.domain && property.range) group = "both";
+                                            else if (property.domain) group = "domain";
+                                            else if (property.range) group = "range";
+                                            else group = "noConstraints";
 
                                             var cssClass = propStatusCssClassMap[group];
                                             var parent = property.source;
@@ -1278,22 +1279,19 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
 
         return triples;
     };
-    self.showNodeInfos=function(role){
-        var node=null;
+    self.showNodeInfos = function (role) {
+        var node = null;
 
-        if(role=='start')
-      var  nodeData=self.sourceNode
-        else  if(role=='end')
-            nodeData=self.targetNode
-        if( nodeData) {
-            var node={
-                id:nodeData.id,
-                data:nodeData
-            }
-            NodeInfosWidget.showNodeInfos(nodeData.source, node,"mainDialogDiv")
+        if (role == "start") var nodeData = self.sourceNode;
+        else if (role == "end") nodeData = self.targetNode;
+        if (nodeData) {
+            var node = {
+                id: nodeData.id,
+                data: nodeData,
+            };
+            NodeInfosWidget.showNodeInfos(nodeData.source, node, "mainDialogDiv");
         }
-
-    }
+    };
 
     return self;
 })();

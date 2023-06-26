@@ -89,9 +89,8 @@ module.exports = function () {
 
                     var ontologyContentEncoded64 = Buffer.from(str).toString("base64");
 
-                    var payload =JSON.parse(req.query.payload)
-                    payload.ontologyContentEncoded64=ontologyContentEncoded64;
-
+                    var payload = JSON.parse(req.query.payload);
+                    payload.ontologyContentEncoded64 = ontologyContentEncoded64;
 
                     var options = {
                         method: "POST",
@@ -151,9 +150,6 @@ module.exports = function () {
                 type: "string",
                 required: false,
             },
-
-
-
         ],
 
         responses: {

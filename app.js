@@ -34,6 +34,9 @@ app.use(morganLogger("dev"));
  * App middleware for authentication and session handling
  */
 app.use(cookieParser());
+if (config.cookieSecureTrustProxy) {
+    app.set("trust proxy", 1);
+}
 app.use(
     require("express-session")({
         secret: config.cookieSecret ? config.cookieSecret : "S3cRet!",

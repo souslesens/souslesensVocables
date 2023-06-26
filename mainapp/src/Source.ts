@@ -106,7 +106,6 @@ function controllerDefault(schemaType: string | undefined): string {
 
 export type ServerSource = z.infer<typeof ServerSourceSchema>;
 export type InputSource = z.infer<typeof InputSourceSchema>;
-type SparqlServer = z.infer<typeof SparqlServerSchema>;
 
 export const SparqlServerSchema = z
     .object({
@@ -167,7 +166,7 @@ export const ServerSourceSchema = z.object({
     predicates: SourcePredicatesSchema,
     group: z.string().default(""),
     imports: z.array(z.string()).default([]),
-    taxonomyPredicates: z.array(z.string()).default([]),
+    taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
 });
 
 export const InputSourceSchema = z.object({
@@ -194,7 +193,7 @@ export const InputSourceSchema = z.object({
     isDraft: z.boolean().default(false),
     allowIndividuals: z.boolean().default(false),
     predicates: SourcePredicatesSchema,
-    group: z.string().default(""),
+    group: z.string().nonempty({ message: "Required" }),
     imports: z.array(z.string()).default([]),
     taxonomyPredicates: z.array(z.string()).default([]),
 });
@@ -203,6 +202,7 @@ export const defaultSource = (id: string): ServerSource => {
     return ServerSourceSchema.parse({
         _type: "source",
         id: id,
+        sparql_server: SparqlServerSchema.parse({}),
     });
 };
 

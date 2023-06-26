@@ -176,7 +176,9 @@ export const InputSourceSchema = z.object({
         .string()
         .nonempty({ message: "Required" })
         .refine((val) => val !== "admin", { message: "Name can't be admin" })
-        .refine((val) => val.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i), { message: "Name can only contain alphanumeric characters" }),
+        .refine((val) => val.match(/.{2,254}/i), { message: "Name can only contain between 2 and 255 chars" })
+        .refine((val) => val.match(/^[a-z0-9]/i), { message: "Name have to start with alphanum char" })
+        .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
 
     _type: z.string().optional(),
     type: z.string().default(""),

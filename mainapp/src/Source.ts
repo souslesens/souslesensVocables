@@ -181,7 +181,7 @@ export const InputSourceSchema = z.object({
 
     _type: z.string().optional(),
     type: z.string().default(""),
-    graphUri: z.string().nonempty({ message: "Required" }),
+    graphUri: z.string().optional(),
     sparql_server: SparqlServerSchema,
     controller: z.string().optional(),
     topClassFilter: z.string().optional(),

@@ -2,6 +2,7 @@ import common from "../../shared/common.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+import OntologyModels from "../../shared/ontologyModels.js";
 
 self.lineageVisjsGraph;
 import Lineage_classes from "./lineage_classes.js";
@@ -218,10 +219,15 @@ var Lineage_blend = (function () {
                                             var propertyLabel = property.label || Sparql_common.getLabelFromURI(propId);
                                             var label = (property.domainLabel || "any") + "<b>-" + propertyLabel + "-></b>" + (property.rangeLabel || "any");
                                             var group = null;
-                                            if (property.domain && property.range) group = "both";
-                                            else if (property.domain) group = "domain";
-                                            else if (property.range) group = "range";
-                                            else group = "noConstraints";
+                                            if (property.domain && property.range) {
+                                                group = "both";
+                                            } else if (property.domain) {
+                                                group = "domain";
+                                            } else if (property.range) {
+                                                group = "range";
+                                            } else {
+                                                group = "noConstraints";
+                                            }
 
                                             var cssClass = propStatusCssClassMap[group];
                                             var parent = property.source;
@@ -271,28 +277,26 @@ var Lineage_blend = (function () {
                                                 superProp: self.currentPropertiesTreeNode.data.id,
                                             });
 
-                                            if (!self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id]) {
-                                                self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id] = [];
-                                            }
-                                            self.currentSpecificObjectPropertiesMap[self.currentPropertiesTreeNode.data.id].push({
-                                                id: result.uri,
-                                                label: subPropertyLabel,
-                                            });
+                                            OntologyModels.registerSourcesModel(Lineage_sources.activeSource, function (err, result) {
+                                                if (err) {
+                                                    return alert(err.responsetext);
+                                                }
 
-                                            var jstreeData = [
-                                                {
-                                                    id: result.uri,
-                                                    text: subPropertyLabel,
-                                                    parent: self.currentPropertiesTreeNode.data.id,
-                                                    data: {
+                                                var jstreeData = [
+                                                    {
                                                         id: result.uri,
-                                                        label: subPropertyLabel,
-                                                        source: Lineage_sources.activeSource,
+                                                        text: subPropertyLabel,
+                                                        parent: self.currentPropertiesTreeNode.data.id,
+                                                        data: {
+                                                            id: result.uri,
+                                                            label: subPropertyLabel,
+                                                            source: Lineage_sources.activeSource,
+                                                        },
                                                     },
-                                                },
-                                            ];
+                                                ];
 
-                                            JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
+                                                JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
+                                            });
                                         });
                                     },
                                 },
@@ -1282,8 +1286,11 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
     self.showNodeInfos = function (role) {
         var node = null;
 
-        if (role == "start") var nodeData = self.sourceNode;
-        else if (role == "end") nodeData = self.targetNode;
+        if (role == "start") {
+            var nodeData = self.sourceNode;
+        } else if (role == "end") {
+            nodeData = self.targetNode;
+        }
         if (nodeData) {
             var node = {
                 id: nodeData.id,

@@ -375,6 +375,11 @@ var OntologyModels = (function () {
         var allConstraints = {};
         var hierarchies = {};
 
+        var noConstaintsArray = [];
+        var propertiesMatchingBoth = [];
+        var propertiesMatchingStartNode = [];
+        var propertiesMatchingEndNode = [];
+
         async.series(
             [
                 function (callbackSeries) {
@@ -408,10 +413,6 @@ var OntologyModels = (function () {
                         endNodeAncestorIds.push(item.superClass.value);
                     });
 
-                    var noConstaintsArray = [];
-                    var propertiesMatchingBoth = [];
-                    var propertiesMatchingStartNode = [];
-                    var propertiesMatchingEndNode = [];
                     allSources.forEach(function (_source) {
                         var sourceConstraints = Config.ontologiesVocabularyModels[_source].constraints;
                         for (var property in sourceConstraints) {
@@ -445,10 +446,6 @@ var OntologyModels = (function () {
                             }
                         }
                     });
-                    validProperties = propertiesMatchingBoth;
-                    validProperties = common.array.union(validProperties, propertiesMatchingStartNode);
-                    validProperties = common.array.union(validProperties, propertiesMatchingEndNode);
-                    validProperties = common.array.union(validProperties, noConstaintsArray);
 
                     callbackSeries();
                 },
@@ -469,9 +466,20 @@ var OntologyModels = (function () {
                         }
                     }
 
-                    validProperties.forEach(function (propId) {
+                    propertiesMatchingBoth.forEach(function (propId) {
                         recurse(propId);
                     });
+                    propertiesMatchingStartNode.forEach(function (propId) {
+                        recurse(propId);
+                    });
+                    propertiesMatchingEndNode.forEach(function (propId) {
+                        recurse(propId);
+                    });
+
+                    validProperties = propertiesMatchingBoth;
+                    validProperties = common.array.union(validProperties, propertiesMatchingStartNode);
+                    validProperties = common.array.union(validProperties, propertiesMatchingEndNode);
+                    validProperties = common.array.union(validProperties, noConstaintsArray);
 
                     validConstraints = {};
 

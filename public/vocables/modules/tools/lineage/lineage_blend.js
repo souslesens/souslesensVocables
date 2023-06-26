@@ -277,11 +277,10 @@ var Lineage_blend = (function () {
                                                 superProp: self.currentPropertiesTreeNode.data.id,
                                             });
 
-                                            OntologyModels.registerSourcesModel(Lineage_sources.activeSource, function (err, result) {
+                                            OntologyModels.registerSourcesModel(Lineage_sources.activeSource, function (err, result2) {
                                                 if (err) {
                                                     return alert(err.responsetext);
                                                 }
-
 
                                                 var jstreeData = [
                                                     {

@@ -47,11 +47,11 @@
         padding: 3px;
     }
 
-    .lineage_rules_premise_class {
+    .lineage_rules_premise_Class {
         background-color: #ddddaa;
     }
 
-    .lineage_rules_premise_property {
+    .lineage_rules_premise_ObjectProperty {
         background-color: #70ac47;
     }
 </style>
@@ -81,7 +81,7 @@ Rules
 
 
     <div style="display: flex;flex-direction: column;  background-color: #ddd;border-radius: 5px;margin: 5px;padding: 5px">
-      Conclusion
+   <!--   Conclusion
       <div id="lineage_rules_conclusionDiv" style="width:300px;overflow: auto">
 
         <div> TYPE <select id="lineage_rules_conclusionTypeSelect">
@@ -89,15 +89,15 @@ Rules
           <option>owl:ObjectProperty</option>
         </select>
         </div>
-        <!--  <div> URI <input id="lineage_rules_conclusionUri" style="width:250px"/></div>-->
+       <div> URI <input id="lineage_rules_conclusionUri" style="width:250px"/></div>
       </div>
-      Label <input id="lineage_rules_conclusionLabel" style="width:200px" />
+      Label <input id="lineage_rules_conclusionLabel" style="width:200px" />-->
       <div>
         <select id="lineage_rules_outputTypeSelect">
           <option>list</option>
           <option>createTriples</option>
         </select>
-        <button onclick="Lineage_rules.execRule">Execute</button>
+        <button onclick="Lineage_rules.execRule()">Execute</button>
       </div>
     </div>
   </div>

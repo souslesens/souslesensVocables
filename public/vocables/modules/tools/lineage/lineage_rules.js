@@ -21,7 +21,7 @@ var Lineage_rules = (function() {
       return;
     }
     var term = $("#lineage_rules_searchClassInput").val();
-    self.searchItem(term, "class");
+    self.searchItem(term, "Class");
   };
 
   self.onSearchPropertyKeyDown = function(event) {
@@ -29,16 +29,18 @@ var Lineage_rules = (function() {
       return;
     }
     var term = $("#lineage_rules_searchClassInput").val();
-    self.searchItem(term, "property");
+    self.searchItem(term, "ObjectProperty");
   };
 
   self.searchItem = function(term, type) {
     term = term.replace("*", "");
-    var filter = "filter (regex(?label,'" + term + "','i')"
-    if( type=="class")
-      filter+="  && ?type=owl:Class)";
-    else if( type="property")
-      filter+="  && ?type=owl:ObjectProperty)";
+    var filter = "filter (regex(?label,'" + term + "','i')";
+    if (type == "Class") {
+      filter += "  && ?type=owl:Class)";
+    }
+    else if (type = "ObjectProperty") {
+      filter += "  && ?type=owl:ObjectProperty)";
+    }
     Sparql_OWL.getDictionary(Lineage_sources.activeSource, { filter: filter, selectGraph: 1 }, null, function(err, result) {
       if (err) {
         return alert(err.responseText);
@@ -53,7 +55,7 @@ var Lineage_rules = (function() {
             id: item.id.value,
             label: item.label.value,
             source: Sparql_common.getSourceFromGraphUri(item.g.value),
-            type:type
+            type: type
           }
 
         });
@@ -80,27 +82,30 @@ var Lineage_rules = (function() {
         self.addPremise(self.currentTreeNode);
       }
     };
- /*   items.seToNode = {
-      label: "List  properties",
-      action: function(_e, _xx) {
-        self.addPropertiesToTree(self.currentTreeNode);
-      }
-    };*/
+    /*   items.seToNode = {
+         label: "List  properties",
+         action: function(_e, _xx) {
+           self.addPropertiesToTree(self.currentTreeNode);
+         }
+       };*/
 
     return items;
   };
   self.selectTreeNodeFn = function(event, obj) {
     self.currentTreeNode = obj.node;
+    self.addPremise(self.currentTreeNode);
 
 
   };
 
 
   self.addPremise = function(node) {
-    self.premiseDivs[premiseDivId] = node;
+
     var premiseDivId = "premise_" + common.getRandomHexaId(5);
-    var html = "<div class='lineage_rules_premise lineage_rules_premise_"+node.data.type+"' id='" + premiseDivId + "'>" +
-      "<span>" + node.data.label + " </span>" +
+    self.premiseDivs[premiseDivId] = node.data;
+    var label = node.data.type + " : " + node.data.label;
+    var html = "<div class='lineage_rules_premise lineage_rules_premise_" + node.data.type + "' id='" + premiseDivId + "'>" +
+      "<span>" + label + " </span>" +
       "<button onclick='Lineage_rules.clearPremise(\"" + premiseDivId + "\")'>X</bbutton>";
     $("#lineage_rules_premisesDiv").append(html);
   };
@@ -137,6 +142,160 @@ var Lineage_rules = (function() {
 
     });
   };
+  /*
+  "premise":[
+      {
+          "type": "owl:Class",
+          "entities": [
+              {
+                  "name": "Person",
+                  "var": ["A"]
+              },
+              {
+                  "name": "Man",
+                  "var": ["Y"]
+              }
+          ]
+      },
+      {
+          "type": "owl:ObjectProperty",
+          "entities": [
+              {
+                  "name": "hasSibling",
+                  "var": ["A", "Y"]
+              }
+          ]
+      }
+  ],
+  "conclusion":[
+      {
+          "type": "owl:ObjectProperty",
+          "entities": [
+              {
+                  "name": "hasBrother",
+                  "var": ["A", "Y"]
+              }
+          ]
+      }
+  ]
+
+
+  }
+
+
+
+
+   */
+
+  self.execRule = function() {
+
+    var operation
+    var classes = [];
+    var objectProperties = [];
+    var premisesDivs = $("#lineage_rules_premisesDiv").children().each(function() {
+      var divId = $(this).attr("id");
+      var premiseData = self.premiseDivs[divId];
+      if (premiseData.type == "Class") {
+        classes.push(premiseData);
+      }
+      else if (premiseData.type == "ObjectProperty") {
+        objectProperties.push(premiseData);
+      }
+    });
+
+    if (classes.length == 0) {
+      return alert("no Class premise");
+    }
+    //insertRuleReclassification
+    else if (classes.length == 1) {
+      operation = "insertRuleReclassification";
+      var conclusion = prompt("Conclusion Class name");
+      var payload = {
+        "premise": [classes[0].id],
+        "conclusion": [conclusion]
+      };
+    }
+    else if (classes.length == 2) {
+      if (objectProperties.length != 1) {
+        return alert(" one and only one ObjectProperty is needed ");
+      }
+      var conclusion = prompt("Conclusion Property name");
+       var operation = "insertRulePropertyVA";
+     var  classeArray = [];
+     var  propertyClasses = [];
+      classes.forEach(function(item, index) {
+        var varName = Sparql_common.formatStringForTriple(item.label,true);
+        propertyClasses.push(varName);
+        classeArray.push({
+          "name": item.id,
+          "var": [varName]
+        });
+      });
+      var payload = {
+
+        "premise": [{
+          "type": "owl:Class",
+          "entities": classeArray
+        },
+          {
+            "type": "owl:ObjectProperty",
+            "entities": {
+              "name": objectProperties[0].id,
+              "var": propertyClasses
+
+            }
+          }
+        ],
+        "conclusion": [
+          {
+            "type": "owl:ObjectProperty",
+            "entities": [
+              {
+                "name": conclusion,
+                "var": propertyClasses
+              }
+            ]
+          }
+        ]
+      };
+    }
+    else {
+      return alert("case not implemented yet");
+    }
+
+    var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
+    var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
+
+
+    const params = new URLSearchParams({
+      operation: operation,
+      type: "internalGraphUri",
+      payload: JSON.stringify(payload),
+      url: Config.sources[Lineage_sources.activeSource].graphUri,
+      describeQuery:describeQuery
+    });
+  //  $("#lineage_reasoner_infosDiv").html("<span style='color:green;font-style:italic'>Processing " + Lineage_sources.activeSource + "...</span>");
+
+    $.ajax({
+      type: "GET",
+      url: Config.apiUrl + "/jowl/rules?" + params.toString(),
+      dataType: "json",
+
+      success: function (data, _textStatus, _jqXHR) {
+
+
+      },
+      error(err) {
+        return alert(err.responseText);
+        if (callback) {
+          return callback(err);
+        }
+      },
+    });
+
+
+  };
+
 
   /*
 
@@ -152,9 +311,9 @@ var Lineage_rules = (function() {
           self.drawGraph(visjsData);
       }
 
-};
+  };
 
-self.drawGraph = function (visjsData) {
+  self.drawGraph = function (visjsData) {
     var xOffset = 60;
     var yOffset = 130;
     xOffset = parseInt($("#axiomsDraw_xOffset").val());
@@ -193,9 +352,9 @@ self.drawGraph = function (visjsData) {
     $("#" + graphDivContainer).html("<div id='axiomsGraphDiv' style='width:100%;height:100%' onclick='MainController.UI.hidePopup(\"axioms_graphPopupDiv\")';></div>");
     self.axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv", visjsData, options);
     self.axiomsVisjsGraph.draw(function () {});
-};
+  };
 
-self.onNodeClick = function (node, point, nodeEvent) {
+  self.onNodeClick = function (node, point, nodeEvent) {
 
     self.currentGraphNode = node;
     if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
@@ -210,12 +369,13 @@ self.onNodeClick = function (node, point, nodeEvent) {
     }
 
     self.showNodeInfos(node, point, options);
-};
+  };
 
-*/
+  */
 
 
   return self;
-})();
+})
+();
 export default Lineage_rules;
 window.Lineage_rules = Lineage_rules;

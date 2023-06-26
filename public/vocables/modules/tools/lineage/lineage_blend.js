@@ -210,7 +210,17 @@ var Lineage_blend = (function () {
                                             uniqueProps[propId] = 1;
                                             var propertyLabel = property.label || Sparql_common.getLabelFromURI(propId);
                                             var label = (property.domainLabel || "any") + "<b>-" + propertyLabel + "-></b>" + (property.rangeLabel || "any");
-                                            var group = property.group;
+                                            var group = null;
+                                            if(property.domain && property.range)
+                                                group="both";
+                                            else if(property.domain )
+                                                group="domain";
+                                            else if(property.range )
+                                                group="range";
+                                            else
+                                                group="noConstraints";
+
+
                                             var cssClass = propStatusCssClassMap[group];
                                             var parent = property.source;
 

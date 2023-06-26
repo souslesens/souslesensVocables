@@ -23,7 +23,7 @@ module.exports = function () {
         var jowlConfig = ConfigManager.config.jowlServer;
 
         if (req.query.type == "externalUrl") {
-            var url = jowlConfig.url + "reasoner/" + req.query.operation + "?filePath=" + req.query.url;
+            var url = jowlConfig.url + "SWRL/" + req.query.operation + "?filePath=" + req.query.url;
             HttpProxy.post(jowlConfig.url, {}, function (err, result) {
                 if (err) {
                     next(err);
@@ -32,7 +32,7 @@ module.exports = function () {
                 }
             });
         } else if (req.query.type == "internalGraphUri" && ConfigManager.config) {
-            var query = req.query.describeSparqlQuery;
+            var query = req.query.describeQuery;
             var url = ConfigManager.config.default_sparql_url + "?query=";
 
             var requestOptions = {
@@ -89,10 +89,9 @@ module.exports = function () {
 
                     var ontologyContentEncoded64 = Buffer.from(str).toString("base64");
 
-                    var payload = {
-                        ontologyContentEncoded64: ontologyContentEncoded64,
-                        predicates: JSON.parse(req.query.predicates),
-                    };
+                    var payload =JSON.parse(req.query.payload)
+                    payload.ontologyContentEncoded64=ontologyContentEncoded64;
+
 
                     var options = {
                         method: "POST",
@@ -100,7 +99,7 @@ module.exports = function () {
                         headers: {
                             "content-type": "application/json",
                         },
-                        url: jowlConfig.url + "reasoner/" + req.query.operation,
+                        url: jowlConfig.url + "SWRL/" + req.query.operation,
                     };
                     request(options, function (error, response, body) {
                         return processResponse(res, error, body);
@@ -112,9 +111,9 @@ module.exports = function () {
 
     GET.apiDoc = {
         security: [{ loginScheme: [] }],
-        summary: "Query Jowl server",
-        description: "Query Jowl server",
-        operationId: "Query Jowl server",
+        summary: "Query Jowl server rules",
+        description: "Query Jowl server  rules",
+        operationId: "Query Jowl server  rules",
         parameters: [
             {
                 name: "operation",
@@ -137,28 +136,24 @@ module.exports = function () {
                 type: "string",
                 required: false,
             },
+
             {
-                name: "describeSparqlQuery",
-                description: "describeSparqlQuery",
+                name: "payload",
+                description: "payload",
                 in: "query",
                 type: "string",
                 required: false,
             },
             {
-                name: "predicates",
-                description: "predicates array ",
+                name: "describeQuery",
+                description: "describeQuery ",
                 in: "query",
                 type: "string",
                 required: false,
             },
 
-            {
-                name: "options",
-                description: "JSON ",
-                in: "query",
-                type: "string",
-                required: false,
-            },
+
+
         ],
 
         responses: {

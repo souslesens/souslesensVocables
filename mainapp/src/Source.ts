@@ -91,7 +91,7 @@ export async function deleteSource(source: InputSource, updateModel: React.Dispa
 }
 
 const decodeSource = (key: string, source: ServerSource): ServerSource => {
-    return ServerSourceSchema.parse({ name: source.name ?? key });
+    return ServerSourceSchema.parse({ ...source, name: source.name ?? key });
 };
 
 function controllerDefault(schemaType: string | undefined): string {

@@ -1,0 +1,95 @@
+<style>
+    .lineage_rulesUri {
+        font-weight: bold;
+        color: #0067bb;
+        min-width: 100px;
+    }
+
+    .lineage_rules_predicate {
+        display: flex;
+        flex-direction: row;
+        margin: 5px;
+        padding: 3px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        background-color: #ddd;
+    }
+
+    .lineage_rules_subject {
+        background-color: #ceeeb8;
+        border-radius: 4px;
+        margin: 3px;
+        padding: 3px;
+    }
+
+    .lineage_rules_property {
+        background-color: #eccbab;
+        border-radius: 4px;
+        margin: 3px;
+        padding: 3px;
+    }
+
+    .lineage_rules_object {
+        background-color: rgba(178, 198, 229, 0.5);
+        border-radius: 4px;
+        margin: 3px;
+        padding: 3px;
+    }
+
+    .lineage_rules_premise {
+        border-radius: 4px;
+        margin: 3px;
+        padding: 3px;
+    }
+
+    .lineage_rules_premise_Class {
+        background-color: #ddddaa;
+    }
+
+    .lineage_rules_premise_ObjectProperty {
+        background-color: #70ac47;
+    }
+</style>
+
+Rules
+<!--<button onclick="Lineage_rules.initVisjsPathMode()">Select on Whiteboard</button>-->
+<button onclick="Lineage_rules.clearNodes()">Clear</button>
+
+<div style="display: flex; flex-direction: row; margin: 5px; margin-top: 15px">
+    <div>
+        <div>search Class &nbsp;<input id="lineage_rules_searchClassInput" /></div>
+        <div>search Property &nbsp;<input id="lineage_rules_searchPropertyInput" /></div>
+        <div style="width: 400px; height: 700px; overflow: auto">
+            <div id="lineage_rules_searchJsTreeDiv"></div>
+        </div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; background-color: #ddd; border-radius: 5px; margin: 5px; padding: 5px">
+        Premises
+        <div id="lineage_rules_premisesDiv" style="width: 250px; height: 400px; overflow: auto"></div>
+    </div>
+
+    <div style="display: flex; flex-direction: column; background-color: #ddd; border-radius: 5px; margin: 5px; padding: 5px">
+        <!--   Conclusion
+       <div id="lineage_rules_conclusionDiv" style="width:300px;overflow: auto">
+
+         <div> TYPE <select id="lineage_rules_conclusionTypeSelect">
+           <option>owl:Class</option>
+           <option>owl:ObjectProperty</option>
+         </select>
+         </div>
+        <div> URI <input id="lineage_rules_conclusionUri" style="width:250px"/></div>
+       </div>
+       Label <input id="lineage_rules_conclusionLabel" style="width:200px" />-->
+        <div>
+            <select id="lineage_rules_outputTypeSelect">
+                <option>list</option>
+                <option>createTriples</option>
+            </select>
+            <button onclick="Lineage_rules.execRule()">Execute</button>
+        </div>
+    </div>
+</div>

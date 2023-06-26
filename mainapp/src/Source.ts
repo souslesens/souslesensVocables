@@ -195,7 +195,7 @@ export const InputSourceSchema = z.object({
     predicates: SourcePredicatesSchema,
     group: z.string().nonempty({ message: "Required" }),
     imports: z.array(z.string()).default([]),
-    taxonomyPredicates: z.array(z.string()).default([]),
+    taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
 });
 
 export const defaultSource = (id: string): ServerSource => {

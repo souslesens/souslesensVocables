@@ -148,7 +148,7 @@ var Ontocommons = (function () {
         }
         var rdfUrlEncoded = encodeURIComponent(rdfUrlUrl);
         var slsvUrl = window.location.protocol + "//" + window.location.host;
-
+        var slsvUrl = "https://slsvasso.org/vocables/";
         var targetUrl = slsvUrl + "?tool=lineage&source=" + ontologyId + "&rdfUrl=" + rdfUrlEncoded + "&reload=" + reload + "&editable=" + editable;
         $("#slsv_iframe").attr("src", targetUrl);
     };

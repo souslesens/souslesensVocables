@@ -65,14 +65,14 @@ var Lineage_properties = (function () {
                         Lineage_common.pasteNodeFromClipboard(self.currentTreeNode);
                     },
                 };
-                items.deleteProperty = {
+                /* items.deleteProperty = {
                     label: "delete property",
                     action: function (_e) {
                         // pb avec source
 
-                        Lineage_JstreeWidget.deleteNode(self.currentTreeNode, "Lineage_propertiesTree");
+                        JstreeWidget.deleteNode(self.currentTreeNode, "Lineage_propertiesTree");
                     },
-                };
+                };*/
             }
         }
 

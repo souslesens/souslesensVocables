@@ -1,6 +1,7 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
+import Lineage_axioms_draw from "../tools/lineage/lineage_axioms_draw.js";
 
 // eslint-disable-next-line no-global-assign
 var OntologyModels = (function () {
@@ -18,7 +19,9 @@ var OntologyModels = (function () {
             function (source, callbackEach) {
                 var graphUri;
                 if (!Config.ontologiesVocabularyModels[source]) {
-                    if (!Config.sources[source]) return MainController.UI.message("source " + source + " not allowed for user ");
+                    if (!Config.sources[source]) {
+                        return MainController.UI.message("source " + source + " not allowed for user ");
+                    }
                     graphUri = Config.sources[source].graphUri;
                     if (!graphUri) {
                         return callback();
@@ -43,11 +46,13 @@ var OntologyModels = (function () {
                         function (callbackSeries) {
                             var query =
                                 queryP +
-                                " SELECT distinct ?prop ?propLabel ?inverseProp from <" +
+                                " SELECT distinct ?prop ?propLabel ?inverseProp ?superProperty from <" +
                                 graphUri +
                                 ">  WHERE {\n" +
-                                "  ?prop ?p ?o optional{?prop rdfs:label ?propLabel}" +
+                                "  ?prop ?p ?o " +
+                                Sparql_common.getVariableLangLabel("prop", true, true) +
                                 "optional{?prop owl:inverseOf ?inverseProp}" +
+                                "optional{?prop rdfs:subPropertyOf ?superProperty}" +
                                 " VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty owl:AnnotationProperty} }";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
@@ -55,12 +60,16 @@ var OntologyModels = (function () {
                                 }
 
                                 result.results.bindings.forEach(function (item) {
+                                    if (item.superProperty) {
+                                        var x = 3;
+                                    }
                                     if (!uniqueProperties[item.prop.value]) {
                                         uniqueProperties[item.prop.value] = 1;
                                         Config.ontologiesVocabularyModels[source].properties.push({
                                             id: item.prop.value,
                                             label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
-                                            inversProp: item.inverseProp ? item.inverseProp.value : null,
+                                            inverseProp: item.inverseProp ? item.inverseProp.value : null,
+                                            superProp: item.superProperty ? item.superProperty.value : null,
                                         });
                                     }
                                     if (item.inverseProp) {
@@ -81,7 +90,9 @@ var OntologyModels = (function () {
                                 " select distinct ?sub ?subLabel FROM <" +
                                 graphUri +
                                 "> where{" +
-                                " ?sub rdf:type ?class. OPTIONAL{ ?sub rdfs:label ?subLabel} VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
+                                " ?sub rdf:type ?class. " +
+                                Sparql_common.getVariableLangLabel("sub", true, true) +
+                                " VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -100,7 +111,15 @@ var OntologyModels = (function () {
 
                         //set domain constraints
                         function (callbackSeries) {
-                            var query = queryP + "" + " select distinct ?prop ?domain FROM <" + graphUri + "> where{" + " ?prop rdfs:domain ?domain." + "OPTIONAL{ ?domain rdfs:label ?domainLabel} }";
+                            var query =
+                                queryP +
+                                "" +
+                                " select distinct ?prop ?domain FROM <" +
+                                graphUri +
+                                "> where{" +
+                                " ?prop rdfs:domain ?domain." +
+                                Sparql_common.getVariableLangLabel("domain", true, true) +
+                                " }";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -119,7 +138,8 @@ var OntologyModels = (function () {
                         },
                         //set range constraints
                         function (callbackSeries) {
-                            var query = queryP + " select distinct ?prop ?range FROM <" + graphUri + "> where{" + " ?prop rdfs:range ?range.OPTIONAL{ ?range rdfs:label ?rangeLabel} }";
+                            var query =
+                                queryP + " select distinct ?prop ?range FROM <" + graphUri + "> where{" + " ?prop rdfs:range ?range." + Sparql_common.getVariableLangLabel("range", true, true) + " }";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -230,7 +250,7 @@ var OntologyModels = (function () {
 
                         //set inherited domains
                         function (callbackSeries) {
-                            if (propsWithoutDomain.length == 0) {
+                            if (false && propsWithoutDomain.length == 0) {
                                 return callbackSeries();
                             }
                             var props = propsWithoutDomain.concat(propsWithoutRange);
@@ -261,6 +281,61 @@ var OntologyModels = (function () {
                                 return callbackSeries();
                             });
                         },
+
+                        // set constraints prop label and superProp
+                        function (callbackSeries) {
+                            Config.ontologiesVocabularyModels[source].properties.forEach(function (property) {
+                                if (Config.ontologiesVocabularyModels[source].constraints[property.id]) {
+                                    Config.ontologiesVocabularyModels[source].constraints[property.id].label = property.label;
+
+                                    Config.ontologiesVocabularyModels[source].constraints[property.id].superProp = property.superProp;
+                                }
+                            });
+                            return callbackSeries();
+                        },
+
+                        // set transSourceRangeAndDomainLabels
+                        function (callbackSeries) {
+                            if (!Config.sources[source]) {
+                                return callbackSeries();
+                            }
+                            var classes = [];
+                            for (var propId in Config.ontologiesVocabularyModels[source].constraints) {
+                                var constraint = Config.ontologiesVocabularyModels[source].constraints[propId];
+                                if (constraint.domain && classes.indexOf(constraint.domain) < 0) {
+                                    classes.push(constraint.domain);
+                                }
+                                if (constraint.range && classes.indexOf(constraint.range) < 0) {
+                                    classes.push(constraint.range);
+                                }
+                            }
+                            var filter = Sparql_common.setFilter("id", classes);
+                            Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, null, function (err, result) {
+                                if (err) {
+                                    return callbackSeries(err);
+                                }
+                                var labelsMap = {};
+                                result.forEach(function (item) {
+                                    if (item.label) {
+                                        labelsMap[item.id.value] = item.label.value;
+                                    } else {
+                                        labelsMap[item.id.value] = Sparql_common.getLabelFromURI(item.id.value);
+                                    }
+                                });
+                                for (var propId in Config.ontologiesVocabularyModels[source].constraints) {
+                                    var constraint = Config.ontologiesVocabularyModels[source].constraints[propId];
+                                    if (labelsMap[constraint.domain]) {
+                                        Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = labelsMap[constraint.domain];
+                                    }
+                                    if (labelsMap[constraint.range]) {
+                                        Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = labelsMap[constraint.range];
+                                    }
+                                }
+
+                                return callbackSeries();
+                            });
+                        },
+
                         //register source in Config.sources
                         function (callbackSeries) {
                             if (!Config.sources[source]) {
@@ -285,8 +360,141 @@ var OntologyModels = (function () {
     self.unRegisterSourceModel = function () {
         var basicsSources = Object.keys(Config.basicVocabularies);
         for (var source in Config.ontologiesVocabularyModels) {
-            if (basicsSources.indexOf(source) < 0) delete Config.ontologiesVocabularyModels[source];
+            if (basicsSources.indexOf(source) < 0) {
+                delete Config.ontologiesVocabularyModels[source];
+            }
         }
+    };
+
+    self.getAllowedPropertiesBetweenNodes = function (source, startNodeId, endNodeId, callback) {
+        var startNodeAncestors = [];
+        var endNodeAncestors = [];
+
+        var validProperties = [];
+        var validConstraints = {};
+        var allConstraints = {};
+        var hierarchies = {};
+
+        var noConstaintsArray = [];
+        var propertiesMatchingBoth = [];
+        var propertiesMatchingStartNode = [];
+        var propertiesMatchingEndNode = [];
+
+        async.series(
+            [
+                function (callbackSeries) {
+                    Sparql_OWL.getNodesAncestors(source, [startNodeId, endNodeId], { excludeItself: 0 }, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        hierarchies = result.hierarchies;
+                        callbackSeries();
+                    });
+                }, //get matching properties
+                function (callbackSeries) {
+                    var allSources = [source];
+                    if (Config.sources[source].imports) {
+                        allSources = allSources.concat(Config.sources[source].imports);
+                    }
+
+                    var allDomains = {};
+                    var allRanges = {};
+
+                    var validConstraints = {};
+
+                    var startNodeAncestorIds = [];
+                    hierarchies[startNodeId].forEach(function (item) {
+                        startNodeAncestorIds.push(item.superClass.value);
+                    });
+
+                    var endNodeAncestorIds = [];
+                    var endNodeIndex;
+                    hierarchies[endNodeId].forEach(function (item, startNodeIndex) {
+                        endNodeAncestorIds.push(item.superClass.value);
+                    });
+
+                    allSources.forEach(function (_source) {
+                        var sourceConstraints = Config.ontologiesVocabularyModels[_source].constraints;
+                        for (var property in sourceConstraints) {
+                            var constraint = sourceConstraints[property];
+                            constraint.source = _source;
+                            var domainOK = false;
+                            allConstraints[property] = constraint;
+
+                            if (constraint.domain) {
+                                if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
+                                    if (!constraint.range) {
+                                        propertiesMatchingStartNode.push(property);
+                                    } else {
+                                        domainOK = true;
+                                    }
+                                }
+                            }
+                            if (constraint.range) {
+                                if ((endNodeIndex = endNodeAncestorIds.indexOf(constraint.range)) > -1) {
+                                    if (domainOK) {
+                                        propertiesMatchingBoth.push(property);
+                                    } else {
+                                        if (!constraint.domain) {
+                                            propertiesMatchingEndNode.push(property);
+                                        }
+                                    }
+                                }
+                            }
+                            if (!constraint.domain && !constraint.range) {
+                                noConstaintsArray.push(property);
+                            }
+                        }
+                    });
+
+                    callbackSeries();
+                },
+
+                //remove matching superproperties
+                function (callbackSeries) {
+                    var propsToRemove = [];
+
+                    function recurse(propId) {
+                        if (allConstraints[propId]) {
+                            var superProp = allConstraints[propId].superProp;
+                            if (superProp) {
+                                if (validProperties.indexOf(superProp) > -1) {
+                                    if (propsToRemove.indexOf(superProp) < 0) propsToRemove.push(superProp);
+                                }
+                                recurse(superProp);
+                            }
+                        }
+                    }
+
+                    propertiesMatchingBoth.forEach(function (propId) {
+                        recurse(propId);
+                    });
+                    propertiesMatchingStartNode.forEach(function (propId) {
+                        recurse(propId);
+                    });
+                    propertiesMatchingEndNode.forEach(function (propId) {
+                        recurse(propId);
+                    });
+
+                    validProperties = propertiesMatchingBoth;
+                    validProperties = common.array.union(validProperties, propertiesMatchingStartNode);
+                    validProperties = common.array.union(validProperties, propertiesMatchingEndNode);
+                    validProperties = common.array.union(validProperties, noConstaintsArray);
+
+                    validConstraints = {};
+
+                    validProperties.forEach(function (propId) {
+                        if (propsToRemove.indexOf(propId) < 0) {
+                            validConstraints[propId] = allConstraints[propId];
+                        }
+                    });
+                    callbackSeries();
+                },
+            ],
+            function (err) {
+                return callback(err, validConstraints);
+            }
+        );
     };
 
     return self;

@@ -39,7 +39,11 @@ app.use(
         secret: config.cookieSecret ? config.cookieSecret : "S3cRet!",
         resave: false,
         saveUninitialized: false,
-        cookie: { maxAge: config.cookieMaxAge ? config.cookieMaxAge : 2629800000 },
+        cookie: {
+            maxAge: config.cookieMaxAge ? config.cookieMaxAge : 2629800000,
+            sameSite: config.cookieSameSite ? config.cookieSameSite : false,
+            secure: config.cookieSecure ? config.cookieSecure : false,
+        },
     })
 );
 

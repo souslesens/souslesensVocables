@@ -25,18 +25,18 @@ export async function putSources(body: ServerSource[]): Promise<ServerSource[]> 
 function mapSources(resources: ServerSource[]) {
     const sources = Object.entries(resources);
     const mapped_sources = sources
-      .map(([key, val]) => decodeSource(key, val))
-      .sort((source1: ServerSource, source2: ServerSource) => {
-          const name1 = source1.name.toUpperCase();
-          const name2 = source2.name.toUpperCase();
-          if (name1 < name2) {
-              return -1;
-          }
-          if (name1 > name2) {
-              return 1;
-          }
-          return 0;
-      });
+        .map(([key, val]) => decodeSource(key, val))
+        .sort((source1: ServerSource, source2: ServerSource) => {
+            const name1 = source1.name.toUpperCase();
+            const name2 = source2.name.toUpperCase();
+            if (name1 < name2) {
+                return -1;
+            }
+            if (name1 > name2) {
+                return 1;
+            }
+            return 0;
+        });
     return mapped_sources;
 }
 
@@ -109,19 +109,19 @@ export type InputSource = z.infer<typeof InputSourceSchema>;
 type SparqlServer = z.infer<typeof SparqlServerSchema>;
 
 export const SparqlServerSchema = z
-  .object({
-      url: z.string().default("_default"),
-      method: z.string().default("GET"),
-      headers: z.array(z.string()).default([]),
-  })
-  .default({ url: "", method: "", headers: [] });
+    .object({
+        url: z.string().default("_default"),
+        method: z.string().default("GET"),
+        headers: z.array(z.string()).default([]),
+    })
+    .default({ url: "", method: "", headers: [] });
 
 const SourcePredicatesSchema = z
-  .object({
-      broaderPredicate: z.string().default(""),
-      lang: z.string().default(""),
-  })
-  .default({ broaderPredicate: "", lang: "" });
+    .object({
+        broaderPredicate: z.string().default(""),
+        lang: z.string().default(""),
+    })
+    .default({ broaderPredicate: "", lang: "" });
 
 const LocalDictionarySchema = z.object({
     table: z.string().default(""),
@@ -139,14 +139,14 @@ const defaultDataSource: DataSource = {
 };
 
 const dataSourceSchema = z
-  .object({
-      type: z.array(z.string()).default([]),
-      connection: z.string().default("_default"),
-      dbName: z.string().default(""),
-      table_schema: z.string().default(""),
-      local_dictionary: LocalDictionarySchema,
-  })
-  .default(defaultDataSource);
+    .object({
+        type: z.array(z.string()).default([]),
+        connection: z.string().default("_default"),
+        dbName: z.string().default(""),
+        table_schema: z.string().default(""),
+        local_dictionary: LocalDictionarySchema,
+    })
+    .default(defaultDataSource);
 
 export const ServerSourceSchema = z.object({
     id: z.string().default(ulid()),
@@ -173,10 +173,10 @@ export const ServerSourceSchema = z.object({
 export const InputSourceSchema = z.object({
     id: z.string().default(ulid()),
     name: z
-      .string()
-      .nonempty({ message: "Required" })
-      .refine((val) => val !== "admin", { message: "Name can't be admin" })
-      .refine((val) => val.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i), { message: "Name can only contain alphanumeric characters" }),
+        .string()
+        .nonempty({ message: "Required" })
+        .refine((val) => val !== "admin", { message: "Name can't be admin" })
+        .refine((val) => val.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i), { message: "Name can only contain alphanumeric characters" }),
 
     _type: z.string().optional(),
     type: z.string().default(""),

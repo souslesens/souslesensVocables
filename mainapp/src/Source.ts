@@ -91,7 +91,7 @@ export async function deleteSource(source: InputSource, updateModel: React.Dispa
 }
 
 const decodeSource = (key: string, source: ServerSource): ServerSource => {
-    return ServerSourceSchema.parse({ ...source, name: source.name ?? key });
+    return ServerSourceSchema.parse({ name: source.name ?? key });
 };
 
 function controllerDefault(schemaType: string | undefined): string {
@@ -106,6 +106,7 @@ function controllerDefault(schemaType: string | undefined): string {
 
 export type ServerSource = z.infer<typeof ServerSourceSchema>;
 export type InputSource = z.infer<typeof InputSourceSchema>;
+type SparqlServer = z.infer<typeof SparqlServerSchema>;
 
 export const SparqlServerSchema = z
     .object({
@@ -166,7 +167,7 @@ export const ServerSourceSchema = z.object({
     predicates: SourcePredicatesSchema,
     group: z.string().default(""),
     imports: z.array(z.string()).default([]),
-    taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
+    taxonomyPredicates: z.array(z.string()).default([]),
 });
 
 export const InputSourceSchema = z.object({
@@ -175,13 +176,11 @@ export const InputSourceSchema = z.object({
         .string()
         .nonempty({ message: "Required" })
         .refine((val) => val !== "admin", { message: "Name can't be admin" })
-        .refine((val) => val.match(/.{2,254}/i), { message: "Name can only contain between 2 and 255 chars" })
-        .refine((val) => val.match(/^[a-z0-9]/i), { message: "Name have to start with alphanum char" })
-        .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
+        .refine((val) => val.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i), { message: "Name can only contain alphanumeric characters" }),
 
     _type: z.string().optional(),
     type: z.string().default(""),
-    graphUri: z.string().optional(),
+    graphUri: z.string().nonempty({ message: "Required" }),
     sparql_server: SparqlServerSchema,
     controller: z.string().optional(),
     topClassFilter: z.string().optional(),
@@ -193,16 +192,15 @@ export const InputSourceSchema = z.object({
     isDraft: z.boolean().default(false),
     allowIndividuals: z.boolean().default(false),
     predicates: SourcePredicatesSchema,
-    group: z.string().nonempty({ message: "Required" }),
+    group: z.string().default(""),
     imports: z.array(z.string()).default([]),
-    taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
+    taxonomyPredicates: z.array(z.string()).default([]),
 });
 
 export const defaultSource = (id: string): ServerSource => {
     return ServerSourceSchema.parse({
         _type: "source",
         id: id,
-        sparql_server: SparqlServerSchema.parse({}),
     });
 };
 

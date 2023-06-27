@@ -25,18 +25,18 @@ export async function putSources(body: ServerSource[]): Promise<ServerSource[]> 
 function mapSources(resources: ServerSource[]) {
     const sources = Object.entries(resources);
     const mapped_sources = sources
-        .map(([key, val]) => decodeSource(key, val))
-        .sort((source1: ServerSource, source2: ServerSource) => {
-            const name1 = source1.name.toUpperCase();
-            const name2 = source2.name.toUpperCase();
-            if (name1 < name2) {
-                return -1;
-            }
-            if (name1 > name2) {
-                return 1;
-            }
-            return 0;
-        });
+      .map(([key, val]) => decodeSource(key, val))
+      .sort((source1: ServerSource, source2: ServerSource) => {
+          const name1 = source1.name.toUpperCase();
+          const name2 = source2.name.toUpperCase();
+          if (name1 < name2) {
+              return -1;
+          }
+          if (name1 > name2) {
+              return 1;
+          }
+          return 0;
+      });
     return mapped_sources;
 }
 
@@ -91,7 +91,7 @@ export async function deleteSource(source: InputSource, updateModel: React.Dispa
 }
 
 const decodeSource = (key: string, source: ServerSource): ServerSource => {
-    return ServerSourceSchema.parse({ ...source, name: source.name ?? key });
+    return ServerSourceSchema.parse({ name: source.name ?? key });
 };
 
 function controllerDefault(schemaType: string | undefined): string {
@@ -106,21 +106,22 @@ function controllerDefault(schemaType: string | undefined): string {
 
 export type ServerSource = z.infer<typeof ServerSourceSchema>;
 export type InputSource = z.infer<typeof InputSourceSchema>;
+type SparqlServer = z.infer<typeof SparqlServerSchema>;
 
 export const SparqlServerSchema = z
-    .object({
-        url: z.string().default("_default"),
-        method: z.string().default("GET"),
-        headers: z.array(z.string()).default([]),
-    })
-    .default({ url: "", method: "", headers: [] });
+  .object({
+      url: z.string().default("_default"),
+      method: z.string().default("GET"),
+      headers: z.array(z.string()).default([]),
+  })
+  .default({ url: "", method: "", headers: [] });
 
 const SourcePredicatesSchema = z
-    .object({
-        broaderPredicate: z.string().default(""),
-        lang: z.string().default(""),
-    })
-    .default({ broaderPredicate: "", lang: "" });
+  .object({
+      broaderPredicate: z.string().default(""),
+      lang: z.string().default(""),
+  })
+  .default({ broaderPredicate: "", lang: "" });
 
 const LocalDictionarySchema = z.object({
     table: z.string().default(""),
@@ -138,14 +139,14 @@ const defaultDataSource: DataSource = {
 };
 
 const dataSourceSchema = z
-    .object({
-        type: z.array(z.string()).default([]),
-        connection: z.string().default("_default"),
-        dbName: z.string().default(""),
-        table_schema: z.string().default(""),
-        local_dictionary: LocalDictionarySchema,
-    })
-    .default(defaultDataSource);
+  .object({
+      type: z.array(z.string()).default([]),
+      connection: z.string().default("_default"),
+      dbName: z.string().default(""),
+      table_schema: z.string().default(""),
+      local_dictionary: LocalDictionarySchema,
+  })
+  .default(defaultDataSource);
 
 export const ServerSourceSchema = z.object({
     id: z.string().default(ulid()),
@@ -166,22 +167,20 @@ export const ServerSourceSchema = z.object({
     predicates: SourcePredicatesSchema,
     group: z.string().default(""),
     imports: z.array(z.string()).default([]),
-    taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
+    taxonomyPredicates: z.array(z.string()).default([]),
 });
 
 export const InputSourceSchema = z.object({
     id: z.string().default(ulid()),
     name: z
-        .string()
-        .nonempty({ message: "Required" })
-        .refine((val) => val !== "admin", { message: "Name can't be admin" })
-        .refine((val) => val.match(/.{2,254}/i), { message: "Name can only contain between 2 and 255 chars" })
-        .refine((val) => val.match(/^[a-z0-9]/i), { message: "Name have to start with alphanum char" })
-        .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
+      .string()
+      .nonempty({ message: "Required" })
+      .refine((val) => val !== "admin", { message: "Name can't be admin" })
+      .refine((val) => val.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i), { message: "Name can only contain alphanumeric characters" }),
 
     _type: z.string().optional(),
     type: z.string().default(""),
-    graphUri: z.string().optional(),
+    graphUri: z.string().nonempty({ message: "Required" }),
     sparql_server: SparqlServerSchema,
     controller: z.string().optional(),
     topClassFilter: z.string().optional(),
@@ -193,16 +192,15 @@ export const InputSourceSchema = z.object({
     isDraft: z.boolean().default(false),
     allowIndividuals: z.boolean().default(false),
     predicates: SourcePredicatesSchema,
-    group: z.string().nonempty({ message: "Required" }),
+    group: z.string().default(""),
     imports: z.array(z.string()).default([]),
-    taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
+    taxonomyPredicates: z.array(z.string()).default([]),
 });
 
 export const defaultSource = (id: string): ServerSource => {
     return ServerSourceSchema.parse({
         _type: "source",
         id: id,
-        sparql_server: SparqlServerSchema.parse({}),
     });
 };
 

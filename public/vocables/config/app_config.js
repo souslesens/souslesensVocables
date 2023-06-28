@@ -138,6 +138,17 @@ var Config = (function () {
     self.selectListsCache = {};
 
     self.Lineage = {
+        disabledButtons: [
+            "lineage_actionDiv_similars",
+            "lineage_actionDiv_equivClass",
+            "lineage_actionDiv_linkedData",
+            "lineage_actionDiv_reasoner",
+            "lineage_actionDiv_rules",
+            "lineage_actionDiv_newAxiom",
+            //"lineage_actionDiv_clearLast",
+            // "lineage_actionDiv_last"
+        ],
+
         numberOfContainersLevel: 3,
         showSourceNodesInGraph: false,
         basicObjectProperties: [

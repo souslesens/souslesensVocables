@@ -438,35 +438,32 @@ var OntologyModels = (function () {
                             var domainOK = false;
                             if (!allConstraints[property]) {
                                 allConstraints[property] = constraint;
-                            } else if (allConstraints[property].domain != constraint.domain && allConstraints[property].range != constraint.range) {
-                                constraint.id = property;
-                                duplicateProps.push(constraint);
-                                allConstraints[property].id = property;
-                                duplicateProps.push(allConstraints[property]);
-                            }
 
-                            if (constraint.domain) {
-                                if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
-                                    if (!constraint.range) {
-                                        propertiesMatchingStartNode.push(property);
-                                    } else {
-                                        domainOK = true;
-                                    }
-                                }
-                            }
-                            if (constraint.range) {
-                                if (endNodeAncestorIds.indexOf(constraint.range) > -1) {
-                                    if (domainOK) {
-                                        propertiesMatchingBoth.push(property);
-                                    } else {
-                                        if (!constraint.domain) {
-                                            propertiesMatchingEndNode.push(property);
+                                if (constraint.domain) {
+                                    if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
+                                        if (!constraint.range) {
+                                            propertiesMatchingStartNode.push(property);
+                                        } else {
+                                            domainOK = true;
                                         }
                                     }
                                 }
-                            }
-                            if (!constraint.domain && !constraint.range) {
-                                noConstaintsArray.push(property);
+                                if (constraint.range) {
+                                    if (endNodeAncestorIds.indexOf(constraint.range) > -1) {
+                                        if (domainOK) {
+                                            propertiesMatchingBoth.push(property);
+                                        } else {
+                                            if (!constraint.domain) {
+                                                propertiesMatchingEndNode.push(property);
+                                            }
+                                        }
+                                    }
+                                }
+                                if (!constraint.domain && !constraint.range) {
+                                    noConstaintsArray.push(property);
+                                }
+                            } else if (allConstraints[property].domain != constraint.domain && allConstraints[property].range != constraint.range) {
+                                duplicateProps.push(property + "_" + allConstraints[property].source + "-----" + constraint.source);
                             }
                         }
                     });
@@ -532,7 +529,11 @@ var OntologyModels = (function () {
                 },
             ],
             function (err) {
-                console.log("DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN\r" + duplicateProps);
+                if (duplicateProps.length > 0) MainController.UI.message(duplicateProps.length + " DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN");
+                console.warn("DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN\r");
+                duplicateProps.forEach(function (item) {
+                    console.warn(item);
+                });
                 return callback(err, validConstraints);
             }
         );

@@ -19,6 +19,12 @@ var Lineage_sources = (function () {
     self.sourceDivsMap = {};
 
     self.init = function (showDialog) {
+        if (true) {
+            Config.Lineage.disabledButtons.forEach(function (buttonId) {
+                $("#" + buttonId).prop("disabled", true);
+            });
+        }
+
         if (self.loadedSources) {
             for (var source in self.loadedSources) {
                 self.menuActions.closeSource(source);
@@ -147,9 +153,11 @@ var Lineage_sources = (function () {
             return alert("source" + source + "not found");
         }
 
-        if (false) {
+        if (true) {
+            Config.Lineage.disabledButtons.forEach(function (buttonId) {
+                $("#" + buttonId).prop("disabled", true);
+            });
             // $("#Lineage_Tabs").tabs("disable", 3);
-            $("#lineage_classes_showLinkedDataButton").prop("disabled", true);
         }
 
         function highlightSourceDiv(source) {

@@ -6,7 +6,8 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 var Lineage_rules = (function () {
     var self = {};
 
-    self.premiseDivs = {};
+    self.selectedEntitiesDiv = {};
+    self.conclusionsDivs = {};
 
     self.showRulesDialog = function () {
         $("#mainDialogDiv").dialog("open");
@@ -69,47 +70,61 @@ var Lineage_rules = (function () {
     self.getContextMenu = function () {
         var items = {};
 
-        items.AddPremise = {
+        items.addPremise = {
             label: "Add Premise",
             action: function (_e, _xx) {
-                self.addPremise(self.currentTreeNode);
+                self.addPremiseOrConclusion(self.currentTreeNode,"premise");
             },
         };
-        /*   items.seToNode = {
-         label: "List  properties",
-         action: function(_e, _xx) {
-           self.addPropertiesToTree(self.currentTreeNode);
-         }
-       };*/
+        items.addConclusion = {
+            label: "Add Conclusion",
+            action: function (_e, _xx) {
+                self.addPremiseOrConclusion(self.currentTreeNode,"conclusion");
+            },
+        };
+      
 
         return items;
     };
     self.selectTreeNodeFn = function (event, obj) {
         self.currentTreeNode = obj.node;
-        self.addPremise(self.currentTreeNode);
+   
     };
 
-    self.addPremise = function (node) {
-        var premiseDivId = "premise_" + common.getRandomHexaId(5);
-        self.premiseDivs[premiseDivId] = node.data;
+    self.addPremiseOrConclusion = function (node,role) {
+
+
+       var containerDiv,divId;
+        if(role=="premise") {
+           divId = "premise_" + common.getRandomHexaId(5);
+            containerDiv="lineage_rules_premisesDiv"
+        } else   if(role=="conclusion") {
+            divId = "conclusion_" + common.getRandomHexaId(5);
+            containerDiv="lineage_rules_conclusionsDiv"
+
+        }
+        self.selectedEntitiesDiv[divId] = node.data;
+        self.selectedEntitiesDiv[divId].role =role;
+
+
         var label = node.data.type + " : " + node.data.label;
         var html =
             "<div class='lineage_rules_premise lineage_rules_premise_" +
             node.data.type +
             "' id='" +
-            premiseDivId +
+            divId +
             "'>" +
             "<span>" +
             label +
             " </span>" +
             "<button onclick='Lineage_rules.clearPremise(\"" +
-            premiseDivId +
+            divId +
             "\")'>X</bbutton>";
-        $("#lineage_rules_premisesDiv").append(html);
+        $("#"+containerDiv).append(html);
     };
 
     self.clearPremise = function (div) {
-        delete self.premiseDivs[div];
+        delete self.selectedEntitiesDiv[div];
         $("#" + div).remove();
     };
 
@@ -182,40 +197,83 @@ var Lineage_rules = (function () {
 
     self.execRule = function () {
         var operation;
-        var classes = [];
-        var objectProperties = [];
-        var premisesDivs = $("#lineage_rules_premisesDiv")
+        var params={
+            premises:{classes:[],objectProperties:[]},
+            conclusions:{classes:[],objectProperties:[]}
+        }
+
+
+        for( var divId in self.selectedEntitiesDiv){
+            var data = self.selectedEntitiesDiv[divId];
+            if(data.role=="premise") {
+                if (data.type == "Class") {
+                    params.premises.classes.push(data);
+                }
+                else if (premiseData.type == "ObjectProperty") {
+                    params.premises.objectProperties.push(data);
+                }
+            }else if(data.role=="conclusion") {
+                if (data.type == "Class") {
+                    params.conclusions.classes.push(data);
+                }
+                else if (premiseData.type == "ObjectProperty") {
+                    params.conclusions.objectProperties.push(data);
+                }
+            }
+        }
+
+     /*   var premisesDivs = $("#lineage_rules_premisesDiv")
             .children()
             .each(function () {
                 var divId = $(this).attr("id");
-                var premiseData = self.premiseDivs[divId];
-                if (premiseData.type == "Class") {
-                    classes.push(premiseData);
+                var data = self.selectedEntitiesDiv[divId];
+                if (data.type == "Class") {
+                    params.premises.classes.push(data);
                 } else if (premiseData.type == "ObjectProperty") {
-                    objectProperties.push(premiseData);
+                    params.objectProperties.push(data);
                 }
             });
 
-        if (classes.length == 0) {
-            return alert("no Class premise");
+        var conclusionsDivs = $("#lineage_rules_conclusionsDiv")
+          .children()
+          .each(function () {
+              var divId = $(this).attr("id");
+              var data = self.conclusionDivs[divId];
+              if (data.type == "Class") {
+                  params.conclusions.objectProperties.push(data);
+              } else if (data.type == "ObjectProperty") {
+                  params.conclusions.objectProperties.push(data);
+              }
+          });*/
+
+
+        if (params.premises.classes.length == 0 ) {
+            return alert("no Class premise selected");
         }
+
+        if (params.conclusions.classes.length == 0 && params.conclusions.objectProperties.length == 0) {
+            return alert("no Conclusion selected");
+        }
+
+
         //insertRuleReclassification
-        else if (classes.length == 1) {
+        else if (params.premises.classes.length == 1 && params.conclusions.classes.length == 1) {
             operation = "alternative_exec_rule";
-            var conclusion = prompt("Conclusion Class name");
             var payload = {
-                premise: [classes[0].id],
-                conclusion: [conclusion],
+                premise: [params.premises.classes[0].id],
+                conclusion: [ params.conclusions.classes[0].id],
             };
-        } else if (classes.length == 2) {
-            if (objectProperties.length != 1) {
+        } else if (params.premises.classes.length  == 2) {
+            if (params.premises.objectProperties.length != 1) {
                 return alert(" one and only one ObjectProperty is needed ");
             }
-            var conclusion = prompt("Conclusion Property name");
+            var conclusion=null
+
             var operation = "exec_rule";
             var classeArray = [];
             var propertyClasses = [];
-            classes.forEach(function (item, index) {
+            params.conclusions.classes.forEach(function (item, index) {
+                conclusion=item.id
                 var varName = Sparql_common.formatStringForTriple(item.label, true);
                 propertyClasses.push(varName);
                 classeArray.push({
@@ -223,6 +281,17 @@ var Lineage_rules = (function () {
                     var: [varName],
                 });
             });
+            params.conclusions.objectProperties.forEach(function (item, index) {
+                conclusion=item.id
+                var varName = Sparql_common.formatStringForTriple(item.label, true);
+                propertyClasses.push(varName);
+                classeArray.push({
+                    name: item.id,
+                    var: [varName],
+                });
+            });
+
+
             var payload = {
                 premise: [
                     {
@@ -232,7 +301,7 @@ var Lineage_rules = (function () {
                     {
                         type: "owl:ObjectProperty",
                         entities: {
-                            name: objectProperties[0].id,
+                            name:  params.premises.objectProperties[0].id,
                             var: propertyClasses,
                         },
                     },
@@ -256,7 +325,7 @@ var Lineage_rules = (function () {
         var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
         var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
 
-        const params = new URLSearchParams({
+        const queryParams = new URLSearchParams({
             operation: operation,
             type: "internalGraphUri",
             payload: JSON.stringify(payload),
@@ -267,7 +336,7 @@ var Lineage_rules = (function () {
 
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "/jowl/rules?" + params.toString(),
+            url: Config.apiUrl + "/jowl/rules?" + queryParams.toString(),
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {},

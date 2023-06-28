@@ -585,6 +585,7 @@ var Sparql_OWL = (function () {
             classIds = [classIds];
         }
         var filterStr = Sparql_common.setFilter("class", classIds);
+
         var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
         var modifier = "*";
         if (options.excludeItself) {
@@ -604,6 +605,9 @@ var Sparql_OWL = (function () {
             filterStr +
             " filter (?superClassType !=owl:Restriction)";
 
+        if (options.filter) {
+            query += options.filter;
+        }
         if (options.withLabels) {
             query += "OPTIONAL {?class rdfs: label classLabel }OPTIONAL {?subClass rdfs: label subClassLabel } OPTIONAL {?superClass rdfs: label superClassLabel }";
         }

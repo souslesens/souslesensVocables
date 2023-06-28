@@ -211,37 +211,29 @@ var Lineage_blend = (function () {
                                     },
                                 });
 
-                                for (var propId in authorizedProps) {
-                                    var property = authorizedProps[propId];
-                                    if (property.source == _source) {
-                                        if (!uniqueProps[propId]) {
-                                            uniqueProps[propId] = 1;
-                                            var propertyLabel = property.label || Sparql_common.getLabelFromURI(propId);
-                                            var label = (property.domainLabel || "any") + "<b>-" + propertyLabel + "-></b>" + (property.rangeLabel || "any");
-                                            var group = null;
-                                            if (property.domain && property.range) {
-                                                group = "both";
-                                            } else if (property.domain) {
-                                                group = "domain";
-                                            } else if (property.range) {
-                                                group = "range";
-                                            } else {
-                                                group = "noConstraints";
-                                            }
+                                for (var group in authorizedProps) {
+                                    for (var propId in authorizedProps[group]) {
+                                        var property = authorizedProps[group][propId];
+                                        if (property.source == _source) {
+                                            if (!uniqueProps[propId]) {
+                                                uniqueProps[propId] = 1;
+                                                var propertyLabel = property.label || Sparql_common.getLabelFromURI(propId);
+                                                var label = (property.domainLabel || "any") + "<b>-" + propertyLabel + "-></b>" + (property.rangeLabel || "any");
 
-                                            var cssClass = propStatusCssClassMap[group];
-                                            var parent = property.source;
+                                                var cssClass = propStatusCssClassMap[group];
+                                                var parent = property.source;
 
-                                            jstreeData.push({
-                                                id: propId,
-                                                text: "<span class='" + cssClass + "'>" + label + "</span>",
-                                                parent: parent,
-                                                data: {
+                                                jstreeData.push({
                                                     id: propId,
-                                                    label: label,
-                                                    source: property.source,
-                                                },
-                                            });
+                                                    text: "<span class='" + cssClass + "'>" + label + "</span>",
+                                                    parent: parent,
+                                                    data: {
+                                                        id: propId,
+                                                        label: label,
+                                                        source: property.source,
+                                                    },
+                                                });
+                                            }
                                         }
                                     }
                                 }

@@ -228,10 +228,17 @@ var common = (function () {
         },
 
         union: function (a, b) {
-            b.forEach(function (v) {
-                if (a.indexOf(v) < 0) a.push(v);
+            var c = [];
+            var aa = {};
+            a.forEach(function (v) {
+                aa[v] = 1;
+                c.push(v);
             });
-            return a;
+
+            b.forEach(function (v) {
+                if (!aa[v]) c.push(v);
+            });
+            return c;
         },
         difference: function (a, b) {
             var bb = {};

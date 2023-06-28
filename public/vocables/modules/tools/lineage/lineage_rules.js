@@ -201,7 +201,7 @@ var Lineage_rules = (function () {
         }
         //insertRuleReclassification
         else if (classes.length == 1) {
-            operation = "insertRuleReclassification";
+            operation = "alternative_exec_rule";
             var conclusion = prompt("Conclusion Class name");
             var payload = {
                 premise: [classes[0].id],
@@ -212,7 +212,7 @@ var Lineage_rules = (function () {
                 return alert(" one and only one ObjectProperty is needed ");
             }
             var conclusion = prompt("Conclusion Property name");
-            var operation = "insertRulePropertyVA";
+            var operation = "exec_rule";
             var classeArray = [];
             var propertyClasses = [];
             classes.forEach(function (item, index) {

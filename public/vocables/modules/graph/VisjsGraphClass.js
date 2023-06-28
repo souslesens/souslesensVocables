@@ -53,7 +53,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 }
             }
             if (event == "add") {
-                self.lastAddedNodes = properties.data;
+                self.lastAddedNodes = properties.items;
             }
         });
 

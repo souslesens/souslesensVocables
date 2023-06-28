@@ -98,7 +98,7 @@ module.exports = function () {
                         headers: {
                             "content-type": "application/json",
                         },
-                        url: jowlConfig.url + "SWRL/" + req.query.operation,
+                        url: jowlConfig.url + "swrl/" + req.query.operation,
                     };
                     request(options, function (error, response, body) {
                         return processResponse(res, error, body);

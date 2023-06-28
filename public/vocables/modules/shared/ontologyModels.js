@@ -379,15 +379,29 @@ var OntologyModels = (function () {
         var propertiesMatchingBoth = [];
         var propertiesMatchingStartNode = [];
         var propertiesMatchingEndNode = [];
-
+        var filter = "filter (?superClass not in (<http://purl.obolibrary.org/obo/BFO_0000001>,<http://purl.obolibrary.org/obo/BFO_0000002>,<http://purl.obolibrary.org/obo/BFO_0000003>))";
+        var duplicateProps = [];
         async.series(
             [
                 function (callbackSeries) {
-                    Sparql_OWL.getNodesAncestors(source, [startNodeId, endNodeId], { excludeItself: 0 }, function (err, result) {
+                    Sparql_OWL.getNodesAncestors(source, [startNodeId], { excludeItself: 0, filter: filter }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
                         hierarchies = result.hierarchies;
+                        callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    Sparql_OWL.getNodesAncestors(source, [endNodeId], { excludeItself: 0, filter: filter }, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        var hierarchiesEnd = result.hierarchies;
+                        for (var key in hierarchiesEnd) {
+                            hierarchies[key] = hierarchiesEnd[key];
+                        }
+
                         callbackSeries();
                     });
                 }, //get matching properties
@@ -408,7 +422,7 @@ var OntologyModels = (function () {
                     });
 
                     var endNodeAncestorIds = [];
-                    var endNodeIndex;
+
                     hierarchies[endNodeId].forEach(function (item, startNodeIndex) {
                         endNodeAncestorIds.push(item.superClass.value);
                     });
@@ -416,10 +430,20 @@ var OntologyModels = (function () {
                     allSources.forEach(function (_source) {
                         var sourceConstraints = Config.ontologiesVocabularyModels[_source].constraints;
                         for (var property in sourceConstraints) {
+                            if (property == "https://www.inf.ufrgs.br/bdi/ontologies/geologicalspatialrelationsontology#UFRGS:GeologicalSpatialRelationsOntology_has_tangential_proper_spatial_part") {
+                                var x = 3;
+                            }
                             var constraint = sourceConstraints[property];
                             constraint.source = _source;
                             var domainOK = false;
-                            allConstraints[property] = constraint;
+                            if (!allConstraints[property]) {
+                                allConstraints[property] = constraint;
+                            } else if (allConstraints[property].domain != constraint.domain && allConstraints[property].range != constraint.range) {
+                                constraint.id = property;
+                                duplicateProps.push(constraint);
+                                allConstraints[property].id = property;
+                                duplicateProps.push(allConstraints[property]);
+                            }
 
                             if (constraint.domain) {
                                 if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
@@ -431,7 +455,7 @@ var OntologyModels = (function () {
                                 }
                             }
                             if (constraint.range) {
-                                if ((endNodeIndex = endNodeAncestorIds.indexOf(constraint.range)) > -1) {
+                                if (endNodeAncestorIds.indexOf(constraint.range) > -1) {
                                     if (domainOK) {
                                         propertiesMatchingBoth.push(property);
                                     } else {
@@ -459,7 +483,9 @@ var OntologyModels = (function () {
                             var superProp = allConstraints[propId].superProp;
                             if (superProp) {
                                 if (validProperties.indexOf(superProp) > -1) {
-                                    if (propsToRemove.indexOf(superProp) < 0) propsToRemove.push(superProp);
+                                    if (propsToRemove.indexOf(superProp) < 0) {
+                                        propsToRemove.push(superProp);
+                                    }
                                 }
                                 recurse(superProp);
                             }
@@ -476,22 +502,37 @@ var OntologyModels = (function () {
                         recurse(propId);
                     });
 
-                    validProperties = propertiesMatchingBoth;
-                    validProperties = common.array.union(validProperties, propertiesMatchingStartNode);
-                    validProperties = common.array.union(validProperties, propertiesMatchingEndNode);
-                    validProperties = common.array.union(validProperties, noConstaintsArray);
+                    /*   validProperties = propertiesMatchingBoth;
+             validProperties = common.array.union(validProperties, propertiesMatchingStartNode);
+             validProperties = common.array.union(validProperties, propertiesMatchingEndNode);
+             validProperties = common.array.union(validProperties, noConstaintsArray);*/
 
-                    validConstraints = {};
+                    validConstraints = { both: {}, domain: {}, range: {}, noConstraints: {} };
 
-                    validProperties.forEach(function (propId) {
+                    propertiesMatchingBoth.forEach(function (propId) {
                         if (propsToRemove.indexOf(propId) < 0) {
-                            validConstraints[propId] = allConstraints[propId];
+                            validConstraints["both"][propId] = allConstraints[propId];
                         }
+                    });
+                    propertiesMatchingStartNode.forEach(function (propId) {
+                        if (propsToRemove.indexOf(propId) < 0) {
+                            validConstraints["domain"][propId] = allConstraints[propId];
+                        }
+                    });
+
+                    propertiesMatchingEndNode.forEach(function (propId) {
+                        if (propsToRemove.indexOf(propId) < 0) {
+                            validConstraints["range"][propId] = allConstraints[propId];
+                        }
+                    });
+                    noConstaintsArray.forEach(function (propId) {
+                        validConstraints["noConstraints"][propId] = allConstraints[propId];
                     });
                     callbackSeries();
                 },
             ],
             function (err) {
+                console.log("DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN\r" + duplicateProps);
                 return callback(err, validConstraints);
             }
         );

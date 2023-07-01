@@ -18,7 +18,7 @@ var Config = (function () {
     if (location.hostname == "localhost") {
         self.logSparqlQueries = true;
     }
-
+    self.labelsGraphUri="http://souslesens.org/vocables/resource/labels/"
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/";
 
     self.defaultNewUriRoot = "http://souslesens.org/resource/";
@@ -28,6 +28,8 @@ var Config = (function () {
     self.loginMode = "json";
 
     self.appName = "VOCABLES";
+
+
     self.debug = { query: 1 };
     self.enableCollections = false;
     self.showAssetQueyMenu = true;

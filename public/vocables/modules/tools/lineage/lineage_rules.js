@@ -139,15 +139,21 @@ var Lineage_rules = (function() {
     $("#" + div).remove();
   };
 
-  self.addPropertiesToTree = function(node) {
 
-
-
-    OntologyModels.getInferredModel(node.data.source,  null, function(err, result) {
+  self.getInferredModel = function() {
+    OntologyModels.getInferredModel(Lineage_sources.activeSource, null, function(err, result) {
 
     })
 
-    return ;
+    return;
+  }
+
+
+
+
+  self.addPropertiesToTree = function(node) {
+
+
 
 
    OntologyModels.getAllowedPropertiesBetweenNodes(node.data.source, node.data.id, null, function(err, result) {

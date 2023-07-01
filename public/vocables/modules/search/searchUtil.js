@@ -258,6 +258,11 @@ indexes.push(source.toLowerCase());
             size = 10000;
         }
 
+        var indexes=null;
+        if(index)
+            indexes=index
+        else indexes="*"
+
         if (_ids) {
             var slices = common.array.slice(_ids, 100);
             var allHits = [];
@@ -265,10 +270,8 @@ indexes.push(source.toLowerCase());
                 slices,
                 function (ids, callbackEach) {
                     var str = "";
-                    var header = {};
-                    if (index) {
-                        header = { index: index };
-                    }
+                    var header =  { "index":indexes };
+
                     ids.forEach(function (id) {
                         var query = {
                             query: {
@@ -276,11 +279,12 @@ indexes.push(source.toLowerCase());
                                     "id.keyword": id,
                                 },
                             },
+                            _source:"label"
                         };
                         str += JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
                     });
                     MainController.UI.message("getting labels " + allHits.length + " ...");
-                    ElasticSearchProxy.executeMsearch(str, [index], function (err, result) {
+                    ElasticSearchProxy.executeMsearch(str, [indexes], function (err, result) {
                         if (err) {
                             return callbackEach(err);
                         }

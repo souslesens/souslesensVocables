@@ -562,7 +562,7 @@ var OntologyModels = (function() {
       "  ?s ?prop ?o." +
       "optional {?prop  rdfs:label  ?propLabel.}" +
       "{SELECT   distinct ?g ?prop ?l " + importGraphUri + " WHERE {\n" +
-      "  GRAPH ?g{ ?prop  rdf:type  ?x." +
+      "  GRAPH ?g{ ?prop  rdf:type  owl:ObjectProperty." +
      
       "} \n" +
 

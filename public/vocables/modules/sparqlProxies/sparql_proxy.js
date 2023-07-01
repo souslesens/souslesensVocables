@@ -164,6 +164,9 @@ var Sparql_proxy = (function () {
 
                 if (data.results.bindings.length > 500) console.log(data.results.bindings.length);
                 if (data.results.bindings.length == 0); // MainController.UI.message("No data found", true);
+
+              //  Sparql_common.getSparqlQueryResultsLabelsFromElasticsearch(data)
+
                 callback(null, data);
             },
             error: function (err) {

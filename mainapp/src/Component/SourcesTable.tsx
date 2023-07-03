@@ -423,7 +423,16 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                             </FormControl>
                         </Grid>
                         <Grid item xs={6}>
-                            <TextField fullWidth onChange={handleFieldUpdate("group")} value={sourceModel.sourceForm.group} id={`group`} label={"Group"} variant="standard" />
+                            <TextField
+                                fullWidth
+                                helperText={errorMessage(zo.errors.group)}
+                                onBlur={validateAfterSubmission}
+                                onChange={handleFieldUpdate("group")}
+                                value={sourceModel.sourceForm.group}
+                                id={`group`}
+                                label={"Group"}
+                                variant="standard"
+                            />
                         </Grid>
 
                         <Grid item xs={6}>

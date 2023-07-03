@@ -12,7 +12,7 @@ const async = require("async");
 module.exports = function () {
     let operations = {
         GET,
-    };
+        };
 
     function GET(req, res, next) {
         let options = null;
@@ -138,7 +138,7 @@ module.exports = function () {
             },
             {
                 name: "describeSparqlQuery",
-                description: "describeSparqlQuery",
+                description: "describeSparqlQuery",  
                 in: "query",
                 type: "string",
                 required: false,

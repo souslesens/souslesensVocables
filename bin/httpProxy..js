@@ -78,8 +78,10 @@ var httpProxy = {
         if (headers) {
             options.headers = headers;
 
-            if (headers["content-type"] && headers["content-type"].indexOf("json") > -1) options.json = params;
-            else options.form = params;
+            if (headers["Content-Type"] && headers["Content-Type"].indexOf("json") > -1)  options.json = params;
+            else{
+                options.form = params;
+            } 
         } else {
             options.headers = {
                 "content-type": "application/x-www-form-urlencoded",
@@ -95,11 +97,19 @@ var httpProxy = {
 
         options.rejectUnauthorized = false;
 
+        console.log("options");
+        console.log(options);
+
+
         request(options, function (error, response, body) {
             if (error) {
                 console.log(error);
                 //  console.log("HTTP_PROXY_ERROR"+JSON.stringify(error, null, 2))
                 return callback(error);
+            }
+
+            if (response.headers["content-type"].includes("text/turtle")) {
+                return callback(null, body); // Return the body directly if it's in Turtle format
             }
 
             if (headers && headers["Accept"] && headers["Accept"].indexOf("json") < 0) return callback(null, body);

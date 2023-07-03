@@ -55,30 +55,7 @@ var Lineage_reasoner = (function () {
             },
         });
     };
-
-    self.runUnsatisfiable = function () {
-        var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
-        var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
-        const params = new URLSearchParams({
-            operation: "unsatisfiable",
-            type: "internalGraphUri",
-            describeSparqlQuery: describeQuery,
-        });
-        $("#lineage_reasoner_infosDiv").html("Processing " + Lineage_sources.activeSource + "...");
-        $.ajax({
-            type: "GET",
-            url: Config.apiUrl + "/jowl/reasoner?" + params.toString(),
-            dataType: "json",
-
-            success: function (data, _textStatus, _jqXHR) {
-                $("#lineage_reasoner_infosDiv").html(JSON.stringify(data, null, 2));
-            },
-            error(err) {
-                alert(err.responseText);
-            },
-        });
-    };
-
+ 
     self.runInference = function () {
         var operation = $("#lineage_reasoner_operationSelect").val();
 

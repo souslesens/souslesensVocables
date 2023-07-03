@@ -3,6 +3,8 @@ const util = require("util");
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
 const path = require("path");
+const N3 = require("n3");
+
 const sanitizePath = (/** @type {string} */ user_input) => {
     if (user_input.indexOf("\0") !== -1) {
         throw Error("Bad Input");
@@ -129,8 +131,17 @@ function processResponse(response, error, result) {
             response.status(500).send({ ERROR: error });
         } else if (!result) {
             response.send({ done: true });
-        } else if (typeof result == "string") {
-            response.send(JSON.stringify({ result: result }));
+        } else if (typeof result === "string") {
+            let parser = new N3.Parser();
+            try {
+                parser.parse(result); // if the result is not valid Turtle, this will throw an error
+                response.setHeader("Content-type", "text/turtle");
+                response.send(result);
+            } catch (error) {
+                // if it's not Turtle, send as a regular JSON string
+                response.setHeader("Content-type", "application/json");
+                response.send(JSON.stringify({ result: result }));
+            } 
         } else if (result.contentType && result.data) {
             response.setHeader("Content-type", result.contentType);
             if (typeof result.data == "object") response.send(JSON.stringify(result.data));

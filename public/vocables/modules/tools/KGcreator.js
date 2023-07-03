@@ -112,6 +112,8 @@ var KGcreator = (function () {
     self.blankNodeTemplates = {};
     self.usedTemplates = []; // Will be used to store used templates
     self.counter = {},
+    self.rmlTextareaModified = false;
+
 
     
     self.rmlPrefixes = {
@@ -281,7 +283,7 @@ var KGcreator = (function () {
                 }
                 result.forEach(function (file) {
                     var p;
-                    if ((p = file.indexOf(".json")) > -1) {
+                    if ((p = file.indexOf(".rml")) > -1) {
                         self.mappingFiles[file.substring(0, p)] = 1;
                     }
                 });
@@ -362,7 +364,7 @@ var KGcreator = (function () {
                 //  withCheckboxes: true,
             };
             data.forEach(function (file) {
-                if (file.indexOf(".json") > 0) {
+                if (file.indexOf(".rml") > 0) {
                     return;
                 }
                 var label = file;
@@ -626,6 +628,13 @@ var KGcreator = (function () {
                     });
                 },
 
+                function (callbackSeries) {
+                    return callbackSeries();
+                    self.fillPredicatesSelect(self.currentSlsvSource, "KGcreator_predicateSelect", { usualProperties: true }, function (err) {
+                        return callbackSeries(err);
+                    });
+                },
+
                 //fill objectOptions
                 function (callbackSeries) {
                     return callbackSeries();
@@ -649,6 +658,14 @@ var KGcreator = (function () {
 
                         return callbackSeries();
                     });
+                },
+                function (callbackSeries) {
+                
+                    $("#rmlTextArea").on("input", function() {
+                        self.rmlTextareaModified = true;
+                    });
+                
+                    callbackSeries(null, self.rmlTextAreaModified);
                 },
 
                 function (callbackSeries) {
@@ -878,7 +895,6 @@ var KGcreator = (function () {
         let template = $('#Selected_BlankNodeID').val(); 
 
        
-            
 
 
         self.validateTripleElements(subject, predicate, object);
@@ -921,7 +937,7 @@ var KGcreator = (function () {
             rml += `<#${subject}Mapping>\n`;
             rml += "   a rr:TriplesMap;\n";
             rml += "   rml:logicalSource [\n";
-            rml += `        rml:source "${self.currentJsonObject.fileName}";\n`;
+            rml += `        rml:source "../data/CSV/${self.currentCsvDir}/${self.currentJsonObject.fileName}";\n`;
             rml += "        rml:referenceFormulation ql:CSV\n";
             rml += "   ];\n\n";
 
@@ -1107,60 +1123,42 @@ window.onload = () => {
         }
     }
 
-        self.createRDFTriples = function () {
+    self.createRDFTriples = function () {
 
-            var rmlString = $('#rmlTextarea').val();  
-            var fileName = self.currentJsonObject.fileName;  
+        var rml = $('#rmlTextarea').val();  
+        var fullFileName = self.currentJsonObject.fileName;
+        var fileName = fullFileName.split('.').slice(0, -1).join('.'); 
+        var format = "csv"; 
+        var filePath = "./data/"+ self.currentSourceType + "/"+ self.currentCsvDir + "/"+ fullFileName ;
         
-        
-            var csvHeaders = self.columnDataList ;
-        
-
-            console.log("Headers:", csvHeaders);
-            console.log("First row of original data:", self.csvData[0]);
-            
-            var csvData = self.csvData.map(row => {
-              var newRow = csvHeaders.map(header => {
-                if (row[header] === undefined) {
-                  console.log(`No property '${header}' in row`, row);
-                }
-                return row[header];
-              });
-              return newRow;
-            });
-            
-            console.log(csvData)
-
-
-            
-            
-        
-            var data = {
-                rml: rmlString,
-                sources: [{
-                    fileName: fileName,
-                    csvHeaders: csvHeaders,
-                    csvData: csvData
-                }]
-            };
-
-            console.log(data)
-
-
-            $.ajax({
-                url: 'http://localhost:9090/api/mapping',  // replace with your actual Spring Boot app URL
-                method: 'POST',
-                data: JSON.stringify(data),
-                contentType: 'application/json',
-                success: function(responseData) {
-                    $('#KGcreator_dataSampleDiv').val(responseData);  // replace with your actual output textarea id
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    alert('Error during the RML mapping process: ' + errorThrown);
-                }
-            });
-
+        var dataToSend = {
+            rml: rml,
+            sources: [{
+                fileName: fileName,
+                data: filePath, 
+                format: format
+            }]
         };
+    
+        console.log("ci-dessous payload !")
+        console.log(dataToSend)
+    
+        $.ajax({
+            url: `${Config.apiUrl}/jowl/rmlMapping`,
+            method: 'POST',
+            data: JSON.stringify(dataToSend),
+            contentType: 'application/json',
+            headers: { 'Accept': 'application/json' },
+            success: function(responseData) {
+                $('#KGcreator_dataSampleDiv').val(responseData);  
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert('Error during the RML mapping process: ' + errorThrown);
+            }
+        });
+            
+    };
+    
       
       
 
@@ -1368,30 +1366,45 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         $("#KGcreator_dialogDiv").dialog("close");
     };
 
-    /* self.saveClassMapping=function() {
-var classId=prompt("Class id for this Mapping")
-if(classId)
-self.saveMappings({classId:classId})
-}*/
+self.validateRml = function(){
+    var rmlString = $("#rmlTextarea").val(); 
+    var payload = { "rml": rmlString };
+
+    $.ajax({
+        type: "POST",
+        url: `http://localhost:9090/api/validateRML`,
+        data: JSON.stringify({ "rml": rmlString }),
+        contentType: "application/json",
+        dataType: "json",
+        success: function (_result, _textStatus, _jqXHR) {
+            alert("RML validation successful");
+        
+        },
+        error: function (xhr, _ajaxOptions, _thrownError) {
+            var errMsg = 'RML validation failed'; // Default error message
+    
+            if (xhr.responseJSON && xhr.responseJSON.message) { // Check if the backend sent details
+                errMsg += ": " + xhr.responseJSON.message; // Append backend's message to our default
+            }
+    
+            alert(errMsg);  // Display the error message in an alert
+        }
+    });
+    
+
+}
 self.saveRMLMappings = function () { 
    var rml = $("#rmlTextarea").val();
-
-    if (rml.trim() === "") {
-        alert("R2RML mapping is empty. Please enter valid mapping.");
-        return;
-    }else {
-    if (!confirm("Save modified RML?")) {
-        return;
-    } }
-    $("#KGcreator_saveFileButton");
-
    
 
     var payload = {
-        dir: "RML/", // Update the directory path to where you want to save the R2RML mapping file
-        fileName: self.currentTreeNode.data.id + ".rml", // Update the file name with the .ttl extension
+        dir: "CSV/" + self.currentCsvDir,
+        fileName: self.currentSource + "_" + self.currentJsonObject.fileName + ".rml",
         data: rml,
     };
+
+    console.log(payload);
+
 
     $.ajax({
         type: "POST",
@@ -1496,29 +1509,21 @@ self.saveRMLMappings = function () {
     };
 
     self.loadMappings = function (csvFileName, callback) {
-        function getMappingFileJson(callback2) {
+        function getMappingFileRML(callback2) {
             var currentJsonObject = {};
-            var payload = {};
-            if (self.currentDataSourceModel) {
-                var dbName = self.currentDbName;
-                payload = {
-                    dir: "CSV/" + self.currentSlsvSource,
-                    name: dbName + "_" + csvFileName + ".json",
-                };
-            } else {
-                payload = {
-                    dir: "CSV/" + self.currentCsvDir,
-                    name: self.currentSource + "_" + csvFileName + ".json",
-                };
-            }
+            var payload = {
+                dir: "CSV/" + self.currentCsvDir,
+                name: self.currentSource + "_" + csvFileName + ".rml",
+            };
+    
             $.ajax({
                 type: "GET",
                 url: `${Config.apiUrl}/data/file`,
                 data: payload,
                 dataType: "json",
                 success: function (result, _textStatus, _jqXHR) {
-                    currentJsonObject = JSON.parse(result);
-
+                    currentJsonObject = result;
+                    
                     callback2(null, currentJsonObject);
                 },
                 error(_err) {
@@ -1533,35 +1538,35 @@ self.saveRMLMappings = function () {
                 },
             });
         }
+        
 
         if (callback) {
-            return getMappingFileJson(function (err, result) {
+            return getMappingFileRML(function (err, result) {
                 return callback(null, result);
             });
         } else {
             function showMappings() {
-                return getMappingFileJson(function (err, result) {
+                return getMappingFileRML(function (err, result) {
                     self.currentJsonObject = result;
                     self.mainJsonEditor.load(result);
+                    document.getElementById('rmlTextarea').value = result;
                     self.setUpperOntologyPrefix();
 
-                    self.mainJsonEditorModified = false;
 
                     if (!self.currentJsonObject.graphUri) {
-                        currentJsonObject.graphUri = currentGraphUri || "";
+                        self.currentJsonObject.graphUri = currentGraphUri || "";
                     } else {
                         self.currentGraphUri = self.currentJsonObject.graphUri;
                     }
                 });
             }
 
-            if (self.mainJsonEditorModified) {
-                //self.currentJsonObject && self.currentJsonObject.tripleModels && self.currentJsonObject.tripleModels.length > 0) {
+            if (self.rmlTextareaModified ) {
                 if (!self.currentJsonObject.fileName) {
                     return showMappings();
                 }
 
-                if (confirm(" save current json before opening new file")) {
+                if (confirm(" save current rml before opening new file")) {
                     self.saveMappings(null, function (_err, _result) {
                         showMappings();
                     });

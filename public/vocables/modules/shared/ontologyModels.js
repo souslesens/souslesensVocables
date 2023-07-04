@@ -297,6 +297,9 @@ var OntologyModels = (function() {
 
             // set transSourceRangeAndDomainLabels
             function(callbackSeries) {
+
+              return callbackSeries();
+
               if (!Config.sources[source]) {
                 return callbackSeries();
               }
@@ -551,48 +554,136 @@ var OntologyModels = (function() {
 
 
   self.getInferredModel = function(source, options, callback) {
+    var inferredModel=[];
+    var inferredProperties={}
+    var allEntitiesIds=[]
+    async.series([
 
-    var sourceGraphUri = Sparql_common.getFromStr(source, false, true);
-    var importGraphUri = Sparql_common.getFromStr(source, true, false);
 
-    var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
-      "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-      "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-      " SELECT   distinct ?g ?prop  ?propLabel" + sourceGraphUri + " where {" +
-      "  ?s ?prop ?o." +
-      "optional {?prop  rdfs:label  ?propLabel.}" +
-      "{SELECT   distinct ?g ?prop ?l " + importGraphUri + " WHERE {\n" +
-      "  GRAPH ?g{ ?prop  rdf:type  owl:ObjectProperty." +
-     
-      "} \n" +
+      //get effective distinct ObjectProperties
+      function(  callbackSeries){
+return callbackSeries()
+        var sourceGraphUri = Sparql_common.getFromStr(source, false, true);
+        var importGraphUri = Sparql_common.getFromStr(source, true, false);
 
-      "  }}} LIMIT 1000";
+        var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+          " SELECT   distinct ?g ?prop  ?propLabel" + sourceGraphUri + " where {" +
+          "  ?s ?prop ?o." +
+          "optional {?prop  rdfs:label  ?propLabel.}" +
+          "{SELECT   distinct ?g ?prop ?l " + importGraphUri + " WHERE {\n" +
+          "  GRAPH ?g{ ?prop  rdf:type  owl:ObjectProperty." +
 
-    let url = Config.default_sparql_url + "?format=json&query=";
-    Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
-      if (err) {
-        return callbackSeries(err);
+          "} \n" +
+
+          "  }}} LIMIT 1000";
+
+        let url = Config.default_sparql_url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+          if (err) {
+            return callbackSeries(err);
+          }
+          inferredProperties=result;
+          return callbackSeries()
+
+        });
+
+
       }
+      // get effective classes
+      ,    function(callbackSeries) {
+        var importGraphUri = Sparql_common.getFromStr(source, true, false);
+      //  var importGraphUri = Sparql_common.getFromStr(source, true, false);
+
+        var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+          "    SELECT  distinct  ?prop ?stype ?otype\n" +
+        importGraphUri+
+                  "WHERE {\n" +
+          "      \n" +
+          "   graph <"+Config.sources[source].graphUri+">  {\n" +
+          "    ?s ?prop ?o.\n" +
+          "       ?s rdf:type+ ?stype. \n" +
+          "     ?o rdf:type+ ?otype. \n" +
+          "    }\n" +
+          "    graph  ?g{\n" +
+          "        ?prop  rdf:type  owl:ObjectProperty.}\n" +
+          "  } LIMIT 10000";
+
+        let url = Config.default_sparql_url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function(err, result) {
+          if (err) {
+            return callbackSeries(err);
+          }
+result.results.bindings.forEach(function(item){
+           if(! inferredProperties[item.prop.value]){
+             inferredProperties[item.prop.value]= { from:[],to:[] }
+           }
+           if( inferredProperties[item.prop.value].from.indexOf(item.stype.value)<0){}
+            inferredProperties[item.prop.value].from.push(item.stype.value)
+  if( inferredProperties[item.prop.value].from.indexOf(item.otype.value)<0)
+            inferredProperties[item.prop.value].to.push(item.otype.value)
+if(!allEntitiesIds[item.stype.value])
+  allEntitiesIds[item.stype.value]=[]
+  if(!allEntitiesIds[item.otype.value])
+    allEntitiesIds[item.otype.value]=[]
 
 
-      var graphUriSourcesMap = { };
-      graphUriSourcesMap[ Config.sources[source].graphUri]=source
-      var imports = Config.sources[source].imports;
-      if (imports) {
-        imports.forEach(function(sourceImport) {
-          graphUriSourcesMap[Config.sources[sourceImport].graphUri] = sourceImport
+
+
+})
+
+
+
+          return callbackSeries()
         })
+      },
+      function(callbackSeries) {
+        Sparql_OWL.getNodesAncestors(source,Object.keys(allEntitiesIds), { excludeItself: 0 }, function(err, result) {
+          if (err) {
+            return callbackSeries(err);
+          }
+
+          var hierarchies=result.hierarchies
+
+        });
+      },
+
+
+          //check constraints
+      ,    function(callbackEach){
+  var x=inferredProperties
+
+
+
+      return callbackSeries()
+
+
+        var graphUriSourcesMap = { };
+        graphUriSourcesMap[ Config.sources[source].graphUri]=source
+        var imports = Config.sources[source].imports;
+        if (imports) {
+          imports.forEach(function(sourceImport) {
+            graphUriSourcesMap[Config.sources[sourceImport].graphUri] = sourceImport
+          })
+        }
+
+
+        result.results.bindings.forEach(function(item) {
+
+          var itemSource=graphUriSourcesMap[item.g.value];
+          if(Config.ontologiesVocabularyModels[itemSource] &&  Config.ontologiesVocabularyModels[itemSource].constraints[item.prop.value])
+            inferredModel.push(Config.ontologiesVocabularyModels[itemSource].constraints[item.prop.value]);
+        });
+        return callbackSeries()
+
+
       }
-      
-      var inferredModel=[]
-      result.results.bindings.forEach(function(item) {
-        
-        var itemSource=graphUriSourcesMap[item.g.value];
-        if(Config.ontologiesVocabularyModels[itemSource] &&  Config.ontologiesVocabularyModels[itemSource].constraints[item.prop.value])
-        inferredModel.push(Config.ontologiesVocabularyModels[itemSource].constraints[item.prop.value]);
-      });
+    ],function(err){
       return inferredModel;
-    });
+    })
 
 
   };

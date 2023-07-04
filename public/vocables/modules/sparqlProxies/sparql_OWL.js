@@ -599,7 +599,7 @@ var Sparql_OWL = (function () {
             fromStr +
             " WHERE {" +
             " ?class rdf:type ?type." +
-            " ?class rdfs:subClassOf+ ?superClass." +
+            " ?class rdfs:subClassOf"+modifier+"|rdf:type"+modifier+" ?superClass." +
             " ?superClass ^rdfs:subClassOf ?subClass." +
             " ?subClass rdf:type ?subClassType. ?superClass rdf:type ?superClassType" +
             filterStr +
@@ -2094,9 +2094,9 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
                   "}" +
 
                   "{" +
-                  "SELECT    distinct ?sub ?label " + graphUrisStr
+                  "SELECT    distinct ?sub ?label " + graphUrisStr+
                 " WHERE {?sub rdfs:label ?label } }"
-                var url = Config.sources[Config.default_source].sparql_server.url + "?query=";
+                var url = Config.default_sparql_url+ "?query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: source }, function (err, _result) {
                     if (err) {
                         return callback(err);
@@ -2110,7 +2110,8 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         ],function(err){
             if( err)
                 alert(err.responseText)
-            return MainController.UI.message("all Sources labels graph recreated");
+            callback(null,"all Sources labels graph recreated")
+
         })
 
 

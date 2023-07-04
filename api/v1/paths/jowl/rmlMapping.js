@@ -31,7 +31,7 @@ module.exports = function() {
             }
         }
 
-        const url = "http://localhost:9090/KGcreator/mapping    ";
+        const url = "http://localhost:9170/rml/mapping";
 
         let options = {
             method: "POST",
@@ -50,12 +50,14 @@ module.exports = function() {
         console.log(options.headers);
         console.log(options.body);
         HttpProxy.post(options.url, options.headers, options.body, function (error, result) {
+            console.log("Received result data: ", result);
             if (error) {
                 return res.status(500).send({ error: "Error during the RML mapping process: " + error.message });
             } else {
                 processResponse(res, error, result);
             }
         });
+        
     }       
     POST.apiDoc = {
         security: [{ loginScheme: [] }],

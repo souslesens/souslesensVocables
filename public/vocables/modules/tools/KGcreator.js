@@ -937,7 +937,7 @@ var KGcreator = (function () {
             rml += `<#${subject}Mapping>\n`;
             rml += "   a rr:TriplesMap;\n";
             rml += "   rml:logicalSource [\n";
-            rml += `        rml:source "../data/CSV/${self.currentCsvDir}/${self.currentJsonObject.fileName}";\n`;
+            rml += "        rml:source temp-files/mapping/"+self.currentJsonObject.fileName+"\;\n";
             rml += "        rml:referenceFormulation ql:CSV\n";
             rml += "   ];\n\n";
 
@@ -1126,10 +1126,14 @@ window.onload = () => {
     self.createRDFTriples = function () {
 
         var rml = $('#rmlTextarea').val();  
-        var fullFileName = self.currentJsonObject.fileName;
+        var fullFileName = self.currentJsonObject && self.currentJsonObject.fileName;
+        if(!fullFileName) {
+            console.error("FileName is undefined");
+            return;
+        }
         var fileName = fullFileName.split('.').slice(0, -1).join('.'); 
         var format = "csv"; 
-        var filePath = "./data/"+ self.currentSourceType + "/"+ self.currentCsvDir + "/"+ fullFileName ;
+        var filePath = "./data/"+ self.currentSourceType + "/"+ self.currentCsvDir + "/"+ fullFileName;
         
         var dataToSend = {
             rml: rml,
@@ -1148,9 +1152,19 @@ window.onload = () => {
             method: 'POST',
             data: JSON.stringify(dataToSend),
             contentType: 'application/json',
-            headers: { 'Accept': 'application/json' },
+            headers: { 'Accept': 'text/turtle' },
             success: function(responseData) {
-                $('#KGcreator_dataSampleDiv').val(responseData);  
+                var responseDataString;
+
+        if (typeof responseData === 'object') {
+            // If it's a simple JavaScript object, convert to JSON string
+            responseDataString = JSON.stringify(responseData, null, 2);
+        } else {
+            // If it's already a string, just use it directly
+            responseDataString = responseData;
+        }
+
+        $('#KGcreator_dataSampleDiv').val(responseDataString); 
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 alert('Error during the RML mapping process: ' + errorThrown);
@@ -1159,7 +1173,6 @@ window.onload = () => {
             
     };
     
-      
       
 
 
@@ -1394,31 +1407,30 @@ self.validateRml = function(){
 
 }
 self.saveRMLMappings = function () { 
-   var rml = $("#rmlTextarea").val();
-   
-
-    var payload = {
-        dir: "CSV/" + self.currentCsvDir,
-        fileName: self.currentSource + "_" + self.currentJsonObject.fileName + ".rml",
-        data: rml,
-    };
-
-    console.log(payload);
-
-
-    $.ajax({
-        type: "POST",
-        url: `${Config.apiUrl}/data/file`,
-        data: payload,
-        dataType: "json",
-        success: function (_result, _textStatus, _jqXHR) {
-            MainController.UI.message("File saved");
-        },
-        error(err) {
-            return alert(err.responseText);
-        },
-    });
-};
+    var rml = $("#rmlTextarea").val();
+    
+     var payload = {
+         dir: "CSV/" + self.currentCsvDir,
+         fileName: self.currentSource + "_" + self.currentJsonObject.fileName + ".rml",
+         data: rml,
+     };
+ 
+     console.log(payload);
+ 
+     $.ajax({
+         type: "POST",
+         url: `${Config.apiUrl}/data/file`,
+         data: payload,
+         dataType: "json",
+         success: function (_result, _textStatus, _jqXHR) {
+             MainController.UI.message("File saved");
+         },
+         error(err) {
+             return alert(err.responseText);
+         },
+     });
+ };
+ 
     self.saveMappings = function (options, callback) {
         try {
             var data = self.mainJsonEditor.get();
@@ -1507,27 +1519,27 @@ self.saveRMLMappings = function () {
             $("#KGcreator_topLevelOntologiesSelect").val(currentTopLevelOntology);
         }
     };
-
     self.loadMappings = function (csvFileName, callback) {
-        function getMappingFileRML(callback2) {
-            var currentJsonObject = {};
+        console.log(csvFileName); 
+    
+        function getMappingFileRML(csvFileName, callback2) {
             var payload = {
                 dir: "CSV/" + self.currentCsvDir,
                 name: self.currentSource + "_" + csvFileName + ".rml",
             };
-    
+        
             $.ajax({
                 type: "GET",
                 url: `${Config.apiUrl}/data/file`,
                 data: payload,
-                dataType: "json",
                 success: function (result, _textStatus, _jqXHR) {
-                    currentJsonObject = result;
-                    
-                    callback2(null, currentJsonObject);
+                    callback2(null, {
+                        fileName: csvFileName,
+                        content: result
+                    });
                 },
                 error(_err) {
-                    currentJsonObject = {
+                    var currentJsonObject = {
                         fileName: csvFileName,
                         tripleModels: [],
                         transform: {},
@@ -1539,33 +1551,21 @@ self.saveRMLMappings = function () {
             });
         }
         
-
+    
         if (callback) {
-            return getMappingFileRML(function (err, result) {
+            return getMappingFileRML(csvFileName, function (err, result) {
                 return callback(null, result);
             });
         } else {
             function showMappings() {
-                return getMappingFileRML(function (err, result) {
-                    self.currentJsonObject = result;
-                    self.mainJsonEditor.load(result);
-                    document.getElementById('rmlTextarea').value = result;
-                    self.setUpperOntologyPrefix();
-
-
-                    if (!self.currentJsonObject.graphUri) {
-                        self.currentJsonObject.graphUri = currentGraphUri || "";
-                    } else {
-                        self.currentGraphUri = self.currentJsonObject.graphUri;
-                    }
+                return getMappingFileRML(csvFileName, function (err, result) {
+                    self.currentJsonObject = result; // Now it's an object with fileName and content properties
+                    document.getElementById('rmlTextarea').value = result.content;
                 });
             }
-
+            
+    
             if (self.rmlTextareaModified ) {
-                if (!self.currentJsonObject.fileName) {
-                    return showMappings();
-                }
-
                 if (confirm(" save current rml before opening new file")) {
                     self.saveMappings(null, function (_err, _result) {
                         showMappings();
@@ -1578,6 +1578,8 @@ self.saveRMLMappings = function () {
             }
         }
     };
+
+    
     self.createTriples = function (test, _options) {
         MainController.UI.message("creating triples...");
         $("#KGcreator_dataSampleDiv").val("creating triples...");

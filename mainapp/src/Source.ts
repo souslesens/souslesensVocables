@@ -193,7 +193,7 @@ export const InputSourceSchema = z.object({
     isDraft: z.boolean().default(false),
     allowIndividuals: z.boolean().default(false),
     predicates: SourcePredicatesSchema,
-    group: z.string().nonempty({ message: "Required" }),
+    group: z.string().min(3, { message: "Required, 3 chars min" }),
     imports: z.array(z.string()).default([]),
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
 });

@@ -430,6 +430,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 onChange={handleFieldUpdate("group")}
                                 value={sourceModel.sourceForm.group}
                                 id={`group`}
+                                name={zo.fields.group()}
                                 label={"Group"}
                                 variant="standard"
                             />

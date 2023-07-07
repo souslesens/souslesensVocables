@@ -791,10 +791,10 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         }
 
         if (subjectIsBlank) {
-            tripleObj.isSubjectBlankNode = subject;
+            tripleObj.isSubjectBlankNode = true;
         }
         if (objectIsBlank) {
-            tripleObj.isObjectBlankNode = object;
+            tripleObj.isObjectBlankNode = true;
         }
 
         if (isRestrictionCBX) {

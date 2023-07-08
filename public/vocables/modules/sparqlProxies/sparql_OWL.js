@@ -1647,24 +1647,28 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
     self.getPropertiesInheritedConstraints = function (sourceLabel, properties, options, callback) {
         var fromStr = Sparql_common.getFromStr(sourceLabel, options.withGraph, options.withoutImports);
         var filterProps = Sparql_common.setFilter("prop0", properties, null, { useFilterKeyWord: 1 });
-      /*  var query =
+       var query =
             "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-            "SELECT distinct * " +
+            "SELECT distinct ?prop0 ?prop ?domain ?range" +
             fromStr +
             " WHERE {" +
-            "{?prop0 rdfs:subPropertyOf+ ?prop . ?prop rdfs:domain ?domain }" + //optional {?domain rdfs:label ?domainLabel}"+ filterProps+"}"+
+            "{?prop0 rdfs:subPropertyOf+ ?prop . ?prop rdfs:domain ?domain optional {?prop rdfs:range ?range } }" + //optional {?domain rdfs:label ?domainLabel}"+ filterProps+"}"+
             " UNION " +
-            "{?prop0 rdfs:subPropertyOf+ ?prop . ?prop rdfs:range ?range }" + //optional {?range rdfs:label ?rangeLabel}"+ filterProps+"}"+
-            "} LIMIT 10000";*/
+            "{?prop0 rdfs:subPropertyOf+ ?prop . ?prop rdfs:range ?range  optional {?prop rdfs:domain ?domain }}" + //optional {?range rdfs:label ?rangeLabel}"+ filterProps+"}"+
+            "} LIMIT 10000";
 
 
 
-        var query=  "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+     /*   var query=  "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
           "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
           "SELECT distinct * " +
           fromStr +
-          "WHERE {?prop0 rdfs:subPropertyOf+ ?prop.  optional { ?prop rdfs:domain ?domain}  optional{ ?prop rdfs:range ?range }} LIMIT 10000"
+          "WHERE {?prop0 rdfs:subPropertyOf+ ?prop." +
+          "  optional { ?prop rdfs:domain ?domain}" +
+          "  optional{ ?prop rdfs:range ?range }" +
+          filterProps +
+          "} LIMIT 10000"*/
 
         var url;
         if (!Config.sources[sourceLabel]) {

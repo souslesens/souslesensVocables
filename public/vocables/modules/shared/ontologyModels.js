@@ -196,6 +196,12 @@ var OntologyModels = (function() {
               });
             },
 
+            //set inverse Props constraints
+            function(callbackSeries) {
+              self.setInversePropertiesConstaints(source,inversePropsMap);
+              callbackSeries();
+            },
+
             //set inherited Constraints
             function(callbackSeries) {
               if (!Config.sources[source] || !Config.topLevelOntologies[source]) {
@@ -223,10 +229,10 @@ var OntologyModels = (function() {
             function(callbackSeries) {
             if( false)
               return callbackSeries();
-              if (false && propsWithoutDomain.length == 0) {
-                return callbackSeries();
-              }
+
               var props = propsWithoutDomain.concat(propsWithoutRange);
+              if(props.length==0)
+                return callbackSeries()
               Sparql_OWL.getPropertiesInheritedConstraints(source, props, {withoutImports:0}, function(err, propsMap) {
                 if (err) {
                   return callbackSeries(err);
@@ -299,36 +305,7 @@ var OntologyModels = (function() {
 
               //set inverse Props constraints
               function(callbackSeries) {
-                for (var propId in inversePropsMap) {
-                  var propConstraints = Config.ontologiesVocabularyModels[source].constraints[propId];
-                  var inversePropConstraints = Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]];
-                  if (!propConstraints) {
-                    propConstraints = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
-                    Config.ontologiesVocabularyModels[source].constraints[propId] = propConstraints;
-                  }
-                  if (!inversePropConstraints) {
-                    inversePropConstraints = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
-                    Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]] = inversePropConstraints;
-                  }
-
-                  if (propConstraints.domain && !inversePropConstraints.range) {
-                    Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].range = propConstraints.domain;
-                    Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].rangeLabel = propConstraints.domainLabel;
-                  }
-                  if (propConstraints.range && !inversePropConstraints.domain) {
-                    Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].domain = propConstraints.range;
-                    Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].domainLabel = propConstraints.rangeLabel;
-                  }
-
-                  if (inversePropConstraints.domain && !propConstraints.range) {
-                    Config.ontologiesVocabularyModels[source].constraints[propId].range = inversePropConstraints.domain;
-                    Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = inversePropConstraints.domainLabel;
-                  }
-                  if (inversePropConstraints.range && !propConstraints.domain) {
-                    Config.ontologiesVocabularyModels[source].constraints[propId].domain = inversePropConstraints.range;
-                    Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = inversePropConstraints.rangeLabel;
-                  }
-                }
+                self.setInversePropertiesConstaints(source,inversePropsMap);
                 callbackSeries();
               },
 
@@ -352,6 +329,39 @@ var OntologyModels = (function() {
       }
     );
   };
+
+  self.setInversePropertiesConstaints=function(source,inversePropsMap){
+    for (var propId in inversePropsMap) {
+      var propConstraints = Config.ontologiesVocabularyModels[source].constraints[propId];
+      var inversePropConstraints = Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]];
+      if (!propConstraints) {
+        propConstraints = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+        Config.ontologiesVocabularyModels[source].constraints[propId] = propConstraints;
+      }
+      if (!inversePropConstraints) {
+        inversePropConstraints = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+        Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]] = inversePropConstraints;
+      }
+
+      if (propConstraints.domain && !inversePropConstraints.range) {
+        Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].range = propConstraints.domain;
+        Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].rangeLabel = propConstraints.domainLabel;
+      }
+      if (propConstraints.range && !inversePropConstraints.domain) {
+        Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].domain = propConstraints.range;
+        Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].domainLabel = propConstraints.rangeLabel;
+      }
+
+      if (inversePropConstraints.domain && !propConstraints.range) {
+        Config.ontologiesVocabularyModels[source].constraints[propId].range = inversePropConstraints.domain;
+        Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = inversePropConstraints.domainLabel;
+      }
+      if (inversePropConstraints.range && !propConstraints.domain) {
+        Config.ontologiesVocabularyModels[source].constraints[propId].domain = inversePropConstraints.range;
+        Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = inversePropConstraints.rangeLabel;
+      }
+    }
+  }
 
   self.unRegisterSourceModel = function() {
     var basicsSources = Object.keys(Config.basicVocabularies);
@@ -377,6 +387,13 @@ var OntologyModels = (function() {
     var propertiesMatchingEndNode = [];
     var filter = "filter (?superClass not in (<http://purl.obolibrary.org/obo/BFO_0000001>,<http://purl.obolibrary.org/obo/BFO_0000002>,<http://purl.obolibrary.org/obo/BFO_0000003>))";
     var duplicateProps = [];
+
+
+
+    var validConstraints = {};
+    var startNodeAncestorIds = [];
+    var endNodeAncestorIds = [];
+
     async.series(
       [
         function(callbackSeries) {
@@ -413,14 +430,13 @@ var OntologyModels = (function() {
           var allDomains = {};
           var allRanges = {};
 
-          var validConstraints = {};
 
-          var startNodeAncestorIds = [];
+
           hierarchies[startNodeId].forEach(function(item) {
             startNodeAncestorIds.push(item.superClass.value);
           });
 
-          var endNodeAncestorIds = [];
+
 
           if (endNodeId) {
             hierarchies[endNodeId].forEach(function(item, startNodeIndex) {
@@ -538,7 +554,7 @@ var OntologyModels = (function() {
         duplicateProps.forEach(function(item) {
           console.warn(item);
         });
-        return callback(err, validConstraints);
+        return callback(err, {constraints :validConstraints, nodes: {startNode:startNodeAncestorIds,endNode:endNodeAncestorIds}});
       }
     );
   };

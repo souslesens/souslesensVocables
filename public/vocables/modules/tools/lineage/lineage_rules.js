@@ -160,7 +160,7 @@ var Lineage_rules = (function() {
       if (err) {
         return callbackSeries(err);
       }
-      var authorizedProps = result;
+      var authorizedProps = result.constraints;
 
 
       var jstreeData = [];

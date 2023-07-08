@@ -179,10 +179,35 @@ var Lineage_blend = (function () {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
-                                authorizedProps = result;
+                                authorizedProps = result.constraints;
+
+                                var html=""
+                                var str=""
+                                result. nodes.startNode.forEach(function(item, index){
+                                    if( index>0)
+                                    str+="->"
+                                    str+=Sparql_common.getLabelFromURI(item)
+                                })
+                                html+=str;
+                                html+="<br>"
+                                result. nodes.endNode.forEach(function(item, index){
+                                    if( index>0)
+                                        str+="->"
+                                    str+=Sparql_common.getLabelFromURI(item)
+                                })
+                                html+=str;
+                                $("#lineageAddEdgeDialog_nodesAncestorsDiv").html(html)
+
                                 return callbackSeries();
                             });
                         },
+                        function (callbackSeries) {
+
+                                return callbackSeries();
+
+                        },
+
+
 
                         function (callbackSeries) {
                             var sources = [source];

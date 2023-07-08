@@ -181,18 +181,17 @@ var Lineage_blend = (function () {
                                 }
                                 authorizedProps = result.constraints;
 
-                                var html=""
-                                var str=""
+                                var html="Ancestors<br>"
+                                var str="<b>"+ self.sourceNode.label+"</b>"
                                 result. nodes.startNode.forEach(function(item, index){
-                                    if( index>0)
                                     str+="->"
                                     str+=Sparql_common.getLabelFromURI(item)
                                 })
                                 html+=str;
                                 html+="<br>"
+                                var str="<b>"+ self.targetNode.label+"</b>"
                                 result. nodes.endNode.forEach(function(item, index){
-                                    if( index>0)
-                                        str+="->"
+                                    str+="->"
                                     str+=Sparql_common.getLabelFromURI(item)
                                 })
                                 html+=str;

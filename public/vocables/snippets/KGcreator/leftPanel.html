@@ -54,12 +54,69 @@ body.modal-open .modal {
                     <textarea class="form-control" id="xpathPreview" rows="3" style="height: 300px;"></textarea>
                   </div>
                 </div>
+                <small id="xpathHelp" class="form-text text-muted">
+                    Here are some XPath operators:
+                    <ul>
+                      <li>/: Root node</li>
+                      <li>//: Selects nodes in the document from the current node that match the selection no matter where they are</li>
+                      <li>.: Current node</li>
+                      <li>..: Parent of the current node</li>
+                      <li>@: Select attributes</li>
+                      <li>*: Matches any element node</li>
+                      <li>node(): Matches any node of any kind</li>
+                      <li>[]: Predicate. Used to find a specific node or a node that contains a specific value</li>
+                      <li>text(): Selects the text of a node</li>
+                      <li>|: Computes two nodesets into one nodeset</li>
+                    </ul>
+                    </small>
                 <div class="modal-footer">
                       <button type="button" class="btn btn-primary">Save changes</button>
                 </div>
               </div>
             </div>
           </div>
+        <div class="modal fade" id="jsonpathModal" tabindex="-1" aria-labelledby="jsonpathModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="jsonpathModalLabel">Select JSONPath</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="jsonpathInput" class="form-label">JSONPath</label>
+                            <input type="text" class="form-control" id="jsonpathInput">
+                            <small id="jsonpathHelp" class="form-text text-muted">
+                                Please enter the JSONPath. Use . to navigate down nodes and [ ] to select specific items.
+                            </small>
+                            
+                            <div id="invalidJsonPathWarning" style="display: none; color: red;">Please enter a valid JSONPath.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="jsonpathPreview" class="form-label" >Preview</label>
+                            <textarea class="form-control" id="jsonpathPreview" rows="3" style="height: 300px;"></textarea>
+                        </div>
+                    </div>
+                    <small id="jsonPathHelp" class="form-text text-muted">
+                        Here are some JSONPath operators:
+                        <ul>
+                          <li>$: Root object</li>
+                          <li>@: Current object/element</li>
+                          <li>. or []: Child operator</li>
+                          <li>..: Retrieve all child elements recursively</li>
+                          <li>*: Wildcard. Can be used for all names or indices</li>
+                          <li>[start:end:step]: Array slice operator</li>
+                          <li>[?(<expression>)]: Filter via boolean returning script</li>
+                        </ul>
+                    </small>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="saveJsonPathChanges">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+          
           
       
 

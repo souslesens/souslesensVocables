@@ -361,7 +361,7 @@ var KGcreator = (function () {
             var jstreeData = [];
             var options = {
                 openAll: true,
-                selectTreeNodeFn: KGcreator.onCsvtreeNodeClicked,
+                selectTreeNodeFn: KGcreator.onFilestreeNodeClicked,
                 contextMenu: KGcreator.getContextMenu(),
                 //  withCheckboxes: true,
             };
@@ -717,7 +717,7 @@ var KGcreator = (function () {
     };
 
     
-        self.onCsvtreeNodeClicked = function (event, obj, callback) {
+    self.onFilestreeNodeClicked = function (event, obj, callback) {
             $("#KGcreator_dataSampleDiv").val("");
 
             self.currentTreeNode = obj.node;
@@ -847,32 +847,77 @@ var KGcreator = (function () {
                             console.error(err);
                         },
                     });
-                }else if (self.getFileType(obj.node.id) == "JSON"){
+                } else if (self.getFileType(obj.node.id) == "JSON") {
+                    var myModal = new bootstrap.Modal(document.getElementById('jsonpathModal'));
+                    myModal.show();
+                
                     const payload = {
                         dir: "CSV/" + self.currentCsvDir,
                         name: obj.node.id,
-                        options: JSON.stringify({ lines: 100 }),
                     };
+                
                     $.ajax({
                         type: "GET",
                         url: `${Config.apiUrl}/data/json`,
-                        dataType: "json",
+                        dataType: "text",
                         data: payload,
                         success: function (result, _textStatus, _jqXHR) {
-                            // Display the file content in the text area
-                            $("#KGcreator_dataSampleDiv").val(JSON.stringify(result, null, 2));
+                            let JsonData = JSON.parse(result);  // Parse the result manually
+                            $("#KGcreator_dataSampleDiv").val(JSON.stringify(JsonData, null, 2));
+                        
+                            // Add input event listener to JSONPath input field
+                            $("#jsonpathInput").on('input', function() {
+                                const jsonpathExpr = $(this).val();
+                
+                                const jsonpathPayload = {
+                                    dir: payload.dir,
+                                    name: payload.name,
+                                    jsonpath: jsonpathExpr,
+                                };
+                                $.ajax({
+                                    type: "GET",
+                                    url: `${Config.apiUrl}/data/json-jsonpath`,
+                                    dataType: "text",
+                                    data: jsonpathPayload,
+                                    success: function (jsonpathResult) {
+                                        let JsonpathJsonData = JSON.parse(jsonpathResult);  // Parse the result manually
+                                        $("#jsonpathPreview").val(JSON.stringify(JsonpathJsonData, null, 2));
+                                        $("#KGcreator_dataSampleDiv").val(JSON.stringify(JsonpathJsonData, null, 2));
+            
+                                        if ($("#jsonpathPreview").val().trim() === '[]') {
+                                            $("#invalidJsonPathWarning").show(); // Assuming this is an element designed to show the warning message
+                                        } else {
+                                            $("#invalidJsonPathWarning").hide();
+                                        }
+                                    },
+                                    error: function (err) {
+                                        // Handle error
+                                        console.error(err);
+                                        
+                                    },
+                                });
+                            });
                         },
                         error: function (err) {
                             // Handle error
                             console.error(err);
                         },
                     });
-
                 }
+                
             }
         };
 
-    //RML Mapping file generator 
+    self.initTextareaChangeListener = function() {
+        self.currentTextareaValue = null;
+    
+        $(document).ready(function(){
+            $('#rmlTextarea').on('input', function() {
+                self.currentTextareaValue = $(this).val();
+            });
+        });
+    };
+    
 
     $(document).ready(() => {
         $("#KGcreator_subjectSelect").change(() => {
@@ -984,13 +1029,16 @@ var KGcreator = (function () {
         let selectedBlankNode = $('#subjectSelect').val();
         let template = $('#Selected_BlankNodeID').val(); 
         let xpath = $("#xpathInput").val();
+        let jsonPath = $("#jsonpathInput").val();
 
         if(self.getFileType(self.currentJsonObject.fileName) == "XML" && !xpath) {
             alert("Please enter a valid XPath.");
-            return; // Stop execution of the function
+            return;
         }
-       
-
+        if(self.getFileType(self.currentJsonObject.fileName) == "JSON" && !jsonPath) {
+            alert("Please enter a valid jsonPath.");
+            return; 
+        }
 
         if (!self.validateTripleElements(subject, predicate, object)) {
             return;
@@ -1038,7 +1086,7 @@ var KGcreator = (function () {
             if(self.getFileType(self.currentJsonObject.fileName)=="CSV"){  
                 rml += "        rml:referenceFormulation ql:CSV\n"; } 
             else if (self.getFileType(self.currentJsonObject.fileName)=="JSON"){
-               
+                rml += "        rml:iterator \""+jsonPath+"\"\;\n"
                 rml += "        rml:referenceFormulation ql:JSONPath;\n"; 
 
 
@@ -1221,8 +1269,11 @@ window.onload = () => {
 
     self.createRDFTriples = function () {
 
-        var rml = $('#rmlTextarea').val();  
-        var fullFileName = self.currentJsonObject && self.currentJsonObject.fileName;
+          // Use the value from the listener instead of directly from the textarea
+          var rml = self.currentTextareaValue ? self.currentTextareaValue : $('#rmlTextarea').val(); 
+ 
+        console.log(rml)      
+         var fullFileName = self.currentJsonObject && self.currentJsonObject.fileName;
         if(!fullFileName) {
             console.error("FileName is undefined");
             return;
@@ -1652,6 +1703,7 @@ self.saveRMLMappings = function () {
                         transform: {},
                         lookups: [],
                         graphUri: "",
+                        content:""
                     };
                     callback2(null, currentJsonObject);
                 },

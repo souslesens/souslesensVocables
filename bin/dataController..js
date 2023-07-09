@@ -2,7 +2,7 @@ var fs = require("fs");
 var path = require("path");
 var csvCrawler = require("../bin/_csvCrawler.");
 var xpath = require('xpath');
-
+var jsonpath = require('jsonpath'); 
 var dom = require('xmldom').DOMParser;
 var DataController = {
     /**
@@ -143,6 +143,27 @@ var DataController = {
                 return callback(null, result);
             } catch (error) {
                 return callback({ message: "Invalid XPath expression" }, null);
+            }
+        });
+    },
+    /**
+     * Parse JSON using JSONPath
+     * @param {string} dir - directory path under data
+     * @param {string} fileName - name of the file to read
+     * @param {string} jsonpathExpr - JSONPath expression to select data from the JSON
+     * @param {(err: Error | string | null, result: any | null) => void} callback -
+     *   function to be called with the selected data as second argument
+     */
+    parseJsonWithJsonPath: function (dir, fileName, jsonpathExpr, callback) {
+        this.readFile(dir, fileName, function(err, fileData) {
+            if (err) return callback(err, null);
+
+            try {
+                var jsonData = JSON.parse(fileData);
+                var result = jsonpath.query(jsonData, jsonpathExpr);
+                return callback(null, result);
+            } catch (error) {
+                return callback({ message: "Invalid JSONPath expression or JSON format" }, null);
             }
         });
     }

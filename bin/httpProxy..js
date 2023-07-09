@@ -108,7 +108,8 @@ var httpProxy = {
                 return callback(error);
             }
 
-            if (response.headers["content-type"].includes("text/turtle")) {
+            if (response && response.headers && response.headers["content-type"] && response.headers["content-type"].includes("text/turtle")) {
+
                 return callback(null, body); // Return the body directly if it's in Turtle format
             }
 

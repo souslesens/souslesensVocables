@@ -195,9 +195,9 @@ export default function App() {
 
     const browseForm = (
         <Form.Group controlId="formFileMultiple" className="mb-3">
-            <Form.Control name="files" type="file" multiple accept=".csv,.tsv" onChange={uploadFileHandler} />
+            <Form.Control name="files" type="file" multiple accept=".csv,.tsv,.xml,.json" onChange={uploadFileHandler} />
             <Form.Text color="muted">
-                <p>Supported files: CSV</p>
+                <p>Supported files: CSV, XML and JSON</p>
             </Form.Text>
         </Form.Group>
     );

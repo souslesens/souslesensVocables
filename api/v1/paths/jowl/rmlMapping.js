@@ -19,19 +19,19 @@ module.exports = function() {
         }
 
         for(let source of req.body.sources) {
-            if (source.data) {
+            if (source.contentEncoded64) {
                 try {
-                    let data = await fs.readFile(path.resolve(source.data));
-                    let base64Data = Buffer.from(data).toString('base64');
-                    source.data = base64Data;
+                    let ContentFile = await fs.readFile(path.resolve(source.contentEncoded64));
+                    let base64Data = Buffer.from(ContentFile).toString('base64');
+                    source.contentEncoded64 = base64Data;
                 } catch (err) {
-                    console.log(`Error reading file ${source.data}: `, err);
+                    console.log(`Error reading file ${source.filePath}: `, err);
                     return res.status(500).send({error: `Error reading file ${source.data}: ${err.message}`});
                 }
             }
         }
 
-        const url = "http://localhost:9170/rml/mapping";
+        const url = "http://localhost:9170/rml/createTriples";
 
         let options = {
             method: "POST",
@@ -49,14 +49,37 @@ module.exports = function() {
         console.log("headers and body");
         console.log(options.headers);
         console.log(options.body);
-        HttpProxy.post(options.url, options.headers, options.body, function (error, result) {
+        HttpProxy.post(options.url, options.headers, options.body, function (error, result, response) {
             console.log("Received result data: ", result);
-            if (error) {
-                return res.status(500).send({ error: "Error during the RML mapping process: " + error.message });
+            if (error || res.status >= 400) {
+                let errorMessage = "Error during the RML mapping process.";
+                if (result) {
+                    errorMessage += " " + result;
+                } else if (error) {
+                    errorMessage += " " + error.message;
+                }
+                return res.status(500).send({ error: errorMessage });
             } else {
-                processResponse(res, error, result);
+                // parse result to triples
+                let triples = [];
+                parser.parse(result, function(error, quad, prefixes) {
+                    if (quad) {
+                        triples.push({
+                            s: quad.subject.id,
+                            p: quad.predicate.id,
+                            o: quad.object.id,
+                        });
+                    } else {
+                        // No more quads, so result is parsed completely
+                        console.log("Parsed triples: ", triples);
+                        processResponse(res, error, triples); // pass triples instead of result
+                    }
+                });
             }
         });
+        
+        
+        
         
     }       
     POST.apiDoc = {
@@ -81,9 +104,9 @@ module.exports = function() {
                             items: {
                                 type: 'object',
                                 properties: {
-                                    data: {
+                                    contentEncoded64: {
                                         type: 'string',
-                                        description: 'Content of the file'
+                                        description: 'Content of the file encoded64'
                                     },
                                     format: {
                                         type: 'string',

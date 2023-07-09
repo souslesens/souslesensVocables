@@ -4,6 +4,14 @@
         overflow: auto;
         width: 450px;
     }
+    body.modal-open .modal-backdrop {
+    z-index: 1040 !important;
+}
+
+body.modal-open .modal {
+    z-index: 1050 !important;
+}
+
 </style>
 
 <script src="js/external/jquery/jquery.json-editor.min.js"></script>
@@ -23,7 +31,37 @@
         <div class="KGcreator_tree_container" id="KGcreator_tree_containerDiv">
             <div id="KGcreator_csvTreeDiv"></div>
         </div>
-    </div>
+
+        
+        <div class="modal fade" id="xpathModal" tabindex="-1" aria-labelledby="xpathModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="xpathModalLabel">Select XPath</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  <div class="mb-3">
+                    <label for="xpathInput" class="form-label">XPath</label>
+                    <input type="text" class="form-control" id="xpathInput">
+                    <small id="xpathHelp" class="form-text text-muted">
+                        Please enter the XPath. Use / to navigate down nodes and [ ] to select specific items.
+                    </small>
+                    <div id="invalidXPathWarning" style="display: none; color: red;">Please enter a valid XPath.</div>
+                  </div>
+                  <div class="mb-3">
+                    <label for="xpathPreview" class="form-label" >Preview</label>
+                    <textarea class="form-control" id="xpathPreview" rows="3" style="height: 300px;"></textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                      <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+      
 
     <script>
         KGcreator.displayUploadApp();

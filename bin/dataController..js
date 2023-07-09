@@ -1,7 +1,9 @@
 var fs = require("fs");
 var path = require("path");
 var csvCrawler = require("../bin/_csvCrawler.");
+var xpath = require('xpath');
 
+var dom = require('xmldom').DOMParser;
 var DataController = {
     /**
      * Gets the list of files in a sub-directory of `data`
@@ -94,6 +96,61 @@ var DataController = {
             return callback(null, { headers: headers, data: data });
         });
     },
+
+    readJson: function (dir, fileName, callback) {
+        var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
+        if (!fs.existsSync(filePath)) return callback("file " + filePath + "does not exist", null);
+        
+        fs.readFile(filePath, 'utf8', function(err, fileData) {
+            if(err) return callback(err, null);
+            try {
+                var jsonData = JSON.parse(fileData);
+                return callback(null, jsonData);
+            } catch(parseErr) {
+                return callback(parseErr, null);
+            }
+        });
+    },
+    
+    readXml: function (dir, fileName, callback) {
+        var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
+        if (!fs.existsSync(filePath)) return callback("file " + filePath + "does not exist", null);
+        
+        fs.readFile(filePath, 'utf8', function(err, fileData) {
+            if(err) return callback(err, null);
+            return callback(null, fileData);
+        });
+    },
+
+    /**
+     * Parse XML using XPath
+     * @param {string} dir - directory path under data
+     * @param {string} fileName - name of the file to read
+     * @param {string} xpathExpr - XPath expression to select data from the XML
+     * @param {(err: Error | string | null, result: string[] | null) => void} callback -
+     *   function to be called with the file content as second argument
+     */
+    parseXmlWithXPath: function (dir, fileName, xpathExpr, callback) {
+        this.readFile(dir, fileName, function(err, fileData) {
+            if (err) return callback(err, null);
+    
+            try {
+                var doc = new dom().parseFromString(fileData);
+                var nodes = xpath.select(xpathExpr, doc);
+                var result = nodes.map(function (node) {
+                    return node.toString();
+                });
+                return callback(null, result);
+            } catch (error) {
+                return callback({ message: "Invalid XPath expression" }, null);
+            }
+        });
+    }
+    
+
+
+    
+    
 };
 
 module.exports = DataController;

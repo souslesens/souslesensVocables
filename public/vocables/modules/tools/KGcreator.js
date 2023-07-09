@@ -180,14 +180,16 @@ var KGcreator = (function () {
             }
         });
     };
+    self.getFileType = function (fileName) {
+        const extension = fileName.split('.').pop().toUpperCase();
+        return extension;
+    }
     self.onChangeSourceTypeSelect = function (sourceType, callback) {
         self.currentSourceType = sourceType;
         if (sourceType == "CSV") {
             self.loadCsvDirs();
         } else if (sourceType == "DATABASE") {
             self.loadDataBases(callback);
-        }else if (sourceType == "JSON"){
-            return console.log("loadJsonData")
         }
 
     };
@@ -715,77 +717,160 @@ var KGcreator = (function () {
     };
 
     
-    self.onCsvtreeNodeClicked = function (event, obj, callback) {
-        $("#KGcreator_dataSampleDiv").val("");
+        self.onCsvtreeNodeClicked = function (event, obj, callback) {
+            $("#KGcreator_dataSampleDiv").val("");
 
-        self.currentTreeNode = obj.node;
-        if (obj.node.parents.length == 0) {
-            return;
-        }
-
-        //click column
-        if (obj.node.parents.length == 2) {
-            self.showSampleData(obj.node);
-        } else {
-            if (obj.event && obj.event.button != 2) {
-                //if popup menu dont load
-                self.loadMappings(obj.node.data.id);
+            self.currentTreeNode = obj.node;
+            if (obj.node.parents.length == 0) {
+                return;
             }
-        }
 
-        if (obj.node.children.length > 0) {
-            return;
-        }
+            //click column
+            if (obj.node.parents.length == 2) {
+                self.showSampleData(obj.node);
+            } else {
+                if (obj.event && obj.event.button != 2) {
+                    //if popup menu dont load
+                    self.loadMappings(obj.node.data.id);
+                }
+            }
 
-        if (self.currentSourceType == "CSV") {
-            // load csv columns
-            const payload = {
-                dir: "CSV/" + self.currentCsvDir,
-                name: obj.node.id,
-                options: JSON.stringify({ lines: 100 }),
-            };
-
-            $.ajax({
-                type: "GET",
-                url: `${Config.apiUrl}/data/csv`,
-                dataType: "json",
-                data: payload,
-                success: function (result, _textStatus, _jqXHR) {
-                  
-                    var jstreeData = [];
-                    self.csvData = result.data;
-                    self.csvHeaders = result.headers;  // save headers
+            if (obj.node.children.length > 0) {
+                return;
+            }
 
 
+            if (self.currentSourceType == "CSV") {
 
-                    result.headers.forEach(function (col) {
-                        jstreeData.push({
-                            id: obj.node.id + "_" + col,
-                            text: col,
-                            parent: obj.node.id,
-                            data: { id: col, sample: result.data[0] },
-                        });
-                    });
-                    
-                    
-                // Convert the result into a string
-                var rowCount = result.data[0].length;
-                self.csvHeaders = 
-
-
-                    JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData);
-                    self.columnDataList = jstreeData.map(function(col) {
-                        return col.text;
-                    });
+                if (self.getFileType(obj.node.id) == "CSV"){
+                    const payload = {
+                        dir: "CSV/" + self.currentCsvDir,
+                        name: obj.node.id,
+                        options: JSON.stringify({ lines: 100 }),
+                    };
                 
-                    
-                },
-                error: function (err) {
-                    // alert(err.responseText);
-                },
-            });
-        }
-    };
+
+                    $.ajax({
+                        type: "GET",
+                        url: `${Config.apiUrl}/data/csv`,
+                        dataType: "json",
+                        data: payload,
+                        success: function (result, _textStatus, _jqXHR) {
+                        
+                            var jstreeData = [];
+                            self.csvData = result.data;
+                            self.csvHeaders = result.headers;  // save headers
+
+
+
+                            result.headers.forEach(function (col) {
+                                jstreeData.push({
+                                    id: obj.node.id + "_" + col,
+                                    text: col,
+                                    parent: obj.node.id,
+                                    data: { id: col, sample: result.data[0] },
+                                });
+                            });
+                            
+                            
+                        // Convert the result into a string
+                        var rowCount = result.data[0].length;
+                        self.csvHeaders = 
+
+
+                            JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData);
+                            self.columnDataList = jstreeData.map(function(col) {
+                                return col.text;
+                            });
+                        
+                            
+                        },
+                        error: function (err) {
+                            // alert(err.responseText);
+                        },
+                    });
+                } else if (self.getFileType(obj.node.id) == "XML"){
+                    var myModal = new bootstrap.Modal(document.getElementById('xpathModal'));
+                    myModal.show();
+
+                
+                    const payload = {
+                        dir: "CSV/" + self.currentCsvDir,
+                        name: obj.node.id,
+                    };
+                
+                    $.ajax({
+                        type: "GET",
+                        url: `${Config.apiUrl}/data/xml`,
+                        dataType: "text",
+                        data: payload,
+                        success: function (result, _textStatus, _jqXHR) {
+                            let XmlData = JSON.parse(result);  // Parse the result manually
+                            $("#KGcreator_dataSampleDiv").val(XmlData);
+                        
+                            // Add input event listener to XPath input field
+                            $("#xpathInput").on('input', function() {
+                                const xpathExpr = $(this).val();
+                
+                                const xpathPayload = {
+                                    dir: payload.dir,
+                                    name: payload.name,
+                                    xpath: xpathExpr,
+                                };
+                                $.ajax({
+                                    type: "GET",
+                                    url: `${Config.apiUrl}/data/xml-xpath`,
+                                    dataType: "text",
+                                    data: xpathPayload,
+                                    success: function (xpathResult) {
+                                        let XpathXmlData = JSON.parse(xpathResult);  // Parse the result manually
+                                        $("#xpathPreview").val(XpathXmlData);
+                                        $("#KGcreator_dataSampleDiv").val(XpathXmlData);
+                        
+                                    },
+                                    complete: function () {
+                                        if ($("#xpathPreview").val().trim() === '') {
+                                            $("#invalidXPathWarning").show(); // Assuming this is an element designed to show the warning message
+                                        } else {
+                                            $("#invalidXPathWarning").hide();
+                                        }
+                                    },
+                                    error: function (err) {
+                                        // Handle error
+                                        console.error(err);
+                                    },
+                                });
+                            });
+                        },
+                        error: function (err) {
+                            // Handle error
+                            console.error(err);
+                        },
+                    });
+                }else if (self.getFileType(obj.node.id) == "JSON"){
+                    const payload = {
+                        dir: "CSV/" + self.currentCsvDir,
+                        name: obj.node.id,
+                        options: JSON.stringify({ lines: 100 }),
+                    };
+                    $.ajax({
+                        type: "GET",
+                        url: `${Config.apiUrl}/data/json`,
+                        dataType: "json",
+                        data: payload,
+                        success: function (result, _textStatus, _jqXHR) {
+                            // Display the file content in the text area
+                            $("#KGcreator_dataSampleDiv").val(JSON.stringify(result, null, 2));
+                        },
+                        error: function (err) {
+                            // Handle error
+                            console.error(err);
+                        },
+                    });
+
+                }
+            }
+        };
 
     //RML Mapping file generator 
 
@@ -805,15 +890,20 @@ var KGcreator = (function () {
 
     self.validateTripleElements = function(subject, predicate, object) {
         if (!subject) {
-            return alert("missing subject");
+            alert("missing subject");
+            return false;
         }
         if (!predicate) {
-            return alert("missing predicate");
+            alert("missing predicate");
+            return false;
         }
         if (!object) {
-            return alert("missing object");
+            alert("missing object");
+            return false;
         }
-    }
+        return true;
+    };
+    
 
     self.handleBlankNode = function(subject) {
         if(!self.blankNodeList.includes(subject)){
@@ -893,11 +983,18 @@ var KGcreator = (function () {
         let tripleObject = $("#subjectSelect").val();
         let selectedBlankNode = $('#subjectSelect').val();
         let template = $('#Selected_BlankNodeID').val(); 
+        let xpath = $("#xpathInput").val();
 
+        if(self.getFileType(self.currentJsonObject.fileName) == "XML" && !xpath) {
+            alert("Please enter a valid XPath.");
+            return; // Stop execution of the function
+        }
        
 
 
-        self.validateTripleElements(subject, predicate, object);
+        if (!self.validateTripleElements(subject, predicate, object)) {
+            return;
+        }
 
         if (subject === "_blankNode") {
             self.handleBlankNode(subject);
@@ -937,9 +1034,20 @@ var KGcreator = (function () {
             rml += `<#${subject}Mapping>\n`;
             rml += "   a rr:TriplesMap;\n";
             rml += "   rml:logicalSource [\n";
-            rml += "        rml:source temp-files/mapping/"+self.currentJsonObject.fileName+"\;\n";
-            rml += "        rml:referenceFormulation ql:CSV\n";
+            rml += "        rml:source temp-files/Mapping/"+self.currentJsonObject.fileName+"\;\n";
+            if(self.getFileType(self.currentJsonObject.fileName)=="CSV"){  
+                rml += "        rml:referenceFormulation ql:CSV\n"; } 
+            else if (self.getFileType(self.currentJsonObject.fileName)=="JSON"){
+               
+                rml += "        rml:referenceFormulation ql:JSONPath;\n"; 
+
+
+            }else if (self.getFileType(self.currentJsonObject.fileName)=="XML"){
+                rml += "        rml:iterator \""+xpath+"\"\;\n";   
+                rml += "         rml:referenceFormulation ql:XPath;\n"; 
+            }
             rml += "   ];\n\n";
+           
 
             if (subject.startsWith("_blankNode")) {
                 rml += "   rr:subjectMap [\n";
@@ -1005,18 +1113,6 @@ window.onload = () => {
 };
 
 
-
-
-
-
-
- 
-    
-
-
- 
-
-    
     function showModal() {
         var subject = $("#KGcreator_subjectInput").val();
         var modal = document.getElementById("myModal");
@@ -1132,20 +1228,24 @@ window.onload = () => {
             return;
         }
         var fileName = fullFileName.split('.').slice(0, -1).join('.'); 
-        var format = "csv"; 
+        var format = self.getFileType(fullFileName);  
+        console.log(format)
         var filePath = "./data/"+ self.currentSourceType + "/"+ self.currentCsvDir + "/"+ fullFileName;
         
         var dataToSend = {
             rml: rml,
             sources: [{
                 fileName: fileName,
-                data: filePath, 
+                contentEncoded64: filePath, 
                 format: format
             }]
         };
     
         console.log("ci-dessous payload !")
         console.log(dataToSend)
+    
+        // Set "Loading..." message
+        $('#KGcreator_dataSampleDiv').val("Loading...");
     
         $.ajax({
             url: `${Config.apiUrl}/jowl/rmlMapping`,
@@ -1155,23 +1255,28 @@ window.onload = () => {
             headers: { 'Accept': 'text/turtle' },
             success: function(responseData) {
                 var responseDataString;
-
-        if (typeof responseData === 'object') {
-            // If it's a simple JavaScript object, convert to JSON string
-            responseDataString = JSON.stringify(responseData, null, 2);
-        } else {
-            // If it's already a string, just use it directly
-            responseDataString = responseData;
-        }
-
-        $('#KGcreator_dataSampleDiv').val(responseDataString); 
+    
+                if (typeof responseData === 'object') {
+                    // If it's a simple JavaScript object, convert to JSON string
+                    responseDataString = JSON.stringify(responseData, null, 2);
+                } else {
+                    // If it's already a string, just use it directly
+                    responseDataString = responseData;
+                }
+    
+                // Set the response data in the textarea
+                $('#KGcreator_dataSampleDiv').val(responseDataString); 
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 alert('Error during the RML mapping process: ' + errorThrown);
+    
+                // Clear the "Loading..." message
+                $('#KGcreator_dataSampleDiv').val(""); 
             }
         });
             
     };
+    
     
       
 
@@ -1521,6 +1626,8 @@ self.saveRMLMappings = function () {
     };
     self.loadMappings = function (csvFileName, callback) {
         console.log(csvFileName); 
+        console.log(self.currentSourceType); 
+
     
         function getMappingFileRML(csvFileName, callback2) {
             var payload = {
@@ -1752,7 +1859,7 @@ self.saveRMLMappings = function () {
         if (!size) {
             size = 200;
         }
-        if (node.data.sample) {
+        if (node.data.sample) { 
             //csv
             $("#KGcreator_dataSampleDiv").val("");
 

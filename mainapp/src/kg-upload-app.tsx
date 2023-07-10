@@ -1,5 +1,5 @@
 import * as React from "react";
-import * as ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
 import { useState, useEffect } from "react";
 
 import Form from "react-bootstrap/Form";
@@ -261,4 +261,6 @@ export default function App() {
     );
 }
 
-ReactDOM.render(<App />, document.getElementById("mount-kg-upload-app-here"));
+const container = document.getElementById("mount-kg-upload-app-here");
+const root = createRoot(container!);
+root.render(<App />);

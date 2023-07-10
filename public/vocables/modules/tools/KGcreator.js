@@ -613,7 +613,7 @@ var KGcreator = (function () {
                                 <br/>
                                 <span style='margin-left: 10px;  font-weight: bold; '>Lookup</span>
                                 <input id='KGcreator_objectLookupName' style='width:100%;  height: 30px; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc;'/>
-                                <button style='margin-left: 10px; padding: 5px 10px; border-radius: 5px; border: none; background-color: gray; color: white; cursor: pointer;' onclick='KGcreator.handleAddClick()'>Add</button>
+                                <button style='margin-left: 10px; padding: 5px 10px; border-radius: 5px; border: none; background-color: gray; color: white; cursor: pointer;' onclick='KGcreator.handleGenerateRMLAddClick()'>Add</button>
                             </div>`;
                         
                         $("#editPredicate_customContentDiv").html(html);
@@ -790,8 +790,8 @@ var KGcreator = (function () {
                         },
                     });
                 } else if (self.getFileType(obj.node.id) == "XML"){
-                    var myModal = new bootstrap.Modal(document.getElementById('xpathModal'));
-                    myModal.show();
+                    var xpathModal = new bootstrap.Modal(document.getElementById('xpathModal'));
+                    xpathModal.show();
 
                 
                     const payload = {
@@ -848,8 +848,8 @@ var KGcreator = (function () {
                         },
                     });
                 } else if (self.getFileType(obj.node.id) == "JSON") {
-                    var myModal = new bootstrap.Modal(document.getElementById('jsonpathModal'));
-                    myModal.show();
+                    var JsonPathModal = new bootstrap.Modal(document.getElementById('jsonpathModal'));
+                    JsonPathModal.show();
                 
                     const payload = {
                         dir: "CSV/" + self.currentCsvDir,
@@ -967,7 +967,7 @@ var KGcreator = (function () {
     }
 
     self.handleBlankNodeTemplates = function() {
-        let selectedBlankNode = $('#subjectSelect').val();
+        let selectedBlankNode = $('#BlankNodeSelect').val();
         let template = $('#Selected_BlankNodeID').val(); 
 
         let existingBlankNode = Object.keys(self.blankNodeTemplates).find(key => self.blankNodeTemplates[key] === template);
@@ -977,7 +977,7 @@ var KGcreator = (function () {
         }
         self.blankNodeTemplates[selectedBlankNode] = template;
         $('#Selected_BlankNodeID').val('');
-        $('#subjectSelect').val('');
+        $('#BlankNodeSelect').val('');
         $('#blankNodeID').val('');
 
     }
@@ -1002,19 +1002,40 @@ var KGcreator = (function () {
         }
     }
 
-    self.refreshSubjectSelect = function(subject) {
-        let subjectSelect = document.getElementById('subjectSelect');
-        subjectSelect.innerHTML = '';
+    self.refreshBlankNodeSelect = function(subject) {
+        let BlankNodeSelect = document.getElementById('BlankNodeSelect');
+        BlankNodeSelect.innerHTML = '';
         let placeholderOption = new Option('Select a _blankNode');
         placeholderOption.disabled = true;
         placeholderOption.selected = true;
-        subjectSelect.add(placeholderOption);
+        BlankNodeSelect.add(placeholderOption);
         self.blankNodeList.filter(sub => sub !== subject).forEach(sub => {
             let option = new Option(sub, sub);
-            subjectSelect.add(option);
+            BlankNodeSelect.add(option);
         });
     }
+    self.addRowIdToCsv = function() {
+        var payload = {
+            dir: "CSV/" + self.currentCsvDir,
+            fileName: self.currentJsonObject.fileName,
+        };
+        console.log(payload)
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/data/addRowIdToCsv`,
+            data: payload,
+            dataType: "json",
+            success: function (response) {
+                console.log(response.message);
 
+            },
+            error(err) {
+                return alert(err.responseText);
+            },
+        });
+
+
+    }
     self.generateRML = function() {
         $("#KGcreator_tripleMessageDiv").html("");
         let subject = $("#KGcreator_subjectInput").val();
@@ -1025,8 +1046,7 @@ var KGcreator = (function () {
         let objectLookupName = $("#KGcreator_objectLookupName").val();
         let isRestrictionCBX = $("#KGcreator_isRestrictionCBX").prop("checked");
         let isSpecificPredicate = $("#KGcreator_isSpecificPredicateCBX").prop("checked");
-        let tripleObject = $("#subjectSelect").val();
-        let selectedBlankNode = $('#subjectSelect').val();
+        let selectedBlankNode = $('#BlankNodeSelect').val();
         let template = $('#Selected_BlankNodeID').val(); 
         let xpath = $("#xpathInput").val();
         let jsonPath = $("#jsonpathInput").val();
@@ -1161,15 +1181,15 @@ window.onload = () => {
 };
 
 
-    function showModal() {
+self.showBlankNodeObjectModal = function () {
         var subject = $("#KGcreator_subjectInput").val();
-        var modal = document.getElementById("myModal");
+        var modal = document.getElementById("BlankNodeObjectModal");
     
         // Show the modal
         modal.style.display = "block";
     
-        var subjectSelect = document.getElementById('subjectSelect');
-        subjectSelect.innerHTML = '';
+        var BlankNodeSelect = document.getElementById('BlankNodeSelect');
+        BlankNodeSelect.innerHTML = '';
     
         // Create a new option for placeholder
         var placeholderOption = document.createElement('option');
@@ -1179,7 +1199,7 @@ window.onload = () => {
         placeholderOption.disabled = true; // The user cannot select this option
     
         // Add the placeholder option to the select element
-        subjectSelect.add(placeholderOption);
+        BlankNodeSelect.add(placeholderOption);
     
         self.blankNodeList
             .filter(function(sub) {
@@ -1192,10 +1212,10 @@ window.onload = () => {
                 option.text = sub;
     
                 // Add the option to the select element
-                subjectSelect.add(option);
+                BlankNodeSelect.add(option);
             });
             $(document).ready(function() {
-                $("#subjectSelect").change(function() {
+                $("#BlankNodeSelect").change(function() {
                     var selectedOption = $(this).children("option:selected").val();
                     if (selectedOption.startsWith("_blankNode")) {
                         // Clear existing options
@@ -1229,7 +1249,13 @@ window.onload = () => {
                 $("#blankNodeID").change(function() {
                     var selectedOption = $(this).children("option:selected").val();
                     // Set the text of the input field according to the selected option
-                    $("#Selected_BlankNodeID").val("_yourkey_{" + selectedOption + "}");
+                    if (selectedOption === "Generate an ID") {
+                        // set the value of the input field to 'row_ID'
+                        $("#Selected_BlankNodeID").val("_yourkey_{row_ID}"); }
+                    else {
+                        $("#Selected_BlankNodeID").val("_yourkey_{" + selectedOption + "}");
+                        }
+                   
             
                     // Show the input field
                     $("#Selected_BlankNodeID").show();
@@ -1238,30 +1264,33 @@ window.onload = () => {
             
             
             
-        // Enable the subjectSelect
-        subjectSelect.disabled = false;
+        // Enable the BlankNodeSelect
+        BlankNodeSelect.disabled = false;
         
 
     
-        // Attach the onclick event to the button
         var modalButton = document.getElementById("modalButton");
-        modalButton.onclick = KGcreator.generateRML;
+        modalButton.onclick = function() {
+            if ($("#blankNodeID").val() === "Generate an ID") {
+            KGcreator.addRowIdToCsv();  
+            }
+            KGcreator.generateRML();
+        };
     }
     
-    self.closeModal = function() {
-        var modal = document.getElementById("myModal");
+    self.CloseBlankNodeObjectModal= function() {
+        var modal = document.getElementById("BlankNodeObjectModal");
         modal.style.display = "none";
     }
     
      
      
-    self.handleAddClick = function() {
+    self.handleGenerateRMLAddClick = function() {
         var object = $("#editPredicate_objectValue").val();
     
         if (object.trim() === "_blankNodeSubjectTriple") {
-            // Here you call the function that presents the modal
-            // Let's assume it's called showModal()
-            showModal();
+          
+            self.showBlankNodeObjectModal();
         } else {
             self.generateRML();
         }

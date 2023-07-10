@@ -73,7 +73,7 @@
     outline: none;
     color: #888;
 }
-#subjectSelect {
+#BlankNodeSelect {
     width: 100%;
     padding: 8px;
     border: 1px solid #ccc;
@@ -116,7 +116,7 @@
     background-color: darkgray;
 }
 
-#subjectSelect option {
+#BlankNodeSelect option {
     padding: 8px;
     background-color: #f2f2f2;
     color: #333;
@@ -180,12 +180,13 @@
                 
         </div>
     </div>
-    <div id="myModal" class="modal">
+    <div id="BlankNodeObjectModal" class="modal">
         <div class="modal-content">
-            <button id="closeButton" onclick="KGcreator.closeModal()">&times;</button>
-            <select id="subjectSelect" name="subject">
+            <button id="closeButton" onclick="KGcreator.CloseBlankNodeObjectModal()">&times;</button>
+            <select id="BlankNodeSelect" name="BlankNodeSelect">
                 <option value="">Select the triple map</option>
             </select>
+            
 
             <select id="blankNodeID" name="_ID" style="display:none;">
                 <option value="">Select the blank node ID</option>

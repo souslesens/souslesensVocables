@@ -3,6 +3,10 @@ var path = require("path");
 var csvCrawler = require("../bin/_csvCrawler.");
 var xpath = require('xpath');
 var jsonpath = require('jsonpath'); 
+const csv = require('csv-parser');
+const createCsvWriter = require('csv-writer').createObjectCsvWriter;
+
+
 var dom = require('xmldom').DOMParser;
 var DataController = {
     /**
@@ -97,6 +101,46 @@ var DataController = {
         });
     },
 
+    /**
+     * Adds a row_ID column to a CSV file in the data directory
+     * @param {string} dir - directory path under data
+     * @param {string} fileName - name of the file to update
+     * @param {(err: NodeJS.ErrnoException | null, data: "file updated" | null) => void} callback -
+     *   function to be called once the file has been updated
+     */
+    addRowIdToCsv: function (dir, fileName, callback) {
+        var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
+        if (!fs.existsSync(filePath)) return callback("file does not exist", null);
+
+        const data = [];
+        let rowIndex = 1;
+        console.log(dir);
+        console.log(fileName)
+
+
+        fs.createReadStream(filePath)
+            .pipe(csv())
+            .on('data', (row) => {
+                row.row_ID = rowIndex++;
+                data.push(row);
+            })
+            .on('end', () => {
+                const headers = Object.keys(data[0]).map(id => ({id, title: id}));
+
+                const csvWriter = createCsvWriter({
+                    path: filePath,
+                    header: headers
+                });
+
+                csvWriter
+                    .writeRecords(data)
+                    .then(() => callback(null, "file updated"))
+                    .catch(err => callback(err, null));
+            })
+            .on('error', (err) => callback(err, null));
+    },
+
+
     readJson: function (dir, fileName, callback) {
         var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
         if (!fs.existsSync(filePath)) return callback("file " + filePath + "does not exist", null);
@@ -121,6 +165,7 @@ var DataController = {
             return callback(null, fileData);
         });
     },
+    
 
     /**
      * Parse XML using XPath

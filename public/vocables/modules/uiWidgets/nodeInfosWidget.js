@@ -668,11 +668,9 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             value = value + "^^xsd:dateTime";
             $("#editPredicate_objectValue").datepicker("destroy");
         }
-        if (property.startsWith("xsd:") ){
-           
-            value = value + "^^"+property;
-            property='owl:hasValue'
-            
+        if (property.startsWith("xsd:")) {
+            value = value + "^^" + property;
+            property = "owl:hasValue";
         }
 
         $("#sourceBrowser_addPropertyDiv").css("display", "none");
@@ -930,7 +928,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
     };
     self.showModifyPredicateDialog = function (predicateId) {
         PredicatesSelectorWidget.currentEditingItem = PredicatesSelectorWidget.predicatesIdsMap[predicateId];
-        PredicatesSelectorWidget.currentEditingProperty= predicateId;
+        PredicatesSelectorWidget.currentEditingProperty = predicateId;
         if (!PredicatesSelectorWidget.currentEditingItem) {
             return alert("error");
         }
@@ -941,7 +939,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                 self.deletePredicate(PredicatesSelectorWidget.currentEditingProperty);
             });
         });
-         
+
         $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
         $("#editPredicate_objectValue").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);
         var h = Math.max((PredicatesSelectorWidget.currentEditingItem.item.value.value.length / 80) * 30, 50);

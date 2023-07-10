@@ -323,9 +323,9 @@ var Export = (function () {
         return { cols: cols, dataSet: dataSet };
     };
 
-    self.showDataTable = function (div, cols, dataSet, buttons, options,additionalbuttons,additionalparams,callback) {
-        if(!options){
-            var options={};
+    self.showDataTable = function (div, cols, dataSet, buttons, options, additionalbuttons, additionalparams, callback) {
+        if (!options) {
+            var options = {};
         }
 
         if (self.dataTable) {
@@ -334,17 +334,15 @@ var Export = (function () {
             $("#dataTableDivExport").remove();
         }
         if (!div) {
-            if(!options.notDialog){
+            if (!options.notDialog) {
                 $("#mainDialogDiv").dialog("open");
-                
             }
-            
+
             $("#mainDialogDiv").html("<table id='dataTableDivExport'></table>");
             div = "dataTableDiv";
-            
         } else {
-            if(!options.notDialog){
-            $("#" + div).dialog("open");
+            if (!options.notDialog) {
+                $("#" + div).dialog("open");
             }
             $("#" + div).html("<table id='dataTableDivExport'></table>");
         }
@@ -369,7 +367,7 @@ var Export = (function () {
                 ].concat(additionalbuttons),
 
                 paging: false,
-                
+
                 /*  columnDefs: [
                     { width: 400, targets: 0 }
                 ],
@@ -377,7 +375,7 @@ var Export = (function () {
 
                 //  order: []
             };
-            params=Object.assign(params,additionalparams);
+            params = Object.assign(params, additionalparams);
 
             if (false && options && options.fixedColumns) {
                 params.fixedColumns = true;
@@ -387,10 +385,9 @@ var Export = (function () {
             }
 
             self.dataTable = $("#dataTableDivExport").DataTable(params);
-            if(callback){
+            if (callback) {
                 callback();
             }
-            
         }, 200);
     };
 
@@ -400,4 +397,3 @@ var Export = (function () {
 export default Export;
 
 window.Export = Export;
-

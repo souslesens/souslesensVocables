@@ -586,7 +586,7 @@ var Lineage_classes = (function () {
             options.edges = _options.edges;
         }
 
-        if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
+        if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource) || typeof DataGovernor!='undefined') {
             // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
             options.manipulation = {
                 enabled: true,
@@ -595,7 +595,7 @@ var Lineage_classes = (function () {
                 deleteEdge: false,
                 editNode: false,
                 editEdge: false,
-
+               
                 addEdge: function (edgeData, callback) {
                     var sourceNode = self.lineageVisjsGraph.data.nodes.get(edgeData.from);
                     var targetNode = self.lineageVisjsGraph.data.nodes.get(edgeData.to);
@@ -634,6 +634,7 @@ var Lineage_classes = (function () {
                     });
                 },
             };
+            
             if (false) {
                 options.interaction = {
                     navigationButtons: true,
@@ -641,18 +642,7 @@ var Lineage_classes = (function () {
             }
 
             Lineage_sources.showHideEditButtons(Lineage_sources.activeSource);
-        } else {
-            /* options.manipulation = {
-enabled: true,
-initiallyActive: false,
-deleteNode: false,
-deleteEdge: false,
-editNode: false,
-editEdge: false,
-addEdge:false,
-addNode:false
-}*/
-        }
+        } 
 
         options.skipColorGraphNodesByType = _options.skipColorGraphNodesByType;
 

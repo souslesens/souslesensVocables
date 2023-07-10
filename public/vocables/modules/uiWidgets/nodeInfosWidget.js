@@ -12,6 +12,8 @@ import Lineage_axioms_draw from "../tools/lineage/lineage_axioms_draw.js";
 import Lineage_axioms_create from "../tools/lineage/lineage_axioms_create.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 
+
+
 var NodeInfosWidget = (function () {
     var self = {};
     self.initDialog = function (sourceLabel, divId, callback) {
@@ -191,6 +193,14 @@ var NodeInfosWidget = (function () {
 
             str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
         }
+        if(typeof DataGovernor!='undefined' && !Lineage_sources.isSourceEditableForUser(self.currentSource)){
+            str +=
+            "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
+            "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'> Suggest new Predicate </button>";
+
+             str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.deleteNode()'> Suggest Deletion </button>";
+        }
+
         str += "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;background-color: #e1ddd1;padding:5px';display:flex;>";
 
         if (self.visitedNodes.length > 1) {
@@ -207,7 +217,13 @@ var NodeInfosWidget = (function () {
             $("#sourceBrowser_addPropertyDiv").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
                 $("#editPredicate_controlsDiv").css("display", "block");
             });
-        }
+        };
+        if(typeof DataGovernor!='undefined' && !Lineage_sources.isSourceEditableForUser(self.currentSource)){
+            $("#sourceBrowser_addPropertyDiv").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
+                $("#editPredicate_controlsDiv").css("display", "block");
+            });
+        };
+
     };
 
     self.configureEditPredicateWidget = function () {
@@ -368,6 +384,17 @@ defaultLang = 'en';*/
                             "\")'>edit</button>";
                         optionalStr +=
                             "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='font-size: 10px'" + " onclick='NodeInfosWidget.deletePredicate(\"" + predicateId + "\")'>X</button>";
+                    }
+                    if (!Lineage_sources.isSourceEditableForUser(sourceLabel) && typeof DataGovernor!='undefined') {
+                        //  if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[sourceLabel].editable > -1 && !_options.hideModifyButtons) {
+                        var propUri = self.propertiesMap.properties[key].propUri;
+
+                        optionalStr +=
+                            "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary ' style='font-size: 10px' onclick=' NodeInfosWidget.showModifyPredicateDialog(\"" +
+                            predicateId +
+                            "\")'>Suggest edition</button>";
+                        optionalStr +=
+                            "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary' style='font-size: 10px'" + " onclick='NodeInfosWidget.deletePredicate(\"" + predicateId + "\")'>Suggest deletion</button>";
                     }
                     return optionalStr;
                 }

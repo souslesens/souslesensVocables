@@ -323,18 +323,25 @@ var Export = (function () {
         return { cols: cols, dataSet: dataSet };
     };
 
-    self.showDataTable = function (div, cols, dataSet, buttons, options,additionalbuttons,callback) {
+    self.showDataTable = function (div, cols, dataSet, buttons, options,additionalbuttons,additionalparams,callback) {
+        if(!options){
+            var options={};
+        }
+
         if (self.dataTable) {
             self.dataTable.destroy();
             $("#dataTableDiv").html("");
+            $("#dataTableDivExport").remove();
         }
         if (!div) {
             if(!options.notDialog){
                 $("#mainDialogDiv").dialog("open");
+                
             }
             
-            $("#" +div).html("<table id='dataTableDivExport'></table>");
+            $("#mainDialogDiv").html("<table id='dataTableDivExport'></table>");
             div = "dataTableDiv";
+            
         } else {
             if(!options.notDialog){
             $("#" + div).dialog("open");
@@ -362,6 +369,7 @@ var Export = (function () {
                 ].concat(additionalbuttons),
 
                 paging: false,
+                
                 /*  columnDefs: [
                     { width: 400, targets: 0 }
                 ],
@@ -369,6 +377,7 @@ var Export = (function () {
 
                 //  order: []
             };
+            params=Object.assign(params,additionalparams);
 
             if (false && options && options.fixedColumns) {
                 params.fixedColumns = true;
@@ -378,7 +387,10 @@ var Export = (function () {
             }
 
             self.dataTable = $("#dataTableDivExport").DataTable(params);
-            callback();
+            if(callback){
+                callback();
+            }
+            
         }, 200);
     };
 

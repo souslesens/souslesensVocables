@@ -92,6 +92,13 @@ var UserRequestFiltering = {
             if (!graphUri) {
                 error = "DATA PROTECTION : operation " + operation + " needs explicit graph declaration";
             } else {
+                if(graphUri.includes('changeTrackerModifications/')){
+                    var real_graphUri=graphUri.replace('changeTrackerModifications/','');
+                    if(userGraphUrisMap[real_graphUri].acl=='r'||userGraphUrisMap[real_graphUri].acl=='w'){
+                        return callback(error, query);
+                    }
+
+                }
                 if (!userGraphUrisMap[graphUri]) {
                     error = " DATA PROTECTION : graphUri not allowed for user  " + graphUri + "\n";
                 } else {
@@ -132,12 +139,18 @@ var UserRequestFiltering = {
             //check graphuris authorized for user
             var fromError = "";
             json.from.default.forEach(function (fromGraphUri) {
+                if(fromGraphUri.value.includes('changeTrackerModifications/')){
+                     fromGraphUri.value=fromGraphUri.value.replace('changeTrackerModifications/','');
+                }
                 if (!userGraphUrisMap[fromGraphUri.value]) {
                     fromError += "DATA PROTECTION: graphUri " + fromGraphUri.value + " not allowed for current user ";
                 }
             });
 
             json.from.named.forEach(function (fromGraphUri) {
+                if(fromGraphUri.value.includes('changeTrackerModifications/')){
+                    fromGraphUri.value=fromGraphUri.value.replace('changeTrackerModifications/','');
+                }
                 if (!userGraphUrisMap[fromGraphUri.value]) {
                     fromError += "DATA PROTECTION : graphUri  " + fromGraphUri.value + " not allowed for current user";
                 }
@@ -179,7 +192,7 @@ var UserRequestFiltering = {
 
         var indicesMap = {};
         for (var source in userSourcesMap) {
-            indicesMap[source.toLowerCase()] = { source: source, acl: source.accessControl == "readwrite" ? "w" : "r" };
+            indicesMap[source.toLowerCase()] = { source: source, acl: userSourcesMap[source].accessControl == "readwrite" ? "w" : "r" };
         }
         var error = null;
         indices.forEach(function (indexName) {

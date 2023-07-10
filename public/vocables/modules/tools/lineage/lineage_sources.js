@@ -247,6 +247,7 @@ var Lineage_sources = (function () {
             Lineage_classes.lineageVisjsGraph.network.enableEditMode();
             $(".vis-edit-mode").css("display", "block");
         } else {
+           
             Lineage_classes.lineageVisjsGraph.network.disableEditMode();
             $(".vis-edit-mode").css("display", "none");
         }
@@ -732,12 +733,18 @@ self.onSelectWhiteboardAction = function (action) {
             return; // console.log("no source " + source);
         }
         const groups = authentication.currentUser.groupes;
+        var sourcesAccessControlParsed={}
         const currentAccessControls = groups.map((group) => {
             const defaultAccessControl = Config.profiles[group].defaultSourceAccessControl;
             const sourcesAccessControl = Config.profiles[group].sourcesAccessControl;
-            return sourcesAccessControl.hasOwnProperty(source) ? sourcesAccessControl[source] : defaultAccessControl;
+            var sourcesAccessControlParsed={}
+            Object.keys(sourcesAccessControl).forEach(element=>{
+                var parsed_path=element.split('/');
+                sourcesAccessControlParsed[parsed_path[parsed_path.length-1]]=sourcesAccessControl[element];
+            })
+            return sourcesAccessControlParsed.hasOwnProperty(source) ? sourcesAccessControlParsed[source] : defaultAccessControl;
         });
-        if (groups.indexOf("admin") && Config.sources[source].editable > -1) {
+        if (groups.indexOf("admin")> -1 && Config.sources[source].editable ) {
             return true;
         }
 

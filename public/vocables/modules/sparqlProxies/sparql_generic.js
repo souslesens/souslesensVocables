@@ -3,6 +3,7 @@ import Sparql_proxy from "./sparql_proxy.js";
 import common from "../shared/common.js";
 import Sparql_OWL from "./sparql_OWL.js";
 
+
 //biblio
 //https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf
 
@@ -400,10 +401,23 @@ var Sparql_generic = (function () {
         if (Array.isArray(graphUri)) {
             graphUri = graphUri[0];
         }
-
+        
         var query = self.getDefaultSparqlPrefixesStr();
         query += "with <" + graphUri + "> " + " DELETE {?s ?p ?o} WHERE{ ?s ?p ?o " + filterStr + "}";
         var queryOptions = "";
+        if(typeof DataGovernor!='undefined'){
+            
+            var isAdmin=DataGovernor.deleteTracker(sourceLabel,filterStr);
+            if(!isAdmin){
+                    // Stop the queries
+                    
+
+                    return callback(null,null);
+            }
+            
+            
+            
+        }
         let url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, queryOptions, { source: sourceLabel }, function (err, result) {
             if (err) {
@@ -482,11 +496,30 @@ var Sparql_generic = (function () {
         if (!options) {
             options = {};
         }
-        var graphUri = Config.sources[sourceLabel].graphUri;
+        if(options.graphUri){
+            var graphUri=sourceLabel
+        }else{
+            var graphUri = Config.sources[sourceLabel].graphUri;
+        }
+        
         if (Array.isArray(graphUri)) {
             graphUri = graphUri[0];
         }
+        
+        if(typeof DataGovernor!='undefined'){
+            if(!options.changeTrackInsert){
+                var isAdmin=DataGovernor.insertChangeTraker(sourceLabel,_triples,options,callback);
+                if(!isAdmin){
+                    // Stop the queries
+                    
 
+                    return callback(null,null);
+                }
+            }
+            
+            
+        }
+        
         var slices = common.array.slice(_triples, 200);
         var uniqueTriples = {};
         async.eachSeries(
@@ -512,7 +545,13 @@ var Sparql_generic = (function () {
                     return callback(null, query);
                 }
                 // console.log(query)
-                var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+                if(options.graphUri){
+                    
+                    var url = Config.sources['rdf'].sparql_server.url + "?format=json&query=";
+                }else{
+                    
+                    var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+                }
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
                     return callbackEach(err);
                 });

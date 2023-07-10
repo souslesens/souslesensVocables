@@ -2,7 +2,8 @@ var fs = require("fs");
 var sources = fs.readFileSync("../config/public_sources.json");
 sources = JSON.parse(sources);
 for (var key in sources) {
-    str += key + "\n";
+    var source = sources[key];
+    if (!source.graphUri) str += key + "\n";
 }
 
 var str =

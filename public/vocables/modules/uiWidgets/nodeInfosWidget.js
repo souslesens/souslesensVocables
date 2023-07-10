@@ -620,6 +620,8 @@ defaultLang = 'en';*/
                 str += "</tr>";
             });
             $("#" + divId).append(str);
+
+            return _callback();
         });
     };
 
@@ -711,7 +713,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "mainDialogDiv", {}, function (err, result) {
                     //  self.showNodeInfosToolbar();
                     if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
-                        visjsGraph.data.nodes.push({
+                        Lineage_classes.lineageVisjsGraph.data.nodes.push({
                             id: self.currentNodeId,
                             label: value,
                             shape: Lineage_classes.defaultShape,
@@ -814,8 +816,8 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     },
                     //update trees
                     function (callbackSeries) {
-                        if (self.currentNodeId.from) {
-                            var jstreeNode = JstreeWidget.getNodeByDataField("#Lineage_propertiesTree", "id", self.currentNodeId);
+                        if (self.currentNode.from || self.currentNode.data.type == "http://www.w3.org/2002/07/owl#ObjectProperty") {
+                            var jstreeNode = JstreeWidget.getNodeByDataField("Lineage_propertiesTree", "id", self.currentNodeId);
                             if (jstreeNode) {
                                 $("#Lineage_propertiesTree").jstree().delete_node(jstreeNode);
                             }
@@ -824,13 +826,14 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                             if (jstreeNode) {
                                 $("#LineageNodesJsTreeDiv").jstree().delete_node(jstreeNode);
                             }
-
-                            return callbackSeries();
                         }
+                        return callbackSeries();
                     },
                     //update graph
                     function (callbackSeries) {
-                        visjsGraph.data.nodes.remove(self.currentNodeId);
+                        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
+                            Lineage_classes.lineageVisjsGraph.data.nodes.remove(self.currentNodeId);
+                        }
                         return callbackSeries();
                     },
                 ],
@@ -913,9 +916,9 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         if (jstreeNode) {
                             $("#Lineage_propertiesTree").jstree().rename_node(jstreeNode, newValue);
                         }
-                        visjsGraph.data.edges.update({ id: self.currentNodeId, label: newValue });
+                        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) Lineage_classes.lineageVisjsGraph.data.edges.update({ id: self.currentNodeId, label: newValue });
                     } else {
-                        visjsGraph.data.nodes.update({ id: self.currentNodeId, label: newValue });
+                        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) Lineage_classes.lineageVisjsGraph.data.nodes.update({ id: self.currentNodeId, label: newValue });
                         var jstreeNode = JstreeWidget.getNodeByDataField("LineageNodesJsTreeDiv", "id", self.currentNode.data.id);
                         if (jstreeNode) {
                             $("#LineageNodesJsTreeDiv").jstree().rename_node(jstreeNode, newValue);

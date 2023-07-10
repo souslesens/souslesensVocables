@@ -68,7 +68,7 @@ var Lineage_axioms_create = (function () {
                     if (err) {
                         return alert(err.responseText);
                     }
-                    result.forEach(function (item) {
+                    result.rawResult.forEach(function (item) {
                         if (types.indexOf(item.superClass.value) < 0) {
                             types.push(item.superClass.value);
                         }

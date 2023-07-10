@@ -37,12 +37,19 @@ app.use(morganLogger("dev"));
  * App middleware for authentication and session handling
  */
 app.use(cookieParser());
+if (config.cookieSecureTrustProxy) {
+    app.set("trust proxy", 1);
+}
 app.use(
     require("express-session")({
         secret: config.cookieSecret ? config.cookieSecret : "S3cRet!",
         resave: false,
         saveUninitialized: false,
-        cookie: { maxAge: config.cookieMaxAge ? config.cookieMaxAge : 2629800000 },
+        cookie: {
+            maxAge: config.cookieMaxAge ? config.cookieMaxAge : 2629800000,
+            sameSite: config.cookieSameSite ? config.cookieSameSite : false,
+            secure: config.cookieSecure ? config.cookieSecure : false,
+        },
     })
 );
 

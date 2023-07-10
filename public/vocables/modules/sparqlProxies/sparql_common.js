@@ -124,7 +124,9 @@ var Sparql_common = (function () {
                     }
                 }
             } else if (ids) {
-                if (!Array.isArray) return;
+                if (!Array.isArray) {
+                    return;
+                }
                 if (!Array.isArray(ids)) {
                     ids = [ids];
                 }
@@ -136,9 +138,10 @@ var Sparql_common = (function () {
 
                 var uriIds = [];
                 ids.forEach(function (id, _index) {
-                    if (true || ("" + id).indexOf(":") > -1)
+                    if (true || ("" + id).indexOf(":") > -1) {
                         // literal
                         uriIds.push(id);
+                    }
                 });
 
                 uriIds.forEach(function (id, _index) {
@@ -157,7 +160,9 @@ var Sparql_common = (function () {
                     }
                 });
 
-                if (conceptIdsStr == "") return "";
+                if (conceptIdsStr == "") {
+                    return "";
+                }
                 if (options.useFilterKeyWord) {
                     filters.push(" FILTER( ?" + varName + " in (" + conceptIdsStr + "))");
                 } else {
@@ -224,7 +229,9 @@ var Sparql_common = (function () {
         if (skosPrefLabel) {
             pred = "|<http://www.w3.org/2004/02/skos/core#prefLabel>";
         }
-        var str = "?" + variable + " rdfs:label" + pred + " ?" + variable + "Label. filter( lang(?" + variable + "Label)= '" + Config.default_lang + "' || !lang(?" + variable + "Label))";
+        //     var str = "?" + variable + " rdfs:label" + pred + " ?" + variable + "Label. filter( lang(?" + variable + "Label)= '" + Config.default_lang + "' || !lang(?" + variable + "Label))";
+        var str = "?" + variable + " rdfs:label" + pred + " ?" + variable + "Label. filter(regex( lang(?" + variable + "Label), '" + Config.default_lang + "') || !lang(?" + variable + "Label))";
+
         if (optional) {
             return " OPTIONAL {" + str + "} ";
         }
@@ -342,7 +349,15 @@ var Sparql_common = (function () {
         }
 
         var fromStr = "";
-        var graphUris = Config.sources[source].graphUri;
+        var graphUris;
+        if (Config.basicVocabularies[source]) {
+            graphUris = Config.basicVocabularies[source].graphUri;
+        } else if (Config.sources[source]) {
+            graphUris = Config.sources[source].graphUri;
+        } else {
+            return "XXX no graphUri";
+        }
+
         if (!graphUris || graphUris == "") {
             return "";
         }
@@ -356,14 +371,16 @@ var Sparql_common = (function () {
         if (withoutImports === undefined) {
             withoutImports = self.withoutImports;
         }
-        var imports = Config.sources[source].imports;
-        if (Lineage_sources.fromAllWhiteboardSources) {
-            for (var source2 in Lineage_sources.loadedSources) {
-                if (source2 != source) {
-                    var graphUri = Config.sources[source2].graphUri;
-                    if (graphUri) {
-                        if (graphUri && fromStr.indexOf(graphUri) < 0) {
-                            fromStr += from + "  <" + graphUri + "> ";
+        if (Config.sources[source]) {
+            var imports = Config.sources[source].imports;
+            if (Lineage_sources.fromAllWhiteboardSources) {
+                for (var source2 in Lineage_sources.loadedSources) {
+                    if (source2 != source) {
+                        var graphUri = Config.sources[source2].graphUri;
+                        if (graphUri) {
+                            if (graphUri && fromStr.indexOf(graphUri) < 0) {
+                                fromStr += from + "  <" + graphUri + "> ";
+                            }
                         }
                     }
                 }

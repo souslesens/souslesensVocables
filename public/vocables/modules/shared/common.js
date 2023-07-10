@@ -66,7 +66,9 @@ var common = (function () {
     };
 
     self.fillSelectWithColorPalette = function (selectId, colors) {
-        if (!colors) colors = common.paletteIntense;
+        if (!colors) {
+            colors = common.paletteIntense;
+        }
         var array = [];
         colors.forEach(function (color) {
             array.push();
@@ -211,6 +213,44 @@ var common = (function () {
             }
 
             return matrix2;
+        },
+
+        intersection: function (a, b) {
+            var aa = {};
+            a.forEach(function (v) {
+                aa[v] = 1;
+            });
+            var c = [];
+            b.forEach(function (v) {
+                if (aa[v]) c.push(v);
+            });
+            return c;
+        },
+
+        union: function (a, b) {
+            var c = [];
+            var aa = {};
+            a.forEach(function (v) {
+                aa[v] = 1;
+                c.push(v);
+            });
+
+            b.forEach(function (v) {
+                if (!aa[v]) c.push(v);
+            });
+            return c;
+        },
+        difference: function (a, b) {
+            var bb = {};
+            b.forEach(function (v) {
+                bb[v] = 1;
+            });
+            var c = [];
+
+            a.forEach(function (v) {
+                if (!bb[v]) c.push(v);
+            });
+            return c;
         },
     };
 

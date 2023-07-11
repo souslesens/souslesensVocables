@@ -111,7 +111,7 @@ export const SparqlServerSchema = z
     .object({
         url: z.string().default("_default"),
         method: z.string().default("GET"),
-        headers: z.array(z.string()).default([]),
+        headers: z.array(z.object({ key: z.string(), value: z.string() })),
     })
     .default({ url: "", method: "", headers: [] });
 
@@ -130,7 +130,7 @@ const LocalDictionarySchema = z.object({
 export type LocalDictionary = z.infer<typeof LocalDictionarySchema>;
 
 const defaultDataSource: DataSource = {
-    type: [],
+    type: "",
     connection: "_default",
     dbName: "",
     table_schema: "",
@@ -139,11 +139,11 @@ const defaultDataSource: DataSource = {
 
 const dataSourceSchema = z
     .object({
-        type: z.array(z.string()).default([]),
+        type: z.string().default(""),
         connection: z.string().default("_default"),
         dbName: z.string().default(""),
         table_schema: z.string().default(""),
-        local_dictionary: LocalDictionarySchema,
+        local_dictionary: LocalDictionarySchema.nullable(),
     })
     .default(defaultDataSource);
 
@@ -152,7 +152,7 @@ export const ServerSourceSchema = z.object({
     name: z.string().default(""),
     _type: z.string().optional(),
     type: z.string().default(""),
-    graphUri: z.string().default(""),
+    graphUri: z.string().optional(),
     sparql_server: SparqlServerSchema,
     controller: z.string().default("Sparql_OWL"),
     topClassFilter: z.string().default("?topConcept rdf:type owl:Class ."),
@@ -207,17 +207,17 @@ export const defaultSource = (id: string): ServerSource => {
 };
 
 export interface DataSource {
-    type: string[];
+    type: string;
     connection: string;
     dbName: string;
     table_schema: string;
-    local_dictionary: LocalDictionary;
+    local_dictionary: LocalDictionary | null;
 }
 
 interface CommonSource {
     id: string;
-    graphUri: string[];
-    sparql_server: { url: string; method: string; headers: string[] };
+    graphUri: string;
+    sparql_server: { url: string; method: string; headers: { key: string; value: string }[] };
     color: string;
     controller: string;
     topClassFilter: string;

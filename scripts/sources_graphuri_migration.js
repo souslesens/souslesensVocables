@@ -41,8 +41,20 @@ fs.readFile(sourcesFilePath, (_err, sourcesRawData) => {
                     value.dataSource.local_dictionary = null;
                 }
             } catch {}
-            if (Array.isArray(value.sparql_server.headers)) {
+            if (Array.isArray(value.sparql_server.headers) && !value.sparql_server.headers) {
                 value.sparql_server.headers = {};
+            }
+            if (!Array.isArray(value.sparql_server.headers) && value.sparql_server.headers) {
+                const newHeaders = Object.entries(value.sparql_server.headers).map(([key, value]) => {
+                    return {
+                        key: key,
+                        value: value,
+                    };
+                });
+                value.sparql_server.headers = newHeaders;
+            }
+            if (typeof value.sparql_server.headers == "undefined") {
+                value.sparql_server.headers = [];
             }
             console.log(value.sparql_server.headers);
             return [key, value];

@@ -57,7 +57,7 @@ const SourcesTable = () => {
             ),
             failure: (msg: string) => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    ,<p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
+                    <p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
                 </Box>
             ),
             success: (gotSources: ServerSource[]) => {
@@ -180,9 +180,9 @@ type Msg_ =
     | { type: Type.UserClickedAddDataSource; payload: boolean }
     | {
           type: Type.UserUpdatedDataSource;
-          payload: { type: string[]; table_schema: string; connection: string; dbName: string; local_dictionary: { table: string; labelColumn: string; idColumn: string } };
+          payload: { type: string; table_schema: string; connection: string; dbName: string; local_dictionary: { table: string; labelColumn: string; idColumn: string } | null };
       }
-    | { type: Type.UserUpdatedsparql_server; payload: { url: string; method: string; headers: string[] } };
+    | { type: Type.UserUpdatedsparql_server; payload: { url: string; method: string; headers: { key: string; value: string }[] } };
 
 const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): SourceEditionState => {
     const { model } = useModel();
@@ -205,7 +205,7 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
                 ...sourceEditionState,
                 sourceForm: {
                     ...sourceEditionState.sourceForm,
-                    dataSource: msg.payload ? { type: [], table_schema: "", connection: "", dbName: "", local_dictionary: { table: "", labelColumn: "", idColumn: "" } } : null,
+                    dataSource: msg.payload ? { type: "", table_schema: "", connection: "", dbName: "", local_dictionary: { table: "", labelColumn: "", idColumn: "" } } : null,
                 },
             };
 
@@ -260,11 +260,12 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
 
     const _handleFieldUpdate = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserAddedGraphUri, payload: event.target.value });
 
-    const handleSparql_serverUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) =>
+    const handleSparql_serverUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         update({
             type: Type.UserUpdatedsparql_server,
-            payload: { ...sourceModel.sourceForm.sparql_server, [fieldName]: fieldName === "headers" ? event.target.value.replace(/\s+/g, "").split(",") : event.target.value },
+            payload: { ...sourceModel.sourceForm.sparql_server, [fieldName]: fieldName === "headers" ? [] : event.target.value },
         });
+    };
     const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } });
 
@@ -518,7 +519,7 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
             type: Type.UserUpdatedDataSource,
             payload: props.model.sourceForm.dataSource
                 ? { ...props.model.sourceForm.dataSource, [fieldName]: event.target.value }
-                : { type: [], table_schema: "string", connection: "string", dbName: "string", local_dictionary: { table: "string", labelColumn: "string", idColumn: "string" } },
+                : { type: "", table_schema: "string", connection: "string", dbName: "string", local_dictionary: { table: "string", labelColumn: "string", idColumn: "string" } },
         });
 
     const handleAddDataSource = (event: React.ChangeEvent<HTMLInputElement>) => props.update({ type: Type.UserClickedAddDataSource, payload: event.target.checked });
@@ -556,12 +557,13 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
                             <Select
                                 labelId="dataSource-type"
                                 id="dataSource"
-                                value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.type : []}
+                                value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.type : ""}
                                 label="Data source's type"
                                 fullWidth
                                 multiple
                                 style={{ width: "400px" }}
-                                renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
+                                // renderValue={selected}
+                                // renderValue={(selected: string | string) => (typeof selected === "string" ? selected : selected.join(", "))}
                                 onChange={handleDataSourceUpdate("type")}
                             >
                                 {["sql.sqlserver"].map((type) => (

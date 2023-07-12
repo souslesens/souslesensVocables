@@ -1,0 +1,47 @@
+<style>
+.input-field {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    transition: 0.3s;
+}
+
+.input-field:focus {
+    border: 2px solid #007BFF;
+}
+
+.submit-button {
+    background-color: #007BFF;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+</style>
+<div id="KGcreator_dialogDiv" title="Add Lookup">
+    <h6>Add Lookup</h6>
+    <form id="lookupForm">
+        <label for="sourceDataset">Source Dataset:</label><br>
+        <input type="text" id="sourceDataset" name="sourceDataset" class="input-field"><br>
+        <label for="targetTriplesMap">Target TriplesMap:</label><br>
+        <input type="text" id="targetTriplesMap" name="targetTriplesMap" class="input-field"><br>
+        <label for="sourceJoinColumn">Join Column in Source Dataset:</label><br>
+        <input type="text" id="sourceJoinColumn" name="sourceJoinColumn" class="input-field"><br>
+        <label for="targetJoinColumn">Join Column in Target TriplesMap:</label><br>
+        <input type="text" id="targetJoinColumn" name="targetJoinColumn" class="input-field"><br>
+        <label for="outputProperty">Output Property:</label><br>
+        <input type="text" id="outputProperty" name="outputProperty" class="input-field"><br>
+    </form>
+    <button id="addLookup" class="submit-button">Add Lookup</button>
+</div>

@@ -465,7 +465,7 @@ var KGcreator = (function () {
                 if (self.currentTreeNode.parents.length < 1) {
                     return;
                 }
-                $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupDialog.html", function () {
+                $("#KGcreator_dialogDiv").load("snippets/KGcreatorRML/lookupDialog.html", function () {
                     $("#KGCreator_lookupFileName").val(self.currentTreeNode.data.id);
                 });
                 $("#KGcreator_dialogDiv").dialog("open");
@@ -1087,7 +1087,7 @@ var KGcreator = (function () {
             rml += `@prefix ${key}: <${self.rmlPrefixes[key]}>.\n`;
         }
 
-        rml += "@base <http://example.com/ns#>.\n\n";
+        rml += "@base <http://eni-tarbes.fr/ns#>.\n\n";
 
         for (let subject in self.subjects) {
             
@@ -1129,8 +1129,14 @@ var KGcreator = (function () {
             } else {
                 rml += `   rr:subjectMap [\n`;
                 rml += `        rr:termType rr:BlankNode;\n`;
-                rml += `        rr:class <http://example.com/ns#${subject}>;\n`;
                 rml += `   ];\n\n`;
+                rml += `   rr:predicateObjectMap [\n`;
+                rml += `        rr:predicate rdf:type;\n`;
+                rml += `        rr:objectMap [\n`;
+                rml += `               rr:template "http://eni-tarbes.fr/ns#{${subject}}";\n`;  // replace "Activity" with the actual column name
+                rml += `               rr:termType rr:IRI;\n`;
+                rml += `    ];\n`;
+                rml += `];\n\n`;
             }
 
             let predicates = Object.keys(self.subjects[subject]);
@@ -1296,7 +1302,27 @@ self.showBlankNodeObjectModal = function () {
         }
     }
 
-    self.createRDFTriples = function () {
+    self.createRDFTriples = function (test) {
+        $("#KGcreator_dataSampleDiv").val("creating triples...");
+        if (!self.currentJsonObject) {
+            return;
+        }
+        if (!test){
+
+        if (!self.currentJsonObject.graphUri) {
+            var graphUri = "";
+            if (self.currentGraphUri) {
+                graphUri = self.currentGraphUri;
+            }
+            graphUri = prompt("enter graphUri", graphUri);
+            if (!graphUri) {
+                return;
+            }
+            self.currentGraphUri = graphUri;
+            self.currentJsonObject.graphUri = graphUri;
+        }
+    }
+
 
           // Use the value from the listener instead of directly from the textarea
           var rml = self.currentTextareaValue ? self.currentTextareaValue : $('#rmlTextarea').val(); 
@@ -1307,25 +1333,38 @@ self.showBlankNodeObjectModal = function () {
             console.error("FileName is undefined");
             return;
         }
+        var options = {};
         var fileName = fullFileName.split('.').slice(0, -1).join('.'); 
         var format = self.getFileType(fullFileName);  
         console.log(format)
         var filePath = "./data/"+ self.currentSourceType + "/"+ self.currentCsvDir + "/"+ fullFileName;
-        
+        var options = {};
+        if (test) {
+            options = {
+                deleteOldGraph: false,
+                sampleSize: 500,
+            };
+        } else {
+            options = {
+                deleteOldGraph: false,
+                graphUri 
+            };
+        }
         var dataToSend = {
             rml: rml,
             sources: [{
                 fileName: fileName,
                 contentEncoded64: filePath, 
                 format: format
-            }]
+            }],
+            options: options,
+
         };
     
         console.log("ci-dessous payload !")
         console.log(dataToSend)
     
-        // Set "Loading..." message
-        $('#KGcreator_dataSampleDiv').val("Loading...");
+     
     
         $.ajax({
             url: `${Config.apiUrl}/jowl/rmlMapping`,
@@ -1334,19 +1373,12 @@ self.showBlankNodeObjectModal = function () {
             contentType: 'application/json',
             headers: { 'Accept': 'text/turtle' },
             success: function(responseData) {
-                var responseDataString;
-    
-                if (typeof responseData === 'object') {
-                    // If it's a simple JavaScript object, convert to JSON string
-                    responseDataString = JSON.stringify(responseData, null, 2);
-                } else {
-                    // If it's already a string, just use it directly
-                    responseDataString = responseData;
-                }
-    
+                var responseDataString = JSON.stringify(responseData, null, 2);
+
                 // Set the response data in the textarea
-                $('#KGcreator_dataSampleDiv').val(responseDataString); 
+                $('#KGcreator_dataSampleDiv').val(responseDataString);
             },
+    
             error: function(jqXHR, textStatus, errorThrown) {
                 alert('Error during the RML mapping process: ' + errorThrown);
     
@@ -1355,8 +1387,9 @@ self.showBlankNodeObjectModal = function () {
             }
         });
             
-    };
+    }
     
+
     
       
 

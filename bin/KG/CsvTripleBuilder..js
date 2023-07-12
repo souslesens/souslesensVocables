@@ -43,6 +43,7 @@ var CsvTripleBuilder = {
         iso81346: "<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
         slsv: "<http://souslesens.org/resource/vocabulary/>",
         dcterms: "<http://purl.org/dc/terms/>",
+        
     },
 
     getSparqlPrefixesStr: function () {

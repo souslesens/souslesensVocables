@@ -267,6 +267,12 @@ node scripts/controller-migration.js -c config -w
 node scripts/remove_admin_profile_migration.js -c config -w
 ```
 
+#### Release 1.37
+
+```bash
+node scripts/migration_1.37_sources.js -c config -w
+```
+
 SouslesensVocables will be available at [localhost:3010](http://localhost:3010).
 
 ## Contribute to souslesensVocable

@@ -38,8 +38,6 @@ import { errorMessage } from "./errorMessage";
 import { ZodCustomIssueWithMessage } from "react-zorm/dist/types";
 import { Add, Remove } from "@mui/icons-material";
 
-type SparqlServerHeaders = ServerSource["sparql_server"]["headers"];
-
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
 
@@ -157,7 +155,30 @@ const SourcesTable = () => {
     return renderSources;
 };
 
-type SourceEditionState = { modal: boolean; sourceForm: ServerSource };
+type SparqlServerHeadersFormData = { key: string; value: string }[];
+type SourceFormData = Omit<ServerSource, "sparql_server"> & { sparql_server: Omit<ServerSource["sparql_server"], "headers"> & { headers: SparqlServerHeadersFormData } };
+
+function toFormData(source: ServerSource): SourceFormData {
+    return {
+        ...source,
+        sparql_server: {
+            ...source.sparql_server,
+            headers: Object.entries(source.sparql_server.headers).map(([key, value]) => ({ key, value })),
+        },
+    };
+}
+
+function fromFormData(source: SourceFormData): ServerSource {
+    return {
+        ...source,
+        sparql_server: {
+            ...source.sparql_server,
+            headers: Object.fromEntries(source.sparql_server.headers.map(({ key, value }) => [key, value])),
+        },
+    };
+}
+
+type SourceEditionState = { modal: boolean; sourceForm: SourceFormData };
 
 const enum Type {
     UserClickedModal,
@@ -193,7 +214,7 @@ type Msg_ =
 const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): SourceEditionState => {
     const { model } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
-    const getUnmodifiedSources = unwrappedSources.reduce((acc, value) => (sourceEditionState.sourceForm.id === value.id ? value : acc), defaultSource(ulid()));
+    const getUnmodifiedSources: SourceFormData = unwrappedSources.reduce((acc, value) => (sourceEditionState.sourceForm.id === value.id ? toFormData(value) : acc), toFormData(defaultSource(ulid())));
     const resetSourceForm = msg.payload ? sourceEditionState.sourceForm : getUnmodifiedSources;
     const fieldToUpdate: any = msg.type === Type.UserUpdatedField ? msg.payload.fieldname : null;
     switch (msg.type) {
@@ -230,7 +251,7 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
         case Type.ResetSource:
             switch (msg.payload) {
                 case Mode.Creation:
-                    return { ...sourceEditionState, sourceForm: defaultSource(ulid()) };
+                    return { ...sourceEditionState, sourceForm: toFormData(defaultSource(ulid())) };
 
                 case Mode.Edition:
                     return { ...sourceEditionState, sourceForm: msg.payload ? sourceEditionState.sourceForm : resetSourceForm };
@@ -248,7 +269,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
     const sources = React.useMemo(() => unwrappedSources, [unwrappedSources]);
 
-    const [sourceModel, update] = React.useReducer(updateSource, { modal: false, sourceForm: source });
+    const [sourceModel, update] = React.useReducer(updateSource, { modal: false, sourceForm: toFormData(source) });
     const [issues, setIssues] = React.useState<ZodCustomIssueWithMessage[]>([]);
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
 
@@ -273,7 +294,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
         });
     };
 
-    const handleSparql_serverHeadersUpdate = (updater: (previousHeaders: SparqlServerHeaders) => SparqlServerHeaders) => {
+    const handleSparql_serverHeadersUpdate = (updater: (previousHeaders: SparqlServerHeadersFormData) => SparqlServerHeadersFormData) => {
         update({
             type: Type.UserUpdatedsparql_server,
             payload: { ...sourceModel.sourceForm.sparql_server, headers: updater(sourceModel.sourceForm.sparql_server.headers) },
@@ -328,7 +349,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
         };
     }
     const saveSources = () => {
-        void saveSource(sourceModel.sourceForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
+        void saveSource(fromFormData(sourceModel.sourceForm), create ? Mode.Creation : Mode.Edition, updateModel, update);
     };
     const createIssues = (issue: ZodCustomIssueWithMessage[]) => setIssues(issue);
     const validateAfterSubmission = () => {

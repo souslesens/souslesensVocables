@@ -37,24 +37,19 @@ fs.readFile(sourcesFilePath, (_err, sourcesRawData) => {
             value.topClassFilter = topClassFilter;
 
             try {
-                if (typeof value.dataSource.local_dictionary == "undefined") {
+                if (typeof value.dataSource.local_dictionary === "undefined") {
                     value.dataSource.local_dictionary = null;
                 }
             } catch {}
-            if (Array.isArray(value.sparql_server.headers) && !value.sparql_server.headers) {
-                value.sparql_server.headers = {};
-            }
-            if (!Array.isArray(value.sparql_server.headers) && value.sparql_server.headers) {
-                const newHeaders = Object.entries(value.sparql_server.headers).map(([key, value]) => {
-                    return {
-                        key: key,
-                        value: value,
-                    };
-                });
-                value.sparql_server.headers = newHeaders;
-            }
-            if (typeof value.sparql_server.headers == "undefined") {
-                value.sparql_server.headers = [];
+
+            // Handle empty arrays in sparql_server.headers
+            const sparql_server = value.sparql_server;
+            if (Array.isArray(sparql_server.headers)) {
+                if (sparql_server.headers.length === 0) {
+                    delete sparql_server.headers;
+                } else {
+                    throw new Error("Non-empty array found in sparql_server.headers");
+                }
             }
 
             // Remove unused "type" property

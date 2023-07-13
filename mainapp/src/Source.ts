@@ -111,9 +111,9 @@ export const SparqlServerSchema = z
     .object({
         url: z.string().default("_default"),
         method: z.string().default("GET"),
-        headers: z.array(z.object({ key: z.string(), value: z.string() })),
+        headers: z.record(z.string(), z.string()).default({}),
     })
-    .default({ url: "", method: "", headers: [] });
+    .default({ url: "", method: "", headers: {} });
 
 const SourcePredicatesSchema = z
     .object({
@@ -200,7 +200,7 @@ export const defaultSource = (id: string): ServerSource => {
     return ServerSourceSchema.parse({
         _type: "source",
         id: id,
-        sparql_server: SparqlServerSchema.parse({ headers: [] }),
+        sparql_server: SparqlServerSchema.parse({ headers: {} }),
     });
 };
 

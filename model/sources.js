@@ -218,11 +218,14 @@ class SourceModel {
         await lock.acquire("SourcesThread");
         try {
             const sources = await this._read();
-            if (!(source.id in sources)) {
+            // XXX We currently find sources by their name
+            // We would prefer to use their ids.
+            if (!(source.name in sources)) {
                 return false;
             }
             const updatedSources = { ...sources };
-            updatedSources[source.id] = source;
+            // XXX same here
+            updatedSources[source.name] = source;
             await this._write(updatedSources);
             return true;
         } finally {

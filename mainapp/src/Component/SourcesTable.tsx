@@ -19,6 +19,8 @@ import {
     TableHead,
     TableRow,
     Stack,
+    IconButton,
+    InputAdornment,
 } from "@mui/material";
 import { useModel } from "../Admin";
 import * as React from "react";
@@ -34,6 +36,7 @@ import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
 import { useZorm, createCustomIssues } from "react-zorm";
 import { errorMessage } from "./errorMessage";
 import { ZodCustomIssueWithMessage } from "react-zorm/dist/types";
+import { Add, Remove } from "@mui/icons-material";
 
 type SparqlServerHeaders = ServerSource["sparql_server"]["headers"];
 
@@ -419,20 +422,35 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                         <Grid container item xs={6}>
                             {sourceModel.sourceForm.sparql_server.headers.map((header, headerIdx) => (
                                 <React.Fragment key={headerIdx}>
-                                    <Grid container>
-                                        <Grid item xs={5}>
+                                    <Grid container spacing={4}>
+                                        <Grid item xs={6}>
                                             <TextField fullWidth onChange={updateHeaderKey(headerIdx)} value={header.key} id={`sparql_server_headers`} label={"Header key"} variant="standard" />
                                         </Grid>
                                         <Grid item xs={6}>
-                                            <TextField fullWidth onChange={updateHeaderValue(headerIdx)} value={header.value} id={`sparql_server_headers`} label={"Header value"} variant="standard" />
-                                        </Grid>
-                                        <Grid item xs={1}>
-                                            <Button onClick={() => removeHeader(headerIdx)}>-</Button>
+                                            <TextField
+                                                fullWidth
+                                                onChange={updateHeaderValue(headerIdx)}
+                                                value={header.value}
+                                                id={`sparql_server_headers`}
+                                                label={"Header value"}
+                                                variant="standard"
+                                                InputProps={{
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <IconButton color="secondary" onClick={() => removeHeader(headerIdx)}>
+                                                                <Remove />
+                                                            </IconButton>
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                            />
                                         </Grid>
                                     </Grid>
                                 </React.Fragment>
                             ))}
-                            <Button onClick={addHeader}>Add header</Button>
+                            <Button onClick={addHeader} startIcon={<Add />}>
+                                Add header
+                            </Button>
                         </Grid>
                         <Grid item xs={6}>
                             <TextField

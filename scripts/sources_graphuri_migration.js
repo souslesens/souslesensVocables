@@ -56,7 +56,10 @@ fs.readFile(sourcesFilePath, (_err, sourcesRawData) => {
             if (typeof value.sparql_server.headers == "undefined") {
                 value.sparql_server.headers = [];
             }
-            console.log(value.sparql_server.headers);
+
+            // Remove unused "type" property
+            delete value["type"];
+
             return [key, value];
         })
     );

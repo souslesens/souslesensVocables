@@ -151,7 +151,6 @@ export const ServerSourceSchema = z.object({
     id: z.string().default(ulid()),
     name: z.string().default(""),
     _type: z.string().optional(),
-    type: z.string().default(""),
     graphUri: z.string().optional(),
     sparql_server: SparqlServerSchema,
     controller: z.string().default("Sparql_OWL"),
@@ -180,7 +179,6 @@ export const InputSourceSchema = z.object({
         .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
 
     _type: z.string().optional(),
-    type: z.string().default(""),
     graphUri: z.string().optional(),
     sparql_server: SparqlServerSchema,
     controller: z.string().optional(),
@@ -202,7 +200,7 @@ export const defaultSource = (id: string): ServerSource => {
     return ServerSourceSchema.parse({
         _type: "source",
         id: id,
-        sparql_server: SparqlServerSchema.parse({}),
+        sparql_server: SparqlServerSchema.parse({ headers: [] }),
     });
 };
 

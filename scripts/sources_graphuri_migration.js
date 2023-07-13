@@ -52,6 +52,10 @@ fs.readFile(sourcesFilePath, (_err, sourcesRawData) => {
                 }
             }
 
+            if (typeof value.name !== "string") {
+                value.name = key;
+            }
+
             // Remove unused "type" property
             delete value["type"];
 

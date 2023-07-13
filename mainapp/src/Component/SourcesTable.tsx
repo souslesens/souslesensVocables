@@ -34,6 +34,9 @@ import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
 import { useZorm, createCustomIssues } from "react-zorm";
 import { errorMessage } from "./errorMessage";
 import { ZodCustomIssueWithMessage } from "react-zorm/dist/types";
+
+type SparqlServerHeaders = ServerSource["sparql_server"]["headers"];
+
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
 
@@ -266,6 +269,40 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
             payload: { ...sourceModel.sourceForm.sparql_server, [fieldName]: fieldName === "headers" ? [] : event.target.value },
         });
     };
+
+    const handleSparql_serverHeadersUpdate = (updater: (previousHeaders: SparqlServerHeaders) => SparqlServerHeaders) => {
+        update({
+            type: Type.UserUpdatedsparql_server,
+            payload: { ...sourceModel.sourceForm.sparql_server, headers: updater(sourceModel.sourceForm.sparql_server.headers) },
+        });
+    };
+
+    const addHeader = () => {
+        handleSparql_serverHeadersUpdate((prevHeaders) => [...prevHeaders, { key: "", value: "" }]);
+    };
+
+    const removeHeader = (idx: number) => {
+        handleSparql_serverHeadersUpdate((prevHeaders) => {
+            const newHeaders = [...prevHeaders];
+            newHeaders.splice(idx, 1);
+            return newHeaders;
+        });
+    };
+
+    const updateHeaderKey = (idx: number) => (event: React.ChangeEvent<HTMLInputElement>) =>
+        handleSparql_serverHeadersUpdate((prevHeaders) => {
+            const newHeaders = [...prevHeaders];
+            newHeaders[idx] = { ...prevHeaders[idx], key: event.currentTarget.value };
+            return newHeaders;
+        });
+
+    const updateHeaderValue = (idx: number) => (event: React.ChangeEvent<HTMLInputElement>) =>
+        handleSparql_serverHeadersUpdate((prevHeaders) => {
+            const newHeaders = [...prevHeaders];
+            newHeaders[idx] = { ...prevHeaders[idx], value: event.currentTarget.value };
+            return newHeaders;
+        });
+
     const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } });
 
@@ -379,15 +416,23 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 variant="standard"
                             />
                         </Grid>
-                        <Grid item xs={6}>
-                            <TextField
-                                fullWidth
-                                onChange={handleSparql_serverUpdate("headers")}
-                                value={sourceModel.sourceForm.sparql_server.headers}
-                                id={`sparql_server_headers`}
-                                label={"Sparql server headers"}
-                                variant="standard"
-                            />
+                        <Grid container item xs={6}>
+                            {sourceModel.sourceForm.sparql_server.headers.map((header, headerIdx) => (
+                                <React.Fragment key={headerIdx}>
+                                    <Grid container>
+                                        <Grid item xs={5}>
+                                            <TextField fullWidth onChange={updateHeaderKey(headerIdx)} value={header.key} id={`sparql_server_headers`} label={"Header key"} variant="standard" />
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <TextField fullWidth onChange={updateHeaderValue(headerIdx)} value={header.value} id={`sparql_server_headers`} label={"Header value"} variant="standard" />
+                                        </Grid>
+                                        <Grid item xs={1}>
+                                            <Button onClick={() => removeHeader(headerIdx)}>-</Button>
+                                        </Grid>
+                                    </Grid>
+                                </React.Fragment>
+                            ))}
+                            <Button onClick={addHeader}>Add header</Button>
                         </Grid>
                         <Grid item xs={6}>
                             <TextField

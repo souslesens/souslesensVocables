@@ -10,6 +10,7 @@ import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 
 var KGcreator = (function () {
     var self = {};
+    self.filesNameList = [];
     self.rowCount = 0;
     self.mainJsonEditor = null;
     self.currentSource = null;
@@ -113,6 +114,10 @@ var KGcreator = (function () {
     self.usedTemplates = []; // Will be used to store used templates
     self.counter = {},
     self.rmlTextareaModified = false;
+    self.currentNodeId = null;
+    self.tripleMap = []
+
+
 
 
     
@@ -370,6 +375,7 @@ var KGcreator = (function () {
                     return;
                 }
                 var label = file;
+                self.filesNameList.push(file); 
 
                 //  if (data.indexOf(file + ".json") > -1)
                 for (var key in self.mappingFiles) {
@@ -385,6 +391,8 @@ var KGcreator = (function () {
                     data: { id: file },
                 });
             });
+     
+            
             if (self.currentDataSourceModel) {
                 options.openAll = false;
                 for (var key in self.currentDataSourceModel) {
@@ -436,6 +444,9 @@ var KGcreator = (function () {
                     return;
                 }
                 $("#KGcreator_subjectInput").val(self.currentTreeNode.data.id);
+                self.currentNodeId = self.currentTreeNode.original.parent
+                console.log('blabla'+self.currentNodeId)
+
             },
         };
 
@@ -465,21 +476,59 @@ var KGcreator = (function () {
                 if (self.currentTreeNode.parents.length < 1) {
                     return;
                 }
+                console.log(self.filesNameList)
+
                 $("#KGcreator_dialogDiv").load("snippets/KGcreatorRML/lookupDialog.html", function () {
-                    $("#KGCreator_lookupFileName").val(self.currentTreeNode.data.id);
-                });
-                $("#KGcreator_dialogDiv").dialog("open");
-            },
-        };
-        items.showTransformDialog = {
-            label: "Add Transform",
-            action: function (_e) {
-                // pb avec source
-                if (self.currentTreeNode.parents.length != 2) {
-                    return;
-                }
-                $("#KGcreator_dialogDiv").load("snippets/KGcreator/transformDialog.html", function () {
-                    $("#KGcreator_transformColumn").val(self.currentTreeNode.data.id);
+                    $("#lookup_sourceJoinColumn").val(self.currentTreeNode.data.id);
+                    $("#lookup_sourceDataset").val(self.currentNodeId);
+
+                    
+                    $("#lookup_sourceJoinColumn").prop("readonly", true);
+                    $("#lookup_sourceDataset").prop("readonly", true);
+                    $("#lookup_targetDataset").empty();
+                    $("#lookup_targetDataset").append(new Option('Select Target Dataset', '', true, true));
+                    $.each(self.filesNameList, function(index, value) {
+                        if(value !== self.currentNodeId) {
+                            $("#lookup_targetDataset").append(new Option(value, value));
+                        }
+                    });
+                    $("#lookup_targetDataset").change(function() {
+                        var selectedDataset = $(this).val(); 
+                        console.log(selectedDataset);
+                        if (self.currentSourceType == "CSV") {
+                            if (self.getFileType(selectedDataset) == "CSV"){
+                                const payload = {
+                                    dir: "CSV/" + self.currentCsvDir,
+                                    name: selectedDataset,
+                                    options: JSON.stringify({ lines: 100 }),
+                                };
+                                $.ajax({
+                                    type: "GET",
+                                    url: `${Config.apiUrl}/data/csv`,
+                                    dataType: "json",
+                                    data: payload,
+                                    success: function (result, _textStatus, _jqXHR) {
+                                        console.log(result.headers);
+                                        // Create a select field populated with result.headers
+                                        var select = $('<select id="targetJoinColumn" name="targetJoinColumn" class="input-field"><option disabled selected>Select Target join column</option></select>');
+                                        $.each(result.headers, function(index, value) {
+                                            select.append(new Option(value, value));
+                                        });
+                                        // Replace the existing field with the select
+                                        $("#targetJoinColumnWrapper").empty().append(select);
+                                    }
+                                });
+                            } else {
+                                // Create an input field
+                                var input = $('<input type="text" id="targetJoinColumn" name="targetJoinColumn" class="input-field">');
+                                // Replace the existing field with the input
+                                $("#targetJoinColumnWrapper").empty().append(input);
+                            }
+                        }
+                        
+
+                    });
+                    
                 });
                 $("#KGcreator_dialogDiv").dialog("open");
             },
@@ -509,6 +558,27 @@ var KGcreator = (function () {
         }
 
         return items;
+    };
+    self.setLookupInputs = function () {
+        var sourceDatasetValue = $("#lookup_sourceDataset").val();
+    var targetDatasetValue = $("#lookup_targetDataset").val();
+    var sourceJoinColumnValue = $("#lookup_sourceJoinColumn").val();
+    var targetJoinColumnValue = $("#targetJoinColumn").val();
+
+    
+
+
+    if(sourceDatasetValue && targetDatasetValue && sourceJoinColumnValue && targetJoinColumnValue) {
+        // Assigning values only if all inputs are filled
+        $("#KGcreator_subjectLookupName").val(sourceJoinColumnValue);
+        $("#KGcreator_objectLookupName").val(`${targetJoinColumnValue}`);
+        $("#editPredicate_objectValue").val("");
+        self.generateRML();
+
+    } else {
+        // If any of the inputs is not filled, show an alert
+        alert("Please make sure all fields are filled");
+    }   
     };
 
     self.editFile = function () {
@@ -661,6 +731,7 @@ var KGcreator = (function () {
                         return callbackSeries();
                     });
                 },
+              
                 function (callbackSeries) {
                 
                     $("#rmlTextArea").on("input", function() {
@@ -721,6 +792,8 @@ var KGcreator = (function () {
             $("#KGcreator_dataSampleDiv").val("");
 
             self.currentTreeNode = obj.node;
+            self.currentNodeId = obj.node.original.parent;  // Store the ID here
+
             if (obj.node.parents.length == 0) {
                 return;
             }
@@ -775,7 +848,6 @@ var KGcreator = (function () {
                             
                         // Convert the result into a string
                         var rowCount = result.data[0].length;
-                        self.csvHeaders = 
 
 
                             JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", obj.node.id, jstreeData);
@@ -933,7 +1005,7 @@ var KGcreator = (function () {
         self.usedTemplates = [];
     }
 
-    self.validateTripleElements = function(subject, predicate, object) {
+    self.validateTripleElements = function(subject, predicate, object, subjectLookupName, objectLookupName) {
         if (!subject) {
             alert("missing subject");
             return false;
@@ -943,8 +1015,10 @@ var KGcreator = (function () {
             return false;
         }
         if (!object) {
-            alert("missing object");
-            return false;
+            if (!subjectLookupName || !objectLookupName) {
+                alert("missing object or lookup subject/object");
+                return false;
+            }
         }
         return true;
     };
@@ -988,19 +1062,40 @@ var KGcreator = (function () {
         self.blankNodeList.forEach(blankNode => blankNodeSelect.append(new Option(blankNode, blankNode)));
     }
 
-    self.handleSubjects = function(subject, predicate, object) {
+    self.handleSubjects = function(subject, source, predicate, object, subjectLookupName, objectLookupName) {
         if (!self.subjects[subject]) {  // If the subject doesn't exist
             self.subjects[subject] = {};  // Add it to the dictionary
         }
-        if (!self.subjects[subject][predicate]) {  // If the predicate for this subject doesn't exist
-            self.subjects[subject][predicate] = [];  // Add it to the subject's dictionary
+        if (!self.subjects[subject][source]) {  // If the source for this subject doesn't exist
+            self.subjects[subject][source] = {};  // Add it to the subject's dictionary
         }
-        if (!self.subjects[subject][predicate].includes(object)) {  // If the object does not already exist for this predicate
-            self.subjects[subject][predicate].push(object);  // Add the object to the predicate's array
-        } else {
-            alert("This predicate-object pair already exists for the subject.");
+        if (!self.subjects[subject][source][predicate]) {  // If the predicate for this source doesn't exist
+            self.subjects[subject][source][predicate] = {  // Add it to the source's dictionary
+                objects: [],
+                lookupPairs: []
+            };
+        }
+    
+        if (object && !self.subjects[subject][source][predicate].objects.includes(object)) {  // If the object does not already exist for this predicate
+            self.subjects[subject][source][predicate].objects.push(object);  // Add the object to the predicate's objects array
+        } else if (object) {
+            alert("This object already exists for the subject and predicate.");
+        }
+    
+        if (subjectLookupName && objectLookupName) {  // If both lookupName and lookupObject exist
+            let exists = self.subjects[subject][source][predicate].lookupPairs.some(function(pair){
+                return pair.subjectLookupName === subjectLookupName && pair.objectLookupName === objectLookupName;
+            });
+            if (!exists) {  // If the lookup pair does not already exist for this predicate
+                self.subjects[subject][source][predicate].lookupPairs.push({subjectLookupName: subjectLookupName, objectLookupName: objectLookupName});  // Add the lookup pair to the predicate's lookupPairs array
+            } else {
+                alert("This lookup pair already exists for the subject and predicate.");
+            }
+        } else if (subjectLookupName || objectLookupName) {
+            alert("Both subjectLookupName and objectLookupName must be provided.");
         }
     }
+    
 
     self.refreshBlankNodeSelect = function(subject) {
         let BlankNodeSelect = document.getElementById('BlankNodeSelect');
@@ -1044,6 +1139,8 @@ var KGcreator = (function () {
         let isObjectString = $("#KGcreator_isObjectStringCBX").prop("checked");
         let subjectLookupName = $("#KGcreator_subjectLookupName").val();
         let objectLookupName = $("#KGcreator_objectLookupName").val();
+        let LookupTargetDataset = $("#lookup_targetDataset").val();
+        var targetJoinColumnValue = $("#targetJoinColumn").val();
         let isRestrictionCBX = $("#KGcreator_isRestrictionCBX").prop("checked");
         let isSpecificPredicate = $("#KGcreator_isSpecificPredicateCBX").prop("checked");
         let selectedBlankNode = $('#BlankNodeSelect').val();
@@ -1060,7 +1157,7 @@ var KGcreator = (function () {
             return; 
         }
 
-        if (!self.validateTripleElements(subject, predicate, object)) {
+        if (!self.validateTripleElements(subject, predicate, object, subjectLookupName, objectLookupName)) {
             return;
         }
 
@@ -1076,10 +1173,12 @@ var KGcreator = (function () {
         if (subject !== "_blankNode") {
             if (!self.subjectList.includes(subject)) {
                 self.subjectList.push(subject);
+                console.log("subject liste below")
+                console.log(self.subjectList)
             }
         }
-
-        self.handleSubjects(subject, predicate, object);
+  
+        self.handleSubjects(subject, self.currentNodeId, predicate, object, subjectLookupName, objectLookupName);
 
         let rml = "";
 
@@ -1088,8 +1187,46 @@ var KGcreator = (function () {
         }
 
         rml += "@base <http://eni-tarbes.fr/ns#>.\n\n";
+        if (LookupTargetDataset){
+            var targetfileName = LookupTargetDataset.split('.').slice(0, -1).join('.'); }
 
         for (let subject in self.subjects) {
+            for (let source in self.subjects[subject]) {
+
+            let predicates = Object.keys(self.subjects[subject][source]);
+            for (let i = 0; i < predicates.length; i++) {
+                let predicate = predicates[i];
+                let lookupPairs = self.subjects[subject][source][predicate].lookupPairs;
+                
+                for (let k = 0; k < lookupPairs.length; k++) {
+                    
+                    let lookupPair = lookupPairs[k];
+                    if(!self.tripleMap.includes(`${lookupPair.objectLookupName}_${targetfileName}`) ){
+                        self.tripleMap.push(`${lookupPair.objectLookupName}_${targetfileName}`);
+                    rml += `<#${lookupPair.objectLookupName}_${targetfileName}Mapping>\n`;
+                    rml += "   a rr:TriplesMap;\n";
+                    rml += "   rml:logicalSource [\n";
+                    rml += "        rml:source temp-files/Mapping/"+LookupTargetDataset+"\;\n";
+                    if(self.getFileType(LookupTargetDataset)=="CSV"){  
+                        rml += "        rml:referenceFormulation ql:CSV\n"; } 
+                    else if (self.getFileType(LookupTargetDataset)=="JSON"){
+                        rml += "        rml:iterator \"$\";\n"
+                        rml += "        rml:referenceFormulation ql:JSONPath;\n"; 
+        
+        
+                    }else if (self.getFileType(LookupTargetDataset)=="XML"){
+                        rml += "        rml:iterator \"/\";\n";   
+                        rml += "         rml:referenceFormulation ql:XPath;\n"; 
+                    }
+                    rml += "   ];\n\n";
+                    rml += "   rr:subjectMap [\n";
+                    rml += `               rr:template "http://eni-tarbes.fr/ns#{${targetJoinColumnValue}}";\n`; 
+                    rml += "   ].\n\n";
+
+                } 
+                }
+            }  
+
             
             if (subject === "_blankNode") {
                 let uniqueBlankNodeName = `_blankNode${self.blankNodeCounter}`;
@@ -1098,19 +1235,25 @@ var KGcreator = (function () {
                 delete self.subjects[subject];
                 subject = uniqueBlankNodeName;
             }
+            
+            var fileName = source.split('.').slice(0, -1).join('.'); 
+            if (!self.tripleMap.includes( `${subject}_${fileName}`)) {
+                self.tripleMap.push(`${subject}_${fileName}`);
+            }
 
-            rml += `<#${subject}Mapping>\n`;
+
+            rml += `<#${subject}_${fileName}Mapping>\n`;
             rml += "   a rr:TriplesMap;\n";
             rml += "   rml:logicalSource [\n";
-            rml += "        rml:source temp-files/Mapping/"+self.currentJsonObject.fileName+"\;\n";
-            if(self.getFileType(self.currentJsonObject.fileName)=="CSV"){  
+            rml += "        rml:source temp-files/Mapping/"+source+"\;\n";
+            if(self.getFileType(source)=="CSV"){  
                 rml += "        rml:referenceFormulation ql:CSV\n"; } 
-            else if (self.getFileType(self.currentJsonObject.fileName)=="JSON"){
+            else if (self.getFileType(source)=="JSON"){
                 rml += "        rml:iterator \""+jsonPath+"\"\;\n"
                 rml += "        rml:referenceFormulation ql:JSONPath;\n"; 
 
 
-            }else if (self.getFileType(self.currentJsonObject.fileName)=="XML"){
+            }else if (self.getFileType(source)=="XML"){
                 rml += "        rml:iterator \""+xpath+"\"\;\n";   
                 rml += "         rml:referenceFormulation ql:XPath;\n"; 
             }
@@ -1138,48 +1281,81 @@ var KGcreator = (function () {
                 rml += `    ];\n`;
                 rml += `];\n\n`;
             }
-
-            let predicates = Object.keys(self.subjects[subject]);
             for (let i = 0; i < predicates.length; i++) {
                 let predicate = predicates[i];
-                for (let j = 0; j < self.subjects[subject][predicate].length; j++) {
-                    let object = self.subjects[subject][predicate][j];
+
+        
+                let objects = self.subjects[subject][source][predicate].objects;
+                let lookupPairs = self.subjects[subject][source][predicate].lookupPairs;
+            
+                for (let j = 0; j < objects.length; j++) {
+                    let object = objects[j];
 
                     rml += "   rr:predicateObjectMap [\n";
                     rml += `        rr:predicate ${predicate};\n`;
                     rml += "        rr:objectMap [\n";
-                    if (object === "_blankNodeSubjectTriple") {
-                        rml += `               rr:termType rr:BlankNode;\n`;
-                        rml += `               rr:template "${template}";\n`;
-                    } else if (self.columnDataList.includes(object)) {
-                        if (self.subjectList.includes(object)) {
-                            rml += `               rr:parentTriplesMap <#${object}Mapping>;\n`;
-                            rml += "               rr:joinCondition [\n";
-                            rml += `                      rr:child "${object}";\n`;
-                            rml += `                      rr:parent "${object}"\n`;
-                            rml += "               ];\n";
+                        if (object === "_blankNodeSubjectTriple") {
+                        
+                            rml += `               rr:termType rr:BlankNode;\n`;
+                            rml += `               rr:template "${template}";\n`;
+                        } else if (self.columnDataList.includes(object)) {
+                            if (self.subjectList.includes(object)) {
+                          
+                                rml += `               rr:parentTriplesMap <#${object}Mapping>;\n`;
+                                rml += "               rr:joinCondition [\n";
+                                rml += `                      rr:child "${object}";\n`;
+                                rml += `                      rr:parent "${object}"\n`;
+                                rml += "               ];\n";
+                            } else {
+                                rml += `               rr:reference "${object}"\n`;
+                            }
                         } else {
-                            rml += `               rr:reference "${object}"\n`;
+                            rml += `               rr:constant ${object}`;
                         }
-                    } else {
-                        rml += `               rr:constant ${object}`;
-                    }
 
-                    rml += "        ];\n";
-                    if (i === predicates.length - 1 && j === self.subjects[subject][predicate].length - 1) {
-                        rml += "   ].\n\n";
-                    } else {
-                        rml += "   ];\n\n";
+                        rml += "        ];\n";
+                        if (i === predicates.length - 1 && j === objects.length - 1 && lookupPairs.length === 0) {
+                            rml += "   ].\n\n";
+                        } else {
+                            rml += "   ];\n\n";
+                        }
+                      
+                    
                     }
+                    
+                    for (let k = 0; k < lookupPairs.length; k++) {
+                        let lookupPair = lookupPairs[k];
+                        rml += "   rr:predicateObjectMap [\n";
+                        rml += `        rr:predicate ${predicate};\n`;
+                        rml += "        rr:objectMap [\n";
+                        rml += `           rr:parentTriplesMap <#${lookupPair.objectLookupName}_${targetfileName}>;\n`;
+                        rml += "           rr:joinCondition [\n";
+                        rml += `              rr:child "${lookupPair.subjectLookupName}";\n`;
+                        rml += `              rr:parent "${lookupPair.objectLookupName}"\n`;
+                        rml += "           ];\n";
+                        rml += "        ];\n";
+                      
+                        if (i === predicates.length - 1 && k === lookupPairs.length - 1 && objects.length === 0) {
+                            rml += "   ].\n\n";
+                        } else {
+                            rml += "   ];\n\n";
+                        }
+                    
+                    }
+                
+                    
+            
                 }
-            }
+            
+            
         }
-
+    }
         var rmlTextarea = document.getElementById("rmlTextarea");
         if (rmlTextarea) {
             rmlTextarea.value = rml;
         }
-    }
+        } 
+
 
 
 window.onload = () => {
@@ -1526,7 +1702,7 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
 
     self.addLookup = function () {
         var lookup = {
-            name: $("#KGCreator_lookupName").val(),
+            name: $("#sourceDataset").val(),
             fileName: $("#KGCreator_lookupFileName").val(),
             sourceColumn: $("#KGCreator_lookupSourceColumn").val(),
             targetColumn: $("#KGCreator_lookupTargetColumn").val(),

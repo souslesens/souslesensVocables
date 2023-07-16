@@ -3,7 +3,7 @@ const dataController = require("../../../../bin/dataController.");
 module.exports = function () {
     let operations = {
         GET,
-    };
+    };  
 
     function GET(req, res, next) {
         let options = null;
@@ -11,12 +11,18 @@ module.exports = function () {
             options = JSON.parse(req.query.options);
         }
         dataController.readCsv(req.query.dir, req.query.name, options, function (err, result) {
+            if (res.headersSent) {
+                console.log('Headers already sent, not sending a second response');
+                return;
+            }
             if (err) {
                 next(err);
+                return; 
             } else {
-                return res.status(200).json(result);
+                res.status(200).json(result);
+                return;
             }
-        });
+        });      
     }
 
     GET.apiDoc = {

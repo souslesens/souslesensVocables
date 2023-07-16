@@ -33,15 +33,19 @@
     <h6>Add Lookup</h6>
     <form id="lookupForm">
         <label for="sourceDataset">Source Dataset:</label><br>
-        <input type="text" id="sourceDataset" name="sourceDataset" class="input-field"><br>
-        <label for="targetTriplesMap">Target TriplesMap:</label><br>
-        <input type="text" id="targetTriplesMap" name="targetTriplesMap" class="input-field"><br>
+        <input type="text" id="lookup_sourceDataset" name="sourceDataset" class="input-field"><br>
+        <label for="targetDataset">Target Dataset:</label><br>
+        <select id="lookup_targetDataset" name="lookup_targetDataset" class="input-field">
+            <option disabled selected>Select Target Dataset</option>
+           
+        </select><br>
         <label for="sourceJoinColumn">Join Column in Source Dataset:</label><br>
-        <input type="text" id="sourceJoinColumn" name="sourceJoinColumn" class="input-field"><br>
-        <label for="targetJoinColumn">Join Column in Target TriplesMap:</label><br>
-        <input type="text" id="targetJoinColumn" name="targetJoinColumn" class="input-field"><br>
-        <label for="outputProperty">Output Property:</label><br>
-        <input type="text" id="outputProperty" name="outputProperty" class="input-field"><br>
+        <input type="text" id="lookup_sourceJoinColumn" name="sourceJoinColumn" class="input-field"><br>
+        <label for="targetJoinColumn">Join Column in Target Dataset:</label><br>
+        <div id="targetJoinColumnWrapper">
+        <input type="text" id="targetJoinColumn" name="targetJoinColumn" class="input-field" ><br>
+        </div>
+       
     </form>
-    <button id="addLookup" class="submit-button">Add Lookup</button>
+    <button id="addLookup" class="submit-button" onclick="KGcreator.setLookupInputs()">Add Lookup</button>
 </div>

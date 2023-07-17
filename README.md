@@ -211,7 +211,7 @@ docker-compose -f docker-compose.dev.yaml up -d
 Load some data into virtuoso
 
 ```bash
-bash tests/load_data.sh
+bash tests/load_data.sh dev
 ```
 
 Create a user account in MariaDB (for database authentication)

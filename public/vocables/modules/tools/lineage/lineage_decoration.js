@@ -218,9 +218,6 @@ var Lineage_decoration = (function () {
         }
 
         self.currentVisjGraphNodesMap = {};
-        if (false && self.currentTopOntologyClassesMap && Object.keys(self.currentTopOntologyClassesMap).length > 0) {
-            return self.colorNodesByTopLevelOntologyTopType(visjsNodes);
-        }
 
         self.setTopLevelOntologyClassesMap(function (err, result) {
             if (Config.topLevelOntologies[Config.currentTopLevelOntology]) {

@@ -11,8 +11,10 @@ import Sparql_CRUD from "../../sparqlProxies/sparql_CRUD.js";
 // eslint-disable-next-line no-global-assign
 var Lineage_relations = (function () {
     var self = {};
+    self.whiteboardSourcesFromStatus=false
     self.showDrawRelationsDialog = function (caller) {
         self.drawRelationCurrentCaller = caller;
+
 
         $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").dialog("option", "title", "Query");
@@ -210,6 +212,7 @@ var Lineage_relations = (function () {
             Lineage_classes.lineageVisjsGraph.data.edges.remove(edgesToClear);
         } else {
             //draw
+            self.whiteboardSourcesFromStatus=Lineage_sources.fromAllWhiteboardSources
             var x = $("input[name='lineageRelations_selection']");
             x = x.filter(":checked").val();
             var direction = $("input[name='lineageRelations_relDirection']").filter(":checked").val();
@@ -469,6 +472,7 @@ var Lineage_relations = (function () {
             ],
 
             function (err) {
+               Lineage_sources.fromAllWhiteboardSources= self.whiteboardSourcesFromStatus
                 if (allVisjsData.nodes.length == 0 && allVisjsData.edges.length == 0) {
                     return MainController.UI.message("no data found", true);
                 }

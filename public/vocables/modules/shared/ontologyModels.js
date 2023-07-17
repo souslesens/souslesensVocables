@@ -227,8 +227,7 @@ var OntologyModels = (function() {
 
             //set inherited domains
             function(callbackSeries) {
-            if( false)
-              return callbackSeries();
+
 
               var props = propsWithoutDomain.concat(propsWithoutRange);
               if(props.length==0)
@@ -266,24 +265,7 @@ var OntologyModels = (function() {
 
                   })
 
-             /*   for (var propId in propsMap) {
-                  var constraint = propsMap[propId];
-                  if (!Config.ontologiesVocabularyModels[source].constraints[propId]) {
-                    Config.ontologiesVocabularyModels[source].constraints[propId] = { domain: "", range: "" };
-                  }
 
-                  if (constraint.domain && !Config.ontologiesVocabularyModels[source].constraints[propId].domain) {
-                    Config.ontologiesVocabularyModels[source].constraints[propId].domain = constraint.domain;
-                    Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = constraint.domainLabel;
-                    Config.ontologiesVocabularyModels[source].constraints[propId].domainParentProperty = constraint.parentProp;
-                  }
-
-                  if (constraint.range && !Config.ontologiesVocabularyModels[source].constraints[propId].range) {
-                    Config.ontologiesVocabularyModels[source].constraints[propId].range = constraint.range;
-                    Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = constraint.rangeLabel;
-                    Config.ontologiesVocabularyModels[source].constraints[propId].rangeParentProperty = constraint.parentProp;
-                  }
-                }*/
 
                 return callbackSeries();
               });
@@ -311,6 +293,7 @@ var OntologyModels = (function() {
 
             // set transSourceRangeAndDomainLabels
             function (callbackSeries) {
+
               if (!Config.sources[source]) {
                 return callbackSeries();
               }
@@ -607,7 +590,7 @@ var OntologyModels = (function() {
 
     if(!Config.ontologiesVocabularyModels[source])
       Config.ontologiesVocabularyModels[source]
-    if(Config.ontologiesVocabularyModels[source].inferredClassModel)
+    if(false && Config.ontologiesVocabularyModels[source].inferredClassModel)
       return callback(null,Config.ontologiesVocabularyModels[source].inferredClassModel);
     else {
       var sourceGraphUri = Config.sources[source].graphUri

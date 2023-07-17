@@ -288,7 +288,7 @@ var elasticRestProxy = {
         console.log("DEBUG:bin/elasticRestProxy:listIndexes");
         elasticRestProxy.sendAuthRequest(options, function (error, response, body) {
             if (error) {
-                console.log("ERROR:bin/elasticRestProxy:listIndexes/SendAuthRequestError "+error);
+                console.log("ERROR:bin/elasticRestProxy:listIndexes/SendAuthRequestError " + error);
                 return callback(error);
             }
             console.log("DEBUG:bin/elasticRestProxy:listIndexes tryParseBody");

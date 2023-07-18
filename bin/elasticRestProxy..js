@@ -39,17 +39,14 @@ var elasticRestProxy = {
         }
     },
 
+    // send authenticated request if elasticsearch requires authentication
     sendAuthRequest: function (options, callback) {
-        if (ConfigManager.config.ElasticSearch) {
-            if (options.method == "POST") {
-                options.auth = {
-                    user: ConfigManager.config.ElasticSearch.user,
-                    password: ConfigManager.config.ElasticSearch.password,
-                };
-            } else {
-                const token = Buffer.from(ConfigManager.config.ElasticSearch.user + ":" + ConfigManager.config.ElasticSearch.password).toString("base64");
-                options.headers.Authorization = "Basic " + token;
-            }
+        const elasticConf = ConfigManager.config.ElasticSearch;
+        if (elasticConf && elasticConf.user && elasticConf.password) {
+            options.auth = {
+                user: ConfigManager.config.ElasticSearch.user,
+                password: ConfigManager.config.ElasticSearch.password,
+            };
         }
         process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
         console.log("DEBUG:bin/elasticRestProxy:sendAuthRequest" + JSON.stringify(options));
@@ -279,12 +276,6 @@ var elasticRestProxy = {
             },
             url: elasticUrl + "_cat/indices?format=json",
         };
-        if (ConfigManager.config.ElasticSearch) {
-            options.auth = {
-                user: ConfigManager.config.ElasticSearch.user,
-                password: ConfigManager.config.ElasticSearch.password,
-            };
-        }
         console.log("DEBUG:bin/elasticRestProxy:listIndexes");
         elasticRestProxy.sendAuthRequest(options, function (error, response, body) {
             if (error) {

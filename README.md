@@ -198,7 +198,13 @@ Run the config script to create a default configuration:
 node scripts/init_configs.js
 ```
 
-Then, edit the `config/*.json` to your needs.
+Then, edit the `config/*.json` to your needs or run the following
+script to copy the values from the docker-compose configuration
+into the `config/*.json` files.
+
+```bash
+node scripts/config_from_docker_compose.js
+```
 
 ### Start docker dependencies
 

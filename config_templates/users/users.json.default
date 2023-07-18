@@ -1,13 +1,11 @@
 {
-  "admin": {
-    "id": "admin",
-    "login": "admin",
-    "password": "admin",
-    "groups": [
-      "admin"
-    ],
-    "_type": "user",
-    "source": "json",
-    "name": "admin"
-  }
+    "admin": {
+        "id": "admin",
+        "login": "admin",
+        "password": "admin",
+        "groups": ["admin"],
+        "source": "json",
+        "_type": "user",
+        "name": "admin"
+    }
 }

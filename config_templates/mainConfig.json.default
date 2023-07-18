@@ -13,13 +13,7 @@
     "sentryDsnNode": "",
     "sentryDsnJsFront": "",
     "formalOntologySourceLabel": "",
-    "tools_available": [
-        "lineage",
-        "KGcreator",
-        "Standardizer",
-        "admin",
-        "ConfigEditor"
-    ],
+    "tools_available": ["lineage", "KGcreator", "Standardizer", "admin", "ConfigEditor"],
     "keycloak": {
         "realm": "master",
         "publicClient": false,
@@ -27,10 +21,7 @@
         "clientSecret": "xxx",
         "authServerURL": "https://xxx"
     },
-    "health_enabled_services": [
-        "virtuoso",
-        "elasticsearch"
-    ],
+    "health_enabled_services": ["virtuoso", "elasticsearch"],
     "SQLserver": {
         "user": "",
         "password": "",

@@ -69,8 +69,7 @@ module.exports = function() {
                         let objectId;
                         if (quad.object.termType === 'Literal') {
                             // Use double quotes for literal value and add datatype enclosed in <> if it starts with "http"
-                            objectId = `"${quad.object.value}"` + 
-                                (quad.object.datatype.value.startsWith('http') ? `^^<${quad.object.datatype.value}>` : '');
+                            objectId = `"${quad.object.value}"` + (quad.object.datatype.value.startsWith("http") ? `^^<${quad.object.datatype.value}>` : "");
                         } else if (quad.object.termType === 'NamedNode' && quad.object.value.startsWith('http')) {
                             // If it's a NamedNode (a URI) and it starts with "http", enclose it in <>
                             objectId = `<${quad.object.id}>`;
@@ -99,21 +98,20 @@ module.exports = function() {
                             if (err) return console.log("error");
                             sparqlServerUrl = result.default_sparql_url;
                         });
-                        if (req.body.options.deleteOldGraph){
+                        if (req.body.options.deleteTriples){
+                            console.log("graphURI"+req.body.options.graphUri)
                             CsvTripleBuilder.clearGraph(req.body.options.graphUri, sparqlServerUrl, function (err, _result) {
                                 console.log("graph deleted");
                             });
-                        }
-                        console.log(req.body.options.graphUri);
-                        console.log(sparqlServerUrl)
-                    
-                        CsvTripleBuilder.writeUniqueTriples(triples, req.body.options.graphUri, sparqlServerUrl, function(err, length) {
-                            if (err) {
-                                console.error("An error occurred:", err);
-                            } else {
-                                console.log("Successfully wrote", length, "triples");
-                            }
-                        });
+                        } else {
+                            CsvTripleBuilder.writeUniqueTriples(triples, req.body.options.graphUri, sparqlServerUrl, function (err, length) {
+                                if (err) {
+                                    console.error("An error occurred:", err);
+                                } else {
+                                    console.log("Successfully wrote", length, "triples");
+                                }
+                            });
+                    }
 
 
 

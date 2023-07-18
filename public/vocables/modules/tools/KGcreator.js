@@ -71,9 +71,8 @@ var KGcreator = (function () {
         "skos:Concept",
         "skos:Collection",
         "slsv:TopConcept",
-        "_function",
         "_blankNode",
-        "_blankNodeSubjectTriple",
+        "_blankNodeTripleMap",
         "",
         
     ];
@@ -1003,6 +1002,7 @@ var KGcreator = (function () {
     
         self.blankNodeList = [];
         self.usedTemplates = [];
+        self.tripleMap = []
     }
 
     self.validateTripleElements = function(subject, predicate, object, subjectLookupName, objectLookupName) {
@@ -1294,7 +1294,7 @@ var KGcreator = (function () {
                     rml += "   rr:predicateObjectMap [\n";
                     rml += `        rr:predicate ${predicate};\n`;
                     rml += "        rr:objectMap [\n";
-                        if (object === "_blankNodeSubjectTriple") {
+                        if (object === "_blankNodeTripleMap") {
                         
                             rml += `               rr:termType rr:BlankNode;\n`;
                             rml += `               rr:template "${template}";\n`;
@@ -1328,7 +1328,7 @@ var KGcreator = (function () {
                         rml += "   rr:predicateObjectMap [\n";
                         rml += `        rr:predicate ${predicate};\n`;
                         rml += "        rr:objectMap [\n";
-                        rml += `           rr:parentTriplesMap <#${lookupPair.objectLookupName}_${targetfileName}>;\n`;
+                        rml += `           rr:parentTriplesMap <#${lookupPair.objectLookupName}_${targetfileName}Mapping>;\n`;
                         rml += "           rr:joinCondition [\n";
                         rml += `              rr:child "${lookupPair.subjectLookupName}";\n`;
                         rml += `              rr:parent "${lookupPair.objectLookupName}"\n`;
@@ -1470,7 +1470,7 @@ self.showBlankNodeObjectModal = function () {
     self.handleGenerateRMLAddClick = function() {
         var object = $("#editPredicate_objectValue").val();
     
-        if (object.trim() === "_blankNodeSubjectTriple") {
+        if (object.trim() === "_blankNodeTripleMap") {
           
             self.showBlankNodeObjectModal();
         } else {
@@ -1478,7 +1478,7 @@ self.showBlankNodeObjectModal = function () {
         }
     }
 
-    self.createRDFTriples = function (test) {
+    self.createRDFTriples = function (test, _options) {
         $("#KGcreator_dataSampleDiv").val("creating triples...");
         if (!self.currentJsonObject) {
             return;
@@ -1526,6 +1526,10 @@ self.showBlankNodeObjectModal = function () {
                 graphUri 
             };
         }
+        if (_options && _options.deleteTriples) {
+            options.deleteTriples = true;
+        }
+
         var dataToSend = {
             rml: rml,
             sources: [{
@@ -1882,19 +1886,20 @@ self.saveRMLMappings = function () {
             });
         });
     };
-    self.clearRML = function () {
-        if (confirm("Clear RML textarea")) {
-            $("#rmlTextarea").val("");
-            self.subjects = {};
-            self.subjectList = []; 
-        }
-    };
+
     
 
     self.clearMappings = function () {
         if (confirm("Clear mappings")) {
-            self.mainJsonEditor.load({});
-            self.mainJsonEditorModified = false;
+            $("#rmlTextarea").val("");
+            self.subjects = {};
+            self.subjectList = []; 
+            self.blankNodeList = [];
+            self.blankNodeCounter = 1;
+            self.blankNodeTemplates = {};
+            self.usedTemplates = []; 
+            self.tripleMap = []
+
         }
     };
 
@@ -2095,7 +2100,16 @@ self.saveRMLMappings = function () {
             return;
         } //alert("no file mappings selected");
         if (!self.currentJsonObject.graphUri) {
-            return alert("no graphUri");
+            var graphUri = "";
+            if (self.currentGraphUri) {
+                graphUri = self.currentGraphUri;
+            }
+            graphUri = prompt("enter graphUri", graphUri);
+            if (!graphUri) {
+                return;
+            }
+            self.currentGraphUri = graphUri;
+            self.currentJsonObject.graphUri = graphUri;
         }
 
         if (!confirm("Do you really want to clear graph " + self.currentJsonObject.graphUri)) {
@@ -2119,15 +2133,14 @@ self.saveRMLMappings = function () {
     self.deleteKGcreatorTriples = function (deleteAllGraph) {
         if (!self.currentJsonObject) {
             return;
-        } //alert("no file mappings selected");
-        if (!self.currentJsonObject.graphUri) {
-            return alert("no graphUri");
         }
 
         if (deleteAllGraph) {
+
             if (!confirm("Do you really want to delete  triples created with KGCreator in " + self.currentJsonObject.graphUri)) {
                 return;
             }
+            
 
             var filter = "?p =<http://purl.org/dc/terms/creator> && ?o='KGcreator'";
             Sparql_generic.deleteTriplesWithFilter(self.currentSlsvSource, filter, function (err, result) {
@@ -2140,7 +2153,11 @@ self.saveRMLMappings = function () {
             if (!confirm("Do you really want to delete  triples created with KGCreator in " + self.currentJsonObject.fileName)) {
                 return;
             }
-            self.createTriples(false, { deleteTriples: true });
+            self.createRDFTriples(false, { deleteTriples: true });
+            console.log(graphUri)
+
+            alert("triples deleted");
+
         }
     };
 

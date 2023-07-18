@@ -258,10 +258,9 @@ indexes.push(source.toLowerCase());
             size = 10000;
         }
 
-        var indexes=null;
-        if(index)
-            indexes=index
-        else indexes="*"
+        var indexes = null;
+        if (index) indexes = index;
+        else indexes = "*";
 
         if (_ids) {
             var slices = common.array.slice(_ids, 100);
@@ -270,7 +269,7 @@ indexes.push(source.toLowerCase());
                 slices,
                 function (ids, callbackEach) {
                     var str = "";
-                    var header =  { "index":indexes };
+                    var header = { index: indexes };
 
                     ids.forEach(function (id) {
                         var query = {
@@ -279,7 +278,7 @@ indexes.push(source.toLowerCase());
                                     "id.keyword": id,
                                 },
                             },
-                            _source:"label"
+                            _source: "label",
                         };
                         str += JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
                     });

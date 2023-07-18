@@ -18,7 +18,7 @@ var Config = (function () {
     if (location.hostname == "localhost") {
         self.logSparqlQueries = true;
     }
-    self.labelsGraphUri="http://souslesens.org/vocables/resource/labels/"
+    self.labelsGraphUri = "http://souslesens.org/vocables/resource/labels/";
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/";
 
     self.defaultNewUriRoot = "http://souslesens.org/resource/";
@@ -28,7 +28,6 @@ var Config = (function () {
     self.loginMode = "json";
 
     self.appName = "VOCABLES";
-
 
     self.debug = { query: 1 };
     self.enableCollections = false;
@@ -145,7 +144,7 @@ var Config = (function () {
             "lineage_actionDiv_equivClass",
             "lineage_actionDiv_linkedData",
             //"lineage_actionDiv_reasoner",
-          //  "lineage_actionDiv_rules",
+            //  "lineage_actionDiv_rules",
             "lineage_actionDiv_newAxiom",
             //"lineage_actionDiv_clearLast",
             // "lineage_actionDiv_last"

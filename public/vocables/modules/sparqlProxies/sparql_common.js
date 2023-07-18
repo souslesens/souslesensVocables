@@ -493,8 +493,6 @@ var Sparql_common = (function () {
         return null;
     };
 
-
-
     return self;
 })();
 

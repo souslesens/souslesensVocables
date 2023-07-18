@@ -181,32 +181,28 @@ var Lineage_blend = (function () {
                                 }
                                 authorizedProps = result.constraints;
 
-                                var html="Ancestors<br>"
-                                var str="<b>"+ self.sourceNode.label+"</b>"
-                                result. nodes.startNode.forEach(function(item, index){
-                                    str+="->"
-                                    str+=Sparql_common.getLabelFromURI(item)
-                                })
-                                html+=str;
-                                html+="<br>"
-                                var str="<b>"+ self.targetNode.label+"</b>"
-                                result. nodes.endNode.forEach(function(item, index){
-                                    str+="->"
-                                    str+=Sparql_common.getLabelFromURI(item)
-                                })
-                                html+=str;
-                                $("#lineageAddEdgeDialog_nodesAncestorsDiv").html(html)
+                                var html = "Ancestors<br>";
+                                var str = "<b>" + self.sourceNode.label + "</b>";
+                                result.nodes.startNode.forEach(function (item, index) {
+                                    str += "->";
+                                    str += Sparql_common.getLabelFromURI(item);
+                                });
+                                html += str;
+                                html += "<br>";
+                                var str = "<b>" + self.targetNode.label + "</b>";
+                                result.nodes.endNode.forEach(function (item, index) {
+                                    str += "->";
+                                    str += Sparql_common.getLabelFromURI(item);
+                                });
+                                html += str;
+                                $("#lineageAddEdgeDialog_nodesAncestorsDiv").html(html);
 
                                 return callbackSeries();
                             });
                         },
                         function (callbackSeries) {
-
-                                return callbackSeries();
-
+                            return callbackSeries();
                         },
-
-
 
                         function (callbackSeries) {
                             var sources = [source];

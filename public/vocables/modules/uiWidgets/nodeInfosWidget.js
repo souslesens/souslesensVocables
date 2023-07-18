@@ -15,7 +15,7 @@ import Lineage_sources from "../tools/lineage/lineage_sources.js";
 var NodeInfosWidget = (function () {
     var self = {};
 
-    self.initDialog = function (sourceLabel, divId,options, callback) {
+    self.initDialog = function (sourceLabel, divId, options, callback) {
         self.currentSource = sourceLabel;
         if (!options.noDialog) {
             $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
@@ -66,7 +66,7 @@ var NodeInfosWidget = (function () {
             self.currentSource = sourceLabel;
         }
         Lineage_axioms_draw.currentSource = sourceLabel;
-      /*  if (!node ) {
+        /*  if (!node ) {
             self.initDialog(sourceLabel, divId,options function () {
 
                 //   self.showNodeInfosToolbar(options);
@@ -123,7 +123,7 @@ var NodeInfosWidget = (function () {
             self.visitedNodes.currentIndex = index;
         }
 
-        self.initDialog(sourceLabel, divId, options,function () {
+        self.initDialog(sourceLabel, divId, options, function () {
             if (true || !options.showAxioms) {
                 self.drawAllInfos(sourceLabel, nodeId, options, function (err, result) {
                     if (callback) {

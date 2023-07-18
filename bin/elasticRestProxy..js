@@ -39,8 +39,7 @@ var elasticRestProxy = {
         }
     },
 
-    // send authenticated request if elasticsearch requires authentication
-    sendAuthRequest: function (options, callback) {
+    forwardRequest: function (options, callback) {
         const elasticConf = ConfigManager.config.ElasticSearch;
         if (elasticConf && elasticConf.user && elasticConf.password) {
             options.auth = {
@@ -49,9 +48,9 @@ var elasticRestProxy = {
             };
         }
         process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
-        console.log("DEBUG:bin/elasticRestProxy:sendAuthRequest" + JSON.stringify(options));
+        console.log("DEBUG:bin/elasticRestProxy:forwardRequest" + JSON.stringify(options));
         request(options, function (error, response, body) {
-            console.log("DEBUG:bin/elasticRestProxy:sendAuthRequest\n  error=" + error + "\n  reponse=" + response + "\n  body " + body);
+            console.log("DEBUG:bin/elasticRestProxy:forwardRequest\n  error=" + error + "\n  reponse=" + response + "\n  body " + body);
             return callback(error, response, body);
         });
     },
@@ -88,7 +87,7 @@ var elasticRestProxy = {
             url: url,
         };
 
-        elasticRestProxy.sendAuthRequest(options, function (error, response, body) {
+        elasticRestProxy.forwardRequest(options, function (error, response, body) {
             if (error) {
                 return callback(error);
             }
@@ -125,7 +124,7 @@ var elasticRestProxy = {
         };
 
         //   console.log(ndjson);
-        elasticRestProxy.sendAuthRequest(options, function (error, response, _body) {
+        elasticRestProxy.forwardRequest(options, function (error, response, _body) {
             if (error) {
                 return callback(error, null);
             }
@@ -186,7 +185,7 @@ var elasticRestProxy = {
             },
             url: config.indexation.elasticUrl + config.general.indexName + "/_refresh",
         };
-        elasticRestProxy.sendAuthRequest(options, function (error, _response, _body) {
+        elasticRestProxy.forwardRequest(options, function (error, _response, _body) {
             if (error) {
                 return callback(error);
             }
@@ -209,7 +208,7 @@ var elasticRestProxy = {
             json: json,
             url: elasticUrl + "_analyze",
         };
-        elasticRestProxy.sendAuthRequest(options, function (error, response, body) {
+        elasticRestProxy.forwardRequest(options, function (error, response, body) {
             if (error) {
                 return callback(error);
             }
@@ -230,7 +229,7 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + indexName + "/",
                     };
-                    elasticRestProxy.sendAuthRequest(options, function (error, response, _body) {
+                    elasticRestProxy.forwardRequest(options, function (error, response, _body) {
                         if (error) {
                             return callbackSeries(error);
                         }
@@ -254,7 +253,7 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + indexName,
                     };
-                    elasticRestProxy.sendAuthRequest(options, function (error, _response, _body) {
+                    elasticRestProxy.forwardRequest(options, function (error, _response, _body) {
                         if (error) {
                             return callbackSeries(error);
                         }
@@ -277,7 +276,7 @@ var elasticRestProxy = {
             url: elasticUrl + "_cat/indices?format=json",
         };
         console.log("DEBUG:bin/elasticRestProxy:listIndexes");
-        elasticRestProxy.sendAuthRequest(options, function (error, response, body) {
+        elasticRestProxy.forwardRequest(options, function (error, response, body) {
             if (error) {
                 console.log("ERROR:bin/elasticRestProxy:listIndexes/SendAuthRequestError " + error);
                 return callback(error);
@@ -399,7 +398,7 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + indexName,
                     };
-                    elasticRestProxy.sendAuthRequest(requestOptions, function (error, _response, _body) {
+                    elasticRestProxy.forwardRequest(requestOptions, function (error, _response, _body) {
                         if (error) {
                             return callbackSeries(error);
                         }
@@ -417,7 +416,7 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl,
                     };
-                    elasticRestProxy.sendAuthRequest(requestOptions, function (error, _response, _body) {
+                    elasticRestProxy.forwardRequest(requestOptions, function (error, _response, _body) {
                         if (error) {
                             return callbackSeries(error);
                         }
@@ -455,7 +454,7 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + "_bulk?refresh=wait_for",
                     };
-                    elasticRestProxy.sendAuthRequest(requestOptions, function (error, response, body) {
+                    elasticRestProxy.forwardRequest(requestOptions, function (error, response, body) {
                         if (error) {
                             return callbackSeries(error);
                         }

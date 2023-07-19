@@ -215,7 +215,7 @@ var MainController = (function () {
 
                     function (callbackSeries) {
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
-                        return callbackSeries();
+                       // return callbackSeries();
 
                         OntologyModels.registerSourcesModel(sources, function (err) {
                             callbackSeries(err);

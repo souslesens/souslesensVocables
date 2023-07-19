@@ -6,7 +6,7 @@ import Lineage_sources from "../tools/lineage/lineage_sources.js";
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
 
- Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modifUNDEF valuesy, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
@@ -149,7 +149,7 @@ var Sparql_common = (function () {
                         return;
                     }
                     if (conceptIdsStr != "") {
-                        conceptIdsStr += options.useFilterKeyWord ? "," : " ";
+                        conceptIdsStr += (true||options.useFilterKeyWord) ? "," : " ";
                     }
 
                     id = "" + id;
@@ -163,10 +163,10 @@ var Sparql_common = (function () {
                 if (conceptIdsStr == "") {
                     return "";
                 }
-                if (options.useFilterKeyWord) {
+                if (true || options.useFilterKeyWord) {
                     filters.push(" FILTER( ?" + varName + " in (" + conceptIdsStr + "))");
                 } else {
-                    filters.push(" VALUES ?" + varName + "{" + conceptIdsStr + "}");
+                    filters.push(" VALUES ?" + varName + "{  "  + conceptIdsStr + "}");
                 }
             } else {
                 return "";

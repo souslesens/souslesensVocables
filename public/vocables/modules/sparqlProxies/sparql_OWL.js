@@ -382,6 +382,7 @@ var Sparql_OWL = (function () {
         if (options.getValuesLabels) {
             query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} ";
         }
+        if(query.excludeBlankNodes)
         query += "    filter( !isBlank(?value))";
         query += "}";
 
@@ -622,9 +623,12 @@ var Sparql_OWL = (function () {
         query += "} LIMIT 1000";
 
         var url = self.sparql_url + "?format=json&query=";
-        self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
-        if (self.no_params) {
-            url = self.sparql_url;
+        self.no_params = true
+        if(Config.sources[sourceLabel]) {
+            self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
+            if (self.no_params) {
+                url = self.sparql_url;
+            }
         }
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
             if (err) {

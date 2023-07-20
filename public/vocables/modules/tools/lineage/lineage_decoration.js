@@ -24,7 +24,7 @@ var Lineage_decoration = (function () {
         var nonTopLevelOntologynodeIds = [];
         var topLevelOntologynodeIds = [];
         var individualNodes = {};
-        if (!visjsNodes) {
+        if (true || !visjsNodes) {
             visjsNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
         }
 
@@ -41,28 +41,70 @@ var Lineage_decoration = (function () {
         var legendJsTreeData = [];
         var legendClassesMap = {};
         var newVisJsNodes = [];
+        var uniqueLegendJsTreeDataNodes={}
 
-        function getNodeColorInLegend(ancestorNode, parent) {
-            var color = legendClassesMap[ancestorNode.superClass.value];
-            if (!color) {
-                for (var key in Config.topLevelOntologyFixedlegendMap) {
-                    if (!Config.topLevelOntologyFixedlegendMap[key]) {
-                        return Lineage_classes.getSourceColor(key);
+        function getNodeColorInLegend(ancestors ) {
+
+            function getColor(ancestorNode,parent) {
+
+                var color = legendClassesMap[ancestorNode.superClass.value];
+                if (!color) {
+                    for (var key in Config.topLevelOntologyFixedlegendMap) {
+                        if(!color) {
+                            if (!Config.topLevelOntologyFixedlegendMap[key]) {
+                                return Lineage_classes.getSourceColor(key);
+                            }
+                            color = Config.topLevelOntologyFixedlegendMap[key][ancestorNode.class.value];
+                             if (!color) {
+                                  color = Config.topLevelOntologyFixedlegendMap[key][ancestorNode.superClass.value];
+                              }
+                        }
                     }
-                    color = Config.topLevelOntologyFixedlegendMap[key][ancestorNode.superClass.value];
-                    if (!color) {
-                        color = Lineage_classes.getSourceColor(ancestorNode.superClass.value);
+
+                    if(color){
+                        legendClassesMap[ancestorNode.superClass.value]=color
+                        if(!uniqueLegendJsTreeDataNodes[ancestorNode.superClass.value]) {
+                            uniqueLegendJsTreeDataNodes[ancestorNode.superClass.value]=1
+                            var label = ancestorNode.superClassLabel ? ancestorNode.superClassLabel.value : Sparql_common.getLabelFromURI(ancestorNode.superClass.value);
+                            legendJsTreeData.push({
+                                id: ancestorNode.superClass.value,
+                                text: "<span  style='font-size:10px;background-color:" + color + "'>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;" + label,
+                                parent: parent,
+                                color: color,
+                            });
+                        }
                     }
+
+
                 }
-                var label = ancestorNode.superClassLabel ? ancestorNode.superClassLabel.value : Sparql_common.getLabelFromURI(ancestorNode.superClass.value);
-                legendJsTreeData.push({
-                    id: ancestorNode.superClass.value,
-                    text: "<span  style='font-size:10px;background-color:" + color + "'>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;" + label,
-                    parent: parent,
-                    color: color,
-                });
-                legendClassesMap[ancestorNode.superClass.value] = color;
+
+                return color;
+
             }
+
+            var  color=null;
+            for(var i= ancestors.length-1;i>-1;i--) {
+                var parent="#"
+                if(i!=ancestors.length-1)
+                    parent=ancestors[i+1].class.value
+
+
+                if (!color) {
+                    color = getColor(ancestors[i])
+                    if (!color) {
+                        if (i < ancestors.length-1 )
+                             color = getColor(ancestors[i + 1])
+
+
+                    }
+
+                    /*   if( !color){
+                           color=legendClassesMap[ancestors[i].superClass.value]
+
+                       }*/
+                }
+            }
+
             return color;
         }
 
@@ -70,27 +112,36 @@ var Lineage_decoration = (function () {
             [
                 // get nodes Classes
                 function (callbackSeries) {
-                    Sparql_OWL.getNodesAncestors(Lineage_sources.activeSource, nodeIds, { excludeItself: 0 }, function (err, result) {
+
+                var slices=common.array.slice(nodeIds,Config.slicedArrayLength)
+                async.eachSeries(slices,function(slice,callbackEach) {
+                    Sparql_OWL.getNodesAncestors(Lineage_sources.activeSource, slice, { excludeItself: 0 }, function(err, result) {
                         if (err) {
-                            return callbackSeries(err);
+                            return callbackEach(err);
                         }
-                        hierarchies = result.hierarchies;
-                        callbackSeries();
+                        for (var key in result.hierarchies){
+                            hierarchies[key]=result.hierarchies[key];
+                        }
+                        callbackEach();
                     });
+                },function(err){
+                    callbackSeries();
+                })
                 },
                 //get each node color in legend
+
                 function (callbackSeries) {
+                var uniqueNewVisJsNodes={}
                     for (var nodeId in hierarchies) {
                         var ancestors = hierarchies[nodeId];
-                        ancestors.forEach(function (ancestor, index) {
-                            var parent = "#";
-                            if (index < ancestors.length - 1) {
-                                parent = ancestors[index + 1].superClass.value;
-                            }
-                            var color = getNodeColorInLegend(ancestor, parent);
-                            newVisJsNodes.push({ id: ancestor.class.value, color: color });
-                        });
+                        var color = getNodeColorInLegend(ancestors,);
+                        newVisJsNodes.push({ id: nodeId, color: color });
                     }
+
+
+
+
+
                     callbackSeries();
                 },
                 //change vijsNodes Color

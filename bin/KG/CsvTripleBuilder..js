@@ -300,6 +300,8 @@ var CsvTripleBuilder = {
                                                         var lineError = "";
                                                         var blankNode_cellMap = {};
                                                         mapping.tripleModels.forEach(function (item) {
+
+
                                                             for (var key in line) {
                                                                 line[key] = "" + line[key];
                                                                 if (line[key] && !CsvTripleBuilder.isUri(line[key])) {
@@ -312,6 +314,9 @@ var CsvTripleBuilder = {
 
                                                             //get value for Subject
                                                             {
+
+
+
                                                                 if (item.s_type == "fixed") {
                                                                     subjectStr = item.s;
                                                                 } else if (typeof item.s === "function") {
@@ -321,6 +326,9 @@ var CsvTripleBuilder = {
                                                                         return (lineError = e);
                                                                     }
                                                                 } else if (item.isSubjectBlankNode) {
+                                                                    if(!line[item.s] || !line[item.o])
+                                                                        return;
+
                                                                     var blankNode = blankNode_cellMap[item.s];
                                                                     if (!blankNode) {
                                                                         blankNode = getNewBlankNodeId();
@@ -371,6 +379,8 @@ var CsvTripleBuilder = {
                                                                 if (item.o_type == "fixed") {
                                                                     objectStr = item.o;
                                                                 } else if (item.isObjectBlankNode) {
+                                                                    if(!line[item.s] || !line[item.o])
+                                                                        return;
                                                                     var blankNode = blankNode_cellMap[item.o];
                                                                     if (!blankNode) {
                                                                         blankNode = getNewBlankNodeId();
@@ -391,6 +401,8 @@ var CsvTripleBuilder = {
                                                                         return (lineError = e);
                                                                     }
                                                                 } else if (item.o === "_blankNode") {
+                                                                    if(!line[item.s] || !line[item.o])
+                                                                        return;
                                                                     currentBlankNode = currentBlankNode || getNewBlankNodeId();
                                                                     objectStr = currentBlankNode;
                                                                 } else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {

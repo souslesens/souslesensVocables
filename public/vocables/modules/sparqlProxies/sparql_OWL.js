@@ -620,6 +620,7 @@ var Sparql_OWL = (function () {
             query += "OPTIONAL {?class rdfs: label classLabel }OPTIONAL {?subClass rdfs: label subClassLabel } OPTIONAL {?superClass rdfs: label superClassLabel }";
         }
         query += filterStr;
+
         query += "} LIMIT 1000";
 
         var url = self.sparql_url + "?format=json&query=";
@@ -739,11 +740,10 @@ var Sparql_OWL = (function () {
             if (options.filter) {
                 query += " " + options.filter;
             }
-            if (!(options.filter && options.filter.indexOf("?object") < 0)) {
+          if (!(options.filter && options.filter.indexOf("?object") > -1)) {
                 query += " filter (!isLiteral(?object) )";
 
-                /*   query += " filter (?subjectType in (owl:NamedIndividual, owl:Class))";
-query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
+
             }
             query += " } order by ?propLabel ";
             var limit = options.limit || Config.queryLimit;
@@ -1499,7 +1499,11 @@ query += " filter (?objectType in (owl:NamedIndividual, owl:Class))";*/
         if (options.filter && options.filter.indexOf("?label") > -1) {
             optionalLabel = "";
         }
-        query += "{ ?id rdf:type ?type. " + typeFilterStr + " " + optionalLabel + " {?id rdfs:label ?label " + langFilter + "}" + filter + " }}";
+       var skosPrefLabel=""
+        if(options.skosPrefLabel)
+            skosPrefLabel="OPTIONAL {?id skos:prefLabel ?skosPrefLabel}"
+
+              query += "{ ?id rdf:type ?type. " + typeFilterStr + " " + optionalLabel + " {?id rdfs:label ?label " + langFilter + "}" + filter + " }"+skosPrefLabel+"}";
 
         var allData = [];
         var resultSize = 1;

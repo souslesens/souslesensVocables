@@ -358,7 +358,7 @@ indexes.push(source.toLowerCase());
                         must: {
                             query_string: {
                                 query: word,
-                                fields: ["label", "skoslabel"],
+                                fields: ["label", "skoslabels"],
                             },
                         },
                         // ,
@@ -557,10 +557,11 @@ indexes.push(source.toLowerCase());
                                         parents = [item.type2.value, sourceLabel];
                                     }
 
+                                    var skosLabel=item.skosPrefLabel?item.skosPrefLabel.value:null;
                                     individualsToIndex.push({
                                         id: item.id.value,
                                         label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value),
-                                        skoslabels: [],
+                                        skoslabels: [skosLabel],
                                         parent: parent,
                                         parents: parents,
                                         type: item.type2.value,
@@ -585,7 +586,7 @@ indexes.push(source.toLowerCase());
                             };
 
                             var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
-                            Sparql_OWL.getDictionary(sourceLabel, { filter: filter, processorFectchSize: 100 }, processor, function (err, result) {
+                            Sparql_OWL.getDictionary(sourceLabel, { filter: filter, processorFectchSize: 100,skosPrefLabel:true }, processor, function (err, result) {
                                 return callbackSeries(err);
                             });
                         },

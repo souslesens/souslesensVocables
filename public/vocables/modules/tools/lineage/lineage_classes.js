@@ -591,22 +591,22 @@ var Lineage_classes = (function() {
     };
 
     if (_options.layout) {
-      options.layout = _options.layout;
+      options.visjsOptions.layout = _options.layout;
     }
     if (_options.layoutHierarchical) {
-      options.layoutHierarchical = _options.layoutHierarchical;
+      options.visjsOptions.layoutHierarchical = _options.layoutHierarchical;
     }
 
     if (_options.physics) {
-      options.physics = _options.physics;
+      options.visjsOptions.physics = _options.physics;
     }
     if (_options.edges) {
-      options.edges = _options.edges;
+      options.visjsOptions.edges = _options.edges;
     }
 
     if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
       // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
-      options.manipulation = {
+      options.visjsOptions.manipulation = {
         enabled: true,
         initiallyActive: true,
         deleteNode: false,
@@ -654,7 +654,7 @@ var Lineage_classes = (function() {
         }
       };
       if (false) {
-        options.interaction = {
+        options.visjsOptions.interaction = {
           navigationButtons: true
         };
       }

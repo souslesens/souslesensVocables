@@ -214,6 +214,7 @@ var MainController = (function () {
                     },
 
                     function (callbackSeries) {
+
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
                        // return callbackSeries();
 

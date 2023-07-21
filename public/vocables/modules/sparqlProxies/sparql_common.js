@@ -149,7 +149,7 @@ var Sparql_common = (function () {
                         return;
                     }
                     if (conceptIdsStr != "") {
-                        conceptIdsStr += (true||options.useFilterKeyWord) ? "," : " ";
+                        conceptIdsStr += (options.useFilterKeyWord) ? "," : " ";
                     }
 
                     id = "" + id;
@@ -163,7 +163,7 @@ var Sparql_common = (function () {
                 if (conceptIdsStr == "") {
                     return "";
                 }
-                if (true || options.useFilterKeyWord) {
+                if ( options.useFilterKeyWord) {
                     filters.push(" FILTER( ?" + varName + " in (" + conceptIdsStr + "))");
                 } else {
                     filters.push(" VALUES ?" + varName + "{  "  + conceptIdsStr + "}");

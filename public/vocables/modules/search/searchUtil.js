@@ -334,6 +334,7 @@ indexes.push(source.toLowerCase());
             if (word.indexOf && word.indexOf("http://") == 0) {
                 field = "id.keyword";
             }
+          //  word=word.toLowerCase()
             var queryObj;
             if (!mode || mode == "exactMatch") {
                 queryObj = {

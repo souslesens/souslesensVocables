@@ -141,7 +141,7 @@ var Config = (function () {
 
     self.Lineage = {
         disabledButtons: [
-            "lineage_actionDiv_similars",
+           // "lineage_actionDiv_similars",
             "lineage_actionDiv_equivClass",
             "lineage_actionDiv_linkedData",
             //"lineage_actionDiv_reasoner",
@@ -248,6 +248,9 @@ var Config = (function () {
             "http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject": "#70AC47",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Activity": "#70309f",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#70309f",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Prescriptive": "#703011",
+
+
         },
         "ISO_15926-part-14_PCA": {
             "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#F90EDD",

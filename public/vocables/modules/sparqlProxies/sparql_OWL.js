@@ -668,7 +668,48 @@ var Sparql_OWL = (function () {
         });
     };
 
-    /**
+
+
+    self.getNodesTypesMap=function (sourceLabel, ids, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        if (!Array.isArray(ids)) {
+            ids = [ids];
+        }
+        var filterStr = Sparql_common.setFilter("id", ids);
+
+        var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
+
+        var query =
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+          "select ?id (GROUP_CONCAT( distinct ?type;separator=\";;\")as ?types)   " + fromStr + " where" +
+          " { ?id rdf:type  ?type " + filterStr+
+          " }" +
+          "GROUP  BY ?id " +
+          "limit 10000"
+
+        var url = self.sparql_url + "?format=json&query=";
+        self.no_params = true
+        if (Config.sources[sourceLabel]) {
+            self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
+            if (self.no_params) {
+                url = self.sparql_url;
+            }
+        }
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var map={}
+            result.results.bindings.forEach(function(item){
+                map[item.id.value]=item.types.value
+            })
+            return callback(null,map)
+        })
+    }
+
+            /**
      *
      *
      * query triples fitered by subjectIds and/or propertyIds and/or objectIds

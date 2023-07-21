@@ -295,6 +295,8 @@ var OntologyModels = (function () {
                                     classes.push(constraint.range);
                                 }
                             }
+                            if(classes.length==0)
+                                return callbackSeries()
                             Sparql_OWL.getLabelsMapFromLabelsGraph(classes, function (err, labelsMap) {
                                 if (err) {
                                     return callbackSeries(err);

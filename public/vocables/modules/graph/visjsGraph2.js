@@ -122,18 +122,7 @@ var visjsGraph = (function () {
             }
         }
 
-        // self.network.startSimulation()
 
-        /*  window.setTimeout(function () {
-            return;
-            // if (!_options.layoutHierarchical) {
-            //     if (!self.network.stopSimulation) return;
-            //     self.network.stopSimulation();
-            //     if (!_options.noFit) self.network.fit();
-            //     self.simulationOn = false;
-            //     if (_options.afterDrawing) _options.afterDrawing();
-            // }
-        }, self.simulationTimeOut);*/
 
         self.network.on("afterDrawing", function (/** @type {any} */ _params) {
             self.drawingDone = true;

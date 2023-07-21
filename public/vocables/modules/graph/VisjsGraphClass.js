@@ -99,7 +99,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
 
         self.globalOptions = options;
-        self.network = new vis.Network(container, self.data, options);
+        self.network = new vis.Network(container, self.data, options.visjsOptions);
         self.simulationOn = true;
 
         // self.network.startSimulation()

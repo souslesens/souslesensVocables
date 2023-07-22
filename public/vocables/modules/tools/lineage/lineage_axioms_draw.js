@@ -597,19 +597,19 @@ common.fillSelectOptions("axiomsDraw_otherSourcesSelect",otherSources)*/
             /* physics: {
 enabled:true},*/
 
-                layoutHierarchical: {
-                    direction: "LR",
-                    sortMethod: "hubsize",
-                    //  sortMethod:"directed",
-                    //    shakeTowards:"roots",
-                    //  sortMethod:"directed",
-                    levelSeparation: xOffset,
-                    parentCentralization: true,
-                    shakeTowards: true,
-                    blockShifting: true,
+            layoutHierarchical: {
+                direction: "LR",
+                sortMethod: "hubsize",
+                //  sortMethod:"directed",
+                //    shakeTowards:"roots",
+                //  sortMethod:"directed",
+                levelSeparation: xOffset,
+                parentCentralization: true,
+                shakeTowards: true,
+                blockShifting: true,
 
-                    nodeSpacing: yOffset,
-                },
+                nodeSpacing: yOffset,
+            },
             visjsOptions: {
                 edges: {
                     smooth: {

@@ -103,8 +103,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.network = new vis.Network(container, self.data, options.visjsOptions);
         self.simulationOn = true;
 
-
-
         self.network.on("afterDrawing", function (/** @type {any} */ _params) {
             self.drawingDone = true;
         });

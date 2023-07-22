@@ -212,38 +212,31 @@ $("#sourceDivControlPanelDiv").html(html);*/
         }
     };
 
-    self.clearOntologyModelCache=function(){
+    self.clearOntologyModelCache = function () {
         var sources = SourceSelectorWidget.getCheckedSources();
         var source;
         if (sources.length == 0) {
-           if(! confirm ("clear all ontologyModel cache"))
-               return;
-           else
-               source=null;
-
-        }
-        else
-            source=sources[0]
+            if (!confirm("clear all ontologyModel cache")) return;
+            else source = null;
+        } else source = sources[0];
         const params = new URLSearchParams({
-            source: source
+            source: source,
         });
 
-        var x= params.toString()
+        var x = params.toString();
         $.ajax({
             type: "DELETE",
-            url: Config.apiUrl+"/ontologyModels?" + params.toString(),
+            url: Config.apiUrl + "/ontologyModels?" + params.toString(),
             dataType: "json",
 
-            success: function(data, _textStatus, _jqXHR) {
-                return MainController.UI.message("DONE")
-
-            }, error: function(err) {
+            success: function (data, _textStatus, _jqXHR) {
+                return MainController.UI.message("DONE");
+            },
+            error: function (err) {
                 return alert(err);
-
-            }
+            },
         });
-
-    }
+    };
 
     self.exportTaxonomyToCsv = function (_rootUri) {
         var sources = SourceSelectorWidget.getCheckedSources();

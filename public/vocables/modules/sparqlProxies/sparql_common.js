@@ -149,7 +149,7 @@ var Sparql_common = (function () {
                         return;
                     }
                     if (conceptIdsStr != "") {
-                        conceptIdsStr += (options.useFilterKeyWord) ? "," : " ";
+                        conceptIdsStr += options.useFilterKeyWord ? "," : " ";
                     }
 
                     id = "" + id;
@@ -163,10 +163,10 @@ var Sparql_common = (function () {
                 if (conceptIdsStr == "") {
                     return "";
                 }
-                if ( options.useFilterKeyWord) {
+                if (options.useFilterKeyWord) {
                     filters.push(" FILTER( ?" + varName + " in (" + conceptIdsStr + "))");
                 } else {
-                    filters.push(" VALUES ?" + varName + "{  "  + conceptIdsStr + "}");
+                    filters.push(" VALUES ?" + varName + "{  " + conceptIdsStr + "}");
                 }
             } else {
                 return "";
@@ -416,7 +416,7 @@ var Sparql_common = (function () {
                 options.includeSources = [options.includeSources];
             }
             options.includeSources.forEach(function (source) {
-                if( Config.sources[source] && Config.sources[source].graphUri) {
+                if (Config.sources[source] && Config.sources[source].graphUri) {
                     var importGraphUri = Config.sources[source].graphUri;
                     if (fromStr.indexOf(importGraphUri) < 0) {
                         fromStr += from + "  <" + importGraphUri + "> ";

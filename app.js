@@ -19,7 +19,6 @@ const Sentry = require("@sentry/node");
 const { userModel } = require("./model/users");
 const { profileModel } = require("./model/profiles");
 
-
 // sentry/glitchtip
 if (config.sentryDsnNode) {
     Sentry.init({ dsn: config.sentryDsnNode });
@@ -30,7 +29,7 @@ if (config.sentryDsnNode) {
 app.use(express.json());
 //app.use(express.urlencoded({ extended: true }));
 //ajout CF
-app.use(express.urlencoded({ extended: true, limit: '20mb', parameterLimit: 10000 }));
+app.use(express.urlencoded({ extended: true, limit: "20mb", parameterLimit: 10000 }));
 /*
 const bodyParser = require('body-parser');
 app.use(bodyParser.json({
@@ -42,7 +41,6 @@ app.use(bodyParser.urlencoded({
     parameterLimit: 100000,
     extended: true
 }));*/
-
 
 app.use(fileUpload());
 

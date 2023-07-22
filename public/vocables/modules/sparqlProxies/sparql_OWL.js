@@ -382,8 +382,7 @@ var Sparql_OWL = (function () {
         if (options.getValuesLabels) {
             query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} ";
         }
-        if(query.excludeBlankNodes)
-        query += "    filter( !isBlank(?value))";
+        if (query.excludeBlankNodes) query += "    filter( !isBlank(?value))";
         query += "}";
 
         if (options.inverseProperties) {
@@ -624,8 +623,8 @@ var Sparql_OWL = (function () {
         query += "} LIMIT 1000";
 
         var url = self.sparql_url + "?format=json&query=";
-        self.no_params = true
-        if(Config.sources[sourceLabel]) {
+        self.no_params = true;
+        if (Config.sources[sourceLabel]) {
             self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
             if (self.no_params) {
                 url = self.sparql_url;
@@ -668,9 +667,7 @@ var Sparql_OWL = (function () {
         });
     };
 
-
-
-    self.getNodesTypesMap=function (sourceLabel, ids, options, callback) {
+    self.getNodesTypesMap = function (sourceLabel, ids, options, callback) {
         if (!options) {
             options = {};
         }
@@ -682,34 +679,37 @@ var Sparql_OWL = (function () {
         var fromStr = Sparql_common.getFromStr(sourceLabel, false, options.withoutImports, true);
 
         var query =
-          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
-          "select ?id (GROUP_CONCAT( distinct ?type;separator=\";;\")as ?types)   " + fromStr + " where" +
-          " { ?id rdf:type  ?type " + filterStr+
-          " }" +
-          "GROUP  BY ?id " +
-          "limit 10000"
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            'select ?id (GROUP_CONCAT( distinct ?type;separator=";;")as ?types)   ' +
+            fromStr +
+            " where" +
+            " { ?id rdf:type  ?type " +
+            filterStr +
+            " }" +
+            "GROUP  BY ?id " +
+            "limit 10000";
 
         var url = self.sparql_url + "?format=json&query=";
-        self.no_params = true
+        self.no_params = true;
         if (Config.sources[sourceLabel]) {
             self.no_params = Config.sources[sourceLabel].sparql_server.no_params;
             if (self.no_params) {
                 url = self.sparql_url;
             }
         }
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
             if (err) {
                 return callback(err);
             }
-            var map={}
-            result.results.bindings.forEach(function(item){
-                map[item.id.value]=item.types.value
-            })
-            return callback(null,map)
-        })
-    }
+            var map = {};
+            result.results.bindings.forEach(function (item) {
+                map[item.id.value] = item.types.value;
+            });
+            return callback(null, map);
+        });
+    };
 
-            /**
+    /**
      *
      *
      * query triples fitered by subjectIds and/or propertyIds and/or objectIds
@@ -781,10 +781,8 @@ var Sparql_OWL = (function () {
             if (options.filter) {
                 query += " " + options.filter;
             }
-          if (!(options.filter && options.filter.indexOf("?object") > -1)) {
+            if (!(options.filter && options.filter.indexOf("?object") > -1)) {
                 query += " filter (!isLiteral(?object) )";
-
-
             }
             query += " } order by ?propLabel ";
             var limit = options.limit || Config.queryLimit;
@@ -1540,11 +1538,10 @@ var Sparql_OWL = (function () {
         if (options.filter && options.filter.indexOf("?label") > -1) {
             optionalLabel = "";
         }
-       var skosPrefLabel=""
-        if(options.skosPrefLabel)
-            skosPrefLabel="OPTIONAL {?id skos:prefLabel ?skosPrefLabel}"
+        var skosPrefLabel = "";
+        if (options.skosPrefLabel) skosPrefLabel = "OPTIONAL {?id skos:prefLabel ?skosPrefLabel}";
 
-              query += "{ ?id rdf:type ?type. " + typeFilterStr + " " + optionalLabel + " {?id rdfs:label ?label " + langFilter + "}" + filter + " }"+skosPrefLabel+"}";
+        query += "{ ?id rdf:type ?type. " + typeFilterStr + " " + optionalLabel + " {?id rdfs:label ?label " + langFilter + "}" + filter + " }" + skosPrefLabel + "}";
 
         var allData = [];
         var resultSize = 1;

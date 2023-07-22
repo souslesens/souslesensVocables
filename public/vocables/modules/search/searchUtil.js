@@ -334,7 +334,7 @@ indexes.push(source.toLowerCase());
             if (word.indexOf && word.indexOf("http://") == 0) {
                 field = "id.keyword";
             }
-          //  word=word.toLowerCase()
+            //  word=word.toLowerCase()
             var queryObj;
             if (!mode || mode == "exactMatch") {
                 queryObj = {
@@ -558,7 +558,7 @@ indexes.push(source.toLowerCase());
                                         parents = [item.type2.value, sourceLabel];
                                     }
 
-                                    var skosLabel=item.skosPrefLabel?item.skosPrefLabel.value:null;
+                                    var skosLabel = item.skosPrefLabel ? item.skosPrefLabel.value : null;
                                     individualsToIndex.push({
                                         id: item.id.value,
                                         label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value),
@@ -587,7 +587,7 @@ indexes.push(source.toLowerCase());
                             };
 
                             var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
-                            Sparql_OWL.getDictionary(sourceLabel, { filter: filter, processorFectchSize: 100,skosPrefLabel:true }, processor, function (err, result) {
+                            Sparql_OWL.getDictionary(sourceLabel, { filter: filter, processorFectchSize: 100, skosPrefLabel: true }, processor, function (err, result) {
                                 return callbackSeries(err);
                             });
                         },

@@ -10,12 +10,11 @@ module.exports = function() {
   ///// GET api/v1/sources
   async function GET(req, res, next) {
 
-      const model = ontologyModelsCache[req.query.source];
-if(model)
-        return processResponse(res, null, model);
+    const model = ontologyModelsCache[req.query.source];
+    if (model) {
+      return processResponse(res, null, model);
+    }
     return processResponse(res, "no data", null);
-
-
 
 
   }
@@ -31,8 +30,8 @@ if(model)
         description: "source",
         type: "string",
         in: "query",
-        required: true,
-      },
+        required: true
+      }
     ],
     responses: {
       200: {
@@ -85,7 +84,7 @@ if(model)
         }
       }
     }
-  }
+  };
   DELETE.apiDoc = {
     summary: "delete ontology model",
     security: [{ loginScheme: [] }],
@@ -97,8 +96,8 @@ if(model)
         description: "source",
         type: "string",
         in: "query",
-        required: true,
-      },
+        required: false
+      }
     ],
     responses: {
       200: {
@@ -110,9 +109,15 @@ if(model)
 
     }
   };
+
   ///// POST api/v1/sources
   async function DELETE(req, res, next) {
-   delete ontologyModelsCache[req.body.source]
+    if (req.query.source) {
+      delete ontologyModelsCache[req.query.source];
+    }
+    else {
+      ontologyModelsCache = {};
+    }
     return processResponse(res, null, "done");
   }
 

@@ -198,7 +198,13 @@ Run the config script to create a default configuration:
 node scripts/init_configs.js
 ```
 
-Then, edit the `config/*.json` to your needs.
+Then, edit the `config/*.json` to your needs or run the following
+script to copy the values from the docker-compose configuration
+into the `config/*.json` files.
+
+```bash
+node scripts/config_from_docker_compose.js
+```
 
 ### Start docker dependencies
 
@@ -211,7 +217,7 @@ docker-compose -f docker-compose.dev.yaml up -d
 Load some data into virtuoso
 
 ```bash
-bash tests/load_data.sh
+bash tests/load_data.sh dev
 ```
 
 Create a user account in MariaDB (for database authentication)
@@ -265,6 +271,12 @@ node scripts/controller-migration.js -c config -w
 
 ```bash
 node scripts/remove_admin_profile_migration.js -c config -w
+```
+
+#### Release 1.37
+
+```bash
+node scripts/migration_1.37_sources.js -c config -w
 ```
 
 SouslesensVocables will be available at [localhost:3010](http://localhost:3010).

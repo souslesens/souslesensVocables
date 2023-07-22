@@ -1,70 +1,65 @@
 {
-  "souslesensUrl": "http://localhost:3010",
-  "listenPort": "3010",
-  "serverUrl": "../slsv",
-  "default_sparql_url": "http://xxxxxx:8890/sparql",
-  "auth": "local",
-  "defaultGroups": [],
-  "logDir": "logs",
-  "sentryDsnNode": "",
-  "sentryDsnJsFront": "",
-  "formalOntologySourceLabel": "",
-  "tools_available": [
-    "lineage",
-    "Standardizer",
-    "KGcreator",
-    "admin",
-    "ConfigEditor"
-  ],
-  "keycloak": {
-    "realm": "master",
-    "publicClient": false,
-    "clientID": "xxx",
-    "clientSecret": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
-    "authServerURL": "https://xxxx.fr/auth"
-  },
-  "SQLserver": {
-    "user": "",
-    "password": "",
-    "server": "",
-    "database": ""
-  },
-  "ElasticSearch": {
-    "url": "http://xxxx:9200/",
-    "other_servers": [
-
-    ]
-  },
-  "annotator": {
-    "tikaServerUrl": "127.0.0.1:41000",
-    "spacyServerUrl": "xxxxxx:8000/pos",
-    "parsedDocumentsHomeDir": null,
-    "uploadDirPath": null
-  },
-  "wiki": {
-    "url": "https://xxxxxxxx"
-  },
-  "authenticationDatabase": {
-     "user": "xxx",
-     "password": "xxxx",
-     "host": "127.0.0.1",
-     "database": "slsv",
-     "table": "user",
-     "loginColumn": "login",
-     "passwordColumn": "password",
-     "groupsColumn": "groups"
-  }
-
-
-  ,
-   "authenticationDatabase": {
-          "user": "root",
-          "password": "xxx",
-          "host": "127.0.0.1",
-          "database": "slsv",
-          "table": "users",
-          "loginColumn": "login",
-          "passwordColumn": "password",
-          "groupsColumn": "groups"
-      }
+    "souslesensUrl": "http://localhost:3010",
+    "listenPort": "3010",
+    "serverUrl": "../slsv",
+    "default_sparql_url": "http://xxxxxxxx:8890/sparql",
+    "auth": "local",
+    "cookieSameSite": "",
+    "cookieSecure": false,
+    "cookieSecureTrustProxy": false,
+    "defaultGroups": [],
+    "logDir": "logs",
+    "cookieMaxAge": 2629800000,
+    "sentryDsnNode": "",
+    "sentryDsnJsFront": "",
+    "formalOntologySourceLabel": "",
+    "tools_available": ["lineage", "KGcreator", "Standardizer", "admin", "ConfigEditor"],
+    "keycloak": {
+        "realm": "master",
+        "publicClient": false,
+        "clientID": "xxx",
+        "clientSecret": "xxx",
+        "authServerURL": "https://xxx"
+    },
+    "health_enabled_services": ["virtuoso", "elasticsearch"],
+    "SQLserver": {
+        "user": "",
+        "password": "",
+        "server": "",
+        "database": "",
+        "trustServerCertificate": true
+    },
+    "sparql_server": {
+        "url": "http://xxx:8890/sparql",
+        "user": "",
+        "password": ""
+    },
+    "ElasticSearch": {
+        "url": "http://xxx:9200/",
+        "user": "",
+        "password": "",
+        "other_servers": []
+    },
+    "jowlServer": {
+        "url": "http://xxx"
+    },
+    "annotator": {
+        "tikaServerUrl": "http://xxx:41000",
+        "spacyServerUrl": "http://xxx:8000/pos",
+        "parsedDocumentsHomeDir": null,
+        "uploadDirPath": null
+    },
+    "wiki": {
+        "url": "https://wiki.tsf.logilab.fr/"
+    },
+    "authenticationDatabase": {
+        "user": "",
+        "password": "",
+        "host": "",
+        "database": "",
+        "table": "",
+        "loginColumn": "",
+        "passwordColumn": "",
+        "groupsColumn": ""
+    }
 }

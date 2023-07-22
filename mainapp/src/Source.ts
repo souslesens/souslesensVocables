@@ -91,7 +91,7 @@ export async function deleteSource(source: InputSource, updateModel: React.Dispa
 }
 
 const decodeSource = (key: string, source: ServerSource): ServerSource => {
-    return ServerSourceSchema.parse({ name: source.name ?? key });
+    return ServerSourceSchema.parse({ ...source, name: source.name ?? key });
 };
 
 function controllerDefault(schemaType: string | undefined): string {
@@ -106,15 +106,14 @@ function controllerDefault(schemaType: string | undefined): string {
 
 export type ServerSource = z.infer<typeof ServerSourceSchema>;
 export type InputSource = z.infer<typeof InputSourceSchema>;
-type SparqlServer = z.infer<typeof SparqlServerSchema>;
 
 export const SparqlServerSchema = z
     .object({
         url: z.string().default("_default"),
         method: z.string().default("GET"),
-        headers: z.array(z.string()).default([]),
+        headers: z.record(z.string(), z.string()).default({}),
     })
-    .default({ url: "", method: "", headers: [] });
+    .default({ url: "", method: "", headers: {} });
 
 const SourcePredicatesSchema = z
     .object({
@@ -131,7 +130,7 @@ const LocalDictionarySchema = z.object({
 export type LocalDictionary = z.infer<typeof LocalDictionarySchema>;
 
 const defaultDataSource: DataSource = {
-    type: [],
+    type: "",
     connection: "_default",
     dbName: "",
     table_schema: "",
@@ -140,11 +139,11 @@ const defaultDataSource: DataSource = {
 
 const dataSourceSchema = z
     .object({
-        type: z.array(z.string()).default([]),
+        type: z.string().default(""),
         connection: z.string().default("_default"),
         dbName: z.string().default(""),
         table_schema: z.string().default(""),
-        local_dictionary: LocalDictionarySchema,
+        local_dictionary: LocalDictionarySchema.nullable(),
     })
     .default(defaultDataSource);
 
@@ -152,8 +151,7 @@ export const ServerSourceSchema = z.object({
     id: z.string().default(ulid()),
     name: z.string().default(""),
     _type: z.string().optional(),
-    type: z.string().default(""),
-    graphUri: z.string().default(""),
+    graphUri: z.string().optional(),
     sparql_server: SparqlServerSchema,
     controller: z.string().default("Sparql_OWL"),
     topClassFilter: z.string().default("?topConcept rdf:type owl:Class ."),
@@ -167,7 +165,7 @@ export const ServerSourceSchema = z.object({
     predicates: SourcePredicatesSchema,
     group: z.string().default(""),
     imports: z.array(z.string()).default([]),
-    taxonomyPredicates: z.array(z.string()).default([]),
+    taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
 });
 
 export const InputSourceSchema = z.object({
@@ -176,11 +174,12 @@ export const InputSourceSchema = z.object({
         .string()
         .nonempty({ message: "Required" })
         .refine((val) => val !== "admin", { message: "Name can't be admin" })
-        .refine((val) => val.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i), { message: "Name can only contain alphanumeric characters" }),
+        .refine((val) => val.match(/.{2,254}/i), { message: "Name can only contain between 2 and 255 chars" })
+        .refine((val) => val.match(/^[a-z0-9]/i), { message: "Name have to start with alphanum char" })
+        .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
 
     _type: z.string().optional(),
-    type: z.string().default(""),
-    graphUri: z.string().nonempty({ message: "Required" }),
+    graphUri: z.string().optional(),
     sparql_server: SparqlServerSchema,
     controller: z.string().optional(),
     topClassFilter: z.string().optional(),
@@ -192,30 +191,31 @@ export const InputSourceSchema = z.object({
     isDraft: z.boolean().default(false),
     allowIndividuals: z.boolean().default(false),
     predicates: SourcePredicatesSchema,
-    group: z.string().default(""),
+    group: z.string().min(3, { message: "Required, 3 chars min" }),
     imports: z.array(z.string()).default([]),
-    taxonomyPredicates: z.array(z.string()).default([]),
+    taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
 });
 
 export const defaultSource = (id: string): ServerSource => {
     return ServerSourceSchema.parse({
         _type: "source",
         id: id,
+        sparql_server: SparqlServerSchema.parse({ headers: {} }),
     });
 };
 
 export interface DataSource {
-    type: string[];
+    type: string;
     connection: string;
     dbName: string;
     table_schema: string;
-    local_dictionary: LocalDictionary;
+    local_dictionary: LocalDictionary | null;
 }
 
 interface CommonSource {
     id: string;
-    graphUri: string[];
-    sparql_server: { url: string; method: string; headers: string[] };
+    graphUri: string;
+    sparql_server: { url: string; method: string; headers: { key: string; value: string }[] };
     color: string;
     controller: string;
     topClassFilter: string;

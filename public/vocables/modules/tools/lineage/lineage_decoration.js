@@ -357,7 +357,7 @@ var Lineage_decoration = (function() {
     self.drawLegend(newJstreeData);
   };
 
-  (self.showDecorateDialog = function() {
+  self.showDecorateDialog = function() {
     $("#smallDialogDiv").dialog("open");
     $("#smallDialogDiv").load("snippets/lineage/lineage_decorateDialog.html", function() {
       $("#lineage_decorate_applyButton").bind("click", Lineage_decoration.decorateNodes);
@@ -365,8 +365,8 @@ var Lineage_decoration = (function() {
       var shapes = ["dot", "square", "box", "text", "diamond", "star", "triangle", "ellipse", "circle", "database", "triangleDown", "hexagon"];
       common.fillSelectOptions("lineage_decorate_shapeSelect", shapes, true);
     });
-  }),
-    (self.decorateNodes = function() {
+  }
+   self.decorateNodes = function() {
       var selection = $("#lineage_decorate_selectionSelect").val();
       var nodes;
       if (selection == "Last added nodes") {
@@ -403,7 +403,7 @@ var Lineage_decoration = (function() {
       });
 
       Lineage_classes.lineageVisjsGraph.data.nodes.update(newIds);
-    });
+    };
 
   return self;
 })();

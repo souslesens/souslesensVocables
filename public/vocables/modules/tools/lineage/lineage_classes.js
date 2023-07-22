@@ -594,7 +594,7 @@ var Lineage_classes = (function() {
       options.visjsOptions.layout = _options.layout;
     }
     if (_options.layoutHierarchical) {
-      options.visjsOptions.layoutHierarchical = _options.layoutHierarchical;
+      options.layoutHierarchical = _options.layoutHierarchical;
     }
 
     if (_options.physics) {

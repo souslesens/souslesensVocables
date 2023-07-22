@@ -3,7 +3,8 @@ var ontologyModelsCache = {};
 module.exports = function() {
   let operations = {
     GET,
-    POST
+    POST,
+    DELETE
   };
 
   ///// GET api/v1/sources
@@ -43,6 +44,7 @@ if(model)
 
     }
   };
+
 
   ///// POST api/v1/sources
   async function POST(req, res, next) {
@@ -84,7 +86,35 @@ if(model)
       }
     }
   }
+  DELETE.apiDoc = {
+    summary: "delete ontology model",
+    security: [{ loginScheme: [] }],
+    operationId: "deleteOntologyModel",
 
+    parameters: [
+      {
+        name: "source",
+        description: "source",
+        type: "string",
+        in: "query",
+        required: true,
+      },
+    ],
+    responses: {
+      200: {
+        description: "Results",
+        schema: {
+          type: "object"
+        }
+      }
+
+    }
+  };
+  ///// POST api/v1/sources
+  async function DELETE(req, res, next) {
+   delete ontologyModelsCache[req.body.source]
+    return processResponse(res, null, "done");
+  }
 
   return operations;
 };

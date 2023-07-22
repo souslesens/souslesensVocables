@@ -416,9 +416,11 @@ var Sparql_common = (function () {
                 options.includeSources = [options.includeSources];
             }
             options.includeSources.forEach(function (source) {
-                var importGraphUri = Config.sources[source].graphUri;
-                if (fromStr.indexOf(importGraphUri) < 0) {
-                    fromStr += from + "  <" + importGraphUri + "> ";
+                if( Config.sources[source] && Config.sources[source].graphUri) {
+                    var importGraphUri = Config.sources[source].graphUri;
+                    if (fromStr.indexOf(importGraphUri) < 0) {
+                        fromStr += from + "  <" + importGraphUri + "> ";
+                    }
                 }
             });
         }

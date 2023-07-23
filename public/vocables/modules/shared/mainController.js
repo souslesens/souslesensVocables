@@ -488,9 +488,8 @@ return;*/
             $("#actionDivContolPanelDiv").html("");
             $("#rightPanelDivInner").html("");
 
-            Lineage_sources.setAllWhiteBoardSources(true);
-
             if (toolId == "lineage") {
+                Lineage_sources.setAllWhiteBoardSources(true);
                 $("#accordion").accordion("option", { active: 2 });
                 MainController.currentSource = null;
 

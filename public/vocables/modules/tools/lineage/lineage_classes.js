@@ -96,12 +96,13 @@ var Lineage_classes = (function () {
         $("#graphDiv").bind("click", function () {
             // MainController.UI.showHideRightPanel()
         });
+        $("#sourcesTreeDivContainer").html("");
+        var x = $("#actionDivContolPanelDiv").html();
 
-        // @ts-ignore
-        $("#actionDivContolPanelDiv").load("snippets/lineage/lineageLeftPanel.html", function () {
+        $("#actionDivContolPanelDiv").load("snippets/lineage/lineageLeftPanel.html", function (err, x) {
             Lineage_sources.init();
 
-            // @ts-ignore
+            $("#rightPanelDivInner").html("");
             $("#rightPanelDivInner").load("snippets/lineage/lineageRightPanel.html", function () {
                 $("#GenericTools_searchSchemaType").val("OWL");
 

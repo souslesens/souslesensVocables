@@ -21,12 +21,10 @@
         <script src="js/external/sunburst.js"></script>
         <script src="js/external/d3/d3.js"></script>
 
+        <!-- <script src="js/external/websocket.js"></script>-->
+        <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
 
-     <!-- <script src="js/external/websocket.js"></script>-->
-      <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossOrigin="anonymous"></script>
-
-      <script src="js/socketIoProxy.js"></script>
-
+        <script src="js/socketIoProxy.js"></script>
 
         <script type="module" src="modules/shared/common.js" charset="utf-8"></script>
         <script type="module" src="modules/graph/visjsGraph2.js"></script>
@@ -481,15 +479,6 @@
                         <div id="tools-panel" style="margin: 5px" class="max-height">
                             <div class="max-height" id="toolsTreeDiv" class="jstree"></div>
                         </div>
-
-                        <!--    <h3><span class="title">Sources </span></h3>
-        <div id="sourcesPanel" style="margin: 5px" class="max-height">
-            <div id="sourceDivControlPanelDiv" style="min-height: 50px; margin-left: 10px"></div>
-            <div>Search : <input id="Lineage_SearchSourceInput" value="" style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" /></div>
-            <div id="sourcesTreeDivContainer" style="overflow: auto" class="jstreeContainer XXXmax-height">
-                <div id="sourcesTreeDiv"></div>
-            </div>
-        </div>-->
 
                         <h3><span class="title" id="toolPanelLabel"> </span></h3>
                         <div id="toolPanelDiv" style="margin: 5px; height: 900px !important; overflow: auto" class="max-height">

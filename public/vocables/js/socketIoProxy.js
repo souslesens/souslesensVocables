@@ -1,25 +1,19 @@
-
 const socket = io();
 // client-side
 socket.on("connect", () => {
-  Config.clientSocketId=socket.id
-  console.log(socket.id); // x8WIv7-mJelg7on_ALbx
+    Config.clientSocketId = socket.id;
+    console.log(socket.id); // x8WIv7-mJelg7on_ALbx
 });
 
 socket.on("disconnect", () => {
-  console.log(socket.id); // undefined
+    console.log(socket.id); // undefined
 });
 
+socket.on("KGcreator", function (message) {
+    KGcreator.socketMessage(message);
+});
 
-
-
-socket.on("KGcreator",function(message){
- KGcreator.socketMessage(message)
-})
-
-
-
-socket.connect('ws://localhost:8080/', 'echo-protocol');
+socket.connect("ws://localhost:8080/", "echo-protocol");
 
 /*var WebSocketClient = require('websocket').client;
 var client = new WebSocketClient();

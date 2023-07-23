@@ -9,21 +9,15 @@ var sqlServerProxy = require("./KG/SQLserverConnector.");
 var ConfigManager = require("./configManager.");
 const SocketManager = require("./socketManager.");
 
-
-
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 
 var KGtripleBuilder = {
-
-    message:function(clientSocketId,content,isError){
-        if(clientSocketId) {
-            SocketManager.message(clientSocketId, "KGcreator", content)
+    message: function (clientSocketId, content, isError) {
+        if (clientSocketId) {
+            SocketManager.message(clientSocketId, "KGcreator", content);
         }
-        if(isError)
-            console.log(content)
+        if (isError) console.log(content);
     },
-
-
 
     predefinedPart14Relations: [
         ["Location", "Location", "hasSubLocation"],
@@ -100,7 +94,6 @@ var KGtripleBuilder = {
             descriptionMap = { filePath: filePath, headers: result.headers, length: result.data[0].length };
 
             fs.writeFileSync(filePath.replace(".txt", "description.json"), JSON.stringify(descriptionMap, null, 2));
-
         });
     },
 
@@ -184,8 +177,8 @@ var KGtripleBuilder = {
                                             lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
                                             lookupLines.forEach(function (line, index) {
                                                 if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
-                                                 return   KGtripleBuilder.message(  options.clientSocketId,"missing lookup line" + index + " " + lookupFilePath,true)
-                                                   }
+                                                    return KGtripleBuilder.message(options.clientSocketId, "missing lookup line" + index + " " + lookupFilePath, true);
+                                                }
                                                 lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
                                             });
 
@@ -201,11 +194,10 @@ var KGtripleBuilder = {
                                             lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
                                             lookupLines.forEach(function (line, index) {
                                                 if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
-                                                         return  KGtripleBuilder.message(  options.clientSocketId,"missing lookup line" + index + " " + lookupFilePath,true)
-
+                                                    return KGtripleBuilder.message(options.clientSocketId, "missing lookup line" + index + " " + lookupFilePath, true);
                                                 }
 
-                                                   lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
+                                                lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
                                             });
 
                                             callbackEachLookup();
@@ -226,8 +218,7 @@ var KGtripleBuilder = {
 
                             KGtripleBuilder.readCsv(mapping.csvDataFilePath, options.sampleSize, function (err, result) {
                                 if (err) {
-                                    KGtripleBuilder.message(  options.clientSocketId,err,true)
-
+                                    KGtripleBuilder.message(options.clientSocketId, err, true);
 
                                     return callbackSeries(err);
                                 }
@@ -440,7 +431,6 @@ var KGtripleBuilder = {
                                                                 }
                                                             }
                                                             if (!objectStr) {
-
                                                                 return;
                                                             }
 
@@ -631,8 +621,7 @@ var KGtripleBuilder = {
                                                 });
                                                 triples = triples.concat(metaDataTriples);
 
-                                                KGtripleBuilder.message(  options.clientSocketId,"writing triples:" + triples.length)
-
+                                                KGtripleBuilder.message(options.clientSocketId, "writing triples:" + triples.length);
 
                                                 var slices = util.sliceArray(triples, 200);
                                                 triples = [];
@@ -648,7 +637,7 @@ var KGtripleBuilder = {
                                                                 }
                                                                 sliceIndex += 1;
 
-                                                                  totalTriples += result;
+                                                                totalTriples += result;
 
                                                                 callbackEach();
                                                             });
@@ -660,14 +649,14 @@ var KGtripleBuilder = {
                                                                 }
                                                                 sliceIndex += 1;
                                                                 totalTriples += result;
-                                                                KGtripleBuilder.message(  options.clientSocketId,"writen triples:" + totalTriples)
+                                                                KGtripleBuilder.message(options.clientSocketId, "writen triples:" + totalTriples);
 
                                                                 callbackEach();
                                                             });
                                                         }
                                                     },
                                                     function (_err) {
-                                                     //   KGtripleBuilder.message(  options.clientSocketId,"total triples writen:" + totalTriples)
+                                                        //   KGtripleBuilder.message(  options.clientSocketId,"total triples writen:" + totalTriples)
 
                                                         callbackSeries2();
                                                     }
@@ -692,7 +681,7 @@ var KGtripleBuilder = {
                             message = "------------ deleted triples " + totalTriples;
                         }
 
-                        KGtripleBuilder.message(  options.clientSocketId,message)
+                        KGtripleBuilder.message(options.clientSocketId, message);
                         callbackEachMapping(_err);
                     }
                 );
@@ -703,7 +692,7 @@ var KGtripleBuilder = {
                     if (options.deleteTriples) {
                         message = "------------ deleted triples " + totalTriples;
                     }
-                    KGtripleBuilder.message(  options.clientSocketId,message)
+                    KGtripleBuilder.message(options.clientSocketId, message);
                     return callback(_err, message);
                 }
             }
@@ -967,7 +956,7 @@ var KGtripleBuilder = {
     createTriplesFromCsv: function (dirName, mappingFileName, options, callback) {
         var sparqlServerUrl;
         var output = "";
-        var clientSocketId= options.clientSocketId;
+        var clientSocketId = options.clientSocketId;
         async.series(
             [
                 // set sparql server
@@ -993,7 +982,7 @@ var KGtripleBuilder = {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        KGtripleBuilder.message(  options.clientSocketId,"graph deleted")
+                        KGtripleBuilder.message(options.clientSocketId, "graph deleted");
 
                         callbackSeries();
                     });

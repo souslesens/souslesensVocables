@@ -1,4 +1,4 @@
-const CsvTripleBuilder = require("../../../../bin/KGtripleBuilder.");
+const KGtripleBuilder = require("../../../../bin/KGtripleBuilder.");
 const { processResponse } = require("../utils");
 
 module.exports = function () {
@@ -8,7 +8,7 @@ module.exports = function () {
 
     function POST(req, res, next) {
         try {
-            CsvTripleBuilder.clearGraph(req.body.graphUri, undefined, function (err, result) {
+            KGtripleBuilder.clearGraph(req.body.graphUri, undefined, function (err, result) {
                 processResponse(res, err, result);
             });
         } catch (e) {

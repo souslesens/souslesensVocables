@@ -140,7 +140,7 @@ module.exports = function () {
                                     insertTriplesStr += str;
                                 });
 
-                                var queryGraph = ""; //CsvTripleBuilder.getSparqlPrefixesStr();
+                                var queryGraph = ""; //KGtripleBuilder.getSparqlPrefixesStr();
 
                                 queryGraph += " WITH GRAPH  <" + body.graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
                                 // console.log(query)

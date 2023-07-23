@@ -2,6 +2,7 @@
 const socket = io();
 // client-side
 socket.on("connect", () => {
+  Config.clientSocketId=socket.id
   console.log(socket.id); // x8WIv7-mJelg7on_ALbx
 });
 
@@ -12,8 +13,8 @@ socket.on("disconnect", () => {
 
 
 
-socket.on("xxx",function(message){
-  var x=messge
+socket.on("KGcreator",function(message){
+ KGcreator.socketMessage(message)
 })
 
 

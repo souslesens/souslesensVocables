@@ -10,7 +10,6 @@ var SocketManager = {
     },
 
     message: function (clientSocketId,channel, message) {
-        console.log(message);
         if (SocketManager.clientSockets[clientSocketId] && SocketManager.clientSockets[clientSocketId].emit) {
             SocketManager.clientSockets[clientSocketId].emit(channel, message);
         }

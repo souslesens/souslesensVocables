@@ -1,13 +1,13 @@
 var fs = require("fs");
 var path = require("path");
-var csvCrawler = require("../_csvCrawler.");
+var csvCrawler = require("./_csvCrawler.");
 var async = require("async");
-var util = require("../util.");
-var httpProxy = require("../httpProxy.");
-var sqlServerProxy = require("./SQLserverConnector.");
+var util = require("./util.");
+var httpProxy = require("./httpProxy.");
+var sqlServerProxy = require("./KG/SQLserverConnector.");
 
-var ConfigManager = require("../configManager.");
-const SocketManager = require("../socketManager.");
+var ConfigManager = require("./configManager.");
+const SocketManager = require("./socketManager.");
 
 
 
@@ -15,9 +15,12 @@ const SocketManager = require("../socketManager.");
 
 var KGtripleBuilder = {
 
-    message:function(clientSocketId,type,content){
-
-        SocketManager.message(clientSocketId,"KGCreator",content)
+    message:function(clientSocketId,content,isError){
+        if(clientSocketId) {
+            SocketManager.message(clientSocketId, "KGcreator", content)
+        }
+        if(isError)
+            console.log(content)
     },
 
 
@@ -85,7 +88,7 @@ var KGtripleBuilder = {
             }
             var data = result.data;
             var headers = result.headers;
-            console.log(filePath);
+
             return callback(null, { headers: headers, data: data });
         });
     },
@@ -97,7 +100,7 @@ var KGtripleBuilder = {
             descriptionMap = { filePath: filePath, headers: result.headers, length: result.data[0].length };
 
             fs.writeFileSync(filePath.replace(".txt", "description.json"), JSON.stringify(descriptionMap, null, 2));
-            //  console.log(JSON.stringify(descriptionMap,null,2))
+
         });
     },
 
@@ -181,8 +184,8 @@ var KGtripleBuilder = {
                                             lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
                                             lookupLines.forEach(function (line, index) {
                                                 if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
-                                                    return console.log("missing lookup line" + index + " " + lookupFilePath);
-                                                }
+                                                 return   KGtripleBuilder.message(  options.clientSocketId,"missing lookup line" + index + " " + lookupFilePath,true)
+                                                   }
                                                 lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
                                             });
 
@@ -198,11 +201,11 @@ var KGtripleBuilder = {
                                             lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
                                             lookupLines.forEach(function (line, index) {
                                                 if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
-                                                    return console.log("missing lookup line" + index + " " + lookupFilePath);
+                                                         return  KGtripleBuilder.message(  options.clientSocketId,"missing lookup line" + index + " " + lookupFilePath,true)
+
                                                 }
 
-                                                // lookUpMap[lookup.name].dictionary[util.formatStringForTriple(line[lookup.sourceColumn],true)] =util.formatStringForTriple( line[lookup.targetColumn],true);
-                                                lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
+                                                   lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
                                             });
 
                                             callbackEachLookup();
@@ -223,7 +226,9 @@ var KGtripleBuilder = {
 
                             KGtripleBuilder.readCsv(mapping.csvDataFilePath, options.sampleSize, function (err, result) {
                                 if (err) {
-                                    console.log(err);
+                                    KGtripleBuilder.message(  options.clientSocketId,err,true)
+
+
                                     return callbackSeries(err);
                                 }
 
@@ -427,7 +432,7 @@ var KGtripleBuilder = {
                                                                     }
                                                                     var lookupValue = getLookupValue(item.lookup_o, objectStr);
                                                                     if (!lookupValue) {
-                                                                        missingLookups_o += 1; // console.log("missing lookup_o: " + line[item.o]);
+                                                                        missingLookups_o += 1;
                                                                     } else {
                                                                         okLookups_o += 1;
                                                                         objectStr = lookupValue;
@@ -435,7 +440,7 @@ var KGtripleBuilder = {
                                                                 }
                                                             }
                                                             if (!objectStr) {
-                                                                // console.log(line[item.o]);
+
                                                                 return;
                                                             }
 
@@ -589,7 +594,6 @@ var KGtripleBuilder = {
                                                                 }
                                                                 if (subjectStr && objectStr) {
                                                                     if (true || !item.datatype) {
-                                                                        // return console.log("missing type " + item.p)
                                                                         if (!existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr]) {
                                                                             existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
                                                                             triples.push({
@@ -626,8 +630,10 @@ var KGtripleBuilder = {
                                                     }
                                                 });
                                                 triples = triples.concat(metaDataTriples);
-                                                // socket.message("KGbuild", "loading ONE MODEL superClasses ");
-                                                console.log("writing triples:" + triples.length);
+
+                                                KGtripleBuilder.message(  options.clientSocketId,"writing triples:" + triples.length)
+
+
                                                 var slices = util.sliceArray(triples, 200);
                                                 triples = [];
                                                 var sliceIndex = 0;
@@ -641,8 +647,8 @@ var KGtripleBuilder = {
                                                                     return callbackEach(err);
                                                                 }
                                                                 sliceIndex += 1;
-                                                                console.log("writed triples:" + triples.result);
-                                                                totalTriples += result;
+
+                                                                  totalTriples += result;
 
                                                                 callbackEach();
                                                             });
@@ -654,13 +660,15 @@ var KGtripleBuilder = {
                                                                 }
                                                                 sliceIndex += 1;
                                                                 totalTriples += result;
+                                                                KGtripleBuilder.message(  options.clientSocketId,"writen triples:" + totalTriples)
 
                                                                 callbackEach();
                                                             });
                                                         }
                                                     },
                                                     function (_err) {
-                                                        console.log("total triples writen:" + totalTriples);
+                                                     //   KGtripleBuilder.message(  options.clientSocketId,"total triples writen:" + totalTriples)
+
                                                         callbackSeries2();
                                                     }
                                                 );
@@ -683,7 +691,8 @@ var KGtripleBuilder = {
                         if (options.deleteTriples) {
                             message = "------------ deleted triples " + totalTriples;
                         }
-                        console.log(message);
+
+                        KGtripleBuilder.message(  options.clientSocketId,message)
                         callbackEachMapping(_err);
                     }
                 );
@@ -694,6 +703,7 @@ var KGtripleBuilder = {
                     if (options.deleteTriples) {
                         message = "------------ deleted triples " + totalTriples;
                     }
+                    KGtripleBuilder.message(  options.clientSocketId,message)
                     return callback(_err, message);
                 }
             }
@@ -705,7 +715,6 @@ var KGtripleBuilder = {
         var totalTriples = 0;
         triples.forEach(function (triple) {
             var str = triple.s + " " + triple.p + " " + triple.o + ". ";
-            //   console.log(str)
             insertTriplesStr += str;
         });
         var query = KGtripleBuilder.getSparqlPrefixesStr();
@@ -838,16 +847,12 @@ var KGtripleBuilder = {
         var totalTriples = 0;
         triples.forEach(function (triple) {
             var str = triple.s + " " + triple.p + " " + triple.o + ". ";
-            //   console.log(str)
             insertTriplesStr += str;
         });
 
         var queryGraph = KGtripleBuilder.getSparqlPrefixesStr();
 
         queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
-        // console.log(query)
-
-        //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
 
         var params = { query: queryGraph };
 
@@ -865,8 +870,6 @@ var KGtripleBuilder = {
                 return callback(err);
             }
             totalTriples += triples.length;
-
-            //  console.log(totalTriples);
             return callback(null, totalTriples);
         });
     },
@@ -964,6 +967,7 @@ var KGtripleBuilder = {
     createTriplesFromCsv: function (dirName, mappingFileName, options, callback) {
         var sparqlServerUrl;
         var output = "";
+        var clientSocketId= options.clientSocketId;
         async.series(
             [
                 // set sparql server
@@ -989,17 +993,18 @@ var KGtripleBuilder = {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        console.log("graph deleted");
+                        KGtripleBuilder.message(  options.clientSocketId,"graph deleted")
+
                         callbackSeries();
                     });
                 },
                 // read mapping file and prepare mappings
                 function (callbackSeries) {
-                    var mappingsFilePath = path.join(__dirname, "../../data/" + dirName + "/" + mappingFileName);
+                    var mappingsFilePath = path.join(__dirname, "../data/" + dirName + "/" + mappingFileName);
                     var mappings = "" + fs.readFileSync(mappingsFilePath);
                     mappings = JSON.parse(mappings);
                     if (typeof options.dataLocation == "string") {
-                        mappings.csvDataFilePath = path.join(__dirname, "../../data/" + dirName + "/" + options.dataLocation);
+                        mappings.csvDataFilePath = path.join(__dirname, "../data/" + dirName + "/" + options.dataLocation);
                     } else {
                         mappings.datasource = options.dataLocation;
                     }

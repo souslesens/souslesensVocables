@@ -1,4 +1,4 @@
-const CsvTripleBuilder = require("../../../../../bin/KG/CsvTripleBuilder.");
+const CsvTripleBuilder = require("../../../../../bin/KGtripleBuilder.");
 const { processResponse } = require("../../utils");
 
 module.exports = function () {

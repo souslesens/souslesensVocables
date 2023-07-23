@@ -174,7 +174,7 @@ var Lineage_decoration = (function () {
                             obj.shape = "triangle";
                         }
                         if (nodeTypesMap[nodeId] && nodeTypesMap[nodeId].allTypes.indexOf("Bag") > -1) {
-                            obj.shape = "triangleDown";
+                            obj.shape = "box";
                         }
                         if (nodeIds.indexOf(nodeId) > -1) {
                             newVisJsNodes.push(obj);

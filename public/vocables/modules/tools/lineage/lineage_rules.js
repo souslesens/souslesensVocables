@@ -2,11 +2,14 @@ import Lineage_sources from "./lineage_sources.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+import OntologyModels from "../../shared/ontologyModels.js";
+import jstreeWidget from "../../uiWidgets/jstreeWidget.js";
 
 var Lineage_rules = (function () {
     var self = {};
 
-    self.premiseDivs = {};
+    self.selectedEntitiesDiv = {};
+    self.conclusionsDivs = {};
 
     self.showRulesDialog = function () {
         $("#mainDialogDiv").dialog("open");
@@ -32,14 +35,17 @@ var Lineage_rules = (function () {
     };
 
     self.searchItem = function (term, type) {
-        term = term.replace("*", "");
-        var filter = "filter (regex(?label,'" + term + "','i')";
-        if (type == "Class") {
-            filter += "  && ?type=owl:Class)";
-        } else if ((type = "ObjectProperty")) {
-            filter += "  && ?type=owl:ObjectProperty)";
+        var filter = "";
+        if (term) {
+            term = term.replace("*", "");
+            filter += "filter (regex(?label,'" + term + "','i'))";
         }
-        Sparql_OWL.getDictionary(Lineage_sources.activeSource, { filter: filter, selectGraph: 1 }, null, function (err, result) {
+        if (type == "Class") {
+            filter += "filter (  ?type=owl:Class)";
+        } else if ((type = "ObjectProperty")) {
+            filter += " filter ( ?type=owl:ObjectProperty)";
+        }
+        Sparql_OWL.getDictionary(Lineage_sources.activeSource, { filter: filter, selectGraph: 1, withoutImports: 1 }, null, function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -69,153 +75,184 @@ var Lineage_rules = (function () {
     self.getContextMenu = function () {
         var items = {};
 
-        items.AddPremise = {
+        items.addPremise = {
             label: "Add Premise",
             action: function (_e, _xx) {
-                self.addPremise(self.currentTreeNode);
+                self.addPremiseOrConclusion(self.currentTreeNode, "premise");
             },
         };
-        /*   items.seToNode = {
-         label: "List  properties",
-         action: function(_e, _xx) {
-           self.addPropertiesToTree(self.currentTreeNode);
-         }
-       };*/
+        items.addConclusion = {
+            label: "Add Conclusion",
+            action: function (_e, _xx) {
+                self.addPremiseOrConclusion(self.currentTreeNode, "conclusion");
+            },
+        };
 
         return items;
     };
     self.selectTreeNodeFn = function (event, obj) {
         self.currentTreeNode = obj.node;
-        self.addPremise(self.currentTreeNode);
+        if (obj.node.children.length == 0) {
+            self.addPropertiesToTree(obj.node);
+        }
     };
 
-    self.addPremise = function (node) {
-        var premiseDivId = "premise_" + common.getRandomHexaId(5);
-        self.premiseDivs[premiseDivId] = node.data;
+    self.addPremiseOrConclusion = function (node, role) {
+        var containerDiv, divId;
+        if (role == "premise") {
+            divId = "premise_" + common.getRandomHexaId(5);
+            containerDiv = "lineage_rules_premisesDiv";
+        } else if (role == "conclusion") {
+            divId = "conclusion_" + common.getRandomHexaId(5);
+            containerDiv = "lineage_rules_conclusionsDiv";
+        }
+        self.selectedEntitiesDiv[divId] = node.data;
+        self.selectedEntitiesDiv[divId].role = role;
+
         var label = node.data.type + " : " + node.data.label;
         var html =
             "<div class='lineage_rules_premise lineage_rules_premise_" +
             node.data.type +
             "' id='" +
-            premiseDivId +
+            divId +
             "'>" +
             "<span>" +
             label +
             " </span>" +
             "<button onclick='Lineage_rules.clearPremise(\"" +
-            premiseDivId +
+            divId +
             "\")'>X</bbutton>";
-        $("#lineage_rules_premisesDiv").append(html);
+        $("#" + containerDiv).append(html);
     };
 
     self.clearPremise = function (div) {
-        delete self.premiseDivs[div];
+        delete self.selectedEntitiesDiv[div];
         $("#" + div).remove();
     };
 
+    self.getInferredModel = function () {
+        OntologyModels.getInferredModel(Lineage_sources.activeSource, null, function (err, result) {});
+
+        return;
+    };
+
     self.addPropertiesToTree = function (node) {
-        Sparql_OWL.getFilteredTriples(node.data.source, node.data.id, null, null, null, function (err, result) {
+        OntologyModels.getAllowedPropertiesBetweenNodes(node.data.source, node.data.id, null, function (err, result) {
             if (err) {
-                alert(err.responseText);
+                return callbackSeries(err);
             }
+            var authorizedProps = result.constraints;
+
             var jstreeData = [];
-            result.forEach(function (item) {
-                var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.propValue);
-                jstreeData.push({
-                    id: item.prop.value,
-                    text: propLabel,
-                    parent: node.id,
-                    data: {
-                        id: item.prop.value,
-                        data: propLabel,
-                        source: self.currentTreeNode.data.source,
-                    },
-                });
-                JstreeWidget.addNodesToJstree("lineage_rules_searchJsTreeDiv", node.id, jstreeData);
-            });
+            var existingIds = jstreeWidget.getjsTreeNodes("lineage_rules_searchJsTreeDiv", true, "#");
+            for (var group in authorizedProps) {
+                for (var propId in authorizedProps[group]) {
+                    var property = authorizedProps[group][propId];
+
+                    var propertyLabel = property.label || Sparql_common.getLabelFromURI(propId);
+                    if (!property.domain) {
+                        propertyLabel = "<i>" + propertyLabel + "</i>";
+                    } else if (property.range) {
+                        propertyLabel = propertyLabel + "->" + property.rangeLabel ? property.rangeLabel : Sparql_common.getLabelFromURI(property.range);
+                    }
+                    propertyLabel = property.source + " : " + propertyLabel;
+
+                    var id = node.id + "_" + propId;
+                    if (existingIds.indexOf(id) < 0) {
+                        existingIds.push(id);
+                        jstreeData.push({
+                            id: id,
+                            text: propertyLabel,
+                            parent: node.id,
+                            data: {
+                                id: propId,
+                                label: property.label,
+                                source: node.data.source,
+                                type: "ObjectProperty",
+                            },
+                        });
+                    }
+                }
+            }
+
+            jstreeWidget.addNodesToJstree("lineage_rules_searchJsTreeDiv", node.id, jstreeData, { openAll: true });
         });
     };
-    /*
-  "premise":[
-      {
-          "type": "owl:Class",
-          "entities": [
-              {
-                  "name": "Person",
-                  "var": ["A"]
-              },
-              {
-                  "name": "Man",
-                  "var": ["Y"]
-              }
-          ]
-      },
-      {
-          "type": "owl:ObjectProperty",
-          "entities": [
-              {
-                  "name": "hasSibling",
-                  "var": ["A", "Y"]
-              }
-          ]
-      }
-  ],
-  "conclusion":[
-      {
-          "type": "owl:ObjectProperty",
-          "entities": [
-              {
-                  "name": "hasBrother",
-                  "var": ["A", "Y"]
-              }
-          ]
-      }
-  ]
-
-
-  }
-
-
-
-
-   */
 
     self.execRule = function () {
         var operation;
-        var classes = [];
-        var objectProperties = [];
-        var premisesDivs = $("#lineage_rules_premisesDiv")
-            .children()
-            .each(function () {
-                var divId = $(this).attr("id");
-                var premiseData = self.premiseDivs[divId];
-                if (premiseData.type == "Class") {
-                    classes.push(premiseData);
-                } else if (premiseData.type == "ObjectProperty") {
-                    objectProperties.push(premiseData);
-                }
-            });
+        var params = {
+            premises: { classes: [], objectProperties: [] },
+            conclusions: { classes: [], objectProperties: [] },
+        };
 
-        if (classes.length == 0) {
-            return alert("no Class premise");
+        for (var divId in self.selectedEntitiesDiv) {
+            var data = self.selectedEntitiesDiv[divId];
+            if (data.role == "premise") {
+                if (data.type == "Class") {
+                    params.premises.classes.push(data);
+                } else if (premiseData.type == "ObjectProperty") {
+                    params.premises.objectProperties.push(data);
+                }
+            } else if (data.role == "conclusion") {
+                if (data.type == "Class") {
+                    params.conclusions.classes.push(data);
+                } else if (premiseData.type == "ObjectProperty") {
+                    params.conclusions.objectProperties.push(data);
+                }
+            }
         }
+
+        /*   var premisesDivs = $("#lineage_rules_premisesDiv")
+           .children()
+           .each(function () {
+               var divId = $(this).attr("id");
+               var data = self.selectedEntitiesDiv[divId];
+               if (data.type == "Class") {
+                   params.premises.classes.push(data);
+               } else if (premiseData.type == "ObjectProperty") {
+                   params.objectProperties.push(data);
+               }
+           });
+
+       var conclusionsDivs = $("#lineage_rules_conclusionsDiv")
+         .children()
+         .each(function () {
+             var divId = $(this).attr("id");
+             var data = self.conclusionDivs[divId];
+             if (data.type == "Class") {
+                 params.conclusions.objectProperties.push(data);
+             } else if (data.type == "ObjectProperty") {
+                 params.conclusions.objectProperties.push(data);
+             }
+         });*/
+
+        if (params.premises.classes.length == 0) {
+            return alert("no Class premise selected");
+        }
+
+        if (params.conclusions.classes.length == 0 && params.conclusions.objectProperties.length == 0) {
+            return alert("no Conclusion selected");
+        }
+
         //insertRuleReclassification
-        else if (classes.length == 1) {
+        else if (params.premises.classes.length == 1 && params.conclusions.classes.length == 1) {
             operation = "alternative_exec_rule";
-            var conclusion = prompt("Conclusion Class name");
             var payload = {
-                premise: [classes[0].id],
-                conclusion: [conclusion],
+                premise: [params.premises.classes[0].id],
+                conclusion: [params.conclusions.classes[0].id],
             };
-        } else if (classes.length == 2) {
-            if (objectProperties.length != 1) {
+        } else if (params.premises.classes.length == 2) {
+            if (params.premises.objectProperties.length != 1) {
                 return alert(" one and only one ObjectProperty is needed ");
             }
-            var conclusion = prompt("Conclusion Property name");
+            var conclusion = null;
+
             var operation = "exec_rule";
             var classeArray = [];
             var propertyClasses = [];
-            classes.forEach(function (item, index) {
+            params.conclusions.classes.forEach(function (item, index) {
+                conclusion = item.id;
                 var varName = Sparql_common.formatStringForTriple(item.label, true);
                 propertyClasses.push(varName);
                 classeArray.push({
@@ -223,6 +260,16 @@ var Lineage_rules = (function () {
                     var: [varName],
                 });
             });
+            params.conclusions.objectProperties.forEach(function (item, index) {
+                conclusion = item.id;
+                var varName = Sparql_common.formatStringForTriple(item.label, true);
+                propertyClasses.push(varName);
+                classeArray.push({
+                    name: item.id,
+                    var: [varName],
+                });
+            });
+
             var payload = {
                 premise: [
                     {
@@ -232,7 +279,7 @@ var Lineage_rules = (function () {
                     {
                         type: "owl:ObjectProperty",
                         entities: {
-                            name: objectProperties[0].id,
+                            name: params.premises.objectProperties[0].id,
                             var: propertyClasses,
                         },
                     },
@@ -256,7 +303,7 @@ var Lineage_rules = (function () {
         var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource, false, false);
         var describeQuery = "DESCRIBE ?s ?p ?o  " + fromStr + "  WHERE {  ?s ?p ?o    } ";
 
-        const params = new URLSearchParams({
+        const queryParams = new URLSearchParams({
             operation: operation,
             type: "internalGraphUri",
             payload: JSON.stringify(payload),
@@ -267,7 +314,7 @@ var Lineage_rules = (function () {
 
         $.ajax({
             type: "GET",
-            url: Config.apiUrl + "/jowl/rules?" + params.toString(),
+            url: Config.apiUrl + "/jowl/rules?" + queryParams.toString(),
             dataType: "json",
 
             success: function (data, _textStatus, _jqXHR) {},
@@ -282,79 +329,79 @@ var Lineage_rules = (function () {
 
     /*
 
-    self.addNodeToGraph=function(){
+  self.addNodeToGraph=function(){
 
 
 
-      //draw graph
-      if (options.addToGraph && self.axiomsVisjsGraph) {
-          self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
-          self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
-      } else {
-          self.drawGraph(visjsData);
-      }
-
-  };
-
-  self.drawGraph = function (visjsData) {
-    var xOffset = 60;
-    var yOffset = 130;
-    xOffset = parseInt($("#axiomsDraw_xOffset").val());
-    yOffset = parseInt($("#axiomsDraw_yOffset").val());
-    var options = {
-        keepNodePositionOnDrag: true,
-
-        layoutHierarchical: {
-            direction: "LR",
-            sortMethod: "hubsize",
-            //  sortMethod:"directed",
-            //    shakeTowards:"roots",
-            //  sortMethod:"directed",
-            levelSeparation: xOffset,
-            parentCentralization: true,
-            shakeTowards: true,
-            blockShifting: true,
-
-            nodeSpacing: yOffset,
-        },
-        edges: {
-            smooth: {
-                // type: "cubicBezier",
-                type: "diagonalCross",
-                forceDirection: "horizontal",
-
-                roundness: 0.4,
-            },
-        },
-        onclickFn: Lineage_axioms_draw.onNodeClick,
-        onRightClickFn: Lineage_axioms_draw.showGraphPopupMenu,
-        onHoverNodeFn: Lineage_axioms_draw.selectNodesOnHover,
-    };
-
-    var graphDivContainer = "axiomsGraphDivContainer";
-    $("#" + graphDivContainer).html("<div id='axiomsGraphDiv' style='width:100%;height:100%' onclick='MainController.UI.hidePopup(\"axioms_graphPopupDiv\")';></div>");
-    self.axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv", visjsData, options);
-    self.axiomsVisjsGraph.draw(function () {});
-  };
-
-  self.onNodeClick = function (node, point, nodeEvent) {
-
-    self.currentGraphNode = node;
-    if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
-        var options = { addToGraph: 1, level: self.currentGraphNode.level };
-        return self.drawNodeAxioms(self.context.sourceLabel, self.currentGraphNode.data.id, self.context.divId, 2, options);
-    }
-
-    if (!node) {
-        return $("#nodeInfosWidget_HoverDiv").css("display", "none");
+    //draw graph
+    if (options.addToGraph && self.axiomsVisjsGraph) {
+        self.axiomsVisjsGraph.data.nodes.add(visjsData.nodes);
+        self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
     } else {
-        self.currentGraphNode = node;
+        self.drawGraph(visjsData);
     }
 
-    self.showNodeInfos(node, point, options);
+};
+
+self.drawGraph = function (visjsData) {
+  var xOffset = 60;
+  var yOffset = 130;
+  xOffset = parseInt($("#axiomsDraw_xOffset").val());
+  yOffset = parseInt($("#axiomsDraw_yOffset").val());
+  var options = {
+      keepNodePositionOnDrag: true,
+
+      layoutHierarchical: {
+          direction: "LR",
+          sortMethod: "hubsize",
+          //  sortMethod:"directed",
+          //    shakeTowards:"roots",
+          //  sortMethod:"directed",
+          levelSeparation: xOffset,
+          parentCentralization: true,
+          shakeTowards: true,
+          blockShifting: true,
+
+          nodeSpacing: yOffset,
+      },
+      edges: {
+          smooth: {
+              // type: "cubicBezier",
+              type: "diagonalCross",
+              forceDirection: "horizontal",
+
+              roundness: 0.4,
+          },
+      },
+      onclickFn: Lineage_axioms_draw.onNodeClick,
+      onRightClickFn: Lineage_axioms_draw.showGraphPopupMenu,
+      onHoverNodeFn: Lineage_axioms_draw.selectNodesOnHover,
   };
 
-  */
+  var graphDivContainer = "axiomsGraphDivContainer";
+  $("#" + graphDivContainer).html("<div id='axiomsGraphDiv' style='width:100%;height:100%' onclick='MainController.UI.hidePopup(\"axioms_graphPopupDiv\")';></div>");
+  self.axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv", visjsData, options);
+  self.axiomsVisjsGraph.draw(function () {});
+};
+
+self.onNodeClick = function (node, point, nodeEvent) {
+
+  self.currentGraphNode = node;
+  if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
+      var options = { addToGraph: 1, level: self.currentGraphNode.level };
+      return self.drawNodeAxioms(self.context.sourceLabel, self.currentGraphNode.data.id, self.context.divId, 2, options);
+  }
+
+  if (!node) {
+      return $("#nodeInfosWidget_HoverDiv").css("display", "none");
+  } else {
+      self.currentGraphNode = node;
+  }
+
+  self.showNodeInfos(node, point, options);
+};
+
+*/
 
     return self;
 })();

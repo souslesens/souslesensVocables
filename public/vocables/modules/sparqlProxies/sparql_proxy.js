@@ -32,7 +32,9 @@ var Sparql_proxy = (function () {
         };
 
         var p = query.toLowerCase().indexOf("limit");
-        if (p > -1) query = query.substring(0, p);
+        if (p > -1) {
+            query = query.substring(0, p);
+        }
         query += " LIMIT " + limit;
 
         // XXX rewrite this data generator with fetch + async + await
@@ -95,31 +97,49 @@ var Sparql_proxy = (function () {
      * @param {Function} callback - Function called to process the result of the query
      */
     self.querySPARQL_GET_proxy = function (url, query, queryOptions, options, callback) {
+        if (!options) {
+            options = {};
+        }
         // query=query.replace(/[\n\r]/g," ")
 
-        if (url.indexOf("_default") == 0) url = Config.default_sparql_url;
+        query = self.addFromLabelsGraphToQuery(query);
+
+        if (url.indexOf("_default") == 0) {
+            url = Config.default_sparql_url;
+        }
         var sourceParams;
         var headers = {};
-        if (options.source) sourceParams = Config.sources[options.source];
-        else sourceParams = Config.sources[MainController.currentSource];
+        if (options.source) {
+            sourceParams = Config.sources[options.source];
+        } else {
+            sourceParams = Config.sources[MainController.currentSource];
+        }
 
         /*    if(!sourceParams.graphUri){// cas des sources sans graphe
-    query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
+query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
 }*/
 
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
 
         $("#waitImg").css("display", "block");
 
-        if (!options.skipCurrentQuery) self.currentQuery = query;
+        if (!options.skipCurrentQuery) {
+            self.currentQuery = query;
+        }
 
         var payload = {
             options: {},
         };
-        if (!queryOptions) queryOptions = "";
+        if (!queryOptions) {
+            queryOptions = "";
+        }
 
         var useProxy = false;
-        if (url.indexOf(Config.default_sparql_url) == 0) useProxy = true;
+        if (url.indexOf(Config.default_sparql_url) == 0) {
+            useProxy = true;
+        }
 
         if (sourceParams && sourceParams.sparql_server.method && sourceParams.sparql_server.method == "GET") {
             payload.GET = true;
@@ -136,10 +156,15 @@ var Sparql_proxy = (function () {
             if (sourceParams && sourceParams.sparql_server.headers) {
                 body = JSON.stringify({ headers: sourceParams.sparql_server.headers });
             }
-            if (sourceParams && sourceParams.sparql_server.type == "fuseki") url = url.replace("&query=", "");
+            if (sourceParams && sourceParams.sparql_server.type == "fuseki") {
+                url = url.replace("&query=", "");
+            }
 
-            if (options.acceptHeader) headers["Accept"] = options.acceptHeader;
-            else headers["Accept"] = "application/sparql-results+json";
+            if (options.acceptHeader) {
+                headers["Accept"] = options.acceptHeader;
+            } else {
+                headers["Accept"] = "application/sparql-results+json";
+            }
             headers["Content-Type"] = "application/x-www-form-urlencoded";
             var body = {
                 params: { query: query, useProxy: useProxy },
@@ -157,13 +182,23 @@ var Sparql_proxy = (function () {
             data: payload,
             dataType: "json",
             success: function (data, _textStatus, _jqXHR) {
-                if (headers["Accept"] && headers["Accept"].indexOf("json") < 0) return callback(null, data);
-                if (data.result && typeof data.result != "object") data = JSON.parse(data.result.trim());
+                if (headers["Accept"] && headers["Accept"].indexOf("json") < 0) {
+                    return callback(null, data);
+                }
+                if (data.result && typeof data.result != "object") {
+                    data = JSON.parse(data.result.trim());
+                }
 
-                if (!data.results) return callback(null, { results: { bindings: [] } });
+                if (!data.results) {
+                    return callback(null, { results: { bindings: [] } });
+                }
 
-                if (data.results.bindings.length > 500) console.log(data.results.bindings.length);
-                if (data.results.bindings.length == 0); // MainController.UI.message("No data found", true);
+                if (data.results.bindings.length > 500) {
+                    console.log(data.results.bindings.length);
+                }
+                if (data.results.bindings.length == 0) {
+                } // MainController.UI.message("No data found", true);
+
                 callback(null, data);
             },
             error: function (err) {
@@ -198,7 +233,9 @@ var Sparql_proxy = (function () {
     self.exportGraph = function (source) {
         var graphUri = Config.sources[source].graphUri;
         var graphUriStr = "";
-        if (graphUri) graphUriStr = " from <" + graphUri + "> ";
+        if (graphUri) {
+            graphUriStr = " from <" + graphUri + "> ";
+        }
 
         //var query = "select ?s ?p ?o "+graphUriStr+"  where  {?s ?p ?o} limit 10000";
 
@@ -209,7 +246,9 @@ var Sparql_proxy = (function () {
         //  headers["Content-Type"] = "application/x-nice-turtle; charset=UTF-8";
 
         var serverUrl = Config.sources[source].sparql_server.url;
-        if (serverUrl.indexOf("_default") == 0) serverUrl = Config.default_sparql_url;
+        if (serverUrl.indexOf("_default") == 0) {
+            serverUrl = Config.default_sparql_url;
+        }
 
         var body = {
             params: { query: query, useProxy: false },
@@ -234,9 +273,47 @@ var Sparql_proxy = (function () {
                 common.copyTextToClipboard(str);
             },
             error(err) {
-                if (err) return alert(err.responseText);
+                if (err) {
+                    return alert(err.responseText);
+                }
             },
         });
+    };
+
+    self.executeAsyncQuery = async function (url, query, queryOptions, options) {
+        let promise = new Promise(function (resolve, reject) {
+            self.querySPARQL_GET_proxy(url, query, queryOptions, options, function (err, result) {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(result);
+                }
+            });
+        });
+
+        return promise;
+    };
+
+    self.addFromLabelsGraphToQuery = function (query) {
+        var p = query.toLowerCase().indexOf("where");
+        if (p < 0) {
+            return query;
+        }
+
+        var regex = /\?[A-z]+Label/gi;
+        var array = [];
+        var varNames = [];
+        while ((array = regex.exec(query)) != null) {
+            array.forEach(function (item) {
+                if (varNames.indexOf(item) < 0) varNames.push(item);
+            });
+        }
+        if (varNames.length == 0) {
+            return query;
+        }
+
+        var query2 = query.substring(0, p) + "from <" + Config.labelsGraphUri + "> " + query.substring(p);
+        return query2;
     };
 
     return self;

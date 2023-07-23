@@ -35,6 +35,8 @@ function normalizePort(val) {
  */
 const app = require("../app");
 
+
+
 const port = normalizePort(process.env.PORT || config.listenPort || "3010");
 app.set("port", port);
 
@@ -66,16 +68,16 @@ server.on("error", (error) => {
 });
 
 /**
- * Create WebSocket server
+ * Create WebSocket server and init SocketManager for each socket
  *
- * TODO use plain websocket instead of socket.io ?
- * https://github.com/websockets/ws
- */
-const socketio = require("socket.io");
-const io = socketio(server);
-const SocketManager = require("./socketManager.");
 
-io.on("connection", (clientSocket) => {
-    clientSocket.emit("hello", "hello");
-    SocketManager.initClientSocket(clientSocket);
+ */
+const { Server  } = require("socket.io");
+const SocketManager=require('./socketManager.')
+const io = new Server (server, { /* options */ });
+io.on("connection", (socket) => {
+    SocketManager.initClientSocket(socket)
+console.log("Client Socket connected "+socket.id)
+
+
 });

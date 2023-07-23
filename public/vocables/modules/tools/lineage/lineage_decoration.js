@@ -3,8 +3,9 @@ import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_sources from "./lineage_sources.js";
 import common from "../../shared/common.js";
-self.lineageVisjsGraph;
+import OntologyModels from "../../shared/ontologyModels.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+import Lineage_classes from "./lineage_classes.js";
 
 //@typescript-eslint/no-unused-vars
 var Lineage_decoration = (function () {
@@ -15,376 +16,208 @@ var Lineage_decoration = (function () {
     self.currentVisjGraphNodesMap = {};
     self.currentLegendDJstreedata = {};
 
-    /*  self.init = function () {
-
-    self.operationsMap = {
-        colorNodesByType: self.colorGraphNodesByType,
-        colorNodesByTopLevelOntologyTopType: self.colorNodesByTopLevelOntologyTopType,
-    };
-    var operations = Object.keys(self.operationsMap);
-
-    common.fillSelectOptions("Lineage_classes_graphDecoration_operationSelect", operations, true);
-    self.currentVisjGraphNodesMap = {};
-    self.legendMap = {};
-    self.currentLegendDJstreedata = {};
-};*/
-    self.run = function (operation) {
-        $("#Lineage_classes_graphDecoration_operationSelect").val("");
-        self.operationsMap[operation]();
-    };
-
-    self.showGraphDecorationDialog = function () {
-        $("#mainDialogDiv").load("snippets/lineage/graphDecoration.html", function () {
-            $("#mainDialogDiv").dialog("open");
-        });
-    };
-
-    /**
-     * set the upper ontology classes map
-     * @param callback
-     * @returns {*}
-     */
-    self.setTopLevelOntologyClassesMap = function (callback) {
-        if (!Config.currentTopLevelOntology) {
-            return callback(null, null);
-        }
-        self.topLevelOntologyPredifinedLegendMap = JSON.parse(JSON.stringify(Config.topLevelOntologyFixedlegendMap));
-        if (self.topOntologiesClassesMap[Config.currentTopLevelOntology]) {
-            self.currentTopOntologyClassesMap = self.topOntologiesClassesMap[Config.currentTopLevelOntology];
-            return callback(null, self.currentTopOntologyClassesMap);
-        }
-        self.currentTopOntologyClassesMap = {};
-        Sparql_generic.getSourceTaxonomy(Config.currentTopLevelOntology, { lang: Config.default_lang, skipCurrentQuery: true }, function (err, result) {
-            if (err) {
-                return callback(null, {});
-            }
-
-            self.currentTopOntologyClassesMap = result.classesMap;
-            var countColors = 0;
-            for (var topClass in self.currentTopOntologyClassesMap) {
-                if (!self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology]) {
-                    return callback(null, []);
-                }
-                var color = null;
-                if (self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][topClass]) {
-                    //predifined color
-                    color = self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][topClass];
-                } else {
-                    //look for a predifined parent class
-                    self.currentTopOntologyClassesMap[topClass].parents.forEach(function (parent) {
-                        if (self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][parent]) {
-                            //predifined color
-                            color = self.topLevelOntologyPredifinedLegendMap[Config.currentTopLevelOntology][parent];
-                        }
-                    });
-                }
-                if (!color) {
-                    //calculated color in palette
-                    color = common.paletteIntense[countColors % Object.keys(common.paletteIntense).length];
-                }
-                self.currentTopOntologyClassesMap[topClass].color = color;
-                countColors++;
-            }
-            return callback(null, self.currentTopOntologyClassesMap);
-        });
-    };
-
-    /**
-   search for each node in visjs graph correpsonding nodes in upper ontology (if any)
-   an set the lowest upper ontology class thanks to the self.currentTopOntologyClassesMap[topclass].parents nodes length
-
-   */
-
-    self.getVisjsClassNodesTopLevelOntologyClass = function (ids, callback) {
-        if (!ids || ids.length == 0) {
-            return callback(null, []);
-        }
-
-        var sourceLabel = Lineage_sources.activeSource;
-
-        var strFrom = Sparql_common.getFromStr(sourceLabel, null, true, true);
-        var sparql_url = Config.sources[sourceLabel].sparql_server.url;
-        var url = sparql_url + "?format=json&query=";
-        var slices = common.array.slice(ids, 50);
-        var uriPattern = Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern;
-        var data = [];
-        async.eachSeries(
-            slices,
-            function (slice, callbackEach) {
-                if (!slice) {
-                    return callback(null, []);
-                }
-                var filter = Sparql_common.setFilter("x", slice);
-                if (!filter || filter.indexOf("?x in( )") > -1) {
-                    return callbackEach();
-                }
-
-                var fromStr = Sparql_common.getFromStr(Lineage_sources.activeSource);
-
-                var query =
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                    "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
-                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>  SELECT distinct ?type ?sLabel ?x " +
-                    fromStr +
-                    "  WHERE {\n" +
-                    "GRAPH <" +
-                    Config.sources[Config.currentTopLevelOntology].graphUri +
-                    ">{\n" +
-                    "  ?s rdfs:label|skos:prefLabel ?sLabel. bind(?s as ?type)\n" +
-                    "}\n" +
-                    "  {GRAPH <" +
-                    Config.sources[sourceLabel].graphUri +
-                    ">{  \n" +
-                    "      ?x rdfs:subClassOf|rdf:type* ?s. ?x ?ww ?xx}\n" +
-                    filter +
-                    "    }} LIMIT 10000";
-
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, skipCurrentQuery: true }, function (err, result) {
-                    if (err) {
-                        return callback(err);
-                    }
-                    data = data.concat(result.results.bindings);
-                    //  if (data.length > 100) ; // console.error(query);
-                    return callbackEach();
-                });
-            },
-            function (err) {
-                return callback(err, data);
-            }
-        );
-    };
-
-    self.getVisjsNamedIndividualNodesClass = function (ids, callback) {
-        if (!ids || ids.length == 0) {
-            return callback(null, []);
-        }
-
-        var sourceLabel = Lineage_sources.activeSource;
-
-        var strFrom = Sparql_common.getFromStr(sourceLabel, null, true, true);
-        var sparql_url = Config.sources[sourceLabel].sparql_server.url;
-        var url = sparql_url + "?format=json&query=";
-        var slices = common.array.slice(ids, 50);
-        //  var uriPattern = Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern;
-        var data = [];
-        async.eachSeries(
-            slices,
-            function (slice, callbackEach) {
-                var query =
-                    "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-                    "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-                    "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>\n" +
-                    "PREFIX owl: <http://www.w3.org/2002/07/owl#>";
-
-                query +=
-                    "  SELECT distinct ?x ?class ?g ?label" +
-                    strFrom +
-                    "WHERE {GRAPH ?g{" +
-                    "    ?x  rdf:type owl:NamedIndividual. " +
-                    "OPTIONAL {?x rdfs:label ?label}" +
-                    "  ?x   rdf:type+ ?class.  ?class rdf:type owl:Class ";
-
-                var filter = Sparql_common.setFilter("x", slice);
-                if (filter.indexOf("?x in( )") > -1) {
-                    return callbackEach();
-                }
-
-                query += filter + "}}";
-                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
-                    if (err) {
-                        return callback(err);
-                    }
-                    data = data.concat(result.results.bindings);
-                    //  if (data.length > 100) ; // console.error(query);
-                    return callbackEach();
-                });
-            },
-            function (err) {
-                return callback(err, data);
-            }
-        );
-    };
-
     self.colorGraphNodesByType = function (visjsNodes) {
-        self.incomingQuery = Sparql_proxy.currentQuery;
-        if (!Lineage_sources.activeSource) {
-            return;
-        }
-        Lineage_sources.setTopLevelOntologyFromImports(Lineage_sources.activeSource);
-
         if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) {
-            return;
-        }
-
-        self.currentVisjGraphNodesMap = {};
-        if (false && self.currentTopOntologyClassesMap && Object.keys(self.currentTopOntologyClassesMap).length > 0) {
-            return self.colorNodesByTopLevelOntologyTopType(visjsNodes);
-        }
-
-        self.setTopLevelOntologyClassesMap(function (err, result) {
-            if (Config.topLevelOntologies[Config.currentTopLevelOntology]) {
-                // self.legendMap = {};
-                self.uriPattern = Config.topLevelOntologies[Config.currentTopLevelOntology].uriPattern;
-                self.colorNodesByTopLevelOntologyTopType(visjsNodes);
-            } else {
-                return;
-            }
-        });
-    };
-    self.clearLegend = function () {
-        $("#Lineage_classes_graphDecoration_legendDiv").html("");
-        self.legendMap = {};
-    };
-
-    self.colorNodesByTopLevelOntologyTopType = function (visjsNodes) {
-        if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) {
-            return;
+            return $("#lineage_legendWrapper").css("display", "none");
         }
 
         var nonTopLevelOntologynodeIds = [];
         var topLevelOntologynodeIds = [];
         var individualNodes = {};
-        if (!visjsNodes) {
+        if (true || !visjsNodes) {
             visjsNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
         }
 
         if (visjsNodes.length == 0) {
             return;
         }
+        var nodeIds = [];
+        visjsNodes.forEach(function (node) {
+            nodeIds.push(node.id);
+        });
 
+        var hierarchies = {};
+        var upperOntologiesHierarchy = {};
+        var legendJsTreeData = [];
+        var legendClassesMap = {};
+        var newVisJsNodes = [];
+        var uniqueLegendJsTreeDataNodes = {};
+
+        function getPredefinedColor(classId) {
+            var color = null;
+            for (var key in Config.topLevelOntologyFixedlegendMap) {
+                if (!color) {
+                    if (!Config.topLevelOntologyFixedlegendMap[key]) {
+                        return Lineage_classes.getSourceColor(key);
+                    }
+                    color = Config.topLevelOntologyFixedlegendMap[key][classId];
+                }
+            }
+            return color;
+        }
+
+        function getNodeColorInLegend(ancestors) {
+            function getColorFromParent(ancestorNode, parent) {
+                var color = legendClassesMap[ancestorNode.superClass.value];
+                if (!color) {
+                    color = getPredefinedColor(ancestorNode.class.value);
+                    if (!color) {
+                        color = getPredefinedColor(ancestorNode.superClass.value);
+                    }
+
+                    if (color) {
+                        legendClassesMap[ancestorNode.superClass.value] = color;
+                        if (!uniqueLegendJsTreeDataNodes[ancestorNode.superClass.value]) {
+                            uniqueLegendJsTreeDataNodes[ancestorNode.superClass.value] = 1;
+                            var label = ancestorNode.superClassLabel ? ancestorNode.superClassLabel.value : Sparql_common.getLabelFromURI(ancestorNode.superClass.value);
+                            legendJsTreeData.push({
+                                id: ancestorNode.superClass.value,
+                                text: "<span  style='font-size:10px;background-color:" + color + "'>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;" + label,
+                                parent: parent,
+                                color: color,
+                            });
+                        }
+                    }
+                }
+
+                return color;
+            }
+
+            var color = null;
+            for (var i = ancestors.length - 1; i > -1; i--) {
+                var parent = "#";
+                if (i != ancestors.length - 1) {
+                    parent = ancestors[i + 1].class.value;
+                }
+
+                if (!color) {
+                    color = getColorFromParent(ancestors[i]);
+                    if (!color) {
+                        if (i < ancestors.length - 1) {
+                            color = getColorFromParent(ancestors[i + 1]);
+                        }
+                    }
+
+                    /*   if( !color){
+                 color=legendClassesMap[ancestors[i].superClass.value]
+
+             }*/
+                }
+            }
+
+            return color;
+        }
+
+        var nodeTypesMap = {};
         async.series(
             [
-                // split nodes by type
+                // get nodes super Classes
                 function (callbackSeries) {
-                    visjsNodes.forEach(function (node) {
-                        if (node.data && node.data.rdfType == "NamedIndividual") {
-                            individualNodes[node.id] = {};
-                        } else if (true || node.id.indexOf(self.uriPattern) < 0) {
-                            nonTopLevelOntologynodeIds.push(node.id);
-                        } else {
-                            if (self.currentTopOntologyClassesMap[node.id]) {
-                                topLevelOntologynodeIds.push({
-                                    id: node.id,
-                                    color: self.currentTopOntologyClassesMap[node.id].color,
+                    var uniqueTypes = {};
+                    var slices = common.array.slice(nodeIds, Config.slicedArrayLength);
+                    async.eachSeries(
+                        slices,
+                        function (slice, callbackEach) {
+                            Sparql_OWL.getNodesTypesMap(Lineage_sources.activeSource, slice, {}, function (err, result) {
+                                if (err) {
+                                    return callbackEach(err);
+                                }
+                                for (var nodeId in result) {
+                                    var obj = { allTypes: result[nodeId], class: "" };
+                                    var types = result[nodeId].split(";");
+
+                                    types.forEach(function (type) {
+                                        if (!nodeTypesMap[nodeId] && type && type.indexOf("/owl") < 0 && type.indexOf("/rdf") < 0) {
+                                            obj.class = type;
+                                            if (slice.indexOf(type) < 0 && !uniqueTypes[type]) {
+                                                uniqueTypes[type] = 1;
+                                                slice.push(type);
+                                            }
+                                        }
+                                        nodeTypesMap[nodeId] = obj;
+                                    });
+                                }
+
+                                Sparql_OWL.getNodesAncestors(Lineage_sources.activeSource, slice, { excludeItself: 0 }, function (err, result) {
+                                    if (err) {
+                                        return callbackEach(err);
+                                    }
+                                    for (var key in result.hierarchies) {
+                                        hierarchies[key] = result.hierarchies[key];
+                                    }
+                                    callbackEach();
                                 });
-                            }
+                            });
+                        },
+                        function (err) {
+                            callbackSeries();
                         }
-                    });
-                    Lineage_classes.lineageVisjsGraph.data.nodes.update(topLevelOntologynodeIds);
+                    );
+                },
+                //get each node color in legend
+
+                function (callbackSeries) {
+                    var uniqueNewVisJsNodes = {};
+                    for (var nodeId in hierarchies) {
+                        var ancestors = hierarchies[nodeId];
+                        var color = null;
+
+                        color = getNodeColorInLegend(ancestors);
+
+                        if (!color) {
+                            color = getPredefinedColor(nodeId);
+                        }
+
+                        var obj = { id: nodeId, color: color };
+
+                        if (nodeTypesMap[nodeId] && nodeTypesMap[nodeId].allTypes.indexOf("Individual") > -1) {
+                            obj.shape = "triangle";
+                        }
+                        if (nodeTypesMap[nodeId] && nodeTypesMap[nodeId].allTypes.indexOf("Bag") > -1) {
+                            obj.shape = "box";
+                        }
+                        if (nodeIds.indexOf(nodeId) > -1) {
+                            newVisJsNodes.push(obj);
+                        } else {
+                            legendClassesMap[nodeId] = color;
+                        }
+                    }
+
                     callbackSeries();
                 },
-                //get individuals class and add it to nonTopLevelOntologynodeIds
-                function (callbackSeries) {
-                    self.getVisjsNamedIndividualNodesClass(Object.keys(individualNodes), function (err, result) {
-                        if (err) {
-                            return;
-                        }
-                        result.forEach(function (item) {
-                            individualNodes[item.x.value] = item.class.value;
-                            if (nonTopLevelOntologynodeIds.indexOf(item.class.value) < 0) {
-                                nonTopLevelOntologynodeIds.push(item.class.value);
-                            }
-                        });
-                        callbackSeries();
-                    });
-                },
 
-                // set nodes topClasses
                 function (callbackSeries) {
-                    self.getVisjsClassNodesTopLevelOntologyClass(nonTopLevelOntologynodeIds, function (err, result) {
-                        if (err) {
-                            return;
-                        }
-                        var excludedTypes = ["TopConcept", "Class", "Restriction"];
-
-                        var maxNumberOfParents = 0;
-
-                        result.forEach(function (item) {
-                            if (!self.currentVisjGraphNodesMap[item.x.value]) {
-                                self.currentVisjGraphNodesMap[item.x.value] = {
-                                    type: item.type.value,
-                                    // graphUri: item.g.value,
-                                    label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.x.value),
-                                    topLevelOntologyClass: null,
-                                    topLevelOntologyNumberOfParents: 0,
-                                    color: null,
-                                };
-                            }
-                            if (self.currentTopOntologyClassesMap[item.x.value]) {
-                                self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyClass = item.x.value;
-                                self.currentVisjGraphNodesMap[item.x.value].color = self.currentTopOntologyClassesMap[item.x.value].color;
-                                self.currentVisjGraphNodesMap[item.x.value].type = item.x.value;
-                                if (self.currentTopOntologyClassesMap[item.type.value] && self.currentTopOntologyClassesMap[item.type.value].parents) {
-                                    self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyNumberOfParents = self.currentTopOntologyClassesMap[item.type.value].parents.length;
-                                }
-                            } else if (self.currentTopOntologyClassesMap[item.type.value]) {
-                                // select the deepest upper ontology class  among all retrieved
-                                if (self.currentTopOntologyClassesMap[item.type.value].parents.length > self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyNumberOfParents) {
-                                    self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyClass = item.type.value;
-                                    self.currentVisjGraphNodesMap[item.x.value].color = self.currentTopOntologyClassesMap[item.type.value].color;
-                                    self.currentVisjGraphNodesMap[item.x.value].type = item.type.value;
-                                    self.currentVisjGraphNodesMap[item.x.value].topLevelOntologyNumberOfParents = self.currentTopOntologyClassesMap[item.type.value].parents.length;
-                                }
-                            }
-                        });
-                        callbackSeries();
-                    });
-                },
-                // prepare legend
-                function (callbackSeries) {
-                    for (var nodeId in self.currentVisjGraphNodesMap) {
-                        var node = self.currentVisjGraphNodesMap[nodeId];
-                        if (!self.legendMap[node.topLevelOntologyClass]) {
-                            var topClass = self.currentTopOntologyClassesMap[node.topLevelOntologyClass];
-                            if (topClass) {
-                                self.legendMap[node.topLevelOntologyClass] = {
-                                    id: node.topLevelOntologyClass,
-                                    label: topClass.label,
-                                    color: topClass.color,
-                                    parents: topClass.parents,
-                                };
+                    for (var nodeId in hierarchies) {
+                        //processing namedIndividuals
+                        if (hierarchies[nodeId].length == 0 && nodeTypesMap[nodeId]) {
+                            var color = legendClassesMap[nodeTypesMap[nodeId].class];
+                            if (color) {
+                                newVisJsNodes.push({ id: nodeId, color: color });
                             }
                         }
                     }
                     callbackSeries();
                 },
 
-                // update nodes color
+                //change vijsNodes Color
                 function (callbackSeries) {
-                    // modify nodes color according to toOntolog superClass
-                    var neutralColor = null; //"#ccc";
-
-                    var newNodes = [];
-                    for (var nodeId in self.currentVisjGraphNodesMap) {
-                        var obj = self.currentVisjGraphNodesMap[nodeId];
-                        if (obj) {
-                            newNodes.push({ id: nodeId, color: obj.color, legendType: obj.type });
-                        }
-                    }
-
-                    for (var individualId in individualNodes) {
-                        var classId = individualNodes[individualId];
-                        var obj = self.currentVisjGraphNodesMap[classId];
-                        if (obj) {
-                            newNodes.push({ id: individualId, color: obj.color, legendType: obj.type });
-                        }
-                    }
-
-                    if (Lineage_classes.lineageVisjsGraph.data && Lineage_classes.lineageVisjsGraph.data.nodes) {
-                        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
-                    }
-
+                    Lineage_classes.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
                     callbackSeries();
                 },
+
+                //draw legend
                 function (callbackSeries) {
-                    self.drawLegend();
-                    Sparql_proxy.currentQuery = self.incomingQuery;
+                    self.drawLegend(legendJsTreeData);
                     callbackSeries();
                 },
             ],
             function (err) {}
         );
+    };
+
+    self.clearLegend = function () {
+        $("#Lineage_classes_graphDecoration_legendDiv").html("");
+        self.legendMap = {};
     };
 
     self.drawLegend = function (jstreeData) {
@@ -397,38 +230,6 @@ var Lineage_decoration = (function () {
 
         var str = "<div  class='Lineage_legendTypeTopLevelOntologyDiv' style='display: flex;>";
 
-        if (!jstreeData) {
-            var jstreeData = [];
-            var uniqueIds = {};
-            for (var topClassId in self.legendMap) {
-                var topClass = self.legendMap[topClassId];
-                topClass.parents.push(topClassId);
-                topClass.parents.forEach(function (id, index) {
-                    var parent;
-                    var color = null,
-                        label = "-";
-                    if (index == 0) {
-                        label = topClass.parents[index];
-                        parent = "#";
-                    } else {
-                        parent = topClass.parents[index - 1];
-
-                        if (self.currentTopOntologyClassesMap[id]) {
-                            color = self.currentTopOntologyClassesMap[id].color;
-                            label = self.currentTopOntologyClassesMap[id].label;
-                        }
-                    }
-                    if (!uniqueIds[id]) {
-                        uniqueIds[id] = 1;
-                        jstreeData.push({
-                            id: id,
-                            text: "<span  style='font-size:10px;background-color:" + color + "'>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;" + label,
-                            parent: parent,
-                        });
-                    }
-                });
-            }
-        }
         self.currentLegendDJstreedata[Lineage_sources.activeSource] = jstreeData;
         var options = {
             openAll: true,
@@ -438,7 +239,9 @@ var Lineage_decoration = (function () {
             tie_selection: false,
         };
         $("#Lineage_classes_graphDecoration_legendDiv").jstree("destroy").empty();
-        $("#Lineage_classes_graphDecoration_legendDiv").html("<div  class='jstreeContainer' style='height: 350px;width:90%'><div id='Lineage_classes_graphDecoration_legendTreeDiv'></div></div>");
+        $("#Lineage_classes_graphDecoration_legendDiv").html(
+            "<div  class='jstreeContainer' style='height: 350px;width:90%'>" + "<div id='Lineage_classes_graphDecoration_legendTreeDiv' style='height: 25px;width:100%'></div></div>"
+        );
         JstreeWidget.loadJsTree("Lineage_classes_graphDecoration_legendTreeDiv", jstreeData, options, function () {
             $("#Lineage_classes_graphDecoration_legendTreeDiv").jstree(true).check_all();
         });
@@ -525,7 +328,7 @@ var Lineage_decoration = (function () {
         self.drawLegend(newJstreeData);
     };
 
-    (self.showDecorateDialog = function () {
+    self.showDecorateDialog = function () {
         $("#smallDialogDiv").dialog("open");
         $("#smallDialogDiv").load("snippets/lineage/lineage_decorateDialog.html", function () {
             $("#lineage_decorate_applyButton").bind("click", Lineage_decoration.decorateNodes);
@@ -533,43 +336,43 @@ var Lineage_decoration = (function () {
             var shapes = ["dot", "square", "box", "text", "diamond", "star", "triangle", "ellipse", "circle", "database", "triangleDown", "hexagon"];
             common.fillSelectOptions("lineage_decorate_shapeSelect", shapes, true);
         });
-    }),
-        (self.decorateNodes = function () {
-            var selection = $("#lineage_decorate_selectionSelect").val();
-            var nodes;
-            if (selection == "Last added nodes") {
-                nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
-            } else if (selection == "All nodes") {
-                nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
-            } else if (selection == "Selected nodes") {
-                nodes = Lineage_selection.selectedNodes;
+    };
+    self.decorateNodes = function () {
+        var selection = $("#lineage_decorate_selectionSelect").val();
+        var nodes;
+        if (selection == "Last added nodes") {
+            nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
+        } else if (selection == "All nodes") {
+            nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
+        } else if (selection == "Selected nodes") {
+            nodes = Lineage_selection.selectedNodes;
+        }
+
+        $("#smallDialogDiv").dialog("close");
+        var newIds = [];
+
+        var color = $("#lineage_decorate_colorSelect").val();
+        var shape = $("#lineage_decorate_shapeSelect").val();
+        var size = $("#lineage_decorate_sizeInput").val();
+        nodes.forEach(function (node) {
+            if (!node.data) {
+                return;
             }
-
-            $("#smallDialogDiv").dialog("close");
-            var newIds = [];
-
-            var color = $("#lineage_decorate_colorSelect").val();
-            var shape = $("#lineage_decorate_shapeSelect").val();
-            var size = $("#lineage_decorate_sizeInput").val();
-            nodes.forEach(function (node) {
-                if (!node.data) {
-                    return;
-                }
-                var obj = { id: node.id };
-                if (color) {
-                    obj.color = color;
-                }
-                if (shape) {
-                    obj.shape = shape;
-                }
-                if (size) {
-                    obj.size = parseInt(size);
-                }
-                newIds.push(obj);
-            });
-
-            Lineage_classes.lineageVisjsGraph.data.nodes.update(newIds);
+            var obj = { id: node.id };
+            if (color) {
+                obj.color = color;
+            }
+            if (shape) {
+                obj.shape = shape;
+            }
+            if (size) {
+                obj.size = parseInt(size);
+            }
+            newIds.push(obj);
         });
+
+        Lineage_classes.lineageVisjsGraph.data.nodes.update(newIds);
+    };
 
     return self;
 })();

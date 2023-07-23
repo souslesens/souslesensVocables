@@ -18,7 +18,7 @@ var Config = (function () {
     if (location.hostname == "localhost") {
         self.logSparqlQueries = true;
     }
-
+    self.labelsGraphUri = "http://souslesens.org/vocables/resource/labels/";
     self.wikiCategoriesGraphUri = "http://souslesens.org/data/total/ep/";
 
     self.defaultNewUriRoot = "http://souslesens.org/resource/";
@@ -28,6 +28,7 @@ var Config = (function () {
     self.loginMode = "json";
 
     self.appName = "VOCABLES";
+
     self.debug = { query: 1 };
     self.enableCollections = false;
     self.showAssetQueyMenu = true;
@@ -38,6 +39,7 @@ var Config = (function () {
     self.maxSelectListSize = 500;
     self.minSelectListSize = 200;
     self.whiteBoardMaxLabelLength = 20;
+    self.slicedArrayLength = 100;
 
     self.dataTableOutputLimit = 500;
     self.defaultGraphTheme = "white"; //dark
@@ -139,7 +141,7 @@ var Config = (function () {
 
     self.Lineage = {
         disabledButtons: [
-            "lineage_actionDiv_similars",
+            // "lineage_actionDiv_similars",
             "lineage_actionDiv_equivClass",
             "lineage_actionDiv_linkedData",
             "lineage_actionDiv_reasoner",
@@ -238,12 +240,15 @@ var Config = (function () {
 
     self.topLevelOntologyFixedlegendMap = {
         IDO: {
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Dependent": "#cb6601",
+            "	http://rds.posccaesar.org/ontology/lis14/rdl/Object": "#00AFEF",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#F90EDD",
             "http://rds.posccaesar.org/ontology/lis14/rdl/PhysicalObject": "#00AFEF",
             "http://rds.posccaesar.org/ontology/lis14/rdl/FunctionalObject": "#FDBF01",
             "http://rds.posccaesar.org/ontology/lis14/rdl/InformationObject": "#70AC47",
             "http://rds.posccaesar.org/ontology/lis14/rdl/Activity": "#70309f",
-            "http://rds.posccaesar.org/ontology/lis14/rdl/Aspect": "#cb6601",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Temporal": "#70309f",
+            "http://rds.posccaesar.org/ontology/lis14/rdl/Prescriptive": "#703011",
         },
         "ISO_15926-part-14_PCA": {
             "http://rds.posccaesar.org/ontology/lis14/rdl/Location": "#F90EDD",

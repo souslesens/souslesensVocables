@@ -258,6 +258,10 @@ indexes.push(source.toLowerCase());
             size = 10000;
         }
 
+        var indexes = null;
+        if (index) indexes = index;
+        else indexes = "*";
+
         if (_ids) {
             var slices = common.array.slice(_ids, 100);
             var allHits = [];
@@ -265,10 +269,8 @@ indexes.push(source.toLowerCase());
                 slices,
                 function (ids, callbackEach) {
                     var str = "";
-                    var header = {};
-                    if (index) {
-                        header = { index: index };
-                    }
+                    var header = { index: indexes };
+
                     ids.forEach(function (id) {
                         var query = {
                             query: {
@@ -276,11 +278,12 @@ indexes.push(source.toLowerCase());
                                     "id.keyword": id,
                                 },
                             },
+                            _source: "label",
                         };
                         str += JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
                     });
                     MainController.UI.message("getting labels " + allHits.length + " ...");
-                    ElasticSearchProxy.executeMsearch(str, [index], function (err, result) {
+                    ElasticSearchProxy.executeMsearch(str, [indexes], function (err, result) {
                         if (err) {
                             return callbackEach(err);
                         }
@@ -331,6 +334,7 @@ indexes.push(source.toLowerCase());
             if (word.indexOf && word.indexOf("http://") == 0) {
                 field = "id.keyword";
             }
+            //  word=word.toLowerCase()
             var queryObj;
             if (!mode || mode == "exactMatch") {
                 queryObj = {
@@ -355,7 +359,7 @@ indexes.push(source.toLowerCase());
                         must: {
                             query_string: {
                                 query: word,
-                                fields: ["label", "skoslabel"],
+                                fields: ["label", "skoslabels"],
                             },
                         },
                         // ,
@@ -554,10 +558,11 @@ indexes.push(source.toLowerCase());
                                         parents = [item.type2.value, sourceLabel];
                                     }
 
+                                    var skosLabel = item.skosPrefLabel ? item.skosPrefLabel.value : null;
                                     individualsToIndex.push({
                                         id: item.id.value,
                                         label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value),
-                                        skoslabels: [],
+                                        skoslabels: [skosLabel],
                                         parent: parent,
                                         parents: parents,
                                         type: item.type2.value,
@@ -582,7 +587,7 @@ indexes.push(source.toLowerCase());
                             };
 
                             var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
-                            Sparql_OWL.getDictionary(sourceLabel, { filter: filter, processorFectchSize: 100 }, processor, function (err, result) {
+                            Sparql_OWL.getDictionary(sourceLabel, { filter: filter, processorFectchSize: 100, skosPrefLabel: true }, processor, function (err, result) {
                                 return callbackSeries(err);
                             });
                         },

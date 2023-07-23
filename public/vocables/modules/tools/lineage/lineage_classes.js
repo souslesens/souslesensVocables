@@ -20,6 +20,7 @@ import authentication from "../../shared/authentification.js";
 import Clipboard from "../../shared/clipboard.js";
 
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
+import OntologyModels from "../../shared/ontologyModels.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -95,12 +96,13 @@ var Lineage_classes = (function () {
         $("#graphDiv").bind("click", function () {
             // MainController.UI.showHideRightPanel()
         });
+        $("#sourcesTreeDivContainer").html("");
+        var x = $("#actionDivContolPanelDiv").html();
 
-        // @ts-ignore
-        $("#actionDivContolPanelDiv").load("snippets/lineage/lineageLeftPanel.html", function () {
+        $("#actionDivContolPanelDiv").load("snippets/lineage/lineageLeftPanel.html", function (err, x) {
             Lineage_sources.init();
 
-            // @ts-ignore
+            $("#rightPanelDivInner").html("");
             $("#rightPanelDivInner").load("snippets/lineage/lineageRightPanel.html", function () {
                 $("#GenericTools_searchSchemaType").val("OWL");
 
@@ -532,30 +534,32 @@ var Lineage_classes = (function () {
             onclickFn: Lineage_classes.graphActions.onNodeClick,
             onRightClickFn: Lineage_classes.graphActions.showGraphPopupMenu,
             onHoverNodeFn: Lineage_selection.selectNodesOnHover,
-            physics: {
-                stabilization: {
-                    enabled: false,
-                    iterations: 180, // maximum number of iteration to stabilize
-                    updateInterval: 10,
-                    ///  onlyDynamicEdges: false,
-                    fit: true,
+            visjsOptions: {
+                physics: {
+                    stabilization: {
+                        enabled: false,
+                        iterations: 180, // maximum number of iteration to stabilize
+                        updateInterval: 10,
+                        ///  onlyDynamicEdges: false,
+                        fit: true,
+                    },
+                    barnesHut: {
+                        springLength: 0,
+                        damping: 0.15,
+                        centralGravity: 0.8,
+                    },
+                    minVelocity: 0.75,
                 },
-                barnesHut: {
-                    springLength: 0,
-                    damping: 0.15,
-                    centralGravity: 0.8,
-                },
-                minVelocity: 0.75,
-            },
-            nodes: { font: { color: self.defaultNodeFontColor } },
-            edges: {
-                font: {
-                    color: self.defaultEdgeColor,
-                    multi: true,
-                    size: 10,
-                    strokeWidth: 0,
-                    strokeColor: 0,
-                    ital: true,
+                nodes: { font: { color: self.defaultNodeFontColor } },
+                edges: {
+                    font: {
+                        color: self.defaultEdgeColor,
+                        multi: true,
+                        size: 10,
+                        strokeWidth: 0,
+
+                        //ital: true,
+                    },
                 },
             },
             onAddNodeToGraph: function (/** @type {any} */ _properties, /** @type {any} */ _senderId) {
@@ -573,22 +577,22 @@ var Lineage_classes = (function () {
         };
 
         if (_options.layout) {
-            options.layout = _options.layout;
+            options.visjsOptions.layout = _options.layout;
         }
         if (_options.layoutHierarchical) {
             options.layoutHierarchical = _options.layoutHierarchical;
         }
 
         if (_options.physics) {
-            options.physics = _options.physics;
+            options.visjsOptions.physics = _options.physics;
         }
         if (_options.edges) {
-            options.edges = _options.edges;
+            options.visjsOptions.edges = _options.edges;
         }
 
         if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
             // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
-            options.manipulation = {
+            options.visjsOptions.manipulation = {
                 enabled: true,
                 initiallyActive: true,
                 deleteNode: false,
@@ -635,7 +639,7 @@ var Lineage_classes = (function () {
                 },
             };
             if (false) {
-                options.interaction = {
+                options.visjsOptions.interaction = {
                     navigationButtons: true,
                 };
             }
@@ -2007,31 +2011,6 @@ restrictionSource = Config.predicatesSource;
                         var predicateUri = options.inverse ? null : item.prop.value;
 
                         visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject.value, item.subjectLabel.value, predicateUri));
-
-                        /*  var color = self.getSourceColor(source);
-
-              var size = Lineage_classes.defaultShapeSize;
-              if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
-                  label = Config.Lineage.logicalOperatorsMap[item.prop.value];
-                  shape = "hegagon";
-                  color = "#EEE";
-              }
-              visjsData.nodes.push({
-                  id: item.subject.value,
-                  label: item.subjectLabel.value,
-                  shadow: self.nodeShadow,
-                  shape: shape,
-                  size: size,
-
-                  color: color,
-                  level: self.currentExpandLevel,
-                  data: {
-                      source: source,
-                      id: item.subject.value,
-                      label: item.subjectLabel.value,
-                      varName: "value",
-                  },
-              });*/
                     }
                     var color;
                     var size = self.defaultShapeSize;
@@ -2072,24 +2051,6 @@ restrictionSource = Config.predicatesSource;
 
                         var predicateUri = options.inverse ? item.prop.value : null;
                         visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.value.value, item.valueLabel.value, predicateUri));
-
-                        /*     visjsData.nodes.push({
-                     id: item.value.value,
-                     label: label,
-                     shadow: self.nodeShadow,
-                     shape: shape,
-                     size: size,
-
-                     color: color,
-                     level: self.currentExpandLevel,
-                     data: {
-                         source: source,
-                         id: item.value.value,
-                         label: item.valueLabel.value,
-                         varName: "value",
-                         type: item.value.type,
-                     },
-                 });*/
                     }
                     var edgeId = item.node.value; //item.value.value + "_" + item.subject.value + "_" + item.prop.value;
                     if (!existingNodes[edgeId]) {
@@ -2598,6 +2559,100 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 return callback(null, visjsData);
             }
         });
+    };
+
+    self.drawInferredClassesModel = function (source) {
+        if (!source) {
+            source = Lineage_sources.activeSource;
+        }
+        var inferredModel = [];
+
+        async.series(
+            [
+                //get effective distinct ObjectProperties
+                function (callbackSeries) {
+                    OntologyModels.getInferredModel(source, {}, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        inferredModel = result;
+
+                        if (inferredModel.length == 0) {
+                            callbackSeries("no inferred model for source " + source);
+                        } else {
+                            callbackSeries();
+                        }
+                    });
+                },
+                //get effective distinct ObjectProperties
+                function (callbackSeries) {
+                    var existingNodes = {};
+                    var visjsData = { nodes: [], edges: [] };
+                    var source = Lineage_sources.activeSource;
+                    inferredModel.forEach(function (item) {
+                        var options = {
+                            shape: Lineage_classes.defaultShape,
+                            size: Lineage_classes.defaultShapeSize,
+                            color: Lineage_classes.getSourceColor(source),
+                        };
+                        if (!existingNodes[item.sClass.value]) {
+                            existingNodes[item.sClass.value] = 1;
+                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.sClass.value, item.sClassLabel.value, null, options));
+                        }
+                        if (!existingNodes[item.oClass.value]) {
+                            existingNodes[item.oClass.value] = 1;
+                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, item.oClassLabel.value, null, options));
+                        }
+                        var edgeId = item.sClass.value + "_" + item.prop.value + "_" + item.oClass.value;
+                        if (!existingNodes[edgeId]) {
+                            existingNodes[edgeId] = 1;
+
+                            visjsData.edges.push({
+                                id: edgeId,
+                                from: item.sClass.value,
+                                to: item.oClass.value,
+                                label: item.propLabel.value,
+                                font: { color: options.edgesColor || Lineage_classes.restrictionColor },
+                                data: {
+                                    propertyId: item.prop.value,
+                                    source: source,
+                                    propertyLabel: item.propLabel.value,
+                                },
+
+                                arrows: {
+                                    to: {
+                                        enabled: true,
+                                        type: "solid",
+                                        scaleFactor: 0.5,
+                                    },
+                                },
+                                dashes: true,
+                                color: options.edgesColor || Lineage_classes.restrictionColor,
+                            });
+                        }
+                    });
+
+                    if (true || !self.lineageVisjsGraph.isGraphNotEmpty()) {
+                        self.drawNewGraph(visjsData);
+                    }
+                    /*  else {
+          self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+          self.lineageVisjsGraph.data.edges.add(visjsData.edges);
+          self.lineageVisjsGraph.network.fit();
+        }*/
+
+                    $("#waitImg").css("display", "none");
+                },
+                function (callbackSeries) {
+                    return callbackSeries();
+                },
+            ],
+            function (err) {
+                if (err) {
+                    return alert(err);
+                }
+            }
+        );
     };
 
     self.graphActions = {

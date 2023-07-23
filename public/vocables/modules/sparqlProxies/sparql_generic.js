@@ -2,6 +2,7 @@ import Sparql_common from "./sparql_common.js";
 import Sparql_proxy from "./sparql_proxy.js";
 import common from "../shared/common.js";
 import Sparql_OWL from "./sparql_OWL.js";
+import searchUtil from "../search/searchUtil.js";
 
 //biblio
 //https://www.iro.umontreal.ca/~lapalme/ift6281/sparql-1_1-cheat-sheet.pdf
@@ -787,6 +788,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
         if (!Array.isArray(_fields)) {
             _fields = [_fields];
         }
+
         _fields.forEach(function (_field) {
             bindings.forEach(function (item) {
                 for (var i = 0; i < 20; i++) {

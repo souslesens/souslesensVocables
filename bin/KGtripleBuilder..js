@@ -1,17 +1,24 @@
 var fs = require("fs");
 var path = require("path");
-var csvCrawler = require("../_csvCrawler.");
+var csvCrawler = require("./_csvCrawler.");
 var async = require("async");
-var util = require("../util.");
-var httpProxy = require("../httpProxy.");
-var sqlServerProxy = require("./SQLserverConnector.");
+var util = require("./util.");
+var httpProxy = require("./httpProxy.");
+var sqlServerProxy = require("./KG/SQLserverConnector.");
 
-var ConfigManager = require("../configManager.");
-const socket = require("../socketManager.");
+var ConfigManager = require("./configManager.");
+const SocketManager = require("./socketManager.");
 
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 
-var CsvTripleBuilder = {
+var KGtripleBuilder = {
+    message: function (clientSocketId, content, isError) {
+        if (clientSocketId) {
+            SocketManager.message(clientSocketId, "KGcreator", content);
+        }
+        if (isError) console.log(content);
+    },
+
     predefinedPart14Relations: [
         ["Location", "Location", "hasSubLocation"],
         ["Location", "Activity", "hasActivityPart"],
@@ -47,8 +54,8 @@ var CsvTripleBuilder = {
 
     getSparqlPrefixesStr: function () {
         var str = "";
-        for (var key in CsvTripleBuilder.sparqlPrefixes) {
-            str += "PREFIX " + key + ": " + CsvTripleBuilder.sparqlPrefixes[key] + " ";
+        for (var key in KGtripleBuilder.sparqlPrefixes) {
+            str += "PREFIX " + key + ": " + KGtripleBuilder.sparqlPrefixes[key] + " ";
         }
         return str;
     },
@@ -56,7 +63,7 @@ var CsvTripleBuilder = {
         if (!str) {
             return false;
         }
-        var prefixesArray = Object.keys(CsvTripleBuilder.sparqlPrefixes);
+        var prefixesArray = Object.keys(KGtripleBuilder.sparqlPrefixes);
         var array = str.split(":");
         if (array.length == 0) {
             return false;
@@ -75,7 +82,7 @@ var CsvTripleBuilder = {
             }
             var data = result.data;
             var headers = result.headers;
-            console.log(filePath);
+
             return callback(null, { headers: headers, data: data });
         });
     },
@@ -83,11 +90,10 @@ var CsvTripleBuilder = {
     getDescription: function (filePath) {
         var descriptionMap = {};
 
-        CsvTripleBuilder.readCsv(filePath, null, function (err, result) {
+        KGtripleBuilder.readCsv(filePath, null, function (err, result) {
             descriptionMap = { filePath: filePath, headers: result.headers, length: result.data[0].length };
 
             fs.writeFileSync(filePath.replace(".txt", "description.json"), JSON.stringify(descriptionMap, null, 2));
-            //  console.log(JSON.stringify(descriptionMap,null,2))
         });
     },
 
@@ -163,7 +169,7 @@ var CsvTripleBuilder = {
                                     if (mapping.csvDataFilePath) {
                                         var lookupFilePath = lookup.filePath;
 
-                                        CsvTripleBuilder.readCsv(lookupFilePath, null, function (err, result) {
+                                        KGtripleBuilder.readCsv(lookupFilePath, null, function (err, result) {
                                             if (err) {
                                                 return callbackEachLookup(err);
                                             }
@@ -171,7 +177,7 @@ var CsvTripleBuilder = {
                                             lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
                                             lookupLines.forEach(function (line, index) {
                                                 if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
-                                                    return console.log("missing lookup line" + index + " " + lookupFilePath);
+                                                    return KGtripleBuilder.message(options.clientSocketId, "missing lookup line" + index + " " + lookupFilePath, true);
                                                 }
                                                 lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
                                             });
@@ -188,10 +194,9 @@ var CsvTripleBuilder = {
                                             lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
                                             lookupLines.forEach(function (line, index) {
                                                 if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
-                                                    return console.log("missing lookup line" + index + " " + lookupFilePath);
+                                                    return KGtripleBuilder.message(options.clientSocketId, "missing lookup line" + index + " " + lookupFilePath, true);
                                                 }
 
-                                                // lookUpMap[lookup.name].dictionary[util.formatStringForTriple(line[lookup.sourceColumn],true)] =util.formatStringForTriple( line[lookup.targetColumn],true);
                                                 lookUpMap[lookup.name].dictionary[line[lookup.sourceColumn]] = line[lookup.targetColumn];
                                             });
 
@@ -211,9 +216,10 @@ var CsvTripleBuilder = {
                                 return callbackSeries();
                             }
 
-                            CsvTripleBuilder.readCsv(mapping.csvDataFilePath, options.sampleSize, function (err, result) {
+                            KGtripleBuilder.readCsv(mapping.csvDataFilePath, options.sampleSize, function (err, result) {
                                 if (err) {
-                                    console.log(err);
+                                    KGtripleBuilder.message(options.clientSocketId, err, true);
+
                                     return callbackSeries(err);
                                 }
 
@@ -302,7 +308,7 @@ var CsvTripleBuilder = {
                                                         mapping.tripleModels.forEach(function (item) {
                                                             for (var key in line) {
                                                                 line[key] = "" + line[key];
-                                                                if (line[key] && !CsvTripleBuilder.isUri(line[key])) {
+                                                                if (line[key] && !KGtripleBuilder.isUri(line[key])) {
                                                                     line[key] = util.formatStringForTriple(line[key]);
                                                                 }
                                                             }
@@ -321,6 +327,8 @@ var CsvTripleBuilder = {
                                                                         return (lineError = e);
                                                                     }
                                                                 } else if (item.isSubjectBlankNode) {
+                                                                    if (!line[item.s] || !line[item.o]) return;
+
                                                                     var blankNode = blankNode_cellMap[item.s];
                                                                     if (!blankNode) {
                                                                         blankNode = getNewBlankNodeId();
@@ -371,6 +379,7 @@ var CsvTripleBuilder = {
                                                                 if (item.o_type == "fixed") {
                                                                     objectStr = item.o;
                                                                 } else if (item.isObjectBlankNode) {
+                                                                    if (!line[item.s] || !line[item.o]) return;
                                                                     var blankNode = blankNode_cellMap[item.o];
                                                                     if (!blankNode) {
                                                                         blankNode = getNewBlankNodeId();
@@ -391,6 +400,7 @@ var CsvTripleBuilder = {
                                                                         return (lineError = e);
                                                                     }
                                                                 } else if (item.o === "_blankNode") {
+                                                                    if (!line[item.s] || !line[item.o]) return;
                                                                     currentBlankNode = currentBlankNode || getNewBlankNodeId();
                                                                     objectStr = currentBlankNode;
                                                                 } else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
@@ -413,7 +423,7 @@ var CsvTripleBuilder = {
                                                                     }
                                                                     var lookupValue = getLookupValue(item.lookup_o, objectStr);
                                                                     if (!lookupValue) {
-                                                                        missingLookups_o += 1; // console.log("missing lookup_o: " + line[item.o]);
+                                                                        missingLookups_o += 1;
                                                                     } else {
                                                                         okLookups_o += 1;
                                                                         objectStr = lookupValue;
@@ -421,7 +431,6 @@ var CsvTripleBuilder = {
                                                                 }
                                                             }
                                                             if (!objectStr) {
-                                                                // console.log(line[item.o]);
                                                                 return;
                                                             }
 
@@ -473,7 +482,7 @@ var CsvTripleBuilder = {
                                                                 var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
                                                                 var prop = propStr;
                                                                 if (prop.indexOf("$") == 0) {
-                                                                    prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
+                                                                    prop = KGtripleBuilder.getUserPredicateUri(item.p, line, graphUri);
                                                                 }
                                                                 if (prop.indexOf("http") == 0) {
                                                                     prop = "<" + prop + ">";
@@ -511,7 +520,7 @@ var CsvTripleBuilder = {
                                                                         blankNode = getNewBlankNodeId();
                                                                         prop = propStr;
                                                                         if (prop.indexOf("$") == 0) {
-                                                                            prop = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
+                                                                            prop = KGtripleBuilder.getUserPredicateUri(item.p, line, graphUri);
                                                                         }
                                                                         if (prop.indexOf("http") == 0) {
                                                                             prop = "<" + prop + ">";
@@ -564,7 +573,7 @@ var CsvTripleBuilder = {
                                                                         return (lineError = e);
                                                                     }
                                                                 } else if (item.p.indexOf("$") == 0) {
-                                                                    propertyStr = CsvTripleBuilder.getUserPredicateUri(item.p, line, graphUri);
+                                                                    propertyStr = KGtripleBuilder.getUserPredicateUri(item.p, line, graphUri);
                                                                 }
                                                                 if (!propertyStr) {
                                                                     var x = 3;
@@ -575,7 +584,6 @@ var CsvTripleBuilder = {
                                                                 }
                                                                 if (subjectStr && objectStr) {
                                                                     if (true || !item.datatype) {
-                                                                        // return console.log("missing type " + item.p)
                                                                         if (!existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr]) {
                                                                             existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
                                                                             triples.push({
@@ -608,12 +616,13 @@ var CsvTripleBuilder = {
                                                 triples.forEach(function (triple) {
                                                     if (!uniqueSubjects[triple.s]) {
                                                         uniqueSubjects[triple.s] = 1;
-                                                        metaDataTriples = metaDataTriples.concat(CsvTripleBuilder.getMetaDataTriples(triple.s, options));
+                                                        metaDataTriples = metaDataTriples.concat(KGtripleBuilder.getMetaDataTriples(triple.s, options));
                                                     }
                                                 });
                                                 triples = triples.concat(metaDataTriples);
-                                                // socket.message("KGbuild", "loading ONE MODEL superClasses ");
-                                                console.log("writing triples:" + triples.length);
+
+                                                KGtripleBuilder.message(options.clientSocketId, "writing triples:" + triples.length);
+
                                                 var slices = util.sliceArray(triples, 200);
                                                 triples = [];
                                                 var sliceIndex = 0;
@@ -621,32 +630,34 @@ var CsvTripleBuilder = {
                                                     slices,
                                                     function (slice, callbackEach) {
                                                         if (options.deleteTriples) {
-                                                            CsvTripleBuilder.deleteTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
+                                                            KGtripleBuilder.deleteTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
                                                                 if (err) {
                                                                     errors += err + " slice " + sliceIndex + "\n";
                                                                     return callbackEach(err);
                                                                 }
                                                                 sliceIndex += 1;
-                                                                console.log("writed triples:" + triples.result);
+
                                                                 totalTriples += result;
 
                                                                 callbackEach();
                                                             });
                                                         } else {
-                                                            CsvTripleBuilder.writeUniqueTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
+                                                            KGtripleBuilder.writeUniqueTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
                                                                 if (err) {
                                                                     errors += err + " slice " + sliceIndex + "\n";
                                                                     return callbackEach(err);
                                                                 }
                                                                 sliceIndex += 1;
                                                                 totalTriples += result;
+                                                                KGtripleBuilder.message(options.clientSocketId, "writen triples:" + totalTriples);
 
                                                                 callbackEach();
                                                             });
                                                         }
                                                     },
                                                     function (_err) {
-                                                        console.log("total triples writen:" + totalTriples);
+                                                        //   KGtripleBuilder.message(  options.clientSocketId,"total triples writen:" + totalTriples)
+
                                                         callbackSeries2();
                                                     }
                                                 );
@@ -669,7 +680,8 @@ var CsvTripleBuilder = {
                         if (options.deleteTriples) {
                             message = "------------ deleted triples " + totalTriples;
                         }
-                        console.log(message);
+
+                        KGtripleBuilder.message(options.clientSocketId, message);
                         callbackEachMapping(_err);
                     }
                 );
@@ -680,6 +692,7 @@ var CsvTripleBuilder = {
                     if (options.deleteTriples) {
                         message = "------------ deleted triples " + totalTriples;
                     }
+                    KGtripleBuilder.message(options.clientSocketId, message);
                     return callback(_err, message);
                 }
             }
@@ -691,10 +704,9 @@ var CsvTripleBuilder = {
         var totalTriples = 0;
         triples.forEach(function (triple) {
             var str = triple.s + " " + triple.p + " " + triple.o + ". ";
-            //   console.log(str)
             insertTriplesStr += str;
         });
-        var query = CsvTripleBuilder.getSparqlPrefixesStr();
+        var query = KGtripleBuilder.getSparqlPrefixesStr();
         query += "DELETE DATA {  GRAPH <" + graphUri + "> {  " + insertTriplesStr + " }  } ";
         var params = { query: query };
         if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
@@ -722,7 +734,7 @@ var CsvTripleBuilder = {
             [
                 //insert triple into tempoary graph
                 function (callbackSeries) {
-                    CsvTripleBuilder.writeTriples(triples, tempGraphUri, sparqlServerUrl, function (err, result) {
+                    KGtripleBuilder.writeTriples(triples, tempGraphUri, sparqlServerUrl, function (err, result) {
                         return callbackSeries(err);
                         callbackSeries();
                     });
@@ -824,16 +836,12 @@ var CsvTripleBuilder = {
         var totalTriples = 0;
         triples.forEach(function (triple) {
             var str = triple.s + " " + triple.p + " " + triple.o + ". ";
-            //   console.log(str)
             insertTriplesStr += str;
         });
 
-        var queryGraph = CsvTripleBuilder.getSparqlPrefixesStr();
+        var queryGraph = KGtripleBuilder.getSparqlPrefixesStr();
 
         queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
-        // console.log(query)
-
-        //  queryGraph=Buffer.from(queryGraph, 'utf-8').toString();
 
         var params = { query: queryGraph };
 
@@ -851,8 +859,6 @@ var CsvTripleBuilder = {
                 return callback(err);
             }
             totalTriples += triples.length;
-
-            //  console.log(totalTriples);
             return callback(null, totalTriples);
         });
     },
@@ -950,6 +956,7 @@ var CsvTripleBuilder = {
     createTriplesFromCsv: function (dirName, mappingFileName, options, callback) {
         var sparqlServerUrl;
         var output = "";
+        var clientSocketId = options.clientSocketId;
         async.series(
             [
                 // set sparql server
@@ -971,21 +978,22 @@ var CsvTripleBuilder = {
                     if (!options.deleteOldGraph) {
                         return callbackSeries();
                     }
-                    CsvTripleBuilder.clearGraph(options.graphUri, sparqlServerUrl, function (err, _result) {
+                    KGtripleBuilder.clearGraph(options.graphUri, sparqlServerUrl, function (err, _result) {
                         if (err) {
                             return callbackSeries(err);
                         }
-                        console.log("graph deleted");
+                        KGtripleBuilder.message(options.clientSocketId, "graph deleted");
+
                         callbackSeries();
                     });
                 },
                 // read mapping file and prepare mappings
                 function (callbackSeries) {
-                    var mappingsFilePath = path.join(__dirname, "../../data/" + dirName + "/" + mappingFileName);
+                    var mappingsFilePath = path.join(__dirname, "../data/" + dirName + "/" + mappingFileName);
                     var mappings = "" + fs.readFileSync(mappingsFilePath);
                     mappings = JSON.parse(mappings);
                     if (typeof options.dataLocation == "string") {
-                        mappings.csvDataFilePath = path.join(__dirname, "../../data/" + dirName + "/" + options.dataLocation);
+                        mappings.csvDataFilePath = path.join(__dirname, "../data/" + dirName + "/" + options.dataLocation);
                     } else {
                         mappings.datasource = options.dataLocation;
                     }
@@ -1064,12 +1072,12 @@ var CsvTripleBuilder = {
 
                     // add prefixes (for upper ontology)
                     if (mappings.prefixes) {
-                        for (var prefix in mappings.prefixes) CsvTripleBuilder.sparqlPrefixes[prefix] = "<" + mappings.prefixes[prefix] + ">";
+                        for (var prefix in mappings.prefixes) KGtripleBuilder.sparqlPrefixes[prefix] = "<" + mappings.prefixes[prefix] + ">";
                     }
 
                     var mappingsMap = { [mappings.csvDataFilePath]: mappings };
 
-                    CsvTripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function (err, result) {
+                    KGtripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -1104,4 +1112,4 @@ var CsvTripleBuilder = {
     },
 };
 
-module.exports = CsvTripleBuilder;
+module.exports = KGtripleBuilder;

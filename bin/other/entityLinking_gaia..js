@@ -1,6 +1,6 @@
 var fs = require("fs");
 var Util = require("../util..js");
-var tripleBuilder = require("../KG/CsvTripleBuilder.");
+var tripleBuilder = require("../KGtripleBuilder.");
 const util = require("../util.");
 const async = require("async");
 

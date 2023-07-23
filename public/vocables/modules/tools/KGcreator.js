@@ -728,8 +728,6 @@ var KGcreator = (function () {
     };
 
     self.addTripleToTA = function () {
-        $("#KGcreator_tripleMessageDiv").html("");
-
         if (self.RMLSyntaxOn) {
             return self.generateRML();
         }
@@ -791,10 +789,10 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         }
 
         if (subjectIsBlank) {
-            tripleObj.isSubjectBlankNode = subject;
+            tripleObj.isSubjectBlankNode = true;
         }
         if (objectIsBlank) {
-            tripleObj.isObjectBlankNode = object;
+            tripleObj.isObjectBlankNode = true;
         }
 
         if (isRestrictionCBX) {
@@ -1087,6 +1085,7 @@ self.saveMappings({classId:classId})
             }
         }
     };
+
     self.createTriples = function (test, _options) {
         MainController.UI.message("creating triples...");
         $("#KGcreator_dataSampleDiv").val("creating triples...");
@@ -1135,6 +1134,10 @@ self.saveMappings({classId:classId})
         }
         if (_options && _options.deleteTriples) {
             options.deleteTriples = true;
+        }
+
+        if (Config.clientSocketId) {
+            options.clientSocketId = Config.clientSocketId;
         }
 
         self.saveMappings(null, function (_err, _result) {
@@ -1667,7 +1670,6 @@ self.saveMappings({classId:classId})
             // Add other necessary prefixes here
         };
 
-        $("#KGcreator_tripleMessageDiv").html("");
         var subject = $("#KGcreator_subjectInput").val();
 
         var predicate = $("#editPredicate_propertyValue").val();
@@ -1874,6 +1876,11 @@ self.saveMappings({classId:classId})
                 rmlTextarea.value = rml;
             }
         }
+    };
+    self.socketMessage = function (message) {
+        //  console.log(message)
+        MainController.UI.message(message);
+        //  $("#KGcreator_dataSampleDiv").append(message+"\n")
     };
 
     return self;

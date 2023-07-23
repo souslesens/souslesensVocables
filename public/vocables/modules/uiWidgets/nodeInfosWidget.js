@@ -15,10 +15,12 @@ import Lineage_sources from "../tools/lineage/lineage_sources.js";
 var NodeInfosWidget = (function () {
     var self = {};
 
-    self.initDialog = function (sourceLabel, divId, callback) {
+    self.initDialog = function (sourceLabel, divId, options, callback) {
         self.currentSource = sourceLabel;
-        $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
-        $("#" + divId).dialog("open");
+        if (!options.noDialog) {
+            $("#" + divId).dialog("option", "title", " Node infos : source " + sourceLabel);
+            $("#" + divId).dialog("open");
+        }
         $("#" + divId).load("snippets/nodeInfosWidget.html", function () {
             $("#nodeInfosWidget_tabsDiv").tabs({
                 //  active: options.showAxioms ? 1 : 0,
@@ -63,15 +65,15 @@ var NodeInfosWidget = (function () {
         } else {
             self.currentSource = sourceLabel;
         }
+        Lineage_axioms_draw.currentSource = sourceLabel;
+        /*  if (!node ) {
+            self.initDialog(sourceLabel, divId,options function () {
 
-        if (!node) {
-            self.initDialog(sourceLabel, divId, function () {
-                Lineage_axioms_draw.currentSource = sourceLabel;
                 //   self.showNodeInfosToolbar(options);
             });
 
             return;
-        }
+        }*/
 
         if (typeof node == "object") {
             self.currentNode = node;
@@ -121,17 +123,15 @@ var NodeInfosWidget = (function () {
             self.visitedNodes.currentIndex = index;
         }
 
-        self.initDialog(sourceLabel, divId, function () {
+        self.initDialog(sourceLabel, divId, options, function () {
             if (true || !options.showAxioms) {
                 self.drawAllInfos(sourceLabel, nodeId, options, function (err, result) {
-                    common.getStackTrace();
                     if (callback) {
                         callback(err);
                     }
                     if (err) {
                         return alert(err);
                     }
-
                     self.showNodeInfosToolbar(options);
                 });
             }

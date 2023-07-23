@@ -596,6 +596,7 @@ common.fillSelectOptions("axiomsDraw_otherSourcesSelect",otherSources)*/
             keepNodePositionOnDrag: true,
             /* physics: {
 enabled:true},*/
+
             layoutHierarchical: {
                 direction: "LR",
                 sortMethod: "hubsize",
@@ -609,13 +610,15 @@ enabled:true},*/
 
                 nodeSpacing: yOffset,
             },
-            edges: {
-                smooth: {
-                    // type: "cubicBezier",
-                    type: "diagonalCross",
-                    forceDirection: "horizontal",
+            visjsOptions: {
+                edges: {
+                    smooth: {
+                        // type: "cubicBezier",
+                        type: "diagonalCross",
+                        forceDirection: "horizontal",
 
-                    roundness: 0.4,
+                        roundness: 0.4,
+                    },
                 },
             },
             onclickFn: Lineage_axioms_draw.onNodeClick,

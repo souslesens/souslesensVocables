@@ -118,15 +118,15 @@ var MainController = (function () {
             },
         });
         /*   $.getJSON("config/sources.json", function (json) {
-       Config.sources = json;
-      for(var sourceLabel in Config.sources){
-           if(Config.sources[sourceLabel].sparql_server && Config.sources[sourceLabel].sparql_server.url=="_default")
-               Config.sources[sourceLabel].sparql_server.url=Config.default_sparql_url
-       }
-       if (callback)
-           return callback()
+   Config.sources = json;
+  for(var sourceLabel in Config.sources){
+       if(Config.sources[sourceLabel].sparql_server && Config.sources[sourceLabel].sparql_server.url=="_default")
+           Config.sources[sourceLabel].sparql_server.url=Config.default_sparql_url
+   }
+   if (callback)
+       return callback()
 
-   });*/
+});*/
     };
     self.loadProfiles = function (callback) {
         $.ajax({
@@ -215,6 +215,7 @@ var MainController = (function () {
 
                     function (callbackSeries) {
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
+                        // return callbackSeries();
 
                         OntologyModels.registerSourcesModel(sources, function (err) {
                             callbackSeries(err);
@@ -487,9 +488,8 @@ return;*/
             $("#actionDivContolPanelDiv").html("");
             $("#rightPanelDivInner").html("");
 
-            Lineage_sources.setAllWhiteBoardSources(true);
-
             if (toolId == "lineage") {
+                Lineage_sources.setAllWhiteBoardSources(true);
                 $("#accordion").accordion("option", { active: 2 });
                 MainController.currentSource = null;
 

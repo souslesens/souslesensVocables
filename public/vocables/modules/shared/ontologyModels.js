@@ -2,6 +2,7 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Lineage_axioms_draw from "../tools/lineage/lineage_axioms_draw.js";
+import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 
 // eslint-disable-next-line no-global-assign
 var OntologyModels = (function () {
@@ -40,8 +41,21 @@ var OntologyModels = (function () {
                 var propsWithoutDomain = [];
                 var propsWithoutRange = [];
                 var inversePropsMap = [];
+
                 async.series(
                     [
+                        function (callbackSeries) {
+                            self.readModelOnServerCache(source, function (err, result) {
+                                if (result) {
+                                    Config.ontologiesVocabularyModels[source] = result;
+
+                                    return callbackEach();
+                                } else {
+                                    callbackSeries();
+                                }
+                            });
+                        },
+
                         // set properties
                         function (callbackSeries) {
                             var query =
@@ -74,6 +88,8 @@ var OntologyModels = (function () {
                                     }
                                     if (item.inverseProp) {
                                         inversePropsMap[item.prop.value] = item.inverseProp.value;
+
+                                        inversePropsMap[item.inverseProp.value] = item.prop.value;
                                     }
                                 });
 
@@ -157,40 +173,6 @@ var OntologyModels = (function () {
                             });
                         },
 
-                        //set inverse Props constraints
-                        function (callbackSeries) {
-                            for (var propId in inversePropsMap) {
-                                var propConstraints = Config.ontologiesVocabularyModels[source].constraints[propId];
-                                var inversePropConstraints = Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]];
-                                if (!propConstraints) {
-                                    propConstraints = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
-                                    Config.ontologiesVocabularyModels[source].constraints[propId] = propConstraints;
-                                }
-                                if (!inversePropConstraints) {
-                                    inversePropConstraints = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
-                                    Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]] = inversePropConstraints;
-                                }
-
-                                if (propConstraints.domain && !inversePropConstraints.range) {
-                                    Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].range = propConstraints.domain;
-                                    Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].rangeLabel = propConstraints.domainLabel;
-                                }
-                                if (propConstraints.range && !inversePropConstraints.domain) {
-                                    Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].domain = propConstraints.range;
-                                    Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].domainLabel = propConstraints.rangeLabel;
-                                }
-
-                                if (inversePropConstraints.domain && !propConstraints.range) {
-                                    Config.ontologiesVocabularyModels[source].constraints[propId].range = inversePropConstraints.domain;
-                                    Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = inversePropConstraints.domainLabel;
-                                }
-                                if (inversePropConstraints.range && !propConstraints.domain) {
-                                    Config.ontologiesVocabularyModels[source].constraints[propId].domain = inversePropConstraints.range;
-                                    Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = inversePropConstraints.rangeLabel;
-                                }
-                            }
-                            callbackSeries();
-                        },
                         // set retrictions constraints
                         function (callbackSeries) {
                             // only relations  declared in sources.json
@@ -226,6 +208,12 @@ var OntologyModels = (function () {
                             });
                         },
 
+                        //set inverse Props constraints
+                        function (callbackSeries) {
+                            self.setInversePropertiesConstaints(source, inversePropsMap);
+                            callbackSeries();
+                        },
+
                         //set inherited Constraints
                         function (callbackSeries) {
                             if (!Config.sources[source] || !Config.topLevelOntologies[source]) {
@@ -250,33 +238,42 @@ var OntologyModels = (function () {
 
                         //set inherited domains
                         function (callbackSeries) {
-                            if (false && propsWithoutDomain.length == 0) {
+                            var props = propsWithoutDomain.concat(propsWithoutRange);
+                            if (props.length == 0) {
                                 return callbackSeries();
                             }
-                            var props = propsWithoutDomain.concat(propsWithoutRange);
-                            Sparql_OWL.getPropertiesInheritedConstraints(source, props, {}, function (err, propsMap) {
+                            Sparql_OWL.getPropertiesInheritedConstraints(source, props, { withoutImports: 0 }, function (err, propsMap) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
 
-                                for (var propId in propsMap) {
-                                    var constraint = propsMap[propId];
-                                    if (!Config.ontologiesVocabularyModels[source].constraints[propId]) {
-                                        Config.ontologiesVocabularyModels[source].constraints[propId] = { domain: "", range: "" };
-                                    }
+                                // for (var propId in Config.ontologiesVocabularyModels[source].properties) {
+                                Config.ontologiesVocabularyModels[source].properties.forEach(function (prop) {
+                                    var propId = prop.id;
 
-                                    if (constraint.domain && !Config.ontologiesVocabularyModels[source].constraints[propId].domain) {
-                                        Config.ontologiesVocabularyModels[source].constraints[propId].domain = constraint.domain;
-                                        Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = constraint.domainLabel;
-                                        Config.ontologiesVocabularyModels[source].constraints[propId].domainParentProperty = constraint.parentProp;
+                                    if (propId == "http://rds.posccaesar.org/ontology/lis14/rdl/activeParticipantIn") {
+                                        var x = 3;
                                     }
+                                    var inheritedConstaint = propsMap[propId];
+                                    if (inheritedConstaint) {
+                                        if (!Config.ontologiesVocabularyModels[source].constraints[propId]) {
+                                            Config.ontologiesVocabularyModels[source].constraints[propId] = { domain: "", range: "" };
+                                        }
 
-                                    if (constraint.range && !Config.ontologiesVocabularyModels[source].constraints[propId].range) {
-                                        Config.ontologiesVocabularyModels[source].constraints[propId].range = constraint.range;
-                                        Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = constraint.rangeLabel;
-                                        Config.ontologiesVocabularyModels[source].constraints[propId].rangeParentProperty = constraint.parentProp;
+                                        // inheritance but no overload of constraint
+                                        if (inheritedConstaint.domain && !Config.ontologiesVocabularyModels[source].constraints[propId].domain) {
+                                            Config.ontologiesVocabularyModels[source].constraints[propId].domain = inheritedConstaint.domain;
+                                            Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = inheritedConstaint.domainLabel;
+                                            Config.ontologiesVocabularyModels[source].constraints[propId].domainParentProperty = inheritedConstaint.parentProp;
+                                        }
+
+                                        if (inheritedConstaint.range && !Config.ontologiesVocabularyModels[source].constraints[propId].range) {
+                                            Config.ontologiesVocabularyModels[source].constraints[propId].range = inheritedConstaint.range;
+                                            Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = inheritedConstaint.rangeLabel;
+                                            Config.ontologiesVocabularyModels[source].constraints[propId].rangeParentProperty = inheritedConstaint.parentProp;
+                                        }
                                     }
-                                }
+                                });
 
                                 return callbackSeries();
                             });
@@ -294,6 +291,12 @@ var OntologyModels = (function () {
                             return callbackSeries();
                         },
 
+                        //set inverse Props constraints
+                        function (callbackSeries) {
+                            self.setInversePropertiesConstaints(source, inversePropsMap);
+                            callbackSeries();
+                        },
+
                         // set transSourceRangeAndDomainLabels
                         function (callbackSeries) {
                             if (!Config.sources[source]) {
@@ -309,19 +312,13 @@ var OntologyModels = (function () {
                                     classes.push(constraint.range);
                                 }
                             }
-                            var filter = Sparql_common.setFilter("id", classes);
-                            Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, null, function (err, result) {
+                            if (classes.length == 0) {
+                                return callbackSeries();
+                            }
+                            Sparql_OWL.getLabelsMapFromLabelsGraph(classes, function (err, labelsMap) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
-                                var labelsMap = {};
-                                result.forEach(function (item) {
-                                    if (item.label) {
-                                        labelsMap[item.id.value] = item.label.value;
-                                    } else {
-                                        labelsMap[item.id.value] = Sparql_common.getLabelFromURI(item.id.value);
-                                    }
-                                });
                                 for (var propId in Config.ontologiesVocabularyModels[source].constraints) {
                                     var constraint = Config.ontologiesVocabularyModels[source].constraints[propId];
                                     if (labelsMap[constraint.domain]) {
@@ -334,6 +331,33 @@ var OntologyModels = (function () {
 
                                 return callbackSeries();
                             });
+
+                            /*
+var filter = Sparql_common.setFilter("id", classes);
+Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, null, function (err, result) {
+  if (err) {
+    return callbackSeries(err);
+  }
+  var labelsMap = {};
+  result.forEach(function (item) {
+    if (item.label) {
+      labelsMap[item.id.value] = item.label.value;
+    } else {
+      labelsMap[item.id.value] = Sparql_common.getLabelFromURI(item.id.value);
+    }
+  });
+  for (var propId in Config.ontologiesVocabularyModels[source].constraints) {
+    var constraint = Config.ontologiesVocabularyModels[source].constraints[propId];
+    if (labelsMap[constraint.domain]) {
+      Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = labelsMap[constraint.domain];
+    }
+    if (labelsMap[constraint.range]) {
+      Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = labelsMap[constraint.range];
+    }
+  }
+
+  return callbackSeries();
+});*/
                         },
 
                         //register source in Config.sources
@@ -342,6 +366,14 @@ var OntologyModels = (function () {
                                 Config.sources[source] = { graphUri: graphUri, controllerName: Sparql_OWL, controller: Sparql_OWL, sparql_server: { url: Config.default_sparql_url } };
                             }
                             return callbackSeries();
+                        },
+                        function (callbackSeries) {
+                            if (true || Config.basicVocabularies[source]) {
+                                self.writeModelOnServerCache(source, Config.ontologiesVocabularyModels[source], function (err, result) {
+                                    if (err) console.log(err);
+                                    return callbackSeries();
+                                });
+                            }
                         },
                     ],
                     function (err) {
@@ -357,6 +389,39 @@ var OntologyModels = (function () {
         );
     };
 
+    self.setInversePropertiesConstaints = function (source, inversePropsMap) {
+        for (var propId in inversePropsMap) {
+            var propConstraints = Config.ontologiesVocabularyModels[source].constraints[propId];
+            var inversePropConstraints = Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]];
+            if (!propConstraints) {
+                propConstraints = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+                Config.ontologiesVocabularyModels[source].constraints[propId] = propConstraints;
+            }
+            if (!inversePropConstraints) {
+                inversePropConstraints = { domain: "", range: "", domainLabel: "", rangeLabel: "" };
+                Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]] = inversePropConstraints;
+            }
+
+            if (propConstraints.domain && !inversePropConstraints.range) {
+                Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].range = propConstraints.domain;
+                Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].rangeLabel = propConstraints.domainLabel;
+            }
+            if (propConstraints.range && !inversePropConstraints.domain) {
+                Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].domain = propConstraints.range;
+                Config.ontologiesVocabularyModels[source].constraints[inversePropsMap[propId]].domainLabel = propConstraints.rangeLabel;
+            }
+
+            if (inversePropConstraints.domain && !propConstraints.range) {
+                Config.ontologiesVocabularyModels[source].constraints[propId].range = inversePropConstraints.domain;
+                Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = inversePropConstraints.domainLabel;
+            }
+            if (inversePropConstraints.range && !propConstraints.domain) {
+                Config.ontologiesVocabularyModels[source].constraints[propId].domain = inversePropConstraints.range;
+                Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = inversePropConstraints.rangeLabel;
+            }
+        }
+    };
+
     self.unRegisterSourceModel = function () {
         var basicsSources = Object.keys(Config.basicVocabularies);
         for (var source in Config.ontologiesVocabularyModels) {
@@ -364,6 +429,44 @@ var OntologyModels = (function () {
                 delete Config.ontologiesVocabularyModels[source];
             }
         }
+    };
+
+    self.readModelOnServerCache = function (source, callback) {
+        const params = new URLSearchParams({
+            source: source,
+        });
+
+        var x = params.toString();
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/ontologyModels?" + params.toString(),
+            dataType: "json",
+
+            success: function (data, _textStatus, _jqXHR) {
+                return callback(null, data);
+            },
+            error: function (err) {
+                return callback(err);
+            },
+        });
+    };
+    self.writeModelOnServerCache = function (source, model, callback) {
+        var payload = {
+            source: source,
+            model: model,
+        };
+
+        $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/ontologyModels`,
+            data: payload,
+            success: function (data, _textStatus, _jqXHR) {
+                return callback(null, data);
+            },
+            error: function (err) {
+                return callback(err);
+            },
+        });
     };
 
     self.getAllowedPropertiesBetweenNodes = function (source, startNodeId, endNodeId, callback) {
@@ -381,6 +484,11 @@ var OntologyModels = (function () {
         var propertiesMatchingEndNode = [];
         var filter = "filter (?superClass not in (<http://purl.obolibrary.org/obo/BFO_0000001>,<http://purl.obolibrary.org/obo/BFO_0000002>,<http://purl.obolibrary.org/obo/BFO_0000003>))";
         var duplicateProps = [];
+
+        var validConstraints = {};
+        var startNodeAncestorIds = [];
+        var endNodeAncestorIds = [];
+
         async.series(
             [
                 function (callbackSeries) {
@@ -393,6 +501,9 @@ var OntologyModels = (function () {
                     });
                 },
                 function (callbackSeries) {
+                    if (!endNodeId) {
+                        return callbackSeries();
+                    }
                     Sparql_OWL.getNodesAncestors(source, [endNodeId], { excludeItself: 0, filter: filter }, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
@@ -414,25 +525,19 @@ var OntologyModels = (function () {
                     var allDomains = {};
                     var allRanges = {};
 
-                    var validConstraints = {};
-
-                    var startNodeAncestorIds = [];
                     hierarchies[startNodeId].forEach(function (item) {
                         startNodeAncestorIds.push(item.superClass.value);
                     });
 
-                    var endNodeAncestorIds = [];
-
-                    hierarchies[endNodeId].forEach(function (item, startNodeIndex) {
-                        endNodeAncestorIds.push(item.superClass.value);
-                    });
+                    if (endNodeId) {
+                        hierarchies[endNodeId].forEach(function (item, startNodeIndex) {
+                            endNodeAncestorIds.push(item.superClass.value);
+                        });
+                    }
 
                     allSources.forEach(function (_source) {
                         var sourceConstraints = Config.ontologiesVocabularyModels[_source].constraints;
                         for (var property in sourceConstraints) {
-                            if (property == "https://www.inf.ufrgs.br/bdi/ontologies/geologicalspatialrelationsontology#UFRGS:GeologicalSpatialRelationsOntology_has_tangential_proper_spatial_part") {
-                                var x = 3;
-                            }
                             var constraint = sourceConstraints[property];
                             constraint.source = _source;
                             var domainOK = false;
@@ -441,7 +546,7 @@ var OntologyModels = (function () {
 
                                 if (constraint.domain) {
                                     if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
-                                        if (!constraint.range) {
+                                        if (!constraint.range || !endNodeId) {
                                             propertiesMatchingStartNode.push(property);
                                         } else {
                                             domainOK = true;
@@ -500,9 +605,9 @@ var OntologyModels = (function () {
                     });
 
                     /*   validProperties = propertiesMatchingBoth;
-             validProperties = common.array.union(validProperties, propertiesMatchingStartNode);
-             validProperties = common.array.union(validProperties, propertiesMatchingEndNode);
-             validProperties = common.array.union(validProperties, noConstaintsArray);*/
+validProperties = common.array.union(validProperties, propertiesMatchingStartNode);
+validProperties = common.array.union(validProperties, propertiesMatchingEndNode);
+validProperties = common.array.union(validProperties, noConstaintsArray);*/
 
                     validConstraints = { both: {}, domain: {}, range: {}, noConstraints: {} };
 
@@ -529,14 +634,86 @@ var OntologyModels = (function () {
                 },
             ],
             function (err) {
-                if (duplicateProps.length > 0) MainController.UI.message(duplicateProps.length + " DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN");
+                if (duplicateProps.length > 0) {
+                    MainController.UI.message(duplicateProps.length + " DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN");
+                }
                 console.warn("DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN\r");
                 duplicateProps.forEach(function (item) {
                     console.warn(item);
                 });
-                return callback(err, validConstraints);
+                return callback(err, { constraints: validConstraints, nodes: { startNode: startNodeAncestorIds, endNode: endNodeAncestorIds } });
             }
         );
+    };
+
+    self.getInferredModel = function (source, options, callback) {
+        if (!Config.ontologiesVocabularyModels[source]) {
+            Config.ontologiesVocabularyModels[source];
+        }
+        if (false && Config.ontologiesVocabularyModels[source].inferredClassModel) {
+            return callback(null, Config.ontologiesVocabularyModels[source].inferredClassModel);
+        } else {
+            var sourceGraphUri = Config.sources[source].graphUri;
+            var sourceGraphUriFrom = Sparql_common.getFromStr(source, true, true);
+            var importGraphUriFrom = Sparql_common.getFromStr(source, true, false);
+
+            var query =
+                "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+                "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+                "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+                "    SELECT   distinct  ?prop ?sClass  ?oClass ?propLabel ?sClassLabel ?oClassLabel \n" +
+                sourceGraphUriFrom +
+                " " +
+                importGraphUriFrom +
+                "  \n" +
+                " WHERE {" +
+                "   graph ?g3 {\n" +
+                "      ?sparent rdf:type ?stype filter (?stype in (owl:Class))\n" +
+                "    optional { ?sparent rdfs:subClassOf ?sparentClass filter (!isBlank(?sparentClass))}\n" +
+                "    bind (if(bound(?sparentClass) && ?g3=<" +
+                sourceGraphUri +
+                ">,?sparentClass,?sparent) as ?sClass)  optional{?sClass rdfs:label ?sClassLabel}\n" +
+                "    \n" +
+                "    \n" +
+                "       ?oparent rdf:type ?otype filter (?otype in (owl:Class))\n" +
+                "    optional { ?oparent rdfs:subClassOf ?oparentClass filter (!isBlank(?oparentClass))}\n" +
+                "    bind (if(bound(?oparentClass) && ?g3=<" +
+                sourceGraphUri +
+                ">,?oparentClass,?oparent) as ?oClass)  optional{?oClass rdfs:label ?oClassLabel}\n" +
+                "    \n" +
+                "  }\n" +
+                "  \n" +
+                "  \n" +
+                "      graph ?g2{\n" +
+                "    ?sparent rdf:type ?stype filter (?stype in (owl:Class))\n" +
+                "    \n" +
+                "  }\n" +
+                "  graph ?g3{\n" +
+                "      ?oparent rdf:type ?otype filter (?otype in (owl:Class))\n" +
+                "  }\n" +
+                "   graph <" +
+                sourceGraphUri +
+                ">  {\n" +
+                "    ?s ?prop ?o.\n" +
+                "     ?s rdf:type+ ?sparent.  \n" +
+                "       ?o rdf:type+ ?oparent.  \n" +
+                "  }\n" +
+                "    graph  ?g{\n" +
+                "     \n" +
+                "        ?prop  rdf:type  owl:ObjectProperty. optional{?prop rdfs:label ?propLabel} }\n" +
+                "  } LIMIT 10000";
+
+            let url = Config.default_sparql_url + "?format=json&query=";
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+                if (err) {
+                    return callback(err);
+                }
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
+
+                Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
+                return callback(null, result.results.bindings);
+            });
+        }
     };
 
     return self;

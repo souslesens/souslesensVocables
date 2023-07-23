@@ -11,6 +11,7 @@
 
         <script src="./js/external/async.js" charset="utf-8"></script>
         <script src="./js/external/jsTree/jstree.js" charset="utf-8"></script>
+
         <script type="text/javascript" src="./js/external/visjs/vis-network.min.js"></script>
         <link href="js/external/visjs/vis-network.css" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
@@ -19,6 +20,11 @@
         <script src="js/external/download.js"></script>
         <script src="js/external/sunburst.js"></script>
         <script src="js/external/d3/d3.js"></script>
+
+        <!-- <script src="js/external/websocket.js"></script>-->
+        <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
+
+        <script src="js/socketIoProxy.js"></script>
 
         <script type="module" src="modules/shared/common.js" charset="utf-8"></script>
         <script type="module" src="modules/graph/visjsGraph2.js"></script>
@@ -193,7 +199,7 @@
 
                     authentication.init();
 
-                    //  SocketProxy.init()
+                    //SocketProxy.init()
 
                     if (err) {
                         return console.error(err);
@@ -224,7 +230,7 @@
                     $("#smallDialogDiv").dialog({
                         autoOpen: false,
                         height: 500,
-                        width: 400,
+                        width: 700,
                         modal: true,
                     });
 
@@ -329,27 +335,8 @@
                 border: #6e2500 1px groove;
             }
 
-            .infosTable {
-                background-color: #d9d9d9;
-                padding: 5px;
-                width: 100%;
-            }
 
-            .detailsCellName {
-                padding: 2px;
-                max-width: 400px;
-                text-align: right;
-                width: 250px;
-            }
 
-            .detailsCellValue {
-                padding: 2px;
-                border-radius: 3px;
-                border: 1px solid black;
-                background-color: white;
-                max-width: 400px;
-                line-height: 1.8;
-            }
 
             .messageDiv {
                 font-weight: normal;
@@ -492,15 +479,6 @@
                         <div id="tools-panel" style="margin: 5px" class="max-height">
                             <div class="max-height" id="toolsTreeDiv" class="jstree"></div>
                         </div>
-
-                        <!--    <h3><span class="title">Sources </span></h3>
-        <div id="sourcesPanel" style="margin: 5px" class="max-height">
-            <div id="sourceDivControlPanelDiv" style="min-height: 50px; margin-left: 10px"></div>
-            <div>Search : <input id="Lineage_SearchSourceInput" value="" style="width: 200px; font-size: 12px; margin: 3px; padding: 3px" /></div>
-            <div id="sourcesTreeDivContainer" style="overflow: auto" class="jstreeContainer XXXmax-height">
-                <div id="sourcesTreeDiv"></div>
-            </div>
-        </div>-->
 
                         <h3><span class="title" id="toolPanelLabel"> </span></h3>
                         <div id="toolPanelDiv" style="margin: 5px; height: 900px !important; overflow: auto" class="max-height">

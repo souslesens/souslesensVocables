@@ -415,7 +415,7 @@ setTimeout(function () {
                     self.drawSunBurst(searchResultArray, words, {}, function (_err) {
                         // pass
                     });
-                }, 500);
+                }, 500)
             }
         );
     };

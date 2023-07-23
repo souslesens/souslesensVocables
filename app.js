@@ -85,8 +85,16 @@ if (config.auth !== "disabled") {
  */
 
 // Static content
-app.use(express.static(path.join(__dirname, "public")));
-app.use(express.static(path.join(__dirname, "mainapp/static")));
+app.use("/vocables", express.static(path.join(__dirname, "public/vocables/dist")));
+app.use("/assets", express.static(path.join(__dirname, "public/vocables/dist/assets")));
+app.use("/vocables/browse.html", express.static(path.join(__dirname, "public/vocables/browse.html")));
+app.use("/mainapp/assets", express.static(path.join(__dirname, "mainapp/static/assets")));
+app.use("/vocables/images", express.static(path.join(__dirname, "public/vocables/images")));
+app.use("/vocables/snippets", express.static(path.join(__dirname, "public/vocables/snippets")));
+app.use("/icons", express.static(path.join(__dirname, "public/vocables/icons")));
+app.use("/vocables/icons", express.static(path.join(__dirname, "public/vocables/icons")));
+app.use("/vocables/scripts", express.static(path.join(__dirname, "public/vocables/js/external")));
+app.use("/vocables/plugins", express.static(path.join(__dirname, "plugins")));
 
 async function loggedIn(req, _res, next) {
     if (req.isAuthenticated || config.auth === "disabled") {

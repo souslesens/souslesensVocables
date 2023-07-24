@@ -2,17 +2,18 @@ import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_relationFilter from "./lineage_relationFilter.js";
 
-self.lineageVisjsGraph;
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Export from "../../shared/export.js";
 import Lineage_classes from "./lineage_classes.js";
 import Sparql_CRUD from "../../sparqlProxies/sparql_CRUD.js";
+import MainController from "../../shared/mainController.js";
 
 // eslint-disable-next-line no-global-assign
 var Lineage_relations = (function () {
     var self = {};
     self.whiteboardSourcesFromStatus = false;
     self.showDrawRelationsDialog = function (caller) {
+        MainController.UI.showHideRightPanel("hide")
         self.drawRelationCurrentCaller = caller;
 
         $("#mainDialogDiv").dialog("open");

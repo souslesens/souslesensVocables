@@ -148,8 +148,8 @@ var Ontocommons = (function () {
         }
         var rdfUrlEncoded = encodeURIComponent(rdfUrlUrl);
         var slsvUrl = window.location.protocol + "//" + window.location.host;
-        var slsvUrl = "https://slsvasso.org/vocables/";
-        //   var slsvUrl = "http://51.178.39.209/vocables/";
+      //  var slsvUrl = "https://slsvasso.org/vocables/";
+        var slsvUrl = "http://51.178.39.209/vocables/";
         var targetUrl = slsvUrl + "?tool=lineage&source=" + ontologyId + "&rdfUrl=" + rdfUrlEncoded + "&reload=" + reload + "&editable=" + editable;
         $("#slsv_iframe").attr("src", targetUrl);
     };
@@ -210,7 +210,7 @@ var Ontocommons = (function () {
                 if (callback) {
                     return callback(err);
                 }
-                alert(err.responseText);
+               // alert(err.responseText);
             },
         });
     };

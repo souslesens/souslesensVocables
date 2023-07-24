@@ -43,15 +43,12 @@
     "jowlServer": {
         "url": "http://xxx"
     },
-    "annotator": {
-        "tikaServerUrl": "http://xxx:41000",
-        "spacyServerUrl": "http://xxx:8000/pos",
-        "parsedDocumentsHomeDir": null,
-        "uploadDirPath": null
-    },
-    "wiki": {
-        "url": "https://wiki.tsf.logilab.fr/"
-    },
+
+       "logger": {
+            "errorsLogPath": "logs/error.log",
+            "usersLogPath": "logs/vocables.log"
+        },
+
     "authenticationDatabase": {
         "user": "",
         "password": "",

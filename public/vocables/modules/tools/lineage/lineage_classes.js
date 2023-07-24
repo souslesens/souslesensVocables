@@ -321,6 +321,7 @@ var Lineage_classes = (function () {
     };
 
     self.drawTopConcepts = function (/** @type {string} */ source, /** @type {(arg0: string | undefined) => any} */ callback) {
+        MainController.UI.showHideRightPanel("hide")
         self.currentExpandLevel = 1;
 
         if (!source) {

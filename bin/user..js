@@ -23,14 +23,6 @@ const user = {
                 authSource: "json",
                 auth: {},
             };
-        }
-        if (config.auth === "public_read") {
-            result = {
-                logged: true,
-                user: { login: "admin", groups: ["admin"] },
-                authSource: "json",
-                auth: {},
-            };
         } else if (logged) {
             const findUser = await userModel.findUserAccount(reqUser.login);
             if (findUser === undefined) {

@@ -49,15 +49,17 @@ Checkout the latest [release](https://github.com/souslesens/souslesensVocables/r
 git checkout x.x.x  # replace with release number (e.g. 1.15.0)
 ```
 
+Create the `config` directory from the config_templates directory
+
+```bash
+cp -R  config_templates config
+```
 
 Create a `.env` file from the template
 
 ```bash
 cp env.template .env
 ```
-
-
-
 
 Edit the `.env` file:
 

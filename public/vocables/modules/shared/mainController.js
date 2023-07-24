@@ -629,11 +629,19 @@ return;*/
             self.previousPanelLabel = panelLabel;
         },
 
-        showHideRightPanel: function (show) {
+        showHideRightPanel: function (state) {
             var left = $("#rightPanelDiv").position().left;
             var w = $(window).width();
-
-            if (show || w - left < 100) {
+            var show = false;
+            if (!state) {
+                if (w - left < 100) show = true;
+                else show = false;
+            } else if (state == "show") {
+                show = true;
+            } else if (state == "hide") {
+                show = false;
+            }
+            if (show) {
                 var lw = $("#rightPanelDiv").width();
                 if (lw < 100) {
                     return;
@@ -644,6 +652,7 @@ return;*/
                 $("#graphDiv").css("zIndex", 19);
                 $("#rightPanelDiv_searchIconInput").attr("src", "./icons/slideRight.png");
             } else {
+                //hide panel
                 var newLeft = "" + w + "px";
                 $("#rightPanelDiv").css("left", newLeft);
                 $("#rightPanelDiv_searchIconInput").attr("src", "./icons/search.png");

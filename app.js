@@ -60,7 +60,7 @@ app.use(
         resave: false,
         saveUninitialized: false,
         cookie: {
-            maxAge: config.cookieMaxAge ? config.cookieMaxAge : 2629800000,
+            maxAge: config.cookieMaxAge ? config.cookieMaxAge : config.cookieMaxAge,
             sameSite: config.cookieSameSite ? config.cookieSameSite : false,
             secure: config.cookieSecure ? config.cookieSecure : false,
         },

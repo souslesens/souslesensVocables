@@ -7,7 +7,7 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 // eslint-disable-next-line no-global-assign
 var OntologyModels = (function () {
     self.registerSourcesModel = function (sources, callback) {
-        MainController.UI.message("loading ontology models")
+        MainController.UI.message("loading ontology models");
         if (!Array.isArray(sources)) {
             sources = [sources];
         }
@@ -383,7 +383,7 @@ Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, 
                 );
             },
             function (err) {
-                MainController.UI.message("",true)
+                MainController.UI.message("", true);
                 if (callback) {
                     return callback(err);
                 }

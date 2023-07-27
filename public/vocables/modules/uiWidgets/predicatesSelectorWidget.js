@@ -199,11 +199,15 @@ var PredicatesSelectorWidget = (function() {
 
   self.getSelectedProperty = function() {
     var property = $("#editPredicate_propertyValue").val();
+
     if (property.indexOf("xsd:") == 0) {
       // get operator
       return  "owl:hasValue"
     }else{
+      if(property.indexOf("http")==0)
       return "<"+property+">";
+      else
+        return property;
     }
 
   };

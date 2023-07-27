@@ -1016,7 +1016,7 @@ propertyStr = line[item.p];
    * Generate triples from a CSV file
    *
    * @param {string} dirName - the subdirectory of <src-dir>/data where to look for <mappingFileName>
-   * @param {string} mappingFileName - name of the csv file to generate triples from
+   * @param {string} mappingFileName - name of the csv file to generate triples from (optional if null create triples from all mappings)
    * @param {Object} options - keys: sparqlServerUrl, deleteOldGraph, graphUri
    * @param {Function} callback - Node-style async Function called to proccess result or handle error
    */
@@ -1024,6 +1024,7 @@ propertyStr = line[item.p];
     var sparqlServerUrl;
     var output = "";
     var clientSocketId = options.clientSocketId;
+    var allMappingFiles=[]
 
     KGtripleBuilder.stopCreateTriples=false
     SocketManager.clientSockets[options.clientSocketId].on("KGCreator",function(message){
@@ -1062,8 +1063,32 @@ propertyStr = line[item.p];
             callbackSeries();
           });
         },
+
+        function(callbackSeries) {
+         if( mappingFileName) {
+           allMappingFiles = [mappingFileName]
+
+           return callbackSeries()
+         }
+
+          var mappingsDirPath = path.join(__dirname, "../data/" + dirName );
+          var files = "" + fs.readDirSync(mappingsFilePath);
+          files.forEach(function(file){
+            if(file.indexOf(".json")>-1){
+              allMappingFiles.push(file)
+            }
+          })
+
+          return callbackSeries()
+
+        },
+
+
         // read mapping file and prepare mappings
         function(callbackSeries) {
+
+        async.eachSeries( allMappingFiles,function(mappingFileName,callbackEach){
+
           var mappingsFilePath = path.join(__dirname, "../data/" + dirName + "/" + mappingFileName);
           var mappings = "" + fs.readFileSync(mappingsFilePath);
           mappings = JSON.parse(mappings);
@@ -1166,6 +1191,9 @@ propertyStr = line[item.p];
             }
             callbackSeries();
           });
+        },function(err){
+          callbackEach(err)
+        })
         }
       ],
       function(err) {

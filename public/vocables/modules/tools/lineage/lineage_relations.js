@@ -325,7 +325,11 @@ var Lineage_relations = (function () {
         }
         // manage drawing at the end off all visjs query
         options.returnVisjsData = true;
-        var existingNodes = options.output == "table" ? {} : Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+        var existingNodes = {}
+        if(options.output == "table")
+            existingNodes= {}
+        else if( Lineage_classes.lineageVisjsGraph &&  Lineage_classes.lineageVisjsGraph.getExistingIdsMap )
+            existingNodes=  Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
         var allVisjsData = { nodes: [], edges: [] };
 
         function concatVisjsdata(visjsData) {

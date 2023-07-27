@@ -627,7 +627,7 @@ if (callback) return callback(err);
 
     // var dateTime='2000-01-15T00:00:00'
 
-    self.dateToRDFString = function (date) {
+    self.dateToRDFString = function (date,time) {
         var str = "";
         if (date instanceof Date && isFinite(date)) {
             var month = "" + (date.getMonth() + 1);
@@ -650,7 +650,9 @@ if (callback) return callback(err);
             if (sec.length == 1) {
                 sec = "0" + sec;
             }
-            str = date.getFullYear() + "-" + month + "-" + day + "T" + hour + ":" + min + ":" + sec;
+            str = date.getFullYear() + "-" + month + "-" + day ;
+            if(time)
+                str+= "T" + hour + ":" + min + ":" + sec;
         } else {
             str = "";
         }
@@ -813,9 +815,17 @@ if (callback) return callback(err);
     };
 
     self.setDatePickerOnInput = function (inputId, options) {
-        $("#" + inputId).datepicker({});
-        $("#" + inputId).datepicker("option", "dateFormat", "yy-mm-dd");
+    $("#" + inputId).datepicker({"dateFormat": "yy-mm-dd"});
+
+
     };
+    self.unsetDatePickerOnInput = function (inputId, options) {
+        if( $("#" + inputId).datepicker &&  $("#" + inputId).datepicker.destroy)
+        $("#" + inputId).datepicker. destroy();
+
+    };
+
+
 
     return self;
 })();

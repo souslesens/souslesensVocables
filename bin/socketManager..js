@@ -13,5 +13,6 @@ var SocketManager = {
             SocketManager.clientSockets[clientSocketId].emit(channel, message);
         }
     },
+
 };
 module.exports = SocketManager;

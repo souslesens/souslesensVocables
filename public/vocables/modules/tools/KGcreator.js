@@ -622,11 +622,16 @@ var KGcreator = (function () {
                 },
                 function (callbackSeries) {
                     $("#editPredicate_mainDiv").remove();
-                    $("#sharedPredicatesPanel").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
-                        PredicatesSelectorWidget.init(KGcreator.currentSlsvSource, function () {
-                            PredicatesSelectorWidget.onSelectObjectFn = function (value) {};
-                            PredicatesSelectorWidget.onSelectPropertyFn = function (value) {};
-                        });
+
+                    PredicatesSelectorWidget.load("sharedPredicatesPanel",KGcreator.currentSlsvSource,function () {
+
+                            PredicatesSelectorWidget.init(KGcreator.currentSlsvSource, function () {
+                                PredicatesSelectorWidget.onSelectObjectFn = function (value) {};
+                                PredicatesSelectorWidget.onSelectPropertyFn = function (value) {};
+                            });
+
+
+
 
                         var html =
                             "<div> " +
@@ -717,9 +722,9 @@ var KGcreator = (function () {
             o: column,
             isString: true,
         });
-        if (!self.currentJsonObject.transform[column]) {
+      /*  if (!self.currentJsonObject.transform[column]) {
             self.currentJsonObject.transform[column] = "function{if (value=='null') return null;if(mapping.isString && role=='o') return value; else return '" + column + "_'+value;}";
-        }
+        }*/
 
         self.mainJsonEditor.load(self.currentJsonObject);
         self.mainJsonEditorModified = true;
@@ -1162,7 +1167,7 @@ self.saveMappings({classId:classId})
 
             $.ajax({
                 type: "POST",
-                url: `${Config.apiUrl}/kg/csv/triples`,
+                url: `${Config.apiUrl}/kg/triples`,
                 data: payload,
                 dataType: "json",
                 success: function (result, _textStatus, _jqXHR) {
@@ -1882,6 +1887,11 @@ self.saveMappings({classId:classId})
         MainController.UI.message(message);
         //  $("#KGcreator_dataSampleDiv").append(message+"\n")
     };
+
+    self.stopCreateTriples=function(){
+       socket.emit("KGCreator", "stopCreateTriples");
+        MainController.UI.message("import interrupted by user",true);
+    }
 
     return self;
 })();

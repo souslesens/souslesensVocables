@@ -35,7 +35,7 @@
                 onchange="PredicatesSelectorWidget.onSelectPredicateProperty($(this).val())"
             ></select>
         </div>
-        <input id="editPredicate_propertyValue" style="width: 95%" /><br />
+        <input id="editPredicate_propertyValue" style="width: 95%;background-color: beige;" /><br />
         <div id="editPredicate_customPredicateContentDiv"></div>
     </div>
 
@@ -58,7 +58,8 @@
             <select id="editPredicate_objectSelect" style="min-width: 200px; background-color: #ddd" onchange="PredicatesSelectorWidget.onSelectCurrentVocabObject($(this).val())"></select>
         </div>
         <div></div>
-        <textarea id="editPredicate_objectValue" style="width: 95%"></textarea>
+        <textarea id="editPredicate_objectValueTA" style="width: 95%;display:none" ></textarea>
+        <input id="editPredicate_objectValue" style="width: 95%;background-color: beige;"></input>
         <div id="editPredicate_customContentDiv"></div>
     </div>
 </div>

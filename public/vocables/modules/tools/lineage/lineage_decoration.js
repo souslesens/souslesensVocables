@@ -328,51 +328,6 @@ var Lineage_decoration = (function () {
         self.drawLegend(newJstreeData);
     };
 
-    self.showDecorateDialog = function () {
-        $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").load("snippets/lineage/lineage_decorateDialog.html", function () {
-            $("#lineage_decorate_applyButton").bind("click", Lineage_decoration.decorateNodes);
-            common.fillSelectWithColorPalette("lineage_decorate_colorSelect");
-            var shapes = ["dot", "square", "box", "text", "diamond", "star", "triangle", "ellipse", "circle", "database", "triangleDown", "hexagon"];
-            common.fillSelectOptions("lineage_decorate_shapeSelect", shapes, true);
-        });
-    };
-    self.decorateNodes = function () {
-        var selection = $("#lineage_decorate_selectionSelect").val();
-        var nodes;
-        if (selection == "Last added nodes") {
-            nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
-        } else if (selection == "All nodes") {
-            nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
-        } else if (selection == "Selected nodes") {
-            nodes = Lineage_selection.selectedNodes;
-        }
-
-        $("#smallDialogDiv").dialog("close");
-        var newIds = [];
-
-        var color = $("#lineage_decorate_colorSelect").val();
-        var shape = $("#lineage_decorate_shapeSelect").val();
-        var size = $("#lineage_decorate_sizeInput").val();
-        nodes.forEach(function (node) {
-            if (!node.data) {
-                return;
-            }
-            var obj = { id: node.id };
-            if (color) {
-                obj.color = color;
-            }
-            if (shape) {
-                obj.shape = shape;
-            }
-            if (size) {
-                obj.size = parseInt(size);
-            }
-            newIds.push(obj);
-        });
-
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newIds);
-    };
 
     return self;
 })();

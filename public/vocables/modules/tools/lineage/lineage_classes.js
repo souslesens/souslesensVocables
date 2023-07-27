@@ -1220,7 +1220,7 @@ addNode:false
         }
         MainController.UI.message("");
 
-        var slices = common.array.slice(nodeIds, 100);
+        var slices = common.array.slice(nodeIds, 300);
 
         var memberPredicate = false;
 
@@ -1228,11 +1228,12 @@ addNode:false
             options = {};
         }
         options.selectGraph = 1;
+        var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
         var visjsData = { nodes: [], edges: [] };
         async.eachSeries(
             slices,
             function (/** @type {any} */ slice, /** @type {(arg0: undefined) => void} */ callbackEach) {
-                Sparql_generic.getNodeParents(source, null, slice, 1, options, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+                Sparql_OWL.getNodeParents(source, null, slice, 1, options, function (/** @type {any} */ err, /** @type {any[]} */ result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -1243,7 +1244,7 @@ addNode:false
                         return callbackEach(null);
                     }
 
-                    var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
+
 
                     var shape = self.defaultShape;
 
@@ -1336,7 +1337,9 @@ addNode:false
                     }
                     return MainController.UI.message("No data found");
                 }
-                self.lineageVisjsGraph.network.fit();
+                if (self.lineageVisjsGraph.network) {
+                    self.lineageVisjsGraph.network.fit();
+                }
                 if (callback) {
                     callback(null, visjsData);
                 }

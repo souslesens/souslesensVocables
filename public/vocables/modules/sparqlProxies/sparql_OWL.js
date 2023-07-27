@@ -2032,7 +2032,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
-            allResults = _result.results.bindings;
+          var  allResults = _result.results.bindings;
             callback(null, allResults);
         });
     };

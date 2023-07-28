@@ -36,7 +36,8 @@ var Lineage_classes = (function () {
     var sourceColors = {};
 
     var self = {};
-    self.lineageVisjsGraph = {};
+    //self.lineageVisjsGraph = {};
+    self.lineageVisjsGraph = new VisjsGraphClass("graphDiv", { nodes:[],edges:[] }, {  });
     self.showLimit = 1000;
 
     var graphContext = {};
@@ -1952,6 +1953,7 @@ addNode:false
                         return callbackSeries();
                     }
                     options.withoutImports = Lineage_sources.activeSource || false;
+
                     //  var _options = { withoutImports: Lineage_sources.activeSource || false };
                     Sparql_OWL.getObjectRestrictions(source, classIds, options, function (err, _result) {
                         if (err) {

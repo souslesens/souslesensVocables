@@ -451,7 +451,7 @@ return false;
         });
     self.getExistingIdsMap = function (/** @type {any} */ nodesOnly) {
         var existingVisjsIds = {};
-        if (!self.data || !self.data.nodes) {
+        if (!self.data || !self.data.nodes || self.data.nodes.length==0) {
             return {};
         }
         var oldIds = self.data.nodes.getIds();

@@ -1,0 +1,17 @@
+<div class="lineageRelations_div" style="display: flex; flex-direction: column; justify-content: space-between">
+  <div style="display: flex; flex-direction: column; align-items: flex-start;">
+    <div>
+      <b>Role</b> <br />
+      <select id="lineage_relation_filterDomainRangeRoleSelect" style="overflow-y: auto; width: 150px; text-align: center" size="2" >
+        <option>Domain</option>
+        <option>Range</option>
+      </select>
+    </div>
+  </div>
+  <div id="lineage_relation_predicateSelectorDomainRangeDiv"> </div>
+  <div >
+    <textarea id="lineage_relation_filterDomainRangeTA" style="width:300px;height: 200px;background-color: beige"></textarea>
+  </div>
+  <button onclick='$("#smallDialogDiv").dialog("close")'>Skip</button>
+  <button onclick='Lineage_relations.addRangeAndDomainFilter()'>Skip</button>
+</div>

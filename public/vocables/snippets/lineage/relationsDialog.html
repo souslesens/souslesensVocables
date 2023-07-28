@@ -13,13 +13,14 @@
   <div id="lineageRelations_tabs" style="width: 600px">
     <ul>
       <li class="lineageRelations_div"><a href="#lineageRelations_propertiesTab">Properties</a></li>
-      <li class="lineageRelations_div"><a href="#lineageRelations_resourcesTab">Resources</a></li>
-      <li class="lineageRelations_div"><a href="#lineageRelations_resources2Tab">Resources2</a></li>
+    <!--  <li class="lineageRelations_div"><a href="#lineageRelations_resourcesTab">Resources</a></li>-->
+      <li class="lineageRelations_div"><a href="#lineageRelations_resources2Tab">Resources</a></li>
     </ul>
     <div id="lineageRelations_propertiesTab">
       <div class="lineageRelations_div" style="height: 500px; align-items: center">
         <div>
           search<input id="LineageRelations_searchJsTreeInput" />
+          <button onclick="Lineage_relations.showInferredProperties()">Proposed</button>
           <!--  or
 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.showAddFilterDiv(true)">Any</button>-->
         </div>
@@ -31,7 +32,7 @@
            id="Lineage_relation_constraints"></div>
     </div>
 
-    <div id="lineageRelations_resourcesTab">
+ <!--   <div id="lineageRelations_resourcesTab">
       <div class="lineageRelations_div" style="display: flex; flex-direction: row; justify-content: space-between">
         <div style="display: flex; flex-direction: column; align-items: center">
           <b>Role</b> <br />
@@ -72,7 +73,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div>-->
 
 
     <div id="lineageRelations_resources2Tab">
@@ -165,6 +166,9 @@
                 onclick="Lineage_relations.onshowDrawRelationsDialogValidate('graph')">Draw
         </button>
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold"
+                onclick="Lineage_relations.onshowDrawRelationsDialogValidate('outline')">Outline
+        </button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold"
                 onclick="Lineage_relations.onshowDrawRelationsDialogValidate('table')">Table
         </button>
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relations.saveCurrentQuery()">Save
@@ -186,6 +190,3 @@
   </div>
 </div>
 
-<script>
-  $("#lineageRelations_tabs").tabs();
-</script>

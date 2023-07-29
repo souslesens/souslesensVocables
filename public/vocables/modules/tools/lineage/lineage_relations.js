@@ -9,7 +9,9 @@ import Sparql_CRUD from "../../sparqlProxies/sparql_CRUD.js";
 import MainController from "../../shared/mainController.js";
 import Lineage_sources from "./lineage_sources.js";
 import OntologyModels from "../../shared/ontologyModels.js";
-import SearchUtil from "../../search/searchUtil.js";
+import Lineage_relationIndividualsFilter from "./lineage_relationIndividualsFilter.js";
+import GraphDecorationWidget from "../../uiWidgets/graphDecorationWidget.js";
+
 
 // eslint-disable-next-line no-global-assign
 var Lineage_relations = (function() {
@@ -282,12 +284,10 @@ var Lineage_relations = (function() {
       propIds.forEach(function(prop) {
         if (prop.parent != "#") {
           properties.push(prop.data.id);
-          if (prop.data.domain) {
-            propDomainFilter.push(prop.data.domain);
+          if (prop.data.constraints) {
+            propDomainFilter.push(prop.data.constraints.domain.id);
+            propRangeFilter.push(prop.data.constraints.range.id);
           }
-        }
-        if (prop.data.range) {
-          propRangeFilter.push(prop.data.range);
         }
       });
 
@@ -316,6 +316,8 @@ var Lineage_relations = (function() {
       if (propRangeFilter.length > 0) {
         options.filter += Sparql_common.setFilter("objectType", propRangeFilter, null, { useFilterKeyWord: 1 });
       }
+
+      options.filter += Lineage_relationIndividualsFilter.filter;
 
 
       if (type == "both") {
@@ -556,6 +558,27 @@ var Lineage_relations = (function() {
         else if (options.output == "table") {
           Export.exportGraphToDataTable(self.lineageVisjsGraph, null, allVisjsData.nodes, allVisjsData.edges);
         }
+        else if(options.output =='outline'){
+          var existingNewNodes = {  };
+          var existingWhiteboardNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+
+
+          var nodeIds=[]
+          allVisjsData.nodes.forEach(function(node){
+            nodeIds.push(node.id)
+          })
+
+          nodeIds.forEach(function(item) {
+            if (existingWhiteboardNodes[item.s.value] && !existingNewNodes[item.s.value]) {
+              existingNewNodes[item.s.value] = 1;
+            }
+          });
+
+          GraphDecorationWidget.showDecorateDialog(function(){
+            return Object.keys(existingNewNodes);
+          })
+
+        }
       }
     );
   };
@@ -662,70 +685,12 @@ var Lineage_relations = (function() {
   };
 
   self.onCheckNodePropertyTreeNode = function(event, obj) {
+    self.currentPropertyTreeNode = obj.node;
     if (obj.node.data && obj.node.data.constraints) {
-      $("#smallDialogDiv").dialog("open");
-      $("#smallDialogDiv").load("snippets/lineage/relationPropDomainRangeDialog.html", function() {
-
-
-        var roles = [
-          obj.node.data.constraints.domain, obj.node.data.constraints.range
-        ];
-
-        common.fillSelectOptions("lineage_relation_filterRoleSelect", roles, null, "label", "id");
-
-        common.fillSelectOptions("Lineage_relation_filterTypeSelect", Lineage_relationFilter.ObjectsTypesMap["any"], false);
-
-
-        return;
-        PredicatesSelectorWidget.load("lineage_relation_predicateSelectorDomainRangeDiv", Lineage_sources.activeSource, function() {
-          var roles = [
-            obj.node.data.constraints.domain, obj.node.data.constraints.range
-          ];
-
-          common.fillSelectOptions("lineage_relation_filterDomainRangeRoleSelect", roles, null, "label", "id");
-
-          $("#editPredicate_vocabularySelect2").val(Lineage_sources.activeSource);
-          PredicatesSelectorWidget.setCurrentVocabClassesSelect(Lineage_sources.activeSource, "editPredicate_objectSelect");
-        });
-      });
-
-
+      Lineage_relationIndividualsFilter.init();
     }
   };
 
-  self.searchClassIndividuals = function() {
-    var classId=$("#lineage_relation_filterRoleSelect").val();
-   if(!classId)
-     return alert (" select a class")
-    var term = $("#lineage_relation_searchTermInput").val();
-
-    var mode = "exactMatch";
-    if (term.indexOf("*") > -1) {
-      mode = "fuzzyMatch";
-     // term=term.replace("*","")
-    }
-    var options={classFilter: classId,skosLabels:true};
-    SearchUtil.getSimilarLabelsInSources(null, Lineage_sources.activeSource, [term], null, mode, options, function(_err, result) {
-      if (_err) {
-        return alert(_err.responseText);
-      }
-      if (Object.keys(result[0].matches).length == 0) {
-        $("#lineage_relation_searchTermResultDiv").html("<b>No matches found</b>");
-      }
-
-
-    });
-
-  };
-
-
-  /* self.addRangeAndDomainFilter=function(){
-     var role=$("#lineage_relation_filterDomainRangeRoleSelect").val();
-     var property=PredicatesSelectorWidget.getSelectedProperty()
-     var object=PredicatesSelectorWidget.getSelectedObjectValue()
-
-
-   }*/
 
   self.callPreviousQuery = function() {
     if (!self.previousQuery) {

@@ -311,12 +311,9 @@ var KGtripleBuilder = {
                             var blankNode_cellMap = {};
 
 
-
-
-
                             mapping.tripleModels.forEach(function(item) {
 
-                              if (!line[item.s] || line[item.s]=="null" ) {
+                              if (!line[item.s] || line[item.s] == "null") {
                                 return;
                               }
 
@@ -344,7 +341,9 @@ var KGtripleBuilder = {
                                   }
                                 }
                                 else if (item.isSubjectBlankNode) {
-
+                                  if (!line[item.s] || !line[item.o]) {
+                                    return;
+                                  }
                                   var blankNode = blankNode_cellMap[item.s];
                                   if (!blankNode) {
                                     blankNode = getNewBlankNodeId();
@@ -402,7 +401,7 @@ var KGtripleBuilder = {
                                   objectStr = item.o;
                                 }
                                 else if (item.isObjectBlankNode) {
-                                  if ( !line[item.o]) {
+                                  if (!line[item.s] || !line[item.o]) {
                                     return;
                                   }
                                   var blankNode = blankNode_cellMap[item.o];
@@ -417,7 +416,7 @@ var KGtripleBuilder = {
                                   if (!str) {
                                     return;
                                   }
-                                  if(item.dataType=="xsd:dateTime") {
+                                  if (item.dataType == "xsd:dateTime") {
                                     var isDate = function(date) {
                                       return (new Date(date) !== "Invalid Date" && !isNaN(new Date(date))) ? true : false;
                                     };
@@ -425,12 +424,13 @@ var KGtripleBuilder = {
                                     var formatDate = function(date) {
                                       return new Date(date).toISOString();//.slice(0, 10);
                                     };
-                                    if (!isDate(str))
+                                    if (!isDate(str)) {
                                       return;
-                                    str=formatDate(str)
+                                    }
+                                    str = formatDate(str);
                                   }
 
-                                    item.p = "owl:hasValue";
+                                  item.p = "owl:hasValue";
 
 
                                   objectStr = "'" + str + "'^^" + item.dataType;
@@ -443,7 +443,7 @@ var KGtripleBuilder = {
                                   }
                                 }
                                 else if (item.o === "_blankNode") {
-                                  if ( !line[item.o]) {
+                                  if (!line[item.o]) {
                                     return;
                                   }
                                   currentBlankNode = currentBlankNode || getNewBlankNodeId();
@@ -480,7 +480,7 @@ var KGtripleBuilder = {
                                   }
                                 }
                               }
-                              if (!objectStr) {
+                              if (!objectStr || objectStr == "null") {
                                 return;
                               }
 
@@ -680,7 +680,7 @@ propertyStr = line[item.p];
                         });
                         triples = triples.concat(metaDataTriples);
 
-                        KGtripleBuilder.message(options.clientSocketId, "writing triples:" + triples.length);
+                        KGtripleBuilder.message(options.clientSocketId, "mapping " + mapping.fileName + " : writing triples:" + triples.length);
 
                         var slices = util.sliceArray(triples, 200);
                         triples = [];
@@ -688,10 +688,10 @@ propertyStr = line[item.p];
                         async.eachSeries(
                           slices,
                           function(slice, callbackEach) {
-                            if( KGtripleBuilder.stopCreateTriples) {
-                              var message="import interrupted by user"
-                            //  KGtripleBuilder.message(options.clientSocketId,message)
-                              return callbackSeries(message)
+                            if (KGtripleBuilder.stopCreateTriples) {
+                              var message = "mapping " + mapping.fileName + " : import interrupted by user";
+                              //  KGtripleBuilder.message(options.clientSocketId,message)
+                              return callbackSeries(message);
                             }
 
 
@@ -716,7 +716,7 @@ propertyStr = line[item.p];
                                 }
                                 sliceIndex += 1;
                                 totalTriples += result;
-                                KGtripleBuilder.message(options.clientSocketId, "writen triples:" + totalTriples);
+                                KGtripleBuilder.message(options.clientSocketId, "mapping " + mapping.fileName + " : writen triples:" + totalTriples);
 
                                 callbackEach();
                               });
@@ -932,7 +932,7 @@ propertyStr = line[item.p];
 
   getMetaDataTriples: function(subjectUri, options) {
     var creator = "KGcreator";
-    var dateTime = "'" + util.dateToRDFString(new Date(),true) + "'^^xsd:dateTime";
+    var dateTime = "'" + util.dateToRDFString(new Date(), true) + "'^^xsd:dateTime";
 
     if (!options) {
       options = {};
@@ -1024,13 +1024,14 @@ propertyStr = line[item.p];
     var sparqlServerUrl;
     var output = "";
     var clientSocketId = options.clientSocketId;
-    var allMappingFiles=[]
+    var allMappingFiles = [];
 
-    KGtripleBuilder.stopCreateTriples=false
-    SocketManager.clientSockets[options.clientSocketId].on("KGCreator",function(message){
-      if(message=="stopCreateTriples")
-        KGtripleBuilder.stopCreateTriples=true
-    })
+    KGtripleBuilder.stopCreateTriples = false;
+    SocketManager.clientSockets[options.clientSocketId].on("KGCreator", function(message) {
+      if (message == "stopCreateTriples") {
+        KGtripleBuilder.stopCreateTriples = true;
+      }
+    });
 
 
     async.series(
@@ -1065,21 +1066,26 @@ propertyStr = line[item.p];
         },
 
         function(callbackSeries) {
-         if( mappingFileName) {
-           allMappingFiles = [mappingFileName]
+          if (mappingFileName) {
+            allMappingFiles = [mappingFileName];
 
-           return callbackSeries()
-         }
-
-          var mappingsDirPath = path.join(__dirname, "../data/" + dirName );
-          var files = "" + fs.readDirSync(mappingsFilePath);
-          files.forEach(function(file){
-            if(file.indexOf(".json")>-1){
-              allMappingFiles.push(file)
+            return callbackSeries();
+          }
+          try {
+            var mappingsDirPath = path.join(__dirname, "../data/" + dirName);
+            var files = fs.readdirSync(mappingsDirPath);
+            for (var i = 0; i < files.length; i++) {
+              var file = files[i];
+              if (file.indexOf(".json") > -1) {
+                allMappingFiles.push(file);
+              }
             }
-          })
 
-          return callbackSeries()
+          } catch (e) {
+            return callbackSeries(e);
+          }
+
+          return callbackSeries();
 
         },
 
@@ -1087,113 +1093,118 @@ propertyStr = line[item.p];
         // read mapping file and prepare mappings
         function(callbackSeries) {
 
-        async.eachSeries( allMappingFiles,function(mappingFileName,callbackEach){
+          async.eachSeries(allMappingFiles, function(mappingFileName, callbackEach) {
 
-          var mappingsFilePath = path.join(__dirname, "../data/" + dirName + "/" + mappingFileName);
-          var mappings = "" + fs.readFileSync(mappingsFilePath);
-          mappings = JSON.parse(mappings);
-          if (typeof options.dataLocation == "string") {
-            mappings.csvDataFilePath = path.join(__dirname, "../data/" + dirName + "/" + options.dataLocation);
-          }
-          else {
-            mappings.datasource = options.dataLocation;
-          }
-
-          function getFunction(argsArray, fnStr, callback) {
-            try {
-              fnStr = fnStr.replace(/[/r/n/t]gm/, "");
-              var array = /\{(?<body>.*)\}/.exec(fnStr);
-              if (!array) {
-                return callbackSeries("cannot parse object function " + JSON.stringify(item) + " missing enclosing body into 'function{..}'");
-              }
-              var fnBody = array.groups["body"];
-              fnBody = "try{" + fnBody + "}catch(e){\rreturn console.log(e)\r}";
-              var fn = new Function(argsArray, fnBody);
-              return callback(null, fn);
-            } catch (err) {
-              return callback("error in object function " + fnStr + "\n" + err);
-            }
-          }
-
-          // format functions
-          mappings.tripleModels.forEach(function(item) {
-            if (item.s.indexOf("function{") > -1) {
-              getFunction(["row", "mapping"], item.s, function(err, fn) {
-                if (err) {
-                  return callbackSeries(err + " in mapping" + JSON.stringify(item));
-                }
-                item.s = fn;
-              });
-            }
-            if (item.o.indexOf("function{") > -1) {
-              getFunction(["row", "mapping"], item.o, function(err, fn) {
-                if (err) {
-                  return callbackSeries(err + " in mapping" + JSON.stringify(item));
-                }
-
-                item.o = fn;
-              });
-            }
-
-            if (item.p.indexOf("function{") > -1) {
-              getFunction(["row", "mapping"], item.p, function(err, fn) {
-                if (err) {
-                  return callbackSeries(err + " in mapping" + JSON.stringify(item));
-                }
-
-                item.p = fn;
-              });
-            }
-          });
-          for (var key in mappings.transform) {
-            var fnStr = mappings.transform[key];
-            if (fnStr.indexOf("function{") > -1) {
-              getFunction(["value", "role", "prop", "row", "mapping"], fnStr, function(err, fn) {
-                if (err) {
-                  return callbackSeries(err + " in mapping" + JSON.stringify(fnStr));
-                }
-                mappings.transform[key] = fn;
-              });
-            }
-          }
-
-          // format lookups
-          mappings.lookups.forEach(function(item) {
-            var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
-            item.filePath = lookupFilePath;
-            if (item.transformFn) {
-              getFunction(["value", "role", "prop", "row", "mapping"], item.transformFn, function(err, fn) {
-                if (err) {
-                  return callbackSeries(err + " in mapping" + JSON.stringify(item));
-                }
-                item.transformFn = fn;
-              });
-            }
-          });
-
-          // add prefixes (for upper ontology)
-          if (mappings.prefixes) {
-            for (var prefix in mappings.prefixes) KGtripleBuilder.sparqlPrefixes[prefix] = "<" + mappings.prefixes[prefix] + ">";
-          }
-
-          var mappingsMap = { [mappings.csvDataFilePath]: mappings };
-
-          KGtripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function(err, result) {
-            if (err) {
-              return callbackSeries(err);
-            }
-            if (options.sampleSize) {
-              output = result;
-              return callback(err, output);
+            var mappingsFilePath = path.join(__dirname, "../data/" + dirName + "/" + mappingFileName);
+            var mappings = "" + fs.readFileSync(mappingsFilePath);
+            mappings = JSON.parse(mappings);
+            if (typeof options.dataLocation == "string") {
+              mappings.csvDataFilePath = path.join(__dirname, "../data/" + dirName + "/" + options.dataLocation);
             }
             else {
-              output = { countCreatedTriples: result };
+              mappings.datasource = options.dataLocation;
             }
-            callbackSeries();
+
+            function getFunction(argsArray, fnStr, callback) {
+              try {
+                fnStr = fnStr.replace(/[/r/n/t]gm/, "");
+                var array = /\{(?<body>.*)\}/.exec(fnStr);
+                if (!array) {
+                  return callbackSeries("cannot parse object function " + JSON.stringify(item) + " missing enclosing body into 'function{..}'");
+                }
+                var fnBody = array.groups["body"];
+                fnBody = "try{" + fnBody + "}catch(e){\rreturn console.log(e)\r}";
+                var fn = new Function(argsArray, fnBody);
+                return callback(null, fn);
+              } catch (err) {
+                return callback("error in object function " + fnStr + "\n" + err);
+              }
+            }
+
+            // format functions
+            if(!mappings.tripleModels){
+              return callbackEach()
+            }
+
+            mappings.tripleModels.forEach(function(item) {
+              if (item.s.indexOf("function{") > -1) {
+                getFunction(["row", "mapping"], item.s, function(err, fn) {
+                  if (err) {
+                    return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                  }
+                  item.s = fn;
+                });
+              }
+              if (item.o.indexOf("function{") > -1) {
+                getFunction(["row", "mapping"], item.o, function(err, fn) {
+                  if (err) {
+                    return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                  }
+
+                  item.o = fn;
+                });
+              }
+
+              if (item.p.indexOf("function{") > -1) {
+                getFunction(["row", "mapping"], item.p, function(err, fn) {
+                  if (err) {
+                    return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                  }
+
+                  item.p = fn;
+                });
+              }
+            });
+            for (var key in mappings.transform) {
+              var fnStr = mappings.transform[key];
+              if (fnStr.indexOf("function{") > -1) {
+                getFunction(["value", "role", "prop", "row", "mapping"], fnStr, function(err, fn) {
+                  if (err) {
+                    return callbackSeries(err + " in mapping" + JSON.stringify(fnStr));
+                  }
+                  mappings.transform[key] = fn;
+                });
+              }
+            }
+
+            // format lookups
+            mappings.lookups.forEach(function(item) {
+              var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
+              item.filePath = lookupFilePath;
+              if (item.transformFn) {
+                getFunction(["value", "role", "prop", "row", "mapping"], item.transformFn, function(err, fn) {
+                  if (err) {
+                    return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                  }
+                  item.transformFn = fn;
+                });
+              }
+            });
+
+            // add prefixes (for upper ontology)
+            if (mappings.prefixes) {
+              for (var prefix in mappings.prefixes) KGtripleBuilder.sparqlPrefixes[prefix] = "<" + mappings.prefixes[prefix] + ">";
+            }
+
+            var mappingsMap = { [mappings.csvDataFilePath]: mappings };
+
+            KGtripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function(err, result) {
+              KGtripleBuilder.message(options.clientSocketId,"creating triples for mapping "+mappings.fileName)
+              if (err) {
+                return callbackSeries(err);
+              }
+              if (options.sampleSize) {
+                output = result;
+                return callback(err, output);
+              }
+              else {
+                output = { countCreatedTriples: result };
+              }
+              callbackEach();
+            });
+          }, function(err) {
+            callbackSeries(err);
           });
-        },function(err){
-          callbackEach(err)
-        })
         }
       ],
       function(err) {
@@ -1216,7 +1227,7 @@ propertyStr = line[item.p];
     else {
       return predicate;
     }
-  },
+  }
 };
 
 module.exports = KGtripleBuilder;

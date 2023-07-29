@@ -1,19 +1,48 @@
 <div id="lineageRelations_resourcesTab">
-  <div class="lineageRelations_div" style="display: flex; flex-direction: row; justify-content: space-between">
-    <div style="display: flex; flex-direction: column; align-items: center">
+  <div class="lineageRelations_div" style="display: flex; flex-direction: column; justify-content: space-between">
+    <div style="display: flex; flex-direction:row;    justify-content: space-evenly; padding:5px;margin:5px;">
 
-      <select id="lineage_relation_filterRoleSelect" style="overflow-y: auto; width: 150px; text-align: center"
-              size="2" onclick="Lineage_relationFilter.onSelectRoleType($(this).val())">
+        <select id="lineage_relationIndividuals_filterRoleSelect"
+                style="overflow-y: auto; width: 150px; text-align: center" size="2">
 
-      </select>
+        </select>
+
+      <div>
+        <div>
+          label <input id="lineage_relationIndividuals_searchTermInput" style="width: 100px" value="">
+          <button class="btn btn-sm my-1 py-0 btn-outline-primary"
+                  onclick="Lineage_relationIndividualsFilter.searchClassIndividuals()">Search
+          </button>
+          or
+          <button onclick="Lifex_dalia.showDateRangePicker()"> Period</button>
+          <input id="dateRangPicker" value="" style=" width: 150px;">
+        </div>
+
+      </div>
+    </div>
+
+    <div style="display: flex;flex-direction: row;justify-content: space-evenly;padding:5px;margin:5px;">
+      <div>
+        <select id="lineage_relationIndividuals_matchesSelect" size="10" style=" width: 250px;"
+                onclick="Lineage_relationIndividualsFilter.addIndividualFilter()">
+
+        </select>
+      </div>
+      <div>
+
+
+
+
+      </div>
     </div>
   </div>
-      <input id="lineage_relation_searchTermInput" style="width: 150px" value="">
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary"
-              onclick="Lineage_relations.searchClassIndividuals()">Search
-      </button>
-  <div id="lineage_relation_searchTermResultDiv" style="width: 250px;height: 300px; overflow:auto;"></div>
-    </div>
+  <div>
+    <textarea id="lineage_relationIndividuals_fitlerTA" style=" padding:5px;margin:5px;   width: 600px;   height: 50px;"></textarea>
+  </div>
+  <div style=" padding:5px;margin:5px; width: 300px;">
+
+    <button onclick="Lineage_relationIndividualsFilter.addRangeAndDomainFilter()">OK</button>
+    <button onclick='$("#smallDialogDiv").dialog("close")'>Skip</button>
   </div>
 </div>
 

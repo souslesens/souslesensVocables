@@ -9,6 +9,7 @@ import Sparql_CRUD from "../../sparqlProxies/sparql_CRUD.js";
 import MainController from "../../shared/mainController.js";
 import Lineage_sources from "./lineage_sources.js";
 import OntologyModels from "../../shared/ontologyModels.js";
+import SearchUtil from "../../search/searchUtil.js";
 
 // eslint-disable-next-line no-global-assign
 var Lineage_relations = (function() {
@@ -22,13 +23,13 @@ var Lineage_relations = (function() {
     $("#mainDialogDiv").dialog("option", "title", "Query");
     $("#mainDialogDiv").load("snippets/lineage/relationsDialog.html", function() {
       $("#lineageRelations_tabs").tabs({
-        activate: function ( e,  ui) {
+        activate: function(e, ui) {
 
           var divId = ui.newPanel.selector;
           if (divId == "#lineageRelations_resources2Tab") {
             PredicatesSelectorWidget.load("lineage_relation_predicateSelectorDiv", Lineage_sources.activeSource);
           }
-          }
+        }
       });
       $("#lineageRelations_history_previousBtn").css("display", self.previousQuery ? "inline" : "none");
       $("#lineageRelations_history_deleteBtn").css("display", "none");
@@ -46,8 +47,6 @@ var Lineage_relations = (function() {
           $("#LineageRelations_searchJsTreeInput").val("");
         }
       });
-
-
 
 
       common.fillSelectWithColorPalette("lineageRelations_colorsSelect");
@@ -159,7 +158,7 @@ var Lineage_relations = (function() {
           var options = {
             contextMenu: Lineage_relations.getPropertiesJstreeMenu(),
             selectTreeNodeFn: Lineage_relations.onSelectPropertyTreeNode,
-            onCheckNodeFn:Lineage_relations.onCheckNodePropertyTreeNode,
+            onCheckNodeFn: Lineage_relations.onCheckNodePropertyTreeNode,
             withCheckboxes: true,
             searchPlugin: {
               case_insensitive: true,
@@ -278,19 +277,19 @@ var Lineage_relations = (function() {
       }
       var propIds = $("#lineageRelations_propertiesJstreeDiv").jstree().get_checked(true);
       var properties = [];
-      var propDomainFilter=[]
-      var propRangeFilter=[]
+      var propDomainFilter = [];
+      var propRangeFilter = [];
       propIds.forEach(function(prop) {
         if (prop.parent != "#") {
           properties.push(prop.data.id);
-          if(prop.data.domain){
-            propDomainFilter.push(prop.data.domain)
+          if (prop.data.domain) {
+            propDomainFilter.push(prop.data.domain);
           }
         }
-        if(prop.data.range){
-          propRangeFilter.push(prop.data.range)
+        if (prop.data.range) {
+          propRangeFilter.push(prop.data.range);
         }
-      })
+      });
 
       options.filter = "";
       if (properties.length > 0) {
@@ -305,22 +304,18 @@ var Lineage_relations = (function() {
       }
 
 
-
-
       var propFilter = $("#Lineage_relation_filterText2").val();
       if (propFilter) {
         options.filter += propFilter;
       }
 
-      if(  propDomainFilter.length>0){
-        options.filter +=Sparql_common.setFilter("subjectType",propDomainFilter,null,{useFilterKeyWord:1})
+      if (propDomainFilter.length > 0) {
+        options.filter += Sparql_common.setFilter("subjectType", propDomainFilter, null, { useFilterKeyWord: 1 });
       }
 
-      if(  propRangeFilter.length>0){
-        options.filter +=Sparql_common.setFilter("objectType",propRangeFilter,null,{useFilterKeyWord:1})
+      if (propRangeFilter.length > 0) {
+        options.filter += Sparql_common.setFilter("objectType", propRangeFilter, null, { useFilterKeyWord: 1 });
       }
-
-
 
 
       if (type == "both") {
@@ -570,7 +565,7 @@ var Lineage_relations = (function() {
     if (!source) {
       source = Lineage_sources.activeSource;
     }
-$("#lineageRelations_relType").prop("checked")
+    $("#lineageRelations_relType").prop("checked");
     $("input[name='lineageRelations_relType'][value=predicates]").prop("checked", true);
     $("input[name='lineageRelations_relDirection'][value=direct]").prop("checked", true);
     var options = {};
@@ -637,20 +632,20 @@ $("#lineageRelations_relType").prop("checked")
 
             });
 
-            distinctProps[item.id].forEach(function(item2){
+            distinctProps[item.id].forEach(function(item2) {
               jstreeData.push({
-                id: item2.domain.id+"_"+item2.range.id,
-                text: "<i>" + item2.domain.label+"->" +item2.range.label +"<i>",
+                id: item2.domain.id + "_" + item2.range.id,
+                text: "<i>" + item2.domain.label + "->" + item2.range.label + "<i>",
                 parent: item.id,
                 data: {
                   id: item.id,
-                  constraints:item2
+                  constraints: item2
 
                 }
 
 
               });
-            })
+            });
           });
           JstreeWidget.addNodesToJstree("lineageRelations_propertiesJstreeDiv", null, jstreeData);
           return callbackSeries();
@@ -665,32 +660,72 @@ $("#lineageRelations_relType").prop("checked")
       }
     );
   };
-  
-  self.onCheckNodePropertyTreeNode=function(event, obj){
-    if(obj.node.data && obj.node.data.constraints){
+
+  self.onCheckNodePropertyTreeNode = function(event, obj) {
+    if (obj.node.data && obj.node.data.constraints) {
       $("#smallDialogDiv").dialog("open");
-      $("#smallDialogDiv").load("snippets/lineage/relationPropDomainRangeDialog.html",function(){
-        PredicatesSelectorWidget.load("lineage_relation_predicateSelectorDomainRangeDiv",Lineage_sources.activeSource)
-        var roles=[
-          obj.node.data.constraints.domain,   obj.node.data.constraints.range
-        ]
-
-       common.fillSelectOptions("lineage_relation_filterDomainRangeRoleSelect",roles,null,"label","id")
-
-      })
+      $("#smallDialogDiv").load("snippets/lineage/relationPropDomainRangeDialog.html", function() {
 
 
-  }
+        var roles = [
+          obj.node.data.constraints.domain, obj.node.data.constraints.range
+        ];
+
+        common.fillSelectOptions("lineage_relation_filterRoleSelect", roles, null, "label", "id");
+
+        common.fillSelectOptions("Lineage_relation_filterTypeSelect", Lineage_relationFilter.ObjectsTypesMap["any"], false);
 
 
+        return;
+        PredicatesSelectorWidget.load("lineage_relation_predicateSelectorDomainRangeDiv", Lineage_sources.activeSource, function() {
+          var roles = [
+            obj.node.data.constraints.domain, obj.node.data.constraints.range
+          ];
+
+          common.fillSelectOptions("lineage_relation_filterDomainRangeRoleSelect", roles, null, "label", "id");
+
+          $("#editPredicate_vocabularySelect2").val(Lineage_sources.activeSource);
+          PredicatesSelectorWidget.setCurrentVocabClassesSelect(Lineage_sources.activeSource, "editPredicate_objectSelect");
+        });
+      });
 
 
-  }
+    }
+  };
+
+  self.searchClassIndividuals = function() {
+    var classId=$("#lineage_relation_filterRoleSelect").val();
+   if(!classId)
+     return alert (" select a class")
+    var term = $("#lineage_relation_searchTermInput").val();
+
+    var mode = "exactMatch";
+    if (term.indexOf("*") > -1) {
+      mode = "fuzzyMatch";
+     // term=term.replace("*","")
+    }
+    var options={classFilter: classId,skosLabels:true};
+    SearchUtil.getSimilarLabelsInSources(null, Lineage_sources.activeSource, [term], null, mode, options, function(_err, result) {
+      if (_err) {
+        return alert(_err.responseText);
+      }
+      if (Object.keys(result[0].matches).length == 0) {
+        $("#lineage_relation_searchTermResultDiv").html("<b>No matches found</b>");
+      }
 
 
-  self.addRangeAndDomainFilter=function(){
+    });
 
-  }
+  };
+
+
+  /* self.addRangeAndDomainFilter=function(){
+     var role=$("#lineage_relation_filterDomainRangeRoleSelect").val();
+     var property=PredicatesSelectorWidget.getSelectedProperty()
+     var object=PredicatesSelectorWidget.getSelectedObjectValue()
+
+
+   }*/
 
   self.callPreviousQuery = function() {
     if (!self.previousQuery) {

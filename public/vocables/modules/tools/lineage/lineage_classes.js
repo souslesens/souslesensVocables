@@ -3026,11 +3026,7 @@ attrs.color=self.getSourceColor(superClassValue)
         $("#lineage_actionDiv_Keyslegend").css("display", display);
     };
 
-    self.getSourceSpecificClasses = function (source) {
-        if (!source) {
-            GenericTools_searchAllClassSelect;
-        }
-    };
+
 
     self.showWikiPage = function (sourceLabel) {
         var wikiUrl = Config.wiki.url + "Source " + sourceLabel;

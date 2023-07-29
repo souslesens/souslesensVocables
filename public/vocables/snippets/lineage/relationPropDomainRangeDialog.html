@@ -1,4 +1,69 @@
-<div class="lineageRelations_div" style="display: flex; flex-direction: column; justify-content: space-between">
+<div id="lineageRelations_resourcesTab">
+  <div class="lineageRelations_div" style="display: flex; flex-direction: row; justify-content: space-between">
+    <div style="display: flex; flex-direction: column; align-items: center">
+
+      <select id="lineage_relation_filterRoleSelect" style="overflow-y: auto; width: 150px; text-align: center"
+              size="2" onclick="Lineage_relationFilter.onSelectRoleType($(this).val())">
+
+      </select>
+    </div>
+  </div>
+      <input id="lineage_relation_searchTermInput" style="width: 150px" value="">
+      <button class="btn btn-sm my-1 py-0 btn-outline-primary"
+              onclick="Lineage_relations.searchClassIndividuals()">Search
+      </button>
+  <div id="lineage_relation_searchTermResultDiv" style="width: 250px;height: 300px; overflow:auto;"></div>
+    </div>
+  </div>
+</div>
+
+
+<!--<div id="lineageRelations_resourcesTab">
+  <div class="lineageRelations_div" style="display: flex; flex-direction: row; justify-content: space-between">
+    <div style="display: flex; flex-direction: column; align-items: center">
+      <b>Role</b> <br />
+      <select id="lineage_relation_filterRoleSelect" style="overflow-y: auto; width: 150px; text-align: center"
+              size="2" onclick="Lineage_relationFilter.onSelectRoleType($(this).val())">
+        <option>subject</option>
+        <option>object</option>
+      </select>
+      <br />
+      <b>Type</b>
+      <br />
+      <select
+        id="Lineage_relation_filterTypeSelect"
+        style="overflow-y: auto; width: 150px; text-align: center"
+        size="10"
+        onclick="Lineage_relationFilter.onSelectResourceType($(this).val())"
+      ></select>
+    </div>
+    <div style="display: flex; flex-direction: column; justify-content: space-between; margin: 10px">
+      <div id="Lineage_relation_filterValueDiv">
+        <div class="lineageRelations_divX" style="display: none; width: 200px" id="lineageQuery_uriValueDiv" ;>
+          <select id="Lineage_relation_filterVocabularySelect"
+                  onchange="Lineage_relationFilter.onSelectResource($(this).val())"></select>
+          <select id="Lineage_relation_filterResourcesSelect" style="width: 200px"></select>
+        </div>
+
+        <div class="lineageRelations_divX" style="display: none" id="lineageQuery_literalValueDiv">
+          <select id="lineageQuery_operator"></select>
+          <input id="lineageQuery_value" size="20" value="" />
+        </div>
+        <div>
+          <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineageQuery_addFilterButton"
+                  onclick="Lineage_relationFilter.addFilter()">Add filter
+          </button>
+        </div>
+        <textarea id="Lineage_relation_filterText"
+                  style="width: 300px; background-color: #ddd; height: 100px; margin: 10px"></textarea>
+      </div>
+    </div>
+  </div>
+
+-->
+
+
+<!--<div class="lineageRelations_div" style="display: flex; flex-direction: column; justify-content: space-between">
   <div style="display: flex; flex-direction: column; align-items: flex-start;">
     <div>
       <b>Role</b> <br />
@@ -14,4 +79,4 @@
   </div>
   <button onclick='$("#smallDialogDiv").dialog("close")'>Skip</button>
   <button onclick='Lineage_relations.addRangeAndDomainFilter()'>Skip</button>
-</div>
+</div>-->

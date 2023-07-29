@@ -337,36 +337,44 @@ indexes.push(source.toLowerCase());
             //  word=word.toLowerCase()
             var queryObj;
             if (!mode || mode == "exactMatch") {
+                var field = "label";
                 queryObj = {
                     bool: {
-                        should: [
+                        must: [
                             {
-                                term: {
+                                match: {
                                     [field]: word,
                                 },
-                            },
-                            {
-                                term: {
-                                    "skoslabels.keyword": word,
-                                },
-                            },
-                        ],
+                            }
+
+                        ]
                     },
                 };
+               /* if (options.skosLabels) {
+                    queryObj.bool.must.push( {
+                        term: {
+                            "skoslabels.keyword": word,
+                        },
+                    })
+
+                }*/
             } else if (word.indexOf("*") > -1) {
                 queryObj = {
                     bool: {
                         must: {
                             query_string: {
                                 query: word,
-                                fields: ["label", "skoslabels"],
+                                fields: ["label"],
                             },
                         },
-                        // ,
-                        // "filter":  {"term":{"parents.keyword":"http://rds.posccaesar.org/ontology/lis14/rdl/Quality"}}
+
                     },
                 };
-                //   if (options.classFilter) queryObj.bool.filter = { term: { "parents.keyword": options.classFilter } };
+                if (options.skosLabels) {
+                    queryObj.bool.must.query_string.fields.push( "skoslabels");
+
+                }
+
             } else {
                 queryObj = {
                     bool: {
@@ -381,6 +389,10 @@ indexes.push(source.toLowerCase());
                         ],
                     },
                 };
+                if (options.skosLabels) {
+                    queryObj.bool.must.query_string.fields.push( "skoslabels");
+
+                }
             }
             if (options.classFilter) {
                 queryObj.bool.filter = {
@@ -391,6 +403,7 @@ indexes.push(source.toLowerCase());
                     },
                 };
             }
+
 
             var header = {};
             if (indexes) {

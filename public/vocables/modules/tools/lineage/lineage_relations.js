@@ -170,9 +170,21 @@ var Lineage_relations = (function() {
           };
           JstreeWidget.loadJsTree("lineageRelations_propertiesJstreeDiv", jstreeData, options, function() {
             //  $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(Lineage_sources.activeSource);
+            return callbackSeries();
           });
+
+        },
+        function(callbackSeries) {
+          if (Config.UIprofile == "KG") {
+            Lineage_relations.showInferredProperties();
+          }
+          return callbackSeries();
         }
-      ]);
+      ], function(err) {
+        if (err) {
+          return alert(err.responseText);
+        }
+      });
     });
   };
 
@@ -334,429 +346,441 @@ var Lineage_relations = (function() {
         propIds: propIds,
         propFilter: propFilter
       };
-      self.drawRelations(direction, type, caller, options);
+
+      if (options.output == "outline") {
+        self.outlineWhiteboardNodes(options);
+      }
+      else {
+        self.drawRelations(direction, type, caller, options);
+      }
     }
     $("#mainDialogDiv").dialog("close");
   };
 
-  self.drawRelations = function(direction, type, caller, options) {
-    if (!options) {
-      options = {};
+
+  self.outlineWhiteboardNodes = function(options) {
+    var source = Lineage_sources.activeSource;
+    var subjectIds = Lineage_classes.getGraphIdsFromSource(source);
+    Sparql_OWL.getFilteredTriples(source, subjectIds, null, null, options, function(err, result) {
+      if (err) {
+        return callback(err);
+      }
+
+      var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+      var groups = {};
+      result.forEach(function(item) {
+        if (!groups[item.object.value]) {
+          groups[item.object.value] = { id: item.object.value, label: item.objectLabel.value, nodeIds: []};
+        }
+        groups[item.object.value].nodeIds.push(item.subject.value)
+
+
+      });
+      GraphDecorationWidget.showOutlinedNodesAndLegend (groups)
+    });
+
+
+}
+
+self.drawRelations = function(direction, type, caller, options) {
+  if (!options) {
+    options = {};
+  }
+  options.skipLiterals = true;
+  var source = null;
+  var data = null;
+  var levelsMap = {};
+  if (!options.data) {
+    if (caller == "Graph") {
+      data = Lineage_classes.currentGraphNode.data.id;
+      levelsMap[Lineage_classes.currentGraphNode.data.id] = Lineage_classes.currentGraphNode.level;
     }
-    options.skipLiterals = true;
-    var source = null;
-    var data = null;
-    var levelsMap = {};
-    if (!options.data) {
-      if (caller == "Graph") {
-        data = Lineage_classes.currentGraphNode.data.id;
-        levelsMap[Lineage_classes.currentGraphNode.data.id] = Lineage_classes.currentGraphNode.level;
-      }
-      else if (caller == "Tree") {
-        data = Lineage_classes.currentTreeNode.data.id;
-      }
-      else if (caller == "both") {
-        data = null;
-      }
-      else if (caller == "leftPanel" || type == "dictionary") {
-        var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
-        nodes.forEach(function(node) {
-          if (node.data && (!node.data.type || node.data.type != "literal")) {
-            data.push(node.id);
-            levelsMap[node.id] = node.level;
-          }
-        });
-      }
+    else if (caller == "Tree") {
+      data = Lineage_classes.currentTreeNode.data.id;
     }
-    else if (options.data == "allSourceNodes") {
+    else if (caller == "both") {
       data = null;
     }
-    else {
-      data = options.data;
+    else if (caller == "leftPanel" || type == "dictionary") {
+      var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+      nodes.forEach(function(node) {
+        if (node.data && (!node.data.type || node.data.type != "literal")) {
+          data.push(node.id);
+          levelsMap[node.id] = node.level;
+        }
+      });
     }
-    // manage drawing at the end off all visjs query
-    options.returnVisjsData = true;
-    var existingNodes = {};
-    if (options.output == "table") {
-      existingNodes = {};
-    }
-    else if (Lineage_classes.lineageVisjsGraph && Lineage_classes.lineageVisjsGraph.getExistingIdsMap) {
-      existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
-    }
-    var allVisjsData = { nodes: [], edges: [] };
+  }
+  else if (options.data == "allSourceNodes") {
+    data = null;
+  }
+  else {
+    data = options.data;
+  }
+  // manage drawing at the end off all visjs query
+  options.returnVisjsData = true;
+  var existingNodes = {};
+  if (options.output == "table") {
+    existingNodes = {};
+  }
+  else if (Lineage_classes.lineageVisjsGraph && Lineage_classes.lineageVisjsGraph.getExistingIdsMap) {
+    existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+  }
+  var allVisjsData = { nodes: [], edges: [] };
 
-    function concatVisjsdata(visjsData) {
-      if (!visjsData.nodes || !visjsData.edges) {
-        return;
+  function concatVisjsdata(visjsData) {
+    if (!visjsData.nodes || !visjsData.edges) {
+      return;
+    }
+    visjsData.nodes.forEach(function(item) {
+      if (!existingNodes[item.id]) {
+        existingNodes[item.id] = 1;
+        allVisjsData.nodes.push(item);
       }
-      visjsData.nodes.forEach(function(item) {
-        if (!existingNodes[item.id]) {
-          existingNodes[item.id] = 1;
-          allVisjsData.nodes.push(item);
-        }
-      });
-      visjsData.edges.forEach(function(item) {
-        if (!existingNodes[item.id]) {
-          existingNodes[item.id] = 1;
-          allVisjsData.edges.push(item);
-        }
-      });
-    }
+    });
+    visjsData.edges.forEach(function(item) {
+      if (!existingNodes[item.id]) {
+        existingNodes[item.id] = 1;
+        allVisjsData.edges.push(item);
+      }
+    });
+  }
 
-    var totalTriples = 0;
-    async.series(
-      [
-        // draw equivClasses or sameLabel (coming from Config.dictionarySource)
-        function(callbackSeries) {
-          if (type != "dictionary") {
-            return callbackSeries();
-          }
-          source = Config.dictionarySource;
-          options.includeSources = Config.dictionarySource;
-
-
-          data = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
-          options.filter = "FILTER (?prop in (owl:sameAs,owl:equivalentClass))";
-          Lineage_sources.registerSource(Config.dictionarySource);
-
-          type = null;
+  var totalTriples = 0;
+  async.series(
+    [
+      // draw equivClasses or sameLabel (coming from Config.dictionarySource)
+      function(callbackSeries) {
+        if (type != "dictionary") {
           return callbackSeries();
-        },
-
-        // draw restrictions normal
-        function(callbackSeries) {
-          if (type && type != "restrictions") {
-            return callbackSeries();
-          }
-          if (options.filter && options.filter.indexOf("^^") > -1) {
-            return callbackSeries();
-          }
-
-          if (!direction || direction == "direct") {
-            options.inverse = false;
-
-            MainController.UI.message("searching restrictions");
-
-            Lineage_classes.drawRestrictions(source, data, null, null, options, function(err, result) {
-              if (err) {
-                return callbackSeries(err);
-              }
-              concatVisjsdata(result);
-              return callbackSeries();
-            });
-          }
-          else {
-            return callbackSeries();
-          }
-        },
-        // draw restrictions inverse
-        function(callbackSeries) {
-          if (type && type != "restrictions") {
-            return callbackSeries();
-          }
-          if (options.filter && options.filter.indexOf("^^") > -1) {
-            return callbackSeries();
-          }
-          if (!direction || direction == "inverse") {
-            options.inverse = true;
-            MainController.UI.message("searching inverse restrictions");
-
-            Lineage_classes.drawRestrictions(source, data, null, null, options, function(err, result) {
-              if (err) {
-                return callbackSeries(err);
-              }
-              concatVisjsdata(result);
-              return callbackSeries();
-            });
-          }
-          else {
-            return callbackSeries();
-          }
-        },
-
-        // draw objectProperties direct
-        function(callbackSeries) {
-          if (type && type == "restrictions") {
-            return callbackSeries();
-          }
-
-          if (type != "dictionary") {
-            source = Lineage_sources.activeSource;
-          }
-
-          if (!data) {
-            if (options.data != "allSourceNodes") {
-              data = Lineage_classes.getGraphIdsFromSource(Lineage_sources.activeSource);
-            }
-          }
-          if (!direction || direction == "direct") {
-            MainController.UI.message("searching predicates");
-
-            Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
-              if (err) {
-                return callbackSeries(err);
-              }
-              concatVisjsdata(result);
-              return callbackSeries(err);
-            });
-          }
-          else {
-            return callbackSeries();
-          }
-        },
-        // draw objectProperties inverse
-        function(callbackSeries) {
-          if (type && type == "restrictions") {
-            return callbackSeries();
-          }
-
-          if (type != "dictionary") {
-            source = Lineage_sources.activeSource;
-          }
-
-          if (!data) {
-            if (options.data != "allSourceNodes") {
-              data = Lineage_classes.getGraphIdsFromSource(Lineage_sources.activeSource);
-            }
-          }
-          if (!direction || direction == "inverse") {
-            options.inversePredicate = true;
-            MainController.UI.message("searching inverse predicates");
-
-            Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
-              if (err) {
-                return callbackSeries(err);
-              }
-              concatVisjsdata(result);
-              return callbackSeries();
-            });
-          }
-          else {
-            return callbackSeries();
-          }
         }
-      ],
+        source = Config.dictionarySource;
+        options.includeSources = Config.dictionarySource;
 
-      function(err) {
-        Lineage_sources.fromAllWhiteboardSources = self.whiteboardSourcesFromStatus;
-        if (allVisjsData.nodes.length == 0 && allVisjsData.edges.length == 0) {
-          return MainController.UI.message("no data found", true);
+
+        data = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
+        options.filter = "FILTER (?prop in (owl:sameAs,owl:equivalentClass))";
+        Lineage_sources.registerSource(Config.dictionarySource);
+
+        type = null;
+        return callbackSeries();
+      },
+
+      // draw restrictions normal
+      function(callbackSeries) {
+        if (type && type != "restrictions") {
+          return callbackSeries();
         }
-        if (!options.output || options.output == "graph") {
-          MainController.UI.message("drawing " + allVisjsData.nodes.length + "nodes and " + allVisjsData.edges.length + " edges...", true);
-          if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
-            Lineage_classes.lineageVisjsGraph.data.nodes.add(allVisjsData.nodes);
-            Lineage_classes.lineageVisjsGraph.data.edges.add(allVisjsData.edges);
-          }
-          else {
-            Lineage_classes.drawNewGraph(allVisjsData);
-          }
-          if (err) {
-            return alert(err);
-          }
+        if (options.filter && options.filter.indexOf("^^") > -1) {
+          return callbackSeries();
         }
-        else if (options.output == "table") {
-          Export.exportGraphToDataTable(self.lineageVisjsGraph, null, allVisjsData.nodes, allVisjsData.edges);
-        }
-        else if(options.output =='outline'){
-          var existingNewNodes = {  };
-          var existingWhiteboardNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
 
+        if (!direction || direction == "direct") {
+          options.inverse = false;
 
-          var nodeIds=[]
-          allVisjsData.nodes.forEach(function(node){
-            nodeIds.push(node.id)
-          })
+          MainController.UI.message("searching restrictions");
 
-          nodeIds.forEach(function(item) {
-            if (existingWhiteboardNodes[item.s.value] && !existingNewNodes[item.s.value]) {
-              existingNewNodes[item.s.value] = 1;
-            }
-          });
-
-          GraphDecorationWidget.showDecorateDialog(function(){
-            return Object.keys(existingNewNodes);
-          })
-
-        }
-      }
-    );
-  };
-
-
-  self.showInferredProperties = function(source) {
-    if (!source) {
-      source = Lineage_sources.activeSource;
-    }
-    $("#lineageRelations_relType").prop("checked");
-    $("input[name='lineageRelations_relType'][value=predicates]").prop("checked", true);
-    $("input[name='lineageRelations_relDirection'][value=direct]").prop("checked", true);
-    var options = {};
-    var inferredProps = [];
-    var distinctProps = {};
-    async.series(
-      [
-        function(callbackSeries) {
-
-          var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
-          var nodes = Object.keys(existingNodes);
-          if (nodes.length == 0) {
-            return callbackSeries();
-          }
-          else {
-            options.filter = Sparql_common.setFilter("s", nodes);
-            return callbackSeries();
-          }
-        },
-        //get effective distinct ObjectProperties
-        function(callbackSeries) {
-          OntologyModels.getInferredModel(source, options, function(err, result) {
+          Lineage_classes.drawRestrictions(source, data, null, null, options, function(err, result) {
             if (err) {
               return callbackSeries(err);
             }
-
-            result.forEach(function(item) {
-              if (!distinctProps[item.prop.value]) {
-                distinctProps[item.prop.value] = [];
-
-                inferredProps.push({
-                  id: item.prop.value,
-                  label: item.propLabel.value
-                });
-              }
-              distinctProps[item.prop.value].push({
-                domain: { id: item.sparent.value, label: item.sparentLabel.value },
-                range: { id: item.oparent.value, label: item.oparentLabel.value }
-              });
-            });
+            concatVisjsdata(result);
             return callbackSeries();
           });
+        }
+        else {
+          return callbackSeries();
+        }
+      },
+      // draw restrictions inverse
+      function(callbackSeries) {
+        if (type && type != "restrictions") {
+          return callbackSeries();
+        }
+        if (options.filter && options.filter.indexOf("^^") > -1) {
+          return callbackSeries();
+        }
+        if (!direction || direction == "inverse") {
+          options.inverse = true;
+          MainController.UI.message("searching inverse restrictions");
 
-
-        },
-
-        function(callbackSeries) {
-          var jstreeData = [{
-            id: "proposed",
-            text: "proposed",
-            parent: "#"
-
-          }];
-          inferredProps.forEach(function(item) {
-            jstreeData.push({
-              id: item.id,
-              text: "<b>" + item.label + "<b>",
-              parent: "proposed",
-              data: {
-                id: item.id,
-                label: item.label
-              }
-
-
-            });
-
-            distinctProps[item.id].forEach(function(item2) {
-              jstreeData.push({
-                id: item2.domain.id + "_" + item2.range.id,
-                text: "<i>" + item2.domain.label + "->" + item2.range.label + "<i>",
-                parent: item.id,
-                data: {
-                  id: item.id,
-                  constraints: item2
-
-                }
-
-
-              });
-            });
+          Lineage_classes.drawRestrictions(source, data, null, null, options, function(err, result) {
+            if (err) {
+              return callbackSeries(err);
+            }
+            concatVisjsdata(result);
+            return callbackSeries();
           });
-          JstreeWidget.addNodesToJstree("lineageRelations_propertiesJstreeDiv", null, jstreeData);
+        }
+        else {
+          return callbackSeries();
+        }
+      },
+
+      // draw objectProperties direct
+      function(callbackSeries) {
+        if (type && type == "restrictions") {
           return callbackSeries();
         }
 
+        if (type != "dictionary") {
+          source = Lineage_sources.activeSource;
+        }
 
-      ],
-      function(err) {
+        if (!data) {
+          if (options.data != "allSourceNodes") {
+            data = Lineage_classes.getGraphIdsFromSource(Lineage_sources.activeSource);
+          }
+        }
+        if (!direction || direction == "direct") {
+          MainController.UI.message("searching predicates");
+
+          Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
+            if (err) {
+              return callbackSeries(err);
+            }
+            concatVisjsdata(result);
+            return callbackSeries(err);
+          });
+        }
+        else {
+          return callbackSeries();
+        }
+      },
+      // draw objectProperties inverse
+      function(callbackSeries) {
+        if (type && type == "restrictions") {
+          return callbackSeries();
+        }
+
+        if (type != "dictionary") {
+          source = Lineage_sources.activeSource;
+        }
+
+        if (!data) {
+          if (options.data != "allSourceNodes") {
+            data = Lineage_classes.getGraphIdsFromSource(Lineage_sources.activeSource);
+          }
+        }
+        if (!direction || direction == "inverse") {
+          options.inversePredicate = true;
+          MainController.UI.message("searching inverse predicates");
+
+          Lineage_properties.drawPredicatesGraph(source, data, null, options, function(err, result) {
+            if (err) {
+              return callbackSeries(err);
+            }
+            concatVisjsdata(result);
+            return callbackSeries();
+          });
+        }
+        else {
+          return callbackSeries();
+        }
+      }
+    ],
+
+    function(err) {
+      Lineage_sources.fromAllWhiteboardSources = self.whiteboardSourcesFromStatus;
+      if (allVisjsData.nodes.length == 0 && allVisjsData.edges.length == 0) {
+        return MainController.UI.message("no data found", true);
+      }
+      if (!options.output || options.output == "graph") {
+        MainController.UI.message("drawing " + allVisjsData.nodes.length + "nodes and " + allVisjsData.edges.length + " edges...", true);
+        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
+          Lineage_classes.lineageVisjsGraph.data.nodes.add(allVisjsData.nodes);
+          Lineage_classes.lineageVisjsGraph.data.edges.add(allVisjsData.edges);
+        }
+        else {
+          Lineage_classes.drawNewGraph(allVisjsData);
+        }
         if (err) {
           return alert(err);
         }
       }
-    );
-  };
+      else if (options.output == "table") {
+        Export.exportGraphToDataTable(self.lineageVisjsGraph, null, allVisjsData.nodes, allVisjsData.edges);
+      }
 
-  self.onCheckNodePropertyTreeNode = function(event, obj) {
-    self.currentPropertyTreeNode = obj.node;
-    if (obj.node.data && obj.node.data.constraints) {
-      Lineage_relationIndividualsFilter.init();
     }
-  };
+  );
+};
 
 
-  self.callPreviousQuery = function() {
-    if (!self.previousQuery) {
-      return;
+self.showInferredProperties = function(source) {
+  if (!source) {
+    source = Lineage_sources.activeSource;
+  }
+  $("#lineageRelations_relType").prop("checked");
+  $("input[name='lineageRelations_relType'][value=predicates]").prop("checked", true);
+  $("input[name='lineageRelations_relDirection'][value=direct]").prop("checked", true);
+  var options = {};
+  var inferredProps = [];
+  var distinctProps = {};
+  async.series(
+    [
+      function(callbackSeries) {
+
+        var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+        var nodes = Object.keys(existingNodes);
+        if (nodes.length == 0) {
+          return callbackSeries();
+        }
+        else {
+          options.filter = Sparql_common.setFilter("s", nodes);
+          return callbackSeries();
+        }
+      },
+      //get effective distinct ObjectProperties
+      function(callbackSeries) {
+        OntologyModels.getInferredModel(source, options, function(err, result) {
+          if (err) {
+            return callbackSeries(err);
+          }
+
+          result.forEach(function(item) {
+            if (!distinctProps[item.prop.value]) {
+              distinctProps[item.prop.value] = [];
+
+              inferredProps.push({
+                id: item.prop.value,
+                label: item.propLabel.value
+              });
+            }
+            distinctProps[item.prop.value].push({
+              domain: { id: item.sparent.value, label: item.sparentLabel.value },
+              range: { id: item.oparent.value, label: item.oparentLabel.value }
+            });
+          });
+          return callbackSeries();
+        });
+
+
+      },
+
+      function(callbackSeries) {
+        var jstreeData = [{
+          id: "proposed",
+          text: "proposed",
+          parent: "#"
+
+        }];
+        inferredProps.forEach(function(item) {
+          jstreeData.push({
+            id: item.id,
+            text: "<b>" + item.label + "<b>",
+            parent: "proposed",
+            data: {
+              id: item.id,
+              label: item.label
+            }
+
+
+          });
+
+          distinctProps[item.id].forEach(function(item2) {
+            jstreeData.push({
+              id: item2.domain.id + "_" + item2.range.id,
+              text: "<i>" + item2.domain.label + "->" + item2.range.label + "<i>",
+              parent: item.id,
+              data: {
+                id: item.id,
+                constraints: item2
+
+              }
+
+
+            });
+          });
+        });
+        JstreeWidget.addNodesToJstree("lineageRelations_propertiesJstreeDiv", null, jstreeData);
+        return callbackSeries();
+      }
+
+
+    ],
+    function(err) {
+      if (err) {
+        return alert(err);
+      }
+    }
+  );
+};
+
+self.onCheckNodePropertyTreeNode = function(event, obj) {
+  self.currentPropertyTreeNode = obj.node;
+  if (obj.node.data && obj.node.data.constraints) {
+    Lineage_relationIndividualsFilter.init();
+  }
+};
+
+
+self.callPreviousQuery = function() {
+  if (!self.previousQuery) {
+    return;
+  }
+  $("#lineageRelations_propertiesJstreeDiv").jstree().uncheck_all();
+  $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(self.previousQuery.propIds);
+  $("#Lineage_relation_filterText2").css("display", "block");
+  $("#lineageQuery_addFilterButton").removeProp("disabled");
+
+  if (self.previousQuery.propFilter) {
+    //  Lineage_relationFilter.showAddFilterDiv(true);
+    $("#Lineage_relation_filterText2").css("display", "block");
+    $("#Lineage_relation_filterText2").val(self.previousQuery.propFilter);
+  }
+};
+self.loadUserQueries = function() {
+  Sparql_CRUD.list("STORED_QUERIES", null, null, "lineageRelations_savedQueriesSelect");
+};
+self.onSelectSavedQuery = function(id) {
+  $("#lineageRelations_history_deleteBtn").css("display", "inline");
+  Sparql_CRUD.loadItem(id, {}, function(err, result) {
+    if (err) {
+      return alert(err.responseText);
     }
     $("#lineageRelations_propertiesJstreeDiv").jstree().uncheck_all();
-    $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(self.previousQuery.propIds);
+    $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(result.propIds);
     $("#Lineage_relation_filterText2").css("display", "block");
     $("#lineageQuery_addFilterButton").removeProp("disabled");
 
-    if (self.previousQuery.propFilter) {
+    if (result.propFilter) {
       //  Lineage_relationFilter.showAddFilterDiv(true);
-      $("#Lineage_relation_filterText2").css("display", "block");
-      $("#Lineage_relation_filterText2").val(self.previousQuery.propFilter);
+      $("#Lineage_relation_filterText2").val(result.propFilter);
     }
+  });
+};
+self.saveCurrentQuery = function() {
+  var propIds = $("#lineageRelations_propertiesJstreeDiv").jstree().get_checked(true);
+  var propFilter = $("#Lineage_relation_filterText2").val();
+
+  var data = {
+    propIds: propIds,
+    propFilter: propFilter
   };
-  self.loadUserQueries = function() {
-    Sparql_CRUD.list("STORED_QUERIES", null, null, "lineageRelations_savedQueriesSelect");
-  };
-  self.onSelectSavedQuery = function(id) {
-    $("#lineageRelations_history_deleteBtn").css("display", "inline");
-    Sparql_CRUD.loadItem(id, {}, function(err, result) {
+  Sparql_CRUD.save("STORED_QUERIES", null, data, "private", function(err, result) {
+    if (err) {
+      return alert(err.responseText);
+    }
+    $("#lineageRelations_savedQueriesSelect").append("<option value='" + result.id + "'>" + result.label + "</option>");
+  });
+};
+
+self.deleteSavedQuery = function(id) {
+  if (confirm("delete query")) {
+    Sparql_CRUD.delete("STORED_QUERIES", id, function(err, result) {
       if (err) {
         return alert(err.responseText);
       }
-      $("#lineageRelations_propertiesJstreeDiv").jstree().uncheck_all();
-      $("#lineageRelations_propertiesJstreeDiv").jstree().check_node(result.propIds);
-      $("#Lineage_relation_filterText2").css("display", "block");
-      $("#lineageQuery_addFilterButton").removeProp("disabled");
-
-      if (result.propFilter) {
-        //  Lineage_relationFilter.showAddFilterDiv(true);
-        $("#Lineage_relation_filterText2").val(result.propFilter);
-      }
+      self.loadUserQueries();
+      $("#lineageRelations_history_deleteBtn").css("display", "none");
     });
-  };
-  self.saveCurrentQuery = function() {
-    var propIds = $("#lineageRelations_propertiesJstreeDiv").jstree().get_checked(true);
-    var propFilter = $("#Lineage_relation_filterText2").val();
+  }
+};
 
-    var data = {
-      propIds: propIds,
-      propFilter: propFilter
-    };
-    Sparql_CRUD.save("STORED_QUERIES", null, data, "private", function(err, result) {
-      if (err) {
-        return alert(err.responseText);
-      }
-      $("#lineageRelations_savedQueriesSelect").append("<option value='" + result.id + "'>" + result.label + "</option>");
-    });
-  };
-
-  self.deleteSavedQuery = function(id) {
-    if (confirm("delete query")) {
-      Sparql_CRUD.delete("STORED_QUERIES", id, function(err, result) {
-        if (err) {
-          return alert(err.responseText);
-        }
-        self.loadUserQueries();
-        $("#lineageRelations_history_deleteBtn").css("display", "none");
-      });
-    }
-  };
-
-  return self;
-})();
+return self;
+})
+();
 
 export default Lineage_relations;
 

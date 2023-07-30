@@ -10,13 +10,13 @@
       <div>
         <div>
           label <input id="lineage_relationIndividuals_searchTermInput" style="width: 100px" value="">
-          <button class="btn btn-sm my-1 py-0 btn-outline-primary"
+         <!-- <button class="btn btn-sm my-1 py-0 btn-outline-primary"
                   onclick="Lineage_relationIndividualsFilter.searchClassIndividuals()">Search
-          </button>
-          or
+          </button>-->
+      <!--    or
           <button onclick="Lifex_dalia.showDateRangePicker()"> Period</button>
           <input id="dateRangPicker" value="" style=" width: 150px;">
-        </div>
+        </div>-->
 
       </div>
     </div>
@@ -41,8 +41,16 @@
   </div>
   <div style=" padding:5px;margin:5px; width: 300px;">
 
-    <button onclick="Lineage_relationIndividualsFilter.addRangeAndDomainFilter()">OK</button>
-    <button onclick='$("#smallDialogDiv").dialog("close")'>Skip</button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold"
+            onclick="Lineage_relationIndividualsFilter.execFilter('graph')">Draw
+    </button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold"
+            onclick="Lineage_relationIndividualsFilter.execFilter('outline')">Outline
+    </button>
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold"
+            onclick="Lineage_relationIndividualsFilter.execFilter('table')">Table
+    </button>
+    <button onclick='$("#smallDialogDiv").dialog("close")'>Cancel</button>
   </div>
 </div>
 

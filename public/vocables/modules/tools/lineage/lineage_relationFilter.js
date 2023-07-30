@@ -336,7 +336,7 @@ var Lineage_relationFilter = (function() {
     filter.filterStr = objectFilterStr;
     var text = $("#Lineage_relation_filterText").val();
     $("#Lineage_relation_filterText2").css("display", "block");
-    $("#Lineage_relation_filterText2").val(text + filter.filterStr + "\n");
+    $("#Lineage_relation_filterText2").val(text + filter.filterStr);
 
   };
   return self;

@@ -4,6 +4,10 @@ import Lineage_classes from "../tools/lineage/lineage_classes.js";
 
 var GraphDecorationWidget = (function() {
   var self = {};
+  self.currentAttrsPalette = {};
+  var attrsShapes = [ "triangle", "box", "diamond"];
+  attrsShapes.index = 0;
+  var colorPalette = common.paletteIntense;
 
   self.showDecorateDialog = function(nodeSelectorFn) {
     $("#smallDialogDiv").dialog("open");
@@ -46,15 +50,18 @@ var GraphDecorationWidget = (function() {
     var size = $("#lineage_decorate_sizeInput").val();
     nodes.forEach(function(node) {
       var id;
-      if(typeof node==="object") {
+      if (typeof node === "object") {
         if (!node.data) {
           return;
-        }else
-         id= node.id
-      }else{
-        id=node
+        }
+        else {
+          id = node.id;
+        }
       }
-      var obj = { id: id};
+      else {
+        id = node;
+      }
+      var obj = { id: id };
       if (color) {
         obj.color = color;
       }
@@ -68,6 +75,59 @@ var GraphDecorationWidget = (function() {
     });
     Lineage_classes.lineageVisjsGraph.data.nodes.update(newIds);
   };
+
+
+  self.getNodeDecorationAttrs = function(nodeId) {
+
+
+    var attrs = self.currentAttrsPalette[nodeId];
+
+    if (!attrs) {
+      if (Object.keys(self.currentAttrsPalette).length > colorPalette.length) {
+        attrsShapes.index += 1;
+      }
+      var color = colorPalette[Object.keys(self.currentAttrsPalette).length];
+      var shape = attrsShapes[attrsShapes.index];
+      attrs = { color: color, shape: shape };
+      self.currentAttrsPalette[nodeId] = attrs;
+    }
+    return attrs;
+
+
+  };
+
+
+  self.showOutlinedNodesAndLegend = function(groups) {
+
+    self.currentAttrsPalette = {};
+    attrsShapes.index = 0;
+    var legendVisjsTreeData = [];
+    var newVisjsNodes = [];
+    for (var group in groups) {
+      var attrs = self.getNodeDecorationAttrs(group);
+      legendVisjsTreeData.push({
+        id: group,
+        text: "<span  style='font-size:10px;background-color:" + attrs.color + "'>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;" + groups[group].label,
+        parent: "#",
+        color: attrs.color
+
+      });
+
+      groups[group].nodeIds.forEach(function(nodeId) {
+        newVisjsNodes.push({ id: nodeId, color: attrs.color, shape: attrs.shape });
+      });
+
+    }
+    ;
+
+    $("#lineage_actionDiv_title").html("Outline Legend");
+    LegendWidget.drawLegend("Lineage_classes_graphDecoration_legendDiv", legendVisjsTreeData);
+    Lineage_classes.lineageVisjsGraph.data.nodes.update(newVisjsNodes);
+
+
+  };
+
+
   return self;
 })();
 export default GraphDecorationWidget;

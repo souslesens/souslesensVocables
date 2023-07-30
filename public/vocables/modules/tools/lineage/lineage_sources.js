@@ -195,7 +195,6 @@ var Lineage_sources = (function () {
             self.activeSource = source;
             highlightSourceDiv(source);
             self.whiteboard_setGraphOpacity(source);
-            Lineage_decoration.refreshLegend(source);
             self.setAllWhiteBoardSources(true);
         }
 

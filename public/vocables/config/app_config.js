@@ -14,6 +14,7 @@ var Config = (function () {
 
     self.apiUrl = "/api/v1";
 
+    self.UIprofile="KG"//ontology
     self.logSparqlQueries = false;
     if (location.hostname == "localhost") {
         self.logSparqlQueries = true;

@@ -264,7 +264,7 @@ var Lineage_classes = (function () {
         MainController.UI.message("");
         self.lineageVisjsGraph.clearGraph();
 
-        Lineage_decoration.clearLegend();
+        LegendWidget.clearLegend();
 
         if (clearTree) {
             $("#lineage_drawnSources").html("");

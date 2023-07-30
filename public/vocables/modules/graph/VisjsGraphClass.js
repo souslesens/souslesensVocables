@@ -344,9 +344,7 @@ return false;
         self.data = null;
     };
 
-    self.drawLegend = function () {
-        // Pass
-    };
+
 
     self.removeNodes = function (/** @type {string | number} */ key, /** @type {any} */ value, /** @type {any} */ removeEdges) {
         /**

@@ -264,7 +264,7 @@ var Lineage_properties = (function () {
             if (err) {
                 return callback(err);
             }
-            if (options.output != "table") {
+            if (options.output == "graph") {
                 result = Lineage_classes.truncateResultToVisGraphLimit(result);
             }
             Sparql_common.setSparqlResultPropertiesLabels(source, result, "prop", function (err, result2) {

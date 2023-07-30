@@ -15,7 +15,6 @@ var Lineage_decoration = (function () {
     self.legendMap = {};
     self.currentVisjGraphNodesMap = {};
 
-
     self.colorGraphNodesByType = function (visjsNodes) {
         if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) {
             return $("#lineage_legendWrapper").css("display", "none");
@@ -217,9 +216,9 @@ var Lineage_decoration = (function () {
 
     self.setGraphPopupMenus = function () {
         var html =
-          '    <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(true);"> Hide Type</span>' +
-          ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType();"> Show Type</span>' +
-          ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(null,true);"> Show Only</span>';
+            '    <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(true);"> Hide Type</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType();"> Show Type</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(null,true);"> Show Only</span>';
         $("#graphPopupDiv").html(html);
     };
 
@@ -227,17 +226,14 @@ var Lineage_decoration = (function () {
         if (!Config.currentTopLevelOntology) {
             $("#lineage_legendWrapper").css("display", "none");
             return;
-        }
-        else {
+        } else {
             $("#lineage_legendWrapper").css("display", "block");
         }
 
         var str = "<div  class='Lineage_legendTypeTopLevelOntologyDiv' style='display: flex;>";
 
-        LegendWidget.drawLegend("Lineage_classes_graphDecoration_legendDiv",jstreeData)
-    }
-
-
+        LegendWidget.drawLegend("Lineage_classes_graphDecoration_legendDiv", jstreeData);
+    };
 
     return self;
 })();

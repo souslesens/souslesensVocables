@@ -21,11 +21,9 @@ var Lineage_blend = (function () {
             $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
                 $("#LineagePopup").load("snippets/lineage/lineageAddNodeDialog.html", function () {
                     $("#editPredicate_mainDiv").remove();
-                    PredicatesSelectorWidget.load("LineageBlend_commonPredicateObjectDiv",Lineage_sources.activeSource,function () {
+                    PredicatesSelectorWidget.load("LineageBlend_commonPredicateObjectDiv", Lineage_sources.activeSource, function () {
                         $("#editPredicate_propertyDiv").css("display", "none");
-                    })
-
-
+                    });
                 });
 
                 return;
@@ -844,7 +842,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
         }
         var login = authentication.currentUser.login;
         //  var authorUri = Config.defaultNewUriRoot + "users/" + login;
-        var dateTime = common.dateToRDFString(new Date(),true) + "^^xsd:dateTime";
+        var dateTime = common.dateToRDFString(new Date(), true) + "^^xsd:dateTime";
 
         metaDataTriples.push({
             subject: subjectUri,
@@ -1221,7 +1219,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
         }
         var login = authentication.currentUser.login;
         //  var authorUri = Config.defaultNewUriRoot + "users/" + login;
-        var dateTime = common.dateToRDFString(new Date(),true) + "^^xsd:dateTime";
+        var dateTime = common.dateToRDFString(new Date(), true) + "^^xsd:dateTime";
 
         metaDataTriples.push({
             subject: subjectUri,
@@ -1283,7 +1281,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
         triples.push({
             subject: graphUri,
             predicate: "http://www.w3.org/2002/07/owl#versionInfo",
-            object: "Revised " + common.dateToRDFString(new Date(),true),
+            object: "Revised " + common.dateToRDFString(new Date(), true),
         });
         if (options.label) {
             triples.push({

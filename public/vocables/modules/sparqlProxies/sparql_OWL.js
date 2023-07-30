@@ -793,12 +793,11 @@ var Sparql_OWL = (function () {
             if (self.no_params) {
                 url = self.sparql_url;
             }
-            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel,caller: "getFilteredTriples"}, function (err, result) {
+            Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, caller: "getFilteredTriples" }, function (err, result) {
                 if (err) {
                     return callbackQuery(err);
                 }
-                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["object", "prop", "subject"],
-                  { source: sourceLabel , caller:"getFilteredTriples"});
+                result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["object", "prop", "subject"], { source: sourceLabel, caller: "getFilteredTriples" });
                 return callbackQuery(null, result.results.bindings);
             });
         }
@@ -1221,7 +1220,7 @@ var Sparql_OWL = (function () {
 
         var url = self.sparql_url + "?format=json&query=";
 
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel,  caller:"getObjectRestrictions" }, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, caller: "getObjectRestrictions" }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -1242,7 +1241,7 @@ var Sparql_OWL = (function () {
         query += "{ graph ?g {?subject owl:inverseOf <" + restrictionId + ">." + "?subject ?predicate ?object.}}";
         self.sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var url = self.sparql_url + "?format=json&query=";
-        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel , caller:"getInverseRestrictions"}, function (err, result) {
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel, caller: "getInverseRestrictions" }, function (err, result) {
             if (err) {
                 return callback(err);
             }
@@ -2034,7 +2033,7 @@ var Sparql_OWL = (function () {
             if (err) {
                 return callback(err);
             }
-          var  allResults = _result.results.bindings;
+            var allResults = _result.results.bindings;
             callback(null, allResults);
         });
     };

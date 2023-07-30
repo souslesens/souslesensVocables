@@ -58,7 +58,7 @@ var util = {
          * signed int to an unsigned by doing an unsigned bitshift. */
         return hash >>> 0;
     },
-    dateToRDFString: function (date,time) {
+    dateToRDFString: function (date, time) {
         var str = "";
         if (date instanceof Date && isFinite(date)) {
             var month = "" + (date.getMonth() + 1);
@@ -72,8 +72,7 @@ var util = {
             var sec = "" + date.getSeconds();
             if (sec.length == 1) sec = "0" + sec;
             str = date.getFullYear() + "-" + month + "-" + day;
-            if(time)
-                str+=  "T" + hour + ":" + min + ":" + sec;
+            if (time) str += "T" + hour + ":" + min + ":" + sec;
         } else str = "";
         return str;
     },

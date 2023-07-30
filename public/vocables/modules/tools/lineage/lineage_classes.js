@@ -37,7 +37,7 @@ var Lineage_classes = (function () {
 
     var self = {};
     //self.lineageVisjsGraph = {};
-    self.lineageVisjsGraph = new VisjsGraphClass("graphDiv", { nodes:[],edges:[] }, {  });
+    self.lineageVisjsGraph = new VisjsGraphClass("graphDiv", { nodes: [], edges: [] }, {});
     self.showLimit = 1000;
 
     var graphContext = {};
@@ -1244,8 +1244,6 @@ addNode:false
                         MainController.UI.message("No data found");
                         return callbackEach(null);
                     }
-
-
 
                     var shape = self.defaultShape;
 
@@ -3025,8 +3023,6 @@ attrs.color=self.getSourceColor(superClassValue)
         }
         $("#lineage_actionDiv_Keyslegend").css("display", display);
     };
-
-
 
     self.showWikiPage = function (sourceLabel) {
         var wikiUrl = Config.wiki.url + "Source " + sourceLabel;

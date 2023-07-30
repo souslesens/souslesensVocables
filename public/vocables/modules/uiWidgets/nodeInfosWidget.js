@@ -204,17 +204,13 @@ var NodeInfosWidget = (function () {
 
         $("#" + self.currentNodeIdInfosDivId).prepend(str);
 
-
-
         if (Lineage_sources.isSourceEditableForUser(self.currentSource) && !options.hideModifyButtons) {
-            PredicatesSelectorWidget.load("sourceBrowser_addPropertyDiv", self.currentSource, function() {
-               $("#editPredicate_controlsDiv").css("display", "block");
+            PredicatesSelectorWidget.load("sourceBrowser_addPropertyDiv", self.currentSource, function () {
+                $("#editPredicate_controlsDiv").css("display", "block");
                 $("#sourceBrowser_addPropertyDiv").css("display", "none");
-
             });
         }
-
-        };
+    };
 
     self.configureEditPredicateWidget = function () {
         $("#editPredicate_savePredicateButton").click(function () {
@@ -657,18 +653,18 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
     };
     self.addPredicate = function (property, value, source, createNewNode, callback) {
         if (!property) {
-            property =  PredicatesSelectorWidget.getSelectedProperty()
+            property = PredicatesSelectorWidget.getSelectedProperty();
         }
         if (!value) {
-           // value = $("#editPredicate_objectValue").val().trim();
-            value = PredicatesSelectorWidget.getSelectedObjectValue()
+            // value = $("#editPredicate_objectValue").val().trim();
+            value = PredicatesSelectorWidget.getSelectedObjectValue();
         }
 
         if (!property || !value) {
             return alert("enter property and value");
         }
 
-       /* if ($("#sourceBrowser_addPropertyObjectSelect").val() == "xsd:dateTime") {
+        /* if ($("#sourceBrowser_addPropertyObjectSelect").val() == "xsd:dateTime") {
             if (!value.match(/\d\d\d\d-\d\d-\d\d/)) {
                 return alert("wrong date format (need yyy-mm-dd");
             }
@@ -897,9 +893,9 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
             return;
         }
 
-      //  var newValue = $("#editPredicate_objectValue").val();
+        //  var newValue = $("#editPredicate_objectValue").val();
 
-        var newValue =PredicatesSelectorWidget.getSelectedObjectValue()
+        var newValue = PredicatesSelectorWidget.getSelectedObjectValue();
 
         var oldValue = self.currentEditingItem.item.value.value;
         if (self.currentEditingItem.item.value.type == "literal") {

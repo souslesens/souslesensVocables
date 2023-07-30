@@ -235,7 +235,7 @@
                     var exactMatch = $("#Browse_exactMatchCBX").prop("checked");
                     var mode = "fuzzyMatch";
                     if (exactMatch) mode = "exactMatch";
-                    var options = { parentlabels: true,skosLabels:true };
+                    var options = { parentlabels: true, skosLabels: true };
                     if (!term || term == "") return alert(" enter a word ");
                     SearchUtil.getSimilarLabelsInSources(null, null, [term], null, mode, options, function (_err, result) {
                         if (_err) return alert(err);

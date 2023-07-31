@@ -309,13 +309,13 @@ var KGtripleBuilder = {
                                                         var blankNode_cellMap = {};
 
                                                         mapping.tripleModels.forEach(function (item) {
-                                                            if ( line[item.s] == "null") {
-                                                                line[item.s]=null;
+                                                            if (line[item.s] == "null") {
+                                                                line[item.s] = null;
                                                             }
-                                                              if (!line[item.o] == "null") {
-                                                                  line[item.o]=null;
-                                                              }
-                                                            if (!line[item.s] ) {
+                                                            if (!line[item.o] == "null") {
+                                                                line[item.o] = null;
+                                                            }
+                                                            if (!line[item.s]) {
                                                                 return;
                                                             }
 
@@ -340,7 +340,7 @@ var KGtripleBuilder = {
                                                                         return (lineError = e);
                                                                     }
                                                                 } else if (item.isSubjectBlankNode) {
-                                                                    if (!line[item.s] ) {
+                                                                    if (!line[item.s]) {
                                                                         return;
                                                                     }
                                                                     var blankNode = blankNode_cellMap[item.s];
@@ -393,7 +393,7 @@ var KGtripleBuilder = {
                                                                 if (item.o_type == "fixed") {
                                                                     objectStr = item.o;
                                                                 } else if (item.isObjectBlankNode) {
-                                                                    if ( !line[item.o]) {
+                                                                    if (!line[item.o]) {
                                                                         return;
                                                                     }
                                                                     var blankNode = blankNode_cellMap[item.o];

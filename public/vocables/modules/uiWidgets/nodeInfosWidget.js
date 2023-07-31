@@ -247,13 +247,12 @@ var NodeInfosWidget = (function () {
                 var graphUri = "";
                 var uniqueTriples = {};
                 data.forEach(function (item) {
-                    var key
+                    var key;
                     if (item.objectValue) {
-
-                       var value = item.objectValue.value.replace(/T[\d:]*Z/, "");
-                        item.value.value=value;
-                        var key = item.prop.value + "_" + value
-                    }else {
+                        var value = item.objectValue.value.replace(/T[\d:]*Z/, "");
+                        item.value.value = value;
+                        var key = item.prop.value + "_" + value;
+                    } else {
                         var key = item.prop.value + "_" + item.value.value + item.value["xml:lang"];
                     }
                     if (uniqueTriples[key]) {
@@ -305,7 +304,6 @@ value = item.valueLabel.value;*/
                     PredicatesSelectorWidget.predicatesIdsMap[predicateId] = { item: item };
 
                     // dont manage lang clustering when source is editable
-
 
                     if (!Lineage_sources.isSourceEditableForUser(sourceLabel) && item.value && item.value["xml:lang"]) {
                         if (!self.propertiesMap.properties[propName].langValues[item.value["xml:lang"]]) {

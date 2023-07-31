@@ -382,6 +382,7 @@ var Sparql_OWL = (function() {
       query += "graph ?g ";
     }
     query += "{<" + conceptId + "> ?prop ?value.  ";
+    query+= "OPTIONAL {?value owl:hasValue ?objectValue.} "
     if (options.getValuesLabels) {
       query += "  Optional {?value rdfs:label ?valueLabel}  Optional {?prop rdfs:label ?propLabel} ";
     }

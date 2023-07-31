@@ -64,13 +64,13 @@ var VisjsUtil = (function () {
 
         var node = {
             id: id,
-            label: attrs.label,
+            label: attrs.label || label,
             shape: attrs.shape,
             color: attrs.color,
             size: attrs.size,
             data: {
                 id: id,
-                label: label,
+                label: attrs.label || label,
                 source: source,
                 type: options.type,
             },

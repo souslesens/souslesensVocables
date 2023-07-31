@@ -309,7 +309,13 @@ var KGtripleBuilder = {
                                                         var blankNode_cellMap = {};
 
                                                         mapping.tripleModels.forEach(function (item) {
-                                                            if (!line[item.s] || line[item.s] == "null") {
+                                                            if ( line[item.s] == "null") {
+                                                                line[item.s]=null;
+                                                            }
+                                                              if (!line[item.o] == "null") {
+                                                                  line[item.o]=null;
+                                                              }
+                                                            if (!line[item.s] ) {
                                                                 return;
                                                             }
 
@@ -334,7 +340,7 @@ var KGtripleBuilder = {
                                                                         return (lineError = e);
                                                                     }
                                                                 } else if (item.isSubjectBlankNode) {
-                                                                    if (!line[item.s] || !line[item.o]) {
+                                                                    if (!line[item.s] ) {
                                                                         return;
                                                                     }
                                                                     var blankNode = blankNode_cellMap[item.s];
@@ -387,7 +393,7 @@ var KGtripleBuilder = {
                                                                 if (item.o_type == "fixed") {
                                                                     objectStr = item.o;
                                                                 } else if (item.isObjectBlankNode) {
-                                                                    if (!line[item.s] || !line[item.o]) {
+                                                                    if ( !line[item.o]) {
                                                                         return;
                                                                     }
                                                                     var blankNode = blankNode_cellMap[item.o];
@@ -659,7 +665,7 @@ propertyStr = line[item.p];
                                                         if (KGtripleBuilder.stopCreateTriples) {
                                                             var message = "mapping " + mapping.fileName + " : import interrupted by user";
                                                             //  KGtripleBuilder.message(options.clientSocketId,message)
-                                                            return callbackSeries(message);
+                                                            return callbackEach(message);
                                                         }
 
                                                         if (options.deleteTriples) {
@@ -1156,7 +1162,7 @@ propertyStr = line[item.p];
                                 }
                                 if (options.sampleSize) {
                                     output = result;
-                                    return callback(err, output);
+                                    return callbackEach(err, output);
                                 } else {
                                     output = { countCreatedTriples: result };
                                 }

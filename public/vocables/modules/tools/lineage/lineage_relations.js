@@ -357,12 +357,31 @@ var Lineage_relations = (function () {
 
             var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
             var groups = {};
-            result.forEach(function (item) {
-                if (!groups[item.object.value]) {
-                    groups[item.object.value] = { id: item.object.value, label: item.objectLabel.value, nodeIds: [] };
-                }
-                groups[item.object.value].nodeIds.push(item.subject.value);
-            });
+
+            if(result.length==0)
+                return MainController.UI.message("no data found",true)
+
+
+
+                result.forEach(function(item) {
+                    var groupName=item.object.value;
+                    if(item.objectValue && item.objectValue.datatype=='http://www.w3.org/2001/XMLSchema#dateTime') {
+                        var date=new Date( item.objectValue.value);
+                        var year=date.getFullYear();
+                        var month=date.getMonth();
+                        groupName=year+"-"+month
+                        if (!groups[groupName]) {
+                            groups[groupName] = { id: groupName, label: groupName, nodeIds: [] };
+                        }
+                    }
+                    else {
+                        if (!groups[groupName]) {
+                            groups[groupName] = { id: item.object.value, label: item.objectLabel.value, nodeIds: [] };
+                        }
+                    }
+                    groups[groupName].nodeIds.push(item.subject.value);
+                });
+
             GraphDecorationWidget.showOutlinedNodesAndLegend(groups);
         });
     };

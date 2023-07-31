@@ -629,16 +629,16 @@ return;*/
             self.previousPanelLabel = panelLabel;
         },
 
-        showHideRightPanel: function (state) {
+        showHideRightPanel: function (showOrHide) {
             var left = $("#rightPanelDiv").position().left;
             var w = $(window).width();
             var show = false;
-            if (!state) {
+            if (!showOrHide) {
                 if (w - left < 100) show = true;
                 else show = false;
-            } else if (state == "show") {
+            } else if (showOrHide == "show") {
                 show = true;
-            } else if (state == "hide") {
+            } else if (showOrHide == "hide") {
                 show = false;
             }
             if (show) {

@@ -36,7 +36,8 @@ var Lineage_classes = (function () {
     var sourceColors = {};
 
     var self = {};
-    self.lineageVisjsGraph = {};
+    //self.lineageVisjsGraph = {};
+    self.lineageVisjsGraph = new VisjsGraphClass("graphDiv", { nodes: [], edges: [] }, {});
     self.showLimit = 1000;
 
     var graphContext = {};
@@ -263,7 +264,7 @@ var Lineage_classes = (function () {
         MainController.UI.message("");
         self.lineageVisjsGraph.clearGraph();
 
-        Lineage_decoration.clearLegend();
+        LegendWidget.clearLegend();
 
         if (clearTree) {
             $("#lineage_drawnSources").html("");
@@ -1220,7 +1221,7 @@ addNode:false
         }
         MainController.UI.message("");
 
-        var slices = common.array.slice(nodeIds, 100);
+        var slices = common.array.slice(nodeIds, 300);
 
         var memberPredicate = false;
 
@@ -1228,11 +1229,12 @@ addNode:false
             options = {};
         }
         options.selectGraph = 1;
+        var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
         var visjsData = { nodes: [], edges: [] };
         async.eachSeries(
             slices,
             function (/** @type {any} */ slice, /** @type {(arg0: undefined) => void} */ callbackEach) {
-                Sparql_generic.getNodeParents(source, null, slice, 1, options, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+                Sparql_OWL.getNodeParents(source, null, slice, 1, options, function (/** @type {any} */ err, /** @type {any[]} */ result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -1242,8 +1244,6 @@ addNode:false
                         MainController.UI.message("No data found");
                         return callbackEach(null);
                     }
-
-                    var existingNodes = self.lineageVisjsGraph.getExistingIdsMap();
 
                     var shape = self.defaultShape;
 
@@ -1336,7 +1336,9 @@ addNode:false
                     }
                     return MainController.UI.message("No data found");
                 }
-                self.lineageVisjsGraph.network.fit();
+                if (self.lineageVisjsGraph.network) {
+                    self.lineageVisjsGraph.network.fit();
+                }
                 if (callback) {
                     callback(null, visjsData);
                 }
@@ -1949,6 +1951,7 @@ addNode:false
                         return callbackSeries();
                     }
                     options.withoutImports = Lineage_sources.activeSource || false;
+
                     //  var _options = { withoutImports: Lineage_sources.activeSource || false };
                     Sparql_OWL.getObjectRestrictions(source, classIds, options, function (err, _result) {
                         if (err) {
@@ -3019,12 +3022,6 @@ attrs.color=self.getSourceColor(superClassValue)
             display = "none";
         }
         $("#lineage_actionDiv_Keyslegend").css("display", display);
-    };
-
-    self.getSourceSpecificClasses = function (source) {
-        if (!source) {
-            GenericTools_searchAllClassSelect;
-        }
     };
 
     self.showWikiPage = function (sourceLabel) {

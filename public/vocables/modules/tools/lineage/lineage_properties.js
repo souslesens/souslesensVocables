@@ -1,4 +1,5 @@
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
+
 self.lineageVisjsGraph;
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Lineage_classes from "./lineage_classes.js";
@@ -66,13 +67,13 @@ var Lineage_properties = (function () {
                     },
                 };
                 /* items.deleteProperty = {
-                    label: "delete property",
-                    action: function (_e) {
-                        // pb avec source
+            label: "delete property",
+            action: function (_e) {
+                // pb avec source
 
-                        JstreeWidget.deleteNode(self.currentTreeNode, "Lineage_propertiesTree");
-                    },
-                };*/
+                JstreeWidget.deleteNode(self.currentTreeNode, "Lineage_propertiesTree");
+            },
+        };*/
             }
         }
 
@@ -264,7 +265,7 @@ var Lineage_properties = (function () {
             if (err) {
                 return callback(err);
             }
-            if (options.output != "table") {
+            if (options.output == "graph") {
                 result = Lineage_classes.truncateResultToVisGraphLimit(result);
             }
             Sparql_common.setSparqlResultPropertiesLabels(source, result, "prop", function (err, result2) {
@@ -300,31 +301,38 @@ var Lineage_properties = (function () {
                             }
 
                             /*  if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
-                                label = Config.Lineage.logicalOperatorsMap[item.prop.value];
-                                shape = "circle";
-                                color = "#EEE";
-                            }*/
+                  label = Config.Lineage.logicalOperatorsMap[item.prop.value];
+                  shape = "circle";
+                  color = "#EEE";
+              }*/
                         }
 
                         var predicateUri = options.inversePredicate ? null : item.prop.value;
                         visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject.value, label, predicateUri, { shape: shape }));
                         /*  visjsData.nodes.push({
-                            id: item.subject.value,
-                            label: label,
-                            shape: shape,
-                            size: size,
-                            color: color,
-                            data: {
-                                source: source,
-                                id: item.subject.value,
-                                label: item.subjectLabel.value,
-                            },
-                        });*/
+                id: item.subject.value,
+                label: label,
+                shape: shape,
+                size: size,
+                color: color,
+                data: {
+                    source: source,
+                    id: item.subject.value,
+                    label: item.subjectLabel.value,
+                },
+            });*/
                     }
-                    if (options.skipLiterals && item.object.type && item.object.type.indexOf("literal") > -1) return;
+                    if (options.skipLiterals && item.object.type && item.object.type.indexOf("literal") > -1) {
+                        return;
+                    }
                     if (!existingNodes[item.object.value]) {
                         existingNodes[item.object.value] = 1;
-                        var label = item.objectLabel ? item.objectLabel.value : Sparql_common.getLabelFromURI(item.object.value);
+                        var label = "";
+                        if (item.objectValue) {
+                            label = item.objectValue.value.replace(/T[\d:]*Z/, "");
+                        } else {
+                            label = item.objectLabel ? item.objectLabel.value : Sparql_common.getLabelFromURI(item.object.value);
+                        }
                         var shape = Lineage_classes.defaultShape;
 
                         var type = item.objectType ? item.objectType.value : "?";
@@ -343,36 +351,39 @@ var Lineage_properties = (function () {
                             }
 
                             /*  if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
-                                label = Config.Lineage.logicalOperatorsMap[item.prop.value] || "";
-                                shape = "hexagon";
-                                color = "#EEE";
-                            }*/
+                  label = Config.Lineage.logicalOperatorsMap[item.prop.value] || "";
+                  shape = "hexagon";
+                  color = "#EEE";
+              }*/
                         }
                         var font = null;
                         if (item.object.type == "literal") {
                             shape = "text";
-                            if (label.length > Config.whiteBoardMaxLabelLength) label = label.substring(0, Config.whiteBoardMaxLabelLength) + "...";
+                            if (label.length > Config.whiteBoardMaxLabelLength) {
+                                label = label.substring(0, Config.whiteBoardMaxLabelLength) + "...";
+                            }
 
                             font = "12px arial #3c8fe1";
                         }
 
                         var predicateUri = options.inversePredicate ? item.prop.value : null;
+
                         visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.object.value, label, predicateUri, { shape: shape }));
 
                         /*   visjsData.nodes.push({
-                            id: item.object.value,
-                            label: label,
-                            shape: shape,
-                            size: size,
-                            color: color,
-                            font: font,
-                            data: {
-                                source: source,
-                                id: item.object.value,
-                                label: item.objectLabel.value,
-                                type: item.object.type,
-                            },
-                        });*/
+                id: item.object.value,
+                label: label,
+                shape: shape,
+                size: size,
+                color: color,
+                font: font,
+                data: {
+                    source: source,
+                    id: item.object.value,
+                    label: item.objectLabel.value,
+                    type: item.object.type,
+                },
+            });*/
                     }
                     var edgeId = item.subject.value + "_" + item.prop.value + "_" + item.object.value;
                     if (!existingNodes[edgeId]) {
@@ -426,36 +437,36 @@ var Lineage_properties = (function () {
                 });
 
                 /*    var fromNodesMap={}
-                var leafNodesMap={}
-                visjsData.edges.forEach(function(item){
-                    fromNodesMap[item.from]=1
+        var leafNodesMap={}
+        visjsData.edges.forEach(function(item){
+            fromNodesMap[item.from]=1
 
-                })
+        })
 
-                var leafNodes=[]
-                visjsData.edges.forEach(function(item){
-                    if(!fromNodesMap[item.to]){
-                        var shape,label,color;
-                        var str=""
-                        if ( item.id.indexOf("union")>-1  || item.id.indexOf("intersection")>-1){
-                            shape = "circle";
-                            label = "V";
-                            color = "#eee";
-                            leafNodesMap[item.to]={shape:shape,label:label,color:color}
+        var leafNodes=[]
+        visjsData.edges.forEach(function(item){
+            if(!fromNodesMap[item.to]){
+                var shape,label,color;
+                var str=""
+                if ( item.id.indexOf("union")>-1  || item.id.indexOf("intersection")>-1){
+                    shape = "circle";
+                    label = "V";
+                    color = "#eee";
+                    leafNodesMap[item.to]={shape:shape,label:label,color:color}
 
-                        }
+                }
 
-                    }
-                })
+            }
+        })
 
-                visjsData.nodes.forEach(function(item,index){
-                    if(leafNodesMap[item.id]){
-                        visjsData.nodes[index].shape=leafNodesMap[item.id].shape;
-                        visjsData.nodes[index].color=leafNodesMap[item.id].color;
-                        visjsData.nodes[index].label=leafNodesMap[item.id].label;
-                    }
+        visjsData.nodes.forEach(function(item,index){
+            if(leafNodesMap[item.id]){
+                visjsData.nodes[index].shape=leafNodesMap[item.id].shape;
+                visjsData.nodes[index].color=leafNodesMap[item.id].color;
+                visjsData.nodes[index].label=leafNodesMap[item.id].label;
+            }
 
-                })*/
+        })*/
 
                 if (callback && options.returnVisjsData) {
                     return callback(null, visjsData);
@@ -961,7 +972,7 @@ var Lineage_properties = (function () {
 
             /*  Lineage_classes.lineageVisjsGraph.network.fit();
 
-     */
+*/
             self.graphInited = true;
         });
     };

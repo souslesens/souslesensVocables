@@ -14,7 +14,6 @@ var Lineage_decoration = (function () {
     self.topOntologiesClassesMap = {};
     self.legendMap = {};
     self.currentVisjGraphNodesMap = {};
-    self.currentLegendDJstreedata = {};
 
     self.colorGraphNodesByType = function (visjsNodes) {
         if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) {
@@ -215,9 +214,12 @@ var Lineage_decoration = (function () {
         );
     };
 
-    self.clearLegend = function () {
-        $("#Lineage_classes_graphDecoration_legendDiv").html("");
-        self.legendMap = {};
+    self.setGraphPopupMenus = function () {
+        var html =
+            '    <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(true);"> Hide Type</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType();"> Show Type</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(null,true);"> Show Only</span>';
+        $("#graphPopupDiv").html(html);
     };
 
     self.drawLegend = function (jstreeData) {
@@ -230,148 +232,7 @@ var Lineage_decoration = (function () {
 
         var str = "<div  class='Lineage_legendTypeTopLevelOntologyDiv' style='display: flex;>";
 
-        self.currentLegendDJstreedata[Lineage_sources.activeSource] = jstreeData;
-        var options = {
-            openAll: true,
-            withCheckboxes: true,
-            onCheckNodeFn: Lineage_decoration.onLegendCheckBoxes,
-            onUncheckNodeFn: Lineage_decoration.onLegendCheckBoxes,
-            tie_selection: false,
-        };
-        $("#Lineage_classes_graphDecoration_legendDiv").jstree("destroy").empty();
-        $("#Lineage_classes_graphDecoration_legendDiv").html(
-            "<div  class='jstreeContainer' style='height: 350px;width:90%'>" + "<div id='Lineage_classes_graphDecoration_legendTreeDiv' style='height: 25px;width:100%'></div></div>"
-        );
-        JstreeWidget.loadJsTree("Lineage_classes_graphDecoration_legendTreeDiv", jstreeData, options, function () {
-            $("#Lineage_classes_graphDecoration_legendTreeDiv").jstree(true).check_all();
-        });
-    };
-
-    self.onLegendCheckBoxes = function () {
-        var checkdeTopClassesIds = $("#Lineage_classes_graphDecoration_legendTreeDiv").jstree(true).get_checked();
-
-        var allNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
-        var newNodes = [];
-        allNodes.forEach(function (node) {
-            var hidden = true;
-            if (node && checkdeTopClassesIds.indexOf(node.legendType) > -1) {
-                hidden = false;
-            }
-
-            newNodes.push({
-                id: node.id,
-                hidden: hidden,
-            });
-        });
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
-    };
-
-    self.onlegendTypeDivClick = function (div, type) {
-        self.currentLegendObject = { type: type, div: div };
-        self.setGraphPopupMenus();
-        var point = div.position();
-        point.x = point.left;
-        point.y = point.top;
-        MainController.UI.showPopup(point, "graphPopupDiv", true);
-    };
-
-    self.setGraphPopupMenus = function () {
-        var html =
-            '    <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(true);"> Hide Type</span>' +
-            ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType();"> Show Type</span>' +
-            ' <span  class="popupMenuItem" onclick="Lineage_decoration.hideShowLegendType(null,true);"> Show Only</span>';
-        $("#graphPopupDiv").html(html);
-    };
-    self.hideShowLegendType = function (hide, only) {
-        if (hide) {
-            self.currentLegendObject.div.addClass("Lineage_legendTypeDivHidden");
-        } else {
-            self.currentLegendObject.div.removeClass("Lineage_legendTypeDivHidden");
-        }
-        var allNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
-        var newNodes = [];
-        var hidden = hide ? true : false;
-        allNodes.forEach(function (node) {
-            if (only) {
-                if (only == "all" || (node && node.legendType == self.currentLegendObject.type)) {
-                    newNodes.push({
-                        id: node.id,
-                        hidden: false,
-                    });
-                } else {
-                    newNodes.push({ id: node.id, hidden: true });
-                }
-            } else {
-                if (node && node.legendType == self.currentLegendObject.type) {
-                    newNodes.push({
-                        id: node.id,
-                        hidden: hidden,
-                    });
-                }
-            }
-        });
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
-    };
-
-    self.refreshLegend = function (source) {
-        var newJstreeData = [
-            {
-                id: source,
-                text: source,
-                parent: "#",
-            },
-        ];
-        if (self.currentLegendDJstreedata[source]) {
-            newJstreeData = self.currentLegendDJstreedata[source];
-        }
-
-        self.drawLegend(newJstreeData);
-    };
-
-    self.showDecorateDialog = function () {
-        $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").load("snippets/lineage/lineage_decorateDialog.html", function () {
-            $("#lineage_decorate_applyButton").bind("click", Lineage_decoration.decorateNodes);
-            common.fillSelectWithColorPalette("lineage_decorate_colorSelect");
-            var shapes = ["dot", "square", "box", "text", "diamond", "star", "triangle", "ellipse", "circle", "database", "triangleDown", "hexagon"];
-            common.fillSelectOptions("lineage_decorate_shapeSelect", shapes, true);
-        });
-    };
-    self.decorateNodes = function () {
-        var selection = $("#lineage_decorate_selectionSelect").val();
-        var nodes;
-        if (selection == "Last added nodes") {
-            nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
-        } else if (selection == "All nodes") {
-            nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
-        } else if (selection == "Selected nodes") {
-            nodes = Lineage_selection.selectedNodes;
-        }
-
-        $("#smallDialogDiv").dialog("close");
-        var newIds = [];
-
-        var color = $("#lineage_decorate_colorSelect").val();
-        var shape = $("#lineage_decorate_shapeSelect").val();
-        var size = $("#lineage_decorate_sizeInput").val();
-        nodes.forEach(function (node) {
-            if (!node.data) {
-                return;
-            }
-            var obj = { id: node.id };
-            if (color) {
-                obj.color = color;
-            }
-            if (shape) {
-                obj.shape = shape;
-            }
-            if (size) {
-                obj.size = parseInt(size);
-            }
-            newIds.push(obj);
-        });
-
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newIds);
+        LegendWidget.drawLegend("Lineage_classes_graphDecoration_legendDiv", jstreeData);
     };
 
     return self;

@@ -15,6 +15,7 @@ import authentication from "../shared/authentification.js";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 var Sparql_proxy = (function () {
     var self = {};
+    self.queriesHistory = {};
 
     /**
      * @param {string} url - URL of the sparql endpoint to query
@@ -174,6 +175,13 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
 
             payload.body = JSON.stringify(body);
             payload.url = url + queryOptions;
+
+            if (options.caller) {
+                if (!self.queriesHistory[options.caller]) {
+                    self.queriesHistory[options.caller] = [];
+                }
+                self.queriesHistory[options.caller].push(body);
+            }
         }
 
         $.ajax({
@@ -305,7 +313,9 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
         var varNames = [];
         while ((array = regex.exec(query)) != null) {
             array.forEach(function (item) {
-                if (varNames.indexOf(item) < 0) varNames.push(item);
+                if (varNames.indexOf(item) < 0) {
+                    varNames.push(item);
+                }
             });
         }
         if (varNames.length == 0) {

@@ -336,28 +336,28 @@ var OntologyModels = (function () {
                             /*
 var filter = Sparql_common.setFilter("id", classes);
 Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, null, function (err, result) {
-  if (err) {
-    return callbackSeries(err);
-  }
-  var labelsMap = {};
-  result.forEach(function (item) {
-    if (item.label) {
-      labelsMap[item.id.value] = item.label.value;
-    } else {
-      labelsMap[item.id.value] = Sparql_common.getLabelFromURI(item.id.value);
-    }
-  });
-  for (var propId in Config.ontologiesVocabularyModels[source].constraints) {
-    var constraint = Config.ontologiesVocabularyModels[source].constraints[propId];
-    if (labelsMap[constraint.domain]) {
-      Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = labelsMap[constraint.domain];
-    }
-    if (labelsMap[constraint.range]) {
-      Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = labelsMap[constraint.range];
-    }
-  }
+if (err) {
+return callbackSeries(err);
+}
+var labelsMap = {};
+result.forEach(function (item) {
+if (item.label) {
+labelsMap[item.id.value] = item.label.value;
+} else {
+labelsMap[item.id.value] = Sparql_common.getLabelFromURI(item.id.value);
+}
+});
+for (var propId in Config.ontologiesVocabularyModels[source].constraints) {
+var constraint = Config.ontologiesVocabularyModels[source].constraints[propId];
+if (labelsMap[constraint.domain]) {
+Config.ontologiesVocabularyModels[source].constraints[propId].domainLabel = labelsMap[constraint.domain];
+}
+if (labelsMap[constraint.range]) {
+Config.ontologiesVocabularyModels[source].constraints[propId].rangeLabel = labelsMap[constraint.range];
+}
+}
 
-  return callbackSeries();
+return callbackSeries();
 });*/
                         },
 
@@ -371,7 +371,9 @@ Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, 
                         function (callbackSeries) {
                             if (true || Config.basicVocabularies[source]) {
                                 self.writeModelOnServerCache(source, Config.ontologiesVocabularyModels[source], function (err, result) {
-                                    if (err) console.log(err);
+                                    if (err) {
+                                        console.log(err);
+                                    }
                                     return callbackSeries();
                                 });
                             }
@@ -649,12 +651,15 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
     };
 
     self.getInferredModel = function (source, options, callback) {
+        if (!options) {
+            options = {};
+        }
         if (!Config.ontologiesVocabularyModels[source]) {
             Config.ontologiesVocabularyModels[source];
         }
-        if (false && Config.ontologiesVocabularyModels[source].inferredClassModel) {
-            return callback(null, Config.ontologiesVocabularyModels[source].inferredClassModel);
-        } else {
+        var filterStr = options.filter || "";
+
+        {
             var sourceGraphUri = Config.sources[source].graphUri;
             var sourceGraphUriFrom = Sparql_common.getFromStr(source, true, true);
             var importGraphUriFrom = Sparql_common.getFromStr(source, true, false);
@@ -663,7 +668,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                 "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
                 "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
                 "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
-                "    SELECT   distinct  ?prop ?sClass  ?oClass ?propLabel ?sClassLabel ?oClassLabel \n" +
+                "      SELECT   distinct ?prop ?sClass  ?oClass ?propLabel ?sClassLabel ?oClassLabel ?sparent ?oparent  ?sparentLabel ?oparentLabel \n" +
                 sourceGraphUriFrom +
                 " " +
                 importGraphUriFrom +
@@ -672,12 +677,14 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                 "   graph ?g3 {\n" +
                 "      ?sparent rdf:type ?stype filter (?stype in (owl:Class))\n" +
                 "    optional { ?sparent rdfs:subClassOf ?sparentClass filter (!isBlank(?sparentClass))}\n" +
+                "   optional { ?sparent rdfs:label ?sparentLabel}\n" +
                 "    bind (if(bound(?sparentClass) && ?g3=<" +
                 sourceGraphUri +
                 ">,?sparentClass,?sparent) as ?sClass)  optional{?sClass rdfs:label ?sClassLabel}\n" +
                 "    \n" +
                 "    \n" +
                 "       ?oparent rdf:type ?otype filter (?otype in (owl:Class))\n" +
+                "   optional { ?oparent rdfs:label ?oparentLabel}\n" +
                 "    optional { ?oparent rdfs:subClassOf ?oparentClass filter (!isBlank(?oparentClass))}\n" +
                 "    bind (if(bound(?oparentClass) && ?g3=<" +
                 sourceGraphUri +
@@ -699,6 +706,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                 "    ?s ?prop ?o.\n" +
                 "     ?s rdf:type+ ?sparent.  \n" +
                 "       ?o rdf:type+ ?oparent.  \n" +
+                filterStr +
                 "  }\n" +
                 "    graph  ?g{\n" +
                 "     \n" +

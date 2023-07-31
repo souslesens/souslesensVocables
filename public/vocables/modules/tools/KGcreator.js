@@ -5,6 +5,7 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
+import MainController from "../shared/mainController.js";
 
 //https://openbase.com/js/@json-editor/json-editor/documentation
 
@@ -116,9 +117,11 @@ var KGcreator = (function () {
                 $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {
                     self.initCentralPanel();
                 });
-                $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function () {
-                    // pass
-                });
+
+                MainController.UI.showHideRightPanel("hide");
+                // $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function() {
+                // pass
+                //  });
             });
         });
         $("#accordion").accordion("option", { active: 2 });
@@ -379,7 +382,7 @@ var KGcreator = (function () {
     };
 
     self.onCsvtreeNodeClicked = function (event, obj, callback) {
-        $("#KGcreator_dataSampleDiv").val("");
+        $("#KGcreator_infosDiv").val("");
 
         self.currentTreeNode = obj.node;
         if (obj.node.parents.length == 0) {
@@ -550,7 +553,7 @@ var KGcreator = (function () {
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
                 $("#KGcreator_saveFileButton").css("display", "block");
-                $("#KGcreator_dataSampleDiv").val(_result);
+                $("#KGcreator_infosDiv").val(_result);
             },
             error(err) {
                 if (callback) {
@@ -566,7 +569,7 @@ var KGcreator = (function () {
             return;
         }
         $("#KGcreator_saveFileButton").css("display", "none");
-        var str = $("#KGcreator_dataSampleDiv").val();
+        var str = $("#KGcreator_infosDiv").val();
 
         payload = {
             dir: "CSV/" + self.currentCsvDir,
@@ -581,7 +584,7 @@ var KGcreator = (function () {
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
                 MainController.UI.message("file saved");
-                $("#KGcreator_dataSampleDiv").val("");
+                $("#KGcreator_infosDiv").val("");
             },
             error(err) {
                 return alert(err.responseText);
@@ -622,7 +625,8 @@ var KGcreator = (function () {
                 },
                 function (callbackSeries) {
                     $("#editPredicate_mainDiv").remove();
-                    $("#sharedPredicatesPanel").load("snippets/commonUIwidgets/editPredicateDialog.html", function () {
+
+                    PredicatesSelectorWidget.load("sharedPredicatesPanel", KGcreator.currentSlsvSource, function () {
                         PredicatesSelectorWidget.init(KGcreator.currentSlsvSource, function () {
                             PredicatesSelectorWidget.onSelectObjectFn = function (value) {};
                             PredicatesSelectorWidget.onSelectPropertyFn = function (value) {};
@@ -717,9 +721,9 @@ var KGcreator = (function () {
             o: column,
             isString: true,
         });
-        if (!self.currentJsonObject.transform[column]) {
-            self.currentJsonObject.transform[column] = "function{if (value=='null') return null;if(mapping.isString && role=='o') return value; else return '" + column + "_'+value;}";
-        }
+        /*  if (!self.currentJsonObject.transform[column]) {
+          self.currentJsonObject.transform[column] = "function{if (value=='null') return null;if(mapping.isString && role=='o') return value; else return '" + column + "_'+value;}";
+      }*/
 
         self.mainJsonEditor.load(self.currentJsonObject);
         self.mainJsonEditorModified = true;
@@ -937,8 +941,10 @@ self.saveMappings({classId:classId})
         }
         self.checkModel(self.currentSource, function (err, result) {
             if (err) {
-                $("#KGcreator_dataSampleDiv").val(err);
-                if (!confirm("errors in mappings , save anyway ?")) return;
+                $("#KGcreator_infosDiv").val(err);
+                if (!confirm("errors in mappings , save anyway ?")) {
+                    return;
+                }
             }
             MainController.UI.message("Mapping conssitant with model");
 
@@ -1009,6 +1015,7 @@ self.saveMappings({classId:classId})
 
     self.loadMappings = function (csvFileName, callback) {
         var currentJsonObject = {};
+
         function getMappingFileJson(callback2) {
             var payload = {};
             if (self.currentDataSourceModel) {
@@ -1086,10 +1093,13 @@ self.saveMappings({classId:classId})
         }
     };
 
-    self.createTriples = function (test, _options) {
+    self.createTriples = function (test, _options, callback) {
         MainController.UI.message("creating triples...");
-        $("#KGcreator_dataSampleDiv").val("creating triples...");
+        $("#KGcreator_infosDiv").val("creating triples...");
         if (!self.currentJsonObject) {
+            if (callback) {
+                return callback("no currentJsonObject");
+            }
             return;
         }
 
@@ -1144,8 +1154,10 @@ self.saveMappings({classId:classId})
             if (_err) {
                 return alert(_err);
             }
-            $("#KGcreator_dataSampleDiv").val("");
+
+            $("#KGcreator_infosDiv").val("");
             var payload;
+
             if (self.currentSourceType == "CSV") {
                 payload = {
                     dir: "CSV/" + self.currentCsvDir,
@@ -1160,30 +1172,40 @@ self.saveMappings({classId:classId})
                 };
             }
 
+            if (_options && _options.allMappings) {
+                payload.fileName = null;
+            }
+
             $.ajax({
                 type: "POST",
-                url: `${Config.apiUrl}/kg/csv/triples`,
+                url: `${Config.apiUrl}/kg/triples`,
                 data: payload,
                 dataType: "json",
                 success: function (result, _textStatus, _jqXHR) {
                     if (test) {
                         var str = JSON.stringify(result, null, 2);
 
-                        $("#KGcreator_dataSampleDiv").val(str);
+                        $("#KGcreator_infosDiv").val(str);
                         MainController.UI.message("", true);
                     } else {
-                        $("#KGcreator_dataSampleDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
+                        $("#KGcreator_infosDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
                         MainController.UI.message("triples created", true);
+                    }
+                    if (callback) {
+                        return callback();
                     }
                 },
                 error(err) {
+                    if (callback) {
+                        return callback(err.responseText);
+                    }
                     return alert(err.responseText);
                 },
             });
         });
     };
 
-    self.indexGraph = function () {
+    self.indexGraph = function (callback) {
         var graphSource = null;
         for (var source in Config.sources) {
             if (Config.sources[source].graphUri == self.currentGraphUri) {
@@ -1191,20 +1213,30 @@ self.saveMappings({classId:classId})
             }
         }
         if (!source) {
+            if (callback) {
+                return callback("no source associated to graph " + self.currentGraphUri);
+            }
             return alert("no source associated to graph " + self.currentGraphUri);
         }
-        if (confirm("index source " + graphSource)) {
+        if (callback || confirm("index source " + graphSource)) {
             SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
                 if (err) {
-                    return alert(err);
+                    if (callback) {
+                        return callback(err.responseText);
+                    }
+                    return alert(err.responseText);
                 }
-                $("#KGcreator_dataSampleDiv").val("indexed graph " + self.currentJsonObject.graphUri + " in index " + graphSource.toLowerCase());
+                $("#KGcreator_infosDiv").val("indexed graph " + self.currentJsonObject.graphUri + " in index " + graphSource.toLowerCase());
+                if (callback) {
+                    return callback();
+                }
             });
         }
     };
 
-    self.clearGraph = function (deleteAllGraph) {
+    self.clearGraph = function (deleteAllGraph, callback) {
         if (!self.currentJsonObject) {
+            if (callback) return callback("node currentJsonObject selected");
             return;
         } //alert("no file mappings selected");
         if (!self.currentJsonObject.graphUri) {
@@ -1212,6 +1244,9 @@ self.saveMappings({classId:classId})
         }
 
         if (!confirm("Do you really want to clear graph " + self.currentJsonObject.graphUri)) {
+            if (callback) {
+                return callback("graph deletion aborted");
+            }
             return;
         }
         const payload = { graphUri: self.currentJsonObject.graphUri };
@@ -1221,39 +1256,70 @@ self.saveMappings({classId:classId})
             data: payload,
             dataType: "json",
             success: function (_result, _textStatus, _jqXHR) {
+                if (callback) {
+                    return callback();
+                }
                 return MainController.UI.message("graph deleted " + self.currentJsonObject.graphUri);
             },
             error(err) {
+                if (callback) {
+                    return callback(err);
+                }
                 return MainController.UI.message(err);
             },
         });
     };
 
-    self.deleteKGcreatorTriples = function (deleteAllGraph) {
+    self.deleteKGcreatorTriples = function (deleteAllKGcreatorTriples, callback) {
         if (!self.currentJsonObject) {
+            if (callback) return callback("node currentJsonObject selected");
             return;
         } //alert("no file mappings selected");
         if (!self.currentJsonObject.graphUri) {
+            if (callback) {
+                return callback("no graphUri");
+            }
             return alert("no graphUri");
         }
 
-        if (deleteAllGraph) {
+        if (deleteAllKGcreatorTriples) {
             if (!confirm("Do you really want to delete  triples created with KGCreator in " + self.currentJsonObject.graphUri)) {
+                if (callback) {
+                    return callback("triples deletion aborted");
+                }
                 return;
             }
 
             var filter = "?p =<http://purl.org/dc/terms/creator> && ?o='KGcreator'";
             Sparql_generic.deleteTriplesWithFilter(self.currentSlsvSource, filter, function (err, result) {
                 if (err) {
+                    if (callback) {
+                        return callback("triples deletion aborted");
+                    }
                     return alert(err.responseText);
                 }
+
                 alert("triples deleted");
+                if (callback) return callback();
             });
         } else {
             if (!confirm("Do you really want to delete  triples created with KGCreator in " + self.currentJsonObject.fileName)) {
+                if (callback) {
+                    return callback("triples deletion aborted");
+                }
                 return;
             }
-            self.createTriples(false, { deleteTriples: true });
+            self.createTriples(false, { deleteTriples: true }, function (err, result) {
+                if (err) {
+                    if (callback) {
+                        return callback("triples deletion aborted");
+                    }
+                    return alert(err.responseText);
+                }
+
+                alert("triples deleted");
+                if (callback) return callback();
+            });
         }
     };
 
@@ -1263,7 +1329,7 @@ self.saveMappings({classId:classId})
         }
         if (node.data.sample) {
             //csv
-            $("#KGcreator_dataSampleDiv").val("");
+            $("#KGcreator_infosDiv").val("");
 
             var str = "";
 
@@ -1294,7 +1360,7 @@ self.saveMappings({classId:classId})
             if (callback) {
                 return callback(null, str);
             }
-            $("#KGcreator_dataSampleDiv").val(str);
+            $("#KGcreator_infosDiv").val(str);
         } else if (self.currentSourceType == "DATABASE") {
             var sqlQuery = "select top  " + size + " " + (allColumns ? "*" : node.data.id) + " from " + node.parent;
             const params = new URLSearchParams({
@@ -1309,7 +1375,7 @@ self.saveMappings({classId:classId})
                 dataType: "json",
 
                 success: function (data, _textStatus, _jqXHR) {
-                    $("#KGcreator_dataSampleDiv").val("");
+                    $("#KGcreator_infosDiv").val("");
                     var str = "";
                     if (allColumns) {
                         var headers = [];
@@ -1338,7 +1404,7 @@ self.saveMappings({classId:classId})
                     if (callback) {
                         return callback(null, str);
                     }
-                    $("#KGcreator_dataSampleDiv").val(str);
+                    $("#KGcreator_infosDiv").val(str);
                 },
                 error(err) {
                     if (callback) {
@@ -1543,11 +1609,15 @@ self.saveMappings({classId:classId})
             function (file, callbackEach) {
                 var file2 = file.substring(file.indexOf("_") + 1);
                 self.loadMappings(file2, function (err, result) {
-                    if (err) return callbackEach();
+                    if (err) {
+                        return callbackEach();
+                    }
 
                     for (var key in result.tripleModels) {
                         var mapping = result.tripleModels[key];
-                        if (!allMappings[mapping.s]) allMappings[mapping.s] = [];
+                        if (!allMappings[mapping.s]) {
+                            allMappings[mapping.s] = [];
+                        }
                         allMappings[mapping.s].push({ p: mapping.p, o: mapping.o });
                     }
 
@@ -1652,9 +1722,9 @@ self.saveMappings({classId:classId})
         $("#KGcreator_rmlTextarea").html(rml);
         // Display the generated RML mapping file in the textarea
         /*  var rmlTextarea = document.getElementById("rmlTextarea");
-    if (rmlTextarea) {
-        rmlTextarea.value = rml;
-    }*/
+if (rmlTextarea) {
+    rmlTextarea.value = rml;
+}*/
     };
 
     self.generateRMLEmna = function () {
@@ -1729,7 +1799,7 @@ self.saveMappings({classId:classId})
 
         /*  var subjectSelect = document.getElementById('subjectSelect');
 
-        subjectSelect.innerHTML = '';*/
+    subjectSelect.innerHTML = '';*/
 
         // Create a new option for placeholder
         var placeholderOption = document.createElement("option");
@@ -1880,7 +1950,51 @@ self.saveMappings({classId:classId})
     self.socketMessage = function (message) {
         //  console.log(message)
         MainController.UI.message(message);
-        //  $("#KGcreator_dataSampleDiv").append(message+"\n")
+        //  $("#KGcreator_infosDiv").append(message+"\n")
+    };
+
+    self.stopCreateTriples = function () {
+        socket.emit("KGCreator", "stopCreateTriples");
+        MainController.UI.message("import interrupted by user", true);
+    };
+
+    self.createAllMappingsTriples = function () {
+        if (!self.currentJsonObject) {
+            return callback("select any existing  mapping ");
+        }
+        if (!confirm("generate KGcreator triples form all mappings. this only will delete all previous  KGcreator triples ")) {
+            return;
+        }
+        $("#KGcreator_infosDiv").val("generating KGcreator triples form all mappings ");
+        async.series(
+            [
+                //delete previous KG creator triples
+                function (callbackSeries) {
+                    $("#KGcreator_infosDiv").val("\ndeleting previous KGcreator triples ");
+                    self.deleteKGcreatorTriples(true, function (err, result) {
+                        return callbackSeries(err);
+                    });
+                },
+                function (callbackSeries) {
+                    $("#KGcreator_infosDiv").val("\ncreating new triples (can take long...)");
+                    self.createTriples(false, { allMappings: 1 }, function (err, result) {
+                        return callbackSeries(err);
+                    });
+                },
+
+                function (callbackSeries) {
+                    $("#KGcreator_infosDiv").val("\nreindexing graph)");
+                    self.indexGraph(function (err, result) {
+                        return callbackSeries(err);
+                    });
+                },
+            ],
+            function (err) {
+                if (err) {
+                    $("#KGcreator_infosDiv").val("\nALL DONE");
+                }
+            }
+        );
     };
 
     return self;

@@ -65,7 +65,7 @@ var Lineage_axioms_draw = (function () {
 
         var sources = [sourceLabel];
 
-        if (Config.sources[sourceLabel].imports) {
+        if (Config.sources[sourceLabel] && Config.sources[sourceLabel].imports) {
             sources = sources.concat(Config.sources[sourceLabel].imports);
         }
         sources.forEach(function (source) {

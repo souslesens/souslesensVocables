@@ -259,8 +259,11 @@ indexes.push(source.toLowerCase());
         }
 
         var indexes = null;
-        if (index) indexes = index;
-        else indexes = "*";
+        if (index) {
+            indexes = index;
+        } else {
+            indexes = "*";
+        }
 
         if (_ids) {
             var slices = common.array.slice(_ids, 100);
@@ -325,89 +328,100 @@ indexes.push(source.toLowerCase());
         }
     };
 
-    self.getElasticSearchMatches = function (words, indexes, mode, from, size, options, callback) {
-        $("#waitImg").css("display", "block");
-        //   MainController.UI.message("Searching exact matches ")
+    self.escapeElasticReservedChars = function (word) {
+        var chars = ["+", "-", "=", "&&", "||", ">", "<", "!", "(", ")", "{", "}", "[", "]", "^", '"', "~", "?", ":", "/"];
+        var p = word.indexOf("*");
+        var word2 = word.replace("*", "");
 
-        self.getWordBulkQuery = function (word, mode, indexes) {
-            var field = "label.keyword";
-            if (word.indexOf && word.indexOf("http://") == 0) {
-                field = "id.keyword";
+        chars.forEach(function (char) {
+            if (word.indexOf(char) > -1) {
+                p = -1;
             }
-            //  word=word.toLowerCase()
-            var queryObj;
-            if (!mode || mode == "exactMatch") {
-                queryObj = {
-                    bool: {
-                        should: [
-                            {
-                                term: {
-                                    [field]: word,
-                                },
+            word2 = word2.replaceAll(char, "\\\\" + char);
+        });
+        if (p > -1) {
+            word2 += "*";
+        }
+        return word2;
+    };
+
+    self.getWordBulkQuery = function (word, mode, indexes, options) {
+        word = self.escapeElasticReservedChars(word);
+        var field = "label.keyword";
+        if (word.indexOf && word.indexOf("http://") == 0) {
+            field = "id.keyword";
+        }
+        //  word=word.toLowerCase()
+        var queryObj;
+        if (!mode || mode == "exactMatch") {
+            var field = "label";
+            queryObj = {
+                bool: {
+                    must: [
+                        {
+                            match: {
+                                [field]: word,
                             },
-                            {
-                                term: {
-                                    "skoslabels.keyword": word,
-                                },
-                            },
-                        ],
+                        },
+                    ],
+                },
+            };
+            /* if (options.skosLabels) {
+           queryObj.bool.must.push( {
+               term: {
+                   "skoslabels.keyword": word,
+               },
+           })
+
+       }*/
+        } else if (word.indexOf("*") > -1) {
+            queryObj = {
+                bool: {
+                    must: {
+                        query_string: {
+                            query: word,
+                            fields: ["label"],
+                        },
                     },
-                };
-            } else if (word.indexOf("*") > -1) {
-                queryObj = {
-                    bool: {
-                        must: {
+                },
+            };
+            if (options.skosLabels) {
+                queryObj.bool.must.query_string.fields.push("skoslabels");
+            }
+        } else {
+            queryObj = {
+                bool: {
+                    must: [
+                        {
                             query_string: {
                                 query: word,
                                 fields: ["label", "skoslabels"],
+                                default_operator: "AND",
                             },
                         },
-                        // ,
-                        // "filter":  {"term":{"parents.keyword":"http://rds.posccaesar.org/ontology/lis14/rdl/Quality"}}
-                    },
-                };
-                //   if (options.classFilter) queryObj.bool.filter = { term: { "parents.keyword": options.classFilter } };
-            } else {
-                queryObj = {
-                    bool: {
-                        must: [
-                            {
-                                query_string: {
-                                    query: word,
-                                    fields: ["label", "skoslabels"],
-                                    default_operator: "AND",
-                                },
-                            },
-                        ],
-                    },
-                };
-            }
-            if (options.classFilter) {
-                queryObj.bool.filter = {
-                    multi_match: {
-                        query: options.classFilter,
-                        fields: ["parents.keyword", "id.keyword"],
-                        operator: "or",
-                    },
-                };
-            }
-
-            var header = {};
-            if (indexes) {
-                header = { index: indexes };
-            }
-
-            var query = {
-                query: queryObj,
-                from: from,
-                size: size,
-                _source: {
-                    excludes: ["attachment.content"],
+                    ],
                 },
             };
-            var str = JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
-            return str;
-        };
+            if (options.skosLabels) {
+                queryObj.bool.must[0].query_string.fields.push("skoslabels");
+            }
+        }
+        if (options.classFilter) {
+            queryObj.bool.filter = {
+                multi_match: {
+                    query: options.classFilter,
+                    fields: ["parents.keyword", "parent.keyword", "id.keyword"],
+                    operator: "or",
+                },
+            };
+        }
+
+        return queryObj;
+    };
+
+    self.getElasticSearchMatches = function (words, indexes, mode, from, size, options, callback) {
+        $("#waitImg").css("display", "block");
+        //   MainController.UI.message("Searching exact matches ")
 
         self.entitiesMap = {};
         var bulQueryStr = "";
@@ -424,7 +438,21 @@ indexes.push(source.toLowerCase());
                     if (!word) {
                         return;
                     }
-                    var wordQuery = self.getWordBulkQuery(word, mode, indexes);
+                    var queryObj = self.getWordBulkQuery(word, mode, indexes, options);
+                    var header = {};
+                    if (indexes) {
+                        header = { index: indexes };
+                    }
+
+                    var query = {
+                        query: queryObj,
+                        from: from,
+                        size: size,
+                        _source: {
+                            excludes: ["attachment.content"],
+                        },
+                    };
+                    var wordQuery = JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
                     bulQueryStr += wordQuery;
                 });
                 ElasticSearchProxy.executeMsearch(bulQueryStr, indexes, function (err, result) {
@@ -533,8 +561,8 @@ indexes.push(source.toLowerCase());
                         // indexNamedIndividuals
                         function (callbackSeries) {
                             /*   if (true || !options.indexNamedIndividuals) {
-                                return callbackSeries();
-                            }*/
+                  return callbackSeries();
+              }*/
 
                             var taxonomyClassesIdsMap = {};
                             taxonomyClasses.forEach(function (item) {

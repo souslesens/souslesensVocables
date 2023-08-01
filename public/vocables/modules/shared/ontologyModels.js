@@ -36,7 +36,17 @@ var OntologyModels = (function () {
                 Config.ontologiesVocabularyModels[source].constraints = {}; //range and domain
                 Config.ontologiesVocabularyModels[source].restrictions = {};
                 Config.ontologiesVocabularyModels[source].classes = {};
-                Config.ontologiesVocabularyModels[source].properties = [];
+                Config.ontologiesVocabularyModels[source].properties = {  };
+
+
+                Config.ontologiesVocabularyModels.getPropertiesArray=function(source){
+                    var array=[]
+                    for( var key in  Config.ontologiesVocabularyModels[source].properties ){
+                        array.push(Config.ontologiesVocabularyModels[source].properties[key])
+                    }
+                    return array;
+                }
+
 
                 var uniqueProperties = {};
                 var propsWithoutDomain = [];
@@ -80,12 +90,12 @@ var OntologyModels = (function () {
                                     }
                                     if (!uniqueProperties[item.prop.value]) {
                                         uniqueProperties[item.prop.value] = 1;
-                                        Config.ontologiesVocabularyModels[source].properties.push({
+                                        Config.ontologiesVocabularyModels[source].properties[item.prop.value]={
                                             id: item.prop.value,
                                             label: item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value),
                                             inverseProp: item.inverseProp ? item.inverseProp.value : null,
                                             superProp: item.superProperty ? item.superProperty.value : null,
-                                        });
+                                        };
                                     }
                                     if (item.inverseProp) {
                                         inversePropsMap[item.prop.value] = item.inverseProp.value;
@@ -189,7 +199,7 @@ var OntologyModels = (function () {
 
                                     if (!uniqueProperties[item.prop.value]) {
                                         uniqueProperties[item.prop.value] = 1;
-                                        Config.ontologiesVocabularyModels[source].properties.push({
+                                        Config.ontologiesVocabularyModels[source].properties[item.prop.value]=({
                                             id: item.prop.value,
                                             label: propLabel,
                                         });
@@ -221,7 +231,8 @@ var OntologyModels = (function () {
                                 return callbackSeries();
                             }
                             var constraints = Config.ontologiesVocabularyModels[source].constraints;
-                            Config.ontologiesVocabularyModels[source].properties.forEach(function (prop) {
+                           for (var prop in  Config.ontologiesVocabularyModels[source].properties ){
+                               var prop=Config.ontologiesVocabularyModels[source].properties[prop]
                                 if (!constraints[prop.id]) {
                                     propsWithoutDomain.push(prop.id);
                                     propsWithoutRange.push(prop.id);
@@ -233,7 +244,7 @@ var OntologyModels = (function () {
                                         propsWithoutRange.push(prop.id);
                                     }
                                 }
-                            });
+                            };
                             callbackSeries();
                         },
 
@@ -249,7 +260,9 @@ var OntologyModels = (function () {
                                 }
 
                                 // for (var propId in Config.ontologiesVocabularyModels[source].properties) {
-                                Config.ontologiesVocabularyModels[source].properties.forEach(function (prop) {
+
+                                    for (var prop in  Config.ontologiesVocabularyModels[source].properties ){
+                                        var prop=Config.ontologiesVocabularyModels[source].properties[prop]
                                     var propId = prop.id;
 
                                     if (propId == "http://rds.posccaesar.org/ontology/lis14/rdl/activeParticipantIn") {
@@ -274,7 +287,7 @@ var OntologyModels = (function () {
                                             Config.ontologiesVocabularyModels[source].constraints[propId].rangeParentProperty = inheritedConstaint.parentProp;
                                         }
                                     }
-                                });
+                                };
 
                                 return callbackSeries();
                             });
@@ -282,13 +295,14 @@ var OntologyModels = (function () {
 
                         // set constraints prop label and superProp
                         function (callbackSeries) {
-                            Config.ontologiesVocabularyModels[source].properties.forEach(function (property) {
+                            for (var prop in  Config.ontologiesVocabularyModels[source].properties ){
+                                var property=Config.ontologiesVocabularyModels[source].properties[prop]
                                 if (Config.ontologiesVocabularyModels[source].constraints[property.id]) {
                                     Config.ontologiesVocabularyModels[source].constraints[property.id].label = property.label;
 
                                     Config.ontologiesVocabularyModels[source].constraints[property.id].superProp = property.superProp;
                                 }
-                            });
+                            };
                             return callbackSeries();
                         },
 
@@ -440,7 +454,7 @@ return callbackSeries();
             source: source,
         });
 
-        var x = params.toString();
+
         $.ajax({
             type: "GET",
             url: Config.apiUrl + "/ontologyModels?" + params.toString(),
@@ -454,6 +468,53 @@ return callbackSeries();
             },
         });
     };
+
+
+
+    self.updateModel=function(source,data,options, callback){
+        if( !options){
+            options={}
+        }
+        for (var entryType in data) {
+            for (var id in data[entryType]) {
+
+                ontologyModelsCache[req.body.source][entryType][id] = data[entryType][id];
+
+            }
+        }
+        if(!options.noUpdateCache){
+            self.updateModelOnServerCache  (source,data,function(err, result){
+                callback(err)
+            })
+        }else {
+            callback(done)
+        }
+    }
+
+    self.updateModelOnServerCache = function (source,data, callback) {
+
+
+        const params = new URLSearchParams({
+            source: source,
+            data:data
+        });
+
+
+        $.ajax({
+            type: "UPDATE",
+            url: Config.apiUrl + "/ontologyModels?" + params.toString(),
+            dataType: "json",
+
+            success: function (data, _textStatus, _jqXHR) {
+                return callback(null, data);
+            },
+            error: function (err) {
+                return callback(err);
+            },
+        });
+    };
+
+
     self.writeModelOnServerCache = function (source, model, callback) {
         var payload = {
             source: source,

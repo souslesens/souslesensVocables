@@ -169,8 +169,9 @@
     <div id="lineage_allActions">
         <div class="lineage_actionDiv_title">Active Source&nbsp;(s)</div>
         <div id="lineage_actionsWrapper" class="lineage_actionDiv" style="display: flex; flex-wrap: wrap; widthnpm: 100%; justify-content: space-evenly; gap: 5px 5px; border: #c8c8c8 solid 2px">
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_classes.drawTopConcepts()">TopClasses</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" style="font-weight: bold" onclick="Lineage_relations.showDrawRelationsDialog()">Query...</button>
+
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_classes.drawTopConcepts()">TopClasses</button>
 
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_classes.addChildrenToGraph()">Expand</button>
 
@@ -200,7 +201,7 @@
     <div id="lineage_actionsWrapper2" class="lineage_actionDiv" style="display: flex; flex-direction: row; justify-content: space-between">
         <div class="lineage_actionDiv" style="display: flex; flex-direction: column; width: 55%">
             <div class="lineage_button_group">
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.initUI()">Clear all</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary"  style="font-weight: bold"  onclick="Lineage_classes.initUI()">Clear all</button>
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_clearLast" onclick="Lineage_classes.clearLastAddedNodesAndEdges()">Clear last</button>
 
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineage_actionDiv_last" onclick="Lineage_classes.showLastAddedNodesOnly()">Only last</button>

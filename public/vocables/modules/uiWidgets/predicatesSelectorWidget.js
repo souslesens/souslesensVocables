@@ -84,7 +84,7 @@ var PredicatesSelectorWidget = (function () {
             properties.push({ label: "-------", id: "" });
             common.fillSelectOptions(selectId, properties, true, "label", "id");
         } else if (Config.ontologiesVocabularyModels[vocabulary]) {
-            properties = Config.ontologiesVocabularyModels[vocabulary].properties;
+            properties = Config.ontologiesVocabularyModels[vocabulary].getPropertiesArray()
             common.fillSelectOptions(selectId, properties, true, "label", "id");
         } else {
             return PromptedSelectWidget.prompt("owl:ObjectProperty", "editPredicate_currentVocabPredicateSelect", vocabulary);

@@ -5,7 +5,7 @@ module.exports = function() {
     GET,
     POST,
     DELETE,
-    UPDATE
+    PUT
   };
 
   ///// GET api/v1/sources
@@ -116,7 +116,7 @@ module.exports = function() {
   }
 
 
-  UPDATE.apiDoc = {
+  PUT.apiDoc = {
     summary: "update ontology model",
     security: [{ loginScheme: [] }],
     operationId: "updateOntologyModel",
@@ -151,18 +151,20 @@ module.exports = function() {
   };
 
 
-  async function UPDATE(req, res, next) {
+  async function PUT(req, res, next) {
     if (!ontologyModelsCache[req.body.source]) {
       return processResponse(res, null, "source not exists in ontologyModelsCache");
 
     }
     else {
 
-      for (var entryType in data) {
-        for (var id in data[entryType]) {
-
-          ontologyModelsCache[req.body.source][entryType][id] = data[entryType][id];
-
+      for (var entryType in req.body.data) {
+        for (var id in req.body.data[entryType]) {
+          if(entryType=="restrictions"){
+            ontologyModelsCache[req.body.source][entryType][id].concat(req.body.data[entryType][id])
+          }else {
+            ontologyModelsCache[req.body.source][entryType][id] = req.body.data[entryType][id];
+          }
         }
       }
     }

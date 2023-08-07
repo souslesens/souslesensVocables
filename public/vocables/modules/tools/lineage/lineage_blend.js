@@ -687,6 +687,19 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
             }
             MainController.UI.message("node Created and Indexed");
           });
+
+          var modelData= {
+            classes: {
+              [self.graphModification.creatingsourceUri]: {
+                "label": "sss",
+
+              }
+            }
+          }
+
+          OntologyModels.updateModel (inSource, modelData, {}, function(err, result){
+            console.log(err|| "ontologyModelCache updated")
+          })
         });
       }
     },
@@ -1041,6 +1054,25 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
         });
       }
 
+      if (!Config.ontologiesVocabularyModels[inSource].restrictions[propId]) {
+        Config.ontologiesVocabularyModels[inSource].restrictions[propId] = [];
+      }
+
+      var modelData= {
+        restrictions: {
+          [propId]: [{
+            "domain": relation.sourceNode.id,
+            "range": relation.targetNode.id,
+            "domainLabel": relation.sourceNode.label,
+            "rangeLabel": relation.targetNode.label
+          }]
+        }
+      }
+
+      OntologyModels.updateModel (inSource, modelData, {}, function(err, result){
+        console.log(err|| "ontologyModelCache updated")
+      })
+
       allTriples = allTriples.concat(restrictionTriples);
       if (options.additionalTriples) {
         allTriplesallTriples.concat(options.additionalTriples);
@@ -1050,20 +1082,8 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
     Sparql_generic.insertTriples(inSource, allTriples, null, function(err, _result) {
 
 
-      if (!Config.ontologiesVocabularyModels[inSource].constraints[propId]) {
-        Config.ontologiesVocabularyModels[inSource].constraints[propId] = [];
-      }
-      Config.ontologiesVocabularyModels[inSource].constraints[propId].push({
-        "domain": relation.sourceNode.id,
-        "range": relation.targetNode.id,
-        "domainLabel": relation.sourceNode.label,
-        "rangeLabel": relation.targetNode.label,
-        "label": "language",
-        "superProp": ""
-      });
-      OntologyModels.updateModelOnServerCache(inSource, Config.ontologiesVocabularyModels[inSource].constraints[propId],function(err, result){
-        console.log(err|| "ontologyModelCache updated")
-      });
+
+
      return  callback(err, normalBlankNode);
     });
   };

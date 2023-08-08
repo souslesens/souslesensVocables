@@ -95,7 +95,7 @@ var Lineage_relations = (function () {
                                     vocabulariesPropertiesMap[vocabulary] = properties;
                                     return callbackEach();
                                 } else if (Config.ontologiesVocabularyModels[vocabulary]) {
-                                    properties = Config.ontologiesVocabularyModels[vocabulary].getPropertiesArray();
+                                    properties = OntologyModels.getPropertiesArray(vocabulary);
                                     vocabulariesPropertiesMap[vocabulary] = properties;
                                     return callbackEach();
                                 } else {

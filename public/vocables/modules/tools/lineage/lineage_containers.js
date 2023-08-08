@@ -154,23 +154,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
       self.flag_search_launch_search = true;
     }
 
-    $("#lineage_containers_containersJstree").bind("move_node.jstree", function(e, data) {
 
-      function getjstreeIdUri(id) {
-        var node = $("#lineage_containers_containersJstree").jstree().get_node(id);
-        var uri = (node && node.data) ? node.data.id : "x";
-        return uri;
-      }
-
-      var movingInfos = {
-        nodeId: getjstreeIdUri(data.node.id),
-        newParent: getjstreeIdUri(data.parent),
-        oldParent: getjstreeIdUri(data.old_parent),
-        position: getjstreeIdUri(data.position)
-      };
-      self.writeMovedNodeNewParent(movingInfos);
-      // console.log(movingInfos)
-    });
   };
 
   self.reset_tree = function(source, filter, jstreeDiv, memberType, options, callback) {
@@ -339,6 +323,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
         $("#" + jstreeDiv)
           .jstree()
           .open_node("#");
+        self.bindMoveNode(jstreeDiv)
         callback(null);
       });
     });
@@ -616,7 +601,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 openAll: false,
                 contextMenu: Lineage_containers.getContextJstreeMenu(),
                 selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
-                dnd: {
+              /*  dnd: {
                   drag_stop: function(data, element, helper, event) {
                     //  self.onMoveContainer(data, element, helper, event);
                   },
@@ -624,7 +609,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                     var sourceNodeId = element.data.nodes[0];
                     self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
                   }
-                }
+                }*/
               };
             }
 
@@ -635,6 +620,14 @@ Lineage_styles.showDialog(self.currentContainer.data);
                   .open_node("#");
                 $("#" + jstreeDiv).jstree("open_all");
                 self.flag_function();
+
+              self.bindMoveNode(jstreeDiv)
+
+
+
+
+
+
               });
             }
             else {
@@ -662,6 +655,26 @@ Lineage_styles.showDialog(self.currentContainer.data);
       );
     }
   };
+
+  self.bindMoveNode=function(jstreeDiv){
+    $("#"+jstreeDiv).bind("move_node.jstree", function(e, data) {
+
+      function getjstreeIdUri(id) {
+        var node = $("#lineage_containers_containersJstree").jstree().get_node(id);
+        var uri = (node && node.data) ? node.data.id : "x";
+        return uri;
+      }
+
+      var movingInfos = {
+        nodeId: getjstreeIdUri(data.node.id),
+        newParent: getjstreeIdUri(data.parent),
+        oldParent: getjstreeIdUri(data.old_parent),
+        position: getjstreeIdUri(data.position)
+      };
+      self.writeMovedNodeNewParent(movingInfos);
+      // console.log(movingInfos)
+    });
+  }
 
   self.addContainer = function(source) {
     if (!source) {

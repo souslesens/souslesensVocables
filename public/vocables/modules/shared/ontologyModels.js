@@ -39,9 +39,6 @@ var OntologyModels = (function() {
         Config.ontologiesVocabularyModels[source].properties = {};
 
 
-
-
-
         var uniqueProperties = {};
         var propsWithoutDomain = [];
         var propsWithoutRange = [];
@@ -452,6 +449,14 @@ return callbackSeries();
     }
   };
 
+  self.getPropertiesArray = function(source) {
+    var array = [];
+    for (var prop in Config.ontologiesVocabularyModels[source].properties) {
+      array.push(Config.ontologiesVocabularyModels[source].properties[prop]);
+    }
+    return array;
+  };
+
   self.unRegisterSourceModel = function() {
     var basicsSources = Object.keys(Config.basicVocabularies);
     for (var source in Config.ontologiesVocabularyModels) {
@@ -488,13 +493,13 @@ return callbackSeries();
     }
     for (var entryType in data) {
 
-        for (var id in data[entryType]) {
-          if(entryType=="restrictions"){
-            Config.ontologiesVocabularyModels[source][entryType][id].concat(data[entryType][id])
-          }else{
-            Config.ontologiesVocabularyModels[source][entryType][id]= data[entryType][id];
-          }
-
+      for (var id in data[entryType]) {
+        if (entryType == "restrictions") {
+          Config.ontologiesVocabularyModels[source][entryType][id].push(data[entryType][id]);
+        }
+        else {
+          Config.ontologiesVocabularyModels[source][entryType][id] = data[entryType][id];
+        }
 
 
       }
@@ -510,7 +515,6 @@ return callbackSeries();
   };
 
   self.updateModelOnServerCache = function(source, data, callback) {
-
 
 
     var payload = {

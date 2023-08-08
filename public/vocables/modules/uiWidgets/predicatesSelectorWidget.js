@@ -1,6 +1,7 @@
 import common from "../shared/common.js";
 import KGcreator from "../tools/KGcreator.js";
 import PromptedSelectWidget from "./promptedSelectWidget.js";
+import OntologyModels from "../shared/ontologyModels.js";
 
 var PredicatesSelectorWidget = (function () {
     var self = {};
@@ -84,7 +85,7 @@ var PredicatesSelectorWidget = (function () {
             properties.push({ label: "-------", id: "" });
             common.fillSelectOptions(selectId, properties, true, "label", "id");
         } else if (Config.ontologiesVocabularyModels[vocabulary]) {
-            properties = Config.ontologiesVocabularyModels[vocabulary].getPropertiesArray()
+            properties = OntologyModels.getPropertiesArray(vocabulary);
             common.fillSelectOptions(selectId, properties, true, "label", "id");
         } else {
             return PromptedSelectWidget.prompt("owl:ObjectProperty", "editPredicate_currentVocabPredicateSelect", vocabulary);
@@ -122,6 +123,9 @@ var PredicatesSelectorWidget = (function () {
     };
 
     self.onSelectCurrentVocabObject = function (value) {
+        if (value == "_searchClass") {
+            return PromptedSelectWidget.prompt("owl:Class", "editPredicate_objectSelect", self.currentVocabulary);
+        }
         if (value == "_search") {
             return PromptedSelectWidget.prompt(null, "editPredicate_objectSelect", self.currentVocabulary);
         }
@@ -144,7 +148,7 @@ var PredicatesSelectorWidget = (function () {
             });
             common.fillSelectOptions(selectId, classes, true, "label", "id");
         } else if (Config.ontologiesVocabularyModels[vocabulary]) {
-            var classes = [{ id: "_search", label: "search..." }];
+            var classes = [{ id: "_searchClass", label: "search..." }];
 
             var uniqueClasses = {};
             for (var key in Config.ontologiesVocabularyModels[vocabulary].classes) {

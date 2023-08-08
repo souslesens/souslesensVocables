@@ -697,7 +697,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
             }
           }
 
-          OntologyModels.updateModel (inSource, modelData, {}, function(err, result){
+          OntologyModels.updateModel (Lineage_sources.activeSource, modelData, {}, function(err, result){
             console.log(err|| "ontologyModelCache updated")
           })
         });

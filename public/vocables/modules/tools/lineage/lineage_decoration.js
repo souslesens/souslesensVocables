@@ -174,6 +174,8 @@ var Lineage_decoration = (function () {
                         }
                         if (nodeTypesMap[nodeId] && nodeTypesMap[nodeId].allTypes.indexOf("Bag") > -1) {
                             obj.shape = "box";
+                            obj.color="#ddd"
+                            obj.font={color:color}
                         }
                         if (nodeIds.indexOf(nodeId) > -1) {
                             newVisJsNodes.push(obj);

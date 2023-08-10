@@ -315,7 +315,7 @@ var KGtripleBuilder = {
                                                             if (!line[item.o] == "null") {
                                                                 line[item.o] = null;
                                                             }
-                                                            if (!line[item.s]) {
+                                                            if (!line[item.s] && !item.subjectIsSpecificUri) {
                                                                 return;
                                                             }
 
@@ -331,7 +331,7 @@ var KGtripleBuilder = {
 
                                                             //get value for Subject
                                                             {
-                                                                if (item.s_type == "fixed") {
+                                                                if (item.subjectIsSpecificUri) {
                                                                     subjectStr = item.s;
                                                                 } else if (typeof item.s === "function") {
                                                                     try {
@@ -390,7 +390,7 @@ var KGtripleBuilder = {
 
                                                             //get value for Object
                                                             {
-                                                                if (item.o_type == "fixed") {
+                                                                if (item.objectIsSpecificUri) {
                                                                     objectStr = item.o;
                                                                 } else if (item.isObjectBlankNode) {
                                                                     if (!line[item.o]) {

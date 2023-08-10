@@ -754,6 +754,7 @@ var KGcreator = (function () {
         $("#KGcreator_objectSelect").val("");
         $("#KGcreator_predicateSelect").val("");
 
+
         if (!subject) {
             return alert("missing subject");
         }
@@ -808,6 +809,11 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         if (isSpecificPredicate) {
             tripleObj.isSpecificPredicate = true;
         }
+
+        if( subject.indexOf("http://")>0)
+            tripleObj.subjectIsSpecificUri=true
+        if( object.indexOf("http://")>0)
+            tripleObj.objectIsSpecificUri=true
 
         self.currentJsonObject.tripleModels.push(tripleObj);
 

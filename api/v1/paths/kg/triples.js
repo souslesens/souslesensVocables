@@ -1,5 +1,5 @@
-const CsvTripleBuilder = require("../../../../../bin/KG/CsvTripleBuilder.");
-const { processResponse } = require("../../utils");
+const KGtripleBuilder = require("../../../../bin/KGtripleBuilder.");
+const { processResponse } = require("../utils");
 
 module.exports = function () {
     let operations = {
@@ -8,7 +8,7 @@ module.exports = function () {
 
     function POST(req, res, next) {
         try {
-            CsvTripleBuilder.createTriplesFromCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
+            KGtripleBuilder.createTriplesFromCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
                 processResponse(res, err, result);
             });
         } catch (e) {

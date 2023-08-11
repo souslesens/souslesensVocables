@@ -39,22 +39,18 @@ var elasticRestProxy = {
         }
     },
 
-    sendAuthRequest: function (options, callback) {
-        if (ConfigManager.config.ElasticSearch) {
-            if (options.method == "POST") {
-                options.auth = {
-                    user: ConfigManager.config.ElasticSearch.user,
-                    password: ConfigManager.config.ElasticSearch.password,
-                };
-            } else {
-                var token = Buffer.from(ConfigManager.config.ElasticSearch.user + ":" + ConfigManager.config.ElasticSearch.password).toString("base64");
-                options.headers.Authorization = "Basic " + token;
-            }
+    forwardRequest: function (options, callback) {
+        const elasticConf = ConfigManager.config.ElasticSearch;
+        if (elasticConf && elasticConf.user && elasticConf.password) {
+            options.auth = {
+                user: ConfigManager.config.ElasticSearch.user,
+                password: ConfigManager.config.ElasticSearch.password,
+            };
         }
         process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
-        console.log("beforeSendAuthRequest2");
+        console.log("DEBUG:bin/elasticRestProxy:forwardRequest" + JSON.stringify(options));
         request(options, function (error, response, body) {
-            console.log("SendAuthRequestError :reponse " + error + "\nreponse " + response + "\nbody " + body);
+            console.log("DEBUG:bin/elasticRestProxy:forwardRequest\n  error=" + error + "\n  reponse=" + response + "\n  body " + body);
             return callback(error, response, body);
         });
     },
@@ -91,8 +87,7 @@ var elasticRestProxy = {
             url: url,
         };
 
-        elasticRestProxy.sendAuthRequest(options, function (error, response, body) {
-            //  request(options, function(error, response, body) {
+        elasticRestProxy.forwardRequest(options, function (error, response, body) {
             if (error) {
                 return callback(error);
             }
@@ -129,8 +124,7 @@ var elasticRestProxy = {
         };
 
         //   console.log(ndjson);
-        elasticRestProxy.sendAuthRequest(options, function (error, response, _body) {
-            //  request(options, function(error, response, _body) {
+        elasticRestProxy.forwardRequest(options, function (error, response, _body) {
             if (error) {
                 return callback(error, null);
             }
@@ -138,15 +132,7 @@ var elasticRestProxy = {
             if (json.error && json.error.reason) {
                 return callback(json.error.reason, null);
             }
-            var responses = json.responses;
-            /*  responses.forEach(function (response, responseIndex) {
-
-      var hits = response.hits.hits;
-      hits.forEach(function (hit) {
-
-      })
-  })*/
-            return callback(null, responses);
+            return callback(null, json.responses);
         });
     },
 
@@ -199,8 +185,7 @@ var elasticRestProxy = {
             },
             url: config.indexation.elasticUrl + config.general.indexName + "/_refresh",
         };
-        elasticRestProxy.sendAuthRequest(options, function (error, _response, _body) {
-            // request(options, function(error, _response, _body) {
+        elasticRestProxy.forwardRequest(options, function (error, _response, _body) {
             if (error) {
                 return callback(error);
             }
@@ -223,8 +208,7 @@ var elasticRestProxy = {
             json: json,
             url: elasticUrl + "_analyze",
         };
-        elasticRestProxy.sendAuthRequest(options, function (error, response, body) {
-            // request(options, function(error, response, body) {
+        elasticRestProxy.forwardRequest(options, function (error, response, body) {
             if (error) {
                 return callback(error);
             }
@@ -245,8 +229,7 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + indexName + "/",
                     };
-                    elasticRestProxy.sendAuthRequest(options, function (error, response, _body) {
-                        //  request(options, function(error, response, _body) {
+                    elasticRestProxy.forwardRequest(options, function (error, response, _body) {
                         if (error) {
                             return callbackSeries(error);
                         }
@@ -270,8 +253,7 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + indexName,
                     };
-                    elasticRestProxy.sendAuthRequest(options, function (error, _response, _body) {
-                        //  request(options, function(error, _response, _body) {
+                    elasticRestProxy.forwardRequest(options, function (error, _response, _body) {
                         if (error) {
                             return callbackSeries(error);
                         }
@@ -286,7 +268,6 @@ var elasticRestProxy = {
         );
     },
     listIndexes: function (elasticUrl, callback) {
-        console.log("listIndexes1");
         var options = {
             method: "GET",
             headers: {
@@ -294,22 +275,13 @@ var elasticRestProxy = {
             },
             url: elasticUrl + "_cat/indices?format=json",
         };
-        console.log("listIndexes2");
-        if (ConfigManager.config.ElasticSearch) {
-            options.auth = {
-                user: ConfigManager.config.ElasticSearch.user,
-                password: ConfigManager.config.ElasticSearch.password,
-            };
-        }
-        console.log("listIndexes3");
-        console.log("beforeSendAuthRequest");
-        elasticRestProxy.sendAuthRequest(options, function (error, response, body) {
-            // request(options, function(error, response, body) {
+        console.log("DEBUG:bin/elasticRestProxy:listIndexes");
+        elasticRestProxy.forwardRequest(options, function (error, response, body) {
             if (error) {
-                console.log("SendAuthRequestERROR");
+                console.log("ERROR:bin/elasticRestProxy:listIndexes/SendAuthRequestError " + error);
                 return callback(error);
             }
-            console.log("tryParseBody");
+            console.log("DEBUG:bin/elasticRestProxy:listIndexes tryParseBody");
             var json = JSON.parse(body);
             var indexes = [];
             json.forEach(function (item) {
@@ -426,8 +398,7 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + indexName,
                     };
-                    elasticRestProxy.sendAuthRequest(requestOptions, function (error, _response, _body) {
-                        //  request(requestOptions, function (error, _response, _body) {
+                    elasticRestProxy.forwardRequest(requestOptions, function (error, _response, _body) {
                         if (error) {
                             return callbackSeries(error);
                         }
@@ -445,8 +416,7 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl,
                     };
-                    elasticRestProxy.sendAuthRequest(requestOptions, function (error, _response, _body) {
-                        //  request(requestOptions, function (error, _response, _body) {
+                    elasticRestProxy.forwardRequest(requestOptions, function (error, _response, _body) {
                         if (error) {
                             return callbackSeries(error);
                         }
@@ -484,8 +454,7 @@ var elasticRestProxy = {
                         },
                         url: elasticUrl + "_bulk?refresh=wait_for",
                     };
-                    elasticRestProxy.sendAuthRequest(requestOptions, function (error, response, body) {
-                        // request(requestOptions, function (error, response, body) {
+                    elasticRestProxy.forwardRequest(requestOptions, function (error, response, body) {
                         if (error) {
                             return callbackSeries(error);
                         }

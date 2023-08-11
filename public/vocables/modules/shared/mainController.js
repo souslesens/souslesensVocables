@@ -50,26 +50,6 @@ var MainController = (function () {
         });
     };
 
-    /* self.loadSourcesMappings = function (callback) {
-      $.ajax({
-          type: "GET",
-          url: `${Config.apiUrl}/data/file?dir=mappings&name=sourcesLinkedMappings.json`,
-          dataType: "json",
-
-          success: function (data_, _textStatus, _jqXHR) {
-              try {
-                  var json = JSON.parse(data_);
-              } catch (e) {
-                  callback(e);
-              }
-              callback(null, json);
-          },
-          error(err) {
-              callback(err);
-          },
-      });
-  };*/
-
     self.loadSources = function (sourcesFile, callback) {
         var _payload = {
             getSources: 1,
@@ -138,15 +118,15 @@ var MainController = (function () {
             },
         });
         /*   $.getJSON("config/sources.json", function (json) {
-       Config.sources = json;
-      for(var sourceLabel in Config.sources){
-           if(Config.sources[sourceLabel].sparql_server && Config.sources[sourceLabel].sparql_server.url=="_default")
-               Config.sources[sourceLabel].sparql_server.url=Config.default_sparql_url
-       }
-       if (callback)
-           return callback()
+   Config.sources = json;
+  for(var sourceLabel in Config.sources){
+       if(Config.sources[sourceLabel].sparql_server && Config.sources[sourceLabel].sparql_server.url=="_default")
+           Config.sources[sourceLabel].sparql_server.url=Config.default_sparql_url
+   }
+   if (callback)
+       return callback()
 
-   });*/
+});*/
     };
     self.loadProfiles = function (callback) {
         $.ajax({
@@ -235,6 +215,7 @@ var MainController = (function () {
 
                     function (callbackSeries) {
                         var sources = Object.keys(Config.ontologiesVocabularyModels);
+                        // return callbackSeries();
 
                         OntologyModels.registerSourcesModel(sources, function (err) {
                             callbackSeries(err);
@@ -507,9 +488,8 @@ return;*/
             $("#actionDivContolPanelDiv").html("");
             $("#rightPanelDivInner").html("");
 
-            Lineage_sources.setAllWhiteBoardSources(true);
-
             if (toolId == "lineage") {
+                Lineage_sources.setAllWhiteBoardSources(true);
                 $("#accordion").accordion("option", { active: 2 });
                 MainController.currentSource = null;
 
@@ -649,11 +629,19 @@ return;*/
             self.previousPanelLabel = panelLabel;
         },
 
-        showHideRightPanel: function (show) {
+        showHideRightPanel: function (showOrHide) {
             var left = $("#rightPanelDiv").position().left;
             var w = $(window).width();
-
-            if (show || w - left < 100) {
+            var show = false;
+            if (!showOrHide) {
+                if (w - left < 100) show = true;
+                else show = false;
+            } else if (showOrHide == "show") {
+                show = true;
+            } else if (showOrHide == "hide") {
+                show = false;
+            }
+            if (show) {
                 var lw = $("#rightPanelDiv").width();
                 if (lw < 100) {
                     return;
@@ -664,6 +652,7 @@ return;*/
                 $("#graphDiv").css("zIndex", 19);
                 $("#rightPanelDiv_searchIconInput").attr("src", "./icons/slideRight.png");
             } else {
+                //hide panel
                 var newLeft = "" + w + "px";
                 $("#rightPanelDiv").css("left", newLeft);
                 $("#rightPanelDiv_searchIconInput").attr("src", "./icons/search.png");

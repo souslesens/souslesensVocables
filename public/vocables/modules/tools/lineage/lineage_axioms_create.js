@@ -27,6 +27,16 @@ var Lineage_axioms_create = (function () {
                 { id: "_newOwlEntity", label: "New entity" },
                 //  { id: "_new", label: "New entity from " + source }
             ];
+            for (var key in Config.basicVocabularies) {
+                if (!Config.sources[key]) {
+                    Config.sources[key] = {
+                        imports: [],
+                        graphUri: Config.basicVocabularies[key].graphUri,
+                        sparql_server: { url: Config.default_sparql_url },
+                    };
+                }
+            }
+
             if (Config.sources[source].imports) {
                 var imports = JSON.parse(JSON.stringify(Config.sources[source].imports));
                 imports.push(source);
@@ -68,7 +78,7 @@ var Lineage_axioms_create = (function () {
                     if (err) {
                         return alert(err.responseText);
                     }
-                    result.forEach(function (item) {
+                    result.rawResult.forEach(function (item) {
                         if (types.indexOf(item.superClass.value) < 0) {
                             types.push(item.superClass.value);
                         }
@@ -317,7 +327,9 @@ common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes);*/
         }
 
         function removeDuplicateTriples(triples) {
-            if (!self.currentTriples) return triples;
+            if (!self.currentTriples) {
+                return triples;
+            }
 
             var existingStrTriples = [];
             // remove duplicate triples
@@ -329,7 +341,9 @@ common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes);*/
 
             var uniqueTriples = [];
             triples.forEach(function (triple) {
-                if (existingStrTriples.indexOf(triple.subject + "_" + triple.predicate + "_ " + triple.object) < 0) uniqueTriples.push(triple);
+                if (existingStrTriples.indexOf(triple.subject + "_" + triple.predicate + "_ " + triple.object) < 0) {
+                    uniqueTriples.push(triple);
+                }
             });
 
             return uniqueTriples;
@@ -352,7 +366,7 @@ common.fillSelectOptions("axioms_create_entityTypeSelect", entityTypes);*/
 
                 return str;
                 /*  return uri;
-    return Sparql_common.getLabelFromURI(uri);*/
+return Sparql_common.getLabelFromURI(uri);*/
             }
 
             var html = "";

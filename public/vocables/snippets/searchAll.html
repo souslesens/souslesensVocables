@@ -1,6 +1,6 @@
 <div style="display: flex; flex-direction: column; height: 50px">
     <div>
-        <input type="checkbox" checked="checked" id="GenericTools_allExactMatchSearchCBX" />Exact Match
+        <input type="checkbox" id="GenericTools_allExactMatchSearchCBX" />Exact Match
 
         <b>Scope </b>
         <select id="GenericTools_searchScope" class="GenericTools_searchAllOptional" onchange="Lineage_sources.initSourcesSearchSelect()">
@@ -17,6 +17,7 @@
         Class
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.onSearchClass()">?</button>
         <select id="GenericTools_searchAllClassSelect" style="min-width: 100px"></select>
+        &nbsp;<input type="checkbox" checked="checked" id="GenericTools_searchAllLabelsCBX" />All labels
     </div>
     <div>
         <input id="searchWidget_searchTermInput" style="width: 150px" value="" />

@@ -53,7 +53,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 }
             }
             if (event == "add") {
-                self.lastAddedNodes = properties.data;
+                self.lastAddedNodes = properties.items;
             }
         });
 
@@ -86,10 +86,10 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
 
         if (_options.layoutHierarchical) {
-            options.layout = {
+            options.visjsOptions.layout = {
                 hierarchical: _options.layoutHierarchical,
             };
-            options.physics = { enabled: false };
+            options.visjsOptions.physics = { enabled: false };
         } else {
             $("#visjsGraph_layoutSelect").val("");
         }
@@ -99,21 +99,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
 
         self.globalOptions = options;
-        self.network = new vis.Network(container, self.data, options);
+
+        self.network = new vis.Network(container, self.data, options.visjsOptions);
         self.simulationOn = true;
-
-        // self.network.startSimulation()
-
-        /*  window.setTimeout(function () {
-        return;
-        // if (!_options.layoutHierarchical) {
-        //     if (!self.network.stopSimulation) return;
-        //     self.network.stopSimulation();
-        //     if (!_options.noFit) self.network.fit();
-        //     self.simulationOn = false;
-        //     if (_options.afterDrawing) _options.afterDrawing();
-        // }
-    }, self.simulationTimeOut);*/
 
         self.network.on("afterDrawing", function (/** @type {any} */ _params) {
             self.drawingDone = true;
@@ -356,10 +344,6 @@ return false;
         self.data = null;
     };
 
-    self.drawLegend = function () {
-        // Pass
-    };
-
     self.removeNodes = function (/** @type {string | number} */ key, /** @type {any} */ value, /** @type {any} */ removeEdges) {
         /**
          * @type {any[]}
@@ -463,7 +447,7 @@ return false;
         });
     self.getExistingIdsMap = function (/** @type {any} */ nodesOnly) {
         var existingVisjsIds = {};
-        if (!self.data || !self.data.nodes) {
+        if (!self.data || !self.data.nodes || self.data.nodes.length == 0) {
             return {};
         }
         var oldIds = self.data.nodes.getIds();

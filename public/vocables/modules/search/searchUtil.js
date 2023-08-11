@@ -258,6 +258,13 @@ indexes.push(source.toLowerCase());
             size = 10000;
         }
 
+        var indexes = null;
+        if (index) {
+            indexes = index;
+        } else {
+            indexes = "*";
+        }
+
         if (_ids) {
             var slices = common.array.slice(_ids, 100);
             var allHits = [];
@@ -265,10 +272,8 @@ indexes.push(source.toLowerCase());
                 slices,
                 function (ids, callbackEach) {
                     var str = "";
-                    var header = {};
-                    if (index) {
-                        header = { index: index };
-                    }
+                    var header = { index: indexes };
+
                     ids.forEach(function (id) {
                         var query = {
                             query: {
@@ -276,11 +281,12 @@ indexes.push(source.toLowerCase());
                                     "id.keyword": id,
                                 },
                             },
+                            _source: "label",
                         };
                         str += JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
                     });
                     MainController.UI.message("getting labels " + allHits.length + " ...");
-                    ElasticSearchProxy.executeMsearch(str, [index], function (err, result) {
+                    ElasticSearchProxy.executeMsearch(str, [indexes], function (err, result) {
                         if (err) {
                             return callbackEach(err);
                         }
@@ -322,88 +328,100 @@ indexes.push(source.toLowerCase());
         }
     };
 
+    self.escapeElasticReservedChars = function (word) {
+        var chars = ["+", "-", "=", "&&", "||", ">", "<", "!", "(", ")", "{", "}", "[", "]", "^", '"', "~", "?", ":", "/"];
+        var p = word.indexOf("*");
+        var word2 = word.replace("*", "");
+
+        chars.forEach(function (char) {
+            if (word.indexOf(char) > -1) {
+                p = -1;
+            }
+            word2 = word2.replaceAll(char, "\\\\" + char);
+        });
+        if (p > -1) {
+            word2 += "*";
+        }
+        return word2;
+    };
+
+    self.getWordBulkQuery = function (word, mode, indexes, options) {
+        word = self.escapeElasticReservedChars(word);
+        var field = "label.keyword";
+        if (word.indexOf && word.indexOf("http://") == 0) {
+            field = "id.keyword";
+        }
+        //  word=word.toLowerCase()
+        var queryObj;
+        if (!mode || mode == "exactMatch") {
+            var field = "label";
+            queryObj = {
+                bool: {
+                    must: [
+                        {
+                            match: {
+                                [field]: word,
+                            },
+                        },
+                    ],
+                },
+            };
+            /* if (options.skosLabels) {
+           queryObj.bool.must.push( {
+               term: {
+                   "skoslabels.keyword": word,
+               },
+           })
+
+       }*/
+        } else if (word.indexOf("*") > -1) {
+            queryObj = {
+                bool: {
+                    must: {
+                        query_string: {
+                            query: word,
+                            fields: ["label"],
+                        },
+                    },
+                },
+            };
+            if (options.skosLabels) {
+                queryObj.bool.must.query_string.fields.push("skoslabels");
+            }
+        } else {
+            queryObj = {
+                bool: {
+                    must: [
+                        {
+                            query_string: {
+                                query: word,
+                                fields: ["label", "skoslabels"],
+                                default_operator: "AND",
+                            },
+                        },
+                    ],
+                },
+            };
+            if (options.skosLabels) {
+                queryObj.bool.must[0].query_string.fields.push("skoslabels");
+            }
+        }
+        if (options.classFilter) {
+            queryObj.bool.filter = {
+                multi_match: {
+                    query: options.classFilter,
+                    fields: ["parents.keyword", "parent.keyword", "id.keyword"],
+                    operator: "or",
+                },
+            };
+        }
+
+        return queryObj;
+    };
+
     self.getElasticSearchMatches = function (words, indexes, mode, from, size, options, callback) {
         $("#waitImg").css("display", "block");
         //   MainController.UI.message("Searching exact matches ")
-
-        self.getWordBulkQuery = function (word, mode, indexes) {
-            var field = "label.keyword";
-            if (word.indexOf && word.indexOf("http://") == 0) {
-                field = "id.keyword";
-            }
-            var queryObj;
-            if (!mode || mode == "exactMatch") {
-                queryObj = {
-                    bool: {
-                        should: [
-                            {
-                                term: {
-                                    [field]: word,
-                                },
-                            },
-                            {
-                                term: {
-                                    "skoslabels.keyword": word,
-                                },
-                            },
-                        ],
-                    },
-                };
-            } else if (word.indexOf("*") > -1) {
-                queryObj = {
-                    bool: {
-                        must: {
-                            query_string: {
-                                query: word,
-                                fields: ["label", "skoslabel"],
-                            },
-                        },
-                        // ,
-                        // "filter":  {"term":{"parents.keyword":"http://rds.posccaesar.org/ontology/lis14/rdl/Quality"}}
-                    },
-                };
-                //   if (options.classFilter) queryObj.bool.filter = { term: { "parents.keyword": options.classFilter } };
-            } else {
-                queryObj = {
-                    bool: {
-                        must: [
-                            {
-                                query_string: {
-                                    query: word,
-                                    fields: ["label", "skoslabels"],
-                                    default_operator: "AND",
-                                },
-                            },
-                        ],
-                    },
-                };
-            }
-            if (options.classFilter) {
-                queryObj.bool.filter = {
-                    multi_match: {
-                        query: options.classFilter,
-                        fields: ["parents.keyword", "id.keyword"],
-                        operator: "or",
-                    },
-                };
-            }
-
-            var header = {};
-            if (indexes) {
-                header = { index: indexes };
-            }
-
-            var query = {
-                query: queryObj,
-                from: from,
-                size: size,
-                _source: {
-                    excludes: ["attachment.content"],
-                },
-            };
-            var str = JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
-            return str;
-        };
 
         self.entitiesMap = {};
         var bulQueryStr = "";
@@ -420,7 +438,21 @@ indexes.push(source.toLowerCase());
                     if (!word) {
                         return;
                     }
-                    var wordQuery = self.getWordBulkQuery(word, mode, indexes);
+                    var queryObj = self.getWordBulkQuery(word, mode, indexes, options);
+                    var header = {};
+                    if (indexes) {
+                        header = { index: indexes };
+                    }
+
+                    var query = {
+                        query: queryObj,
+                        from: from,
+                        size: size,
+                        _source: {
+                            excludes: ["attachment.content"],
+                        },
+                    };
+                    var wordQuery = JSON.stringify(header) + "\r\n" + JSON.stringify(query) + "\r\n";
                     bulQueryStr += wordQuery;
                 });
                 ElasticSearchProxy.executeMsearch(bulQueryStr, indexes, function (err, result) {
@@ -529,8 +561,8 @@ indexes.push(source.toLowerCase());
                         // indexNamedIndividuals
                         function (callbackSeries) {
                             /*   if (true || !options.indexNamedIndividuals) {
-                                return callbackSeries();
-                            }*/
+                  return callbackSeries();
+              }*/
 
                             var taxonomyClassesIdsMap = {};
                             taxonomyClasses.forEach(function (item) {
@@ -554,10 +586,11 @@ indexes.push(source.toLowerCase());
                                         parents = [item.type2.value, sourceLabel];
                                     }
 
+                                    var skosLabel = item.skosPrefLabel ? item.skosPrefLabel.value : null;
                                     individualsToIndex.push({
                                         id: item.id.value,
                                         label: item.label ? item.label.value : Sparql_common.getLabelFromURI(item.id.value),
-                                        skoslabels: [],
+                                        skoslabels: [skosLabel],
                                         parent: parent,
                                         parents: parents,
                                         type: item.type2.value,
@@ -582,7 +615,7 @@ indexes.push(source.toLowerCase());
                             };
 
                             var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
-                            Sparql_OWL.getDictionary(sourceLabel, { filter: filter, processorFectchSize: 100 }, processor, function (err, result) {
+                            Sparql_OWL.getDictionary(sourceLabel, { filter: filter, processorFectchSize: 100, skosPrefLabel: true }, processor, function (err, result) {
                                 return callbackSeries(err);
                             });
                         },

@@ -3,29 +3,15 @@
  */
 
 var SocketManager = {
-    currentClient: {},
+    clientSockets: {},
     initClientSocket: function (clientSocket) {
-        SocketManager.currentClient = clientSocket;
+        SocketManager.clientSockets[clientSocket.id] = clientSocket;
     },
 
-    message: function (channel, message) {
-        console.log(message);
-        if (SocketManager.currentClient && SocketManager.currentClient.emit) {
-            SocketManager.currentClient.emit(channel, message);
+    message: function (clientSocketId, channel, message) {
+        if (SocketManager.clientSockets[clientSocketId] && SocketManager.clientSockets[clientSocketId].emit) {
+            SocketManager.clientSockets[clientSocketId].emit(channel, message);
         }
     },
 };
 module.exports = SocketManager;
-
-/*
-var socket = (module.exports = {});
-var client = {};
-socket.stuff = function (_client, io) {
-    client = _client;
-};
-socket.message = function (channel, message) {
-    console.log(message);
-    if (client && client.emit) {
-        client.emit(channel, message);
-    }
-};*/

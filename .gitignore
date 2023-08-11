@@ -134,6 +134,9 @@ mainapp/lib
 /public/vocables/config/sourcesNotUsed.json
 /public/vocables/images/2022-03-17_08-23-52.png
 
+
+
+/bin/test.js
 /public/vocables/customPlugins/
 /jena/data/temp.rdf
 /jena/lib/
@@ -142,3 +145,5 @@ mainapp/lib
 /public/yasguy/
 /mainapp/static/index.html
 /public/vocables/snippets/treemap/
+/mainapp/static/kg_upload_app.js.LICENSE.txt
+/mainapp/static/mainapp.js.LICENSE.txt

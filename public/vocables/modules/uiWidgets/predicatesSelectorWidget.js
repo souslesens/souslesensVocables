@@ -7,7 +7,17 @@ var PredicatesSelectorWidget = (function () {
 
     self.predicatesIdsMap = {};
 
-    self.init = function (source, configureFn) {
+    self.load = function (divId, source, configureFn, callback) {
+        $("#" + divId).load("modules/uiWidgets/predicatesSelectorWidgetDialog.html", function () {
+            self.init(source, configureFn, function (err, result) {
+                if (callback) {
+                    return callback();
+                }
+            });
+        });
+    };
+
+    self.init = function (source, configureFn, callback) {
         $("#sourceBrowser_addPropertyDiv").css("display", "flex");
 
         $("#editPredicate_currentVocabPredicateSelect").prop("disabled", false);
@@ -20,16 +30,23 @@ var PredicatesSelectorWidget = (function () {
 
         // var properties = Config.Lineage.basicObjectProperties;
 
-        self.configure(configureFn);
+        self.configure(configureFn, function (err, result) {
+            if (callback) {
+                return callback();
+            }
+        });
     };
 
-    self.configure = function (configureFn) {
+    self.configure = function (configureFn, callback) {
         self.onSelectPropertyFn = null;
         self.onSelectObjectFn = null;
         $("#editPredicate_vocabularySelect").val("usual");
         $("#editPredicate_vocabularySelect2").val("usual");
         if (configureFn) {
             configureFn();
+            if (callback) {
+                return callback();
+            }
         }
     };
 
@@ -48,7 +65,9 @@ var PredicatesSelectorWidget = (function () {
             vocabularies = [source];
             vocabularies = vocabularies.concat(Config.sources[source].imports);
         } else {
-            if (!Array.isArray(filter)) filter = [filter];
+            if (!Array.isArray(filter)) {
+                filter = [filter];
+            }
             vocabularies = filter;
         }
         common.fillSelectOptions("editPredicate_vocabularySelect", vocabularies, true);
@@ -73,10 +92,33 @@ var PredicatesSelectorWidget = (function () {
     };
 
     self.onSelectPredicateProperty = function (value) {
+        $("#editPredicate_objectSelect").val("");
+        $("#editPredicate_objectValue").val("");
         $("#editPredicate_propertyValue").val(value);
+        common.unsetDatePickerOnInput("editPredicate_objectValue");
         if (self.onSelectPropertyFn) {
             self.onSelectPropertyFn(value);
         }
+        self.operators = {
+            String: ["contains", "not contains", "="],
+            Number: ["=", "!=", "<", "<=", ">", ">="],
+        };
+        if (value.indexOf("xsd:") > -1) {
+            $("#editPredicate_vocabularySelect2").css("display", "none");
+            if (value == "xsd:dateTime") {
+                common.fillSelectOptions("editPredicate_objectSelect", self.operators.Number);
+                common.setDatePickerOnInput("editPredicate_objectValue");
+            } else if (value == "xsd:string") {
+                common.fillSelectOptions("editPredicate_objectSelect", self.operators.String);
+            } else {
+                common.fillSelectOptions("editPredicate_objectSelect", self.operators.String);
+            }
+        } else {
+            $("#editPredicate_vocabularySelect2").css("display", "block");
+            $("#editPredicate_vocabularySelect2").val("usual");
+            self.setCurrentVocabClassesSelect("usual", "editPredicate_objectSelect");
+        }
+        ("");
     };
 
     self.onSelectCurrentVocabObject = function (value) {
@@ -133,6 +175,43 @@ var PredicatesSelectorWidget = (function () {
         } else {
             return PromptedSelectWidget.prompt("owl:Class", "editPredicate_objectSelect", vocabulary);
         }
+    };
+
+    self.getSelectedProperty = function () {
+        var property = $("#editPredicate_propertyValue").val();
+
+        if (property.indexOf("xsd:") == 0) {
+            // get operator
+            return "owl:hasValue";
+        } else {
+            if (property.indexOf("http") == 0) return "<" + property + ">";
+            else return property;
+        }
+    };
+    self.getSelectedObjectValue = function () {
+        var property = $("#editPredicate_propertyValue").val();
+        var value = $("#editPredicate_objectValue").val().trim();
+
+        if (property.indexOf("xsd") > -1) {
+            if (property == "xsd:dateTime") {
+                var date = $("#editPredicate_objectValue").datepicker("getDate");
+                return "'" + common.dateToRDFString(date) + "'^^xsd:dateTime";
+            } else {
+                return "'" + value + "'^^" + property;
+            }
+        } else if (value.indexOf("http") == 0) {
+            return "<" + value + ">";
+        } else {
+            return value;
+        }
+    };
+
+    self.getSelectedOperator = function () {
+        var property = $("#editPredicate_propertyValue").val();
+        if (property.indexOf("xsd") > -1) {
+            return $("#editPredicate_objectSelect").val();
+        }
+        return null;
     };
 
     return self;

@@ -2,9 +2,9 @@
     "souslesensUrl": "http://localhost:3010",
     "listenPort": "3010",
     "serverUrl": "../slsv",
-    "default_sparql_url": "http://xxxxxxxx:8890/sparql",
-    "auth": "local",
-    "cookieSameSite": "",
+    "default_sparql_url": "http://virtuoso:8890/sparql",
+    "auth": "disabled",
+    "cookieSameSite": "none",
     "cookieSecure": false,
     "cookieSecureTrustProxy": false,
     "defaultGroups": [],
@@ -14,41 +14,41 @@
     "sentryDsnJsFront": "",
     "formalOntologySourceLabel": "",
     "tools_available": ["lineage", "KGcreator", "Standardizer", "admin", "ConfigEditor"],
-    "keycloak": {
-        "realm": "master",
-        "publicClient": false,
-        "clientID": "xxx",
-        "clientSecret": "xxx",
-        "authServerURL": "https://xxx"
-    },
-    "health_enabled_services": ["virtuoso", "elasticsearch"],
+
     "SQLserver": {
-        "user": "",
-        "password": "",
-        "server": "",
-        "database": "",
+        "user": "SA",
+        "password": "Sup3rSecretP@ssword",
+        "server": "sqlserver",
+        "database": "master",
         "trustServerCertificate": true
     },
     "sparql_server": {
-        "url": "http://xxx:8890/sparql",
+        "url": "http://137.74.198.126:8890/sparql",
         "user": "",
         "password": ""
     },
     "ElasticSearch": {
-        "url": "http://xxx:9200/",
-        "user": "",
-        "password": "",
-        "other_servers": []
+        "url": "https://51.178.139.80:9200/",
+        "user": "elastic",
+        "password": "SlSv@51"
+    },
+
+    "logger": {
+        "errorsLogPath": "logs/error.log",
+        "usersLogPath": "logs/vocables.log"
     },
     "jowlServer": {
-        "url": "http://xxx"
+        "url": "http://51.178.39.209:9170/"
     },
-
-       "logger": {
-            "errorsLogPath": "logs/error.log",
-            "usersLogPath": "logs/vocables.log"
-        },
-
+    "annotator": {
+        "tikaServerUrl": "http://137.74.198.126:41000",
+        "spacyServerUrl": "http://137.74.198.126:8000/pos",
+        "parsedDocumentsHomeDir": null,
+        "uploadDirPath": null
+    },
+    "wiki": {
+        "url": ""
+    },
     "authenticationDatabase": {
         "user": "",
         "password": "",

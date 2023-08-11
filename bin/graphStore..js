@@ -242,7 +242,7 @@ var GraphStore = {
                 sparql_server: {
                     url: sparqlServerUrl,
                     method: "Post",
-                    headers: [],
+                    headers: {},
                 },
                 editable: options.editable === "true",
                 controller: "Sparql_OWL",

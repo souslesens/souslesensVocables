@@ -19,6 +19,8 @@ import {
     TableHead,
     TableRow,
     Stack,
+    IconButton,
+    InputAdornment,
 } from "@mui/material";
 import { useModel } from "../Admin";
 import * as React from "react";
@@ -34,6 +36,8 @@ import { Datas } from "react-csv-downloader/dist/esm/lib/csv";
 import { useZorm, createCustomIssues } from "react-zorm";
 import { errorMessage } from "./errorMessage";
 import { ZodCustomIssueWithMessage } from "react-zorm/dist/types";
+import { Add, Remove } from "@mui/icons-material";
+
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
 
@@ -57,7 +61,7 @@ const SourcesTable = () => {
             ),
             failure: (msg: string) => (
                 <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
-                    ,<p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
+                    <p>{`I stumbled into this error when I tried to fetch data: ${msg}. Please, reload this page.`}</p>
                 </Box>
             ),
             success: (gotSources: ServerSource[]) => {
@@ -151,7 +155,30 @@ const SourcesTable = () => {
     return renderSources;
 };
 
-type SourceEditionState = { modal: boolean; sourceForm: ServerSource };
+type SparqlServerHeadersFormData = { key: string; value: string }[];
+type SourceFormData = Omit<ServerSource, "sparql_server"> & { sparql_server: Omit<ServerSource["sparql_server"], "headers"> & { headers: SparqlServerHeadersFormData } };
+
+function toFormData(source: ServerSource): SourceFormData {
+    return {
+        ...source,
+        sparql_server: {
+            ...source.sparql_server,
+            headers: Object.entries(source.sparql_server.headers).map(([key, value]) => ({ key, value })),
+        },
+    };
+}
+
+function fromFormData(source: SourceFormData): ServerSource {
+    return {
+        ...source,
+        sparql_server: {
+            ...source.sparql_server,
+            headers: Object.fromEntries(source.sparql_server.headers.map(({ key, value }) => [key, value])),
+        },
+    };
+}
+
+type SourceEditionState = { modal: boolean; sourceForm: SourceFormData };
 
 const enum Type {
     UserClickedModal,
@@ -180,14 +207,14 @@ type Msg_ =
     | { type: Type.UserClickedAddDataSource; payload: boolean }
     | {
           type: Type.UserUpdatedDataSource;
-          payload: { type: string[]; table_schema: string; connection: string; dbName: string; local_dictionary: { table: string; labelColumn: string; idColumn: string } };
+          payload: { type: string; table_schema: string; connection: string; dbName: string; local_dictionary: { table: string; labelColumn: string; idColumn: string } | null };
       }
-    | { type: Type.UserUpdatedsparql_server; payload: { url: string; method: string; headers: string[] } };
+    | { type: Type.UserUpdatedsparql_server; payload: { url: string; method: string; headers: { key: string; value: string }[] } };
 
 const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): SourceEditionState => {
     const { model } = useModel();
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
-    const getUnmodifiedSources = unwrappedSources.reduce((acc, value) => (sourceEditionState.sourceForm.id === value.id ? value : acc), defaultSource(ulid()));
+    const getUnmodifiedSources: SourceFormData = unwrappedSources.reduce((acc, value) => (sourceEditionState.sourceForm.id === value.id ? toFormData(value) : acc), toFormData(defaultSource(ulid())));
     const resetSourceForm = msg.payload ? sourceEditionState.sourceForm : getUnmodifiedSources;
     const fieldToUpdate: any = msg.type === Type.UserUpdatedField ? msg.payload.fieldname : null;
     switch (msg.type) {
@@ -205,7 +232,7 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
                 ...sourceEditionState,
                 sourceForm: {
                     ...sourceEditionState.sourceForm,
-                    dataSource: msg.payload ? { type: [], table_schema: "", connection: "", dbName: "", local_dictionary: { table: "", labelColumn: "", idColumn: "" } } : null,
+                    dataSource: msg.payload ? { type: "", table_schema: "", connection: "", dbName: "", local_dictionary: { table: "", labelColumn: "", idColumn: "" } } : null,
                 },
             };
 
@@ -224,7 +251,7 @@ const updateSource = (sourceEditionState: SourceEditionState, msg: Msg_): Source
         case Type.ResetSource:
             switch (msg.payload) {
                 case Mode.Creation:
-                    return { ...sourceEditionState, sourceForm: defaultSource(ulid()) };
+                    return { ...sourceEditionState, sourceForm: toFormData(defaultSource(ulid())) };
 
                 case Mode.Edition:
                     return { ...sourceEditionState, sourceForm: msg.payload ? sourceEditionState.sourceForm : resetSourceForm };
@@ -242,7 +269,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     const unwrappedSources = SRD.unwrap([], identity, model.sources);
     const sources = React.useMemo(() => unwrappedSources, [unwrappedSources]);
 
-    const [sourceModel, update] = React.useReducer(updateSource, { modal: false, sourceForm: source });
+    const [sourceModel, update] = React.useReducer(updateSource, { modal: false, sourceForm: toFormData(source) });
     const [issues, setIssues] = React.useState<ZodCustomIssueWithMessage[]>([]);
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
 
@@ -260,11 +287,46 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
 
     const _handleFieldUpdate = (event: React.ChangeEvent<HTMLInputElement>) => update({ type: Type.UserAddedGraphUri, payload: event.target.value });
 
-    const handleSparql_serverUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) =>
+    const handleSparql_serverUpdate = (fieldName: string) => (event: React.ChangeEvent<HTMLTextAreaElement>) => {
         update({
             type: Type.UserUpdatedsparql_server,
-            payload: { ...sourceModel.sourceForm.sparql_server, [fieldName]: fieldName === "headers" ? event.target.value.replace(/\s+/g, "").split(",") : event.target.value },
+            payload: { ...sourceModel.sourceForm.sparql_server, [fieldName]: fieldName === "headers" ? [] : event.target.value },
         });
+    };
+
+    const handleSparql_serverHeadersUpdate = (updater: (previousHeaders: SparqlServerHeadersFormData) => SparqlServerHeadersFormData) => {
+        update({
+            type: Type.UserUpdatedsparql_server,
+            payload: { ...sourceModel.sourceForm.sparql_server, headers: updater(sourceModel.sourceForm.sparql_server.headers) },
+        });
+    };
+
+    const addHeader = () => {
+        handleSparql_serverHeadersUpdate((prevHeaders) => [...prevHeaders, { key: "", value: "" }]);
+    };
+
+    const removeHeader = (idx: number) => {
+        handleSparql_serverHeadersUpdate((prevHeaders) => {
+            const newHeaders = [...prevHeaders];
+            newHeaders.splice(idx, 1);
+            return newHeaders;
+        });
+    };
+
+    const updateHeaderKey = (idx: number) => (event: React.ChangeEvent<HTMLInputElement>) =>
+        handleSparql_serverHeadersUpdate((prevHeaders) => {
+            const newHeaders = [...prevHeaders];
+            newHeaders[idx] = { ...prevHeaders[idx], key: event.currentTarget.value };
+            return newHeaders;
+        });
+
+    const updateHeaderValue = (idx: number) => (event: React.ChangeEvent<HTMLInputElement>) =>
+        handleSparql_serverHeadersUpdate((prevHeaders) => {
+            const newHeaders = [...prevHeaders];
+            newHeaders[idx] = { ...prevHeaders[idx], value: event.currentTarget.value };
+            return newHeaders;
+        });
+
     const handleCheckbox = (checkboxName: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserClickedCheckBox, payload: { checkboxName: checkboxName, value: event.target.checked } });
 
@@ -287,7 +349,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
         };
     }
     const saveSources = () => {
-        void saveSource(sourceModel.sourceForm, create ? Mode.Creation : Mode.Edition, updateModel, update);
+        void saveSource(fromFormData(sourceModel.sourceForm), create ? Mode.Creation : Mode.Edition, updateModel, update);
     };
     const createIssues = (issue: ZodCustomIssueWithMessage[]) => setIssues(issue);
     const validateAfterSubmission = () => {
@@ -378,15 +440,38 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 variant="standard"
                             />
                         </Grid>
-                        <Grid item xs={6}>
-                            <TextField
-                                fullWidth
-                                onChange={handleSparql_serverUpdate("headers")}
-                                value={sourceModel.sourceForm.sparql_server.headers}
-                                id={`sparql_server_headers`}
-                                label={"Sparql server headers"}
-                                variant="standard"
-                            />
+                        <Grid container item xs={6}>
+                            {sourceModel.sourceForm.sparql_server.headers.map((header, headerIdx) => (
+                                <React.Fragment key={headerIdx}>
+                                    <Grid container spacing={4}>
+                                        <Grid item xs={6}>
+                                            <TextField fullWidth onChange={updateHeaderKey(headerIdx)} value={header.key} id={`sparql_server_headers`} label={"Header key"} variant="standard" />
+                                        </Grid>
+                                        <Grid item xs={6}>
+                                            <TextField
+                                                fullWidth
+                                                onChange={updateHeaderValue(headerIdx)}
+                                                value={header.value}
+                                                id={`sparql_server_headers`}
+                                                label={"Header value"}
+                                                variant="standard"
+                                                InputProps={{
+                                                    endAdornment: (
+                                                        <InputAdornment position="end">
+                                                            <IconButton color="secondary" onClick={() => removeHeader(headerIdx)}>
+                                                                <Remove />
+                                                            </IconButton>
+                                                        </InputAdornment>
+                                                    ),
+                                                }}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </React.Fragment>
+                            ))}
+                            <Button onClick={addHeader} startIcon={<Add />}>
+                                Add header
+                            </Button>
                         </Grid>
                         <Grid item xs={6}>
                             <TextField
@@ -423,7 +508,17 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                             </FormControl>
                         </Grid>
                         <Grid item xs={6}>
-                            <TextField fullWidth onChange={handleFieldUpdate("group")} value={sourceModel.sourceForm.group} id={`group`} label={"Group"} variant="standard" />
+                            <TextField
+                                fullWidth
+                                helperText={errorMessage(zo.errors.group)}
+                                onBlur={validateAfterSubmission}
+                                onChange={handleFieldUpdate("group")}
+                                value={sourceModel.sourceForm.group}
+                                id={`group`}
+                                name={zo.fields.group()}
+                                label={"Group"}
+                                variant="standard"
+                            />
                         </Grid>
 
                         <Grid item xs={6}>
@@ -508,7 +603,7 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
             type: Type.UserUpdatedDataSource,
             payload: props.model.sourceForm.dataSource
                 ? { ...props.model.sourceForm.dataSource, [fieldName]: event.target.value }
-                : { type: [], table_schema: "string", connection: "string", dbName: "string", local_dictionary: { table: "string", labelColumn: "string", idColumn: "string" } },
+                : { type: "", table_schema: "string", connection: "string", dbName: "string", local_dictionary: { table: "string", labelColumn: "string", idColumn: "string" } },
         });
 
     const handleAddDataSource = (event: React.ChangeEvent<HTMLInputElement>) => props.update({ type: Type.UserClickedAddDataSource, payload: event.target.checked });
@@ -546,12 +641,13 @@ const FormGivenSchemaType = (props: { model: SourceEditionState; update: React.D
                             <Select
                                 labelId="dataSource-type"
                                 id="dataSource"
-                                value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.type : []}
+                                value={props.model.sourceForm.dataSource ? props.model.sourceForm.dataSource.type : ""}
                                 label="Data source's type"
                                 fullWidth
                                 multiple
                                 style={{ width: "400px" }}
-                                renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
+                                // renderValue={selected}
+                                // renderValue={(selected: string | string) => (typeof selected === "string" ? selected : selected.join(", "))}
                                 onChange={handleDataSourceUpdate("type")}
                             >
                                 {["sql.sqlserver"].map((type) => (

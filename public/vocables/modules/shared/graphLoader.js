@@ -32,7 +32,7 @@ var GraphLoader = (function () {
         var sourcesJsonFile = "sources.json";
 
         if (!graphUri) graphUri = "http://industryportal.enit.fr/ontologies/" + sourceName + "/";
-        if (!options.group) group = "ONTOCOMMONS";
+        if (!group) group = "ONTOCOMMONS";
         var body = {
             rdfUrl: rdfUrl,
             sourceName: sourceName,

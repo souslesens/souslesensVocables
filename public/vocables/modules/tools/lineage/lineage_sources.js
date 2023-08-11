@@ -19,6 +19,12 @@ var Lineage_sources = (function () {
     self.sourceDivsMap = {};
 
     self.init = function (showDialog) {
+        if (true) {
+            Config.Lineage.disabledButtons.forEach(function (buttonId) {
+                $("#" + buttonId).prop("disabled", true);
+            });
+        }
+
         if (self.loadedSources) {
             for (var source in self.loadedSources) {
                 self.menuActions.closeSource(source);
@@ -147,9 +153,11 @@ var Lineage_sources = (function () {
             return alert("source" + source + "not found");
         }
 
-        if (false) {
+        if (true) {
+            Config.Lineage.disabledButtons.forEach(function (buttonId) {
+                $("#" + buttonId).prop("disabled", true);
+            });
             // $("#Lineage_Tabs").tabs("disable", 3);
-            $("#lineage_classes_showLinkedDataButton").prop("disabled", true);
         }
 
         function highlightSourceDiv(source) {
@@ -187,7 +195,6 @@ var Lineage_sources = (function () {
             self.activeSource = source;
             highlightSourceDiv(source);
             self.whiteboard_setGraphOpacity(source);
-            Lineage_decoration.refreshLegend(source);
             self.setAllWhiteBoardSources(true);
         }
 
@@ -787,7 +794,7 @@ self.onSelectWhiteboardAction = function (action) {
         }
 
         $("#graphDiv").css("background-color", backgroundColor);
-        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty && Lineage_classes.lineageVisjsGraph.data) {
+        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty && Lineage_classes.lineageVisjsGraph.data && Lineage_classes.lineageVisjsGraph.data.nodes.get) {
             /* Lineage_classes.lineageVisjsGraph.network.options.nodes.font = { color: Lineage_classes.defaultNodeFontColor };
 Lineage_classes.lineageVisjsGraph.network.options.edges.font = { color: self.defaultEdgeFontColor };*/
 

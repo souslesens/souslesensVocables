@@ -15,7 +15,7 @@ var Admin = (function () {
     var self = {};
 
     self.onLoaded = function () {
-        $("#toolPanelDiv").load("snippets/admin.html", function () {
+        $("#actionDivContolPanelDiv").load("snippets/admin.html", function () {
             // MainController.UI.showSources("sourcesTreeDiv", true, null, null, {});
             var options = {
                 withCheckboxes: true,
@@ -23,16 +23,16 @@ var Admin = (function () {
             SourceSelectorWidget.initWidget(null, "sourcesTreeDiv", false, null, null, options);
         });
         /*   var html =
-        " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showTSFdictionary()'>TSF Dictionary</button>" +
-        "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.refreshIndexes()'>refreshIndexes </button>&nbsp;<input type='checkbox'  id='admin_refreshIndexWithImportCBX' > Imports also<br>" +
-        " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportTaxonomyToCsv()'>export Taxonomy To Csv </button>" +
-        " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportTTL()'>export TTL </button>" +
-        " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.getClassesLineage()'>getLineage </button>" +
-        " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showUserSources()'>showUserSources </button>" +
-        " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.generateInverseRestrictionsDialog()'>generateInverseRestrictions </button>" +
-        " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.drawPropsRangeAndDomainMatrix()'>drawPropsRangeAndDomainMatrix </button>" +
-        " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.createDecapitalizedLabelTriples()'>createDecapitalizedLabelTriples </button>";
-    $("#sourceDivControlPanelDiv").html(html);*/
+    " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showTSFdictionary()'>TSF Dictionary</button>" +
+    "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.refreshIndexes()'>refreshIndexes </button>&nbsp;<input type='checkbox'  id='admin_refreshIndexWithImportCBX' > Imports also<br>" +
+    " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportTaxonomyToCsv()'>export Taxonomy To Csv </button>" +
+    " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.exportTTL()'>export TTL </button>" +
+    " <button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.getClassesLineage()'>getLineage </button>" +
+    " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.showUserSources()'>showUserSources </button>" +
+    " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.generateInverseRestrictionsDialog()'>generateInverseRestrictions </button>" +
+    " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.drawPropsRangeAndDomainMatrix()'>drawPropsRangeAndDomainMatrix </button>" +
+    " <br><button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='Admin.createDecapitalizedLabelTriples()'>createDecapitalizedLabelTriples </button>";
+$("#sourceDivControlPanelDiv").html(html);*/
     };
 
     self.onSourceSelect = function () {
@@ -212,6 +212,32 @@ var Admin = (function () {
         }
     };
 
+    self.clearOntologyModelCache = function () {
+        var sources = SourceSelectorWidget.getCheckedSources();
+        var source;
+        if (sources.length == 0) {
+            if (!confirm("clear all ontologyModel cache")) return;
+            else source = null;
+        } else source = sources[0];
+        const params = new URLSearchParams({
+            source: source,
+        });
+
+        var x = params.toString();
+        $.ajax({
+            type: "DELETE",
+            url: Config.apiUrl + "/ontologyModels?" + params.toString(),
+            dataType: "json",
+
+            success: function (data, _textStatus, _jqXHR) {
+                return MainController.UI.message("DONE");
+            },
+            error: function (err) {
+                return alert(err);
+            },
+        });
+    };
+
     self.exportTaxonomyToCsv = function (_rootUri) {
         var sources = SourceSelectorWidget.getCheckedSources();
         if (sources.length != 1) {
@@ -377,6 +403,23 @@ var Admin = (function () {
                 return MainController.UI.message(err);
             },
         });
+    };
+
+    self.reCreateAllSourcesLabelGraph = function () {
+        if (confirm("reCreateAllSourcesLabelGraph (it will take some time...")) {
+            var t1 = new Date();
+
+            MainController.UI.message("reCreating AllSourcesLabelGraph (it will take some time...");
+            $("#waitImg").css("display", "block");
+            Sparql_OWL.reCreateAllSourcesLabelGraph(null, function (err, result) {
+                $("#waitImg").css("display", "block");
+                if (err) {
+                    return alert(err.response);
+                }
+                var duration = Math.round((new Date() - t1) / 1000);
+                MainController.UI.message(result + "  in sec." + duration, true);
+            });
+        }
     };
 
     return self;

@@ -11,52 +11,9 @@ import Export from "../shared/export.js";
 var SearchWidget = (function () {
     var self = {};
 
-    self.searchTermXXX = function (sourceLabel, term, rootId, callback) {
-        if (!term) {
-            term = $("#searchWidget_searchTermInput").val();
-        }
-
-        var exactMatch = $("#GenericTools_exactMatchSearchCBX").prop("checked");
-        if (!term || term == "") {
-            return alert(" enter a word ");
-        }
-        if (term.indexOf("*") > -1) {
-            $("#GenericTools_exactMatchSearchCBX").removeProp("checked");
-        }
-        if (!term || term == "") {
-            return;
-        }
-        var options = {
-            term: term,
-            rootId: rootId,
-            exactMatch: exactMatch,
-            limit: Config.searchLimit,
-        };
-        self.getFilteredNodesJstreeData(sourceLabel, options, function (err, jstreeData) {
-            if (callback) {
-                return err, jstreeData;
-            }
-            MainController.UI.message("");
-            if (jstreeData.length == 0) {
-                $("#waitImg").css("display", "none");
-                return $("#" + self.currentTargetDiv).html("No data found");
-            }
-            common.jstree.loadJsTree(self.currentTargetDiv, jstreeData, {
-                openAll: true,
-                selectTreeNodeFn: function (event, obj) {
-                    if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) {
-                        return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
-                    }
-                    self.editThesaurusConceptInfos(MainController.currentSource);
-                },
-                contextMenu: self.getJstreeConceptsContextMenu(),
-            });
-        });
-    };
-
     /**
      *
-     * show in jstree hierarchy of terms found in elestic search  from research UI or options if any
+     * show in jstree hierarchy of terms found in elastic search  from research UI or options if any
      *
      * @param options
      *  -term searched term
@@ -123,6 +80,8 @@ var SearchWidget = (function () {
             searchAllSources = $("#GenericTools_searchInAllSources").prop("checked");
         }
 
+        var searchAllLabels = $("#GenericTools_searchAllLabelsCBX").prop("checked");
+
         var searchedSources = [];
         term = term.toLowerCase();
 
@@ -154,10 +113,6 @@ var SearchWidget = (function () {
                 if (Lineage_combine.currentSources.length > 0) {
                     searchedSources = Lineage_combine.currentSources;
                 } else {
-                    /*   var mainSource = Lineage_sources.activeSource;
-searchedSources.push(mainSource);
-var importedSources = Config.sources[mainSource].imports;
-searchedSources = searchedSources.concat(importedSources);*/
                     searchedSources = Object.keys(Lineage_sources.loadedSources);
                 }
             } else if (sourcesScope == "all_OWLsources") {
@@ -190,226 +145,23 @@ searchedSources = searchedSources.concat(importedSources);*/
         if (classFilter) {
             options.classFilter = classFilter;
         }
-
-        if (true || schemaType == "OWL") {
-            SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
-                if (_err) {
-                    return alert(_err.responseText);
-                }
-                if (Object.keys(result[0].matches).length == 0) return $("#" + (options.jstreeDiv || self.currentTargetDiv)).html("<b>No matches found</b>");
-
-                self.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
-                    if (err) {
-                        return alert(err.responseText);
-                    }
-                });
-            });
-        } else if (schemaType == "SKOS") {
-            async.eachSeries(
-                searchedSources,
-                function (sourceLabel, callbackEach) {
-                    // setTimeout(function () {
-                    MainController.UI.message("searching in " + sourceLabel);
-                    // }, 100)
-                    if (!term) {
-                        term = $("#GenericTools_searchTermInput").val();
-                    }
-
-                    if (!term || term == "") {
-                        return;
-                    }
-                    var options2 = {
-                        term: term,
-                        rootId: sourceLabel,
-                        exactMatch: exactMatch,
-                        limit: Config.searchLimit,
-                    };
-                    var type = Config.sources[sourceLabel].schemaType;
-
-                    self.getFilteredNodesJstreeData(sourceLabel, options2, function (err, result) {
-                        if (err) {
-                            MainController.UI.message(err.responseText);
-                            var text = "<span class='searched_conceptSource'>" + sourceLabel + " Error !!!" + "</span>";
-                            jstreeData.push({
-                                id: sourceLabel,
-                                text: text,
-                                parent: "#",
-                                data: { source: sourceLabel, id: sourceLabel, label: text },
-                            });
-                        } else {
-                            text = "<span class='searched_conceptSource'>" + sourceLabel + "</span>";
-
-                            jstreeData.push({
-                                id: sourceLabel,
-                                text: text,
-                                parent: "#",
-                                type: type,
-                                data: { source: sourceLabel, id: sourceLabel, label: text },
-                            });
-                            result.forEach(function (item) {
-                                if (!uniqueIds[item.id]) {
-                                    uniqueIds[item.id] = 1;
-                                    jstreeData.push(item);
-                                }
-                            });
-                        }
-                        callbackEach();
-                    });
-                },
-                function (_err) {
-                    $("#accordion").accordion("option", { active: 2 });
-                    var html = "<div id='" + self.currentTargetDiv + "'></div>";
-
-                    if ($("#" + self.currentTargetDiv).length == 0) {
-                        html = "<div id='" + self.currentTargetDiv + "'></div>";
-                        $("#actionDiv").html(html);
-                    }
-                    $("#" + self.currentTargetDiv).html(html);
-
-                    MainController.UI.message("Search Done");
-
-                    var jstreeOptions = {
-                        openAll: true,
-                        selectTreeNodeFn: function (event, obj) {
-                            SearchWidget.currentTreeNode = obj.node;
-
-                            if (Config.tools[MainController.currentTool].controller.selectTreeNodeFn) {
-                                return Config.tools[MainController.currentTool].controller.selectTreeNodeFn(event, obj);
-                            }
-
-                            self.editThesaurusConceptInfos(obj.node.data.source, obj.node);
-                        },
-                        contextMenu: function () {
-                            if (Config.tools[MainController.currentTool].controller.contextMenuFn) {
-                                return Config.tools[MainController.currentTool].controller.contextMenuFn();
-                            } else {
-                                return self.getJstreeConceptsContextMenu();
-                            }
-                        },
-                    };
-
-                    var jstreeDiv = options.jstreeDiv || self.currentTargetDiv;
-                    JstreeWidget.loadJsTree(jstreeDiv, jstreeData, jstreeOptions);
-                    setTimeout(function () {
-                        MainController.UI.updateActionDivLabel("Multi source search :" + term);
-                        MainController.UI.message("");
-                        $("#waitImg").css("display", "none");
-                    }, 200);
-                }
-            );
-        }
-    };
-
-    self.getFilteredNodesJstreeData = function (sourceLabel, options, callback) {
-        self.currentFoundIds = [];
-        if (!options.term) {
-            options.term = $("#GenericTools_searchTermInput").val();
+        if (searchAllLabels) {
+            options.skosLabels = 1;
         }
 
-        if (!options.rootId) {
-            options.rootId = "#";
-        }
-        if (!sourceLabel) {
-            sourceLabel = MainController.currentSource;
-        }
-        var depth = Config.searchDepth;
-        Sparql_generic.getNodeParents(sourceLabel, options.term, options.ids, depth, options, function (err, result) {
-            if (err) {
-                MainController.UI.message(err);
-                return callback(err);
+        SearchUtil.getSimilarLabelsInSources(null, searchedSources, [term], null, mode, options, function (_err, result) {
+            if (_err) {
+                return alert(_err.responseText);
+            }
+            if (Object.keys(result[0].matches).length == 0) {
+                return $("#" + (options.jstreeDiv || self.currentTargetDiv)).html("<b>No matches found</b>");
             }
 
-            var existingNodes = {};
-            var jstreeData = [];
-
-            if (result.length == 0) {
-                if (callback) {
-                    return callback(null, []);
-                } else {
-                    $("#waitImg").css("display", "none");
-                }
-                return $("#" + self.currentTargetDiv).html("No data found");
-            }
-
-            result.forEach(function (item, _index) {
-                for (var i = 20; i > 0; i--) {
-                    if (item["broader" + i]) {
-                        //   item["broader" + i].jstreeId = sourceLabel+"_"+item["broader" + i].value + "_" + index
-                        item["broader" + i].jstreeId = sourceLabel + "_" + item["broader" + i].value;
-                    }
-                }
-                item.subject.jstreeId = sourceLabel + "_" + item.subject.value;
-            });
-
-            var type = Config.sources[sourceLabel].schemaType;
-            if (type == "SKOS") {
-                type = "subject";
-            } else if (type == "OWL") {
-                type = "class";
-            }
-            result.forEach(function (item, _index) {
-                for (var i = 20; i > 0; i--) {
-                    if (item["broader" + i]) {
-                        var id = item["broader" + i].value;
-                        //if (false && id.indexOf("nodeID://") > -1)
-                        //skip anonym nodes
-                        //  return;
-                        var jstreeId = item["broader" + i].jstreeId;
-                        if (!existingNodes[jstreeId]) {
-                            existingNodes[jstreeId] = 1;
-                            var label = item["broader" + i + "Label"].value;
-                            var parentId = options.rootId;
-                            if (item["broader" + (i + 1)]) {
-                                parentId = item["broader" + (i + 1)].jstreeId;
-                            }
-
-                            jstreeData.push({
-                                id: jstreeId,
-                                text: label,
-                                parent: parentId,
-                                type: type,
-                                data: {
-                                    type: "http://www.w3.org/2002/07/owl#Class",
-                                    source: sourceLabel,
-                                    id: id,
-                                    label: item["broader" + i + "Label"].value,
-                                },
-                            });
-                        }
-                    }
-                }
-
-                jstreeId = item.subject.jstreeId;
-                if (!existingNodes[jstreeId]) {
-                    existingNodes[jstreeId] = 1;
-                    var text = "<span class='searched_concept'>" + item.subjectLabel.value + "</span>";
-                    id = item.subject.value;
-                    self.currentFoundIds.push(id);
-
-                    var broader1 = item["broader1"];
-                    var parent;
-                    if (!broader1) {
-                        parent = options.rootId;
-                    } else {
-                        parent = item["broader1"].jstreeId;
-                    }
-
-                    jstreeData.push({
-                        id: jstreeId,
-                        text: text,
-                        parent: parent,
-                        type: type,
-                        data: {
-                            type: "http://www.w3.org/2002/07/owl#Class",
-                            source: sourceLabel,
-                            id: id,
-                            label: item.subjectLabel.value,
-                        },
-                    });
+            self.searchResultToJstree(options.jstreeDiv || self.currentTargetDiv, result, options, function (err, _result) {
+                if (err) {
+                    return alert(err.responseText);
                 }
             });
-            //console.log(JSON.stringify(jstreeData))
-            return callback(null, jstreeData);
         });
     };
 
@@ -434,12 +186,7 @@ searchedSources = searchedSources.concat(importedSources);*/
                 });
 
                 items.forEach(function (match) {
-                    /*   if(match.label.toLowerCase().indexOf(term)<0 )
-return*/
-
                     if (match.parents) {
-                        //} && match.parents.split) {
-
                         var parentId = "";
                         var parents = match.parents; //.split("|")
                         var nodeId = "";
@@ -518,7 +265,7 @@ return*/
                     if (_options.contextMenu) {
                         return _options.contextMenu;
                     } else if (_options.contextMenuFn) {
-                        return _options.contextMenuFn;
+                        return _options.contextMenuFn();
                     } else if (Config.tools[MainController.currentTool].controller.contextMenuFn) {
                         return Config.tools[MainController.currentTool].controller.contextMenuFn;
                     } else {
@@ -667,13 +414,13 @@ return*/
                 },
             };
             /*  items.axioms = {
-                label: "graph axioms",
-                action: function (e) {
+          label: "graph axioms",
+          action: function (e) {
 
-                    NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv",{showAxioms:1});
+              NodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode, "mainDialogDiv",{showAxioms:1});
 
-                },
-            };*/
+          },
+      };*/
 
             if (self.currentSource && Config.sources[self.currentSource].editable) {
                 items.pasteNode = {

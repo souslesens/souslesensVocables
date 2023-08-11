@@ -129,7 +129,7 @@ class ProfileModel {
     /**
      * @param {string} profileName -  a profile name
      */
-    deleteProfile = async (profileName) => {
+    _deleteProfileByName = async (profileName) => {
         await lock.acquire("ProfilesThread");
         try {
             const profiles = await this._read();
@@ -142,6 +142,27 @@ class ProfileModel {
         } finally {
             lock.release("ProfilesThread");
         }
+    };
+
+    /**
+     * @param {string} profileNameId -  a profile name or Id
+     */
+    deleteProfile = async (profileNameId) => {
+        const profiles = await this._read();
+        let { [profileNameId]: profileToDelete, ..._remainingProfiles } = profiles;
+        if (profileToDelete) {
+            return this._deleteProfileByName(profileNameId);
+        } else {
+            // no profile found. Try with id
+            const profilesList = Object.entries(profiles);
+            const profileToDeleteWithId = profilesList.find(([_name, profile]) => {
+                return profile.id === profileNameId;
+            });
+            if (profileToDeleteWithId) {
+                return this._deleteProfileByName(profileToDeleteWithId[0]);
+            }
+        }
+        return false;
     };
 
     /**

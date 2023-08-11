@@ -527,10 +527,12 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 ))}
                             </Select>
                         </FormControl>
-                        <FormControl>
-                            <FormLabel id="default-source-access-control-label">Default source access control</FormLabel>
-                            <SourcesTreeView />
-                        </FormControl>
+                        <Box style={{ maxHeight: "300px", overflow: "auto" }}>
+                            <FormControl>
+                                <FormLabel id="default-source-access-control-label">Default source access control</FormLabel>
+                                <SourcesTreeView />
+                            </FormControl>
+                        </Box>
                         <FormGroup>
                             <FormControlLabel control={<Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />} label="Allow all tools" />
 

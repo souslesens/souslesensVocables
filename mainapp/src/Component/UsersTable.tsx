@@ -116,11 +116,7 @@ const UsersTable = () => {
                                                             <TableCell>
                                                                 <Box sx={{ display: "flex" }}>
                                                                     <UserForm id={`edit-button-${user.id}`} maybeuser={user} />
-                                                                    <ButtonWithConfirmation
-                                                                        disabled={user.source != "keycloak" ? false : true}
-                                                                        label="Delete"
-                                                                        msg={() => deleteUser(user, updateModel)}
-                                                                    />{" "}
+                                                                    <ButtonWithConfirmation label="Delete" msg={() => deleteUser(user, updateModel)} />{" "}
                                                                 </Box>
                                                             </TableCell>
                                                         </TableRow>
@@ -233,14 +229,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
                         <h2>{`Edit ${user.login}`}</h2>
                         <FormControl>
                             <InputLabel id="login-label">Login</InputLabel>
-                            <OutlinedInput
-                                fullWidth
-                                onChange={handleFieldUpdate("login")}
-                                value={userModel.userForm.login}
-                                id={`login`}
-                                label={"Login"}
-                                disabled={create ? false : user.source != "keycloak" ? true : false}
-                            />
+                            <OutlinedInput fullWidth onChange={handleFieldUpdate("login")} value={userModel.userForm.login} id={`login`} label={"Login"} disabled={create ? false : true} />
                         </FormControl>
 
                         <FormControl>

@@ -192,10 +192,32 @@ class SourceModel {
     };
 
     /**
+     * @param {string} sourceNameId -  a source name or id
+     * @returns {Promise<boolean>} - true if the source exists
+     */
+    deleteSource = async (sourceNameId) => {
+        const sources = await this._read();
+        const { [sourceNameId]: sourceToDelete, ..._remainingSources } = sources;
+        if (sourceToDelete) {
+            return this._deleteSourceByName(sourceNameId);
+        } else {
+            // no source found. Try with id
+            const sourcesList = Object.entries(sources);
+            const sourceToDeleteWithId = sourcesList.find(([_name, source]) => {
+                return source.id === sourceNameId;
+            });
+            if (sourceToDeleteWithId) {
+                return this._deleteSourceByName(sourceToDeleteWithId[0]);
+            }
+        }
+        return false;
+    };
+
+    /**
      * @param {string} sourceName -  a source name
      * @returns {Promise<boolean>} - true if the source exists
      */
-    deleteSource = async (sourceName) => {
+    _deleteSourceByName = async (sourceName) => {
         await lock.acquire("SourcesThread");
         try {
             const sources = await this._read();

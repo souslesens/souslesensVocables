@@ -813,12 +813,7 @@ if (callback) return callback(err);
         return paramsMap;
     };
 
-    self.setDatePickerOnInput = function (inputId, options) {
-        $("#" + inputId).datepicker({ dateFormat: "yy-mm-dd" });
-    };
-    self.unsetDatePickerOnInput = function (inputId, options) {
-        if ($("#" + inputId).datepicker && $("#" + inputId).datepicker.destroy) $("#" + inputId).datepicker.destroy();
-    };
+
 
     return self;
 })();

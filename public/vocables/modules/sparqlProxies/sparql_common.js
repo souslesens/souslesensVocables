@@ -495,6 +495,58 @@ var Sparql_common = (function () {
         return null;
     };
 
+    self.setDateRangeSparqlFilter=function(varName,startDate,endDate, options) {
+        if(!options){
+            options={}
+        }
+
+
+        if(options.precision && !endDate){
+           if( options.precision=="day"){
+               endDate=startDate.setHours(23,59,59)
+               startDate.setHours(0,0,0,0);
+           }
+            if( options.precision=="month"){
+                var daysInMonth = new Date(startDate.getYear(), startDate.getMonth(),0).getDate();
+                endDate=startDate.setDate(daysInMonth)
+                startDate.setDate(0);
+            }
+            if( options.precision=="year"){
+
+                endDate=startDate.setMonth(11)
+                startDate.setMonth(0);
+            }
+
+            if( options.precision=="hour"){
+                endDate=startDate.setHours(startDate.getHours(),59)
+                startDate.setHours(startDate.getHours(),0)
+            }
+            if( options.precision=="min"){
+                endDate=startDate.setHours(startDate.getHours(),startDate.getMinutes(),59)
+                startDate.setHours(startDate.getHours(),startDate.getMinutes(),0)
+            }
+            if( options.precision=="sec"){
+
+            }
+
+        }
+
+        var startDateStr = "'" + common.dateToRDFString(startDate) + "'^^xsd:dateTime";
+        var endDateStr = "'" + common.dateToRDFString(endDate) + "'^^xsd:dateTime";
+        var filter = "";
+
+        if (startDate || endDate) {
+            filter += "?" + varName + " ?d ?date.?date owl:hasValue ?dateValue. ";
+            if (startDate) {
+                filter += "filter(?dateValue>=" + startDateStr + ")";
+            }
+            if (endDate) {
+                filter += "filter(?dateValue<=" + endDateStr + ")";
+            }
+        }
+        return filter;
+    }
+
     return self;
 })();
 

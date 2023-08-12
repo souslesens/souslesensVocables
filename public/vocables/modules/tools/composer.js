@@ -262,7 +262,7 @@ var Composer = (function () {
                 //draw  parent containers
                 function (callbackSeries) {
                     return callbackSeries();
-                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], function (err, result) {
+                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], null,function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -1075,7 +1075,7 @@ var Composer = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], function (err, result) {
+                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id],null, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }

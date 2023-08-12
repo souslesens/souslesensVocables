@@ -162,7 +162,7 @@ var Lineage_relationFilter = (function () {
         } else if (type == "Date") {
             $("#lineageQuery_literalValueDiv").css("display", "block");
             common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
-            common.setDatePickerOnInput("lineageQuery_value");
+            dateWidget.setDatePickerOnInput("lineageQuery_value");
             $("#lineageQuery_operator").val(">=");
         } else if (type == "Number") {
             $("#lineageQuery_literalValueDiv").css("display", "block");
@@ -203,7 +203,7 @@ var Lineage_relationFilter = (function () {
     self.onCommonUIWidgetSelectObjectValue = function (value) {
         if (value.indexOf("xsd") == 0) {
             if (value == "xsd:dateTime") {
-                common.setDatePickerOnInput("editPredicate_objectValue");
+                dateWidget.setDatePickerOnInput("editPredicate_objectValue");
             } else {
                 $("#editPredicate_objectValue").val(value);
             }

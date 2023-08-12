@@ -746,6 +746,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
     }
     var filterStr = options.filter || "";
 
+  //  filterStr+=" filter (?s!=<http://www.w3.org/2002/07/owl#Restriction> && ?o!=<http://www.w3.org/2002/07/owl#Restriction>) "
     {
       var sourceGraphUri = Config.sources[source].graphUri;
       var sourceGraphUriFrom = Sparql_common.getFromStr(source, true, true);
@@ -768,6 +769,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
         "    bind (if(bound(?sparentClass) && ?g3=<" +
         sourceGraphUri +
         ">,?sparentClass,?sparent) as ?sClass)  optional{?sClass rdfs:label ?sClassLabel}\n" +
+          " filter (?sClass!=<http://www.w3.org/2002/07/owl#Restriction>)"+
         "    \n" +
         "    \n" +
         "       ?oparent rdf:type ?otype filter (?otype in (owl:Class))\n" +
@@ -776,6 +778,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
         "    bind (if(bound(?oparentClass) && ?g3=<" +
         sourceGraphUri +
         ">,?oparentClass,?oparent) as ?oClass)  optional{?oClass rdfs:label ?oClassLabel}\n" +
+        " filter (?oClass!=<http://www.w3.org/2002/07/owl#Restriction>)"+
         "    \n" +
         "  }\n" +
         "  \n" +

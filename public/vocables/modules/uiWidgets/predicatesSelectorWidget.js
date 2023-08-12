@@ -96,7 +96,7 @@ var PredicatesSelectorWidget = (function () {
         $("#editPredicate_objectSelect").val("");
         $("#editPredicate_objectValue").val("");
         $("#editPredicate_propertyValue").val(value);
-        common.unsetDatePickerOnInput("editPredicate_objectValue");
+        dateWidget.unsetDatePickerOnInput("editPredicate_objectValue");
         if (self.onSelectPropertyFn) {
             self.onSelectPropertyFn(value);
         }
@@ -108,7 +108,7 @@ var PredicatesSelectorWidget = (function () {
             $("#editPredicate_vocabularySelect2").css("display", "none");
             if (value == "xsd:dateTime") {
                 common.fillSelectOptions("editPredicate_objectSelect", self.operators.Number);
-                common.setDatePickerOnInput("editPredicate_objectValue");
+                dateWidget.setDatePickerOnInput("editPredicate_objectValue");
             } else if (value == "xsd:string") {
                 common.fillSelectOptions("editPredicate_objectSelect", self.operators.String);
             } else {

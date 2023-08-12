@@ -1124,8 +1124,8 @@ Lineage_styles.showDialog(self.currentContainer.data);
               shadow: self.nodeShadow,
               shape: "box",
               size: size,
-              font: type == "container" ? { color: "#eee" } : null,
-              color: "#70309f",
+              font: type == "container" ? { color: "#70309f" } : null,
+              color: "#ddd",
               data: {
                 type: type,
                 source: source,
@@ -1152,8 +1152,8 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 shadow: self.nodeShadow,
                 shape: type == "container" ? "box" : shape,
                 size: size,
-                font: type == "container" ? { color: "#eee", size: 10 } : null,
-                color: color2,
+                font: type == "container" ? { color: color2, size: 10 } : null,
+                color: "#ddd",
                 data: {
                   type: type,
                   source: source,
@@ -1176,8 +1176,9 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 shadow: self.nodeShadow,
                 shape: type == "container" ? "box" : shape,
                 size: size,
-                font: type == "container" ? { color: "#eee", size: 10 } : null,
-                color: color2,
+                font: type == "container" ? { color: color2, size: 10 } : null,
+                color: "#ddd",
+
                 data: {
                   type: type,
                   source: source,
@@ -1408,7 +1409,10 @@ Lineage_styles.showDialog(self.currentContainer.data);
   self.applyContainerstyle = function(containerUrl) {
   };
 
-  self.graphWhiteboardNodesContainers = function(source, ids, callback) {
+  self.graphWhiteboardNodesContainers = function(source, ids,options, callback) {
+    if(!options){
+      options={}
+    }
     if (!source) {
       source = Lineage_sources.activeSource;
     }
@@ -1417,6 +1421,10 @@ Lineage_styles.showDialog(self.currentContainer.data);
       ids = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
     }
     var filter = Sparql_common.setFilter("node", ids);
+
+    if(options.filter)
+      filter+=options.filter
+
     var query =
       "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
       "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -1450,8 +1458,8 @@ Lineage_styles.showDialog(self.currentContainer.data);
             shadow: self.nodeShadow,
             shape: "box",
             size: Lineage_classes.defaultShapeSize,
-            font: { color: "#eee" },
-            color: color2,
+            font: { color:color2 },
+            color: "#ddd",
             data: {
               type: "container",
               source: Lineage_sources.activeSource,
@@ -1489,6 +1497,38 @@ Lineage_styles.showDialog(self.currentContainer.data);
       }
     });
   };
+
+  self.getContainerTypes=function(source,options,callback){
+    if(!options){
+      options={}
+    }
+   var fromStr = Sparql_common.getFromStr(source, false, options.withoutImports);
+    var query="PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+      "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+      "SELECT distinct ?type ?typeLabel " +fromStr+
+      "  WHERE {\n" +
+      " ?sub rdf:type rdf:Bag  .\n" +
+      "  ?sub rdf:type  ?type . filter (!regex(str(?type),'owl') && ?type!='rdf:Bag')\n" +
+      "  optional {?type rdfs:label ?typeLabel}"+
+      "  }"
+
+    var sparql_url = Config.sources[source].sparql_server.url;
+    var url = sparql_url + "?format=json&query=";
+
+    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function(err, result) {
+      if (err) {
+        return callback(err);
+      }
+      var types=[]
+      result.results.bindings.forEach(function(item){
+        var typeLabel=item.typeLabel?item.typeLabel.value:Sparql_common.getLabelFromURI(item.type.value)
+        types.push({id:item.type.value,label:typeLabel})
+      })
+      return callback(null,types);
+
+    })
+    }
+
 
   return self;
 })();

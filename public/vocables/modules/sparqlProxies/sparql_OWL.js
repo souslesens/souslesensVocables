@@ -2224,6 +2224,9 @@ var Sparql_OWL = (function () {
         );
     };
 
+
+
+
     return self;
 })();
 

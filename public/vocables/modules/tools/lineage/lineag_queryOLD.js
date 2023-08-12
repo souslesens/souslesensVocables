@@ -82,12 +82,12 @@ var Lineage_query = (function () {
             common.fillSelectOptions("lineageQuery_operator", self.operators["number"], true);
             $("#lineageQuery_operator").val(">=");
 
-            common.setDatePickerOnInput("lineageQuery_value");
+            dateWidget.setDatePickerOnInput("lineageQuery_value");
         } else if (predicate.indexOf("hasEnding") > -1) {
             $("#lineageQuery_objectTypeSelect").val("date");
             common.fillSelectOptions("lineageQuery_operator", self.operators["number"], true);
             $("#lineageQuery_operator").val("<=");
-            common.setDatePickerOnInput("lineageQuery_value");
+            dateWidget.setDatePickerOnInput("lineageQuery_value");
         } else if (type == "string") {
             common.fillSelectOptions("lineageQuery_operator", self.operators["string"], true);
             $("#lineageQuery_valueDiv").css("display", "block");
@@ -102,7 +102,7 @@ var Lineage_query = (function () {
             }
         } else if (type == "number") {
             common.fillSelectOptions("lineageQuery_operator", self.operators["number"], true);
-            common.setDatePickerOnInput("lineageQuery_value");
+            dateWidget.setDatePickerOnInput("lineageQuery_value");
         } else if (type == "owl:Class" || type == "owl:NamedIndividual" || type == "rdf:Bag") {
             if (role == "subject") {
                 $("#lineageQuery_subjectUriSelect").css("display", "block");

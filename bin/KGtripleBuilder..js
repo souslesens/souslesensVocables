@@ -188,6 +188,8 @@ var KGtripleBuilder = {
                                         });
                                     } else if (mapping.databaseSource) {
                                         var sqlQuery = "select distinct " + lookup.sourceColumn + "," + lookup.targetColumn + " from " + lookup.fileName;
+
+
                                         sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
                                             if (err) {
                                                 return callbackEachLookup(err);
@@ -235,7 +237,10 @@ var KGtripleBuilder = {
                             if (!mapping.databaseSource) {
                                 return callbackSeries();
                             }
-                            var sqlQuery = "select * from " + mapping.fileName;
+                            var limitStr="";
+                           if(options.sampleSize)
+                               limitStr=" TOP ("+options.sampleSize+") "
+                            var sqlQuery = "select"+limitStr+" * from " + mapping.fileName;
                             sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
@@ -329,6 +334,9 @@ var KGtripleBuilder = {
                                                             subjectStr = null;
                                                             objectStr = null;
 
+
+                                                            if(item.p=="rdfs:member")
+                                                                var x=3
                                                             //get value for Subject
                                                             {
                                                                 if (item.subjectIsSpecificUri) {
@@ -498,6 +506,8 @@ var KGtripleBuilder = {
                                                                 } else if (objectStr.indexOf("xsd:") > -1) {
                                                                     //pass
                                                                 } else {
+                                                                   /* if(!item.isString)
+                                                                        objectStr=objectStr.replace(/[\-_]/g,"")*/
                                                                     objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                                                 }
                                                             }

@@ -646,6 +646,10 @@ var KGcreator = (function () {
                         //   +' <input type="checkbox" id="KGcreatorCBX">RML syntax</div>';
                         $("#editPredicate_customContentDiv").html(html);
 
+                        $("#editPredicate_objectSelect").bind("change", function(){
+
+                           KGcreator.onTripleModelSelect('o',$(this).val())
+                        })
                         return callbackSeries();
                     });
                 },
@@ -843,14 +847,14 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
 
             //  $("#KGcreator_subjectSelect").val("");
         } else if (role == "p") {
-            $("#KGcreator_predicateInput").val(value);
+            $("#editPredicate_propertyValue").val(value);
 
             //   $("#KGcreator_predicateSelect").val("");
         } else if (role == "o") {
             if (value == "_selectedColumn") {
-                $("#KGcreator_objectInput").val(self.currentTreeNode.text);
+                $("#editPredicate_objectValue").val(self.currentTreeNode.text);
             } else {
-                $("#KGcreator_objectInput").val(value);
+                $("#editPredicate_objectValue").val(value);
             }
 
             //   $("#KGcreator_objectSelect").val("");

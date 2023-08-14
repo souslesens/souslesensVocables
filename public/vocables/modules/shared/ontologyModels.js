@@ -761,34 +761,42 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
         " " +
         importGraphUriFrom +
         "  \n" +
-        " WHERE {" +
-        "   graph ?g3 {\n" +
-        "      ?sparent rdf:type ?stype filter (?stype in (owl:Class))\n" +
-        "    optional { ?sparent rdfs:subClassOf ?sparentClass filter (!isBlank(?sparentClass))}\n" +
-        "   optional { ?sparent rdfs:label ?sparentLabel}\n" +
-        "    bind (if(bound(?sparentClass) && ?g3=<" +
-        sourceGraphUri +
-        ">,?sparentClass,?sparent) as ?sClass)  optional{?sClass rdfs:label ?sClassLabel}\n" +
-          " filter (?sClass!=<http://www.w3.org/2002/07/owl#Restriction>)"+
-        "    \n" +
-        "    \n" +
-        "       ?oparent rdf:type ?otype filter (?otype in (owl:Class))\n" +
-        "   optional { ?oparent rdfs:label ?oparentLabel}\n" +
-        "    optional { ?oparent rdfs:subClassOf ?oparentClass filter (!isBlank(?oparentClass))}\n" +
-        "    bind (if(bound(?oparentClass) && ?g3=<" +
-        sourceGraphUri +
-        ">,?oparentClass,?oparent) as ?oClass)  optional{?oClass rdfs:label ?oClassLabel}\n" +
-        " filter (?oClass!=<http://www.w3.org/2002/07/owl#Restriction>)"+
-        "    \n" +
-        "  }\n" +
-        "  \n" +
-        "  \n" +
-        "      graph ?g2{\n" +
-        "    ?sparent rdf:type ?stype filter (?stype in (owl:Class))\n" +
+        " WHERE {"
+
+
+       if( false) {
+         query += "   graph ?g3 {\n" +
+           "      ?sparent rdf:type ?stype filter (?stype in (owl:Class))\n" +
+           "    optional { ?sparent rdfs:subClassOf ?sparentClass filter (!isBlank(?sparentClass))}\n" +
+           "   optional { ?sparent rdfs:label ?sparentLabel}\n" +
+           "    bind (if(bound(?sparentClass) && ?g3=<" +
+           sourceGraphUri +
+           ">,?sparentClass,?sparent) as ?sClass)  optional{?sClass rdfs:label ?sClassLabel}\n" +
+           " filter (?sClass!=<http://www.w3.org/2002/07/owl#Restriction>)" +
+           "    \n" +
+           "    \n" +
+           "       ?oparent rdf:type ?otype filter (?otype in (owl:Class))\n" +
+           "   optional { ?oparent rdfs:label ?oparentLabel}\n" +
+           "    optional { ?oparent rdfs:subClassOf ?oparentClass filter (!isBlank(?oparentClass))}\n" +
+           "    bind (if(bound(?oparentClass) && ?g3=<" +
+           sourceGraphUri +
+           ">,?oparentClass,?oparent) as ?oClass)  optional{?oClass rdfs:label ?oClassLabel}\n" +
+           " filter (?oClass!=<http://www.w3.org/2002/07/owl#Restriction>)" +
+           "    \n" +
+           "  }\n" +
+           "  \n" +
+           "  \n"
+       }
+
+
+      query+=    "      graph ?g2{\n" +
+        "    ?sparent rdf:type ?stype filter (?stype in (owl:Class)) \n" +
+       " optional { ?sparent rdfs:label ?sparentLabel}\n" +
         "    \n" +
         "  }\n" +
         "  graph ?g3{\n" +
         "      ?oparent rdf:type ?otype filter (?otype in (owl:Class))\n" +
+        " optional { ?oparent rdfs:label ?oparentLabel}\n" +
         "  }\n" +
         "   graph <" +
         sourceGraphUri +

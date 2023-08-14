@@ -7,7 +7,7 @@ var DateWidget = (function() {
     $("#" + inputId).datepicker({
       dateFormat: "yy-mm-dd", onClose: function(selectedDate) {
         if (callback) {
-          return callback(selectedDate);
+          return callback(  $("#" + inputId).datepicker( "getDate" ));
         }
       }
     });

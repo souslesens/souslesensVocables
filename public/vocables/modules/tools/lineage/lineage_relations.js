@@ -33,7 +33,8 @@ var Lineage_relations = (function () {
             });
             $("#lineageRelations_history_previousBtn").css("display", self.previousQuery ? "inline" : "none");
             $("#lineageRelations_history_deleteBtn").css("display", "none");
-            $("#LineageRelations_searchJsTreeInput").focus();
+            $("#Lineage_relation_filterText2").val("")
+         //   $("#LineageRelations_searchJsTreeInput").focus();
             Lineage_relationFilter.showAddFilterDiv(true);
 
             //$("#lineageRelations_savedQueriesSelect").bind('click',null,Lineage_relations.onSelectSavedQuery)
@@ -598,7 +599,7 @@ var Lineage_relations = (function () {
         }
         $("#lineageRelations_relType").prop("checked");
         $("input[name='lineageRelations_relType'][value=predicates]").prop("checked", true);
-        $("input[name='lineageRelations_relDirection'][value=direct]").prop("checked", true);
+      //  $("input[name='lineageRelations_relDirection'][value=direct]").prop("checked", true);
         var options = {};
         var inferredProps = [];
         var distinctProps = {};
@@ -607,10 +608,10 @@ var Lineage_relations = (function () {
                 function (callbackSeries) {
                     var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
                     var nodes = Object.keys(existingNodes);
-                    if (nodes.length == 0) {
+                    if (true || nodes.length == 0) {
                         return callbackSeries();
                     } else {
-                        options.filter = Sparql_common.setFilter("s", nodes);
+                        options.filter = Sparql_common.setFilter(["s","o"], nodes,null,{useFilterKeyWord:1});
                         return callbackSeries();
                     }
                 },

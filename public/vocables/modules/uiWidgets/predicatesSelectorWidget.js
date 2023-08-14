@@ -2,6 +2,7 @@ import common from "../shared/common.js";
 import KGcreator from "../tools/KGcreator.js";
 import PromptedSelectWidget from "./promptedSelectWidget.js";
 import OntologyModels from "../shared/ontologyModels.js";
+import DateWidget from "./dateWidget.js";
 
 var PredicatesSelectorWidget = (function () {
     var self = {};
@@ -96,7 +97,7 @@ var PredicatesSelectorWidget = (function () {
         $("#editPredicate_objectSelect").val("");
         $("#editPredicate_objectValue").val("");
         $("#editPredicate_propertyValue").val(value);
-        dateWidget.unsetDatePickerOnInput("editPredicate_objectValue");
+        DateWidget.unsetDatePickerOnInput("editPredicate_objectValue");
         if (self.onSelectPropertyFn) {
             self.onSelectPropertyFn(value);
         }
@@ -108,7 +109,7 @@ var PredicatesSelectorWidget = (function () {
             $("#editPredicate_vocabularySelect2").css("display", "none");
             if (value == "xsd:dateTime") {
                 common.fillSelectOptions("editPredicate_objectSelect", self.operators.Number);
-                dateWidget.setDatePickerOnInput("editPredicate_objectValue");
+                DateWidget.setDatePickerOnInput("editPredicate_objectValue");
             } else if (value == "xsd:string") {
                 common.fillSelectOptions("editPredicate_objectSelect", self.operators.String);
             } else {

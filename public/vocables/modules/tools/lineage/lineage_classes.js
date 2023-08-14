@@ -2588,12 +2588,19 @@ self.zoomGraphOnNode(node.data[0].id, false);
                         }
                     });
                 },
-                //get effective distinct ObjectProperties
+
                 function (callbackSeries) {
                     var existingNodes = {};
                     var visjsData = { nodes: [], edges: [] };
                     var source = Lineage_sources.activeSource;
                     inferredModel.forEach(function (item) {
+
+                        item.sClass=item.sClass || item.sparent
+                        item.oClass=item.oClass || item.oparent;
+
+
+
+
                         var options = {
                             shape: Lineage_classes.defaultShape,
                             size: Lineage_classes.defaultShapeSize,
@@ -2601,11 +2608,13 @@ self.zoomGraphOnNode(node.data[0].id, false);
                         };
                         if (!existingNodes[item.sClass.value]) {
                             existingNodes[item.sClass.value] = 1;
-                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.sClass.value, item.sClassLabel.value, null, options));
+                            var label=item.sClassLabel?item.sClassLabel.value:Sparql_common.getLabelFromURI(item.sClass.value)
+                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.sClass.value, label, null, options));
                         }
                         if (!existingNodes[item.oClass.value]) {
                             existingNodes[item.oClass.value] = 1;
-                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, item.oClassLabel.value, null, options));
+                            var label=item.oClassLabel?item.oClassLabel.value:Sparql_common.getLabelFromURI(item.oClass.value)
+                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, label, null, options));
                         }
                         var edgeId = item.sClass.value + "_" + item.prop.value + "_" + item.oClass.value;
                         if (!existingNodes[edgeId]) {

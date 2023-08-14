@@ -136,7 +136,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.network
             .on("click", function (/** @type {{ pointer: { DOM: { x: any; y: any; }; }; }} */ params) {
                 // eslint-disable-next-line no-console
-                console.log(self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y));
+              //  console.log(self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y));
                 self.processClicks(params, _options);
             })
             .on("hoverNode", function (/** @type {{ node: any; pointer: { DOM: any; }; }} */ params) {

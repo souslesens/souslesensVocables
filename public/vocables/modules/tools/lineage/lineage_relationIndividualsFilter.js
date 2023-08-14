@@ -23,6 +23,7 @@ var Lineage_relationIndividualsFilter = (function() {
       $("#lineage_relationIndividuals_searchTermInput").keypress(function(e) {
         if (e.which == 13 || e.which == 9) {
           Lineage_relationIndividualsFilter.searchClassIndividuals();
+          self.filter=""
         }
       });
       $(".lineage_relationIndividuals_filterTypeDiv").css("display", "none");
@@ -90,7 +91,7 @@ var Lineage_relationIndividualsFilter = (function() {
       var options = {
         openAll: true,
         withCheckboxes: true,
-        onCheckNodeFn: Lineage_relationIndividualsFilter.addIndividualFilter
+        selectTreeNodeFn: Lineage_relationIndividualsFilter.addIndividualFilter
       };
 
       JstreeWidget.loadJsTree("lineage_relationIndividuals_matchesTreeDiv", jstreeData, options);
@@ -99,17 +100,22 @@ var Lineage_relationIndividualsFilter = (function() {
     });
   };
 
-  self.addIndividualFilter = function() {
+  self.addIndividualFilter = function(event, obj) {
     var classId = $("#lineage_relationIndividuals_filterRoleSelect").val();
     var classIndex = $("#lineage_relationIndividuals_filterRoleSelect")[0].selectedIndex;
     var classLabel = $("#lineage_relationIndividuals_filterRoleSelect").text();
-    var individual = $("#lineage_relationIndividuals_matchesSelect").val();
+    var individuals
+if(!obj)
+     individuals = $("#lineage_relationIndividuals_matchesTreeDiv").jstree().get_checked();
+    else
+     individuals =[obj.node.id] ;
     var individualLabel = $("#lineage_relationIndividuals_filterRoleSelect").text();
     //  var message="filter  "+classLabel+" = "+individualLabel
 
     var role = classIndex == 0 ? "subject" : "object";
-    var message = "FILTER(?" + role + " = <" + individual + ">)  ";
 
+    var message =Sparql_common.setFilter(role,individuals)
+   // var message = "FILTER(?" + role + " = <" + individual + ">)  ";
     $("#lineage_relationIndividuals_fitlerTA").text(message);
   };
 
@@ -145,7 +151,7 @@ var Lineage_relationIndividualsFilter = (function() {
 
     if (filterType == "searchLabel") {
       var term = prompt("contains");
-      if (!term) {
+      if (false && !term) {
         return   $(".filterTypeDiv_" + filterType).css("display", "none");;
       }
       self.searchClassIndividuals(term)
@@ -174,6 +180,8 @@ var Lineage_relationIndividualsFilter = (function() {
         return;
       var classIndex = $("#lineage_relationIndividuals_filterRoleSelect")[0].selectedIndex;
       var date=$("#lineage_relationIndividuals_datePicker").datepicker( "getDate" );
+      if(!date)
+        return alert("select a date")
       var role = classIndex == 0 ? "subject" : "object";
 
       var filter=Sparql_common.setDateRangeSparqlFilter(role,date,null, {precision:precision})

@@ -2,10 +2,10 @@ import common from "../shared/common.js";
 import Lineage_upperOntologies from "./lineage/lineage_upperOntologies.js";
 import SearchUtil from "../search/searchUtil.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
-import visjsGraph from "../graph/visjsGraph2.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../shared/mainController.js";
+import visjsGraphClass from "../graph/VisjsGraphClass.js";
 
 //https://openbase.com/js/@json-editor/json-editor/documentation
 
@@ -155,14 +155,7 @@ var KGcreator = (function() {
 
     $("#KGcreator_topLevelOntologiesInput").html(Config.currentTopLevelOntology);
     self.topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
-    self.initModel(source, function(err, result) {
-      if (err) {
-        return alert(err.responseText);
-      }
-      if (callback) {
-        callback(err);
-      }
-    });
+
   };
   self.onChangeSourceTypeSelect = function(sourceType, callback) {
     self.currentSourceType = sourceType;
@@ -1070,8 +1063,9 @@ self.saveMappings({classId:classId})
 
   self.getMappingFileJson = function(csvFileName, callback) {
 
-if(csvFileName.indexOf(".json")<0)
-  csvFileName= csvFileName + ".json"
+    if (csvFileName.indexOf(".json") < 0) {
+      csvFileName = csvFileName + ".json";
+    }
     var payload = {};
     if (self.currentDataSourceModel) {
       var dbName = self.currentDbName;
@@ -1520,8 +1514,10 @@ if(csvFileName.indexOf(".json")<0)
     $("#KGcreator_fnBody").val(str);
   };
 
-  self.graphMappings = function() {
-    var mappingsTriples = self.currentJsonObject.tripleModels;
+  self.drawMappings = function(mappingsTriples) {
+    if (!mappingsTriples) {
+      mappingsTriples = self.currentJsonObject.tripleModels;
+    }
     var visjsData = { nodes: [], edges: [] };
     var existingNodes = {};
     var shape = "box";
@@ -1574,11 +1570,12 @@ if(csvFileName.indexOf(".json")<0)
       }
     });
 
-    var html = "<div id='KGcreator_mappingsGraphDiv' style='width:900px;height:750px'></div>";
+    var html = "<div id='KGcreator_mappingsGraphDiv' style='width:1100px;height:750px'></div>";
     $("#mainDialogDiv").dialog("open");
     $("#mainDialogDiv").html(html);
-    visjsGraph.draw("KGcreator_mappingsGraphDiv", visjsData, {}, function() {
-    });
+    self.mappingVisjsGraph=new visjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, {})
+    self.mappingVisjsGraph.draw()
+
   };
 
   /**
@@ -1640,22 +1637,7 @@ if(csvFileName.indexOf(".json")<0)
     });
   };
 
-  self.initModel = function(source, callback) {
-    Sparql_OWL.getObjectRestrictions(source, null, null, function(err, result) {
-      if (err) {
-        return alert(err.responseText);
-      }
-      self.currentSourceRestrictions = {};
-      var data = [];
-      result.forEach(function(item) {
-        for (var key in item) {
-          item[key] = item[key].value;
-        }
-        self.currentSourceRestrictions[item.prop] = item;
-      });
-      return callback(null, self.currentSourceRestrictions);
-    });
-  };
+
 
   /**
    * check if prdicate are conform to restrictions defined in Lineage_classes
@@ -1666,8 +1648,11 @@ if(csvFileName.indexOf(".json")<0)
    */
   self.checkModel = function(source, callback) {
     return callback();
+    //to DO!!!!!!!!!!!!!!!!!!!!!!
+
+
     var sourceObjects = {};
-    self.getAllMappings(function(err, allMappings) {
+  self.getAllMappings(function(err, allMappings) {
       for (var subject in allMappings) {
         var item = allMappings[subject];
         item.forEach(function(mapping) {
@@ -1697,35 +1682,7 @@ if(csvFileName.indexOf(".json")<0)
     });
   };
 
-  self.getAllMappings = function(callback) {
-    var allMappings = {};
-    var files = Object.keys(self.mappingFiles);
-    async.eachSeries(
-      files,
-      function(file, callbackEach) {
-        var file2 = file.substring(file.indexOf("_") + 1);
-        self.loadMappings(file2, function(err, result) {
-          if (err) {
-            return callbackEach();
-          }
 
-          for (var key in result.tripleModels) {
-            var mapping = result.tripleModels[key];
-            if (!allMappings[mapping.s]) {
-              allMappings[mapping.s] = [];
-            }
-            allMappings[mapping.s].push({ p: mapping.p, o: mapping.o });
-          }
-
-          callbackEach();
-        });
-      },
-      function(err) {
-        self.allMappingsSubjectsmap = allMappings;
-        return callback(null, allMappings);
-      }
-    );
-  };
 
 
   self.socketMessage = function(message) {
@@ -1786,15 +1743,31 @@ if(csvFileName.indexOf(".json")<0)
 
       var allTripleMappings = [];
       async.eachSeries(result, function(mappingFileName, callbackEach) {
-        self.getMappingFileJson(mappingFileName, function(err, result) {
-          if (err) {
-            return callback(err);
+        var payload = {
+          dir: "CSV/" + self.currentSlsvSource || self.currentCsvDir,
+          name: mappingFileName
+        };
+
+        $.ajax({
+          type: "GET",
+          url: `${Config.apiUrl}/data/file`,
+          data: payload,
+          dataType: "json",
+          success: function(result, _textStatus, _jqXHR) {
+            try {
+              var jsonObject = JSON.parse(result);
+              if (jsonObject.tripleModels.length > 0) {
+                allTripleMappings = allTripleMappings.concat(jsonObject.tripleModels);
+              }
+            } catch (e) {
+              console.log("parsing error " + mappingFileName);
+
+            }
+            callbackEach();
+          },
+          error(err) {
+            return callbackEach(err);
           }
-          if (result.tripleModels.length > 0) {
-            allTripleMappings = allTripleMappings.concat(result.tripleModels);
-          }
-          // A FINIR
-          callbackEach();
         });
 
       }, function(err) {
@@ -1808,6 +1781,15 @@ if(csvFileName.indexOf(".json")<0)
     });
   };
 
+
+  self.drawAllMappings = function() {
+    self.getAllTriplesMappings(function(err, tripleModels) {
+      if (err) {
+        return alert(err.responseText);
+      }
+      self.drawMappings(tripleModels);
+    });
+  };
   self.showModelMatchingProperties = function() {
 
     var subject = $("#KGcreator_subjectInput").val();
@@ -1818,8 +1800,7 @@ if(csvFileName.indexOf(".json")<0)
       if (err) {
         return alert(err.responseText);
       }
-      for (var key in tripleModels) {
-        var item = tripleModels[key];
+      tripleModels.forEach(function(item) {
         if (item.s == subject && item.p == "rdf:type") {
           if (item.o.indexOf("owl") < 0) {
             subjectType.push(item.o);
@@ -1830,10 +1811,12 @@ if(csvFileName.indexOf(".json")<0)
             objectType.push(item.o);
           }
         }
-      }
+      });
     });
 
-    var x = 3;
+  // to be implemented with Config.ontologyModels
+
+    }
 
     // A FINIR
 

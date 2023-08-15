@@ -1509,7 +1509,7 @@ self.saveMappings({classId:classId})
     $("#KGcreator_fnBody").val(str);
   };
 
-  self.graphMappings = function() {
+  self.drawMappings = function() {
     var mappingsTriples = self.currentJsonObject.tripleModels;
     var visjsData = { nodes: [], edges: [] };
     var existingNodes = {};

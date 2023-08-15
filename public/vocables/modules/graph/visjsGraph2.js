@@ -109,8 +109,6 @@ var visjsGraph = (function () {
             $("#visjsGraph_layoutSelect").val("");
         }
 
-
-
         self.globalOptions = options;
 
         self.network = new vis.Network(container, self.data, options);

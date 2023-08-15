@@ -549,7 +549,7 @@ sourceDivId +
     };
 
     self.menuActions = {
-        setSourceOpacity: function(source) {
+        setSourceOpacity: function (source) {
             var opacity = prompt("opacity %", 100);
             if (!opacity) {
                 return;
@@ -561,7 +561,7 @@ sourceDivId +
             var nodesMapSources = {};
             var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
             var newNodes = [];
-            nodes.forEach(function(node) {
+            nodes.forEach(function (node) {
                 nodesMapSources[node.id] = node.data.source;
                 if (node.data.source == source) {
                     newNodes.push({
@@ -575,7 +575,7 @@ sourceDivId +
 
             var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
             var newEdges = [];
-            edges.forEach(function(edge) {
+            edges.forEach(function (edge) {
                 if (nodesMapSources[edge.from] == source) {
                     newEdges.push({
                         id: edge.id,
@@ -593,14 +593,14 @@ sourceDivId +
             });
             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
         },
-        closeSource: function(source) {
+        closeSource: function (source) {
             if (source) {
                 self.activeSource = source;
             }
             if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                 var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
                 var nodesToRemove = [];
-                nodes.forEach(function(node) {
+                nodes.forEach(function (node) {
                     if (node.data && node.data.source == self.activeSource) {
                         nodesToRemove.push(node.id);
                     }
@@ -611,15 +611,15 @@ sourceDivId +
             self.loadedSources[self.activeSource] = null;
             $("#" + sourceDivId).remove();
         },
-        hideSource: function(source) {
+        hideSource: function (source) {
             MainController.UI.hidePopup("graphPopupDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, true);
         },
-        showSource: function() {
+        showSource: function () {
             MainController.UI.hidePopup("graphPopupDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, false);
         },
-        groupSource: function(source) {
+        groupSource: function (source) {
             MainController.UI.hidePopup("graphPopupDiv");
 
             if (!source) {
@@ -667,15 +667,15 @@ sourceDivId +
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
         },
-        ungroupSource: function(source) {
+        ungroupSource: function (source) {
             MainController.UI.hidePopup("graphPopupDiv");
             if (!source) {
                 source = Lineage_sources.activeSource;
             }
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(source);
         },
-        exportOWL: function(source) {
-            Sparql_OWL.generateOWL(source, {}, function(err, result) {
+        exportOWL: function (source) {
+            Sparql_OWL.generateOWL(source, {}, function (err, result) {
                 if (err) {
                     return console.log(err);
                 }
@@ -693,16 +693,15 @@ sourceDivId +
                 url: Config.apiUrl + "/graphStore/graph",
                 data: payload,
                 dataType: "json",
-                success: function(data, _textStatus, _jqXHR) {
+                success: function (data, _textStatus, _jqXHR) {
                     common.copyTextToClipboard(data);
                 },
-                error: function(err) {
+                error: function (err) {
                     alert(err.responseText);
                 },
             });
-
-        }
-    }
+        },
+    };
 
     self.isSourceEditableForUser = function (source) {
         if (!Config.sources[source]) {

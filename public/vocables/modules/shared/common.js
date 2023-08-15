@@ -813,8 +813,6 @@ if (callback) return callback(err);
         return paramsMap;
     };
 
-
-
     return self;
 })();
 

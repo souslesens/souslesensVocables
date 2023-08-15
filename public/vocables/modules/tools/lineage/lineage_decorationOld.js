@@ -33,8 +33,6 @@ var Lineage_decoration = (function () {
         self.operationsMap[operation]();
     };
 
-
-
     /**
      * set the upper ontology classes map
      * @param callback
@@ -476,7 +474,9 @@ var Lineage_decoration = (function () {
             tie_selection: false,
         };
         $("#Lineage_whiteboard_graphDecoration_legendDiv").jstree("destroy").empty();
-        $("#Lineage_whiteboard_graphDecoration_legendDiv").html("<div  class='jstreeContainer' style='height: 350px;width:90%'><div id='Lineage_whiteboard_graphDecoration_legendTreeDiv'></div></div>");
+        $("#Lineage_whiteboard_graphDecoration_legendDiv").html(
+            "<div  class='jstreeContainer' style='height: 350px;width:90%'><div id='Lineage_whiteboard_graphDecoration_legendTreeDiv'></div></div>"
+        );
         JstreeWidget.loadJsTree("Lineage_whiteboard_graphDecoration_legendTreeDiv", jstreeData, options, function () {
             $("#Lineage_whiteboard_graphDecoration_legendTreeDiv").jstree(true).check_all();
         });

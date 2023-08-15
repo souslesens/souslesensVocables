@@ -16,16 +16,16 @@ var LegendWidget = (function () {
             withCheckboxes: true,
             onCheckNodeFn: LegendWidget.onLegendCheckBoxes,
             onUncheckNodeFn: LegendWidget.onLegendCheckBoxes,
-            selectTreeNodeFn:function(evt, obj){
-                self.currentLegendNode=obj.node
+            selectTreeNodeFn: function (evt, obj) {
+                self.currentLegendNode = obj.node;
             },
             tie_selection: false,
-           contextMenu:LegendWidget.getLegendJstreeContextMenu()
+            contextMenu: LegendWidget.getLegendJstreeContextMenu(),
         };
         $("#Lineage_classes_graphDecoration_legendDiv").jstree("destroy").empty();
         $("#Lineage_classes_graphDecoration_legendDiv").html("<div  class='jstreeContainer' style='height: 350px;width:90%'>" + "<div id=legendDivId style='height: 25px;width:100%'></div></div>");
         JstreeWidget.loadJsTree(legendDivId, jstreeData, options, function () {
-            self.legendDivId=legendDivId
+            self.legendDivId = legendDivId;
             $("#" + legendDivId)
                 .jstree(true)
                 .check_all();
@@ -33,7 +33,7 @@ var LegendWidget = (function () {
     };
 
     self.onLegendCheckBoxes = function () {
-        var checkdeTopClassesIds = $("#" +  self.legendDivId)
+        var checkdeTopClassesIds = $("#" + self.legendDivId)
             .jstree(true)
             .get_checked();
 
@@ -53,20 +53,17 @@ var LegendWidget = (function () {
         Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
     };
 
-
-
-
-    self.getLegendJstreeContextMenu=function(){
+    self.getLegendJstreeContextMenu = function () {
         var items = {};
 
         items.groupNodes = {
             label: "Group nodes",
             action: function (_e) {
-                var node=self.currentLegendNode;
+                var node = self.currentLegendNode;
             },
         };
         return items;
-    }
+    };
 
     return self;
 })();

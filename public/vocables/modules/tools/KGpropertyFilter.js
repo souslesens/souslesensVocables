@@ -724,7 +724,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     });
                 },
                 function (callbackSeries) {
-                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id],null, function (err, result) {
+                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], null, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }

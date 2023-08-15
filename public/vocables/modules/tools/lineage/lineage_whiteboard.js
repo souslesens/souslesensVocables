@@ -570,7 +570,8 @@ var Lineage_whiteboard = (function () {
                         var node = self.lineageVisjsGraph.data.nodes.get(_properties.items[0]);
                         Lineage_sources.activeSource = node.data.source;
                     }
-                    if (true){//!self.lineageVisjsGraph.skipColorGraphNodesByType) {
+                    if (true) {
+                        //!self.lineageVisjsGraph.skipColorGraphNodesByType) {
                         var nodes = self.lineageVisjsGraph.data.nodes.get(_properties.items);
                         Lineage_decoration.decorateNodeAndDrawLegend(nodes);
                     }
@@ -660,8 +661,6 @@ addNode:false
 }*/
         }
 
-
-
         if (!graphDiv) {
             graphDiv = "graphDiv";
         }
@@ -670,12 +669,9 @@ addNode:false
         self.lineageVisjsGraph.draw(function () {
             MainController.UI.message("", true);
 
-                Lineage_decoration.decorateNodeAndDrawLegend();
-
+            Lineage_decoration.decorateNodeAndDrawLegend();
         });
         return;
-
-     
     };
 
     self.getGraphIdsFromSource = function (/** @type {any} */ source) {
@@ -2061,9 +2057,9 @@ addNode:false
                             var nodeSource = source;
                             var prop = item.prop.value;
                             if (
-                              options.includeSources &&
-                              options.includeSources.length > 0 &&
-                              (prop == "http://www.w3.org/2002/07/owl#sameAs" || prop == "http://www.w3.org/2002/07/owl#equivalentClass")
+                                options.includeSources &&
+                                options.includeSources.length > 0 &&
+                                (prop == "http://www.w3.org/2002/07/owl#sameAs" || prop == "http://www.w3.org/2002/07/owl#equivalentClass")
                             ) {
                                 nodeSource = options.includeSources[0];
                             }
@@ -2843,12 +2839,8 @@ self.zoomGraphOnNode(node.data[0].id, false);
                     var visjsData = { nodes: [], edges: [] };
                     var source = Lineage_sources.activeSource;
                     inferredModel.forEach(function (item) {
-
-                        item.sClass=item.sClass || item.sparent
-                        item.oClass=item.oClass || item.oparent;
-
-
-
+                        item.sClass = item.sClass || item.sparent;
+                        item.oClass = item.oClass || item.oparent;
 
                         var options = {
                             shape: Lineage_whiteboard.defaultShape,
@@ -2857,12 +2849,12 @@ self.zoomGraphOnNode(node.data[0].id, false);
                         };
                         if (!existingNodes[item.sClass.value]) {
                             existingNodes[item.sClass.value] = 1;
-                            var label=item.sClassLabel?item.sClassLabel.value:Sparql_common.getLabelFromURI(item.sClass.value)
+                            var label = item.sClassLabel ? item.sClassLabel.value : Sparql_common.getLabelFromURI(item.sClass.value);
                             visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.sClass.value, label, null, options));
                         }
                         if (!existingNodes[item.oClass.value]) {
                             existingNodes[item.oClass.value] = 1;
-                            var label=item.oClassLabel?item.oClassLabel.value:Sparql_common.getLabelFromURI(item.oClass.value)
+                            var label = item.oClassLabel ? item.oClassLabel.value : Sparql_common.getLabelFromURI(item.oClass.value);
                             visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, label, null, options));
                         }
                         var edgeId = item.sClass.value + "_" + item.prop.value + "_" + item.oClass.value;

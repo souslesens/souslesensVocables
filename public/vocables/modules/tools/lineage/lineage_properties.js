@@ -233,7 +233,6 @@ var Lineage_properties = (function () {
      * @param nodeData
      */
 
-
     self.drawObjectPropertiesRestrictions = function (source, nodeIds, properties, options) {
         if (!options) {
             options = {};
@@ -292,7 +291,7 @@ var Lineage_properties = (function () {
                             varName: "value",
                         },
                     });
-                   var edgeId = item.prop.value + "_" + item.restriction.value;
+                    var edgeId = item.prop.value + "_" + item.restriction.value;
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
 
@@ -1042,9 +1041,7 @@ var Lineage_properties = (function () {
                     options.withoutImports = true;
                 }
                 Lineage_relations.drawRelations(null, null, "Properties", options);
-             
             } else if (target == "table") {
-             
             }
         }
 

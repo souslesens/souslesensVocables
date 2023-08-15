@@ -4,7 +4,7 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_sources from "./lineage_sources.js";
 import VisjsUtil from "../../graph/visjsUtil.js";
 
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";

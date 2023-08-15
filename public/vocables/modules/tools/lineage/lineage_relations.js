@@ -4,7 +4,7 @@ import Lineage_relationFilter from "./lineage_relationFilter.js";
 
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Export from "../../shared/export.js";
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Sparql_CRUD from "../../sparqlProxies/sparql_CRUD.js";
 import MainController from "../../shared/mainController.js";
 import Lineage_sources from "./lineage_sources.js";
@@ -56,10 +56,10 @@ var Lineage_relations = (function () {
                 cbxValue = "selected";
             } else {
                 if (
-                    !Lineage_classes.lineageVisjsGraph.data ||
-                    !Lineage_classes.lineageVisjsGraph.data.nodes ||
-                    !Lineage_classes.lineageVisjsGraph.data.nodes.get ||
-                    Lineage_classes.lineageVisjsGraph.data.nodes.get().length == 0
+                    !Lineage_whiteboard.lineageVisjsGraph.data ||
+                    !Lineage_whiteboard.lineageVisjsGraph.data.nodes ||
+                    !Lineage_whiteboard.lineageVisjsGraph.data.nodes.get ||
+                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.get().length == 0
                 ) {
                     cbxValue = "all";
                 } else {
@@ -226,7 +226,7 @@ var Lineage_relations = (function () {
     self.onshowDrawRelationsDialogValidate = function (action, _type) {
         if (action == "clear") {
             var properties = $("#lineageRelations_propertiesJstreeDiv").jstree().get_checked(true);
-            var edges = Lineage_classes.lineageVisjsGraph.data.edges.get();
+            var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
             var edgesToClear = [];
             edges.forEach(function (edge) {
                 if (properties.length > 0) {
@@ -242,7 +242,7 @@ var Lineage_relations = (function () {
                 }
             });
 
-            Lineage_classes.lineageVisjsGraph.data.edges.remove(edgesToClear);
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(edgesToClear);
         } else {
             //draw
             self.whiteboardSourcesFromStatus = Lineage_sources.fromAllWhiteboardSources;
@@ -261,17 +261,17 @@ var Lineage_relations = (function () {
                     if (node.type && node.type == "literal") {
                         return alert(currentGraphNode.data.id);
                     }
-                    options.data = Lineage_classes.currentGraphNode.data.id;
+                    options.data = Lineage_whiteboard.currentGraphNode.data.id;
                 } else if (caller == "Tree") {
-                    options.data = Lineage_classes.currentTreeNode.data.id;
+                    options.data = Lineage_whiteboard.currentTreeNode.data.id;
                 }
             } else if (selection == "visible") {
                 Lineage_sources.fromAllWhiteboardSources = true;
-                if (!Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
+                if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                     options.data = null;
                 } else {
                     var data = [];
-                    var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+                    var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
                     nodes.forEach(function (node) {
                         if (node.data && (!node.data.type || node.data.type != "literal")) {
                             data.push(node.id);
@@ -350,13 +350,13 @@ var Lineage_relations = (function () {
 
     self.outlineWhiteboardNodes = function (options) {
         var source = Lineage_sources.activeSource;
-        var subjectIds = Lineage_classes.getGraphIdsFromSource(source);
+        var subjectIds = Lineage_whiteboard.getGraphIdsFromSource(source);
         Sparql_OWL.getFilteredTriples(source, subjectIds, null, null, options, function (err, result) {
             if (err) {
                 return callback(err);
             }
 
-            var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+            var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             var groups = {};
 
             if (result.length == 0) return MainController.UI.message("no data found", true);
@@ -393,14 +393,14 @@ var Lineage_relations = (function () {
         var levelsMap = {};
         if (!options.data) {
             if (caller == "Graph") {
-                data = Lineage_classes.currentGraphNode.data.id;
-                levelsMap[Lineage_classes.currentGraphNode.data.id] = Lineage_classes.currentGraphNode.level;
+                data = Lineage_whiteboard.currentGraphNode.data.id;
+                levelsMap[Lineage_whiteboard.currentGraphNode.data.id] = Lineage_whiteboard.currentGraphNode.level;
             } else if (caller == "Tree") {
-                data = Lineage_classes.currentTreeNode.data.id;
+                data = Lineage_whiteboard.currentTreeNode.data.id;
             } else if (caller == "both") {
                 data = null;
             } else if (caller == "leftPanel" || type == "dictionary") {
-                var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
                 nodes.forEach(function (node) {
                     if (node.data && (!node.data.type || node.data.type != "literal")) {
                         data.push(node.id);
@@ -418,8 +418,8 @@ var Lineage_relations = (function () {
         var existingNodes = {};
         if (options.output == "table") {
             existingNodes = {};
-        } else if (Lineage_classes.lineageVisjsGraph && Lineage_classes.lineageVisjsGraph.getExistingIdsMap) {
-            existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+        } else if (Lineage_whiteboard.lineageVisjsGraph && Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap) {
+            existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
         }
         var allVisjsData = { nodes: [], edges: [] };
 
@@ -452,7 +452,7 @@ var Lineage_relations = (function () {
                     source = Config.dictionarySource;
                     options.includeSources = Config.dictionarySource;
 
-                    data = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
+                    data = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
                     options.filter = "FILTER (?prop in (owl:sameAs,owl:equivalentClass))";
                     Lineage_sources.registerSource(Config.dictionarySource);
 
@@ -474,7 +474,7 @@ var Lineage_relations = (function () {
 
                         MainController.UI.message("searching restrictions");
 
-                        Lineage_classes.drawRestrictions(source, data, null, null, options, function (err, result) {
+                        Lineage_whiteboard.drawRestrictions(source, data, null, null, options, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
@@ -497,7 +497,7 @@ var Lineage_relations = (function () {
                         options.inverse = true;
                         MainController.UI.message("searching inverse restrictions");
 
-                        Lineage_classes.drawRestrictions(source, data, null, null, options, function (err, result) {
+                        Lineage_whiteboard.drawRestrictions(source, data, null, null, options, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
@@ -521,13 +521,13 @@ var Lineage_relations = (function () {
 
                     if (!data) {
                         if (options.data != "allSourceNodes") {
-                            data = Lineage_classes.getGraphIdsFromSource(Lineage_sources.activeSource);
+                            data = Lineage_whiteboard.getGraphIdsFromSource(Lineage_sources.activeSource);
                         }
                     }
                     if (!direction || direction == "direct") {
                         MainController.UI.message("searching predicates");
 
-                        Lineage_properties.drawPredicatesGraph(source, data, null, options, function (err, result) {
+                        Lineage_whiteboard.drawPredicatesGraph(source, data, null, options, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
@@ -550,14 +550,14 @@ var Lineage_relations = (function () {
 
                     if (!data) {
                         if (options.data != "allSourceNodes") {
-                            data = Lineage_classes.getGraphIdsFromSource(Lineage_sources.activeSource);
+                            data = Lineage_whiteboard.getGraphIdsFromSource(Lineage_sources.activeSource);
                         }
                     }
                     if (!direction || direction == "inverse") {
                         options.inversePredicate = true;
                         MainController.UI.message("searching inverse predicates");
 
-                        Lineage_properties.drawPredicatesGraph(source, data, null, options, function (err, result) {
+                        Lineage_whiteboard.drawPredicatesGraph(source, data, null, options, function (err, result) {
                             if (err) {
                                 return callbackSeries(err);
                             }
@@ -577,11 +577,11 @@ var Lineage_relations = (function () {
                 }
                 if (!options.output || options.output == "graph") {
                     MainController.UI.message("drawing " + allVisjsData.nodes.length + "nodes and " + allVisjsData.edges.length + " edges...", true);
-                    if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
-                        Lineage_classes.lineageVisjsGraph.data.nodes.add(allVisjsData.nodes);
-                        Lineage_classes.lineageVisjsGraph.data.edges.add(allVisjsData.edges);
+                    if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(allVisjsData.nodes);
+                        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(allVisjsData.edges);
                     } else {
-                        Lineage_classes.drawNewGraph(allVisjsData);
+                        Lineage_whiteboard.drawNewGraph(allVisjsData);
                     }
                     if (err) {
                         return alert(err);
@@ -606,7 +606,7 @@ var Lineage_relations = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                    var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+                    var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
                     var nodes = Object.keys(existingNodes);
                     if (true || nodes.length == 0) {
                         return callbackSeries();

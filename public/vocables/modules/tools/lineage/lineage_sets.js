@@ -1,6 +1,6 @@
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
 import Lineage_blend from "./lineage_blend.js";
 import Lineage_combine from "./lineage_combine.js";
@@ -135,7 +135,7 @@ var Lineage_sets = (function () {
                     visjsData.nodes.push(node);
                 }
             });
-            Lineage_classes.drawNewGraph(visjsData);
+            Lineage_whiteboard.drawNewGraph(visjsData);
         });
     };
 

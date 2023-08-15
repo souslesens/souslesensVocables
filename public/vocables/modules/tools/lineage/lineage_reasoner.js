@@ -2,7 +2,7 @@ import common from "../../shared/common.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 self.lineageVisjsGraph;
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_sources from "./lineage_sources.js";
 import sparql_common from "../../sparqlProxies/sparql_common.js";
 
@@ -240,7 +240,7 @@ var Lineage_reasoner = (function () {
             }
 
             var visjsData = { nodes: [], edges: [] };
-            var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+            var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             var edgeColor = $("#lineage_reasoner_colorSelect").val();
             var nodes = {};
             filteredData.forEach(function (item) {
@@ -277,7 +277,7 @@ var Lineage_reasoner = (function () {
                             arrows: {
                                 to: {
                                     enabled: true,
-                                    type: Lineage_classes.defaultEdgeArrowType,
+                                    type: Lineage_whiteboard.defaultEdgeArrowType,
                                     scaleFactor: 0.5,
                                 },
                             },
@@ -293,12 +293,12 @@ var Lineage_reasoner = (function () {
             var predicates = $("#reasonerSubjectsDiv").jstree().get_checked();
             if (predicates) visjsData = self.filterVisjsDataPath(predicates, visjsData);
 
-            if (!Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
-                Lineage_classes.drawNewGraph(visjsData);
+            if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                Lineage_whiteboard.drawNewGraph(visjsData);
             }
-            Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-            Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
-            Lineage_classes.lineageVisjsGraph.network.fit();
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+            Lineage_whiteboard.lineageVisjsGraph.network.fit();
             $("#waitImg").css("display", "none");
         }
     };
@@ -322,7 +322,7 @@ var Lineage_reasoner = (function () {
         });
 
         var visjsData2 = { nodes: [], edges: path };
-        var uniqueNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+        var uniqueNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
         path.forEach(function (edge) {
             visjsData.nodes.forEach(function (node) {
                 if (edge.from == node.id || edge.to == node.id) {

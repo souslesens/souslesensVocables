@@ -33,7 +33,7 @@ var visjsGraph = (function () {
     self.showNodesLabelMinScale = 0.5;
     self.currentContext;
     self.drawingDone = false;
-    self.skipColorGraphNodesByType = false;
+
     var lastClickTime = new Date();
     var dbleClickIntervalDuration = 500;
 
@@ -109,7 +109,7 @@ var visjsGraph = (function () {
             $("#visjsGraph_layoutSelect").val("");
         }
 
-        if (_options.skipColorGraphNodesByType) self.skipColorGraphNodesByType = true;
+
 
         self.globalOptions = options;
 
@@ -842,7 +842,7 @@ var visjsGraph = (function () {
                     self.message("");
                 } else {
                     //functions
-                    var context = JSON.parse(JSON.stringify(data.context).replace(/self./g, "Lineage_classes."));
+                    var context = JSON.parse(JSON.stringify(data.context).replace(/self./g, "Lineage_whiteboard."));
                     //  var context = data.context
 
                     for (var key in context.options) {

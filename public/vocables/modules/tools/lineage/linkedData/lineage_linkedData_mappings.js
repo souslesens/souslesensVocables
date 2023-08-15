@@ -1,6 +1,6 @@
 import KGcreator from "../../KGcreator.js";
 
-import Lineage_classes from "../lineage_classes.js";
+import Lineage_whiteboard from "../lineage_whiteboard.js";
 import common from "../../../shared/common.js";
 import Sparql_common from "../../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../../sparqlProxies/sparql_generic.js";
@@ -101,8 +101,8 @@ self.graphTable(KGcreator.currentTreeNode);
     };
 
     self.onAddEdgeDropped = function (edgeData) {
-        var sourceNode = Lineage_classes.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
-        var targetNode = Lineage_classes.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
+        var sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
+        var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 
         // link join beetwen tables
         if (sourceNode.context == self.context && targetNode.context == self.context) {
@@ -122,7 +122,7 @@ self.graphTable(KGcreator.currentTreeNode);
 
     self.linkColumnToGraphNode = function (jstreeNode) {
         if (jstreeNode.parents.length != 2) return alert("select a column");
-        var graphNode = Lineage_classes.currentGraphNode;
+        var graphNode = Lineage_whiteboard.currentGraphNode;
         if (!graphNode || graphNode.from || !graphNode.data.source) return alert(" select a class or an individual node");
 
         var columnObj = {
@@ -138,18 +138,18 @@ self.graphTable(KGcreator.currentTreeNode);
                 if (err) return alert(err.responseText);
                 var columnUri = result.columnUri;
                 var visjsData = { nodes: [], edges: [] };
-                var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+                var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
                 if (!existingNodes[columnUri]) {
-                    var color = Lineage_classes.getSourceColor(columnObj.database);
+                    var color = Lineage_whiteboard.getSourceColor(columnObj.database);
                     existingNodes[columnUri] = 1;
                     visjsData.nodes.push({
                         id: columnUri,
                         label: columnObj.table + "." + columnObj.column,
 
-                        shadow: Lineage_classes.nodeShadow,
+                        shadow: Lineage_whiteboard.nodeShadow,
                         shape: Lineage_linkedData_mappings.columnShape,
                         level: 1,
-                        size: Lineage_classes.defaultShapeSize,
+                        size: Lineage_whiteboard.defaultShapeSize,
                         color: color,
                         data: columnObj,
                     });
@@ -172,17 +172,17 @@ self.graphTable(KGcreator.currentTreeNode);
                         color: color,
                     });
                 }
-                if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
-                    Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-                    Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                    Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
                 } else {
-                    Lineage_classes.drawNewGraph(visjsData);
+                    Lineage_whiteboard.drawNewGraph(visjsData);
                 }
             });
     };
 
     self.createGraphRelationJoin = function () {
-        var edge = Lineage_classes.currentGraphEdge;
+        var edge = Lineage_whiteboard.currentGraphEdge;
         if (!edge) return alert("select relation");
 
         self.currentDatabase = KGcreator.currentCsvDir || KGcreator.currentDbName;
@@ -614,7 +614,7 @@ self.graphTable(KGcreator.currentTreeNode);
     self.graphRelations = function () {
         self.getSourceJoinsMappings(Lineage_sources.activeSource, { withoutSqlDescription: true }, function (err, joinsMap) {
             var edges = [];
-            var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+            var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             for (var joinId in joinsMap) {
                 var join = joinsMap[joinId];
                 var edgeId = join.bNode;
@@ -644,12 +644,12 @@ self.graphTable(KGcreator.currentTreeNode);
                     });
                 }
             }
-            Lineage_classes.lineageVisjsGraph.data.edges.add(edges);
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(edges);
         });
     };
 
     self.graphColumns = function (columns) {
-        var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+        var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
         var visjsData = { nodes: [], edges: [] };
 
@@ -658,7 +658,7 @@ self.graphTable(KGcreator.currentTreeNode);
             var database = columnObj.database;
             var table = columnObj.table;
             var column = columnObj.column;
-            var color = Lineage_classes.getSourceColor(database);
+            var color = Lineage_whiteboard.getSourceColor(database);
 
             var columnId = database + "." + table + "." + column;
             var tableId = database + "." + table;
@@ -669,10 +669,10 @@ self.graphTable(KGcreator.currentTreeNode);
                     id: database,
                     label: database,
 
-                    shadow: Lineage_classes.nodeShadow,
+                    shadow: Lineage_whiteboard.nodeShadow,
                     shape: Lineage_linkedData_mappings.databaseShape,
                     level: 1,
-                    size: Lineage_classes.defaultShapeSize,
+                    size: Lineage_whiteboard.defaultShapeSize,
                     color: color,
                     data: {
                         context: self.context,
@@ -687,10 +687,10 @@ self.graphTable(KGcreator.currentTreeNode);
                     id: tableId,
                     label: table,
 
-                    shadow: Lineage_classes.nodeShadow,
+                    shadow: Lineage_whiteboard.nodeShadow,
                     shape: Lineage_linkedData_mappings.tableShape,
                     level: 1,
-                    size: Lineage_classes.defaultShapeSize,
+                    size: Lineage_whiteboard.defaultShapeSize,
                     color: color,
                     data: {
                         context: self.context,
@@ -733,10 +733,10 @@ self.graphTable(KGcreator.currentTreeNode);
                     id: columnId,
                     label: column,
 
-                    shadow: Lineage_classes.nodeShadow,
+                    shadow: Lineage_whiteboard.nodeShadow,
                     shape: Lineage_linkedData_mappings.columnShape,
                     level: 1,
-                    size: Lineage_classes.defaultShapeSize,
+                    size: Lineage_whiteboard.defaultShapeSize,
                     color: color,
                     data: {
                         context: self.context,
@@ -775,11 +775,11 @@ self.graphTable(KGcreator.currentTreeNode);
                     id: columnObj.subject,
                     label: columnObj.subjectLabel,
 
-                    shadow: Lineage_classes.nodeShadow,
-                    shape: Lineage_classes.defaultShape,
+                    shadow: Lineage_whiteboard.nodeShadow,
+                    shape: Lineage_whiteboard.defaultShape,
                     level: 1,
-                    size: Lineage_classes.defaultShapeSize,
-                    color: Lineage_classes.getSourceColor(Lineage_sources.currentSource),
+                    size: Lineage_whiteboard.defaultShapeSize,
+                    color: Lineage_whiteboard.getSourceColor(Lineage_sources.currentSource),
                     data: {
                         source: Lineage_sources.activeSource,
                         id: columnObj.subject,
@@ -806,11 +806,11 @@ self.graphTable(KGcreator.currentTreeNode);
             }
         }
 
-        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
-            Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-            Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
+        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
         } else {
-            Lineage_classes.drawNewGraph(visjsData);
+            Lineage_whiteboard.drawNewGraph(visjsData);
         }
     };
 

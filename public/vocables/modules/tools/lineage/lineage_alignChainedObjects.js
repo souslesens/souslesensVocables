@@ -4,10 +4,10 @@ var Lineage_alignChainedObjects = (function () {
     self.alignListMembers = function (containerId) {
         if (!containerId) containerId = self.currentContainer.id;
 
-        var containerPosition = Lineage_classes.lineageVisjsGraph.network.getPositions()[containerId];
+        var containerPosition = Lineage_whiteboard.lineageVisjsGraph.network.getPositions()[containerId];
         containerPosition.index = 0;
-        var edges = Lineage_classes.lineageVisjsGraph.data.edges.get();
-        var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+        var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
+        var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
 
         var listMembersFromMap = [];
         var listMembersToMap = [];
@@ -111,13 +111,13 @@ nodes.forEach(function(node) {
 
 
 
-Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
+Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
 
 **/
 
         if (false) {
             var sortedNodes = [];
-            Lineage_classes.lineageVisjsGraph.data.nodes.forEach(function (node) {
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.forEach(function (node) {
                 if (node.data.next || node.data.previous) {
                     sortedNodes.push(node);
                 }
@@ -175,16 +175,16 @@ Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
                 }
             });
 
-            Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
-            Lineage_classes.lineageVisjsGraph.data.edges.add(newEdges);
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(newEdges);
         }
 
         var nextEdges = [];
         var nodesMap = {};
-        Lineage_classes.lineageVisjsGraph.data.nodes.forEach(function (node) {
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.forEach(function (node) {
             nodesMap[node.id] = node;
         });
-        Lineage_classes.lineageVisjsGraph.data.edges.forEach(function (edge) {
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.forEach(function (edge) {
             if (edge.data.type == "next") nextEdges.push(edge);
         });
 
@@ -199,7 +199,7 @@ Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
 
         var nextEdges = [];
         var nodesMap = {};
-        Lineage_classes.lineageVisjsGraph.data.nodes.forEach(function (node) {
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.forEach(function (node) {
             if (node.data.next) {
                 if (!nodesMap[node.id]) nodesMap[node.id] = node;
 
@@ -249,8 +249,8 @@ Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
             });
         });
 
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
-        Lineage_classes.lineageVisjsGraph.data.edges.update(nextEdges);
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.update(nextEdges);
 
         return;
         /*******************************************/
@@ -279,13 +279,13 @@ Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
             });
         });
 
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
-        Lineage_classes.lineageVisjsGraph.data.edges.add(nextEdges);
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(nextEdges);
 
         return;
 
         var edgesFrom = [];
-        Lineage_classes.lineageVisjsGraph.data.edges.forEach(function (edge) {
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.forEach(function (edge) {
             var p = edgesFrom.indexOf(edge.from);
             if (p < 0) {
                 edgesFrom.splice(0, 0, edge.from);
@@ -337,8 +337,8 @@ Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
             newNodes = newNodesMap[id];
         }
 
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
-        Lineage_classes.lineageVisjsGraph.data.edges.update(newEdges);
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
 
         return;
     };

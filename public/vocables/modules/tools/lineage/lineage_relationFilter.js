@@ -176,7 +176,7 @@ var Lineage_relationFilter = (function () {
         } else {
             $("#lineageQuery_uriValueDiv").css("display", "block");
             var scopes = [];
-            if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
+            if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
                 scopes.push("whiteBoardNodes");
             }
             scopes.push(Lineage_sources.activeSource);
@@ -244,7 +244,7 @@ var Lineage_relationFilter = (function () {
             return alert("no filter defined");
         }
         if (resourceType == "whiteBoardNodes") {
-            var nodeIds = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
+            var nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
             if (role == "subject") {
                 filter.filterStr = " ?subject rdf:type " + resourceType + ". ";
                 filter.subjectIds = nodeIds;

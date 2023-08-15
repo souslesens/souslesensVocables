@@ -2,7 +2,7 @@ import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 
 self.lineageVisjsGraph;
 import Export from "../../shared/export.js";
@@ -227,16 +227,16 @@ var Lineage_query = (function () {
             }
 
             if (type == "_selectedNode") {
-                if (!Lineage_classes.currentGraphNode) {
+                if (!Lineage_whiteboard.currentGraphNode) {
                     return callback("no node selected");
                 }
-                var filter = getFilter([Lineage_classes.currentGraphNode]);
+                var filter = getFilter([Lineage_whiteboard.currentGraphNode]);
                 return callback(null, filter);
             } else if (type == "_whiteBoardNodes") {
-                if (!Lineage_classes.lineageVisjsGraph.data) {
+                if (!Lineage_whiteboard.lineageVisjsGraph.data) {
                     return callback("no nodes on witheboard");
                 }
-                var filter = getFilter(Lineage_classes.lineageVisjsGraph.data.nodes);
+                var filter = getFilter(Lineage_whiteboard.lineageVisjsGraph.data.nodes);
                 return callback(null, filter);
             }
             return "";
@@ -356,7 +356,7 @@ var Lineage_query = (function () {
                         nodeIds.push(item.s.value);
                     }
                 });
-                Lineage_classes.addNodesAndParentsToGraph(source, nodeIds, {});
+                Lineage_whiteboard.addNodesAndParentsToGraph(source, nodeIds, {});
                 Lineage_query.executeQuery("list");
                 self.setMessage("");
                 $("#QueryDialog").dialog({
@@ -424,7 +424,7 @@ var Lineage_query = (function () {
             action: function (_e) {
                 var selectedNodes = $("#lineageQuery_listResultDivTree").jstree().get_selected(true);
                 if (selectedNodes.length > 1) {
-                    Lineage_classes.drawNodesAndParents(selectedNodes, 0);
+                    Lineage_whiteboard.drawNodesAndParents(selectedNodes, 0);
                 } else if (self.currentTreeNode.children.length > 0) {
                     var selectedNodes = [];
                     self.currentTreeNode.children.forEach(function (childId) {
@@ -432,9 +432,9 @@ var Lineage_query = (function () {
                         selectedNodes.push(node);
                     });
 
-                    Lineage_classes.drawNodesAndParents(selectedNodes, 0);
+                    Lineage_whiteboard.drawNodesAndParents(selectedNodes, 0);
                 } else {
-                    Lineage_classes.drawNodesAndParents(self.currentTreeNode, 1, null, function (err, result) {});
+                    Lineage_whiteboard.drawNodesAndParents(self.currentTreeNode, 1, null, function (err, result) {});
                 }
             },
         };
@@ -449,7 +449,7 @@ var Lineage_query = (function () {
     };
 
     self.showDecorateGraphDialog = function () {
-        var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+        var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
         if (Object.keys(existingNodes).length == 0) {
             return alert("draw nodes first");
         }
@@ -479,7 +479,7 @@ var Lineage_query = (function () {
             var color = $("#lineage_selection_decorate_colorSelect").val();
             var shape = $("#lineage_selection_decorate_shapeSelect").val();
             var size = $("#lineage_selection_decorate_sizeInput").val();
-            var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+            var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             nodes.forEach(function (nodeId) {
                 if (!existingNodes[nodeId]) {
                     return;
@@ -497,7 +497,7 @@ var Lineage_query = (function () {
                 newIds.push(obj);
             });
             $("#LineagePopup").dialog("close");
-            Lineage_classes.lineageVisjsGraph.data.nodes.update(newIds);
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newIds);
         }
 
         var selectedNodes = $("#lineageQuery_listResultDivTree").jstree().get_selected(true);
@@ -605,15 +605,15 @@ var Lineage_query = (function () {
         var toClass = self.databasesMap[currentDatabase].toClass;
 
         var visjsData = { nodes: [], edges: [] };
-        var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+        var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
         if (!existingNodes[fromClass.classId]) {
             existingNodes[fromClass.classId] = 1;
             visjsData.nodes.push({
                 id: fromClass.classId,
                 label: fromClass.classLabel,
-                shape: Lineage_classes.defaultShape,
-                color: Lineage_classes.getSourceColor(Lineage_sources.activeSource),
+                shape: Lineage_whiteboard.defaultShape,
+                color: Lineage_whiteboard.getSourceColor(Lineage_sources.activeSource),
                 data: {
                     id: fromClass.classId,
                     label: fromClass.label,
@@ -627,8 +627,8 @@ var Lineage_query = (function () {
             visjsData.nodes.push({
                 id: toClass.classId,
                 label: toClass.classLabel,
-                shape: Lineage_classes.defaultShape,
-                color: Lineage_classes.getSourceColor(Lineage_sources.activeSource),
+                shape: Lineage_whiteboard.defaultShape,
+                color: Lineage_whiteboard.getSourceColor(Lineage_sources.activeSource),
                 data: {
                     id: toClass.classId,
                     label: toClass.label,
@@ -659,7 +659,7 @@ var Lineage_query = (function () {
                     id: idFrom,
                     label: idFrom,
                     shape: "square",
-                    size: Lineage_classes.defaultShapeSize,
+                    size: Lineage_whiteboard.defaultShapeSize,
                     color: "brown",
                     data: {
                         id: idFrom,
@@ -676,7 +676,7 @@ var Lineage_query = (function () {
                     id: idTo,
                     label: idTo,
                     shape: "square",
-                    size: Lineage_classes.defaultShapeSize,
+                    size: Lineage_whiteboard.defaultShapeSize,
                     color: "grey",
                     data: {
                         id: idTo,
@@ -700,7 +700,7 @@ var Lineage_query = (function () {
                             scaleFactor: 0.5,
                         },
                     },
-                    color: Lineage_classes.defaultEdgeColor,
+                    color: Lineage_whiteboard.defaultEdgeColor,
                 });
             }
             var edgeId = idTo + "_" + toClass.classId;
@@ -717,7 +717,7 @@ var Lineage_query = (function () {
                             scaleFactor: 0.5,
                         },
                     },
-                    color: Lineage_classes.defaultEdgeColor,
+                    color: Lineage_whiteboard.defaultEdgeColor,
                 });
             }
             var edgeId = idFrom + "_" + idTo;
@@ -745,12 +745,12 @@ var Lineage_query = (function () {
             }
         });
 
-        if (!Lineage_classes.lineageVisjsGraph.data || !Lineage_classes.lineageVisjsGraph.data.nodes) {
+        if (!Lineage_whiteboard.lineageVisjsGraph.data || !Lineage_whiteboard.lineageVisjsGraph.data.nodes) {
             self.drawNewGraph(visjsData);
         }
-        Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-        Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
-        Lineage_classes.lineageVisjsGraph.network.fit();
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+        Lineage_whiteboard.lineageVisjsGraph.network.fit();
         $("#waitImg").css("display", "none");
     };
 

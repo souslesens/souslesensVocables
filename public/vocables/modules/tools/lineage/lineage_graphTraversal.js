@@ -4,7 +4,7 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 import common from "../../shared/common.js";
 self.lineageVisjsGraph;
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 import SearchWidget from "../../uiWidgets/searchWidget.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -135,7 +135,7 @@ var Lineage_graphTraversal = (function () {
 
     self.initVisjsPathMode = function () {
         self.inPathMode = true;
-        Lineage_classes.lineageVisjsGraph.network.addEdgeMode();
+        Lineage_whiteboard.lineageVisjsGraph.network.addEdgeMode();
         $("#mainDialogDiv").dialog("close");
     };
 
@@ -252,21 +252,21 @@ var Lineage_graphTraversal = (function () {
 
     self.drawPathesOnWhiteboard = function draw(relations) {
         var visjsData = { nodes: [], edges: [] };
-        var existingIdsMap = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+        var existingIdsMap = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
-        var shape = Lineage_classes.defaultShape;
+        var shape = Lineage_whiteboard.defaultShape;
         var source = Lineage_sources.activeSource;
-        var color = Lineage_classes.getSourceColor(Lineage_sources.activeSource);
+        var color = Lineage_whiteboard.getSourceColor(Lineage_sources.activeSource);
         relations.forEach(function (relation, index) {
             if (!existingIdsMap[relation.from]) {
                 existingIdsMap[relation.from] = 1;
                 var node = {
                     id: relation.from,
                     label: relation.fromLabel,
-                    shadow: Lineage_classes.nodeShadow,
+                    shadow: Lineage_whiteboard.nodeShadow,
                     shape: shape,
                     color: color,
-                    size: Lineage_classes.defaultShapeSize,
+                    size: Lineage_whiteboard.defaultShapeSize,
                     data: {
                         source: source,
                         id: relation.from,
@@ -280,10 +280,10 @@ var Lineage_graphTraversal = (function () {
                 var node = {
                     id: relation.to,
                     label: relation.toLabel,
-                    shadow: Lineage_classes.nodeShadow,
+                    shadow: Lineage_whiteboard.nodeShadow,
                     shape: shape,
                     color: color,
-                    size: Lineage_classes.defaultShapeSize,
+                    size: Lineage_whiteboard.defaultShapeSize,
                     data: {
                         source: source,
                         id: relation.to,
@@ -318,18 +318,18 @@ var Lineage_graphTraversal = (function () {
             }
         });
 
-        var oldEdges = Lineage_classes.lineageVisjsGraph.data.edges.get();
+        var oldEdges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
         var toDelete = [];
         oldEdges.forEach(function (edge) {
             if (edge.type == "path") toDelete.push(edge.id);
         });
-        Lineage_classes.lineageVisjsGraph.data.edges.remove(toDelete);
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(toDelete);
 
-        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
-            Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-            Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
+        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
         } else {
-            Lineage_classes.drawNewGraph(visjsData);
+            Lineage_whiteboard.drawNewGraph(visjsData);
         }
     };
 

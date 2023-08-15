@@ -2,7 +2,7 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 
 self.lineageVisjsGraph;
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 import common from "../../shared/common.js";
 import Export from "../../shared/export.js";
 
@@ -232,259 +232,7 @@ var Lineage_properties = (function () {
      * @param nodes
      * @param nodeData
      */
-    self.drawPredicatesGraph = function (source, nodeIds, properties, options, callback) {
-        if (!options) {
-            options = {};
-        }
-        if (nodeIds && !Array.isArray(nodeIds)) {
-            nodeIds = [nodeIds];
-        }
-        if (properties && !Array.isArray(properties)) {
-            properties = [properties];
-        }
-        var filter = "";
-        if ((!properties || properties.length == 0) && !options.filter) {
-            filter = " FILTER( ?prop not in(rdf:type, rdfs:subClassOf,rdfs:member))";
-        }
-        if (!options) {
-            options = {};
-        }
-        var subjectIds, objectIds;
 
-        if (options.inversePredicate) {
-            subjectIds = null;
-            objectIds = nodeIds;
-        } else {
-            subjectIds = nodeIds;
-            objectIds = null;
-        }
-
-        options.filter = (options.filter || "") + " " + filter;
-
-        Sparql_OWL.getFilteredTriples(source, subjectIds, properties, objectIds, options, function (err, result) {
-            if (err) {
-                return callback(err);
-            }
-            if (options.output == "graph") {
-                result = Lineage_classes.truncateResultToVisGraphLimit(result);
-            }
-            Sparql_common.setSparqlResultPropertiesLabels(source, result, "prop", function (err, result2) {
-                if (err) {
-                    return callback(err);
-                }
-
-                var visjsData = { nodes: [], edges: [] };
-                var existingNodes = options.output == "table" ? {} : Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
-                var color = Lineage_classes.getSourceColor(source);
-
-                var toNodesMap = [];
-
-                result2.forEach(function (item) {
-                    if (!existingNodes[item.subject.value]) {
-                        existingNodes[item.subject.value] = 1;
-
-                        var label = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value);
-                        var shape = Lineage_classes.defaultShape;
-                        var size = Lineage_classes.defaultShapeSize;
-
-                        var type = item.subjectType ? item.subjectType.value : "?";
-                        if (type.indexOf("NamedIndividual") > -1) {
-                            shape = Lineage_classes.namedIndividualShape;
-                        }
-
-                        if (options.inversePredicate) {
-                            if (item.subject.type == "bnode") {
-                                label = "";
-                                shape = "circle";
-                                color = "#EEE";
-                                size = 2;
-                            }
-
-                            /*  if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
-                  label = Config.Lineage.logicalOperatorsMap[item.prop.value];
-                  shape = "circle";
-                  color = "#EEE";
-              }*/
-                        }
-
-                        var predicateUri = options.inversePredicate ? null : item.prop.value;
-                        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject.value, label, predicateUri, { shape: shape }));
-                        /*  visjsData.nodes.push({
-                id: item.subject.value,
-                label: label,
-                shape: shape,
-                size: size,
-                color: color,
-                data: {
-                    source: source,
-                    id: item.subject.value,
-                    label: item.subjectLabel.value,
-                },
-            });*/
-                    }
-                    if (options.skipLiterals && item.object.type && item.object.type.indexOf("literal") > -1) {
-                        return;
-                    }
-                    if (!existingNodes[item.object.value]) {
-                        existingNodes[item.object.value] = 1;
-                        var label = "";
-                        if (item.objectValue) {
-                            label = item.objectValue.value.replace(/T[\d:]*Z/, "");
-                        } else {
-                            label = item.objectLabel ? item.objectLabel.value : Sparql_common.getLabelFromURI(item.object.value);
-                        }
-                        var shape = Lineage_classes.defaultShape;
-
-                        var type = item.objectType ? item.objectType.value : "?";
-
-                        var size = Lineage_classes.defaultShapeSize;
-                        if (type.indexOf("NamedIndividual") > -1) {
-                            shape = Lineage_classes.namedIndividualShape;
-                        }
-
-                        if (!options.inversePredicate) {
-                            if (item.object.type == "bnode") {
-                                label = "";
-                                shape = "circle";
-                                color = "#EEE";
-                                size = 2;
-                            }
-
-                            /*  if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
-                  label = Config.Lineage.logicalOperatorsMap[item.prop.value] || "";
-                  shape = "hexagon";
-                  color = "#EEE";
-              }*/
-                        }
-                        var font = null;
-                        if (item.object.type == "literal") {
-                            shape = "text";
-                            if (label.length > Config.whiteBoardMaxLabelLength) {
-                                label = label.substring(0, Config.whiteBoardMaxLabelLength) + "...";
-                            }
-
-                            font = "12px arial #3c8fe1";
-                        }
-
-                        var predicateUri = options.inversePredicate ? item.prop.value : null;
-
-                        visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.object.value, label, predicateUri, { shape: shape }));
-
-                        /*   visjsData.nodes.push({
-                id: item.object.value,
-                label: label,
-                shape: shape,
-                size: size,
-                color: color,
-                font: font,
-                data: {
-                    source: source,
-                    id: item.object.value,
-                    label: item.objectLabel.value,
-                    type: item.object.type,
-                },
-            });*/
-                    }
-                    var edgeId = item.subject.value + "_" + item.prop.value + "_" + item.object.value;
-                    if (!existingNodes[edgeId]) {
-                        existingNodes[edgeId] = 1;
-
-                        //specific case of equivalentClass and sameAs
-                        {
-                            var nodeSource = source;
-                            var prop = item.prop.value;
-                            if (
-                                options.includeSources &&
-                                options.includeSources.length > 0 &&
-                                (prop == "http://www.w3.org/2002/07/owl#sameAs" || prop == "http://www.w3.org/2002/07/owl#equivalentClass")
-                            ) {
-                                nodeSource = options.includeSources[0];
-                            }
-                        }
-                        var dashes = false;
-                        var edgeColor = options.edgesColor || Lineage_classes.defaultPredicateEdgeColor;
-                        if (item.object.type.indexOf("literal") > -1) {
-                            edgeColor = "#3c8fe1";
-                            dashes = [6, 2, 3];
-                        }
-
-                        visjsData.edges.push({
-                            id: edgeId,
-                            from: item.subject.value,
-                            to: item.object.value,
-                            data: {
-                                id: edgeId,
-                                type: "ObjectProperty",
-                                propLabel: item.propLabel.value,
-                                from: item.subject.value,
-                                to: item.object.value,
-                                prop: item.prop.value,
-                                source: nodeSource,
-                            },
-                            label: item.propLabel.value,
-                            font: { edgeColor },
-                            arrows: {
-                                to: {
-                                    enabled: true,
-                                    type: "solid",
-                                    scaleFactor: 0.5,
-                                },
-                            },
-                            dashes: dashes,
-                            color: edgeColor,
-                        });
-                    }
-                });
-
-                /*    var fromNodesMap={}
-        var leafNodesMap={}
-        visjsData.edges.forEach(function(item){
-            fromNodesMap[item.from]=1
-
-        })
-
-        var leafNodes=[]
-        visjsData.edges.forEach(function(item){
-            if(!fromNodesMap[item.to]){
-                var shape,label,color;
-                var str=""
-                if ( item.id.indexOf("union")>-1  || item.id.indexOf("intersection")>-1){
-                    shape = "circle";
-                    label = "V";
-                    color = "#eee";
-                    leafNodesMap[item.to]={shape:shape,label:label,color:color}
-
-                }
-
-            }
-        })
-
-        visjsData.nodes.forEach(function(item,index){
-            if(leafNodesMap[item.id]){
-                visjsData.nodes[index].shape=leafNodesMap[item.id].shape;
-                visjsData.nodes[index].color=leafNodesMap[item.id].color;
-                visjsData.nodes[index].label=leafNodesMap[item.id].label;
-            }
-
-        })*/
-
-                if (callback && options.returnVisjsData) {
-                    return callback(null, visjsData);
-                }
-                if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
-                    Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-                    Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
-                } else {
-                    Lineage_classes.drawNewGraph(visjsData);
-                }
-
-                $("#waitImg").css("display", "none");
-                if (callback) {
-                    return callback(null, visjsData);
-                }
-            });
-        });
-    };
 
     self.drawObjectPropertiesRestrictions = function (source, nodeIds, properties, options) {
         if (!options) {
@@ -502,13 +250,13 @@ var Lineage_properties = (function () {
             }
             var visjsData = { nodes: [], edges: [] };
 
-            var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+            var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             var isNewGraph = true;
             if (Object.keys(existingNodes).length > 0) {
                 isNewGraph = false;
             }
 
-            var color = Lineage_classes.getSourceColor(source);
+            var color = Lineage_whiteboard.getSourceColor(source);
             //  console.log(JSON.stringify(result, null, 2))
             result.forEach(function (item) {
                 if (true && !existingNodes[item.prop.value]) {
@@ -517,7 +265,7 @@ var Lineage_properties = (function () {
                         id: item.prop.value,
                         label: item.propLabel.value,
                         shape: "ellipse",
-                        size: Lineage_classes.defaultShapeSize,
+                        size: Lineage_whiteboard.defaultShapeSize,
                         color: "#fdbf01",
                         data: {
                             source: source,
@@ -535,7 +283,7 @@ var Lineage_properties = (function () {
                         label: item.sourceClassLabel.value + (item.targetClassLabel ? " -> " + item.targetClassLabel.value : " -> any"),
                         shape: "box",
                         font: { background: "#ddd" },
-                        //  size: Lineage_classes.defaultShapeSize,
+                        //  size: Lineage_whiteboard.defaultShapeSize,
                         // color: color,
                         data: {
                             source: source,
@@ -544,7 +292,7 @@ var Lineage_properties = (function () {
                             varName: "value",
                         },
                     });
-                    edgeId = item.prop.value + "_" + item.restriction.value;
+                   var edgeId = item.prop.value + "_" + item.restriction.value;
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
 
@@ -562,7 +310,7 @@ var Lineage_properties = (function () {
                                 },
                             },
                             dashes: true,
-                            color: Lineage_classes.restrictionColor,
+                            color: Lineage_whiteboard.restrictionColor,
                         });
                     }
                 }
@@ -586,18 +334,18 @@ var Lineage_properties = (function () {
                                 },
                             },
                             dashes: true,
-                            color: Lineage_classes.restrictionColor,
+                            color: Lineage_whiteboard.restrictionColor,
                         });
                     }
                 }
             });
             if (!isNewGraph) {
-                Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-                Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
             } else {
-                Lineage_classes.drawNewGraph(visjsData);
+                Lineage_whiteboard.drawNewGraph(visjsData);
             }
-            Lineage_classes.lineageVisjsGraph.network.fit();
+            Lineage_whiteboard.lineageVisjsGraph.network.fit();
             $("#waitImg").css("display", "none");
         });
     };
@@ -607,8 +355,8 @@ var Lineage_properties = (function () {
         var targetnodes = null;
         var nodesSelection = $("#LineagePropertie_nodesSelectionSelect").val();
         nodesSelection = false;
-        if (Lineage_classes.lineageVisjsGraph.data && Lineage_classes.lineageVisjsGraph.data.nodes && nodesSelection == "currentGraphNodes") {
-            targetnodes = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
+        if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes && nodesSelection == "currentGraphNodes") {
+            targetnodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
         }
         self.getPropertiesRangeAndDomain(source, property, {}, function (err, result) {
             if (err) {
@@ -669,10 +417,10 @@ var Lineage_properties = (function () {
             }
             var visjsData = { nodes: [], edges: [] };
             var existingNodes = {};
-            if (Lineage_classes.lineageVisjsGraph.data && Lineage_classes.lineageVisjsGraph.data.nodes) {
-                existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+            if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes) {
+                existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             }
-            var color = Lineage_classes.getSourceColor(Lineage_sources.activeSource);
+            var color = Lineage_whiteboard.getSourceColor(Lineage_sources.activeSource);
 
             var classShape = "dot";
             var propColor = "#ddd";
@@ -743,11 +491,11 @@ var Lineage_properties = (function () {
                                 from: item.property.value,
                                 to: subProperty.id,
                                 data: { id: edgeId, source: Lineage_sources.activeSource },
-                                color: Lineage_classes.defaultEdgeColor,
+                                color: Lineage_whiteboard.defaultEdgeColor,
                                 arrows: {
                                     from: {
                                         enabled: true,
-                                        type: Lineage_classes.defaultEdgeArrowType,
+                                        type: Lineage_whiteboard.defaultEdgeArrowType,
                                         scaleFactor: 0.5,
                                     },
                                 },
@@ -783,12 +531,12 @@ var Lineage_properties = (function () {
                             id: edgeId,
                             from: item.property.value,
                             to: subProperty,
-                            color: Lineage_classes.defaultEdgeColor,
+                            color: Lineage_whiteboard.defaultEdgeColor,
                             data: { id: edgeId, source: Lineage_sources.activeSource },
                             arrows: {
                                 from: {
                                     enabled: true,
-                                    type: Lineage_classes.defaultEdgeArrowType,
+                                    type: Lineage_whiteboard.defaultEdgeArrowType,
                                     scaleFactor: 0.5,
                                 },
                             },
@@ -800,7 +548,7 @@ var Lineage_properties = (function () {
                     if (!existingNodes[item.range.value]) {
                         if (item.rangeType) {
                             if (item.rangeType.value.indexOf("Class") > -1) {
-                                shape = Lineage_classes.defaultShape;
+                                shape = Lineage_whiteboard.defaultShape;
                             }
                             if (item.rangeType.value.indexOf("property") > -1) {
                                 shape = self.defaultShape;
@@ -833,7 +581,7 @@ var Lineage_properties = (function () {
                             arrows: {
                                 to: {
                                     enabled: true,
-                                    type: Lineage_classes.defaultEdgeArrowType,
+                                    type: Lineage_whiteboard.defaultEdgeArrowType,
                                     scaleFactor: 0.5,
                                 },
                             },
@@ -846,7 +594,7 @@ var Lineage_properties = (function () {
                         var shape = "text";
                         if (item.domainType) {
                             if (item.domainType.value.indexOf("Class") > -1) {
-                                shape = Lineage_classes.defaultShape;
+                                shape = Lineage_whiteboard.defaultShape;
                             }
                             if (item.domainType.value.indexOf("property") > -1) {
                                 shape = self.defaultShape;
@@ -878,7 +626,7 @@ var Lineage_properties = (function () {
                             arrows: {
                                 from: {
                                     enabled: true,
-                                    type: Lineage_classes.defaultEdgeArrowType,
+                                    type: Lineage_whiteboard.defaultEdgeArrowType,
                                     scaleFactor: 0.5,
                                 },
                             },
@@ -890,7 +638,7 @@ var Lineage_properties = (function () {
                         shape = "text";
                         if (item.rangeType) {
                             if (item.rangeType.value.indexOf("Class") > -1) {
-                                shape = Lineage_classes.defaultShape;
+                                shape = Lineage_whiteboard.defaultShape;
                             }
                             if (item.rangeType.value.indexOf("property") > -1) {
                                 shape = self.propertiesLineage_classes.defaultShape;
@@ -923,7 +671,7 @@ var Lineage_properties = (function () {
                             arrows: {
                                 to: {
                                     enabled: true,
-                                    type: Lineage_classes.defaultEdgeArrowType,
+                                    type: Lineage_whiteboard.defaultEdgeArrowType,
                                     scaleFactor: 0.5,
                                 },
                             },
@@ -963,14 +711,14 @@ var Lineage_properties = (function () {
                 }
             });
 
-            if (!Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
-                Lineage_classes.drawNewGraph(visjsData);
+            if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                Lineage_whiteboard.drawNewGraph(visjsData);
             } else {
-                Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-                Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
             }
 
-            /*  Lineage_classes.lineageVisjsGraph.network.fit();
+            /*  Lineage_whiteboard.lineageVisjsGraph.network.fit();
 
 */
             self.graphInited = true;
@@ -1002,8 +750,8 @@ var Lineage_properties = (function () {
             var mode = $("#LineagePropertie_nodesSelectionSelect").val();
             var filterNodes = null;
             if (mode == "currentGraphNodes") {
-                if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty) {
-                    filterNodes = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
+                if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty) {
+                    filterNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
                 }
             }
             MainController.UI.message("searching...");
@@ -1269,8 +1017,8 @@ var Lineage_properties = (function () {
         }
         var nodeIds = null;
         var nodesSelection = $("#lineageProperties_nodesSelectionSelect").val();
-        if (Lineage_classes.lineageVisjsGraph.data && Lineage_classes.lineageVisjsGraph.data.nodes && nodesSelection == "currentGraphNodes") {
-            nodeIds = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
+        if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes && nodesSelection == "currentGraphNodes") {
+            nodeIds = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
         }
 
         var source = Lineage_sources.activeSource;
@@ -1294,9 +1042,9 @@ var Lineage_properties = (function () {
                     options.withoutImports = true;
                 }
                 Lineage_relations.drawRelations(null, null, "Properties", options);
-                // Lineage_properties.drawPredicatesGraph(source, nodeIds, properties);
+             
             } else if (target == "table") {
-                //  Lineage_classes.graphNodeNeighborhood(data, "outcoming", function(err, result) {
+             
             }
         }
 
@@ -1305,9 +1053,9 @@ var Lineage_properties = (function () {
                 return alert("You must select properties or nodes to show predicates");
             }
             if (target == "visj") {
-                Lineage_properties.drawPredicatesGraph(source, nodeIds, properties, { withoutImports: true });
+                Lineage_whiteboard.drawPredicatesGraph(source, nodeIds, properties, { withoutImports: true });
             } else if (target == "table") {
-                //  Lineage_classes.graphNodeNeighborhood(data, "outcoming", function(err, result) {
+                //  Lineage_whiteboard.graphNodeNeighborhood(data, "outcoming", function(err, result) {
             }
         } else if (action == "restrictions") {
             if (target == "visj") {

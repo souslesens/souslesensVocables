@@ -1,5 +1,5 @@
 import visjsGraph from "../graph/visjsGraph2.js";
-import Lineage_classes from "../tools/lineage/lineage_classes.js";
+import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -65,7 +65,7 @@ var GraphController = (function () {
                 }
 
                 if (!existingIds[fromId]) {
-                    var color = Lineage_classes.getSourceColor(null, fromId);
+                    var color = Lineage_whiteboard.getSourceColor(null, fromId);
                     existingIds[fromId] = 1;
                     var node = {
                         id: fromId,
@@ -99,7 +99,7 @@ var GraphController = (function () {
 
                 if (!existingIds[toId]) {
                     existingIds[toId] = 1;
-                    color = Lineage_classes.getSourceColor(null, toId);
+                    color = Lineage_whiteboard.getSourceColor(null, toId);
                     node = {
                         id: toId,
                         label: toLabel,

@@ -4,7 +4,7 @@ import SearchUtil from "../search/searchUtil.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 import TreeController from "../shared/treeController.js";
-import Lineage_classes from "../tools/lineage/lineage_classes.js";
+import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import common from "../shared/common.js";
 import Export from "../shared/export.js";
 
@@ -382,9 +382,9 @@ var SearchWidget = (function () {
                     // pb avec source
                     var selectedNodes = $("#LineageNodesJsTreeDiv").jstree().get_selected(true);
                     if (selectedNodes.length > 1) {
-                        Lineage_classes.drawNodesAndParents(selectedNodes, 0);
+                        Lineage_whiteboard.drawNodesAndParents(selectedNodes, 0);
                     } else {
-                        Lineage_classes.drawNodesAndParents(self.currentTreeNode, 0);
+                        Lineage_whiteboard.drawNodesAndParents(self.currentTreeNode, 0);
                     }
                 },
             };
@@ -393,7 +393,7 @@ var SearchWidget = (function () {
                 label: "LinkedData",
                 action: function () {
                     Lineage_linkedData.showLinkedDataPanel(self.currentTreeNode);
-                    // Lineage_classes.drawNamedIndividuals(self.currentTreeNode.data.id);
+                    // Lineage_whiteboard.drawNamedIndividuals(self.currentTreeNode.data.id);
                 },
             };
 

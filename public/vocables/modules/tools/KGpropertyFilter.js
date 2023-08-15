@@ -4,7 +4,7 @@ import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 import Export from "../shared/export.js";
 import visjsGraph from "../graph/visjsGraph2.js";
-import Lineage_classes from "./lineage/lineage_classes.js";
+import Lineage_whiteboard from "./lineage/lineage_whiteboard.js";
 import Lineage_containers from "./lineage/lineage_containers.js";
 
 var KGpropertyFilter = (function () {
@@ -427,7 +427,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
         searchBO: function (origin) {
             if (origin == "graph") {
-                self.currentDataContainer = Lineage_classes.currentGraphNode;
+                self.currentDataContainer = Lineage_whiteboard.currentGraphNode;
             }
 
             var term = self.currentDataContainer.data.label;
@@ -670,7 +670,6 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                 function (callbackSeries) {
                     visjsGraph.clearGraph();
                     var options = {
-                        skipColorGraphNodesByType: true,
                         physics: {
                             forceAtlas2Based: {
                                 centralGravity: 0.45,
@@ -680,15 +679,15 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                             minVelocity: 0.75,
                         },
                     };
-                    Lineage_classes.drawNewGraph({ nodes: [], edges: [] }, null, options);
+                    Lineage_whiteboard.drawNewGraph({ nodes: [], edges: [] }, null, options);
                     if (!self.graphButtonsInitialized) {
                         self.graphButtonsInitialized = 1;
                         var html =
                             "<div  style='position: absolute;top:30px;left:450px;'>" +
                             "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='visjsGraph.clearGraph()'> clear Graph</button>" +
                             "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='Export.exportGraphToDataTable()' > Export</button>" +
-                            '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.addNodesAndParentsToGraph()">Parents</button>' +
-                            '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.addChildrenToGraph()">Expand</button>' +
+                            '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()">Parents</button>' +
+                            '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand</button>' +
                             //   "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onClick='visjsGraph.showGraphConfig()'>Display</button>";
                             "</div>";
                         $("#centralPanelDiv").append(html);
@@ -871,14 +870,14 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
                     return callbackSeries();
                     var properties = ["rdfs:member"];
                     var options = { inversePredicate: 1 };
-                    Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
+                    Lineage_whiteboard.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
                         return callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
                     var properties = ["http://datalenergies.total.com/resource/tsf/idcp/mapsWith"];
                     var options = {};
-                    Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
+                    Lineage_whiteboard.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -957,7 +956,7 @@ $("#KGpropertyFilter_rightPanelTabs").tabs("option","active",0)*/
 
     self.getGraphPopupMenuItem = function () {
         var html =
-            ' <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showNodeInfos();"> Node infos</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>' +
             '<span  class="popupMenuItem" onclick="KGpropertyFilter.commonJstreeActions.searchBO(\'graph\');"> Search BO</span>';
         return html;
     };

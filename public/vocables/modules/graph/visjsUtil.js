@@ -1,5 +1,5 @@
 import Sparql_common from "../sparqlProxies/sparql_common.js";
-import Lineage_classes from "../tools/lineage/lineage_classes.js";
+import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 
@@ -20,15 +20,15 @@ var VisjsUtil = (function () {
             options = {};
         }
         var shape, color, lab;
-        var size = Lineage_classes.defaultShapeSize;
+        var size = Lineage_whiteboard.defaultShapeSize;
         var str;
         if (options.symbol) {
             shape = "circle";
             label = options.symbol;
             color = "#eee";
         } else {
-            shape = options.shape || Lineage_classes.defaultShape;
-            color = options.color || Lineage_classes.getSourceColor(source);
+            shape = options.shape || Lineage_whiteboard.defaultShape;
+            color = options.color || Lineage_whiteboard.getSourceColor(source);
             var regex = /[0-9a-f]{3}/; //blank nodes
             if (uri.indexOf("http") < 0 && label.match(regex)) {
                 shape = "hexagon";
@@ -98,7 +98,7 @@ var VisjsUtil = (function () {
                     label = Config.Lineage.logicalOperatorsMap[logicalOperator];
                     color = "#eee";
                 } else {
-                    shape = options.subjectShape || Lineage_classes.defaultShape;
+                    shape = options.subjectShape || Lineage_whiteboard.defaultShape;
                     color = color || "grey";
                 }
                 visjsData.nodes.push({
@@ -106,7 +106,7 @@ var VisjsUtil = (function () {
                     label: label,
                     shape: shape,
                     color: color,
-                    size: Lineage_classes.defaultShapeSize,
+                    size: Lineage_whiteboard.defaultShapeSize,
                     data: {
                         id: id,
                         label: label,
@@ -142,7 +142,7 @@ var VisjsUtil = (function () {
                     arrows: {
                         to: {
                             enabled: true,
-                            type: Lineage_classes.defaultEdgeArrowType,
+                            type: Lineage_whiteboard.defaultEdgeArrowType,
                             scaleFactor: 0.5,
                         },
                     },
@@ -160,7 +160,7 @@ var VisjsUtil = (function () {
 
     self.drawVisjsData = function (visjsData, graphDiv, options) {
         if (!visjsGraph.isGraphNotEmpty()) {
-            Lineage_classes.drawNewGraph(visjsData, graphDiv, options);
+            Lineage_whiteboard.drawNewGraph(visjsData, graphDiv, options);
         }
         visjsGraph.data.nodes.add(visjsData.nodes);
         visjsGraph.data.edges.add(visjsData.edges);

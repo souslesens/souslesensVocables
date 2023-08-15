@@ -1,5 +1,5 @@
 import common from "../shared/common.js";
-import Lineage_classes from "../tools/lineage/lineage_classes.js";
+import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 
 var GraphDecorationWidget = (function () {
     var self = {};
@@ -30,9 +30,9 @@ var GraphDecorationWidget = (function () {
             var selection = $("#lineage_decorate_selectionSelect").val();
 
             if (selection == "Last added nodes") {
-                nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
+                nodes = Lineage_whiteboard.lineageVisjsGraph.lastAddedNodes;
             } else if (selection == "All nodes") {
-                nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
+                nodes = Lineage_whiteboard.lineageVisjsGraph.lastAddedNodes;
             } else if (selection == "Selected nodes") {
                 nodes = Lineage_selection.selectedNodes;
             }
@@ -67,7 +67,7 @@ var GraphDecorationWidget = (function () {
             }
             newIds.push(obj);
         });
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newIds);
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newIds);
     };
 
     self.getNodeDecorationAttrs = function (nodeId) {
@@ -105,7 +105,7 @@ var GraphDecorationWidget = (function () {
         }
         $("#lineage_actionDiv_title").html("Outline Legend");
         LegendWidget.drawLegend("Lineage_classes_graphDecoration_legendDiv", legendVisjsTreeData);
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newVisjsNodes);
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisjsNodes);
     };
 
     return self;

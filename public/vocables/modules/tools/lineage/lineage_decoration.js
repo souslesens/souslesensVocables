@@ -5,7 +5,7 @@ import Lineage_sources from "./lineage_sources.js";
 import common from "../../shared/common.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 
 //@typescript-eslint/no-unused-vars
 var Lineage_decoration = (function() {
@@ -15,7 +15,24 @@ var Lineage_decoration = (function() {
   self.legendMap = {};
   self.currentVisjGraphNodesMap = {};
 
-  self.colorGraphNodesByType = function(visjsNodes) {
+  self.decorateNodeAndDrawLegend = function(visjsNodes) {
+
+    if (Config.UIprofile == "KG") {
+      self.decorateByUpperOntologyByQuery(visjsNodes)
+    }
+    else {
+      self.decorateByUpperOntologyByClass(visjsNodes)
+    }
+
+
+  }
+
+  self.decorateByUpperOntologyByQuery=function(visjsNodes){
+    
+  }
+
+
+  self.decorateByUpperOntologyByClass=function(visjsNodes){
     if (!Config.topLevelOntologies[Config.currentTopLevelOntology]) {
       return $("#lineage_legendWrapper").css("display", "none");
     }
@@ -24,7 +41,7 @@ var Lineage_decoration = (function() {
     var topLevelOntologynodeIds = [];
     var individualNodes = {};
     if (true || !visjsNodes) {
-      visjsNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+      visjsNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
     }
 
     if (visjsNodes.length == 0) {
@@ -47,7 +64,7 @@ var Lineage_decoration = (function() {
       for (var key in Config.topLevelOntologyFixedlegendMap) {
         if (!color) {
           if (!Config.topLevelOntologyFixedlegendMap[key]) {
-            return Lineage_classes.getSourceColor(key);
+            return Lineage_whiteboard.getSourceColor(key);
           }
           color = Config.topLevelOntologyFixedlegendMap[key][classId];
         }
@@ -232,7 +249,7 @@ var Lineage_decoration = (function() {
 
         //change vijsNodes Color
         function(callbackSeries) {
-          Lineage_classes.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
+          Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisJsNodes);
           callbackSeries();
         },
 
@@ -259,7 +276,7 @@ var Lineage_decoration = (function() {
 
     var str = "<div  class='Lineage_legendTypeTopLevelOntologyDiv' style='display: flex;>";
 
-    LegendWidget.drawLegend("Lineage_classes_graphDecoration_legendDiv", jstreeData);
+    LegendWidget.drawLegend("Lineage_whiteboard_graphDecoration_legendDiv", jstreeData);
   };
 
   return self;

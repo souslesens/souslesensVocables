@@ -23,21 +23,17 @@ var Lineage_decoration = (function () {
   };
   var operations = Object.keys(self.operationsMap);
 
-  common.fillSelectOptions("Lineage_classes_graphDecoration_operationSelect", operations, true);
+  common.fillSelectOptions("Lineage_whiteboard_graphDecoration_operationSelect", operations, true);
   self.currentVisjGraphNodesMap = {};
   self.legendMap = {};
   self.currentLegendDJstreedata = {};
 };*/
     self.run = function (operation) {
-        $("#Lineage_classes_graphDecoration_operationSelect").val("");
+        $("#Lineage_whiteboard_graphDecoration_operationSelect").val("");
         self.operationsMap[operation]();
     };
 
-    self.showGraphDecorationDialog = function () {
-        $("#mainDialogDiv").load("snippets/lineage/graphDecoration.html", function () {
-            $("#mainDialogDiv").dialog("open");
-        });
-    };
+
 
     /**
      * set the upper ontology classes map
@@ -215,7 +211,7 @@ var Lineage_decoration = (function () {
         var topLevelOntologynodeIds = [];
         var individualNodes = {};
         if (!visjsNodes) {
-            visjsNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+            visjsNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
         }
 
         if (visjsNodes.length == 0) {
@@ -275,7 +271,7 @@ var Lineage_decoration = (function () {
         });
     };
     self.clearLegend = function () {
-        $("#Lineage_classes_graphDecoration_legendDiv").html("");
+        $("#Lineage_whiteboard_graphDecoration_legendDiv").html("");
         self.legendMap = {};
     };
 
@@ -288,7 +284,7 @@ var Lineage_decoration = (function () {
         var topLevelOntologynodeIds = [];
         var individualNodes = {};
         if (!visjsNodes) {
-            visjsNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+            visjsNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
         }
 
         if (visjsNodes.length == 0) {
@@ -313,7 +309,7 @@ var Lineage_decoration = (function () {
                             }
                         }
                     });
-                    Lineage_classes.lineageVisjsGraph.data.nodes.update(topLevelOntologynodeIds);
+                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(topLevelOntologynodeIds);
                     callbackSeries();
                 },
                 //get individuals class and add it to nonTopLevelOntologynodeIds
@@ -413,8 +409,8 @@ var Lineage_decoration = (function () {
                         }
                     }
 
-                    if (Lineage_classes.lineageVisjsGraph.data && Lineage_classes.lineageVisjsGraph.data.nodes) {
-                        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
+                    if (Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes) {
+                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
                     }
 
                     callbackSeries();
@@ -479,17 +475,17 @@ var Lineage_decoration = (function () {
             onUncheckNodeFn: Lineage_decoration.onLegendCheckBoxes,
             tie_selection: false,
         };
-        $("#Lineage_classes_graphDecoration_legendDiv").jstree("destroy").empty();
-        $("#Lineage_classes_graphDecoration_legendDiv").html("<div  class='jstreeContainer' style='height: 350px;width:90%'><div id='Lineage_classes_graphDecoration_legendTreeDiv'></div></div>");
-        JstreeWidget.loadJsTree("Lineage_classes_graphDecoration_legendTreeDiv", jstreeData, options, function () {
-            $("#Lineage_classes_graphDecoration_legendTreeDiv").jstree(true).check_all();
+        $("#Lineage_whiteboard_graphDecoration_legendDiv").jstree("destroy").empty();
+        $("#Lineage_whiteboard_graphDecoration_legendDiv").html("<div  class='jstreeContainer' style='height: 350px;width:90%'><div id='Lineage_whiteboard_graphDecoration_legendTreeDiv'></div></div>");
+        JstreeWidget.loadJsTree("Lineage_whiteboard_graphDecoration_legendTreeDiv", jstreeData, options, function () {
+            $("#Lineage_whiteboard_graphDecoration_legendTreeDiv").jstree(true).check_all();
         });
     };
 
     self.onLegendCheckBoxes = function () {
-        var checkdeTopClassesIds = $("#Lineage_classes_graphDecoration_legendTreeDiv").jstree(true).get_checked();
+        var checkdeTopClassesIds = $("#Lineage_whiteboard_graphDecoration_legendTreeDiv").jstree(true).get_checked();
 
-        var allNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+        var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
         var newNodes = [];
         allNodes.forEach(function (node) {
             var hidden = true;
@@ -502,7 +498,7 @@ var Lineage_decoration = (function () {
                 hidden: hidden,
             });
         });
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
     };
 
     self.onlegendTypeDivClick = function (div, type) {
@@ -527,7 +523,7 @@ var Lineage_decoration = (function () {
         } else {
             self.currentLegendObject.div.removeClass("Lineage_legendTypeDivHidden");
         }
-        var allNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+        var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
         var newNodes = [];
         var hidden = hide ? true : false;
         allNodes.forEach(function (node) {
@@ -549,7 +545,7 @@ var Lineage_decoration = (function () {
                 }
             }
         });
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
     };
 
     self.refreshLegend = function (source) {
@@ -580,9 +576,9 @@ var Lineage_decoration = (function () {
             var selection = $("#lineage_decorate_selectionSelect").val();
             var nodes;
             if (selection == "Last added nodes") {
-                nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
+                nodes = Lineage_whiteboard.lineageVisjsGraph.lastAddedNodes;
             } else if (selection == "All nodes") {
-                nodes = Lineage_classes.lineageVisjsGraph.lastAddedNodes;
+                nodes = Lineage_whiteboard.lineageVisjsGraph.lastAddedNodes;
             } else if (selection == "Selected nodes") {
                 nodes = Lineage_selection.selectedNodes;
             }
@@ -610,7 +606,7 @@ var Lineage_decoration = (function () {
                 newIds.push(obj);
             });
 
-            Lineage_classes.lineageVisjsGraph.data.nodes.update(newIds);
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newIds);
         });
 
     return self;

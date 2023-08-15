@@ -5,7 +5,7 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import OntologyModels from "../../shared/ontologyModels.js";
 
 self.lineageVisjsGraph;
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // !!!!!!!!  const util = require("../../../../../bin/util.");
@@ -54,8 +54,8 @@ var Lineage_blend = (function() {
       $("#LineagePopup").dialog("open");
       $("#LineagePopup").dialog("option", "title", "Create relation in source " + Lineage_sources.activeSource);
       $("#LineagePopup").load("snippets/lineage/lineageAddEdgeDialog.html", function() {
-        self.sourceNode = Lineage_classes.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
-        self.targetNode = Lineage_classes.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
+        self.sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from).data;
+        self.targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to).data;
 
         var source = Lineage_sources.activeSource;
 
@@ -382,8 +382,8 @@ var Lineage_blend = (function() {
 
       $("#LineageBlend_creatingNodeClassParamsDiv").dialog("open");
       $("#LineageBlend_creatingNodeClassParamsDiv").tabs({});
-      if (Lineage_classes.currentGraphNode && Lineage_classes.currentGraphNode.data) {
-        $("#LineageBlend_creatingNodeObjectsSelect").val(Lineage_classes.currentGraphNode.data.id);
+      if (Lineage_whiteboard.currentGraphNode && Lineage_whiteboard.currentGraphNode.data) {
+        $("#LineageBlend_creatingNodeObjectsSelect").val(Lineage_whiteboard.currentGraphNode.data.id);
       }
     },
     openCreatNodeDialogOpen: function(type) {
@@ -630,7 +630,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                 return alert(err.responseText);
               }
               if (self.graphModification.currentCreatingNodeType == "Class") {
-                Lineage_classes.addNodesAndParentsToGraph(Lineage_sources.activeSource, sourceUrisArray, {}, function(err) {
+                Lineage_whiteboard.addNodesAndParentsToGraph(Lineage_sources.activeSource, sourceUrisArray, {}, function(err) {
                   $("#LineageBlend_creatingNodeClassParamsDiv").dialog("close");
                   $("#LineagePopup").dialog("close");
                   MainController.UI.message(sourceUrisArray.length + "nodes Created and Indexed");
@@ -680,7 +680,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
           };
           MainController.UI.message("node Created");
           self.graphModification.creatingNodeTriples = [];
-          Lineage_classes.drawNodesAndParents(nodeData);
+          Lineage_whiteboard.drawNodesAndParents(nodeData);
           SearchUtil.generateElasticIndex(Lineage_sources.activeSource, { ids: [self.graphModification.creatingsourceUri] }, function(err, result) {
             if (err) {
               return alert(err.responseText);
@@ -763,7 +763,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
         });
       }
       else {
-        var oldRelations = Lineage_classes.lineageVisjsGraph.getNodeEdges(sourceNode.id, targetNode.id);
+        var oldRelations = Lineage_whiteboard.lineageVisjsGraph.getNodeEdges(sourceNode.id, targetNode.id);
         self.createRelation(inSource, propId, sourceNode, targetNode, true, true, {}, function(err, blankNodeId) {
           if (err) {
             return callback(err);
@@ -834,15 +834,15 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
         (newEdge.arrows = {
           to: {
             enabled: true,
-            type: Lineage_classes.defaultEdgeArrowType,
+            type: Lineage_whiteboard.defaultEdgeArrowType,
             scaleFactor: 0.5
           }
         });
       newEdge.dashes = true;
 
       if (result.type == "ObjectProperty") {
-        newEdge.color = Lineage_classes.defaultPredicateEdgeColor;
-        newEdge.font = { color: Lineage_classes.defaultPredicateEdgeColor };
+        newEdge.color = Lineage_whiteboard.defaultPredicateEdgeColor;
+        newEdge.font = { color: Lineage_whiteboard.defaultPredicateEdgeColor };
         newEdge.data = {
           id: relationId,
           type: "ObjectProperty",
@@ -854,8 +854,8 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
         };
       }
       else if (result.type == "Restriction") {
-        newEdge.color = Lineage_classes.restrictionColor;
-        newEdge.font = { color: Lineage_classes.restrictionColor };
+        newEdge.color = Lineage_whiteboard.restrictionColor;
+        newEdge.font = { color: Lineage_whiteboard.restrictionColor };
         newEdge.data = {
           source: inSource,
           bNodeId: relationId,
@@ -864,7 +864,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
         };
       }
 
-      Lineage_classes.lineageVisjsGraph.data.edges.add([newEdge]);
+      Lineage_whiteboard.lineageVisjsGraph.data.edges.add([newEdge]);
     });
   };
 
@@ -1000,7 +1000,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
     }
 
     self.addImportToCurrentSource(mainSourceLabel, importedSourceLabel, function(_err, _result) {
-      Lineage_classes.registerSource(importedSourceLabel);
+      Lineage_whiteboard.registerSource(importedSourceLabel);
       callback();
     });
   };
@@ -1137,8 +1137,8 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
           }
         ],
         function(_err) {
-          Lineage_classes.lineageVisjsGraph.data.edges.remove(restrictionNode.id);
-          Lineage_classes.lineageVisjsGraph.data.edges.remove(inverseRestriction);
+          Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(restrictionNode.id);
+          Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(inverseRestriction);
           MainController.UI.message("restriction removed", true);
           if (callback) {
             return callback(_err);
@@ -1204,7 +1204,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
     var sourceNode = self.currentAssociation[0];
     var targetNode = self.currentAssociation[1];
 
-    var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+    var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
     var visjsData = { nodes: [], edges: [] };
 
     if (!existingNodes[sourceNode.id]) {
@@ -1212,10 +1212,10 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
       visjsData.nodes.push({
         id: sourceNode.id,
         label: sourceNode.label,
-        shape: Lineage_classes.defaultShape,
-        size: Lineage_classes.defaultShapeSize,
-        color: Lineage_classes.getSourceColor(sourceNode.source),
-        level: Lineage_classes.currentExpandLevel,
+        shape: Lineage_whiteboard.defaultShape,
+        size: Lineage_whiteboard.defaultShapeSize,
+        color: Lineage_whiteboard.getSourceColor(sourceNode.source),
+        level: Lineage_whiteboard.currentExpandLevel,
         data: {
           id: sourceNode.id,
           label: sourceNode.label,
@@ -1229,10 +1229,10 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
       visjsData.nodes.push({
         id: targetNode.id,
         label: targetNode.label,
-        shape: Lineage_classes.defaultShape,
-        size: Lineage_classes.defaultShapeSize,
-        color: Lineage_classes.getSourceColor(targetNode.source),
-        level: Lineage_classes.currentExpandLevel,
+        shape: Lineage_whiteboard.defaultShape,
+        size: Lineage_whiteboard.defaultShapeSize,
+        color: Lineage_whiteboard.getSourceColor(targetNode.source),
+        level: Lineage_whiteboard.currentExpandLevel,
         data: {
           id: targetNode.id,
           label: targetNode.label,
@@ -1260,12 +1260,12 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
           }
         },
         dashes: true,
-        color: Lineage_classes.objectPropertyColor
+        color: Lineage_whiteboard.objectPropertyColor
       });
     }
-    Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-    Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
-    Lineage_classes.lineageVisjsGraph.network.fit();
+    Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+    Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
+    Lineage_whiteboard.lineageVisjsGraph.network.fit();
     $("#waitImg").css("display", "none");
   };
 

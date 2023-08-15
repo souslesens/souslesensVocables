@@ -1,5 +1,5 @@
 import OntologyModels from "../../shared/ontologyModels.js";
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_decoration from "./lineage_decoration.js";
 import common from "../../shared/common.js";
 
@@ -64,7 +64,7 @@ var Lineage_sources = (function () {
 
     self.resetVisjsGraph = function () {
         $("#graphDiv").html("");
-        Lineage_classes.drawNewGraph({ nodes: [], edges: [] });
+        Lineage_whiteboard.drawNewGraph({ nodes: [], edges: [] });
     };
 
     self.showSourcesDialog = function (forceDialog) {
@@ -186,7 +186,7 @@ var Lineage_sources = (function () {
 
                 highlightSourceDiv(source);
 
-                Lineage_classes.initWhiteBoard(false);
+                Lineage_whiteboard.initWhiteBoard(false);
 
                 // self.initWhiteboardActions();
                 self.showHideLineageLeftPanels();
@@ -242,29 +242,29 @@ var Lineage_sources = (function () {
     };
 
     self.showHideEditButtons = function (source, hide) {
-        if (!Lineage_classes.lineageVisjsGraph.network) {
+        if (!Lineage_whiteboard.lineageVisjsGraph.network) {
             return;
         }
         if (hide) {
-            Lineage_classes.lineageVisjsGraph.network.disableEditMode();
+            Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
             $(".vis-edit-mode").css("display", "none");
         }
         var isNodeEditable = Lineage_sources.isSourceEditableForUser(source);
         if (isNodeEditable) {
-            Lineage_classes.lineageVisjsGraph.network.enableEditMode();
+            Lineage_whiteboard.lineageVisjsGraph.network.enableEditMode();
             $(".vis-edit-mode").css("display", "block");
         } else {
-            Lineage_classes.lineageVisjsGraph.network.disableEditMode();
+            Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode();
             $(".vis-edit-mode").css("display", "none");
         }
     };
 
     self.whiteboard_setGraphOpacity = function (source) {
         var nodesMapSources = {};
-        if (!Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
+        if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
             return;
         }
-        var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+        var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
         var newNodes = [];
 
         nodes.forEach(function (node) {
@@ -276,11 +276,11 @@ var Lineage_sources = (function () {
             var color;
             var fontColor;
             if (source && node.data.source != source) {
-                color = common.colorToRgba(node.data.fullColor, Lineage_classes.defaultLowOpacity);
-                fontColor = common.colorToRgba(Lineage_classes.defaultNodeFontColor, Lineage_classes.defaultLowOpacity);
+                color = common.colorToRgba(node.data.fullColor, Lineage_whiteboard.defaultLowOpacity);
+                fontColor = common.colorToRgba(Lineage_whiteboard.defaultNodeFontColor, Lineage_whiteboard.defaultLowOpacity);
             } else {
                 color = node.data.fullColor;
-                fontColor = Lineage_classes.defaultNodeFontColor;
+                fontColor = Lineage_whiteboard.defaultNodeFontColor;
             }
             newNodes.push({
                 id: node.id,
@@ -288,9 +288,9 @@ var Lineage_sources = (function () {
                 font: { color: fontColor },
             });
         });
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
 
-        var edges = Lineage_classes.lineageVisjsGraph.data.edges.get();
+        var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
         var newEdges = [];
         edges.forEach(function (edge) {
             if (!edge.data) {
@@ -308,9 +308,9 @@ var Lineage_sources = (function () {
                 color = edge.data.fullColor;
                 // width=2
             } else {
-                color = common.colorToRgba(edge.data.fullColor, Lineage_classes.defaultLowOpacity);
+                color = common.colorToRgba(edge.data.fullColor, Lineage_whiteboard.defaultLowOpacity);
                 // width=1
-                // fontColor=common.colorToRgba(edge.data.fullColor, Lineage_classes.defaultLowOpacity)
+                // fontColor=common.colorToRgba(edge.data.fullColor, Lineage_whiteboard.defaultLowOpacity)
             }
 
             newEdges.push({
@@ -327,7 +327,7 @@ var Lineage_sources = (function () {
                 },
             });
         });
-        Lineage_classes.lineageVisjsGraph.data.edges.update(newEdges);
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
     };
 
     self.initSource = function (source, callback) {
@@ -344,7 +344,7 @@ var Lineage_sources = (function () {
 
                 var drawTopConcepts = false;
                 if (drawTopConcepts) {
-                    Lineage_classes.drawTopConcepts(source, function (err) {
+                    Lineage_whiteboard.drawTopConcepts(source, function (err) {
                         if (err) {
                             return MainController.UI.message(err);
                         }
@@ -394,7 +394,7 @@ var Lineage_sources = (function () {
                 "<div  id='" +
                 sourceDivId +
                 "' style='color: " +
-                Lineage_classes.getSourceColor(sourceLabel) +
+                Lineage_whiteboard.getSourceColor(sourceLabel) +
                 "'" +
                 " class='Lineage_sourceLabelDiv' " +
                 ">" +
@@ -497,7 +497,7 @@ sourceDivId +
             source = Lineage_sources.activeSource;
         }
 
-        var allNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+        var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
         var newNodes = [];
         allNodes.forEach(function (node) {
             if (node && node.data && node.data.source == source) {
@@ -507,7 +507,7 @@ sourceDivId +
                 });
             }
         });
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
 
         if (hide) {
             $("#Lineage_source_" + Lineage_sources.activeSource).addClass("lineage_hiddenSource");
@@ -549,7 +549,7 @@ sourceDivId +
     };
 
     self.menuActions = {
-        setSourceOpacity: function (source) {
+        setSourceOpacity: function(source) {
             var opacity = prompt("opacity %", 100);
             if (!opacity) {
                 return;
@@ -559,29 +559,29 @@ sourceDivId +
             }
             opacity = opacity / 100;
             var nodesMapSources = {};
-            var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+            var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
             var newNodes = [];
-            nodes.forEach(function (node) {
+            nodes.forEach(function(node) {
                 nodesMapSources[node.id] = node.data.source;
                 if (node.data.source == source) {
                     newNodes.push({
                         id: node.id,
                         color: common.colorToRgba(node.color, opacity),
-                        font: { color: common.colorToRgba(Lineage_classes.defaultNodeFontColor, opacity) },
+                        font: { color: common.colorToRgba(Lineage_whiteboard.defaultNodeFontColor, opacity) },
                     });
                 }
             });
-            Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
 
-            var edges = Lineage_classes.lineageVisjsGraph.data.edges.get();
+            var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
             var newEdges = [];
-            edges.forEach(function (edge) {
+            edges.forEach(function(edge) {
                 if (nodesMapSources[edge.from] == source) {
                     newEdges.push({
                         id: edge.id,
                         color: common.colorToRgba(edge.color, opacity),
                         font: {
-                            color: common.colorToRgba(Lineage_classes.defaultEdgeFontColor, opacity),
+                            color: common.colorToRgba(Lineage_whiteboard.defaultEdgeFontColor, opacity),
                             multi: true,
                             size: 10,
                             strokeWidth: 0,
@@ -591,47 +591,47 @@ sourceDivId +
                     });
                 }
             });
-            Lineage_classes.lineageVisjsGraph.data.edges.update(newEdges);
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
         },
-        closeSource: function (source) {
+        closeSource: function(source) {
             if (source) {
                 self.activeSource = source;
             }
-            if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
-                var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+            if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
                 var nodesToRemove = [];
-                nodes.forEach(function (node) {
+                nodes.forEach(function(node) {
                     if (node.data && node.data.source == self.activeSource) {
                         nodesToRemove.push(node.id);
                     }
                 });
-                Lineage_classes.lineageVisjsGraph.data.nodes.remove(nodesToRemove);
+                Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(nodesToRemove);
             }
             var sourceDivId = self.loadedSources[self.activeSource].sourceDivId;
             self.loadedSources[self.activeSource] = null;
             $("#" + sourceDivId).remove();
         },
-        hideSource: function (source) {
+        hideSource: function(source) {
             MainController.UI.hidePopup("graphPopupDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, true);
         },
-        showSource: function () {
+        showSource: function() {
             MainController.UI.hidePopup("graphPopupDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, false);
         },
-        groupSource: function (source) {
+        groupSource: function(source) {
             MainController.UI.hidePopup("graphPopupDiv");
 
             if (!source) {
                 source = Lineage_sources.activeSource;
             }
-            var color = Lineage_classes.getSourceColor(source);
+            var color = Lineage_whiteboard.getSourceColor(source);
             var color2 = common.colorToRgba(color, 0.1);
             var visjsData = { nodes: [], edges: [] };
-            var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+            var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
             for (var nodeId in existingNodes) {
-                var node = Lineage_classes.lineageVisjsGraph.data.nodes.get(nodeId);
+                var node = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(nodeId);
                 if (node && node.id != source && node.data && node.data.source == source) {
                     var edgeId = nodeId + "_" + source;
                     if (!existingNodes[edgeId]) {
@@ -655,27 +655,27 @@ sourceDivId +
                 var sourceNode = {
                     id: source,
                     label: source,
-                    shadow: Lineage_classes.nodeShadow,
+                    shadow: Lineage_whiteboard.nodeShadow,
                     shape: "ellipse",
                     level: 1,
-                    size: Lineage_classes.defaultShapeSize,
+                    size: Lineage_whiteboard.defaultShapeSize,
                     data: { source: source },
                     color: common.colorToRgba(color, 0.3),
                 };
                 visjsData.nodes.push(sourceNode);
             }
-            Lineage_classes.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
-            Lineage_classes.lineageVisjsGraph.data.edges.update(visjsData.edges);
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
         },
-        ungroupSource: function (source) {
+        ungroupSource: function(source) {
             MainController.UI.hidePopup("graphPopupDiv");
             if (!source) {
                 source = Lineage_sources.activeSource;
             }
-            Lineage_classes.lineageVisjsGraph.data.nodes.remove(source);
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(source);
         },
-        exportOWL: function (source) {
-            Sparql_OWL.generateOWL(source, {}, function (err, result) {
+        exportOWL: function(source) {
+            Sparql_OWL.generateOWL(source, {}, function(err, result) {
                 if (err) {
                     return console.log(err);
                 }
@@ -693,46 +693,16 @@ sourceDivId +
                 url: Config.apiUrl + "/graphStore/graph",
                 data: payload,
                 dataType: "json",
-                success: function (data, _textStatus, _jqXHR) {
+                success: function(data, _textStatus, _jqXHR) {
                     common.copyTextToClipboard(data);
                 },
-                error: function (err) {
+                error: function(err) {
                     alert(err.responseText);
                 },
             });
 
-            /*  Sparql_OWL.generateOWL(source, {}, function (err, result) {
-    if (err) {
-        return console.log(err);
+        }
     }
-
-    common.copyTextToClipboard(result);
-});*/
-        },
-    };
-
-    /* self.initWhiteboardActions = function () {
-    self.whiteboardActions = {
-        "Clear all": Lineage_classes.clearLastAddedNodesAndEdges,
-        "Show Last only": Lineage_classes.showLastAddedNodesOnly,
-        "Show/Hide individuals": Lineage_classes.showHideIndividuals,
-        "Draw similar label nodes": Lineage_combine.getSimilars,
-        Selection: "",
-        "  Show": Lineage_selection.listNodesSelection,
-        "  Clear": Lineage_selection.clearNodesSelection,
-    };
-
-    var actions = Object.keys(self.whiteboardActions);
-    common.fillSelectOptions("lineage_classes_whiteboardSelect", actions, true);
-};
-
-self.onSelectWhiteboardAction = function (action) {
-    var fn = self.whiteboardActions[action];
-    if (fn) {
-        fn();
-    }
-    $("#lineage_classes_whiteboardSelect").val("");
-};*/
 
     self.isSourceEditableForUser = function (source) {
         if (!Config.sources[source]) {
@@ -761,15 +731,15 @@ self.onSelectWhiteboardAction = function (action) {
         if (!source) {
             source = self.activeSource;
         }
-        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty && Lineage_classes.lineageVisjsGraph.data) {
-            var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty && Lineage_whiteboard.lineageVisjsGraph.data) {
+            var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
             var newNodes = [];
             nodes.forEach(function (node) {
                 if (node.data && node.data.source == source) {
                     newNodes.push({ id: node.id });
                 }
             });
-            Lineage_classes.lineageVisjsGraph.data.nodes.remove(newNodes);
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(newNodes);
         }
     };
 
@@ -778,31 +748,31 @@ self.onSelectWhiteboardAction = function (action) {
 
         if (theme == "white") {
             backgroundColor = "white";
-            Lineage_classes.defaultNodeFontColor = "#343434";
-            Lineage_classes.defaultEdgeFontColor = "#343434";
+            Lineage_whiteboard.defaultNodeFontColor = "#343434";
+            Lineage_whiteboard.defaultEdgeFontColor = "#343434";
         } else if (theme == "dark") {
             backgroundColor = "#414040FF";
-            Lineage_classes.defaultNodeFontColor = "#eee";
-            Lineage_classes.defaultEdgeFontColor = "#eee";
+            Lineage_whiteboard.defaultNodeFontColor = "#eee";
+            Lineage_whiteboard.defaultEdgeFontColor = "#eee";
         }
 
         $("#graphDiv").css("background-color", backgroundColor);
-        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty && Lineage_classes.lineageVisjsGraph.data && Lineage_classes.lineageVisjsGraph.data.nodes.get) {
-            /* Lineage_classes.lineageVisjsGraph.network.options.nodes.font = { color: Lineage_classes.defaultNodeFontColor };
-Lineage_classes.lineageVisjsGraph.network.options.edges.font = { color: self.defaultEdgeFontColor };*/
+        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty && Lineage_whiteboard.lineageVisjsGraph.data && Lineage_whiteboard.lineageVisjsGraph.data.nodes.get) {
+            /* Lineage_whiteboard.lineageVisjsGraph.network.options.nodes.font = { color: Lineage_whiteboard.defaultNodeFontColor };
+Lineage_whiteboard.lineageVisjsGraph.network.options.edges.font = { color: self.defaultEdgeFontColor };*/
 
-            var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+            var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
             var newNodes = [];
             nodes.forEach(function (node) {
-                newNodes.push({ id: node.id, font: { color: Lineage_classes.defaultNodeFontColor } });
+                newNodes.push({ id: node.id, font: { color: Lineage_whiteboard.defaultNodeFontColor } });
             });
-            Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
-            var edges = Lineage_classes.lineageVisjsGraph.data.edges.get();
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
+            var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
             var newEdges = [];
             edges.forEach(function (edge) {
-                newEdges.push({ id: edge.id, font: { color: Lineage_classes.defaultEdgeFontColor } });
+                newEdges.push({ id: edge.id, font: { color: Lineage_whiteboard.defaultEdgeFontColor } });
             });
-            Lineage_classes.lineageVisjsGraph.data.edges.update(newEdges);
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
         }
     };
     self.getSourcesClasses = function (source, callback) {
@@ -852,8 +822,8 @@ target: Math.round(Math.random() * (id-1))
 }))
 };*/
 
-        var nodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
-        var edges = Lineage_classes.lineageVisjsGraph.data.edges.get();
+        var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+        var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
         var gData2 = { nodes: [], links: [] };
         nodes.forEach(function (node) {
             if (node.id) {

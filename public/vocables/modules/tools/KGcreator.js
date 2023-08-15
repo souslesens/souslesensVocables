@@ -1562,7 +1562,7 @@ self.saveMappings({classId:classId})
           arrows: {
             to: {
               enabled: true,
-              type: Lineage_classes.defaultEdgeArrowType,
+              type: Lineage_whiteboard.defaultEdgeArrowType,
               scaleFactor: 0.5
             }
           }
@@ -1640,7 +1640,7 @@ self.saveMappings({classId:classId})
 
 
   /**
-   * check if prdicate are conform to restrictions defined in Lineage_classes
+   * check if prdicate are conform to restrictions defined in Lineage_whiteboard
    *
    *
    * @param source
@@ -1818,10 +1818,9 @@ self.saveMappings({classId:classId})
 
     }
 
-    // A FINIR
 
 
-  };
+
 
   return self;
 })();

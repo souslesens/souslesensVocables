@@ -1,5 +1,5 @@
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
-import Lineage_classes from "../tools/lineage/lineage_classes.js";
+import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 
 var LegendWidget = (function () {
     var self = {};
@@ -37,7 +37,7 @@ var LegendWidget = (function () {
             .jstree(true)
             .get_checked();
 
-        var allNodes = Lineage_classes.lineageVisjsGraph.data.nodes.get();
+        var allNodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
         var newNodes = [];
         allNodes.forEach(function (node) {
             var hidden = true;
@@ -50,7 +50,7 @@ var LegendWidget = (function () {
                 hidden: hidden,
             });
         });
-        Lineage_classes.lineageVisjsGraph.data.nodes.update(newNodes);
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
     };
 
 

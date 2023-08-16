@@ -78,6 +78,8 @@
         <script type="module" src="modules/uiWidgets/legendWidget.js"></script>
         <script type="module" src="modules/uiWidgets/containerSearchWidget.js"></script>
         <script type="module" src="modules/uiWidgets/dateWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/popupMenuWidget.js"></script>
+
 
         <script type="module" src="modules/tools/lineage/lineage_rules.js"></script>
 
@@ -312,7 +314,7 @@
                 border: 2px solid #ddd;
             }
 
-            #graphPopupDiv {
+            #popupMenuWidgetDiv {
                 z-index: 20;
                 position: absolute;
                 flex-direction: column;
@@ -445,6 +447,20 @@
                 border: #e1d9bf solid 1px !important;
 
             }
+
+            .legend_colorDiv {
+                width: 30px;
+                height: 20px;
+                border-radius: 3px;
+                margin: 3px;
+            }
+                .legend_itemDiv{
+                    display: flex;flex-direction: row;
+                    border-width: 1px ;
+                    border-style: solid ;
+                    border-color: #b8a587
+                }
+
         </style>
     </head>
     <body>
@@ -511,7 +527,7 @@
                     </div>
                     <div id="rightPanelDivInner" style="display: flex; flex-direction: column"></div>
                 </div>
-                <div id="graphPopupDiv" onclick="MainController.UI.hidePopup('graphPopupDiv');"></div>
+                <div id="popupMenuWidgetDiv" onclick="  PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>
             </div>
         </div>
         <div id="loginDiv" style="position: absolute; visibility: hidden; display: flex; justify-content: center; align-items: center">

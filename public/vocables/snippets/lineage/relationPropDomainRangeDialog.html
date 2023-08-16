@@ -1,8 +1,8 @@
 <div id="lineageRelations_resourcesTab">
     <div class="lineageRelations_div" style="display: flex; flex-direction: column; justify-content: space-between">
         <div style="display: flex; flex-direction: row; justify-content: space-evenly; padding: 5px; margin: 5px">
-            <div style="display: flex; flex-direction: column; align-items: center">
-                <div>
+            <div id="lineage_relationIndividuals_LeftDiv"  style="display: flex; flex-direction: column; align-items: center">
+                <div >
                     <div>Class</div>
                     <select id="lineage_relationIndividuals_filterRoleSelect" style="overflow-y: auto; width: 150px; text-align: center" size="2"></select>
                 </div>
@@ -49,6 +49,35 @@
 
                 <div class="lineage_relationIndividuals_filterTypeDiv filterTypeDiv_advanced"></div>
             </div>
+
+
+            <div class="lineage_relationIndividuals_filterTypeDiv filterTypeDiv_advanced">
+                <div class="lineageRelations_div" style="display: flex; flex-direction: column; justify-content: space-between">
+                    <div style="display: flex; flex-direction: column; align-items: flex-start">
+                        <div>
+                            <b>Role</b> <br />
+                            <select
+                              id="lineage_relation_filterRoleSelect2"
+                              style="overflow-y: auto; width: 150px; text-align: center"
+                              size="2"
+                              onclick="Lineage_relationFilter.onSelectRoleType($(this).val())"
+                            >
+                                <option selected="selected">subject</option>
+                                <option>object</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="lineage_relation_predicateSelectorDiv"></div>
+                    <div>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.addPredicateSelectorFilter()">Add filter</button>
+                    </div>
+                 <!--   <textarea id="Lineage_relation_filterText2" style="width: 300px; background-color: #ddd; height: 100px; margin: 10px"></textarea>-->
+                </div>
+            </div>
+
+
+
+
 
             <div style="display: flex; flex-direction: row; justify-content: space-evenly; padding: 5px; margin: 5px">
                 <div></div>

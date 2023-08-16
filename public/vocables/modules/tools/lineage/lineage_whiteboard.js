@@ -1,12 +1,9 @@
 import common from "../../shared/common.js";
 import KGcreator from "../KGcreator.js";
-import Lineage_sets from "./lineage_sets.js";
 import Lineage_linkedData_mappings from "./linkedData/lineage_linkedData_mappings.js";
-
 import Lineage_graphTraversal from "./lineage_graphTraversal.js";
 import Lineage_selection from "./lineage_selection.js";
 import KGquery from "./assetQuery.js";
-//import self.lineageVisjsGraph from "../../graph/visjsGraph2.js";
 import Lineage_decoration from "./lineage_decoration.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
@@ -18,9 +15,9 @@ import Lineage_sources from "./lineage_sources.js";
 import MainController from "../../shared/mainController.js";
 import authentication from "../../shared/authentification.js";
 import Clipboard from "../../shared/clipboard.js";
-
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import OntologyModels from "../../shared/ontologyModels.js";
+import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
 
 /** The MIT License
  Copyright 2020 Claude Fauconnet / SousLesens Claude.fauconnet@gmail.com
@@ -81,6 +78,8 @@ var Lineage_whiteboard = (function () {
 
     self.isLoaded = false;
     self.currentExpandLevel = 1;
+    
+    self.queriesStack=[]
 
     /**
      *
@@ -91,6 +90,7 @@ var Lineage_whiteboard = (function () {
         if (self.isLoaded) {
         } // return;
         self.isLoaded = true;
+       
 
         $("#sourceDivControlPanelDiv").html("");
 
@@ -158,7 +158,7 @@ var Lineage_whiteboard = (function () {
                 }
                 $("#GenericTools_searchSchemaType").val("OWL");
 
-                //    Lineage_sets.init();
+
                 if (callback) {
                     callback();
                 }
@@ -241,7 +241,7 @@ var Lineage_whiteboard = (function () {
         return items;
     };
 
-    self.selectTreeNodeFn = function (/** @type {{ which: number; }} */ event, /** @type {{ node: { data: any; }; event: { ctrlKey: any; }; }} */ propertiesMap) {
+    self.selectTreeNodeFn = function (event,  propertiesMap) {
         SearchWidget.currentTreeNode = propertiesMap.node;
         self.currentTreeNode = propertiesMap.node;
         var data = propertiesMap.node.data;
@@ -249,21 +249,16 @@ var Lineage_whiteboard = (function () {
             return;
         }
         if (self.onGraphOrTreeNodeClick(self.currentTreeNode, propertiesMap.event, { callee: "Tree" }) != null) {
-            if (Config.sources[data.source].schemaType == "INDIVIDUAL") {
-                return KGquery.showJstreeNodeChildren(SearchWidget.currentTargetDiv, propertiesMap.node);
-            } else {
-                setTimeout(function () {
-                    SearchWidget.openTreeNode(SearchWidget.currentTargetDiv, data.source, propertiesMap.node, { ctrlKey: propertiesMap.event.ctrlKey });
-                }, 200);
-            }
-            // returnNodeInfosWidget.showNodeInfos(self.currentTreeNode.data.source, self.currentTreeNode.data.id, "mainDialogDiv")
+                    SearchWidget.openTreeNode(SearchWidget.currentTargetDiv, data.source, propertiesMap.node,
+                      { ctrlKey: propertiesMap.event.ctrlKey });
+
         }
     };
 
     self.initUI = function (clearTree) {
         MainController.UI.message("");
         self.lineageVisjsGraph.clearGraph();
-
+        self.queriesStack=[]
         LegendWidget.clearLegend();
 
         if (clearTree) {
@@ -669,7 +664,7 @@ addNode:false
         self.lineageVisjsGraph.draw(function () {
             MainController.UI.message("", true);
 
-            Lineage_decoration.decorateNodeAndDrawLegend();
+            Lineage_decoration.decorateNodeAndDrawLegend(visjsData.nodes);
         });
         return;
     };
@@ -1955,35 +1950,18 @@ addNode:false
                             shape = Lineage_whiteboard.namedIndividualShape;
                         }
 
-                        if (options.inversePredicate) {
+
                             if (item.subject.type == "bnode") {
                                 label = "";
-                                shape = "circle";
+                                shape = "hexagon";
                                 color = "#EEE";
                                 size = 2;
                             }
 
-                            /*  if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
-                  label = Config.Lineage.logicalOperatorsMap[item.prop.value];
-                  shape = "circle";
-                  color = "#EEE";
-              }*/
-                        }
 
                         var predicateUri = options.inversePredicate ? null : item.prop.value;
                         visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.subject.value, label, predicateUri, { shape: shape }));
-                        /*  visjsData.nodes.push({
-                id: item.subject.value,
-                label: label,
-                shape: shape,
-                size: size,
-                color: color,
-                data: {
-                    source: source,
-                    id: item.subject.value,
-                    label: item.subjectLabel.value,
-                },
-            });*/
+
                     }
                     if (options.skipLiterals && item.object.type && item.object.type.indexOf("literal") > -1) {
                         return;
@@ -2005,20 +1983,14 @@ addNode:false
                             shape = Lineage_whiteboard.namedIndividualShape;
                         }
 
-                        if (!options.inversePredicate) {
+
                             if (item.object.type == "bnode") {
                                 label = "";
-                                shape = "circle";
+                                shape = "hexagon";
                                 color = "#EEE";
                                 size = 2;
                             }
 
-                            /*  if (Config.Lineage.logicalOperatorsMap[item.prop.value]) {
-                  label = Config.Lineage.logicalOperatorsMap[item.prop.value] || "";
-                  shape = "hexagon";
-                  color = "#EEE";
-              }*/
-                        }
                         var font = null;
                         if (item.object.type == "literal") {
                             shape = "text";
@@ -2557,7 +2529,7 @@ restrictionSource = Config.predicatesSource;
                 '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.removeOthersFromGraph();">Remove others</span>';
         }
 
-        $("#graphPopupDiv").html(html);
+        $("#popupMenuWidgetDiv").html(html);
     };
 
     self.zoomGraphOnNode = function (/** @type {any} */ nodeId, changeSise) {
@@ -2917,20 +2889,20 @@ self.zoomGraphOnNode(node.data[0].id, false);
                 if (true) {
                     //   if (!self.currentGraphEdge.data || !self.currentGraphEdge.data.propertyId) return;
                     self.setGraphPopupMenus(node, event);
-                    MainController.UI.showPopup(point, "graphPopupDiv");
+                   PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
                 }
                 //NodeInfosWidget.showNodeInfos(self.currentGraphEdge.data.source, self.currentGraphEdge.data.propertyId, "mainDialogDiv", { resetVisited: 1 });
             } else {
                 self.setGraphPopupMenus(node, event);
                 self.currentGraphNode = node;
                 self.currentGraphEdge = null;
-                MainController.UI.showPopup(point, "graphPopupDiv");
+               PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
             }
         },
 
         onNodeClick: function (/** @type {{ data: { cluster: any; }; }} */ node, /** @type {any} */ point, /** @type {{ dbleClick: any; }} */ options) {
             if (!node) {
-                MainController.UI.hidePopup("graphPopupDiv");
+               PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
 
                 return;
             }
@@ -3089,9 +3061,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
             html += ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.graphNodeNeighborhood(\'outcoming\');">outcoming</span>';
             html += ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.graphNodeNeighborhood(\'ranges\');">ranges</span>';
 
-            $("#graphPopupDiv").html(html);
+            $("#popupMenuWidgetDiv").html(html);
             setTimeout(function () {
-                $("#graphPopupDiv").css("display", "flex");
+                $("#popupMenuWidgetDiv").css("display", "flex");
             }, 100);
         },
         removeFromGraph: function () {

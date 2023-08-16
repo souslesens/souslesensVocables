@@ -211,7 +211,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     $("#Lineage_Tabs").tabs("option", "active", 3);
                     callbackSeries();
                     /*   var point={x:300,y:600}
-                       MainController.UI.showPopup(point, "graphPopupDiv")*/
+                      PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv")*/
                 },
             ],
             function (_err) {
@@ -288,7 +288,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 html += "</div>";
                 $("#KGquery_propertiesDiv").html(html);
                 /*   var point={x:300,y:600}
-                       MainController.UI.showPopup(point, "graphPopupDiv")*/
+                      PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv")*/
             });
         },
         expandSubclasses: function () {
@@ -379,8 +379,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 var jsTreeOptions = {};
                 jsTreeOptions.contextMenu = KGquery.getJstreeConceptsContextMenu();
                 jsTreeOptions.selectTreeNodeFn = KGquery.selectTreeNodeFn;
-                //  jsTreeOptions.onCheckNodeFn = KGquery.checkTreeNodeFn;
-                //  jsTreeOptions.withCheckboxes=true
+
 
                 JstreeWidget.loadJsTree("KGquery_queryTreeDiv", jstreeData, jsTreeOptions);
             } else {

@@ -4,7 +4,10 @@ import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 var LegendWidget = (function () {
     var self = {};
     self.currentLegendDJstreedata = {};
+    self.legendDivsStack={}
+
     self.clearLegend = function () {
+        self.legendDivsStack = {};
         $("#Lineage_classes_graphDecoration_legendDiv").html("");
         self.legendMap = {};
     };

@@ -1189,8 +1189,7 @@ var Sparql_OWL = (function () {
             "{ ?subject rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction." +
             filterStr +
             " ?node owl:onProperty ?prop ." +
-            //  " OPTIONAL {?prop rdfs:label ?propLabel}" +
-            //  " OPTIONAL {?subject rdfs:label ?subjectLabel}";
+
             Sparql_common.getVariableLangLabel("prop", true) +
             Sparql_common.getVariableLangLabel("subject", true);
 

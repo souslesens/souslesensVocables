@@ -172,7 +172,7 @@ var visjsGraph = (function () {
                 if (_options.onHoverNodeFn) _options.onHoverNodeFn(node, point, options);
             })
             .on("blurNode", function (/** @type {any} */ _params) {
-                // $("#graphPopupDiv").css("display", "none")
+                // $("#popupMenuWidgetDiv").css("display", "none")
             })
             .on("zoom", function (/** @type {any} */ _params) {
                 self.onScaleChange();

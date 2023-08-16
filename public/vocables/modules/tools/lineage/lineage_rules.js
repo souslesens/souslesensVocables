@@ -379,7 +379,7 @@ self.drawGraph = function (visjsData) {
   };
 
   var graphDivContainer = "axiomsGraphDivContainer";
-  $("#" + graphDivContainer).html("<div id='axiomsGraphDiv' style='width:100%;height:100%' onclick='MainController.UI.hidePopup(\"axioms_graphPopupDiv\")';></div>");
+  $("#" + graphDivContainer).html("<div id='axiomsGraphDiv' style='width:100%;height:100%' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>");
   self.axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv", visjsData, options);
   self.axiomsVisjsGraph.draw(function () {});
 };

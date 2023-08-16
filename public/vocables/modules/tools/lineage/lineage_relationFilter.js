@@ -291,22 +291,23 @@ var Lineage_relationFilter = (function () {
         var property = PredicatesSelectorWidget.getSelectedProperty();
         var value = PredicatesSelectorWidget.getSelectedObjectValue();
         var operator = PredicatesSelectorWidget.getSelectedOperator();
+        var role = $("#lineage_relation_filterRoleSelect2").val();
         if (!property || !value) {
             return alert("select a property and  an object");
         }
 
         var objectFilterStr = "";
         if (value.indexOf("xsd:dateTime") > -1) {
-            objectFilterStr = "?" + self.currentResourceFilterRole + "  owl:hasValue ?value  filter(    datatype(?value) = xsd:dateTime" + " && ?value" + operator + value + ")";
+            objectFilterStr = "?" + self.role + "  owl:hasValue ?value  filter(    datatype(?value) = xsd:dateTime" + " && ?value" + operator + value + ")";
         } else if (value.indexOf("xsd:") > -1) {
-            objectFilterStr = "?" + self.currentResourceFilterRole + "  owl:hasValue ?value  filter(  ?value" + operator + value + ")";
+            objectFilterStr = "?" + self.role + "  owl:hasValue ?value  filter(  ?value" + operator + value + ")";
         } else {
-            var objectFilterStr = "?" + self.currentResourceFilterRole + " " + property + " " + value;
+            var objectFilterStr = "?" + self.role + " " + property + " " + value;
         }
         filter.filterStr = objectFilterStr;
         var text = $("#Lineage_relation_filterText").val();
-        $("#Lineage_relation_filterText2").css("display", "block");
-        $("#Lineage_relation_filterText2").val(text + filter.filterStr);
+     //   $("#lineage_relationIndividuals_fitlerTA").css("display", "block");
+        $("#lineage_relationIndividuals_fitlerTA").val(text + filter.filterStr);
     };
     return self;
 })();

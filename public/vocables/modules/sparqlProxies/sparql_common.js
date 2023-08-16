@@ -12,7 +12,7 @@ import Lineage_sources from "../tools/lineage/lineage_sources.js";
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 var Sparql_common = (function () {
     var self = {};
     self.withoutImports = false;
@@ -333,6 +333,8 @@ var Sparql_common = (function () {
     };
 
     self.getLabelFromURI = function (id) {
+        if(id.indexOf("_:")==0)// blank node
+            return "";
         const p = id.lastIndexOf("#");
         if (p > -1) {
             return id.substring(p + 1);
@@ -582,14 +584,7 @@ var Sparql_common = (function () {
     return self;
 })();
 
-/*
-var str="?prop rdfs:label ?propLabel} ?prop rdf:type rdf:ObjectProperty. ?value rdf:type ?valueType filter (?valueType in (owl:Class,owl:NamedIndividual))}}"
-var prefixes={
-    rdfs:"<http://www.w3.org/2000/01/rdf-schema#>",
-    rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-}
-Sparql_common.replaceSparqlPrefixByUri(str,prefixes)
-*/
+
 
 export default Sparql_common;
 

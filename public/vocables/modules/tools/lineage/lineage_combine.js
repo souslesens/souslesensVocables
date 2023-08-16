@@ -64,7 +64,7 @@ var Lineage_combine = (function () {
             ' <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.showSource();"> Show Source</span>' +
             ' <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.groupSource();"> Group Source</span>' +
             ' <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.ungroupSource();"> ungroup Source</span>';
-        $("#graphPopupDiv").html(html);
+        $("#popupMenuWidgetDiv").html(html);
     };
 
     self.showMergeNodesDialog = function (fromNode, toNode) {

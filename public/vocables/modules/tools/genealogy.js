@@ -235,12 +235,12 @@ var Genealogy = (function () {
     };
     self.graphActions = {
         showPopup: function (point) {
-            $("#graphPopupDiv").css("left", point.x + leftPanelWidth);
-            $("#graphPopupDiv").css("top", point.y);
-            $("#graphPopupDiv").css("display", "flex");
+            $("#popupMenuWidgetDiv").css("left", point.x + leftPanelWidth);
+            $("#popupMenuWidgetDiv").css("top", point.y);
+            $("#popupMenuWidgetDiv").css("display", "flex");
         },
         hidePopup: function () {
-            $("#graphPopupDiv").css("display", "none");
+            $("#popupMenuWidgetDiv").css("display", "none");
         },
 
         drawChildren: function () {

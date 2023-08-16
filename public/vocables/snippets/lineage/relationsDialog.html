@@ -14,7 +14,7 @@
         <ul>
             <li class="lineageRelations_div"><a href="#lineageRelations_propertiesTab">Properties</a></li>
             <!--  <li class="lineageRelations_div"><a href="#lineageRelations_resourcesTab">Resources</a></li>-->
-            <li class="lineageRelations_div"><a href="#lineageRelations_resources2Tab">Resources</a></li>
+         <!--   <li class="lineageRelations_div"><a href="#lineageRelations_resources2Tab">Resources</a></li>-->
         </ul>
         <div id="lineageRelations_propertiesTab">
             <div class="lineageRelations_div" style="height: 500px; align-items: center">
@@ -73,29 +73,8 @@
       </div>
     </div>-->
 
-        <div id="lineageRelations_resources2Tab">
-            <div class="lineageRelations_div" style="display: flex; flex-direction: column; justify-content: space-between">
-                <div style="display: flex; flex-direction: column; align-items: flex-start">
-                    <div>
-                        <b>Role</b> <br />
-                        <select
-                            id="lineage_relation_filterRoleSelect2"
-                            style="overflow-y: auto; width: 150px; text-align: center"
-                            size="2"
-                            onclick="Lineage_relationFilter.onSelectRoleType($(this).val())"
-                        >
-                            <option selected="selected">subject</option>
-                            <option>object</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="lineage_relation_predicateSelectorDiv"></div>
-                <div>
-                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.addPredicateSelectorFilter()">Add filter</button>
-                </div>
-                <textarea id="Lineage_relation_filterText2" style="width: 300px; background-color: #ddd; height: 100px; margin: 10px"></textarea>
-            </div>
-        </div>
+
+
     </div>
 
     <div style="display: flex; align-content: space-around; flex-direction: column; justify-content: space-between; width: 600px">

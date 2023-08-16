@@ -791,7 +791,7 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
 
         _fields.forEach(function (_field) {
             bindings.forEach(function (item) {
-                for (var i = 0; i < 20; i++) {
+                for (var i = 0; i < 5; i++) {
                     var iStr = "" + i;
                     if (i == 0) {
                         iStr = "";
@@ -810,12 +810,18 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                     var id = item[field].value;
 
                     if (!item[field + "Label"]) {
-                        var p = id.lastIndexOf("#");
-                        if (p > -1) {
-                            item[field + "Label"] = { value: id.substring(p + 1) };
-                        } else {
-                            p = id.lastIndexOf("/");
-                            item[field + "Label"] = { value: id.substring(p + 1) };
+                        if(id.indexOf("_:")==0) {
+                            item[field + "Label"] = ""
+                        }
+                        else {
+                            var p = id.lastIndexOf("#");
+                            if (p > -1) {
+                                item[field + "Label"] = { value: id.substring(p + 1) };
+                            }
+                            else {
+                                p = id.lastIndexOf("/");
+                                item[field + "Label"] = { value: id.substring(p + 1) };
+                            }
                         }
                     }
                 }

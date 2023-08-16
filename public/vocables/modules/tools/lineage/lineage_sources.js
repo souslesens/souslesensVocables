@@ -441,14 +441,9 @@ sourceDivId +
             ' <span  class="popupMenuItem" onclick="Lineage_sources.menuActions.exportOWL(\'' +
             source +
             "');\"> export OWL </span>";
-        $("#graphPopupDiv").html(html);
-        var e = window.event;
-        var point = { x: e.pageX, y: e.pageY };
-        //  var point={x:100,y:100}
-        MainController.UI.showPopup(point, "graphPopupDiv", true);
-        $("#graphPopupDiv").on("mouseleave", function () {
-            MainController.UI.hidePopup("graphPopupDiv");
-        });
+
+        PopupMenuWidget.initAndShow(html)
+
     };
 
     self.registerSourceImports = function (sourceLabel, callback) {
@@ -612,15 +607,15 @@ sourceDivId +
             $("#" + sourceDivId).remove();
         },
         hideSource: function (source) {
-            MainController.UI.hidePopup("graphPopupDiv");
+           PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, true);
         },
         showSource: function () {
-            MainController.UI.hidePopup("graphPopupDiv");
+           PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, false);
         },
         groupSource: function (source) {
-            MainController.UI.hidePopup("graphPopupDiv");
+           PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
 
             if (!source) {
                 source = Lineage_sources.activeSource;
@@ -668,7 +663,7 @@ sourceDivId +
             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
         },
         ungroupSource: function (source) {
-            MainController.UI.hidePopup("graphPopupDiv");
+           PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             if (!source) {
                 source = Lineage_sources.activeSource;
             }

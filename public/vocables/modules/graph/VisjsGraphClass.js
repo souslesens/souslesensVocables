@@ -164,7 +164,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 }
             })
             .on("blurNode", function (/** @type {any} */ _params) {
-                // $("#graphPopupDiv").css("display", "none")
+                // $("#popupMenuWidgetDiv").css("display", "none")
             })
             .on("zoom", function (/** @type {any} */ _params) {
                 self.onScaleChange();

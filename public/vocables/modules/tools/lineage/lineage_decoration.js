@@ -42,7 +42,7 @@ var Lineage_decoration = (function() {
     LegendWidget.legendDivsStack[legendDivId]={nodeIds:visjsNodes}
     var html = "<div  class='legend_itemDiv' id='"+legendDivId + "'>" +
       "<div class='legend_colorDiv' style='background-color:" + color + "'> </div>" +
-     // "<input type='image' src='./icons/caret-right.png'  style='opacity: 0.5; width: 20px;height: 20px;}' onclick='Lineage_decoration.showLegendDivPopupMenu("+index+")'/> </div>"; +
+    "<input type='image' src='./icons/caret-right.png'  style='opacity: 0.5; width: 20px;height: 20px;}' onclick='Lineage_decoration.showLegendDivPopupMenu("+index+")'/> </div>"; +
 
       (queryInfos.predicate || "") + "<br>" +(queryInfos.filter.classLabel|| "") + (queryInfos.filter.value|| "");
     "</div>";
@@ -59,16 +59,18 @@ var Lineage_decoration = (function() {
   self.showLegendDivPopupMenu=function(legendIndex){
 
    var html =
-      '    <span  class="popupMenuItem" onclick="Lineage_decoration.popupActions("+legendIndex+",hideNodes);"> Hide nodes</span>' +
-      '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.popupActions("+legendIndex"+,showNodes);">show nodes</span>'
+     /* '    <span  class="popupMenuItem" onclick="Lineage_decoration.popupActions(\"'+legendIndex+'\",\"hideNodes\");"> Hide nodes</span>' +
+      '    <span  class="popupMenuItem" onclick="Lineage_whiteboard.popupActions(\"'+legendIndex+'\",\"showNodes\";">show nodes</span>'+*/
+" <span  class=\"popupMenuItem\" onclick=\"Lineage_decoration.popupActions('"+legendIndex+"','hideNodes');\"> Hide nodes</span>" +
+     " <span  class=\"popupMenuItem\" onclick=\"Lineage_decoration.popupActions('"+legendIndex+"','showNodes');\">Show nodes</span>"
 
 
     PopupMenuWidget.initAndShow(html)
 
   }
 
-  self.popupActions=function(legendDivId,action){
-    var nodeIds=LegendWidget.legendDivsStack[legendDivId].nodeIds
+  self.popupActions=function(legendIndex,action){
+    var visjsNodes=LegendWidget.legendDivsStack["legendDiv_"+legendIndex].nodeIds
   if(action=='hideNodes'){
     var newVisJsNodes = [];
     visjsNodes.forEach(function(node) {

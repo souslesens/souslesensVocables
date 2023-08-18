@@ -1,10 +1,11 @@
 var PopupMenuWidget = (function() {
   var self = {};
   self.initAndShow = function(html) {
+    var e = window.event;
     event.stopPropagation();
 
     $("#popupMenuWidgetDiv").html(html);
-    var e = window.event;
+
     var point = { x: e.pageX, y: e.pageY };
     //  var point={x:100,y:100}
     PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv", true);

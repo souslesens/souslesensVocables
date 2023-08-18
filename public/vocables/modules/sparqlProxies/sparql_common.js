@@ -344,6 +344,19 @@ var Sparql_common = (function () {
         }
     };
 
+  self.setFilterGraph=function(source,filter){
+      var graphUri;
+      if (Config.basicVocabularies[source]) {
+          graphUri = Config.basicVocabularies[source].graphUri;
+      } else if (Config.sources[source]) {
+          graphUri = Config.sources[source].graphUri;
+      } else {
+          return filter;
+      }
+      return "GRAPH <"+graphUri+"> {"+filter+"}"
+  }
+
+
     self.getFromStr = function (source, named, withoutImports, options) {
         if (!options) {
             options = {};
@@ -580,6 +593,24 @@ var Sparql_common = (function () {
         }
         return filter;
     };
+
+    self.isTripleObjectString=function(property,object){
+       if (property.toLowerCase().indexOf("label") > -1) {
+           return true;
+        } if (property.toLowerCase().indexOf("definedby") > -1) {
+           return true;
+        }  if (property.toLowerCase().indexOf("comment") > -1) {
+           return true;
+        }  if (property.toLowerCase().indexOf("example") > -1) {
+           return true;
+        }
+           if( object && object.indexOf("http://")==0)
+               return false;
+        if(object && object.indexOf(":")>2 && object.indexOf(":")<5)
+            return false;
+
+        return true;
+    }
 
     return self;
 })();

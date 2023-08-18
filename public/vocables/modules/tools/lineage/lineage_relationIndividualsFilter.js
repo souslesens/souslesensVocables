@@ -15,43 +15,38 @@ var Lineage_relationIndividualsFilter = (function() {
     var currentPropertyNode = Lineage_relations.currentPropertyTreeNode;
     $("#smallDialogDiv").dialog("open");
     $("#smallDialogDiv").load("snippets/lineage/relationPropDomainRangeDialog.html", function() {
+
       if (currentPropertyNode.data.constraints) {
         var roles = [currentPropertyNode.data.constraints.domain, currentPropertyNode.data.constraints.range];
+        $(".lineage_relationIndividuals_filterTypeDiv").css("display", "none");
+        common.fillSelectOptions("lineage_relationIndividuals_filterRoleSelect", roles, null, "label", "id");
+        if (currentPropertyNode.data.constraints) {
+          $("#lineage_relationIndividuals_filterRoleSelect").val(currentPropertyNode.data.constraints.domain.id);
+        }
+
+        $("#lineage_relationIndividuals_searchTermInput").keypress(function(e) {
+          if (e.which == 13 || e.which == 9) {
+            Lineage_relationIndividualsFilter.searchClassIndividuals();
+            self.filter = "";
+          }
+        });
       }
       else {
         roles = [{ id: "anyClass", label: "any Class" }];
-      }
-      common.fillSelectOptions("lineage_relationIndividuals_filterRoleSelect", roles, null, "label", "id");
-      if (currentPropertyNode.data.constraints) {
-        $("#lineage_relationIndividuals_filterRoleSelect").val(currentPropertyNode.data.constraints.domain.id);
+        self.onFilterTypeSelect("advanced")
       }
 
-      $("#lineage_relationIndividuals_searchTermInput").keypress(function(e) {
-        if (e.which == 13 || e.which == 9) {
-          Lineage_relationIndividualsFilter.searchClassIndividuals();
-          self.filter = "";
-        }
-      });
-      $(".lineage_relationIndividuals_filterTypeDiv").css("display", "none");
-      // $("#lineage_relationIndividuals_searchTermInput").focus();
 
-      return;
-      /* PredicatesSelectorWidget.load("lineage_relation_predicateSelectorDomainRangeDiv", Lineage_sources.activeSource, function() {
-  var roles = [currentPropertyNode.data.constraints.domain, currentPropertyNode.data.constraints.range];
 
-  common.fillSelectOptions("lineage_relation_filterDomainRangeRoleSelect", roles, null, "label", "id");
 
-  $("#editPredicate_vocabularySelect2").val(Lineage_sources.activeSource);
-  PredicatesSelectorWidget.setCurrentVocabClassesSelect(Lineage_sources.activeSource, "editPredicate_objectSelect");
 
-});*/
     });
   };
 
   self.searchClassIndividuals = function(term) {
     var classId = $("#lineage_relationIndividuals_filterRoleSelect").val();
 
-    if (!classId || classId!="anyClass") {
+    if (!classId  && classId!="anyClass") {
       return alert(" select a class");
     }
     if (term.indexOf("*") < 0) {
@@ -132,19 +127,21 @@ var Lineage_relationIndividualsFilter = (function() {
 
     var message = Sparql_common.setFilter(role, individuals);
     // var message = "FILTER(?" + role + " = <" + individual + ">)  ";
-    $("#lineage_relationIndividuals_fitlerTA").text(message);
+    $("#lineage_relationIndividuals_filterTA").text(message);
   };
 
   self.execFilter = function(action) {
-    $("#smallDialogDiv").dialog("close");
-    $("#mainDialogDiv").dialog("close");
+   
 
     Lineage_relationIndividualsFilter.addRangeAndDomainFilter();
     Lineage_relations.onshowDrawRelationsDialogValidate(action);
+    $("#smallDialogDiv").dialog("close");
+    $("#mainDialogDiv").dialog("close");
   };
 
   self.addRangeAndDomainFilter = function() {
-    var filter = $("#lineage_relationIndividuals_fitlerTA").text();
+
+    var filter = $("#lineage_relationIndividuals_filterTA").val();
     if (filter) {
       self.filter = filter;
     }
@@ -173,7 +170,7 @@ var Lineage_relationIndividualsFilter = (function() {
         var classIndex = $("#lineage_relationIndividuals_filterRoleSelect")[0].selectedIndex;
         var role = classIndex == 0 ? "subject" : "object";
         var filter = Sparql_common.setDateRangeSparqlFilter(role, dateRange.startDate, dateRange.endDate);
-        $("#lineage_relationIndividuals_fitlerTA").text(filter);
+        $("#lineage_relationIndividuals_filterTA").text(filter);
       });
     }
     else if (filterType == "date") {
@@ -201,7 +198,7 @@ var Lineage_relationIndividualsFilter = (function() {
     Lineage_relations.currentQueryInfos.filter.value = "Date" + precision + date.toDateString();
 
     var filter = Sparql_common.setDateRangeSparqlFilter(role, date, null, { precision: precision });
-    $("#lineage_relationIndividuals_fitlerTA").text(filter);
+    $("#lineage_relationIndividuals_filterTA").text(filter);
   };
 
   return self;

@@ -1159,6 +1159,8 @@ var Sparql_OWL = (function () {
             } else {
                 filterStr = Sparql_common.setFilter("subject", ids, null, options);
             }
+
+
         }
         var fromStr = "";
         if (sourceLabel) {

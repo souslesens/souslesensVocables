@@ -341,10 +341,10 @@ var Lineage_relations = (function() {
            options.filter += filterProp;
          }
    */
-      var propFilter = $("#Lineage_relation_filterText2").val();
+   /*   var propFilter = $("#Lineage_relation_filterText2").val();
       if (propFilter) {
         options.filter += propFilter;
-      }
+      }*/
 
       if (propDomainFilter.length > 0) {
         options.filter += Sparql_common.setFilter("subjectType", propDomainFilter, null, { useFilterKeyWord: 1 });
@@ -368,7 +368,7 @@ var Lineage_relations = (function() {
 
       self.previousQuery = {
         propIds: propIds,
-        propFilter: propFilter
+       // propFilter: propFilter
       };
 
       if (options.output == "outline") {
@@ -705,7 +705,7 @@ var Lineage_relations = (function() {
 
             {
               id: "proposed",
-              text: "proposed",
+              text: "Proposed",
               parent: "#"
             },  {
               id: "_anyProperty",
@@ -754,7 +754,7 @@ var Lineage_relations = (function() {
     self.currentPropertyTreeNode = obj.node;
     if (true || obj.node.data && obj.node.data.constraints) {
       self.currentQueryInfos.predicate = obj.node.data.label;
-      Lineage_relationIndividualsFilter.init();
+      Lineage_relationIndividualsFilter.init(obj.node);
     }
   };
 

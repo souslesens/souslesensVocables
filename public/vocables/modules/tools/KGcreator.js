@@ -118,7 +118,7 @@ var KGcreator = (function () {
                     return alert(err.responseText);
                 }
                 $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {
-                    self.initCentralPanel();
+
                 });
 
                 MainController.UI.showHideRightPanel("hide");
@@ -138,8 +138,12 @@ var KGcreator = (function () {
             $("#mainDialogDiv").dialog("close");
             var source = SourceSelectorWidget.getSelectedSource()[0];
             self.initSource(source, callback);
+            self.initCentralPanel();
+
         };
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
+        if(callback)
+            callback()
     };
 
     self.initSource = function (source, callback) {
@@ -1037,20 +1041,21 @@ self.saveMappings({classId:classId})
     };
 
     self.getMappingFileJson = function (csvFileName, callback) {
+        var jsonFileName
         if (csvFileName.indexOf(".json") < 0) {
-            csvFileName = csvFileName + ".json";
+            jsonFileName = csvFileName + ".json";
         }
         var payload = {};
         if (self.currentDataSourceModel) {
             var dbName = self.currentDbName;
             payload = {
                 dir: "CSV/" + self.currentSlsvSource,
-                name: dbName + "_" + csvFileName,
+                name: dbName + "_" + jsonFileName,
             };
         } else {
             payload = {
                 dir: "CSV/" + self.currentCsvDir,
-                name: self.currentSource + "_" + csvFileName,
+                name: self.currentSource + "_" + jsonFileName,
             };
         }
 
@@ -1092,7 +1097,7 @@ self.saveMappings({classId:classId})
                     self.mainJsonEditorModified = false;
 
                     if (!self.currentJsonObject.graphUri) {
-                        currentJsonObject.graphUri = self.currentGraphUri || "";
+                        self.currentJsonObject.graphUri = self.currentGraphUri || "";
                     } else {
                         self.currentGraphUri = self.currentJsonObject.graphUri;
                     }

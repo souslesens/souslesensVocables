@@ -18,9 +18,11 @@ var ContainerSearchWidget = (function () {
             var html = "<div>types <select id='containerSearchWidget_typesSelect' onchange='ContainerSearchWidget.execSearch()' </div>";
 
             $("#smallDialogDiv").html(html);
-            $("#smallDialogDiv").dialog("open");
+           $("#smallDialogDiv").dialog("open");
             types.splice(0, 0, { id: "all", label: "all" });
+
             common.fillSelectOptions("containerSearchWidget_typesSelect", types, true, "label", "id");
+          //  PopupMenuWidget.initAndShow(html)
         });
     };
 

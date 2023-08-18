@@ -42,6 +42,34 @@ $("#sourceDivControlPanelDiv").html(html);*/
     self.showTSFdictionary = function () {
         Lineage_dictionary.showTSFdictionaryDialog("Lineage_dictionary");
     };
+    self.cleanIndices = function () {
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/elasticsearch/clean`,
+            success: function (data, _textStatus, _jqXHR) {
+                if (data.toDelete.length > 0) {
+                    const yes = confirm(`Delete ${data.toDelete.length} indices? (${data.toDelete.join(", ")})`);
+                    if (yes) {
+                        $.ajax({
+                            type: "POST",
+                            url: `${Config.apiUrl}/elasticsearch/clean`,
+                            success: function (data, _text, _jqXHR) {
+                                if (data.deleted.length > 0) {
+                                    alert(`${data.deleted.length} indices deleted`);
+                                }
+                            },
+                        });
+                    }
+                } else {
+                    alert("No index to delete");
+                }
+            },
+            error: function (err) {
+                console.error("Error", err);
+                alert(err);
+            },
+        });
+    };
     self.refreshIndexes = function () {
         var sources = SourceSelectorWidget.getCheckedSources();
         if (!sources || sources.length == 0) {

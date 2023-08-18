@@ -48,6 +48,8 @@ services:
         environment:
             ES_JAVA_OPTS: "-Xmx256m -Xms256m"
             discovery.type: single-node
+            ELASTIC_PASSWORD: toto
+            xpack.security.enabled: "true"
         networks:
             - dev-backend
 

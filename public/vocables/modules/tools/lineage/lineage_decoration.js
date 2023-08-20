@@ -65,7 +65,7 @@ var Lineage_decoration = (function() {
      " <span  class=\"popupMenuItem\" onclick=\"Lineage_decoration.popupActions('"+legendIndex+"','showNodes');\">Show nodes</span>"
 
 
-    PopupMenuWidget.initAndShow(html)
+    PopupMenuWidget.initAndShow(html,"popupMenuWidgetDiv")
 
   }
 

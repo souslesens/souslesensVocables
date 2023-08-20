@@ -4,6 +4,7 @@ import PromptedSelectWidget from "./promptedSelectWidget.js";
 import OntologyModels from "../shared/ontologyModels.js";
 import DateWidget from "./dateWidget.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
+import IndividualValueFilterWidget from "./individualValuefilterWidget.js";
 
 var PredicatesSelectorWidget = (function() {
   var self = {};
@@ -126,7 +127,7 @@ var PredicatesSelectorWidget = (function() {
       }
       else {
 
-          common.fillSelectOptions("editPredicate_objectSelect", self.operators["Number"]);
+        common.fillSelectOptions("editPredicate_objectSelect", self.operators["Number"]);
 
       }
     }
@@ -250,60 +251,16 @@ var PredicatesSelectorWidget = (function() {
     return null;
   };
 
-  self.getSparqlFilter = function(varName) {
+  self.getSparqlFilter = function() {
     var property = self.getSelectedProperty();
     var value = self.getSelectedObjectValue();
-
     var operator = self.getSelectedOperator();
-
-
-    if (!property || !value) {
-      return null;
-    }
     var operator = null;
     if (Sparql_common.isTripleObjectString(property, value)) {
       operator = $("#editPredicate_objectSelect").val();
     }
+    IndividualValueFilterWidget.getSparqlFilter(varName, property, operator, value);
 
-    var filter = "";
-    var filterIndex = "";
-    if (operator) {
-      if (value.indexOf("xsd:dateTime") > -1) {
-        filter = "?" + varName + "  owl:hasValue ?value  filter(    datatype(?value) = xsd:dateTime" + " && ?value" + operator + value + ")";
-      }
-      else if (value.indexOf("xsd:") > -1) {
-        filter = "?" + varName + "  owl:hasValue ?value  filter(  ?value" + operator + value + ")";
-
-      }
-      else {
-
-        if (operator == "contains") {
-          filter += "?" + varName + "  " + property + " ?q. Filter(regex(str(?q" + filterIndex + "),'" + value + "','i')).";
-        }
-        else if (operator == "not contains") {
-          filter += "?" + varName + "  " + property + " ?q. Filter(!regex(str(?q" + filterIndex + "),'" + value + "','i')).";
-        }
-        else {
-          if (Sparql_common.isTripleObjectString(property, value)) {
-            value = "'" + value + "'";
-          }
-          if (self.operators.indexOf(operator) > -1) {
-            filter += "?" + varName + "  " + property + " ?q. Filter(?q" + operator + ")" + value + ").";
-          }
-          else {
-            filter = "?" + varName + "  " + property + " " + value + "";
-          }
-
-        }
-
-      }
-    }
-
-    else {
-      filter = "?" + varName + " " + property + " " + value;
-
-    }
-    return filter;
   };
 
   return self;

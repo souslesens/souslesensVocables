@@ -442,7 +442,7 @@ sourceDivId +
             source +
             "');\"> export OWL </span>";
 
-        PopupMenuWidget.initAndShow(html)
+        PopupMenuWidget.initAndShow(html,"popupMenuWidgetDiv")
 
     };
 

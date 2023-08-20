@@ -1,20 +1,21 @@
 var PopupMenuWidget = (function() {
   var self = {};
-  self.initAndShow = function(html) {
+  self.initAndShow = function(html,popupDivId,relativeToWindow) {
     var e = window.event;
     event.stopPropagation();
 
-    $("#popupMenuWidgetDiv").html(html);
+    $("#"+popupDivId).html(html);
 
     var point = { x: e.pageX, y: e.pageY };
     //  var point={x:100,y:100}
-    PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv", true);
-    $("#popupMenuWidgetDiv").on("mouseleave", function() {
-      PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+    PopupMenuWidget.showPopup(point, popupDivId, !relativeToWindow);
+    $("#"+popupDivId).on("mouseleave", function() {
+      PopupMenuWidget.hidePopup(popupDivId);
     });
   };
 
   self.showPopup = function(point, popupDiv, absolutePosition) {
+    $("#" + popupDiv).addClass("popupMenuWidgetDiv")
     $("#" + popupDiv).css("display", "flex");
     var popupH = Math.min(300, $("#" + popupDiv).height());
     var popupW = Math.min(200, $("#" + popupDiv).width());

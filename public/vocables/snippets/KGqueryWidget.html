@@ -7,9 +7,17 @@
         width: 300px
 
     }
+
     .KGqueryWidget_classDiv {
         margin: 3px;
         padding-top: 3px;
+    }
+
+    #KGqueryWidget_dataTableDiv {
+        width: 600px;
+        height: 800px;
+        overflow: auto;
+
     }
 </style>
 
@@ -17,17 +25,17 @@
 <div style="display: flex;flex-direction: row">
 
 
-  <div id="KGqueryWidget_graphDiv" style="width:50%;height: 500px "></div>
+  <div id="KGqueryWidget_graphDiv" style="width:40%;height: 800px "></div>
 
 
   <div style="display: flex;flex-direction: column">
 
 
     <div>
-      <div id="KGqueryWidget_predicateSelectDiv"></div>
+      <div id="KGqueryWidget_filterDiv"></div>
     </div>
     <div class="KGqueryWidget_classDiv"> From Class
-      <div  id="KGqueryWidget_fromClassNodeDiv"></div>
+      <div id="KGqueryWidget_fromClassNodeDiv"></div>
     </div>
     <div class="KGqueryWidget_classDiv"> To Class
       <div id="KGqueryWidget_toClassNodeDiv"></div>
@@ -36,8 +44,10 @@
 
 
     <div>
-      <button onclick="KGqueryWidget.queryKG('draw')">Draw Graph</button>
+      <button onclick="KGqueryWidget.queryKG('draw')">Exec Query</button>
     </div>
   </div>
 
+  <div id="KGqueryWidget_dataTableDiv"></div>
 </div>
+<div id="KGqueryWidget_popupMenuDiv" style="position:absolute"></div>

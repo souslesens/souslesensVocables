@@ -1222,7 +1222,7 @@ self.saveMappings({classId:classId})
                         MainController.UI.message("", true);
                     } else {
                         if (_options.deleteTriples) {
-                            $("#KGcreator_infosDiv").val(result);
+                            $("#KGcreator_infosDiv").val(result.result);
                             MainController.UI.message(result.result, true);
                         } else {
                             $("#KGcreator_infosDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
@@ -1333,6 +1333,7 @@ self.saveMappings({classId:classId})
             }
 
             var filter = "?p =<http://souslesens.org/KGcreator#mappingFile>";
+            MainControlle.UI.message("delting triples triples created with KGCreator in " + self.currentJsonObject.graphUri)
             Sparql_generic.deleteTriplesWithFilter(self.currentSlsvSource, filter, function (err, result) {
                 if (err) {
                     if (callback) {
@@ -1353,6 +1354,7 @@ self.saveMappings({classId:classId})
                 }
                 return;
             }
+            MainController.UI.message("delting triples from mapping file : " + self.currentJsonObject.fileName)
             self.createTriples(false, { deleteTriples: true }, function (err, result) {
                 if (err) {
                     if (callback) {

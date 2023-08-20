@@ -746,6 +746,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                     "   graph ?g3 {\n" +
                     "      ?sparent rdf:type ?stype filter (?stype in (owl:Class))\n" +
                     "    optional { ?sparent rdfs:subClassOf ?sparentClass filter (!isBlank(?sparentClass))}\n" +
+                //  "    optional { ?sparent rdfs:subClassOf ?sparentClass. filter (not exists {?sparentClass ref:type owl:Restriction })}\n" +
                     "   optional { ?sparent rdfs:label ?sparentLabel}\n" +
                     "    bind (if(bound(?sparentClass) && ?g3=<" +
                     sourceGraphUri +
@@ -756,6 +757,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                     "       ?oparent rdf:type ?otype filter (?otype in (owl:Class))\n" +
                     "   optional { ?oparent rdfs:label ?oparentLabel}\n" +
                     "    optional { ?oparent rdfs:subClassOf ?oparentClass filter (!isBlank(?oparentClass))}\n" +
+                 // "     optional { ?oparent rdfs:subClassOf ?oparentClass filter (not exists {oparentClass ref:type owl:Restriction })}\n" +
                     "    bind (if(bound(?oparentClass) && ?g3=<" +
                     sourceGraphUri +
                     ">,?oparentClass,?oparent) as ?oClass)  optional{?oClass rdfs:label ?oClassLabel}\n" +

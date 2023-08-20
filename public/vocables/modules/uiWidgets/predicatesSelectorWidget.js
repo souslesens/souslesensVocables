@@ -104,6 +104,7 @@ var PredicatesSelectorWidget = (function() {
     $("#editPredicate_objectSelect").val("");
     $("#editPredicate_objectValue").val("");
     $("#editPredicate_propertyValue").val(value);
+    $("#editPredicate_vocabularySelect2").css("display", "block");
     DateWidget.unsetDatePickerOnInput("editPredicate_objectValue");
     if (self.onSelectPropertyFn) {
       self.onSelectPropertyFn(value);
@@ -123,8 +124,14 @@ var PredicatesSelectorWidget = (function() {
       else if (value == "xsd:string") {
         common.fillSelectOptions("editPredicate_objectSelect", self.operators.String);
       }
+      else {
+
+          common.fillSelectOptions("editPredicate_objectSelect", self.operators["Number"]);
+
+      }
     }
     else if (Sparql_common.isTripleObjectString(value)) {
+      $("#editPredicate_vocabularySelect2").css("display", "none");
       common.fillSelectOptions("editPredicate_objectSelect", self.operators.String);
 
     }

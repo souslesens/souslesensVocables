@@ -151,7 +151,7 @@ $("#mainDialogDiv").load("snippets/lineage/relationsDialogFilter.html", function
     }
   };
 
-  self.onSelectResourceType = function(type) {
+ /* self.onSelectResourceType = function(type) {
     var role = self.currentResourceFilterRole;
     $("#lineageQuery_value").datepicker("destroy");
     $("#lineageQuery_value").val("");
@@ -169,6 +169,15 @@ $("#mainDialogDiv").load("snippets/lineage/relationsDialogFilter.html", function
       $("#lineageQuery_literalValueDiv").css("display", "block");
       common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
       dateWidget.setDatePickerOnInput("lineageQuery_value");
+      $("#lineageQuery_operator").val(">=");
+    }
+    else if (type.indexOf("xsd:")==0) {
+
+      $("#lineageQuery_literalValueDiv").css("display", "block");
+      if(type=="xsd:string")
+      common.fillSelectOptions("lineageQuery_operator", self.operators["String"]);
+      else
+        common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
       $("#lineageQuery_operator").val(">=");
     }
     else if (type == "Number") {
@@ -196,7 +205,7 @@ $("#mainDialogDiv").load("snippets/lineage/relationsDialogFilter.html", function
 
       common.fillSelectOptions("Lineage_relation_filterVocabularySelect", scopes, true);
     }
-  };
+  };*/
 
 
 

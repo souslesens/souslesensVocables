@@ -1,0 +1,43 @@
+<style>
+    .KGqueryWidget_nodeDiv {
+        border: 1px saddlebrown solid;
+        margin: 3px;
+        padding-top: 3px;
+        border-radius: 3px;
+        width: 300px
+
+    }
+    .KGqueryWidget_classDiv {
+        margin: 3px;
+        padding-top: 3px;
+    }
+</style>
+
+
+<div style="display: flex;flex-direction: row">
+
+
+  <div id="KGqueryWidget_graphDiv" style="width:50%;height: 500px "></div>
+
+
+  <div style="display: flex;flex-direction: column">
+
+
+    <div>
+      <div id="KGqueryWidget_predicateSelectDiv"></div>
+    </div>
+    <div class="KGqueryWidget_classDiv"> From Class
+      <div  id="KGqueryWidget_fromClassNodeDiv"></div>
+    </div>
+    <div class="KGqueryWidget_classDiv"> To Class
+      <div id="KGqueryWidget_toClassNodeDiv"></div>
+
+    </div>
+
+
+    <div>
+      <button onclick="KGqueryWidget.queryKG('draw')">Draw Graph</button>
+    </div>
+  </div>
+
+</div>

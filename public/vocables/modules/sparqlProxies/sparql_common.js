@@ -609,7 +609,7 @@ var Sparql_common = (function () {
         if(object && object.indexOf(":")>2 && object.indexOf(":")<5)
             return false;
 
-        return true;
+        return false;
     }
 
     return self;

@@ -63,32 +63,36 @@ var IndividualValueFilterWidget = (function() {
       var operators = self.operators["Number"];
     }
     common.fillSelectOptions("individualValueFilter_operatorSelect", operators, true);
-  }
+  };
 
-    self.onOKbutton = function() {
-      var property = $("#individualValueFilter_propertySelect").val();
-      var operator = $("#individualValueFilter_operatorSelect").val();
-      var value = $("#individualValueFilter_objectValue").val();
+  self.onOKbutton = function() {
+    var property = $("#individualValueFilter_propertySelect").val();
+    var operator = $("#individualValueFilter_operatorSelect").val();
+    var value = $("#individualValueFilter_objectValue").val();
 
-   /*   if (self.validateFn && (!property || !operator || !value)) {
-        return self.validateFn("missing paramaters in filter");
-      }*/
+    /*   if (self.validateFn && (!property || !operator || !value)) {
+         return self.validateFn("missing paramaters in filter");
+       }*/
 
 
-      self.filter = self.getSparqlFilter(self.varName, property, operator, value);
-      $("#" + self.divId).dialog("close");
-      if (self.validateFn) {
+    self.filter = self.getSparqlFilter(self.varName, property, operator, value);
+    $("#" + self.divId).dialog("close");
+    if (self.validateFn) {
 
-          return self.validateFn(null, self.filter);
+      return self.validateFn(null, self.filter);
 
-      }
+    }
 
-    };
-
+  };
 
 
   self.getSparqlFilter = function(varName, property, operator, value) {
-
+    if (varName) {
+      varName = "?" + varName;
+    }
+    else {
+      varName = "";
+    }
     if (!property || !value) {
       return null;
     }
@@ -104,26 +108,26 @@ var IndividualValueFilterWidget = (function() {
     var filterIndex = "";
 
     if (value.indexOf("xsd:dateTime") > -1) {
-      filter = "?" + varName + "  owl:hasValue ?value  filter(    datatype(?value) = xsd:dateTime" + " && ?value" + operator + value + ")";
+      filter = varName + "  owl:hasValue ?value  filter(    datatype(?value) = xsd:dateTime" + " && ?value" + operator + value + ")";
     }
     else if (value.indexOf("xsd:") > -1) {
-      filter = "?" + varName + "  owl:hasValue ?value  filter(  ?value" + operator + value + ")";
+      filter = varName + "  owl:hasValue ?value  filter(  ?value" + operator + value + ")";
 
     }
     else {
 
       if (operator == "contains") {
-        filter += "?" + varName + "  " + property + " ?q. Filter(regex(str(?q" + filterIndex + "),'" + value + "','i')).";
+        filter += varName + "  " + property + " ?q. Filter(regex(str(?q" + filterIndex + "),'" + value + "','i')).";
       }
       else if (operator == "not contains") {
-        filter += "?" + varName + "  " + property + " ?q. Filter(!regex(str(?q" + filterIndex + "),'" + value + "','i')).";
+        filter += varName + "  " + property + " ?q. Filter(!regex(str(?q" + filterIndex + "),'" + value + "','i')).";
       }
       else {
         if (Sparql_common.isTripleObjectString(property, value)) {
           value = "'" + value + "'";
         }
 
-        filter += "?" + varName + "  " + property + " ?q. Filter(?q" + operator + ")" + value + ").";
+        filter += varName + "  " + property + " ?q. Filter(?q" + operator + ")" + value + ").";
 
 
       }
@@ -135,7 +139,7 @@ var IndividualValueFilterWidget = (function() {
 
 
   self.onSelectOperator = function(value) {
-    $("#individualValueFilter_objectValue").focus()
+    $("#individualValueFilter_objectValue").focus();
   };
   self.onSelectObject = function(value) {
 

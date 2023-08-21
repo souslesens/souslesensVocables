@@ -744,8 +744,7 @@ var KGcreator = (function () {
         var subject = $("#KGcreator_subjectInput").val();
         var subjectIsBlank = $("#KGcreator_isSubjectBlankNodeCBX").prop("checked");
         var objectIsBlank = $("#KGcreator_isObjectBlankNodeCBX").prop("checked");
-        //  var predicate = $("#KGcreator_predicateInput").val();
-        //  var object = $("#KGcreator_objectInput").val();
+
 
         var predicate = $("#editPredicate_propertyValue").val();
         var object = $("#editPredicate_objectValue").val();
@@ -841,10 +840,10 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         self.mainJsonEditor.load(self.currentJsonObject);
         self.mainJsonEditorModified = true;
 
-        $("#KGcreator_objectInput").val("");
+      /*  $("#KGcreator_objectInput").val("");
         $("#KGcreator_objectSelect").val("");
         $("#KGcreator_predicateInput").val("");
-        $("#KGcreator_predicateSelect").val("");
+        $("#KGcreator_predicateSelect").val("");*/
 
         //   $("#KGcreator_tripleTA").val(JSON.stringify(tripleObj))
     };
@@ -922,9 +921,9 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         if (role == "s") {
             $("#KGcreator_subjectInput").val(fnObject);
         } else if (role == "p") {
-            $("#KGcreator_predicateInput").val(fnObject);
+            $("#editPredicate_propertyValue").val(fnObject);
         } else if (role == "o") {
-            $("#KGcreator_objectInput").val(fnObject);
+            $("#editPredicate_objectValue").val(fnObject);
         }
         $("#KGcreator_dialogDiv").dialog("close");
     };

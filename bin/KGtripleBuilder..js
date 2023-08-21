@@ -436,7 +436,13 @@ var KGtripleBuilder = {
                                   if (item.objectIsSpecificUri) {
                                     objectStr = item.o;
                                   }
-
+                                  else if (typeof item.o === "function") {
+                                    try {
+                                      objectStr = item.o(line, item);
+                                    } catch (e) {
+                                      return (lineError = e);
+                                    }
+                                  }
                                   else if (item.o.indexOf("$_") == 0) {
                                     // virtual column
                                     var blankNode = blankNodesMap[item.o];
@@ -500,13 +506,7 @@ var KGtripleBuilder = {
                                     }
 
 
-                                    else if (typeof item.o === "function") {
-                                      try {
-                                        objectStr = item.o(line, item);
-                                      } catch (e) {
-                                        return (lineError = e);
-                                      }
-                                    }
+
 
 
                                     else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {

@@ -63,7 +63,7 @@ var IndividualValueFilterWidget = (function() {
       var operators = self.operators["Number"];
     }
     common.fillSelectOptions("individualValueFilter_operatorSelect", operators, true);
-
+  }
 
     self.onOKbutton = function() {
       var property = $("#individualValueFilter_propertySelect").val();
@@ -84,7 +84,7 @@ var IndividualValueFilterWidget = (function() {
       }
 
     };
-  };
+
 
 
   self.getSparqlFilter = function(varName, property, operator, value) {

@@ -25,7 +25,7 @@ var KGqueryWidget = (function() {
         if (err) {
           return alert(err.responseText);
         }
-
+        self.vicinityArray = [];
         visjsData.edges.forEach(function(edge) {
           self.vicinityArray.push([edge.from, edge.to, edge.data.propertyId]);
         });
@@ -81,7 +81,7 @@ var KGqueryWidget = (function() {
 
 
     if (self.queryNodes.fromNode && self.queryNodes.toNode) {
-      self.allQueries.push(JSON.parse(JSON.stringify(self.queryNodes)));
+      self.allQueries.push({input:JSON.parse(JSON.stringify(self.queryNodes)),sparqlQuery:""});
       self.queryNodes = { fromNode: self.queryNodes.toNode };
     }
 
@@ -203,9 +203,9 @@ var KGqueryWidget = (function() {
     ids.forEach(function(id) {
       newNodes.push({
         id: id,
-        shape: Lineage_whiteboard.defaultShape,
-        size: Lineage_whiteboard.defaultShapeSize,
-        color: Lineage_whiteboard.getSourceColor(self.source)
+        shape: self.visjsNodeOptions.shape,
+        size: self.visjsNodeOptions.size,
+        color: self.visjsNodeOptions.color,
       });
     });
     self.KGqueryGraph.data.nodes.update(newNodes);
@@ -237,18 +237,34 @@ var KGqueryWidget = (function() {
       return;
     }
     if (self.allQueries.length == 0) {
-      self.allQueries.push(self.queryNodes);
+      self.allQueries.push({input:self.queryNodes,sparqlQuery:""});
     }
     var data = [];
-    async.eachSeries(self.allQueries, function(queryNodes, callbackEach) {
+    var index=0
+    async.eachSeries(self.allQueries, function(queryObj, callbackEach) {
 
+      var queryNodes=queryObj.input;
       var filterStr = "";
       if (queryNodes.fromNode.filter) {
-        filterStr += " " + self.queryNodes.fromNode.filter + " ";
+        filterStr += " " +queryNodes.fromNode.filter + " ";
       }
 
       if (queryNodes.toNode.filter) {
         filterStr += " " + queryNodes.fromNode.toNode + " ";
+      }
+
+     if(false && index>0){// add subQuery on object with previous query
+
+        var previousQuery=self.allQueries[index-1].sparqlQuery
+       // sparqlQuery=replace(/subject/gm,"subject_"+index)
+      //  sparqlQuery=replace(/object/gm,"object_"+index)
+     // var  sparqlQuery=replace(/\*/gm,"?subject ?object")
+        var p=sparqlQuery.indexOf("Select")
+        sparqlQuery=sparqlQuery.substring(p)
+        filterStr+=  "{ "+sparqlQuery+"}"
+
+
+
       }
 
 
@@ -256,7 +272,9 @@ var KGqueryWidget = (function() {
         if (err) {
           return callbackEach(err);
         }
-        data = result.results.bindings;
+        data = result.bindings;
+        self.allQueries[index].sparqlQuery=result.sparqlQuery
+        index+=1
         callbackEach();
       });
     }, function(err) {
@@ -372,9 +390,15 @@ var KGqueryWidget = (function() {
         return callback(err);
       }
 
-      callback(null, result);
+      callback(null, {sparqlQuery:query, bindings: result.results.bindings });
 
     });
+  };
+  
+  self.visjsNodeOptions= {
+    shape: "box",//Lineage_whiteboard.defaultShape,
+    size: Lineage_whiteboard.defaultShapeSize,
+    color: "#ddd"//Lineage_whiteboard.getSourceColor(source)
   };
 
   self.getInferredModelVisjsData = function(source, callback) {
@@ -412,20 +436,16 @@ var KGqueryWidget = (function() {
             item.sClass = item.sClass || item.sparent;
             item.oClass = item.oClass || item.oparent;
 
-            var options = {
-              shape: Lineage_whiteboard.defaultShape,
-              size: Lineage_whiteboard.defaultShapeSize,
-              color: Lineage_whiteboard.getSourceColor(source)
-            };
+           
             if (!existingNodes[item.sClass.value]) {
               existingNodes[item.sClass.value] = 1;
               var label = item.sClassLabel ? item.sClassLabel.value : Sparql_common.getLabelFromURI(item.sClass.value);
-              visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.sClass.value, label, null, options));
+              visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.sClass.value, label, null, self.visjsNodeOptions));
             }
             if (!existingNodes[item.oClass.value]) {
               existingNodes[item.oClass.value] = 1;
               var label = item.oClassLabel ? item.oClassLabel.value : Sparql_common.getLabelFromURI(item.oClass.value);
-              visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, label, null, options));
+              visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, label, null, self.visjsNodeOptions));
             }
             var edgeId = item.sClass.value + "_" + item.prop.value + "_" + item.oClass.value;
             if (!existingNodes[edgeId]) {
@@ -436,7 +456,7 @@ var KGqueryWidget = (function() {
                 from: item.sClass.value,
                 to: item.oClass.value,
                 label: item.propLabel.value,
-                font: { color: options.edgesColor || Lineage_whiteboard.restrictionColor },
+                font: { color:  Lineage_whiteboard.restrictionColor },
                 data: {
                   propertyId: item.prop.value,
                   source: source,
@@ -451,7 +471,7 @@ var KGqueryWidget = (function() {
                   }
                 },
                 dashes: true,
-                color: options.edgesColor || Lineage_whiteboard.restrictionColor
+                color: Lineage_whiteboard.restrictionColor
               });
             }
           });

@@ -173,11 +173,14 @@ class ProfileModel {
         await lock.acquire("ProfilesThread");
         try {
             const profiles = await this._read();
-            if (!(profile.id in profiles)) {
+            const updatedProfiles = { ...profiles };
+            if (profile.id in profiles) {
+                updatedProfiles[profile.id] = profile;
+            } else if (profile.name in profiles) {
+                updatedProfiles[profile.name] = profile;
+            } else {
                 return false;
             }
-            const updatedProfiles = { ...profiles };
-            updatedProfiles[profile.id] = profile;
             await this._write(updatedProfiles);
             return true;
         } finally {

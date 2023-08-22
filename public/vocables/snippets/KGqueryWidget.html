@@ -19,9 +19,10 @@
         overflow: auto;
 
     }
-    #dataTableDivExport_wrapper{
+
+    #dataTableDivExport_wrapper {
         width: 600px;
-        height: 800px;
+        height: 700px;
         overflow: auto;
     }
 </style>
@@ -29,31 +30,32 @@
 
 <div style="display: flex;flex-direction: row">
 
-
-  <div id="KGqueryWidget_graphDiv" style="width:40%;height: 800px "></div>
-
-
   <div style="display: flex;flex-direction: column">
+    <div style="display: flex;flex-direction: row">
+
+      <div>
+        <div id="KGqueryWidget_filterDiv"></div>
+      </div>
+      <div class="KGqueryWidget_classDiv"> From Class
+        <div id="KGqueryWidget_fromClassNodeDiv"></div>
+      </div>
+      <div class="KGqueryWidget_classDiv"> To Class
+        <div id="KGqueryWidget_toClassNodeDiv"></div>
+
+      </div>
 
 
-    <div>
-      <div id="KGqueryWidget_filterDiv"></div>
+      <div>
+        <button onclick="KGqueryWidget.queryKG('draw')">Exec Query</button>
+        <button onclick="KGqueryWidget.clearAll()">Clear all</button>
+      </div>
     </div>
-    <div class="KGqueryWidget_classDiv"> From Class
-      <div id="KGqueryWidget_fromClassNodeDiv"></div>
-    </div>
-    <div class="KGqueryWidget_classDiv"> To Class
-      <div id="KGqueryWidget_toClassNodeDiv"></div>
-
-    </div>
 
 
-    <div>
-      <button onclick="KGqueryWidget.queryKG('draw')">Exec Query</button>
-      <button onclick="KGqueryWidget.clearAll()">Clear all</button>
-    </div>
+    <div id="KGqueryWidget_graphDiv" style="width:800px;height: 600px "></div>
   </div>
-
   <div id="KGqueryWidget_dataTableDiv"></div>
 </div>
+
+
 <div id="KGqueryWidget_popupMenuDiv" style="position:absolute"></div>

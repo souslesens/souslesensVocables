@@ -162,26 +162,38 @@ var KGqueryWidget = (function() {
       if (err) {
         return callbackEach(err);
       }
-      var data = result.bindings;
 
 
+      //prepare columns
+
+      var data = result.results.bindings;
+      var nonNullCols = {};
+      data.forEach(function(item) {
+        result.head.vars.forEach(function(varName) {
+          if (nonNullCols[varName]) {
+            return;
+          }
+          if (item[varName]) {
+            nonNullCols[varName] = item[varName].type;
+          }
+        });
+      });
       var tableCols = [];
+      var colNames = [];
+      for (var varName in nonNullCols) {
+        tableCols.push({ title: varName, defaultContent: "", width: "15%" });
+        colNames.push(varName);
 
-      var classLabel = self.queryPathParams.fromNode.label;
-      tableCols.push({ title: classLabel + "_label", defaultContent: "", width: "15%" });
-      tableCols.push({ title: classLabel + "_value", defaultContent: "", width: "15%" });
-      classLabel = self.queryPathParams.toNode.label;
-      tableCols.push({ title: classLabel + "_label", defaultContent: "", width: "15%" });
-      tableCols.push({ title: classLabel + "_value", defaultContent: "", width: "15%" });
+      }
 
 
       var tableData = [];
       data.forEach(function(item) {
         var line = [];
-        line.push(item.subjectLabel ? item.subjectLabel.value : null);
-        line.push(item.subjectValue ? item.subjectValue.value : null);
-        line.push(item.objectLabel ? item.objectLabel.value : null);
-        line.push(item.objectValue ? item.objectValue.value : null);
+        colNames.forEach(function(col){
+          line.push(item[col] ? item[col].value : null);
+        })
+
         tableData.push(line);
       });
 
@@ -193,7 +205,7 @@ var KGqueryWidget = (function() {
   };
 
 
-  self.execPathQuery = function(allQueryPathes, filterStr, callback) {
+  self.execPathQuery = function(allQueryPathes, callback) {
 
 
     var predicateStr = "";
@@ -203,38 +215,33 @@ var KGqueryWidget = (function() {
     allQueryPathes.forEach(function(queryPath, queryIndex) {
       var subjectVarName;
 
-        subjectVarName = "?" + Sparql_common.formatStringForTriple(queryPath.fromNode.label || Sparql_common.getLabelFromURI(queryPath.fromNode.id) );
-        var subjectUri =queryPath.fromNode.id
-      if(!distinctTypesMap[subjectVarName]){
-        distinctTypesMap[subjectVarName]=1
+      subjectVarName = "?" + Sparql_common.formatStringForTriple(queryPath.fromNode.label || Sparql_common.getLabelFromURI(queryPath.fromNode.id));
+      var subjectUri = queryPath.fromNode.id;
+      if (!distinctTypesMap[subjectVarName]) {
+        distinctTypesMap[subjectVarName] = 1;
         filterStr += " " + subjectVarName + "  rdf:type <" + subjectUri + ">. ";
 
       }
 
-      var objectVarName = "?" + Sparql_common.formatStringForTriple(queryPath.toNode.label || Sparql_common.getLabelFromURI(queryPath.toNode.id) );
-      var objectUri =queryPath.toNode.id
-      var subjectUri =queryPath.fromNode.id
-      if(!distinctTypesMap[objectVarName]) {
-        distinctTypesMap[objectVarName] = 1
+      var objectVarName = "?" + Sparql_common.formatStringForTriple(queryPath.toNode.label || Sparql_common.getLabelFromURI(queryPath.toNode.id));
+      var objectUri = queryPath.toNode.id;
+      var subjectUri = queryPath.fromNode.id;
+      if (!distinctTypesMap[objectVarName]) {
+        distinctTypesMap[objectVarName] = 1;
         filterStr += " " + objectVarName + "  rdf:type <" + objectUri + ">.";
       }
 
 
-
       predicateStr += subjectVarName + " ";
-      queryPath.path.forEach(function(pathItem,pathIndex) {
-      if (pathIndex > 0) {
-        predicateStr += "/";
-      }
-      var inverseStr = (pathItem.length == 4) ? "^" : "";
-      predicateStr += inverseStr + "<" + pathItem[2] + ">";
-      })
+      queryPath.path.forEach(function(pathItem, pathIndex) {
+        if (pathIndex > 0) {
+          predicateStr += "/";
+        }
+        var inverseStr = (pathItem.length == 4) ? "^" : "";
+        predicateStr += inverseStr + "<" + pathItem[2] + ">";
+      });
 
       predicateStr += " " + objectVarName + ". ";
-
-
-
-
 
 
       if (queryPath.fromNode.filter) {
@@ -277,7 +284,7 @@ var KGqueryWidget = (function() {
         return callback(err);
       }
 
-      callback(null, { sparqlQuery: query, bindings: result.results.bindings });
+      callback(null, result);
 
     });
 

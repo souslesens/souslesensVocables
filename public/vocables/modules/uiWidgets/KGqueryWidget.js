@@ -45,7 +45,7 @@ var KGqueryWidget = (function() {
   };
 
 
-  self.addNode = function(node,nodeEvent) {
+  self.addNode = function(node, nodeEvent) {
     var html = "";
     if (!self.currentGraphNode) {
       return;
@@ -69,12 +69,12 @@ var KGqueryWidget = (function() {
     /**
 
      if a path exist the new node has to be the target (to) Node of a new path and the from node should be the nearest node among the previous paths nodes
-     **/
+     */
     if (self.queryPathParams.fromNode && self.queryPathParams.toNode) {
 
 
       self.getNearestNode(self.currentGraphNode.id, self.allQueryPathes, function(err, nodeId) {
-        self.queryPathParams = { fromNode: {id:nodeId} };
+        self.queryPathParams = { fromNode: { id: nodeId } };
         self.addNode();
       });
 
@@ -104,7 +104,7 @@ var KGqueryWidget = (function() {
 
         var newVisjsEdges = [];
         path.forEach(function(pathItem, index) {
-         var edgeId = pathItem[0] + "_" + pathItem[2] + "_" + pathItem[1];
+          var edgeId = pathItem[0] + "_" + pathItem[2] + "_" + pathItem[1];
           newVisjsEdges.push({ id: edgeId, color: color, width: 3 });
         });
         self.KGqueryGraph.data.edges.update(newVisjsEdges);
@@ -115,8 +115,9 @@ var KGqueryWidget = (function() {
     self.KGqueryGraph.data.nodes.update({ id: self.currentGraphNode.id, shape: "hexagon", size: 14, color: color });
 
 
-    if(nodeEvent && nodeEvent.ctrlKey )
-    self.addFilterToNode(divId);
+    if (nodeEvent && nodeEvent.ctrlKey) {
+      self.addFilterToNode(divId);
+    }
   };
 
 
@@ -198,34 +199,42 @@ var KGqueryWidget = (function() {
     var predicateStr = "";
     var filterStr = "";
     var optionalStr = "";
+    var distinctTypesMap = {};
     allQueryPathes.forEach(function(queryPath, queryIndex) {
       var subjectVarName;
-      if (queryIndex == 0) {
-        subjectVarName = "?subject_" + queryIndex;
+
+        subjectVarName = "?" + Sparql_common.formatStringForTriple(queryPath.fromNode.label || Sparql_common.getLabelFromURI(queryPath.fromNode.id) );
+        var subjectUri =queryPath.fromNode.id
+      if(!distinctTypesMap[subjectVarName]){
+        distinctTypesMap[subjectVarName]=1
+        filterStr += " " + subjectVarName + "  rdf:type <" + subjectUri + ">. ";
+
       }
-      else {
-        subjectVarName = "?object_" + (queryIndex - 1);
+
+      var objectVarName = "?" + Sparql_common.formatStringForTriple(queryPath.toNode.label || Sparql_common.getLabelFromURI(queryPath.toNode.id) );
+      var objectUri =queryPath.toNode.id
+      var subjectUri =queryPath.fromNode.id
+      if(!distinctTypesMap[objectVarName]) {
+        distinctTypesMap[objectVarName] = 1
+        filterStr += " " + objectVarName + "  rdf:type <" + objectUri + ">.";
       }
-      var objectVarName = "?object_" + queryIndex;
+
+
 
       predicateStr += subjectVarName + " ";
-      queryPath.path.forEach(function(pathItem, pathIndex) {
-        if (pathIndex > 0) {
-          predicateStr += "/";
-        }
-        var inverseStr = (pathItem.length == 4) ? "^" : "";
+      queryPath.path.forEach(function(pathItem,pathIndex) {
+      if (pathIndex > 0) {
+        predicateStr += "/";
+      }
+      var inverseStr = (pathItem.length == 4) ? "^" : "";
+      predicateStr += inverseStr + "<" + pathItem[2] + ">";
+      })
 
-        predicateStr += inverseStr + "<" + pathItem[2] + ">";
-        if (pathIndex == 0) {
-          var subjectUri = (pathItem.length < 4) ? pathItem[0] : pathItem[1];
-          filterStr += " " + subjectVarName + "  rdf:type <" + subjectUri + ">. ";
-        }
-        else if (pathIndex == queryPath.path.length - 1) {
-          var objectUri = (pathItem.length < 4) ? pathItem[1] : pathItem[0];
-          filterStr += " " + objectVarName + "  rdf:type <" + objectUri + ">.";
-        }
-      });
       predicateStr += " " + objectVarName + ". ";
+
+
+
+
 
 
       if (queryPath.fromNode.filter) {
@@ -257,7 +266,7 @@ var KGqueryWidget = (function() {
 
     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
     var fromStr = Sparql_common.getFromStr(self.source);
-    query += "Select distinct *  " + fromStr + " where {" + predicateStr +"\n"+ optionalStr +"\n"+ filterStr;
+    query += "Select distinct *  " + fromStr + " where {" + predicateStr + "\n" + optionalStr + "\n" + filterStr;
 
     query += "} limit 10000";
 
@@ -312,46 +321,47 @@ var KGqueryWidget = (function() {
 
   self.getNearestNode = function(nodeId, queryPathes, callback) {
 
-    var allCandidateNodesMap={}
+    var allCandidateNodesMap = {};
 
     queryPathes.forEach(function(querypath) {
-      if(false){// take all nodes in the path
-      querypath.path.forEach(function(pathItem) {
-        allCandidateNodesMap[pathItem[0]] = 0;
-        allCandidateNodesMap[pathItem[1]] = 0;
+      if (false) {// take all nodes in the path
+        querypath.path.forEach(function(pathItem) {
+          allCandidateNodesMap[pathItem[0]] = 0;
+          allCandidateNodesMap[pathItem[1]] = 0;
 
-      });
-      }else{// only terminaisons of path
+        });
+      }
+      else {// only terminaisons of path
         allCandidateNodesMap[querypath.fromNode.id] = 0;
         allCandidateNodesMap[querypath.toNode.id] = 0;
       }
 
 
-
-
     });
-   var  allCandidateNodesArray=Object.keys(allCandidateNodesMap)
-    async.eachSeries(allCandidateNodesArray,function( candidateNodeId,callbackEach) {
+    var allCandidateNodesArray = Object.keys(allCandidateNodesMap);
+    async.eachSeries(allCandidateNodesArray, function(candidateNodeId, callbackEach) {
       self.getPathBetweenNodes(candidateNodeId, nodeId, function(err, path) {
-        if (err)
-          return callbackEach(err)
+        if (err) {
+          return callbackEach(err);
+        }
 
-        allCandidateNodesMap[candidateNodeId] = path.length
-        callbackEach()
-      })
-    },function(err) {
-      if (err)
-        return callback(err)
-
-      var minEdges=100
-      var nearestNodeId=null;
-     for( var key in  allCandidateNodesMap)
-      if(allCandidateNodesMap[key]< minEdges){
-        minEdges=allCandidateNodesMap[key]
-        nearestNodeId=key
+        allCandidateNodesMap[candidateNodeId] = path.length;
+        callbackEach();
+      });
+    }, function(err) {
+      if (err) {
+        return callback(err);
       }
-     callback(null,nearestNodeId)
-    })
+
+      var minEdges = 100;
+      var nearestNodeId = null;
+      for (var key in allCandidateNodesMap)
+        if (allCandidateNodesMap[key] < minEdges) {
+          minEdges = allCandidateNodesMap[key];
+          nearestNodeId = key;
+        }
+      callback(null, nearestNodeId);
+    });
 
 
   };
@@ -482,9 +492,9 @@ var KGqueryWidget = (function() {
     $("#KGqueryWidget_toClassNodeDiv").html("");
   };
   self.graphActions = {
-    onNodeClick: function(node,point,nodeEvent,) {
+    onNodeClick: function(node, point, nodeEvent) {
       self.currentGraphNode = node;
-      KGqueryWidget.addNode(node,nodeEvent);
+      KGqueryWidget.addNode(node, nodeEvent);
 
     },
 

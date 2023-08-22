@@ -257,7 +257,7 @@ var KGqueryWidget = (function() {
 
     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
     var fromStr = Sparql_common.getFromStr(self.source);
-    query += "Select distinct *  " + fromStr + " where {" + predicateStr + optionalStr + filterStr;
+    query += "Select distinct *  " + fromStr + " where {" + predicateStr +"\n"+ optionalStr +"\n"+ filterStr;
 
     query += "} limit 10000";
 

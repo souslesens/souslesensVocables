@@ -37,8 +37,8 @@ var IndividualValueFilterWidget = (function() {
   ];
 
 
-  self.showDialog = function(divId, varName, validateFn) {
-    self.varName = varName;
+  self.showDialog = function(divId, classes, validateFn) {
+
     self.validateFn = validateFn;
 
     if (!divId) {
@@ -50,11 +50,15 @@ var IndividualValueFilterWidget = (function() {
 
       common.fillSelectOptions("individualValueFilter_propertySelect", self.properties, true);
 
+      common.fillSelectOptions("individualValueFilter_classesSelect",classes, true,);
     });
 
   };
 
   self.onSelectProperty = function(property) {
+    self.varName = $("#individualValueFilter_classesSelect").val();
+    if(! self.varName )
+      return alert ("select a class")
     if (Sparql_common.isTripleObjectString(property)) {
       var operators = self.operators["String"];
 

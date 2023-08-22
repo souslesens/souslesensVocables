@@ -1,5 +1,5 @@
 <style>
-    .KGqueryWidget_nodeDiv {
+    .KGqueryWidget_pathDiv {
         border: 1px saddlebrown solid;
         margin: 3px;
         padding-top: 3px;
@@ -14,44 +14,46 @@
     }
 
     #KGqueryWidget_dataTableDiv {
-        width: 600px;
+        width: 800px;
         height: 800px;
         overflow: auto;
 
     }
 
     #dataTableDivExport_wrapper {
-        width: 600px;
-        height: 700px;
+        width: 800px;
+        height: 800px;
         overflow: auto;
+    }
+
+    .KGqueryWidget_divActions {
+        font-size: 12px;
+        height: 25px;
+        width: 25px;
+
+        margin: 3px;
+        padding: 3px;
+        margin-right: 8px;
     }
 </style>
 
+<div style="display: flex;flex-direction: row">
+
+  <div  style="display: flex;flex-direction: row" id="KGqueryWidget_selectedClassesDiv">
+
+
+  </div>
+
+
+  <div>
+    <button onclick="KGqueryWidget.queryKG('draw')">Exec Query</button>
+    <button onclick="KGqueryWidget.clearAll()">Clear all</button>
+  </div>
+</div>
 
 <div style="display: flex;flex-direction: row">
 
   <div style="display: flex;flex-direction: column">
-    <div style="display: flex;flex-direction: row">
-
-      <div>
-        <div id="KGqueryWidget_filterDiv"></div>
-      </div>
-      <div class="KGqueryWidget_classDiv"> From Class
-        <div id="KGqueryWidget_fromClassNodeDiv"></div>
-      </div>
-      <div class="KGqueryWidget_classDiv"> To Class
-        <div id="KGqueryWidget_toClassNodeDiv"></div>
-
-      </div>
-
-
-      <div>
-        <button onclick="KGqueryWidget.queryKG('draw')">Exec Query</button>
-        <button onclick="KGqueryWidget.clearAll()">Clear all</button>
-      </div>
-    </div>
-
-
     <div id="KGqueryWidget_graphDiv" style="width:800px;height: 600px "></div>
   </div>
   <div id="KGqueryWidget_dataTableDiv"></div>

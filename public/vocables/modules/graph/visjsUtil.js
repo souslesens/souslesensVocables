@@ -79,6 +79,12 @@ var VisjsUtil = (function () {
             if (key == "color" && node.color == "#bbb");
             else node[key] = options[key];
         }
+
+        if(options.data) {
+            for (var key in options.data) {
+                node.data[key] = options.data[key];
+            }
+        }
         return node;
     };
 

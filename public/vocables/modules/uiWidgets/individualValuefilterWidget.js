@@ -10,35 +10,21 @@ var IndividualValueFilterWidget = (function() {
   };
 
 
-  self.properties = [
-    "rdfs:label",
-    "rdfs:isDefinedBy",
-    "rdfs:comment",
-
-    "",
-    "xsd:string",
-    "xsd:dateTime",
-    "xsd:boolean",
-    "xsd:integer",
-    "xsd:float",
-    "xsd:double",
-    "xsd:decimal",
-    "rdf:XMLLiteral",
-
-    "",
-
-    "skos:altLabel",
-    "skos:prefLabel",
-    "skos:definition",
-    "skos:example",
+  self.properties = {
+    String: ["rdfs:label",
+      "rdfs:isDefinedBy",
+      "rdfs:comment",
+      "skos:altLabel",
+      "skos:prefLabel",
+      "skos:definition",
+      "skos:example"]
 
 
-    ""
-  ];
+  };
 
 
-  self.showDialog = function(divId, classes, validateFn) {
-
+  self.showDialog = function(divId, varName, datatype, validateFn) {
+    self.varName = varName;
     self.validateFn = validateFn;
 
     if (!divId) {
@@ -48,26 +34,91 @@ var IndividualValueFilterWidget = (function() {
     }
     $("#" + divId).load("snippets/IndividualValueFilterWidget.html", function() {
 
-      common.fillSelectOptions("individualValueFilter_propertySelect", self.properties, true);
+      if (datatype) {
+        common.fillSelectOptions("individualValueFilter_propertySelect", [{ id: "owl:hasValue", label: "owl:hasValue" }], false, "label", "value");
+        common.fillSelectOptions("individualValueFilter_operatorSelect", self.operators.Number, false);
+        $("#individualValueFilter_operatorSelect").val(">")
+      }
+      else {
+        common.fillSelectOptions("individualValueFilter_propertySelect", self.properties.String, false);
+        common.fillSelectOptions("individualValueFilter_operatorSelect", self.operators.String, false);
+        $("#individualValueFilter_operatorSelect").val("contains")
+      }
 
-      common.fillSelectOptions("individualValueFilter_classesSelect",classes, true,);
+      $('#individualValueFilter_propertySelect option').eq(1).prop('selected', true);
+      $("#individualValueFilter_objectValue").focus();
+
+
     });
 
   };
 
-  self.onSelectProperty = function(property) {
-    self.varName = $("#individualValueFilter_classesSelect").val();
-    if(! self.varName )
-      return alert ("select a class")
-    if (Sparql_common.isTripleObjectString(property)) {
-      var operators = self.operators["String"];
+
+
+
+  self.getSparqlFilter = function(varName, property, operator, value) {
+    if (varName) {
+      varName = "?"+varName;
+    }
+    else {
+      varName = "";
+    }
+    if (!property || !value) {
+      return null;
+    }
+    if (property.indexOf("xsd:") == 0) {
+      var xsd = property;
+      property = "owl:hasValue";
+      value = "'" + value + "'^^" + xsd;
+
+    }
+
+
+    var filter = "";
+  
+
+    if (value.indexOf("xsd:dateTime") > -1) {
+      filter = varName + "  owl:hasValue "+varName+"_value  filter(    datatype("+varName+"_value) = xsd:dateTime" + " && "+varName+"_value" + operator + value + ")";
+    }
+    else if (value.indexOf("xsd:") > -1) {
+      filter = varName + "  owl:hasValue "+varName+"_value  filter(  "+varName+"_value" + operator + value + ")";
 
     }
     else {
-      var operators = self.operators["Number"];
+
+      if (operator == "contains") {
+        filter += varName + "  " + property + " "+varName+"_value. Filter(regex(str("+varName+"_value),'" + value + "','i')).";
+      }
+      else if (operator == "not contains") {
+        filter += varName + "  " + property + " "+varName+"_value. Filter(!regex(str("+varName+"_value),'" + value + "','i')).";
+      }
+      else {
+        if (Sparql_common.isTripleObjectString(property, value)) {
+          value = "'" + value + "'";
+        }
+
+        filter += varName + "  " + property + " "+varName+"_value. Filter("+varName+"_value" + operator + "" + value + ").";
+
+
+      }
+
     }
-    common.fillSelectOptions("individualValueFilter_operatorSelect", operators, true);
+
+    return filter;
   };
+
+
+  self.onSelectOperator = function(value) {
+    $("#individualValueFilter_objectValue").focus();
+  };
+  self.onSelectObject = function(value) {
+
+  };
+  self.onSelectProperty = function(property) {
+
+  };
+
+
 
   self.onOKbutton = function() {
     var property = $("#individualValueFilter_propertySelect").val();
@@ -89,67 +140,7 @@ var IndividualValueFilterWidget = (function() {
 
   };
 
-
-  self.getSparqlFilter = function(varName, property, operator, value) {
-    if (varName) {
-      varName = "?" + varName;
-    }
-    else {
-      varName = "";
-    }
-    if (!property || !value) {
-      return null;
-    }
-    if (property.indexOf("xsd:") == 0) {
-      var xsd = property;
-      property = "owl:hasValue";
-      value = "'" + value + "'^^" + xsd;
-
-    }
-
-
-    var filter = "";
-    var filterIndex = "";
-
-    if (value.indexOf("xsd:dateTime") > -1) {
-      filter = varName + "  owl:hasValue ?value  filter(    datatype(?value) = xsd:dateTime" + " && ?value" + operator + value + ")";
-    }
-    else if (value.indexOf("xsd:") > -1) {
-      filter = varName + "  owl:hasValue ?value  filter(  ?value" + operator + value + ")";
-
-    }
-    else {
-
-      if (operator == "contains") {
-        filter += varName + "  " + property + " ?q. Filter(regex(str(?q" + filterIndex + "),'" + value + "','i')).";
-      }
-      else if (operator == "not contains") {
-        filter += varName + "  " + property + " ?q. Filter(!regex(str(?q" + filterIndex + "),'" + value + "','i')).";
-      }
-      else {
-        if (Sparql_common.isTripleObjectString(property, value)) {
-          value = "'" + value + "'";
-        }
-
-        filter += varName + "  " + property + " ?q. Filter(?q" + operator + ")" + value + ").";
-
-
-      }
-
-    }
-
-    return filter;
-  };
-
-
-  self.onSelectOperator = function(value) {
-    $("#individualValueFilter_objectValue").focus();
-  };
-  self.onSelectObject = function(value) {
-
-  };
-
   return self;
 })();
 export default IndividualValueFilterWidget;
-window.IndividualValueFilterWidget = IndividualValueFilterWidget
+window.IndividualValueFilterWidget = IndividualValueFilterWidget;

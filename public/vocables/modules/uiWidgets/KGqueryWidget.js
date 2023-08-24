@@ -7,6 +7,9 @@ import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import PopupMenuWidget from "./popupMenuWidget.js";
 import Export from "../shared/export.js";
 import common from "../shared/common.js";
+import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
+import IndividualAggregateWidget from "./individualAggregateWidget.js";
+import IndividualValueFilterWidget from "./individualValuefilterWidget.js";
 
 
 var KGqueryWidget = (function() {
@@ -14,9 +17,10 @@ var KGqueryWidget = (function() {
   self.queryPathParams = {};
   self.vicinityArray = [];
   self.allQueryPathes = [];
-  self.nodeDivsMap = {};
-
-
+  self.classDivsMap = {};
+  self.classeMap = {};
+  self.pathDivsMap = {};
+  self.classFiltersMap = {};
 
 
   self.showDialog = function() {
@@ -43,7 +47,7 @@ var KGqueryWidget = (function() {
 
         self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", visjsData, options);
         self.KGqueryGraph.draw();
-        self.clearAll()
+        self.clearAll();
       });
     });
 
@@ -56,29 +60,41 @@ var KGqueryWidget = (function() {
     if (!self.currentGraphNode) {
       return;
     }
-    var nodeDivId = "nodeDiv_" + common.getRandomHexaId(3);
 
 
 
 
-    function getHtml(queryObject) {
 
-      var html = "<div  class='KGqueryWidget_pathDiv' id='" + nodeDivId + "'>" +
-        "<span style='font:bold 14px'>" + self.getVarName(queryObject.fromNode, true) + "< ->" +
-        "" + self.getVarName(queryObject.toNode, true) + "</span><br>" +
-        "<button class='KGqueryWidget_divActions' about='add filter' onclick='KGqueryWidget.addFilterToNode(\""+nodeDivId+"\");'>F</button>" +
-        "<button  class='KGqueryWidget_divActions'  about='remove'   onclick='KGqueryWidget.divActions($(this).parent().val());'>X</button>" +
-        "<button  class='KGqueryWidget_divActions' about='groupBy' onclick='KGqueryWidget.divActions($(this).parent().val());'>G</button>" +
-        //   "&nbsp;<input type='image' src='./icons/caret-right.png'  style='opacity: 0.5; width: 20px;height: 20px;}' onclick='KGqueryWidget.showNodeDivPopupMenu($(this).parent())'/>" +
-        "<div  id='" + nodeDivId + "_filter'></div> </div>";
+    function getClassNodeDivHtml(node, nodeDivId) {
+      var html = "<div  class='KGqueryWidget_pathNodeDiv' id='" + nodeDivId + "'>" +
+        "<span style='font:bold 14px'>" + self.getVarName(node, true) + "" +
+        "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outline-primary' about='add filter' onclick='KGqueryWidget.addNodeFilter(\"" + nodeDivId + "\");'>F</button>";
+   /*   if (node.data.datatype) {
+        html += "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outline-primary' about='add filter' onclick='KGqueryWidget.groupBy(\"" + nodeDivId + "\");'>∑</button>";
+      }
+      else {
+        html += "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outline-primary' about='add filter' onclick='KGqueryWidget.groupBy(\"" + nodeDivId + "\");'>⋃</button>";
+      }*/
+      html +=  "<div style='font-size: 10px;' id='" + nodeDivId + "_filter'></div> " +
+      "</div>" +
+      "</div>";
+      return html;
 
-      $("#KGqueryWidget_selectedClassesDiv").append(html);
 
     }
 
 
+
+
+    function getPathHtml(pathDivId) {
+      var html = "<div  class='KGqueryWidget_pathDiv' id='" + pathDivId + "'>" + "</div>";
+      return html
+    }
+
+
     var color = null;
-    var fromNode = $("#KGqueryWidget_fromClassNodeDiv").val();
+
+
 
     /**
 
@@ -89,6 +105,18 @@ var KGqueryWidget = (function() {
 
       self.getNearestNode(self.currentGraphNode.id, self.allQueryPathes, function(err, nodeId) {
         self.queryPathParams = { fromNode: { id: nodeId } };
+        var pathDivId = "pathDiv_" + common.getRandomHexaId(3);
+        var nodeDivId = "nodeDiv_" + common.getRandomHexaId(3);
+        var fromNode=self.classeMap[nodeId];
+        self.queryPathParams.fromNode = fromNode;
+        self.queryPathParams.pathDivId = pathDivId;
+        self.queryPathParams.fromNodeDivId = nodeDivId;
+        self.classDivsMap[nodeDivId]=self.currentGraphNode
+
+        $("#KGqueryWidget_pathsDiv").append(getPathHtml(pathDivId))
+
+        $("#" + self.queryPathParams.pathDivId).append(getClassNodeDivHtml(fromNode, nodeDivId))
+
         self.addNode();
       });
 
@@ -96,12 +124,26 @@ var KGqueryWidget = (function() {
     }
 
 
-    if (!self.queryPathParams.fromNode) {
-      self.queryPathParams.fromNode = self.currentGraphNode;
 
+
+    else if (!self.queryPathParams.fromNode) {
       color = "blue";
+      self.classeMap[self.currentGraphNode.id]=self.currentGraphNode
+      var pathDivId = "pathDiv_" + common.getRandomHexaId(3);
+      var nodeDivId = "nodeDiv_" + common.getRandomHexaId(3);
+      self.queryPathParams.fromNode = self.currentGraphNode;
+      self.queryPathParams.pathDivId = pathDivId;
+      self.queryPathParams.fromNodeDivId = nodeDivId;
+
+      self.classDivsMap[nodeDivId]=self.currentGraphNode
+
+      $("#KGqueryWidget_pathsDiv").append(getPathHtml(pathDivId))
+      $("#" + self.queryPathParams.pathDivId).append(getClassNodeDivHtml(self.currentGraphNode, nodeDivId))
+
+
     }
     else if (!self.queryPathParams.toNode) {
+      self.classeMap[self.currentGraphNode.id]=self.currentGraphNode
       self.queryPathParams.toNode = self.currentGraphNode;
       color = "green";
       self.getPathBetweenNodes(self.queryPathParams.fromNode.id, self.queryPathParams.toNode.id, function(err, path) {
@@ -110,17 +152,18 @@ var KGqueryWidget = (function() {
         }
         self.currentPath = path;
         self.queryPathParams.path = path;
-
-        var divId = "queryPath_" + common.getRandomHexaId(5);
-        self.queryPathParams.divId = nodeDivId;
-        self.queryPathParams.index=self.allQueryPathes.length
+        self.queryPathParams.index = self.allQueryPathes.length;
 
 
         var queryObject = JSON.parse(JSON.stringify(self.queryPathParams));
+        self.pathDivsMap[pathDivId]=queryObject;
         self.allQueryPathes.push(queryObject);
-        self.nodeDivsMap[nodeDivId] = queryObject;
 
-        $("#KGqueryWidget_toClassNodeDiv").html(getHtml(queryObject));
+        var nodeDivId = "nodeDiv_" + common.getRandomHexaId(3);
+        self.classDivsMap[nodeDivId]=self.currentGraphNode
+        $("#" +  self.queryPathParams.pathDivId).append(getClassNodeDivHtml(self.currentGraphNode, nodeDivId))
+      //  self.queryPathParams = {};
+
 
 
         var newVisjsEdges = [];
@@ -131,6 +174,11 @@ var KGqueryWidget = (function() {
         self.KGqueryGraph.data.edges.update(newVisjsEdges);
 
 
+
+
+
+
+
       });
 
     }
@@ -138,40 +186,51 @@ var KGqueryWidget = (function() {
 
 
     if (nodeEvent && nodeEvent.ctrlKey) {
-      self.addFilterToNode(nodeDivId);
+      self.addNodeFilter(nodeDivId);
     }
   };
 
 
-  self.addFilterToNode = function(nodeDivId) {
-    var queryObject = self.nodeDivsMap[nodeDivId];
-    var vanNames = [
-      self.getVarName(queryObject.fromNode,true),
-      self.getVarName(queryObject.toNode,true),
-    ];
+  self.addNodeFilter = function(classDivId) {
+    var aClass = self.classDivsMap[classDivId];
+    var varName = [self.getVarName(aClass, true)];
+    var datatype=aClass.data.datatype
 
-    IndividualValueFilterWidget.showDialog(null, vanNames, function(err, filter) {
+    IndividualValueFilterWidget.showDialog(null, varName,datatype, function(err, filter) {
       if (err) {
         return alert(err);
       }
       if (!filter) {
         return;
       }
-      if (!self.nodeDivsMap[nodeDivId].filter) {
-        self.nodeDivsMap[nodeDivId].filter = filter;
-      }
-      else {
-        self.nodeDivsMap[nodeDivId].filter += " " + filter;
-      }
 
-      self.allQueryPathes[ self.nodeDivsMap[nodeDivId].index].filter=self.nodeDivsMap[nodeDivId].filter
+      self.classFiltersMap[aClass.id]={class:aClass,filter:filter}
 
-      $("#"+nodeDivId).append(filter);
+
+      $("#" + classDivId + "_filter").append(filter);
     });
 
 
   };
+  self.removeNodeFilter = function(nodeDivId) {
+    var queryObject = self.classDivsMap[nodeDivId];
+    self.allQueryPathes[self.classDivsMap[nodeDivId].index].filter = null;
+    self.classDivsMap[nodeDivId].filter = null;
+    $("#" + nodeDivId + "_filter").append(filter);
+  };
 
+  self.aggregateQuery=function(){
+
+    IndividualAggregateWidget.showDialog(null, function(callback){
+
+      callback(self.classeMap)
+    }
+
+      , function(err, filter) {
+
+      })
+
+  }
 
   self.queryKG = function(output) {
 
@@ -182,57 +241,108 @@ var KGqueryWidget = (function() {
       self.allQueryPathes.push(self.queryPathParams);
     }
 
+
+
+
+
+
+    $("#KGqueryWidget_dataTableDiv").html("")
+    self.message("searching...",)
+    $("#KGqueryWidget_waitImg").css("display", "block");
     self.execPathQuery(self.allQueryPathes, function(err, result) {
+      self.message("",true)
       if (err) {
-        return callbackEach(err);
+        return alert(err.responseText);
       }
 
-
-      //prepare columns
-
-      var data = result.results.bindings;
-      var nonNullCols = {};
-      data.forEach(function(item) {
-        result.head.vars.forEach(function(varName) {
-          if (nonNullCols[varName]) {
-            return;
-          }
-          if (item[varName]) {
-            if (item[varName].type != "uri") {
-              nonNullCols[varName] = item[varName].type;
-            }
-          }
-        });
-      });
-      var tableCols = [];
-      var colNames = [];
-      for (var varName in nonNullCols) {
-        tableCols.push({ title: varName, defaultContent: "", width: "15%" });
-        colNames.push(varName);
-
+      if (result.results.bindings.length == 0) {
+        return alert("no result");
       }
+      if (output == "table") {
+        self.queryResultToTable(result);
+      }
+      else if (output == "vijsGraph") {
+        self.queryResultToVisjsGraph(result);
+      }
+    });
+  };
 
 
-      var tableData = [];
-      data.forEach(function(item) {
-        var line = [];
-        colNames.forEach(function(col) {
-          line.push(item[col] ? item[col].value : null);
-        });
+  self.queryResultToVisjsGraph = function(result) {
 
-        tableData.push(line);
+    var classNodes = self.getAllQueryPathClasses();
+
+
+    var data = result.results.bindings;
+    var visjsData = { nodes: [], edges: [] };
+    var existingNodes = {};
+    data.forEach(function(item) {
+      classNodes.forEach(function(classNode) {
+        var varNameKey = self.getVarName(classNode, true);
+        var labelKey = varNameKey + "Label";
+
+        if (!existingNodes[item[varNameKey].value]) {
+          existingNodes[item[varNameKey].value] = 1;
+          var options = {
+            shape: Lineage_whiteboard.defaultShape,
+            size: Lineage_whiteboard.defaultShapeSize,
+            color: Lineage_whiteboard.getSourceColor(varNameKey)
+          };
+          var label = item[labelKey] ? item[labelKey].value : Sparql_common.getLabelFromURI(item[varNameKey].value);
+          visjsData.nodes.push(VisjsUtil.getVisjsNode(self.source, item[varNameKey].value, label, null, options));
+        }
       });
 
 
-      Export.showDataTable("KGqueryWidget_dataTableDiv", tableCols, tableData);
+    });
+
+    Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
+  };
+
+  self.queryResultToTable = function(result) {
+    var data = result.results.bindings;
+    //prepare columns
+    var nonNullCols = {};
+    data.forEach(function(item) {
+      result.head.vars.forEach(function(varName) {
+        if (varName.length < 3) {
+          return;
+        }
+        if (nonNullCols[varName]) {
+          return;
+        }
+
+        if (item[varName]) {
+          if (item[varName].type != "uri") {
+            nonNullCols[varName] = item[varName].type;
+          }
+        }
+      });
+    });
+    var tableCols = [];
+    var colNames = [];
+    for (var varName in nonNullCols) {
+      tableCols.push({ title: varName, defaultContent: "", width: "15%" });
+      colNames.push(varName);
+
+    }
+
+
+    var tableData = [];
+    data.forEach(function(item) {
+      var line = [];
+      colNames.forEach(function(col) {
+        line.push(item[col] ? item[col].value : null);
+      });
+
+      tableData.push(line);
     });
 
 
+    Export.showDataTable("KGqueryWidget_dataTableDiv", tableCols, tableData);
+
   };
 
-  self.getVarName = function(node, withoutQuestionMark) {
-    return (withoutQuestionMark ? "" : "?") + Sparql_common.formatStringForTriple(node.label || Sparql_common.getLabelFromURI(node.id));
-  };
 
   self.execPathQuery = function(allQueryPathes, callback) {
 
@@ -271,10 +381,10 @@ var KGqueryWidget = (function() {
       predicateStr += " " + objectVarName + ". ";
 
 
-      if (queryPath.filter) {
-        filterStr += queryPath.filter;
-
+      for( var key in self.classFiltersMap){
+        filterStr += self.classFiltersMap[key].filter+" \n"
       }
+
 
       function addToStringIfNotExists(str, text) {
         if (text.indexOf(str) > -1) {
@@ -401,6 +511,7 @@ var KGqueryWidget = (function() {
       source = self.source;
     }
     var inferredModel = [];
+    var dataTypes = {};
 
     var visjsData = { nodes: [], edges: [] };
 
@@ -423,6 +534,21 @@ var KGqueryWidget = (function() {
           });
         },
 
+
+        function(callbackSeries) {
+          OntologyModels.getInferredClassValueDataTypes(source, {}, function(err, result) {
+            if (err) {
+              return callbackSeries(err);
+            }
+            result.forEach(function(item) {
+              dataTypes[item.class.value] = item.datatype.value;
+            });
+            callbackSeries();
+          });
+
+
+        },
+
         function(callbackSeries) {
           var existingNodes = {};
 
@@ -434,11 +560,13 @@ var KGqueryWidget = (function() {
 
             if (!existingNodes[item.sClass.value]) {
               existingNodes[item.sClass.value] = 1;
+              self.visjsNodeOptions.data = { datatype: dataTypes[item.sClass.value] };
               var label = item.sClassLabel ? item.sClassLabel.value : Sparql_common.getLabelFromURI(item.sClass.value);
               visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.sClass.value, label, null, self.visjsNodeOptions));
             }
             if (!existingNodes[item.oClass.value]) {
               existingNodes[item.oClass.value] = 1;
+              self.visjsNodeOptions.data = { datatype: dataTypes[item.oClass.value] };
               var label = item.oClassLabel ? item.oClassLabel.value : Sparql_common.getLabelFromURI(item.oClass.value);
               visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, label, null, self.visjsNodeOptions));
             }
@@ -456,6 +584,7 @@ var KGqueryWidget = (function() {
                   propertyId: item.prop.value,
                   source: source,
                   propertyLabel: item.propLabel.value
+
                 },
 
                 arrows: {
@@ -514,9 +643,13 @@ var KGqueryWidget = (function() {
 
   self.clearAll = function() {
     self.queryPathParams = {};
+
     self.allQueryPathes = [];
-    self.nodeDivsMap = {};
-    $("#KGqueryWidget_selectedClassesDiv").html("");
+    self.classDivsMap = {};
+    self.classeMap = {};
+    self.pathDivsMap = {};
+    self.classFiltersMap = {};
+    $("#KGqueryWidget_pathsDiv").html("");
     self.resetVisjNodes();
     self.resetVisjEdges();
 
@@ -569,15 +702,40 @@ var KGqueryWidget = (function() {
 
   };
 
+  self.getVarName = function(node, withoutQuestionMark) {
+    return (withoutQuestionMark ? "" : "?") + Sparql_common.formatStringForTriple(node.label || Sparql_common.getLabelFromURI(node.id));
+  };
+
+  self.getAllQueryPathClasses = function() {
+    var classes = [];
+    self.allQueryPathes.forEach(function(queryPath) {
+      classes.push(queryPath.fromNode);
+      classes.push(queryPath.toNode);
+    });
+    return classes;
+  };
+
   self.showNodeDivPopupMenu = function(nodeDiv) {
     var nodeDivId = $(nodeDiv).attr("id");
     var html =
-      " <span  class=\"popupMenuItem\" onclick=\"KGqueryWidget.addFilterToNode('" + nodeDivId + "');\">set Filter</span>" +
+      " <span  class=\"popupMenuItem\" onclick=\"KGqueryWidget.addNodeFilter('" + nodeDivId + "');\">set Filter</span>" +
       " <span  class=\"popupMenuItem\" onclick=\"KGqueryWidget.removeNode('" + nodeDivId + "');\"> remove</span>";
 
     PopupMenuWidget.initAndShow(html, "KGqueryWidget_popupMenuDiv");
 
   };
+
+  self.message= function(message, stopWaitImg) {
+    $("#KGqueryWidget_messageDiv").html(message);
+    if (stopWaitImg) {
+      $("#KGqueryWidget_waitImg").css("display", "none");
+    }else
+      $("#KGqueryWidget_waitImg").css("display", "block");
+  };
+
+
+
+
 
   return self;
 })();

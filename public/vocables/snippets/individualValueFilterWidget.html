@@ -24,7 +24,7 @@
 
 <div id="individualValueFilter_mainDiv" style="display: flex; flex-direction: row">
   <div class="individualValueFilterPanel" id="individualValueFilter_propertyDiv">
-    <div><b>Class</b></div>
+
     <div>
 
       <select
@@ -38,7 +38,7 @@
       <select
         id="individualValueFilter_propertySelect"
         style="min-width: 200px; background-color: #ddd"
-        size="15"
+        size="5"
         onchange="IndividualValueFilterWidget.onSelectProperty($(this).val())"
       ></select>
     </div>
@@ -49,7 +49,7 @@
 
     <div>
 
-      <select id="individualValueFilter_operatorSelect"  size="8" style="min-width: 200px; background-color: #ddd" onchange="IndividualValueFilterWidget.onSelectObject($(this).val())"></select>
+      <select id="individualValueFilter_operatorSelect"  size="8" style="min-width: 200px; background-color: #ddd" onchange="IndividualValueFilterWidget.onSelectOperator($(this).val())"></select>
     </div>
     <div></div>
 

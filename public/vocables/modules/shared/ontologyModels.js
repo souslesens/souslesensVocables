@@ -798,11 +798,44 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                 }
                 result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
 
-                Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
+             //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
                 return callback(null, result.results.bindings);
             });
         }
     };
+
+    self.getInferredClassValueDataTypes=function(source,options, callback) {
+            if (!options) {
+                options = {};
+            }
+            if (!Config.ontologiesVocabularyModels[source]) {
+                Config.ontologiesVocabularyModels[source];
+            }
+            var filterStr = options.filter || "";
+
+
+             var sourceGraphUri = Config.sources[source].graphUri;
+        var query="select distinct ?class ?datatype  FROM   <" +sourceGraphUri+">"+
+          " WHERE {   \n" +
+          "  ?s rdf:type+ ?class.\n" +
+          "  ?class rdf:type owl:Class.\n" +
+          "  ?s owl:hasValue ?v.\n" +
+          " bind (datatype(?v) as ?datatype)\n"+
+        //  "   filter (t != '')\n" +
+          "}"
+        let url = Config.default_sparql_url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+
+
+         //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
+            return callback(null, result.results.bindings);
+        });
+
+
+    }
 
     return self;
 })();

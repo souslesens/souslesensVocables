@@ -4,8 +4,12 @@
         margin: 3px;
         padding-top: 3px;
         border-radius: 3px;
-        width: 300px
 
+
+    }
+    .KGqueryWidget_pathNodeDiv{
+        display: flex;
+        flex-direction: row;
     }
 
     .KGqueryWidget_classDiv {
@@ -13,16 +17,16 @@
         padding-top: 3px;
     }
 
-    #KGqueryWidget_dataTableDiv {
+   /* #KGqueryWidget_dataTableDiv {
         width: 800px;
         height: 800px;
         overflow: auto;
 
-    }
+    }*/
 
     #dataTableDivExport_wrapper {
         width: 800px;
-        height: 800px;
+        height: 650px;
         overflow: auto;
     }
 
@@ -39,22 +43,26 @@
 
 <div style="display: flex;flex-direction: row">
 
-  <div  style="display: flex;flex-direction: row" id="KGqueryWidget_selectedClassesDiv">
+  <div  style="display: flex;flex-direction: row" id="KGqueryWidget_pathsDiv">
 
 
   </div>
 
 
   <div>
-    <button onclick="KGqueryWidget.queryKG('draw')">Exec Query</button>
+    <button onclick="KGqueryWidget.queryKG('table')">Table</button>
+    <button onclick="KGqueryWidget.queryKG('vijsGraph')">Graph</button>
+    <button onclick="KGqueryWidget.aggregateQuery()">Aggregate</button>
     <button onclick="KGqueryWidget.clearAll()">Clear all</button>
+    <img src="./images/waitAnimated.gif" id="KGqueryWidget_waitImg" style="display: none; width: 15px; text-align: justify" /></td>
+    <span class="messageDiv" id="KGqueryWidget_messageDiv"></span></td>
   </div>
 </div>
 
 <div style="display: flex;flex-direction: row">
 
   <div style="display: flex;flex-direction: column">
-    <div id="KGqueryWidget_graphDiv" style="width:800px;height: 600px "></div>
+    <div id="KGqueryWidget_graphDiv" style="width:800px;height: 730px "></div>
   </div>
   <div id="KGqueryWidget_dataTableDiv"></div>
 </div>

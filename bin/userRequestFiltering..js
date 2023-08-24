@@ -33,6 +33,9 @@ var UserRequestFiltering = {
             userGraphUrisMap[source.graphUri] = { source: key, acl: "r" };
         }
 
+        // add slsvLabels (readonly) for everyone
+        userGraphUrisMap["http://souslesens.org/vocables/resource/labels/"] = { source: "slsvLabels", acl: "r" };
+
         for (var key in userSourcesMap) {
             var source = userSourcesMap[key];
             if ((source.sparql_server.url == "_default" || source.sparql_server.url == ConfigManager.config.default_sparql_url) && source.graphUri) {

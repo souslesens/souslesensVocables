@@ -62,38 +62,32 @@ var KGqueryWidget = (function() {
     }
 
 
-
-
-
     function getClassNodeDivHtml(node, nodeDivId) {
       var html = "<div  class='KGqueryWidget_pathNodeDiv' id='" + nodeDivId + "'>" +
         "<span style='font:bold 14px'>" + self.getVarName(node, true) + "" +
         "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outline-primary' about='add filter' onclick='KGqueryWidget.addNodeFilter(\"" + nodeDivId + "\");'>F</button>";
-   /*   if (node.data.datatype) {
-        html += "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outline-primary' about='add filter' onclick='KGqueryWidget.groupBy(\"" + nodeDivId + "\");'>∑</button>";
-      }
-      else {
-        html += "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outline-primary' about='add filter' onclick='KGqueryWidget.groupBy(\"" + nodeDivId + "\");'>⋃</button>";
-      }*/
-      html +=  "<div style='font-size: 10px;' id='" + nodeDivId + "_filter'></div> " +
-      "</div>" +
-      "</div>";
+      /*   if (node.data.datatype) {
+           html += "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outline-primary' about='add filter' onclick='KGqueryWidget.groupBy(\"" + nodeDivId + "\");'>∑</button>";
+         }
+         else {
+           html += "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outline-primary' about='add filter' onclick='KGqueryWidget.groupBy(\"" + nodeDivId + "\");'>⋃</button>";
+         }*/
+      html += "<div style='font-size: 10px;' id='" + nodeDivId + "_filter'></div> " +
+        "</div>" +
+        "</div>";
       return html;
 
 
     }
 
 
-
-
     function getPathHtml(pathDivId) {
       var html = "<div  class='KGqueryWidget_pathDiv' id='" + pathDivId + "'>" + "</div>";
-      return html
+      return html;
     }
 
 
     var color = null;
-
 
 
     /**
@@ -107,15 +101,15 @@ var KGqueryWidget = (function() {
         self.queryPathParams = { fromNode: { id: nodeId } };
         var pathDivId = "pathDiv_" + common.getRandomHexaId(3);
         var nodeDivId = "nodeDiv_" + common.getRandomHexaId(3);
-        var fromNode=self.classeMap[nodeId];
+        var fromNode = self.classeMap[nodeId];
         self.queryPathParams.fromNode = fromNode;
         self.queryPathParams.pathDivId = pathDivId;
         self.queryPathParams.fromNodeDivId = nodeDivId;
-        self.classDivsMap[nodeDivId]=self.currentGraphNode
+        self.classDivsMap[nodeDivId] = self.currentGraphNode;
 
-        $("#KGqueryWidget_pathsDiv").append(getPathHtml(pathDivId))
+        $("#KGqueryWidget_pathsDiv").append(getPathHtml(pathDivId));
 
-        $("#" + self.queryPathParams.pathDivId).append(getClassNodeDivHtml(fromNode, nodeDivId))
+        $("#" + self.queryPathParams.pathDivId).append(getClassNodeDivHtml(fromNode, nodeDivId));
 
         self.addNode();
       });
@@ -124,26 +118,24 @@ var KGqueryWidget = (function() {
     }
 
 
-
-
     else if (!self.queryPathParams.fromNode) {
       color = "blue";
-      self.classeMap[self.currentGraphNode.id]=self.currentGraphNode
+      self.classeMap[self.currentGraphNode.id] = self.currentGraphNode;
       var pathDivId = "pathDiv_" + common.getRandomHexaId(3);
       var nodeDivId = "nodeDiv_" + common.getRandomHexaId(3);
       self.queryPathParams.fromNode = self.currentGraphNode;
       self.queryPathParams.pathDivId = pathDivId;
       self.queryPathParams.fromNodeDivId = nodeDivId;
 
-      self.classDivsMap[nodeDivId]=self.currentGraphNode
+      self.classDivsMap[nodeDivId] = self.currentGraphNode;
 
-      $("#KGqueryWidget_pathsDiv").append(getPathHtml(pathDivId))
-      $("#" + self.queryPathParams.pathDivId).append(getClassNodeDivHtml(self.currentGraphNode, nodeDivId))
+      $("#KGqueryWidget_pathsDiv").append(getPathHtml(pathDivId));
+      $("#" + self.queryPathParams.pathDivId).append(getClassNodeDivHtml(self.currentGraphNode, nodeDivId));
 
 
     }
     else if (!self.queryPathParams.toNode) {
-      self.classeMap[self.currentGraphNode.id]=self.currentGraphNode
+      self.classeMap[self.currentGraphNode.id] = self.currentGraphNode;
       self.queryPathParams.toNode = self.currentGraphNode;
       color = "green";
       self.getPathBetweenNodes(self.queryPathParams.fromNode.id, self.queryPathParams.toNode.id, function(err, path) {
@@ -156,14 +148,13 @@ var KGqueryWidget = (function() {
 
 
         var queryObject = JSON.parse(JSON.stringify(self.queryPathParams));
-        self.pathDivsMap[pathDivId]=queryObject;
+        self.pathDivsMap[pathDivId] = queryObject;
         self.allQueryPathes.push(queryObject);
 
         var nodeDivId = "nodeDiv_" + common.getRandomHexaId(3);
-        self.classDivsMap[nodeDivId]=self.currentGraphNode
-        $("#" +  self.queryPathParams.pathDivId).append(getClassNodeDivHtml(self.currentGraphNode, nodeDivId))
-      //  self.queryPathParams = {};
-
+        self.classDivsMap[nodeDivId] = self.currentGraphNode;
+        $("#" + self.queryPathParams.pathDivId).append(getClassNodeDivHtml(self.currentGraphNode, nodeDivId));
+        //  self.queryPathParams = {};
 
 
         var newVisjsEdges = [];
@@ -172,11 +163,6 @@ var KGqueryWidget = (function() {
           newVisjsEdges.push({ id: edgeId, color: color, width: 3 });
         });
         self.KGqueryGraph.data.edges.update(newVisjsEdges);
-
-
-
-
-
 
 
       });
@@ -193,25 +179,28 @@ var KGqueryWidget = (function() {
 
   self.addNodeFilter = function(classDivId) {
     var aClass = self.classDivsMap[classDivId];
-    var varName = [self.getVarName(aClass, true)];
-    var datatype=aClass.data.datatype
 
-    IndividualValueFilterWidget.showDialog(null, varName,datatype, function(err, filter) {
+    if(self.classFiltersMap[aClass.id]) {
+      delete self.classFiltersMap[aClass.id]
+      $("#" + classDivId + "_filter").html("");
+      return
+    }
+    var varName = [self.getVarName(aClass, true)];
+    var datatype = aClass.data.datatype;
+
+    IndividualValueFilterWidget.showDialog(null, varName,aClass.id, datatype, function(err, filter) {
       if (err) {
         return alert(err);
       }
       if (!filter) {
         return;
       }
-
-      self.classFiltersMap[aClass.id]={class:aClass,filter:filter}
-
-
+      self.classFiltersMap[aClass.id] = { class: aClass, filter: filter };
       $("#" + classDivId + "_filter").append(filter);
     });
-
-
   };
+
+
   self.removeNodeFilter = function(nodeDivId) {
     var queryObject = self.classDivsMap[nodeDivId];
     self.allQueryPathes[self.classDivsMap[nodeDivId].index].filter = null;
@@ -219,21 +208,25 @@ var KGqueryWidget = (function() {
     $("#" + nodeDivId + "_filter").append(filter);
   };
 
-  self.aggregateQuery=function(){
+  self.aggregateQuery = function() {
 
-    IndividualAggregateWidget.showDialog(null, function(callback){
+    IndividualAggregateWidget.showDialog(null, function(callback) {
 
-      callback(self.classeMap)
+        callback(self.classeMap);
+      }
+
+      , function(err, aggregateClauses) {
+
+        self.queryKG("table", { aggregate: aggregateClauses });
+
+      });
+
+  };
+
+  self.queryKG = function(output, options) {
+    if (!options) {
+      options = {};
     }
-
-      , function(err, filter) {
-
-      })
-
-  }
-
-  self.queryKG = function(output) {
-
     if (!self.queryPathParams.toNode) {
       return alert("missing target node in  path");
     }
@@ -242,15 +235,11 @@ var KGqueryWidget = (function() {
     }
 
 
-
-
-
-
-    $("#KGqueryWidget_dataTableDiv").html("")
-    self.message("searching...",)
+    $("#KGqueryWidget_dataTableDiv").html("");
+    self.message("searching...");
     $("#KGqueryWidget_waitImg").css("display", "block");
-    self.execPathQuery(self.allQueryPathes, function(err, result) {
-      self.message("",true)
+    self.execPathQuery(self.allQueryPathes, options, function(err, result) {
+      self.message("", true);
       if (err) {
         return alert(err.responseText);
       }
@@ -295,7 +284,7 @@ var KGqueryWidget = (function() {
 
 
     });
-
+    $("#mainDialogDiv").dialog("close");
     Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
   };
 
@@ -344,9 +333,11 @@ var KGqueryWidget = (function() {
   };
 
 
-  self.execPathQuery = function(allQueryPathes, callback) {
+  self.execPathQuery = function(allQueryPathes, options, callback) {
 
-
+    if (!options) {
+      options = {};
+    }
     var predicateStr = "";
     var filterStr = "";
     var optionalStr = "";
@@ -381,8 +372,8 @@ var KGqueryWidget = (function() {
       predicateStr += " " + objectVarName + ". ";
 
 
-      for( var key in self.classFiltersMap){
-        filterStr += self.classFiltersMap[key].filter+" \n"
+      for (var key in self.classFiltersMap) {
+        filterStr += self.classFiltersMap[key].filter + " \n";
       }
 
 
@@ -406,9 +397,17 @@ var KGqueryWidget = (function() {
 
     var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
     var fromStr = Sparql_common.getFromStr(self.source);
-    query += "Select distinct *  " + fromStr + " where {" + predicateStr + "\n" + optionalStr + "\n" + filterStr;
 
-    query += "} limit 10000";
+    var selectStr = "distinct *";
+    var groupByStr = "";
+    if (options.aggregate) {
+      selectStr = options.aggregate.select;
+      groupByStr = " GROUP BY " + options.aggregate.groupBy;
+    }
+
+    query += "Select " + selectStr + "  " + fromStr + " where {" + predicateStr + "\n" + optionalStr + "\n" + filterStr;
+
+    query += "} " + groupByStr + " limit 10000";
 
     var url = Config.sources[self.source].sparql_server.url + "?format=json&query=";
 
@@ -540,6 +539,18 @@ var KGqueryWidget = (function() {
             if (err) {
               return callbackSeries(err);
             }
+
+
+            result.push( {
+              "class": {
+                "type": "uri",
+                "value": "http://rds.posccaesar.org/ontology/lis14/rdl/InstantRegion"
+              },
+              "datatype": {
+                "type": "uri",
+                "value": "http://www.w3.org/2001/XMLSchema#dateTime"
+              }
+            })
             result.forEach(function(item) {
               dataTypes[item.class.value] = item.datatype.value;
             });
@@ -725,16 +736,15 @@ var KGqueryWidget = (function() {
 
   };
 
-  self.message= function(message, stopWaitImg) {
+  self.message = function(message, stopWaitImg) {
     $("#KGqueryWidget_messageDiv").html(message);
     if (stopWaitImg) {
       $("#KGqueryWidget_waitImg").css("display", "none");
-    }else
+    }
+    else {
       $("#KGqueryWidget_waitImg").css("display", "block");
+    }
   };
-
-
-
 
 
   return self;

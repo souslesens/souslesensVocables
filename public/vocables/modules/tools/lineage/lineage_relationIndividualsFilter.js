@@ -4,6 +4,7 @@ import Lineage_sources from "./lineage_sources.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Lineage_relations from "./lineage_relations.js";
 import DateWidget from "../../uiWidgets/dateWidget.js";
+import IndividualValueFilterWidget from "../../uiWidgets/individualValuefilterWidget.js";
 
 var Lineage_relationIndividualsFilter = (function() {
   var self = {};
@@ -45,51 +46,10 @@ var Lineage_relationIndividualsFilter = (function() {
 
   self.searchClassIndividuals = function(term) {
     var classId = $("#lineage_relationIndividuals_filterRoleSelect").val();
+    IndividualValueFilterWidget.getClassLabelsJstreeData(term,classId,function(err, jstreeData){
 
-    if (!classId  && classId!="anyClass") {
-      return alert(" select a class");
-    }
-    if (term.indexOf("*") < 0) {
-      term += "*";
-    }
-
-    var mode = "exactMatch";
-    if (term.indexOf("*") > -1) {
-      mode = "fuzzyMatch";
-      // term=term.replace("*","")
-    }
-    if(classId=="anyClass")
-      classId=null;
-    var options = { classFilter: classId, skosLabels: true };
-    var indexes = [Lineage_sources.activeSource.toLowerCase()];
-    SearchUtil.getElasticSearchMatches([term], indexes, mode, 0, 1000, options, function(err, result) {
-      if (err) {
-        return alert(err);
-      }
-
-      var matches = [];
-      result.forEach(function(item, index) {
-        if (item.error) {
-          return alert(err);
-        }
-        var hits = item.hits.hits;
-        var uniqueItems = {};
-        hits.forEach(function(hit) {
-          if (!uniqueItems[hit._source.id]) {
-            uniqueItems[hit._source.id] = 1;
-            matches.push(hit._source);
-          }
-        });
-      });
-
-      var jstreeData = [];
-      matches.forEach(function(item) {
-        jstreeData.push({
-          id: item.id,
-          text: item.label,
-          parent: "#"
-        });
-      });
+      if( err)
+        return alert(err.responseText)
       var options = {
         openAll: true,
         withCheckboxes: true,
@@ -98,8 +58,12 @@ var Lineage_relationIndividualsFilter = (function() {
 
       JstreeWidget.loadJsTree("lineage_relationIndividuals_matchesTreeDiv", jstreeData, options);
 
-      //   common.fillSelectOptions("lineage_relationIndividuals_matchesSelect", matches, false, "label", "id");
-    });
+    })
+
+
+
+
+
   };
 
   self.addIndividualFilter = function(event, obj) {

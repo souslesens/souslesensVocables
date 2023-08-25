@@ -17,9 +17,10 @@
         background-color: #ddd;
     }
 
-    input[type="checkbox"] {
-        width: 30px;
-    }
+   .individualAggregate_select{
+       width:200px
+   }
+
 </style>
 
 <div id="individualAggregate_mainDiv" style="display: flex; flex-direction: row">
@@ -27,7 +28,7 @@
 
     <div>
       Group by<br>
-      <select
+      <select class="individualAggregate_select"
         id="individualAggregate_groupBySelect"  size="8" multiple="multiple">
 
       </select>
@@ -36,13 +37,13 @@
 
     <div>
       Group function<br>
-      <select
-        id="individualAggregate_groupFunctionSelect"  size="5"
+      <select class="individualAggregate_select"
+        id="individualAggregate_groupFunctionSelect"  size="8" multiple="multiple" onclick="IndividualAggregateWidget.onGroupFunctionSelect($(this).val())"
       ></select>
     </div>
     <div>
       function variable<br>
-      <select
+      <select class="individualAggregate_select"
         id="individualAggregate_functionVariableSelect"  size="8" multiple="multiple">
 
       </select>

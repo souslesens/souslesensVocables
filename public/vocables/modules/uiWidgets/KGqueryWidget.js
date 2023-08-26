@@ -10,6 +10,7 @@ import common from "../shared/common.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import IndividualAggregateWidget from "./individualAggregateWidget.js";
 import IndividualValueFilterWidget from "./individualValuefilterWidget.js";
+import SimpleListSelectorWidget from "./simpleListSelectorWidget.js";
 
 
 var KGqueryWidget = (function() {
@@ -142,8 +143,11 @@ var KGqueryWidget = (function() {
         if (err) {
           return alert(err.responseText);
         }
-        self.currentPath = path;
-        self.queryPathParams.path = path;
+
+        self.managePathAmbiguousEdges(path,function(unAmbiguousPath){
+          self.currentPath = unAmbiguousPath;
+          self.queryPathParams.path = unAmbiguousPath;
+
         self.queryPathParams.index = self.allQueryPathes.length;
 
 
@@ -162,8 +166,19 @@ var KGqueryWidget = (function() {
           var edgeId = pathItem[0] + "_" + pathItem[2] + "_" + pathItem[1];
           newVisjsEdges.push({ id: edgeId, color: color, width: 3 });
         });
+
+
+
+
+
         self.KGqueryGraph.data.edges.update(newVisjsEdges);
 
+
+          if (nodeEvent && nodeEvent.ctrlKey) {
+            self.addNodeFilter(nodeDivId);
+          }
+
+        });
 
       });
 
@@ -176,19 +191,70 @@ var KGqueryWidget = (function() {
     }
   };
 
+  self.managePathAmbiguousEdges = function(path,callback) {
+    var fromToMap = {};
+    path.forEach(function(pathItem, pathIndex) {
+      var fromTo = [pathItem[0] +"_"+ pathItem[1]];
+      if (!fromToMap[fromTo]) {
+        fromToMap[fromTo] = [];
+      }
+      fromToMap[fromTo].push(pathItem[2]);
+    });
+    var ambiguousEdges = null;
+    for (var key in fromToMap) {
+      if (fromToMap[key].length > 1) {
+        ambiguousEdges= { id: key, properties: fromToMap[key] };
+      }
+    }
+    if (ambiguousEdges && ambiguousEdges.properties.length > 0) {
+      return SimpleListSelectorWidget.showDialog(null,
+        function(callbackLoad) {
+          return callbackLoad(ambiguousEdges.properties);
+        }
+        , function(selectedProperty) {
+          ambiguousEdges.selectedProperty = selectedProperty;
+
+          var pathsToDelete = []
+          path.forEach(function(pathItem, pathIndex) {
+            if (ambiguousEdges.id == [pathItem[0] + "_" + pathItem[1]] || ambiguousEdges.id == [pathItem[1] + "_" + pathItem[0]]) {
+              if (pathItem[2] != ambiguousEdges.selectedProperty) {
+                pathsToDelete.push(pathIndex)
+              }
+            }
+          })
+          var unambiguousPaths = []
+          path.forEach(function(pathItem, pathIndex) {
+            if (pathsToDelete.indexOf(pathIndex) < 0)
+              unambiguousPaths.push(pathItem)
+          })
+          return callback(unambiguousPaths)
+        })
+
+    }else
+      return callback(path)
+
+  }
+
+
+
+
+
+
+
+
 
   self.addNodeFilter = function(classDivId) {
     var aClass = self.classDivsMap[classDivId];
 
-    if(self.classFiltersMap[aClass.id]) {
-      delete self.classFiltersMap[aClass.id]
+    if (self.classFiltersMap[aClass.id]) {
+      delete self.classFiltersMap[aClass.id];
       $("#" + classDivId + "_filter").html("");
-      return
+      return;
     }
     var varName = [self.getVarName(aClass, true)];
     var datatype = aClass.data.datatype;
 
-    IndividualValueFilterWidget.showDialog(null, varName,aClass.id, datatype, function(err, filter) {
+    IndividualValueFilterWidget.showDialog(null, varName, aClass.id, datatype, function(err, filter) {
       if (err) {
         return alert(err);
       }
@@ -247,6 +313,8 @@ var KGqueryWidget = (function() {
       if (result.results.bindings.length == 0) {
         return alert("no result");
       }
+
+      self.message("found items :" + result.results.bindings.length);
       if (output == "table") {
         self.queryResultToTable(result);
       }
@@ -359,9 +427,10 @@ var KGqueryWidget = (function() {
         filterStr += " " + objectVarName + "  rdf:type <" + objectUri + ">.";
       }
 
-
-      predicateStr += subjectVarName + " ";
+      predicateStr += " " + subjectVarName + "  ";
       queryPath.path.forEach(function(pathItem, pathIndex) {
+
+
         if (pathIndex > 0) {
           predicateStr += "/";
         }
@@ -442,6 +511,7 @@ var KGqueryWidget = (function() {
     var payload = {
       body: body
     };
+
     $.ajax({
       type: "POST",
       url: `${Config.apiUrl}/shortestPath`,
@@ -541,16 +611,6 @@ var KGqueryWidget = (function() {
             }
 
 
-            result.push( {
-              "class": {
-                "type": "uri",
-                "value": "http://rds.posccaesar.org/ontology/lis14/rdl/InstantRegion"
-              },
-              "datatype": {
-                "type": "uri",
-                "value": "http://www.w3.org/2001/XMLSchema#dateTime"
-              }
-            })
             result.forEach(function(item) {
               dataTypes[item.class.value] = item.datatype.value;
             });
@@ -714,7 +774,7 @@ var KGqueryWidget = (function() {
   };
 
   self.getVarName = function(node, withoutQuestionMark) {
-    return (withoutQuestionMark ? "" : "?") + Sparql_common.formatStringForTriple(node.label || Sparql_common.getLabelFromURI(node.id));
+    return (withoutQuestionMark ? "" : "?") + Sparql_common.formatStringForTriple(node.label || Sparql_common.getLabelFromURI(node.id),true);
   };
 
   self.getAllQueryPathClasses = function() {

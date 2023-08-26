@@ -828,10 +828,10 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
             tripleObj.isSpecificPredicate = true;
         }
 
-        if (subject.indexOf("http://") > 0) {
+        if (subject.indexOf("http://") > 0  && object.indexOf("function")<0 ) {
             tripleObj.subjectIsSpecificUri = true;
         }
-        if (object.indexOf("http://") > 0) {
+        if (object.indexOf("http://") > 0 && object.indexOf("function")<0 ) {
             tripleObj.objectIsSpecificUri = true;
         }
 

@@ -1,5 +1,6 @@
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
+import NodeInfosWidget from "./nodeInfosWidget.js";
 
 var TimeLineWidget = (function() {
 
@@ -47,7 +48,8 @@ var TimeLineWidget = (function() {
           var id = index;
           var POB = item.OffshorePOBValue.value;
           var discipline = item.DisciplineLabel.value;
-          var jobCard = item.Job_CardLabel.value;
+          var jobCardLabel = item.Job_CardLabel.value;
+          var jobCard = item.Job_Card.value;
           var startDate = new Date(item.StartDateValue.value.substring(0, 10));
           var endDate = new Date(item.EndDateValue.value.substring(0, 10));
           timeBounds.start = (timeBounds.start < startDate) ? startDate : timeBounds.start;
@@ -66,7 +68,7 @@ var TimeLineWidget = (function() {
             // type: "box",
             group: groupKey,
             // content: POB,
-            // title: POB,
+            title: jobCardLabel+" POB"+ POB,
             className: "green",
             start: startDate,
             end: endDate,
@@ -74,9 +76,12 @@ var TimeLineWidget = (function() {
             data:{
               POB:POB,
               jobCard:jobCard,
+              jobCardLabel:jobCardLabel,
               discipline:discipline
             },
-            style :"background-color:#22A784;height:"+Math.log(parseInt(POB))+"px"
+          //  style :"background-color:#22A784;height:"+Math.log(parseInt(POB))+"px"
+            style :"background-color:#22A784;height:"+POB+"px",
+            visible:false
           });
         });
 
@@ -99,6 +104,12 @@ var TimeLineWidget = (function() {
           });
         }
 
+        var groupsArray=[]
+        for(var key in groups){
+          groupsArray.push({id:key,label:key})
+        }
+   common.fillSelectOptions("timeLineWidget_groupSelect",groupsArray,false,"label","id")
+
         var x = dataDataset.get();
         var container = document.getElementById("timeLineDiv");
 
@@ -112,7 +123,7 @@ var TimeLineWidget = (function() {
         var options = {
           min: timeBounds.start,                // lower limit of visible range
           max: timeBounds.end,
-          verticalScroll: true,
+         verticalScroll: true,
           maxHeight: "700px",
           margin:{item:{vertical:1}}
           //  clickToUse:true,
@@ -128,28 +139,52 @@ var TimeLineWidget = (function() {
 
           if( properties && properties.item) {
             var item= self.timeline.itemsData.get(properties.item)
-            $("#timeLineWidget_messageDiv").html(JSON.stringify(item.data))
+            self.currrentTimelineItem=item
+            var html=JSON.stringify(item.data)+" <button onclick='TimeLineWidget.showJCinfos()'>JC infos</button>"
+            $("#timeLineWidget_messageDiv").html(html)
+          }else{
+            self.currrentTimelineItem=null
           }
         });
 
-        timeline.on("select", function(properties) {
-          //var item= self.timeline.getSelection()
-        });
+        /*    timeline.on("select", function(properties) {
+           //var item= self.timeline.getSelection()
+         });
 
-        timeline.on("contextmenu", function(properties) {
-        //  var x = properties;
-        });
+         timeline.on("contextmenu", function(properties) {
+         //  var x = properties;
+         });
 
-        timeline.on("mouseOver", function(properties) {
-          if( properties && properties.item) {
-            var item= self.timeline.itemsData.get(properties.item)
-            $("#timeLineWidget_messageDiv").html(JSON.stringify(item.data))
-          }
-        });
+      timeline.on("mouseOver", function(properties) {
+           if( properties && properties.item) {
+             var item= self.timeline.itemsData.get(properties.item)
+             $("#timeLineWidget_messageDiv").html(JSON.stringify(item.data))
+           }
+         });*/
       });
 
 
     };
+
+
+self.showJCinfos=function(){
+  var obj={data:{id:self.currrentTimelineItem.data.jobCard}}
+  $("#timeLineWidget_popupDiv").css("display","block")
+  NodeInfosWidget.showNodeInfos(self.source,obj,"timeLineWidget_infosDiv",{noDialog:true})
+}
+
+
+self.hidePopup=function(){
+  $("#timeLineWidget_popupDiv").css("display","none")
+}
+
+    self.onGroupSelectChange=function(group){
+      var groupObj= self.timeline.groupsData.get(group);
+      self.timeline.setGroups([groupObj]);
+     // var item= self.timeline.groupsData.update({ id:group,visible: !item.visible})
+
+
+    }
 self.setItemsColorClass = function(items, varName) {
       var palette = {
         "New Color": {
@@ -210,7 +245,14 @@ self.setItemsColorClass = function(items, varName) {
         " OPTIONAL {?EndDate owl:hasValue ?EndDateValue}\n" +
         " OPTIONAL {?EndDate rdfs:label ?EndDateLabel}\n" +
         "\n" +
-        " ?StartDate  rdf:type <http://data.total/resource/tsf/dalia-lifex/StartDate>.  ?Offshore_Construction_or_Installation  rdf:type <http://data.total/resource/tsf/dalia-lifex/Offshore_Construction_or_Installation>. ?Job_Card  rdf:type <http://data.total/resource/tsf/dalia-lifex/Job_Card>. ?Discipline  rdf:type <http://data.total/resource/tsf/dalia-lifex/Discipline>. ?OffshorePOB  rdf:type <http://data.total/resource/tsf/dalia-lifex/OffshorePOB>. ?EndDate  rdf:type <http://data.total/resource/tsf/dalia-lifex/EndDate>.}  limit 10000";
+        " ?StartDate  rdf:type <http://data.total/resource/tsf/dalia-lifex/StartDate>. " +
+        " ?Offshore_Construction_or_Installation  rdf:type <http://data.total/resource/tsf/dalia-lifex/Offshore_Construction_or_Installation>. " +
+        "?Job_Card  rdf:type <http://data.total/resource/tsf/dalia-lifex/Job_Card>. ?" +
+        "Discipline  rdf:type <http://data.total/resource/tsf/dalia-lifex/Discipline>." +
+        " ?OffshorePOB  rdf:type <http://data.total/resource/tsf/dalia-lifex/OffshorePOB>. " +
+        "?EndDate  rdf:type <http://data.total/resource/tsf/dalia-lifex/EndDate>." +
+        "Filter(?OffshorePOBValue >0)" +
+        "}  limit 10000";
 
       var url = Config.sources[self.source].sparql_server.url + "?format=json&query=";
 

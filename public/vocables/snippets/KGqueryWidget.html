@@ -41,12 +41,9 @@
     }
 </style>
 
-<div style="display: flex;flex-direction: row">
+<div style="display: flex;flex-direction: row" >
 
-  <div  style="display: flex;flex-direction: row" id="KGqueryWidget_pathsDiv">
-
-
-  </div>
+  <div  style="display: flex;flex-direction: row" id="KGqueryWidget_pathsDiv"> </div>
 
 
   <div>
@@ -54,9 +51,13 @@
     <button onclick="KGqueryWidget.queryKG('vijsGraph')">Graph</button>
     <button onclick="KGqueryWidget.aggregateQuery()">Aggregate</button>
     <button onclick="KGqueryWidget.clearAll()">Clear all</button>
-    <img src="./images/waitAnimated.gif" id="KGqueryWidget_waitImg" style="display: none; width: 15px; text-align: justify" /></td>
-    <span class="messageDiv" id="KGqueryWidget_messageDiv"></span></td>
+    <button onclick="TimeLineWidget.init()">TimeLine</button>
+
   </div>
+<div style="min-width: 100px">
+  <img src="./images/waitAnimated.gif" id="KGqueryWidget_waitImg" style="display: none; width: 15px; text-align: justify" /></td>
+  <span class="messageDiv" id="KGqueryWidget_messageDiv"></span></td>
+</div>
 </div>
 
 <div style="display: flex;flex-direction: row">

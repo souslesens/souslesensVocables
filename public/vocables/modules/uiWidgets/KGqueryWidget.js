@@ -11,6 +11,7 @@ import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import IndividualAggregateWidget from "./individualAggregateWidget.js";
 import IndividualValueFilterWidget from "./individualValuefilterWidget.js";
 import SimpleListSelectorWidget from "./simpleListSelectorWidget.js";
+import TimeLineWidget from "./timeLineWidget.js";
 
 
 var KGqueryWidget = (function() {

@@ -180,6 +180,7 @@ var KGqueryWidget = (function () {
                 ambiguousEdges = { id: key, properties: fromToMap[key] };
             }
         }
+
         if (ambiguousEdges && ambiguousEdges.properties.length > 0) {
             return SimpleListSelectorWidget.showDialog(
                 null,

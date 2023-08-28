@@ -120,20 +120,14 @@ var GraphTraversal = {
         GraphTraversal.getViscinityArray(sparqlServerUrl, graphUri, options, function (err, viscinityArray) {
             if (err) return callback(err);
 
-            GraphTraversal.getSortestPathFromVicinityArray(viscinityArray,function(err,path){
-                if(err)
-                    return callback(err);
-                return callback(null, path)
-            })
-
+            GraphTraversal.getSortestPathFromVicinityArray(viscinityArray, function (err, path) {
+                if (err) return callback(err);
+                return callback(null, path);
+            });
         });
     },
 
-
-
-
-
-    getSortestPathFromVicinityArray:function(viscinityArray,fromNodeId, toNodeId,options,callback){
+    getSortestPathFromVicinityArray: function (viscinityArray, fromNodeId, toNodeId, options, callback) {
         var graph = new GraphTraversal.path.Graph(viscinityArray);
 
         viscinityArray.forEach(function (edge) {

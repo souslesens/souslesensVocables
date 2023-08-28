@@ -117,9 +117,7 @@ var KGcreator = (function () {
                 if (err) {
                     return alert(err.responseText);
                 }
-                $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {
-
-                });
+                $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {});
 
                 MainController.UI.showHideRightPanel("hide");
                 // $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function() {
@@ -139,11 +137,9 @@ var KGcreator = (function () {
             var source = SourceSelectorWidget.getSelectedSource()[0];
             self.initSource(source, callback);
             self.initCentralPanel();
-
         };
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
-        if(callback)
-            callback()
+        if (callback) callback();
     };
 
     self.initSource = function (source, callback) {
@@ -745,7 +741,6 @@ var KGcreator = (function () {
         var subjectIsBlank = $("#KGcreator_isSubjectBlankNodeCBX").prop("checked");
         var objectIsBlank = $("#KGcreator_isObjectBlankNodeCBX").prop("checked");
 
-
         var predicate = $("#editPredicate_propertyValue").val();
         var object = $("#editPredicate_objectValue").val();
 
@@ -828,10 +823,10 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
             tripleObj.isSpecificPredicate = true;
         }
 
-        if (subject.indexOf("http://") > 0  && object.indexOf("function")<0 ) {
+        if (subject.indexOf("http://") > 0 && object.indexOf("function") < 0) {
             tripleObj.subjectIsSpecificUri = true;
         }
-        if (object.indexOf("http://") > 0 && object.indexOf("function")<0 ) {
+        if (object.indexOf("http://") > 0 && object.indexOf("function") < 0) {
             tripleObj.objectIsSpecificUri = true;
         }
 
@@ -840,7 +835,7 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         self.mainJsonEditor.load(self.currentJsonObject);
         self.mainJsonEditorModified = true;
 
-      /*  $("#KGcreator_objectInput").val("");
+        /*  $("#KGcreator_objectInput").val("");
         $("#KGcreator_objectSelect").val("");
         $("#KGcreator_predicateInput").val("");
         $("#KGcreator_predicateSelect").val("");*/
@@ -1040,7 +1035,7 @@ self.saveMappings({classId:classId})
     };
 
     self.getMappingFileJson = function (csvFileName, callback) {
-        var jsonFileName
+        var jsonFileName;
         if (csvFileName.indexOf(".json") < 0) {
             jsonFileName = csvFileName + ".json";
         }
@@ -1332,7 +1327,7 @@ self.saveMappings({classId:classId})
             }
 
             var filter = "?p =<http://souslesens.org/KGcreator#mappingFile>";
-            MainControlle.UI.message("delting triples triples created with KGCreator in " + self.currentJsonObject.graphUri)
+            MainControlle.UI.message("delting triples triples created with KGCreator in " + self.currentJsonObject.graphUri);
             Sparql_generic.deleteTriplesWithFilter(self.currentSlsvSource, filter, function (err, result) {
                 if (err) {
                     if (callback) {
@@ -1353,7 +1348,7 @@ self.saveMappings({classId:classId})
                 }
                 return;
             }
-            MainController.UI.message("delting triples from mapping file : " + self.currentJsonObject.fileName)
+            MainController.UI.message("delting triples from mapping file : " + self.currentJsonObject.fileName);
             self.createTriples(false, { deleteTriples: true }, function (err, result) {
                 if (err) {
                     if (callback) {

@@ -80,7 +80,7 @@ var VisjsUtil = (function () {
             else node[key] = options[key];
         }
 
-        if(options.data) {
+        if (options.data) {
             for (var key in options.data) {
                 node.data[key] = options.data[key];
             }

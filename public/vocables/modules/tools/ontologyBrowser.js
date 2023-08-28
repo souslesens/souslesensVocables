@@ -254,7 +254,7 @@ var OntologyBrowser = (function () {
     self.showGraphPopupMenu = function (node, point, _event) {
         self.setGraphPopupMenus(node);
         self.currentNode = node;
-       PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+        PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
     };
 
     self.graphActions = {

@@ -442,8 +442,7 @@ sourceDivId +
             source +
             "');\"> export OWL </span>";
 
-        PopupMenuWidget.initAndShow(html,"popupMenuWidgetDiv")
-
+        PopupMenuWidget.initAndShow(html, "popupMenuWidgetDiv");
     };
 
     self.registerSourceImports = function (sourceLabel, callback) {
@@ -607,15 +606,15 @@ sourceDivId +
             $("#" + sourceDivId).remove();
         },
         hideSource: function (source) {
-           PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+            PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, true);
         },
         showSource: function () {
-           PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+            PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             Lineage_sources.showHideCurrentSourceNodes(null, false);
         },
         groupSource: function (source) {
-           PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+            PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
 
             if (!source) {
                 source = Lineage_sources.activeSource;
@@ -663,7 +662,7 @@ sourceDivId +
             Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
         },
         ungroupSource: function (source) {
-           PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
+            PopupMenuWidget.hidePopup("popupMenuWidgetDiv");
             if (!source) {
                 source = Lineage_sources.activeSource;
             }

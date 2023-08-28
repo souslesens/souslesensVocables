@@ -746,7 +746,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                     "   graph ?g3 {\n" +
                     "      ?sparent rdf:type ?stype filter (?stype in (owl:Class))\n" +
                     "    optional { ?sparent rdfs:subClassOf ?sparentClass filter (!isBlank(?sparentClass))}\n" +
-                //  "    optional { ?sparent rdfs:subClassOf ?sparentClass. filter (not exists {?sparentClass ref:type owl:Restriction })}\n" +
+                    //  "    optional { ?sparent rdfs:subClassOf ?sparentClass. filter (not exists {?sparentClass ref:type owl:Restriction })}\n" +
                     "   optional { ?sparent rdfs:label ?sparentLabel}\n" +
                     "    bind (if(bound(?sparentClass) && ?g3=<" +
                     sourceGraphUri +
@@ -757,7 +757,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                     "       ?oparent rdf:type ?otype filter (?otype in (owl:Class))\n" +
                     "   optional { ?oparent rdfs:label ?oparentLabel}\n" +
                     "    optional { ?oparent rdfs:subClassOf ?oparentClass filter (!isBlank(?oparentClass))}\n" +
-                 // "     optional { ?oparent rdfs:subClassOf ?oparentClass filter (not exists {oparentClass ref:type owl:Restriction })}\n" +
+                    // "     optional { ?oparent rdfs:subClassOf ?oparentClass filter (not exists {oparentClass ref:type owl:Restriction })}\n" +
                     "    bind (if(bound(?oparentClass) && ?g3=<" +
                     sourceGraphUri +
                     ">,?oparentClass,?oparent) as ?oClass)  optional{?oClass rdfs:label ?oClassLabel}\n" +
@@ -798,44 +798,43 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                 }
                 result.results.bindings = Sparql_generic.setBindingsOptionalProperties(result.results.bindings, ["prop", "sClass", "oClass"], { source: source });
 
-             //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
+                //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
                 return callback(null, result.results.bindings);
             });
         }
     };
 
-    self.getInferredClassValueDataTypes=function(source,options, callback) {
-            if (!options) {
-                options = {};
-            }
-            if (!Config.ontologiesVocabularyModels[source]) {
-                Config.ontologiesVocabularyModels[source];
-            }
-            var filterStr = options.filter || "";
+    self.getInferredClassValueDataTypes = function (source, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        if (!Config.ontologiesVocabularyModels[source]) {
+            Config.ontologiesVocabularyModels[source];
+        }
+        var filterStr = options.filter || "";
 
-
-             var sourceGraphUri = Config.sources[source].graphUri;
-        var query="select distinct ?class ?datatype  FROM   <" +sourceGraphUri+">"+
-          " WHERE {   \n" +
-          "  ?s rdf:type+ ?class.\n" +
-          "  ?class rdf:type owl:Class.\n" +
-          "  ?s owl:hasValue ?v.\n" +
-          " bind (datatype(?v) as ?datatype)\n"+
-        //  "   filter (t != '')\n" +
-          "}"
+        var sourceGraphUri = Config.sources[source].graphUri;
+        var query =
+            "select distinct ?class ?datatype  FROM   <" +
+            sourceGraphUri +
+            ">" +
+            " WHERE {   \n" +
+            "  ?s rdf:type+ ?class.\n" +
+            "  ?class rdf:type owl:Class.\n" +
+            "  ?s owl:hasValue ?v.\n" +
+            " bind (datatype(?v) as ?datatype)\n" +
+            //  "   filter (t != '')\n" +
+            "}";
         let url = Config.default_sparql_url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
             if (err) {
                 return callback(err);
             }
 
-
-         //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
+            //   Config.ontologiesVocabularyModels[source].inferredClassModel = result.results.bindings;
             return callback(null, result.results.bindings);
         });
-
-
-    }
+    };
 
     return self;
 })();

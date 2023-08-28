@@ -1,50 +1,44 @@
 import common from "../shared/common.js";
 
+var SimpleListSelectorWidget = (function () {
+    var self = {};
 
-var SimpleListSelectorWidget = (function() {
+    self.showDialog = function (options, loadFn, validateFn) {
+        self.validateFn = validateFn;
+        if (!options) {
+            options = { size: 10, multiple: false };
+        }
 
-  var self = {};
+        var html =
+            "<div><select id='SimpleListSelectorWidget_select' size='" +
+            options.size +
+            "' multiple='" +
+            options.multiple +
+            "'>" +
+            " </select> <br> <button onclick='SimpleListSelectorWidget.onOKbutton()'>OK</button></div>";
 
-  self.showDialog = function(options, loadFn, validateFn) {
-    self.validateFn = validateFn;
-    if (!options) {
-      options = { size: 10, multiple: false };
-    }
+        var divId = "smallDialogDiv";
+        self.divId = divId;
+        $("#" + divId).dialog("open");
 
-    var html = "<div><select id='SimpleListSelectorWidget_select' size='" + options.size + "' multiple='" + options.multiple + "'>" +
+        $("#" + divId).html(html);
 
-      " </select> <br> <button onclick='SimpleListSelectorWidget.onOKbutton()'>OK</button></div>";
+        loadFn(function (data) {
+            if (typeof data[0] === "object") {
+                common.fillSelectOptions("SimpleListSelectorWidget_select", data, !options.multiple, "label", "id");
+            } else {
+                common.fillSelectOptions("SimpleListSelectorWidget_select", data, !options.multiple);
+            }
+        });
+    };
 
+    self.onOKbutton = function () {
+        var value = $("#SimpleListSelectorWidget_select").val();
+        $("#" + self.divId).dialog("close");
+        return self.validateFn(value);
+    };
 
-    var divId = "smallDialogDiv";
-    self.divId = divId;
-    $("#" + divId).dialog("open");
-
-    $("#" + divId).html(html);
-
-
-    loadFn(function(data) {
-      if (typeof (data[0])==="object") {
-        common.fillSelectOptions("SimpleListSelectorWidget_select", data, !options.multiple, "label", "id");
-      }
-      else {
-        common.fillSelectOptions("SimpleListSelectorWidget_select", data, !options.multiple);
-      }
-
-    });
-
-
-  };
-
-  self.onOKbutton = function() {
-    var value = $("#SimpleListSelectorWidget_select").val();
-    $("#" + self.divId).dialog("close");
-    return self.validateFn(value);
-  };
-
-
-  return self;
-})
-();
+    return self;
+})();
 export default SimpleListSelectorWidget;
 window.SimpleListSelectorWidget = SimpleListSelectorWidget;

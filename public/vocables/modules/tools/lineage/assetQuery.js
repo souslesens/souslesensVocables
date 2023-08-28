@@ -380,7 +380,6 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 jsTreeOptions.contextMenu = KGquery.getJstreeConceptsContextMenu();
                 jsTreeOptions.selectTreeNodeFn = KGquery.selectTreeNodeFn;
 
-
                 JstreeWidget.loadJsTree("KGquery_queryTreeDiv", jstreeData, jsTreeOptions);
             } else {
                 JstreeWidget.addNodesToJstree("KGquery_queryTreeDiv", KGquery.currentNode.id, jstreeData);

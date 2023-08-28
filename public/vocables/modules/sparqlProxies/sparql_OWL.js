@@ -1159,8 +1159,6 @@ var Sparql_OWL = (function () {
             } else {
                 filterStr = Sparql_common.setFilter("subject", ids, null, options);
             }
-
-
         }
         var fromStr = "";
         if (sourceLabel) {
@@ -1191,7 +1189,6 @@ var Sparql_OWL = (function () {
             "{ ?subject rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction." +
             filterStr +
             " ?node owl:onProperty ?prop ." +
-
             Sparql_common.getVariableLangLabel("prop", true) +
             Sparql_common.getVariableLangLabel("subject", true);
 

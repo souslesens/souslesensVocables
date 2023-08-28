@@ -324,8 +324,7 @@ var Export = (function () {
     };
 
     self.showDataTable = function (div, cols, dataSet, buttons, options) {
-        if(!options)
-            options={}
+        if (!options) options = {};
         if (self.dataTable) {
             self.dataTable.destroy();
             $("#dataTableDiv").html("");
@@ -335,10 +334,9 @@ var Export = (function () {
             $("#mainDialogDiv").html("<table id='dataTableDivExport'></table>");
             div = "dataTableDiv";
         } else {
-          try {
-              $("#" + div).dialog("open");
-          }
-          catch(e){}
+            try {
+                $("#" + div).dialog("open");
+            } catch (e) {}
 
             $("#" + div).html("<table id='dataTableDivExport'></table>");
         }

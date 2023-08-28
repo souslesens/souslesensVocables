@@ -810,15 +810,13 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                     var id = item[field].value;
 
                     if (!item[field + "Label"]) {
-                        if(id.indexOf("_:")==0) {
-                            item[field + "Label"] = ""
-                        }
-                        else {
+                        if (id.indexOf("_:") == 0) {
+                            item[field + "Label"] = "";
+                        } else {
                             var p = id.lastIndexOf("#");
                             if (p > -1) {
                                 item[field + "Label"] = { value: id.substring(p + 1) };
-                            }
-                            else {
+                            } else {
                                 p = id.lastIndexOf("/");
                                 item[field + "Label"] = { value: id.substring(p + 1) };
                             }

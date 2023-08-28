@@ -31,10 +31,9 @@ var UserRequestFiltering = {
         for (var key in basicVocabularies) {
             var source = basicVocabularies[key];
             userGraphUrisMap[source.graphUri] = { source: key, acl: "r" };
-
         }
 
-        userGraphUrisMap["http://souslesens.org/vocables/resource/labels/"]= { source: "slsvLabels", acl: "r" };
+        userGraphUrisMap["http://souslesens.org/vocables/resource/labels/"] = { source: "slsvLabels", acl: "r" };
 
         for (var key in userSourcesMap) {
             var source = userSourcesMap[key];

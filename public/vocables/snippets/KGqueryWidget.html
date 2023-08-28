@@ -4,10 +4,9 @@
         margin: 3px;
         padding-top: 3px;
         border-radius: 3px;
-
-
     }
-    .KGqueryWidget_pathNodeDiv{
+
+    .KGqueryWidget_pathNodeDiv {
         display: flex;
         flex-direction: row;
     }
@@ -17,12 +16,12 @@
         padding-top: 3px;
     }
 
-   /* #KGqueryWidget_dataTableDiv {
-        width: 800px;
-        height: 800px;
-        overflow: auto;
+    /* #KGqueryWidget_dataTableDiv {
+         width: 800px;
+         height: 800px;
+         overflow: auto;
 
-    }*/
+     }*/
 
     #dataTableDivExport_wrapper {
         width: 800px;
@@ -41,32 +40,27 @@
     }
 </style>
 
-<div style="display: flex;flex-direction: row" >
+<div style="display: flex; flex-direction: row">
+    <div style="display: flex; flex-direction: row" id="KGqueryWidget_pathsDiv"></div>
 
-  <div  style="display: flex;flex-direction: row" id="KGqueryWidget_pathsDiv"> </div>
-
-
-  <div>
-    <button onclick="KGqueryWidget.queryKG('table')">Table</button>
-    <button onclick="KGqueryWidget.queryKG('vijsGraph')">Graph</button>
-    <button onclick="KGqueryWidget.aggregateQuery()">Aggregate</button>
-    <button onclick="KGqueryWidget.clearAll()">Clear all</button>
-    <button onclick="TimeLineWidget.init()">TimeLine</button>
-
-  </div>
-<div style="min-width: 100px">
-  <img src="./images/waitAnimated.gif" id="KGqueryWidget_waitImg" style="display: none; width: 15px; text-align: justify" /></td>
-  <span class="messageDiv" id="KGqueryWidget_messageDiv"></span></td>
-</div>
+    <div>
+        <button onclick="KGqueryWidget.queryKG('table')">Table</button>
+        <button onclick="KGqueryWidget.queryKG('vijsGraph')">Graph</button>
+        <button onclick="KGqueryWidget.aggregateQuery()">Aggregate</button>
+        <button onclick="KGqueryWidget.clearAll()">Clear all</button>
+        <button onclick="TimeLineWidget.init()">TimeLine</button>
+    </div>
+    <div style="min-width: 100px">
+        <img src="./images/waitAnimated.gif" id="KGqueryWidget_waitImg" style="display: none; width: 15px; text-align: justify" />
+        <span class="messageDiv" id="KGqueryWidget_messageDiv"></span>
+    </div>
 </div>
 
-<div style="display: flex;flex-direction: row">
-
-  <div style="display: flex;flex-direction: column">
-    <div id="KGqueryWidget_graphDiv" style="width:800px;height: 650px "></div>
-  </div>
-  <div id="KGqueryWidget_dataTableDiv"></div>
+<div style="display: flex; flex-direction: row">
+    <div style="display: flex; flex-direction: column">
+        <div id="KGqueryWidget_graphDiv" style="width: 800px; height: 650px"></div>
+    </div>
+    <div id="KGqueryWidget_dataTableDiv"></div>
 </div>
 
-
-<div id="KGqueryWidget_popupMenuDiv" style="position:absolute"></div>
+<div id="KGqueryWidget_popupMenuDiv" style="position: absolute"></div>

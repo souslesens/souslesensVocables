@@ -153,8 +153,7 @@ module.exports = function () {
         } else {
             for (var entryType in req.body.data) {
                 for (var id in req.body.data[entryType]) {
-                    if(! ontologyModelsCache[req.body.source][entryType])
-                        ontologyModelsCache[req.body.source][entryType]={}
+                    if (!ontologyModelsCache[req.body.source][entryType]) ontologyModelsCache[req.body.source][entryType] = {};
                     if (entryType == "restrictions") {
                         ontologyModelsCache[req.body.source][entryType][id].concat(req.body.data[entryType][id]);
                     } else {

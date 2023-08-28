@@ -15,7 +15,7 @@ var IndividualAggregateWidget = (function () {
             self.divId = divId;
             $("#smallDialogDiv").dialog("open");
         }
-        $("#" + divId).load("snippets/IndividualAggregateWidget.html", function () {
+        $("#" + divId).load("snippets/individualAggregateWidget.html", function () {
             loadClassesFn(function (data) {
                 var groupByClasses = [];
                 var functionVarClasses = [];

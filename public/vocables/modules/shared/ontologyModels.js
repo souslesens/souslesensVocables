@@ -814,8 +814,10 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
         var filterStr = options.filter || "";
 
         var sourceGraphUri = Config.sources[source].graphUri;
-        var query =
-            "select distinct ?class ?datatype  FROM   <" +
+        var query =  "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" +
+          "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+          "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "SELECT distinct ?class ?datatype  FROM   <" +
             sourceGraphUri +
             ">" +
             " WHERE {   \n" +

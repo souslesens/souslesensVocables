@@ -192,10 +192,32 @@ class SourceModel {
     };
 
     /**
+     * @param {string} sourceNameId -  a source name or id
+     * @returns {Promise<boolean>} - true if the source exists
+     */
+    deleteSource = async (sourceNameId) => {
+        const sources = await this._read();
+        const { [sourceNameId]: sourceToDelete, ..._remainingSources } = sources;
+        if (sourceToDelete) {
+            return this._deleteSourceByName(sourceNameId);
+        } else {
+            // no source found. Try with id
+            const sourcesList = Object.entries(sources);
+            const sourceToDeleteWithId = sourcesList.find(([_name, source]) => {
+                return source.id === sourceNameId;
+            });
+            if (sourceToDeleteWithId) {
+                return this._deleteSourceByName(sourceToDeleteWithId[0]);
+            }
+        }
+        return false;
+    };
+
+    /**
      * @param {string} sourceName -  a source name
      * @returns {Promise<boolean>} - true if the source exists
      */
-    deleteSource = async (sourceName) => {
+    _deleteSourceByName = async (sourceName) => {
         await lock.acquire("SourcesThread");
         try {
             const sources = await this._read();
@@ -218,14 +240,14 @@ class SourceModel {
         await lock.acquire("SourcesThread");
         try {
             const sources = await this._read();
-            // XXX We currently find sources by their name
-            // We would prefer to use their ids.
-            if (!(source.name in sources)) {
+            const updatedSources = { ...sources };
+            if (source.id in sources) {
+                updatedSources[source.id] = source;
+            } else if (source.name in sources) {
+                updatedSources[source.name] = source;
+            } else {
                 return false;
             }
-            const updatedSources = { ...sources };
-            // XXX same here
-            updatedSources[source.name] = source;
             await this._write(updatedSources);
             return true;
         } finally {

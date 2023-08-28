@@ -33,6 +33,7 @@ var UserRequestFiltering = {
             userGraphUrisMap[source.graphUri] = { source: key, acl: "r" };
         }
 
+        // add slsvLabels (readonly) for everyone
         userGraphUrisMap["http://souslesens.org/vocables/resource/labels/"] = { source: "slsvLabels", acl: "r" };
 
         for (var key in userSourcesMap) {

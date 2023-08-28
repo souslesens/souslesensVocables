@@ -69,7 +69,7 @@ export async function saveProfile(body: Profile, mode: Mode, updateModel: React.
 }
 async function deleteProfile(profile: Profile, updateModel: React.Dispatch<Msg>) {
     try {
-        const response = await fetch(`${endpoint}/${profile.id}`, { method: "delete" });
+        const response = await fetch(`${endpoint}/${profile.name}`, { method: "delete" });
         const { message, resources } = (await response.json()) as Response;
         if (response.status === 200) {
             updateModel({ type: "ServerRespondedWithProfiles", payload: success(mapProfiles(resources)) });
@@ -115,7 +115,7 @@ const ProfileSchema = z.object({
     name: z
         .string()
         .refine((val) => val !== "admin", { message: "Name can't be admin" })
-        .refine((val) => val.match(/^([0-9]|[a-z])+([0-9a-z]+)$/i), { message: "Name can only contain alphanumeric characters" }),
+        .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
     _type: z.string().optional(),
     id: z.string().default(ulid()),
     allowedSourceSchemas: z

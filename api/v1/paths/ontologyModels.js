@@ -49,7 +49,7 @@ module.exports = function () {
 
     POST.apiDoc = {
         summary: "Write source model in memory cache",
-        security: [{ restrictAdmin: [] }],
+        security: [{ loginScheme: [] }],
         operationId: "Write source model in memory cache",
         parameters: [
             {

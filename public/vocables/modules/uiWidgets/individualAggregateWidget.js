@@ -10,6 +10,7 @@ var IndividualAggregateWidget = (function () {
         self.functionVarClasses = [];
         self.groupByClasses = [];
 
+
         if (!divId) {
             divId = "smallDialogDiv";
             self.divId = divId;

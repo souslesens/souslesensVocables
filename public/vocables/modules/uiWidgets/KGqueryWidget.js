@@ -22,6 +22,7 @@ var KGqueryWidget = (function () {
     self.classeMap = {};
     self.pathDivsMap = {};
     self.classFiltersMap = {};
+    self.allPathEdges={}
 
     self.showDialog = function () {
         $("#mainDialogDiv").dialog("open");
@@ -129,9 +130,13 @@ var KGqueryWidget = (function () {
                     return alert(err.responseText);
                 }
 
+
                 self.managePathAmbiguousEdges(path, function (unAmbiguousPath) {
                     self.currentPath = unAmbiguousPath;
                     self.queryPathParams.path = unAmbiguousPath;
+
+                    var cleanedPath=self.removeRedondantPredicates(unAmbiguousPath)
+
 
                     self.queryPathParams.index = self.allQueryPathes.length;
 
@@ -207,6 +212,38 @@ var KGqueryWidget = (function () {
             );
         } else return callback(path);
     };
+
+    /**
+     *
+     * is this path allready exists in the query
+     *
+     * @param allQueryPathes
+     * @returns {{}}
+     */
+    self.removeRedondantPredicates=function(pathItem){
+
+        var nonRedondantPaths=[]
+        var ok=true
+        pathItem.forEach(function(singlePath){
+                if(self.allPathEdges[singlePath[0]+"_"+singlePath[1]+"_"+singlePath[2]]){
+                    ok=false
+                }
+              else  if(self.allPathEdges[singlePath[1]+"_"+singlePath[0]+"_"+singlePath[2]]){
+                   ok=false
+                }else {
+
+                    self.allPathEdges[singlePath[0] + "_" + singlePath[1] + "_" + singlePath[2]] = 1
+                    self.allPathEdges[singlePath[1] + "_" + singlePath[0] + "_" + singlePath[2]] = 1
+                    ok = true
+                    nonRedondantPaths.push(pathItem)
+                }
+
+
+        })
+        return nonRedondantPaths
+
+
+    }
 
     self.addNodeFilter = function (classDivId) {
         var aClass = self.classDivsMap[classDivId];
@@ -298,7 +335,7 @@ var KGqueryWidget = (function () {
                 if (!existingNodes[item[varNameKey].value]) {
                     existingNodes[item[varNameKey].value] = 1;
                     var options = {
-                        shape: Lineage_whiteboard.defaultShape,
+                        shape: "triangle",
                         size: Lineage_whiteboard.defaultShapeSize,
                         color: Lineage_whiteboard.getSourceColor(varNameKey),
                     };
@@ -350,6 +387,8 @@ var KGqueryWidget = (function () {
 
         Export.showDataTable("KGqueryWidget_dataTableDiv", tableCols, tableData);
     };
+
+
 
     self.execPathQuery = function (allQueryPathes, options, callback) {
         if (!options) {
@@ -556,16 +595,20 @@ var KGqueryWidget = (function () {
                         item.sClass = item.sClass || item.sparent;
                         item.oClass = item.oClass || item.oparent;
 
+                        item.sClassLabel = item.sClassLabel || item.sparentLabel;
+                        item.oClassLabel = item.oClassLabel || item.oparentLabel;
+
                         if (!existingNodes[item.sClass.value]) {
                             existingNodes[item.sClass.value] = 1;
-                            self.visjsNodeOptions.data = { datatype: dataTypes[item.sClass.value] };
                             var label = item.sClassLabel ? item.sClassLabel.value : Sparql_common.getLabelFromURI(item.sClass.value);
+                            self.visjsNodeOptions.data = { datatype: dataTypes[item.sClass.value],   source: source,id:item.sClass.value,label:label };
+
                             visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.sClass.value, label, null, self.visjsNodeOptions));
                         }
                         if (!existingNodes[item.oClass.value]) {
                             existingNodes[item.oClass.value] = 1;
-                            self.visjsNodeOptions.data = { datatype: dataTypes[item.oClass.value] };
                             var label = item.oClassLabel ? item.oClassLabel.value : Sparql_common.getLabelFromURI(item.oClass.value);
+                            self.visjsNodeOptions.data = { datatype: dataTypes[item.oClass.value],id:item.oClass.value,label:label };
                             visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, label, null, self.visjsNodeOptions));
                         }
                         var edgeId = item.sClass.value + "_" + item.prop.value + "_" + item.oClass.value;
@@ -577,7 +620,7 @@ var KGqueryWidget = (function () {
                                 from: item.sClass.value,
                                 to: item.oClass.value,
                                 label: item.propLabel.value,
-                                font: { color: Lineage_whiteboard.restrictionColor },
+                                font: { color: Lineage_whiteboard.defaultPredicateEdgeColor },
                                 data: {
                                     propertyId: item.prop.value,
                                     source: source,
@@ -591,8 +634,8 @@ var KGqueryWidget = (function () {
                                         scaleFactor: 0.5,
                                     },
                                 },
-                                dashes: true,
-                                color: Lineage_whiteboard.restrictionColor,
+                               // dashes: true,
+                                color: Lineage_whiteboard.defaultPredicateEdgeColor,
                             });
                         }
                     });
@@ -643,14 +686,20 @@ var KGqueryWidget = (function () {
         self.classeMap = {};
         self.pathDivsMap = {};
         self.classFiltersMap = {};
+        self.allPathEdges={}
         $("#KGqueryWidget_pathsDiv").html("");
         self.resetVisjNodes();
         self.resetVisjEdges();
     };
     self.graphActions = {
         onNodeClick: function (node, point, nodeEvent) {
-            self.currentGraphNode = node;
-            KGqueryWidget.addNode(node, nodeEvent);
+            if(nodeEvent.ctrlKey){
+                NodeInfosWidget.showNodeInfos(self.source,node,"smallDialogDiv",{})
+            }else{
+                self.currentGraphNode = node;
+                KGqueryWidget.addNode(node, nodeEvent);
+            }
+
         },
 
         onDnDnode: function (startNode, endNode, point) {},

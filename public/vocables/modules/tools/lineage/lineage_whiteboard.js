@@ -2775,6 +2775,8 @@ self.zoomGraphOnNode(node.data[0].id, false);
     };
 
     self.drawInferredClassesModel = function (source) {
+        if(!source)
+            source=Lineage_sources.activeSource
         KGqueryWidget.getInferredModelVisjsData(source, function (err, visjsData) {
             if (err) {
                 return alert(err.responseText);
@@ -2782,8 +2784,8 @@ self.zoomGraphOnNode(node.data[0].id, false);
             if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
                 Lineage_whiteboard.drawNewGraph(visjsData);
             } else {
-                lineageVisjsGraph.data.nodes.update(visjsData.nodes);
-                lineageVisjsGraph.data.edges.update(visjsData.edges);
+                self.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
+                self.lineageVisjsGraph.data.edges.update(visjsData.edges);
             }
 
             $("#waitImg").css("display", "none");

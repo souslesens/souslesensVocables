@@ -471,10 +471,16 @@ var KGtripleBuilder = {
                                                                             var formatDate = function (date) {
                                                                                 return new Date(date).toISOString(); //.slice(0, 10);
                                                                             };
+
                                                                             if (!isDate(str)) {
+                                                                              var date=util.convertFrDateStr2Date(str)
+                                                                              if(!date)
                                                                                 return;
+                                                                              else
+                                                                                  str =date.toISOString();
+                                                                            }else {
+                                                                                str = formatDate(str);
                                                                             }
-                                                                            str = formatDate(str);
                                                                         }
 
                                                                         item.p = "owl:hasValue";

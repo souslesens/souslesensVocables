@@ -184,6 +184,7 @@ var PredicatesSelectorWidget = (function () {
             classes = common.array.sort(classes, "label");
             common.fillSelectOptions(selectId, classes, true, "label", "id");
         } else {
+            var nClasses=OntologyModels[vocabulary].classes.length
             return PromptedSelectWidget.prompt("owl:Class", "editPredicate_objectSelect", vocabulary);
         }
     };

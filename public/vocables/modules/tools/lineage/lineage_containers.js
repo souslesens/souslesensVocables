@@ -1,9 +1,10 @@
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_styles from "./lineage_styles.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import common from "../../shared/common.js";
 import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
+
 self.lineageVisjsGraph;
 
 var Lineage_containers = (function () {
@@ -35,7 +36,7 @@ var Lineage_containers = (function () {
                 if (self.currentContainer.data.type == "container") {
                     Lineage_containers.graphResources(Lineage_sources.activeSource, self.currentContainer.data, { onlyOneLevel: true });
                 } else {
-                    Lineage_classes.drawNodesAndParents(self.currentContainer, 0);
+                    Lineage_whiteboard.drawNodesAndParents(self.currentContainer, 0);
                 }
             },
         };
@@ -50,7 +51,7 @@ var Lineage_containers = (function () {
             label: "Copy Node(s)",
             action: function (e) {
                 // pb avec source
-                Lineage_classes.copyNode(e);
+                Lineage_whiteboard.copyNode(e);
                 var selectedNodes = $("#lineage_containers_containersJstree").jstree().get_selected(true);
                 Lineage_common.copyNodeToClipboard(selectedNodes);
             },
@@ -58,7 +59,7 @@ var Lineage_containers = (function () {
         items["AddGraphNode"] = {
             label: "Add selected node to container",
             action: function (_e) {
-                var graphNodeData = Lineage_classes.currentGraphNode.data;
+                var graphNodeData = Lineage_whiteboard.currentGraphNode.data;
                 Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, self.currentContainer, graphNodeData);
             },
         };
@@ -134,8 +135,8 @@ Lineage_styles.showDialog(self.currentContainer.data);
         self.currentContainer = null;
         /*  self.listContainerResources(source, null, { filter:filter })
 
-        
-      return;*/
+
+  return;*/
         if ($("#lineage_containers_containersJstree").jstree) {
             $("#lineage_containers_containersJstree").empty();
         }
@@ -158,18 +159,18 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
         var fromStr = Sparql_common.getFromStr(source, null, true);
         /*
-        var query =
-            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
-            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
-            "select distinct * " +
-            fromStr +
-            "where {?member rdfs:label ?memberLabel.?member rdf:type ?memberType." +
-            memberType +
-            " OPTIONAL {?member ^rdfs:member ?parentContainer.?parentContainer rdf:type ?type.filter (?type in (rdf:Bag,rdf:List)).?parentContainer rdfs:label ?parentContainerLabel}" +
-            " " +
-            filter +
-            "}";
-        */
+    var query =
+        "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+        "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+        "select distinct * " +
+        fromStr +
+        "where {?member rdfs:label ?memberLabel.?member rdf:type ?memberType." +
+        memberType +
+        " OPTIONAL {?member ^rdfs:member ?parentContainer.?parentContainer rdf:type ?type.filter (?type in (rdf:Bag,rdf:List)).?parentContainer rdfs:label ?parentContainerLabel}" +
+        " " +
+        filter +
+        "}";
+    */
 
         var query = `
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -300,7 +301,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                     selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
                     dnd: {
                         drag_stop: function (data, element, helper, event) {
-                            self.onMoveContainer(data, element, helper, event);
+                            //  self.onMoveContainer(data, element, helper, event);
                         },
                         drag_start: function (data, element, helper, event) {
                             var sourceNodeId = element.data.nodes[0];
@@ -314,6 +315,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 $("#" + jstreeDiv)
                     .jstree()
                     .open_node("#");
+                self.bindMoveNode(jstreeDiv);
                 callback(null);
             });
         });
@@ -586,15 +588,15 @@ Lineage_styles.showDialog(self.currentContainer.data);
                                 openAll: false,
                                 contextMenu: Lineage_containers.getContextJstreeMenu(),
                                 selectTreeNodeFn: Lineage_containers.onSelectedNodeTreeclick,
-                                dnd: {
-                                    drag_stop: function (data, element, helper, event) {
-                                        self.onMoveContainer(data, element, helper, event);
-                                    },
-                                    drag_start: function (data, element, helper, event) {
-                                        var sourceNodeId = element.data.nodes[0];
-                                        self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
-                                    },
-                                },
+                                /*  dnd: {
+                  drag_stop: function(data, element, helper, event) {
+                    //  self.onMoveContainer(data, element, helper, event);
+                  },
+                  drag_start: function(data, element, helper, event) {
+                    var sourceNodeId = element.data.nodes[0];
+                    self.currenDraggingNodeSourceParent = $("#lineage_containers_containersJstree").jstree().get_node(sourceNodeId).parent;
+                  }
+                }*/
                             };
                         }
 
@@ -605,6 +607,8 @@ Lineage_styles.showDialog(self.currentContainer.data);
                                     .open_node("#");
                                 $("#" + jstreeDiv).jstree("open_all");
                                 self.flag_function();
+
+                                self.bindMoveNode(jstreeDiv);
                             });
                         } else {
                             JstreeWidget.addNodesToJstree(jstreeDiv, null, jstreeData, jstreeOptions, self.flag_function);
@@ -630,6 +634,25 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 }
             );
         }
+    };
+
+    self.bindMoveNode = function (jstreeDiv) {
+        $("#" + jstreeDiv).bind("move_node.jstree", function (e, data) {
+            function getjstreeIdUri(id) {
+                var node = $("#lineage_containers_containersJstree").jstree().get_node(id);
+                var uri = node && node.data ? node.data.id : "x";
+                return uri;
+            }
+
+            var movingInfos = {
+                nodeId: getjstreeIdUri(data.node.id),
+                newParent: getjstreeIdUri(data.parent),
+                oldParent: getjstreeIdUri(data.old_parent),
+                position: getjstreeIdUri(data.position),
+            };
+            self.writeMovedNodeNewParent(movingInfos);
+            // console.log(movingInfos)
+        });
     };
 
     self.addContainer = function (source) {
@@ -774,7 +797,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
             }
 
             if (drawMembershipEdge) {
-                var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+                var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
                 var edges = [];
                 nodesData.forEach(function (nodeData) {
                     var edgeId = container.id + "_" + "member" + "_" + nodeData.id;
@@ -795,7 +818,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                     }
                 });
 
-                Lineage_classes.lineageVisjsGraph.data.edges.add(edges);
+                Lineage_whiteboard.lineageVisjsGraph.data.edges.add(edges);
             }
             if (callback) {
                 return callback(null);
@@ -863,63 +886,63 @@ Lineage_styles.showDialog(self.currentContainer.data);
      * @param callback
      */
     /*  self.getContainerResources = function(source, containerIds, options, callback) {
-      var containers;
-      var firstContainer;
-      if (!Array.isArray(containerIds)) {
-        containers = [containerIds];
-        firstContainer = containerIds;
-      }
-      else {
-        containers = containerIds;
-        firstContainer = containerIds[0];
-      }
+    var containers;
+    var firstContainer;
+    if (!Array.isArray(containerIds)) {
+      containers = [containerIds];
+      firstContainer = containerIds;
+    }
+    else {
+      containers = containerIds;
+      firstContainer = containerIds[0];
+    }
 
-      if (options.allDescendants) {
-        //  $("#lineage_containers_containersJstree").jstree().open_all()
-        var descendantObjs = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", firstContainer, null);
-        var descendantIds = [];
-        descendantObjs.forEach(function(item) {
-          if (item.data.type == "container") {
-            descendantIds.push(item.data.id);
-          }
-        });
-        var containerObj = $("#lineage_containers_containersJstree").jstree().get_node(firstContainer);
-        containers = containers.concat(descendantIds);
-      }
-
-      var subjects = containers;
-      var objects = null;
-      var propFilter = "";
-      var objectTypeFilter;
-      if (options.nodes) {
-        objectTypeFilter = "filter(?objectType not in (rdf:Bag,rdf:List))";
-      }
-      else if (options.containers) {
-        objectTypeFilter = "filter(?objectType in (rdf:Bag,rdf:List))";
-      }
-      else {
-        objectTypeFilter = "";
-      }
-
-      if (options.descendants) {
-        propFilter = "http://www.w3.org/2000/01/rdf-schema#member";
-      }
-      else if (options.ancestors) {
-        var subjects = null;
-        var objects = containers;
-      }
-      else {
-        propFilter = "";
-      }
-
-      if (false && !propFilter && !objectTypeFilter) {
-        return alert("no filter set");
-      }
-
-      Sparql_OWL.getFilteredTriples(source, subjects, propFilter, objects, { filter: objectTypeFilter }, function(err, result) {
-        return callback(err, result);
+    if (options.allDescendants) {
+      //  $("#lineage_containers_containersJstree").jstree().open_all()
+      var descendantObjs = JstreeWidget.getNodeDescendants("lineage_containers_containersJstree", firstContainer, null);
+      var descendantIds = [];
+      descendantObjs.forEach(function(item) {
+        if (item.data.type == "container") {
+          descendantIds.push(item.data.id);
+        }
       });
-    };*/
+      var containerObj = $("#lineage_containers_containersJstree").jstree().get_node(firstContainer);
+      containers = containers.concat(descendantIds);
+    }
+
+    var subjects = containers;
+    var objects = null;
+    var propFilter = "";
+    var objectTypeFilter;
+    if (options.nodes) {
+      objectTypeFilter = "filter(?objectType not in (rdf:Bag,rdf:List))";
+    }
+    else if (options.containers) {
+      objectTypeFilter = "filter(?objectType in (rdf:Bag,rdf:List))";
+    }
+    else {
+      objectTypeFilter = "";
+    }
+
+    if (options.descendants) {
+      propFilter = "http://www.w3.org/2000/01/rdf-schema#member";
+    }
+    else if (options.ancestors) {
+      var subjects = null;
+      var objects = containers;
+    }
+    else {
+      propFilter = "";
+    }
+
+    if (false && !propFilter && !objectTypeFilter) {
+      return alert("no filter set");
+    }
+
+    Sparql_OWL.getFilteredTriples(source, subjects, propFilter, objects, { filter: objectTypeFilter }, function(err, result) {
+      return callback(err, result);
+    });
+  };*/
     self.listContainerResources = function (source, containerNode, options, callback, JstreeDiv) {
         var existingChildren = [];
         if (!JstreeDiv) {
@@ -927,7 +950,9 @@ Lineage_styles.showDialog(self.currentContainer.data);
         }
 
         //Do not execute the descendants request if he already has children?
-        if (containerNode.children.length > 1) return;
+        if (containerNode.children.length > 1) {
+            return;
+        }
 
         self.sparql_queries.getContainerDescendants(source, containerNode ? containerNode.data.id : null, options, function (err, result) {
             if (err) {
@@ -1013,7 +1038,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                             return callbackSeries(err);
                         }
                         data = data.concat(result.results.bindings);
-                        if (data.length > Lineage_classes.showLimit * 8) {
+                        if (data.length > Lineage_whiteboard.showLimit * 8) {
                             return callbackSeries({ responseText: "too many nodes " + data.length + " cannot draw" });
                         }
                         return callbackSeries();
@@ -1054,16 +1079,16 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
                 //draw
                 function (callbackSeries) {
-                    var color = Lineage_classes.getSourceColor(source);
+                    var color = Lineage_whiteboard.getSourceColor(source);
                     var opacity = 1.0;
-                    var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+                    var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
                     visjsData = { nodes: [], edges: [] };
                     var objectProperties = [];
 
                     var shape = "dot";
                     var color2 = common.colorToRgba(color, opacity * 0.7);
                     var memberEdgeColor = common.colorToRgba("#8528c9", opacity * 0.7);
-                    var size = Lineage_classes.defaultShapeSize;
+                    var size = Lineage_whiteboard.defaultShapeSize;
 
                     if (!existingNodes[containerData.id]) {
                         existingNodes[containerData.id] = 1;
@@ -1075,8 +1100,8 @@ Lineage_styles.showDialog(self.currentContainer.data);
                             shadow: self.nodeShadow,
                             shape: "box",
                             size: size,
-                            font: type == "container" ? { color: "#eee" } : null,
-                            color: "#70309f",
+                            font: type == "container" ? { color: "#70309f" } : null,
+                            color: "#ddd",
                             data: {
                                 type: type,
                                 source: source,
@@ -1103,8 +1128,8 @@ Lineage_styles.showDialog(self.currentContainer.data);
                                 shadow: self.nodeShadow,
                                 shape: type == "container" ? "box" : shape,
                                 size: size,
-                                font: type == "container" ? { color: "#eee", size: 10 } : null,
-                                color: color2,
+                                font: type == "container" ? { color: color2, size: 10 } : null,
+                                color: "#ddd",
                                 data: {
                                     type: type,
                                     source: source,
@@ -1127,8 +1152,9 @@ Lineage_styles.showDialog(self.currentContainer.data);
                                 shadow: self.nodeShadow,
                                 shape: type == "container" ? "box" : shape,
                                 size: size,
-                                font: type == "container" ? { color: "#eee", size: 10 } : null,
-                                color: color2,
+                                font: type == "container" ? { color: color2, size: 10 } : null,
+                                color: "#ddd",
+
                                 data: {
                                     type: type,
                                     source: source,
@@ -1149,7 +1175,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                                 arrows: {
                                     middle: {
                                         enabled: true,
-                                        type: Lineage_classes.defaultEdgeArrowType,
+                                        type: Lineage_whiteboard.defaultEdgeArrowType,
                                         scaleFactor: 0.5,
                                     },
                                 },
@@ -1178,7 +1204,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                                 to: item.member.value,
                                 arrows: {
                                     enabled: true,
-                                    type: Lineage_classes.defaultEdgeArrowType,
+                                    type: Lineage_whiteboard.defaultEdgeArrowType,
                                     scaleFactor: 0.5,
                                 },
                                 data: {
@@ -1233,13 +1259,13 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
                     setNodesLevel(visjsData);
 
-                    if (!Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
-                        Lineage_classes.drawNewGraph(visjsData);
+                    if (!Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                        Lineage_whiteboard.drawNewGraph(visjsData);
                     } else {
-                        Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-                        Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
+                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+                        Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
                     }
-                    Lineage_classes.lineageVisjsGraph.network.fit();
+                    Lineage_whiteboard.lineageVisjsGraph.network.fit();
                     $("#waitImg").css("display", "none");
                     if (objectProperties.length > 0) {
                         source = Lineage_sources.activeSource;
@@ -1276,26 +1302,21 @@ Lineage_styles.showDialog(self.currentContainer.data);
         }
     };
 
-    self.onMoveContainer = function (data, element, helper, event) {
-        var sourceNodeId = element.data.nodes[0];
-        var oldParent = self.currenDraggingNodeSourceParent;
-        var targetNodeAnchor = element.event.target.id;
-        var newParent = targetNodeAnchor.substring(0, targetNodeAnchor.indexOf("_anchor"));
-
+    self.writeMovedNodeNewParent = function (movedNodeInfos) {
         var graphUri = Config.sources[Lineage_sources.activeSource].graphUri;
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "with <" +
             graphUri +
             "> delete {<" +
-            oldParent +
+            movedNodeInfos.oldParent +
             "> rdfs:member <" +
-            sourceNodeId +
+            movedNodeInfos.nodeId +
             ">}" +
             "insert {<" +
-            newParent +
+            movedNodeInfos.newParent +
             "> rdfs:member <" +
-            sourceNodeId +
+            movedNodeInfos.nodeId +
             ">}";
 
         var url = Config.sources[Lineage_sources.activeSource].sparql_server.url + "?format=json&query=";
@@ -1359,15 +1380,21 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
     self.applyContainerstyle = function (containerUrl) {};
 
-    self.graphWhiteboardNodesContainers = function (source, ids, callback) {
+    self.graphWhiteboardNodesContainers = function (source, ids, options, callback) {
+        if (!options) {
+            options = {};
+        }
         if (!source) {
             source = Lineage_sources.activeSource;
         }
         var fromStr = Sparql_common.getFromStr(source, false, true);
         if (!ids) {
-            ids = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
+            ids = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
         }
         var filter = Sparql_common.setFilter("node", ids);
+
+        if (options.filter) filter += options.filter;
+
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
             "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
@@ -1387,7 +1414,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 }
                 return alert(err);
             }
-            var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+            var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
             var visjsData = { nodes: [], edges: [] };
 
             result.results.bindings.forEach(function (item) {
@@ -1400,9 +1427,9 @@ Lineage_styles.showDialog(self.currentContainer.data);
                         label: item.containerLabel.value,
                         shadow: self.nodeShadow,
                         shape: "box",
-                        size: Lineage_classes.defaultShapeSize,
-                        font: { color: "#eee" },
-                        color: color2,
+                        size: Lineage_whiteboard.defaultShapeSize,
+                        font: { color: color2 },
+                        color: "#ddd",
                         data: {
                             type: "container",
                             source: Lineage_sources.activeSource,
@@ -1430,14 +1457,46 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 }
             });
 
-            Lineage_classes.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
-            Lineage_classes.lineageVisjsGraph.data.edges.add(visjsData.edges);
+            Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
 
-            Lineage_classes.lineageVisjsGraph.network.fit();
+            Lineage_whiteboard.lineageVisjsGraph.network.fit();
             $("#waitImg").css("display", "none");
             if (callback) {
                 return callback(null, visjsData);
             }
+        });
+    };
+
+    self.getContainerTypes = function (source, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        var fromStr = Sparql_common.getFromStr(source, false, options.withoutImports);
+        var query =
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" +
+            "SELECT distinct ?type ?typeLabel " +
+            fromStr +
+            "  WHERE {\n" +
+            " ?sub rdf:type rdf:Bag  .\n" +
+            "  ?sub rdf:type  ?type . filter (!regex(str(?type),'owl') && ?type!='rdf:Bag')\n" +
+            "  optional {?type rdfs:label ?typeLabel}" +
+            "  }";
+
+        var sparql_url = Config.sources[source].sparql_server.url;
+        var url = sparql_url + "?format=json&query=";
+
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: source }, function (err, result) {
+            if (err) {
+                return callback(err);
+            }
+            var types = [];
+            result.results.bindings.forEach(function (item) {
+                var typeLabel = item.typeLabel ? item.typeLabel.value : Sparql_common.getLabelFromURI(item.type.value);
+                types.push({ id: item.type.value, label: typeLabel });
+            });
+            return callback(null, types);
         });
     };
 

@@ -73,7 +73,7 @@ var Config = (function () {
             type: "slsv:StoredGraph",
         },
     };
-
+    self.ontologyModelMaxClasses = 200; // max classes loaded in ontologyModel.classes  (if more not used)
     self.topLevelOntologies = {
         IDO: { uriPattern: "lis14", prefix: "ido", prefixtarget: "http://rds.posccaesar.org/ontology/lis14/rdl/" },
         "ISO_15926-part-14_PCA": { uriPattern: "lis14", prefix: "part14", prefixtarget: "http://rds.posccaesar.org/ontology/lis14/rdl/" },

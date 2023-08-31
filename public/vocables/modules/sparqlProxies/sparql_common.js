@@ -12,7 +12,7 @@ import Lineage_sources from "../tools/lineage/lineage_sources.js";
 
  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 var Sparql_common = (function () {
     var self = {};
     self.withoutImports = false;
@@ -69,6 +69,9 @@ var Sparql_common = (function () {
         if (!options) {
             options = {};
         }
+
+        options.useFilterKeyWord = 1; // !!!!Problems with values : ne ramene rien si des valeurs manquent
+
         var filter = ";";
 
         var varNames;
@@ -330,6 +333,9 @@ var Sparql_common = (function () {
     };
 
     self.getLabelFromURI = function (id) {
+        if (id.indexOf("_:") == 0)
+            // blank node
+            return "";
         const p = id.lastIndexOf("#");
         if (p > -1) {
             return id.substring(p + 1);
@@ -337,6 +343,18 @@ var Sparql_common = (function () {
             const p = id.lastIndexOf("/");
             return id.substring(p + 1);
         }
+    };
+
+    self.setFilterGraph = function (source, filter) {
+        var graphUri;
+        if (Config.basicVocabularies[source]) {
+            graphUri = Config.basicVocabularies[source].graphUri;
+        } else if (Config.sources[source]) {
+            graphUri = Config.sources[source].graphUri;
+        } else {
+            return filter;
+        }
+        return "GRAPH <" + graphUri + "> {" + filter + "}";
     };
 
     self.getFromStr = function (source, named, withoutImports, options) {
@@ -495,17 +513,108 @@ var Sparql_common = (function () {
         return null;
     };
 
+    self.setDateRangeSparqlFilter = function (varName, startDate, endDate, options) {
+        if (!options) {
+            options = {};
+        }
+
+        if (options.precision && !endDate) {
+            /*   if (options.precision == "day") {
+        endDate = new Date(startDate.setHours(23, 59, 59));
+        startDate.setHours(0, 0, 0, 0);
+      }
+      if (options.precision == "month") {
+        var daysInMonth = new Date(startDate.getYear(), startDate.getMonth(), 0).getDate();
+        endDate = new Date(startDate.setDate(daysInMonth));
+        startDate.setDate(1);
+      }
+      if (options.precision == "year") {
+
+        endDate = new Date(new Date(startDate.setMonth(11)).setDate(31));
+        startDate.setMonth(new Date(startDate.setMonth(11)).set(date(1)));
+      }
+
+      if (options.precision == "hour") {
+        endDate = new Date(new Date(startDate.setHours(startDate).getHours(), 59));
+        startDate.setHours(startDate.getHours(), 0);
+      }
+      if (options.precision == "min") {
+        endDate = new Date(startDate).setHours(startDate.getHours(), startDate.getMinutes(), 59);
+        startDate.setHours(startDate.getHours(), startDate.getMinutes(), 0);
+      }
+      if (options.precision == "sec") {;
+      }*/
+
+            endDate = new Date(startDate);
+            if (options.precision != "sec") {
+                //min
+                endDate.setHours(startDate.getHours(), startDate.getMinutes(), 59);
+                startDate.setHours(startDate.getHours(), startDate.getMinutes(), 0);
+
+                if (options.precision != "min") {
+                    //hour
+                    endDate.setHours(startDate.getHours(), 59);
+                    startDate.setHours(startDate.getHours(), 0);
+
+                    if (options.precision != "hour") {
+                        //day
+                        endDate.setHours(23, 59, 59);
+                        startDate.setHours(0, 0, 0, 0);
+
+                        if (options.precision != "day") {
+                            //month
+                            var daysInMonth = new Date(startDate.getYear(), startDate.getMonth(), 0).getDate();
+                            endDate.setDate(daysInMonth);
+                            startDate.setDate(1);
+                            if (options.precision != "month") {
+                                //year
+                                endDate.setMonth(11), endDate.setDate(31);
+                                startDate.setMonth(0), startDate.setDate(1);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        var startDateStr = "'" + common.dateToRDFString(startDate) + "'^^xsd:dateTime";
+        var endDateStr = "'" + common.dateToRDFString(endDate) + "'^^xsd:dateTime";
+        var filter = "";
+
+        if (startDate || endDate) {
+            filter += "?" + varName + "  owl:hasValue ?dateValue. ";
+            //  filter += "?" + varName + " ?d ?date.?date owl:hasValue ?dateValue. ";
+            if (startDate) {
+                filter += "filter(?dateValue>=" + startDateStr + ")";
+            }
+            if (endDate) {
+                filter += "filter(?dateValue<=" + endDateStr + ")";
+            }
+        }
+        return filter;
+    };
+
+    self.isTripleObjectString = function (property, object) {
+        if (property.toLowerCase().indexOf("label") > -1) {
+            return true;
+        }
+        if (property.toLowerCase().indexOf("definedby") > -1) {
+            return true;
+        }
+        if (property.toLowerCase().indexOf("comment") > -1) {
+            return true;
+        }
+        if (property.toLowerCase().indexOf("example") > -1) {
+            return true;
+        }
+        if (object && object.indexOf("http://") == 0) return false;
+        if (object && object.indexOf(":") > 2 && object.indexOf(":") < 5) return false;
+
+        return false;
+    };
+
     return self;
 })();
-
-/*
-var str="?prop rdfs:label ?propLabel} ?prop rdf:type rdf:ObjectProperty. ?value rdf:type ?valueType filter (?valueType in (owl:Class,owl:NamedIndividual))}}"
-var prefixes={
-    rdfs:"<http://www.w3.org/2000/01/rdf-schema#>",
-    rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>"
-}
-Sparql_common.replaceSparqlPrefixByUri(str,prefixes)
-*/
 
 export default Sparql_common;
 

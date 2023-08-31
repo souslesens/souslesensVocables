@@ -1,7 +1,7 @@
 import common from "../shared/common.js";
 import Lineage_containers from "./lineage/lineage_containers.js";
 
-import Lineage_classes from "./lineage/lineage_classes.js";
+import Lineage_whiteboard from "./lineage/lineage_whiteboard.js";
 import Export from "../shared/export.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
@@ -124,7 +124,7 @@ var Composer = (function () {
                 if (self.currentTreeNode.data.type == "container") {
                     Composer.drawDataContainerDetails(self.currentTreeNode, { onlyChildren: true });
                 } else {
-                    Lineage_classes.drawNodesAndParents(self.currentTreeNode, 0);
+                    Lineage_whiteboard.drawNodesAndParents(self.currentTreeNode, 0);
                 }
             },
         };
@@ -206,7 +206,6 @@ var Composer = (function () {
                 function (callbackSeries) {
                     visjsGraph.clearGraph();
                     var options = {
-                        skipColorGraphNodesByType: true,
                         physics: {
                             forceAtlas2Based: {
                                 centralGravity: 0.45,
@@ -216,15 +215,15 @@ var Composer = (function () {
                             minVelocity: 0.75,
                         },
                     };
-                    Lineage_classes.drawNewGraph({ nodes: [], edges: [] }, null, options);
+                    Lineage_whiteboard.drawNewGraph({ nodes: [], edges: [] }, null, options);
                     if (!self.graphButtonsInitialized) {
                         self.graphButtonsInitialized = 1;
                         var html =
                             "<div  style='position: absolute;top:30px;left:450px;'>" +
                             "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='visjsGraph.clearGraph()'> clear Graph</button>" +
                             "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='Export.exportGraphToDataTable()' > Export</button>" +
-                            '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.addNodesAndParentsToGraph()">Parents</button>' +
-                            '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.addChildrenToGraph()">Expand</button>' +
+                            '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()">Parents</button>' +
+                            '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand</button>' +
                             //   "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onClick='visjsGraph.showGraphConfig()'>Display</button>";
                             "</div>";
                         $("#centralPanelDiv").append(html);
@@ -262,7 +261,7 @@ var Composer = (function () {
                 //draw  parent containers
                 function (callbackSeries) {
                     return callbackSeries();
-                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], function (err, result) {
+                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], null, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -401,7 +400,7 @@ var Composer = (function () {
                     return callbackSeries();
                     var properties = ["rdfs:member"];
                     var options = { inversePredicate: 1 };
-                    Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
+                    Lineage_whiteboard.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
                         return callbackSeries(err);
                     });
                 },
@@ -409,7 +408,7 @@ var Composer = (function () {
                     return callbackSeries();
                     var properties = ["http://datalenergies.total.com/resource/tsf/idcp/mapsWith"];
                     var options = {};
-                    Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
+                    Lineage_whiteboard.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -777,7 +776,7 @@ var Composer = (function () {
 
         searchBO: function (origin) {
             if (origin == "graph") {
-                self.currentDataContainer = Lineage_classes.currentGraphNode;
+                self.currentDataContainer = Lineage_whiteboard.currentGraphNode;
             }
 
             var term = self.currentDataContainer.data.label;
@@ -1020,7 +1019,6 @@ var Composer = (function () {
                 function (callbackSeries) {
                     visjsGraph.clearGraph();
                     var options = {
-                        skipColorGraphNodesByType: true,
                         physics: {
                             forceAtlas2Based: {
                                 centralGravity: 0.45,
@@ -1030,15 +1028,15 @@ var Composer = (function () {
                             minVelocity: 0.75,
                         },
                     };
-                    Lineage_classes.drawNewGraph({ nodes: [], edges: [] }, null, options);
+                    Lineage_whiteboard.drawNewGraph({ nodes: [], edges: [] }, null, options);
                     if (!self.graphButtonsInitialized) {
                         self.graphButtonsInitialized = 1;
                         var html =
                             "<div  style='position: absolute;top:30px;left:450px;'>" +
                             "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='visjsGraph.clearGraph()'> clear Graph</button>" +
                             "<button  class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onclick='Export.exportGraphToDataTable()' > Export</button>" +
-                            '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.addNodesAndParentsToGraph()">Parents</button>' +
-                            '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_classes.addChildrenToGraph()">Expand</button>' +
+                            '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()">Parents</button>' +
+                            '<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand</button>' +
                             //   "<button class=\"btn btn-sm my-1 py-0 btn-outline-primary\" onClick='visjsGraph.showGraphConfig()'>Display</button>";
                             "</div>";
                         $("#centralPanelDiv").append(html);
@@ -1075,7 +1073,7 @@ var Composer = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], function (err, result) {
+                    Lineage_containers.graphWhiteboardNodesContainers(source, [self.currentTreeNode.id], null, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -1221,14 +1219,14 @@ var Composer = (function () {
                     return callbackSeries();
                     var properties = ["rdfs:member"];
                     var options = { inversePredicate: 1 };
-                    Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
+                    Lineage_whiteboard.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
                         return callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
                     var properties = ["http://datalenergies.total.com/resource/tsf/idcp/mapsWith"];
                     var options = {};
-                    Lineage_properties.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
+                    Lineage_whiteboard.drawPredicatesGraph(source, visjsNodes, properties, options, function (err, result) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -1307,7 +1305,7 @@ var Composer = (function () {
 
     self.getGraphPopupMenuItem = function () {
         var html =
-            ' <span  class="popupMenuItem" onclick="Lineage_classes.graphActions.showNodeInfos();"> Node infos</span>' +
+            ' <span  class="popupMenuItem" onclick="Lineage_whiteboard.graphActions.showNodeInfos();"> Node infos</span>' +
             '<span  class="popupMenuItem" onclick="Composer.commonJstreeActions.searchBO(\'graph\');"> Search BO</span>';
         return html;
     };

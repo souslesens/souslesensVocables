@@ -12,7 +12,10 @@
         <script src="./js/external/async.js" charset="utf-8"></script>
         <script src="./js/external/jsTree/jstree.js" charset="utf-8"></script>
 
-        <script type="text/javascript" src="./js/external/visjs/vis-network.min.js"></script>
+        <script src="js/external/visjs/vis-timeline.min.js"></script>
+        <link href="js/external/visjs/graph2d.min.css" rel="stylesheet" type="text/css" />
+
+        <script type="text/javascript" src="./js/external/visjs/vis-network.min.2.js"></script>
         <link href="js/external/visjs/vis-network.css" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
 
@@ -21,7 +24,6 @@
         <script src="js/external/sunburst.js"></script>
         <script src="js/external/d3/d3.js"></script>
 
-        <!-- <script src="js/external/websocket.js"></script>-->
         <script src="https://cdn.socket.io/4.6.0/socket.io.min.js" integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+" crossorigin="anonymous"></script>
 
         <script src="js/socketIoProxy.js"></script>
@@ -41,7 +43,7 @@
         <!-- <script type="module" src="modules/tools/sourceBrowser.js"></script>-->
 
         <script type="module" src="modules/tools/SPARQL_endpoint.js"></script>
-        <script type="module" src="modules/tools/lineage/lineage_classes.js"></script>
+        <script type="module" src="modules/tools/lineage/lineage_whiteboard.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_sources.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_properties.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_common.js"></script>
@@ -76,6 +78,13 @@
         <script type="module" src="modules/uiWidgets/searchWidget.js"></script>
         <script type="module" src="modules/uiWidgets/graphDecorationWidget.js"></script>
         <script type="module" src="modules/uiWidgets/legendWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/containerSearchWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/dateWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/popupMenuWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/KGqueryWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/individualValuefilterWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/individualAggregateWidget.js"></script>
+        <script type="module" src="modules/uiWidgets/simpleListSelectorWidget.js"></script>
 
         <script type="module" src="modules/tools/lineage/lineage_rules.js"></script>
 
@@ -240,7 +249,7 @@
                         autoOpen: false,
                         height: 500,
                         width: 700,
-                        modal: true,
+                        modal: false,
                     });
 
                     $(document).on("click", "a", function () {
@@ -310,7 +319,7 @@
                 border: 2px solid #ddd;
             }
 
-            #graphPopupDiv {
+            .popupMenuWidgetDiv {
                 z-index: 20;
                 position: absolute;
                 flex-direction: column;
@@ -443,6 +452,19 @@
                 border: #e1d9bf solid 1px !important;
 
             }
+
+            .legend_colorDiv {
+                width: 30px;
+                height: 20px;
+                border-radius: 3px;
+                margin: 3px;
+            }
+                .legend_itemDiv{
+                    display: flex;flex-direction: row;
+                    border-width: 1px ;
+                    border-style: solid ;
+                    border-color: #b8a587
+                }
         </style>
     </head>
     <body>
@@ -509,7 +531,7 @@
                     </div>
                     <div id="rightPanelDivInner" style="display: flex; flex-direction: column"></div>
                 </div>
-                <div id="graphPopupDiv" onclick="MainController.UI.hidePopup('graphPopupDiv');"></div>
+                <div id="popupMenuWidgetDiv" onclick="  PopupMenuWidget.hidePopup('popupMenuWidgetDiv');"></div>
             </div>
         </div>
         <div id="loginDiv" style="position: absolute; visibility: hidden; display: flex; justify-content: center; align-items: center">

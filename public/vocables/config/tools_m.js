@@ -1,4 +1,4 @@
-import Lineage_classes from "../modules/tools/lineage/lineage_classes.js";
+import Lineage_whiteboard from "../modules/tools/lineage/lineage_whiteboard.js";
 import KGcreator from "../modules/tools/KGcreator.js";
 import Standardizer from "../modules/tools/Standardizer.js";
 import Lineage_dictionary from "../modules/tools/lineage/lineage_dictionary.js";
@@ -9,7 +9,7 @@ import Idcp from "../modules/tools/TSF_plugins/IDCP.js";
 
 var Tools = {};
 
-Tools["lineage"] = { label: "Lineage", noSource: 0, controller: Lineage_classes, toolDescriptionImg: null }; //"images/taxonomy.png"}
+Tools["lineage"] = { label: "Lineage", noSource: 0, controller: Lineage_whiteboard, toolDescriptionImg: null }; //"images/taxonomy.png"}
 Tools["KGcreator"] = {
     label: "KGcreator",
     noSource: 1,

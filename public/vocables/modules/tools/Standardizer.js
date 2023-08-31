@@ -5,7 +5,7 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 import Lineage_dictionary from "./lineage/lineage_dictionary.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import visjsGraph from "../graph/visjsGraph2.js";
-import Lineage_classes from "./lineage/lineage_classes.js";
+import Lineage_whiteboard from "./lineage/lineage_whiteboard.js";
 import Export from "../shared/export.js";
 import Lineage_blend from "./lineage/lineage_blend.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
@@ -1012,7 +1012,7 @@ setTimeout(function () {
                                     id: item.id,
                                     label: item.name || Sparql_common.getLabelFromURI(item.id),
                                     level: level,
-                                    color: Lineage_classes.getSourceColor(item.index),
+                                    color: Lineage_whiteboard.getSourceColor(item.index),
                                     shape: "box",
                                     //  fixed:{x:false, y:true},
 
@@ -1309,7 +1309,7 @@ setTimeout(function () {
                     for (var key in nodes) {
                         var node = nodes[key];
 
-                        var color = Lineage_classes.getSourceColor(node.index);
+                        var color = Lineage_whiteboard.getSourceColor(node.index);
 
                         if (!existingNodes[node.index]) {
                             existingNodes[node.index] = 1;
@@ -1645,7 +1645,7 @@ sortMethod: "hubsize",
                             render: function (datum, type, row) {
                                 var indexStr = row[0];
                                 if (indexStr.length > 25) indexStr = indexStr.substring(0, 25);
-                                return "<span style='width:100px;background-color: " + Lineage_classes.getSourceColor(row[0]) + ";' class='standardizer_entitySource'>" + indexStr + "</span>";
+                                return "<span style='width:100px;background-color: " + Lineage_whiteboard.getSourceColor(row[0]) + ";' class='standardizer_entitySource'>" + indexStr + "</span>";
                             },
                         });
                         cols.push({ title: "word", defaultContent: "", width: "150px" });

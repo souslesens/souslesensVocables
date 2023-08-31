@@ -1,6 +1,10 @@
 import common from "../shared/common.js";
 import KGcreator from "../tools/KGcreator.js";
 import PromptedSelectWidget from "./promptedSelectWidget.js";
+import OntologyModels from "../shared/ontologyModels.js";
+import DateWidget from "./dateWidget.js";
+import Sparql_common from "../sparqlProxies/sparql_common.js";
+import IndividualValueFilterWidget from "./individualValuefilterWidget.js";
 
 var PredicatesSelectorWidget = (function () {
     var self = {};
@@ -84,7 +88,7 @@ var PredicatesSelectorWidget = (function () {
             properties.push({ label: "-------", id: "" });
             common.fillSelectOptions(selectId, properties, true, "label", "id");
         } else if (Config.ontologiesVocabularyModels[vocabulary]) {
-            properties = Config.ontologiesVocabularyModels[vocabulary].properties;
+            properties = OntologyModels.getPropertiesArray(vocabulary);
             common.fillSelectOptions(selectId, properties, true, "label", "id");
         } else {
             return PromptedSelectWidget.prompt("owl:ObjectProperty", "editPredicate_currentVocabPredicateSelect", vocabulary);
@@ -95,7 +99,8 @@ var PredicatesSelectorWidget = (function () {
         $("#editPredicate_objectSelect").val("");
         $("#editPredicate_objectValue").val("");
         $("#editPredicate_propertyValue").val(value);
-        common.unsetDatePickerOnInput("editPredicate_objectValue");
+        $("#editPredicate_vocabularySelect2").css("display", "block");
+        DateWidget.unsetDatePickerOnInput("editPredicate_objectValue");
         if (self.onSelectPropertyFn) {
             self.onSelectPropertyFn(value);
         }
@@ -103,25 +108,31 @@ var PredicatesSelectorWidget = (function () {
             String: ["contains", "not contains", "="],
             Number: ["=", "!=", "<", "<=", ">", ">="],
         };
+
         if (value.indexOf("xsd:") > -1) {
             $("#editPredicate_vocabularySelect2").css("display", "none");
             if (value == "xsd:dateTime") {
                 common.fillSelectOptions("editPredicate_objectSelect", self.operators.Number);
-                common.setDatePickerOnInput("editPredicate_objectValue");
+                DateWidget.setDatePickerOnInput("editPredicate_objectValue");
             } else if (value == "xsd:string") {
                 common.fillSelectOptions("editPredicate_objectSelect", self.operators.String);
             } else {
-                common.fillSelectOptions("editPredicate_objectSelect", self.operators.String);
+                common.fillSelectOptions("editPredicate_objectSelect", self.operators["Number"]);
             }
+        } else if (Sparql_common.isTripleObjectString(value)) {
+            $("#editPredicate_vocabularySelect2").css("display", "none");
+            common.fillSelectOptions("editPredicate_objectSelect", self.operators.String);
         } else {
             $("#editPredicate_vocabularySelect2").css("display", "block");
             $("#editPredicate_vocabularySelect2").val("usual");
             self.setCurrentVocabClassesSelect("usual", "editPredicate_objectSelect");
         }
-        ("");
     };
 
     self.onSelectCurrentVocabObject = function (value) {
+        if (value == "_searchClass") {
+            return PromptedSelectWidget.prompt("owl:Class", "editPredicate_objectSelect", self.currentVocabulary);
+        }
         if (value == "_search") {
             return PromptedSelectWidget.prompt(null, "editPredicate_objectSelect", self.currentVocabulary);
         }
@@ -143,36 +154,19 @@ var PredicatesSelectorWidget = (function () {
                 });
             });
             common.fillSelectOptions(selectId, classes, true, "label", "id");
-        } else if (Config.ontologiesVocabularyModels[vocabulary]) {
-            var classes = [{ id: "_search", label: "search..." }];
-
-            var uniqueClasses = {};
-            for (var key in Config.ontologiesVocabularyModels[vocabulary].classes) {
-                if (!uniqueClasses[key]) {
-                    uniqueClasses[key] = 1;
-                    classes.push(Config.ontologiesVocabularyModels[vocabulary].classes[key]);
-                }
-            }
-
-            var restrictionsRanges = [];
-
-            for (var key in Config.ontologiesVocabularyModels[vocabulary].restrictions) {
-                var restrictions = Config.ontologiesVocabularyModels[vocabulary].restrictions[key];
-                restrictions.forEach(function (restriction) {
-                    if (!uniqueClasses[restriction.range]) {
-                        uniqueClasses[restriction.range] = 1;
-                        restrictionsRanges.push({
-                            id: restriction.range,
-                            label: restriction.rangeLabel,
-                        });
-                    }
+        } else if (Config.ontologiesVocabularyModels[vocabulary] && Config.ontologiesVocabularyModels[vocabulary].classesCount <= Config.ontologyModelMaxClasses) {
+            var classes = [];
+            for (var classId in Config.ontologiesVocabularyModels[vocabulary].classes) {
+                var classObj = Config.ontologiesVocabularyModels[vocabulary].classes[classId];
+                classes.push({
+                    id: classObj.id,
+                    label: classObj.label,
                 });
             }
 
-            classes = classes.concat(restrictionsRanges);
-            classes = common.array.sort(classes, "label");
             common.fillSelectOptions(selectId, classes, true, "label", "id");
         } else {
+            //PromptedSelectWidget
             return PromptedSelectWidget.prompt("owl:Class", "editPredicate_objectSelect", vocabulary);
         }
     };
@@ -184,8 +178,11 @@ var PredicatesSelectorWidget = (function () {
             // get operator
             return "owl:hasValue";
         } else {
-            if (property.indexOf("http") == 0) return "<" + property + ">";
-            else return property;
+            if (property.indexOf("http") == 0) {
+                return "<" + property + ">";
+            } else {
+                return property;
+            }
         }
     };
     self.getSelectedObjectValue = function () {
@@ -212,6 +209,17 @@ var PredicatesSelectorWidget = (function () {
             return $("#editPredicate_objectSelect").val();
         }
         return null;
+    };
+
+    self.getSparqlFilter = function () {
+        var property = self.getSelectedProperty();
+        var value = self.getSelectedObjectValue();
+        var operator = self.getSelectedOperator();
+        var operator = null;
+        if (Sparql_common.isTripleObjectString(property, value)) {
+            operator = $("#editPredicate_objectSelect").val();
+        }
+        IndividualValueFilterWidget.getSparqlFilter(varName, property, operator, value);
     };
 
     return self;

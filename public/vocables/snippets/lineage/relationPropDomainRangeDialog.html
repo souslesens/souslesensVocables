@@ -1,35 +1,86 @@
 <div id="lineageRelations_resourcesTab">
     <div class="lineageRelations_div" style="display: flex; flex-direction: column; justify-content: space-between">
         <div style="display: flex; flex-direction: row; justify-content: space-evenly; padding: 5px; margin: 5px">
-            <div>
-                <select id="lineage_relationIndividuals_filterRoleSelect" style="overflow-y: auto; width: 150px; text-align: center" size="2"></select>
-            </div>
-
-            <div style="display: flex; flex-direction: column">
+            <div id="lineage_relationIndividuals_LeftDiv" style="display: flex; flex-direction: column; align-items: center">
                 <div>
-                    label <input id="lineage_relationIndividuals_searchTermInput" style="width: 100px" value="" />
-                    <!-- <button class="btn btn-sm my-1 py-0 btn-outline-primary"
-        onclick="Lineage_relationIndividualsFilter.searchClassIndividuals()">Search
-  </button>-->
+                    <div>Class</div>
+                    <select id="lineage_relationIndividuals_filterRoleSelect" style="overflow-y: auto; width: 150px; text-align: center" size="2"></select>
                 </div>
                 <div>
-                    <select id="lineage_relationIndividuals_matchesSelect" size="10" style="width: 250px" onclick="Lineage_relationIndividualsFilter.addIndividualFilter()"></select>
+                    <div>Filter type</div>
+                    <select id="lineage_relationIndividuals_filterTypeSelect" size="5" onclick="Lineage_relationIndividualsFilter.onFilterTypeSelect($(this).val())">
+                        <option value="searchLabel">search by label</option>
+                        <option value="date">date</option>
+                        <option value="dateRange">date range</option>
+                        <option>advanced</option>
+                    </select>
                 </div>
             </div>
 
-            <div>
-                Date Range
-                <br />
-                <input id="lineage_relationIndividuals_dateRangPicker" value="" style="width: 150px" />
-            </div>
-        </div>
+            <div style="display: flex; flex-direction: column" id="lineage_relationIndividuals_filterDiv">
+                <div class="lineage_relationIndividuals_filterTypeDiv filterTypeDiv_searchLabel" style="display: flex; flex-direction: column">
+                    <div id="lineage_relationIndividuals_matchesContainerDiv" size="10" style="width: 350px; height: 220px; overflow: auto">
+                        <div id="lineage_relationIndividuals_matchesTreeDiv"></div>
+                    </div>
 
-        <div style="display: flex; flex-direction: row; justify-content: space-evenly; padding: 5px; margin: 5px">
-            <div></div>
+                    <div><button onclick="Lineage_relationIndividualsFilter.addIndividualFilter()">Set filter</button></div>
+                </div>
+
+                <div class="lineage_relationIndividuals_filterTypeDiv filterTypeDiv_dateRange">
+                    Date Range
+                    <br />
+                    <input id="lineage_relationIndividuals_dateRangePicker" value="calendar" style="width: 150px; height: 20px" />
+                </div>
+
+                <div class="lineage_relationIndividuals_filterTypeDiv filterTypeDiv_date">
+                    Date
+
+                    <input id="lineage_relationIndividuals_datePicker" value="calendar" style="width: 150px; height: 20px" />
+                    <br />
+                    precision<select id="lineage_relationIndividuals_datePrecision" value="" style="width: 150px" size="6" onclick="Lineage_relationIndividualsFilter.setDateFilter($(this).val())">
+                        <option>day</option>
+                        <option>month</option>
+                        <option>year</option>
+                        <option>hour</option>
+                        <option>min</option>
+                        <option>sec</option>
+                    </select>
+                </div>
+
+                <div class="lineage_relationIndividuals_filterTypeDiv filterTypeDiv_advanced"></div>
+            </div>
+
+            <div class="lineage_relationIndividuals_filterTypeDiv filterTypeDiv_advanced">
+                <div class="lineageRelations_div" style="display: flex; flex-direction: column; justify-content: space-between; margin: 1px; border: none">
+                    <div style="display: flex; flex-direction: column; align-items: flex-start">
+                        <div>
+                            <b>Role</b> <br />
+                            <select
+                                id="lineage_relation_filterRoleSelect2"
+                                style="overflow-y: auto; width: 150px; text-align: center"
+                                size="2"
+                                onclick="Lineage_relationFilter.onSelectRoleType($(this).val())"
+                            >
+                                <option selected="selected">subject</option>
+                                <option>object</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="lineage_relation_predicateSelectorDiv"></div>
+                    <div>
+                        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_relationFilter.addFilter()">Add filter</button>
+                    </div>
+                    <!--   <textarea id="Lineage_relation_filterText2" style="width: 300px; background-color: #ddd; height: 100px; margin: 10px"></textarea>-->
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: row; justify-content: space-evenly; padding: 5px; margin: 5px">
+                <div></div>
+            </div>
         </div>
     </div>
     <div>
-        <textarea id="lineage_relationIndividuals_fitlerTA" style="padding: 5px; margin: 5px; width: 600px; height: 50px"></textarea>
+        <textarea id="lineage_relationIndividuals_filterTA" style="padding: 5px; margin: 5px; width: 600px; height: 50px"></textarea>
     </div>
     <div style="padding: 5px; margin: 5px; width: 300px">
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_relationIndividualsFilter.execFilter('graph')">Draw</button>
@@ -38,65 +89,3 @@
         <button onclick='$("#smallDialogDiv").dialog("close")'>Cancel</button>
     </div>
 </div>
-
-<!--<div id="lineageRelations_resourcesTab">
-<div class="lineageRelations_div" style="display: flex; flex-direction: row; justify-content: space-between">
-<div style="display: flex; flex-direction: column; align-items: center">
-  <b>Role</b> <br />
-  <select id="lineage_relation_filterRoleSelect" style="overflow-y: auto; width: 150px; text-align: center"
-          size="2" onclick="Lineage_relationFilter.onSelectRoleType($(this).val())">
-    <option>subject</option>
-    <option>object</option>
-  </select>
-  <br />
-  <b>Type</b>
-  <br />
-  <select
-    id="Lineage_relation_filterTypeSelect"
-    style="overflow-y: auto; width: 150px; text-align: center"
-    size="10"
-    onclick="Lineage_relationFilter.onSelectResourceType($(this).val())"
-  ></select>
-</div>
-<div style="display: flex; flex-direction: column; justify-content: space-between; margin: 10px">
-  <div id="Lineage_relation_filterValueDiv">
-    <div class="lineageRelations_divX" style="display: none; width: 200px" id="lineageQuery_uriValueDiv" ;>
-      <select id="Lineage_relation_filterVocabularySelect"
-              onchange="Lineage_relationFilter.onSelectResource($(this).val())"></select>
-      <select id="Lineage_relation_filterResourcesSelect" style="width: 200px"></select>
-    </div>
-
-    <div class="lineageRelations_divX" style="display: none" id="lineageQuery_literalValueDiv">
-      <select id="lineageQuery_operator"></select>
-      <input id="lineageQuery_value" size="20" value="" />
-    </div>
-    <div>
-      <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="lineageQuery_addFilterButton"
-              onclick="Lineage_relationFilter.addFilter()">Add filter
-      </button>
-    </div>
-    <textarea id="Lineage_relation_filterText"
-              style="width: 300px; background-color: #ddd; height: 100px; margin: 10px"></textarea>
-  </div>
-</div>
-</div>
-
--->
-
-<!--<div class="lineageRelations_div" style="display: flex; flex-direction: column; justify-content: space-between">
-<div style="display: flex; flex-direction: column; align-items: flex-start;">
-<div>
-  <b>Role</b> <br />
-  <select id="lineage_relation_filterDomainRangeRoleSelect" style="overflow-y: auto; width: 150px; text-align: center" size="2" >
-    <option>Domain</option>
-    <option>Range</option>
-  </select>
-</div>
-</div>
-<div id="lineage_relation_predicateSelectorDomainRangeDiv"> </div>
-<div >
-<textarea id="lineage_relation_filterDomainRangeTA" style="width:300px;height: 200px;background-color: beige"></textarea>
-</div>
-<button onclick='$("#smallDialogDiv").dialog("close")'>Skip</button>
-<button onclick='Lineage_relations.addRangeAndDomainFilter()'>Skip</button>
-</div>-->

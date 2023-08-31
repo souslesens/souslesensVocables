@@ -3,7 +3,7 @@ import common from "../../shared/common.js";
 import SearchUtil from "../../search/searchUtil.js";
 
 self.lineageVisjsGraph;
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_sources from "./lineage_sources.js";
 
 var Lineage_similars = (function () {
@@ -98,7 +98,7 @@ var Lineage_similars = (function () {
                     if (err) {
                         return alert(err.reason);
                     }
-                    var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+                    var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
                     var visjsData = { nodes: [], edges: [] };
                     for (var label in whiteboardLabelsMap) {
@@ -110,9 +110,9 @@ var Lineage_similars = (function () {
                                 visjsData.nodes.push({
                                     id: similar.id,
                                     label: similar.label,
-                                    shape: Lineage_classes.defaultShape,
-                                    color: Lineage_classes.getSourceColor(source),
-                                    size: Lineage_classes.defaultShapeSize,
+                                    shape: Lineage_whiteboard.defaultShape,
+                                    color: Lineage_whiteboard.getSourceColor(source),
+                                    size: Lineage_whiteboard.defaultShapeSize,
                                     data: {
                                         id: similar.id,
                                         label: similar.label,
@@ -157,8 +157,8 @@ var Lineage_similars = (function () {
                     if (visjsData.edges.length == 0) {
                         return alert("no similars found in source " + source);
                     }
-                    Lineage_classes.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
-                    Lineage_classes.lineageVisjsGraph.data.edges.update(visjsData.edges);
+                    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
+                    Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
                 }
             );
         });
@@ -166,11 +166,11 @@ var Lineage_similars = (function () {
     self.getStartingNodes = function () {
         var nodes = null;
         var selectMode = $("#lineageSimilars_fromSelect").val();
-        if (selectMode == "AllWhiteboardNodes") return Lineage_classes.lineageVisjsGraph.data.nodes.get();
+        if (selectMode == "AllWhiteboardNodes") return Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
     };
     self.drawWhiteBoardSimilars = function (output) {
         var commonNodes = [];
-        var existingNodes = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+        var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
         var nodes = self.getStartingNodes();
         if (!nodes) return alert("no nodes to process");
@@ -230,7 +230,7 @@ var Lineage_similars = (function () {
                     });
                 }
             });
-            Lineage_classes.lineageVisjsGraph.data.edges.update(visjsData.edges);
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
         }
     };
 

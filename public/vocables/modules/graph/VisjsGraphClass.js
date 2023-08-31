@@ -3,6 +3,12 @@ import SVGexport from "./SVGexport.js";
 import GraphMlExport from "./graphMLexport.js";
 
 const VisjsGraphClass = function (graphDiv, data, options) {
+    if (!options) {
+        options = {};
+    }
+    if (!options.visjsOptions) {
+        options.visjsOptions = {};
+    }
     this.graphDiv = graphDiv;
     this.data = data;
     this.options = options;
@@ -21,7 +27,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
     self.showNodesLabelMinScale = 0.5;
     self.currentContext;
     self.drawingDone = false;
-    self.skipColorGraphNodesByType = false;
     var lastClickTime = new Date();
     var dbleClickIntervalDuration = 500;
 
@@ -94,10 +99,6 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             $("#visjsGraph_layoutSelect").val("");
         }
 
-        if (_options.skipColorGraphNodesByType) {
-            self.skipColorGraphNodesByType = true;
-        }
-
         self.globalOptions = options;
 
         self.network = new vis.Network(container, self.data, options.visjsOptions);
@@ -136,7 +137,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         self.network
             .on("click", function (/** @type {{ pointer: { DOM: { x: any; y: any; }; }; }} */ params) {
                 // eslint-disable-next-line no-console
-                console.log(self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y));
+                //  console.log(self.network.getNodeAt(params.pointer.DOM.x, params.pointer.DOM.y));
                 self.processClicks(params, _options);
             })
             .on("hoverNode", function (/** @type {{ node: any; pointer: { DOM: any; }; }} */ params) {
@@ -163,7 +164,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 }
             })
             .on("blurNode", function (/** @type {any} */ _params) {
-                // $("#graphPopupDiv").css("display", "none")
+                // $("#popupMenuWidgetDiv").css("display", "none")
             })
             .on("zoom", function (/** @type {any} */ _params) {
                 self.onScaleChange();
@@ -194,7 +195,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 var newNodes = [];
                 var fixed = false;
                 /*  if (params.event.srcEvent.altKey)
-      fixed = false;*/
+    fixed = false;*/
                 newNodes.push({ id: nodeId, fixed: fixed });
                 self.data.nodes.update(newNodes);
             })
@@ -203,8 +204,8 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             })
             .on("dragging", function (_params) {
                 /* if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
-return false;
-}*/
+    return false;
+    }*/
             })
             .on("dragEnd", function (/** @type {{ event: { srcEvent: { ctrlKey: any; altKey: any; }; }; pointer: { DOM: any; }; nodes: string | any[]; }} */ params) {
                 if (params.event.srcEvent.ctrlKey && options.dndCtrlFn) {
@@ -220,7 +221,7 @@ return false;
 
                 if (params.nodes.length == 1) {
                     /* if (true || (!params.event.srcEvent.ctrlKey && !self.currentContext.options.keepNodePositionOnDrag))
-     return;*/
+    return;*/
 
                     var nodeId = params.nodes[0];
 
@@ -552,9 +553,9 @@ return false;
                     }
                 }
                 /* if(includeParents && edge.to == nodeId){
-     nodes.push(edge.from)
-     recurse(edge.from)
- }*/
+    nodes.push(edge.from)
+    recurse(edge.from)
+    }*/
             });
         }
 
@@ -910,7 +911,7 @@ return false;
                     self.message("");
                 } else {
                     //functions
-                    var context = JSON.parse(JSON.stringify(data.context).replace(/self./g, "Lineage_classes."));
+                    var context = JSON.parse(JSON.stringify(data.context).replace(/self./g, "Lineage_whiteboard."));
                     //  var context = data.context
 
                     for (var key in context.options) {
@@ -1006,5 +1007,4 @@ return false;
         }, 500);
     };
 };
-
 export default VisjsGraphClass;

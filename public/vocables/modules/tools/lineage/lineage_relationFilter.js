@@ -37,7 +37,7 @@ var Lineage_relationFilter = (function () {
         $("#lineageRelations_filterDiv").css("display", "flex");
 
         /* $("#mainDialogDiv").dialog("open");
- $("#mainDialogDiv").load("snippets/lineage/relationsDialogFilter.html", function() {*/
+$("#mainDialogDiv").load("snippets/lineage/relationsDialogFilter.html", function() {*/
 
         self.domainValue = "";
         self.rangeValue = "";
@@ -146,64 +146,66 @@ var Lineage_relationFilter = (function () {
         }
     };
 
-    self.onSelectResourceType = function (type) {
-        var role = self.currentResourceFilterRole;
-        $("#lineageQuery_value").datepicker("destroy");
-        $("#lineageQuery_value").val("");
+    /* self.onSelectResourceType = function(type) {
+    var role = self.currentResourceFilterRole;
+    $("#lineageQuery_value").datepicker("destroy");
+    $("#lineageQuery_value").val("");
 
-        $("#lineageQuery_literalValueDiv").css("display", "none");
-        $("#lineageQuery_literalValueDiv").css("display", "none");
-        $("#lineageQuery_addFilterButton").removeProp("disabled");
+    $("#lineageQuery_literalValueDiv").css("display", "none");
+    $("#lineageQuery_literalValueDiv").css("display", "none");
+    $("#lineageQuery_addFilterButton").removeProp("disabled");
 
-        if (type == "String") {
-            $("#lineageQuery_literalValueDiv").css("display", "block");
-            common.fillSelectOptions("lineageQuery_operator", self.operators["String"]);
-            $("#lineageQuery_operator").val("contains");
-        } else if (type == "Date") {
-            $("#lineageQuery_literalValueDiv").css("display", "block");
-            common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
-            common.setDatePickerOnInput("lineageQuery_value");
-            $("#lineageQuery_operator").val(">=");
-        } else if (type == "Number") {
-            $("#lineageQuery_literalValueDiv").css("display", "block");
-            common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
-            $("#lineageQuery_operator").val(">=");
-        } else if (self.currentProperty && restrictions[self.currentProperty.id]) {
-            $("#lineageQuery_uriValueDiv").css("display", "block");
-            common.fillSelectOptions("Lineage_relation_filterVocabularySelect", [], false);
+    if (type == "String") {
+      $("#lineageQuery_literalValueDiv").css("display", "block");
+      common.fillSelectOptions("lineageQuery_operator", self.operators["String"]);
+      $("#lineageQuery_operator").val("contains");
+    }
+    else if (type == "Date") {
+      $("#lineageQuery_literalValueDiv").css("display", "block");
+      common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
+      dateWidget.setDatePickerOnInput("lineageQuery_value");
+      $("#lineageQuery_operator").val(">=");
+    }
+    else if (type.indexOf("xsd:")==0) {
 
-            common.fillSelectOptions("Lineage_relation_filterResourcesSelect", self.domain, true, "label", "id");
-        } else {
-            $("#lineageQuery_uriValueDiv").css("display", "block");
-            var scopes = [];
-            if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
-                scopes.push("whiteBoardNodes");
-            }
-            scopes.push(Lineage_sources.activeSource);
-            var imports = Config.sources[Lineage_sources.activeSource].imports;
-            if (imports) {
-                scopes = scopes.concat(imports);
-            }
+      $("#lineageQuery_literalValueDiv").css("display", "block");
+      if(type=="xsd:string")
+      common.fillSelectOptions("lineageQuery_operator", self.operators["String"]);
+      else
+        common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
+      $("#lineageQuery_operator").val(">=");
+    }
+    else if (type == "Number") {
+      $("#lineageQuery_literalValueDiv").css("display", "block");
+      common.fillSelectOptions("lineageQuery_operator", self.operators["Number"]);
+      $("#lineageQuery_operator").val(">=");
+    }
+    else if (self.currentProperty && restrictions[self.currentProperty.id]) {
+      $("#lineageQuery_uriValueDiv").css("display", "block");
+      common.fillSelectOptions("Lineage_relation_filterVocabularySelect", [], false);
 
-            common.fillSelectOptions("Lineage_relation_filterVocabularySelect", scopes, true);
-        }
-    };
+      common.fillSelectOptions("Lineage_relation_filterResourcesSelect", self.domain, true, "label", "id");
+    }
+    else {
+      $("#lineageQuery_uriValueDiv").css("display", "block");
+      var scopes = [];
+      if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+        scopes.push("whiteBoardNodes");
+      }
+      scopes.push(Lineage_sources.activeSource);
+      var imports = Config.sources[Lineage_sources.activeSource].imports;
+      if (imports) {
+        scopes = scopes.concat(imports);
+      }
 
-    self.onSelectResource = function (type) {
-        var role = self.currentResourceFilterRole;
-        var resourceType = $("#Lineage_relation_filterTypeSelect").val();
-        if (type == "whiteBoardNodes") {
-        } else {
-            //  if (resourceType == "owl:Class") {
-            PromptedSelectWidget.prompt(null, "Lineage_relation_filterResourcesSelect", type);
-            //  }
-        }
-    };
+      common.fillSelectOptions("Lineage_relation_filterVocabularySelect", scopes, true);
+    }
+  };*/
 
     self.onCommonUIWidgetSelectObjectValue = function (value) {
         if (value.indexOf("xsd") == 0) {
             if (value == "xsd:dateTime") {
-                common.setDatePickerOnInput("editPredicate_objectValue");
+                dateWidget.setDatePickerOnInput("editPredicate_objectValue");
             } else {
                 $("#editPredicate_objectValue").val(value);
             }
@@ -212,102 +214,20 @@ var Lineage_relationFilter = (function () {
     };
 
     self.addFilter = function () {
-        function getLiteralValueFilter() {
-            var filterIndex = "";
-            var operator = $("#lineageQuery_operator").val();
-            var value = $("#lineageQuery_value").val();
-            var type = $("#Lineage_relation_filterTypeSelect").val();
-            var objectFilterStr = "";
-            if (type == "String") {
-                if (operator == "contains") {
-                    objectFilterStr += "?object ?p ?q. Filter(regex(str(?q" + filterIndex + "),'" + value + "','i')).";
-                } else if (operator == "not contains") {
-                    objectFilterStr += "Filter( ! regex(str(?object" + filterIndex + "),'" + value + "','i')).";
-                } else {
-                    objectFilterStr += " Filter(?object" + filterIndex + "" + operator + "'" + value + "').";
-                }
-            } else if (type == "Number") {
-                objectFilterStr += "  Filter(?object" + filterIndex + operator + "'" + value + "'^^xsd:float).";
-            } else if (type == "Date") {
-                objectFilterStr += " bind (?object as ?date) Filter( ?date " + filterIndex + operator + "'" + value + "'^^xsd:dateTime).";
-            }
-
-            return objectFilterStr;
-        }
-
-        var role = self.currentResourceFilterRole;
-        var resourceType = $("#Lineage_relation_filterTypeSelect").val();
-        var resource = $("#Lineage_relation_filterResourcesSelect").val();
-
-        var filter = {};
-        if (!resourceType) {
-            return alert("no filter defined");
-        }
-        if (resourceType == "whiteBoardNodes") {
-            var nodeIds = Lineage_classes.lineageVisjsGraph.data.nodes.getIds();
-            if (role == "subject") {
-                filter.filterStr = " ?subject rdf:type " + resourceType + ". ";
-                filter.subjectIds = nodeIds;
-            } else if (role == "object") {
-                filter.filterStr = " ?object rdf:type " + resourceType + ". ";
-                filter.objectIds = nodeIds;
-            }
-        } else {
-            if (resourceType == "String") {
-                filter.filterStr = getLiteralValueFilter();
-            } else if (resourceType == "Date") {
-                filter.filterStr = getLiteralValueFilter();
-            } else if (resourceType == "Number") {
-                filter.filterStr = getLiteralValueFilter();
-            } else {
-                if (role == "subject") {
-                    if (!resource) {
-                        filter.filterStr = " ?subject rdf:type " + resourceType + ". ";
-                    } else {
-                        filter.filterStr = " ?subject rdf:type|rdfs:subClassOf <" + resource + "> ";
-                    }
-                } else if (role == "object") {
-                    if (!resource) {
-                        filter.filterStr = " ?object rdf:type " + resourceType + ". ";
-                    } else {
-                        filter.filterStr = " ?object rdf:type|rdfs:subClassOf <" + resource + "> ";
-                    }
-                }
-            }
-        }
-
-        Lineage_relations.filter = filter.filterStr;
-        var text = $("#Lineage_relation_filterText").val();
-        $("#Lineage_relation_filterText").css("display", "block");
-        $("#Lineage_relation_filterText").val(text + filter.filterStr + "\n");
-    };
-
-    self.addPredicateSelectorFilter = function () {
-        var filter = {};
-        var role = self.currentResourceFilterRole;
-        if (!role) {
-            return alert("select a role to assign the filter");
-        }
+        var role = $("#lineage_relation_filterRoleSelect2").val();
+        if (!role) role = "subject";
         var property = PredicatesSelectorWidget.getSelectedProperty();
-        var value = PredicatesSelectorWidget.getSelectedObjectValue();
-        var operator = PredicatesSelectorWidget.getSelectedOperator();
-        if (!property || !value) {
+
+        var filter = PredicatesSelectorWidget.getSparqlFilter(role);
+
+        if (!filter) {
             return alert("select a property and  an object");
         }
 
-        var objectFilterStr = "";
-        if (value.indexOf("xsd:dateTime") > -1) {
-            objectFilterStr = "?" + self.currentResourceFilterRole + "  owl:hasValue ?value  filter(    datatype(?value) = xsd:dateTime" + " && ?value" + operator + value + ")";
-        } else if (value.indexOf("xsd:") > -1) {
-            objectFilterStr = "?" + self.currentResourceFilterRole + "  owl:hasValue ?value  filter(  ?value" + operator + value + ")";
-        } else {
-            var objectFilterStr = "?" + self.currentResourceFilterRole + " " + property + " " + value;
-        }
-        filter.filterStr = objectFilterStr;
-        var text = $("#Lineage_relation_filterText").val();
-        $("#Lineage_relation_filterText2").css("display", "block");
-        $("#Lineage_relation_filterText2").val(text + filter.filterStr);
+        var text = $("#lineage_relationIndividuals_filterTA").val();
+        $("#lineage_relationIndividuals_filterTA").val(text + filter);
     };
+
     return self;
 })();
 

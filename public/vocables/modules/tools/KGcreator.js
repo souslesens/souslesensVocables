@@ -2,10 +2,10 @@ import common from "../shared/common.js";
 import Lineage_upperOntologies from "./lineage/lineage_upperOntologies.js";
 import SearchUtil from "../search/searchUtil.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
-import visjsGraph from "../graph/visjsGraph2.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../shared/mainController.js";
+import visjsGraphClass from "../graph/VisjsGraphClass.js";
 
 //https://openbase.com/js/@json-editor/json-editor/documentation
 
@@ -78,14 +78,16 @@ var KGcreator = (function () {
         "skos:Collection",
         "slsv:TopConcept",
         "_function",
-        "_blankNode",
+        // "_blankNode",
+        "_virtualColumn",
+        // "_rowIndex",
         "",
     ];
 
     self.xsdTypes = ["xsd:string", "xsd:dateTime", "xsd:boolean", "xsd:integer", "xsd:float", "xsd:double", "xsd:decimal", "rdf:XMLLiteral"];
 
     self.basicTypeClasses = ["owl:Class", "owl:NamedIndividual", "owl:Thing", ""];
-    self.usualSubjectTypes = ["_function", "_blankNode", "_rowIndex", ""];
+    self.usualSubjectTypes = ["_function", "_rowIndex", "_virtualColumn", ""];
 
     self.predefinedPart14Relations = [
         ["Location", "Location", "hasSubLocation"],
@@ -107,6 +109,7 @@ var KGcreator = (function () {
     ];
 
     self.mappingFiles = {};
+    self.allMapings = {};
     self.onLoaded = function () {
         $("#actionDivContolPanelDiv").load("snippets/KGcreator/leftPanel.html", function () {
             self.loadCsvDirs();
@@ -114,9 +117,7 @@ var KGcreator = (function () {
                 if (err) {
                     return alert(err.responseText);
                 }
-                $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {
-                    self.initCentralPanel();
-                });
+                $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {});
 
                 MainController.UI.showHideRightPanel("hide");
                 // $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function() {
@@ -135,8 +136,10 @@ var KGcreator = (function () {
             $("#mainDialogDiv").dialog("close");
             var source = SourceSelectorWidget.getSelectedSource()[0];
             self.initSource(source, callback);
+            self.initCentralPanel();
         };
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
+        if (callback) callback();
     };
 
     self.initSource = function (source, callback) {
@@ -152,14 +155,6 @@ var KGcreator = (function () {
 
         $("#KGcreator_topLevelOntologiesInput").html(Config.currentTopLevelOntology);
         self.topLevelOntologyPrefix = Config.topLevelOntologies[Config.currentTopLevelOntology].prefix;
-        self.initModel(source, function (err, result) {
-            if (err) {
-                return alert(err.responseText);
-            }
-            if (callback) {
-                callback(err);
-            }
-        });
     };
     self.onChangeSourceTypeSelect = function (sourceType, callback) {
         self.currentSourceType = sourceType;
@@ -266,7 +261,7 @@ var KGcreator = (function () {
                         self.mappingFiles[file.substring(0, p)] = 1;
                     }
                 });
-                callback();
+                callback(null, result);
             },
             error: function (err) {
                 callback(err);
@@ -635,17 +630,24 @@ var KGcreator = (function () {
                         var html =
                             "<div> " +
                             "<input type='checkbox' id='KGcreator_isSubjectBlankNodeCBX' />isBlankNode</div>" +
-                            "<input type='checkbox' id='KGcreator_isRestrictionCBX' />is Restriction</div></div>";
+                            "<div><input type='checkbox' id='KGcreator_isRestrictionCBX' />is Restriction</div>" +
+                            ' <div><button onclick="KGcreator.showModelMatchingProperties()">ModelMatchingProperties</button></div>';
                         $("#editPredicate_customPredicateContentDiv").html(html);
 
                         var html =
                             "<div><input type='checkbox' id='KGcreator_isObjectBlankNodeCBX' />isBlankNode</div>" +
                             '<div> <input type="checkbox" id="KGcreator_isObjectStringCBX" /> is String' +
                             " lookup <input id=\"KGcreator_objectLookupName\" style='width:100px'/></div>" +
+                            " <div>" +
                             ' <button onclick="KGcreator.addTripleToTA()">Add</button>';
+                        ' <select id="KGcreator_objectLookupName">' + "<option></option><option></option>if_column_value_not_null</select> </div>";
+
                         //   +' <input type="checkbox" id="KGcreatorCBX">RML syntax</div>';
                         $("#editPredicate_customContentDiv").html(html);
 
+                        $("#editPredicate_objectSelect").bind("change", function () {
+                            KGcreator.onTripleModelSelect("o", $(this).val());
+                        });
                         return callbackSeries();
                     });
                 },
@@ -722,8 +724,8 @@ var KGcreator = (function () {
             isString: true,
         });
         /*  if (!self.currentJsonObject.transform[column]) {
-          self.currentJsonObject.transform[column] = "function{if (value=='null') return null;if(mapping.isString && role=='o') return value; else return '" + column + "_'+value;}";
-      }*/
+      self.currentJsonObject.transform[column] = "function{if (value=='null') return null;if(mapping.isString && role=='o') return value; else return '" + column + "_'+value;}";
+  }*/
 
         self.mainJsonEditor.load(self.currentJsonObject);
         self.mainJsonEditorModified = true;
@@ -738,8 +740,6 @@ var KGcreator = (function () {
         var subject = $("#KGcreator_subjectInput").val();
         var subjectIsBlank = $("#KGcreator_isSubjectBlankNodeCBX").prop("checked");
         var objectIsBlank = $("#KGcreator_isObjectBlankNodeCBX").prop("checked");
-        //  var predicate = $("#KGcreator_predicateInput").val();
-        //  var object = $("#KGcreator_objectInput").val();
 
         var predicate = $("#editPredicate_propertyValue").val();
         var object = $("#editPredicate_objectValue").val();
@@ -798,6 +798,20 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         if (objectIsBlank) {
             tripleObj.isObjectBlankNode = true;
         }
+        if (object == "_virtualColumn") {
+            var name = prompt("virtual column name");
+            if (!name) {
+                return;
+            }
+            tripleObj.o = "$_" + name;
+        }
+        if (subject == "_virtualColumn") {
+            var name = prompt("virtual column name");
+            if (!name) {
+                return;
+            }
+            tripleObj.s = "$_" + name;
+        }
 
         if (isRestrictionCBX) {
             tripleObj.isRestriction = true;
@@ -809,15 +823,22 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
             tripleObj.isSpecificPredicate = true;
         }
 
+        if (subject.indexOf("http://") > 0 && object.indexOf("function") < 0) {
+            tripleObj.subjectIsSpecificUri = true;
+        }
+        if (object.indexOf("http://") > 0 && object.indexOf("function") < 0) {
+            tripleObj.objectIsSpecificUri = true;
+        }
+
         self.currentJsonObject.tripleModels.push(tripleObj);
 
         self.mainJsonEditor.load(self.currentJsonObject);
         self.mainJsonEditorModified = true;
 
-        $("#KGcreator_objectInput").val("");
+        /*  $("#KGcreator_objectInput").val("");
         $("#KGcreator_objectSelect").val("");
         $("#KGcreator_predicateInput").val("");
-        $("#KGcreator_predicateSelect").val("");
+        $("#KGcreator_predicateSelect").val("");*/
 
         //   $("#KGcreator_tripleTA").val(JSON.stringify(tripleObj))
     };
@@ -837,14 +858,14 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
 
             //  $("#KGcreator_subjectSelect").val("");
         } else if (role == "p") {
-            $("#KGcreator_predicateInput").val(value);
+            $("#editPredicate_propertyValue").val(value);
 
             //   $("#KGcreator_predicateSelect").val("");
         } else if (role == "o") {
             if (value == "_selectedColumn") {
-                $("#KGcreator_objectInput").val(self.currentTreeNode.text);
+                $("#editPredicate_objectValue").val(self.currentTreeNode.text);
             } else {
-                $("#KGcreator_objectInput").val(value);
+                $("#editPredicate_objectValue").val(value);
             }
 
             //   $("#KGcreator_objectSelect").val("");
@@ -895,9 +916,9 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         if (role == "s") {
             $("#KGcreator_subjectInput").val(fnObject);
         } else if (role == "p") {
-            $("#KGcreator_predicateInput").val(fnObject);
+            $("#editPredicate_propertyValue").val(fnObject);
         } else if (role == "o") {
-            $("#KGcreator_objectInput").val(fnObject);
+            $("#editPredicate_objectValue").val(fnObject);
         }
         $("#KGcreator_dialogDiv").dialog("close");
     };
@@ -1013,53 +1034,56 @@ self.saveMappings({classId:classId})
         }
     };
 
-    self.loadMappings = function (csvFileName, callback) {
-        var currentJsonObject = {};
-
-        function getMappingFileJson(callback2) {
-            var payload = {};
-            if (self.currentDataSourceModel) {
-                var dbName = self.currentDbName;
-                payload = {
-                    dir: "CSV/" + self.currentSlsvSource,
-                    name: dbName + "_" + csvFileName + ".json",
-                };
-            } else {
-                payload = {
-                    dir: "CSV/" + self.currentCsvDir,
-                    name: self.currentSource + "_" + csvFileName + ".json",
-                };
-            }
-            $.ajax({
-                type: "GET",
-                url: `${Config.apiUrl}/data/file`,
-                data: payload,
-                dataType: "json",
-                success: function (result, _textStatus, _jqXHR) {
-                    currentJsonObject = JSON.parse(result);
-
-                    callback2(null, currentJsonObject);
-                },
-                error(_err) {
-                    currentJsonObject = {
-                        fileName: csvFileName,
-                        tripleModels: [],
-                        transform: {},
-                        lookups: [],
-                        graphUri: "",
-                    };
-                    callback2(null, currentJsonObject);
-                },
-            });
+    self.getMappingFileJson = function (csvFileName, callback) {
+        var jsonFileName;
+        if (csvFileName.indexOf(".json") < 0) {
+            jsonFileName = csvFileName + ".json";
+        }
+        var payload = {};
+        if (self.currentDataSourceModel) {
+            var dbName = self.currentDbName;
+            payload = {
+                dir: "CSV/" + self.currentSlsvSource,
+                name: dbName + "_" + jsonFileName,
+            };
+        } else {
+            payload = {
+                dir: "CSV/" + self.currentCsvDir,
+                name: self.currentSource + "_" + jsonFileName,
+            };
         }
 
+        $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                var currentJsonObject = JSON.parse(result);
+
+                callback(null, currentJsonObject);
+            },
+            error(_err) {
+                var currentJsonObject = {
+                    fileName: csvFileName,
+                    tripleModels: [],
+                    transform: {},
+                    lookups: [],
+                    graphUri: "",
+                };
+                callback(null, currentJsonObject);
+            },
+        });
+    };
+
+    self.loadMappings = function (csvFileName, callback) {
         if (callback) {
-            return getMappingFileJson(function (err, result) {
+            return self.getMappingFileJson(csvFileName, function (err, result) {
                 return callback(null, result);
             });
         } else {
             function showMappings() {
-                return getMappingFileJson(function (err, result) {
+                return self.getMappingFileJson(csvFileName, function (err, result) {
                     self.currentJsonObject = result;
                     self.mainJsonEditor.load(result);
                     self.setUpperOntologyPrefix();
@@ -1067,7 +1091,7 @@ self.saveMappings({classId:classId})
                     self.mainJsonEditorModified = false;
 
                     if (!self.currentJsonObject.graphUri) {
-                        currentJsonObject.graphUri = self.currentGraphUri || "";
+                        self.currentJsonObject.graphUri = self.currentGraphUri || "";
                     } else {
                         self.currentGraphUri = self.currentJsonObject.graphUri;
                     }
@@ -1094,6 +1118,9 @@ self.saveMappings({classId:classId})
     };
 
     self.createTriples = function (test, _options, callback) {
+        if (!_options) {
+            _options = {};
+        }
         MainController.UI.message("creating triples...");
         $("#KGcreator_infosDiv").val("creating triples...");
         if (!self.currentJsonObject) {
@@ -1142,7 +1169,7 @@ self.saveMappings({classId:classId})
                 dataLocation: dataLocation,
             };
         }
-        if (_options && _options.deleteTriples) {
+        if (_options.deleteTriples) {
             options.deleteTriples = true;
         }
 
@@ -1188,8 +1215,13 @@ self.saveMappings({classId:classId})
                         $("#KGcreator_infosDiv").val(str);
                         MainController.UI.message("", true);
                     } else {
-                        $("#KGcreator_infosDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
-                        MainController.UI.message("triples created", true);
+                        if (_options.deleteTriples) {
+                            $("#KGcreator_infosDiv").val(result.result);
+                            MainController.UI.message(result.result, true);
+                        } else {
+                            $("#KGcreator_infosDiv").val(result.countCreatedTriples + " triples created in graph " + self.currentJsonObject.graphUri);
+                            MainController.UI.message("triples created", true);
+                        }
                     }
                     if (callback) {
                         return callback();
@@ -1236,7 +1268,9 @@ self.saveMappings({classId:classId})
 
     self.clearGraph = function (deleteAllGraph, callback) {
         if (!self.currentJsonObject) {
-            if (callback) return callback("node currentJsonObject selected");
+            if (callback) {
+                return callback("node currentJsonObject selected");
+            }
             return;
         } //alert("no file mappings selected");
         if (!self.currentJsonObject.graphUri) {
@@ -1272,7 +1306,9 @@ self.saveMappings({classId:classId})
 
     self.deleteKGcreatorTriples = function (deleteAllKGcreatorTriples, callback) {
         if (!self.currentJsonObject) {
-            if (callback) return callback("node currentJsonObject selected");
+            if (callback) {
+                return callback("node currentJsonObject selected");
+            }
             return;
         } //alert("no file mappings selected");
         if (!self.currentJsonObject.graphUri) {
@@ -1290,7 +1326,8 @@ self.saveMappings({classId:classId})
                 return;
             }
 
-            var filter = "?p =<http://purl.org/dc/terms/creator> && ?o='KGcreator'";
+            var filter = "?p =<http://souslesens.org/KGcreator#mappingFile>";
+            MainControlle.UI.message("delting triples triples created with KGCreator in " + self.currentJsonObject.graphUri);
             Sparql_generic.deleteTriplesWithFilter(self.currentSlsvSource, filter, function (err, result) {
                 if (err) {
                     if (callback) {
@@ -1300,7 +1337,9 @@ self.saveMappings({classId:classId})
                 }
 
                 alert("triples deleted");
-                if (callback) return callback();
+                if (callback) {
+                    return callback();
+                }
             });
         } else {
             if (!confirm("Do you really want to delete  triples created with KGCreator in " + self.currentJsonObject.fileName)) {
@@ -1309,6 +1348,7 @@ self.saveMappings({classId:classId})
                 }
                 return;
             }
+            MainController.UI.message("delting triples from mapping file : " + self.currentJsonObject.fileName);
             self.createTriples(false, { deleteTriples: true }, function (err, result) {
                 if (err) {
                     if (callback) {
@@ -1318,7 +1358,9 @@ self.saveMappings({classId:classId})
                 }
 
                 alert("triples deleted");
-                if (callback) return callback();
+                if (callback) {
+                    return callback();
+                }
             });
         }
     };
@@ -1425,8 +1467,10 @@ self.saveMappings({classId:classId})
         $("#KGcreator_fnBody").val(str);
     };
 
-    self.graphMappings = function () {
-        var mappingsTriples = self.currentJsonObject.tripleModels;
+    self.drawMappings = function (mappingsTriples) {
+        if (!mappingsTriples) {
+            mappingsTriples = self.currentJsonObject.tripleModels;
+        }
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = {};
         var shape = "box";
@@ -1471,7 +1515,7 @@ self.saveMappings({classId:classId})
                     arrows: {
                         to: {
                             enabled: true,
-                            type: Lineage_classes.defaultEdgeArrowType,
+                            type: Lineage_whiteboard.defaultEdgeArrowType,
                             scaleFactor: 0.5,
                         },
                     },
@@ -1479,10 +1523,11 @@ self.saveMappings({classId:classId})
             }
         });
 
-        var html = "<div id='KGcreator_mappingsGraphDiv' style='width:900px;height:750px'></div>";
+        var html = "<div id='KGcreator_mappingsGraphDiv' style='width:1100px;height:750px'></div>";
         $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").html(html);
-        visjsGraph.draw("KGcreator_mappingsGraphDiv", visjsData, {}, function () {});
+        self.mappingVisjsGraph = new visjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, {});
+        self.mappingVisjsGraph.draw();
     };
 
     /**
@@ -1544,25 +1589,8 @@ self.saveMappings({classId:classId})
         });
     };
 
-    self.initModel = function (source, callback) {
-        Sparql_OWL.getObjectRestrictions(source, null, null, function (err, result) {
-            if (err) {
-                return alert(err.responseText);
-            }
-            self.currentSourceRestrictions = {};
-            var data = [];
-            result.forEach(function (item) {
-                for (var key in item) {
-                    item[key] = item[key].value;
-                }
-                self.currentSourceRestrictions[item.prop] = item;
-            });
-            return callback(null, self.currentSourceRestrictions);
-        });
-    };
-
     /**
-     * check if prdicate are conform to restrictions defined in Lineage_classes
+     * check if prdicate are conform to restrictions defined in Lineage_whiteboard
      *
      *
      * @param source
@@ -1570,6 +1598,8 @@ self.saveMappings({classId:classId})
      */
     self.checkModel = function (source, callback) {
         return callback();
+        //to DO!!!!!!!!!!!!!!!!!!!!!!
+
         var sourceObjects = {};
         self.getAllMappings(function (err, allMappings) {
             for (var subject in allMappings) {
@@ -1601,352 +1631,6 @@ self.saveMappings({classId:classId})
         });
     };
 
-    self.getAllMappings = function (callback) {
-        var allMappings = {};
-        var files = Object.keys(self.mappingFiles);
-        async.eachSeries(
-            files,
-            function (file, callbackEach) {
-                var file2 = file.substring(file.indexOf("_") + 1);
-                self.loadMappings(file2, function (err, result) {
-                    if (err) {
-                        return callbackEach();
-                    }
-
-                    for (var key in result.tripleModels) {
-                        var mapping = result.tripleModels[key];
-                        if (!allMappings[mapping.s]) {
-                            allMappings[mapping.s] = [];
-                        }
-                        allMappings[mapping.s].push({ p: mapping.p, o: mapping.o });
-                    }
-
-                    callbackEach();
-                });
-            },
-            function (err) {
-                self.allMappingsSubjectsmap = allMappings;
-                return callback(null, allMappings);
-            }
-        );
-    };
-
-    self.generateRml = function () {
-        var rml = "";
-
-        for (var key in self.rmlPrefixes) {
-            rml += "@prefix " + key + ": <" + self.rmlPrefixes[key] + "> .\n";
-        }
-
-        // Add the @base statement
-        rml += "@base <http://example.com/ns#>.  \n";
-        rml += "\n";
-
-        for (var subject in subjects) {
-            if (subject === "_blankNode") {
-                // Assign a unique identifier to the blank node using the counter
-                var uniqueBlankNodeName = "_blankNode" + blankNodeCounter;
-                blankNodeCounter++;
-
-                // Rename the blank node in the subjects dictionary
-                Object.defineProperty(subjects, uniqueBlankNodeName, Object.getOwnPropertyDescriptor(subjects, subject));
-                delete subjects[subject];
-                subject = uniqueBlankNodeName;
-            }
-
-            // Define the logical source
-            rml += "<#" + subject + "Mapping>\n";
-            rml += "   a rr:TriplesMap;\n";
-            rml += "   rml:logicalSource [\n";
-            rml += '        rml:source "' + self.currentJsonObject.fileName + '" ;\n';
-            rml += "        rml:referenceFormulation ql:CSV \n";
-            rml += "  ] ;\n\n";
-
-            // Define the subject map
-            if (subject.startsWith("_blankNode")) {
-                // If the subject is a blank node, don't write the rr:class statement
-                rml += "   rr:subjectMap [\n";
-                rml += "        rr:termType rr:BlankNode ;\n";
-                rml += "  ] ;\n\n";
-            } else {
-                rml += "   rr:subjectMap [\n";
-                rml += "        rr:termType rr:BlankNode ;\n";
-                rml += "        rr:class <http://example.com/ns#" + subject + "> ;\n";
-                rml += "  ] ;\n\n";
-            }
-
-            var predicates = Object.keys(subjects[subject]);
-            for (var i = 0; i < predicates.length; i++) {
-                var predicate = predicates[i];
-                for (var j = 0; j < subjects[subject][predicate].length; j++) {
-                    var object = subjects[subject][predicate][j];
-
-                    // Define the predicate object map
-                    rml += "   rr:predicateObjectMap [\n";
-                    rml += "        rr:predicate " + predicate + " ;\n";
-                    rml += "        rr:objectMap [ \n";
-                    if (object === "Nested triples map") {
-                        if (!TripleObject) {
-                            return alert("missing triple object");
-                        }
-
-                        rml += "               rr:parentTriplesMap <#" + TripleObject + "Mapping>;\n";
-                        rml += "               rr:joinCondition [\n";
-                        rml += '                      rr:child "' + TripleObject + '";\n';
-                        rml += '                      rr:parent "' + TripleObject + '"\n';
-                        rml += "               ]\n";
-                    } else {
-                        if (self.columnDataList.includes(object)) {
-                            // If object is a column name in the data source
-                            rml += '  rr:reference "' + object + '"';
-                        } else {
-                            // If object is a fixed value
-                            rml += "  rr:constant " + object;
-                        }
-                    }
-
-                    if (tripleObj.isString) {
-                        rml += "      rr:datatype xsd:string\n";
-                    }
-                    rml += "    ]\n";
-
-                    if (i === predicates.length - 1 && j === subjects[subject][predicate].length - 1) {
-                        rml += "  ] .\n\n"; // Write ']' for the last predicate-object pair of the subject
-                    } else {
-                        rml += "  ] ;\n\n"; // Write '];' for other predicate-object pairs
-                    }
-                }
-            }
-        }
-        $("#KGcreator_mainJsonDisplay").html("<div id='KGcreator_rmlTextarea' style='width:100%;height:100%'></div>");
-        $("#KGcreator_rmlTextarea").html(rml);
-        // Display the generated RML mapping file in the textarea
-        /*  var rmlTextarea = document.getElementById("rmlTextarea");
-if (rmlTextarea) {
-    rmlTextarea.value = rml;
-}*/
-    };
-
-    self.generateRMLEmna = function () {
-        self.rmlPrefixes = {
-            rml: "http://semweb.mmlab.be/ns/rml#",
-            rr: "http://www.w3.org/ns/r2rml#",
-            ql: "http://semweb.mmlab.be/ns/ql#",
-            foaf: "http://xmlns.com/foaf/0.1/",
-            schema: "http://schema.org/",
-            xsd: "http://www.w3.org/2001/XMLSchema#",
-            rdf: "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
-            rdfs: "http://www.w3.org/2000/01/rdf-schema#",
-            // Add other necessary prefixes here
-        };
-
-        var subject = $("#KGcreator_subjectInput").val();
-
-        var predicate = $("#editPredicate_propertyValue").val();
-        var object = $("#editPredicate_objectValue").val();
-
-        var isObjectString = $("#KGcreator_isObjectStringCBX").prop("checked");
-
-        var subjectLookupName = $("#KGcreator_subjectLookupName").val();
-        var objectLookupName = $("#KGcreator_objectLookupName").val();
-        var isRestrictionCBX = $("#KGcreator_isRestrictionCBX").prop("checked");
-        var isSpecificPredicate = $("#KGcreator_isSpecificPredicateCBX").prop("checked");
-
-        var TripleObject = $("#subjectSelect").val();
-
-        $("#KGcreator_objectSelect").val("");
-        $("#KGcreator_predicateSelect").val("");
-
-        // Ensure that self.currentGraphUri is set using the previous code snippet
-        console.log(self.columnDataList);
-        console.log(self.rowCount);
-
-        if (!subject) {
-            return alert("missing subject");
-        }
-        if (!predicate) {
-            return alert("missing predicate");
-        }
-        if (!object) {
-            return alert("missing object");
-        }
-        if (!subjectList.includes(subject)) {
-            // If not, add it.
-            subjectList.push(subject);
-        }
-
-        // Get the select element
-
-        if (!subjects[subject]) {
-            // If the subject doesn't exist
-            subjects[subject] = {}; // Add it to the dictionary
-        }
-
-        if (!subjects[subject][predicate]) {
-            // If the predicate for this subject doesn't exist
-            subjects[subject][predicate] = []; // Add it to the subject's dictionary
-        }
-        if (!subjects[subject][predicate].includes(object)) {
-            // If the object does not already exist for this predicate
-            subjects[subject][predicate].push(object); // Add the object to the predicate's array
-        } else {
-            alert("This predicate-object pair already exists for the subject.");
-        }
-
-        console.log("topLevelOntologyPrefix is " + self.topLevelOntologyPrefix);
-
-        var tripleObj = { s: subject, p: predicate, o: object };
-
-        /*  var subjectSelect = document.getElementById('subjectSelect');
-
-    subjectSelect.innerHTML = '';*/
-
-        // Create a new option for placeholder
-        var placeholderOption = document.createElement("option");
-        placeholderOption.value = "";
-        placeholderOption.text = "Select a subject";
-        placeholderOption.selected = true; // This option will be selected by default
-        placeholderOption.disabled = true; // The user cannot select this option
-
-        // Add the placeholder option to the select element
-        subjectSelect.add(placeholderOption);
-
-        subjectList
-            .filter(function (sub) {
-                return sub !== subject; // This line filters out the current subject from the list
-            })
-            .forEach(function (sub) {
-                // Create a new option element
-                var option = document.createElement("option");
-                option.value = sub;
-                option.text = sub;
-
-                // Add the option to the select element
-                subjectSelect.add(option);
-            });
-
-        if (predicate.indexOf("xsd:") == 0) {
-            tripleObj.dataType = predicate;
-        }
-        if (isObjectString) {
-            tripleObj.isString = true;
-        } else if (predicate.toLowerCase().indexOf("label") > -1) {
-            tripleObj.isString = true;
-        } else if (predicate.toLowerCase().indexOf("definedby") > -1) {
-            tripleObj.isString = true;
-        } else if (predicate.toLowerCase().indexOf("comment") > -1) {
-            tripleObj.isString = true;
-        } else if (predicate.toLowerCase().indexOf("example") > -1) {
-            tripleObj.isString = true;
-        }
-
-        if (!self.currentGraphUri) {
-            var graphUri = "";
-            if (self.currentGraphUri) {
-                graphUri = self.currentGraphUri;
-            }
-            graphUri = prompt("enter graphUri", graphUri);
-            if (!graphUri) {
-                return;
-            }
-            self.currentGraphUri = graphUri;
-            self.currentJsonObject = self.mainJsonEditor.get();
-            self.currentJsonObject.graphUri = graphUri;
-            self.mainJsonEditor.load(self.currentJsonObject);
-        } else {
-            var rml = "";
-
-            for (var key in self.rmlPrefixes) {
-                rml += "@prefix " + key + ": <" + self.rmlPrefixes[key] + "> .\n";
-            }
-
-            // Add the @base statement
-            rml += "@base <http://example.com/ns#>.  \n";
-            rml += "\n";
-
-            for (var subject in subjects) {
-                if (subject === "_blankNode") {
-                    // Assign a unique identifier to the blank node using the counter
-                    var uniqueBlankNodeName = "_blankNode" + blankNodeCounter;
-                    blankNodeCounter++;
-
-                    // Rename the blank node in the subjects dictionary
-                    Object.defineProperty(subjects, uniqueBlankNodeName, Object.getOwnPropertyDescriptor(subjects, subject));
-                    delete subjects[subject];
-                    subject = uniqueBlankNodeName;
-                }
-
-                // Define the logical source
-                rml += "<#" + subject + "Mapping>\n";
-                rml += "   a rr:TriplesMap;\n";
-                rml += "   rml:logicalSource [\n";
-                rml += '        rml:source "' + self.currentJsonObject.fileName + '" ;\n';
-                rml += "        rml:referenceFormulation ql:CSV \n";
-                rml += "  ] ;\n\n";
-
-                // Define the subject map
-                if (subject.startsWith("_blankNode")) {
-                    // If the subject is a blank node, don't write the rr:class statement
-                    rml += "   rr:subjectMap [\n";
-                    rml += "        rr:termType rr:BlankNode ;\n";
-                    rml += "  ] ;\n\n";
-                } else {
-                    rml += "   rr:subjectMap [\n";
-                    rml += "        rr:termType rr:BlankNode ;\n";
-                    rml += "        rr:class <http://example.com/ns#" + subject + "> ;\n";
-                    rml += "  ] ;\n\n";
-                }
-
-                var predicates = Object.keys(subjects[subject]);
-                for (var i = 0; i < predicates.length; i++) {
-                    var predicate = predicates[i];
-                    for (var j = 0; j < subjects[subject][predicate].length; j++) {
-                        var object = subjects[subject][predicate][j];
-
-                        // Define the predicate object map
-                        rml += "   rr:predicateObjectMap [\n";
-                        rml += "        rr:predicate " + predicate + " ;\n";
-                        rml += "        rr:objectMap [ \n";
-                        if (object === "Nested triples map") {
-                            if (!TripleObject) {
-                                return alert("missing triple object");
-                            }
-
-                            rml += "               rr:parentTriplesMap <#" + TripleObject + "Mapping>;\n";
-                            rml += "               rr:joinCondition [\n";
-                            rml += '                      rr:child "' + TripleObject + '";\n';
-                            rml += '                      rr:parent "' + TripleObject + '"\n';
-                            rml += "               ]\n";
-                        } else {
-                            if (self.columnDataList.includes(object)) {
-                                // If object is a column name in the data source
-                                rml += '  rr:reference "' + object + '"';
-                            } else {
-                                // If object is a fixed value
-                                rml += "  rr:constant " + object;
-                            }
-                        }
-
-                        if (tripleObj.isString) {
-                            rml += "      rr:datatype xsd:string\n";
-                        }
-                        rml += "    ]\n";
-
-                        if (i === predicates.length - 1 && j === subjects[subject][predicate].length - 1) {
-                            rml += "  ] .\n\n"; // Write ']' for the last predicate-object pair of the subject
-                        } else {
-                            rml += "  ] ;\n\n"; // Write '];' for other predicate-object pairs
-                        }
-                    }
-                }
-            }
-            // Display the generated RML mapping file in the textarea
-            var rmlTextarea = document.getElementById("rmlTextarea");
-            if (rmlTextarea) {
-                rmlTextarea.value = rml;
-            }
-        }
-    };
     self.socketMessage = function (message) {
         //  console.log(message)
         MainController.UI.message(message);
@@ -1970,20 +1654,20 @@ if (rmlTextarea) {
             [
                 //delete previous KG creator triples
                 function (callbackSeries) {
-                    $("#KGcreator_infosDiv").val("\ndeleting previous KGcreator triples ");
+                    $("#KGcreator_infosDiv").val("deleting previous KGcreator triples ");
                     self.deleteKGcreatorTriples(true, function (err, result) {
                         return callbackSeries(err);
                     });
                 },
                 function (callbackSeries) {
-                    $("#KGcreator_infosDiv").val("\ncreating new triples (can take long...)");
+                    $("#KGcreator_infosDiv").val("creating new triples (can take long...)");
                     self.createTriples(false, { allMappings: 1 }, function (err, result) {
                         return callbackSeries(err);
                     });
                 },
 
                 function (callbackSeries) {
-                    $("#KGcreator_infosDiv").val("\nreindexing graph)");
+                    $("#KGcreator_infosDiv").val("reindexing graph)");
                     self.indexGraph(function (err, result) {
                         return callbackSeries(err);
                     });
@@ -1995,6 +1679,86 @@ if (rmlTextarea) {
                 }
             }
         );
+    };
+
+    self.getAllTriplesMappings = function (callback) {
+        self.loadMappingsList(function (err, result) {
+            if (err) {
+                return alert(err.responseText);
+            }
+
+            var allTripleMappings = [];
+            async.eachSeries(
+                result,
+                function (mappingFileName, callbackEach) {
+                    var payload = {
+                        dir: "CSV/" + self.currentSlsvSource || self.currentCsvDir,
+                        name: mappingFileName,
+                    };
+
+                    $.ajax({
+                        type: "GET",
+                        url: `${Config.apiUrl}/data/file`,
+                        data: payload,
+                        dataType: "json",
+                        success: function (result, _textStatus, _jqXHR) {
+                            try {
+                                var jsonObject = JSON.parse(result);
+                                if (jsonObject.tripleModels.length > 0) {
+                                    allTripleMappings = allTripleMappings.concat(jsonObject.tripleModels);
+                                }
+                            } catch (e) {
+                                console.log("parsing error " + mappingFileName);
+                            }
+                            callbackEach();
+                        },
+                        error(err) {
+                            return callbackEach(err);
+                        },
+                    });
+                },
+                function (err) {
+                    if (err) {
+                        return callback(err.responseText);
+                    }
+                    return callback(null, allTripleMappings);
+                }
+            );
+        });
+    };
+
+    self.drawAllMappings = function () {
+        self.getAllTriplesMappings(function (err, tripleModels) {
+            if (err) {
+                return alert(err.responseText);
+            }
+            self.drawMappings(tripleModels);
+        });
+    };
+    self.showModelMatchingProperties = function () {
+        var subject = $("#KGcreator_subjectInput").val();
+        var object = $("#editPredicate_objectValue").val();
+        var subjectTypes = [];
+        var objectTypes = [];
+        self.getAllTriplesMappings(function (err, tripleModels) {
+            if (err) {
+                return alert(err.responseText);
+            }
+            tripleModels.forEach(function (item) {
+                if (item.s == subject && item.p == "rdf:type") {
+                    if (item.o.indexOf("owl") < 0) {
+                        subjectType.push(item.o);
+                    }
+                }
+                if (item.o == subject && item.p == "rdf:type") {
+                    if (item.o.indexOf("owl") < 0) {
+                        objectType.push(item.o);
+                    }
+                }
+            });
+        });
+
+        // to be implemented with Config.ontologyModels
     };
 
     return self;

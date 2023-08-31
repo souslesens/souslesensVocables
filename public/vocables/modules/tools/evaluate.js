@@ -2,7 +2,7 @@ import common from "../shared/common.js";
 import MainController from "../shared/mainController.js";
 import visjsGraph from "../graph/visjsGraph2.js";
 import Sparql_generic from "../sparqlProxies/sparql_generic.js";
-import Lineage_classes from "./lineage/lineage_classes.js";
+import Lineage_whiteboard from "./lineage/lineage_whiteboard.js";
 import Clipboard from "../shared/clipboard.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget";
 
@@ -295,7 +295,7 @@ var Evaluate = (function () {
                 MainController.initControllers();
                 var sourceConcepts = sources[source];
 
-                var color = Lineage_classes.getSourceColor(source, "palette");
+                var color = Lineage_whiteboard.getSourceColor(source, "palette");
                 visjsData.nodes.push({
                     id: source,
                     label: source,

@@ -46,25 +46,29 @@
 
     <div class="lineage_actionDiv" style="display: flex; flex-direction: column">
         <div class="lineage_button_group" style="min-width: 300px">
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.graphMappings()">Graph mappings</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.saveMappings()">Save mappings</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.drawMappings()">draw mappings</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.drawAllMappings()">draw all mappings</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearMappings()">Clear mappings</button>
+
             <!--   <button onclick="KGcreator.saveMappings(true)">SaveClassmapping</button>-->
 
             <!--  <button onclick="KGcreator.copyMappings()">Copy</button>-->
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearMappings()">Clear mappings</button>
+        </div>
+        <div class="lineage_button_group" style="width: 600px">
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.createTriples(true)">View Sample triples</button>
             <!--  <input type="checkbox" id="KGcreator_addAllPredefinedPart14PredicatesTriples" />addPredefinedPart14Triples-->
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.createTriples()">Create triples</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.stopCreateTriples()">Abort</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.createAllMappingsTriples()">Recreate graph</button>
-
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.indexGraph()">Index graph</button>
             <!--  <input type="checkbox" id="KGcreator_onlySelectionCBX"/>only selection-->
         </div>
         <div class="lineage_button_group" style="width: 600px">
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.deleteKGcreatorTriples('all')">delete ALL KGreator triples</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.deleteKGcreatorTriples()">delete current file triples</button>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearGraph()" style="background-color: #fbcb09 !important">Clear entire graph</button>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.indexGraph()">Index graph</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.deleteKGcreatorTriples('all')">delete ALL KGreator triples</button>
+
+            <!--<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearGraph()" style="background-color: #fbcb09 !important">Clear entire graph</button>-->
 
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="display: none" id="KGcreator_saveFileButton" onclick="KGcreator.saveFile()">Save file</button>
         </div>

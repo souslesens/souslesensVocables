@@ -112,7 +112,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
             modal: false,
         });
 
-        if (!node) node = Lineage_classes.currentGraphNode;
+        if (!node) node = Lineage_whiteboard.currentGraphNode;
         self.currentNode = node;
         var data = [];
         async.series(
@@ -211,7 +211,7 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                     $("#Lineage_Tabs").tabs("option", "active", 3);
                     callbackSeries();
                     /*   var point={x:300,y:600}
-                       MainController.UI.showPopup(point, "graphPopupDiv")*/
+                      PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv")*/
                 },
             ],
             function (_err) {
@@ -288,14 +288,14 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 html += "</div>";
                 $("#KGquery_propertiesDiv").html(html);
                 /*   var point={x:300,y:600}
-                       MainController.UI.showPopup(point, "graphPopupDiv")*/
+                      PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv")*/
             });
         },
         expandSubclasses: function () {
             Config.sources[MainController.currentSource].controller.getNodeChildren(MainController.currentSource, null, KGquery.currentProperty.id, 1, {}, function (err, children) {
                 OwlSchema.setLabelsFromQueryResult(children);
                 if (err) return MainController.UI.message(err);
-                var existingVisjsIds = Lineage_classes.lineageVisjsGraph.getExistingIdsMap();
+                var existingVisjsIds = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
                 var visjsData = { nodes: [], edges: [] };
                 children.forEach(function (item) {
                     if (!existingVisjsIds[item.child1.value]) {
@@ -315,8 +315,8 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                         });
                     }
                 });
-                Lineage_classes.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
-                Lineage_classes.lineageVisjsGraph.data.edges.update(visjsData.edges);
+                Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
+                Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
             });
         },
         resetFilters: function () {
@@ -379,8 +379,6 @@ var propId= item.id + "_" + common.getRandomHexaId(3);
                 var jsTreeOptions = {};
                 jsTreeOptions.contextMenu = KGquery.getJstreeConceptsContextMenu();
                 jsTreeOptions.selectTreeNodeFn = KGquery.selectTreeNodeFn;
-                //  jsTreeOptions.onCheckNodeFn = KGquery.checkTreeNodeFn;
-                //  jsTreeOptions.withCheckboxes=true
 
                 JstreeWidget.loadJsTree("KGquery_queryTreeDiv", jstreeData, jsTreeOptions);
             } else {

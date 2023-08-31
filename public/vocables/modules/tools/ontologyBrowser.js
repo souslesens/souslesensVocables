@@ -235,11 +235,11 @@ var OntologyBrowser = (function () {
                 '    <span  class="popupMenuItem"onclick="OntologyBrowser.graphActions.expandSubclasses();">Subclasses</span>';
         }
         html += '    <span  class="popupMenuItem"onclick="OntologyBrowser.graphActions.showNodeInfo();">showNodeInfo</span>';
-        $("#graphPopupDiv").html(html);
+        $("#popupMenuWidgetDiv").html(html);
     };
 
     self.onNodeClick = function (node, _point, _event) {
-        if (!node) return MainController.UI.hidePopup("graphPopupDiv");
+        if (!node) returnpopupMenuWidget.hidePopup("popupMenuWidgetDiv");
 
         OwlSchema.getClassDescription(MainController.currentSource, node.id, function (err, _result) {
             if (err) {
@@ -254,7 +254,7 @@ var OntologyBrowser = (function () {
     self.showGraphPopupMenu = function (node, point, _event) {
         self.setGraphPopupMenus(node);
         self.currentNode = node;
-        MainController.UI.showPopup(point, "graphPopupDiv");
+        PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
     };
 
     self.graphActions = {
@@ -290,7 +290,7 @@ var OntologyBrowser = (function () {
                 html += "</div>";
                 $("#OntologyBrowser_propertiesDiv").html(html);
                 /*   var point={x:300,y:600}
-                   MainController.UI.showPopup(point, "graphPopupDiv")*/
+                  PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv")*/
             });
         },
         expandSubclasses: function () {

@@ -1189,8 +1189,6 @@ var Sparql_OWL = (function () {
             "{ ?subject rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction." +
             filterStr +
             " ?node owl:onProperty ?prop ." +
-            //  " OPTIONAL {?prop rdfs:label ?propLabel}" +
-            //  " OPTIONAL {?subject rdfs:label ?subjectLabel}";
             Sparql_common.getVariableLangLabel("prop", true) +
             Sparql_common.getVariableLangLabel("subject", true);
 
@@ -1534,7 +1532,10 @@ var Sparql_OWL = (function () {
         if (options.filter) {
             filter = options.filter;
         }
-        filter += " FILTER (!isblank(?id))";
+        if (!options.includeBlankNodes) {
+            filter += " FILTER (!isblank(?id))";
+        }
+
         var typeFilterStr = "";
         if (options.type) {
             typeFilterStr = "FILTER (?type =" + options.type + ")";
@@ -2131,6 +2132,30 @@ var Sparql_OWL = (function () {
         );
     };
 
+    self.getDistinctClassLabels = function (sourceLabel, classIds, options, callback) {
+        if (!options) {
+            options = {};
+        }
+        var fromStr = Sparql_common.getFromStr(sourceLabel);
+        var filterStr = Sparql_common.setFilter("type", classIds);
+        var query =
+            "PREFIX owl: <http://www.w3.org/2002/07/owl#>" +
+            "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+            "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +
+            "SELECT distinct ?label " +
+            fromStr +
+            "" +
+            " WHERE {{ ?id rdf:type ?type. " +
+            filterStr +
+            "?id rdfs:label ?label  }} limit 10000";
+        var url = Config.default_sparql_url + "?format=json&query=";
+        Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
+            if (err) {
+                return callback(err);
+            }
+            return callback(null, _result.results.bindings);
+        });
+    };
     self.getLabelsMapFromLabelsGraph = function (ids, callback) {
         var filter = Sparql_common.setFilter("sub", ids);
         var query =

@@ -3,7 +3,7 @@ import Sparql_common from "../sparqlProxies/sparql_common.js";
 import common from "../shared/common.js";
 import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
-import Lineage_classes from "../tools/lineage/lineage_classes.js";
+import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import ElasticSearchProxy from "../search/elasticSearchProxy.js";
 import SearchUtil from "../search/searchUtil.js";
 import MainController from "../shared/mainController.js";
@@ -719,12 +719,12 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "mainDialogDiv", {}, function (err, result) {
                     //  self.showNodeInfosToolbar();
                     if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
-                        Lineage_classes.lineageVisjsGraph.data.nodes.push({
+                        Lineage_whiteboard.lineageVisjsGraph.data.nodes.push({
                             id: self.currentNodeId,
                             label: value,
-                            shape: Lineage_classes.defaultShape,
-                            size: Lineage_classes.defaultShapeSize,
-                            color: Lineage_classes.getSourceColor(self.currentSource),
+                            shape: Lineage_whiteboard.defaultShape,
+                            size: Lineage_whiteboard.defaultShapeSize,
+                            color: Lineage_whiteboard.getSourceColor(self.currentSource),
                             data: {
                                 id: self.currentNodeId,
                                 label: value,
@@ -737,7 +737,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                     }
                 });
                 if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
-                    Lineage_classes.addEdge(self.currentSource, self.currentNodeId, value, property);
+                    Lineage_whiteboard.addEdge(self.currentSource, self.currentNodeId, value, property);
                 }
             });
         }
@@ -791,7 +791,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     var property = currentEditingItem.item.prop.value;
                     var value = currentEditingItem.item.value.value;
                     if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
-                        Lineage_classes.deleteEdge(self.currentNodeId, value, property);
+                        Lineage_whiteboard.deleteEdge(self.currentNodeId, value, property);
                     }
                 }
             );
@@ -837,8 +837,8 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     },
                     //update graph
                     function (callbackSeries) {
-                        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) {
-                            Lineage_classes.lineageVisjsGraph.data.nodes.remove(self.currentNodeId);
+                        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                            Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(self.currentNodeId);
                         }
                         return callbackSeries();
                     },
@@ -924,9 +924,9 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         if (jstreeNode) {
                             $("#Lineage_propertiesTree").jstree().rename_node(jstreeNode, newValue);
                         }
-                        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) Lineage_classes.lineageVisjsGraph.data.edges.update({ id: self.currentNodeId, label: newValue });
+                        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) Lineage_whiteboard.lineageVisjsGraph.data.edges.update({ id: self.currentNodeId, label: newValue });
                     } else {
-                        if (Lineage_classes.lineageVisjsGraph.isGraphNotEmpty()) Lineage_classes.lineageVisjsGraph.data.nodes.update({ id: self.currentNodeId, label: newValue });
+                        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) Lineage_whiteboard.lineageVisjsGraph.data.nodes.update({ id: self.currentNodeId, label: newValue });
                         var jstreeNode = JstreeWidget.getNodeByDataField("LineageNodesJsTreeDiv", "id", self.currentNode.data.id);
                         if (jstreeNode) {
                             $("#LineageNodesJsTreeDiv").jstree().rename_node(jstreeNode, newValue);

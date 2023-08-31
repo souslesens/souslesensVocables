@@ -20,7 +20,7 @@ var KGtripleBuilder = {
             console.log(content);
         }
     },
-
+    mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
     predefinedPart14Relations: [
         ["Location", "Location", "hasSubLocation"],
         ["Location", "Activity", "hasActivityPart"],
@@ -188,6 +188,7 @@ var KGtripleBuilder = {
                                         });
                                     } else if (mapping.databaseSource) {
                                         var sqlQuery = "select distinct " + lookup.sourceColumn + "," + lookup.targetColumn + " from " + lookup.fileName;
+
                                         sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
                                             if (err) {
                                                 return callbackEachLookup(err);
@@ -217,14 +218,14 @@ var KGtripleBuilder = {
                             if (!mapping.csvDataFilePath) {
                                 return callbackSeries();
                             }
-
+                            KGtripleBuilder.message(options.clientSocketId, "loading data from csv file", false);
                             KGtripleBuilder.readCsv(mapping.csvDataFilePath, options.sampleSize, function (err, result) {
                                 if (err) {
                                     KGtripleBuilder.message(options.clientSocketId, err, true);
 
                                     return callbackSeries(err);
                                 }
-
+                                KGtripleBuilder.message(options.clientSocketId, " data loaded", false);
                                 csvData = result.data;
                                 callbackSeries();
                             });
@@ -235,12 +236,18 @@ var KGtripleBuilder = {
                             if (!mapping.databaseSource) {
                                 return callbackSeries();
                             }
-                            var sqlQuery = "select * from " + mapping.fileName;
+                            var limitStr = "";
+                            if (options.sampleSize) {
+                                limitStr = " TOP (" + options.sampleSize + ") ";
+                            }
+                            var sqlQuery = "select" + limitStr + " * from " + mapping.fileName;
+                            KGtripleBuilder.message(options.clientSocketId, "loading data from sql server", false);
                             sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
                                 csvData = [result];
+                                KGtripleBuilder.message(options.clientSocketId, " data loaded", false);
                                 callbackSeries();
                             });
                         },
@@ -290,6 +297,7 @@ var KGtripleBuilder = {
                                 return target;
                             }
 
+                            var allColumns = {};
                             async.eachSeries(
                                 csvData,
                                 function (lines, callbackEachLines) {
@@ -306,23 +314,30 @@ var KGtripleBuilder = {
                                                         var objectStr = null;
                                                         var currentBlankNode = null;
                                                         var lineError = "";
-                                                        var blankNode_cellMap = {};
+                                                        var blankNodesMap = {};
 
                                                         mapping.tripleModels.forEach(function (item) {
-                                                            if (line[item.s] == "null") {
-                                                                line[item.s] = null;
-                                                            }
-                                                            if (!line[item.o] == "null") {
-                                                                line[item.o] = null;
-                                                            }
-                                                            if (!line[item.s]) {
-                                                                return;
-                                                            }
-
                                                             for (var key in line) {
+                                                                if (!allColumns[key]) {
+                                                                    allColumns[key] = 1;
+                                                                }
                                                                 line[key] = "" + line[key];
                                                                 if (line[key] && !KGtripleBuilder.isUri(line[key])) {
                                                                     line[key] = util.formatStringForTriple(line[key]);
+                                                                }
+                                                            }
+
+                                                            if (line[item.s] == "null") {
+                                                                line[item.s] = null;
+                                                            }
+                                                            if (line[item.o] == "null") {
+                                                                line[item.o] = null;
+                                                            }
+
+                                                            if (item["if_column_value_not_null"]) {
+                                                                var value = line[item["if_column_value_not_null"]];
+                                                                if (!value || value == "null") {
+                                                                    return;
                                                                 }
                                                             }
 
@@ -331,7 +346,7 @@ var KGtripleBuilder = {
 
                                                             //get value for Subject
                                                             {
-                                                                if (item.s_type == "fixed") {
+                                                                if (item.subjectIsSpecificUri) {
                                                                     subjectStr = item.s;
                                                                 } else if (typeof item.s === "function") {
                                                                     try {
@@ -343,22 +358,32 @@ var KGtripleBuilder = {
                                                                     if (!line[item.s]) {
                                                                         return;
                                                                     }
-                                                                    var blankNode = blankNode_cellMap[item.s];
+                                                                    var blankNode = blankNodesMap[item.s];
                                                                     if (!blankNode) {
                                                                         blankNode = getNewBlankNodeId();
-                                                                        blankNode_cellMap[item.s] = blankNode;
+                                                                        blankNodesMap[item.s] = blankNode;
                                                                     }
                                                                     subjectStr = blankNode;
                                                                 } else if (item.s === "_rowIndex") {
-                                                                    var blankNode = blankNode_cellMap["_rowIndex"];
+                                                                    var blankNode = blankNodesMap["_rowIndex"];
                                                                     if (!blankNode) {
                                                                         blankNode = getNewBlankNodeId();
-                                                                        blankNode_cellMap["_rowIndex"] = blankNode;
+                                                                        blankNodesMap["_rowIndex"] = blankNode;
                                                                     }
                                                                     subjectStr = blankNode;
-                                                                } else if (item.s === "_blankNode") {
-                                                                    currentBlankNode = currentBlankNode || getNewBlankNodeId();
-                                                                    subjectStr = currentBlankNode;
+                                                                } else if (item.s.indexOf("$_") == 0) {
+                                                                    // virtual column
+                                                                    if (typeof item.o === "string" && item.o.indexOf("$_") != 0 && allColumns[item.o] && !line[item.o]) {
+                                                                        // ne pas creer des triplest sans objet
+
+                                                                        return;
+                                                                    }
+                                                                    var blankNode = blankNodesMap[item.s];
+                                                                    if (!blankNode) {
+                                                                        blankNode = getNewBlankNodeId();
+                                                                        blankNodesMap[item.s] = blankNode;
+                                                                    }
+                                                                    subjectStr = blankNode;
                                                                 } else if (mapping.transform && line[item.s] && mapping.transform[item.s]) {
                                                                     try {
                                                                         subjectStr = mapping.transform[item.s](line[item.s], "s", item.p, line, item);
@@ -368,6 +393,9 @@ var KGtripleBuilder = {
                                                                 } else if (item.s.match(/.+:.+|http.+/)) {
                                                                     subjectStr = item.s;
                                                                 } else {
+                                                                    if (!line[item.s]) {
+                                                                        return;
+                                                                    }
                                                                     subjectStr = line[item.s];
                                                                 }
 
@@ -390,76 +418,93 @@ var KGtripleBuilder = {
 
                                                             //get value for Object
                                                             {
-                                                                if (item.o_type == "fixed") {
-                                                                    objectStr = item.o;
-                                                                } else if (item.isObjectBlankNode) {
-                                                                    if (!line[item.o]) {
-                                                                        return;
-                                                                    }
-                                                                    var blankNode = blankNode_cellMap[item.o];
+                                                                if (item.o === "_rowIndex") {
+                                                                    var blankNode = blankNodesMap["_rowIndex"];
                                                                     if (!blankNode) {
                                                                         blankNode = getNewBlankNodeId();
-                                                                        blankNode_cellMap[item.o] = blankNode;
+                                                                        blankNodesMap["_rowIndex"] = blankNode;
                                                                     }
                                                                     objectStr = blankNode;
-                                                                } else if (item.dataType) {
-                                                                    var str = line[item.o];
-                                                                    if (!str) {
-                                                                        return;
-                                                                    }
-                                                                    if (item.dataType == "xsd:dateTime") {
-                                                                        var isDate = function (date) {
-                                                                            return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
-                                                                        };
-
-                                                                        var formatDate = function (date) {
-                                                                            return new Date(date).toISOString(); //.slice(0, 10);
-                                                                        };
-                                                                        if (!isDate(str)) {
-                                                                            return;
-                                                                        }
-                                                                        str = formatDate(str);
-                                                                    }
-
-                                                                    item.p = "owl:hasValue";
-
-                                                                    objectStr = "'" + str + "'^^" + item.dataType;
+                                                                } else if (item.objectIsSpecificUri) {
+                                                                    objectStr = item.o;
                                                                 } else if (typeof item.o === "function") {
                                                                     try {
                                                                         objectStr = item.o(line, item);
+                                                                        objectStr = util.formatStringForTriple(objectStr, false);
                                                                     } catch (e) {
                                                                         return (lineError = e);
                                                                     }
-                                                                } else if (item.o === "_blankNode") {
-                                                                    if (!line[item.o]) {
-                                                                        return;
+                                                                } else if (item.o.indexOf("$_") == 0) {
+                                                                    // virtual column
+                                                                    var blankNode = blankNodesMap[item.o];
+                                                                    if (!blankNode) {
+                                                                        blankNode = getNewBlankNodeId();
+                                                                        blankNodesMap[item.o] = blankNode;
                                                                     }
-                                                                    currentBlankNode = currentBlankNode || getNewBlankNodeId();
-                                                                    objectStr = currentBlankNode;
-                                                                } else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
-                                                                    try {
-                                                                        objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line, item);
-                                                                    } catch (e) {
-                                                                        return (lineError = e + " " + item.o);
-                                                                    }
+                                                                    objectStr = blankNode;
                                                                 } else if (item.o.match(/http.+/)) {
                                                                     objectStr = "<" + item.o + ">";
                                                                 } else if (item.o.match(/.+:.+/)) {
                                                                     objectStr = item.o;
                                                                 } else {
-                                                                    objectStr = line[item.o];
-                                                                }
-
-                                                                if (item.lookup_o) {
-                                                                    if (!lookUpMap[item.lookup_o]) {
-                                                                        return (lineError = "no lookup named " + item.lookup_o);
+                                                                    if (!line[item.o] || line[item.o] == "null") {
+                                                                        return;
                                                                     }
-                                                                    var lookupValue = getLookupValue(item.lookup_o, objectStr);
-                                                                    if (!lookupValue) {
-                                                                        missingLookups_o += 1;
+
+                                                                    if (item.isObjectBlankNode) {
+                                                                        var blankNode = blankNodesMap[item.o];
+                                                                        if (!blankNode) {
+                                                                            blankNode = getNewBlankNodeId();
+                                                                            blankNodesMap[item.o] = blankNode;
+                                                                        }
+                                                                        objectStr = blankNode;
+                                                                    } else if (item.dataType) {
+                                                                        var str = line[item.o];
+                                                                        if (!str || str == "null") {
+                                                                            return;
+                                                                        }
+                                                                        if (item.dataType == "xsd:dateTime") {
+                                                                            var isDate = function (date) {
+                                                                                return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
+                                                                            };
+
+                                                                            var formatDate = function (date) {
+                                                                                return new Date(date).toISOString(); //.slice(0, 10);
+                                                                            };
+
+                                                                            if (!isDate(str)) {
+                                                                                var date = util.convertFrDateStr2Date(str);
+                                                                                if (!date) return;
+                                                                                else str = date.toISOString();
+                                                                            } else {
+                                                                                str = formatDate(str);
+                                                                            }
+                                                                        }
+
+                                                                        item.p = "owl:hasValue";
+
+                                                                        objectStr = "'" + str + "'^^" + item.dataType;
+                                                                    } else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
+                                                                        try {
+                                                                            objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line, item);
+                                                                        } catch (e) {
+                                                                            return (lineError = e + " " + item.o);
+                                                                        }
                                                                     } else {
-                                                                        okLookups_o += 1;
-                                                                        objectStr = lookupValue;
+                                                                        objectStr = line[item.o];
+                                                                    }
+
+                                                                    if (item.lookup_o) {
+                                                                        if (!lookUpMap[item.lookup_o]) {
+                                                                            return (lineError = "no lookup named " + item.lookup_o);
+                                                                        }
+                                                                        var lookupValue = getLookupValue(item.lookup_o, objectStr);
+                                                                        if (!lookupValue) {
+                                                                            missingLookups_o += 1;
+                                                                        } else {
+                                                                            okLookups_o += 1;
+                                                                            objectStr = lookupValue;
+                                                                        }
                                                                     }
                                                                 }
                                                             }
@@ -498,6 +543,8 @@ var KGtripleBuilder = {
                                                                 } else if (objectStr.indexOf("xsd:") > -1) {
                                                                     //pass
                                                                 } else {
+                                                                    /* if(!item.isString)
+       objectStr=objectStr.replace(/[\-_]/g,"")*/
                                                                     objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
                                                                 }
                                                             }
@@ -649,7 +696,8 @@ propertyStr = line[item.p];
                                                 triples.forEach(function (triple) {
                                                     if (!uniqueSubjects[triple.s]) {
                                                         uniqueSubjects[triple.s] = 1;
-                                                        metaDataTriples = metaDataTriples.concat(KGtripleBuilder.getMetaDataTriples(triple.s, options));
+
+                                                        metaDataTriples = metaDataTriples.concat(KGtripleBuilder.getMetaDataTriples(triple.s, { mappingFileName: mapping.fileName }));
                                                     }
                                                 });
                                                 triples = triples.concat(metaDataTriples);
@@ -668,20 +716,35 @@ propertyStr = line[item.p];
                                                             return callbackEach(message);
                                                         }
 
-                                                        if (options.deleteTriples) {
-                                                            KGtripleBuilder.deleteTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
+                                                        /*  if (options.deleteTriples) {
+      KGtripleBuilder.deleteTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
+          if (err) {
+              errors += err + " slice " + sliceIndex + "\n";
+              return callbackEach(err);
+          }
+          sliceIndex += 1;
+
+          totalTriples += result;
+
+          callbackEach();
+      });
+  } else {*/
+
+                                                        if (false) {
+                                                            //check unicity of each triples (takes time)
+                                                            KGtripleBuilder.writeUniqueTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
                                                                 if (err) {
                                                                     errors += err + " slice " + sliceIndex + "\n";
                                                                     return callbackEach(err);
                                                                 }
                                                                 sliceIndex += 1;
-
                                                                 totalTriples += result;
+                                                                KGtripleBuilder.message(options.clientSocketId, "mapping " + mapping.fileName + " : writen triples:" + totalTriples);
 
                                                                 callbackEach();
                                                             });
                                                         } else {
-                                                            KGtripleBuilder.writeUniqueTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
+                                                            KGtripleBuilder.writeTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
                                                                 if (err) {
                                                                     errors += err + " slice " + sliceIndex + "\n";
                                                                     return callbackEach(err);
@@ -694,14 +757,15 @@ propertyStr = line[item.p];
                                                             });
                                                         }
                                                     },
-                                                    function (_err) {
+                                                    function (err) {
                                                         //   KGtripleBuilder.message(  options.clientSocketId,"total triples writen:" + totalTriples)
 
-                                                        callbackSeries2();
+                                                        callbackSeries2(err);
                                                     }
                                                 );
                                             },
                                         ],
+
                                         function (err) {
                                             callbackEachLines(err);
                                         }
@@ -736,6 +800,27 @@ propertyStr = line[item.p];
                 }
             }
         );
+    },
+
+    deleteMappingFileTriples: function (mappings, sparqlServerUrl, callback) {
+        var query = "";
+        query += "with  GRAPH <" + mappings.graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGtripleBuilder.mappingFilePredicate + "> '" + mappings.fileName + "'}";
+        var params = { query: query };
+        if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
+            params.auth = {
+                user: ConfigManager.config.sparql_server.user,
+                pass: ConfigManager.config.sparql_server.password,
+                sendImmediately: false,
+            };
+        }
+        httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
+            if (err) {
+                var x = query;
+                return callback(err);
+            }
+
+            return callback(null, result.results.bindings[0]["callret-0"].value);
+        });
     },
 
     deleteTriples: function (triples, graphUri, sparqlServerUrl, callback) {
@@ -910,23 +995,28 @@ propertyStr = line[item.p];
             options = {};
         }
         var metaDataTriples = [];
-        metaDataTriples.push({
-            s: subjectUri,
-            p: "<http://purl.org/dc/terms/creator>",
-            o: "'" + creator + "'",
-        });
+        /*   metaDataTriples.push({
+       s: subjectUri,
+       p: "<http://purl.org/dc/terms/creator>",
+       o: "'" + creator + "'",
+   });*/
 
         metaDataTriples.push({
             s: subjectUri,
             p: "<http://purl.org/dc/terms/created>",
             o: dateTime,
         });
+        metaDataTriples.push({
+            s: subjectUri,
+            p: "<" + KGtripleBuilder.mappingFilePredicate + ">",
+            o: "'" + options.mappingFileName + "'",
+        });
 
         if (options.customMetaData) {
             for (var predicate in options.customMetaData) {
                 metaDataTriples.push({
                     s: subjectUri,
-                    p: predicate,
+                    p: "<" + predicate + ">",
                     o: options.customMetaData[predicate],
                 });
             }
@@ -934,7 +1024,6 @@ propertyStr = line[item.p];
 
         return metaDataTriples;
     },
-
     /**
      * Delete graph named <graphUri> from sparql endpoint at <sparqlServerUrl>
      *
@@ -983,7 +1072,6 @@ propertyStr = line[item.p];
             }
         );
     },
-
     /**
      * Generate triples from a CSV file
      *
@@ -1007,7 +1095,6 @@ propertyStr = line[item.p];
 
         async.series(
             [
-                // set sparql server
                 function (callbackSeries) {
                     if (options.sparqlServerUrl) {
                         sparqlServerUrl = options.sparqlServerUrl;
@@ -1072,102 +1159,112 @@ propertyStr = line[item.p];
                                 mappings.datasource = options.dataLocation;
                             }
 
-                            function getFunction(argsArray, fnStr, callback) {
-                                try {
-                                    fnStr = fnStr.replace(/[/r/n/t]gm/, "");
-                                    var array = /\{(?<body>.*)\}/.exec(fnStr);
-                                    if (!array) {
-                                        return callbackSeries("cannot parse object function " + JSON.stringify(item) + " missing enclosing body into 'function{..}'");
+                            if (options.deleteTriples) {
+                                KGtripleBuilder.deleteMappingFileTriples(mappings, sparqlServerUrl, function (err, result) {
+                                    if (err) {
+                                        return callbackEach(err);
                                     }
-                                    var fnBody = array.groups["body"];
-                                    fnBody = "try{" + fnBody + "}catch(e){\rreturn console.log(e)\r}";
-                                    var fn = new Function(argsArray, fnBody);
-                                    return callback(null, fn);
-                                } catch (err) {
-                                    return callback("error in object function " + fnStr + "\n" + err);
-                                }
-                            }
-
-                            // format functions
-                            if (!mappings.tripleModels) {
-                                return callbackEach();
-                            }
-
-                            mappings.tripleModels.forEach(function (item) {
-                                if (item.s.indexOf("function{") > -1) {
-                                    getFunction(["row", "mapping"], item.s, function (err, fn) {
-                                        if (err) {
-                                            return callbackSeries(err + " in mapping" + JSON.stringify(item));
-                                        }
-                                        item.s = fn;
-                                    });
-                                }
-                                if (item.o.indexOf("function{") > -1) {
-                                    getFunction(["row", "mapping"], item.o, function (err, fn) {
-                                        if (err) {
-                                            return callbackSeries(err + " in mapping" + JSON.stringify(item));
-                                        }
-
-                                        item.o = fn;
-                                    });
-                                }
-
-                                if (item.p.indexOf("function{") > -1) {
-                                    getFunction(["row", "mapping"], item.p, function (err, fn) {
-                                        if (err) {
-                                            return callbackSeries(err + " in mapping" + JSON.stringify(item));
-                                        }
-
-                                        item.p = fn;
-                                    });
-                                }
-                            });
-                            for (var key in mappings.transform) {
-                                var fnStr = mappings.transform[key];
-                                if (fnStr.indexOf("function{") > -1) {
-                                    getFunction(["value", "role", "prop", "row", "mapping"], fnStr, function (err, fn) {
-                                        if (err) {
-                                            return callbackSeries(err + " in mapping" + JSON.stringify(fnStr));
-                                        }
-                                        mappings.transform[key] = fn;
-                                    });
-                                }
-                            }
-
-                            // format lookups
-                            mappings.lookups.forEach(function (item) {
-                                var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
-                                item.filePath = lookupFilePath;
-                                if (item.transformFn) {
-                                    getFunction(["value", "role", "prop", "row", "mapping"], item.transformFn, function (err, fn) {
-                                        if (err) {
-                                            return callbackSeries(err + " in mapping" + JSON.stringify(item));
-                                        }
-                                        item.transformFn = fn;
-                                    });
-                                }
-                            });
-
-                            // add prefixes (for upper ontology)
-                            if (mappings.prefixes) {
-                                for (var prefix in mappings.prefixes) KGtripleBuilder.sparqlPrefixes[prefix] = "<" + mappings.prefixes[prefix] + ">";
-                            }
-
-                            var mappingsMap = { [mappings.csvDataFilePath]: mappings };
-
-                            KGtripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function (err, result) {
-                                KGtripleBuilder.message(options.clientSocketId, "creating triples for mapping " + mappings.fileName);
-                                if (err) {
-                                    return callbackSeries(err);
-                                }
-                                if (options.sampleSize) {
                                     output = result;
-                                    return callbackEach(err, output);
-                                } else {
-                                    output = { countCreatedTriples: result };
+                                    return callbackEach(null, "DELETE Mapping File triples  : " + mappings.fileName + "  " + result);
+                                });
+                            } else {
+                                function getFunction(argsArray, fnStr, callback) {
+                                    try {
+                                        fnStr = fnStr.replace(/[/r/n/t]gm/, "");
+                                        var array = /\{(?<body>.*)\}/.exec(fnStr);
+                                        if (!array) {
+                                            return callbackSeries("cannot parse object function " + JSON.stringify(item) + " missing enclosing body into 'function{..}'");
+                                        }
+                                        var fnBody = array.groups["body"];
+                                        fnBody = "try{" + fnBody + "}catch(e){\rreturn console.log(e)\r}";
+                                        var fn = new Function(argsArray, fnBody);
+                                        return callback(null, fn);
+                                    } catch (err) {
+                                        return callback("error in object function " + fnStr + "\n" + err);
+                                    }
                                 }
-                                callbackEach();
-                            });
+
+                                // format functions
+                                if (!mappings.tripleModels) {
+                                    return callbackEach();
+                                }
+
+                                mappings.tripleModels.forEach(function (item) {
+                                    if (item.s.indexOf("function{") > -1) {
+                                        getFunction(["row", "mapping"], item.s, function (err, fn) {
+                                            if (err) {
+                                                return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                            }
+                                            item.s = fn;
+                                        });
+                                    }
+                                    if (item.o.indexOf("function{") > -1) {
+                                        getFunction(["row", "mapping"], item.o, function (err, fn) {
+                                            if (err) {
+                                                return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                            }
+
+                                            item.o = fn;
+                                        });
+                                    }
+
+                                    if (item.p.indexOf("function{") > -1) {
+                                        getFunction(["row", "mapping"], item.p, function (err, fn) {
+                                            if (err) {
+                                                return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                            }
+
+                                            item.p = fn;
+                                        });
+                                    }
+                                });
+                                for (var key in mappings.transform) {
+                                    var fnStr = mappings.transform[key];
+                                    if (fnStr.indexOf("function{") > -1) {
+                                        getFunction(["value", "role", "prop", "row", "mapping"], fnStr, function (err, fn) {
+                                            if (err) {
+                                                return callbackSeries(err + " in mapping" + JSON.stringify(fnStr));
+                                            }
+                                            mappings.transform[key] = fn;
+                                        });
+                                    }
+                                }
+
+                                // format lookups
+                                mappings.lookups.forEach(function (item) {
+                                    var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
+                                    item.filePath = lookupFilePath;
+                                    if (item.transformFn) {
+                                        getFunction(["value", "role", "prop", "row", "mapping"], item.transformFn, function (err, fn) {
+                                            if (err) {
+                                                return callbackSeries(err + " in mapping" + JSON.stringify(item));
+                                            }
+                                            item.transformFn = fn;
+                                        });
+                                    }
+                                });
+
+                                // add prefixes (for upper ontology)
+                                if (mappings.prefixes) {
+                                    for (var prefix in mappings.prefixes) KGtripleBuilder.sparqlPrefixes[prefix] = "<" + mappings.prefixes[prefix] + ">";
+                                }
+
+                                var mappingsMap = { [mappings.csvDataFilePath]: mappings };
+                                options.customMetaData = { [KGtripleBuilder.mappingFilePredicate]: mappings.fileName };
+                                KGtripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function (err, result) {
+                                    KGtripleBuilder.message(options.clientSocketId, "creating triples for mapping " + mappings.fileName);
+                                    if (err) {
+                                        return callbackSeries(err);
+                                    }
+                                    if (options.sampleSize) {
+                                        output = result;
+                                        return callbackEach(err, output);
+                                    } else {
+                                        output = { countCreatedTriples: result };
+                                    }
+                                    callbackEach();
+                                });
+                            }
                         },
                         function (err) {
                             callbackSeries(err);

@@ -24,14 +24,20 @@ var util = {
         return slices;
     },
     deconcatSQLTableColumn: function (str) {
-        if (str.indexOf(":") > -1) return null;
+        if (str.indexOf(":") > -1) {
+            return null;
+        }
         var array = str.split(".");
-        if (array.length < 2) return null;
+        if (array.length < 2) {
+            return null;
+        }
         if (array.length == 2) {
             return { table: array[0], column: array[1] };
         } else if (array.length == 3) {
             return { table: array[0] + "." + array[1], column: array[2] };
-        } else return null;
+        } else {
+            return null;
+        }
     },
 
     /**
@@ -62,33 +68,49 @@ var util = {
         var str = "";
         if (date instanceof Date && isFinite(date)) {
             var month = "" + (date.getMonth() + 1);
-            if (month.length == 1) month = "0" + month;
+            if (month.length == 1) {
+                month = "0" + month;
+            }
             var day = "" + date.getDate();
-            if (day.length == 1) day = "0" + day;
+            if (day.length == 1) {
+                day = "0" + day;
+            }
             var hour = "" + date.getHours();
-            if (day.hour == 1) hour = "0" + hour;
+            if (day.hour == 1) {
+                hour = "0" + hour;
+            }
             var min = "" + date.getMinutes();
-            if (min.length == 1) min = "0" + min;
+            if (min.length == 1) {
+                min = "0" + min;
+            }
             var sec = "" + date.getSeconds();
-            if (sec.length == 1) sec = "0" + sec;
+            if (sec.length == 1) {
+                sec = "0" + sec;
+            }
             str = date.getFullYear() + "-" + month + "-" + day;
-            if (time) str += "T" + hour + ":" + min + ":" + sec;
-        } else str = "";
+            if (time) {
+                str += "T" + hour + ":" + min + ":" + sec;
+            }
+        } else {
+            str = "";
+        }
         return str;
     },
 
     prepareJsonForsource: function (obj) {
         /*  if (!(typeof obj === "object"))
-         obj = JSON.parse(obj);*/
+     obj = JSON.parse(obj);*/
 
         for (var key in obj) {
             var value = obj[key];
             if (!(typeof value === "object")) {
                 if (key == "_id") {
                     /*  if(ObjectID.isValid(value))
-                     obj[key] = new ObjectID(id);*/
+           obj[key] = new ObjectID(id);*/
                     var id = "" + obj[key];
-                    if (id.length > 24) id = id.substring(id.length - 24);
+                    if (id.length > 24) {
+                        id = id.substring(id.length - 24);
+                    }
 
                     while (id.length < 24) {
                         id = "F" + id;
@@ -97,8 +119,11 @@ var util = {
                     obj[key] = new ObjectID.createFromHexString(id);
                     // obj[key] = new ObjectID(id);
                 } else if (!isNaN(value) && value.indexOf) {
-                    if (value.indexOf(".") > -1) value = parseFloat(value);
-                    else value = parseInt(value);
+                    if (value.indexOf(".") > -1) {
+                        value = parseFloat(value);
+                    } else {
+                        value = parseInt(value);
+                    }
                     obj[key] = value;
                 }
             }
@@ -120,11 +145,21 @@ var util = {
         return new Buffer(bitmap).toString("base64");
     },
     convertNumStringToNumber: function (value) {
-        if (value.match && value.match(/.*[a-zA-Z/\\$].*/)) return value;
-        if (util.isInt(value)) return parseInt(value);
-        if (util.isFloat(value)) return parseFloat(value);
-        if (value == "true") return true;
-        if (value == "false") return false;
+        if (value.match && value.match(/.*[a-zA-Z/\\$].*/)) {
+            return value;
+        }
+        if (util.isInt(value)) {
+            return parseInt(value);
+        }
+        if (util.isFloat(value)) {
+            return parseFloat(value);
+        }
+        if (value == "true") {
+            return true;
+        }
+        if (value == "false") {
+            return false;
+        }
         return value;
     },
     isNumber: function (n) {
@@ -153,16 +188,16 @@ var util = {
                         if (isNaN(valueObj)) {
                             //escape non ascii
                             /*  var str = "";
-                              for (var i = 0; i < value.length; i++) {
-                                  var c = value.charCodeAt(i);
-                                  var s=value.charAt(i)
-                                  if (c < 48 || (c > 57 && c < 65) || c > 122) {
-                                      str += '\\' + s;
-                                  }
-                                  else
-                                      str += s;
-                              }
-                              value=str;*/
+                for (var i = 0; i < value.length; i++) {
+                    var c = value.charCodeAt(i);
+                    var s=value.charAt(i)
+                    if (c < 48 || (c > 57 && c < 65) || c > 122) {
+                        str += '\\' + s;
+                    }
+                    else
+                        str += s;
+                }
+                value=str;*/
 
                             value = value.replace(/[\n|\r|\t]+/g, " ");
                             value = value.replace(/&/g, " and ");
@@ -172,8 +207,11 @@ var util = {
                             // value = value.replace(/\//g, "%2F");
                             value = value.replace(/\\/g, "");
                             //  value = value.replace(/:/g, "")
-                        } else if (value.indexOf(".") > -1) value = parseFloat(value);
-                        else value = parseInt(value);
+                        } else if (value.indexOf(".") > -1) {
+                            value = parseFloat(value);
+                        } else {
+                            value = parseInt(value);
+                        }
                     }
 
                     obj2[key2] = value;
@@ -188,10 +226,16 @@ var util = {
     },
 
     formatStringForTriple: function (str, forUri) {
-        if (!str) return str;
+        if (!str) {
+            return str;
+        }
         str = str.trim();
-        if (str.indexOf("http://") == 0) return str;
-        if (!str || !str.replace) return null;
+        if (str.indexOf("http://") == 0) {
+            return str;
+        }
+        if (!str || !str.replace) {
+            return null;
+        }
         str = str.trim();
         str = str.replace(/\\/gm, "_");
         str = str.replace(/"/gm, '\\"');
@@ -217,7 +261,7 @@ var util = {
 
             str = str.replace(/[^a-zA-Z0-9-_]/g, "");
             /*  str = encodeURIComponent(str);
-             str = str.replace(/%2F/gm, "/");*/
+       str = str.replace(/%2F/gm, "/");*/
         }
 
         return str;
@@ -233,15 +277,17 @@ var util = {
                 var match = null;
                 if ((match = line.match(/[\n\r]/))) {
                     /*   var p = line.indexOf("\n");
-                    if (p < 0) p = chunk.indexOf("\r");
-                    if (p < 0) {
-                        readStream.destroy();
-                        console.log("no line break or return in file");
-                        return null;*/
+          if (p < 0) p = chunk.indexOf("\r");
+          if (p < 0) {
+              readStream.destroy();
+              console.log("no line break or return in file");
+              return null;*/
 
                     var firstLine = line.substring(0, match.index);
                     for (var k = 0; k < separators.length; k++) {
-                        if (firstLine.indexOf(separators[k]) > -1) callback(separators[k]);
+                        if (firstLine.indexOf(separators[k]) > -1) {
+                            callback(separators[k]);
+                        }
                     }
 
                     readStream.destroy();
@@ -293,8 +339,8 @@ var util = {
             var cells = line.trim().split("\t");
             var obj = {};
             cells.forEach(function (cell, index) {
-                if (lineIndex == 0);
-                else {
+                if (lineIndex == 0) {
+                } else {
                     // cols.push(cell.trim())
                     obj[cols[index]] = cell.trim();
                 }
@@ -308,12 +354,18 @@ var util = {
         var dirsArray = [];
         var dirFilesMap = {};
         var _message = "";
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
 
         function recurse(parent) {
             parent = path.normalize(parent);
-            if (!fs.existsSync(parent)) return "dir doesnt not exist :" + parent;
-            if (parent.charAt(parent.length - 1) != path.sep) parent += path.sep;
+            if (!fs.existsSync(parent)) {
+                return "dir doesnt not exist :" + parent;
+            }
+            if (parent.charAt(parent.length - 1) != path.sep) {
+                parent += path.sep;
+            }
 
             var files = fs.readdirSync(parent);
             for (var i = 0; i < files.length; i++) {
@@ -327,7 +379,9 @@ var util = {
                     recurse(fileName);
                 } else {
                     var p = fileName.lastIndexOf(".");
-                    if (p < 0) continue;
+                    if (p < 0) {
+                        continue;
+                    }
                     var extension = fileName.substring(p + 1).toLowerCase();
                     if (options.acceptedExtensions && options.acceptedExtensions.indexOf(extension) < 0) {
                         message += "!!!!!!  refusedExtension " + fileName;
@@ -337,7 +391,9 @@ var util = {
                         message += "!!!!!! " + fileName + " file  too big " + Math.round(stats.size / 1000) + " Ko , not indexed ";
                         continue;
                     }
-                    if (!dirFilesMap[parent]) dirFilesMap[parent] = [];
+                    if (!dirFilesMap[parent]) {
+                        dirFilesMap[parent] = [];
+                    }
                     dirFilesMap[parent].push({
                         type: "file",
                         parent: parent,
@@ -360,9 +416,22 @@ var util = {
         return altLabel.trim();
     },
     getSparqlDate: function (date) {
-        if (!date) date = new Date();
+        if (!date) {
+            date = new Date();
+        }
         var str = JSON.stringify(date);
         return str + "^^xsd:dateTime ";
+    },
+
+    convertFrDateStr2Date: function (dateStr) {
+        //try convert french date
+        var array = dateStr.split("/");
+        if (array.length == 3) {
+            var date = new Date(array[2], array[1] - 1, array[0]);
+
+            return date;
+        }
+        return null;
     },
 
     replaceSparqlPrefixByUri: function (str, prefixes) {

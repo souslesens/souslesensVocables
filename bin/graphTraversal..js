@@ -119,36 +119,44 @@ var GraphTraversal = {
         if (!options) options = {};
         GraphTraversal.getViscinityArray(sparqlServerUrl, graphUri, options, function (err, viscinityArray) {
             if (err) return callback(err);
-            var graph = new GraphTraversal.path.Graph();
 
-            viscinityArray.forEach(function (edge) {
-                if (options.skipNode == edge[0]) return;
-                graph.addEdge(edge[0], edge[1]);
+            GraphTraversal.getSortestPathFromVicinityArray(viscinityArray, function (err, path) {
+                if (err) return callback(err);
+                return callback(null, path);
             });
-            GraphTraversal.path.bfs(graph, fromNodeId);
-            var path = GraphTraversal.path.shortestPath(graph, fromNodeId, toNodeId);
-            if (!path) return callback(null, []);
-
-            var path2 = [];
-
-            path.forEach(function (nodeId, index) {
-                if (index == 0) return;
-                viscinityArray.forEach(function (edge) {
-                    if (edge[0] == path[index - 1] && edge[1] == nodeId) {
-                        path2.push(edge);
-                        return;
-                    }
-                    if (edge[1] == path[index - 1] && edge[0] == nodeId) {
-                        var inverseEdge = edge;
-                        inverseEdge.push(1);
-                        path2.push(inverseEdge);
-                        return;
-                    }
-                });
-            });
-
-            return callback(null, path2);
         });
+    },
+
+    getSortestPathFromVicinityArray: function (viscinityArray, fromNodeId, toNodeId, options, callback) {
+        var graph = new GraphTraversal.path.Graph(viscinityArray);
+
+        viscinityArray.forEach(function (edge) {
+            if (options.skipNode == edge[0]) return;
+            graph.addEdge(edge[0], edge[1]);
+        });
+        GraphTraversal.path.bfs(graph, fromNodeId);
+        var path = GraphTraversal.path.shortestPath(graph, fromNodeId, toNodeId);
+        if (!path) return callback(null, []);
+
+        var path2 = [];
+
+        path.forEach(function (nodeId, index) {
+            if (index == 0) return;
+            viscinityArray.forEach(function (edge) {
+                if (edge[0] == path[index - 1] && edge[1] == nodeId) {
+                    path2.push(edge);
+                    return;
+                }
+                if (edge[1] == path[index - 1] && edge[0] == nodeId) {
+                    var inverseEdge = edge;
+                    inverseEdge.push(1);
+                    path2.push(inverseEdge);
+                    return;
+                }
+            });
+        });
+
+        return callback(null, path2);
     },
 
     getAllShortestPath: function (sparqlServerUrl, graphUri, fromNodeId, toNodeId, numberOfPathes, options, callback) {

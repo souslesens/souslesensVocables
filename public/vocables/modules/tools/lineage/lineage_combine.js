@@ -1,4 +1,4 @@
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 self.lineageVisjsGraph;
 import common from "../../shared/common.js";
 import Lineage_selection from "./lineage_selection.js";
@@ -38,7 +38,7 @@ var Lineage_combine = (function () {
                 if (!Config.sources[source]) callbackEach();
                 Lineage_sources.registerSource(source);
                 self.currentSources.push(source);
-                Lineage_classes.drawTopConcepts(source, function (err) {
+                Lineage_whiteboard.drawTopConcepts(source, function (err) {
                     if (err) return callbackEach();
                     self.menuActions.groupSource(source);
 
@@ -64,7 +64,7 @@ var Lineage_combine = (function () {
             ' <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.showSource();"> Show Source</span>' +
             ' <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.groupSource();"> Group Source</span>' +
             ' <span  class="popupMenuItem" onclick="Lineage_combine.menuActions.ungroupSource();"> ungroup Source</span>';
-        $("#graphPopupDiv").html(html);
+        $("#popupMenuWidgetDiv").html(html);
     };
 
     self.showMergeNodesDialog = function (fromNode, toNode) {

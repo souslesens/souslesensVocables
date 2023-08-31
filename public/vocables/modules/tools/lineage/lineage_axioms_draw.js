@@ -4,7 +4,7 @@ import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
 import Lineage_sources from "./lineage_sources.js";
 import VisjsUtil from "../../graph/visjsUtil.js";
 
-import Lineage_classes from "./lineage_classes.js";
+import Lineage_whiteboard from "./lineage_whiteboard.js";
 import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import common from "../../shared/common.js";
 import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
@@ -322,7 +322,7 @@ var Lineage_axioms_draw = (function () {
                         options.color = "#blue";
                         options.size = self.defaultNodeSize;
                     } else {
-                        //  options.color = Lineage_classes.getSourceColor(targetItem.g.value || self.defaultNodeColor);
+                        //  options.color = Lineage_whiteboard.getSourceColor(targetItem.g.value || self.defaultNodeColor);
                     }
                 });
                 return { options: options, edgeStyle: edgeStyle };
@@ -492,7 +492,7 @@ var Lineage_axioms_draw = (function () {
                                             imports.forEach(function (importedSource) {
                                                 if (labelsMap[item.data.id].graphs.value.indexOf(Config.sources[importedSource].graphUri) > -1) {
                                                     source = importedSource;
-                                                    var color = Lineage_classes.getSourceColor(source);
+                                                    var color = Lineage_whiteboard.getSourceColor(source);
                                                     visjsData.nodes[index].color = color;
                                                     visjsData.nodes[index].data.source = source;
                                                     if (!sourcesMap[source]) {
@@ -502,7 +502,7 @@ var Lineage_axioms_draw = (function () {
                                             });
                                         }
                                         if (labelsMap[item.data.id].graphs.value.indexOf(Config.sources[sourceLabel].graphUri) > -1) {
-                                            var color = Lineage_classes.getSourceColor(sourceLabel);
+                                            var color = Lineage_whiteboard.getSourceColor(sourceLabel);
                                             visjsData.nodes[index].color = color;
                                             visjsData.nodes[index].data.source = sourceLabel;
                                             if (!sourcesMap[sourceLabel]) {
@@ -550,7 +550,7 @@ var Lineage_axioms_draw = (function () {
                                 if (nodeSource && sources.indexOf(nodeSource) < 0) {
                                     sources.push(nodeSource);
                                 }
-                                var color = Lineage_classes.getSourceColor(nodeSource);
+                                var color = Lineage_whiteboard.getSourceColor(nodeSource);
                                 colorsMap[item.s.value] = color;
                             });
 
@@ -562,7 +562,7 @@ var Lineage_axioms_draw = (function () {
                             //draw Sources legend
                             var html = "";
                             sources.forEach(function (source) {
-                                html += "<div  id='S_" + source + "' style='color: " + Lineage_classes.getSourceColor(source) + "' class='Lineage_sourceLabelDiv'>" + source + "</div>";
+                                html += "<div  id='S_" + source + "' style='color: " + Lineage_whiteboard.getSourceColor(source) + "' class='Lineage_sourceLabelDiv'>" + source + "</div>";
                             });
                             /*   html+="other sources <select id='axiomsDraw_otherSourcesSelect'></select>"
 common.fillSelectOptions("axiomsDraw_otherSourcesSelect",otherSources)*/
@@ -627,7 +627,7 @@ enabled:true},*/
         };
 
         var graphDivContainer = "axiomsGraphDivContainer";
-        $("#" + graphDivContainer).html("<div id='axiomsGraphDiv' style='width:100%;height:100%' onclick='MainController.UI.hidePopup(\"axioms_graphPopupDiv\")';></div>");
+        $("#" + graphDivContainer).html("<div id='axiomsGraphDiv' style='width:100%;height:100%' onclick='  PopupMenuWidget.hidePopup(\"axioms_popupMenuWidgetDiv\")';></div>");
         self.axiomsVisjsGraph = new VisjsGraphClass("axiomsGraphDiv", visjsData, options);
         self.axiomsVisjsGraph.draw(function () {});
     };
@@ -669,8 +669,8 @@ NodeInfosWidget.drawAllInfos(node.data.source, node.data.id);*/
 
         html += "</div>";
 
-        //  MainController.UI.showPopup(point, "axioms_graphPopupDiv");
-        var popupDiv = "axioms_graphPopupDiv";
+        // popupMenuWidget.showPopup(point, "axioms_popupMenuWidgetDiv");
+        var popupDiv = "axioms_popupMenuWidgetDiv";
 
         $("#" + popupDiv).css("display", "flex");
         $("#" + popupDiv).css("left", point.x);

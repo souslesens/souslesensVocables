@@ -5,6 +5,7 @@ module.exports = function () {
         GET,
         POST,
         DELETE,
+        PUT,
     };
 
     ///// GET api/v1/sources
@@ -104,10 +105,62 @@ module.exports = function () {
 
     ///// POST api/v1/sources
     async function DELETE(req, res, next) {
-        if (req.query.source) {
+        if (req.query.source && req.query.source != "null") {
             delete ontologyModelsCache[req.query.source];
         } else {
             ontologyModelsCache = {};
+        }
+        return processResponse(res, null, "done");
+    }
+
+    PUT.apiDoc = {
+        summary: "update ontology model",
+        security: [{ loginScheme: [] }],
+        operationId: "updateOntologyModel",
+
+        parameters: [
+            {
+                name: "body",
+                description: "body",
+                in: "body",
+                schema: {
+                    type: "object",
+                    properties: {
+                        source: {
+                            type: "string",
+                        },
+
+                        data: {
+                            type: "object",
+                        },
+                    },
+                },
+            },
+        ],
+        responses: {
+            200: {
+                description: "Results",
+                schema: {
+                    type: "object",
+                },
+            },
+        },
+    };
+
+    async function PUT(req, res, next) {
+        if (!ontologyModelsCache[req.body.source]) {
+            return processResponse(res, null, "source not exists in ontologyModelsCache");
+        } else {
+            for (var entryType in req.body.data) {
+                for (var id in req.body.data[entryType]) {
+                    if (!ontologyModelsCache[req.body.source][entryType]) ontologyModelsCache[req.body.source][entryType] = {};
+                    if (entryType == "restrictions") {
+                        ontologyModelsCache[req.body.source][entryType][id].concat(req.body.data[entryType][id]);
+                    } else {
+                        ontologyModelsCache[req.body.source][entryType][id] = req.body.data[entryType][id];
+                    }
+                }
+            }
         }
         return processResponse(res, null, "done");
     }

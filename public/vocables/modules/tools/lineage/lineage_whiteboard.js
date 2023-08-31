@@ -2775,8 +2775,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
     };
 
     self.drawInferredClassesModel = function (source) {
-        if(!source)
-            source=Lineage_sources.activeSource
+        if (!source) source = Lineage_sources.activeSource;
         KGqueryWidget.getInferredModelVisjsData(source, function (err, visjsData) {
             if (err) {
                 return alert(err.responseText);

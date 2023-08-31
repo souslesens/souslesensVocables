@@ -473,12 +473,10 @@ var KGtripleBuilder = {
                                                                             };
 
                                                                             if (!isDate(str)) {
-                                                                              var date=util.convertFrDateStr2Date(str)
-                                                                              if(!date)
-                                                                                return;
-                                                                              else
-                                                                                  str =date.toISOString();
-                                                                            }else {
+                                                                                var date = util.convertFrDateStr2Date(str);
+                                                                                if (!date) return;
+                                                                                else str = date.toISOString();
+                                                                            } else {
                                                                                 str = formatDate(str);
                                                                             }
                                                                         }

@@ -10,7 +10,6 @@ var IndividualAggregateWidget = (function () {
         self.functionVarClasses = [];
         self.groupByClasses = [];
 
-
         if (!divId) {
             divId = "smallDialogDiv";
             self.divId = divId;
@@ -53,7 +52,7 @@ var IndividualAggregateWidget = (function () {
         var selectStr = "";
         var groupByStr = "";
         groupByClasses.forEach(function (item) {
-            item=Sparql_common.formatStringForTriple(item,true)
+            item = Sparql_common.formatStringForTriple(item, true);
             selectStr += "?" + item + "Label  ";
             groupByStr += "?" + item + "Label";
         });

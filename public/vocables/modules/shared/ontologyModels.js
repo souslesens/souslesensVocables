@@ -109,32 +109,42 @@ var OntologyModels = (function () {
                                 callbackSeries();
                             });
                         },
-                        // set model classes (if source not  declared in sources.json)
+                        // set model classes (if source not  declared in sources.json && classes.length<Config.ontologyModelMaxClasses)
                         function (callbackSeries) {
-                            if (!Config.basicVocabularies[source] && !Config.topLevelOntologies[source]) {
-                                return callbackSeries();
-                            }
-                            var query =
-                                queryP +
-                                " select distinct ?sub ?subLabel FROM <" +
-                                graphUri +
-                                "> where{" +
-                                " ?sub rdf:type ?class. " +
-                                Sparql_common.getVariableLangLabel("sub", true, true) +
-                                " VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
+                            var query = queryP + " select (count (distinct ?sub) as ?numberOfClasses)  FROM <" + graphUri + "> where{" + " ?sub rdf:type owl:Class.} ";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);
                                 }
-                                result.results.bindings.forEach(function (item) {
-                                    if (!Config.ontologiesVocabularyModels[source].classes[item.sub.value]) {
-                                        Config.ontologiesVocabularyModels[source].classes[item.sub.value] = {
-                                            id: item.sub.value,
-                                            label: item.subLabel ? item.subLabel.value : Sparql_common.getLabelFromURI(item.sub.value),
-                                        };
-                                    }
-                                });
-                                callbackSeries();
+                                var numberOfClasses = parseFloat(result.results.bindings[0].numberOfClasses.value);
+                                Config.ontologiesVocabularyModels[source].classesCount = numberOfClasses;
+
+                                if (numberOfClasses > Config.ontologyModelMaxClasses) {
+                                    return callbackSeries();
+                                } else {
+                                    var query =
+                                        queryP +
+                                        " select distinct ?sub ?subLabel FROM <" +
+                                        graphUri +
+                                        "> where{" +
+                                        " ?sub rdf:type ?class. " +
+                                        Sparql_common.getVariableLangLabel("sub", true, true) +
+                                        " VALUES ?class {owl:Class rdf:class rdfs:Class} filter( !isBlank(?sub))} order by ?sub";
+                                    Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
+                                        if (err) {
+                                            return callbackSeries(err);
+                                        }
+                                        result.results.bindings.forEach(function (item) {
+                                            if (!Config.ontologiesVocabularyModels[source].classes[item.sub.value]) {
+                                                Config.ontologiesVocabularyModels[source].classes[item.sub.value] = {
+                                                    id: item.sub.value,
+                                                    label: item.subLabel ? item.subLabel.value : Sparql_common.getLabelFromURI(item.sub.value),
+                                                };
+                                            }
+                                        });
+                                        callbackSeries();
+                                    });
+                                }
                             });
                         },
 

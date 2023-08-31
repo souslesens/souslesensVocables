@@ -169,13 +169,13 @@
     <div id="lineage_allActions">
         <div class="lineage_actionDiv_title">Active Source&nbsp;(s)</div>
         <div id="lineage_actionsWrapper" class="lineage_actionDiv" style="display: flex; flex-wrap: wrap; widthnpm: 100%; justify-content: space-evenly; gap: 5px 5px; border: #c8c8c8 solid 2px">
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_whiteboard.drawModel()">Model</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_whiteboard.drawTopConcepts()">TopClasses</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand</button>
+            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()">Parents</button>
+
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" style="font-weight: bold" onclick="Lineage_relations.showDrawRelationsDialog()">Query</button>
             <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" style="font-weight: bold" onclick="KGqueryWidget.showDialog()">Query KG</button>
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" style="font-weight: bold" onclick="Lineage_whiteboard.drawTopConcepts()">TopClasses</button>
-
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_whiteboard.addChildrenToGraph()">Expand</button>
-
-            <button class="btn btn-sm my-1 py-0 btn-outline-primary" class="lineage_button" onclick="Lineage_whiteboard.addNodesAndParentsToGraph()">Parents</button>
         </div>
         <div class="lineage_actionDiv" style="display: flex; flex-wrap: wrap; width: 100%; justify-content: space-evenly; gap: 5px 5px">
             <!--  <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="Lineage_sources.clearSource()">Clear</button>-->

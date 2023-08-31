@@ -154,37 +154,19 @@ var PredicatesSelectorWidget = (function () {
                 });
             });
             common.fillSelectOptions(selectId, classes, true, "label", "id");
-        } else if (Config.ontologiesVocabularyModels[vocabulary]) {
-            var classes = [{ id: "_searchClass", label: "search..." }];
-
-            var uniqueClasses = {};
-            for (var key in Config.ontologiesVocabularyModels[vocabulary].classes) {
-                if (!uniqueClasses[key]) {
-                    uniqueClasses[key] = 1;
-                    classes.push(Config.ontologiesVocabularyModels[vocabulary].classes[key]);
-                }
-            }
-
-            var restrictionsRanges = [];
-
-            for (var key in Config.ontologiesVocabularyModels[vocabulary].restrictions) {
-                var restrictions = Config.ontologiesVocabularyModels[vocabulary].restrictions[key];
-                restrictions.forEach(function (restriction) {
-                    if (!uniqueClasses[restriction.range]) {
-                        uniqueClasses[restriction.range] = 1;
-                        restrictionsRanges.push({
-                            id: restriction.range,
-                            label: restriction.rangeLabel,
-                        });
-                    }
+        } else if (Config.ontologiesVocabularyModels[vocabulary] && Config.ontologiesVocabularyModels[vocabulary].classesCount <= Config.ontologyModelMaxClasses) {
+            var classes = [];
+            for (var classId in Config.ontologiesVocabularyModels[vocabulary].classes) {
+                var classObj = Config.ontologiesVocabularyModels[vocabulary].classes[classId];
+                classes.push({
+                    id: classObj.id,
+                    label: classObj.label,
                 });
             }
 
-            classes = classes.concat(restrictionsRanges);
-            classes = common.array.sort(classes, "label");
             common.fillSelectOptions(selectId, classes, true, "label", "id");
         } else {
-            var nClasses = OntologyModels[vocabulary].classes.length;
+            //PromptedSelectWidget
             return PromptedSelectWidget.prompt("owl:Class", "editPredicate_objectSelect", vocabulary);
         }
     };

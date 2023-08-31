@@ -656,6 +656,9 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                         return alert(err);
                     }
                     $("#LineagePopup").dialog("close");
+
+                    MainController.UI.message("node Created");
+
                     var nodeData = {
                         id: self.graphModification.creatingsourceUri,
                         data: {
@@ -663,8 +666,6 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                             source: Lineage_sources.activeSource,
                         },
                     };
-                    MainController.UI.message("node Created");
-                    self.graphModification.creatingNodeTriples = [];
                     Lineage_whiteboard.drawNodesAndParents(nodeData);
                     SearchUtil.generateElasticIndex(Lineage_sources.activeSource, { ids: [self.graphModification.creatingsourceUri] }, function (err, result) {
                         if (err) {
@@ -673,17 +674,20 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                         MainController.UI.message("node Created and Indexed");
                     });
 
+                    var modelData = {};
+                    self.graphModification.creatingNodeTriples.forEach(function (item) {
+                        if (item.predicate == "rdfs:label") {
+                            modelData.label = item.object;
+                            modelData.id = item.subject;
+                        }
+                    });
                     var modelData = {
-                        classes: {
-                            [self.graphModification.creatingsourceUri]: {
-                                label: "sss",
-                            },
-                        },
+                        classes: { [modelData.id]: modelData },
                     };
-
                     OntologyModels.updateModel(Lineage_sources.activeSource, modelData, {}, function (err, result) {
                         console.log(err || "ontologyModelCache updated");
                     });
+                    self.graphModification.creatingNodeTriples = [];
                 });
             }
         },

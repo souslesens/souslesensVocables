@@ -312,7 +312,42 @@ var Lineage_whiteboard = (function () {
         self.lineageVisjsGraph.data.nodes.update(nodesToHide);
     };
 
-    self.drawTopConcepts = function (/** @type {string} */ source, /** @type {(arg0: string | undefined) => any} */ callback) {
+    /**
+     *
+     * draws top classes and restrictions
+     *
+     * @param source
+     */
+    self.drawModel = function (source) {
+        if (!source) {
+            source = Lineage_sources.activeSource;
+        }
+
+        if (!source) {
+            return;
+        }
+
+        if (!Config.sources[source]) {
+            return;
+        }
+        self.drawTopConcepts(source, function (err, result) {
+            if (err) return alert(err.response);
+            var options = { output: "graph" };
+
+            var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+            var data = [];
+            nodes.forEach(function (node) {
+                if (node.data && (!node.data.type || node.data.type != "literal")) {
+                    data.push(node.id);
+                }
+            });
+            options.data = data;
+
+            Lineage_relations.drawRelations(null, "restrictions", null, options);
+        });
+    };
+
+    self.drawTopConcepts = function (source, callback) {
         MainController.UI.showHideRightPanel("hide");
         self.currentExpandLevel = 1;
 

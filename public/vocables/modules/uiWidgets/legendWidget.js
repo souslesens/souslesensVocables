@@ -12,6 +12,9 @@ var LegendWidget = (function () {
         self.legendMap = {};
     };
 
+
+
+
     self.drawLegend = function (legendDivId, jstreeData) {
         self.currentLegendDJstreedata[legendDivId] = jstreeData;
         var options = {

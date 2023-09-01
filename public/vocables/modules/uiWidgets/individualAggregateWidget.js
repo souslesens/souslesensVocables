@@ -57,9 +57,10 @@ var IndividualAggregateWidget = (function () {
             groupByStr += "?" + item + "Label";
         });
         groupFunctions.forEach(function (fn) {
-            if (fn == "concat") selectStr += "(GROUP_CONCAT(distinct ?" + fnVars[0] + ';SEPARATOR=",") AS ?concat_' + fnVars[0] + ")";
-            else if (fn == "COUNT") selectStr += " (" + fn + "(distinct ?" + fnVars[0] + ") as ?" + fn + "_" + fnVars[0] + ")";
-            else selectStr += " (" + fn + "(distinct ?" + fnVars[0] + "Value) as ?" + fn + "_" + fnVars[0] + ")";
+            var fnVar=Sparql_common.formatStringForTriple(fnVars[0],true)
+            if (fn == "concat") selectStr += "(GROUP_CONCAT(distinct ?" + fnVar + ';SEPARATOR=",") AS ?concat_' + fnVar + ")";
+            else if (fn == "COUNT") selectStr += " (" + fn + "(distinct ?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
+            else selectStr += " (" + fn + "(distinct ?" + fnVar + "Value) as ?" + fn + "_" + fnVar + ")";
         });
 
         var aggregateClauses = { select: selectStr, groupBy: groupByStr };

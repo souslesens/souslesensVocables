@@ -630,7 +630,7 @@ var KGqueryWidget = (function () {
                     var options = {
                         shape: "triangle",
                         size: Lineage_whiteboard.defaultShapeSize,
-                        color: common.getSourceColor("class",varNameKey)
+                        color: common.getSourceColor("class", varNameKey),
                     };
                     var label = item[labelKey] ? item[labelKey].value : Sparql_common.getLabelFromURI(item[varNameKey].value);
                     visjsData.nodes.push(VisjsUtil.getVisjsNode(self.source, item[varNameKey].value, label, null, options));

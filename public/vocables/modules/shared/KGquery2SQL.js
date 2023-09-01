@@ -1,6 +1,1 @@
-
-var KGquery2SQL=(function(){
-
-
-
-})()
+var KGquery2SQL = (function () {})();

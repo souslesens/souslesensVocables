@@ -57,7 +57,7 @@ var IndividualAggregateWidget = (function () {
             groupByStr += "?" + item + "Label";
         });
         groupFunctions.forEach(function (fn) {
-            var fnVar=Sparql_common.formatStringForTriple(fnVars[0],true)
+            var fnVar = Sparql_common.formatStringForTriple(fnVars[0], true);
             if (fn == "concat") selectStr += "(GROUP_CONCAT(distinct ?" + fnVar + ';SEPARATOR=",") AS ?concat_' + fnVar + ")";
             else if (fn == "COUNT") selectStr += " (" + fn + "(distinct ?" + fnVar + ") as ?" + fn + "_" + fnVar + ")";
             else selectStr += " (" + fn + "(distinct ?" + fnVar + "Value) as ?" + fn + "_" + fnVar + ")";

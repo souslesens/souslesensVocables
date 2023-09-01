@@ -3131,7 +3131,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         },
     };
 
-    self.getSourceColor = function (source,  nodeId, palette) {
+    self.getSourceColor = function (source, nodeId, palette) {
         if (!palette) {
             palette = "paletteIntense";
         }

@@ -1469,29 +1469,25 @@ self.saveMappings({classId:classId})
 
     self.drawMappings = function (mappingObjectsMap) {
         if (!mappingObjectsMap) {
-            mappingObjectsMap = {[self.currentJsonObject.fileName]:self.currentJsonObject};
-
+            mappingObjectsMap = { [self.currentJsonObject.fileName]: self.currentJsonObject };
         }
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = {};
         var shape = "box";
-        for(var fileName in mappingObjectsMap) {
+        for (var fileName in mappingObjectsMap) {
             var mappingObject = mappingObjectsMap[fileName];
             if (mappingObject.tripleModels) {
-                mappingObject.tripleModels.forEach(function(item) {
+                mappingObject.tripleModels.forEach(function (item) {
                     function getColor(str) {
                         if (str.indexOf("http") > -1) {
                             return "#70ac47";
                         }
                         if (str.indexOf(":") > -1) {
                             return "#0067bb";
-                        }
-                        else {
-                            if (mappingObject.fileName)
-                                return common.getResourceColor("mappingFileName", mappingObject.fileName)
+                        } else {
+                            if (mappingObject.fileName) return common.getResourceColor("mappingFileName", mappingObject.fileName);
                             return "#fdbf01";
                         }
-
                     }
 
                     if (!existingNodes[item.s]) {
@@ -1501,7 +1497,6 @@ self.saveMappings({classId:classId})
                             label: item.s,
                             shape: shape,
                             color: getColor(item.s),
-
                         });
                     }
                     if (!existingNodes[item.o]) {
@@ -1699,7 +1694,7 @@ self.saveMappings({classId:classId})
                 return alert(err.responseText);
             }
 
-            var allTripleMappings = {  };
+            var allTripleMappings = {};
 
             async.eachSeries(
                 result,
@@ -1708,7 +1703,7 @@ self.saveMappings({classId:classId})
                         dir: "CSV/" + self.currentSlsvSource || self.currentCsvDir,
                         name: mappingFileName,
                     };
-                    allTripleMappings[mappingFileName]= {  }
+                    allTripleMappings[mappingFileName] = {};
                     $.ajax({
                         type: "GET",
                         url: `${Config.apiUrl}/data/file`,
@@ -1717,8 +1712,7 @@ self.saveMappings({classId:classId})
                         success: function (result, _textStatus, _jqXHR) {
                             try {
                                 var jsonObject = JSON.parse(result);
-                                allTripleMappings[mappingFileName]=jsonObject
-
+                                allTripleMappings[mappingFileName] = jsonObject;
                             } catch (e) {
                                 console.log("parsing error " + mappingFileName);
                             }
@@ -1745,8 +1739,7 @@ self.saveMappings({classId:classId})
                 return alert(err.responseText);
             }
 
-                self.drawMappings(mappingObjects);
-
+            self.drawMappings(mappingObjects);
         });
     };
     self.showModelMatchingProperties = function () {
@@ -1759,7 +1752,7 @@ self.saveMappings({classId:classId})
                 return alert(err.responseText);
             }
 
-            return ;
+            return;
 
             // TO BE FINISHED
             tripleModels.forEach(function (item) {

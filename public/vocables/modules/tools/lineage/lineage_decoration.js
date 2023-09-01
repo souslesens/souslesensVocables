@@ -32,7 +32,7 @@ var Lineage_decoration = (function () {
         }
 
         var index = Object.keys(LegendWidget.legendDivsStack).length;
-        var color = commmon.getSourceColor("query","query_" + index);
+        var color = commmon.getSourceColor("query", "query_" + index);
         var legendDivId = "legendDiv_" + index;
         LegendWidget.legendDivsStack[legendDivId] = { nodeIds: visjsNodes };
         var html =
@@ -120,7 +120,7 @@ var Lineage_decoration = (function () {
             for (var key in Config.topLevelOntologyFixedlegendMap) {
                 if (!color) {
                     if (!Config.topLevelOntologyFixedlegendMap[key]) {
-                        return common.getSourceColor("class",key);
+                        return common.getSourceColor("class", key);
                     }
                     color = Config.topLevelOntologyFixedlegendMap[key][classId];
                 }

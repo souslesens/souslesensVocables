@@ -47,8 +47,14 @@
         <button onclick="KGqueryWidget.queryKG('table')">Table</button>
         <button onclick="KGqueryWidget.queryKG('vijsGraph')">Graph</button>
         <button onclick="KGqueryWidget.aggregateQuery()">Aggregate</button>
-        <button onclick="KGqueryWidget.clearAll()">Clear all</button>
-        <button onclick="TimeLineWidget.init()">TimeLine</button>
+
+        <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->
+        <button onclick="KGqueryWidget.clearAll(true)">Clear </button>
+        <br>
+      boolean operations
+        <button onclick="KGqueryWidget.combineQueries('minus')">Minus</button>
+        <button onclick="KGqueryWidget.combineQueries('union')">Union</button>
+        <button onclick="KGqueryWidget.clearAll()">Clear all </button>
     </div>
     <div style="min-width: 100px">
         <img src="./images/waitAnimated.gif" id="KGqueryWidget_waitImg" style="display: none; width: 15px; text-align: justify" />

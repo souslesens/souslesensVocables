@@ -71,8 +71,6 @@ var IndividualAggregateWidget = (function () {
         }
     };
 
-
-
     return self;
 })();
 export default IndividualAggregateWidget;

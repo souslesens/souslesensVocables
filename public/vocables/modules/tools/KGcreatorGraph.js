@@ -1,13 +1,39 @@
-import common from "../shared/common";
-import visjsGraphClass from "../graph/VisjsGraphClass";
+import common from "../shared/common.js";
+import visjsGraphClass from "../graph/VisjsGraphClass.js";
 
 var KGcreatorGraph = (function() {
   var self = {};
 
   self.groupByClass = function() {
+    var nodes=self.mappingVisjsGraph.data.nodes.get();
+    var newNodes={}
+    var visjsData={nodes:[],edges:[]}
+    nodes.forEach(function(node){
+      if(!node.data || !node.data.fileName)
+        return
+      if(!newNodes[node.data.fileName]) {
+        newNodes[node.data.fileName] = 1
+        visjsData.nodes.push({
+          id: node.data.fileName,
+          label: node.data.fileName,
+          shape: "database",
+          color: node.color
+        })
+      }
+        var edgeId=node.data.fileName+"_"+node.id
+        visjsData.edges.push({
+          id:edgeId,
+          from:node.id,
+          to :node.data.fileName
+        })
+    })
+
+    self.mappingVisjsGraph.data.nodes.update(visjsData.nodes)
+    self.mappingVisjsGraph.data.edges.update(visjsData.edges)
+
 
   };
-  self.groupByClass = function() {
+  self.groupByFile = function() {
 
   };
 
@@ -54,7 +80,13 @@ var KGcreatorGraph = (function() {
               id: item.s,
               label: item.s,
               shape: shape,
-              color: getColor(item.s)
+              color: getColor(item.s),
+              data:{
+                id: item.s,
+                label: item.s,
+                fileName:fileName
+              }
+
             });
           }
           if (!existingNodes[item.o]) {
@@ -63,7 +95,12 @@ var KGcreatorGraph = (function() {
               id: item.o,
               label: item.o,
               shape: shape,
-              color: getColor(item.o)
+              color: getColor(item.o),
+              data:{
+                id: item.s,
+                label: item.s,
+                fileName:fileName
+              }
             });
           }
           var edgeId = item.s + item.p + item.o;
@@ -103,3 +140,4 @@ var KGcreatorGraph = (function() {
 })();
 
 export default KGcreatorGraph;
+window.KGcreatorGraph=KGcreatorGraph

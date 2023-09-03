@@ -70,18 +70,13 @@ var KGqueryWidget = (function () {
                 "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outline-primary' about='add filter' onclick='KGqueryWidget.addNodeFilter(\"" +
                 nodeDivId +
                 "\");'>F</button>";
-            /*   if (node.data.datatype) {
-html += "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outline-primary' about='add filter' onclick='KGqueryWidget.groupBy(\"" + nodeDivId + "\");'>∑</button>";
-}
-else {
-html += "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outline-primary' about='add filter' onclick='KGqueryWidget.groupBy(\"" + nodeDivId + "\");'>⋃</button>";
-}*/
+
             html += "<div style='font-size: 10px;' id='" + nodeDivId + "_filter'></div> " + "</div>" + "</div>";
             return html;
         }
 
         function getPathHtml(pathDivId) {
-            var html = "<div  class='KGqueryWidget_pathDiv' id='" + pathDivId + "'>" + "</div>";
+            var html = "<div  class='KGqueryWidget_pathDiv'  style='border:solid 2px "+color+"' id='" + pathDivId + "'>" + "</div>";
             return html;
         }
 
@@ -101,6 +96,7 @@ html += "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outlin
                 self.classDivsMap[nodeDivId] = self.currentGraphNode;
 
                 $("#KGqueryWidget_pathsDiv").append(getPathHtml(pathDivId));
+
 
                 $("#" + self.queryPathParams.pathDivId).append(getClassNodeDivHtml(fromNode, nodeDivId));
 
@@ -297,6 +293,9 @@ html += "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outlin
         $("#KGqueryWidget_dataTableDiv").html("");
         self.message("searching...");
         $("#KGqueryWidget_waitImg").css("display", "block");
+
+        $("#KGqueryWidget_graphDiv").css("display","none")
+        $("#KGqueryWidget_dataTableDiv").css("display","block")
         self.execPathQuery(self.currentQuery, options, function (err, result) {
             self.message("", true);
             if (err) {
@@ -708,13 +707,17 @@ html += "<button class='KGqueryWidget_divActions btn btn-sm my-1 py-0 btn-outlin
         self.pathDivsMap = {};
         self.classFiltersMap = {};
         self.allPathEdges = {};
+        $("#KGqueryWidget_graphDiv").css("display","flex")
+        $("#KGqueryWidget_dataTableDiv").css("display","none")
         if (!exceptCombinedQueries) {
             self.combinedQueries = [];
             self.resetVisjEdges();
             self.resetVisjNodes();
+            $("#KGqueryWidget_pathsDiv").html("");
+
         }
 
-        $("#KGqueryWidget_pathsDiv").html("");
+
     };
     self.graphActions = {
         onNodeClick: function (node, point, nodeEvent) {

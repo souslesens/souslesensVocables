@@ -6,6 +6,7 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../shared/mainController.js";
 import visjsGraphClass from "../graph/VisjsGraphClass.js";
+import KGcreatorGraph from "./KGcreatorGraph.js";
 
 //https://openbase.com/js/@json-editor/json-editor/documentation
 

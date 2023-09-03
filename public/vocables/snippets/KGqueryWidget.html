@@ -24,7 +24,7 @@
      }*/
 
     #dataTableDivExport_wrapper {
-        width: 800px;
+        width: 100%;
         height: 650px;
         overflow: auto;
     }
@@ -41,32 +41,42 @@
 </style>
 
 <div style="display: flex; flex-direction: row">
-    <div style="display: flex; flex-direction: row" id="KGqueryWidget_pathsDiv"></div>
+  <div style="width:300px;display: flex;flex-direction: column" id="KGqueryWidget_ControlDiv">
+    <div>
+
+      boolean operations<br>
+     <button onclick="KGqueryWidget.combineQueries('minus')"> <img src="icons/set_minus.png" height='30px' >Minus</button>
+      <button  onclick="KGqueryWidget.combineQueries('union')"> <img src="icons/set_union.png" height='30px'>Union</button>
+      <button onclick="KGqueryWidget.clearAll()">Clear all</button>
+    </div>
+
+
+    <div style="display: flex; flex-direction: column" id="KGqueryWidget_pathsDiv"></div>
+
+
+  </div>
+
+  <div style="width:300px;display: flex;flex-direction: column">
 
     <div>
-        <button onclick="KGqueryWidget.queryKG('table')">Table</button>
-        <button onclick="KGqueryWidget.queryKG('vijsGraph')">Graph</button>
-        <button onclick="KGqueryWidget.aggregateQuery()">Aggregate</button>
+      <button onclick="KGqueryWidget.queryKG('table')">Table</button>
+      <button onclick="KGqueryWidget.queryKG('vijsGraph')">Graph</button>
+      <button onclick="KGqueryWidget.aggregateQuery()">Aggregate</button>
 
-        <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->
-        <button onclick="KGqueryWidget.clearAll(true)">Clear</button>
-        <br />
-        boolean operations
-        <button onclick="KGqueryWidget.combineQueries('minus')">Minus</button>
-        <button onclick="KGqueryWidget.combineQueries('union')">Union</button>
-        <button onclick="KGqueryWidget.clearAll()">Clear all</button>
-    </div>
-    <div style="min-width: 100px">
-        <img src="./images/waitAnimated.gif" id="KGqueryWidget_waitImg" style="display: none; width: 15px; text-align: justify" />
+      <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->
+      <button onclick="KGqueryWidget.clearAll(true)">Clear</button>
+
+        <img src="./images/waitAnimated.gif" id="KGqueryWidget_waitImg"
+             style="display: none; width: 15px; text-align: justify" />
         <span class="messageDiv" id="KGqueryWidget_messageDiv"></span>
-    </div>
-</div>
 
-<div style="display: flex; flex-direction: row">
-    <div style="display: flex; flex-direction: column">
-        <div id="KGqueryWidget_graphDiv" style="width: 800px; height: 650px"></div>
     </div>
-    <div id="KGqueryWidget_dataTableDiv"></div>
+
+    <div id="KGqueryWidget_graphDiv" style="width: 1200px; height: 650px"></div>
+    <div id="KGqueryWidget_dataTableDiv" style="width: 1200px; height: 650px;display:none"></div>
+  </div>
+
+
 </div>
 
 <div id="KGqueryWidget_popupMenuDiv" style="position: absolute"></div>

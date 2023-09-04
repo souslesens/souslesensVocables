@@ -6,6 +6,7 @@ import React from "react";
 import * as z from "zod";
 
 const endpoint = "/api/v1/sources";
+const indicesEndpoint = "/api/v1/elasticsearch/indices";
 
 type Response = { message: string; resources: ServerSource[] };
 
@@ -13,6 +14,12 @@ async function getSources(): Promise<ServerSource[]> {
     const response = await fetch(endpoint);
     const json = (await response.json()) as Response;
     return mapSources(json.resources);
+}
+
+async function getIndices(): Promise<string[]> {
+    const response = await fetch(indicesEndpoint);
+    const json = await response.json();
+    return json;
 }
 
 export async function putSources(body: ServerSource[]): Promise<ServerSource[]> {
@@ -235,4 +242,4 @@ export type SkosSource = CommonSource & SkosSpecificSource;
 
 export type _Source = Knowledge_GraphSource | SkosSource;
 
-export { getSources, defaultDataSource };
+export { getSources, getIndices, defaultDataSource };

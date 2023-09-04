@@ -37,6 +37,9 @@ import { useZorm, createCustomIssues } from "react-zorm";
 import { errorMessage } from "./errorMessage";
 import { ZodCustomIssueWithMessage } from "react-zorm/dist/types";
 import { Add, Remove } from "@mui/icons-material";
+import CircleIcon from "@mui/icons-material/Circle";
+import { green, pink, grey } from "@mui/material/colors";
+import Tooltip from "@mui/material/Tooltip";
 
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
@@ -50,6 +53,11 @@ const SourcesTable = () => {
         setOrder(isAsc ? "desc" : "asc");
         setOrderBy(property);
     }
+
+    const unwrappedIndices = SRD.unwrap([], identity, model.indices);
+    const indices = React.useMemo(() => {
+        return unwrappedIndices;
+    }, [unwrappedIndices]);
 
     const renderSources = SRD.match(
         {
@@ -92,6 +100,7 @@ const SourcesTable = () => {
                     const right: string = b[orderBy] as string;
                     return order === "asc" ? left.localeCompare(right) : right.localeCompare(left);
                 });
+
                 return (
                     <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
                         <Stack>
@@ -118,12 +127,14 @@ const SourcesTable = () => {
                                                 </TableCell>
                                                 <TableCell style={{ fontWeight: "bold" }}>graphUri</TableCell>
                                                 <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
+                                                <TableCell style={{ fontWeight: "bold" }}>Data</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         <TableBody sx={{ width: "100%", overflow: "visible" }}>
                                             {sortedSources
                                                 .filter((source) => source.name.includes(filteringChars))
                                                 .map((source) => {
+                                                    const haveIndices = indices.includes(source.name.toLowerCase()) ? true : false;
                                                     return (
                                                         <TableRow key={source.name}>
                                                             <TableCell>{source.name}</TableCell>
@@ -133,6 +144,14 @@ const SourcesTable = () => {
                                                                     <SourceForm source={source} />
                                                                     <ButtonWithConfirmation label="Delete" msg={() => deleteSource(source, updateModel)} />
                                                                 </Box>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <Tooltip title="RDF Graph">
+                                                                    <CircleIcon sx={{ color: grey[500] }} />
+                                                                </Tooltip>
+                                                                <Tooltip title="ElasticSearch indices">
+                                                                    <CircleIcon sx={{ color: haveIndices ? green[500] : pink[500] }} />
+                                                                </Tooltip>
                                                             </TableCell>
                                                         </TableRow>
                                                     );

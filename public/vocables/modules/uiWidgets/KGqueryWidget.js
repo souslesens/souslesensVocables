@@ -76,7 +76,7 @@ var KGqueryWidget = (function () {
         }
 
         function getPathHtml(pathDivId) {
-            var html = "<div  class='KGqueryWidget_pathDiv'  style='border:solid 2px "+color+"' id='" + pathDivId + "'>" + "</div>";
+            var html = "<div  class='KGqueryWidget_pathDiv'  style='border:solid 2px " + color + "' id='" + pathDivId + "'>" + "</div>";
             return html;
         }
 
@@ -96,7 +96,6 @@ var KGqueryWidget = (function () {
                 self.classDivsMap[nodeDivId] = self.currentGraphNode;
 
                 $("#KGqueryWidget_pathsDiv").append(getPathHtml(pathDivId));
-
 
                 $("#" + self.queryPathParams.pathDivId).append(getClassNodeDivHtml(fromNode, nodeDivId));
 
@@ -294,8 +293,8 @@ var KGqueryWidget = (function () {
         self.message("searching...");
         $("#KGqueryWidget_waitImg").css("display", "block");
 
-        $("#KGqueryWidget_graphDiv").css("display","none")
-        $("#KGqueryWidget_dataTableDiv").css("display","block")
+        $("#KGqueryWidget_graphDiv").css("display", "none");
+        $("#KGqueryWidget_dataTableDiv").css("display", "block");
         self.execPathQuery(self.currentQuery, options, function (err, result) {
             self.message("", true);
             if (err) {
@@ -703,21 +702,19 @@ var KGqueryWidget = (function () {
 
         self.currentQuery = [];
         self.classDivsMap = {};
-        self.classeMap = {};
+
         self.pathDivsMap = {};
         self.classFiltersMap = {};
         self.allPathEdges = {};
-        $("#KGqueryWidget_graphDiv").css("display","flex")
-        $("#KGqueryWidget_dataTableDiv").css("display","none")
+        $("#KGqueryWidget_graphDiv").css("display", "flex");
+        $("#KGqueryWidget_dataTableDiv").css("display", "none");
         if (!exceptCombinedQueries) {
+            self.classeMap = {};
             self.combinedQueries = [];
             self.resetVisjEdges();
             self.resetVisjNodes();
             $("#KGqueryWidget_pathsDiv").html("");
-
         }
-
-
     };
     self.graphActions = {
         onNodeClick: function (node, point, nodeEvent) {
@@ -796,7 +793,19 @@ var KGqueryWidget = (function () {
             query: JSON.parse(JSON.stringify(self.currentQuery)),
             booleanOperator: booleanOperator,
         });
+        $("#KGqueryWidget_pathsDiv").append("<div style='  font-weight: bold;color: brown; '>" + booleanOperator + "</div>");
         self.clearAll(true);
+    };
+
+    self.switchRightPanel = function () {
+        var isGraphDisplayed = $("#KGqueryWidget_graphDiv").css("display");
+        if (isGraphDisplayed == "block") {
+            $("#KGqueryWidget_graphDiv").css("display", "none");
+            $("#KGqueryWidget_dataTableDiv").css("display", "block");
+        } else {
+            $("#KGqueryWidget_graphDiv").css("display", "block");
+            $("#KGqueryWidget_dataTableDiv").css("display", "none");
+        }
     };
 
     return self;

@@ -1468,8 +1468,6 @@ self.saveMappings({classId:classId})
         $("#KGcreator_fnBody").val(str);
     };
 
-
-
     /**
      *
      * fills select options with sourxe and upperOntology predicates
@@ -1672,7 +1670,7 @@ self.saveMappings({classId:classId})
                 return alert(err.responseText);
             }
 
-            KGcreatorGraph.drawMappings(mappingObjects);
+            KGcreatorGraph.showDialog(mappingObjects);
         });
     };
     self.showModelMatchingProperties = function () {

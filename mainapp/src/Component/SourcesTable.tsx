@@ -59,6 +59,11 @@ const SourcesTable = () => {
         return unwrappedIndices;
     }, [unwrappedIndices]);
 
+    const unwrappedGraphs = SRD.unwrap([], identity, model.graphs);
+    const graphs = React.useMemo(() => {
+        return unwrappedGraphs;
+    }, [unwrappedGraphs]);
+
     const renderSources = SRD.match(
         {
             notAsked: () => <p>Let&aposs fetch some data!</p>,
@@ -135,6 +140,7 @@ const SourcesTable = () => {
                                                 .filter((source) => source.name.includes(filteringChars))
                                                 .map((source) => {
                                                     const haveIndices = indices.includes(source.name.toLowerCase()) ? true : false;
+                                                    const haveGraphs = graphs.includes(source.graphUri || "") ? true : false;
                                                     return (
                                                         <TableRow key={source.name}>
                                                             <TableCell>{source.name}</TableCell>
@@ -147,10 +153,10 @@ const SourcesTable = () => {
                                                             </TableCell>
                                                             <TableCell>
                                                                 <Tooltip title="RDF Graph">
-                                                                    <CircleIcon sx={{ color: grey[500] }} />
+                                                                    <CircleIcon sx={{ color: graphs.length > 0 ? (haveGraphs ? green[500] : pink[500]) : grey[500] }} />
                                                                 </Tooltip>
                                                                 <Tooltip title="ElasticSearch indices">
-                                                                    <CircleIcon sx={{ color: haveIndices ? green[500] : pink[500] }} />
+                                                                    <CircleIcon sx={{ color: indices.length > 0 ? (haveIndices ? green[500] : pink[500]) : grey[500] }} />
                                                                 </Tooltip>
                                                             </TableCell>
                                                         </TableRow>

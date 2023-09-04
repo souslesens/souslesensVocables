@@ -7,6 +7,7 @@ import * as z from "zod";
 
 const endpoint = "/api/v1/sources";
 const indicesEndpoint = "/api/v1/elasticsearch/indices";
+const graphsEndpoint = "/api/v1/sparql/graphs";
 
 type Response = { message: string; resources: ServerSource[] };
 
@@ -18,6 +19,12 @@ async function getSources(): Promise<ServerSource[]> {
 
 async function getIndices(): Promise<string[]> {
     const response = await fetch(indicesEndpoint);
+    const json = await response.json();
+    return json;
+}
+
+async function getGraphs(): Promise<string[]> {
+    const response = await fetch(graphsEndpoint);
     const json = await response.json();
     return json;
 }
@@ -242,4 +249,4 @@ export type SkosSource = CommonSource & SkosSpecificSource;
 
 export type _Source = Knowledge_GraphSource | SkosSource;
 
-export { getSources, getIndices, defaultDataSource };
+export { getSources, getIndices, getGraphs, defaultDataSource };

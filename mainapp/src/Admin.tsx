@@ -10,7 +10,7 @@ import { Profile } from "./Profile";
 import { SourcesTable } from "./Component/SourcesTable";
 import { UsersTable } from "./Component/UsersTable";
 import { LogsTable } from "./Component/LogsTable";
-import { ServerSource, getSources, getIndices } from "./Source";
+import { ServerSource, getSources, getIndices, getGraphs } from "./Source";
 import { Config, getConfig } from "./Config";
 import { Log, getLogs } from "./Log";
 
@@ -19,6 +19,7 @@ type Model = {
     profiles: RD<string, Profile[]>;
     sources: RD<string, ServerSource[]>;
     indices: RD<string, string[]>;
+    graphs: RD<string, string[]>;
     logs: RD<string, Log[]>;
     config: RD<string, Config>;
     isModalOpen: boolean;
@@ -64,6 +65,7 @@ const initialModel: Model = {
     profiles: loading(),
     sources: loading(),
     indices: loading(),
+    graphs: loading(),
     logs: loading(),
     config: loading(),
     isModalOpen: false,
@@ -85,6 +87,7 @@ type Msg =
     | { type: "ServerRespondedWithProfiles"; payload: RD<string, Profile[]> }
     | { type: "ServerRespondedWithSources"; payload: RD<string, ServerSource[]> }
     | { type: "ServerRespondedWithIndices"; payload: RD<string, string[]> }
+    | { type: "ServerRespondedWithGraphs"; payload: RD<string, string[]> }
     | { type: "ServerRespondedWithConfig"; payload: RD<string, Config> }
     | { type: "ServerRespondedWithLogs"; payload: RD<string, Log[]> }
     | { type: "UserUpdatedField"; payload: UpadtedFieldPayload }
@@ -104,6 +107,9 @@ function update(model: Model, msg: Msg): Model {
 
         case "ServerRespondedWithIndices":
             return { ...model, indices: msg.payload };
+
+        case "ServerRespondedWithGraphs":
+            return { ...model, graphs: msg.payload };
 
         case "ServerRespondedWithSources":
             return { ...model, sources: msg.payload };
@@ -160,6 +166,11 @@ const Admin = () => {
         getIndices()
             .then((indices) => {
                 updateModel({ type: "ServerRespondedWithIndices", payload: success(indices) });
+            })
+            .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithIndices", payload: failure(err.message) }));
+        getGraphs()
+            .then((graphs) => {
+                updateModel({ type: "ServerRespondedWithGraphs", payload: success(graphs) });
             })
             .catch((err: { message: string }) => updateModel({ type: "ServerRespondedWithIndices", payload: failure(err.message) }));
     }, []);

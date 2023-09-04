@@ -18,7 +18,7 @@ module.exports = function () {
 
         // compare
         const indicesToDelete = indices.filter((index) => {
-            if (!lowerSourceNames.includes(index) && !index.startsWith(".")) {
+            if (!lowerSourceNames.includes(index)) {
                 return index;
             }
         });

@@ -21,9 +21,15 @@ class IndexModel {
         }
         const client = new Client7(connInfo);
         const indices = await client.cat.indices({ format: "json" });
-        const indexNames = indices.body.map((index) => {
-            return index.index;
-        });
+        const indexNames = indices.body
+            .map((index) => {
+                return index.index;
+            })
+            .filter((index) => {
+                if (!index.startsWith(".")) {
+                    return index;
+                }
+            });
         return indexNames;
     };
 

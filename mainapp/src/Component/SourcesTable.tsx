@@ -132,8 +132,8 @@ const SourcesTable = () => {
                                             {sortedSources
                                                 .filter((source) => source.name.includes(filteringChars))
                                                 .map((source) => {
-                                                    const haveIndices = indices.includes(source.name.toLowerCase()) ? true : false;
-                                                    const haveGraphs = graphs.includes(source.graphUri || "") ? true : false;
+                                                    const haveIndices = indices.includes(source.name.toLowerCase());
+                                                    const haveGraphs = graphs.includes(source.graphUri || "");
                                                     return (
                                                         <TableRow key={source.name}>
                                                             <TableCell>{source.name}</TableCell>

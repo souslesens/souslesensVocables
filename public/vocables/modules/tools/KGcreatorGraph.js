@@ -167,6 +167,11 @@ var KGcreatorGraph = (function () {
         self.mappingVisjsGraph.data.edges.update(visjsData.edges);
     };
     self.groupByClass = function () {};
+
+    self.toSVG = function () {
+        self.mappingVisjsGraph.toSVG();
+    };
+
     return self;
 })();
 

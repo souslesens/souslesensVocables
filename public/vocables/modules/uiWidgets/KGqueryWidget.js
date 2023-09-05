@@ -15,8 +15,7 @@ import TimeLineWidget from "./timeLineWidget.js";
 
 var KGqueryWidget = (function () {
     var self = {};
-    self.querySets = [];
-    self.querySets.currentIndex = -1;
+    self.querySets = { sets: [], groups: [], currentIndex: -1 };
 
     self.queryPathParams = {};
     self.vicinityArray = [];
@@ -58,16 +57,46 @@ var KGqueryWidget = (function () {
 
     self.addQuerySet = function (booleanOperator) {
         var pathItem = []; //array of 3 items: formNode, toNode,Property,(inverse 1)
-        var color = self.pathEdgesColors[self.querySets.length];
+        var color = self.pathEdgesColors[self.querySets.sets.length];
         var querySet = { elements: [], color: color, booleanOperator: booleanOperator }; // array of queryElements with a color and a currentIndex
         self.addQueryElementToQuerySet(querySet);
-        self.querySets.push(querySet);
-        self.querySets.currentIndex = self.querySets.length - 1;
+        self.querySets.sets.push(querySet);
+        self.querySets.currentIndex = self.querySets.sets.length - 1;
 
+        var booleanOperatorHtml = "";
         if (booleanOperator) {
-            $("#KGqueryWidget_pathsDiv").append("<div style='  font-weight: bold;color: brown; '>" + booleanOperator + "</div>");
+            var unionStr = booleanOperator == "Union" ? "selected=selected" : "";
+            var minusStr = booleanOperator == "Minus" ? "selected=selected" : "";
+            booleanOperatorHtml =
+                "<div style='  font-weight: bold;color: brown; '>" +
+                " <select  onchange='KGqueryWidget.onBooleanOperatorChange(" +
+                self.querySets.currentIndex +
+                ",$(this).val())'> " +
+                "<option " +
+                unionStr +
+                ">Union</option>" +
+                "<option " +
+                minusStr +
+                ">Minus</option>" +
+                "</select>" +
+                "</div>";
+
             //  self.clearAll(true);
         }
+        var setHtml =
+            "<div id='KGqueryWidget_setDiv_" +
+            self.querySets.currentIndex +
+            "' class='KGqueryWidget_setDiv' style='color:" +
+            color +
+            "'>" +
+            booleanOperatorHtml +
+            "Set " +
+            self.querySets.currentIndex +
+            "<button onclick='' >remove</button>" +
+            "<button onclick='' >save</button>" +
+            "</div>";
+
+        $("#KGqueryWidget_pathsDiv").append(setHtml);
     };
     self.addQueryElementToQuerySet = function (querySet) {
         var queryElement = {
@@ -113,7 +142,7 @@ var KGqueryWidget = (function () {
      add a new queryElement if formNode and toNodes are registered
      if a path exist the new node has to be the target (to) Node of a new path and the from node should be the nearest node among the previous paths nodes
      */
-        var currentQuerySet = self.querySets[self.querySets.currentIndex];
+        var currentQuerySet = self.querySets.sets[self.querySets.currentIndex];
         var currentQueryElement = currentQuerySet.elements[currentQuerySet.elements.length - 1];
 
         var color = currentQuerySet.color;
@@ -148,7 +177,7 @@ var KGqueryWidget = (function () {
             currentQueryElement.fromNodeDivId = nodeDivId;
             self.classDivsMap[nodeDivId] = self.currentGraphNode;
 
-            $("#KGqueryWidget_pathsDiv").append(getPathHtml(pathDivId));
+            $("#KGqueryWidget_setDiv_" + self.querySets.currentIndex).append(getPathHtml(pathDivId));
             $("#" + currentQueryElement.pathDivId).append(getClassNodeDivHtml(self.currentGraphNode, nodeDivId));
         }
 
@@ -319,8 +348,8 @@ var KGqueryWidget = (function () {
             options = {};
         }
         /* if (!self.querySets.toNode) {
-      return alert("missing target node in  path");
-    }*/
+  return alert("missing target node in  path");
+}*/
 
         $("#KGqueryWidget_dataTableDiv").html("");
         self.message("searching...");
@@ -366,7 +395,7 @@ var KGqueryWidget = (function () {
         var whereStr = "";
         var uniqueQueries = {};
 
-        self.querySets.forEach(function (querySet) {
+        self.querySets.sets.forEach(function (querySet) {
             if (querySet.booleanOperator) {
                 whereStr += "\n " + querySet.booleanOperator + "\n ";
             }
@@ -652,7 +681,7 @@ var KGqueryWidget = (function () {
                     var options = {
                         shape: "triangle",
                         size: Lineage_whiteboard.defaultShapeSize,
-                        color: common.getSourceColor("class", varNameKey),
+                        color: common.getResourceColor("class", varNameKey),
                     };
                     var label = item[labelKey] ? item[labelKey].value : Sparql_common.getLabelFromURI(item[varNameKey].value);
                     visjsData.nodes.push(VisjsUtil.getVisjsNode(self.source, item[varNameKey].value, label, null, options));
@@ -731,10 +760,7 @@ var KGqueryWidget = (function () {
     };
 
     self.clearAll = function (exceptCombinedQueries) {
-        self.querySets = [];
-
-        self.querySets.currentIndex = -1;
-        self.addQuerySet();
+        self.querySets = { sets: [], groups: [], currentIndex: -1 };
 
         self.queryPathParams = {};
 
@@ -752,6 +778,7 @@ var KGqueryWidget = (function () {
             self.resetVisjEdges();
             self.resetVisjNodes();
             $("#KGqueryWidget_pathsDiv").html("");
+            self.addQuerySet();
             $("#KGqueryWidget_CombineControlsDiv").css("display", "none");
         }
     };
@@ -774,9 +801,11 @@ var KGqueryWidget = (function () {
 
     self.getAllQueryPathClasses = function () {
         var classes = [];
-        self.currentQuery.forEach(function (queryPath) {
-            classes.push(queryPath.fromNode);
-            classes.push(queryPath.toNode);
+        self.querySets.sets.forEach(function (querySet) {
+            querySet.elements.forEach(function (queryPath) {
+                classes.push(queryPath.fromNode);
+                classes.push(queryPath.toNode);
+            });
         });
         return classes;
     };
@@ -799,6 +828,10 @@ var KGqueryWidget = (function () {
             $("#KGqueryWidget_graphDiv").css("display", "block");
             $("#KGqueryWidget_dataTableDiv").css("display", "none");
         }
+    };
+
+    self.onBooleanOperatorChange = function (querySetIndex, value) {
+        self.querySets.sets[querySetIndex].booleanOperator = value;
     };
 
     return self;

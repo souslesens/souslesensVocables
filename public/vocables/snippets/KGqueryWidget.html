@@ -38,6 +38,12 @@
         padding: 3px;
         margin-right: 8px;
     }
+    .KGqueryWidget_setDiv {
+        margin: 3px;
+        padding: 3px;
+        border-radius: 3px;
+        border: solid 2px brown;
+    }
 </style>
 
 <div style="display: flex; flex-direction: row">
@@ -53,8 +59,9 @@
 
     <div style="width: 300px; display: flex; flex-direction: column">
         <div>
-            <button onclick="KGqueryWidget.clearAll(true)">Clear</button>
             <button onclick="KGqueryWidget.switchRightPanel()">&lt;&gt;</button>
+            <!--  <button onclick="KGqueryWidget.clearAll(true)">Clear</button>-->
+
             &nbsp; &nbsp;
             <button onclick="KGqueryWidget.queryKG('table')">Table</button>
             <button onclick="KGqueryWidget.queryKG('vijsGraph')">Graph</button>

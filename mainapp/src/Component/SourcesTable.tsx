@@ -54,15 +54,8 @@ const SourcesTable = () => {
         setOrderBy(property);
     }
 
-    const unwrappedIndices = SRD.unwrap([], identity, model.indices);
-    const indices = React.useMemo(() => {
-        return unwrappedIndices;
-    }, [unwrappedIndices]);
-
-    const unwrappedGraphs = SRD.unwrap([], identity, model.graphs);
-    const graphs = React.useMemo(() => {
-        return unwrappedGraphs;
-    }, [unwrappedGraphs]);
+    const indices = SRD.withDefault([], model.indices);
+    const graphs = SRD.withDefault([], model.graphs);
 
     const renderSources = SRD.match(
         {

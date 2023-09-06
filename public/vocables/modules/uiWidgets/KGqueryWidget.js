@@ -55,24 +55,21 @@ var KGqueryWidget = (function () {
         }
         var visjsGraphFileName = self.source + "_KGmodelGraph.json";
 
-        try {
-            self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", { nodes: [], edges: [] }, visjsOptions);
-            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
-                if (err) {
-                    throw new Error(err.responseText);
-                }
+        self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", { nodes: [], edges: [] }, visjsOptions);
+        self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
+            if (result) {
                 visjsData = result;
-                draw();
-            });
-        } catch (e) {
-            self.getInferredModelVisjsData(self.source, function (err, result) {
-                if (err) {
-                    return alert(err.responseText);
-                }
-                visjsData = result;
-                draw();
-            });
-        }
+                return draw();
+            } else {
+                self.getInferredModelVisjsData(self.source, function (err, result) {
+                    if (err) {
+                        return alert(err.responseText);
+                    }
+                    visjsData = result;
+                    draw();
+                });
+            }
+        });
     };
     self.addQuerySet = function (booleanOperator) {
         var pathItem = []; //array of 3 items: formNode, toNode,Property,(inverse 1)

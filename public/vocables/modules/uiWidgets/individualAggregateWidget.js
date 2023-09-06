@@ -5,7 +5,7 @@ var IndividualAggregateWidget = (function () {
     var self = {};
     self.groupFunctions = ["COUNT", "SUM", "MAX", "MIN", "AVG", "concat"];
 
-    self.showDialog = function (divId, loadClassesFn, validateFn) {
+    self.showDialog = function (divId, loadClassesFn, validateFn, message) {
         self.validateFn = validateFn;
         self.functionVarClasses = [];
         self.groupByClasses = [];
@@ -30,6 +30,7 @@ var IndividualAggregateWidget = (function () {
                 common.fillSelectOptions("individualAggregate_groupBySelect", self.groupByClasses, null, "label", "label");
 
                 common.fillSelectOptions("individualAggregate_groupFunctionSelect", self.groupFunctions, null);
+                if (message) $("#individualAggregate_messageDiv").html(message);
             });
         });
     };

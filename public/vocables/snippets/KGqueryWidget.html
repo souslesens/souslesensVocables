@@ -44,13 +44,22 @@
         border-radius: 3px;
         border: solid 2px brown;
     }
-</style>
 
+    .KGqueryWidget_smallButton {
+        font-size: 8px;
+    }
+</style>
+<script>
+    $(function () {
+        $("button").addClass(" btn btn-sm my-1 py-0 btn-outline-primary");
+        $("KGqueryWidget_smallButton").addClass(" btn btn-sm my-1 py-0 btn-outline-primary");
+    });
+</script>
 <div style="display: flex; flex-direction: row">
     <div style="width: 300px; display: flex; flex-direction: column">
         <div id="KGqueryWidget_CombineControlsDiv">
-            <button onclick="KGqueryWidget.addQuerySet('minus')"><img src="icons/set_minus.png" height="30px" />Minus</button>
-            <button onclick="KGqueryWidget.addQuerySet('union')"><img src="icons/set_union.png" height="30px" />Union</button>
+            <button onclick="KGqueryWidget.addQuerySet('Minus')"><img src="icons/set_minus.png" height="30px" />Minus</button>
+            <button onclick="KGqueryWidget.addQuerySet('Union')"><img src="icons/set_union.png" height="30px" />Union</button>
             <button onclick="KGqueryWidget.clearAll()">Clear all</button>
         </div>
 
@@ -66,6 +75,7 @@
             <button onclick="KGqueryWidget.queryKG('table')">Table</button>
             <button onclick="KGqueryWidget.queryKG('vijsGraph')">Graph</button>
             <button onclick="KGqueryWidget.aggregateQuery()">Aggregate</button>
+            <button onclick="KGqueryWidget.saveModelGraph()" style="display: none">saveModelGraph</button>
 
             <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->
 

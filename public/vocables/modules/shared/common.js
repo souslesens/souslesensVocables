@@ -669,34 +669,34 @@ if (callback) return callback(err);
     self.isNumber = function (n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     };
-    (self.isInt = function (value) {
+    self.isInt = function (value) {
         return /-?[0-9]+/.test("" + value);
-    }),
-        (self.isFloat = function (value) {
-            return /-?[0-9]+[.,]+[0-9]?/.test("" + value);
-        }),
-        (self.palette = [
-            "#9edae5",
-            "#17becf",
-            "#dbdb8d",
-            "#bcbd22",
-            "#c7c7c7",
-            "#7f7f7f",
-            "#f7b6d2",
-            "#e377c2",
-            "#c49c94",
-            "#c5b0d5",
-            "#ff9896",
-            "#98df8a",
-            "#ffbb78",
-            "#ff7f0e",
-            "#aec7e8",
-            "#1f77b4",
-            "#9467bd",
-            "#8c564b",
-            "#d62728",
-            "#2ca02c",
-        ]);
+    };
+    self.isFloat = function (value) {
+        return /-?[0-9]+[.,]+[0-9]?/.test("" + value);
+    };
+    self.palette = [
+        "#9edae5",
+        "#17becf",
+        "#dbdb8d",
+        "#bcbd22",
+        "#c7c7c7",
+        "#7f7f7f",
+        "#f7b6d2",
+        "#e377c2",
+        "#c49c94",
+        "#c5b0d5",
+        "#ff9896",
+        "#98df8a",
+        "#ffbb78",
+        "#ff7f0e",
+        "#aec7e8",
+        "#1f77b4",
+        "#9467bd",
+        "#8c564b",
+        "#d62728",
+        "#2ca02c",
+    ];
 
     self.paletteIntense = [
         "#0072d5",

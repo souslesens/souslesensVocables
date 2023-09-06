@@ -800,10 +800,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         });
     };
 
-    self.saveGraph = function (
-        /** @type {string | number | boolean | string[] | ((this: HTMLElement, index: number, attr: string) => string | number | void | undefined) | ((this: HTMLElement, index: number, text: string) => string | number | boolean) | null} */ fileName,
-        /** @type {any} */ raw
-    ) {
+    self.saveGraph = function (fileName, raw) {
         if (!self.currentContext) {
             return;
         }
@@ -835,13 +832,24 @@ const VisjsGraphClass = function (graphDiv, data, options) {
             fileName: fileName,
             data: data,
         };
+        var payload = {
+            dir: "graphs/",
+            fileName: fileName,
+            data: JSON.stringify(data),
+        };
 
         $.ajax({
+            type: "POST",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (_result, _textStatus, _jqXHR) {
+                /* $.ajax({
             type: "POST",
             url: Config.apiUrl + "/data",
             data: payload,
             dataType: "json",
-            success: function (_result, _textStatus, _jqXHR) {
+            success: function (_result, _textStatus, _jqXHR) {*/
                 $("#visjsGraph_savedGraphsSelect").append($("<option></option>").attr("value", fileName).text(fileName));
                 MainController.UI.message("graph saved");
             },
@@ -855,11 +863,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         $("#VisJsGraph_message").html(message);
     };
 
-    self.loadGraph = function (
-        /** @type {string | number | string[] | undefined} */ fileName,
-        /** @type {any} */ add,
-        /** @type {(arg0: null, arg1: { nodes: never[]; edges: never[]; }) => void} */ callback
-    ) {
+    self.loadGraph = function (fileName, add, callback) {
         if (!fileName) {
             fileName = $("#visjsGraph_savedGraphsSelect").val();
         }
@@ -869,11 +873,23 @@ const VisjsGraphClass = function (graphDiv, data, options) {
         }
 
         self.message("Loading Graph...");
+
+        var payload = {
+            dir: "graphs/",
+            name: fileName,
+        };
+
         $.ajax({
+            type: "GET",
+            url: `${Config.apiUrl}/data/file`,
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                /*  $.ajax({
             type: "GET",
             url: `${Config.apiUrl}/data/file?dir=graphs&name=${fileName}`,
             dataType: "json",
-            success: function (result, _textStatus, _jqXHR) {
+            success: function (result, _textStatus, _jqXHR) {*/
                 var data = JSON.parse(result);
                 var positions = data.positions;
                 var options = data.context.options;
@@ -882,10 +898,10 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 if (addToCurrentGraph) {
                     existingNodes = self.getExistingIdsMap();
                 }
-                data.nodes.forEach(function (/** @type {{ id: string | number; fixed: { x: boolean; y: boolean; }; x: any; y: any; }} */ node) {
+                data.nodes.forEach(function (node) {
                     if (!existingNodes[node.id]) {
                         existingNodes[node.id] = 1;
-                        if ((node.fixed && positions[node.id]) || options.nodes.fixed) {
+                        if (node.fixed && positions[node.id]) {
                             node.x = positions[node.id].x;
                             node.y = positions[node.id].y;
                             node.fixed = { x: true, y: true };

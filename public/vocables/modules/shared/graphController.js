@@ -65,7 +65,7 @@ var GraphController = (function () {
                 }
 
                 if (!existingIds[fromId]) {
-                    var color = Lineage_whiteboard.getSourceColor(null, fromId);
+                    var color = common.getSourceColor("class", fromId);
                     existingIds[fromId] = 1;
                     var node = {
                         id: fromId,
@@ -99,7 +99,7 @@ var GraphController = (function () {
 
                 if (!existingIds[toId]) {
                     existingIds[toId] = 1;
-                    color = Lineage_whiteboard.getSourceColor(null, toId);
+                    color = common.getSourceColor("class", toId);
                     node = {
                         id: toId,
                         label: toLabel,

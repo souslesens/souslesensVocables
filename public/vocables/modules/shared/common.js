@@ -222,7 +222,9 @@ var common = (function () {
             });
             var c = [];
             b.forEach(function (v) {
-                if (aa[v]) c.push(v);
+                if (aa[v]) {
+                    c.push(v);
+                }
             });
             return c;
         },
@@ -236,7 +238,9 @@ var common = (function () {
             });
 
             b.forEach(function (v) {
-                if (!aa[v]) c.push(v);
+                if (!aa[v]) {
+                    c.push(v);
+                }
             });
             return c;
         },
@@ -248,7 +252,9 @@ var common = (function () {
             var c = [];
 
             a.forEach(function (v) {
-                if (!bb[v]) c.push(v);
+                if (!bb[v]) {
+                    c.push(v);
+                }
             });
             return c;
         },
@@ -651,7 +657,9 @@ if (callback) return callback(err);
                 sec = "0" + sec;
             }
             str = date.getFullYear() + "-" + month + "-" + day;
-            if (time) str += "T" + hour + ":" + min + ":" + sec;
+            if (time) {
+                str += "T" + hour + ":" + min + ":" + sec;
+            }
         } else {
             str = "";
         }
@@ -661,34 +669,34 @@ if (callback) return callback(err);
     self.isNumber = function (n) {
         return !isNaN(parseFloat(n)) && isFinite(n);
     };
-    (self.isInt = function (value) {
+    self.isInt = function (value) {
         return /-?[0-9]+/.test("" + value);
-    }),
-        (self.isFloat = function (value) {
-            return /-?[0-9]+[.,]+[0-9]?/.test("" + value);
-        }),
-        (self.palette = [
-            "#9edae5",
-            "#17becf",
-            "#dbdb8d",
-            "#bcbd22",
-            "#c7c7c7",
-            "#7f7f7f",
-            "#f7b6d2",
-            "#e377c2",
-            "#c49c94",
-            "#c5b0d5",
-            "#ff9896",
-            "#98df8a",
-            "#ffbb78",
-            "#ff7f0e",
-            "#aec7e8",
-            "#1f77b4",
-            "#9467bd",
-            "#8c564b",
-            "#d62728",
-            "#2ca02c",
-        ]);
+    };
+    self.isFloat = function (value) {
+        return /-?[0-9]+[.,]+[0-9]?/.test("" + value);
+    };
+    self.palette = [
+        "#9edae5",
+        "#17becf",
+        "#dbdb8d",
+        "#bcbd22",
+        "#c7c7c7",
+        "#7f7f7f",
+        "#f7b6d2",
+        "#e377c2",
+        "#c49c94",
+        "#c5b0d5",
+        "#ff9896",
+        "#98df8a",
+        "#ffbb78",
+        "#ff7f0e",
+        "#aec7e8",
+        "#1f77b4",
+        "#9467bd",
+        "#8c564b",
+        "#d62728",
+        "#2ca02c",
+    ];
 
     self.paletteIntense = [
         "#0072d5",
@@ -709,6 +717,7 @@ if (callback) return callback(err);
         "#B3B005",
     ];
 
+    self.resourceColorPalettes = {};
     self.quantumModelmappingSources = {
         "http://rds.posccaesar.org/ontology/lis14/ont/core/1.0/PhysicalQuantity": "ISO_15926-part-14",
         "http://data.posccaesar.org/dm/ClassOfQuantity": "ISO_15926-PCA",
@@ -766,6 +775,21 @@ if (callback) return callback(err);
             return "rgba(" + [(c >> 16) & 255, (c >> 8) & 255, c & 255].join(",") + "," + alpha + ")";
         }
         return hex;
+    };
+
+    self.getResourceColor = function (resourceType, resourceId, palette) {
+        if (!palette) {
+            palette = "paletteIntense";
+        }
+        if (!self.resourceColorPalettes[resourceType]) {
+            self.resourceColorPalettes[resourceType] = {};
+        }
+        var color = self.resourceColorPalettes[resourceType][resourceId];
+        if (!color) {
+            color = common[palette][Object.keys(self.resourceColorPalettes[resourceType]).length];
+            self.resourceColorPalettes[resourceType][resourceId] = color;
+        }
+        return color;
     };
 
     self.getInputSelection = function () {

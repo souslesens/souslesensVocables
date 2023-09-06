@@ -6,6 +6,7 @@ import Sparql_OWL from "../sparqlProxies/sparql_OWL.js";
 import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../shared/mainController.js";
 import visjsGraphClass from "../graph/VisjsGraphClass.js";
+import KGcreatorGraph from "./KGcreatorGraph.js";
 
 //https://openbase.com/js/@json-editor/json-editor/documentation
 
@@ -1467,69 +1468,6 @@ self.saveMappings({classId:classId})
         $("#KGcreator_fnBody").val(str);
     };
 
-    self.drawMappings = function (mappingsTriples) {
-        if (!mappingsTriples) {
-            mappingsTriples = self.currentJsonObject.tripleModels;
-        }
-        var visjsData = { nodes: [], edges: [] };
-        var existingNodes = {};
-        var shape = "box";
-        mappingsTriples.forEach(function (item) {
-            function getColor(str) {
-                if (str.indexOf("http") > -1) {
-                    return "#70ac47";
-                }
-                if (str.indexOf(":") > -1) {
-                    return "#0067bb";
-                }
-                return "#fdbf01";
-            }
-
-            if (!existingNodes[item.s]) {
-                existingNodes[item.s] = 1;
-                visjsData.nodes.push({
-                    id: item.s,
-                    label: item.s,
-                    shape: shape,
-                    color: getColor(item.s),
-                });
-            }
-            if (!existingNodes[item.o]) {
-                existingNodes[item.o] = 1;
-                visjsData.nodes.push({
-                    id: item.o,
-                    label: item.o,
-                    shape: shape,
-                    color: getColor(item.o),
-                });
-            }
-            var edgeId = item.s + item.p + item.o;
-            if (!existingNodes[edgeId]) {
-                existingNodes[edgeId] = 1;
-                visjsData.edges.push({
-                    id: edgeId,
-                    from: item.s,
-                    to: item.o,
-                    label: item.p,
-                    // color: getColor(item.o),
-                    arrows: {
-                        to: {
-                            enabled: true,
-                            type: Lineage_whiteboard.defaultEdgeArrowType,
-                            scaleFactor: 0.5,
-                        },
-                    },
-                });
-            }
-        });
-
-        var html = "<div id='KGcreator_mappingsGraphDiv' style='width:1100px;height:750px'></div>";
-        $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").html(html);
-        self.mappingVisjsGraph = new visjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, {});
-        self.mappingVisjsGraph.draw();
-    };
-
     /**
      *
      * fills select options with sourxe and upperOntology predicates
@@ -1687,7 +1625,8 @@ self.saveMappings({classId:classId})
                 return alert(err.responseText);
             }
 
-            var allTripleMappings = [];
+            var allTripleMappings = {};
+
             async.eachSeries(
                 result,
                 function (mappingFileName, callbackEach) {
@@ -1695,7 +1634,7 @@ self.saveMappings({classId:classId})
                         dir: "CSV/" + self.currentSlsvSource || self.currentCsvDir,
                         name: mappingFileName,
                     };
-
+                    allTripleMappings[mappingFileName] = {};
                     $.ajax({
                         type: "GET",
                         url: `${Config.apiUrl}/data/file`,
@@ -1704,9 +1643,7 @@ self.saveMappings({classId:classId})
                         success: function (result, _textStatus, _jqXHR) {
                             try {
                                 var jsonObject = JSON.parse(result);
-                                if (jsonObject.tripleModels.length > 0) {
-                                    allTripleMappings = allTripleMappings.concat(jsonObject.tripleModels);
-                                }
+                                allTripleMappings[mappingFileName] = jsonObject;
                             } catch (e) {
                                 console.log("parsing error " + mappingFileName);
                             }
@@ -1728,11 +1665,12 @@ self.saveMappings({classId:classId})
     };
 
     self.drawAllMappings = function () {
-        self.getAllTriplesMappings(function (err, tripleModels) {
+        self.getAllTriplesMappings(function (err, mappingObjects) {
             if (err) {
                 return alert(err.responseText);
             }
-            self.drawMappings(tripleModels);
+
+            KGcreatorGraph.showDialog(mappingObjects);
         });
     };
     self.showModelMatchingProperties = function () {
@@ -1740,10 +1678,14 @@ self.saveMappings({classId:classId})
         var object = $("#editPredicate_objectValue").val();
         var subjectTypes = [];
         var objectTypes = [];
-        self.getAllTriplesMappings(function (err, tripleModels) {
+        self.getAllTriplesMappings(function (err, mappingObject) {
             if (err) {
                 return alert(err.responseText);
             }
+
+            return;
+
+            // TO BE FINISHED
             tripleModels.forEach(function (item) {
                 if (item.s == subject && item.p == "rdf:type") {
                     if (item.o.indexOf("owl") < 0) {

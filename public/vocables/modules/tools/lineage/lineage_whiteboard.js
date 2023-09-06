@@ -3131,7 +3131,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         },
     };
 
-    self.getSourceColor = function (/** @type {string | number} */ source, /** @type {string | string[]} */ nodeId, /** @type {string} */ palette) {
+    self.getSourceColor = function (source, nodeId, palette) {
         if (!palette) {
             palette = "paletteIntense";
         }
@@ -3150,6 +3150,7 @@ self.zoomGraphOnNode(node.data[0].id, false);
         }
         return sourceColors[source];
     };
+
     self.getPropertyColor = function (/** @type {string | number} */ propertyName, /** @type {string} */ palette) {
         if (!palette) {
             palette = "paletteIntense";

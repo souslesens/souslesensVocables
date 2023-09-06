@@ -948,6 +948,9 @@ const VisjsGraphClass = function (graphDiv, data, options) {
                 }
             },
             error(err) {
+                if (callback) {
+                    return callback(err);
+                }
                 return alert(err);
             },
         });

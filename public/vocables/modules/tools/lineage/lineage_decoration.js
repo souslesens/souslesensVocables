@@ -32,7 +32,7 @@ var Lineage_decoration = (function () {
         }
 
         var index = Object.keys(LegendWidget.legendDivsStack).length;
-        var color = commmon.getSourceColor("query", "query_" + index);
+        var color = common.getResourceColor("query", "query_" + index);
         var legendDivId = "legendDiv_" + index;
         LegendWidget.legendDivsStack[legendDivId] = { nodeIds: visjsNodes };
         var html =
@@ -44,8 +44,8 @@ var Lineage_decoration = (function () {
             "'> </div>" +
             "<input type='image' src='./icons/caret-right.png'  style='opacity: 0.5; width: 20px;height: 20px;}' onclick='Lineage_decoration.showLegendDivPopupMenu(" +
             index +
-            ")'/> </div>";
-        +(queryInfos.predicate || "") + "<br>" + (queryInfos.filter.classLabel || "") + (queryInfos.filter.value || "");
+            ")'/> "+
+        (queryInfos.predicate || "") + "<br>" + (queryInfos.filter.classLabel || "") + (queryInfos.filter.value || "")+
         ("</div>");
         $("#Lineage_classes_graphDecoration_legendDiv").append(html);
 

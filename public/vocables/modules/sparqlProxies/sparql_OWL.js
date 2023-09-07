@@ -779,9 +779,9 @@ var Sparql_OWL = (function () {
                 "OPTIONAL {?subject rdf:type ?subjectType.} " +
                 "OPTIONAL {?object rdf:type ?objectType.} " +
                 "OPTIONAL {?object owl:hasValue ?objectValue.} " +
-                Sparql_common.getVariableLangLabel("prop", true,null,filterStr) +
-                Sparql_common.getVariableLangLabel("subject", true,null,filterStr) +
-                Sparql_common.getVariableLangLabel("object", true,null,filterStr);
+                Sparql_common.getVariableLangLabel("prop", true, null, filterStr) +
+                Sparql_common.getVariableLangLabel("subject", true, null, filterStr) +
+                Sparql_common.getVariableLangLabel("object", true, null, filterStr);
             /* "OPTIONAL{?prop rdfs:label ?propertyLabel.}  " +
 " OPTIONAL{?subject rdfs:label ?subjectLabel.}  " +
 " OPTIONAL{?object rdfs:label ?objectLabel.}  ";*/
@@ -1193,8 +1193,8 @@ var Sparql_OWL = (function () {
             "{ ?subject rdfs:subClassOf ?node.  ?node rdf:type owl:Restriction." +
             filterStr +
             " ?node owl:onProperty ?prop ." +
-            Sparql_common.getVariableLangLabel("prop", true,null,filterStr) +
-            Sparql_common.getVariableLangLabel("subject", true,null,filterStr);
+            Sparql_common.getVariableLangLabel("prop", true, null, filterStr) +
+            Sparql_common.getVariableLangLabel("subject", true, null, filterStr);
 
         if (options.someValuesFrom) {
             query += "?node owl:someValuesFrom ?value." + Sparql_common.getVariableLangLabel("value", true); //OPTIONAL {?value rdfs:label ?valueLabel}";

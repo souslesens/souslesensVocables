@@ -120,7 +120,7 @@ var Sparql_common = (function () {
                     }
 
                     if (options.exactMatch) {
-                        filters.push(" FILTER(?"+varName + "Label = '" + words + "')");
+                        filters.push(" FILTER(?" + varName + "Label = '" + words + "')");
                         //filters.push(" regex(?" + varName + 'Label, "^' + words + '$", "i")');
                     } else {
                         filters.push(" FILTER(regex(?" + varName + 'Label, "' + words + '", "i"))');
@@ -227,15 +227,15 @@ var Sparql_common = (function () {
         });
     };
 
-    self.getVariableLangLabel = function (variable, optional, skosPrefLabel,filterStr) {
+    self.getVariableLangLabel = function (variable, optional, skosPrefLabel, filterStr) {
         //lang doesnt ot work whern filter contains var label
 
         var pred = "";
         if (skosPrefLabel) {
             pred = "|<http://www.w3.org/2004/02/skos/core#prefLabel>";
         }
-        if(filterStr && filterStr.indexOf(variable + "Label")>-1){
-            return  " OPTIONAL {?" + variable + " rdfs:label" + pred + " ?" + variable + "Label.}"
+        if (filterStr && filterStr.indexOf(variable + "Label") > -1) {
+            return " OPTIONAL {?" + variable + " rdfs:label" + pred + " ?" + variable + "Label.}";
         }
 
         //     var str = "?" + variable + " rdfs:label" + pred + " ?" + variable + "Label. filter( lang(?" + variable + "Label)= '" + Config.default_lang + "' || !lang(?" + variable + "Label))";

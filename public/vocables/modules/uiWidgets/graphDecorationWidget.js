@@ -104,7 +104,7 @@ var GraphDecorationWidget = (function () {
             });
         }
         $("#lineage_actionDiv_title").html("Outline Legend");
-        LegendWidget.drawLegend("Lineage_classes_graphDecoration_legendDiv", legendVisjsTreeData);
+        LegendWidget.drawLegend("legendJstreeDivId", legendVisjsTreeData);
         Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newVisjsNodes);
     };
 

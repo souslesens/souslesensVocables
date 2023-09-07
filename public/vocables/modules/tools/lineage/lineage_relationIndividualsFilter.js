@@ -71,8 +71,8 @@ var Lineage_relationIndividualsFilter = (function () {
         Lineage_relations.currentQueryInfos.filter.classLabel = classLabel;
         Lineage_relations.currentQueryInfos.filter.value = individualLabels.toString();
         var role = classIndex == 0 ? "subject" : "object";
-        var message = Sparql_common.setFilter(role, null,individuals,{exactMatch:true});
-      //  var message = Sparql_common.setFilter(role, individuals);
+        var message = Sparql_common.setFilter(role, null, individuals, { exactMatch: true });
+        //  var message = Sparql_common.setFilter(role, individuals);
         // var message = "FILTER(?" + role + " = <" + individual + ">)  ";
         $("#lineage_relationIndividuals_filterTA").text(message);
     };

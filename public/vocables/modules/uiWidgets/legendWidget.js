@@ -16,7 +16,8 @@ var LegendWidget = (function () {
         self.currentLegendDJstreedata[legendDivId] = jstreeData;
         var options = {
             openAll: true,
-            withCheckboxes: true,
+            //withCheckboxes: true, to finish
+            withCheckboxes: false,
             onCheckNodeFn: LegendWidget.onLegendCheckBoxes,
             onUncheckNodeFn: LegendWidget.onLegendCheckBoxes,
             selectTreeNodeFn: function (evt, obj) {
@@ -26,7 +27,9 @@ var LegendWidget = (function () {
             contextMenu: LegendWidget.getLegendJstreeContextMenu(),
         };
         $("#Lineage_classes_graphDecoration_legendDiv").jstree("destroy").empty();
-        $("#Lineage_classes_graphDecoration_legendDiv").html("<div  class='jstreeContainer' style='height: 350px;width:90%'>" + "<div id=legendDivId style='height: 25px;width:100%'></div></div>");
+        $("#Lineage_classes_graphDecoration_legendDiv").html(
+            "<div  class='jstreeContainer' style='height: 350px;width:90%'>" + "<div id='legendJstreeDivId' style='height: 25px;width:100%'></div></div>"
+        );
         JstreeWidget.loadJsTree(legendDivId, jstreeData, options, function () {
             self.legendDivId = legendDivId;
             $("#" + legendDivId)

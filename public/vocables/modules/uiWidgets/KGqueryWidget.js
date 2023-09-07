@@ -17,16 +17,14 @@ var KGqueryWidget = (function () {
     var self = {};
     self.querySets = { sets: [], groups: [], currentIndex: -1 };
 
-    self.queryPathParams = {};
     self.vicinityArray = [];
 
     self.classDivsMap = {};
     self.classeMap = {};
     self.pathDivsMap = {};
-    self.classFiltersMap = {};
     self.allPathEdges = {};
 
-    self.pathEdgesColors = ["green", "blue", "orange"];
+    self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
     self.showDialog = function () {
         $("#mainDialogDiv").dialog("open");
@@ -43,6 +41,7 @@ var KGqueryWidget = (function () {
             onclickFn: KGqueryWidget.graphActions.onNodeClick,
             dndCtrlFn: KGqueryWidget.graphActions.onDnDnode,
         };
+
         function draw() {
             self.vicinityArray = [];
             visjsData.edges.forEach(function (edge) {
@@ -50,9 +49,19 @@ var KGqueryWidget = (function () {
             });
 
             self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", visjsData, visjsOptions);
-            self.KGqueryGraph.draw();
+
+            // cannot get colors from loadGraph ???!!
+            self.KGqueryGraph.draw(function () {
+                var newNodes = [];
+                visjsData.nodes.forEach(function (node) {
+                    newNodes.push({ id: node.id, color: node.color, shape: node.shape });
+                });
+                self.KGqueryGraph.data.nodes.update(newNodes);
+            });
+
             self.clearAll();
         }
+
         var visjsGraphFileName = self.source + "_KGmodelGraph.json";
 
         self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", { nodes: [], edges: [] }, visjsOptions);
@@ -72,9 +81,10 @@ var KGqueryWidget = (function () {
         });
     };
     self.addQuerySet = function (booleanOperator) {
+        self.switchRightPanel();
         var pathItem = []; //array of 3 items: formNode, toNode,Property,(inverse 1)
         var color = self.pathEdgesColors[self.querySets.sets.length];
-        var querySet = { elements: [], color: color, booleanOperator: booleanOperator }; // array of queryElements with a color and a currentIndex
+        var querySet = { elements: [], color: color, booleanOperator: booleanOperator, classFiltersMap: {} }; // array of queryElements with a color and a currentIndex
         self.addQueryElementToQuerySet(querySet);
         self.querySets.sets.push(querySet);
         self.querySets.currentIndex = self.querySets.sets.length - 1;
@@ -110,7 +120,9 @@ var KGqueryWidget = (function () {
             booleanOperatorHtml +
             "Set " +
             (self.querySets.currentIndex + 1);
-        if (self.querySets.currentIndex > 0) setHtml += "&nbsp;<button class='KGqueryWidget_smallButton' onclick='KGqueryWidget.removeSet( " + self.querySets.currentIndex + ")' >X</button>";
+        if (self.querySets.currentIndex > 0) {
+            setHtml += "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary KGqueryWidget_smallButton' onclick='KGqueryWidget.removeSet( " + self.querySets.currentIndex + ")' >X</button>";
+        }
         // "<button onclick='' >save</button>" +
         setHtml += "</div>";
 
@@ -159,7 +171,11 @@ var KGqueryWidget = (function () {
                 "' id='" +
                 queryElementDivId +
                 "'>" +
-                //  "&nbsp;<button class='KGqueryWidget_smallButton' onclick='KGqueryWidget.removeQueryElement( "+setIndex+", "+elementIndex+") '>X</button>" +
+                "&nbsp;<button class='btn btn-sm my-1 py-0 btn-outline-primary KGqueryWidget_smallButton' onclick='KGqueryWidget.removeQueryElement( " +
+                setIndex +
+                ", " +
+                elementIndex +
+                ") '>X</button>" +
                 "" +
                 "</div>";
             return html;
@@ -171,20 +187,23 @@ var KGqueryWidget = (function () {
      */
         var currentQuerySet = self.querySets.sets[self.querySets.currentIndex];
         var currentQueryElement = currentQuerySet.elements[currentQuerySet.elements.length - 1];
-
+        self.currentGraphNode.setIndex = self.querySets.currentIndex;
         var color = currentQuerySet.color;
         if (currentQueryElement.fromNode && currentQueryElement.toNode) {
             self.getNearestNode(self.currentGraphNode.id, currentQuerySet, function (err, nodeId) {
-                var queryElementDivId = "queryElementDiv_" + common.getRandomHexaId(3);
-                var nodeDivId = "nodeDiv_" + common.getRandomHexaId(3);
+                // var queryElementDivId = "queryElementDiv_" + common.getRandomHexaId(3);
 
                 var newQueryElement = self.addQueryElementToQuerySet(currentQuerySet);
+                var elementIndex = currentQuerySet.elements.length;
+                var queryElementDivId = "queryElementDiv_" + self.querySets.currentIndex + "_" + elementIndex;
                 newQueryElement.fromNode = { id: nodeId };
 
                 newQueryElement.queryElementDivId = queryElementDivId;
+                var nodeDivId = "nodeDiv_" + common.getRandomHexaId(3);
+
                 newQueryElement.fromNodeDivId = nodeDivId;
                 self.classDivsMap[nodeDivId] = self.currentGraphNode;
-                var elementIndex = currentQuerySet.elements.length;
+
                 $("#KGqueryWidget_setDiv_" + self.querySets.currentIndex).append(getQueryElementHtml(self.querySets.currentIndex, queryElementDivId, elementIndex));
 
                 var fromNode = self.classeMap[nodeId];
@@ -196,14 +215,15 @@ var KGqueryWidget = (function () {
             return;
         } else if (!currentQueryElement.fromNode) {
             self.classeMap[self.currentGraphNode.id] = self.currentGraphNode;
-            var queryElementDivId = "queryElementDiv_" + common.getRandomHexaId(3);
+            var elementIndex = currentQuerySet.elements.length;
+            var queryElementDivId = "queryElementDiv_" + self.querySets.currentIndex + "_" + elementIndex;
             var nodeDivId = "nodeDiv_" + common.getRandomHexaId(3);
 
             currentQueryElement.fromNode = self.currentGraphNode;
             currentQueryElement.queryElementDivId = queryElementDivId;
             currentQueryElement.fromNodeDivId = nodeDivId;
             self.classDivsMap[nodeDivId] = self.currentGraphNode;
-            var elementIndex = currentQuerySet.elements.length;
+
             $("#KGqueryWidget_setDiv_" + self.querySets.currentIndex).append(getQueryElementHtml(self.querySets.currentIndex, queryElementDivId, elementIndex));
             $("#" + currentQueryElement.queryElementDivId).append(getClassNodeDivHtml(self.currentGraphNode, nodeDivId));
         }
@@ -239,7 +259,7 @@ var KGqueryWidget = (function () {
 
                     self.KGqueryGraph.data.edges.update(newVisjsEdges);
 
-                    $("#KGqueryWidget_CombineControlsDiv").css("display", "flex");
+                    $("#KGqueryWidget_SetsControlsDiv").css("display", "flex");
 
                     if (nodeEvent && nodeEvent.ctrlKey) {
                         self.addNodeFilter(nodeDivId);
@@ -329,9 +349,9 @@ var KGqueryWidget = (function () {
 
     self.addNodeFilter = function (classDivId) {
         var aClass = self.classDivsMap[classDivId];
-
-        if (self.classFiltersMap[aClass.id]) {
-            delete self.classFiltersMap[aClass.id];
+        var classSetIndex = aClass.setIndex;
+        if (self.querySets.sets[classSetIndex].classFiltersMap[aClass.id]) {
+            delete self.querySets.sets[classSetIndex].classFiltersMap[aClass.id];
             $("#" + classDivId + "_filter").html("");
             return;
         }
@@ -345,21 +365,16 @@ var KGqueryWidget = (function () {
             if (!filter) {
                 return;
             }
-            self.classFiltersMap[aClass.id] = { class: aClass, filter: filter };
+            self.querySets.sets[classSetIndex].classFiltersMap[aClass.id] = { class: aClass, filter: filter };
             $("#" + classDivId + "_filter").append(filter);
         });
     };
 
-    self.removeNodeFilter = function (nodeDivId) {
-        var queryObject = self.classDivsMap[nodeDivId];
-        self.currentQuery[self.classDivsMap[nodeDivId].index].filter = null;
-        self.classDivsMap[nodeDivId].filter = null;
-        $("#" + nodeDivId + "_filter").append(filter);
-    };
-
     self.aggregateQuery = function () {
         var message = "";
-        if (self.querySets.sets.length > 0) message = "<font color='blue'>aggregate works only with variables belonging to the same set !</font>";
+        if (self.querySets.sets.length > 0) {
+            message = "<font color='blue'>aggregate works only with variables belonging to the same set !</font>";
+        }
         IndividualAggregateWidget.showDialog(
             null,
             function (callback) {
@@ -472,8 +487,8 @@ return alert("missing target node in  path");
                     }
                 });
 
-                for (var key in self.classFiltersMap) {
-                    filterStr += self.classFiltersMap[key].filter + " \n";
+                for (var key in querySet.classFiltersMap) {
+                    filterStr += querySet.classFiltersMap[key].filter + " \n";
                 }
 
                 function addToStringIfNotExists(str, text) {
@@ -483,6 +498,7 @@ return alert("missing target node in  path");
                         return text + str;
                     }
                 }
+
                 var optionalStr = "";
                 optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " owl:hasValue " + subjectVarName + "Value}\n", optionalStr);
                 optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " owl:hasValue " + objectVarName + "Value}\n", optionalStr);
@@ -792,27 +808,23 @@ return alert("missing target node in  path");
         self.KGqueryGraph.data.edges.update(newVisjsEdges);
     };
 
-    self.clearAll = function (exceptCombinedQueries) {
+    self.clearAll = function (exceptSetQueries) {
         self.querySets = { sets: [], groups: [], currentIndex: -1 };
-
-        self.queryPathParams = {};
-
         self.classDivsMap = {};
 
         self.pathDivsMap = {};
-        self.classFiltersMap = {};
         self.allPathEdges = {};
         $("#KGqueryWidget_graphDiv").css("display", "flex");
         $("#KGqueryWidget_dataTableDiv").css("display", "none");
-        if (!exceptCombinedQueries) {
+        if (!exceptSetQueries) {
             self.classeMap = {};
-            self.combinedQueries = [];
+            self.SetQueries = [];
             self.queryPathesMap = {};
             self.resetVisjEdges();
             self.resetVisjNodes();
             $("#KGqueryWidget_pathsDiv").html("");
             self.addQuerySet();
-            $("#KGqueryWidget_CombineControlsDiv").css("display", "none");
+            $("#KGqueryWidget_SetsControlsDiv").css("display", "none");
         }
     };
     self.graphActions = {
@@ -868,11 +880,13 @@ return alert("missing target node in  path");
     };
 
     self.removeQueryElement = function (setIndex, elementIndex) {
+        $("#queryElementDiv_" + setIndex + "_" + elementIndex).remove();
         self.querySets.sets[setIndex].elements.splice(elementIndex, 1);
     };
     self.removeSet = function (setIndex) {
         $("#KGqueryWidget_setDiv_" + setIndex).remove();
         self.querySets.sets.splice(setIndex, 1);
+        self.querySets.currentIndex = self.querySets.sets.length;
     };
 
     self.saveModelGraph = function () {

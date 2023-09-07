@@ -18,21 +18,20 @@ var Lineage_decoration = (function () {
     self.currentVisjGraphNodesMap = {};
     self.decorateNodeAndDrawLegend = function (visjsNodes) {
         if (Lineage_relations.currentQueryInfos) {
-            self.decorateByUpperOntologyByQueryInfos(visjsNodes, Lineage_relations.currentQueryInfos);
+            self.decorateByQueryInfos(visjsNodes, Lineage_relations.currentQueryInfos);
             Lineage_relations.currentQueryInfos = null;
         } else {
-            return;
             self.decorateByUpperOntologyByClass(visjsNodes);
         }
     };
 
-    self.decorateByUpperOntologyByQueryInfos = function (visjsNodes, queryInfos) {
+    self.decorateByQueryInfos = function (visjsNodes, queryInfos) {
         if (visjsNodes.length == 0) {
             return;
         }
 
         var index = Object.keys(LegendWidget.legendDivsStack).length;
-        var color = commmon.getSourceColor("query", "query_" + index);
+        var color = common.getResourceColor("query", "query_" + index);
         var legendDivId = "legendDiv_" + index;
         LegendWidget.legendDivsStack[legendDivId] = { nodeIds: visjsNodes };
         var html =
@@ -44,9 +43,12 @@ var Lineage_decoration = (function () {
             "'> </div>" +
             "<input type='image' src='./icons/caret-right.png'  style='opacity: 0.5; width: 20px;height: 20px;}' onclick='Lineage_decoration.showLegendDivPopupMenu(" +
             index +
-            ")'/> </div>";
-        +(queryInfos.predicate || "") + "<br>" + (queryInfos.filter.classLabel || "") + (queryInfos.filter.value || "");
-        ("</div>");
+            ")'/> " +
+            (queryInfos.predicate || "") +
+            "<br>" +
+            (queryInfos.filter.classLabel || "") +
+            (queryInfos.filter.value || "") +
+            "</div>";
         $("#Lineage_classes_graphDecoration_legendDiv").append(html);
 
         var newVisJsNodes = [];
@@ -146,7 +148,7 @@ var Lineage_decoration = (function () {
                             treeObj = {
                                 id: ancestorNode.superClass.value,
                                 text: "<span  style='font-size:10px;background-color:" + color + "'>&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp;" + label,
-                                parent: parent,
+                                parent: "#",
                                 color: color,
                             };
                             legendJsTreeData.push(treeObj);
@@ -254,6 +256,7 @@ var Lineage_decoration = (function () {
                             var x = 3;
                         }
 
+                        // var obj = { id: nodeId, color: color,legendType: legendTreeNode.id  };
                         var obj = { id: nodeId, color: color };
 
                         if (nodeTypesMap[nodeId] && nodeTypesMap[nodeId].allTypes.indexOf("Individual") > -1) {
@@ -323,7 +326,7 @@ var Lineage_decoration = (function () {
 
         var str = "<div  class='Lineage_legendTypeTopLevelOntologyDiv' style='display: flex;>";
 
-        LegendWidget.drawLegend("Lineage_whiteboard_graphDecoration_legendDiv", jstreeData);
+        LegendWidget.drawLegend("legendJstreeDivId", jstreeData);
     };
 
     return self;

@@ -21,7 +21,7 @@ var Lineage_decoration = (function () {
             self.decorateByUpperOntologyByQueryInfos(visjsNodes, Lineage_relations.currentQueryInfos);
             Lineage_relations.currentQueryInfos = null;
         } else {
-            return;
+
             self.decorateByUpperOntologyByClass(visjsNodes);
         }
     };

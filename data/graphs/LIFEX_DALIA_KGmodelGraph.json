@@ -26,7 +26,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Procurement",
                 "label": "Procurement"
             },
-            "color": "#dbdb8d",
+            "color": "#ffbb78",
             "_graphPosition": {
                 "x": 490,
                 "y": 137.53125
@@ -49,7 +49,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Detailled_Engineering",
                 "label": "Detailled Engineering"
             },
-            "color": "#dbdb8d",
+            "color": "#ffbb78",
             "fixed": {
                 "x": true,
                 "y": true
@@ -68,7 +68,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Commissioning",
                 "label": "Offshore Commissioning"
             },
-            "color": "#dbdb8d",
+            "color": "#ffbb78",
             "fixed": {
                 "x": true,
                 "y": true
@@ -87,7 +87,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Construction_or_Installation",
                 "label": "Offshore Construction or Installation"
             },
-            "color": "#dbdb8d",
+            "color": "#ffbb78",
             "fixed": {
                 "x": true,
                 "y": true
@@ -110,7 +110,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Pre-commissioning",
                 "label": "Offshore Pre-commissioning"
             },
-            "color": "#dbdb8d",
+            "color": "#ffbb78",
             "fixed": {
                 "x": true,
                 "y": true
@@ -129,7 +129,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Basic_Engineering",
                 "label": "Basic Engineering"
             },
-            "color": "#dbdb8d",
+            "color": "#ffbb78",
             "fixed": {
                 "x": true,
                 "y": true
@@ -148,7 +148,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/PROJECT_-__Onshore_Preparation",
                 "label": "PROJECT -  Onshore Preparation"
             },
-            "color": "#dbdb8d",
+            "color": "#ffbb78",
             "_graphPosition": {
                 "x": 567,
                 "y": 103.53125
@@ -171,7 +171,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Prefabrication",
                 "label": "Prefabrication"
             },
-            "color": "#dbdb8d",
+            "color": "#ffbb78",
             "fixed": {
                 "x": true,
                 "y": true
@@ -191,7 +191,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Entity",
                 "label": "Entity"
             },
-            "color": "#8c564b",
+            "color": "#c5b0d5",
             "fixed": {
                 "x": true,
                 "y": true
@@ -211,7 +211,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/StartDate",
                 "label": "StartDate"
             },
-            "color": "#dbdb8d",
+            "color": "#ffbb78",
             "fixed": {
                 "x": true,
                 "y": true
@@ -231,7 +231,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/EndDate",
                 "label": "EndDate"
             },
-            "color": "#dbdb8d",
+            "color": "#ffbb78",
             "fixed": {
                 "x": true,
                 "y": true
@@ -250,7 +250,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Package",
                 "label": "Package"
             },
-            "color": "#1f77b4",
+            "color": "#FFD900",
             "fixed": {
                 "x": true,
                 "y": true
@@ -273,7 +273,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Tag",
                 "label": "Tag"
             },
-            "color": "#1f77b4",
+            "color": "#FFD900",
             "fixed": {
                 "x": true,
                 "y": true
@@ -293,7 +293,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Module",
                 "label": "Module"
             },
-            "color": "#1f77b4",
+            "color": "#ff9896",
             "fixed": {
                 "x": true,
                 "y": true
@@ -313,7 +313,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Manning",
                 "label": "Manning"
             },
-            "color": "#ffbb78",
+            "color": "#98df8a",
             "fixed": {
                 "x": true,
                 "y": true
@@ -352,7 +352,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Document",
                 "label": "Document"
             },
-            "color": "#c5b0d5",
+            "color": "#c49c94",
             "fixed": {
                 "x": true,
                 "y": true
@@ -371,7 +371,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Functional_Location",
                 "label": "Functional Location"
             },
-            "color": "#1f77b4",
+            "color": "#FFD900",
             "fixed": {
                 "x": true,
                 "y": true
@@ -391,7 +391,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/OffshorePOB",
                 "label": "OffshorePOB"
             },
-            "color": "#ffbb78",
+            "color": "#98df8a",
             "fixed": {
                 "x": true,
                 "y": true
@@ -411,7 +411,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/OffshoreManHours",
                 "label": "OffshoreManHours"
             },
-            "color": "#ffbb78",
+            "color": "#98df8a",
             "fixed": {
                 "x": true,
                 "y": true
@@ -430,7 +430,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/AssetBreakdownStructure",
                 "label": "AssetBreakdownStructure"
             },
-            "color": "#1f77b4",
+            "color": "#ff9896",
             "fixed": {
                 "x": true,
                 "y": true
@@ -450,7 +450,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Equipement_Item",
                 "label": "Equipement Item"
             },
-            "color": "#bcbd22",
+            "color": "#9edae5",
             "fixed": {
                 "x": true,
                 "y": true
@@ -470,7 +470,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Quantity",
                 "label": "Quantity"
             },
-            "color": "#bcbd22",
+            "color": "#9edae5",
             "fixed": {
                 "x": true,
                 "y": true
@@ -489,7 +489,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/DocumentStatus",
                 "label": "DocumentStatus"
             },
-            "color": "#ddd",
+            "color": "#c49c94",
             "fixed": {
                 "x": true,
                 "y": true
@@ -508,7 +508,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/DocumentType",
                 "label": "DocumentType"
             },
-            "color": "#ddd",
+            "color": "#c49c94",
             "fixed": {
                 "x": true,
                 "y": true
@@ -527,7 +527,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/DocumentRevision",
                 "label": "DocumentRevision"
             },
-            "color": "#ddd",
+            "color": "#c49c94",
             "fixed": {
                 "x": true,
                 "y": true
@@ -547,7 +547,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Cost",
                 "label": "Cost"
             },
-            "color": "#bcbd22",
+            "color": "#9edae5",
             "fixed": {
                 "x": true,
                 "y": true
@@ -567,7 +567,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Weight",
                 "label": "Weight"
             },
-            "color": "#bcbd22",
+            "color": "#9edae5",
             "fixed": {
                 "x": true,
                 "y": true
@@ -586,7 +586,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Company",
                 "label": "Company"
             },
-            "color": "#ff9896",
+            "color": "#9467bd",
             "fixed": {
                 "x": true,
                 "y": true
@@ -606,7 +606,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/Elevation",
                 "label": "Elevation"
             },
-            "color": "#1f77b4",
+            "color": "#ff9896",
             "fixed": {
                 "x": true,
                 "y": true
@@ -646,7 +646,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/FunctionalSystem",
                 "label": "FunctionalSystem"
             },
-            "color": "#1f77b4",
+            "color": "#ff9896",
             "fixed": {
                 "x": true,
                 "y": true
@@ -665,7 +665,7 @@
                 "id": "http://data.total/resource/tsf/dalia-lifex/PlantArea",
                 "label": "PlantArea"
             },
-            "color": "#1f77b4",
+            "color": "#ff9896",
             "fixed": {
                 "x": true,
                 "y": true
@@ -700,6 +700,7 @@
             "color": "#fdbf01",
             "width": 1
         },
+
         {
             "id": "http://data.total/resource/tsf/dalia-lifex/Job_Card_http://rds.posccaesar.org/ontology/lis14/rdl/hasTemporalExtent_http://data.total/resource/tsf/dalia-lifex/Detailled_Engineering",
             "from": "http://data.total/resource/tsf/dalia-lifex/Job_Card",
@@ -766,7 +767,7 @@
                     "scaleFactor": 0.5
                 }
             },
-            "color": "#fdbf01",
+            "color": "#98df8a",
             "width": 1
         },
         {
@@ -881,7 +882,7 @@
                     "scaleFactor": 0.5
                 }
             },
-            "color": "#fdbf01",
+            "color": "#c5b0d5",
             "width": 1
         },
         {
@@ -1318,7 +1319,7 @@
                     "scaleFactor": 0.5
                 }
             },
-            "color": "#fdbf01",
+            "color": "#FFD900",
             "width": 1
         },
         {
@@ -1341,7 +1342,7 @@
                     "scaleFactor": 0.5
                 }
             },
-            "color": "#fdbf01",
+            "color": "#FFD900",
             "width": 1
         },
         {
@@ -1479,7 +1480,7 @@
                     "scaleFactor": 0.5
                 }
             },
-            "color": "#fdbf01",
+            "color": "#98df8a",
             "width": 1
         },
         {

@@ -154,7 +154,7 @@ var KGqueryWidget = (function () {
 
                     self.KGqueryGraph.data.edges.update(newVisjsEdges);
                     /// self.combinedQueries.push({ query:  self.KGqueryGraph });
-                    $("#KGqueryWidget_CombineControlsDiv").css("display", "flex");
+                    $("#KGqueryWidget_SetsControlsDiv").css("display", "flex");
 
                     if (nodeEvent && nodeEvent.ctrlKey) {
                         self.addNodeFilter(nodeDivId);
@@ -726,7 +726,7 @@ var KGqueryWidget = (function () {
             self.resetVisjEdges();
             self.resetVisjNodes();
             $("#KGqueryWidget_pathsDiv").html("");
-            $("#KGqueryWidget_CombineControlsDiv").css("display", "none");
+            $("#KGqueryWidget_SetsControlsDiv").css("display", "none");
         }
     };
     self.graphActions = {

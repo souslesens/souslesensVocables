@@ -46,7 +46,9 @@
     }
 
     .KGqueryWidget_smallButton {
-        font-size: 8px;
+        font-size: 4px;
+        float: right;
+        margin: 2px;
     }
 </style>
 <script>
@@ -56,18 +58,19 @@
     });
 </script>
 <div style="display: flex; flex-direction: row">
-    <div style="width: 300px; display: flex; flex-direction: column">
-        <div id="KGqueryWidget_CombineControlsDiv">
+    <div style=" display: flex; flex-direction: column">
+        <div style="width: 300px;align-items: baseline;" id="KGqueryWidget_SetsControlsDiv">
             <button onclick="KGqueryWidget.addQuerySet('Minus')"><img src="icons/set_minus.png" height="30px" />Minus</button>
             <button onclick="KGqueryWidget.addQuerySet('Union')"><img src="icons/set_union.png" height="30px" />Union</button>
-            <button onclick="KGqueryWidget.clearAll()">Clear all</button>
+
         </div>
 
         <div style="display: flex; flex-direction: column" id="KGqueryWidget_pathsDiv"></div>
     </div>
 
-    <div style="width: 300px; display: flex; flex-direction: column">
-        <div>
+    <div style=" display: flex; flex-direction: column">
+        <div style=" display: flex; flex-direction: row;    justify-content: flex-start;  align-items: center;">
+            <button onclick="KGqueryWidget.clearAll()">Clear all</button>
             <button onclick="KGqueryWidget.switchRightPanel()">&lt;&gt;</button>
             <!--  <button onclick="KGqueryWidget.clearAll(true)">Clear</button>-->
 
@@ -78,9 +81,9 @@
             <button onclick="KGqueryWidget.saveModelGraph()" style="display: none">saveModelGraph</button>
 
             <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->
-
-            <img src="./images/waitAnimated.gif" id="KGqueryWidget_waitImg" style="display: none; width: 15px; text-align: justify" />
-            <span class="messageDiv" id="KGqueryWidget_messageDiv"></span>
+&nbsp;
+            <img src="./images/waitAnimated.gif" id="KGqueryWidget_waitImg" style="display: none; width: 15px; height: 15px; text-align: justify" />
+            &nbsp;     <span class="messageDiv" id="KGqueryWidget_messageDiv"></span>
         </div>
 
         <div id="KGqueryWidget_graphDiv" style="width: 1200px; height: 650px"></div>

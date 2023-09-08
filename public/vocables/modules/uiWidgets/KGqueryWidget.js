@@ -763,14 +763,19 @@ return alert("missing target node in  path");
         });
         var tableCols = [];
         var colNames = [];
+        tableCols.push({ title: "rowIndex",   visible: false, defaultContent: "", width: "15%" });
+       // colNames.push("rowIndex");
         for (var varName in nonNullCols) {
             tableCols.push({ title: varName, defaultContent: "", width: "15%" });
             colNames.push(varName);
         }
 
+
         var tableData = [];
-        data.forEach(function (item) {
-            var line = [];
+        self.currentData=data
+        self.tableCols=tableCols
+        data.forEach(function (item,index) {
+            var line = [index];
             colNames.forEach(function (col) {
                 line.push(item[col] ? item[col].value : null);
             });
@@ -781,11 +786,20 @@ return alert("missing target node in  path");
         Export.showDataTable("KGqueryWidget_dataTableDiv", tableCols, tableData,null,null, function(err, datatable){
             $('#dataTableDivExport').on('click', 'td', function () {
                 var table = $('#dataTableDivExport').DataTable();
+
                 var index = table.cell( this ).index();
-                var row = table.cell( this ).row();
-                var column = table.cell( this ).column();
+                var row = table.row( this ).data();
+                var column = table.cell( this ).column().data();
                 var data = table.cell( this ).data();
-                console.log(data);
+
+
+                var datasetIndex=column[index.row]
+                var dataItem=self.currentData[datasetIndex]
+                var varName=self.tableCols[index.column].title
+                varName=varName.replace("Label","").replace("Value","")
+                var uri=dataItem[varName].value;
+                var node={data:{id:uri}}
+                NodeInfosWidget.showNodeInfos(self.source,node,"smallDialogDiv")
             })
         });
 

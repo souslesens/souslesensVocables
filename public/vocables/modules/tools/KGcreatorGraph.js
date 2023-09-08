@@ -18,15 +18,22 @@ var KGcreatorGraph = (function () {
                 id: "MappingFiles",
                 text: "MappingFiles",
                 parent: "#",
+                data:{
+                    type:"MappingFiles"
+                }
             },
             {
                 id: "Classes",
                 text: "Classes",
                 parent: "#",
+                data:{
+                    type:"Classes"
+                }
             },
         ];
         // var nodes=self.mappingVisjsGraph.data.nodes.get();
         var nodes = visjsData.nodes;
+        var existingNodes={}
         nodes.forEach(function (item) {
             var jstreeNode = JSON.parse(JSON.stringify(item));
             jstreeNode.text = jstreeNode.label;
@@ -35,11 +42,37 @@ var KGcreatorGraph = (function () {
                 jstreeData.push(jstreeNode);
             }
             if (item.data && item.data.type == "FileColumn") {
-                jstreeNode.parent = "MappingFiles";
-                jstreeData.push(jstreeNode);
+                if(!existingNodes[jstreeNode.data.fileName]) {
+                    existingNodes[jstreeNode.data.fileName]=1
+                    jstreeNode.parent = "MappingFiles";
+                    jstreeData.push({
+                        id:jstreeNode.data.fileName,
+                        text:jstreeNode.data.fileName,
+                        parent:"MappingFiles",
+                        data:{  id:jstreeNode.data.fileName,
+                            label:jstreeNode.data.fileName,
+                            fileName:jstreeNode.data.fileName
+
+                        }
+                    });
+                }
             }
         });
-        var options = {};
+        var options = {selectTreeNodeFn:function(event, obj){
+            if(!obj.node.data)
+                return;
+            var fileName=obj.node.data.fileName
+            var newNodes=[]
+                self.mappingVisjsGraph.data.nodes.get().forEach(function(visjsNode){
+                    var hidden=true
+                if(obj.node.data.type=="MappingFiles" || visjsNode.data && visjsNode.data.fileName==fileName){
+                    hidden=false
+                    }
+                    newNodes.push({id:visjsNode.id,hidden:hidden})
+                })
+                self.mappingVisjsGraph.data.nodes.update(newNodes)
+            }};
+
         JstreeWidget.loadJsTree("KGcreatorGraph_jstreeDiv", jstreeData, options);
     };
 

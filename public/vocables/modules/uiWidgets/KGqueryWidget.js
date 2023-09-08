@@ -778,7 +778,17 @@ return alert("missing target node in  path");
             tableData.push(line);
         });
 
-        Export.showDataTable("KGqueryWidget_dataTableDiv", tableCols, tableData);
+        Export.showDataTable("KGqueryWidget_dataTableDiv", tableCols, tableData,null,null, function(err, datatable){
+            $('#dataTableDivExport').on('click', 'td', function () {
+                var table = $('#dataTableDivExport').DataTable();
+                var index = table.cell( this ).index();
+                var row = table.cell( this ).row();
+                var column = table.cell( this ).column();
+                var data = table.cell( this ).data();
+                console.log(data);
+            })
+        });
+
     };
 
     self.resetVisjNodes = function (ids) {

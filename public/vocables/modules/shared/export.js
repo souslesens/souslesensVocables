@@ -2,385 +2,436 @@ import common from "./common.js";
 import SearchUtil from "../search/searchUtil.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 
-var Export = (function () {
-    var self = {};
-    self.context = null;
-    self.currentOptions = {};
-    self.currentSource = null;
-    self.dataTable;
+var Export = (function() {
+  var self = {};
+  self.context = null;
+  self.currentOptions = {};
+  self.currentSource = null;
+  self.dataTable;
 
-    self.exportGraphToDataTable = function (graphInstance, divId, nodes, edges) {
-        if (!nodes && !edges) {
-            nodes = graphInstance.data.nodes.get();
-            edges = graphInstance.data.edges.get();
-        }
+  self.exportGraphToDataTable = function(graphInstance, divId, nodes, edges) {
+    if (!nodes && !edges) {
+      nodes = graphInstance.data.nodes.get();
+      edges = graphInstance.data.edges.get();
+    }
 
-        var nodesFromMap = {};
+    var nodesFromMap = {};
 
-        edges.forEach(function (edge) {
-            if (!nodesFromMap[edge.from]) nodesFromMap[edge.from] = [];
-            nodesFromMap[edge.from].push(edge);
-        });
-        var allNodesMap = {};
-        nodes.forEach(function (node) {
-            allNodesMap[node.id] = node;
-        });
+    edges.forEach(function(edge) {
+      if (!nodesFromMap[edge.from]) {
+        nodesFromMap[edge.from] = [];
+      }
+      nodesFromMap[edge.from].push(edge);
+    });
+    var allNodesMap = {};
+    nodes.forEach(function(node) {
+      allNodesMap[node.id] = node;
+    });
 
-        //sort nodes by number of edges
-        var nodesFromArray = Object.keys(nodesFromMap);
-        nodesFromArray.sort(function (a, b) {
-            return nodesFromMap[a] - nodesFromMap[b];
-        });
+    //sort nodes by number of edges
+    var nodesFromArray = Object.keys(nodesFromMap);
+    nodesFromArray.sort(function(a, b) {
+      return nodesFromMap[a] - nodesFromMap[b];
+    });
 
-        var header = "fromLabel\tedgeLabel\ttoLabel\tfromURI\tedgeURI\ttoURI\n";
-        if (nodesFromArray.length < Config.dataTableOutputLimit) {
-            var cols = [];
-            var dataset = [];
-            header
-                .trim()
-                .split("\t")
-                .forEach(function (colName, index) {
-                    var width = "100";
-                    if (index < 3) width = "200";
-                    cols.push({ title: colName, defaultContent: "" });
-                });
-
-            nodesFromArray.forEach(function (nodeFromId, index) {
-                nodesFromMap[nodeFromId].forEach(function (edge) {
-                    if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) return;
-                    var line = [allNodesMap[nodeFromId].data.label, edge.label || "", allNodesMap[edge.to].data ? allNodesMap[edge.to].data.label : "?", nodeFromId, edge.id, edge.to];
-                    dataset.push(line);
-                });
-            });
-            MainController.UI.message("", true);
-            var columnDefs = [{ width: 200, targets: [0, 1, 2] }];
-            Export.showDataTable(divId, cols, dataset, null, { fixedColumns: 1, columnDefs: columnDefs });
-        } else {
-            var str = header;
-            nodesFromArray.forEach(function (nodeFromId, index) {
-                nodesFromMap[nodeFromId].forEach(function (edge) {
-                    if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) return;
-                    var edgeLabel = edge.label || "-";
-                    edgeLabel = edgeLabel.replaceAll("<[^>]*>", "");
-                    str += allNodesMap[nodeFromId].data.label + "\t";
-                    str += edgeLabel + "\t";
-                    str += allNodesMap[edge.to].data ? allNodesMap[edge.to].data.label : "??";
-                    str += "\t" + nodeFromId + "\t" + edge.id + "\t" + edge.to;
-                    str += "\n";
-                });
-            });
-
-            common.copyTextToClipboard(str);
-        }
-    };
-
-    self.exportGraphToDataTableOld = function () {
-        var nodes = visjsGraph.data.nodes.get();
-        var edges = visjsGraph.data.edges.get();
-
-        var nodesToMap = {};
-        edges.forEach(function (edge) {
-            if (!nodesToMap[edge.to]) nodesToMap[edge.to] = [];
-            nodesToMap[edge.to].push(edge);
-
-            /*  if (!nodesFromMap[edge.from])
-            nodesFromMap[edge.from] = []
-        nodesFromMap[edge.from].push(edge)*/
+    var header = "fromLabel\tedgeLabel\ttoLabel\tfromURI\tedgeURI\ttoURI\n";
+    if (nodesFromArray.length < Config.dataTableOutputLimit) {
+      var cols = [];
+      var dataset = [];
+      header
+        .trim()
+        .split("\t")
+        .forEach(function(colName, index) {
+          var width = "100";
+          if (index < 3) {
+            width = "200";
+          }
+          cols.push({ title: colName, defaultContent: "" });
         });
 
-        var leafNodes = [];
-        var nodesMap = {};
-        nodes.forEach(function (node) {
-            nodesMap[node.id] = node;
-            if (!nodesToMap[node.id]) {
-                leafNodes.push(node);
-            }
+      nodesFromArray.forEach(function(nodeFromId, index) {
+        nodesFromMap[nodeFromId].forEach(function(edge) {
+          if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) {
+            return;
+          }
+          var line = [allNodesMap[nodeFromId].data.label, edge.label || "", allNodesMap[edge.to].data ? allNodesMap[edge.to].data.label : "?", nodeFromId, edge.id, edge.to];
+          dataset.push(line);
         });
-
-        function recurse(node, ancestors, level) {
-            if (!node.id) return;
-
-            edges.forEach(function (edge) {
-                if (edge.from == node.id) {
-                    var ok = true;
-                    for (var key in ancestors)
-                        if (ancestors[key].indexOf(edge.to) > -1) {
-                            ok = false;
-                        }
-                    if (ok) {
-                        if (!ancestors["_" + level]) ancestors["_" + level] = [];
-
-                        ancestors["_" + level].push(edge.to);
-                        // eslint-disable-next-line no-console
-
-                        // console.log(nodesMap[edge.to].label);
-                        recurse(nodesMap[edge.to], ancestors, ++level);
-                    }
-                }
-            });
-            return ancestors;
-        }
-
-        //  var tree = {id: "#", children: []}
-        leafNodes.forEach(function (node) {
-            var leafAncestors = recurse(node, {}, 1);
-            node.ancestors = leafAncestors;
+      });
+      MainController.UI.message("", true);
+      var columnDefs = [{ width: 200, targets: [0, 1, 2] }];
+      Export.showDataTable(divId, cols, dataset, null, { fixedColumns: 1, columnDefs: columnDefs });
+    }
+    else {
+      var str = header;
+      nodesFromArray.forEach(function(nodeFromId, index) {
+        nodesFromMap[nodeFromId].forEach(function(edge) {
+          if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) {
+            return;
+          }
+          var edgeLabel = edge.label || "-";
+          edgeLabel = edgeLabel.replaceAll("<[^>]*>", "");
+          str += allNodesMap[nodeFromId].data.label + "\t";
+          str += edgeLabel + "\t";
+          str += allNodesMap[edge.to].data ? allNodesMap[edge.to].data.label : "??";
+          str += "\t" + nodeFromId + "\t" + edge.id + "\t" + edge.to;
+          str += "\n";
         });
+      });
 
-        var dataSet = [];
-        var colsCount = 0;
-        leafNodes.forEach(function (leafNode) {
-            var lineLabels = [];
-            var lineIds = [];
-            var leafLabel = leafNode.id;
-            if (leafLabel.indexOf("?_") == 0)
-                //datatype property
-                leafLabel = leafLabel.substring(leafLabel.lastIndexOf("/") + 1);
-            else leafLabel = leafNode.label || leafNode.id;
-            lineLabels.push(leafLabel);
-            lineIds.push(leafNode.id);
-            var previousAncestorLevel = null;
-            for (var ancestorLevel in leafNode.ancestors) {
-                var labels = "";
-                var ids = "";
-                var propLabel = "";
-                if (previousAncestorLevel) {
-                    // search edge label
-                    edges.forEach(function (edge) {
-                        if (edge.from == leafNode.ancestors[previousAncestorLevel] && edge.to == leafNode.ancestors[ancestorLevel]) propLabel = "-[" + edge.label + "]-";
-                    });
-                }
-                previousAncestorLevel = ancestorLevel;
+      common.copyTextToClipboard(str);
+    }
+  };
 
-                leafNode.ancestors[ancestorLevel].forEach(function (item, index) {
-                    if (index > 0) {
-                        labels += " , ";
-                        ids += " , ";
-                    }
-                    var label = item;
-                    if (nodesMap[item].data) {
-                        label = propLabel + nodesMap[item].data.label || item;
-                    }
+  self.exportGraphToDataTableOld = function() {
+    var nodes = visjsGraph.data.nodes.get();
+    var edges = visjsGraph.data.edges.get();
 
-                    labels += label;
-                    ids += item;
-                });
+    var nodesToMap = {};
+    edges.forEach(function(edge) {
+      if (!nodesToMap[edge.to]) {
+        nodesToMap[edge.to] = [];
+      }
+      nodesToMap[edge.to].push(edge);
 
-                lineLabels.push(labels);
-                lineIds.push(ids);
-            }
-            var row = lineLabels; //.concat(lineIds)
-            colsCount = Math.max(colsCount, row.length);
-            dataSet.push(row);
-        });
+      /*  if (!nodesFromMap[edge.from])
+      nodesFromMap[edge.from] = []
+  nodesFromMap[edge.from].push(edge)*/
+    });
 
-        dataSet.sort(function (a, b) {
-            return a.length - b.length;
-        });
-        var cols = [];
-        for (var i = 1; i <= colsCount; i++) {
-            cols.push({ title: "Label_" + i, defaultContent: "" });
-        }
-        /*   for (var i = 1; i <= colsCount; i++) {
-           cols.push({title: "Uri_" + i, defaultContent: ""})
-       }*/
-        self.showDataTable(null, cols, dataSet);
-    };
+    var leafNodes = [];
+    var nodesMap = {};
+    nodes.forEach(function(node) {
+      nodesMap[node.id] = node;
+      if (!nodesToMap[node.id]) {
+        leafNodes.push(node);
+      }
+    });
 
-    self.exportTreeToDataTable = function (jstreeDiv, nodeId) {
-        if (!jstreeDiv) jstreeDiv = SearchWidget.currentTargetDiv;
-        if (!nodeId) nodeId = SearchWidget.currentTreeNode ? SearchWidget.currentTreeNode.id : "#";
-        if (!nodeId) nodeId = "#";
-        //  var data = JstreeWidget.toTableData(jstreeDiv,nodeId)
-
-        var tree = $("#" + jstreeDiv)
-            .jstree(true)
-            .get_json(nodeId, { flat: false });
-        var nodesMap = {};
-        var nodes = $("#" + jstreeDiv)
-            .jstree(true)
-            .get_json(nodeId, { flat: true });
-        nodes.forEach(function (node) {
-            nodesMap[node.id] = node;
-        });
-
-        const result = [];
-
-        function flat(data, prev = "") {
-            if (Array.isArray(data)) {
-                data.forEach((e) => flat(e, prev));
-            } else {
-                prev = prev + (prev.length ? "|" : "") + data.id;
-                if (!data.children.length) {
-                    // result.push(prev)
-                    result.push(prev.split("|")); //.map(Number))
-                } else flat(data.children, prev);
-            }
-        }
-
-        flat(tree);
-        //  var nodesArray = result;
-
-        var data = self.prepareDataSet(result, nodesMap);
-        self.showDataTable(null, data.cols, data.dataSet);
-
+    function recurse(node, ancestors, level) {
+      if (!node.id) {
         return;
-    };
+      }
 
-    self.exportAllDescendants = function (parentId, options, indexes) {
-        if (!options) options = {};
-
-        MainController.UI.message("exporting node descendants...");
-        $("#waitImg").css("display", "block");
-        SearchUtil.getParentAllDescendants(parentId, indexes, null, function (err, result) {
-            if (err) MainController.UI.message(err, true);
-            var matrixLabels = [];
-            var matrixIds = [];
-            var maxParentsLength = 0;
-            result.data.forEach(function (hit, _index) {
-                var parentIdsArray = [];
-                var parentLabelsArray = [];
-                if (!hit.parents || !hit.parents.forEach) return;
-                hit.parents.forEach(function (parent, indexParent) {
-                    if (indexParent > 0) {
-                        parentLabelsArray.push(result.labelsMap[parent] || Sparql_common.getLabelFromURI(parent));
-                        parentIdsArray.push(parent);
-                    }
-                });
-                maxParentsLength = Math.max(maxParentsLength, parentIdsArray.length);
-
-                if (options.fromBottomToTop) {
-                    parentIdsArray.push(hit.id);
-                    parentIdsArray = parentIdsArray.reverse();
-                } else {
-                    parentIdsArray.push(hit.id);
-                }
-
-                matrixIds.push(parentIdsArray);
-
-                if (options.fromBottomToTop) {
-                    parentLabelsArray.push(hit.label);
-                    parentLabelsArray = parentLabelsArray.reverse();
-                } else {
-                    parentLabelsArray.push(hit.label);
-                }
-
-                matrixLabels.push(parentLabelsArray);
-            });
-            var cols = [];
-            for (var i = 0; i <= maxParentsLength; i++) {
-                cols.push({ title: "Label_level_" + i, defaultContent: "" });
+      edges.forEach(function(edge) {
+        if (edge.from == node.id) {
+          var ok = true;
+          for (var key in ancestors)
+            if (ancestors[key].indexOf(edge.to) > -1) {
+              ok = false;
+            }
+          if (ok) {
+            if (!ancestors["_" + level]) {
+              ancestors["_" + level] = [];
             }
 
-            matrixLabels.forEach(function (line, lineIndex) {
-                for (var i = line.length; i <= maxParentsLength + 1; i++) {
-                    matrixLabels[lineIndex].push("");
-                }
-                matrixLabels[lineIndex] = matrixLabels[lineIndex].concat(matrixIds[lineIndex]);
-            });
-            cols.push({ title: "-----", defaultContent: "" });
-            // cols = cols.concat(cols);
-            for (var i = 0; i <= maxParentsLength; i++) {
-                cols.push({ title: "ID_level_" + i, defaultContent: "" });
+            ancestors["_" + level].push(edge.to);
+            // eslint-disable-next-line no-console
+
+            // console.log(nodesMap[edge.to].label);
+            recurse(nodesMap[edge.to], ancestors, ++level);
+          }
+        }
+      });
+      return ancestors;
+    }
+
+    //  var tree = {id: "#", children: []}
+    leafNodes.forEach(function(node) {
+      var leafAncestors = recurse(node, {}, 1);
+      node.ancestors = leafAncestors;
+    });
+
+    var dataSet = [];
+    var colsCount = 0;
+    leafNodes.forEach(function(leafNode) {
+      var lineLabels = [];
+      var lineIds = [];
+      var leafLabel = leafNode.id;
+      if (leafLabel.indexOf("?_") == 0)
+        //datatype property
+      {
+        leafLabel = leafLabel.substring(leafLabel.lastIndexOf("/") + 1);
+      }
+      else {
+        leafLabel = leafNode.label || leafNode.id;
+      }
+      lineLabels.push(leafLabel);
+      lineIds.push(leafNode.id);
+      var previousAncestorLevel = null;
+      for (var ancestorLevel in leafNode.ancestors) {
+        var labels = "";
+        var ids = "";
+        var propLabel = "";
+        if (previousAncestorLevel) {
+          // search edge label
+          edges.forEach(function(edge) {
+            if (edge.from == leafNode.ancestors[previousAncestorLevel] && edge.to == leafNode.ancestors[ancestorLevel]) {
+              propLabel = "-[" + edge.label + "]-";
             }
-            cols.push({ title: "-----", defaultContent: "" });
+          });
+        }
+        previousAncestorLevel = ancestorLevel;
 
-            MainController.UI.message("", true);
-            Export.showDataTable(null, cols, matrixLabels);
-        });
-    };
+        leafNode.ancestors[ancestorLevel].forEach(function(item, index) {
+          if (index > 0) {
+            labels += " , ";
+            ids += " , ";
+          }
+          var label = item;
+          if (nodesMap[item].data) {
+            label = propLabel + nodesMap[item].data.label || item;
+          }
 
-    self.prepareDataSet = function (flatNodesArray, nodesMap) {
-        var cols = [];
-        var dataSet = [];
-        var colsMax = 0;
-        flatNodesArray.forEach(function (item) {
-            var line = [];
-            var line2 = [];
-            item.forEach(function (id) {
-                var obj = nodesMap[id];
-                if (obj && obj.data) {
-                    var label = obj.data.label;
-                    if (label == "any") {
-                        label = obj.data.id;
-                    }
-                    line.push(label);
-                    line2.push(obj.data.id);
-                }
-            });
-            colsMax = Math.max(colsMax, line.length);
-            line = line.concat(line2);
-
-            dataSet.push(line);
+          labels += label;
+          ids += item;
         });
 
-        for (var i = 1; i <= colsMax; i++) {
-            cols.push({ title: "Label_" + i, defaultContent: "", width: "20%" });
+        lineLabels.push(labels);
+        lineIds.push(ids);
+      }
+      var row = lineLabels; //.concat(lineIds)
+      colsCount = Math.max(colsCount, row.length);
+      dataSet.push(row);
+    });
+
+    dataSet.sort(function(a, b) {
+      return a.length - b.length;
+    });
+    var cols = [];
+    for (var i = 1; i <= colsCount; i++) {
+      cols.push({ title: "Label_" + i, defaultContent: "" });
+    }
+    /*   for (var i = 1; i <= colsCount; i++) {
+       cols.push({title: "Uri_" + i, defaultContent: ""})
+   }*/
+    self.showDataTable(null, cols, dataSet);
+  };
+
+  self.exportTreeToDataTable = function(jstreeDiv, nodeId) {
+    if (!jstreeDiv) {
+      jstreeDiv = SearchWidget.currentTargetDiv;
+    }
+    if (!nodeId) {
+      nodeId = SearchWidget.currentTreeNode ? SearchWidget.currentTreeNode.id : "#";
+    }
+    if (!nodeId) {
+      nodeId = "#";
+    }
+    //  var data = JstreeWidget.toTableData(jstreeDiv,nodeId)
+
+    var tree = $("#" + jstreeDiv)
+      .jstree(true)
+      .get_json(nodeId, { flat: false });
+    var nodesMap = {};
+    var nodes = $("#" + jstreeDiv)
+      .jstree(true)
+      .get_json(nodeId, { flat: true });
+    nodes.forEach(function(node) {
+      nodesMap[node.id] = node;
+    });
+
+    const result = [];
+
+    function flat(data, prev = "") {
+      if (Array.isArray(data)) {
+        data.forEach((e) => flat(e, prev));
+      }
+      else {
+        prev = prev + (prev.length ? "|" : "") + data.id;
+        if (!data.children.length) {
+          // result.push(prev)
+          result.push(prev.split("|")); //.map(Number))
         }
-        for (let i = 1; i <= colsMax; i++) {
-            cols.push({ title: "Uri_" + i, defaultContent: "" });
+        else {
+          flat(data.children, prev);
         }
-        return { cols: cols, dataSet: dataSet };
-    };
+      }
+    }
 
-    self.showDataTable = function (div, cols, dataSet, buttons, options) {
-        if (!options) options = {};
-        if (self.dataTable) {
-            self.dataTable.destroy();
-            $("#dataTableDiv").html("");
+    flat(tree);
+    //  var nodesArray = result;
+
+    var data = self.prepareDataSet(result, nodesMap);
+    self.showDataTable(null, data.cols, data.dataSet);
+
+    return;
+  };
+
+  self.exportAllDescendants = function(parentId, options, indexes) {
+    if (!options) {
+      options = {};
+    }
+
+    MainController.UI.message("exporting node descendants...");
+    $("#waitImg").css("display", "block");
+    SearchUtil.getParentAllDescendants(parentId, indexes, null, function(err, result) {
+      if (err) {
+        MainController.UI.message(err, true);
+      }
+      var matrixLabels = [];
+      var matrixIds = [];
+      var maxParentsLength = 0;
+      result.data.forEach(function(hit, _index) {
+        var parentIdsArray = [];
+        var parentLabelsArray = [];
+        if (!hit.parents || !hit.parents.forEach) {
+          return;
         }
-        if (!div) {
-            $("#mainDialogDiv").dialog("open");
-            $("#mainDialogDiv").html("<table id='dataTableDivExport'></table>");
-            div = "dataTableDiv";
-        } else {
-            try {
-                $("#" + div).dialog("open");
-            } catch (e) {}
+        hit.parents.forEach(function(parent, indexParent) {
+          if (indexParent > 0) {
+            parentLabelsArray.push(result.labelsMap[parent] || Sparql_common.getLabelFromURI(parent));
+            parentIdsArray.push(parent);
+          }
+        });
+        maxParentsLength = Math.max(maxParentsLength, parentIdsArray.length);
 
-            $("#" + div).html("<table id='dataTableDivExport'></table>");
+        if (options.fromBottomToTop) {
+          parentIdsArray.push(hit.id);
+          parentIdsArray = parentIdsArray.reverse();
+        }
+        else {
+          parentIdsArray.push(hit.id);
         }
 
-        if (!buttons) buttons = "Bfrtip";
-        setTimeout(function () {
-            if (!buttons) buttons = "Bfrtip";
-            var params = {
-                data: dataSet,
-                columns: cols,
-                fixedColumns: true,
-                pageLength: 15,
-                dom: buttons,
-                buttons: [
-                    {
-                        extend: "csvHtml5",
-                        text: "Export CSV",
-                        fieldBoundary: "",
-                        fieldSeparator: ";",
-                    },
-                    "copy",
-                ],
+        matrixIds.push(parentIdsArray);
 
-                paging: false,
-                /*  columnDefs: [
-                    { width: 400, targets: 0 }
-                ],
-                fixedColumns: true*/
+        if (options.fromBottomToTop) {
+          parentLabelsArray.push(hit.label);
+          parentLabelsArray = parentLabelsArray.reverse();
+        }
+        else {
+          parentLabelsArray.push(hit.label);
+        }
 
-                //  order: []
-            };
+        matrixLabels.push(parentLabelsArray);
+      });
+      var cols = [];
+      for (var i = 0; i <= maxParentsLength; i++) {
+        cols.push({ title: "Label_level_" + i, defaultContent: "" });
+      }
 
-            if (false && options && options.fixedColumns) {
-                params.fixedColumns = true;
-            }
-            if (false && options && options.columnDefs) {
-                params.columnDefs = options.columnDefs;
-            }
+      matrixLabels.forEach(function(line, lineIndex) {
+        for (var i = line.length; i <= maxParentsLength + 1; i++) {
+          matrixLabels[lineIndex].push("");
+        }
+        matrixLabels[lineIndex] = matrixLabels[lineIndex].concat(matrixIds[lineIndex]);
+      });
+      cols.push({ title: "-----", defaultContent: "" });
+      // cols = cols.concat(cols);
+      for (var i = 0; i <= maxParentsLength; i++) {
+        cols.push({ title: "ID_level_" + i, defaultContent: "" });
+      }
+      cols.push({ title: "-----", defaultContent: "" });
 
-            self.dataTable = $("#dataTableDivExport").DataTable(params);
-        }, 200);
-    };
+      MainController.UI.message("", true);
+      Export.showDataTable(null, cols, matrixLabels);
+    });
+  };
 
-    return self;
+  self.prepareDataSet = function(flatNodesArray, nodesMap) {
+    var cols = [];
+    var dataSet = [];
+    var colsMax = 0;
+    flatNodesArray.forEach(function(item) {
+      var line = [];
+      var line2 = [];
+      item.forEach(function(id) {
+        var obj = nodesMap[id];
+        if (obj && obj.data) {
+          var label = obj.data.label;
+          if (label == "any") {
+            label = obj.data.id;
+          }
+          line.push(label);
+          line2.push(obj.data.id);
+        }
+      });
+      colsMax = Math.max(colsMax, line.length);
+      line = line.concat(line2);
+
+      dataSet.push(line);
+    });
+
+    for (var i = 1; i <= colsMax; i++) {
+      cols.push({ title: "Label_" + i, defaultContent: "", width: "20%" });
+    }
+    for (let i = 1; i <= colsMax; i++) {
+      cols.push({ title: "Uri_" + i, defaultContent: "" });
+    }
+    return { cols: cols, dataSet: dataSet };
+  };
+
+  self.showDataTable = function(div, cols, dataSet, buttons, options, callback) {
+    if (!options) {
+      options = {};
+    }
+    if (self.dataTable) {
+      self.dataTable.destroy();
+      $("#dataTableDiv").html("");
+    }
+    if (!div) {
+      $("#mainDialogDiv").dialog("open");
+      $("#mainDialogDiv").html("<table id='dataTableDivExport'></table>");
+      div = "dataTableDiv";
+    }
+    else {
+      try {
+        $("#" + div).dialog("open");
+      } catch (e) {
+      }
+
+      $("#" + div).html("<table id='dataTableDivExport'></table>");
+    }
+
+    if (!buttons) {
+      buttons = "Bfrtip";
+    }
+    setTimeout(function() {
+      if (!buttons) {
+        buttons = "Bfrtip";
+      }
+      var params = {
+        data: dataSet,
+        columns: cols,
+        fixedColumns: true,
+        pageLength: 15,
+        dom: buttons,
+        buttons: [
+          {
+            extend: "csvHtml5",
+            text: "Export CSV",
+            fieldBoundary: "",
+            fieldSeparator: ";"
+          },
+          "copy"
+        ],
+
+        paging: false
+        /*  columnDefs: [
+            { width: 400, targets: 0 }
+        ],
+        fixedColumns: true*/
+
+        //  order: []
+      };
+
+      if (false && options && options.fixedColumns) {
+        params.fixedColumns = true;
+      }
+      if (false && options && options.columnDefs) {
+        params.columnDefs = options.columnDefs;
+      }
+
+      self.dataTable = $("#dataTableDivExport").DataTable(params);
+      if (callback) {
+        return callback(null, self.dataTable)
+      }
+    }, 200);
+  };
+
+
+  return self;
 })();
 
 export default Export;

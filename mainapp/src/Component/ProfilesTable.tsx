@@ -243,8 +243,14 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     }, [unwrappedSources]);
 
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
-    const tools: string[] = ["ALL", "sourceBrowser", "sourceMatcher", "evaluate", "ancestors", "lineage", "SPARQL", "ADLmappings", "ADLbrowser", "Standardizer", "SQLquery"];
+
+    const config = SRD.withDefault({ auth: "", tools_available: [] }, model.config);
     const [profileModel, update] = React.useReducer(updateProfile, { modal: false, profileForm: profile });
+
+    // tools is all available tools (described in mainconfig.json) + tools that are found in forbiddenTools + ALL
+    const tools: string[] = ["ALL", ...profileModel.profileForm.forbiddenTools, ...config.tools_available].filter((val, idx, array) => {
+        return array.indexOf(val) === idx;
+    });
 
     React.useEffect(() => {
         update({ type: Type.ResetProfile, payload: profile });

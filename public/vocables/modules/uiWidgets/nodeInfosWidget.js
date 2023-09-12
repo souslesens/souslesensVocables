@@ -786,13 +786,17 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     if (err) {
                         return alert(err);
                     }
-                    self.showNodeInfos(self.currentSource, self.currentNode, "mainDialogDiv");
 
+                   
+                        self.showNodeInfos(self.currentSource, self.currentNode, "mainDialogDiv");
+                    
                     var property = currentEditingItem.item.prop.value;
                     var value = currentEditingItem.item.value.value;
                     if (property.indexOf("subClassOf") > -1 || property.indexOf("type") > -1) {
                         Lineage_whiteboard.deleteEdge(self.currentNodeId, value, property);
                     }
+                    
+                    
                 }
             );
         }
@@ -943,9 +947,14 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
             $("#editPredicate_savePredicateButton").click(function () {
-                self.addPredicate();
+                self.addPredicate(null,null,null,null,function(){
+                   
+                    self.deletePredicate(predicateId);
+                
+                });
+                
+             });
             });
-        });
 
         $("#editPredicate_propertyValue").val(PredicatesSelectorWidget.currentEditingItem.item.prop.value);
         $("#editPredicate_objectValue").val(PredicatesSelectorWidget.currentEditingItem.item.value.value);

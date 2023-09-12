@@ -155,9 +155,8 @@ var PredicatesSelectorWidget = (function () {
             });
             common.fillSelectOptions(selectId, classes, true, "label", "id");
         } else {
-            OntologyModels.registerSourcesModel([vocabulary],function(err, result) {
-                if (err)
-                    return alert(err.responseText)
+            OntologyModels.registerSourcesModel([vocabulary], function (err, result) {
+                if (err) return alert(err.responseText);
                 if (Config.ontologiesVocabularyModels[vocabulary] && Config.ontologiesVocabularyModels[vocabulary].classesCount <= Config.ontologyModelMaxClasses) {
                     var classes = [];
                     for (var classId in Config.ontologiesVocabularyModels[vocabulary].classes) {
@@ -169,12 +168,11 @@ var PredicatesSelectorWidget = (function () {
                     }
 
                     common.fillSelectOptions(selectId, classes, true, "label", "id");
-                }
-                else {
+                } else {
                     //PromptedSelectWidget
                     return PromptedSelectWidget.prompt("owl:Class", "editPredicate_objectSelect", vocabulary);
                 }
-            })
+            });
         }
     };
 

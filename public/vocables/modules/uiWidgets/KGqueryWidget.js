@@ -66,50 +66,42 @@ var KGqueryWidget = (function () {
 
         self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", { nodes: [], edges: [] }, visjsOptions);
 
-        if(true){
-            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function(err, result) {
+        if (true) {
+            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
+                visjsData = result;
 
-                    visjsData = result;
+                self.getInferredModelVisjsData(self.source, function (err, result2) {
+                    var oldNodesMap = {};
+                    var oldEdgesMap = {};
+                    var newNodes = [];
+                    var newEdges = [];
+                    visjsData.nodes.forEach(function (item) {
+                        oldNodesMap[item.id] = item;
+                    });
 
+                    visjsData.edges.forEach(function (item) {
+                        oldEdgesMap[item.id] = item;
+                    });
 
-                    self.getInferredModelVisjsData(self.source, function(err, result2) {
+                    result2.nodes.forEach(function (item) {
+                        if (!oldNodesMap[item.id]) newNodes.push(item);
+                    });
+                    result2.edges.forEach(function (item) {
+                        if (!oldEdgesMap[item.id]) newEdges.push(item);
+                    });
+                    visjsData.nodes = visjsData.nodes.concat(newNodes);
+                    visjsData.edges = visjsData.edges.concat(newEdges);
 
-                       var oldNodesMap={}
-                        var oldEdgesMap={}
-                        var newNodes=[]
-                        var newEdges=[]
-                        visjsData.nodes.forEach(function(item){
-                            oldNodesMap[item.id]=item;
-                        })
-
-                        visjsData.edges.forEach(function(item){
-                            oldEdgesMap[item.id]=item;
-                        })
-
-                        result2.nodes.forEach(function(item){
-                            if(!oldNodesMap[item.id])
-                                newNodes.push(item)
-                        })
-                        result2.edges.forEach(function(item){
-                            if(!oldEdgesMap[item.id])
-                                newEdges.push(item)
-                        })
-                        visjsData.nodes=visjsData.nodes.concat(newNodes)
-                        visjsData.edges=visjsData.edges.concat(newEdges)
-
-                        return draw();
-                    })
-                })
-        }
-
-        else {
-            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function(err, result) {
-                if ( result) {
+                    return draw();
+                });
+            });
+        } else {
+            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
+                if (result) {
                     visjsData = result;
                     return draw();
-                }
-                else {
-                    self.getInferredModelVisjsData(self.source, function(err, result) {
+                } else {
+                    self.getInferredModelVisjsData(self.source, function (err, result) {
                         if (err) {
                             return alert(err.responseText);
                         }
@@ -803,18 +795,17 @@ return alert("missing target node in  path");
         });
         var tableCols = [];
         var colNames = [];
-        tableCols.push({ title: "rowIndex",   visible: false, defaultContent: "", width: "15%" });
-       // colNames.push("rowIndex");
+        tableCols.push({ title: "rowIndex", visible: false, defaultContent: "", width: "15%" });
+        // colNames.push("rowIndex");
         for (var varName in nonNullCols) {
             tableCols.push({ title: varName, defaultContent: "", width: "15%" });
             colNames.push(varName);
         }
 
-
         var tableData = [];
-        self.currentData=data
-        self.tableCols=tableCols
-        data.forEach(function (item,index) {
+        self.currentData = data;
+        self.tableCols = tableCols;
+        data.forEach(function (item, index) {
             var line = [index];
             colNames.forEach(function (col) {
                 line.push(item[col] ? item[col].value : null);
@@ -823,26 +814,24 @@ return alert("missing target node in  path");
             tableData.push(line);
         });
 
-        Export.showDataTable("KGqueryWidget_dataTableDiv", tableCols, tableData,null,null, function(err, datatable){
-            $('#dataTableDivExport').on('click', 'td', function () {
-                var table = $('#dataTableDivExport').DataTable();
+        Export.showDataTable("KGqueryWidget_dataTableDiv", tableCols, tableData, null, null, function (err, datatable) {
+            $("#dataTableDivExport").on("click", "td", function () {
+                var table = $("#dataTableDivExport").DataTable();
 
-                var index = table.cell( this ).index();
-                var row = table.row( this ).data();
-                var column = table.cell( this ).column().data();
-                var data = table.cell( this ).data();
+                var index = table.cell(this).index();
+                var row = table.row(this).data();
+                var column = table.cell(this).column().data();
+                var data = table.cell(this).data();
 
-
-                var datasetIndex=column[index.row]
-                var dataItem=self.currentData[datasetIndex]
-                var varName=self.tableCols[index.column].title
-                varName=varName.replace("Label","").replace("Value","")
-                var uri=dataItem[varName].value;
-                var node={data:{id:uri}}
-                NodeInfosWidget.showNodeInfos(self.source,node,"smallDialogDiv")
-            })
+                var datasetIndex = column[index.row];
+                var dataItem = self.currentData[datasetIndex];
+                var varName = self.tableCols[index.column].title;
+                varName = varName.replace("Label", "").replace("Value", "");
+                var uri = dataItem[varName].value;
+                var node = { data: { id: uri } };
+                NodeInfosWidget.showNodeInfos(self.source, node, "smallDialogDiv");
+            });
         });
-
     };
 
     self.resetVisjNodes = function (ids) {

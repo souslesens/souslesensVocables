@@ -68,7 +68,6 @@ var NodeInfosWidget = (function () {
         }
         Lineage_axioms_draw.currentSource = sourceLabel;
 
-
         if (typeof node == "object") {
             self.currentNode = node;
             if (node.data) {
@@ -144,15 +143,15 @@ var NodeInfosWidget = (function () {
                 },
 
                 function (callbackSeries) {
-                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class")<0) {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
                         return callbackSeries();
                     }
-                    var html="<button onclick='NodeInfosWidget.showClassIndividuals()'>Individuals</button>"
+                    var html = "<button onclick='NodeInfosWidget.showClassIndividuals()'>Individuals</button>";
                     $("#nodeInfos_individualsDiv").html(html);
-                   callbackSeries()
+                    callbackSeries();
                 },
                 function (callbackSeries) {
-                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class")<0) {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
                         return callbackSeries();
                     }
                     self.showClassRestrictions(self.currentNodeRealSource, [nodeId], options, function (err) {
@@ -161,8 +160,7 @@ var NodeInfosWidget = (function () {
                 },
 
                 function (callbackSeries) {
-
-                    if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty")<0) {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
                         return callbackSeries();
                     }
                     self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfosWidget_InfosTabDiv", function (_err, _result) {
@@ -194,13 +192,11 @@ var NodeInfosWidget = (function () {
             str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
         }
 
-        if( authentication.currentUser.groupes.indexOf("Annotator")>-1){
+        if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
             str +=
-              "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
-              "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
+                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
+                "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
         }
-
-
 
         str += "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;background-color: #e1ddd1;padding:5px';display:flex;>";
 
@@ -586,13 +582,8 @@ defaultLang = 'en';*/
     };
 
     self.showClassIndividuals = function (sourceLabel, nodeId, callback) {
-
-
-        if(!sourceLabel)
-            sourceLabel =self.currentNodeRealSource;
-           if(!nodeId)
-               nodeId=self.currentNodeId
-
+        if (!sourceLabel) sourceLabel = self.currentNodeRealSource;
+        if (!nodeId) nodeId = self.currentNodeId;
 
         var sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var fromStr = Sparql_common.getFromStr(sourceLabel);
@@ -691,13 +682,11 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             return alert("enter property and value");
         }
 
-
         $("#sourceBrowser_addPropertyDiv").css("display", "none");
         if (source) {
             self.currentSource = source;
         }
         if (createNewNode || true) {
-
             var triples = [];
             if (createNewNode) {
                 self.currentNodeId = Config.sources[self.currentSource].graphUri + common.getRandomHexaId(10);
@@ -719,12 +708,10 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 if (err) {
                     return alert(err);
                 }
-// store Annotator infos in source/userGraph
-                if( authentication.currentUser.groupes.indexOf("Annotator")>-1){
-                    var userGraphUri=Config.sources[self.currentSource].graphUri+authentication.currentUser.login
-                    Sparql_generic.insertTriples(null, triples, {graphUri:userGraphUri}, function (err, _result) {
-
-                    })
+                // store Annotator infos in source/userGraph
+                if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
+                    var userGraphUri = Config.sources[self.currentSource].graphUri + authentication.currentUser.login;
+                    Sparql_generic.insertTriples(null, triples, { graphUri: userGraphUri }, function (err, _result) {});
                 }
 
                 self.isModified = true;
@@ -862,8 +849,8 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     },
                     //synchronize OntologyModels
                     function (callbackSeries) {
-                    //  OntologyModels.
-                        return callbackSeries();// TO DO
+                        //  OntologyModels.
+                        return callbackSeries(); // TO DO
                     },
                 ],
                 function (err) {

@@ -3,6 +3,7 @@ import visjsGraphClass from "../graph/VisjsGraphClass.js";
 import JstreeWidget from "../uiWidgets/jstreeWidget.js";
 import Sparql_common from "../sparqlProxies/sparql_common.js";
 
+
 var KGcreatorGraph = (function () {
     var self = {};
 

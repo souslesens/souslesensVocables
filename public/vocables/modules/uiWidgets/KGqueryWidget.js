@@ -65,20 +65,60 @@ var KGqueryWidget = (function () {
         var visjsGraphFileName = self.source + "_KGmodelGraph.json";
 
         self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", { nodes: [], edges: [] }, visjsOptions);
-        self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
-            if (result) {
-                visjsData = result;
-                return draw();
-            } else {
-                self.getInferredModelVisjsData(self.source, function (err, result) {
-                    if (err) {
-                        return alert(err.responseText);
-                    }
+
+        if(true){
+            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function(err, result) {
+
                     visjsData = result;
-                    draw();
-                });
-            }
-        });
+
+
+                    self.getInferredModelVisjsData(self.source, function(err, result2) {
+
+                       var oldNodesMap={}
+                        var oldEdgesMap={}
+                        var newNodes=[]
+                        var newEdges=[]
+                        visjsData.nodes.forEach(function(item){
+                            oldNodesMap[item.id]=item;
+                        })
+
+                        visjsData.edges.forEach(function(item){
+                            oldEdgesMap[item.id]=item;
+                        })
+
+                        result2.nodes.forEach(function(item){
+                            if(!oldNodesMap[item.id])
+                                newNodes.push(item)
+                        })
+                        result2.edges.forEach(function(item){
+                            if(!oldEdgesMap[item.id])
+                                newEdges.push(item)
+                        })
+                        visjsData.nodes=visjsData.nodes.concat(newNodes)
+                        visjsData.edges=visjsData.edges.concat(newEdges)
+
+                        return draw();
+                    })
+                })
+        }
+
+        else {
+            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function(err, result) {
+                if ( result) {
+                    visjsData = result;
+                    return draw();
+                }
+                else {
+                    self.getInferredModelVisjsData(self.source, function(err, result) {
+                        if (err) {
+                            return alert(err.responseText);
+                        }
+                        visjsData = result;
+                        draw();
+                    });
+                }
+            });
+        }
     };
     self.addQuerySet = function (booleanOperator) {
         self.switchRightPanel();

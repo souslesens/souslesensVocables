@@ -48,9 +48,9 @@ var elasticRestProxy = {
             };
         }
         process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = 0;
-        console.log("DEBUG:bin/elasticRestProxy:forwardRequest" + JSON.stringify(options));
+      //  console.log("DEBUG:bin/elasticRestProxy:forwardRequest" + JSON.stringify(options));
         request(options, function (error, response, body) {
-            console.log("DEBUG:bin/elasticRestProxy:forwardRequest\n  error=" + error + "\n  reponse=" + response + "\n  body " + body);
+          //  console.log("DEBUG:bin/elasticRestProxy:forwardRequest\n  error=" + error + "\n  reponse=" + response + "\n  body " + body);
             return callback(error, response, body);
         });
     },
@@ -354,12 +354,16 @@ var elasticRestProxy = {
                                     },
                                     skoslabels: {
                                         type: "text",
+                                        fielddata: true,
                                         fields: {
                                             keyword: {
                                                 type: "keyword",
                                                 ignore_above: 256,
+                                                normalizer: "lowercase_normalizer",
                                             },
+
                                         },
+
                                     },
 
                                     id: {

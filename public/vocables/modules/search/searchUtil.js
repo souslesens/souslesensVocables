@@ -615,6 +615,7 @@ indexes.push(source.toLowerCase());
                             };
 
                             var filter = "?id rdf:type ?type2. filter (?type= owl:NamedIndividual && ?type2!=?type)";
+                           // filter+="?id <http://souslesens.org/KGcreator#mappingFile> 'dbo.V_task'"
                             Sparql_OWL.getDictionary(sourceLabel, { filter: filter, processorFectchSize: 100, skosPrefLabel: true }, processor, function (err, result) {
                                 return callbackSeries(err);
                             });

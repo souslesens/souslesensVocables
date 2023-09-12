@@ -31,6 +31,8 @@ var authentication = (function () {
                 if (!data.logged) {
                     location.href = "/login";
                 } else {
+                   // data.user.groups.push("Annotator")
+
                     authentication.currentUser = {
                         identifiant: data.user.login,
                         login: data.user.login,

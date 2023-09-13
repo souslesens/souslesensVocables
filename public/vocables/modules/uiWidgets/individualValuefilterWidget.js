@@ -89,7 +89,7 @@ var IndividualValueFilterWidget = (function () {
         $("#individualValueFilter_objectValue").focus();
     };
     self.onSelectObject = function (value) {
-        self.useLabelsList=false
+        self.useLabelsList = false;
     };
     self.onSelectProperty = function (property) {};
 

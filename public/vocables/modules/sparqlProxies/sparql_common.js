@@ -72,6 +72,10 @@ var Sparql_common = (function () {
 
         options.useFilterKeyWord = 1; // !!!!Problems with values : ne ramene rien si des valeurs manquent
 
+        if (options.values) {
+            options.useFilterKeyWord = 0;
+        }
+
         var filter = ";";
 
         var varNames;

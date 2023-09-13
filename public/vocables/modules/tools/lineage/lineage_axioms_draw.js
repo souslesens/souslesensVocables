@@ -86,7 +86,7 @@ var Lineage_axioms_draw = (function () {
             includeIncomingTriplesStr = "  UNION  {<" + nodeId + ">  ^(<>|!<>){1," + depth + "} ?o filter (isIri(?o) || isBlank(?o))} ";
         }
 
-        var filterProps = Sparql_common.setFilter("p", props);
+        var filterProps = Sparql_common.setFilter("p", props, null, { values: 1 });
 
         var query =
             "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>" +

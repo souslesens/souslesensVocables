@@ -483,9 +483,15 @@ var Sparql_generic = (function () {
         if (!options) {
             options = {};
         }
-        var graphUri = Config.sources[sourceLabel].graphUri;
-        if (Array.isArray(graphUri)) {
-            graphUri = graphUri[0];
+        var graphUri;
+        if (!sourceLabel) {
+            if (!options.graphUri) return callback("no sourceLabel or graphUri");
+            graphUri = options.graphUri;
+        } else {
+            graphUri = Config.sources[sourceLabel].graphUri;
+            if (Array.isArray(graphUri)) {
+                graphUri = graphUri[0];
+            }
         }
 
         var slices = common.array.slice(_triples, 200);
@@ -513,7 +519,7 @@ var Sparql_generic = (function () {
                     return callback(null, query);
                 }
                 // console.log(query)
-                var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+                var url = Config.sources[sourceLabel] ? Config.sources[sourceLabel].sparql_server.url : Config.default_sparql_url + "?format=json&query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
                     return callbackEach(err);
                 });

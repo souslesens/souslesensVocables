@@ -32,9 +32,9 @@ var LegendWidget = (function () {
         );
         JstreeWidget.loadJsTree(legendDivId, jstreeData, options, function () {
             self.legendDivId = legendDivId;
-            $("#" + legendDivId)
+            /*    $("#" + legendDivId)
                 .jstree(true)
-                .check_all();
+                .check_all();*/
         });
     };
 

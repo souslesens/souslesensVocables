@@ -88,7 +88,9 @@ var IndividualValueFilterWidget = (function () {
     self.onSelectOperator = function (value) {
         $("#individualValueFilter_objectValue").focus();
     };
-    self.onSelectObject = function (value) {};
+    self.onSelectObject = function (value) {
+        self.useLabelsList = false;
+    };
     self.onSelectProperty = function (property) {};
 
     self.onOKbutton = function () {
@@ -100,7 +102,7 @@ var IndividualValueFilterWidget = (function () {
 
         $("#" + self.divId).dialog("close");
 
-        if (self.useLabelsList) {
+        if (!value && self.useLabelsList) {
             var individualObjs = null;
             if ($("#individualValueFilter_labelsTreeDiv").jstree) {
                 individualObjs = $("#individualValueFilter_labelsTreeDiv").jstree().get_checked(true);
@@ -109,7 +111,7 @@ var IndividualValueFilterWidget = (function () {
             individualObjs.forEach(function (item, index) {
                 labelsList.push(item.id);
             });
-            var listFilter = " FILTER ( " + Sparql_common.setFilter(self.varName, null, labelsList, { exactMatch: 1 }) + ") ";
+            var listFilter = Sparql_common.setFilter(self.varName, null, labelsList, { exactMatch: 1 }) + " ";
 
             return self.validateFn(null, listFilter);
         } else if (self.date && datePrecision) {

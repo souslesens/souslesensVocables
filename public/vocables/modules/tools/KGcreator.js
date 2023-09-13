@@ -7,6 +7,7 @@ import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../shared/mainController.js";
 import visjsGraphClass from "../graph/VisjsGraphClass.js";
 import KGcreatorGraph from "./KGcreatorGraph.js";
+import R2Gmappings from "../shared/R2Gmappings.js";
 
 //https://openbase.com/js/@json-editor/json-editor/documentation
 
@@ -140,12 +141,15 @@ var KGcreator = (function () {
             self.initCentralPanel();
         };
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, null, options);
-        if (callback) callback();
+        if (callback) {
+            callback();
+        }
     };
 
     self.initSource = function (source, callback) {
         self.currentSource = source;
         self.currentSlsvSource = source;
+
         Config.currentTopLevelOntology = Lineage_sources.setTopLevelOntologyFromImports(source);
 
         self.currentGraphUri = Config.sources[source].graphUri;
@@ -725,8 +729,8 @@ var KGcreator = (function () {
             isString: true,
         });
         /*  if (!self.currentJsonObject.transform[column]) {
-      self.currentJsonObject.transform[column] = "function{if (value=='null') return null;if(mapping.isString && role=='o') return value; else return '" + column + "_'+value;}";
-  }*/
+  self.currentJsonObject.transform[column] = "function{if (value=='null') return null;if(mapping.isString && role=='o') return value; else return '" + column + "_'+value;}";
+}*/
 
         self.mainJsonEditor.load(self.currentJsonObject);
         self.mainJsonEditorModified = true;
@@ -837,9 +841,9 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         self.mainJsonEditorModified = true;
 
         /*  $("#KGcreator_objectInput").val("");
-        $("#KGcreator_objectSelect").val("");
-        $("#KGcreator_predicateInput").val("");
-        $("#KGcreator_predicateSelect").val("");*/
+    $("#KGcreator_objectSelect").val("");
+    $("#KGcreator_predicateInput").val("");
+    $("#KGcreator_predicateSelect").val("");*/
 
         //   $("#KGcreator_tripleTA").val(JSON.stringify(tripleObj))
     };
@@ -1619,53 +1623,9 @@ self.saveMappings({classId:classId})
         );
     };
 
-    self.getAllTriplesMappings = function (callback) {
-        self.loadMappingsList(function (err, result) {
-            if (err) {
-                return alert(err.responseText);
-            }
-
-            var allTripleMappings = {};
-
-            async.eachSeries(
-                result,
-                function (mappingFileName, callbackEach) {
-                    var payload = {
-                        dir: "CSV/" + self.currentSlsvSource || self.currentCsvDir,
-                        name: mappingFileName,
-                    };
-                    allTripleMappings[mappingFileName] = {};
-                    $.ajax({
-                        type: "GET",
-                        url: `${Config.apiUrl}/data/file`,
-                        data: payload,
-                        dataType: "json",
-                        success: function (result, _textStatus, _jqXHR) {
-                            try {
-                                var jsonObject = JSON.parse(result);
-                                allTripleMappings[mappingFileName] = jsonObject;
-                            } catch (e) {
-                                console.log("parsing error " + mappingFileName);
-                            }
-                            callbackEach();
-                        },
-                        error(err) {
-                            return callbackEach(err);
-                        },
-                    });
-                },
-                function (err) {
-                    if (err) {
-                        return callback(err.responseText);
-                    }
-                    return callback(null, allTripleMappings);
-                }
-            );
-        });
-    };
-
     self.drawAllMappings = function () {
-        self.getAllTriplesMappings(function (err, mappingObjects) {
+        var source = self.currentSlsvSource || self.currentCsvDir;
+        R2Gmappings.getAllTriplesMappings(source, function (err, mappingObjects) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -1673,12 +1633,21 @@ self.saveMappings({classId:classId})
             KGcreatorGraph.showDialog(mappingObjects);
         });
     };
+    self.drawMappings = function () {
+        var fileName = self.currentJsonObject.fileName;
+        var mappingObjects = {
+            [fileName]: self.currentJsonObject,
+        };
+        KGcreatorGraph.showDialog(mappingObjects);
+    };
+
     self.showModelMatchingProperties = function () {
         var subject = $("#KGcreator_subjectInput").val();
         var object = $("#editPredicate_objectValue").val();
         var subjectTypes = [];
         var objectTypes = [];
-        self.getAllTriplesMappings(function (err, mappingObject) {
+        var source = self.currentSlsvSource || self.currentCsvDir;
+        R2Gmappings.getAllTriplesMappings(source, function (err, mappingObject) {
             if (err) {
                 return alert(err.responseText);
             }

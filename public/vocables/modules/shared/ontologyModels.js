@@ -615,6 +615,7 @@ return callbackSeries();
                     }
 
                     allSources.forEach(function (_source) {
+                        if (!Config.ontologiesVocabularyModels[_source]) return;
                         var sourceConstraints = Config.ontologiesVocabularyModels[_source].constraints;
                         for (var property in sourceConstraints) {
                             var constraint = sourceConstraints[property];

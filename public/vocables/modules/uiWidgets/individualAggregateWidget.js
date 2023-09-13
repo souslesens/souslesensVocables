@@ -54,8 +54,8 @@ var IndividualAggregateWidget = (function () {
         var groupByStr = "";
         groupByClasses.forEach(function (item) {
             item = Sparql_common.formatStringForTriple(item, true);
-            selectStr += "?" + item + "Label  ";
-            groupByStr += "?" + item + "Label";
+            selectStr += "?" + item + " ?" + item + "Label  ";
+            groupByStr += "?" + item + " ?" + item + "Label";
         });
         groupFunctions.forEach(function (fn) {
             var fnVar = Sparql_common.formatStringForTriple(fnVars[0], true);

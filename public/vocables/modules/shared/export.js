@@ -18,7 +18,9 @@ var Export = (function () {
         var nodesFromMap = {};
 
         edges.forEach(function (edge) {
-            if (!nodesFromMap[edge.from]) nodesFromMap[edge.from] = [];
+            if (!nodesFromMap[edge.from]) {
+                nodesFromMap[edge.from] = [];
+            }
             nodesFromMap[edge.from].push(edge);
         });
         var allNodesMap = {};
@@ -41,13 +43,17 @@ var Export = (function () {
                 .split("\t")
                 .forEach(function (colName, index) {
                     var width = "100";
-                    if (index < 3) width = "200";
+                    if (index < 3) {
+                        width = "200";
+                    }
                     cols.push({ title: colName, defaultContent: "" });
                 });
 
             nodesFromArray.forEach(function (nodeFromId, index) {
                 nodesFromMap[nodeFromId].forEach(function (edge) {
-                    if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) return;
+                    if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) {
+                        return;
+                    }
                     var line = [allNodesMap[nodeFromId].data.label, edge.label || "", allNodesMap[edge.to].data ? allNodesMap[edge.to].data.label : "?", nodeFromId, edge.id, edge.to];
                     dataset.push(line);
                 });
@@ -59,7 +65,9 @@ var Export = (function () {
             var str = header;
             nodesFromArray.forEach(function (nodeFromId, index) {
                 nodesFromMap[nodeFromId].forEach(function (edge) {
-                    if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) return;
+                    if (!allNodesMap[nodeFromId] || !allNodesMap[edge.to]) {
+                        return;
+                    }
                     var edgeLabel = edge.label || "-";
                     edgeLabel = edgeLabel.replaceAll("<[^>]*>", "");
                     str += allNodesMap[nodeFromId].data.label + "\t";
@@ -80,12 +88,14 @@ var Export = (function () {
 
         var nodesToMap = {};
         edges.forEach(function (edge) {
-            if (!nodesToMap[edge.to]) nodesToMap[edge.to] = [];
+            if (!nodesToMap[edge.to]) {
+                nodesToMap[edge.to] = [];
+            }
             nodesToMap[edge.to].push(edge);
 
             /*  if (!nodesFromMap[edge.from])
-            nodesFromMap[edge.from] = []
-        nodesFromMap[edge.from].push(edge)*/
+      nodesFromMap[edge.from] = []
+  nodesFromMap[edge.from].push(edge)*/
         });
 
         var leafNodes = [];
@@ -98,7 +108,9 @@ var Export = (function () {
         });
 
         function recurse(node, ancestors, level) {
-            if (!node.id) return;
+            if (!node.id) {
+                return;
+            }
 
             edges.forEach(function (edge) {
                 if (edge.from == node.id) {
@@ -108,7 +120,9 @@ var Export = (function () {
                             ok = false;
                         }
                     if (ok) {
-                        if (!ancestors["_" + level]) ancestors["_" + level] = [];
+                        if (!ancestors["_" + level]) {
+                            ancestors["_" + level] = [];
+                        }
 
                         ancestors["_" + level].push(edge.to);
                         // eslint-disable-next-line no-console
@@ -133,10 +147,12 @@ var Export = (function () {
             var lineLabels = [];
             var lineIds = [];
             var leafLabel = leafNode.id;
-            if (leafLabel.indexOf("?_") == 0)
+            if (leafLabel.indexOf("?_") == 0) {
                 //datatype property
                 leafLabel = leafLabel.substring(leafLabel.lastIndexOf("/") + 1);
-            else leafLabel = leafNode.label || leafNode.id;
+            } else {
+                leafLabel = leafNode.label || leafNode.id;
+            }
             lineLabels.push(leafLabel);
             lineIds.push(leafNode.id);
             var previousAncestorLevel = null;
@@ -147,7 +163,9 @@ var Export = (function () {
                 if (previousAncestorLevel) {
                     // search edge label
                     edges.forEach(function (edge) {
-                        if (edge.from == leafNode.ancestors[previousAncestorLevel] && edge.to == leafNode.ancestors[ancestorLevel]) propLabel = "-[" + edge.label + "]-";
+                        if (edge.from == leafNode.ancestors[previousAncestorLevel] && edge.to == leafNode.ancestors[ancestorLevel]) {
+                            propLabel = "-[" + edge.label + "]-";
+                        }
                     });
                 }
                 previousAncestorLevel = ancestorLevel;
@@ -182,15 +200,21 @@ var Export = (function () {
             cols.push({ title: "Label_" + i, defaultContent: "" });
         }
         /*   for (var i = 1; i <= colsCount; i++) {
-           cols.push({title: "Uri_" + i, defaultContent: ""})
-       }*/
+       cols.push({title: "Uri_" + i, defaultContent: ""})
+   }*/
         self.showDataTable(null, cols, dataSet);
     };
 
     self.exportTreeToDataTable = function (jstreeDiv, nodeId) {
-        if (!jstreeDiv) jstreeDiv = SearchWidget.currentTargetDiv;
-        if (!nodeId) nodeId = SearchWidget.currentTreeNode ? SearchWidget.currentTreeNode.id : "#";
-        if (!nodeId) nodeId = "#";
+        if (!jstreeDiv) {
+            jstreeDiv = SearchWidget.currentTargetDiv;
+        }
+        if (!nodeId) {
+            nodeId = SearchWidget.currentTreeNode ? SearchWidget.currentTreeNode.id : "#";
+        }
+        if (!nodeId) {
+            nodeId = "#";
+        }
         //  var data = JstreeWidget.toTableData(jstreeDiv,nodeId)
 
         var tree = $("#" + jstreeDiv)
@@ -214,7 +238,9 @@ var Export = (function () {
                 if (!data.children.length) {
                     // result.push(prev)
                     result.push(prev.split("|")); //.map(Number))
-                } else flat(data.children, prev);
+                } else {
+                    flat(data.children, prev);
+                }
             }
         }
 
@@ -228,19 +254,25 @@ var Export = (function () {
     };
 
     self.exportAllDescendants = function (parentId, options, indexes) {
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
 
         MainController.UI.message("exporting node descendants...");
         $("#waitImg").css("display", "block");
         SearchUtil.getParentAllDescendants(parentId, indexes, null, function (err, result) {
-            if (err) MainController.UI.message(err, true);
+            if (err) {
+                MainController.UI.message(err, true);
+            }
             var matrixLabels = [];
             var matrixIds = [];
             var maxParentsLength = 0;
             result.data.forEach(function (hit, _index) {
                 var parentIdsArray = [];
                 var parentLabelsArray = [];
-                if (!hit.parents || !hit.parents.forEach) return;
+                if (!hit.parents || !hit.parents.forEach) {
+                    return;
+                }
                 hit.parents.forEach(function (parent, indexParent) {
                     if (indexParent > 0) {
                         parentLabelsArray.push(result.labelsMap[parent] || Sparql_common.getLabelFromURI(parent));
@@ -323,8 +355,10 @@ var Export = (function () {
         return { cols: cols, dataSet: dataSet };
     };
 
-    self.showDataTable = function (div, cols, dataSet, buttons, options) {
-        if (!options) options = {};
+    self.showDataTable = function (div, cols, dataSet, buttons, options, callback) {
+        if (!options) {
+            options = {};
+        }
         if (self.dataTable) {
             self.dataTable.destroy();
             $("#dataTableDiv").html("");
@@ -341,9 +375,13 @@ var Export = (function () {
             $("#" + div).html("<table id='dataTableDivExport'></table>");
         }
 
-        if (!buttons) buttons = "Bfrtip";
+        if (!buttons) {
+            buttons = "Bfrtip";
+        }
         setTimeout(function () {
-            if (!buttons) buttons = "Bfrtip";
+            if (!buttons) {
+                buttons = "Bfrtip";
+            }
             var params = {
                 data: dataSet,
                 columns: cols,
@@ -362,9 +400,9 @@ var Export = (function () {
 
                 paging: false,
                 /*  columnDefs: [
-                    { width: 400, targets: 0 }
-                ],
-                fixedColumns: true*/
+            { width: 400, targets: 0 }
+        ],
+        fixedColumns: true*/
 
                 //  order: []
             };
@@ -377,6 +415,9 @@ var Export = (function () {
             }
 
             self.dataTable = $("#dataTableDivExport").DataTable(params);
+            if (callback) {
+                return callback(null, self.dataTable);
+            }
         }, 200);
     };
 

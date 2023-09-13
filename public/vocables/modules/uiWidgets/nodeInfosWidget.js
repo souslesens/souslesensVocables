@@ -11,6 +11,7 @@ import PredicatesSelectorWidget from "./predicatesSelectorWidget.js";
 import Lineage_axioms_draw from "../tools/lineage/lineage_axioms_draw.js";
 import Lineage_axioms_create from "../tools/lineage/lineage_axioms_create.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
+import authentication from "../shared/authentification.js";
 
 var NodeInfosWidget = (function () {
     var self = {};
@@ -66,14 +67,6 @@ var NodeInfosWidget = (function () {
             self.currentSource = sourceLabel;
         }
         Lineage_axioms_draw.currentSource = sourceLabel;
-        /*  if (!node ) {
-            self.initDialog(sourceLabel, divId,options function () {
-
-                //   self.showNodeInfosToolbar(options);
-            });
-
-            return;
-        }*/
 
         if (typeof node == "object") {
             self.currentNode = node;
@@ -139,29 +132,35 @@ var NodeInfosWidget = (function () {
     };
 
     self.drawAllInfos = function (sourceLabel, nodeId, options, callback) {
-        var type;
+        var types;
         async.series(
             [
                 function (callbackSeries) {
                     self.drawCommonInfos(sourceLabel, nodeId, "nodeInfosWidget_InfosTabDiv", options, function (_err, result) {
-                        type = result.type;
+                        types = result.types;
                         callbackSeries();
                     });
                 },
 
                 function (callbackSeries) {
-                    self.showTypeOfResources(self.currentNodeRealSource, nodeId, function (err) {
-                        callbackSeries(err);
-                    });
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
+                        return callbackSeries();
+                    }
+                    var html = "<button onclick='NodeInfosWidget.showClassIndividuals()'>Individuals</button>";
+                    $("#nodeInfos_individualsDiv").html(html);
+                    callbackSeries();
                 },
                 function (callbackSeries) {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#Class") < 0) {
+                        return callbackSeries();
+                    }
                     self.showClassRestrictions(self.currentNodeRealSource, [nodeId], options, function (err) {
                         callbackSeries(err);
                     });
                 },
 
                 function (callbackSeries) {
-                    if (type != "http://www.w3.org/2002/07/owl#ObjectProperty") {
+                    if (types.indexOf("http://www.w3.org/2002/07/owl#ObjectProperty") < 0) {
                         return callbackSeries();
                     }
                     self.showPropertyRestrictions(self.currentNodeRealSource, nodeId, "nodeInfosWidget_InfosTabDiv", function (_err, _result) {
@@ -192,6 +191,13 @@ var NodeInfosWidget = (function () {
 
             str += "<button class='btn btn-sm my-1 py-0 btn-outline-primary' onclick='NodeInfosWidget.deleteNode()'> Delete </button>";
         }
+
+        if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
+            str +=
+                "<button class='btn btn-sm my-1 py-0 btn-outline-primary' " +
+                "onclick='PredicatesSelectorWidget.init(Lineage_sources.activeSource, NodeInfosWidget.configureEditPredicateWidget)'>  Add Predicate </button>";
+        }
+
         str += "<div id='sourceBrowser_addPropertyDiv' style='display:none;margin:5px;background-color: #e1ddd1;padding:5px';display:flex;>";
 
         if (self.visitedNodes.length > 1) {
@@ -243,7 +249,7 @@ var NodeInfosWidget = (function () {
                     });
                 }
 
-                var type = null;
+                var types = [];
                 var graphUri = "";
                 var uniqueTriples = {};
                 data.forEach(function (item) {
@@ -273,7 +279,7 @@ var NodeInfosWidget = (function () {
                     }
 
                     if (item.prop.value == "http://www.w3.org/1999/02/22-rdf-syntax-ns#type") {
-                        type = item.value.value;
+                        types.push(item.value.value);
                     }
 
                     var propName = item.prop.value;
@@ -491,7 +497,7 @@ defaultLang = 'en';*/
 
                 $("#nodeInfosWidget_InfosTabDiv").html(str);
 
-                return callback(null, { type: type, blankNodes: blankNodes });
+                return callback(null, { types: types, blankNodes: blankNodes });
             }
         );
     };
@@ -575,7 +581,10 @@ defaultLang = 'en';*/
         );
     };
 
-    self.showTypeOfResources = function (sourceLabel, nodeId, callback) {
+    self.showClassIndividuals = function (sourceLabel, nodeId, callback) {
+        if (!sourceLabel) sourceLabel = self.currentNodeRealSource;
+        if (!nodeId) nodeId = self.currentNodeId;
+
         var sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var fromStr = Sparql_common.getFromStr(sourceLabel);
         var query = " PREFIX  rdfs:<http://www.w3.org/2000/01/rdf-schema#> " + "select distinct * " + fromStr + " where {";
@@ -673,20 +682,11 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             return alert("enter property and value");
         }
 
-        /* if ($("#sourceBrowser_addPropertyObjectSelect").val() == "xsd:dateTime") {
-            if (!value.match(/\d\d\d\d-\d\d-\d\d/)) {
-                return alert("wrong date format (need yyy-mm-dd");
-            }
-            value = value + "^^xsd:dateTime";
-            $("#editPredicate_objectValue").datepicker("destroy");
-        }*/
-
         $("#sourceBrowser_addPropertyDiv").css("display", "none");
         if (source) {
             self.currentSource = source;
         }
         if (createNewNode || true) {
-            //confirm("add property")) {
             var triples = [];
             if (createNewNode) {
                 self.currentNodeId = Config.sources[self.currentSource].graphUri + common.getRandomHexaId(10);
@@ -707,6 +707,11 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
             Sparql_generic.insertTriples(self.currentSource, triples, {}, function (err, _result) {
                 if (err) {
                     return alert(err);
+                }
+                // store Annotator infos in source/userGraph
+                if (authentication.currentUser.groupes.indexOf("Annotator") > -1) {
+                    var userGraphUri = Config.sources[self.currentSource].graphUri + authentication.currentUser.login;
+                    Sparql_generic.insertTriples(null, triples, { graphUri: userGraphUri }, function (err, _result) {});
                 }
 
                 self.isModified = true;
@@ -841,6 +846,11 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                             Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(self.currentNodeId);
                         }
                         return callbackSeries();
+                    },
+                    //synchronize OntologyModels
+                    function (callbackSeries) {
+                        //  OntologyModels.
+                        return callbackSeries(); // TO DO
                     },
                 ],
                 function (err) {

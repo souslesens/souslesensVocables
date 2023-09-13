@@ -108,6 +108,9 @@
         <script src="config/app_config.js"></script>
 
         <script type="module" src="modules/shared/authentification.js"></script>
+
+        <script type="module" src="modules/shared/R2Gmappings.js"></script>
+
         <script type="module">
             import { allTools, loadToolsAndPlugins } from "./config/tools.js";
 
@@ -240,6 +243,12 @@
                     $("#accordion").on("accordionbeforeactivate", function (event, ui) {});
                     $("#accordion").on("accordionactivate", function (event, ui) {});
                     $("#mainDialogDiv").dialog({
+                        autoOpen: false,
+                        height: 800,
+                        width: $(document).width() * 0.85,
+                        modal: false,
+                    });
+                    $("#mainDialogDiv2").dialog({
                         autoOpen: false,
                         height: 800,
                         width: $(document).width() * 0.85,
@@ -408,6 +417,9 @@
             .mainDialogDiv {
                 background-color: #ddd;
             }
+            .mainDialogDiv2 {
+                background-color: #ddd;
+            }
 
             .td_title {
                 padding: 3px;
@@ -550,7 +562,7 @@
         </div>
 
         <div id="mainDialogDiv"></div>
-
+        <div id="mainDialogDiv2"></div>
         <div id="smallDialogDiv"></div>
 
         <!-- Footer -->

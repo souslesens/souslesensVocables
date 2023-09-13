@@ -23,95 +23,21 @@ var KGqueryWidget = (function () {
     self.classeMap = {};
     self.pathDivsMap = {};
     self.allPathEdges = {};
-
+    self.isLoaded = false;
     self.pathEdgesColors = ["green", "blue", "orange", "grey", "yellow"];
 
     self.showDialog = function () {
-        $("#mainDialogDiv").dialog("open");
-        $("#mainDialogDiv").dialog("option", "title", "Query");
-        $("#mainDialogDiv").load("snippets/KGqueryWidget.html", function () {
-            self.source = Lineage_sources.activeSource;
-            self.drawVisjsModel();
-        });
-    };
-
-    self.drawVisjsModel = function () {
-        var visjsData;
-        var visjsOptions = {
-            onclickFn: KGqueryWidget.graphActions.onNodeClick,
-            dndCtrlFn: KGqueryWidget.graphActions.onDnDnode,
-        };
-
-        function draw() {
-            self.vicinityArray = [];
-            visjsData.edges.forEach(function (edge) {
-                self.vicinityArray.push([edge.from, edge.to, edge.data.propertyId]);
-            });
-
-            self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", visjsData, visjsOptions);
-
-            // cannot get colors from loadGraph ???!!
-            self.KGqueryGraph.draw(function () {
-                var newNodes = [];
-                visjsData.nodes.forEach(function (node) {
-                    newNodes.push({ id: node.id, color: node.color, shape: node.shape });
-                });
-                self.KGqueryGraph.data.nodes.update(newNodes);
-            });
-
-            self.clearAll();
-        }
-
-        var visjsGraphFileName = self.source + "_KGmodelGraph.json";
-
-        self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", { nodes: [], edges: [] }, visjsOptions);
-
-        if (true) {
-            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
-                visjsData = result;
-
-                self.getInferredModelVisjsData(self.source, function (err, result2) {
-                    var oldNodesMap = {};
-                    var oldEdgesMap = {};
-                    var newNodes = [];
-                    var newEdges = [];
-                    visjsData.nodes.forEach(function (item) {
-                        oldNodesMap[item.id] = item;
-                    });
-
-                    visjsData.edges.forEach(function (item) {
-                        oldEdgesMap[item.id] = item;
-                    });
-
-                    result2.nodes.forEach(function (item) {
-                        if (!oldNodesMap[item.id]) newNodes.push(item);
-                    });
-                    result2.edges.forEach(function (item) {
-                        if (!oldEdgesMap[item.id]) newEdges.push(item);
-                    });
-                    visjsData.nodes = visjsData.nodes.concat(newNodes);
-                    visjsData.edges = visjsData.edges.concat(newEdges);
-
-                    return draw();
-                });
-            });
-        } else {
-            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
-                if (result) {
-                    visjsData = result;
-                    return draw();
-                } else {
-                    self.getInferredModelVisjsData(self.source, function (err, result) {
-                        if (err) {
-                            return alert(err.responseText);
-                        }
-                        visjsData = result;
-                        draw();
-                    });
-                }
+        $("#mainDialogDiv2").dialog("open");
+        $("#mainDialogDiv2").dialog("option", "title", "Query");
+        if (!self.isLoaded) {
+            $("#mainDialogDiv2").load("snippets/KGqueryWidget.html", function () {
+                self.source = Lineage_sources.activeSource;
+                self.drawVisjsModel();
+                self.isLoaded = true;
             });
         }
     };
+
     self.addQuerySet = function (booleanOperator) {
         self.switchRightPanel();
         var pathItem = []; //array of 3 items: formNode, toNode,Property,(inverse 1)
@@ -159,6 +85,11 @@ var KGqueryWidget = (function () {
         setHtml += "</div>";
 
         $("#KGqueryWidget_pathsDiv").append(setHtml);
+        $("#KGqueryWidget_setDiv_" + self.querySets.currentIndex).bind("click", function () {
+            var id = $(this).attr("id");
+            var index = parseInt(id.replace("KGqueryWidget_setDiv_", ""));
+            self.querySets.currentIndex = index;
+        });
     };
 
     self.addQueryElementToQuerySet = function (querySet) {
@@ -749,16 +680,27 @@ return alert("missing target node in  path");
     self.queryResultToVisjsGraph = function (result) {
         var classNodes = self.getAllQueryPathClasses();
 
+        /*    var edgesModel={}
+        self.querySets.sets.forEach(function (querySet) {
+            querySet.elements.forEach(function (queryElement, queryElementIndex) {
+                edgesModel[queryElement.fromNode+"_"+queryElement.toNode.id]= {  }
+            })
+        })*/
+
         var data = result.results.bindings;
         var visjsData = { nodes: [], edges: [] };
         var existingNodes = {};
-        data.forEach(function (item) {
+        data.forEach(function (item, index) {
+            var lineNodeId = common.getRandomHexaId(5);
+            visjsData.nodes.push(VisjsUtil.getVisjsNode(self.source, lineNodeId, "", null, { shape: "text", size: 2, color: "#ddd" }));
+
             classNodes.forEach(function (classNode) {
                 var varNameKey = self.getVarName(classNode, true);
                 var labelKey = varNameKey + "Label";
 
                 if (!existingNodes[item[varNameKey].value]) {
                     existingNodes[item[varNameKey].value] = 1;
+
                     var options = {
                         shape: "triangle",
                         size: Lineage_whiteboard.defaultShapeSize,
@@ -766,11 +708,17 @@ return alert("missing target node in  path");
                     };
                     var label = item[labelKey] ? item[labelKey].value : Sparql_common.getLabelFromURI(item[varNameKey].value);
                     visjsData.nodes.push(VisjsUtil.getVisjsNode(self.source, item[varNameKey].value, label, null, options));
+                    visjsData.edges.push({
+                        id: lineNodeId + item[varNameKey].value,
+                        from: item[varNameKey].value,
+                        to: lineNodeId,
+                    });
                 }
             });
+
+            $("#mainDialogDiv2").dialog("close");
+            Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
         });
-        $("#mainDialogDiv").dialog("close");
-        Lineage_whiteboard.drawNewGraph(visjsData, "graphDiv");
     };
 
     self.queryResultToTable = function (result) {
@@ -826,7 +774,9 @@ return alert("missing target node in  path");
                 var datasetIndex = column[index.row];
                 var dataItem = self.currentData[datasetIndex];
                 var varName = self.tableCols[index.column].title;
-                varName = varName.replace("Label", "").replace("Value", "");
+                if (true || !dataItem[varName]) {
+                    varName = varName.replace("Label", "").replace("Value", "");
+                }
                 var uri = dataItem[varName].value;
                 var node = { data: { id: uri } };
                 NodeInfosWidget.showNodeInfos(self.source, node, "smallDialogDiv");
@@ -967,6 +917,87 @@ return alert("missing target node in  path");
                 return alert(err.responseText);
             },
         });
+    };
+    self.drawVisjsModel = function () {
+        var visjsData;
+        var visjsOptions = {
+            onclickFn: KGqueryWidget.graphActions.onNodeClick,
+            dndCtrlFn: KGqueryWidget.graphActions.onDnDnode,
+        };
+
+        function draw() {
+            self.vicinityArray = [];
+            visjsData.edges.forEach(function (edge) {
+                self.vicinityArray.push([edge.from, edge.to, edge.data.propertyId]);
+            });
+
+            self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", visjsData, visjsOptions);
+
+            // cannot get colors from loadGraph ???!!
+            self.KGqueryGraph.draw(function () {
+                var newNodes = [];
+                visjsData.nodes.forEach(function (node) {
+                    newNodes.push({ id: node.id, color: node.color, shape: node.shape });
+                });
+                self.KGqueryGraph.data.nodes.update(newNodes);
+            });
+
+            self.clearAll();
+        }
+
+        var visjsGraphFileName = self.source + "_KGmodelGraph.json";
+
+        self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", { nodes: [], edges: [] }, visjsOptions);
+
+        if (false) {
+            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
+                visjsData = result;
+
+                self.getInferredModelVisjsData(self.source, function (err, result2) {
+                    var oldNodesMap = {};
+                    var oldEdgesMap = {};
+                    var newNodes = [];
+                    var newEdges = [];
+                    visjsData.nodes.forEach(function (item) {
+                        oldNodesMap[item.id] = item;
+                    });
+
+                    visjsData.edges.forEach(function (item) {
+                        oldEdgesMap[item.id] = item;
+                    });
+
+                    result2.nodes.forEach(function (item) {
+                        if (!oldNodesMap[item.id]) {
+                            newNodes.push(item);
+                        }
+                    });
+                    result2.edges.forEach(function (item) {
+                        if (!oldEdgesMap[item.id]) {
+                            newEdges.push(item);
+                        }
+                    });
+                    visjsData.nodes = visjsData.nodes.concat(newNodes);
+                    visjsData.edges = visjsData.edges.concat(newEdges);
+
+                    return draw();
+                });
+            });
+        } else {
+            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
+                if (false && result) {
+                    visjsData = result;
+                    return draw();
+                } else {
+                    self.getInferredModelVisjsData(self.source, function (err, result) {
+                        if (err) {
+                            return alert(err.responseText);
+                        }
+                        visjsData = result;
+                        draw();
+                    });
+                }
+            });
+        }
     };
 
     return self;

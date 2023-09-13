@@ -91,7 +91,7 @@ var KGcreatorGraph = (function () {
                         }
                         if (str.indexOf(":") > -1) {
                             // return "#0067bb";
-                            return { type: "OwlType", color: "#0067bb", shape: "ellipse" };
+                            return { type: "OwlType", color: "#aaa", shape: "ellipse" };
                         } else {
                             if (mappingObject.fileName) {
                                 var color = common.getResourceColor("mappingFileName", mappingObject.fileName);
@@ -122,7 +122,7 @@ var KGcreatorGraph = (function () {
                         existingNodes[item.o] = 1;
                         var label = Sparql_common.getLabelFromURI(item.o);
 
-                        var attrs = getNodeAttrs(item.s);
+                        var attrs = getNodeAttrs(item.o);
                         visjsData.nodes.push({
                             id: item.o,
                             label: label,

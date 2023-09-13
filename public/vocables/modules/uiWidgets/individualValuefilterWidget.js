@@ -109,7 +109,7 @@ var IndividualValueFilterWidget = (function () {
             individualObjs.forEach(function (item, index) {
                 labelsList.push(item.id);
             });
-            var listFilter = " FILTER ( " + Sparql_common.setFilter(self.varName, null, labelsList, { exactMatch: 1 }) + ") ";
+            var listFilter = Sparql_common.setFilter(self.varName, null, labelsList, { exactMatch: 1 }) + " ";
 
             return self.validateFn(null, listFilter);
         } else if (self.date && datePrecision) {

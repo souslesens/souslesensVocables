@@ -7,6 +7,7 @@ import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../shared/mainController.js";
 import visjsGraphClass from "../graph/VisjsGraphClass.js";
 import KGcreatorGraph from "./KGcreatorGraph.js";
+import R2Gmappings from "../shared/R2Gmappings.js";
 
 //https://openbase.com/js/@json-editor/json-editor/documentation
 
@@ -1622,53 +1623,9 @@ self.saveMappings({classId:classId})
         );
     };
 
-    self.getAllTriplesMappings = function (callback) {
-        self.loadMappingsList(function (err, result) {
-            if (err) {
-                return alert(err.responseText);
-            }
-
-            var allTripleMappings = {};
-
-            async.eachSeries(
-                result,
-                function (mappingFileName, callbackEach) {
-                    var payload = {
-                        dir: "CSV/" + self.currentSlsvSource || self.currentCsvDir,
-                        name: mappingFileName,
-                    };
-                    allTripleMappings[mappingFileName] = {};
-                    $.ajax({
-                        type: "GET",
-                        url: `${Config.apiUrl}/data/file`,
-                        data: payload,
-                        dataType: "json",
-                        success: function (result, _textStatus, _jqXHR) {
-                            try {
-                                var jsonObject = JSON.parse(result);
-                                allTripleMappings[mappingFileName] = jsonObject;
-                            } catch (e) {
-                                console.log("parsing error " + mappingFileName);
-                            }
-                            callbackEach();
-                        },
-                        error(err) {
-                            return callbackEach(err);
-                        },
-                    });
-                },
-                function (err) {
-                    if (err) {
-                        return callback(err.responseText);
-                    }
-                    return callback(null, allTripleMappings);
-                }
-            );
-        });
-    };
-
     self.drawAllMappings = function () {
-        self.getAllTriplesMappings(function (err, mappingObjects) {
+        var source = self.currentSlsvSource || self.currentCsvDir;
+        R2Gmappings.getAllTriplesMappings(source, function (err, mappingObjects) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -1689,7 +1646,8 @@ self.saveMappings({classId:classId})
         var object = $("#editPredicate_objectValue").val();
         var subjectTypes = [];
         var objectTypes = [];
-        self.getAllTriplesMappings(function (err, mappingObject) {
+        var source = self.currentSlsvSource || self.currentCsvDir;
+        R2Gmappings.getAllTriplesMappings(source, function (err, mappingObject) {
             if (err) {
                 return alert(err.responseText);
             }

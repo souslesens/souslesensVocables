@@ -88,7 +88,9 @@ var IndividualValueFilterWidget = (function () {
     self.onSelectOperator = function (value) {
         $("#individualValueFilter_objectValue").focus();
     };
-    self.onSelectObject = function (value) {};
+    self.onSelectObject = function (value) {
+        self.useLabelsList=false
+    };
     self.onSelectProperty = function (property) {};
 
     self.onOKbutton = function () {
@@ -100,7 +102,7 @@ var IndividualValueFilterWidget = (function () {
 
         $("#" + self.divId).dialog("close");
 
-        if (self.useLabelsList) {
+        if (!value && self.useLabelsList) {
             var individualObjs = null;
             if ($("#individualValueFilter_labelsTreeDiv").jstree) {
                 individualObjs = $("#individualValueFilter_labelsTreeDiv").jstree().get_checked(true);

@@ -135,6 +135,34 @@ var Lineage_axioms_draw = (function () {
 
         var filterProps = ""; //Sparql_common.setFilter("p",props)
 
+
+
+
+        var queryNew="PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>PREFIX owl: <http://www.w3.org/2002/07/owl#>PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> \n" +
+          "\n" +
+          "SELECT distinct  ?s ?p ?o FROM   <http://purl.obolibrary.org/obo/bfo.owl>  \n" +
+          "\n" +
+          "WHERE {?s (<http://www.w3.org/2002/07/owl#complementOf>|<http://www.w3.org/2002/07/owl#disjointWith>|<http://www.w3.org/2002/07/owl#disjointUnionOf>|<http://www.w3.org/2002/07/owl#hasKey>|<http://www.w3.org/2002/07/owl#equivalentClass>|<http://www.w3.org/2002/07/owl#unionOf>|<http://www.w3.org/2002/07/owl#intersectionOf>|<http://www.w3.org/2002/07/owl#oneOf>|<http://www.w3.org/2000/01/rdf-schema#subClassOf>){1,3} ?o. \n" +
+          "  ?s ?p ?o.\n" +
+          "\n" +
+          "  \n" +
+          "  \n" +
+          "\n" +
+          "{ SELECT distinct ?s \n" +
+          "    WHERE {?s (<http://www.w3.org/2002/07/owl#complementOf>|<http://www.w3.org/2002/07/owl#disjointWith>|<http://www.w3.org/2002/07/owl#disjointUnionOf>|<http://www.w3.org/2002/07/owl#hasKey>|<http://www.w3.org/2002/07/owl#equivalentClass>|<http://www.w3.org/2002/07/owl#unionOf>|<http://www.w3.org/2002/07/owl#intersectionOf>|<http://www.w3.org/2002/07/owl#oneOf>|<http://www.w3.org/2000/01/rdf-schema#subClassOf>) ?o.}\n" +
+          "}\n" +
+          "  \n" +
+          "  \n" +
+          "\n" +
+          "}\n" +
+          "  limit 1000"
+
+
+
+
+
+
+
         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
         Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function (err, result) {
             if (err) {

@@ -26,7 +26,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Query Jowl server to get inference parameters",
         description: "Query Jowl server to get inference parameters",
         operationId: "reasonerListInferenceParams",

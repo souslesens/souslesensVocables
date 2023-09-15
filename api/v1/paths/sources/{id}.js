@@ -60,7 +60,7 @@ module.exports = function () {
     GET.apiDoc = {
         summary: "This resource returns profiles list or a profile if an id is provided",
         operationId: "getProfiles",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         parameters: [],
         responses: {
             200: {

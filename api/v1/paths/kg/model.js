@@ -24,7 +24,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Retrieve SQL model",
         description: "Retrieve SQL model",
         operationId: "Retrieve SQL model",

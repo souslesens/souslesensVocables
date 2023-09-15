@@ -86,7 +86,7 @@ module.exports = function () {
 
     POST.apiDoc = {
         summary: "Access to Graph Store",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "GraphStore",
         parameters: [
             {

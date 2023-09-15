@@ -17,7 +17,7 @@ module.exports = function () {
     }
     GET.apiDoc = {
         summary: "Returns blender sources",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "getAllBlenderSources",
         parameters: [],
         responses: responseSchema("BlenderSources", "GET"),

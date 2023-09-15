@@ -54,7 +54,7 @@ module.exports = function () {
     }
 
     POST.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Elasticsearch msearch",
         description: "Elasticsearch msearch",
         operationId: "Elasticsearch msearch",

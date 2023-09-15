@@ -31,7 +31,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "get turtle  from triples",
         description: "get turtle  from triples",
         operationId: "get turtle  from triples",
@@ -79,7 +79,7 @@ module.exports = function () {
     }
 
     POST.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Save rdf url to SLSV graph store",
         description: "Save rdf file or url to SLSV graph store",
         operationId: "Save rdf file or url to SLSV graph store",

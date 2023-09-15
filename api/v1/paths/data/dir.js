@@ -16,7 +16,7 @@ module.exports = function () {
     }
 
     POST.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Create new directory in a subdirectory of data",
         description: "Create new directory in a subdirectory of data",
         operationId: "Create new directory in a subdirectory of data",

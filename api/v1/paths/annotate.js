@@ -16,7 +16,7 @@ module.exports = function () {
     }
 
     POST.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Annotate",
         description: "Annotate",
         operationId: "Annotate",

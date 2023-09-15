@@ -16,7 +16,7 @@ module.exports = function () {
     }
 
     POST.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Build a KG Mapping",
         description: "Build a KG Mapping",
         operationId: "Build a KG Mapping",

@@ -17,7 +17,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Get ElasticSearch indices",
         description: "Get ElasticSearch indices",
         operationId: "Get ElasticSearch indices",

@@ -59,7 +59,7 @@ module.exports = function () {
 
     GET.apiDoc = {
         summary: "Get a specific profile",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "getOneProfile",
         parameters: [],
         responses: {

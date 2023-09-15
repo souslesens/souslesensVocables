@@ -109,7 +109,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Query Jowl server rules",
         description: "Query Jowl server  rules",
         operationId: "Query Jowl server  rules",

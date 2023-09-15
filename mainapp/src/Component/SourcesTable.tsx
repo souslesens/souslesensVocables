@@ -54,8 +54,8 @@ const SourcesTable = () => {
         setOrderBy(property);
     }
 
-    const indices = SRD.withDefault([], model.indices);
-    const graphs = SRD.withDefault([], model.graphs);
+    const indices = SRD.withDefault(null, model.indices);
+    const graphs = SRD.withDefault(null, model.graphs);
 
     const renderSources = SRD.match(
         {
@@ -132,8 +132,9 @@ const SourcesTable = () => {
                                             {sortedSources
                                                 .filter((source) => source.name.includes(filteringChars))
                                                 .map((source) => {
-                                                    const haveIndices = indices.includes(source.name.toLowerCase());
-                                                    const haveGraphs = graphs.includes(source.graphUri || "");
+                                                    const haveIndices = indices ? indices.includes(source.name.toLowerCase()) : false;
+                                                    const haveGraphs = graphs ? graphs.includes(source.graphUri || "") : false;
+                                                    console.log();
                                                     return (
                                                         <TableRow key={source.name}>
                                                             <TableCell>{source.name}</TableCell>
@@ -146,10 +147,10 @@ const SourcesTable = () => {
                                                             </TableCell>
                                                             <TableCell>
                                                                 <Tooltip title="RDF Graph">
-                                                                    <CircleIcon sx={{ color: graphs.length > 0 ? (haveGraphs ? green[500] : pink[500]) : grey[500] }} />
+                                                                    <CircleIcon sx={{ color: graphs !== null ? (haveGraphs ? green[500] : pink[500]) : grey[500] }} />
                                                                 </Tooltip>
                                                                 <Tooltip title="ElasticSearch indices">
-                                                                    <CircleIcon sx={{ color: indices.length > 0 ? (haveIndices ? green[500] : pink[500]) : grey[500] }} />
+                                                                    <CircleIcon sx={{ color: indices !== null ? (haveIndices ? green[500] : pink[500]) : grey[500] }} />
                                                                 </Tooltip>
                                                             </TableCell>
                                                         </TableRow>

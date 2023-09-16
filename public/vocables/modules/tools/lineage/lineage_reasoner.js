@@ -306,6 +306,8 @@ var Lineage_reasoner = (function () {
     self.filterVisjsDataPath = function (nodeIds, visjsData) {
         var path = [];
         var visited = {};
+        if(nodeIds.length==0)
+            return visjsData
         function recurse(nodeId) {
             if (!visited[nodeId]) {
                 visited[nodeId] = 1;

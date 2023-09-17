@@ -347,7 +347,7 @@ var Lineage_axioms_draw = (function() {
             if (stop)
               return
               if (node.s == "http://purl.obolibrary.org/obo/BFO_0000001") {
-                stop = true;
+              ;//  stop = true;
               }
 
 
@@ -387,7 +387,7 @@ var Lineage_axioms_draw = (function() {
                   existingNodes[parentNode.o] = 1;
                   var style = geNodeStyle(parentNode.o, parentNode.oType, parentNode.oLabel);
 
-                  if (parentNode.oIsBlank &&  parentNode.oType  && parentNode.oType.indexOf("Restriction") < 0) {
+                  if (parentNode.oIsBlank &&  (!parentNode.oType || parentNode.oType.indexOf("Restriction") < 0)) {
                     style.label = Config.Lineage.logicalOperatorsMap[parentNode.p];
                   }
 
@@ -434,6 +434,9 @@ var Lineage_axioms_draw = (function() {
                     }
                   });
                   parentNode.s = parentNode.o;
+
+
+                  if(!node.sIsBlank)
                   recurse(parentNode, level + 1);
                 }
 
@@ -643,6 +646,11 @@ var Lineage_axioms_draw = (function() {
     }
 
     html += "</table>";
+
+    html=JSON.stringify(node.data,function(key,value){
+      return value;//.replace(/"/g,"").replace(/,/g,"<br>")
+
+    },2)
 
     $("#nodeInfosWidget_HoverDiv").css("top", point.y);
     $("#nodeInfosWidget_HoverDiv").css("left", point.x);

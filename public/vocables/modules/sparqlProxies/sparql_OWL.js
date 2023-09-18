@@ -1196,7 +1196,7 @@ var Sparql_OWL = (function () {
             Sparql_common.getVariableLangLabel("prop", true, null, filterStr) +
             Sparql_common.getVariableLangLabel("subject", true, null, filterStr);
 
-        if (options.someValuesFrom) {
+        if (true || options.someValuesFrom) {
             query += "?node owl:someValuesFrom ?value." + Sparql_common.getVariableLangLabel("value", true); //OPTIONAL {?value rdfs:label ?valueLabel}";
         } else if (options.allValuesFrom) {
             query += "?node owl:allValuesFrom ?value." + Sparql_common.getVariableLangLabel("value", true); // OPTIONAL {?value rdfs:label ?valueLabel}";

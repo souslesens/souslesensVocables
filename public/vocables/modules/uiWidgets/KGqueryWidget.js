@@ -983,7 +983,14 @@ return alert("missing target node in  path");
                 });
             });
         } else {
-            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
+            self.getInferredModelVisjsData(self.source, function (err, result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+                visjsData = result;
+                draw();
+            });
+            /*  self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                 if (false && result) {
                     visjsData = result;
                     return draw();
@@ -996,7 +1003,7 @@ return alert("missing target node in  path");
                         draw();
                     });
                 }
-            });
+            });*/
         }
     };
 

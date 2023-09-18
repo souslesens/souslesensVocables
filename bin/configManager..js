@@ -27,7 +27,9 @@ var ConfigManager = {
         var err = null;
         try {
             editableConfig.version = process.env.npm_package_version;
-            if (!editableConfig.data_dir) editableConfig.data_dir = path.join(__dirname, "../data/");
+            if (!editableConfig.data_dir) {
+                editableConfig.data_dir = path.join(__dirname, "../data/");
+            }
 
             ConfigManager.config = editableConfig;
         } catch (e) {
@@ -35,7 +37,9 @@ var ConfigManager = {
             // in that case return the string content not parsed
             err = e;
         } finally {
-            if (callback) callback(err, editableConfig);
+            if (callback) {
+                callback(err, editableConfig);
+            }
         }
     },
     // TODO move to model/profiles
@@ -58,16 +62,20 @@ var ConfigManager = {
             [
                 // create and initiate graph triples
                 function (callbackSeries) {
-                    if (options.type == "SKOS")
+                    if (options.type == "SKOS") {
                         SourceManager.createNewSkosSourceGraph(sourceName, graphUri, targetSparqlServerUrl, options, function (err, result) {
                             return callbackSeries(err, result);
                         });
-                    else if (options.type == "OWL") return callbackSeries(null);
+                    } else if (options.type == "OWL") {
+                        return callbackSeries(null);
+                    }
                 },
                 function (callbackSeries) {
                     var sourcesPath = path.join(__dirname, "../" + configPath + "/blenderSources.json");
                     jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
-                        if (err) return callback(err);
+                        if (err) {
+                            return callback(err);
+                        }
                         if (options.type == "SKOS") {
                             sources[sourceName] = {
                                 editable: true,
@@ -118,7 +126,9 @@ var ConfigManager = {
                 function (callbackSeries) {
                     var sourcesPath = path.join(__dirname, "../" + configPath + "/blenderSources.json");
                     jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, sources) {
-                        if (err) return callback(err);
+                        if (err) {
+                            return callback(err);
+                        }
                         delete sources[sourceName];
 
                         jsonFileStorage.store(path.resolve(sourcesPath), sources, function (err, _sources) {
@@ -135,10 +145,16 @@ var ConfigManager = {
     // TODO move to model/sources
     addImportToSource: function (parentSource, importedSource, callback) {
         ConfigManager.getSources(null, function (err, sources) {
-            if (err) return callback(err);
-            if (!sources[parentSource]) return callback(err);
+            if (err) {
+                return callback(err);
+            }
+            if (!sources[parentSource]) {
+                return callback(err);
+            }
 
-            if (!sources[parentSource].imports) sources[parentSource].imports = [];
+            if (!sources[parentSource].imports) {
+                sources[parentSource].imports = [];
+            }
             sources[parentSource].imports.push(importedSource);
             ConfigManager.saveSources(sources, function (err, result) {
                 callback(err, result);
@@ -188,6 +204,7 @@ var ConfigManager = {
             // return all sources if user is admin
             let filteredSources;
             if (!userInfo.user.groups.includes("admin")) {
+                //   if (!userInfo.user.groups.indexOf("admin")>-1) {
                 // return filtered sources if user is not admin
                 const profiles = await read(profilesJSON);
                 const parsedProfiles = JSON.parse(profiles);

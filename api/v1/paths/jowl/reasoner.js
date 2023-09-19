@@ -91,7 +91,7 @@ module.exports = function () {
 
                     var payload = {
                         ontologyContentEncoded64: ontologyContentEncoded64,
-                        predicates:req.query.predicates?JSON.parse(req.query.predicates):null,
+                        predicates: req.query.predicates ? JSON.parse(req.query.predicates) : null,
                     };
 
                     var options = {

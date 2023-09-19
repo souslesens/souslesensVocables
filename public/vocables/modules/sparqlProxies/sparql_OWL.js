@@ -2195,6 +2195,7 @@ var Sparql_OWL = (function () {
         async.series(
             [
                 function (callbackSeries) {
+                    callbackSeries(err);
                     const payload = { graphUri: Config.labelsGraphUri };
                     $.ajax({
                         type: "POST",

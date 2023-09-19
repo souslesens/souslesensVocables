@@ -317,13 +317,15 @@ var Lineage_graphTraversal = (function () {
                 });
             }
         });
-
-        var oldEdges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
-        var toDelete = [];
-        oldEdges.forEach(function (edge) {
-            if (edge.type == "path") toDelete.push(edge.id);
-        });
-        Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(toDelete);
+        if(Lineage_whiteboard.lineageVisjsGraph.data){
+            var oldEdges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
+            var toDelete = [];
+            oldEdges.forEach(function (edge) {
+                if (edge.type == "path") toDelete.push(edge.id);
+            });
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(toDelete);
+        }
+       
 
         if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);

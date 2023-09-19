@@ -115,7 +115,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
 
         var filter = "";
         if (term) {
-            filter = "FILTER (" + Sparql_common.setFilter("member", null, term) + ")";
+            filter =  Sparql_common.setFilter("member", null, term) ;
         }
 
         var search_on_container = "";

@@ -228,10 +228,11 @@ var Lineage_blend = (function () {
                                         text: _source,
                                     },
                                 });
-
+                                var array=[]
                                 for (var group in authorizedProps) {
                                     for (var propId in authorizedProps[group]) {
                                         var property = authorizedProps[group][propId];
+
                                         if (property.source == _source) {
                                             if (!uniqueProps[propId]) {
                                                 uniqueProps[propId] = 1;
@@ -241,11 +242,12 @@ var Lineage_blend = (function () {
                                                 var cssClass = propStatusCssClassMap[group];
                                                 var parent = property.source;
 
-                                                jstreeData.push({
+                                                array.push({
                                                     id: propId,
                                                     text: "<span class='" + cssClass + "'>" + label + "</span>",
                                                     parent: parent,
                                                     data: {
+                                                        propLabel:property.label,
                                                         id: propId,
                                                         label: label,
                                                         source: property.source,
@@ -255,6 +257,17 @@ var Lineage_blend = (function () {
                                         }
                                     }
                                 }
+
+                                array.sort(function(a,b){
+                                    if(a.data.propLabel>b.data.propLabel)
+                                        return 1;
+                                    if(a.data.propLabel<b.data.propLabel)
+                                        return -1;
+                                    return 0;
+                                })
+
+                                jstreeData=jstreeData.concat(array)
+
                             });
                             //  })
 

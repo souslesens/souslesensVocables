@@ -554,6 +554,8 @@ return callbackSeries();
   };
 
   self.getAllowedPropertiesBetweenNodes = function(source, startNodeId, endNodeId, callback) {
+
+    var allConstraints=true
     var startNodeAncestors = [];
     var endNodeAncestors = [];
 
@@ -632,8 +634,8 @@ return callbackSeries();
               if (!allConstraints[property]) {
                 allConstraints[property] = constraint;
 
-                if (constraint.domain) {
-                  if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
+                if ( constraint.domain) {
+                  if (allConstraints || startNodeAncestorIds.indexOf(constraint.domain) > -1) {
                     if (!constraint.range || !endNodeId) {
                       propertiesMatchingStartNode.push(property);
                     }
@@ -642,8 +644,8 @@ return callbackSeries();
                     }
                   }
                 }
-                if (constraint.range) {
-                  if (endNodeAncestorIds.indexOf(constraint.range) > -1) {
+                if (  constraint.range) {
+                  if ( allConstraints || endNodeAncestorIds.indexOf(constraint.range) > -1) {
                     if (domainOK) {
                       propertiesMatchingBoth.push(property);
                     }
@@ -741,8 +743,14 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
 
 
 
+
+
+
       ],
       function(err) {
+
+
+
         if (duplicateProps.length > 0) {
           MainController.UI.message(duplicateProps.length + " DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN");
         }

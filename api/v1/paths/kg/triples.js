@@ -17,7 +17,7 @@ module.exports = function () {
     }
 
     POST.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [],
         summary: "Creates triples from csv file",
         description: "Takes a csv filename and directory and returns triples",
         operationId: "createTriplesFromCsv",

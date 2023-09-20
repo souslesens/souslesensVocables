@@ -228,7 +228,7 @@ var Lineage_blend = (function () {
                                         text: _source,
                                     },
                                 });
-                                var array=[]
+                                var array = [];
                                 for (var group in authorizedProps) {
                                     for (var propId in authorizedProps[group]) {
                                         var property = authorizedProps[group][propId];
@@ -247,7 +247,7 @@ var Lineage_blend = (function () {
                                                     text: "<span class='" + cssClass + "'>" + label + "</span>",
                                                     parent: parent,
                                                     data: {
-                                                        propLabel:property.label,
+                                                        propLabel: property.label,
                                                         id: propId,
                                                         label: label,
                                                         source: property.source,
@@ -258,16 +258,13 @@ var Lineage_blend = (function () {
                                     }
                                 }
 
-                                array.sort(function(a,b){
-                                    if(a.data.propLabel>b.data.propLabel)
-                                        return 1;
-                                    if(a.data.propLabel<b.data.propLabel)
-                                        return -1;
+                                array.sort(function (a, b) {
+                                    if (a.data.propLabel > b.data.propLabel) return 1;
+                                    if (a.data.propLabel < b.data.propLabel) return -1;
                                     return 0;
-                                })
+                                });
 
-                                jstreeData=jstreeData.concat(array)
-
+                                jstreeData = jstreeData.concat(array);
                             });
                             //  })
 

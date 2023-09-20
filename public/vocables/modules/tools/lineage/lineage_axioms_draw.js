@@ -279,6 +279,7 @@ var Lineage_axioms_draw = (function () {
                             }
                             object.s = object.o;
                             object.parent = node;
+                            object.incomingProperty = node.p;
                             if (false && node.parent && !node.sType) {
                                 // skip null type->disjonction node
                                 node.sLabel = node.pLabel;
@@ -297,7 +298,7 @@ var Lineage_axioms_draw = (function () {
                         s: nodeId,
                         sLabel: "xx",
 
-                        type:"http://www.w3.org/2002/07/owl#Class"//allBasicAxioms[nodeId].sLabel
+                        type: "http://www.w3.org/2002/07/owl#Class", //allBasicAxioms[nodeId].sLabel
                     };
                     recurseTree(nodeIdTree);
                     return callbackSeries();
@@ -381,6 +382,7 @@ var Lineage_axioms_draw = (function () {
 
                         if (node.objects) {
                             node.objects.forEach(function (parentNode) {
+                                if (node.incomingProperty && node.incomingProperty.indexOf("disjointWith") > -1) return;
                                 if (options.skipRestrictions && parentNode.oType && parentNode.oType.indexOf("Restriction") > -1) {
                                     return;
                                 }

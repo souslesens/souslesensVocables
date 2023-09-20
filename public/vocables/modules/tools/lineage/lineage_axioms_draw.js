@@ -295,7 +295,9 @@ var Lineage_axioms_draw = (function () {
 
                     nodeIdTree = {
                         s: nodeId,
-                        sLabel: "xx", //allBasicAxioms[nodeId].sLabel
+                        sLabel: "xx",
+
+                        type:"http://www.w3.org/2002/07/owl#Class"//allBasicAxioms[nodeId].sLabel
                     };
                     recurseTree(nodeIdTree);
                     return callbackSeries();

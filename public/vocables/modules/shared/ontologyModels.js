@@ -555,7 +555,7 @@ return callbackSeries();
 
   self.getAllowedPropertiesBetweenNodes = function(source, startNodeId, endNodeId, callback) {
 
-    var allConstraints=true
+    var allConstraints=false
     var startNodeAncestors = [];
     var endNodeAncestors = [];
 

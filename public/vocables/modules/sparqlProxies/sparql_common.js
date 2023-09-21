@@ -238,8 +238,7 @@ var Sparql_common = (function () {
             return " OPTIONAL {?" + variable + " rdfs:label" + pred + " ?" + variable + "Label.}";
         }
 
-        //     var str = "?" + variable + " rdfs:label" + pred + " ?" + variable + "Label. filter( lang(?" + variable + "Label)= '" + Config.default_lang + "' || !lang(?" + variable + "Label))";
-        var str = "?" + variable + " rdfs:label" + pred + " ?" + variable + "Label. filter(regex( lang(?" + variable + "Label), '" + Config.default_lang + "') || !lang(?" + variable + "Label))";
+            var str = "?" + variable + " rdfs:label" + pred + " ?" + variable + "Label. filter(regex( lang(?" + variable + "Label), '" + Config.default_lang + "') || !lang(?" + variable + "Label))";
 
         if (optional) {
             return " OPTIONAL {" + str + "} ";

@@ -106,6 +106,7 @@ var Lineage_whiteboard = (function () {
             $("#rightPanelDivInner").load("snippets/lineage/lineageRightPanel.html", function () {
                 $("#GenericTools_searchSchemaType").val("OWL");
 
+
                 if (Object.keys(Lineage_sources.loadedSources).length == 0) {
                     $("#lineage_allActions").css("visibility", "hidden");
                 }
@@ -156,6 +157,7 @@ var Lineage_whiteboard = (function () {
                     }
                 }
                 $("#GenericTools_searchSchemaType").val("OWL");
+
 
                 if (callback) {
                     callback();
@@ -467,7 +469,7 @@ var Lineage_whiteboard = (function () {
 
                     var shape = self.defaultShape;
                     result.forEach(function (/** @type {{ topConcept: { value: string; }; topConceptLabel: { value: any; }; }} */ item) {
-                        var nodeSource = item.subjectGraph ? Sparql_common.getSourceFromGraphUri(item.subjectGraph.value) : source;
+                        var nodeSource = item.subjectGraph ? Sparql_common.getSourceFromGraphUri(item.subjectGraph.value,source) : source;
                         //  var color = self.getSourceColor(nodeSource);
                         var attrs = self.getNodeVisjAttrs(item.topConcept, null, nodeSource);
                         if (!existingNodes[item.topConcept.value]) {
@@ -1266,7 +1268,7 @@ addNode:false
 
                     result.forEach(function (/** @type {{ broader1: { value: string; }; broader1Label: { value: any; }; concept: { value: string; }; }} */ item) {
                         if (item.broader1) {
-                            let nodeSource = item.broader1Graph ? Sparql_common.getSourceFromGraphUri(item.broader1Graph.value) : source;
+                            let nodeSource = item.broader1Graph ? Sparql_common.getSourceFromGraphUri(item.broader1Graph.value,source) : source;
                             let nodeColor = self.getSourceColor(nodeSource);
 
                             if (!existingNodes[item.subject.value]) {
@@ -1515,7 +1517,7 @@ addNode:false
 
                         for (var i = 1; i < depth + 1; i++) {
                             if (item["child" + i]) {
-                                let childNodeSource = item["child" + i + "Graph"] ? Sparql_common.getSourceFromGraphUri(item["child" + i + "Graph"]) : source;
+                                let childNodeSource = item["child" + i + "Graph"] ? Sparql_common.getSourceFromGraphUri(item["child" + i + "Graph"],source) : source;
 
                                 if (!existingIds[item["child" + i]]) {
                                     var attrs = self.getNodeVisjAttrs(item["child" + i + "Type"], item.subject, childNodeSource);

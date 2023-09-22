@@ -58,7 +58,7 @@ var Lineage_rules = (function () {
                     data: {
                         id: item.id.value,
                         label: item.label.value,
-                        source: Sparql_common.getSourceFromGraphUri(item.g.value),
+                        source: Sparql_common.getSourceFromGraphUri(item.g.value,Lineage_sources.activeSource),
                         type: type,
                     },
                 });

@@ -20,7 +20,7 @@
         &nbsp;<input type="checkbox" checked="checked" id="GenericTools_searchAllLabelsCBX" />All labels
     </div>
     <div>
-        <input id="searchWidget_searchTermInput" style="width: 150px" value="" />
+        <input id="searchWidget_searchTermInput" autocomplete="off" style="width: 150px" value="" />
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="GenericTools_onSearchAllInput" onclick="SearchWidget.searchTermInSources()">Search</button>
         <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="SearchWidget.showTopConcepts();">reset</button>
         <button class="btn btn-sm my-1 py-0 btn-outline-primary GenericTools_searchAllOptional" onclick="Export.exportTreeToDataTable(null,'#')">toTable</button>
@@ -43,6 +43,7 @@
             SearchWidget.searchTermInSources();
         }
     });
+    $("#searchWidget_searchTermInput").focus()
     $("#sourcesSelectionDialogdiv").dialog({
         autoOpen: false,
         height: 750,

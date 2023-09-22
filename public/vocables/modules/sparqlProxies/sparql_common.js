@@ -325,16 +325,27 @@ var Sparql_common = (function () {
         return str;
     };
 
-    self.getSourceFromGraphUri = function (graphUri) {
-        if (!self.graphUrisMap) {
-            self.graphUrisMap = {};
-            for (var source in Config.sources) {
-                if (Config.sources[source].graphUri) {
-                    self.graphUrisMap[Config.sources[source].graphUri] = source;
+    self.getSourceFromGraphUri = function (graphUri,mainSource) {
+
+
+        if(mainSource){
+            var sourcesInScope=[mainSource]
+            Config.sources[mainSource].imports.forEach(function(importSource){
+
+            })
+
+
+        }else {// search in allsources
+            if (!self.graphUrisMap) {
+                self.graphUrisMap = {};
+                for (var source in Config.sources) {
+                    if (Config.sources[source].graphUri) {
+                        self.graphUrisMap[Config.sources[source].graphUri] = source;
+                    }
                 }
             }
+            return self.graphUrisMap[graphUri];
         }
-        return self.graphUrisMap[graphUri];
     };
 
     self.getLabelFromURI = function (id) {
@@ -524,31 +535,7 @@ var Sparql_common = (function () {
         }
 
         if (options.precision && !endDate) {
-            /*   if (options.precision == "day") {
-        endDate = new Date(startDate.setHours(23, 59, 59));
-        startDate.setHours(0, 0, 0, 0);
-      }
-      if (options.precision == "month") {
-        var daysInMonth = new Date(startDate.getYear(), startDate.getMonth(), 0).getDate();
-        endDate = new Date(startDate.setDate(daysInMonth));
-        startDate.setDate(1);
-      }
-      if (options.precision == "year") {
 
-        endDate = new Date(new Date(startDate.setMonth(11)).setDate(31));
-        startDate.setMonth(new Date(startDate.setMonth(11)).set(date(1)));
-      }
-
-      if (options.precision == "hour") {
-        endDate = new Date(new Date(startDate.setHours(startDate).getHours(), 59));
-        startDate.setHours(startDate.getHours(), 0);
-      }
-      if (options.precision == "min") {
-        endDate = new Date(startDate).setHours(startDate.getHours(), startDate.getMinutes(), 59);
-        startDate.setHours(startDate.getHours(), startDate.getMinutes(), 0);
-      }
-      if (options.precision == "sec") {;
-      }*/
 
             endDate = new Date(startDate);
             if (options.precision != "sec") {

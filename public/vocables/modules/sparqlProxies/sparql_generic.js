@@ -1046,15 +1046,15 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                             "SELECT distinct *  " +
                             fromStr +
                             "  WHERE {{  ?subject   rdfs:subClassOf   ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. " +
-                         // "filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))" +
-                          "OPTIONAL{?subject skos:altLabel \n" +
+                            // "filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))" +
+                            "OPTIONAL{?subject skos:altLabel \n" +
                             "          ?skosAltLabel. } }" +
                             " UNION " +
                             "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  }" +
                             "UNION  {" +
                             "    ?subject rdf:type owl:Class.?subject rdfs:label ?subjectLabel." +
-                          //  "   filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))" +
-                          "  OPTIONAL{?subject skos:altLabel  ?skosAltLabel}" +
+                            //  "   filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))" +
+                            "  OPTIONAL{?subject skos:altLabel  ?skosAltLabel}" +
                             "  filter( not exists{  ?subject   rdfs:subClassOf   ?aParent.  ?aParent rdf:type owl:Class.  })}" +
                             "}";
                     } else {
@@ -1066,14 +1066,15 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                             "SELECT distinct * " +
                             fromStr +
                             " WHERE {";
-                   //     var where = "  ?subject " + parentType + " ?firstParent." + Sparql_common.getVariableLangLabel("subject", false, true) + "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
+                        //     var where = "  ?subject " + parentType + " ?firstParent." + Sparql_common.getVariableLangLabel("subject", false, true) + "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
 
-                        var where = "  ?subject " + parentType + " ?firstParent." +
-                        " OPTIONAL {?subject rdfs:label ?subjectLabel.}"+
-                        //  Sparql_common.getVariableLangLabel("subject", false, true)
-                          + "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
-
-
+                        var where =
+                            "  ?subject " +
+                            parentType +
+                            " ?firstParent." +
+                            " OPTIONAL {?subject rdfs:label ?subjectLabel.}" +
+                            //  Sparql_common.getVariableLangLabel("subject", false, true)
+                            +"OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
 
                         if (options.filter) {
                             where += " " + options.filter + " ";

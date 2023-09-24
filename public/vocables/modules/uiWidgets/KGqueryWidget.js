@@ -952,7 +952,7 @@ return alert("missing target node in  path");
         if (true) {
             self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                 visjsData = result;
-              //  return draw();
+                //  return draw();
                 self.getInferredModelVisjsData(self.source, function (err, result2) {
                     var oldNodesMap = {};
                     var oldEdgesMap = {};

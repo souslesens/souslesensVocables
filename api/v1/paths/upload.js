@@ -23,7 +23,7 @@ module.exports = function () {
     }
     POST.apiDoc = {
         summary: "Upload files",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "upload",
         parameters: [],
         responses: {

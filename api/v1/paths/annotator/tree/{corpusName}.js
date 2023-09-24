@@ -16,7 +16,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Annotator subjects tree",
         description: "Annotator subjects tree",
         operationId: "Annotator subjects tree",

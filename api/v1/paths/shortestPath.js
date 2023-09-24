@@ -51,7 +51,7 @@ module.exports = function () {
 
     POST.apiDoc = {
         summary: "Get the shortest path between two node",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "getShortestPath",
         parameters: [
             {

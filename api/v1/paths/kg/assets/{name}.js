@@ -16,7 +16,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Retrieve a KG asset mapping",
         description: "Retrieve a KG asset mapping",
         operationId: "Retrieve a KG asset mapping",

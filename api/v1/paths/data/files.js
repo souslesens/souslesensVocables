@@ -17,7 +17,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "List files in data directory",
         description: "List files in data directory",
         operationId: "List files in data directory",

@@ -20,7 +20,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Read content of a file",
         description: "Read content of a file",
         operationId: "Read content of a file",

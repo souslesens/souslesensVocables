@@ -20,7 +20,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Get json file",
         description: "Get a json file",
         operationId: "getJsonFile",

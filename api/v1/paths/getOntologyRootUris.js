@@ -14,7 +14,7 @@ module.exports = function () {
 
     POST.apiDoc = {
         summary: "Get the common parts of uris",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "getOntologyRootUris",
         parameters: [
             {

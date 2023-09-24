@@ -28,7 +28,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Retrive annotate corpus list",
         description: "Retrive annotate corpus list",
         operationId: "Retrive annotate corpus list",
@@ -53,7 +53,7 @@ module.exports = function () {
     };
 
     POST.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Annotate corpus",
         description: "Annotate corpus",
         operationId: "Annotate corpus",

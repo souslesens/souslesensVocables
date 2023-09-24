@@ -25,7 +25,7 @@ module.exports = function () {
     }
     GET.apiDoc = {
         summary: "Returns all profiles",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "getProfiles",
         responses: responseSchema("Profiles", "GET"),
     };

@@ -35,7 +35,7 @@ module.exports = function () {
     }
     GET.apiDoc = {
         summary: "Returns all sources",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "getSources",
         responses: responseSchema("Sources", "GET"),
         parameters: [

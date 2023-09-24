@@ -18,7 +18,7 @@ module.exports = function () {
     }
     GET.apiDoc = {
         summary: "Returns an ontology",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "getOntology",
         parameters: [
             {

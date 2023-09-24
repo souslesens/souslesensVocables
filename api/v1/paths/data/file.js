@@ -17,7 +17,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Read content of a file",
         description: "Read content of a file",
         operationId: "Read content of a file",
@@ -59,7 +59,7 @@ module.exports = function () {
     }
 
     POST.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Save Data to file",
         description: "Save Data to file",
         operationId: "Save Data to file",

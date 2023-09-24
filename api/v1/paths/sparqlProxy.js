@@ -84,7 +84,7 @@ module.exports = function () {
 
     POST.apiDoc = {
         summary: "Send a request to a different domain",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "httpProxy",
         parameters: [],
         responses: {

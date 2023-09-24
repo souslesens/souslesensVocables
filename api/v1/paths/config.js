@@ -22,7 +22,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Returns serveur configuration",
         operationId: "Config",
         parameters: [],

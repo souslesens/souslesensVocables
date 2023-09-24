@@ -25,7 +25,7 @@ module.exports = function () {
     }
 
     POST.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Let users upload a zip File",
         description: "Let users upload a zip File",
         operationId: "uploadZipFile",

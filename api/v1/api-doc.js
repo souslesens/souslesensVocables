@@ -7,7 +7,7 @@ const apiDoc = {
         version: "1.0.0",
     },
     securityDefinitions: {
-        loginScheme: {
+        restrictLoggedUser: {
             type: "basic",
         },
         restrictAdmin: {

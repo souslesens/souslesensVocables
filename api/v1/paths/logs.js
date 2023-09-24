@@ -65,7 +65,7 @@ module.exports = function () {
         return res.status(200).json({ done: true });
     }
     POST.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Write user logs",
         description: "Write user logs",
         operationId: "Write user logs",

@@ -238,7 +238,7 @@ var Sparql_common = (function () {
             return " OPTIONAL {?" + variable + " rdfs:label" + pred + " ?" + variable + "Label.}";
         }
 
-            var str = "?" + variable + " rdfs:label" + pred + " ?" + variable + "Label. filter(regex( lang(?" + variable + "Label), '" + Config.default_lang + "') || !lang(?" + variable + "Label))";
+        var str = "?" + variable + " rdfs:label" + pred + " ?" + variable + "Label. filter(regex( lang(?" + variable + "Label), '" + Config.default_lang + "') || !lang(?" + variable + "Label))";
 
         if (optional) {
             return " OPTIONAL {" + str + "} ";
@@ -325,17 +325,30 @@ var Sparql_common = (function () {
         return str;
     };
 
-    self.getSourceFromGraphUri = function (graphUri,mainSource) {
+    self.getSourceGraphUrisMap = function (sourceLabel) {
+        //set graphUrisMap
+        var graphUrisMap = {};
+        var sources = [sourceLabel];
+        var imports = Config.sources[sourceLabel].imports;
+        if (imports) {
+            imports.forEach(function (importSource) {
+                sources.push(importSource);
+            });
+        }
+        sources.forEach(function (source) {
+            var graphUri = Config.sources[source].graphUri;
+            graphUrisMap[graphUri] = source;
+        });
 
+        return graphUrisMap;
+    };
 
-        if(mainSource){
-            var sourcesInScope=[mainSource]
-            Config.sources[mainSource].imports.forEach(function(importSource){
-
-            })
-
-
-        }else {// search in allsources
+    self.getSourceFromGraphUri = function (graphUri, mainSource) {
+        if (mainSource) {
+            var sourcesInScope = [mainSource];
+            Config.sources[mainSource].imports.forEach(function (importSource) {});
+        } else {
+            // search in allsources
             if (!self.graphUrisMap) {
                 self.graphUrisMap = {};
                 for (var source in Config.sources) {
@@ -535,8 +548,6 @@ var Sparql_common = (function () {
         }
 
         if (options.precision && !endDate) {
-
-
             endDate = new Date(startDate);
             if (options.precision != "sec") {
                 //min

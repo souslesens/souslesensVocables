@@ -8,6 +8,7 @@ import MainController from "../shared/mainController.js";
 import visjsGraphClass from "../graph/VisjsGraphClass.js";
 import KGcreatorGraph from "./KGcreatorGraph.js";
 import R2Gmappings from "../shared/R2Gmappings.js";
+import authentication from "../shared/authentification.js";
 
 //https://openbase.com/js/@json-editor/json-editor/documentation
 
@@ -120,7 +121,9 @@ var KGcreator = (function () {
                     return alert(err.responseText);
                 }
                 $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {});
-
+                if (!authentication.currentUser.groupes.indexOf("admin") > -1) {
+                    $("#KGcreator_deleteKGcreatorTriplesBtn").css("display", "none");
+                }
                 MainController.UI.showHideRightPanel("hide");
                 // $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function() {
                 // pass
@@ -729,7 +732,7 @@ var KGcreator = (function () {
             isString: true,
         });
         /*  if (!self.currentJsonObject.transform[column]) {
-  self.currentJsonObject.transform[column] = "function{if (value=='null') return null;if(mapping.isString && role=='o') return value; else return '" + column + "_'+value;}";
+self.currentJsonObject.transform[column] = "function{if (value=='null') return null;if(mapping.isString && role=='o') return value; else return '" + column + "_'+value;}";
 }*/
 
         self.mainJsonEditor.load(self.currentJsonObject);
@@ -841,9 +844,9 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
         self.mainJsonEditorModified = true;
 
         /*  $("#KGcreator_objectInput").val("");
-    $("#KGcreator_objectSelect").val("");
-    $("#KGcreator_predicateInput").val("");
-    $("#KGcreator_predicateSelect").val("");*/
+$("#KGcreator_objectSelect").val("");
+$("#KGcreator_predicateInput").val("");
+$("#KGcreator_predicateSelect").val("");*/
 
         //   $("#KGcreator_tripleTA").val(JSON.stringify(tripleObj))
     };

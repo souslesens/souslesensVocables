@@ -949,10 +949,10 @@ return alert("missing target node in  path");
 
         self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", { nodes: [], edges: [] }, visjsOptions);
 
-        if (false) {
+        if (true) {
             self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                 visjsData = result;
-
+                //  return draw();
                 self.getInferredModelVisjsData(self.source, function (err, result2) {
                     var oldNodesMap = {};
                     var oldEdgesMap = {};
@@ -983,7 +983,14 @@ return alert("missing target node in  path");
                 });
             });
         } else {
-            self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
+            self.getInferredModelVisjsData(self.source, function (err, result) {
+                if (err) {
+                    return alert(err.responseText);
+                }
+                visjsData = result;
+                draw();
+            });
+            /*  self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                 if (false && result) {
                     visjsData = result;
                     return draw();
@@ -996,7 +1003,7 @@ return alert("missing target node in  path");
                         draw();
                     });
                 }
-            });
+            });*/
         }
     };
 

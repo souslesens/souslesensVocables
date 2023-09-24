@@ -268,7 +268,7 @@ var NodeInfosWidget = (function () {
 
                     if (item.g) {
                         graphUri = item.g.value;
-                        var realSource = Sparql_common.getSourceFromGraphUri(graphUri);
+                        var realSource = Sparql_common.getSourceFromGraphUri(graphUri, sourceLabel);
                         if (realSource) {
                             self.currentNodeRealSource = realSource;
                         }
@@ -495,9 +495,10 @@ defaultLang = 'en';*/
                     "<div id='nodeInfos_individualsDiv'  style='display:flex;flex-direction: column;min-width: 300px;width:45%;background-color: #ddd;padding:5px'></div>" +
                     "</div>";
 
-                $("#nodeInfosWidget_InfosTabDiv").html(str);
-
-                return callback(null, { types: types, blankNodes: blankNodes });
+                $("#" + divId).html(str);
+                if (callback) {
+                    return callback(null, { types: types, blankNodes: blankNodes });
+                }
             }
         );
     };
@@ -582,8 +583,12 @@ defaultLang = 'en';*/
     };
 
     self.showClassIndividuals = function (sourceLabel, nodeId, callback) {
-        if (!sourceLabel) sourceLabel = self.currentNodeRealSource;
-        if (!nodeId) nodeId = self.currentNodeId;
+        if (!sourceLabel) {
+            sourceLabel = self.currentNodeRealSource;
+        }
+        if (!nodeId) {
+            nodeId = self.currentNodeId;
+        }
 
         var sparql_url = Config.sources[sourceLabel].sparql_server.url;
         var fromStr = Sparql_common.getFromStr(sourceLabel);
@@ -721,7 +726,7 @@ Sparql_generic.getItems(self.currentNodeIdInfosSource,{filter:filter,function(er
                 self.newProperties[property] = value;
 
                 // self.showNodeInfos((self.currentSource, self.currentNode, null, {  }, function (err, result) {
-                self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "mainDialogDiv", {}, function (err, result) {
+                self.drawCommonInfos(self.currentSource, self.currentNode.data.id, "nodeInfosWidget_InfosTabDiv", {}, function (err, result) {
                     //  self.showNodeInfosToolbar();
                     if (property == "http://www.w3.org/2000/01/rdf-schema#subClassOf") {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.push({
@@ -934,9 +939,13 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                         if (jstreeNode) {
                             $("#Lineage_propertiesTree").jstree().rename_node(jstreeNode, newValue);
                         }
-                        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) Lineage_whiteboard.lineageVisjsGraph.data.edges.update({ id: self.currentNodeId, label: newValue });
+                        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                            Lineage_whiteboard.lineageVisjsGraph.data.edges.update({ id: self.currentNodeId, label: newValue });
+                        }
                     } else {
-                        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) Lineage_whiteboard.lineageVisjsGraph.data.nodes.update({ id: self.currentNodeId, label: newValue });
+                        if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
+                            Lineage_whiteboard.lineageVisjsGraph.data.nodes.update({ id: self.currentNodeId, label: newValue });
+                        }
                         var jstreeNode = JstreeWidget.getNodeByDataField("LineageNodesJsTreeDiv", "id", self.currentNode.data.id);
                         if (jstreeNode) {
                             $("#LineageNodesJsTreeDiv").jstree().rename_node(jstreeNode, newValue);

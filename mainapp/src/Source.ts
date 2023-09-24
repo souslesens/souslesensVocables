@@ -124,7 +124,7 @@ export type InputSource = z.infer<typeof InputSourceSchema>;
 export const SparqlServerSchema = z
     .object({
         url: z.string().default("_default"),
-        method: z.string().default("GET"),
+        method: z.string().default("POST"),
         headers: z.record(z.string(), z.string()).default({}),
     })
     .default({ url: "", method: "", headers: {} });

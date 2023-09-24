@@ -549,6 +549,7 @@ return callbackSeries();
     };
 
     self.getAllowedPropertiesBetweenNodes = function (source, startNodeId, endNodeId, callback) {
+        var allConstraints = false;
         var startNodeAncestors = [];
         var endNodeAncestors = [];
 
@@ -568,6 +569,10 @@ return callbackSeries();
         var startNodeAncestorIds = [];
         var endNodeAncestorIds = [];
 
+        var allSources = [source];
+        if (Config.sources[source].imports) {
+            allSources = allSources.concat(Config.sources[source].imports);
+        }
         async.series(
             [
                 function (callbackSeries) {
@@ -596,11 +601,6 @@ return callbackSeries();
                     });
                 }, //get matching properties
                 function (callbackSeries) {
-                    var allSources = [source];
-                    if (Config.sources[source].imports) {
-                        allSources = allSources.concat(Config.sources[source].imports);
-                    }
-
                     var allDomains = {};
                     var allRanges = {};
 
@@ -615,7 +615,9 @@ return callbackSeries();
                     }
 
                     allSources.forEach(function (_source) {
-                        if (!Config.ontologiesVocabularyModels[_source]) return;
+                        if (!Config.ontologiesVocabularyModels[_source]) {
+                            return;
+                        }
                         var sourceConstraints = Config.ontologiesVocabularyModels[_source].constraints;
                         for (var property in sourceConstraints) {
                             var constraint = sourceConstraints[property];
@@ -625,7 +627,7 @@ return callbackSeries();
                                 allConstraints[property] = constraint;
 
                                 if (constraint.domain) {
-                                    if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
+                                    if (allConstraints || startNodeAncestorIds.indexOf(constraint.domain) > -1) {
                                         if (!constraint.range || !endNodeId) {
                                             propertiesMatchingStartNode.push(property);
                                         } else {
@@ -634,7 +636,7 @@ return callbackSeries();
                                     }
                                 }
                                 if (constraint.range) {
-                                    if (endNodeAncestorIds.indexOf(constraint.range) > -1) {
+                                    if (allConstraints || endNodeAncestorIds.indexOf(constraint.range) > -1) {
                                         if (domainOK) {
                                             propertiesMatchingBoth.push(property);
                                         } else {
@@ -709,6 +711,20 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                     });
                     noConstaintsArray.forEach(function (propId) {
                         validConstraints["noConstraints"][propId] = allConstraints[propId];
+                    });
+                    callbackSeries();
+                },
+
+                //add existing  restrictions to valid constraints
+                function (callbackSeries) {
+                    allSources.forEach(function (_source) {
+                        var sourceRestrictions = Config.ontologiesVocabularyModels[_source].restrictions;
+                        if (!sourceRestrictions) {
+                            return;
+                        }
+                        for (var propId in sourceRestrictions) {
+                            validConstraints["both"][propId] = sourceRestrictions[propId];
+                        }
                     });
                     callbackSeries();
                 },

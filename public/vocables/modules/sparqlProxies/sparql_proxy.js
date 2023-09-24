@@ -270,6 +270,7 @@ query=query.replace(/GRAPH ?[a-zA-Z0-9]+\{/,"{")
 
         payload.url = serverUrl + "?format=text/turtle";
         payload.url += "&query=" + query2;
+        payload.POST = "true";
 
         $.ajax({
             type: "POST",

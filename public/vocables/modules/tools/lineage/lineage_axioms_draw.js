@@ -102,8 +102,8 @@ var Lineage_axioms_draw = (function () {
             "<http://www.w3.org/2002/07/owl#equivalentClass>|" +
             "<http://www.w3.org/2002/07/owl#unionOf>|" +
             "<http://www.w3.org/2002/07/owl#intersectionOf>|" +
-            "<http://www.w3.org/2002/07/owl#oneOf>|" +
-            "<http://www.w3.org/2000/01/rdf-schema#subClassOf>";
+            "<http://www.w3.org/2002/07/owl#oneOf>" +
+            "|<http://www.w3.org/2000/01/rdf-schema#subClassOf>";
 
         axiomPredicates +=
             "|<http://www.w3.org/2002/07/owl#Restriction>|" +
@@ -130,7 +130,7 @@ var Lineage_axioms_draw = (function () {
             " " +
             fromStr +
             "          WHERE { " +
-            //    "  {GRAPH ?sGraph{ ?s ?sx ?sy} " + sFilterGraph + "}\n" +
+            //  "  {GRAPH ?sGraph{ ?s ?sx ?sy} " + sFilterGraph + "}\n" +
             //   "  {GRAPH ?oGraph{ ?o ?ox ?oy} " + oFilterGraph + "}\n" +
             "?s (" +
             axiomPredicates +
@@ -248,6 +248,25 @@ var Lineage_axioms_draw = (function () {
                     });
                 },
 
+                //get nodes Source
+                function (callbackSeries) {
+                    var ids = Object.keys(allBasicAxioms);
+                    Sparql_OWL.getUrisNamedGraph(self.currentSource, ids, { onlySourceAndImports: 1 }, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        result.forEach(function (item) {
+                            allBasicAxioms[item.id.value].sSource = Sparql_common.getSourceFromGraphUri(item.g.value, self.currentSource);
+                        });
+                        for (var id in allBasicAxioms) {
+                            allBasicAxioms[id].objects.forEach(function (object) {
+                                object.oSource = allBasicAxioms[object.o].sSource;
+                            });
+                        }
+                        callbackSeries();
+                    });
+                },
+
                 //escape some blank nodes
 
                 function (callbackSeries) {
@@ -318,7 +337,7 @@ var Lineage_axioms_draw = (function () {
                         if (type.indexOf("List") > -1) {
                             //    options.edgeStyle  = "property";
                             obj.shape = "text";
-                            obj.color = "#00afef";
+                            obj.color = "#00efdb";
                             obj.label = "L"; //"∀";
                             obj.size = self.defaultNodeSize;
                         } else if (type.indexOf("Restriction") > -1) {
@@ -343,7 +362,7 @@ var Lineage_axioms_draw = (function () {
                     var existingNodes = {};
                     var stop = false;
 
-                    function recurse(nodeId, level, symbol) {
+                    function recurse(_nodeId, level, symbol) {
                         if (level > 1) {
                         } // return
 
@@ -351,7 +370,7 @@ var Lineage_axioms_draw = (function () {
                             return;
                         }
 
-                        var node = allBasicAxioms[nodeId];
+                        var node = allBasicAxioms[_nodeId];
                         if (!node) {
                             return;
                         }
@@ -367,7 +386,13 @@ var Lineage_axioms_draw = (function () {
                             return;
                         }
 
-                        if (!existingNodes[node.s]) {
+                        if (existingNodes[_nodeId]) {
+                            visjsData.nodes.forEach(function (node, nodeIndex) {
+                                if (node.id == _nodeId && node.level > level) {
+                                    visjsData.nodes[nodeIndex].level = level;
+                                }
+                            });
+                        } else {
                             var style = geNodeStyle(node.s, node.sType, node.sLabel);
 
                             if (node.disjonction) {
@@ -377,14 +402,20 @@ var Lineage_axioms_draw = (function () {
                                 symbol = null;
                             }
 
+                            if (style.color == "#00afef" && node.sSource) {
+                                style.color = common.getResourceColor("source", node.sSource);
+                            }
+
                             existingNodes[node.s] = level;
+                            //  var objectLevel = node.sType && node.sType.indexOf("roperty") > -1 ? level - 1 : level;
+
                             visjsData.nodes.push({
                                 id: node.s,
                                 label: symbol || style.label,
                                 shape: symbol ? "circle" : style.shape,
                                 color: symbol ? "#9db99d" : style.color,
                                 size: 8,
-                                level: node.sType && node.sType.indexOf("roperty") > -1 ? level - 1 : level,
+                                level: level,
                                 data: {
                                     id: node.s,
                                     label: node.sLabel,
@@ -394,9 +425,10 @@ var Lineage_axioms_draw = (function () {
                             });
                         }
 
+                        // children
                         if (node.objects) {
                             node.objects.forEach(function (object) {
-                                if (true && object.oSource && object.oSource != sourceLabel) {
+                                if (false && object.oSource && object.oSource != sourceLabel) {
                                     return;
                                 }
 
@@ -435,9 +467,22 @@ var Lineage_axioms_draw = (function () {
                                         symbol = Config.Lineage.logicalOperatorsMap[object.p] || null;
                                     }
 
-                                    if (false && object.oType == "http://www.w3.org/2002/07/owl#Class" && object.p == "http://www.w3.org/2000/01/rdf-schema#subClassOf") return;
+                                    if (level == 0 && object.p != "http://www.w3.org/2002/07/owl#equivalentClass") {
+                                        return;
+                                    }
 
-                                    recurse(object.o, level + 1, symbol);
+                                    if (false && object.oSource != self.currentSource) {
+                                        return;
+                                    }
+                                    var objectLevel = level + 1;
+                                    if (false && (object.p.indexOf("Value") > -1 || object.p.indexOf("onProperty") > -1)) {
+                                        objectLevel = level;
+                                    }
+                                    /* if (object.oType.indexOf("intersection") > -1 || object.oType.indexOf("union") > -1) {
+                     objectLevel = level;
+                   }*/
+
+                                    recurse(object.o, objectLevel, symbol);
                                 }
                             });
                         }
@@ -450,35 +495,46 @@ var Lineage_axioms_draw = (function () {
                     return callbackSeries();
                 },
 
+                //set hide nodes of level > maxLevels
+                function (callbackSeries) {
+                    var maxLevels = 3;
+                    visjsData.nodes.forEach(function (node, nodeIndex) {
+                        if (node.level > maxLevels) {
+                            visjsData.nodes[nodeIndex].hidden = true;
+                        }
+                    });
+                    callbackSeries();
+                },
+
                 // filter FOL nodes
                 function (callbackSeries) {
                     return callbackSeries();
 
                     /*    var strFrom=Sparql_common.getFromStr(self.currentSource,false,true)
-        var query="SELECT distinct ?fol "+strFrom+" WHERE {\n" +
-          "<"+nodeId+">  <https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/firstOrderLogicDefinition> ?fol .}"
+var query="SELECT distinct ?fol "+strFrom+" WHERE {\n" +
+"<"+nodeId+">  <https://spec.industrialontologies.org/ontology/core/meta/AnnotationVocabulary/firstOrderLogicDefinition> ?fol .}"
 
 
 
-         var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
-    Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
-      if (err) {
-        return callback(err);
-      }
+var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+Sparql_proxy.querySPARQL_GET_proxy(url, query, "", { source: sourceLabel }, function(err, result) {
+if (err) {
+return callback(err);
+}
 
-      if(result.results.bindings.length==0)
-        return callbackSeries();
-    var fol=result.results.bindings[0].fol.value.toLowerCase()
+if(result.results.bindings.length==0)
+return callbackSeries();
+var fol=result.results.bindings[0].fol.value.toLowerCase()
 
-      var folNodes=[]
-      visjsData.nodes.forEach(function(node){
-        if(fol.indexOf(node.data.label.toLowerCase())>-1)
-          folNodes.push(node)
-      })
-      visjsData.nodes=folNodes
+var folNodes=[]
+visjsData.nodes.forEach(function(node){
+if(fol.indexOf(node.data.label.toLowerCase())>-1)
+folNodes.push(node)
+})
+visjsData.nodes=folNodes
 
-      callbackSeries();
-    });*/
+callbackSeries();
+});*/
                 },
 
                 //draw graph
@@ -489,6 +545,7 @@ var Lineage_axioms_draw = (function () {
                         self.axiomsVisjsGraph.data.edges.add(visjsData.edges);
                     } else {
                         self.drawGraph(visjsData);
+                        self.currentVisjsData = visjsData;
                     }
                     return callbackSeries();
                 },
@@ -546,16 +603,29 @@ enabled:true},*/
 
     self.onNodeClick = function (node, point, nodeEvent) {
         self.currentGraphNode = node;
+        if (nodeEvent.ctrlKey) {
+            return self.expandNode(node);
+        }
         self.showNodeInfos(node, point, nodeEvent);
         return;
 
         /*  self.currentGraphNode = node;
-      if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
-        var options = { addToGraph: 1, level: self.currentGraphNode.level };
-        return self.drawNodeAxioms(self.context.sourceLabel, self.currentGraphNode.data.id, self.context.divId, 2, options);
-      }
+  if (nodeEvent.ctrlKey && nodeEvent.shiftKey) {
+    var options = { addToGraph: 1, level: self.currentGraphNode.level };
+    return self.drawNodeAxioms(self.context.sourceLabel, self.currentGraphNode.data.id, self.context.divId, 2, options);
+  }
 
-      self.showNodeInfos(node, point, options);*/
+  self.showNodeInfos(node, point, options);*/
+    };
+
+    self.expandNode = function (node) {
+        var newNodes = [];
+        self.currentVisjsData.edges.forEach(function (edge) {
+            if (edge.from == node.id) {
+                newNodes.push({ id: edge.to, hidden: false, level: node.level + 1 });
+            }
+        });
+        self.axiomsVisjsGraph.data.nodes.update(newNodes);
     };
 
     self.showGraphPopupMenu = function (node, point, options) {
@@ -587,22 +657,9 @@ enabled:true},*/
         $("#" + popupDiv).html(html);
     };
 
-    /*  self.showBranchOnly=function(){
-var nodeId=self.currentGraphNode.data.id
-var edges=self.axiomsVisjsGraph.data.edges.get();
-
-var nodesToShow=[]
-function recurse(nodeId) {
-   edges.forEach(function(edge) {
-       if (edge.from == nodeId )
-         })
-}
-
-}*/
-
     self.drawAxiomsFromNode = function () {
         var options = { addToGraph: 1, level: self.currentGraphNode.level };
-        self.drawNodeAxioms(self.context.sourceLabel, self.currentGraphNode.data.id, self.context.divId, 2, options);
+        self.drawNodeAxioms(self.currentSource, self.currentGraphNode.data.id);
     };
     self.selectNodesOnHover = function (node, point, options) {};
 
@@ -729,6 +786,8 @@ return*/
     self.exportSVG = function () {
         self.axiomsVisjsGraph.toSVG();
     };
+
+    self.graphToFOLdefinition = function (node) {};
 
     var edgeStyles = {
         property: {

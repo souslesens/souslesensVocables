@@ -6,6 +6,7 @@ async function getConfig(): Promise<Config> {
 
 export type Config = {
     auth: string;
+    tools_available: string[];
 };
 
 export { getConfig };

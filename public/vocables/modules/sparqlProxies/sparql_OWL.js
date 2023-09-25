@@ -1196,7 +1196,7 @@ var Sparql_OWL = (function () {
             Sparql_common.getVariableLangLabel("prop", true, null, filterStr) +
             Sparql_common.getVariableLangLabel("subject", true, null, filterStr);
 
-        if (options.someValuesFrom) {
+        if (true || options.someValuesFrom) {
             query += "?node owl:someValuesFrom ?value." + Sparql_common.getVariableLangLabel("value", true); //OPTIONAL {?value rdfs:label ?valueLabel}";
         } else if (options.allValuesFrom) {
             query += "?node owl:allValuesFrom ?value." + Sparql_common.getVariableLangLabel("value", true); // OPTIONAL {?value rdfs:label ?valueLabel}";
@@ -1665,6 +1665,39 @@ var Sparql_OWL = (function () {
             return callback(null, result.results.bindings);
         });
     };
+
+    self.getUrisNamedGraph = function (sourceLabel, ids, options, callback) {
+        if (!options) {
+            options = {};
+        }
+
+        var allResults = [];
+        var sliceSize = 200;
+        var slices = common.array.slice(ids, sliceSize);
+        async.eachSeries(
+            slices,
+            function (ids, callbackEach) {
+                var filter = Sparql_common.setFilter("id", ids);
+                var fromStr = Sparql_common.getFromStr(sourceLabel, options.withGraph, options.withoutImports);
+                var query = "SELECT distinct ?id ?g " + fromStr + "WHERE {GRAPH ?g{?id ?p ?o. " + filter + "}} limit 10000";
+
+                self.sparql_url = Config.default_sparql_url;
+                var url = self.sparql_url + "?format=json&query=";
+                Sparql_proxy.querySPARQL_GET_proxy(url, query, "", {}, function (err, result) {
+                    if (err) {
+                        return callbackEach(err);
+                    }
+                    allResults = allResults.concat(result.results.bindings);
+                    return callbackEach();
+                });
+            },
+            function (err) {
+                if (err) return callback(err);
+                return callback(null, allResults);
+            }
+        );
+    };
+
     self.getGraphsByRegex = function (pattern, callback) {
         var query = "SELECT * " + "WHERE {" + '  ?s <http://www.w3.org/2002/07/owl#versionIRI> ?graph. filter (regex(str(?graph),"' + pattern + '"))' + " ?graph ?p ?value." + "}";
 
@@ -2195,6 +2228,7 @@ var Sparql_OWL = (function () {
         async.series(
             [
                 function (callbackSeries) {
+                    // return callbackSeries();
                     const payload = { graphUri: Config.labelsGraphUri };
                     $.ajax({
                         type: "POST",

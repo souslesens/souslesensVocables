@@ -19,7 +19,7 @@ module.exports = function () {
 
     GET.apiDoc = {
         summary: "return ontology model",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "getOntologyModel",
 
         parameters: [
@@ -49,7 +49,7 @@ module.exports = function () {
 
     POST.apiDoc = {
         summary: "Write source model in memory cache",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "Write source model in memory cache",
         parameters: [
             {
@@ -81,7 +81,7 @@ module.exports = function () {
     };
     DELETE.apiDoc = {
         summary: "delete ontology model",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "deleteOntologyModel",
 
         parameters: [
@@ -115,7 +115,7 @@ module.exports = function () {
 
     PUT.apiDoc = {
         summary: "update ontology model",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "updateOntologyModel",
 
         parameters: [

@@ -85,7 +85,7 @@
         <script type="module" src="modules/uiWidgets/individualValuefilterWidget.js"></script>
         <script type="module" src="modules/uiWidgets/individualAggregateWidget.js"></script>
         <script type="module" src="modules/uiWidgets/simpleListSelectorWidget.js"></script>
-
+        <script type="module" src="modules/uiWidgets/FOL2graphWidget.js"></script>
         <script type="module" src="modules/tools/lineage/lineage_rules.js"></script>
 
         <script type="module" src="modules/tools/owlEditor.js"></script>
@@ -108,6 +108,9 @@
         <script src="config/app_config.js"></script>
 
         <script type="module" src="modules/shared/authentification.js"></script>
+
+        <script type="module" src="modules/shared/R2Gmappings.js"></script>
+
         <script type="module">
             import { allTools, loadToolsAndPlugins } from "./config/tools.js";
 
@@ -245,11 +248,17 @@
                         width: $(document).width() * 0.85,
                         modal: false,
                     });
+                    $("#mainDialogDiv2").dialog({
+                        autoOpen: false,
+                        height: 800,
+                        width: $(document).width() * 0.85,
+                        modal: false,
+                    });
 
                     $("#smallDialogDiv").dialog({
                         autoOpen: false,
-                        height: 500,
-                        width: 700,
+                        height: 600,
+                        width: 800,
                         modal: false,
                     });
 
@@ -408,6 +417,9 @@
             .mainDialogDiv {
                 background-color: #ddd;
             }
+            .mainDialogDiv2 {
+                background-color: #ddd;
+            }
 
             .td_title {
                 padding: 3px;
@@ -482,7 +494,7 @@
                 <!-- </div>-->
                 <div class="col text-end" style="z-index: 20">
                     <button onclick=" window.open( './browse.html','_blank');" type="button" class="btn btn-sm py-0 btn-outline-primary" style="font-weight: bold">Search</button>
-
+                    <button onclick="FOL2graphWidget.parse()" type="button" class="btn btn-sm py-0 btn-outline-primary">test</button>
                     <button onclick="MainController.showPart14AxiomsImage()" type="button" class="btn btn-sm py-0 btn-outline-primary">Axioms</button>
                     <!--   <button onclick="OwlEditor.loadUI()" type="button" class="btn btn-sm py-0 btn-outline-primary">OntoEdit</button>-->
                     <!--  <button onclick="MainController.UI.test()" type="button" class="btn btn-sm py-0 btn-outline-primary">test</button>-->
@@ -550,7 +562,7 @@
         </div>
 
         <div id="mainDialogDiv"></div>
-
+        <div id="mainDialogDiv2"></div>
         <div id="smallDialogDiv"></div>
 
         <!-- Footer -->

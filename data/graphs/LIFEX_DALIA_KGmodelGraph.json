@@ -19,8 +19,10 @@
         },
         {
             "id": "http://data.total/resource/tsf/dalia-lifex/Procurement",
+            "hidden": true,
             "label": "Procurement",
             "shape": "box",
+
             "size": 5,
             "data": {
                 "id": "http://data.total/resource/tsf/dalia-lifex/Procurement",
@@ -42,6 +44,7 @@
         },
         {
             "id": "http://data.total/resource/tsf/dalia-lifex/Detailled_Engineering",
+            "hidden": true,
             "label": "Detailled Engineering",
             "shape": "box",
             "size": 5,
@@ -61,6 +64,7 @@
         },
         {
             "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Commissioning",
+            "hidden": true,
             "label": "Offshore Commissioning",
             "shape": "box",
             "size": 5,
@@ -80,6 +84,7 @@
         },
         {
             "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Construction_or_Installation",
+            "hidden": true,
             "label": "Offshore Construction or Installation",
             "shape": "box",
             "size": 5,
@@ -103,6 +108,7 @@
         },
         {
             "id": "http://data.total/resource/tsf/dalia-lifex/Offshore_Pre-commissioning",
+            "hidden": true,
             "label": "Offshore Pre-commissioning",
             "shape": "box",
             "size": 5,
@@ -122,6 +128,7 @@
         },
         {
             "id": "http://data.total/resource/tsf/dalia-lifex/Basic_Engineering",
+            "hidden": true,
             "label": "Basic Engineering",
             "shape": "box",
             "size": 5,
@@ -141,6 +148,7 @@
         },
         {
             "id": "http://data.total/resource/tsf/dalia-lifex/PROJECT_-__Onshore_Preparation",
+            "hidden": true,
             "label": "PROJECT -  Onshore Preparation",
             "shape": "box",
             "size": 5,
@@ -164,6 +172,7 @@
         },
         {
             "id": "http://data.total/resource/tsf/dalia-lifex/Prefabrication",
+            "hidden": true,
             "label": "Prefabrication",
             "shape": "box",
             "size": 5,
@@ -1863,6 +1872,53 @@
                 "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/residesIn",
                 "source": "LIFEX_DALIA",
                 "propertyLabel": "residesIn"
+            },
+            "arrows": {
+                "to": {
+                    "enabled": true,
+                    "type": "solid",
+                    "scaleFactor": 0.5
+                }
+            },
+            "color": "#fdbf01",
+            "width": 1
+        },
+
+        {
+            "id": "http://data.total/resource/tsf/dalia-lifex/Job_Card_http://rds.posccaesar.org/ontology/lis14/rdl/before_http://data.total/resource/tsf/dalia-lifex/EndDate",
+            "from": "http://data.total/resource/tsf/dalia-lifex/Job_Card",
+            "to": "http://data.total/resource/tsf/dalia-lifex/EndDate",
+            "label": "before",
+            "font": {
+                "color": "#266264"
+            },
+            "data": {
+                "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/before",
+                "source": "LIFEX_DALIA",
+                "propertyLabel": "before"
+            },
+            "arrows": {
+                "to": {
+                    "enabled": true,
+                    "type": "solid",
+                    "scaleFactor": 0.5
+                }
+            },
+            "color": "#fdbf01",
+            "width": 1
+        },
+        {
+            "id": "http://data.total/resource/tsf/dalia-lifex/Job_Card_http://rds.posccaesar.org/ontology/lis14/rdl/before_http://data.total/resource/tsf/dalia-lifex/StartDate",
+            "from": "http://data.total/resource/tsf/dalia-lifex/Job_Card",
+            "to": "http://data.total/resource/tsf/dalia-lifex/StartDate",
+            "label": "after",
+            "font": {
+                "color": "#266264"
+            },
+            "data": {
+                "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/before",
+                "source": "LIFEX_DALIA",
+                "propertyLabel": "before"
             },
             "arrows": {
                 "to": {

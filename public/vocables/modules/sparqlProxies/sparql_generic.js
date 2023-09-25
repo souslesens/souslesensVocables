@@ -489,9 +489,15 @@ var Sparql_generic = (function () {
         if (!options) {
             options = {};
         }
-        var graphUri = Config.sources[sourceLabel].graphUri;
-        if (Array.isArray(graphUri)) {
-            graphUri = graphUri[0];
+        var graphUri;
+        if (!sourceLabel) {
+            if (!options.graphUri) return callback("no sourceLabel or graphUri");
+            graphUri = options.graphUri;
+        } else {
+            graphUri = Config.sources[sourceLabel].graphUri;
+            if (Array.isArray(graphUri)) {
+                graphUri = graphUri[0];
+            }
         }
 
         var slices = common.array.slice(_triples, 200);
@@ -519,7 +525,7 @@ var Sparql_generic = (function () {
                     return callback(null, query);
                 }
                 // console.log(query)
-                var url = Config.sources[sourceLabel].sparql_server.url + "?format=json&query=";
+                var url = Config.sources[sourceLabel] ? Config.sources[sourceLabel].sparql_server.url : Config.default_sparql_url + "?format=json&query=";
                 Sparql_proxy.querySPARQL_GET_proxy(url, query, null, { source: sourceLabel }, function (err, _result) {
                     return callbackEach(err);
                 });
@@ -1045,13 +1051,16 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                             "PREFIX skos: <http://www.w3.org/2004/02/skos/core#>" +
                             "SELECT distinct *  " +
                             fromStr +
-                            "  WHERE {{  ?subject   rdfs:subClassOf   ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel \n" +
+                            "  WHERE {{  ?subject   rdfs:subClassOf   ?firstParent.?subject rdfs:label ?subjectLabel.  ?firstParent rdf:type owl:Class. " +
+                            // "filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))" +
+                            "OPTIONAL{?subject skos:altLabel \n" +
                             "          ?skosAltLabel. } }" +
                             " UNION " +
                             "{  ?subject   rdfs:subClassOf  ?firstParent.    ?firstParent rdf:type owl:Class. ?subject <http://www.w3.org/2004/02/skos/core#prefLabel> ?subjectLabel. filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))OPTIONAL{?subject skos:altLabel ?skosAltLabel }  }" +
                             "UNION  {" +
                             "    ?subject rdf:type owl:Class.?subject rdfs:label ?subjectLabel." +
-                            "   filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))  OPTIONAL{?subject skos:altLabel  ?skosAltLabel}" +
+                            //  "   filter( lang(?subjectLabel)= 'en' || !lang(?subjectLabel))" +
+                            "  OPTIONAL{?subject skos:altLabel  ?skosAltLabel}" +
                             "  filter( not exists{  ?subject   rdfs:subClassOf   ?aParent.  ?aParent rdf:type owl:Class.  })}" +
                             "}";
                     } else {
@@ -1063,7 +1072,16 @@ bind (replace(?oldLabel,"Class","Class-") as ?newLabel)
                             "SELECT distinct * " +
                             fromStr +
                             " WHERE {";
-                        var where = "  ?subject " + parentType + " ?firstParent." + Sparql_common.getVariableLangLabel("subject", false, true) + "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
+                        //     var where = "  ?subject " + parentType + " ?firstParent." + Sparql_common.getVariableLangLabel("subject", false, true) + "OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
+
+                        var where =
+                            "  ?subject " +
+                            parentType +
+                            " ?firstParent." +
+                            " OPTIONAL {?subject rdfs:label ?subjectLabel.}" +
+                            //  Sparql_common.getVariableLangLabel("subject", false, true)
+                            +"OPTIONAL{?subject skos:altLabel ?skosAltLabel }";
+
                         if (options.filter) {
                             where += " " + options.filter + " ";
                         }

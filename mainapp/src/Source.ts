@@ -6,6 +6,8 @@ import React from "react";
 import * as z from "zod";
 
 const endpoint = "/api/v1/sources";
+const indicesEndpoint = "/api/v1/elasticsearch/indices";
+const graphsEndpoint = "/api/v1/sparql/graphs";
 
 type Response = { message: string; resources: ServerSource[] };
 
@@ -13,6 +15,18 @@ async function getSources(): Promise<ServerSource[]> {
     const response = await fetch(endpoint);
     const json = (await response.json()) as Response;
     return mapSources(json.resources);
+}
+
+async function getIndices(): Promise<string[]> {
+    const response = await fetch(indicesEndpoint);
+    const json = await response.json();
+    return json;
+}
+
+async function getGraphs(): Promise<string[]> {
+    const response = await fetch(graphsEndpoint);
+    const json = await response.json();
+    return json;
 }
 
 export async function putSources(body: ServerSource[]): Promise<ServerSource[]> {
@@ -110,7 +124,7 @@ export type InputSource = z.infer<typeof InputSourceSchema>;
 export const SparqlServerSchema = z
     .object({
         url: z.string().default("_default"),
-        method: z.string().default("GET"),
+        method: z.string().default("POST"),
         headers: z.record(z.string(), z.string()).default({}),
     })
     .default({ url: "", method: "", headers: {} });
@@ -235,4 +249,4 @@ export type SkosSource = CommonSource & SkosSpecificSource;
 
 export type _Source = Knowledge_GraphSource | SkosSource;
 
-export { getSources, defaultDataSource };
+export { getSources, getIndices, getGraphs, defaultDataSource };

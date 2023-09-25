@@ -40,6 +40,9 @@
         "database": "master",
         "trustServerCertificate": true
     },
+    "sparql_server": {
+        "url": "http://localhost:8899/sparql"
+    },
     "ElasticSearch": {
         "url": "http://localhost:9201/",
         "other_servers": []

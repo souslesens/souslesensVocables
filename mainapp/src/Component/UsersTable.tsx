@@ -213,7 +213,7 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
         }
     };
 
-    const config = SRD.unwrap({ auth: "json" }, identity, model.config);
+    const config = SRD.unwrap({ auth: "json", tools_available: [] }, identity, model.config);
     const createEditButton = (
         <Button id={id} color="primary" variant="contained" onClick={handleOpen}>
             {create ? "Create User" : "Edit"}

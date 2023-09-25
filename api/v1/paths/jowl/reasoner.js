@@ -85,15 +85,18 @@ module.exports = function () {
                     });
                 },
                 function (err) {
-                    if (err) return processResponse(res, err, null);
+                    if (err) {
+                        return processResponse(res, err, null);
+                    }
 
                     var ontologyContentEncoded64 = Buffer.from(str).toString("base64");
 
                     var payload = {
                         ontologyContentEncoded64: ontologyContentEncoded64,
-                        predicates: JSON.parse(req.query.predicates),
                     };
-
+                    if (req.query.predicates) {
+                        payload.predicates = JSON.parse(req.query.predicates);
+                    }
                     var options = {
                         method: "POST",
                         json: payload,
@@ -111,7 +114,7 @@ module.exports = function () {
     }
 
     GET.apiDoc = {
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         summary: "Query Jowl server",
         description: "Query Jowl server",
         operationId: "Query Jowl server",

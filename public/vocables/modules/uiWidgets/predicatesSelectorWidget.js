@@ -154,20 +154,25 @@ var PredicatesSelectorWidget = (function () {
                 });
             });
             common.fillSelectOptions(selectId, classes, true, "label", "id");
-        } else if (Config.ontologiesVocabularyModels[vocabulary] && Config.ontologiesVocabularyModels[vocabulary].classesCount <= Config.ontologyModelMaxClasses) {
-            var classes = [];
-            for (var classId in Config.ontologiesVocabularyModels[vocabulary].classes) {
-                var classObj = Config.ontologiesVocabularyModels[vocabulary].classes[classId];
-                classes.push({
-                    id: classObj.id,
-                    label: classObj.label,
-                });
-            }
-
-            common.fillSelectOptions(selectId, classes, true, "label", "id");
         } else {
-            //PromptedSelectWidget
-            return PromptedSelectWidget.prompt("owl:Class", "editPredicate_objectSelect", vocabulary);
+            OntologyModels.registerSourcesModel([vocabulary], function (err, result) {
+                if (err) return alert(err.responseText);
+                if (Config.ontologiesVocabularyModels[vocabulary] && Config.ontologiesVocabularyModels[vocabulary].classesCount <= Config.ontologyModelMaxClasses) {
+                    var classes = [];
+                    for (var classId in Config.ontologiesVocabularyModels[vocabulary].classes) {
+                        var classObj = Config.ontologiesVocabularyModels[vocabulary].classes[classId];
+                        classes.push({
+                            id: classObj.id,
+                            label: classObj.label,
+                        });
+                    }
+
+                    common.fillSelectOptions(selectId, classes, true, "label", "id");
+                } else {
+                    //PromptedSelectWidget
+                    return PromptedSelectWidget.prompt("owl:Class", "editPredicate_objectSelect", vocabulary);
+                }
+            });
         }
     };
 

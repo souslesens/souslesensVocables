@@ -17,7 +17,7 @@ module.exports = function () {
     POST.apiDoc = {
         summary: "Add an import to a given source",
         description: "Allow user to add an import to a given source",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "sourceImport",
         parameters: [
             { in: "path", name: "id", type: "string", required: true },

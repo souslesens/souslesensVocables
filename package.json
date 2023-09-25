@@ -1,6 +1,6 @@
 {
     "name": "souslesensvocables",
-    "version": "1.40.0",
+    "version": "1.41.0",
     "private": true,
     "scripts": {
         "build:app": "cd mainapp && npm run build",
@@ -46,6 +46,7 @@
         "cookie-parser": "~1.4.6",
         "csv-parser": "^3.0.0",
         "debug": "~4.3.4",
+        "digest-fetch": "^2.0.3",
         "es7": "npm:@elastic/elasticsearch@^7.17.12",
         "etl": "^0.7.0",
         "express": "~4.18.2",

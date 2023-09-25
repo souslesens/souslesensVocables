@@ -19,7 +19,7 @@ module.exports = function () {
     }
     GET.apiDoc = {
         summary: "Returns user tools",
-        security: [{ loginScheme: [] }],
+        security: [{ restrictLoggedUser: [] }],
         operationId: "getTools",
         responses: {
             200: {

@@ -317,7 +317,7 @@ var Lineage_graphTraversal = (function () {
                 });
             }
         });
-        if(Lineage_whiteboard.lineageVisjsGraph.data){
+        if (Lineage_whiteboard.lineageVisjsGraph.data) {
             var oldEdges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
             var toDelete = [];
             oldEdges.forEach(function (edge) {
@@ -325,7 +325,6 @@ var Lineage_graphTraversal = (function () {
             });
             Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(toDelete);
         }
-       
 
         if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);

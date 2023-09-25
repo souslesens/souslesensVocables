@@ -68,7 +68,7 @@ var GraphTraversal = {
             while (tail < queue.length) {
                 var u = queue[tail].vertex,
                     count = queue[tail++].count; // Pop a vertex off the queue.
-                if(graph.neighbors[u]){
+                if (graph.neighbors[u]) {
                     graph.neighbors[u].forEach(function (v) {
                         if (!visited[v]) {
                             visited[v] = true;
@@ -76,7 +76,6 @@ var GraphTraversal = {
                         }
                     });
                 }
-                
             }
         },
 
@@ -123,7 +122,7 @@ var GraphTraversal = {
         GraphTraversal.getViscinityArray(sparqlServerUrl, graphUri, options, function (err, viscinityArray) {
             if (err) return callback(err);
 
-            GraphTraversal.getSortestPathFromVicinityArray(viscinityArray,fromNodeId,toNodeId,options, function (err, path) {
+            GraphTraversal.getSortestPathFromVicinityArray(viscinityArray, fromNodeId, toNodeId, options, function (err, path) {
                 if (err) return callback(err);
                 return callback(null, path);
             });
@@ -131,8 +130,8 @@ var GraphTraversal = {
     },
 
     getSortestPathFromVicinityArray: function (viscinityArray, fromNodeId, toNodeId, options, callback) {
-        if(!options){
-            options={}
+        if (!options) {
+            options = {};
         }
         var graph = new GraphTraversal.path.Graph(viscinityArray);
 

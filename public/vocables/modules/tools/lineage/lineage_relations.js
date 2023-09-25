@@ -263,9 +263,6 @@ var Lineage_relations = (function () {
             var caller = self.drawRelationCurrentCaller;
             if (selection == "selected") {
                 if (caller == "Graph") {
-                    if (node.type && node.type == "literal") {
-                        return alert(currentGraphNode.data.id);
-                    }
                     options.data = Lineage_whiteboard.currentGraphNode.data.id;
                 } else if (caller == "Tree") {
                     options.data = Lineage_whiteboard.currentTreeNode.data.id;

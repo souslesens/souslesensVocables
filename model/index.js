@@ -6,14 +6,19 @@ class IndexModel {
      * @param {string} elasticsearchUrl - url of elasticsearch
      * @param {string} elasticsearchUser - user of elasticsearch
      * @param {string} elasticsearchPassword - password of elasticsearch
+     * @param {boolean} elasticsearchSkipSslVerify - skip ssl check
      */
-    constructor(elasticsearchUrl, elasticsearchUser, elasticsearchPassword) {
+    constructor(elasticsearchUrl, elasticsearchUser, elasticsearchPassword, elasticsearchSkipSslVerify) {
         this.elasticsearchUrl = elasticsearchUrl;
         this.elasticsearchUser = elasticsearchUser;
         this.elasticsearchPassword = elasticsearchPassword;
+        this.skipSslVerify = elasticsearchSkipSslVerify;
     }
 
     getIndices = async () => {
+        if (this.skipSslVerify) {
+            process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
+        }
         let connInfo = { node: this.elasticsearchUrl };
         if (this.elasticsearchUser && this.elasticsearchPassword) {
             const auth = { username: this.elasticsearchUser, password: this.elasticsearchPassword };
@@ -44,6 +49,6 @@ class IndexModel {
     };
 }
 
-const indexModel = new IndexModel(config.ElasticSearch.url, config.ElasticSearch.user, config.ElasticSearch.password);
+const indexModel = new IndexModel(config.ElasticSearch.url, config.ElasticSearch.user, config.ElasticSearch.password, config.ElasticSearch.skipSslVerify);
 
 module.exports = { IndexModel, indexModel };

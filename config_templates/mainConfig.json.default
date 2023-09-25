@@ -38,6 +38,7 @@
         "url": "http://xxx:9200/",
         "user": "",
         "password": "",
+        "skipSslVerify": false,
         "other_servers": []
     },
     "jowlServer": {

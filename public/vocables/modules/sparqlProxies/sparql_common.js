@@ -350,7 +350,7 @@ var Sparql_common = (function () {
     self.getSourceFromGraphUri = function (graphUri, mainSource) {
         if (mainSource) {
             var sourcesInScope = [mainSource];
-            Config.sources[mainSource].imports.forEach(function (importSource) {});
+            //Config.sources[mainSource].imports.forEach(function (importSource) {});
         } else {
             // search in allsources
             if (!self.graphUrisMap) {

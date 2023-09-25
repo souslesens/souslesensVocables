@@ -1335,7 +1335,7 @@ self.saveMappings({classId:classId})
             }
 
             var filter = "?p =<http://souslesens.org/KGcreator#mappingFile>";
-            MainControlle.UI.message("delting triples triples created with KGCreator in " + self.currentJsonObject.graphUri);
+            MainController.UI.message("delting triples triples created with KGCreator in " + self.currentJsonObject.graphUri);
             Sparql_generic.deleteTriplesWithFilter(self.currentSlsvSource, filter, function (err, result) {
                 if (err) {
                     if (callback) {

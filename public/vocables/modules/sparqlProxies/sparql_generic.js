@@ -437,7 +437,13 @@ var Sparql_generic = (function () {
 
             if ((p = elt.indexOf("^^")) > 0) {
                 //xsd type
-                return '"' + item.object.substring(0, p) + '"' + item.object.substring(p);
+
+                var object_value = item.object.substring(0, p);
+                var string_number_version = +item.object.substring(0, p).replace(/'/gm, "");
+                if (!isNaN(string_number_version)) {
+                    object_value = '"' + string_number_version + '"';
+                }
+                return object_value + item.object.substring(p);
             }
 
             var array = elt.trim().split(":");

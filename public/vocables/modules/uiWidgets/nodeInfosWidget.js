@@ -796,6 +796,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                     if (err) {
                         return alert(err);
                     }
+
                     self.showNodeInfos(self.currentSource, self.currentNode, "mainDialogDiv");
 
                     var property = currentEditingItem.item.prop.value;
@@ -962,7 +963,9 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         }
         PredicatesSelectorWidget.init(Lineage_sources.activeSource, function () {
             $("#editPredicate_savePredicateButton").click(function () {
-                self.addPredicate();
+                self.addPredicate(null, null, null, null, function () {
+                    self.deletePredicate(predicateId);
+                });
             });
         });
 

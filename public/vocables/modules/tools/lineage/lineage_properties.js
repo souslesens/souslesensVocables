@@ -568,7 +568,7 @@ var Lineage_properties = (function () {
                             shape: classShape,
                         });
                     }
-                    edgeId = item.property.value + "_" + item.range.value;
+                    edgeId = item.property.value + "_range_" + item.range.value;
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
                         visjsData.edges.push({
@@ -613,7 +613,7 @@ var Lineage_properties = (function () {
                             shape: classShape,
                         });
                     }
-                    edgeId = item.property.value + "_" + item.domain.value;
+                    edgeId = item.property.value + "_domain_" + item.domain.value;
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
                         visjsData.edges.push({
@@ -658,7 +658,7 @@ var Lineage_properties = (function () {
                             shape: classShape,
                         });
                     }
-                    edgeId = item.property.value + "_" + item.range.value;
+                    edgeId = item.property.value + "_range_" + item.range.value;
                     if (!existingNodes[edgeId]) {
                         existingNodes[edgeId] = 1;
                         visjsData.edges.push({

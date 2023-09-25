@@ -38,6 +38,7 @@
         "url": "http://xxx:9200/",
         "user": "",
         "password": "",
+        "caFingerprint": "",
         "other_servers": []
     },
     "jowlServer": {

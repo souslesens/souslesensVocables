@@ -6,17 +6,24 @@ class IndexModel {
      * @param {string} elasticsearchUrl - url of elasticsearch
      * @param {string} elasticsearchUser - user of elasticsearch
      * @param {string} elasticsearchPassword - password of elasticsearch
+     * @param {string} elasticsearchCaFingerprint - Fingerprint of certificate
      */
-    constructor(elasticsearchUrl, elasticsearchUser, elasticsearchPassword) {
+    constructor(elasticsearchUrl, elasticsearchUser, elasticsearchPassword, elasticsearchCaFingerprint) {
         this.elasticsearchUrl = elasticsearchUrl;
         this.elasticsearchUser = elasticsearchUser;
         this.elasticsearchPassword = elasticsearchPassword;
+        this.elasticsearchCaFingerprint = elasticsearchCaFingerprint;
     }
 
     getIndices = async () => {
         let connInfo = { node: this.elasticsearchUrl };
         if (this.elasticsearchUser && this.elasticsearchPassword) {
             const auth = { username: this.elasticsearchUser, password: this.elasticsearchPassword };
+            if (this.elasticsearchUrl.startsWith("https") && this.elasticsearchCaFingerprint) {
+                const tls = { rejectUnauthorized: false };
+                const caFingerprint = this.elasticsearchCaFingerprint;
+                connInfo = { ...connInfo, ssl: tls, caFingerprint: caFingerprint };
+            }
             connInfo = { ...connInfo, auth: auth };
         }
         const client = new Client7(connInfo);
@@ -44,6 +51,6 @@ class IndexModel {
     };
 }
 
-const indexModel = new IndexModel(config.ElasticSearch.url, config.ElasticSearch.user, config.ElasticSearch.password);
+const indexModel = new IndexModel(config.ElasticSearch.url, config.ElasticSearch.user, config.ElasticSearch.password, config.ElasticSearch.caFingerprint);
 
 module.exports = { IndexModel, indexModel };

@@ -156,6 +156,7 @@ var Lineage_whiteboard = (function () {
                     }
                 }
                 $("#GenericTools_searchSchemaType").val("OWL");
+                MainController.UI.showHideRightPanel("hide");
 
                 if (callback) {
                     callback();

@@ -443,6 +443,9 @@ var Sparql_generic = (function () {
                 if (!isNaN(string_number_version)) {
                     object_value = '"' + string_number_version + '"';
                 }
+                if (item.object.split("^^")[1] == "xsd:dateTime") {
+                    object_value = '"' + item.object.substring(0, p).replace(/'/gm, "") + '"';
+                }
                 return object_value + item.object.substring(p);
             }
 

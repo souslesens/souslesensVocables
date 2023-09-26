@@ -780,20 +780,14 @@ var Lineage_relations = (function () {
         }
     };
 
-
-    self.drawEquivalentClasses=function(source,data,callback){
-        var filter=" Filter (?prop= <http://www.w3.org/2002/07/owl#equivalentClass>)"
-        Sparql_OWL.getFilteredTriples(source,data,null,null,{filter:filter},function(err, result){
-            if(err){
+    self.drawEquivalentClasses = function (source, data, callback) {
+        var filter = " Filter (?prop= <http://www.w3.org/2002/07/owl#equivalentClass>)";
+        Sparql_OWL.getFilteredTriples(source, data, null, null, { filter: filter }, function (err, result) {
+            if (err) {
                 return callback(err);
-
             }
-
-
-
-
-        })
-    }
+        });
+    };
 
     return self;
 })();

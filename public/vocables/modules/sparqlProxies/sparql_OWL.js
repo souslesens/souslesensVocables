@@ -95,12 +95,15 @@ var Sparql_OWL = (function () {
         }
         var fromStr = "";
 
-        var strFilterTopConcept;
-        var topClassFilter = Config.sources[sourceLabel].topClassFilter;
-        if (topClassFilter && topClassFilter != "" && topClassFilter != "_default") {
-            strFilterTopConcept = topClassFilter;
-        } else {
-            strFilterTopConcept = "?topConcept rdf:type  owl:Class. filter(NOT EXISTS {?topConcept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?z}) ";
+        var strFilterTopConcept="";
+       if (!options.skipTopClassFilter ) {
+            var topClassFilter = Config.sources[sourceLabel].topClassFilter;
+            if (topClassFilter && topClassFilter != "" && topClassFilter != "_default") {
+                strFilterTopConcept = topClassFilter;
+            }
+            else {
+                strFilterTopConcept = "?topConcept rdf:type  owl:Class. filter(NOT EXISTS {?topConcept " + Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) + " ?z}) ";
+            }
         }
 
         self.graphUri = Config.sources[sourceLabel].graphUri;
@@ -131,14 +134,17 @@ var Sparql_OWL = (function () {
         if (Config.sources[sourceLabel].schemaType != "KNOWLEDGE_GRAPH") {
             query += "?topConcept rdf:type owl:Class.";
         }
-        query += strFilterTopConcept + " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}";
+        query += strFilterTopConcept + " OPTIONAL{?topConcept rdfs:label ?topConceptLabel.}"+
+        "filter (!isBlank( ?topConcept))";
         if (options.filterCollections) {
             query +=
                 "?collection skos:member ?aConcept. ?aConcept " +
                 Sparql_OWL.getSourceTaxonomyPredicates(sourceLabel) +
                 " ?topConcept." +
                 Sparql_common.setFilter("collection", options.filterCollections, null, options);
+
         }
+
         query += Sparql_common.getLangFilter(sourceLabel, "topConceptLabel");
         if (options.selectGraph) {
             query += "}";

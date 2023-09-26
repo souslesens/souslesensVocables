@@ -345,7 +345,7 @@ var Lineage_sources = (function () {
 
                 var drawTopConcepts = false;
                 if (drawTopConcepts) {
-                    Lineage_whiteboard.drawTopConcepts(source, function (err) {
+                    Lineage_whiteboard.drawTopConcepts(source, {},function (err) {
                         if (err) {
                             return MainController.UI.message(err);
                         }

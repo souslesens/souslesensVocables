@@ -331,24 +331,53 @@ var Lineage_whiteboard = (function () {
         if (!Config.sources[source]) {
             return;
         }
-        self.drawTopConcepts(source, function (err, result) {
-            if (err) return alert(err.response);
-            var options = { output: "graph" };
+        var topConcepts = [];
+        async.series(
+            [
+                function (callbackSeries) {
+                    self.drawTopConcepts(source, { skipTopClassFilter: 1 }, function (err, result) {
+                        if (err) {
+                            return alert(err.response);
+                        }
+                        var options = { output: "graph" };
 
-            var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
-            var data = [];
-            nodes.forEach(function (node) {
-                if (node.data && (!node.data.type || node.data.type != "literal")) {
-                    data.push(node.id);
+                        var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get();
+                        var data = [];
+                        nodes.forEach(function (node) {
+                            if (node.data && (!node.data.type || node.data.type != "literal")) {
+                                data.push(node.id);
+                            }
+                        });
+                        topConcepts = data;
+                        callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    var options = { data: topConcepts };
+                    Lineage_relations.drawRelations(null, "restrictions", null, options);
+                    callbackSeries();
+                },
+
+                function (callbackSeries) {
+                    //to be finished
+                    return callbackSeries();
+                    Lineage_relations.drawEquivalentClasses(source, topConcepts, function (err, result) {
+                        callbackSeries();
+                    });
+                },
+            ],
+            function (err) {
+                if (err) {
+                    return alert(err);
                 }
-            });
-            options.data = data;
-
-            Lineage_relations.drawRelations(null, "restrictions", null, options);
-        });
+            }
+        );
     };
 
-    self.drawTopConcepts = function (source, callback) {
+    self.drawTopConcepts = function (source, options, callback) {
+        if (!options) {
+            options = {};
+        }
         MainController.UI.showHideRightPanel("hide");
         self.currentExpandLevel = 1;
 
@@ -444,8 +473,11 @@ var Lineage_whiteboard = (function () {
             allSources,
             function (/** @type {string} */ source, /** @type {(arg0: undefined) => void} */ callbackEach) {
                 MainController.UI.message("loading source " + source);
-                var options = { selectGraph: true, withoutImports: Lineage_sources.activeSource || false };
-                Sparql_generic.getTopConcepts(source, options, function (/** @type {any} */ err, /** @type {any[]} */ result) {
+                var queryOptions = { selectGraph: true, withoutImports: Lineage_sources.activeSource || false };
+                for (var key in options) {
+                    queryOptions[key] = options[key];
+                }
+                Sparql_generic.getTopConcepts(source, queryOptions, function (err, result) {
                     if (err) {
                         return callbackEach(err);
                     }
@@ -2811,7 +2843,9 @@ self.zoomGraphOnNode(node.data[0].id, false);
     };
 
     self.drawInferredClassesModel = function (source) {
-        if (!source) source = Lineage_sources.activeSource;
+        if (!source) {
+            source = Lineage_sources.activeSource;
+        }
         KGqueryWidget.getInferredModelVisjsData(source, function (err, visjsData) {
             if (err) {
                 return alert(err.responseText);

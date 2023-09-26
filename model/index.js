@@ -22,11 +22,6 @@ class IndexModel {
         let connInfo = { node: this.elasticsearchUrl };
         if (this.elasticsearchUser && this.elasticsearchPassword) {
             const auth = { username: this.elasticsearchUser, password: this.elasticsearchPassword };
-            if (this.elasticsearchUrl.startsWith("https") && this.elasticsearchCaFingerprint) {
-                const tls = { rejectUnauthorized: false };
-                const caFingerprint = this.elasticsearchCaFingerprint;
-                connInfo = { ...connInfo, ssl: tls, caFingerprint: caFingerprint };
-            }
             connInfo = { ...connInfo, auth: auth };
         }
         const client = new Client7(connInfo);

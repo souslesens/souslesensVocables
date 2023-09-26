@@ -349,7 +349,7 @@ var Sparql_common = (function () {
 
     self.getSourceFromGraphUri = function (graphUri, mainSource) {
         if (mainSource) {
-            var sourcesInScope = Config.sources[mainSource].imports;
+            var sourcesInScope = JSON.parse(JSON.stringify(Config.sources[mainSource].imports));
             sourcesInScope.push(mainSource);
             var graphUrisMap = [];
             sourcesInScope.forEach(function (source) {

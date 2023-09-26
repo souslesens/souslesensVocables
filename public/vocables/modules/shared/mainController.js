@@ -73,33 +73,6 @@ var MainController = (function () {
                     if (data[source].sparql_server && data[source].sparql_server.url == "_default") {
                         data[source].sparql_server.url = Config.default_sparql_url;
                     }
-                    //manage imports that are not declared as sources in sources.json : create in memory sources
-
-                    if (false) {
-                        if (data[source].imports) {
-                            var imports2 = [];
-                            data[source].imports.forEach(function (item) {
-                                if (item.graphUri) {
-                                    var importSourceName = Sparql_common.getLabelFromURI(item.graphUri);
-                                    if (!item.sparql_server) {
-                                        item.sparql_server = data[source].sparql_server;
-                                    } else if (item.sparql_server.url == "_default") {
-                                        item.sparql_server.url = Config.default_sparql_url;
-                                    }
-
-                                    item.controller = data[source].controller;
-                                    if (!item.topClassFilter) {
-                                        item.topClassFilter = data[source].topClassFilter;
-                                    }
-                                    data[importSourceName] = item;
-                                    imports2.push(importSourceName);
-                                }
-                            });
-                            if (imports2.length > 0) {
-                                data[source].imports = imports2;
-                            }
-                        }
-                    }
                 }
                 Config.sources = data;
 
@@ -589,11 +562,11 @@ return;*/
         },
 
         showHideRightPanel: function (showOrHide) {
-            var left = $("#rightPanelDiv").position().left;
             var w = $(window).width();
             var show = false;
             if (!showOrHide) {
-                if (w - left < 100) {
+                var displayed = $("#rightPanelDivInner").css("display");
+                if (displayed == "none") {
                     show = true;
                 } else {
                     show = false;
@@ -604,19 +577,24 @@ return;*/
                 show = false;
             }
             if (show) {
-                var lw = $("#rightPanelDiv").width();
-                if (lw < 100) {
+                var lw = $("#rightPanelDivInner").width();
+                if (false && lw < 100) {
                     return;
                 }
                 var newLeft = "" + (w - lw) + "px";
                 $("#rightPanelDiv").css("position", "absolute");
+                $("#rightPanelDivInner").css("display", "block");
                 $("#rightPanelDiv").css("left", newLeft);
                 $("#graphDiv").css("zIndex", 19);
+                // $("#rightPanelDiv_searchIconInput").css("display", "block");
                 $("#rightPanelDiv_searchIconInput").attr("src", "./icons/slideRight.png");
             } else {
                 //hide panel
+                $("#rightPanelDiv").css("position", "absolute");
+                $("#rightPanelDivInner").css("display", "none");
                 var newLeft = "" + w + "px";
                 $("#rightPanelDiv").css("left", newLeft);
+                // $("#rightPanelDiv_searchIconInput").css("display", "none");
                 $("#rightPanelDiv_searchIconInput").attr("src", "./icons/search.png");
             }
         },

@@ -1678,6 +1678,15 @@ var Sparql_OWL = (function () {
             slices,
             function (ids, callbackEach) {
                 var filter = Sparql_common.setFilter("id", ids);
+                if (options.onlySourceAndImports) {
+                    var sources = Config.sources[sourceLabel].imports;
+                    sources.push(sourceLabel);
+                    var graphUris = [];
+                    sources.forEach(function (source) {
+                        graphUris.push(Config.sources[source].graphUri);
+                    });
+                    filter += Sparql_common.setFilter("g", graphUris);
+                }
                 var fromStr = Sparql_common.getFromStr(sourceLabel, options.withGraph, options.withoutImports);
                 var query = "SELECT distinct ?id ?g " + fromStr + "WHERE {GRAPH ?g{?id ?p ?o. " + filter + "}} limit 10000";
 

@@ -106,6 +106,7 @@ var Lineage_whiteboard = (function () {
             $("#rightPanelDivInner").load("snippets/lineage/lineageRightPanel.html", function () {
                 $("#GenericTools_searchSchemaType").val("OWL");
 
+
                 if (Object.keys(Lineage_sources.loadedSources).length == 0) {
                     $("#lineage_allActions").css("visibility", "hidden");
                 }
@@ -156,6 +157,7 @@ var Lineage_whiteboard = (function () {
                     }
                 }
                 $("#GenericTools_searchSchemaType").val("OWL");
+                MainController.UI.showHideRightPanel("hide")
 
                 if (callback) {
                     callback();

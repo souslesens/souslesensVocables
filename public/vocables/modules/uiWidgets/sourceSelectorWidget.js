@@ -13,7 +13,7 @@ var SourceSelectorWidget = (function () {
         }
         var jsTreeOptions = options;
         jsTreeOptions.selectTreeNodeFn = selectTreeNodeFn;
-
+        MainController.UI.showHideRightPanel("hide");
         $("#" + targetDivId).load("snippets/sourceSelector.html", function (err) {
             self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
             //  $("#sourceSelector_SearchSourceInput");
@@ -32,6 +32,7 @@ var SourceSelectorWidget = (function () {
 
             if (isDialog) {
                 $("#" + targetDivId).dialog("open");
+
             } else {
             }
         });

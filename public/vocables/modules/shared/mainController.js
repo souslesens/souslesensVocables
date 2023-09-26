@@ -488,6 +488,7 @@ return;*/
             $("#actionDivContolPanelDiv").html("");
             $("#rightPanelDivInner").html("");
 
+
             if (toolId == "lineage") {
                 Lineage_sources.setAllWhiteBoardSources(true);
                 $("#accordion").accordion("option", { active: 2 });
@@ -589,11 +590,12 @@ return;*/
         },
 
         showHideRightPanel: function (showOrHide) {
-            var left = $("#rightPanelDiv").position().left;
+
             var w = $(window).width();
             var show = false;
             if (!showOrHide) {
-                if (w - left < 100) {
+                var displayed=$("#rightPanelDivInner").css("display")
+                if ( displayed=="none") {
                     show = true;
                 } else {
                     show = false;
@@ -604,20 +606,25 @@ return;*/
                 show = false;
             }
             if (show) {
-                var lw = $("#rightPanelDiv").width();
-                if (lw < 100) {
+                var lw = $("#rightPanelDivInner").width();
+                if (false && lw < 100) {
                     return;
                 }
                 var newLeft = "" + (w - lw) + "px";
                 $("#rightPanelDiv").css("position", "absolute");
+                $("#rightPanelDivInner").css("display", "block");
                 $("#rightPanelDiv").css("left", newLeft);
                 $("#graphDiv").css("zIndex", 19);
-                $("#rightPanelDiv_searchIconInput").attr("src", "./icons/slideRight.png");
+               // $("#rightPanelDiv_searchIconInput").css("display", "block");
+              $("#rightPanelDiv_searchIconInput").attr("src", "./icons/slideRight.png");
             } else {
                 //hide panel
+                $("#rightPanelDiv").css("position", "absolute");
+              $("#rightPanelDivInner").css("display", "none");
                 var newLeft = "" + w + "px";
                 $("#rightPanelDiv").css("left", newLeft);
-                $("#rightPanelDiv_searchIconInput").attr("src", "./icons/search.png");
+               // $("#rightPanelDiv_searchIconInput").css("display", "none");
+               $("#rightPanelDiv_searchIconInput").attr("src", "./icons/search.png");
             }
         },
         showCurrentQuery: function () {

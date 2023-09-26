@@ -11,6 +11,7 @@ import Lineage_3D from "./lineage_3d.js";
 import authentication from "../../shared/authentification.js";
 import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
+import MainController from "../../shared/mainController.js";
 
 var Lineage_sources = (function () {
     var self = {};
@@ -88,14 +89,14 @@ var Lineage_sources = (function () {
             self.setCurrentSource(source);
             $("#sourcesSelectionDialogdiv").dialog("close");
             $("#lineage_allActions").css("visibility", "visible");
-            MainController.UI.showHideRightPanel();
+            MainController.UI.showHideRightPanel("show");
         };
 
         var validateButtonFn = function () {
             var sources = SourceSelectorWidget.getCheckedSources();
             self.loadSources(sources);
         };
-
+        MainController.UI.showHideRightPanel("hide");
         SourceSelectorWidget.initWidget(["OWL"], "mainDialogDiv", true, selectTreeNodeFn, validateButtonFn, options);
 
         return;

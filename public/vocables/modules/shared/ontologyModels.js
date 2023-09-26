@@ -569,163 +569,162 @@ return callbackSeries();
         var endNodeAncestorIds = [];
 
         async.series(
-          [
-              function (callbackSeries) {
-                  Sparql_OWL.getNodesAncestors(source, [startNodeId], { excludeItself: 0, filter: filter }, function (err, result) {
-                      if (err) {
-                          return callbackSeries(err);
-                      }
-                      hierarchies = result.hierarchies;
-                      callbackSeries();
-                  });
-              },
-              function (callbackSeries) {
-                  if (!endNodeId) {
-                      return callbackSeries();
-                  }
-                  Sparql_OWL.getNodesAncestors(source, [endNodeId], { excludeItself: 0, filter: filter }, function (err, result) {
-                      if (err) {
-                          return callbackSeries(err);
-                      }
-                      var hierarchiesEnd = result.hierarchies;
-                      for (var key in hierarchiesEnd) {
-                          hierarchies[key] = hierarchiesEnd[key];
-                      }
+            [
+                function (callbackSeries) {
+                    Sparql_OWL.getNodesAncestors(source, [startNodeId], { excludeItself: 0, filter: filter }, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        hierarchies = result.hierarchies;
+                        callbackSeries();
+                    });
+                },
+                function (callbackSeries) {
+                    if (!endNodeId) {
+                        return callbackSeries();
+                    }
+                    Sparql_OWL.getNodesAncestors(source, [endNodeId], { excludeItself: 0, filter: filter }, function (err, result) {
+                        if (err) {
+                            return callbackSeries(err);
+                        }
+                        var hierarchiesEnd = result.hierarchies;
+                        for (var key in hierarchiesEnd) {
+                            hierarchies[key] = hierarchiesEnd[key];
+                        }
 
-                      callbackSeries();
-                  });
-              }, //get matching properties
-              function (callbackSeries) {
-                  var allSources = [source];
-                  if (Config.sources[source].imports) {
-                      allSources = allSources.concat(Config.sources[source].imports);
-                  }
+                        callbackSeries();
+                    });
+                }, //get matching properties
+                function (callbackSeries) {
+                    var allSources = [source];
+                    if (Config.sources[source].imports) {
+                        allSources = allSources.concat(Config.sources[source].imports);
+                    }
 
-                  var allDomains = {};
-                  var allRanges = {};
+                    var allDomains = {};
+                    var allRanges = {};
 
-                  hierarchies[startNodeId].forEach(function (item) {
-                      startNodeAncestorIds.push(item.superClass.value);
-                  });
+                    hierarchies[startNodeId].forEach(function (item) {
+                        startNodeAncestorIds.push(item.superClass.value);
+                    });
 
-                  if (endNodeId) {
-                      hierarchies[endNodeId].forEach(function (item, startNodeIndex) {
-                          endNodeAncestorIds.push(item.superClass.value);
-                      });
-                  }
+                    if (endNodeId) {
+                        hierarchies[endNodeId].forEach(function (item, startNodeIndex) {
+                            endNodeAncestorIds.push(item.superClass.value);
+                        });
+                    }
 
-                  allSources.forEach(function (_source) {
-                      if (!Config.ontologiesVocabularyModels[_source]) return;
-                      var sourceConstraints = Config.ontologiesVocabularyModels[_source].constraints;
-                      for (var property in sourceConstraints) {
-                          var constraint = sourceConstraints[property];
-                          constraint.source = _source;
-                          var domainOK = false;
-                          if (!allConstraints[property]) {
-                              allConstraints[property] = constraint;
+                    allSources.forEach(function (_source) {
+                        if (!Config.ontologiesVocabularyModels[_source]) return;
+                        var sourceConstraints = Config.ontologiesVocabularyModels[_source].constraints;
+                        for (var property in sourceConstraints) {
+                            var constraint = sourceConstraints[property];
+                            constraint.source = _source;
+                            var domainOK = false;
+                            if (!allConstraints[property]) {
+                                allConstraints[property] = constraint;
 
-                              if (constraint.domain) {
-                                  if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
-                                      if (!constraint.range || !endNodeId) {
-                                          propertiesMatchingStartNode.push(property);
-                                      } else {
-                                          domainOK = true;
-                                      }
-                                  }
-                              }
-                              if (constraint.range) {
-                                  if (endNodeAncestorIds.indexOf(constraint.range) > -1) {
-                                      if (domainOK) {
-                                          propertiesMatchingBoth.push(property);
-                                      } else {
-                                          if (!constraint.domain) {
-                                              propertiesMatchingEndNode.push(property);
-                                          }
-                                      }
-                                  }
-                              }
-                              if (!constraint.domain && !constraint.range) {
-                                  noConstaintsArray.push(property);
-                              }
-                          } else if (allConstraints[property].domain != constraint.domain && allConstraints[property].range != constraint.range) {
-                              duplicateProps.push(property + "_" + allConstraints[property].source + "-----" + constraint.source);
-                          }
-                      }
-                  });
+                                if (constraint.domain) {
+                                    if (startNodeAncestorIds.indexOf(constraint.domain) > -1) {
+                                        if (!constraint.range || !endNodeId) {
+                                            propertiesMatchingStartNode.push(property);
+                                        } else {
+                                            domainOK = true;
+                                        }
+                                    }
+                                }
+                                if (constraint.range) {
+                                    if (endNodeAncestorIds.indexOf(constraint.range) > -1) {
+                                        if (domainOK) {
+                                            propertiesMatchingBoth.push(property);
+                                        } else {
+                                            if (!constraint.domain) {
+                                                propertiesMatchingEndNode.push(property);
+                                            }
+                                        }
+                                    }
+                                }
+                                if (!constraint.domain && !constraint.range) {
+                                    noConstaintsArray.push(property);
+                                }
+                            } else if (allConstraints[property].domain != constraint.domain && allConstraints[property].range != constraint.range) {
+                                duplicateProps.push(property + "_" + allConstraints[property].source + "-----" + constraint.source);
+                            }
+                        }
+                    });
 
-                  callbackSeries();
-              },
+                    callbackSeries();
+                },
 
-              //remove matching superproperties
-              function (callbackSeries) {
-                  var propsToRemove = [];
+                //remove matching superproperties
+                function (callbackSeries) {
+                    var propsToRemove = [];
 
-                  function recurse(propId) {
-                      if (allConstraints[propId]) {
-                          var superProp = allConstraints[propId].superProp;
-                          if (superProp) {
-                              if (validProperties.indexOf(superProp) > -1) {
-                                  if (propsToRemove.indexOf(superProp) < 0) {
-                                      propsToRemove.push(superProp);
-                                  }
-                              }
-                              recurse(superProp);
-                          }
-                      }
-                  }
+                    function recurse(propId) {
+                        if (allConstraints[propId]) {
+                            var superProp = allConstraints[propId].superProp;
+                            if (superProp) {
+                                if (validProperties.indexOf(superProp) > -1) {
+                                    if (propsToRemove.indexOf(superProp) < 0) {
+                                        propsToRemove.push(superProp);
+                                    }
+                                }
+                                recurse(superProp);
+                            }
+                        }
+                    }
 
-                  propertiesMatchingBoth.forEach(function (propId) {
-                      recurse(propId);
-                  });
-                  propertiesMatchingStartNode.forEach(function (propId) {
-                      recurse(propId);
-                  });
-                  propertiesMatchingEndNode.forEach(function (propId) {
-                      recurse(propId);
-                  });
+                    propertiesMatchingBoth.forEach(function (propId) {
+                        recurse(propId);
+                    });
+                    propertiesMatchingStartNode.forEach(function (propId) {
+                        recurse(propId);
+                    });
+                    propertiesMatchingEndNode.forEach(function (propId) {
+                        recurse(propId);
+                    });
 
-                  /*   validProperties = propertiesMatchingBoth;
+                    /*   validProperties = propertiesMatchingBoth;
 validProperties = common.array.union(validProperties, propertiesMatchingStartNode);
 validProperties = common.array.union(validProperties, propertiesMatchingEndNode);
 validProperties = common.array.union(validProperties, noConstaintsArray);*/
 
-                  validConstraints = { both: {}, domain: {}, range: {}, noConstraints: {} };
+                    validConstraints = { both: {}, domain: {}, range: {}, noConstraints: {} };
 
-                  propertiesMatchingBoth.forEach(function (propId) {
-                      if (propsToRemove.indexOf(propId) < 0) {
-                          validConstraints["both"][propId] = allConstraints[propId];
-                      }
-                  });
-                  propertiesMatchingStartNode.forEach(function (propId) {
-                      if (propsToRemove.indexOf(propId) < 0) {
-                          validConstraints["domain"][propId] = allConstraints[propId];
-                      }
-                  });
+                    propertiesMatchingBoth.forEach(function (propId) {
+                        if (propsToRemove.indexOf(propId) < 0) {
+                            validConstraints["both"][propId] = allConstraints[propId];
+                        }
+                    });
+                    propertiesMatchingStartNode.forEach(function (propId) {
+                        if (propsToRemove.indexOf(propId) < 0) {
+                            validConstraints["domain"][propId] = allConstraints[propId];
+                        }
+                    });
 
-                  propertiesMatchingEndNode.forEach(function (propId) {
-                      if (propsToRemove.indexOf(propId) < 0) {
-                          validConstraints["range"][propId] = allConstraints[propId];
-                      }
-                  });
-                  noConstaintsArray.forEach(function (propId) {
-                      validConstraints["noConstraints"][propId] = allConstraints[propId];
-                  });
-                  callbackSeries();
-              },
-          ],
-          function (err) {
-              if (duplicateProps.length > 0) {
-                  MainController.UI.message(duplicateProps.length + " DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN");
-              }
-              console.warn("DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN\r");
-              duplicateProps.forEach(function (item) {
-                  console.warn(item);
-              });
-              return callback(err, { constraints: validConstraints, nodes: { startNode: startNodeAncestorIds, endNode: endNodeAncestorIds } });
-          }
+                    propertiesMatchingEndNode.forEach(function (propId) {
+                        if (propsToRemove.indexOf(propId) < 0) {
+                            validConstraints["range"][propId] = allConstraints[propId];
+                        }
+                    });
+                    noConstaintsArray.forEach(function (propId) {
+                        validConstraints["noConstraints"][propId] = allConstraints[propId];
+                    });
+                    callbackSeries();
+                },
+            ],
+            function (err) {
+                if (duplicateProps.length > 0) {
+                    MainController.UI.message(duplicateProps.length + " DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN");
+                }
+                console.warn("DUPLICATE PROPERTIES WITH DIFFERENT RANGE OR DOMAIN\r");
+                duplicateProps.forEach(function (item) {
+                    console.warn(item);
+                });
+                return callback(err, { constraints: validConstraints, nodes: { startNode: startNodeAncestorIds, endNode: endNodeAncestorIds } });
+            }
         );
     };
-
 
     self.getInferredModel = function (source, options, callback) {
         if (!options) {

@@ -32,7 +32,6 @@ var SourceSelectorWidget = (function () {
 
             if (isDialog) {
                 $("#" + targetDivId).dialog("open");
-
             } else {
             }
         });

@@ -130,6 +130,8 @@ var Lineage_graphTraversal = (function () {
         $("#mainDialogDiv").dialog("open");
         $("#mainDialogDiv").load("snippets/lineage/lineage_shortestPathDialog.html", function () {
             $("#lineage_shorterstPath_searchInput").bind("keydown", null, Lineage_graphTraversal.onSearchKeyDown);
+            $("#lineage_DrawAllPaths").prop("disabled", true);
+            $("#Lineage_graphTraversal_numberOfPathes").prop("disabled", true);
         });
     };
 
@@ -229,12 +231,12 @@ var Lineage_graphTraversal = (function () {
             var previousTo = null;
             relations.forEach(function (relation, index) {
                 var from = relation.fromLabel;
-                var prop = relation.propLabel + "->";
+                var prop = relation.propLabel != undefined ? relation.propLabel : relation.prop + "->";
                 var to = relation.toLabel;
                 if (index > 0) {
                     if (from != previousTo) {
                         var to = relation.fromLabel;
-                        var prop = "<-" + relation.propLabel;
+                        var prop = "<-" + (relation.propLabel != undefined ? relation.propLabel : relation.prop);
                         var from = relation.toLabel;
                     }
                 }
@@ -301,7 +303,7 @@ var Lineage_graphTraversal = (function () {
                     id: edgeId,
                     from: relation.from,
                     to: relation.to,
-                    label: relation.propLabel,
+                    label: relation.propLabel != undefined ? relation.propLabel : relation.prop,
                     color: "red",
                     size: 3,
                     // arrows: arrows,
@@ -317,13 +319,14 @@ var Lineage_graphTraversal = (function () {
                 });
             }
         });
-
-        var oldEdges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
-        var toDelete = [];
-        oldEdges.forEach(function (edge) {
-            if (edge.type == "path") toDelete.push(edge.id);
-        });
-        Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(toDelete);
+        if (Lineage_whiteboard.lineageVisjsGraph.data) {
+            var oldEdges = Lineage_whiteboard.lineageVisjsGraph.data.edges.get();
+            var toDelete = [];
+            oldEdges.forEach(function (edge) {
+                if (edge.type == "path") toDelete.push(edge.id);
+            });
+            Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(toDelete);
+        }
 
         if (Lineage_whiteboard.lineageVisjsGraph.isGraphNotEmpty()) {
             Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);

@@ -7,6 +7,14 @@ var SourceSelectorWidget = (function () {
     self.currentTreeDiv = null;
 
     self.initWidget = function (types, targetDivId, isDialog, selectTreeNodeFn, okButtonValidateFn, options) {
+        if (self.currentTreeDiv != null) {
+            if ($("#" + self.currentTreeDiv).jstree() != undefined) {
+                $("#" + self.currentTreeDiv)
+                    .jstree()
+                    .destroy();
+            }
+        }
+
         self.currentTreeDiv = targetDivId;
         if (!options) {
             options = {};

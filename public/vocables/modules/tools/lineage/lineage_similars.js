@@ -81,13 +81,27 @@ var Lineage_similars = (function () {
                             return callbackEach(err);
                         }
 
-                        result.forEach(function (item) {
+                        result.forEach(function (item, index) {
                             if (item.error) {
                                 return callbackEach(err);
                             }
+                            var actual_word_label = words[index];
                             item.hits.hits.forEach(function (hit) {
                                 hit._source.index = hit._index;
-                                whiteboardLabelsMap[hit._source.label].similars.push(hit._source);
+
+                                if ($("#Similars_Only_exact_match").is(":checked")) {
+                                    if (hit._source.label.toLowerCase() == actual_word_label.toLowerCase()) {
+                                        if (!whiteboardLabelsMap[hit._source.label]) {
+                                            whiteboardLabelsMap[hit._source.label] = { fromNode: whiteboardLabelsMap[actual_word_label].fromNode, similars: [] };
+                                        }
+                                        whiteboardLabelsMap[hit._source.label].similars.push(hit._source);
+                                    }
+                                } else {
+                                    if (!whiteboardLabelsMap[hit._source.label]) {
+                                        whiteboardLabelsMap[hit._source.label] = { fromNode: whiteboardLabelsMap[actual_word_label].fromNode, similars: [] };
+                                    }
+                                    whiteboardLabelsMap[hit._source.label].similars.push(hit._source);
+                                }
                             });
                         });
 
@@ -120,9 +134,10 @@ var Lineage_similars = (function () {
                                     },
                                 });
                             }
+
                             var edgeId = whiteboardNode.fromNode.id + "_" + similar.id;
                             var inverseEdgeId = similar.id + "_" + whiteboardNode.fromNode.id;
-                            if (!existingNodes[edgeId] && !existingNodes[inverseEdgeId]) {
+                            if (!existingNodes[edgeId] && !existingNodes[inverseEdgeId] && whiteboardNode.fromNode.id != similar.id) {
                                 existingNodes[edgeId] = 1;
 
                                 visjsData.edges.push({

@@ -68,12 +68,14 @@ var GraphTraversal = {
             while (tail < queue.length) {
                 var u = queue[tail].vertex,
                     count = queue[tail++].count; // Pop a vertex off the queue.
-                graph.neighbors[u].forEach(function (v) {
-                    if (!visited[v]) {
-                        visited[v] = true;
-                        queue.push({ vertex: v, count: count + 1 });
-                    }
-                });
+                if (graph.neighbors[u]) {
+                    graph.neighbors[u].forEach(function (v) {
+                        if (!visited[v]) {
+                            visited[v] = true;
+                            queue.push({ vertex: v, count: count + 1 });
+                        }
+                    });
+                }
             }
         },
 
@@ -91,26 +93,28 @@ var GraphTraversal = {
             while (tail < queue.length) {
                 var u = queue[tail++], // Pop a vertex off the queue.
                     neighbors = graph.neighbors[u];
-                for (var i = 0; i < neighbors.length; ++i) {
-                    var v = neighbors[i];
-                    if (visited[v]) {
-                        continue;
-                    }
-                    visited[v] = true;
-                    if (v === target) {
-                        // Check if the path is complete.
-                        var path = [v]; // If so, backtrack through the path.
-                        while (u !== source) {
-                            path.push(u);
-                            u = predecessor[u];
+                if (neighbors.length) {
+                    for (var i = 0; i < neighbors.length; ++i) {
+                        var v = neighbors[i];
+                        if (visited[v]) {
+                            continue;
                         }
-                        path.push(u);
-                        path.reverse();
+                        visited[v] = true;
+                        if (v === target) {
+                            // Check if the path is complete.
+                            var path = [v]; // If so, backtrack through the path.
+                            while (u !== source) {
+                                path.push(u);
+                                u = predecessor[u];
+                            }
+                            path.push(u);
+                            path.reverse();
 
-                        return path;
+                            return path;
+                        }
+                        predecessor[v] = u;
+                        queue.push(v);
                     }
-                    predecessor[v] = u;
-                    queue.push(v);
                 }
             }
         },
@@ -120,7 +124,7 @@ var GraphTraversal = {
         GraphTraversal.getViscinityArray(sparqlServerUrl, graphUri, options, function (err, viscinityArray) {
             if (err) return callback(err);
 
-            GraphTraversal.getSortestPathFromVicinityArray(viscinityArray, function (err, path) {
+            GraphTraversal.getSortestPathFromVicinityArray(viscinityArray, fromNodeId, toNodeId, options, function (err, path) {
                 if (err) return callback(err);
                 return callback(null, path);
             });
@@ -128,6 +132,9 @@ var GraphTraversal = {
     },
 
     getSortestPathFromVicinityArray: function (viscinityArray, fromNodeId, toNodeId, options, callback) {
+        if (!options) {
+            options = {};
+        }
         var graph = new GraphTraversal.path.Graph(viscinityArray);
 
         viscinityArray.forEach(function (edge) {
@@ -151,6 +158,7 @@ var GraphTraversal = {
                     var inverseEdge = edge;
                     inverseEdge.push(1);
                     path2.push(inverseEdge);
+
                     return;
                 }
             });
@@ -178,8 +186,10 @@ var GraphTraversal = {
 
                     if (!firstPath) firstPath = path;
                     iterations += 1;
-                    skipNode = path[path.length - 2][0];
-                    allpaths.push(path);
+                    if (path.length > 0) {
+                        skipNode = path[path.length - 2][0];
+                        allpaths.push(path);
+                    }
 
                     if (iterations >= numberOfPathes) stop = true;
                     callbackWhilst();

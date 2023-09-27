@@ -93,26 +93,28 @@ var GraphTraversal = {
             while (tail < queue.length) {
                 var u = queue[tail++], // Pop a vertex off the queue.
                     neighbors = graph.neighbors[u];
-                for (var i = 0; i < neighbors.length; ++i) {
-                    var v = neighbors[i];
-                    if (visited[v]) {
-                        continue;
-                    }
-                    visited[v] = true;
-                    if (v === target) {
-                        // Check if the path is complete.
-                        var path = [v]; // If so, backtrack through the path.
-                        while (u !== source) {
-                            path.push(u);
-                            u = predecessor[u];
+                if (neighbors.length) {
+                    for (var i = 0; i < neighbors.length; ++i) {
+                        var v = neighbors[i];
+                        if (visited[v]) {
+                            continue;
                         }
-                        path.push(u);
-                        path.reverse();
+                        visited[v] = true;
+                        if (v === target) {
+                            // Check if the path is complete.
+                            var path = [v]; // If so, backtrack through the path.
+                            while (u !== source) {
+                                path.push(u);
+                                u = predecessor[u];
+                            }
+                            path.push(u);
+                            path.reverse();
 
-                        return path;
+                            return path;
+                        }
+                        predecessor[v] = u;
+                        queue.push(v);
                     }
-                    predecessor[v] = u;
-                    queue.push(v);
                 }
             }
         },

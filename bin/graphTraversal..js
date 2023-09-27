@@ -154,7 +154,7 @@ var GraphTraversal = {
                 }
                 if (edge[1] == path[index - 1] && edge[0] == nodeId) {
                     var inverseEdge = edge;
-                    //inverseEdge.push(1);
+                    inverseEdge.push(1);
                     path2.push(inverseEdge);
 
                     return;

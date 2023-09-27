@@ -81,12 +81,16 @@ var Lineage_similars = (function () {
                             return callbackEach(err);
                         }
 
-                        result.forEach(function (item) {
+                        result.forEach(function (item, index) {
                             if (item.error) {
                                 return callbackEach(err);
                             }
+                            var actual_word_label = words[index];
                             item.hits.hits.forEach(function (hit) {
                                 hit._source.index = hit._index;
+                                if (!whiteboardLabelsMap[hit._source.label]) {
+                                    whiteboardLabelsMap[hit._source.label] = { fromNode: whiteboardLabelsMap[actual_word_label].fromNode, similars: [] };
+                                }
                                 whiteboardLabelsMap[hit._source.label].similars.push(hit._source);
                             });
                         });

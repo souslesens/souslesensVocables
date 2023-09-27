@@ -154,8 +154,9 @@ var GraphTraversal = {
                 }
                 if (edge[1] == path[index - 1] && edge[0] == nodeId) {
                     var inverseEdge = edge;
-                    inverseEdge.push(1);
+                    //inverseEdge.push(1);
                     path2.push(inverseEdge);
+
                     return;
                 }
             });
@@ -183,8 +184,10 @@ var GraphTraversal = {
 
                     if (!firstPath) firstPath = path;
                     iterations += 1;
-                    skipNode = path[path.length - 2][0];
-                    allpaths.push(path);
+                    if (path.length > 0) {
+                        skipNode = path[path.length - 2][0];
+                        allpaths.push(path);
+                    }
 
                     if (iterations >= numberOfPathes) stop = true;
                     callbackWhilst();

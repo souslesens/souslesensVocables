@@ -410,7 +410,7 @@ return alert("missing target node in  path");
 
             var predicateStr = "";
             var filterStr = "";
-            var optionalStrs=""
+            var optionalStrs = "";
 
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
                 var subjectVarName = self.getVarName(queryElement.fromNode);
@@ -468,16 +468,16 @@ return alert("missing target node in  path");
                 optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " owl:hasValue " + objectVarName + "Value}\n", optionalStr);
                 optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " rdfs:label " + subjectVarName + "Label}\n", optionalStr);
                 optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " rdfs:label " + objectVarName + "Label}\n", optionalStr);
-                optionalStrs  += " \n" + optionalStr;
+                optionalStrs += " \n" + optionalStr;
             });
 
-            whereStr += "{" + predicateStr + "\n" + "" + "\n" + filterStr+  "\n" +optionalStrs  +"}";
+            whereStr += "{" + predicateStr + "\n" + "" + "\n" + filterStr + "\n" + optionalStrs + "}";
         });
 
         var fromStr = Sparql_common.getFromStr(self.source);
         var query = "PREFIX owl: <http://www.w3.org/2002/07/owl#>" + "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
 
-        query += " Select " + selectStr + "  " + fromStr + " where {" + whereStr+ "}";
+        query += " Select " + selectStr + "  " + fromStr + " where {" + whereStr + "}";
 
         query += " " + groupByStr + " limit 10000";
 
@@ -952,14 +952,11 @@ return alert("missing target node in  path");
 
         if (true) {
             self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
-                if( err)
-                    visjsData={nodes:[],edges:[]}
-                else
-                visjsData = result;
+                if (err) visjsData = { nodes: [], edges: [] };
+                else visjsData = result;
                 //  return draw();
                 self.getInferredModelVisjsData(self.source, function (err, result2) {
-                    if(err)
-                        return alert(err);
+                    if (err) return alert(err);
                     var oldNodesMap = {};
                     var oldEdgesMap = {};
                     var newNodes = [];

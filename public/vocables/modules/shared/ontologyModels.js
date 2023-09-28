@@ -596,7 +596,6 @@ return callbackSeries();
                     });
                 }, //get matching properties
                 function (callbackSeries) {
-
                     if (Config.sources[source].imports) {
                         allSources = allSources.concat(Config.sources[source].imports);
                     }
@@ -714,19 +713,18 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                 },
 
                 //add existing  restrictions to valid constraints
-                function(callbackSeries) {
-                    allSources.forEach(function(_source) {
+                function (callbackSeries) {
+                    allSources.forEach(function (_source) {
                         var sourceRestrictions = Config.ontologiesVocabularyModels[_source].restrictions;
                         if (!sourceRestrictions) {
-                            return
+                            return;
                         }
                         for (var propId in sourceRestrictions) {
                             validConstraints["both"][propId] = sourceRestrictions[propId];
                         }
-                    })
+                    });
                     callbackSeries();
-                }
-
+                },
             ],
             function (err) {
                 if (duplicateProps.length > 0) {

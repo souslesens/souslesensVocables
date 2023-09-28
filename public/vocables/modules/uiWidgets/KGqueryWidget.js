@@ -410,6 +410,7 @@ return alert("missing target node in  path");
 
             var predicateStr = "";
             var filterStr = "";
+            var optionalStrs = "";
 
             querySet.elements.forEach(function (queryElement, queryElementIndex) {
                 var subjectVarName = self.getVarName(queryElement.fromNode);
@@ -467,10 +468,10 @@ return alert("missing target node in  path");
                 optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " owl:hasValue " + objectVarName + "Value}\n", optionalStr);
                 optionalStr = addToStringIfNotExists(" OPTIONAL {" + subjectVarName + " rdfs:label " + subjectVarName + "Label}\n", optionalStr);
                 optionalStr = addToStringIfNotExists(" OPTIONAL {" + objectVarName + " rdfs:label " + objectVarName + "Label}\n", optionalStr);
-                predicateStr += " \n" + optionalStr;
+                optionalStrs += " \n" + optionalStr;
             });
 
-            whereStr += "{" + predicateStr + "\n" + "" + "\n" + filterStr + "}";
+            whereStr += "{" + predicateStr + "\n" + "" + "\n" + filterStr + "\n" + optionalStrs + "}";
         });
 
         var fromStr = Sparql_common.getFromStr(self.source);
@@ -951,9 +952,11 @@ return alert("missing target node in  path");
 
         if (true) {
             self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
-                visjsData = result;
+                if (err) visjsData = { nodes: [], edges: [] };
+                else visjsData = result;
                 //  return draw();
                 self.getInferredModelVisjsData(self.source, function (err, result2) {
+                    if (err) return alert(err);
                     var oldNodesMap = {};
                     var oldEdgesMap = {};
                     var newNodes = [];

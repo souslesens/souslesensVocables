@@ -567,7 +567,7 @@ return callbackSeries();
         var validConstraints = {};
         var startNodeAncestorIds = [];
         var endNodeAncestorIds = [];
-
+        var allSources = [source];
         async.series(
             [
                 function (callbackSeries) {
@@ -596,7 +596,6 @@ return callbackSeries();
                     });
                 }, //get matching properties
                 function (callbackSeries) {
-                    var allSources = [source];
                     if (Config.sources[source].imports) {
                         allSources = allSources.concat(Config.sources[source].imports);
                     }
@@ -709,6 +708,20 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                     });
                     noConstaintsArray.forEach(function (propId) {
                         validConstraints["noConstraints"][propId] = allConstraints[propId];
+                    });
+                    callbackSeries();
+                },
+
+                //add existing  restrictions to valid constraints
+                function (callbackSeries) {
+                    allSources.forEach(function (_source) {
+                        var sourceRestrictions = Config.ontologiesVocabularyModels[_source].restrictions;
+                        if (!sourceRestrictions) {
+                            return;
+                        }
+                        for (var propId in sourceRestrictions) {
+                            validConstraints["both"][propId] = sourceRestrictions[propId];
+                        }
                     });
                     callbackSeries();
                 },

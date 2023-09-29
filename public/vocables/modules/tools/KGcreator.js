@@ -150,6 +150,8 @@ var KGcreator = (function () {
     };
 
     self.initSource = function (source, callback) {
+        R2Gmappings.loadSourceConfig(source, function (err, result) {});
+
         self.currentSource = source;
         self.currentSlsvSource = source;
 
@@ -1637,6 +1639,7 @@ self.saveMappings({classId:classId})
         });
     };
     self.drawMappings = function () {
+        if (!self.currentJsonObject) return alert("no mapping file selected");
         var fileName = self.currentJsonObject.fileName;
         var mappingObjects = {
             [fileName]: self.currentJsonObject,

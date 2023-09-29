@@ -148,34 +148,26 @@ module.exports = function () {
     };
 
     async function PUT(req, res, next) {
-
         if (!ontologyModelsCache[req.body.source]) {
-
             return processResponse(res, null, "source not exists in ontologyModelsCache");
-
         } else {
-
             for (var entryType in req.body.data) {
-
                 for (var id in req.body.data[entryType]) {
-
                     if (!ontologyModelsCache[req.body.source][entryType]) {
                         ontologyModelsCache[req.body.source][entryType] = {};
                     }
                     if (entryType == "restrictions") {
                         if (!ontologyModelsCache[req.body.source][entryType][id]) {
-                            ontologyModelsCache[req.body.source][entryType][id] =[]
+                            ontologyModelsCache[req.body.source][entryType][id] = [];
                         }
                         ontologyModelsCache[req.body.source][entryType][id].concat(req.body.data[entryType][id]);
                     } else {
                         ontologyModelsCache[req.body.source][entryType][id] = req.body.data[entryType][id];
-
                     }
                 }
             }
         }
         return processResponse(res, null, "done");
-
     }
 
     return operations;

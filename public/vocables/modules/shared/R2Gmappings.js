@@ -1,12 +1,16 @@
+import KGcreator from "../tools/KGcreator.js";
+
 var R2Gmappings = (function () {
     var self = {};
+    self.currentConfig = {};
+    self.currentSource = {};
     self.allTriplesMappings = {};
     self.getAllTriplesMappings = function (source, callback) {
         if (self.allTriplesMappings[source]) {
             return callback(null, self.allTriplesMappings[source]);
         }
 
-        self.loadMappingsList(function (err, result) {
+        KGcreator.loadMappingsList(function (err, result) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -48,6 +52,26 @@ var R2Gmappings = (function () {
                     return callback(null, allTripleMappings);
                 }
             );
+        });
+    };
+
+    self.loadSourceConfig = function (source, callback) {
+        self.currentSource = self.currentCsvDir;
+        var payload = {
+            dir: "mappings/" + source,
+            name: "main.json",
+        };
+        $.ajax({
+            type: "GET",
+            url: Config.apiUrl + "/data/file",
+            data: payload,
+            dataType: "json",
+            success: function (result, _textStatus, _jqXHR) {
+                self.currentConfig = JSON.parse(result);
+            },
+            error: function (err) {
+                callback(err);
+            },
         });
     };
 

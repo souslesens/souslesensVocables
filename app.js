@@ -141,7 +141,7 @@ openapi.initialize({
     app: app,
     paths: "./api/v1/paths",
     securityHandlers: {
-        loginScheme: function (req, _scopes, _definition) {
+        restrictLoggedUser: function (req, _scopes, _definition) {
             if (config.auth != "disabled") {
                 if (config.auth == "keycloak") {
                     passport.authenticate("keycloak", { failureRedirect: "/login" });

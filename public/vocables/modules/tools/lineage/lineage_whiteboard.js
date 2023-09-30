@@ -33,8 +33,9 @@ var Lineage_whiteboard = (function () {
     var sourceColors = {};
 
     var self = {};
-    //self.lineageVisjsGraph = {};
+   // self.lineageVisjsGraph = {};
     self.lineageVisjsGraph = new VisjsGraphClass("graphDiv", { nodes: [], edges: [] }, {});
+
     self.showLimit = 1000;
 
     var graphContext = {};
@@ -166,7 +167,7 @@ var Lineage_whiteboard = (function () {
     };
 
     self.onSourceSelect = function (
-        /** @type {string | Element | Comment | Document | DocumentFragment | ((this: HTMLElement, index: number, oldhtml: string) => string | JQuery.Node)} */ sourceLabel,
+        sourceLabel,
         /** @type {{ button: number; }} */ event
     ) {};
 
@@ -319,7 +320,7 @@ var Lineage_whiteboard = (function () {
      *
      * @param source
      */
-    self.drawModel = function (source) {
+    self.drawModel = function (source,graphDiv) {
         if (!source) {
             source = Lineage_sources.activeSource;
         }
@@ -335,7 +336,7 @@ var Lineage_whiteboard = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                    self.drawTopConcepts(source, { skipTopClassFilter: 1 }, function (err, result) {
+                    self.drawTopConcepts(source, { skipTopClassFilter: 1 },graphDiv, function (err, result) {
                         if (err) {
                             return alert(err.response);
                         }
@@ -353,15 +354,16 @@ var Lineage_whiteboard = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    var options = { data: topConcepts };
-                    Lineage_relations.drawRelations(null, "restrictions", null, options);
+                    var options = { data: topConcepts,source:source };
+                    Lineage_relations.currentQueryInfos=null;
+                    Lineage_relations.drawRelations(null, "restrictions", null,options,graphDiv);
                     callbackSeries();
                 },
 
                 function (callbackSeries) {
                     //to be finished
                     return callbackSeries();
-                    Lineage_relations.drawEquivalentClasses(source, topConcepts, function (err, result) {
+                    Lineage_relations.drawEquivalentClasses(source, topConcepts, graphDiv,function (err, result) {
                         callbackSeries();
                     });
                 },
@@ -374,7 +376,7 @@ var Lineage_whiteboard = (function () {
         );
     };
 
-    self.drawTopConcepts = function (source, options, callback) {
+    self.drawTopConcepts = function (source, options,graphDiv, callback) {
         if (!options) {
             options = {};
         }
@@ -551,7 +553,7 @@ var Lineage_whiteboard = (function () {
                 //   MainController.UI.message("", true)
                 //  self.drawNewGraph(visjsData);
                 if (!self.lineageVisjsGraph.isGraphNotEmpty()) {
-                    self.drawNewGraph(visjsData);
+                    self.drawNewGraph(visjsData,graphDiv);
                 } else {
                     self.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
                     self.lineageVisjsGraph.data.edges.add(visjsData.edges);

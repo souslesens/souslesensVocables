@@ -1,4 +1,7 @@
 import KGcreator from "../tools/KGcreator.js";
+import VisjsGraphClass from "../graph/VisjsGraphClass.js";
+import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
+import lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 
 var R2Gmappings = (function () {
     var self = {};
@@ -9,7 +12,6 @@ var R2Gmappings = (function () {
         if (self.allTriplesMappings[source]) {
             return callback(null, self.allTriplesMappings[source]);
         }
-
         KGcreator.loadMappingsList(function (err, result) {
             if (err) {
                 return alert(err.responseText);
@@ -55,6 +57,7 @@ var R2Gmappings = (function () {
         });
     };
 
+
     self.loadSourceConfig = function (source, callback) {
         self.currentSource = self.currentCsvDir;
         var payload = {
@@ -74,6 +77,7 @@ var R2Gmappings = (function () {
             },
         });
     };
+
 
     self.getIndividualMapping = function (source, className) {
         self.getAllTriplesMappings(source, function (err, allTripleMappings) {
@@ -97,13 +101,26 @@ var R2Gmappings = (function () {
             }
         });
     };
-    self.getIndividualRecord ==
-        function (source, className, uri, callback) {
+    self.getIndividualRecord =  function (source, className, uri, callback) {
             var mapping = self.getIndividualMapping(source, className);
 
             var sql = "select * from " + mapping.table + "where " + mapping.column + " = '" + uri + "'";
         };
 
+
+
+    self.drawOntologyModel=function(source){
+        Lineage_whiteboard.lineageVisjsGraph = new VisjsGraphClass("KGcreator_resourceLinkGraphDiv", { nodes: [], edges: [] }, {});
+        lineage_whiteboard.drawModel(source,"KGcreator_resourceLinkGraphDiv")
+
+
+
+
+
+
+
+
+    }
     return self;
 })();
 

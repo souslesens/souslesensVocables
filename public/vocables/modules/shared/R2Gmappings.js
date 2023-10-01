@@ -1,7 +1,8 @@
 import KGcreator from "../tools/KGcreator.js";
 import VisjsGraphClass from "../graph/VisjsGraphClass.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
-import lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
+import PopupMenuWidget from "../uiWidgets/popupMenuWidget.js";
+
 
 var R2Gmappings = (function () {
     var self = {};
@@ -110,17 +111,79 @@ var R2Gmappings = (function () {
 
 
     self.drawOntologyModel=function(source){
+
+
+       var  options = {
+           visjsOptions: {
+               keepNodePositionOnDrag: true,
+               onclickFn: R2Gmappings.graphActions.onNodeClick,
+               onRightClickFn: R2Gmappings.graphActions.showGraphPopupMenu,
+               visjsOptions: {
+                   physics: {
+                       stabilization: {
+                           enabled: false,
+                           iterations: 180, // maximum number of iteration to stabilize
+                           updateInterval: 10,
+                           ///  onlyDynamicEdges: false,
+                           fit: true
+                       },
+                       barnesHut: {
+                           springLength: 0,
+                           damping: 0.15,
+                           centralGravity: 0.8
+                       },
+                       minVelocity: 0.75
+                   },
+                   nodes: { font: { color: self.defaultNodeFontColor } },
+                   edges: {
+                       font: {
+                           color: self.defaultEdgeColor,
+                           multi: true,
+                           size: 10,
+                           strokeWidth: 0
+
+                           //ital: true,
+                       }
+                   }
+               }
+           }
+       }
         Lineage_whiteboard.lineageVisjsGraph = new VisjsGraphClass("KGcreator_resourceLinkGraphDiv", { nodes: [], edges: [] }, {});
-        lineage_whiteboard.drawModel(source,"KGcreator_resourceLinkGraphDiv")
+        Lineage_whiteboard.drawModel(source,"KGcreator_resourceLinkGraphDiv",options)
+    }
+
+    self.graphActions= {
+        onNodeClick: function(node, point, event) {
+            self.currentGraphNode = node
+        },
+
+
+        showGraphPopupMenu: function(node, point, event) {
+            if (!node || !node.data) {
+                return;
+            }
+            var html = "";
+
+
+            html = "    <span class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.showNodeNodeInfos();\"> Node Infos</span>";
+            html += "    <span class=\"popupMenuItem\" onclick=\"R2Gmappings.graphActions.setFieldClass();\"> Set fieldClass</span>";
+            $("#popupMenuWidgetDiv").html(html);
+            PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
+        },
+
+        setFieldClass:function(){
+            if(!self.currentGraphNode)
+                return alert("select a node")
 
 
 
-
-
+        }
 
 
 
     }
+
+
     return self;
 })();
 

@@ -124,7 +124,7 @@ var KGcreator = (function() {
           $("#KGcreator_centralPanelTabs").tabs( {activate: function (e, ui) {
             var divId = ui.newPanel.selector;
             if (divId == "#KGcreator_resourceslinkingTab") {
-             R2Gmappings.drawOntologyModel(self.currentSource)
+          //
             }
           }})
 
@@ -251,7 +251,8 @@ var KGcreator = (function() {
     $.getScript("/kg_upload_app.js");
   };
 
-  self.loadMappingsList = function(callback) {
+  self.loadMappingsList = function(source,callback) {
+
     self.currentSource = self.currentCsvDir;
     var payload;
     var prefix;

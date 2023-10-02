@@ -121,12 +121,14 @@ var KGcreator = (function() {
           return alert(err.responseText);
         }
         $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function() {
-          $("#KGcreator_centralPanelTabs").tabs( {activate: function (e, ui) {
-            var divId = ui.newPanel.selector;
-            if (divId == "#KGcreator_resourceslinkingTab") {
-          //
+          $("#KGcreator_centralPanelTabs").tabs({
+            activate: function(e, ui) {
+              var divId = ui.newPanel.selector;
+              if (divId == "#KGcreator_resourceslinkingTab") {
+                R2Gmappings.drawOntologyModel(self.currentSlsvSource);
+              }
             }
-          }})
+          });
 
           if (!authentication.currentUser.groupes.indexOf("admin") > -1) {
             $("#KGcreator_deleteKGcreatorTriplesBtn").css("display", "none");
@@ -251,7 +253,7 @@ var KGcreator = (function() {
     $.getScript("/kg_upload_app.js");
   };
 
-  self.loadMappingsList = function(source,callback) {
+  self.loadMappingsList = function(source, callback) {
 
     self.currentSource = self.currentCsvDir;
     var payload;
@@ -328,7 +330,8 @@ var KGcreator = (function() {
     });
   };
 
-  self.listFiles = function(currentCsvDir = null) {
+  self.listFiles = function(currentCsvDir) {
+
     self.currentCsvDir = currentCsvDir ? currentCsvDir : $("#KGcreator_csvDirsSelect").val();
     var payload = {
       dir: "CSV/" + self.currentCsvDir
@@ -347,7 +350,7 @@ var KGcreator = (function() {
     });
   };
 
-  self.getContextMenu = function() {
+  self.getContextMenu = function(node) {
     return self.currentContextMenu();
   };
 

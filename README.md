@@ -307,8 +307,18 @@ bash tests/load_data.sh
 To create a new release:
 
 ```bash
-bash release-new.sh
-git push
+npm run release:minor  # or patch or major
+```
+
+Then, edit the generated `CHANGELOG.md` if necessary and tag the release with
+
+```bash
+npm run release:tag
+```
+
+And push commits and tag to GitHub
+
+```bash
 git push --tags
 ```
 

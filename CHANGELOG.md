@@ -17,6 +17,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Replace groups in the Users table with profiles
 
+### Added
+
+-   help button on all fields of the source form
+
 ## [1.42.3](https://github.com/souslesens/souslesensVocables/compare/1.42.2...1.42.3) - 2023-10-11
 
 ### Fixed

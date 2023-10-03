@@ -217,6 +217,29 @@ export const InputSourceSchemaCreate = {
         .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
 };
 
+export const sourceHelp = {
+    name: "The source name can only contain alphanum and - or _ chars and must be uniq",
+    graphUri: "Graph URI is mandatory when using the default SPARQL server",
+    sparql_server: {
+        url: "_default if using the default SPARQL server, else, the URL of the SPARQL server",
+        method: "The HTTP method (GET or POST) used to request the SPARQL server. The default SPARQL server needs POST",
+        headers: { key: "Name of HTTP header added to the SPARQL request", value: "Value of the HTTP header added to the SPARQL request" },
+    },
+    controller: "OWL uses subClassOf for taxonomy queries, SKOS uses narower and broader",
+    topClassFilter: "SPARQL query used to get the top concepts",
+    schemaType: "DEPRECATED, will be removed in future version",
+    dataSource: "",
+    schema: "",
+    editable: "The source can be modified according to the user profile (read & write)",
+    color: "",
+    isDraft: "Mark the source as draft",
+    allowIndividuals: "Allows user to create named individuals",
+    predicates: "",
+    group: "Group and subgroups (AAA/BBB) used to order the sources",
+    imports: "List of imported sources",
+    taxonomyPredicates: "List of properties used to draw the taxonomies of classes and named individuals",
+};
+
 export const defaultSource = (id: string): ServerSource => {
     return ServerSourceSchema.parse({
         _type: "source",

@@ -38,9 +38,8 @@ var R2Gmappings = (function() {
               R2Gmappings.loadDataSource(self.currentSource, "csvSource", obj.node.id);
             }
             else if (obj.node.data.type == "table") {
-              var name = self.currentConfig.currentDataSource + "_" + obj.node.data.id + ".json";
-              //    var mappingObj = self.currentConfig.databaseSources[self.currentConfig.currentDataSource].mappings[name];
-              var mappingObj = self.currentConfig.currentMappings[name];
+
+              var mappingObj = self.currentConfig.currentMappings[obj.node.data.id];
               self.loadMappingsInJsonEditor(mappingObj);
               var columns = self.currentConfig.databaseSources[self.currentConfig.currentDataSource].tables[obj.node.data.id];
               var table = obj.node.data.id;
@@ -48,9 +47,8 @@ var R2Gmappings = (function() {
               self.currentTreeNode = obj.node;
             }
             else if (obj.node.data.type == "csvFile") {
-              var name = self.currentConfig.currentDataSource + "_" + obj.node.data.id + ".json";
-              // var mappingObj = self.currentConfig.csvSources[self.currentConfig.currentDataSource][name];
-              var mappingObj = self.currentConfig.currentMappings[name];
+
+              var mappingObj = self.currentConfig.currentMappings[obj.node.data.id];
               self.loadMappingsInJsonEditor(mappingObj);
               self.showCsvColumnTree(obj.node.id);
               self.currentTreeNode = obj.node;
@@ -149,11 +147,13 @@ var R2Gmappings = (function() {
           });
         },
         function(callbackSeries) {
-          self.getAllTriplesMappings(slsvSource, function(err, mappings) {
+          self.getAllTriplesMappings(slsvSource, self.currentConfig.currentDataSource,function(err, mappings) {
             if (err) {
               return callbackSeries();
             }
             self.currentConfig.currentMappings = mappings;
+
+
             //  self.currentConfig.databaseSources[dataSource].mappings = mappings;
             callbackSeries();
           });
@@ -183,7 +183,7 @@ var R2Gmappings = (function() {
 
     for (var table in datasourceConfig.tables) {
       var label = table;
-      if (self.currentConfig.currentMappings[datasourceConfig.dataSource + "_" + table + ".json"]) {
+      if (self.currentConfig.currentMappings[table]) {
         label = "<span class='KGcreator_fileWithMappings'>" + table + "</span>";
       }
       jstreeData.push({
@@ -204,7 +204,7 @@ var R2Gmappings = (function() {
 
     for (var file in datasourceConfig.file) {
       var label = file;
-      if (self.currentConfig.currentMappings[datasourceConfig.dataSource + "_" + file + ".json"]) {
+      if (self.currentConfig.currentMappings[file + ".json"]) {
         label = "<span class='KGcreator_fileWithMappings'>" + file + "</span>";
       }
       jstreeData.push({
@@ -227,12 +227,14 @@ var R2Gmappings = (function() {
     var jstreeData = [];
 
 
-    var columnMappings = [];
+    var columnMappings =  self.getColumnMappings(table, null, "s")
 
     tableColumns.forEach(function(column) {
-      var label = table;
-      if (self.currentConfig.currentMappings[self.currentConfig.currentDataSource + "_" + table + ".json"]) {
-        label = "<span class='KGcreator_columnWithMappings'>" + column + "</span>";
+      var label = column;
+
+      if (columnMappings[column]) {
+        label = "<span class='KGcreator_fileWithMappings'>" + column + "</span>";
+
       }
 
       jstreeData.push({
@@ -243,10 +245,21 @@ var R2Gmappings = (function() {
 
       });
 
+
+
+
     });
 
 
     JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", table, jstreeData);
+    self.graphActions.setTableGraphClassesAndDraw(table)
+
+
+
+    for( var column in  columnMappings ){
+
+    }
+    self.graphActions.drawColumnNodes(jstreeData)
 
   };
   self.showCsvColumnTree = function(table, datasourceConfig) {
@@ -255,7 +268,7 @@ var R2Gmappings = (function() {
     for (var table in datasourceConfig.tables) {
       var label = table;
       if (self.currentConfig.currentMappings[self.currentConfig.currentDataSource + "_" + table + ".json"]) {
-        label = "<span class='KGcreator_columnWithMappings'>" + table + "</span>";
+        label = "<span class='KGcreator_fileWithMappings'>" + table + "</span>";
       }
 
 
@@ -328,7 +341,7 @@ var R2Gmappings = (function() {
 
 
   self.getIndividualMapping = function(source, className) {
-    self.getAllTriplesMappings(source, function(err, allTripleMappings) {
+    self.getAllTriplesMappings(source, self.currentConfig.currentDataSource,function(err, allTripleMappings) {
       if (err) {
         return callback(err);
       }
@@ -404,10 +417,13 @@ var R2Gmappings = (function() {
 
   self.graphActions = {
     onNodeClick: function(node, point, event) {
+      PopupMenuWidget.hidePopup()
       self.currentGraphNode = node;
     },
 
-
+    showNodeNodeInfos:function(){
+      NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
+    },
     showGraphPopupMenu: function(node, point, event) {
       if (!node) {
         return;
@@ -419,7 +435,7 @@ var R2Gmappings = (function() {
       var html = "";
 
 
-      html = "    <span class=\"popupMenuItem\" onclick=\"Lineage_whiteboard.graphActions.showNodeNodeInfos();\"> Node Infos</span>";
+      html = "    <span class=\"popupMenuItem\" onclick=\"R2Gmappings.graphActions.showNodeNodeInfos();\"> Node Infos</span>";
       html += "    <span class=\"popupMenuItem\" onclick=\"R2Gmappings.graphActions.showLinkFieldToClassDialog();\"> Set fieldClass</span>";
       $("#popupMenuWidgetDiv").html(html);
       PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
@@ -427,10 +443,19 @@ var R2Gmappings = (function() {
 
 
     showLinkFieldToClassDialog: function() {
-      var fieldNode = self.currentTreeNode;
-      if (fieldNode.data.type.indexOf("Column") < 0) {
+      PopupMenuWidget.hidePopup()
+      var columnNode = self.currentTreeNode;
+      if (columnNode.data.type.indexOf("Column") < 0) {
         return alert("select a field (column)");
       }
+
+      var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+      if (existingNodes[columnNode.data.id]) {
+      if (!confirm("field "+columnNode+" already has a type, continue anyway ?")) {
+        return;
+      }
+    }
+
 
       $("#smallDialogDiv").dialog("open");
 
@@ -438,12 +463,18 @@ var R2Gmappings = (function() {
         var columnTriples = {};
 
 
+        for (var key in self.currentConfig.currentMappings) {
+          columnTriples[key]= self.getColumnMappings(key,columnNode.data.id,"s")
+
+        }
+
         var triplesHtml = "<ul>";
         for (var key in columnTriples) {
-
+          if(!columnTriples[key][columnNode.data.id])
+            continue;
           triplesHtml += "<li><b>" + key + "</b></li>";
           triplesHtml += "<ul>";
-          columnTriples[key].forEach(function(triple) {
+          columnTriples[key][columnNode.data.id].forEach(function(triple) {
             triplesHtml += "<li>" + triple.s + "-" + triple.p + "->" + triple.o + "</li>";
           });
           triplesHtml += "</ul>";
@@ -463,107 +494,158 @@ var R2Gmappings = (function() {
     },
 
     validateLinkColumnToClass: function() {
-      var fieldNode = self.currentTreeNode;
+      var columnNode = self.currentTreeNode;
 
 
       if (!self.currentGraphNode) {
         return alert("select a node");
       }
+      if (confirm(" set class " + self.currentGraphNode.data.label + " as rdf:type for  field " + columnNode.data.label)) {
 
-      var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
-      if (existingNodes[fieldNode.data.id]) {
-        if (!prompt("filed already has a type, continue anyway ?")) {
-          return;
-        }
-      }
-
-      if (confirm(" set class " + self.currentGraphNode.data.label + " as rdf:type for  field " + fieldNode.data.label)) {
         KGcreator.currentJsonObject.tripleModels.push({
-          s: fieldNode.data.id,
+          s: columnNode.data.id,
           p: "rdf:type",
           o: self.currentGraphNode.data.id
         });
         KGcreator.mainJsonEditor.load(KGcreator.currentJsonObject);
+
+        columnNode.data.classNode=self.currentGraphNode.id
+        self.graphActions.drawColumnToClassGraph([columnNode])
       }
+
+    },
+
+
+    drawColumnToClassGraph:function(columnNodes){
+
+
+
 
       var visjsData = { nodes: [], edges: [] };
+      var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
-      if (!existingNodes[fieldNode.data.table]) {
-        visjsData.nodes.push({
-          id: fieldNode.data.table,
-          label: fieldNode.data.table,
 
-          shadow: Lineage_whiteboard.nodeShadow,
-          shape: "ellipse",
-          size: Lineage_whiteboard.defaultShapeSize,
-          color: "grey",
-          data: fieldNode.data.table
-        });
+      columnNodes.forEach(function(columnNode) {
+      var  classNode=columnNode.data.classNode
+        if (!existingNodes[columnNode.data.table]) {
+          existingNodes[columnNode.data.table]=1
+          visjsData.nodes.push({
+            id: columnNode.data.table,
+            label: columnNode.data.table,
 
-      }
-      if (!existingNodes[fieldNode.data.id]) {
-        visjsData.nodes.push({
-          id: fieldNode.data.id,
-          label: fieldNode.data.label,
+            shadow: Lineage_whiteboard.nodeShadow,
+            shape: "ellipse",
+            size: Lineage_whiteboard.defaultShapeSize,
+            color: "grey",
+            data: columnNode.data.table
+          });
 
-          shadow: Lineage_whiteboard.nodeShadow,
-          shape: "square",
-          size: Lineage_whiteboard.defaultShapeSize,
-          color: "grey",
-          data: fieldNode.data
-        });
+        }
+        if (!existingNodes[columnNode.data.id]) {
+          existingNodes[columnNode.data.id]=1
+          visjsData.nodes.push({
+            id: columnNode.data.id,
+            label: columnNode.data.label,
+
+            shadow: Lineage_whiteboard.nodeShadow,
+            shape: "square",
+            size: Lineage_whiteboard.defaultShapeSize,
+            color: "grey",
+            data: columnNode.data
+          });
 //edge to table
-        var edgeId = fieldNode.data.table + "_" + fieldNode.data.id;
-        if (!existingNodes[edgeId]) {
-          existingNodes[edgeId] = 1;
+          var edgeId = columnNode.data.table + "_" + columnNode.data.id;
+          if (!existingNodes[edgeId]) {
+            existingNodes[edgeId] = 1;
 
-          visjsData.edges.push({
-            id: edgeId,
-            from: fieldNode.data.table,
-            to: fieldNode.data.id,
-            data: {
-              context: self.context,
+            visjsData.edges.push({
               id: edgeId,
-              from: fieldNode.data.table,
-              to: fieldNode.data.id,
-              type: "table"
-            },
-            color: "grey"
-          });
-        }
+              from: columnNode.data.table,
+              to: columnNode.data.id,
+              data: {
+                id: edgeId,
+                from: columnNode.data.table,
+                to: columnNode.data.id,
+                type: "table"
+              },
+              color: "grey"
+            });
+          }
 
 
-        //edge toClass
+          //edge toClass
 
-        var edgeId = fieldNode.data.id + "_" + self.currentGraphNode.id;
-        if (!existingNodes[edgeId]) {
-          existingNodes[edgeId] = 1;
+          var edgeId = columnNode.data.id + "_" + classNode;
+          if (!existingNodes[edgeId]) {
+            existingNodes[edgeId] = 1;
 
-          visjsData.edges.push({
-            id: edgeId,
-            from: fieldNode.data.id,
-            to: self.currentGraphNode.id,
-            data: {
-              context: self.context,
+            visjsData.edges.push({
               id: edgeId,
-              from: fieldNode.data.id,
-              to: self.currentGraphNode.id,
-              type: "map"
-            },
-            color: "blue"
-          });
+              from: columnNode.data.id,
+              to: classNode,
+              data: {
+                id: edgeId,
+                from: columnNode.data.id,
+                to: classNode,
+                type: "map"
+              },
+              color: "blue"
+            });
+          }
         }
-      }
+      })
 
       Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
       Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
 
 
+    },
+
+    setTableGraphClassesAndDraw:function(table) {
+      var columnsWithClass = []
+      var existingGraphNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+      self.currentConfig.currentMappings[table].tripleModels.forEach(function(triple) {
+            if (triple.p == "rdf:type" && existingGraphNodes[triple.o]) {
+              columnsWithClass.push({
+                data: { id: triple.s, table: table, label: triple.s, type: "tableColumn", classNode: triple.o }
+              });
+            }
+          })
+
+      self.graphActions.drawColumnToClassGraph(columnsWithClass)
     }
   };
 
+  self.getAllTriplesMappings = function(slsvSource, mappingSource, callback) {
 
-  self.getAllTriplesMappings = function(source, callback) {
+    var payload = {
+      dir: "mappings/" + slsvSource,
+      name: mappingSource + ".json"
+    };
+
+    $.ajax({
+      type: "GET",
+      url: `${Config.apiUrl}/data/file`,
+      data: payload,
+      dataType: "json",
+      success: function(result, _textStatus, _jqXHR) {
+        try {
+
+          return callback(null, JSON.parse(result));
+
+        } catch (e) {
+          return callback(e);
+        }
+        callback();
+      },
+      error(err) {
+        return callback(null, {});
+      }
+    });
+
+  }
+
+  self.getAllTriplesMappingsOld = function(source, callback) {
     if (false && self.allTriplesMappings[source]) {
       return callback(null, self.allTriplesMappings[source]);
     }
@@ -606,6 +688,16 @@ var R2Gmappings = (function() {
             return callback(err.responseText);
           }
           self.allTriplesMappings[source] = allTripleMappings;
+
+
+      /*    for (var key in allTripleMappings) {
+            delete allTripleMappings[key].graphUri
+            delete allTripleMappings[key].fileName;
+            delete allTripleMappings[key].databaseSource;
+          }*/
+
+
+
           return callback(null, allTripleMappings);
         }
       );
@@ -613,22 +705,27 @@ var R2Gmappings = (function() {
   };
 
 
-  self.getColumnMappings = function(table, field, role) {
-    var columnTriples = [];
+  self.getColumnMappings = function(table, column, role) {
+    var columnTriples = {  };
     if (!self.currentConfig.currentMappings[table]) {
       return columnTriples;
     }
 
     self.currentConfig.currentMappings[table].tripleModels.forEach(function(triple) {
-      if (triple[role] == field) {
-        columnTriples.push(triple);
+      if ((column  && triple[role] == column) || !column ) {
+        if(! columnTriples[triple[role]]){
+          columnTriples[triple[role]]=[]
+        }
+        columnTriples[triple[role]].push(triple);
       }
     });
     return columnTriples;
   };
 
+
+
   return self;
-})();
+})()
 
 export default R2Gmappings;
 window.R2Gmappings = R2Gmappings;

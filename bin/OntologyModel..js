@@ -446,9 +446,9 @@ Sparql_OWL.getDictionary(source, { lang: Config.default_lang, filter: filter }, 
     initConfig: function () {
         const fs = require("fs");
         const path = require("path");
-        OntologyModel.Config = JSON.parse("" + fs.readFileSync(path.resolve("../../config/mainConfig.json")));
+        const { config } = require("../model/config");
+        OntologyModel.Config = config;
         OntologyModel.Config.sources = JSON.parse("" + fs.readFileSync(path.resolve("../../config/sources.json")));
-
         OntologyModel.Config.default_lang = "en";
         OntologyModel.Config.topLevelOntologies = {
             IDO: { uriPattern: "lis14", prefix: "ido", prefixtarget: "http://rds.posccaesar.org/ontology/lis14/rdl/" },

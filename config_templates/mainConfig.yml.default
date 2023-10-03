@@ -1,0 +1,120 @@
+## server config
+
+# the public url of souslesens (http[s]://fqdn[:port]))
+souslesensUrl: http://localhost:3010
+
+# port of express server
+listenPort: '3010'
+
+serverUrl: ../slsv  #FIXME: not used, will be removed in futur version
+
+## Souslesens configuration
+
+# list of default groups when a new user is created
+defaultGroups: []
+
+# directory used to store logs
+logDir: logs
+
+# name of the formal ontology source
+formalOntologySourceLabel: ISO_15926-part-14_PCA
+
+# List of tools available in the web interface
+tools_available:
+  - lineage
+  - KGcreator
+  - Standardizer
+  - admin
+  - ConfigEditor
+
+# Secret used to sign the session ID cookie
+cookieSecret: S3cRet!
+
+# value for the SameSite Set-Cookie attribute
+# can be true, false, 'lax', 'none', or 'strict'
+cookieSameSite: false
+
+# Number of milliseconds before the session cookie expires
+cookieMaxAge: 2629800000
+
+# Set to true if souslesens is served behind https
+cookieSecure: false
+
+# Set to true if souslesens is behind a proxy
+cookieSecureTrustProxy: false
+
+# Service that are watched in route /api/v1/health
+health_enabled_services:
+  - virtuoso
+  - elasticsearch
+
+## Authentication
+
+# disabled, local, database or keycloak
+auth: local
+
+# uncomment if auth=keycloak
+# keycloak:
+  # realm:
+  # publicClient: false
+  # clientID:
+  # clientSecret:
+  # authServerURL:
+
+# uncomment if auth=database
+# authenticationDatabase:
+  # user:
+  # password:
+  # host: 127.0.0.1
+  # database: slsv
+  # table: user
+  # loginColumn: login
+  # passwordColumn: password
+  # groupsColumn: groups
+
+
+## Sentry
+
+# sentryDsnNode:
+# sentryDsnJsFront:
+
+
+## external services used by souslesens
+
+# SQL server database
+SQLserver:
+  user: sa
+  password: xxx
+  server: xxx
+  database: master
+  trustServerCertificate: true
+
+# SPARQL endpoint (virtuoso)
+default_sparql_url: http://xxxxxxxx:8890/sparql  #FIXME: duplicate of sparql_server.url
+sparql_server:
+  url: http://xxxxxxxx:8890/sparql
+  user: dba
+  password: xxx
+
+# ElasticSearch
+ElasticSearch:
+  url: https://xxxxxxxx:9200/
+  user: elastic
+  password: xxx
+  # Set to true if elasticSearch use a self-signed certificate
+  skipSslVerify: false
+
+# Annotator services
+annotator:  #FIXME: deprecated, may be removed in a futur version
+  tikaServerUrl: http://127.0.0.1:41000
+  spacyServerUrl: http://127.0.0.1:8000/pos
+  parsedDocumentsHomeDir: null
+  uploadDirPath: null
+
+# Jowl server (https://github.com/souslesens/jowl)
+# jowlServer:
+  # url:
+
+# souslesens wiki
+wiki:
+  url: https://wiki.example.org/

@@ -10,6 +10,7 @@ const fs = require("fs");
 const { processResponse } = require("../api/v1/paths/utils");
 const ConfigManager = require("./configManager.");
 var exec = require("child_process").exec;
+const { config } = require("../model/config");
 
 var GraphStore = {
     exportGraph: function (sparqlServerConnection, graphUri, callback) {
@@ -313,12 +314,8 @@ var GraphStore = {
                     } else {
                         graphUri = "http://industryportal.enit.fr/ontologies/" + sourceName + "#";
                     }
-                    configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
-                    jsonFileStorage.retrieve(path.resolve(configPath), function (err, _config) {
-                        Config = _config;
-                        sparqlServerUrl = options.sparqlServerUrl || Config.default_sparql_url;
-                        return callbackSeries();
-                    });
+                    Config = config;
+                    return callbackSeries();
                 },
 
                 //get sources

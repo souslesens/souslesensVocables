@@ -9,6 +9,7 @@ const Util = require("./util.");
 const fs = require("fs");
 const ConfigManager = require("./configManager.");
 var exec = require("child_process").exec;
+const { config } = require("../model/config");
 
 var SourceIntegrator = {
     creatTriplesFromUrl: function (ontologyUrl, callback) {
@@ -249,12 +250,9 @@ var SourceIntegrator = {
                     } else {
                         graphUri = "http://industryportal.enit.fr/ontologies/" + sourceName + "#";
                     }
-                    configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
-                    jsonFileStorage.retrieve(path.resolve(configPath), function (err, _config) {
-                        Config = _config;
-                        sparqlServerUrl = options.sparqlServerUrl || Config.default_sparql_url;
-                        return callbackSeries();
-                    });
+
+                    sparqlServerUrl = options.sparqlServerUrl || config.default_sparql_url;
+                    return callbackSeries();
                 },
 
                 //get sources

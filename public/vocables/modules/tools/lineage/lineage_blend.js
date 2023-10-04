@@ -305,12 +305,14 @@ var Lineage_blend = (function () {
                                             if (!self.domainOntologyProperties) {
                                                 self.domainOntologyProperties = [];
                                             }
-                                            self.domainOntologyProperties.push({
+                                            var newProp={
                                                 id: result.uri,
                                                 label: subPropertyLabel,
                                                 superProp: self.currentPropertiesTreeNode.data.id,
-                                            });
-
+                                            };
+                                            self.domainOntologyProperties.push(newProp);
+                                            var propId=newProp.id;
+                                            /*
                                             OntologyModels.registerSourcesModel(Lineage_sources.activeSource, function (err, result2) {
                                                 if (err) {
                                                     return alert(err.responsetext);
@@ -331,6 +333,37 @@ var Lineage_blend = (function () {
 
                                                 JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
                                             });
+                                            */
+                                           var superpropConstraints=JSON.parse(JSON.stringify(Config.ontologiesVocabularyModels[Config.currentTopLevelOntology]['constraints'][self.currentPropertiesTreeNode.data.id]));
+                                           superpropConstraints.source=Lineage_sources.activeSource;
+                                           superpropConstraints.label=subPropertyLabel;
+                                           superpropConstraints.parent=self.currentPropertiesTreeNode.data.id;
+                                           superpropConstraints.superProp=self.currentPropertiesTreeNode.data.id;
+                                           var propertiesToAdd={};
+                                           propertiesToAdd[propId]=newProp;
+                                           var constraintsToAdd={};
+                                           constraintsToAdd[propId]=superpropConstraints;
+                                           OntologyModels.updateModel (Lineage_sources.activeSource, {'properties':propertiesToAdd,'constraints':constraintsToAdd}, null, function(err, result2) {
+                                                if (err) {
+                                                    return alert(err.responsetext);
+                                                }
+
+                                                var jstreeData = [
+                                                    {
+                                                        id: result.uri,
+                                                        text: subPropertyLabel,
+                                                        parent: self.currentPropertiesTreeNode.data.id,
+                                                        data: {
+                                                            id: result.uri,
+                                                            label: subPropertyLabel,
+                                                            source: Lineage_sources.activeSource,
+                                                        },
+                                                    },
+                                                ];
+
+                                                JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
+                                           })
+
                                         });
                                     },
                                 },

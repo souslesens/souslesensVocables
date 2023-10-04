@@ -523,7 +523,7 @@ return callbackSeries();
                     
                 } else {
                     if(options.remove){
-                        delete Config.ontologiesVocabularyModels[source][entryType][id]; 
+                        delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]]; 
 
                     }
                     else{

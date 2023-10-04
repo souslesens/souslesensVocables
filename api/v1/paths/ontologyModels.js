@@ -133,6 +133,9 @@ module.exports = function () {
                         data: {
                             type: "object",
                         },
+                        options: {
+                            type: "object",
+                        }
                     },
                 },
             },
@@ -153,17 +156,25 @@ module.exports = function () {
         } else {
             for (var entryType in req.body.data) {
                 for (var id in req.body.data[entryType]) {
-                    if (!ontologyModelsCache[req.body.source][entryType]) {
-                        ontologyModelsCache[req.body.source][entryType] = {};
+                    if(req.body.options.remove=='true'){
+                        delete ontologyModelsCache[req.body.source][entryType][req.body.data[entryType][id]];
                     }
-                    if (entryType == "restrictions") {
-                        if (!ontologyModelsCache[req.body.source][entryType][id]) {
-                            ontologyModelsCache[req.body.source][entryType][id] = [];
+                    else{
+                        if (!ontologyModelsCache[req.body.source][entryType]) {
+                            ontologyModelsCache[req.body.source][entryType] = {};
                         }
-                        ontologyModelsCache[req.body.source][entryType][id].concat(req.body.data[entryType][id]);
-                    } else {
-                        ontologyModelsCache[req.body.source][entryType][id] = req.body.data[entryType][id];
+                        if (entryType == "restrictions") {
+                            if (!ontologyModelsCache[req.body.source][entryType][id]) {
+                                ontologyModelsCache[req.body.source][entryType][id] = [];
+                            }
+                            ontologyModelsCache[req.body.source][entryType][id]=ontologyModelsCache[req.body.source][entryType][id].concat(req.body.data[entryType][id]);
+                        } else {
+                            ontologyModelsCache[req.body.source][entryType][id] = req.body.data[entryType][id];
+                        }
+
                     }
+                    
+                    
                 }
             }
         }

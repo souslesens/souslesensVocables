@@ -232,8 +232,9 @@ var Lineage_blend = (function () {
                                 for (var group in authorizedProps) {
                                     for (var propId in authorizedProps[group]) {
                                         var property = authorizedProps[group][propId];
-
+                                        
                                         if (property.source == _source) {
+                                        
                                             if (!uniqueProps[propId]) {
                                                 uniqueProps[propId] = 1;
                                                 var propertyLabel = property.label || Sparql_common.getLabelFromURI(propId);
@@ -241,11 +242,22 @@ var Lineage_blend = (function () {
 
                                                 var cssClass = propStatusCssClassMap[group];
                                                 var parent = property.source;
+                                                if(property.parent){
+                                                    parent=property.parent;
+                                                }
+                                                /*
+                                                if(parent==undefined){
+                                                    parent='http://rds.posccaesar.org/ontology/lis14/rdl/arrangedPartOf';
+                                                    property.source="ISO_15926-part-14_PCA";
 
+                                                }
+                                                */
                                                 array.push({
                                                     id: propId,
                                                     text: "<span class='" + cssClass + "'>" + label + "</span>",
                                                     parent: parent,
+                                                    
+
                                                     data: {
                                                         propLabel: property.label,
                                                         id: propId,
@@ -254,7 +266,9 @@ var Lineage_blend = (function () {
                                                     },
                                                 });
                                             }
+                                           
                                         }
+                                        
                                     }
                                 }
 
@@ -855,9 +869,11 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                     propertyLabel: propLabel,
                     propertyId: obj.node.data.id,
                 };
+               OntologyModels.updateModel
             }
 
             Lineage_whiteboard.lineageVisjsGraph.data.edges.add([newEdge]);
+           
         });
     };
 
@@ -1126,6 +1142,16 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                             callbackSeries();
                         });
                     },
+                    function(callbackSeries){
+                        // update OntologyModel by removing restriction 
+                        var dataToRemove={'restrictions':[restrictionNode.data.propertyId]}
+                        OntologyModels.updateModel(inSource,dataToRemove , {'remove':true}, function (err, result) {
+                            callback(err);
+                        })
+
+
+
+                    }
                 ],
                 function (_err) {
                     Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(restrictionNode.id);

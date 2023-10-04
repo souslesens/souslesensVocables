@@ -3,6 +3,10 @@ import VisjsGraphClass from "../graph/VisjsGraphClass.js";
 import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
 import PopupMenuWidget from "../uiWidgets/popupMenuWidget.js";
 import Lineage_sources from "../tools/lineage/lineage_sources.js";
+import Sparql_common from "../sparqlProxies/sparql_common.js";
+
+
+import JoinTablesWidget from "../uiWidgets/joinTablesWidget.js";
 
 
 var R2Gmappings = (function() {
@@ -11,6 +15,19 @@ var R2Gmappings = (function() {
   self.currentSource = {};
   self.allTriplesMappings = {};
 
+  self.init = function() {
+    $("#KGcreator_centralPanelTabs").tabs({
+      activate: function(e, ui) {
+        var divId = ui.newPanel.selector;
+        if (divId == "#KGcreator_resourceslinkingTab") {
+      //  R2Gmappings.drawOntologyModel(self.currentSlsvSource);
+        }
+      }
+    });
+   R2Gmappings.graphActions.drawOntologyModel(self.currentSlsvSource);
+    $("#KGcreator_resourceLinkRightPanel").load("snippets/KGcreator/graphControlPanel.html", function() {
+    });
+  };
 
   self.loadSourceConfig = function(source, callback) {
     self.currentSource = source;
@@ -147,7 +164,7 @@ var R2Gmappings = (function() {
           });
         },
         function(callbackSeries) {
-          self.getAllTriplesMappings(slsvSource, self.currentConfig.currentDataSource,function(err, mappings) {
+          self.getAllTriplesMappings(slsvSource, self.currentConfig.currentDataSource, function(err, mappings) {
             if (err) {
               return callbackSeries();
             }
@@ -227,7 +244,7 @@ var R2Gmappings = (function() {
     var jstreeData = [];
 
 
-    var columnMappings =  self.getColumnMappings(table, null, "s")
+    var columnMappings = self.getColumnMappings(table, null, "s");
 
     tableColumns.forEach(function(column) {
       var label = column;
@@ -246,20 +263,17 @@ var R2Gmappings = (function() {
       });
 
 
-
-
     });
 
 
     JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", table, jstreeData);
-    self.graphActions.setTableGraphClassesAndDraw(table)
+    self.graphActions.graphColumnToClassPredicates([table]);
 
 
-
-    for( var column in  columnMappings ){
+    for (var column in columnMappings) {
 
     }
-    self.graphActions.drawColumnNodes(jstreeData)
+    self.graphActions.drawColumnNodes(jstreeData);
 
   };
   self.showCsvColumnTree = function(table, datasourceConfig) {
@@ -341,7 +355,7 @@ var R2Gmappings = (function() {
 
 
   self.getIndividualMapping = function(source, className) {
-    self.getAllTriplesMappings(source, self.currentConfig.currentDataSource,function(err, allTripleMappings) {
+    self.getAllTriplesMappings(source, self.currentConfig.currentDataSource, function(err, allTripleMappings) {
       if (err) {
         return callback(err);
       }
@@ -369,59 +383,97 @@ var R2Gmappings = (function() {
   };
 
 
-  self.drawOntologyModel = function(source) {
-
-    if (!source) {
-      source = KGcreator.currentSlsvSource;
-    }
-    var options = {
-      visjsOptions: {
-        keepNodePositionOnDrag: true,
-        onclickFn: R2Gmappings.graphActions.onNodeClick,
-        onRightClickFn: R2Gmappings.graphActions.showGraphPopupMenu,
+  self.graphActions = {
+    drawOntologyModel: function(source) {
+      if (!source) {
+        source = KGcreator.currentSlsvSource;
+      }
+      var options = {
         visjsOptions: {
-          physics: {
-            stabilization: {
-              enabled: false,
-              iterations: 180, // maximum number of iteration to stabilize
-              updateInterval: 10,
-              ///  onlyDynamicEdges: false,
-              fit: true
+          keepNodePositionOnDrag: true,
+          onclickFn: R2Gmappings.graphActions.onNodeClick,
+          onRightClickFn: R2Gmappings.graphActions.showGraphPopupMenu,
+          visjsOptions: {
+            physics: {
+              stabilization: {
+                enabled: false,
+                iterations: 180, // maximum number of iteration to stabilize
+                updateInterval: 10,
+                ///  onlyDynamicEdges: false,
+                fit: true
+              },
+              barnesHut: {
+                springLength: 0,
+                damping: 0.15,
+                centralGravity: 0.8
+              },
+              minVelocity: 0.75
             },
-            barnesHut: {
-              springLength: 0,
-              damping: 0.15,
-              centralGravity: 0.8
-            },
-            minVelocity: 0.75
-          },
-          nodes: { font: { color: self.defaultNodeFontColor } },
-          edges: {
-            font: {
-              color: self.defaultEdgeColor,
-              multi: true,
-              size: 10,
-              strokeWidth: 0
+            nodes: { font: { color: Lineage_whiteboard.defaultNodeFontColor } },
+            edges: {
+              font: {
+                color: Lineage_whiteboard.defaultEdgeColor,
+                multi: true,
+                size: 10,
+                strokeWidth: 0
 
-              //ital: true,
+                //ital: true,
+              }
             }
           }
         }
+      };
+      options.visjsOptions.manipulation = {
+        enabled: true,
+        initiallyActive: true,
+        deleteNode: false,
+        deleteEdge: false,
+        // editNode: false,
+        // editEdge: false,
+
+        addEdge: function(edgeData, callback) {
+          var sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from);
+          var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
+
+          if (sourceNode.data && sourceNode.data.type == "table" && targetNode.data && targetNode.data.type == "table") {
+            return JoinTablesWidget.showJoinTablesDialog(self.currentConfig.currentDataSource,sourceNode.data, targetNode.data);
+          }
+
+
+          else {
+
+            return null;
+
+          }
+        }
       }
-    };
-    Lineage_whiteboard.lineageVisjsGraph = new VisjsGraphClass("KGcreator_resourceLinkGraphDiv", { nodes: [], edges: [] }, {});
+      Lineage_whiteboard.lineageVisjsGraph = new VisjsGraphClass("KGcreator_resourceLinkGraphDiv", { nodes: [], edges: [] }, {});
 
-    Lineage_sources.activeSource = source;
-    Lineage_whiteboard.drawModel(source, "KGcreator_resourceLinkGraphDiv", options);
-  };
+      Lineage_sources.activeSource = source;
+      Lineage_whiteboard.drawModel(source, "KGcreator_resourceLinkGraphDiv", options, function(err) {
+        var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
+        var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.getIds();
+        var newNodes = []
+        var newEdges = []
+        nodes.forEach(function(node) {
+          newNodes.push({ id: node, opacity: 0.2, font: { color: "#ccc" }, layer: "ontology" })
+        })
+        nodes.forEach(function(edge) {
+          newEdges.push({ id: edge, opacity: 0.2, font: { color: "#ccc", physics: false } })
+        })
+        Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
+        Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
 
-  self.graphActions = {
+      });
+
+
+    },
     onNodeClick: function(node, point, event) {
-      PopupMenuWidget.hidePopup()
+      PopupMenuWidget.hidePopup();
       self.currentGraphNode = node;
     },
 
-    showNodeNodeInfos:function(){
+    showNodeNodeInfos: function() {
       NodeInfosWidget.showNodeInfos(self.currentGraphNode.data.source, self.currentGraphNode, "mainDialogDiv");
     },
     showGraphPopupMenu: function(node, point, event) {
@@ -443,7 +495,7 @@ var R2Gmappings = (function() {
 
 
     showLinkFieldToClassDialog: function() {
-      PopupMenuWidget.hidePopup()
+      PopupMenuWidget.hidePopup();
       var columnNode = self.currentTreeNode;
       if (columnNode.data.type.indexOf("Column") < 0) {
         return alert("select a field (column)");
@@ -451,10 +503,10 @@ var R2Gmappings = (function() {
 
       var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
       if (existingNodes[columnNode.data.id]) {
-      if (!confirm("field "+columnNode+" already has a type, continue anyway ?")) {
-        return;
+        if (!confirm("field " + columnNode + " already has a type, continue anyway ?")) {
+          return;
+        }
       }
-    }
 
 
       $("#smallDialogDiv").dialog("open");
@@ -464,14 +516,15 @@ var R2Gmappings = (function() {
 
 
         for (var key in self.currentConfig.currentMappings) {
-          columnTriples[key]= self.getColumnMappings(key,columnNode.data.id,"s")
+          columnTriples[key] = self.getColumnMappings(key, columnNode.data.id, "s");
 
         }
 
         var triplesHtml = "<ul>";
         for (var key in columnTriples) {
-          if(!columnTriples[key][columnNode.data.id])
+          if (!columnTriples[key][columnNode.data.id]) {
             continue;
+          }
           triplesHtml += "<li><b>" + key + "</b></li>";
           triplesHtml += "<ul>";
           columnTriples[key][columnNode.data.id].forEach(function(triple) {
@@ -509,16 +562,14 @@ var R2Gmappings = (function() {
         });
         KGcreator.mainJsonEditor.load(KGcreator.currentJsonObject);
 
-        columnNode.data.classNode=self.currentGraphNode.id
-        self.graphActions.drawColumnToClassGraph([columnNode])
+        columnNode.data.classNode = self.currentGraphNode.id;
+        self.graphActions.drawColumnToClassGraph([columnNode]);
       }
 
     },
 
 
-    drawColumnToClassGraph:function(columnNodes){
-
-
+    drawColumnToClassGraph: function(columnNodes) {
 
 
       var visjsData = { nodes: [], edges: [] };
@@ -526,9 +577,10 @@ var R2Gmappings = (function() {
 
 
       columnNodes.forEach(function(columnNode) {
-      var  classNode=columnNode.data.classNode
+        var columnNodeId = columnNode.data.id;
+        var classNode = columnNode.data.classNode;
         if (!existingNodes[columnNode.data.table]) {
-          existingNodes[columnNode.data.table]=1
+          existingNodes[columnNode.data.table] = 1;
           visjsData.nodes.push({
             id: columnNode.data.table,
             label: columnNode.data.table,
@@ -536,52 +588,53 @@ var R2Gmappings = (function() {
             shadow: Lineage_whiteboard.nodeShadow,
             shape: "ellipse",
             size: Lineage_whiteboard.defaultShapeSize,
-            color: "grey",
-            data: columnNode.data.table
+            color: "#fff",
+            data: { id: columnNode.data.table, type: "table" }
           });
 
         }
-        if (!existingNodes[columnNode.data.id]) {
-          existingNodes[columnNode.data.id]=1
+        if (!existingNodes[columnNodeId]) {
+          existingNodes[columnNodeId] = 1;
           visjsData.nodes.push({
-            id: columnNode.data.id,
+            id: columnNodeId,
             label: columnNode.data.label,
 
             shadow: Lineage_whiteboard.nodeShadow,
-            shape: "square",
+            shape: "box",
             size: Lineage_whiteboard.defaultShapeSize,
-            color: "grey",
-            data: columnNode.data
+            color: "#ddd",
+            data: { id: columnNode.data.id, table: columnNode.data.id, type: "column" }
           });
 //edge to table
-          var edgeId = columnNode.data.table + "_" + columnNode.data.id;
+          var edgeId = columnNode.data.table + "_" + columnNodeId;
           if (!existingNodes[edgeId]) {
             existingNodes[edgeId] = 1;
 
             visjsData.edges.push({
               id: edgeId,
               from: columnNode.data.table,
-              to: columnNode.data.id,
+              to: columnNodeId,
               data: {
                 id: edgeId,
                 from: columnNode.data.table,
                 to: columnNode.data.id,
                 type: "table"
               },
-              color: "grey"
+              color: "#bbb",
+              // physics:false
             });
           }
 
 
           //edge toClass
 
-          var edgeId = columnNode.data.id + "_" + classNode;
+          var edgeId = columnNodeId + "_" + classNode;
           if (!existingNodes[edgeId]) {
             existingNodes[edgeId] = 1;
 
             visjsData.edges.push({
               id: edgeId,
-              from: columnNode.data.id,
+              from: columnNodeId,
               to: classNode,
               data: {
                 id: edgeId,
@@ -593,7 +646,7 @@ var R2Gmappings = (function() {
             });
           }
         }
-      })
+      });
 
       Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(visjsData.nodes);
       Lineage_whiteboard.lineageVisjsGraph.data.edges.add(visjsData.edges);
@@ -601,20 +654,67 @@ var R2Gmappings = (function() {
 
     },
 
-    setTableGraphClassesAndDraw:function(table) {
-      var columnsWithClass = []
+    graphColumnToClassPredicates: function(tables) {
+      var columnsWithClass = [];
       var existingGraphNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
-      self.currentConfig.currentMappings[table].tripleModels.forEach(function(triple) {
+      for (var table in self.currentConfig.currentMappings) {
+        if (!tables || tables.indexOf(table > -1)) {
+          self.currentConfig.currentMappings[table].tripleModels.forEach(function(triple) {
             if (triple.p == "rdf:type" && existingGraphNodes[triple.o]) {
               columnsWithClass.push({
-                data: { id: triple.s, table: table, label: triple.s, type: "tableColumn", classNode: triple.o }
+                data: { id: table + "_" + triple.s, table: table, label: triple.s, type: "tableColumn", classNode: triple.o }
               });
             }
-          })
+          });
+        }
+      }
 
-      self.graphActions.drawColumnToClassGraph(columnsWithClass)
-    }
-  };
+      self.graphActions.drawColumnToClassGraph(columnsWithClass);
+    },
+
+
+    graphColumnToColumnPredicates: function(tables) {
+      var edges = [];
+      var existingGraphNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+      for (var table in self.currentConfig.currentMappings) {
+        if (!tables || tables.indexOf(table > -1)) {
+          self.currentConfig.currentMappings[table].tripleModels.forEach(function(triple) {
+            if (triple.p.indexOf("http://") > -1) {// && existingGraphNodes[triple.o]) {
+              var edgeId = table + "_" + triple.s + "_" + triple.p + "_" + triple.o
+              if (!existingGraphNodes[edgeId]) {
+                existingGraphNodes[edgeId] = 1
+                edges.push({
+                  id: edgeId,
+                  from: table + "_" + triple.s,
+                  to: table + "_" + triple.o,
+                  label: Sparql_common.getLabelFromURI(triple.p),
+                  color: "#f90edd",
+                  //dashes: true,
+                  arrows: {
+                    to: {
+                      enabled: true,
+                      type: "curve"
+                    }
+                  },
+                  // physics:false
+
+                });
+              }
+
+            }
+          });
+        }
+      }
+      Lineage_whiteboard.lineageVisjsGraph.data.edges.add(edges);
+    },
+    drawDataSourceMappings: function() {
+      self.graphActions.graphColumnToClassPredicates(null);
+      self.graphActions.graphColumnToColumnPredicates(null)
+    },
+
+
+
+  }
 
   self.getAllTriplesMappings = function(slsvSource, mappingSource, callback) {
 
@@ -643,7 +743,7 @@ var R2Gmappings = (function() {
       }
     });
 
-  }
+  };
 
   self.getAllTriplesMappingsOld = function(source, callback) {
     if (false && self.allTriplesMappings[source]) {
@@ -690,12 +790,11 @@ var R2Gmappings = (function() {
           self.allTriplesMappings[source] = allTripleMappings;
 
 
-      /*    for (var key in allTripleMappings) {
-            delete allTripleMappings[key].graphUri
-            delete allTripleMappings[key].fileName;
-            delete allTripleMappings[key].databaseSource;
-          }*/
-
+          /*    for (var key in allTripleMappings) {
+                delete allTripleMappings[key].graphUri
+                delete allTripleMappings[key].fileName;
+                delete allTripleMappings[key].databaseSource;
+              }*/
 
 
           return callback(null, allTripleMappings);
@@ -706,15 +805,15 @@ var R2Gmappings = (function() {
 
 
   self.getColumnMappings = function(table, column, role) {
-    var columnTriples = {  };
+    var columnTriples = {};
     if (!self.currentConfig.currentMappings[table]) {
       return columnTriples;
     }
 
     self.currentConfig.currentMappings[table].tripleModels.forEach(function(triple) {
-      if ((column  && triple[role] == column) || !column ) {
-        if(! columnTriples[triple[role]]){
-          columnTriples[triple[role]]=[]
+      if ((column && triple[role] == column) || !column) {
+        if (!columnTriples[triple[role]]) {
+          columnTriples[triple[role]] = [];
         }
         columnTriples[triple[role]].push(triple);
       }
@@ -723,9 +822,8 @@ var R2Gmappings = (function() {
   };
 
 
-
   return self;
-})()
+})();
 
 export default R2Gmappings;
 window.R2Gmappings = R2Gmappings;

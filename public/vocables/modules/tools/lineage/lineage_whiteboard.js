@@ -332,7 +332,7 @@ var Lineage_whiteboard = (function() {
    *
    * @param source
    */
-  self.drawModel = function(source, graphDiv,options) {
+  self.drawModel = function(source, graphDiv,options,callback) {
     if(!options){
       options={}
     }
@@ -385,6 +385,8 @@ var Lineage_whiteboard = (function() {
         }
       ],
       function(err) {
+        if(callback)
+          return callback(err)
         if (err) {
           return alert(err);
         }
@@ -679,7 +681,10 @@ var Lineage_whiteboard = (function() {
       options.visjsOptions.edges = _options.edges;
     }
 
-    if (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
+    if (_options.visjsOptions && _options.visjsOptions.manipulation) {
+      options.visjsOptions.manipulation = _options.visjsOptions.manipulation;
+    }
+    else if  (Lineage_sources.isSourceEditableForUser(Lineage_sources.activeSource)) {
       // if (authentication.currentUser.groupes.indexOf("admin") > -1 && Config.sources[Lineage_sources.activeSource] && Config.sources[Lineage_sources.activeSource].editable) {
       options.visjsOptions.manipulation = {
         enabled: true,
@@ -690,8 +695,8 @@ var Lineage_whiteboard = (function() {
         editEdge: false,
 
         addEdge: function(edgeData, callback) {
-          var sourceNode = self.lineageVisjsGraph.data.nodes.get(edgeData.from);
-          var targetNode = self.lineageVisjsGraph.data.nodes.get(edgeData.to);
+          var sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from);
+          var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
 
           if (sourceNode.data && sourceNode.data.type != "container" && targetNode.data && targetNode.data.type == "container") {
             return Lineage_containers.addResourcesToContainer(Lineage_sources.activeSource, targetNode.data, sourceNode.data, true);

@@ -121,15 +121,7 @@ var KGcreator = (function() {
           return alert(err.responseText);
         }
         $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function() {
-          $("#KGcreator_centralPanelTabs").tabs({
-            activate: function(e, ui) {
-              var divId = ui.newPanel.selector;
-              if (divId == "#KGcreator_resourceslinkingTab") {
-              //  R2Gmappings.drawOntologyModel(self.currentSlsvSource);
-              }
-            }
-          });
-          R2Gmappings.drawOntologyModel(self.currentSlsvSource);
+         R2Gmappings.init()
           if (!authentication.currentUser.groupes.indexOf("admin") > -1) {
             $("#KGcreator_deleteKGcreatorTriplesBtn").css("display", "none");
           }

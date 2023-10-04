@@ -6,7 +6,6 @@ import Sparql_generic from "../sparqlProxies/sparql_generic.js";
 
 // eslint-disable-next-line no-global-assign
 var OntologyModels = (function () {
-   
     self.registerSourcesModel = function (sources, callback) {
         MainController.UI.message("loading ontology models");
         if (!Array.isArray(sources)) {
@@ -16,7 +15,7 @@ var OntologyModels = (function () {
         let url = Config.default_sparql_url + "?format=json&query=";
 
         var queryP = "PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" + "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>\n" + "PREFIX owl: <http://www.w3.org/2002/07/owl#>";
-        
+
         async.eachSeries(
             sources,
             function (source, callbackEach) {
@@ -62,7 +61,6 @@ var OntologyModels = (function () {
                                     if (!Config.ontologiesVocabularyModels[source].properties) {
                                         Config.ontologiesVocabularyModels[source].properties = {};
                                     }
-                                    
 
                                     return callbackEach();
                                 } else {
@@ -242,7 +240,7 @@ var OntologyModels = (function () {
                         //set inherited Constraints
                         function (callbackSeries) {
                             //!Config.sources[source] || !Config.topLevelOntologies[source]
-                            if (!Config.sources[source] ) {
+                            if (!Config.sources[source]) {
                                 return callbackSeries();
                             }
                             var constraints = Config.ontologiesVocabularyModels[source].constraints;
@@ -284,9 +282,8 @@ var OntologyModels = (function () {
                                         var x = 3;
                                     }
                                     var inheritedConstaint = propsMap[propId];
-                                   
+
                                     if (inheritedConstaint) {
-                                        
                                         if (!Config.ontologiesVocabularyModels[source].constraints[propId]) {
                                             Config.ontologiesVocabularyModels[source].constraints[propId] = { domain: "", range: "" };
                                         }
@@ -304,13 +301,12 @@ var OntologyModels = (function () {
                                         }
                                     }
                                 }
-                                for(var propNum in props){
-                                     
+                                for (var propNum in props) {
                                     if (!Config.ontologiesVocabularyModels[source].constraints[props[propNum]]) {
                                         Config.ontologiesVocabularyModels[source].constraints[props[propNum]] = { domain: "", range: "" };
                                     }
                                 }
-                               
+
                                 return callbackSeries();
                             });
                         },
@@ -501,53 +497,49 @@ return callbackSeries();
         if (!options) {
             options = {};
         }
-        
-        if(!options.remove){
-            options.remove=false;
+
+        if (!options.remove) {
+            options.remove = false;
         }
-        
-        
 
         for (var entryType in data) {
             for (var id in data[entryType]) {
                 if (entryType == "restrictions") {
-                    if(options.remove){
-                        delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]]; 
-                    }
-                    else{
-                        data[entryType][id].forEach(_restriction=>{
+                    if (options.remove) {
+                        delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
+                    } else {
+                        data[entryType][id].forEach((_restriction) => {
                             Config.ontologiesVocabularyModels[source][entryType][id].push(_restriction);
-                        })
-                        
-                    }   
-                    
-                } else {
-                    if(options.remove){
-                        delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]]; 
-
+                        });
                     }
-                    else{
+                } else {
+                    if (options.remove) {
+                        delete Config.ontologiesVocabularyModels[source][entryType][data[entryType][id]];
+                    } else {
                         Config.ontologiesVocabularyModels[source][entryType][id] = data[entryType][id];
-                    }   
-                    
+                    }
                 }
             }
         }
         if (!options.noUpdateCache) {
-            self.updateModelOnServerCache(source, data, function (err, result) {
-                callback(err);
-            },options);
+            self.updateModelOnServerCache(
+                source,
+                data,
+                function (err, result) {
+                    callback(err);
+                },
+                options
+            );
         } else {
             callback(done);
         }
     };
-    
 
-    self.updateModelOnServerCache = function (source, data, callback,options) {
+    self.updateModelOnServerCache = function (source, data, callback, options) {
         var payload = {
             source: source,
             data: data,
-            options: options
+            options: options,
         };
 
         $.ajax({
@@ -756,55 +748,42 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                             return;
                         }
                         for (var propId in sourceRestrictions) {
-                        
-                            var propRestrictions=sourceRestrictions[propId];
-                            if(propRestrictions.length>0){
-                                
-                                var validrestrictionCounter=0;
-                                propRestrictions.forEach((_restrction)=>
-                                    {
-                                        if(startNodeAncestorIds.includes(_restrction.domain)|| _restrction.domain==startNodeId){
-                                            if(endNodeAncestorIds.includes(_restrction.range)|| _restrction.range==endNodeId){
-                                                validrestrictionCounter+=1;
-                                            }
+                            var propRestrictions = sourceRestrictions[propId];
+                            if (propRestrictions.length > 0) {
+                                var validrestrictionCounter = 0;
+                                propRestrictions.forEach((_restrction) => {
+                                    if (startNodeAncestorIds.includes(_restrction.domain) || _restrction.domain == startNodeId) {
+                                        if (endNodeAncestorIds.includes(_restrction.range) || _restrction.range == endNodeId) {
+                                            validrestrictionCounter += 1;
                                         }
-                                    });
-                                if(validrestrictionCounter==propRestrictions.length){
-                                    sourceRestrictions[propId].source=_source;
+                                    }
+                                });
+                                if (validrestrictionCounter == propRestrictions.length) {
+                                    sourceRestrictions[propId].source = _source;
                                     validConstraints["both"][propId] = sourceRestrictions[propId];
                                 }
                             }
-                            
-                            
-
                         }
                     });
                     callbackSeries();
                 },
                 // Get parents properties
                 function (callbackSeries) {
-                    
-                    for (var group in validConstraints){
-                        for(var propId in validConstraints[group]){
-                            var propConstraints=validConstraints[group][propId];
-                            allSources.forEach(_source=>{
-                                var sourceOntologyModelProps=Config.ontologiesVocabularyModels[_source].properties;
-                                if(sourceOntologyModelProps[propId]){
-                                    if(sourceOntologyModelProps[propId].superProp){
-                                        validConstraints[group][propId]['parent']=sourceOntologyModelProps[propId].superProp;
-        
+                    for (var group in validConstraints) {
+                        for (var propId in validConstraints[group]) {
+                            var propConstraints = validConstraints[group][propId];
+                            allSources.forEach((_source) => {
+                                var sourceOntologyModelProps = Config.ontologiesVocabularyModels[_source].properties;
+                                if (sourceOntologyModelProps[propId]) {
+                                    if (sourceOntologyModelProps[propId].superProp) {
+                                        validConstraints[group][propId]["parent"] = sourceOntologyModelProps[propId].superProp;
                                     }
                                 }
-                                
-                            });  
-                            
-
-                            
-                            
+                            });
                         }
                     }
                     callbackSeries();
-                }
+                },
             ],
             function (err) {
                 if (duplicateProps.length > 0) {

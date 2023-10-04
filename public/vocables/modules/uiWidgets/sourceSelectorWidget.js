@@ -24,7 +24,7 @@ var SourceSelectorWidget = (function () {
         MainController.UI.showHideRightPanel("hide");
         $("#" + targetDivId).load("snippets/sourceSelector.html", function (err) {
             self.loadSourcesTreeDiv("sourceSelector_jstreeDiv", jsTreeOptions);
-            $("#sourceSelector_searchInput").focus()
+            $("#sourceSelector_searchInput").focus();
             //  $("#sourceSelector_SearchSourceInput");
             $("#sourceSelector_validateButton").bind("click", function () {
                 okButtonValidateFn();

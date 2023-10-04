@@ -232,9 +232,8 @@ var Lineage_blend = (function () {
                                 for (var group in authorizedProps) {
                                     for (var propId in authorizedProps[group]) {
                                         var property = authorizedProps[group][propId];
-                                        
+
                                         if (property.source == _source) {
-                                        
                                             if (!uniqueProps[propId]) {
                                                 uniqueProps[propId] = 1;
                                                 var propertyLabel = property.label || Sparql_common.getLabelFromURI(propId);
@@ -242,8 +241,8 @@ var Lineage_blend = (function () {
 
                                                 var cssClass = propStatusCssClassMap[group];
                                                 var parent = property.source;
-                                                if(property.parent){
-                                                    parent=property.parent;
+                                                if (property.parent) {
+                                                    parent = property.parent;
                                                 }
                                                 /*
                                                 if(parent==undefined){
@@ -256,7 +255,6 @@ var Lineage_blend = (function () {
                                                     id: propId,
                                                     text: "<span class='" + cssClass + "'>" + label + "</span>",
                                                     parent: parent,
-                                                    
 
                                                     data: {
                                                         propLabel: property.label,
@@ -266,9 +264,7 @@ var Lineage_blend = (function () {
                                                     },
                                                 });
                                             }
-                                           
                                         }
-                                        
                                     }
                                 }
 
@@ -305,13 +301,13 @@ var Lineage_blend = (function () {
                                             if (!self.domainOntologyProperties) {
                                                 self.domainOntologyProperties = [];
                                             }
-                                            var newProp={
+                                            var newProp = {
                                                 id: result.uri,
                                                 label: subPropertyLabel,
                                                 superProp: self.currentPropertiesTreeNode.data.id,
                                             };
                                             self.domainOntologyProperties.push(newProp);
-                                            var propId=newProp.id;
+                                            var propId = newProp.id;
                                             /*
                                             OntologyModels.registerSourcesModel(Lineage_sources.activeSource, function (err, result2) {
                                                 if (err) {
@@ -334,16 +330,18 @@ var Lineage_blend = (function () {
                                                 JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
                                             });
                                             */
-                                           var superpropConstraints=JSON.parse(JSON.stringify(Config.ontologiesVocabularyModels[Config.currentTopLevelOntology]['constraints'][self.currentPropertiesTreeNode.data.id]));
-                                           superpropConstraints.source=Lineage_sources.activeSource;
-                                           superpropConstraints.label=subPropertyLabel;
-                                           superpropConstraints.parent=self.currentPropertiesTreeNode.data.id;
-                                           superpropConstraints.superProp=self.currentPropertiesTreeNode.data.id;
-                                           var propertiesToAdd={};
-                                           propertiesToAdd[propId]=newProp;
-                                           var constraintsToAdd={};
-                                           constraintsToAdd[propId]=superpropConstraints;
-                                           OntologyModels.updateModel (Lineage_sources.activeSource, {'properties':propertiesToAdd,'constraints':constraintsToAdd}, null, function(err, result2) {
+                                            var superpropConstraints = JSON.parse(
+                                                JSON.stringify(Config.ontologiesVocabularyModels[Config.currentTopLevelOntology]["constraints"][self.currentPropertiesTreeNode.data.id])
+                                            );
+                                            superpropConstraints.source = Lineage_sources.activeSource;
+                                            superpropConstraints.label = subPropertyLabel;
+                                            superpropConstraints.parent = self.currentPropertiesTreeNode.data.id;
+                                            superpropConstraints.superProp = self.currentPropertiesTreeNode.data.id;
+                                            var propertiesToAdd = {};
+                                            propertiesToAdd[propId] = newProp;
+                                            var constraintsToAdd = {};
+                                            constraintsToAdd[propId] = superpropConstraints;
+                                            OntologyModels.updateModel(Lineage_sources.activeSource, { properties: propertiesToAdd, constraints: constraintsToAdd }, null, function (err, result2) {
                                                 if (err) {
                                                     return alert(err.responsetext);
                                                 }
@@ -362,8 +360,7 @@ var Lineage_blend = (function () {
                                                 ];
 
                                                 JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
-                                           })
-
+                                            });
                                         });
                                     },
                                 },
@@ -902,11 +899,10 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                     propertyLabel: propLabel,
                     propertyId: obj.node.data.id,
                 };
-               OntologyModels.updateModel
+                OntologyModels.updateModel;
             }
 
             Lineage_whiteboard.lineageVisjsGraph.data.edges.add([newEdge]);
-           
         });
     };
 
@@ -1175,16 +1171,13 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                             callbackSeries();
                         });
                     },
-                    function(callbackSeries){
-                        // update OntologyModel by removing restriction 
-                        var dataToRemove={'restrictions':[restrictionNode.data.propertyId]}
-                        OntologyModels.updateModel(inSource,dataToRemove , {'remove':true}, function (err, result) {
+                    function (callbackSeries) {
+                        // update OntologyModel by removing restriction
+                        var dataToRemove = { restrictions: [restrictionNode.data.propertyId] };
+                        OntologyModels.updateModel(inSource, dataToRemove, { remove: true }, function (err, result) {
                             callback(err);
-                        })
-
-
-
-                    }
+                        });
+                    },
                 ],
                 function (_err) {
                     Lineage_whiteboard.lineageVisjsGraph.data.edges.remove(restrictionNode.id);

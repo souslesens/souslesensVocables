@@ -38,7 +38,7 @@ var Lineage_combine = (function () {
                 if (!Config.sources[source]) callbackEach();
                 Lineage_sources.registerSource(source);
                 self.currentSources.push(source);
-                Lineage_whiteboard.drawTopConcepts(source, {}, null,function (err) {
+                Lineage_whiteboard.drawTopConcepts(source, {}, null, function (err) {
                     if (err) return callbackEach();
                     self.menuActions.groupSource(source);
 

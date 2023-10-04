@@ -477,10 +477,8 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         var uri_named = "http://www.w3.org/2002/07/owl#NamedIndividual";
         var uri_bag2 = "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag";
         var type = null;
-        //if un truck différent des 3 prendre ca
-        //else
-        //Bag>Class
-        //Bag>namedindividual
+
+
         if (!types) {
             return "default";
         } else {

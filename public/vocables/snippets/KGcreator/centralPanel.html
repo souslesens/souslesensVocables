@@ -88,8 +88,12 @@
   </div>
 
   <div id="KGcreator_resourceslinkingTab" style="display: flex; flex-direction: row">
-    <div id="KGcreator_resourceLinkGraphDiv" style="height: 800px;"></div>
-    <div id="KGcreator_resourceLinkRightPanel" style="height: 800px;width:300px"></div>
+    <div id="KGcreator_resourceLinkGraphDiv" style="height: 800px;width:70%"></div>
+    <div id="KGcreator_resourceLinkRightPanel" style="height: 800px;width:30%">
+      <button onclick="R2Gmappings.drawOntologyModel()">draw model</button>
+
+
+    </div>
 
 
   </div>
@@ -99,6 +103,6 @@
 
 <div
   id="popupMenuWidgetDiv"
-  onclick="Genealogy.graphActions.hidePopup();"
+  onclick="PopupMenuWidget.hidePopup();"
   style="z-index: 20; position: absolute; flex-direction: column; padding: 5px; border-radius: 5px; text-align: center; display: none; background-color: #ddd"
 ></div>

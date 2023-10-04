@@ -241,7 +241,8 @@ var OntologyModels = (function () {
 
                         //set inherited Constraints
                         function (callbackSeries) {
-                            if (!Config.sources[source] || !Config.topLevelOntologies[source]) {
+                            //!Config.sources[source] || !Config.topLevelOntologies[source]
+                            if (!Config.sources[source] ) {
                                 return callbackSeries();
                             }
                             var constraints = Config.ontologiesVocabularyModels[source].constraints;
@@ -283,11 +284,12 @@ var OntologyModels = (function () {
                                         var x = 3;
                                     }
                                     var inheritedConstaint = propsMap[propId];
+                                   
                                     if (inheritedConstaint) {
+                                        
                                         if (!Config.ontologiesVocabularyModels[source].constraints[propId]) {
                                             Config.ontologiesVocabularyModels[source].constraints[propId] = { domain: "", range: "" };
                                         }
-
                                         // inheritance but no overload of constraint
                                         if (inheritedConstaint.domain && !Config.ontologiesVocabularyModels[source].constraints[propId].domain) {
                                             Config.ontologiesVocabularyModels[source].constraints[propId].domain = inheritedConstaint.domain;
@@ -302,6 +304,13 @@ var OntologyModels = (function () {
                                         }
                                     }
                                 }
+                                for(var propNum in props){
+                                     
+                                    if (!Config.ontologiesVocabularyModels[source].constraints[props[propNum]]) {
+                                        Config.ontologiesVocabularyModels[source].constraints[props[propNum]] = { domain: "", range: "" };
+                                    }
+                                }
+                               
                                 return callbackSeries();
                             });
                         },

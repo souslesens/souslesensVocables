@@ -82,7 +82,7 @@ var OntologyModels = (function () {
                                 Sparql_common.getVariableLangLabel("prop", true, true) +
                                 "optional{?prop owl:inverseOf ?inverseProp}" +
                                 "optional{?prop rdfs:subPropertyOf ?superProperty}" +
-                                " VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty owl:AnnotationProperty} }";
+                                " VALUES ?o {rdf:Property owl:ObjectProperty owl:OntologyProperty } }";
                             Sparql_proxy.querySPARQL_GET_proxy(url, query, null, {}, function (err, result) {
                                 if (err) {
                                     return callbackSeries(err);

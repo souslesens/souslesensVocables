@@ -2,7 +2,8 @@ var JoinTablesWidget = (function() {
   var self = {};
 
 
-  self.showJoinTablesDialog = function(dataSourceConfig, fromTable, toTable) {
+  self.showJoinTablesDialog = function(dataSourceConfig, fromTable, toTable, validateFn) {
+    self.validateFn = validateFn;
 
     $("#smallDialogDiv").dialog("open");
     $("#smallDialogDiv").load("snippets/joinTablesWidgetDialog.html", function() {
@@ -62,61 +63,64 @@ var JoinTablesWidget = (function() {
 
 
   self.joinTable = function(target) {
-   var joinColumn =$("#joinTablesWidgetDialog_joinColumnSelect").val();
-   if(target=="from")
- self.joinFromColumn=joinColumn
-    else
-     self.joinToColumn=joinColumn
+    var joinColumn = $("#joinTablesWidgetDialog_joinColumnSelect").val();
+    if (target == "from") {
+      self.joinFromColumn = joinColumn;
+    }
+    else {
+      self.joinToColumn = joinColumn;
+    }
   };
 
   self.testJoin = function() {
-
-    self.join={
-      fromTable:$("#joinTablesWidgetDialog_fromTableId").html(),
-      toTable:$("#joinTablesWidgetDialog_toTableId").html(),
-      joinTable:$("#joinTablesWidgetDialog_joinTableSelect").val(),
-      fromColumn:$("#joinTablesWidgetDialog_fromColumnSelect").val(),
-      toColumn:$("#joinTablesWidgetDialog_toColumnSelect").val(),
-      joinFromColumn:self.joinFromColumn,
-      joinToColumn:self.joinToColumn,
-
-    }
-
-
-
+    var sql = self.getJoinSql();
+    alert("coming soon");
 
   };
+  self.showJoin = function() {
+    var sql = self.getJoinSql();
+    $("#joinTablesWidgetDialog_sqlJoinDiv").html(sql);
+  };
+
   self.saveJoinMapping = function() {
-
-
-
+    var sql = self.getJoinObjectFromUI();
+    self.validateFn(null, sql);
+    $("#smallDialogDiv").dialog("close");
   };
 
 
-  self.getJoinSql=function(joinObj){
+  self.getJoinObjectFromUI = function() {
+    var joinObj = {
+      fromTable: $("#joinTablesWidgetDialog_fromTableId").html(),
+      toTable: $("#joinTablesWidgetDialog_toTableId").html(),
+      joinTable: $("#joinTablesWidgetDialog_joinTableSelect").val(),
+      fromColumn: $("#joinTablesWidgetDialog_fromColumnSelect").val(),
+      toColumn: $("#joinTablesWidgetDialog_toColumnSelect").val(),
+      joinFromColumn: self.joinFromColumn,
+      joinToColumn: self.joinToColumn
 
-    var sql= "SELECT top 10 * from "
-     sql+=joinObj.fromTable+", "
-    sql+=joinObj.toTable+" "
-    if(joinObj.joinTable) {
-      sql += "," + joinObj.joinTable + " "
+    };
+    return joinObj;
+  };
+
+  self.getJoinSql = function() {
+    var joinObj = self.getJoinObjectFromUI();
+    var sql = "SELECT top 10 * from ";
+    sql += joinObj.fromTable + " ";
+
+    if (joinObj.joinTable) {
+      sql += " LEFT OUTER JOIN " + joinObj.joinTable + " ON " + joinObj.fromTable + "." + joinObj.fromColumn + "=" + joinObj.joinTable + "." + joinObj.joinFromColumn;
+      sql += " LEFT OUTER JOIN " + joinObj.toTable + " ON " + joinObj.joinTable + "." + joinObj.joinFromColumn + "=" + joinObj.toTable + "." + joinObj.toColumn;
     }
-    sql+=" WHERE "
-
-    if(joinObj.joinTable) {
-      sql +=" LEFT OUTER JOIN "+joinObj.joinTable+" ON "+joinObj.fromColumn+"="+joinObj.joinFromColumn
-      sql +=" LEFT OUTER JOIN "+joinObj.toTable+" ON "+joinObj.joinFromColumn+"="+joinObj.toColumn
-    }else{
-      sql +=" LEFT OUTER JOIN "+joinObj.toTable+" ON "+joinObj.fromColumn+"="+joinObj.fromColumn
+    else {
+      sql += " LEFT OUTER JOIN " + joinObj.toTable + " ON " + joinObj.fromTable + "." + joinObj.fromColumn + "=" + joinObj.toTable + "." + joinObj.toColumn;
 
     }
 
-
-  }
-
+    return sql;
 
 
-
+  };
 
 
   return self;
@@ -124,4 +128,4 @@ var JoinTablesWidget = (function() {
 
 
 export default JoinTablesWidget;
-window.JoinTablesWidget = JoinTablesWidget
+window.JoinTablesWidget = JoinTablesWidget;

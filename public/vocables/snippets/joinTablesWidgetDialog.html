@@ -5,12 +5,11 @@
     }
 
     #joinTablesWidgetDialog_table td {
-        text-align: center
+        text-align: center;
+        font-weight: bold;
     }
 
-    #joinTablesWidgetDialog_table td {
-        text-align: center
-    }
+
 
     #joinTablesWidgetDialog_table select {
         width: 250px
@@ -31,7 +30,7 @@ Database <span id="joinTablesWidgetDialog_databaseId"></span>
 
       <tr>
         <td>From Table<span id="joinTablesWidgetDialog_fromTableId"></span></td>
-        <td><select style="width: 230px" onchange="JoinTablesWidget.showJoinTableColumns($(this).val())" id="joinTablesWidgetDialog_joinTableSelect"></select></td>
+        <td>Join table<select style="width: 230px" onchange="JoinTablesWidget.showJoinTableColumns($(this).val())" id="joinTablesWidgetDialog_joinTableSelect"></select></td>
         <td>To Table<span id="joinTablesWidgetDialog_toTableId"></span></td>
       </tr>
 
@@ -76,8 +75,11 @@ Database <span id="joinTablesWidgetDialog_databaseId"></span>
   </div>
   <div style="width: 150px; display: flex; flex-direction: column">
     <br />
-    <br />
+
+    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.showJoin()">show join</button>
     <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.testJoin()">Test join</button>
+    <br />
+    <div id="joinTablesWidgetDialog_sqlJoinDiv" style="width:500px;height: 100px;overflow: auto;"></div>
     <br />
     <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.saveJoinMapping()">Save mapping</button>
   </div>

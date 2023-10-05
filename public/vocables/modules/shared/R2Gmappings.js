@@ -29,7 +29,7 @@ var R2Gmappings = (function() {
     });
   };
 
-  self.loadSourceConfig = function(source, callback) {
+  self.loadSlsvSourceConfig = function(source, callback) {
     self.currentSource = source;
     var payload = {
       dir: "mappings/" + source,
@@ -42,6 +42,7 @@ var R2Gmappings = (function() {
       dataType: "json",
       success: function(result, _textStatus, _jqXHR) {
         self.currentConfig = JSON.parse(result);
+        self.rawConfig=JSON.parse(result);
 
 
         var jstreeData = [];
@@ -132,6 +133,56 @@ var R2Gmappings = (function() {
       }
     });
   };
+
+
+  self.saveSlsvSourceConfig = function(source,data, callback) {
+
+
+
+    var payload = {
+      dir: "mappings/" + source,
+      fileName: "main.json",
+      data: JSON.stringify(data,null,2)
+    };
+    $.ajax({
+      type: "POST",
+      url: Config.apiUrl + "/data/file",
+      data: payload,
+      dataType: "json",
+      success: function(result, _textStatus, _jqXHR) {
+        MainController.UI.message("mappings/" + source + "config saved")
+
+      },
+      error: function(err) {
+        callback(err);
+      }
+    })
+  }
+
+  self.saveDataSourceMappings = function(source,datasource,data, callback) {
+    self.currentSource = source;
+    var payload = {
+      dir: "mappings/" + source,
+      name: datasource+".json",
+      data:  JSON.stringify(data,null,2)
+    };
+    $.ajax({
+      type: "POST",
+      url: Config.apiUrl + "/data/file",
+      data: payload,
+      dataType: "json",
+      success: function(result, _textStatus, _jqXHR) {
+        MainController.UI.message("mappings/" + source + "config saved")
+
+      },
+      error: function(err) {
+        callback(err);
+      }
+    })
+  }
+
+
+
 
 
   self.loadDataSource = function(slsvSource, sourceType, dataSource) {
@@ -442,7 +493,22 @@ var R2Gmappings = (function() {
               dbName: self.currentConfig.currentDataSource,
               type: self.currentConfig.databaseSources[self.currentConfig.currentDataSource].type
             };
-            return JoinTablesWidget.showJoinTablesDialog(databaseSourceConfig, sourceNode.data.id, targetNode.data.id);
+            return JoinTablesWidget.showJoinTablesDialog(databaseSourceConfig, sourceNode.data.id, targetNode.data.id,function(err, result){
+
+              self.rawConfig.databaseSources[self.currentConfig.currentDataSource].joins.push(result)
+
+              self.saveSlsvSourceConfig(self.currentSource,self.currentConfig,function(err, result){
+                if( err)
+                  return alert(err)
+
+                MainController.UI.message("join saved")
+
+
+              })
+
+
+
+            });
           }
 
 

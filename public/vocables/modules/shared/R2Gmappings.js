@@ -20,11 +20,11 @@ var R2Gmappings = (function() {
       activate: function(e, ui) {
         var divId = ui.newPanel.selector;
         if (divId == "#KGcreator_resourceslinkingTab") {
-      //  R2Gmappings.drawOntologyModel(self.currentSlsvSource);
+          //  R2Gmappings.drawOntologyModel(self.currentSlsvSource);
         }
       }
     });
-   R2Gmappings.graphActions.drawOntologyModel(self.currentSlsvSource);
+    R2Gmappings.graphActions.drawOntologyModel(self.currentSlsvSource);
     $("#KGcreator_resourceLinkRightPanel").load("snippets/KGcreator/graphControlPanel.html", function() {
     });
   };
@@ -110,7 +110,7 @@ var R2Gmappings = (function() {
             data: { id: datasource, type: "databaseSource" }
 
           });
-          JstreeWidget.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
+          JstreeWidget.loadJsTree("databaseSources", jstreeData, options);
 
         }
         for (var datasource in self.currentConfig.csvSources) {
@@ -136,7 +136,9 @@ var R2Gmappings = (function() {
 
   self.loadDataSource = function(slsvSource, sourceType, dataSource) {
     self.currentConfig.currentDataSource = dataSource;
-    self.currentConfig.databaseSources[dataSource] = { dataSource: dataSource, tables: [], mappings: {} };
+    self.currentConfig.databaseSources[dataSource].dataSource = dataSource;
+    self.currentConfig.databaseSources[dataSource].tables = [];
+    self.currentConfig.databaseSources[dataSource].mappings = {};
 
     async.series([
         function(callbackSeries) {
@@ -214,7 +216,7 @@ var R2Gmappings = (function() {
       });
 
     }
-    JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", "databaseSources", jstreeData);
+    JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", datasourceConfig.dataSource, jstreeData);
   };
   self.showCsvFilesTree = function(datasourceConfig) {
     var jstreeData = [];
@@ -237,7 +239,7 @@ var R2Gmappings = (function() {
     }
 
 
-    JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", "databaseSources", jstreeData);
+    JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", "csvSources", jstreeData);
 
   };
   self.showTablesColumnTree = function(table, tableColumns) {
@@ -436,7 +438,11 @@ var R2Gmappings = (function() {
           var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
 
           if (sourceNode.data && sourceNode.data.type == "table" && targetNode.data && targetNode.data.type == "table") {
-            return JoinTablesWidget.showJoinTablesDialog(self.currentConfig.currentDataSource,sourceNode.data, targetNode.data);
+            var databaseSourceConfig = {
+              dbName: self.currentConfig.currentDataSource,
+              type: self.currentConfig.databaseSources[self.currentConfig.currentDataSource].type
+            };
+            return JoinTablesWidget.showJoinTablesDialog(databaseSourceConfig, sourceNode.data.id, targetNode.data.id);
           }
 
 
@@ -446,21 +452,21 @@ var R2Gmappings = (function() {
 
           }
         }
-      }
+      };
       Lineage_whiteboard.lineageVisjsGraph = new VisjsGraphClass("KGcreator_resourceLinkGraphDiv", { nodes: [], edges: [] }, {});
 
       Lineage_sources.activeSource = source;
       Lineage_whiteboard.drawModel(source, "KGcreator_resourceLinkGraphDiv", options, function(err) {
         var nodes = Lineage_whiteboard.lineageVisjsGraph.data.nodes.getIds();
         var edges = Lineage_whiteboard.lineageVisjsGraph.data.edges.getIds();
-        var newNodes = []
-        var newEdges = []
+        var newNodes = [];
+        var newEdges = [];
         nodes.forEach(function(node) {
-          newNodes.push({ id: node, opacity: 0.2, font: { color: "#ccc" }, layer: "ontology" })
-        })
+          newNodes.push({ id: node, opacity: 0.2, font: { color: "#ccc" }, layer: "ontology" });
+        });
         nodes.forEach(function(edge) {
-          newEdges.push({ id: edge, opacity: 0.2, font: { color: "#ccc", physics: false } })
-        })
+          newEdges.push({ id: edge, opacity: 0.2, font: { color: "#ccc", physics: false } });
+        });
         Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(newNodes);
         Lineage_whiteboard.lineageVisjsGraph.data.edges.update(newEdges);
 
@@ -620,7 +626,7 @@ var R2Gmappings = (function() {
                 to: columnNode.data.id,
                 type: "table"
               },
-              color: "#bbb",
+              color: "#bbb"
               // physics:false
             });
           }
@@ -680,9 +686,9 @@ var R2Gmappings = (function() {
         if (!tables || tables.indexOf(table > -1)) {
           self.currentConfig.currentMappings[table].tripleModels.forEach(function(triple) {
             if (triple.p.indexOf("http://") > -1) {// && existingGraphNodes[triple.o]) {
-              var edgeId = table + "_" + triple.s + "_" + triple.p + "_" + triple.o
+              var edgeId = table + "_" + triple.s + "_" + triple.p + "_" + triple.o;
               if (!existingGraphNodes[edgeId]) {
-                existingGraphNodes[edgeId] = 1
+                existingGraphNodes[edgeId] = 1;
                 edges.push({
                   id: edgeId,
                   from: table + "_" + triple.s,
@@ -695,7 +701,7 @@ var R2Gmappings = (function() {
                       enabled: true,
                       type: "curve"
                     }
-                  },
+                  }
                   // physics:false
 
                 });
@@ -709,12 +715,11 @@ var R2Gmappings = (function() {
     },
     drawDataSourceMappings: function() {
       self.graphActions.graphColumnToClassPredicates(null);
-      self.graphActions.graphColumnToColumnPredicates(null)
-    },
+      self.graphActions.graphColumnToColumnPredicates(null);
+    }
 
 
-
-  }
+  };
 
   self.getAllTriplesMappings = function(slsvSource, mappingSource, callback) {
 

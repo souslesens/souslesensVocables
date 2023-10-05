@@ -1,27 +1,75 @@
-var JoinTablesWidget=(function(){
-  var self={}
+var JoinTablesWidget = (function() {
+  var self = {};
 
 
-  self.showJoinTablesDialog=  function(dataSource,fromTable, toTable) {
+  self.showJoinTablesDialog = function(dataSourceConfig, fromTable, toTable) {
 
     $("#smallDialogDiv").dialog("open");
-    $("#smallDialogDiv").load("snippets/lineage/linkedData/lineage_linkedData_joinTablesDialog.html", function() {
+    $("#smallDialogDiv").load("snippets/joinTablesWidgetDialog.html", function() {
 
 
-      $("#lineage_linkedData_join_databaseId").html(relation.fromColumn.database);
-      $("#lineage_linkedData_join_fromClassId").html(relation.fromColumn.subjectLabel);
-      $("#lineage_linkedData_join_toClassId").html(relation.toColumn.subjectLabel);
+      $("#joinTablesWidgetDialog_databaseId").html(dataSourceConfig.dbName);
 
-      $("#lineage_linkedData_join_fromTableId").html(relation.fromColumn.table);
-      $("#lineage_linkedData_join_toTableId").html(relation.toColumn.table);
 
-    })
-  }
+      $("#joinTablesWidgetDialog_fromTableId").html(fromTable);
+      $("#joinTablesWidgetDialog_toTableId").html(toTable);
+      self.getDBmodel(dataSourceConfig, function(err, model) {
+        if (err) {
+          return alert(err);
+        }
+        self.model = model;
+
+        var tables = Object.keys(model);
+        common.fillSelectOptions("joinTablesWidgetDialog_joinTableSelect", tables, true);
+        common.fillSelectOptions("joinTablesWidgetDialog_fromColumnSelect", model[fromTable], true);
+        common.fillSelectOptions("joinTablesWidgetDialog_toColumnSelect", model[toTable], true);
+
+
+      });
+
+    });
+  };
+
+
+  self.getDBmodel = function(dataSourceConfig, callback) {
+    const params = new URLSearchParams({
+      name: dataSourceConfig.dbName,
+      type: dataSourceConfig.type
+    });
+    $.ajax({
+      type: "GET",
+      url: Config.apiUrl + "/kg/model?" + params.toString(),
+      dataType: "json",
+      success: function(data, _textStatus, _jqXHR) {
+        return callback(null, data);
+      },
+      error: function(err) {
+        if (callback) {
+          return callback(err);
+        }
+        alert(err.responseText);
+      }
+    });
+  };
+
+  self.viewTableSample = function() {
+
+  };
+
+  self.showJoinTableColumns = function(table) {
+    common.fillSelectOptions("joinTablesWidgetDialog_fromColumnSelect", self.model[table], true);
+  };
+  self.testJoin = function() {
+
+  };
+  self.saveJoinMapping = function() {
+
+  };
 
 
   return self;
-})()
+})();
 
 
 export default JoinTablesWidget;
-window.JoinTablesWidget=JoinTablesWidget
+window.JoinTablesWidget = JoinTablesWidget

@@ -57,14 +57,66 @@ var JoinTablesWidget = (function() {
   };
 
   self.showJoinTableColumns = function(table) {
-    common.fillSelectOptions("joinTablesWidgetDialog_fromColumnSelect", self.model[table], true);
+    common.fillSelectOptions("joinTablesWidgetDialog_joinColumnSelect", self.model[table], true);
   };
+
+
+  self.joinTable = function(target) {
+   var joinColumn =$("#joinTablesWidgetDialog_joinColumnSelect").val();
+   if(target=="from")
+ self.joinFromColumn=joinColumn
+    else
+     self.joinToColumn=joinColumn
+  };
+
   self.testJoin = function() {
+
+    self.join={
+      fromTable:$("#joinTablesWidgetDialog_fromTableId").html(),
+      toTable:$("#joinTablesWidgetDialog_toTableId").html(),
+      joinTable:$("#joinTablesWidgetDialog_joinTableSelect").val(),
+      fromColumn:$("#joinTablesWidgetDialog_fromColumnSelect").val(),
+      toColumn:$("#joinTablesWidgetDialog_toColumnSelect").val(),
+      joinFromColumn:self.joinFromColumn,
+      joinToColumn:self.joinToColumn,
+
+    }
+
+
+
 
   };
   self.saveJoinMapping = function() {
 
+
+
   };
+
+
+  self.getJoinSql=function(joinObj){
+
+    var sql= "SELECT top 10 * from "
+     sql+=joinObj.fromTable+", "
+    sql+=joinObj.toTable+" "
+    if(joinObj.joinTable) {
+      sql += "," + joinObj.joinTable + " "
+    }
+    sql+=" WHERE "
+
+    if(joinObj.joinTable) {
+      sql +=" LEFT OUTER JOIN "+joinObj.joinTable+" ON "+joinObj.fromColumn+"="+joinObj.joinFromColumn
+      sql +=" LEFT OUTER JOIN "+joinObj.toTable+" ON "+joinObj.joinFromColumn+"="+joinObj.toColumn
+    }else{
+      sql +=" LEFT OUTER JOIN "+joinObj.toTable+" ON "+joinObj.fromColumn+"="+joinObj.fromColumn
+
+    }
+
+
+  }
+
+
+
+
 
 
   return self;

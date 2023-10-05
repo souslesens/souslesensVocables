@@ -478,7 +478,6 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         var uri_bag2 = "http://www.w3.org/1999/02/22-rdf-syntax-ns#Bag";
         var type = null;
 
-
         if (!types) {
             return "default";
         } else {

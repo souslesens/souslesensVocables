@@ -394,14 +394,13 @@ var Lineage_relations = (function () {
         });
     };
 
-    self.drawRelations = function (direction, type, caller, options,graphDiv) {
+    self.drawRelations = function (direction, type, caller, options, graphDiv) {
         if (!options) {
             options = {};
         }
         options.skipLiterals = true;
         var source = null;
-        if(options.source)
-            source=options.source
+        if (options.source) source = options.source;
         var data = null;
         var levelsMap = {};
         if (!options.data) {
@@ -602,7 +601,7 @@ var Lineage_relations = (function () {
                         Lineage_whiteboard.lineageVisjsGraph.data.nodes.add(allVisjsData.nodes);
                         Lineage_whiteboard.lineageVisjsGraph.data.edges.add(allVisjsData.edges);
                     } else {
-                        Lineage_whiteboard.drawNewGraph(allVisjsData,graphDiv);
+                        Lineage_whiteboard.drawNewGraph(allVisjsData, graphDiv);
                     }
                     if (err) {
                         return alert(err);

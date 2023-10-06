@@ -1667,7 +1667,7 @@ self.saveMappings({classId:classId})
 
   self.drawAllMappings = function() {
     var source = self.currentSlsvSource || self.currentCsvDir;
-    R2Gmappings.getAllTriplesMappings(source, function(err, mappingObjects) {
+    R2Gmappings.loadSourceMappings(source, function(err, mappingObjects) {
       if (err) {
         return alert(err.responseText);
       }
@@ -1692,7 +1692,7 @@ self.saveMappings({classId:classId})
     var subjectTypes = [];
     var objectTypes = [];
     var source = self.currentSlsvSource || self.currentCsvDir;
-    R2Gmappings.getAllTriplesMappings(source, function(err, mappingObject) {
+    R2Gmappings.loadSourceMappings(source, function(err, mappingObject) {
       if (err) {
         return alert(err.responseText);
       }

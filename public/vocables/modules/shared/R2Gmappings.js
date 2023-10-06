@@ -42,7 +42,7 @@ var R2Gmappings = (function() {
       dataType: "json",
       success: function(result, _textStatus, _jqXHR) {
         self.currentConfig = JSON.parse(result);
-        self.rawConfig=JSON.parse(result);
+        self.rawConfig = JSON.parse(result);
 
 
         var jstreeData = [];
@@ -135,14 +135,13 @@ var R2Gmappings = (function() {
   };
 
 
-  self.saveSlsvSourceConfig = function(source,data, callback) {
-
+  self.saveSlsvSourceConfig = function(source, data, callback) {
 
 
     var payload = {
       dir: "mappings/" + source,
       fileName: "main.json",
-      data: JSON.stringify(data,null,2)
+      data: JSON.stringify(data, null, 2)
     };
     $.ajax({
       type: "POST",
@@ -150,21 +149,21 @@ var R2Gmappings = (function() {
       data: payload,
       dataType: "json",
       success: function(result, _textStatus, _jqXHR) {
-        MainController.UI.message("mappings/" + source + "config saved")
+        MainController.UI.message("mappings/" + source + "config saved");
 
       },
       error: function(err) {
         callback(err);
       }
-    })
-  }
+    });
+  };
 
-  self.saveDataSourceMappings = function(source,datasource,data, callback) {
+  self.saveDataSourceMappings = function(source, datasource, data, callback) {
     self.currentSource = source;
     var payload = {
       dir: "mappings/" + source,
-      name: datasource+".json",
-      data:  JSON.stringify(data,null,2)
+      name: datasource + ".json",
+      data: JSON.stringify(data, null, 2)
     };
     $.ajax({
       type: "POST",
@@ -172,17 +171,14 @@ var R2Gmappings = (function() {
       data: payload,
       dataType: "json",
       success: function(result, _textStatus, _jqXHR) {
-        MainController.UI.message("mappings/" + source + "config saved")
+        MainController.UI.message("mappings/" + source + "config saved");
 
       },
       error: function(err) {
         callback(err);
       }
-    })
-  }
-
-
-
+    });
+  };
 
 
   self.loadDataSource = function(slsvSource, sourceType, dataSource) {
@@ -217,7 +213,7 @@ var R2Gmappings = (function() {
           });
         },
         function(callbackSeries) {
-          self.getAllTriplesMappings(slsvSource, self.currentConfig.currentDataSource, function(err, mappings) {
+          self.loadSourceMappings(slsvSource, self.currentConfig.currentDataSource, function(err, mappings) {
             if (err) {
               return callbackSeries();
             }
@@ -408,7 +404,7 @@ var R2Gmappings = (function() {
 
 
   self.getIndividualMapping = function(source, className) {
-    self.getAllTriplesMappings(source, self.currentConfig.currentDataSource, function(err, allTripleMappings) {
+    self.loadSourceMappings(source, self.currentConfig.currentDataSource, function(err, allTripleMappings) {
       if (err) {
         return callback(err);
       }
@@ -493,19 +489,19 @@ var R2Gmappings = (function() {
               dbName: self.currentConfig.currentDataSource,
               type: self.currentConfig.databaseSources[self.currentConfig.currentDataSource].type
             };
-            return JoinTablesWidget.showJoinTablesDialog(databaseSourceConfig, sourceNode.data.id, targetNode.data.id,function(err, result){
+            return JoinTablesWidget.showJoinTablesDialog(databaseSourceConfig, sourceNode.data.id, targetNode.data.id, function(err, result) {
 
-              self.rawConfig.databaseSources[self.currentConfig.currentDataSource].joins.push(result)
+              self.rawConfig.databaseSources[self.currentConfig.currentDataSource].tableJoins.push(result);
 
-              self.saveSlsvSourceConfig(self.currentSource,self.currentConfig,function(err, result){
-                if( err)
-                  return alert(err)
+              self.saveSlsvSourceConfig(self.currentSource, self.rawConfig, function(err, result) {
+                if (err) {
+                  return alert(err);
+                }
 
-                MainController.UI.message("join saved")
+                MainController.UI.message("join saved");
 
 
-              })
-
+              });
 
 
             });
@@ -787,11 +783,29 @@ var R2Gmappings = (function() {
 
   };
 
-  self.getAllTriplesMappings = function(slsvSource, mappingSource, callback) {
+
+  self.getClass2ColumnMapping = function(mappings, classUri) {
+    for (var table in mappings) {
+      var matches = [];
+      mappings[table].tripleModels.forEach(function(triple) {
+        if (triple.p == "rdf:type" && triple.o == classUri) {
+          matches.push({ table: table, column: rdf.s });
+        }
+      });
+    }
+
+    return matches;
+
+  };
+
+
+
+
+  self.loadSourceMappings = function(slsvSource, dataSource, callback) {
 
     var payload = {
       dir: "mappings/" + slsvSource,
-      name: mappingSource + ".json"
+      name: dataSource + ".json"
     };
 
     $.ajax({

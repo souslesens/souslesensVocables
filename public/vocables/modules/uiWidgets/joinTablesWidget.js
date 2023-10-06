@@ -1,3 +1,5 @@
+import VirtualKGquery from "../shared/virtualKGquery.js";
+
 var JoinTablesWidget = (function() {
   var self = {};
 
@@ -14,7 +16,7 @@ var JoinTablesWidget = (function() {
 
       $("#joinTablesWidgetDialog_fromTableId").html(fromTable);
       $("#joinTablesWidgetDialog_toTableId").html(toTable);
-      self.getDBmodel(dataSourceConfig, function(err, model) {
+      VirtualKGquery.getDBmodel(dataSourceConfig, function(err, model) {
         if (err) {
           return alert(err);
         }
@@ -32,26 +34,7 @@ var JoinTablesWidget = (function() {
   };
 
 
-  self.getDBmodel = function(dataSourceConfig, callback) {
-    const params = new URLSearchParams({
-      name: dataSourceConfig.dbName,
-      type: dataSourceConfig.type
-    });
-    $.ajax({
-      type: "GET",
-      url: Config.apiUrl + "/kg/model?" + params.toString(),
-      dataType: "json",
-      success: function(data, _textStatus, _jqXHR) {
-        return callback(null, data);
-      },
-      error: function(err) {
-        if (callback) {
-          return callback(err);
-        }
-        alert(err.responseText);
-      }
-    });
-  };
+
 
   self.viewTableSample = function() {
 
@@ -78,7 +61,8 @@ var JoinTablesWidget = (function() {
 
   };
   self.showJoin = function() {
-    var sql = self.getJoinSql();
+    var joinObj = self.getJoinObjectFromUI();
+    var sql = VirtualKGquery.getJoinSql(joinObj);
     $("#joinTablesWidgetDialog_sqlJoinDiv").html(sql);
   };
 
@@ -103,24 +87,7 @@ var JoinTablesWidget = (function() {
     return joinObj;
   };
 
-  self.getJoinSql = function() {
-    var joinObj = self.getJoinObjectFromUI();
-    var sql = "SELECT top 10 * from ";
-    sql += joinObj.fromTable + " ";
 
-    if (joinObj.joinTable) {
-      sql += " LEFT OUTER JOIN " + joinObj.joinTable + " ON " + joinObj.fromTable + "." + joinObj.fromColumn + "=" + joinObj.joinTable + "." + joinObj.joinFromColumn;
-      sql += " LEFT OUTER JOIN " + joinObj.toTable + " ON " + joinObj.joinTable + "." + joinObj.joinFromColumn + "=" + joinObj.toTable + "." + joinObj.toColumn;
-    }
-    else {
-      sql += " LEFT OUTER JOIN " + joinObj.toTable + " ON " + joinObj.fromTable + "." + joinObj.fromColumn + "=" + joinObj.toTable + "." + joinObj.toColumn;
-
-    }
-
-    return sql;
-
-
-  };
 
 
   return self;

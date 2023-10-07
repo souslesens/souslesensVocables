@@ -152,7 +152,7 @@ var KGcreator = (function() {
   };
 
   self.initSource = function(source, callback) {
-    R2Gmappings.loadSlsvSourceConfig(source, function(err, result) {
+    R2Gmappings.initSlsvSourceConfig(source, function(err, result) {
     });
 
     self.currentSource = source;

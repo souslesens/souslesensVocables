@@ -16,10 +16,10 @@ var VirtualKGquery = (function() {
     var sqlFrom = "";
     var sqlWhere = "";
 
-    asyn.series([
+    async.series([
 
       function(callbackSeries) {
-        R2Gmappings.loadSlsvSourceConfig(slsvSource, function(err, config) {
+        R2Gmappings.getSlsvSourceConfig(slsvSource, function(err, config) {
           if (err) {
             return callbackSeries(err);
           }
@@ -46,7 +46,7 @@ var VirtualKGquery = (function() {
 
           querySet.elements.forEach(function(queryElement, queryElementIndex) {
 
-            var classUri = queryElement.fromNode;
+            var classUri = queryElement.fromNode.id;
             var matches = R2Gmappings.getClass2ColumnMapping(self.dataSourcemappings, classUri);
             if (matches.length == 0) {
               return callbackSeries("no match for class " + classUri);
@@ -59,8 +59,8 @@ var VirtualKGquery = (function() {
 
 
 
-            var classUri = queryElement.toNode;
-            var matches = R2Gmappings.getClass2ColumnMapping(self.mappings, classUri);
+            var classUri = queryElement.toNode.id;
+            var matches = R2Gmappings.getClass2ColumnMapping(self.dataSourcemappings, classUri);
 
             if (matches.length == 0) {
               return callbackSeries("no match for class " + classUri);
@@ -77,28 +77,35 @@ var VirtualKGquery = (function() {
           });
 
         });
+
+      callbackSeries()
       },
 
 
       //set joins
       function(callbackSeries) {
-        var tableJoins = self.sourceConfig[slsvSource].tableJoins;
+        var tableJoins = self.sourceConfig.databaseSources[dataSource].tableJoins;
         var error = null;
        var existsJoin=false
           paths.forEach(function(path) {
-            tableJoins.forEach(function(join) {
-            if( (path.fromTable=join.fromTable && path.toTable=join.toTable) || (path.fromTable=join.toTable && path.toTable=join.fromTable)){
-              if(! join.id) {
-                join.id = common.getRandomHexaId(3)
+            if(path.fromTable==path.toTable){
+              return;
+            }else {
+              tableJoins.forEach(function(join) {
+                if ((path.fromTable == join.fromTable && path.toTable == join.toTable) || (path.fromTable == join.toTable && path.toTable == join.fromTable)) {
+                  if (!join.id) {
+                    join.id = common.getRandomHexaId(3)
+                  }
+                  path.tableJoin = join
+                  existsJoin = true
+                }
+              });
+              if (!existsJoin) {
+                callbackSeries("no join defined between  tables :" + JSON.stringify(path));
               }
-              path.tableJoin=join
-              existsJoin=true
             }
         });
-            if(!existsJoin){
-              callbackSeries("no join defined between  tables :"+JSON.stringify(path));
-            }
-        });
+
         callbackSeries()
       },
 

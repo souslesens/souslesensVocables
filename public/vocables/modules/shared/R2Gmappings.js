@@ -204,14 +204,17 @@ var R2Gmappings = (function () {
     self.showTablesColumnTree = function (table, tableColumns) {
         var jstreeData = [];
 
+        var columnMappings = [];
+
         tableColumns.forEach(function (column) {
-            /*   if (datasourceConfig.mappings[datasourceConfig.dataSource + "_" + table + ".json"]) {
-           label = "<span class='KGcreator_columnWithMappings'>" + table + "</span>";
-         }*/
+            var label = table;
+            if (self.currentConfig.currentMappings[self.currentConfig.currentDataSource + "_" + table + ".json"]) {
+                label = "<span class='KGcreator_columnWithMappings'>" + column + "</span>";
+            }
 
             jstreeData.push({
                 id: table + "_" + column,
-                text: column,
+                text: label,
                 parent: table,
                 data: { id: column, table: table, label: column, type: "tableColumn" },
             });
@@ -224,8 +227,8 @@ var R2Gmappings = (function () {
         //KGcreator.
         for (var table in datasourceConfig.tables) {
             var label = table;
-            if (datasourceConfig.mappings[datasourceConfig.dataSource + "_" + table + ".json"]) {
-                label = "<span class='KGcreator_fileWithMappings'>" + table + "</span>";
+            if (self.currentConfig.currentMappings[self.currentConfig.currentDataSource + "_" + table + ".json"]) {
+                label = "<span class='KGcreator_columnWithMappings'>" + table + "</span>";
             }
 
             var columns = datasourceConfig.tables[table];
@@ -390,16 +393,6 @@ var R2Gmappings = (function () {
             $("#smallDialogDiv").load("snippets/KGcreator/linkColumnToClassDialog.html", function () {
                 var columnTriples = {};
 
-                for (var key in self.currentConfig.currentMappings) {
-                    self.currentConfig.currentMappings[key].tripleModels.forEach(function (triple) {
-                        if (triple.s == fieldNode.data.id) {
-                            if (!columnTriples[key]) {
-                                columnTriples[key] = [];
-                            }
-                            columnTriples[key].push(triple);
-                        }
-                    });
-                }
                 var triplesHtml = "<ul>";
                 for (var key in columnTriples) {
                     triplesHtml += "<li><b>" + key + "</b></li>";
@@ -563,6 +556,20 @@ var R2Gmappings = (function () {
                 }
             );
         });
+    };
+
+    self.getColumnMappings = function (table, field, role) {
+        var columnTriples = [];
+        if (!self.currentConfig.currentMappings[table]) {
+            return columnTriples;
+        }
+
+        self.currentConfig.currentMappings[table].tripleModels.forEach(function (triple) {
+            if (triple[role] == field) {
+                columnTriples.push(triple);
+            }
+        });
+        return columnTriples;
     };
 
     return self;

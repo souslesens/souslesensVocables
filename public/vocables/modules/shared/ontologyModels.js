@@ -220,7 +220,6 @@ var OntologyModels = (function () {
                                     }
                                     */
 
-
                                     if (!Config.ontologiesVocabularyModels[source].restrictions[item.prop.value]) {
                                         Config.ontologiesVocabularyModels[source].restrictions[item.prop.value] = [];
                                     }
@@ -772,8 +771,8 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                         }
                     });
                     */
-                   // This code section is for restrictions but we have to think how restrictions and constraints need to interact between each others
-                   //For now, we desactivate the function because restrictions are just overcommiting the constraints
+                    // This code section is for restrictions but we have to think how restrictions and constraints need to interact between each others
+                    //For now, we desactivate the function because restrictions are just overcommiting the constraints
                     callbackSeries();
                 },
                 // Get parents properties

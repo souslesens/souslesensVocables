@@ -56,13 +56,14 @@ var JoinTablesWidget = (function() {
   };
 
   self.testJoin = function() {
-    var sql = self.getJoinSql();
+    var joinObj = self.getJoinObjectFromUI();
+    var sql = "SELECT top 10 * from "+ VirtualKGquery.getFromSql(joinObj);
     alert("coming soon");
 
   };
   self.showJoin = function() {
     var joinObj = self.getJoinObjectFromUI();
-    var sql = VirtualKGquery.getJoinSql(joinObj);
+    var sql = "SELECT top 10 * from "+ VirtualKGquery.getFromSql(joinObj);
     $("#joinTablesWidgetDialog_sqlJoinDiv").html(sql);
   };
 

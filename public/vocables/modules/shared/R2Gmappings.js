@@ -825,14 +825,11 @@ self.loadSourceMappings = function(slsvSource, dataSource, callback) {
     data: payload,
     dataType: "json",
     success: function(result, _textStatus, _jqXHR) {
-      try {
 
-        return callback(null, JSON.parse(result));
 
-      } catch (e) {
-        return callback(e);
-      }
-      callback();
+        callback(null, JSON.parse(result));
+
+
     },
     error(err) {
       return callback(null, {});

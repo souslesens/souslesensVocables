@@ -1423,29 +1423,7 @@
             "color": "#fdbf01",
             "width": 1
         },
-        {
-            "id": "http://data.total/resource/tsf/dalia-lifex/Job_Card_http://rds.posccaesar.org/ontology/lis14/rdl/hasPart_http://data.total/resource/tsf/dalia-lifex/Functional_Location",
-            "from": "http://data.total/resource/tsf/dalia-lifex/Job_Card",
-            "to": "http://data.total/resource/tsf/dalia-lifex/Functional_Location",
-            "label": "hasPart",
-            "font": {
-                "color": "#266264"
-            },
-            "data": {
-                "propertyId": "http://rds.posccaesar.org/ontology/lis14/rdl/hasPart",
-                "source": "LIFEX_DALIA",
-                "propertyLabel": "hasPart"
-            },
-            "arrows": {
-                "to": {
-                    "enabled": true,
-                    "type": "solid",
-                    "scaleFactor": 0.5
-                }
-            },
-            "color": "#fdbf01",
-            "width": 1
-        },
+
         {
             "id": "http://data.total/resource/tsf/dalia-lifex/Manning_http://rds.posccaesar.org/ontology/lis14/rdl/hasPart_http://data.total/resource/tsf/dalia-lifex/OffshorePOB",
             "from": "http://data.total/resource/tsf/dalia-lifex/Manning",

@@ -208,7 +208,9 @@ var OntologyModels = (function () {
                                     var domainLabel = item.subjectLabel ? item.subjectLabel.value : Sparql_common.getLabelFromURI(item.subject.value);
                                     var rangeLabel = item.valueLabel ? item.valueLabel.value : Sparql_common.getLabelFromURI(item.value.value);
                                     var propLabel = item.propLabel ? item.propLabel.value : Sparql_common.getLabelFromURI(item.prop.value);
-
+                                    // A property used on a restriction not implies that the property need to be added on this source, this will causes
+                                    // the accaparation of a property by another source in most cases
+                                    /*
                                     if (!uniqueProperties[item.prop.value]) {
                                         uniqueProperties[item.prop.value] = 1;
                                         Config.ontologiesVocabularyModels[source].properties[item.prop.value] = {
@@ -216,6 +218,9 @@ var OntologyModels = (function () {
                                             label: propLabel,
                                         };
                                     }
+                                    */
+
+
                                     if (!Config.ontologiesVocabularyModels[source].restrictions[item.prop.value]) {
                                         Config.ontologiesVocabularyModels[source].restrictions[item.prop.value] = [];
                                     }
@@ -742,6 +747,7 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
 
                 //add existing  restrictions to valid constraints
                 function (callbackSeries) {
+                    /*
                     allSources.forEach(function (_source) {
                         var sourceRestrictions = Config.ontologiesVocabularyModels[_source].restrictions;
                         if (!sourceRestrictions) {
@@ -765,6 +771,9 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
                             }
                         }
                     });
+                    */
+                   // This code section is for restrictions but we have to think how restrictions and constraints need to interact between each others
+                   //For now, we desactivate the function because restrictions are just overcommiting the constraints
                     callbackSeries();
                 },
                 // Get parents properties

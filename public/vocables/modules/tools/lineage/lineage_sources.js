@@ -12,6 +12,7 @@ import authentication from "../../shared/authentification.js";
 import PromptedSelectWidget from "../../uiWidgets/promptedSelectWidget.js";
 import SourceSelectorWidget from "../../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../../shared/mainController.js";
+import SearchWidget from "../../uiWidgets/searchWidget.js";
 
 var Lineage_sources = (function () {
     var self = {};
@@ -202,6 +203,10 @@ var Lineage_sources = (function () {
         $("#LineageNodesJsTreeDiv").empty();
         $("#Lineage_propertiesTree").empty();
         self.showHideEditButtons(source);
+        setTimeout(function(){
+            SearchWidget.init()
+        },500)
+
 
         $("#LineageLinkedDataRelationsDiv").load("snippets/lineage/linkedData/lineage_linkedData_relations.html", function () {
             Lineage_linkedData_query.init();
@@ -227,9 +232,6 @@ var Lineage_sources = (function () {
 
             //  common.fillSelectOptions("GenericTools_searchAllClassSelect", result, true, "label", "id");
         });
-    };
-    self.onSearchClass = function () {
-        PromptedSelectWidget.prompt("owl:Class", "GenericTools_searchAllClassSelect", self.activeSource);
     };
 
     self.showHideLineageLeftPanels = function () {

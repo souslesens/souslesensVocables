@@ -120,24 +120,14 @@ var KGcreator = (function () {
                 if (err) {
                     return alert(err.responseText);
                 }
-                $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {
-                    $("#KGcreator_centralPanelTabs").tabs({
-                        activate: function (e, ui) {
-                            var divId = ui.newPanel.selector;
-                            if (divId == "#KGcreator_resourceslinkingTab") {
-                                R2Gmappings.drawOntologyModel(self.currentSlsvSource);
-                            }
-                        },
-                    });
-
-                    if (!authentication.currentUser.groupes.indexOf("admin") > -1) {
-                        $("#KGcreator_deleteKGcreatorTriplesBtn").css("display", "none");
-                    }
-                    MainController.UI.showHideRightPanel("hide");
-                    // $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function() {
-                    // pass
-                    //  });
-                });
+                $("#graphDiv").load("snippets/KGcreator/centralPanel.html", function () {});
+                if (!authentication.currentUser.groupes.indexOf("admin") > -1) {
+                    $("#KGcreator_deleteKGcreatorTriplesBtn").css("display", "none");
+                }
+                MainController.UI.showHideRightPanel("hide");
+                // $("#rightPanelDiv").load("snippets/KGcreator/rightPanel.html", function() {
+                // pass
+                //  });
             });
         });
         $("#accordion").accordion("option", { active: 2 });
@@ -160,8 +150,6 @@ var KGcreator = (function () {
     };
 
     self.initSource = function (source, callback) {
-        R2Gmappings.loadSourceConfig(source, function (err, result) {});
-
         self.currentSource = source;
         self.currentSlsvSource = source;
 
@@ -250,7 +238,7 @@ var KGcreator = (function () {
         $.getScript("/kg_upload_app.js");
     };
 
-    self.loadMappingsList = function (source, callback) {
+    self.loadMappingsList = function (callback) {
         self.currentSource = self.currentCsvDir;
         var payload;
         var prefix;
@@ -325,7 +313,7 @@ var KGcreator = (function () {
         });
     };
 
-    self.listFiles = function (currentCsvDir) {
+    self.listFiles = function (currentCsvDir = null) {
         self.currentCsvDir = currentCsvDir ? currentCsvDir : $("#KGcreator_csvDirsSelect").val();
         var payload = {
             dir: "CSV/" + self.currentCsvDir,
@@ -344,7 +332,7 @@ var KGcreator = (function () {
         });
     };
 
-    self.getContextMenu = function (node) {
+    self.getContextMenu = function () {
         return self.currentContextMenu();
     };
 
@@ -1649,9 +1637,6 @@ self.saveMappings({classId:classId})
         });
     };
     self.drawMappings = function () {
-        if (!self.currentJsonObject) {
-            return alert("no mapping file selected");
-        }
         var fileName = self.currentJsonObject.fileName;
         var mappingObjects = {
             [fileName]: self.currentJsonObject,

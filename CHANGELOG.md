@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.41.0...master)
 
+> [!IMPORTANT]
+> This release change the `npm` command to start the application. See `package.json` and
+> `README.md` to get the new commands
+
 ### Added
 
 -   Add `ElasticSearch.skipSslVerify` option to mainConfig.json to disable ssl check when
@@ -18,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 -   Rename `loginScheme` to `restrictLoggedUser`
 -   Use vitejs to build mainapp
 -   Reorder docker instruction to build image faster
+-   Change `npm` commands
 
 ## [1.37.0](https://github.com/souslesens/souslesensVocables/compare/1.36.0...1.37.0)
 

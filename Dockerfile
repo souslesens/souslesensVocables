@@ -7,14 +7,14 @@ RUN apk add --update --no-cache openjdk11
 # Install npm packages
 WORKDIR /app
 COPY package.json package-lock.json /app
-RUN npm ci
 WORKDIR /app/mainapp
 COPY mainapp/package.json mainapp/package-lock.json /app/mainapp
+WORKDIR /app
 RUN npm ci
 
 # Install mainapp
 COPY . /app
-RUN npm run build
+RUN npm run mainapp:build
 
 # souslesens default config
 ENV USER_USERNAME="admin"
@@ -22,5 +22,4 @@ ENV USER_PASSWORD="admin"
 ENV DEFAULT_SPARQL_URL="http://localhost:8890/sparql"
 
 # Entrypoint
-WORKDIR /app
 CMD sh /app/entrypoint.sh

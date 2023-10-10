@@ -19,9 +19,9 @@
         "tools:ncu": "ncu",
         "tools:tsc": "tsc",
         "tools:eslint": "eslint",
-        "release:patch": "standard-version --skip.tag --skip.commit  -t '' -r patch",
-        "release:minor": "standard-version --skip.tag --skip.commit  -t '' -r minor",
-        "release:major": "standard-version --skip.tag --skip.commit  -t '' -r major",
+        "release:patch": "standard-version --skip.tag --skip.commit --skip.changelog -t '' -r patch",
+        "release:minor": "standard-version --skip.tag --skip.commit --skip.changelog -t '' -r minor",
+        "release:major": "standard-version --skip.tag --skip.commit --skip.changelog -t '' -r major",
         "release:tag": "sh release-new.sh"
     },
     "devDependencies": {

@@ -234,13 +234,8 @@ and typescript/react.
 ```bash
 # Install the server
 npm ci
-# Install the front
-cd mainapp
-npm ci
 # Build mainapp with vitejs
-npm run build
-# Go back to root
-cd ..
+npm run mainapp:build
 # Run Express server
 npm start
 ```

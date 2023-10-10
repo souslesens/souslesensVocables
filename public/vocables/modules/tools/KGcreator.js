@@ -235,7 +235,7 @@ var KGcreator = (function () {
     };
 
     self.displayUploadApp = function () {
-        $.getScript("/kg_upload_app.js");
+        $.getScript("/assets/kg_upload_app.js");
     };
 
     self.loadMappingsList = function (callback) {

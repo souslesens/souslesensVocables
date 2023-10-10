@@ -25,4 +25,4 @@ jobs:
             - run: npm ci
             - run: cd mainapp && npm ci && cd ..
             - run: npm run build --if-present
-            - run: npm run prettier
+            - run: npm run prettier:check

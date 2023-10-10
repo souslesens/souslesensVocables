@@ -237,18 +237,20 @@ npm ci
 # Install the front
 cd mainapp
 npm ci
-# Build Webpack files
+# Build mainapp with vitejs
 npm run build
 # Go back to root
 cd ..
+# Run Express server
+npm start
 ```
 
-### Run souslesens server
+### Run souslesens server (dev mode)
 
 The following command will build and watch the react app and run and watch the node app.
 
 ```bash
-npm run devserver
+npm run dev:fullstack
 ```
 
 ### Run migration scripts

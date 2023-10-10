@@ -950,7 +950,7 @@ return alert("missing target node in  path");
 
         self.KGqueryGraph = new VisjsGraphClass("KGqueryWidget_graphDiv", { nodes: [], edges: [] }, visjsOptions);
 
-        if (true) {
+        if (false) {
             self.KGqueryGraph.loadGraph(visjsGraphFileName, null, function (err, result) {
                 if (err) visjsData = { nodes: [], edges: [] };
                 else visjsData = result;

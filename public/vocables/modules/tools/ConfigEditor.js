@@ -14,7 +14,11 @@ var ConfigEditor = (function () {
             $("#graphDiv").html(`
                     <div id="mount-app-here"></div>
                 `);
-            $.getScript("/assets/index.js");
+            // const index_script = document.createElement("script");
+            // index_script.type = "module";
+            // index_script.src = "/assets/index.js";
+            // document.body.appendChild(index_script);
+            import("/assets/index.js");
         }, 200);
     };
 

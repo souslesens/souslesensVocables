@@ -3,7 +3,7 @@ import KGcreator from "../KGcreator.js";
 import Lineage_linkedData_mappings from "./linkedData/lineage_linkedData_mappings.js";
 import Lineage_graphTraversal from "./lineage_graphTraversal.js";
 import Lineage_selection from "./lineage_selection.js";
-import KGquery from "./assetQuery.js";
+//import KGquery from "./assetQuery.js";
 import Lineage_decoration from "./lineage_decoration.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";

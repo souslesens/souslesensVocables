@@ -38,6 +38,7 @@
         padding: 3px;
         margin-right: 8px;
     }
+
     .KGqueryWidget_setDiv {
         margin: 3px;
         padding: 3px;
@@ -52,42 +53,42 @@
     }
 </style>
 <script>
-    $(function () {
-        $("button").addClass(" btn btn-sm my-1 py-0 btn-outline-primary");
-        $("KGqueryWidget_smallButton").addClass(" btn btn-sm my-1 py-0 btn-outline-primary");
-    });
+  $(function() {
+    $("button").addClass(" btn btn-sm my-1 py-0 btn-outline-primary");
+    $("KGqueryWidget_smallButton").addClass(" btn btn-sm my-1 py-0 btn-outline-primary");
+  });
 </script>
 <div style="display: flex; flex-direction: row">
-    <div style="display: flex; flex-direction: column">
-        <div style="width: 300px; align-items: baseline" id="KGqueryWidget_SetsControlsDiv">
-            <button onclick="KGqueryWidget.addQuerySet('Minus')"><img src="icons/set_minus.png" height="30px" />Minus</button>
-            <button onclick="KGqueryWidget.addQuerySet('Union')"><img src="icons/set_union.png" height="30px" />Union</button>
-        </div>
-
-        <div style="display: flex; flex-direction: column" id="KGqueryWidget_pathsDiv"></div>
+  <div style="display: flex; flex-direction: column">
+    <div style="width: 300px; align-items: baseline" id="KGqueryWidget_SetsControlsDiv">
+      <button onclick="KGqueryWidget.addQuerySet('Minus')"><img src="icons/set_minus.png" height="30px" />Minus</button>
+      <button onclick="KGqueryWidget.addQuerySet('Union')"><img src="icons/set_union.png" height="30px" />Union</button>
     </div>
 
-    <div style="display: flex; flex-direction: column">
-        <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center">
-            <button onclick="KGqueryWidget.clearAll()">Clear all</button>
-            <button onclick="KGqueryWidget.switchRightPanel()">&lt;&gt;</button>
-            <!--  <button onclick="KGqueryWidget.clearAll(true)">Clear</button>-->
+    <div style="display: flex; flex-direction: column" id="KGqueryWidget_pathsDiv"></div>
+  </div>
 
-            &nbsp; &nbsp;
-            <button onclick="KGqueryWidget.queryKG('table')">Table</button>
-            <button onclick="KGqueryWidget.queryKG('vijsGraph')">Graph</button>
-            <button onclick="KGqueryWidget.aggregateQuery()">Aggregate</button>
-            <button onclick="KGqueryWidget.saveModelGraph()" style="display: none">saveModelGraph</button>
+  <div style="display: flex; flex-direction: column">
+    <div style="display: flex; flex-direction: row; justify-content: flex-start; align-items: center">
+      <button onclick="KGqueryWidget.clearAll()">Clear all</button>
+      <button onclick="KGqueryWidget.switchRightPanel()">&lt;&gt;</button>
+      <!--  <button onclick="KGqueryWidget.clearAll(true)">Clear</button>-->
 
-            <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->
-            &nbsp;
-            <img src="./images/waitAnimated.gif" id="KGqueryWidget_waitImg" style="display: none; width: 15px; height: 15px; text-align: justify" />
-            &nbsp; <span class="messageDiv" id="KGqueryWidget_messageDiv"></span>
-        </div>
+      &nbsp; &nbsp;
+      <button onclick="KGqueryWidget.queryKG('table')">Table</button>
+      <button onclick="KGqueryWidget.queryKG('vijsGraph')">Graph</button>
+      <button onclick="KGqueryWidget.aggregateQuery()">Aggregate</button>
+      <button onclick="KGqueryWidget.saveModelGraph()" style="display: none">saveModelGraph</button>
 
-        <div id="KGqueryWidget_graphDiv" style="width: 1200px; height: 650px"></div>
-        <div id="KGqueryWidget_dataTableDiv" style="width: 1200px; height: 650px; display: none"></div>
+      <!--<button onclick="TimeLineWidget.init()">TimeLine</button>-->
+      &nbsp;
+      <img src="./images/waitAnimated.gif" id="KGqueryWidget_waitImg" style="display: none; width: 15px; height: 15px; text-align: justify" />
+      &nbsp; <span class="messageDiv" id="KGqueryWidget_messageDiv"></span>
     </div>
+
+    <div id="KGqueryWidget_graphDiv" style="width: 1200px; height: 650px"></div>
+    <div id="KGqueryWidget_dataTableDiv" style="width: 1200px; height: 650px; display: none"></div>
+  </div>
 </div>
 
 <div id="KGqueryWidget_popupMenuDiv" style="position: absolute"></div>

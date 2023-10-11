@@ -127,6 +127,7 @@ data/**/*.csv
 mainapp/static/*.js
 mainapp/static/*.js.map
 mainapp/lib
+mainapp/static/assets
 
 /public/vocables/customPlugins/TotalEnergies/
 /bin/dump-graphs.js

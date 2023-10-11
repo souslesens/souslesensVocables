@@ -1,11 +1,16 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import path from "path";
 
 export default defineConfig({
     plugins: [react()],
     build: {
         outDir: "static",
         rollupOptions: {
+            input: {
+                index: path.resolve(__dirname, "src/index.tsx"),
+                kg_upload_app: path.resolve(__dirname, "src/kg-upload-app.tsx"),
+            },
             output: {
                 entryFileNames: `assets/[name].js`,
             },
@@ -13,9 +18,7 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            // string shorthand: http://localhost:5173/foo -> http://localhost:4567/foo
             "/api": "http://localhost:3010",
-            // with options: http://localhost:5173/api/bar-> http://jsonplaceholder.typicode.com/bar
         },
     },
 });

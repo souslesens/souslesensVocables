@@ -5,7 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.41.0...master)
+## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.42.3...master)
+
+> [!IMPORTANT]
+> mainConfig is now in YAML. Use the following script to migrate the `mainConfig.json` to
+> `mainConfig.yml`
+
+```bash
+node scripts/migrations/migration_1.37_sources.js -c config -w
+```
+
+### Changed
+
+-   mainConfig is now in YAML
 
 ## [1.42.3](https://github.com/souslesens/souslesensVocables/compare/1.42.2...1.42.3) - 2023-10-11
 

@@ -69,6 +69,7 @@ var Lineage_sources = (function () {
     };
 
     self.showSourcesDialog = function (forceDialog) {
+
         if (!forceDialog && Config.tools["lineage"].urlParam_source) {
             return self.loadSources(Config.tools["lineage"].urlParam_source);
         }

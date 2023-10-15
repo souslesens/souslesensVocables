@@ -10,6 +10,7 @@ var VirtualKGquery = (function() {
     if (!options) {
       options = {};
     }
+    var isOuterJoin=false
     var paths = [];
     var joins = [];
     var sqlQuery="";
@@ -126,7 +127,7 @@ var VirtualKGquery = (function() {
           if (index > 0) {
             sqlFrom += ",";
           }
-          sqlFrom += self.getFromSql(path);
+          sqlFrom += self.getFromSql(path,isOuterJoin);
         });
 
 
@@ -168,21 +169,25 @@ var VirtualKGquery = (function() {
     });
   };
 
-  self.getFromSql = function(joinObj) {
+  self.getFromSql = function(joinObj,isOuterJoin) {
 
     var sql = "FROM ";//SELECT top 10 * from ";
 
+    var outerStr="";
+    if(isOuterJoin){
+      outerStr="OUTER"
+    }
     if(joinObj.fromTable ==joinObj.toTable )
       return sql+joinObj.fromTable
 
     sql += joinObj.fromTable + " ";
 
     if (joinObj.joinTable) {
-      sql += " LEFT OUTER JOIN " + joinObj.joinTable + " ON " + joinObj.fromTable + "." + joinObj.fromColumn + "=" + joinObj.joinTable + "." + joinObj.joinFromColumn;
-      sql += " LEFT OUTER JOIN " + joinObj.toTable + " ON " + joinObj.joinTable + "." + joinObj.joinFromColumn + "=" + joinObj.toTable + "." + joinObj.toColumn;
+      sql += " LEFT "+outerStr+" JOIN " + joinObj.joinTable + " ON " + joinObj.fromTable + "." + joinObj.fromColumn + "=" + joinObj.joinTable + "." + joinObj.joinFromColumn;
+      sql += " LEFT "+outerStr+" JOIN " + joinObj.toTable + " ON " + joinObj.joinTable + "." + joinObj.joinFromColumn + "=" + joinObj.toTable + "." + joinObj.toColumn;
     }
     else {
-      sql += " LEFT OUTER JOIN " + joinObj.toTable + " ON " + joinObj.fromTable + "." + joinObj.fromColumn + "=" + joinObj.toTable + "." + joinObj.toColumn;
+      sql += " LEFT "+outerStr+" JOIN " + joinObj.toTable + " ON " + joinObj.fromTable + "." + joinObj.fromColumn + "=" + joinObj.toTable + "." + joinObj.toColumn;
 
     }
     return sql;

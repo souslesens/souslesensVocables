@@ -14,8 +14,11 @@ var R2Gmappings = (function() {
   self.currentConfig = {};
   self.currentSource = {};
   self.allTriplesMappings = {};
+  var mappingsDir=  "mappings"
+ // mappingsDir=  "CSV"
 
-  self.init = function() {
+
+    self.init = function() {
     $("#KGcreator_centralPanelTabs").tabs({
       activate: function(e, ui) {
         var divId = ui.newPanel.selector;
@@ -33,7 +36,7 @@ var R2Gmappings = (function() {
   self.getSlsvSourceConfig = function(source, callback) {
     self.currentSource = source;
     var payload = {
-      dir: "mappings/" + source,
+      dir: mappingsDir+"/" + source,
       name: "main.json"
     };
     $.ajax({
@@ -45,11 +48,23 @@ var R2Gmappings = (function() {
         return callback(null, JSON.parse(result));
 
       }, error: function(err) {
-        callback(err);
+    //    callback(err);
+        var newJson={
+
+          "graphUri": Config.sources[self.currentSource].graphUri,
+          "prefixes": {},
+          "databaseSources": {
+          },
+          "csvSources": {
+          }
+        }
+        return callback(null,newJson);
       }
+
 
     });
   };
+
 
 
   self.initSlsvSourceConfig = function(source, callback) {
@@ -95,7 +110,67 @@ var R2Gmappings = (function() {
           }
         },
 
-        contextMenu: KGcreator.getContextMenu()
+        contextMenu: function(node, x){
+          var items={}
+          if( node.id=="databaseSources"){
+            items.addDatabaseSource = {
+              label: "addDatabaseSources",
+              action: function (_e) {
+                R2Gmappings.createDataBaseSourceMappings()
+              },
+            };
+            return items;
+          }
+
+         else  if( node.id=="csvSources"){
+            items.csvSources = {
+              label: "addCsvSources",
+              action: function (_e) {
+                // pb avec source
+               R2Gmappings.createCsvSourceMappings()
+              },
+            };
+            return items;
+          }
+          else  if( node.data.type=="table"){
+            items.showSampleData = {
+              label: "showSampleData",
+              action: function (_e) {
+                // pb avec source
+                KGcreator.showSampleData(  node, true, 200)
+              }
+            }
+            return items;
+          }
+          else  if( node.data.type=="tableColumn"){
+            items=KGcreator.getContextMenu()
+            items.showSampleData = {
+              label: "showSampleData",
+              action: function (_e) {
+                // pb avec source
+                KGcreator.showSampleData(  node, false, 200)
+              }
+            }
+            return items;
+          }
+          else  if( node.data.type=="csvFile"){
+            items=KGcreator.getContextMenu()
+            items.showSampleData = {
+              label: "showSampleData",
+              action: function (_e) {
+                // pb avec source
+                KGcreator.showSampleData(  node, true, 200)
+              }
+            }
+            return items;
+          }
+
+
+
+          return items;
+        }
+
+       // show_contextmenu: KGcreator.getContextMenu()
         //  withCheckboxes: true,
       };
 
@@ -138,9 +213,8 @@ var R2Gmappings = (function() {
           data: { id: datasource, type: "csvFile" }
 
         });
-
-        JstreeWidget.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
       }
+      JstreeWidget.loadJsTree("KGcreator_csvTreeDiv", jstreeData, options);
       if (callback) {
         return callback();
       }
@@ -155,7 +229,7 @@ var R2Gmappings = (function() {
 
 
     var payload = {
-      dir: "mappings/" + source,
+      dir: mappingsDir+"/" + source,
       fileName: "main.json",
       data: JSON.stringify(data, null, 2)
     };
@@ -165,7 +239,7 @@ var R2Gmappings = (function() {
       data: payload,
       dataType: "json",
       success: function(result, _textStatus, _jqXHR) {
-        MainController.UI.message("mappings/" + source + "config saved");
+        MainController.UI.message(mappingsDir+"/" + source + "config saved");
 
       },
       error: function(err) {
@@ -177,7 +251,7 @@ var R2Gmappings = (function() {
   self.saveDataSourceMappings = function(source, datasource, data, callback) {
     self.currentSource = source;
     var payload = {
-      dir: "mappings/" + source,
+      dir: mappingsDir+"/" + source,
       name: datasource + ".json",
       data: JSON.stringify(data, null, 2)
     };
@@ -187,7 +261,7 @@ var R2Gmappings = (function() {
       data: payload,
       dataType: "json",
       success: function(result, _textStatus, _jqXHR) {
-        MainController.UI.message("mappings/" + source + "config saved");
+        MainController.UI.message(mappingsDir+"/" + source + "config saved");
 
       },
       error: function(err) {
@@ -335,10 +409,7 @@ var R2Gmappings = (function() {
     self.graphActions.graphColumnToClassPredicates([table]);
 
 
-    for (var column in columnMappings) {
 
-    }
-    self.graphActions.drawColumnNodes(jstreeData);
 
   };
   self.showCsvColumnTree = function(table, datasourceConfig) {
@@ -372,7 +443,8 @@ var R2Gmappings = (function() {
   self.getMappingsList = function(source, callback) {
 
     var payload = {
-      dir: "mappings/" + source
+    dir: mappingsDir+"/" + source
+    
     };
 
 
@@ -388,7 +460,7 @@ var R2Gmappings = (function() {
         }
         var mappingFiles = [];
         result.forEach(function(file) {
-          if (file != "main.json") {
+          if (file != "main.json" && file.indexOf(".json">-1)) {
             mappingFiles.push(file);
           }
         });
@@ -854,7 +926,7 @@ var R2Gmappings = (function() {
   self.loadSourceMappings = function(slsvSource, dataSource, callback) {
 
     var payload = {
-      dir: "mappings/" + slsvSource,
+      dir: mappingsDir+"/" + slsvSource,
       name: dataSource + ".json"
     };
 
@@ -892,7 +964,7 @@ var R2Gmappings = (function() {
         result,
         function(mappingFileName, callbackEach) {
           var payload = {
-            dir: "mappings/" + source,
+            dir: mappingsDir+"/" + source,
             name: mappingFileName
           };
           allTripleMappings[mappingFileName] = {};
@@ -954,6 +1026,57 @@ var R2Gmappings = (function() {
   };
 
 
+
+  self.createDataBaseSourceMappings=function(){
+    var name=prompt("DBname")
+    if(!name)
+      return;
+    self.currentConfig.databaseSources[name]={
+      "type": "sql.sqlserver",
+      "connection": "_default",
+      "tableJoins": []
+    }
+
+
+
+
+  }
+
+  self.createCsvSourceMappings=function(){
+    var name=prompt("fileName")
+    if(!name)
+      return;
+
+  }
+
+
+
+  self.migrateOldMappings=function(slsvSource){
+    if(!slsvSource)
+      slsvSource=self.currentSource;
+    var json={}
+    R2Gmappings.getAllTriplesMappingsOld(slsvSource, function (err, mappingObjects) {
+      if(err){
+        return alert(err)
+      }
+      for(var key in mappingObjects){
+
+        var item=mappingObjects[key]
+
+        var obj={
+            tripleModels:item.tripleModels,
+            lookups:item.lookups,
+            transform:item.transform,
+            prefixes:item.prefixes
+
+          }
+        json[item.fileName]=obj;
+      }
+     var x=json
+
+    })
+
+  }
   return self;
 })
 ();

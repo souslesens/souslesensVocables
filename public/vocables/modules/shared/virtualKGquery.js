@@ -10,13 +10,13 @@ var VirtualKGquery = (function() {
     if (!options) {
       options = {};
     }
-    var isOuterJoin=false
+    var isOuterJoin = false;
     var paths = [];
     var joins = [];
-    var sqlQuery="";
+    var sqlQuery = "";
     var data = [];
 
-    var dataSourceConfig={}
+    var dataSourceConfig = {};
 
     async.series([
 
@@ -26,9 +26,9 @@ var VirtualKGquery = (function() {
             return callbackSeries(err);
           }
           self.sourceConfig = config;
-          dataSourceConfig=config.databaseSources[dataSource]
-          if(!dataSourceConfig){
-            return callback("no database source declared")
+          dataSourceConfig = config.databaseSources[dataSource];
+          if (!dataSourceConfig) {
+            return callback("no database source declared");
           }
 
           callbackSeries();
@@ -127,20 +127,21 @@ var VirtualKGquery = (function() {
           if (index > 0) {
             sqlFrom += ",";
           }
-          sqlFrom += self.getFromSql(path,isOuterJoin);
+          sqlFrom += self.getFromSql(path, isOuterJoin);
         });
 
 
-         sqlQuery = sqlSelect + " " + sqlFrom;
+        sqlQuery = sqlSelect + " " + sqlFrom;
         callbackSeries();
       },
 
       function(callbackSeries) {
-        self.execSql(sqlQuery,dataSourceConfig.type,dataSource,function(err, result){
-          if(err)
-            return callbackSeries(err)
-          data=result;
-        })
+        self.execSql(sqlQuery, dataSourceConfig.type, dataSource, function(err, result) {
+          if (err) {
+            return callbackSeries(err);
+          }
+          data = result;
+        });
       }], function(err) {
       return callback(err, data);
     });
@@ -169,37 +170,38 @@ var VirtualKGquery = (function() {
     });
   };
 
-  self.getFromSql = function(joinObj,isOuterJoin) {
+  self.getFromSql = function(joinObj, isOuterJoin) {
 
     var sql = "FROM ";//SELECT top 10 * from ";
 
-    var outerStr="";
-    if(isOuterJoin){
-      outerStr="OUTER"
+    var outerStr = "";
+    if (isOuterJoin) {
+      outerStr = "OUTER";
     }
-    if(joinObj.fromTable ==joinObj.toTable )
-      return sql+joinObj.fromTable
+    if (joinObj.fromTable == joinObj.toTable) {
+      return sql + joinObj.fromTable;
+    }
 
     sql += joinObj.fromTable + " ";
 
     if (joinObj.joinTable) {
-      sql += " LEFT "+outerStr+" JOIN " + joinObj.joinTable + " ON " + joinObj.fromTable + "." + joinObj.fromColumn + "=" + joinObj.joinTable + "." + joinObj.joinFromColumn;
-      sql += " LEFT "+outerStr+" JOIN " + joinObj.toTable + " ON " + joinObj.joinTable + "." + joinObj.joinFromColumn + "=" + joinObj.toTable + "." + joinObj.toColumn;
+      sql += " LEFT " + outerStr + " JOIN " + joinObj.joinTable + " ON " + joinObj.fromTable + "." + joinObj.fromColumn + "=" + joinObj.joinTable + "." + joinObj.joinFromColumn;
+      sql += " LEFT " + outerStr + " JOIN " + joinObj.toTable + " ON " + joinObj.joinTable + "." + joinObj.joinFromColumn + "=" + joinObj.toTable + "." + joinObj.toColumn;
     }
     else {
-      sql += " LEFT "+outerStr+" JOIN " + joinObj.toTable + " ON " + joinObj.fromTable + "." + joinObj.fromColumn + "=" + joinObj.toTable + "." + joinObj.toColumn;
+      sql += " LEFT " + outerStr + " JOIN " + joinObj.toTable + " ON " + joinObj.fromTable + "." + joinObj.fromColumn + "=" + joinObj.toTable + "." + joinObj.toColumn;
 
     }
     return sql;
   };
 
-  self.execSql=function(sqlQuery,dataSourceType,dbName,callback){
+  self.execSql = function(sqlQuery, dataSourceType, dbName, callback) {
 
 
     const params = new URLSearchParams({
       type: dataSourceType,
       dbName: dbName,
-      sqlQuery: sqlQuery,
+      sqlQuery: sqlQuery
     });
 
     $.ajax({
@@ -207,7 +209,7 @@ var VirtualKGquery = (function() {
       url: Config.apiUrl + "/kg/data?" + params.toString(),
       dataType: "json",
 
-      success: function (data, _textStatus, _jqXHR) {
+      success: function(data, _textStatus, _jqXHR) {
         if (callback) {
           return callback(null, data);
         }
@@ -216,9 +218,46 @@ var VirtualKGquery = (function() {
         if (callback) {
           return callback(null);
         }
-      },
+      }
     });
-  }
+  };
+
+
+  self.resultToDataTable = function(data) {
+    data.forEach(function(item) {
+      if (varName.length < 3) {
+        return;
+      }
+      if (nonNullCols[varName]) {
+        return;
+      }
+      if (item[varName]) {
+        if (item[varName].type != "uri") {
+          nonNullCols[varName] = item[varName].type;
+        }
+      }
+    });
+
+    var tableCols = [];
+    var colNames = [];
+    tableCols.push({ title: "rowIndex", visible: false, defaultContent: "", width: "15%" });
+    // colNames.push("rowIndex");
+    for (var varName in nonNullCols) {
+      tableCols.push({ title: varName, defaultContent: "", width: "15%" });
+      colNames.push(varName);
+    }
+
+    var tableData = [];
+    self.currentData = data;
+    self.tableCols = tableCols;
+    data.forEach(function(item, index) {
+      var line = [index];
+      colNames.forEach(function(col) {
+        line.push(item[col] ? item[col].value : null);
+      });
+      tableData.push(line);
+    });
+  };
 
 
   return self;

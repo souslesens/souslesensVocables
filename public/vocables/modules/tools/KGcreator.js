@@ -1426,8 +1426,8 @@ self.saveMappings({classId:classId})
         return callback(null, str);
       }
       $("#KGcreator_infosDiv").val(str);
-    } else if (self.currentSourceType == "DATABASE") {
-      var sqlQuery = "select top  " + size + " " + (allColumns ? "*" : node.data.id) + " from " + node.parent;
+    } else if (self.currentSourceType == "DATABASE" || node.data.type=="tableColumn"|| node.data.type=="table") {
+      var sqlQuery = "select top  " + size + " " + (allColumns ? "*" : node.data.id) + " from " + (allColumns ? node.data.id : node.parent);
       const params = new URLSearchParams({
         type: "sql.sqlserver",
         dbName: self.currentDbName,

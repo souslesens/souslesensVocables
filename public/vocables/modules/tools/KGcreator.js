@@ -735,22 +735,25 @@ var KGcreator = (function () {
   };
   self.addBasicMapping = function (type) {
     var column = self.currentTreeNode.data.id;
-    self.currentJsonObject.tripleModels.push({
+    var triples=[]
+    triples.push({
       s: column,
       p: "rdf:type",
       o: type,
     });
-    self.currentJsonObject.tripleModels.push({
+    triples.push({
       s: column,
       p: "rdfs:label",
       o: column,
       isString: true,
     });
+    self.currentJsonObject.tripleModels= self.currentJsonObject.tripleModels.concat(triples)
     /*  if (!self.currentJsonObject.transform[column]) {
 self.currentJsonObject.transform[column] = "function{if (value=='null') return null;if(mapping.isString && role=='o') return value; else return '" + column + "_'+value;}";
 }*/
 
     self.mainJsonEditor.load(self.currentJsonObject);
+  //  R2Gmappings.updateDataSourceTripleModels(null,triples,false)
     self.mainJsonEditorModified = true;
 
     $("#KGcreator_subjectInput").val(column);
@@ -857,13 +860,9 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
 
     self.mainJsonEditor.load(self.currentJsonObject);
     self.mainJsonEditorModified = true;
+    R2Gmappings.updateDataSourceTripleModels(tripleObj)
 
-    /*  $("#KGcreator_objectInput").val("");
-$("#KGcreator_objectSelect").val("");
-$("#KGcreator_predicateInput").val("");
-$("#KGcreator_predicateSelect").val("");*/
 
-    //   $("#KGcreator_tripleTA").val(JSON.stringify(tripleObj))
   };
 
   self.onTripleModelSelect = function (role, value) {
@@ -975,6 +974,9 @@ self.saveMappings({classId:classId})
 }*/
 
   self.saveMappings = function (options, callback) {
+
+    return R2Gmappings.saveDataSourceMappings()
+
     try {
       var data = self.mainJsonEditor.get();
     } catch (err) {

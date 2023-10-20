@@ -309,10 +309,9 @@ Each directory is named after the plugin we want to add.
 plugins/
 └── MyPlugin
     └── public
+        └── index.html 
         └── js
             └── main.js
-        └── html  
-            └──PluginExample.html 
         └── css     
             └── main.css 
 ```

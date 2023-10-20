@@ -309,19 +309,48 @@ Each directory is named after the plugin we want to add.
 plugins/
 └── MyPlugin
     └── public
-        └── MyPlugin.js
+        └── js
+            └── main.js
+        └── html  
+            └──PluginExample.html 
+        └── css     
+            └── main.css 
 ```
 
-The plugin's directory must contain a public directory with the source code within it.
 
-MyPlugin.js must export a single IIFE function.
 
-```
-const Toto = (function () {
-    return { name: "toto" };
+main.js must export a single IIFE function. 
+import functions from "./secondary.js";
+
+var Test = (function () {
+    var self = {};
+
+    self.onLoaded = function () {
+        functions.function_of_secondary_file();
+        $("#graphDiv").load('/plugins/PluginExample/html/PluginExample.html',function() {
+            console.log( " loaded" );
+          });
+    }
+return self;
 })();
-export default Toto;
-```
+
+export default Test;
+window.Test = Test;
+
+We can import differents others modules by creating Js files in the same example than main.js on the same folder and import them on main.js and call theses functions. We can load some html files but they need to be called on non relative path. Addition of an HTML file is not mandatory.
+Content of  PluginExample.html:
+
+<link rel="stylesheet" href="/plugins/PluginExample/css/main.css" />
+<div>
+    <select style="width: 300px" id="y">
+        <option value="currentGraphNodes">Current Graph Nodes</option>
+    </select>
+</div>
+
+We can add to  HTML file a css stylesheet with a non relative path (here main.css)
+
+
+
 
 Once it done, don't forget to add the plugin's name to `mainConfig.tools_available`.
-If you still don't see the plugin in the jsTree, check that your user's profile allows to see this plugin.
+If you still don't see the plugin in the jsTree, check that your user's profile allows you to see this plugin.

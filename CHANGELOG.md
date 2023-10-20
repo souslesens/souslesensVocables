@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unrelease](https://github.com/souslesens/souslesensVocables/compare/1.41.0...master)
 
+### Fixed
+
+-   Add trailing / to COPY instruction in Dockerfile
+
 ## [1.42.3](https://github.com/souslesens/souslesensVocables/compare/1.42.2...1.42.3) - 2023-10-11
 
 ### Fixed

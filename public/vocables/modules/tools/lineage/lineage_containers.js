@@ -9,6 +9,8 @@ self.lineageVisjsGraph;
 
 var Lineage_containers = (function () {
     var self = {};
+
+    self.containerStyle={ shape: "square",color : "#ecba4c"}
     self.nbOfancestors_tree_search = 0;
     self.ancestors_tree_search_areRunning = [false, false, false];
     self.flag_search = false;
@@ -1049,32 +1051,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 //get containersStyles
                 function (callbackSeries) {
                     return callbackSeries();
-                    data.forEach(function (item) {
-                        if (item.containerStyle) {
-                            if (!stylesMap[item.container.value]) {
-                                stylesMap[item.container.value] = { styleId: item.containerStyle.value };
-                            }
-                        }
-                    });
-                    var ids = Object.keys(stylesMap);
-                    if (ids.length == 0) {
-                        return callbackSeries();
-                    }
-                    Lineage_styles.init();
-                    Lineage_styles.listStyles(ids, function (err, styles) {
-                        if (err) {
-                            return alert(err);
-                        }
-                        for (var containerId in stylesMap) {
-                            var styleId = stylesMap[containerId];
-                            var styleObj = styles[styleId];
-                            if (styleObj) {
-                                styleObj.id = styleId;
-                            }
-                            stylesMap[containerId] = styleObj;
-                        }
-                        return callbackSeries();
-                    });
+
                 },
 
                 //draw
@@ -1098,10 +1075,10 @@ Lineage_styles.showDialog(self.currentContainer.data);
                             id: containerData.id,
                             label: containerData.label,
                             shadow: self.nodeShadow,
-                            shape: "box",
+                            shape: Lineage_containers.containerStyle.shape,
                             size: size,
                             font: type == "container" ? { color: "#70309f" } : null,
-                            color: "#ddd",
+                            color: Lineage_containers.containerStyle.color,
                             data: {
                                 type: type,
                                 source: source,
@@ -1112,12 +1089,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                     }
 
                     data.forEach(function (item) {
-                        var containerStyle = stylesMap[containerData.id];
-                        if (containerStyle) {
-                            shape = containerStyle.shape || shape;
-                            color2 = containerStyle.color || color2;
-                            size = containerStyle.size || colorsize2;
-                        }
+
 
                         if (!existingNodes[item.parent.value]) {
                             var type = "container";
@@ -1126,10 +1098,10 @@ Lineage_styles.showDialog(self.currentContainer.data);
                                 id: item.parent.value,
                                 label: item.parentLabel.value,
                                 shadow: self.nodeShadow,
-                                shape: type == "container" ? "box" : shape,
+                                shape: type == "container" ? Lineage_containers.containerStyle.shape : shape,
                                 size: size,
                                 font: type == "container" ? { color: color2, size: 10 } : null,
-                                color: "#ddd",
+                                color:Lineage_containers.containerStyle.color,
                                 data: {
                                     type: type,
                                     source: source,
@@ -1150,10 +1122,10 @@ Lineage_styles.showDialog(self.currentContainer.data);
                                 id: item.member.value,
                                 label: item.memberLabel.value,
                                 shadow: self.nodeShadow,
-                                shape: type == "container" ? "box" : shape,
+                                shape: type == "container" ? "box" : Lineage_containers.containerStyle.shape,
                                 size: size,
                                 font: type == "container" ? { color: color2, size: 10 } : null,
-                                color: "#ddd",
+                                color: Lineage_containers.containerStyle.color,
 
                                 data: {
                                     type: type,
@@ -1426,10 +1398,10 @@ Lineage_styles.showDialog(self.currentContainer.data);
                         id: item.container.value,
                         label: item.containerLabel.value,
                         shadow: self.nodeShadow,
-                        shape: "box",
+                        shape: Lineage_containers.containerStyle.shape,
                         size: Lineage_whiteboard.defaultShapeSize,
                         font: { color: color2 },
-                        color: "#ddd",
+                        color: Lineage_containers.containerStyle.color,
                         data: {
                             type: "container",
                             source: Lineage_sources.activeSource,

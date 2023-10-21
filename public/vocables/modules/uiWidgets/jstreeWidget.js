@@ -348,6 +348,14 @@ $("#" + jstreeDiv).jstree(true).delete_node(item)
         }
     };
 
+    self.setSelectedNodeStyle=function(style){
+      var node= $(".jstree-clicked")
+      for(var key in style) {
+        node.css(key, style[key])
+      }
+     
+    }
+
     self.getjsTreeNodeObj = function (jstreeDiv, id) {
         return $("#" + jstreeDiv)
             .jstree(true)

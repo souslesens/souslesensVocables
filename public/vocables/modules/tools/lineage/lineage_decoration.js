@@ -8,6 +8,7 @@ import Sparql_OWL from "../../sparqlProxies/sparql_OWL.js";
 import Lineage_whiteboard from "./lineage_whiteboard.js";
 import Lineage_relations from "./lineage_relations.js";
 import LegendWidget from "../../uiWidgets/legendWidget.js";
+import Lineage_containers from "./lineage_containers.js";
 
 //@typescript-eslint/no-unused-vars
 var Lineage_decoration = (function () {
@@ -263,8 +264,8 @@ var Lineage_decoration = (function () {
                             obj.shape = "triangle";
                         }
                         if (nodeTypesMap[nodeId] && nodeTypesMap[nodeId].allTypes.indexOf("Bag") > -1) {
-                            obj.shape = "box";
-                            obj.color = "#ddd";
+                            obj.shape =Lineage_containers.containerStyle.shape;
+                            obj.color = Lineage_containers.containerStyle.color;
                             obj.font = { color: color };
                         }
                         if (nodeIds.indexOf(nodeId) > -1) {

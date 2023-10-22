@@ -264,7 +264,7 @@ var Lineage_decoration = (function () {
                             obj.shape = "triangle";
                         }
                         if (nodeTypesMap[nodeId] && nodeTypesMap[nodeId].allTypes.indexOf("Bag") > -1) {
-                            obj.shape =Lineage_containers.containerStyle.shape;
+                            obj.shape = Lineage_containers.containerStyle.shape;
                             obj.color = Lineage_containers.containerStyle.color;
                             obj.font = { color: color };
                         }

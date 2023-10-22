@@ -69,7 +69,6 @@ var Lineage_sources = (function () {
     };
 
     self.showSourcesDialog = function (forceDialog) {
-
         if (!forceDialog && Config.tools["lineage"].urlParam_source) {
             return self.loadSources(Config.tools["lineage"].urlParam_source);
         }
@@ -346,7 +345,7 @@ var Lineage_sources = (function () {
 
                 var drawTopConcepts = false;
                 if (drawTopConcepts) {
-                    Lineage_whiteboard.drawTopConcepts(source, {}, null,function (err) {
+                    Lineage_whiteboard.drawTopConcepts(source, {}, null, function (err) {
                         if (err) {
                             return MainController.UI.message(err);
                         }

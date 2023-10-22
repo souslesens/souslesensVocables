@@ -367,15 +367,12 @@ return alert("missing target node in  path");
         $("#KGqueryWidget_graphDiv").css("display", "none");
         $("#KGqueryWidget_dataTableDiv").css("display", "block");
 
-
-        var isVirtualQuery=$("#KGqueryWidget_virtualQueryCBX").prop("checked")
-        if(isVirtualQuery){
-          return  VirtualKGquery.execPathQuery( self.querySets,self.source,"lifex_dalia_db",{},function(err, result){
-                if(err)
-                    return alert(err)
-            })
+        var isVirtualQuery = $("#KGqueryWidget_virtualQueryCBX").prop("checked");
+        if (isVirtualQuery) {
+            return VirtualKGquery.execPathQuery(self.querySets, self.source, "lifex_dalia_db", {}, function (err, result) {
+                if (err) return alert(err);
+            });
         }
-
 
         self.execPathQuery(options, function (err, result) {
             self.message("", true);

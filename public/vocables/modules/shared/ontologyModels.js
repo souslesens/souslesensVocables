@@ -714,8 +714,8 @@ validProperties = common.array.union(validProperties, noConstaintsArray);*/
 
                 //add existing  restrictions to valid constraints
                 function (callbackSeries) {
-                // do not use by now
-                return callbackSeries();
+                    // do not use by now
+                    return callbackSeries();
                     allSources.forEach(function (_source) {
                         var sourceRestrictions = Config.ontologiesVocabularyModels[_source].restrictions;
                         if (!sourceRestrictions) {

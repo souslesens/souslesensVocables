@@ -10,7 +10,7 @@ self.lineageVisjsGraph;
 var Lineage_containers = (function () {
     var self = {};
 
-    self.containerStyle={ shape: "square",color : "#ecba4c"}
+    self.containerStyle = { shape: "square", color: "#ecba4c" };
     self.nbOfancestors_tree_search = 0;
     self.ancestors_tree_search_areRunning = [false, false, false];
     self.flag_search = false;
@@ -1051,7 +1051,6 @@ Lineage_styles.showDialog(self.currentContainer.data);
                 //get containersStyles
                 function (callbackSeries) {
                     return callbackSeries();
-
                 },
 
                 //draw
@@ -1089,8 +1088,6 @@ Lineage_styles.showDialog(self.currentContainer.data);
                     }
 
                     data.forEach(function (item) {
-
-
                         if (!existingNodes[item.parent.value]) {
                             var type = "container";
                             existingNodes[item.parent.value] = 1;
@@ -1101,7 +1098,7 @@ Lineage_styles.showDialog(self.currentContainer.data);
                                 shape: type == "container" ? Lineage_containers.containerStyle.shape : shape,
                                 size: size,
                                 font: type == "container" ? { color: color2, size: 10 } : null,
-                                color:Lineage_containers.containerStyle.color,
+                                color: Lineage_containers.containerStyle.color,
                                 data: {
                                     type: type,
                                     source: source,

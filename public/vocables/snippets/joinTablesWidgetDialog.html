@@ -25,42 +25,41 @@
 </style>
 Database <span id="joinTablesWidgetDialog_databaseId"></span>
 <div style="display: flex; flex-direction: column">
-  <div>
-    <table id="joinTablesWidgetDialog_table">
+    <div>
+        <table id="joinTablesWidgetDialog_table">
+            <tr>
+                <td>From Table<span id="joinTablesWidgetDialog_fromTableId"></span></td>
+                <td>Join table<select style="width: 230px" onchange="JoinTablesWidget.showJoinTableColumns($(this).val())" id="joinTablesWidgetDialog_joinTableSelect"></select></td>
+                <td>To Table<span id="joinTablesWidgetDialog_toTableId"></span></td>
+            </tr>
 
-      <tr>
-        <td>From Table<span id="joinTablesWidgetDialog_fromTableId"></span></td>
-        <td>Join table<select style="width: 230px" onchange="JoinTablesWidget.showJoinTableColumns($(this).val())" id="joinTablesWidgetDialog_joinTableSelect"></select></td>
-        <td>To Table<span id="joinTablesWidgetDialog_toTableId"></span></td>
-      </tr>
+            <tr>
+                <td>
+                    <select onchange="JoinTablesWidget.viewTableSample('from')" id="joinTablesWidgetDialog_fromColumnSelect" size="10"></select>
+                </td>
 
-      <tr>
-        <td>
-          <select onchange="JoinTablesWidget.viewTableSample('from')" id="joinTablesWidgetDialog_fromColumnSelect" size="10"></select>
+                <td>
+                    <select onchange="JoinTablesWidget.viewTableSample('join')" id="joinTablesWidgetDialog_joinColumnSelect" size="10"></select>
+                </td>
+                <td>
+                    <select onchange="JoinTablesWidget.viewTableSample('to')" id="joinTablesWidgetDialog_toColumnSelect" size="10"></select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <span style="font-style: italic; color: #0d6efd" id="joinTablesWidgetDialog_fromJoinSpan"></span>
+                </td>
+                <td>
+                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.joinTable('from')"><-join From</button>
 
-        <td>
-        <select onchange="JoinTablesWidget.viewTableSample('join')" id="joinTablesWidgetDialog_joinColumnSelect" size="10"></select>
-        </td>
-        <td>
-          <select onchange="JoinTablesWidget.viewTableSample('to')" id="joinTablesWidgetDialog_toColumnSelect" size="10"></select>
-
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <span style="font-style: italic; color: #0d6efd" id="joinTablesWidgetDialog_fromJoinSpan"></span>
-        </td>
-        <td>
-          <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.joinTable('from')"><-join From</button>
-
-          <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.joinTable('to')">join To-></button>
-        </td>
-        <td>
-          <span style="font-style: italic; color: #0d6efd" id="joinTablesWidgetDialog_toJoinSpan"></span>
-        </td>
-      </tr>
-      <tr></tr>
-  <!--    <tr>
+                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.joinTable('to')">join To-></button>
+                </td>
+                <td>
+                    <span style="font-style: italic; color: #0d6efd" id="joinTablesWidgetDialog_toJoinSpan"></span>
+                </td>
+            </tr>
+            <tr></tr>
+            <!--    <tr>
         <td>
           <div id="joinTablesWidgetDialog_fromSampleDataDiv" style="width: 250px; height: 300px; overflow: auto"></div>
         </td>
@@ -71,18 +70,18 @@ Database <span id="joinTablesWidgetDialog_databaseId"></span>
           <div id="joinTablesWidgetDialog_toSampleDataDiv" style="width: 250px; height: 300px; overflow: auto"></div>
         </td>
       </tr>-->
-    </table>
-  </div>
-  <div style="width: 150px; display: flex; flex-direction: column">
-    <br />
+        </table>
+    </div>
+    <div style="width: 150px; display: flex; flex-direction: column">
+        <br />
 
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.showJoin()">show join</button>
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.testJoin()">Test join</button>
-    <br />
-    <div id="joinTablesWidgetDialog_sqlJoinDiv" style="width:500px;height: 100px;overflow: auto;"></div>
-    <br />
-    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.saveJoinMapping()">Save mapping</button>
-  </div>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.showJoin()">show join</button>
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.testJoin()">Test join</button>
+        <br />
+        <div id="joinTablesWidgetDialog_sqlJoinDiv" style="width: 500px; height: 100px; overflow: auto"></div>
+        <br />
+        <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.saveJoinMapping()">Save mapping</button>
+    </div>
 </div>
 
 <!--

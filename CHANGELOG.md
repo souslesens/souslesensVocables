@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Add trailing / to COPY instruction in Dockerfile
 
+### Changed
+
+-   Replace groups in the Users table with profiles
+
 ## [1.42.3](https://github.com/souslesens/souslesensVocables/compare/1.42.2...1.42.3) - 2023-10-11
 
 ### Fixed

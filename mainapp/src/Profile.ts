@@ -111,11 +111,8 @@ const BlenderSchema = z.object({
 });
 
 const SourceAccessControlSchema = z.union([z.literal("forbidden"), z.literal("read"), z.literal("readwrite")]);
-const ProfileSchema = z.object({
-    name: z
-        .string()
-        .refine((val) => val !== "admin", { message: "Name can't be admin" })
-        .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
+
+const ProfileSchema = {
     _type: z.string().optional(),
     id: z.string().default(ulid()),
     allowedSourceSchemas: z
@@ -126,7 +123,16 @@ const ProfileSchema = z.object({
     allowedTools: z.union([z.string(), z.array(z.string())]).default("ALL"),
     forbiddenTools: z.array(z.string()).default([]),
     blender: BlenderSchema.default({ contextMenuActionStartLevel: 0 }),
-});
+};
+
+export const ProfileSchemaCreate = {
+    ...ProfileSchema,
+    name: z
+        .string()
+        .refine((val) => val !== "admin", { message: "Name can't be admin" })
+        .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
+};
+
 type Blender = z.infer<typeof BlenderSchema>;
 
 type SourceAccessControl = z.infer<typeof SourceAccessControlSchema>;

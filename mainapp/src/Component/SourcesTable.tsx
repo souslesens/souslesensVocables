@@ -25,7 +25,7 @@ import {
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
-import { ServerSource, saveSource, defaultSource, deleteSource, InputSourceSchema } from "../Source";
+import { ServerSource, saveSource, defaultSource, deleteSource, InputSourceSchema, InputSourceSchemaCreate } from "../Source";
 import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
 import { ButtonWithConfirmation } from "./ButtonWithConfirmation";
@@ -40,6 +40,7 @@ import { Add, Remove } from "@mui/icons-material";
 import CircleIcon from "@mui/icons-material/Circle";
 import { green, pink, grey } from "@mui/material/colors";
 import Tooltip from "@mui/material/Tooltip";
+import * as z from "zod";
 
 const SourcesTable = () => {
     const { model, updateModel } = useModel();
@@ -292,7 +293,9 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     const [issues, setIssues] = React.useState<ZodCustomIssueWithMessage[]>([]);
     const schemaTypes = [...new Set(sources.map((source) => source.schemaType))];
 
-    const zo = useZorm("source-form", InputSourceSchema, { setupListeners: false, customIssues: issues });
+    const inputSourceSchema = create ? InputSourceSchemaCreate : InputSourceSchema;
+    const zo = useZorm("source-form", z.object(inputSourceSchema), { setupListeners: false, customIssues: issues });
+
     const [isAfterSubmission, setIsAfterSubmission] = React.useState<boolean>(false);
     const handleOpen = () => update({ type: Type.UserClickedModal, payload: true });
     const handleClose = () => update({ type: Type.UserClickedModal, payload: false });
@@ -359,7 +362,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
     function validateSourceName(sourceName: string) {
         const issues = createCustomIssues(InputSourceSchema);
 
-        if (sources.reduce((acc, s) => (acc ||= s.name === sourceName), false)) {
+        if (sources.reduce((acc, s) => (acc ||= s.id === sourceName), false)) {
             issues.name(`Source's name ${sourceName} is already in use`);
         }
 
@@ -424,6 +427,7 @@ const SourceForm = ({ source = defaultSource(ulid()), create = false }: SourceFo
                                 id={`name`}
                                 label={"Name"}
                                 variant="standard"
+                                disabled={!create}
                             />
                         </Grid>
                         <Grid item xs={6}>

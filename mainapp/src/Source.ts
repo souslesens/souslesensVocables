@@ -182,16 +182,8 @@ export const ServerSourceSchema = z.object({
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
 });
 
-export const InputSourceSchema = z.object({
+export const InputSourceSchema = {
     id: z.string().default(ulid()),
-    name: z
-        .string()
-        .nonempty({ message: "Required" })
-        .refine((val) => val !== "admin", { message: "Name can't be admin" })
-        .refine((val) => val.match(/.{2,254}/i), { message: "Name can only contain between 2 and 255 chars" })
-        .refine((val) => val.match(/^[a-z0-9]/i), { message: "Name have to start with alphanum char" })
-        .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
-
     _type: z.string().optional(),
     graphUri: z.string().optional(),
     sparql_server: SparqlServerSchema,
@@ -208,7 +200,18 @@ export const InputSourceSchema = z.object({
     group: z.string().min(3, { message: "Required, 3 chars min" }),
     imports: z.array(z.string()).default([]),
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
-});
+};
+
+export const InputSourceSchemaCreate = {
+    ...InputSourceSchema,
+    name: z
+        .string()
+        .nonempty({ message: "Required" })
+        .refine((val) => val !== "admin", { message: "Name can't be admin" })
+        .refine((val) => val.match(/.{2,254}/i), { message: "Name can only contain between 2 and 255 chars" })
+        .refine((val) => val.match(/^[a-z0-9]/i), { message: "Name have to start with alphanum char" })
+        .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
+};
 
 export const defaultSource = (id: string): ServerSource => {
     return ServerSourceSchema.parse({

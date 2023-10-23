@@ -34,12 +34,13 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { useZorm, createCustomIssues } from "react-zorm";
 import { ZodIssue } from "zod";
+import * as z from "zod";
 import TableSortLabel from "@mui/material/TableSortLabel";
 
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
-import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema } from "../Profile";
+import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate } from "../Profile";
 import { ServerSource } from "../Source";
 import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
@@ -263,7 +264,8 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
     const handleFieldUpdate = (fieldname: string) => (event: React.ChangeEvent<HTMLInputElement>) =>
         update({ type: Type.UserUpdatedField, payload: { fieldname: fieldname, newValue: event.target.value } });
 
-    const zo = useZorm("form", ProfileSchema, { setupListeners: false, customIssues: issues });
+    const profilesSchema = create ? ProfileSchemaCreate : ProfileSchema;
+    const zo = useZorm("form", z.object(profilesSchema), { setupListeners: false, customIssues: issues });
     const handleSourceAccessControlUpdate = (src: SourceTreeNode) => (event: React.ChangeEvent<HTMLInputElement>) => {
         const treeStr = src.treeStr;
 
@@ -497,6 +499,7 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                             id={`name`}
                             label={"Name"}
                             variant="standard"
+                            disabled={!create}
                         />
                         <TextField
                             name={zo.fields.blender.contextMenuActionStartLevel()}

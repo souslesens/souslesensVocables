@@ -70,7 +70,7 @@ const UsersTable = () => {
                     const { groups, _type, password, ...restOfProperties } = user;
                     const data = {
                         ...restOfProperties,
-                        groups: groups.join(";"),
+                        profiles: groups.join(";"),
                     };
 
                     return data;
@@ -100,7 +100,7 @@ const UsersTable = () => {
                                                         Name
                                                     </TableSortLabel>
                                                 </TableCell>
-                                                <TableCell style={{ fontWeight: "bold" }}>groups</TableCell>
+                                                <TableCell style={{ fontWeight: "bold" }}>Profiles</TableCell>
                                                 <TableCell style={{ fontWeight: "bold" }}>Actions</TableCell>
                                             </TableRow>
                                         </TableHead>
@@ -252,13 +252,13 @@ const UserForm = ({ maybeuser: maybeUser, create = false, id }: UserFormProps) =
                             />
                         </FormControl>
                         <FormControl>
-                            <InputLabel id="select-groups-label">Groups</InputLabel>
+                            <InputLabel id="select-groups-label">Profiles</InputLabel>
                             <Select
-                                labelId="select-groups-label"
+                                labelId="select-profiles-label"
                                 id="select-groups"
                                 multiple
                                 value={userModel.userForm.groups}
-                                label="select-groups-label"
+                                label="select-profile-label"
                                 fullWidth
                                 renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                 onChange={handleFieldUpdate("groups")}

@@ -6,6 +6,7 @@ import {
     FormControlLabel,
     FormGroup,
     Grid,
+    InputAdornment,
     InputLabel,
     FormLabel,
     MenuItem,
@@ -40,7 +41,8 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import { useModel } from "../Admin";
 import * as React from "react";
 import { SRD } from "srd";
-import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, ProfileSchema, ProfileSchemaCreate } from "../Profile";
+import { defaultProfile, saveProfile, Profile, deleteProfile, SourceAccessControl, profileHelp, ProfileSchema, ProfileSchemaCreate } from "../Profile";
+import { HelpButton } from "./HelpModal";
 import { ServerSource } from "../Source";
 import { identity, style, joinWhenArray } from "../Utils";
 import { ulid } from "ulid";
@@ -500,6 +502,13 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                             label={"Name"}
                             variant="standard"
                             disabled={!create}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <HelpButton title="Name" message={profileHelp.name} />
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
                         <TextField
                             name={zo.fields.blender.contextMenuActionStartLevel()}
@@ -511,6 +520,13 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                             id={`blender`}
                             label={"Blender Level"}
                             variant="standard"
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <HelpButton title="Blender Level" message={profileHelp.blenderLevel} />
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
                         <FormControl>
                             <InputLabel id="allowedSourceSchemas-label">Allowed Source Schemas</InputLabel>
@@ -523,6 +539,11 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 fullWidth
                                 renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                 onChange={handleFieldUpdate("allowedSourceSchemas")}
+                                endAdornment={
+                                    <InputAdornment position="end">
+                                        <HelpButton title="Allowed Source Schema" message={profileHelp.allowedSourceSchema} />
+                                    </InputAdornment>
+                                }
                             >
                                 {schemaTypes.map((schemaType, i) => (
                                     <MenuItem key={schemaType} value={schemaType}>
@@ -536,14 +557,31 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 ))}
                             </Select>
                         </FormControl>
-                        <Box style={{ maxHeight: "300px", overflow: "auto" }}>
-                            <FormControl>
-                                <FormLabel id="default-source-access-control-label">Default source access control</FormLabel>
+                        <FormControl>
+                            <Grid alignItems="center" container wrap="nowrap">
+                                <Grid item flex={1}>
+                                    <FormLabel id="default-source-access-control-label">Source access control</FormLabel>
+                                </Grid>
+                                <Grid item>
+                                    <HelpButton title="Sources access control" message={profileHelp.sourcesAccessControl} />
+                                </Grid>
+                            </Grid>
+                            <Box style={{ maxHeight: "300px", overflow: "auto" }}>
                                 <SourcesTreeView />
-                            </FormControl>
-                        </Box>
+                            </Box>
+                        </FormControl>
                         <FormGroup>
-                            <FormControlLabel control={<Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />} label="Allow all tools" />
+                            <Grid alignItems="center" container wrap="nowrap">
+                                <Grid item flex={1}>
+                                    <FormControlLabel
+                                        control={<Checkbox onChange={handleCheckedAll("allowedTools")} checked={profileModel.profileForm.allowedTools === "ALL"} />}
+                                        label="Allow all tools"
+                                    />
+                                </Grid>
+                                <Grid item>
+                                    <HelpButton title="Allowed tools" message={profileHelp.allowedTools} />
+                                </Grid>
+                            </Grid>
 
                             <FormControl style={{ display: profileModel.profileForm.allowedTools === "ALL" ? "none" : "" }} disabled={profileModel.profileForm.allowedTools === "ALL"}>
                                 <InputLabel id="allowedTools-label">Allowed tools</InputLabel>
@@ -575,6 +613,11 @@ const ProfileForm = ({ profile = defaultProfile(ulid()), create = false }: Profi
                                 fullWidth
                                 renderValue={(selected: string | string[]) => (typeof selected === "string" ? selected : selected.join(", "))}
                                 onChange={handleFieldUpdate("forbiddenTools")}
+                                endAdornment={
+                                    <InputAdornment position="end">
+                                        <HelpButton title="Forbidden tools" message={profileHelp.forbiddenTools} />
+                                    </InputAdornment>
+                                }
                             >
                                 {tools.map((tool) => (
                                     <MenuItem key={tool} value={tool}>

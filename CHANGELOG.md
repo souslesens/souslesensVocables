@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 -   Add trailing / to COPY instruction in Dockerfile
 -   Disable name field when editing source/profile form
+-   Source form: group cannot start with a /
 
 ### Changed
 

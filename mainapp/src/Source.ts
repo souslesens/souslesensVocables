@@ -197,7 +197,11 @@ export const InputSourceSchema = {
     isDraft: z.boolean().default(false),
     allowIndividuals: z.boolean().default(false),
     predicates: SourcePredicatesSchema,
-    group: z.string().min(3, { message: "Required, 3 chars min" }),
+    group: z
+        .string()
+        .nonempty({ message: "Required" })
+        .min(3, { message: "3 chars min" })
+        .refine((val) => val.match(/^[^\/]/), { message: "Cannot start with /" }),
     imports: z.array(z.string()).default([]),
     taxonomyPredicates: z.array(z.string()).default(["rdfs:subClassOf"]),
 };

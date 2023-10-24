@@ -133,6 +133,15 @@ export const ProfileSchemaCreate = {
         .refine((val) => val.match(/^[a-z0-9][a-z0-9-_]{1,253}$/i), { message: "Name can only contain alphanum and - or _ chars" }),
 };
 
+export const profileHelp = {
+    name: "The profile name, Cannot be admin and can only contain alphanum, - or _",
+    blenderLevel: "Blender level is…",
+    allowedSourceSchema: "The allowed source shema is…",
+    allowedTools: "Tools that are allowed to the profile. If `Allow all tools` is checked, all tools are allowed. otherwise, only tools that are seleced are allowed.",
+    forbiddenTools: "List of tools that are forbidden. The final list of allowed tools are the list of allowed tools without the list of forbidden tools.",
+    sourcesAccessControl: "Define access control (forbidden, read or readwrite) for each sources group",
+};
+
 type Blender = z.infer<typeof BlenderSchema>;
 
 type SourceAccessControl = z.infer<typeof SourceAccessControlSchema>;

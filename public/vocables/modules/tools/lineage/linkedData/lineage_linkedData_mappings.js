@@ -1,4 +1,4 @@
-import KGcreator from "../../KGcreator.js";
+import KGcreator from "../../KGcreator/KGcreator.js";
 
 import Lineage_whiteboard from "../lineage_whiteboard.js";
 import common from "../../../shared/common.js";

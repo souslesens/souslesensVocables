@@ -7,7 +7,7 @@ import SourceSelectorWidget from "../uiWidgets/sourceSelectorWidget.js";
 import MainController from "../shared/mainController.js";
 import visjsGraphClass from "../graph/VisjsGraphClass.js";
 import KGcreatorGraph from "./KGcreatorGraph.js";
-import R2Gmappings from "../shared/R2Gmappings.js";
+import KGcreator from "../shared/KGcreator.js";
 import authentication from "../shared/authentification.js";
 
 //https://openbase.com/js/@json-editor/json-editor/documentation
@@ -125,7 +125,7 @@ var KGcreator = (function () {
                         activate: function (e, ui) {
                             var divId = ui.newPanel.selector;
                             if (divId == "#KGcreator_resourceslinkingTab") {
-                                R2Gmappings.graphActions.drawOntologyModel(self.currentSlsvSource);
+                                KGcreator.graphActions.drawOntologyModel(self.currentSlsvSource);
                             }
                         },
                     });
@@ -160,8 +160,8 @@ var KGcreator = (function () {
     };
 
     self.initSource = function (source, callback) {
-        R2Gmappings.initSlsvSourceConfig(source, function (err, result) {
-            R2Gmappings.init(source, function (err, result) {});
+        KGcreator.initSlsvSourceConfig(source, function (err, result) {
+            KGcreator.init(source, function (err, result) {});
         });
 
         self.currentSource = source;
@@ -754,7 +754,7 @@ self.currentJsonObject.transform[column] = "function{if (value=='null') return n
 }*/
 
         self.mainJsonEditor.load(self.currentJsonObject);
-        //  R2Gmappings.updateDataSourceTripleModels(null,triples,false)
+        //  KGcreator.updateDataSourceTripleModels(null,triples,false)
         self.mainJsonEditorModified = true;
 
         $("#KGcreator_subjectInput").val(column);
@@ -861,7 +861,7 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
 
         self.mainJsonEditor.load(self.currentJsonObject);
         self.mainJsonEditorModified = true;
-        R2Gmappings.updateDataSourceTripleModels(tripleObj);
+        KGcreator.updateDataSourceTripleModels(tripleObj);
     };
 
     self.onTripleModelSelect = function (role, value) {
@@ -973,7 +973,7 @@ self.saveMappings({classId:classId})
 }*/
 
     self.saveMappings = function (options, callback) {
-        return R2Gmappings.saveDataSourceMappings();
+        return KGcreator.saveDataSourceMappings();
 
         try {
             var data = self.mainJsonEditor.get();
@@ -1643,7 +1643,7 @@ self.saveMappings({classId:classId})
 
     self.drawAllMappings = function () {
         var source = self.currentSlsvSource || self.currentCsvDir;
-        R2Gmappings.getAllTriplesMappings(source, function (err, mappingObjects) {
+        KGcreator.getAllTriplesMappings(source, function (err, mappingObjects) {
             if (err) {
                 return alert(err.responseText);
             }
@@ -1668,7 +1668,7 @@ self.saveMappings({classId:classId})
         var subjectTypes = [];
         var objectTypes = [];
         var source = self.currentSlsvSource || self.currentCsvDir;
-        R2Gmappings.getAllTriplesMappings(source, function (err, mappingObject) {
+        KGcreator.getAllTriplesMappings(source, function (err, mappingObject) {
             if (err) {
                 return alert(err.responseText);
             }

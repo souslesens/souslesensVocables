@@ -1,5 +1,5 @@
-import R2Gmappings from "./R2Gmappings.js";
-import common from "./common.js";
+import KGcreator from "../KGcreator/KGcreator.js";
+import common from "../../shared/common.js";
 
 var VirtualKGquery = (function () {
     var self = {};
@@ -19,7 +19,7 @@ var VirtualKGquery = (function () {
         async.series(
             [
                 function (callbackSeries) {
-                    R2Gmappings.getSlsvSourceConfig(slsvSource, function (err, config) {
+                    KGcreator.getSlsvSourceConfig(slsvSource, function (err, config) {
                         if (err) {
                             return callbackSeries(err);
                         }
@@ -34,7 +34,7 @@ var VirtualKGquery = (function () {
                 },
 
                 function (callbackSeries) {
-                    R2Gmappings.loadSourceMappings(slsvSource, dataSource, function (err, mappings) {
+                    KGcreator.loadSourceMappings(slsvSource, dataSource, function (err, mappings) {
                         self.dataSourcemappings = mappings;
                         callbackSeries();
                     });
@@ -46,7 +46,7 @@ var VirtualKGquery = (function () {
                     querySets.sets.forEach(function (querySet) {
                         querySet.elements.forEach(function (queryElement, queryElementIndex) {
                             var classUri = queryElement.fromNode.id;
-                            var matches = R2Gmappings.getClass2ColumnMapping(self.dataSourcemappings, classUri);
+                            var matches = KGcreator.getClass2ColumnMapping(self.dataSourcemappings, classUri);
                             if (matches.length == 0) {
                                 return callbackSeries("no match for class " + classUri);
                             }
@@ -57,7 +57,7 @@ var VirtualKGquery = (function () {
                             var obj = { fromClassUri: classUri, fromColumn: match.column, fromTable: match.table };
 
                             var classUri = queryElement.toNode.id;
-                            var matches = R2Gmappings.getClass2ColumnMapping(self.dataSourcemappings, classUri);
+                            var matches = KGcreator.getClass2ColumnMapping(self.dataSourcemappings, classUri);
 
                             if (matches.length == 0) {
                                 return callbackSeries("no match for class " + classUri);

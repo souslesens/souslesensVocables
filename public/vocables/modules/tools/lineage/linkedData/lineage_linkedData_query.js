@@ -1,6 +1,6 @@
 import Lineage_linkedData_mappings from "./lineage_linkedData_mappings.js";
 import common from "../../../shared/common.js";
-import KGcreator from "../../KGcreator.js";
+import KGcreator from "../../KGcreator/KGcreator.js";
 import Export from "../../../shared/export.js";
 
 import Lineage_whiteboard from "../lineage_whiteboard.js";

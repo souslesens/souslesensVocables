@@ -1,13 +1,13 @@
-import VirtualKGquery from "../shared/virtualKGquery.js";
+import VirtualKGquery from "../KGquery/virtualKGquery.js";
 
-var JoinTablesWidget = (function () {
+var KGcreator_joinTables = (function () {
     var self = {};
 
     self.showJoinTablesDialog = function (dataSourceConfig, fromTable, toTable, validateFn) {
         self.validateFn = validateFn;
 
         $("#smallDialogDiv").dialog("open");
-        $("#smallDialogDiv").load("snippets/joinTablesWidgetDialog.html", function () {
+        $("#smallDialogDiv").load("tools/KGcreator/html/joinTablesWidgetDialog.html", function () {
             $("#joinTablesWidgetDialog_databaseId").html(dataSourceConfig.dbName);
 
             $("#joinTablesWidgetDialog_fromTableId").html(fromTable);
@@ -74,5 +74,5 @@ var JoinTablesWidget = (function () {
     return self;
 })();
 
-export default JoinTablesWidget;
-window.JoinTablesWidget = JoinTablesWidget;
+export default KGcreator_joinTables;
+window.KGcreator_joinTables = KGcreator_joinTables;

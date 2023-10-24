@@ -1,5 +1,5 @@
 import common from "../../shared/common.js";
-import KGcreator from "../KGcreator.js";
+import KGcreator from "../KGcreator/KGcreator.js";
 import Lineage_linkedData_mappings from "./linkedData/lineage_linkedData_mappings.js";
 import Lineage_graphTraversal from "./lineage_graphTraversal.js";
 import Lineage_selection from "./lineage_selection.js";
@@ -136,16 +136,6 @@ var Lineage_whiteboard = (function () {
                             Lineage_properties.init();
                         } else if (divId == "#LineageRelationsTab") {
                             self.currentOwlType = "Relations";
-                        } else if (divId == "#Lineage_mappingsTab") {
-                            $("#Lineage_mappingsTab").load("snippets/lineage/linkedData/lineage_linkedData_mappings.html", function () {
-                                $("#Lineage_tablesTreeDiv").load("snippets/KGcreator/leftPanel.html", function () {
-                                    Lineage_linkedData_mappings.init();
-                                    KGcreator.loadCsvDirs({
-                                        contextualMenuFn: Lineage_linkedData_mappings.getTablesTreeContextMenu,
-                                        selectTreeNodeFn: Lineage_linkedData_mappings.onCsvtreeNodeClicked,
-                                    });
-                                });
-                            });
                         }
                     },
                 });

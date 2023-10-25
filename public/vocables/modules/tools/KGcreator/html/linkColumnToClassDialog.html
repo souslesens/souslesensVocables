@@ -24,7 +24,7 @@
       <!--    <div><span id="LinkColumn_subjectDiv"></span>&nbsp; <input type="checkbox" id="LinkColumn_isBlankNode" />isBlankNode</div>-->
       <div class="linkColumn_tripleDiv">
         add basic
-        <select id="LinkColumn_basicTypeSelect" onchange="KGcreator.mapColumn.addBasicMapping($(this).val())">
+        <select id="LinkColumn_basicTypeSelect" onchange="KGcreator_mappingsaddBasicMapping($(this).val())">
           <option></option>
           <option value="owl:NamedIndividual">addBasicIndividual</option>
           <option value="owl:Class">addBasicClass</option>
@@ -35,7 +35,7 @@
           <b> add triple</b>
           <div class="linkColumn_tripleDiv" style=" width: 300px;">
             <b> Subject</b>
-            <select id="LinkColumn_subjectSelect" onchange="KGcreator.mapColumn.onTripleModelSelect('s',$(this).val())">
+            <select id="LinkColumn_subjectSelect" onchange="KGcreator_mappingsonTripleModelSelect('s',$(this).val())">
               <option value=""></option>
               <option value="_selectedColumn" selected="selected">_selectedColumn</option>
               <option value="_function">_function</option>
@@ -55,11 +55,11 @@
             <option></option>
             <option value="if_column_value_not_null"> column not null</option>
           </select>
-          <button onclick="KGcreator.mapColumn.addTripleFromPredicateSelectorWidget()">add triple</button>
+          <button onclick="KGcreator_mappingsaddTripleFromPredicateSelectorWidget()">add triple</button>
         </div>
         <div>
 
-          <button style="margin: 5px" onclick="KGcreator.mapColumn.validateLinkColumnToClass()">Save mappings</button>
+          <button style="margin: 5px" onclick="KGcreator_mappingsvalidateLinkColumnToClass()">Save mappings</button>
         </div>
       </div>
     </div>

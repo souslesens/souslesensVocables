@@ -58,12 +58,9 @@ var KGcreator_graph = (function () {
         var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
 
         if (sourceNode.data && sourceNode.data.type == "table" && targetNode.data && targetNode.data.type == "table") {
-          var databaseSourceConfig = {
-            dbName: self.currentConfig.currentDataSource,
-            type: self.currentConfig.databaseSources[self.currentConfig.currentDataSource].type
-          };
+          var databaseSourceConfig = KGcreator.currentConfig.currentDataSource
           return JoinTablesWidget.showJoinTablesDialog(databaseSourceConfig, sourceNode.data.id, targetNode.data.id, function(err, result) {
-            self.rawConfig.databaseSources[self.currentConfig.currentDataSource].tableJoins.push(result);
+            self.rawConfig.currentDataSource.tableJoins.push(result);
 
             self.saveSlsvSourceConfig(self.currentSource, self.rawConfig, function(err, result) {
               if (err) {
@@ -120,7 +117,7 @@ var KGcreator_graph = (function () {
     var html = "";
 
     html = "    <span class=\"popupMenuItem\" onclick=\"KGcreator.showNodeNodeInfos();\"> Node Infos</span>";
-    html += "    <span class=\"popupMenuItem\" onclick=\"KGcreator.mapColumn.showMappingDialog(true);\"> Set column Class</span>";
+    html += "    <span class=\"popupMenuItem\" onclick=\"KGcreator_mappings.showMappingDialog(true);\"> Set column Class</span>";
     $("#popupMenuWidgetDiv").html(html);
     PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
   };
@@ -206,9 +203,9 @@ var KGcreator_graph = (function () {
   self.graphColumnToClassPredicates = function(tables) {
     var columnsWithClass = [];
     var existingGraphNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
-    for (var table in self.currentConfig.currentMappings) {
+    for (var table in KGcreator.currentConfig.currentMappings) {
       if (!tables || tables.indexOf(table) > -1) {
-        self.currentConfig.currentMappings[table].tripleModels.forEach(function(triple) {
+       KGcreator.currentConfig.currentMappings[table].tripleModels.forEach(function(triple) {
           if (triple.p == "rdf:type" && existingGraphNodes[triple.o]) {
             columnsWithClass.push({
               data: { id: table + "_" + triple.s, table: table, label: triple.s, type: "tableColumn", classNode: triple.o }
@@ -224,9 +221,9 @@ var KGcreator_graph = (function () {
   self.graphColumnToColumnPredicates = function(tables) {
     var edges = [];
     var existingGraphNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
-    for (var table in self.currentConfig.currentMappings) {
+    for (var table in KGcreator.currentConfig.currentMappings) {
       if (!tables || tables.indexOf(table > -1)) {
-        self.currentConfig.currentMappings[table].tripleModels.forEach(function(triple) {
+       KGcreator.currentConfig.currentMappings[table].tripleModels.forEach(function(triple) {
           if (triple.p.indexOf("http://") > -1) {
             // && existingGraphNodes[triple.o]) {
             var edgeId = table + "_" + triple.s + "_" + triple.p + "_" + triple.o;
@@ -256,7 +253,7 @@ var KGcreator_graph = (function () {
   };
 
   self.graphTablesJoins = function(dataSource) {
-    var tableJoins = self.currentConfig.databaseSources[dataSource].tableJoins;
+    var tableJoins =KGcreator.currentConfig.databaseSources[dataSource].tableJoins;
     var edges = [];
     var existingGraphNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
     tableJoins.forEach(function(join) {
@@ -482,11 +479,36 @@ var KGcreator_graph = (function () {
         self.mappingVisjsGraph.data.nodes.update(visjsData.nodes);
         self.mappingVisjsGraph.data.edges.update(visjsData.edges);
     };
+
+
+  self.deleteColumnNode= function (columnNodes) {
+    if (!Array.isArray(columnNodes)) {
+      columnNodes = [columnNodes];
+    }
+
+    var columnNodeIds = [];
+    columnNodes.forEach(function (columnNode) {
+      columnNodeIds.push(columnNode.id);
+    });
+    Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(columnNodeIds);
+  }  ;
+  self. deleteTableNodes= function (tableNode) {
+    var columnNodeIds = tableNode.children;
+    columnNodeIds.push(tableNode.id);
+    Lineage_whiteboard.lineageVisjsGraph.data.nodes.remove(columnNodeIds);
+
+  };
+
+
+
     self.groupByClass = function () {};
 
     self.toSVG = function () {
         self.mappingVisjsGraph.toSVG();
     };
+
+
+
 
     return self;
 })();

@@ -56,10 +56,10 @@ var KGcreator_graph = (function() {
         if (sourceNode.data && sourceNode.data.type == "table" && targetNode.data && targetNode.data.type == "table") {
           var databaseSourceConfig = {
             dbName: self.currentConfig.currentDataSource,
-            type: self.currentConfig.databaseSources[self.currentConfig.currentDataSource].type
+            type: self.currentConfig.currentDataSource.type
           };
           return JoinTablesWidget.showJoinTablesDialog(databaseSourceConfig, sourceNode.data.id, targetNode.data.id, function(err, result) {
-            self.rawConfig.databaseSources[self.currentConfig.currentDataSource].tableJoins.push(result);
+            self.rawConfig.currentDataSource.tableJoins.push(result);
 
             self.saveSlsvSourceConfig(self.currentSource, self.rawConfig, function(err, result) {
               if (err) {
@@ -116,7 +116,7 @@ var KGcreator_graph = (function() {
     var html = "";
 
     html = "    <span class=\"popupMenuItem\" onclick=\"KGcreator.showNodeNodeInfos();\"> Node Infos</span>";
-    html += "    <span class=\"popupMenuItem\" onclick=\"KGcreator.mapColumn.showMappingDialog(true);\"> Set column Class</span>";
+    html += "    <span class=\"popupMenuItem\" onclick=\"KGcreator_mappingsshowMappingDialog(true);\"> Set column Class</span>";
     $("#popupMenuWidgetDiv").html(html);
     PopupMenuWidget.showPopup(point, "popupMenuWidgetDiv");
   };

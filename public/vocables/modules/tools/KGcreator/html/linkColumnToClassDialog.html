@@ -4,7 +4,7 @@
 
     margin: 2px;
     padding: 2px;
-    border: #6e2500 solid 1px;
+  //  border: #6e2500 solid 1px;
     border-radius: 3px;
 
 
@@ -24,7 +24,7 @@
       <!--    <div><span id="LinkColumn_subjectDiv"></span>&nbsp; <input type="checkbox" id="LinkColumn_isBlankNode" />isBlankNode</div>-->
       <div class="linkColumn_tripleDiv">
         add basic
-        <select id="LinkColumn_basicTypeSelect" onchange="KGcreator_mappingsaddBasicMapping($(this).val())">
+        <select id="LinkColumn_basicTypeSelect" onchange="KGcreator_mappings.addBasicMapping($(this).val())">
           <option></option>
           <option value="owl:NamedIndividual">addBasicIndividual</option>
           <option value="owl:Class">addBasicClass</option>
@@ -35,7 +35,7 @@
           <b> add triple</b>
           <div class="linkColumn_tripleDiv" style=" width: 300px;">
             <b> Subject</b>
-            <select id="LinkColumn_subjectSelect" onchange="KGcreator_mappingsonTripleModelSelect('s',$(this).val())">
+            <select id="LinkColumn_subjectSelect" onchange="KGcreator_mappings.onTripleModelSelect('s',$(this).val())">
               <option value=""></option>
               <option value="_selectedColumn" selected="selected">_selectedColumn</option>
               <option value="_function">_function</option>
@@ -43,23 +43,26 @@
               <option value="_virtualColumn">_virtualColumn</option>
               <option value=""></option>
             </select>
-            <input id="LinkColumn_subjectInput" class="KGcreator_tripleInput">
+            <input id="LinkColumn_subjectInput" class="KGcreator_tripleInput" style="background-color: beige">
             isBlankNode<input type="checkbox" id="LinkColumn_isSubjectBlankNodeCBX"><br>
-            lookup <input id="LinkColumn_subjectLookupName">
+            lookup name<input id="LinkColumn_subjectLookupName">
           </div>
 
           <div id="LinkColumn_predicateSelectorDiv"></div>
-          is Restriction <input type="checkbox" id="KGcreator_isRestrictionCBX" /><br>
-          condition
-          <select id="KGcreator_objectLookupName">
-            <option></option>
-            <option value="if_column_value_not_null"> column not null</option>
-          </select>
-          <button onclick="KGcreator_mappingsaddTripleFromPredicateSelectorWidget()">add triple</button>
+
+          <div class="linkColumn_tripleDiv">
+            is Restriction <input type="checkbox" id="KGcreator_isRestrictionCBX" /><br>
+            condition
+            <select id="KGcreator_objectLookupName">
+              <option></option>
+              <option value="if_column_value_not_null"> column not null</option>
+            </select>
+            <button onclick="KGcreator_mappings.addTripleFromPredicateSelectorWidget()">add triple</button>
+          </div>
         </div>
         <div>
 
-          <button style="margin: 5px" onclick="KGcreator_mappingsvalidateLinkColumnToClass()">Save mappings</button>
+          <button style="margin: 5px" onclick="KGcreator_mappings.validateLinkColumnToClass()">Save mappings</button>
         </div>
       </div>
     </div>

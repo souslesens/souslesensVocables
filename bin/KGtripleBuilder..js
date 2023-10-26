@@ -1073,14 +1073,14 @@ propertyStr = line[item.p];
         );
     },
     /**
-     * Generate triples from a CSV file
+     * Generate triples from a CSV file or database
      *
      * @param {string} dirName - the subdirectory of <src-dir>/data where to look for <mappingFileName>
      * @param {string} mappingFileName - name of the csv file to generate triples from (optional if null create triples from all mappings)
      * @param {Object} options - keys: sparqlServerUrl, deleteOldGraph, graphUri
      * @param {Function} callback - Node-style async Function called to proccess result or handle error
      */
-    createTriplesFromCsv: function (dirName, mappingFileName, options, callback) {
+    createTriplesFromCsvOrTable: function (dirName, mappingFileName, options, callback) {
         var sparqlServerUrl;
         var output = "";
         var clientSocketId = options.clientSocketId;

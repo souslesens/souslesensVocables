@@ -7,8 +7,15 @@ var KGcreator_mappings=(function(){
 
     self.showMappingDialog= function (addColumnClassType) {
       PopupMenuWidget.hidePopup();
-      var columnNode = KGcreator.currentTreeNode;
+
       self.currentSlsvSource=KGcreator.currentSlsvSource
+      self.currentColumn = {
+        node: KGcreator.currentTreeNode,
+        triples: [],
+      };
+      var columnNode=self.currentColumn.node
+    
+    
 
       /*   if (columnNode.data.type.indexOf("Column") < 0) {
     return alert("select a field (column)");
@@ -32,14 +39,14 @@ var KGcreator_mappings=(function(){
             var html =
               "<div>isBlankNode<input type='checkbox' id='LinkColumn_isObjectBlankNodeCBX' />" +
               "is String <input type='checkbox' id='LinkColumn_isObjectStringCBX' /><br> "+
-              " lookup <input id='LinkColumn_objectLookupName' style='width:100px'/></div>";
+              " lookup name <input id='LinkColumn_objectLookupName' style='width:150px;background-color: white'/></div>";
             $("#editPredicate_customContentDiv").html(html);
 
             $("#editPredicate_vocabularySelect2").bind("change", function () {
-              KGcreator_mappingsonTripleModelSelect("o", $(this).val());
+              KGcreator_mappings.onTripleModelSelect("o", $(this).val());
             });
 
-            $("#LinkColumn_subjectInput").val(columnNode.text)
+            $("#LinkColumn_subjectInput").val(columnNode.data.id)
             $("#editPredicate_vocabularySelect2").append('<option value=\"table_Column\">table Column</option>');
 
 
@@ -49,17 +56,13 @@ var KGcreator_mappings=(function(){
           });
 
           self.columnJsonEditor = new JsonEditor("#KGcreator_columnJsonDisplay", {});
-          self.currentColumn = {
-            columnNode: self.currentTreeNode,
-
-            triples: [],
-          };
+         
 
           var existingTriples =KGcreator.getColumnsMappings(columnNode.data.table, columnNode.data.id, "s");
-          if (existingTriples[columnNode.data.id]) self.updateColumnTriplesEditor(existingTriples[columnNode.data.id]);
+          if (existingTriples[ columnNode.data.id]) self.updateColumnTriplesEditor(existingTriples[ columnNode.data.id]);
           if (addColumnClassType && KGcreator_graph.currentGraphNode.data.id) {
             var classTypeTriple = {
-              s: columnNode.data.id,
+              s:  columnNode.data.id,
               p: "rdf:type",
               o: KGcreator_graph.currentGraphNode.data.id,
             };
@@ -71,7 +74,7 @@ var KGcreator_mappings=(function(){
 
       ;
   self.onTripleModelSelect= function (role, value) {
-      var columnNode=self.currentColumn
+      var columnNode=self.currentColumn.node
       if (value == "_function") {
         return self.showFunctionDialog(role);
       }
@@ -90,7 +93,7 @@ var KGcreator_mappings=(function(){
 
       } else if (role == "o") {
         if (value == "table_Column") {
-          var table=self.currentColumn.columnNode.data.table
+          var table=columnNode.data.table
           var columns=KGcreator.currentConfig.currentDataSource.tables[table]
           common.fillSelectOptions("editPredicate_objectSelect",columns,true)
         } else {
@@ -100,6 +103,7 @@ var KGcreator_mappings=(function(){
       }
     }
   ;
+  
   self.updateColumnTriplesEditor= function (triples) {
       if (!Array.isArray(triples)) {
         triples = [triples];
@@ -110,9 +114,11 @@ var KGcreator_mappings=(function(){
       });
       self.columnJsonEditor.load(self.currentColumn.triples);
     }  ;
+  
+  
   self.addBasicMapping= function (basicType) {
       if (basicType) {
-        var column = self.currentColumn.columnNode.data.id;
+        var column = self.currentColumn.node.data.id;
         var triples = [];
         triples.push({
           s: column,
@@ -129,7 +135,7 @@ var KGcreator_mappings=(function(){
       }
     }  ;
   self.addTripleFromPredicateSelectorWidget= function (basicType) {
-      var subject = self.currentColumn.columnNode.data.id;
+      var subject = self.currentColumn.node.data.id;
       var predicate = PredicatesSelectorWidget.getSelectedProperty();
       var object = PredicatesSelectorWidget.getSelectedObjectValue();
       var isColumnBlankNode = $("#LinkColumn_isBlankNode").prop("checked");
@@ -259,12 +265,12 @@ var KGcreator_mappings=(function(){
 
 
   self.validateLinkColumnToClass= function () {
-      var columnNode = self.currentColumn.columnNode;
-      self.currentConfig.currentMappings[columnNode.data.table].tripleModels = self.currentColumn.triples;
-      self.saveDataSourceMappings();
+      var columnNode = self.currentColumn.node;
+    KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels = self.currentColumn.triples;
+      KGcreator.saveDataSourceMappings();
 
       JstreeWidget.setSelectedNodeStyle({ color: "#0067bb" });
-      JstreeWidget.setSelecteKdNodeStyle({ color: "#0067bb" });
+      JstreeWidget.setSelectedNodeStyle({ color: "#0067bb" });
 
       if (self.currentGraphNode) {
         columnNode.data.classNode = KGcreator_graph.currentGraphNode.id;

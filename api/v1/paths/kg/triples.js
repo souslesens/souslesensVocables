@@ -8,7 +8,7 @@ module.exports = function () {
 
     function POST(req, res, next) {
         try {
-            KGtripleBuilder.createTriplesFromCsv(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
+            KGtripleBuilder.createTriplesFromCsvOrTable(req.body.dir, req.body.fileName, JSON.parse(req.body.options), function (err, result) {
                 processResponse(res, err, result);
             });
         } catch (e) {
@@ -20,7 +20,7 @@ module.exports = function () {
         security: [{ restrictLoggedUser: [] }],
         summary: "Creates triples from csv file",
         description: "Takes a csv filename and directory and returns triples",
-        operationId: "createTriplesFromCsv",
+        operationId: "createTriplesFromCsvOrTable",
         parameters: [
             {
                 name: "body",

@@ -60,17 +60,17 @@
 
         <div class="lineage_actionDiv" style="display: flex; flex-direction: column">
             <div class="lineage_button_group" style="min-width: 300px">
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.saveMappings()">Save mappings</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.drawMappings()">draw mappings</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.drawAllMappings()">draw all mappings</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearMappings()">Clear mappings</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.saveDataSourceMappings()">Save mappings</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_graph.drawMappings()">draw mappings</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_graph.drawAllMappings()">draw all mappings</button>
+
 
                 <button onclick="KGcreator.migrateOldMappings()">migrateOldMappings</button>
 
                 <!--  <button onclick="KGcreator.copyMappings()">Copy</button>-->
             </div>
             <div class="lineage_button_group" style="width: 600px">
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.createTriples(true)">View Sample triples</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.createTriples(true)">View Sample triples</button>
                 <!--  <input type="checkbox" id="KGcreator_addAllPredefinedPart14PredicatesTriples" />addPredefinedPart14Triples-->
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.createTriples()">Create triples</button>
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.stopCreateTriples()">Abort</button>

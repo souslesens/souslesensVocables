@@ -1,4 +1,5 @@
 import KGcreator from "./KGcreator.js";
+import KGcreator_graph  from "./KGcreator_graph.js";
 
 var KGcreator_mappings=(function(){
 

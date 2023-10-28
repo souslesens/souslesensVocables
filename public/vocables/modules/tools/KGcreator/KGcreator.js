@@ -144,7 +144,8 @@ var KGcreator = (function() {
               name: obj.node.id,
               tables: [],
               type: "databaseSource",
-              sqlType: obj.node.data.sqlType
+              sqlType: obj.node.data.sqlType,
+              currentTable:""
             };
 
           KGcreator.loadDataBaseSource(self.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
@@ -163,6 +164,7 @@ var KGcreator = (function() {
 
             var columns = self.currentConfig.currentDataSource.tables[obj.node.data.id];
             var table = obj.node.data.id;
+            self.currentConfig.currentDataSource.currentTable=table
             self.showTablesColumnTree(table, columns);
           }
           else if (obj.node.data.type == "csvFile") {
@@ -172,7 +174,8 @@ var KGcreator = (function() {
             };
 
             var mappingObj = self.currentConfig.currentMappings[obj.node.data.id];
-
+            var table = obj.node.data.id;
+            self.currentConfig.currentDataSource.currentTable=table
             self.showCsvColumnTree(obj.node.id);
           }
           else if (obj.node.data.type == "tableColumn") {
@@ -328,7 +331,12 @@ var KGcreator = (function() {
     });
   };
 
-  self.saveSlsvSourceConfig = function(source, data, callback) {
+  self.saveSlsvSourceConfig = function( callback) {
+
+    var data={};
+    var source=self.currentConfig.currentDataSource;
+    self.currentConfig.currentMappings
+
     var payload = {
       dir: mappingsDir + "/" + source,
       fileName: "main.json",
@@ -363,6 +371,7 @@ var KGcreator = (function() {
       (source = self.currentSlsvSource), self.currentConfig.currentDataSource, self.currentConfig.currentMappings;
     }
     if (!datasource) {
+
       datasource = self.currentConfig.currentDataSource;
     }
     if (!data) {
@@ -717,7 +726,7 @@ var KGcreator = (function() {
       tableJoins: []
     };
 
-    self.saveSlsvSourceConfig(self.currentSlsvSource, self.currentConfig, function(err, result) {
+    self.saveSlsvSourceConfig( function(err, result) {
       if (err) {
         return alert(err);
       }

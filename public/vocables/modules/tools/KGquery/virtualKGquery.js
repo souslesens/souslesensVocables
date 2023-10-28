@@ -140,8 +140,8 @@ var VirtualKGquery = (function () {
 
     self.getDBmodel = function (dataSourceConfig, callback) {
         const params = new URLSearchParams({
-            name: dataSourceConfig.dbName,
-            type: dataSourceConfig.type,
+            name: dataSourceConfig.name,
+            type: dataSourceConfig.sqlType,
         });
         $.ajax({
             type: "GET",

@@ -2,11 +2,12 @@ import MainController from "../../shared/mainController.js";
 import KGcreator from "./KGcreator.js";
 import SearchUtil from "../../search/searchUtil.js";
 import Sparql_generic from "../../sparqlProxies/sparql_generic.js";
-var KGcreator_run=(function(){
-  var self={}
+
+var KGcreator_run = (function() {
+  var self = {};
 
 
-  self.createTriples = function (test, _options, callback) {
+  self.createTriples = function(test, _options, callback) {
     if (!_options) {
       _options = {};
     }
@@ -20,9 +21,9 @@ var KGcreator_run=(function(){
     }
 
     var dataLocation = "";
-  
 
-  var mappings=KGcreator.currentConfig.currentMappings
+
+    var mappings = KGcreator.currentConfig.currentMappings;
 
     if (!mappings.graphUri) {
       var graphUri = "";
@@ -42,12 +43,13 @@ var KGcreator_run=(function(){
       options = {
         deleteOldGraph: false,
         sampleSize: 500,
-        dataLocation: dataLocation,
+        dataLocation: dataLocation
       };
-    } else {
+    }
+    else {
       options = {
         deleteOldGraph: false,
-        dataLocation: dataLocation,
+        dataLocation: dataLocation
       };
     }
     if (_options.deleteTriples) {
@@ -58,43 +60,35 @@ var KGcreator_run=(function(){
       options.clientSocketId = Config.clientSocketId;
     }
 
-    self.saveMappings(null, function (_err, _result) {
+    self.saveMappings(null, function(_err, _result) {
       if (_err) {
         return alert(_err);
       }
 
       $("#KGcreator_infosDiv").val("");
 
-      var payload={}
-        var type=KGcreator.currentConfig.currentDataSource.type
-      if(type=="databaseSource"){
-        payload={
-          type:type,
+      var payload = {
 
-        }
-      }else{
-
-      }
-      var payload={
-
-
-
-
-      }
-
+        source: KGcreator.currentSlsvSource,
+        type: KGcreator.currentConfig.currentDataSource.type,
+        datasource: KGcreator.currentConfig.currentDataSource.name,
+        table: KGcreator.currentConfig.currentDataSource.currentTable,
+        options: JSON.stringify(options)
+      };
 
 
       if (self.currentSourceType == "CSV") {
         payload = {
           dir: "CSV/" + self.currentCsvDir,
           fileName: self.currentSource + "_" + mappings.fileName + ".json",
-          options: JSON.stringify(options),
+          options: JSON.stringify(options)
         };
-      } else if (self.currentSourceType == "DATABASE") {
+      }
+      else if (self.currentSourceType == "DATABASE") {
         payload = {
           dir: "CSV/" + self.currentSlsvSource,
           fileName: self.currentDbName + "_" + mappings.fileName + ".json",
-          options: JSON.stringify(options),
+          options: JSON.stringify(options)
         };
       }
 
@@ -107,17 +101,19 @@ var KGcreator_run=(function(){
         url: `${Config.apiUrl}/kg/triples`,
         data: payload,
         dataType: "json",
-        success: function (result, _textStatus, _jqXHR) {
+        success: function(result, _textStatus, _jqXHR) {
           if (test) {
             var str = JSON.stringify(result, null, 2);
 
             $("#KGcreator_infosDiv").val(str);
             MainController.UI.message("", true);
-          } else {
+          }
+          else {
             if (_options.deleteTriples) {
               $("#KGcreator_infosDiv").val(result.result);
               MainController.UI.message(result.result, true);
-            } else {
+            }
+            else {
               $("#KGcreator_infosDiv").val(result.countCreatedTriples + " triples created in graph " + mappings.graphUri);
               MainController.UI.message("triples created", true);
             }
@@ -131,12 +127,12 @@ var KGcreator_run=(function(){
             return callback(err.responseText);
           }
           return alert(err.responseText);
-        },
+        }
       });
     });
   };
 
-  self.indexGraph = function (callback) {
+  self.indexGraph = function(callback) {
     var graphSource = null;
     for (var source in Config.sources) {
       if (Config.sources[source].graphUri == self.currentGraphUri) {
@@ -150,7 +146,7 @@ var KGcreator_run=(function(){
       return alert("no source associated to graph " + self.currentGraphUri);
     }
     if (callback || confirm("index source " + graphSource)) {
-      SearchUtil.generateElasticIndex(graphSource, null, function (err, _result) {
+      SearchUtil.generateElasticIndex(graphSource, null, function(err, _result) {
         if (err) {
           if (callback) {
             return callback(err.responseText);
@@ -165,7 +161,7 @@ var KGcreator_run=(function(){
     }
   };
 
-  self.clearGraph = function (deleteAllGraph, callback) {
+  self.clearGraph = function(deleteAllGraph, callback) {
     if (!mappings) {
       if (callback) {
         return callback("node currentJsonObject selected");
@@ -188,7 +184,7 @@ var KGcreator_run=(function(){
       url: `${Config.apiUrl}/kg/clearGraph`,
       data: payload,
       dataType: "json",
-      success: function (_result, _textStatus, _jqXHR) {
+      success: function(_result, _textStatus, _jqXHR) {
         if (callback) {
           return callback();
         }
@@ -199,11 +195,11 @@ var KGcreator_run=(function(){
           return callback(err);
         }
         return MainController.UI.message(err);
-      },
+      }
     });
   };
 
-  self.deleteKGcreatorTriples = function (deleteAllKGcreatorTriples, callback) {
+  self.deleteKGcreatorTriples = function(deleteAllKGcreatorTriples, callback) {
     if (!mappings) {
       if (callback) {
         return callback("node currentJsonObject selected");
@@ -227,7 +223,7 @@ var KGcreator_run=(function(){
 
       var filter = "?p =<http://souslesens.org/KGcreator#mappingFile>";
       MainController.UI.message("delting triples triples created with KGCreator in " + mappings.graphUri);
-      Sparql_generic.deleteTriplesWithFilter(self.currentSlsvSource, filter, function (err, result) {
+      Sparql_generic.deleteTriplesWithFilter(self.currentSlsvSource, filter, function(err, result) {
         if (err) {
           if (callback) {
             return callback("triples deletion aborted");
@@ -240,7 +236,8 @@ var KGcreator_run=(function(){
           return callback();
         }
       });
-    } else {
+    }
+    else {
       if (!confirm("Do you really want to delete  triples created with KGCreator in " + mappings.fileName)) {
         if (callback) {
           return callback("triples deletion aborted");
@@ -248,7 +245,7 @@ var KGcreator_run=(function(){
         return;
       }
       MainController.UI.message("delting triples from mapping file : " + mappings.fileName);
-      self.createTriples(false, { deleteTriples: true }, function (err, result) {
+      self.createTriples(false, { deleteTriples: true }, function(err, result) {
         if (err) {
           if (callback) {
             return callback("triples deletion aborted");
@@ -263,14 +260,14 @@ var KGcreator_run=(function(){
       });
     }
   };
-  
-  
-  self.stopCreateTriples = function () {
+
+
+  self.stopCreateTriples = function() {
     socket.emit("KGCreator", "stopCreateTriples");
     MainController.UI.message("import interrupted by user", true);
   };
 
-  self.createAllMappingsTriples = function () {
+  self.createAllMappingsTriples = function() {
     if (!mappings) {
       return callback("select any existing  mapping ");
     }
@@ -281,27 +278,27 @@ var KGcreator_run=(function(){
     async.series(
       [
         //delete previous KG creator triples
-        function (callbackSeries) {
+        function(callbackSeries) {
           $("#KGcreator_infosDiv").val("deleting previous KGcreator triples ");
-          self.deleteKGcreatorTriples(true, function (err, result) {
+          self.deleteKGcreatorTriples(true, function(err, result) {
             return callbackSeries(err);
           });
         },
-        function (callbackSeries) {
+        function(callbackSeries) {
           $("#KGcreator_infosDiv").val("creating new triples (can take long...)");
-          self.createTriples(false, { allMappings: 1 }, function (err, result) {
+          self.createTriples(false, { allMappings: 1 }, function(err, result) {
             return callbackSeries(err);
           });
         },
 
-        function (callbackSeries) {
+        function(callbackSeries) {
           $("#KGcreator_infosDiv").val("reindexing graph)");
-          self.indexGraph(function (err, result) {
+          self.indexGraph(function(err, result) {
             return callbackSeries(err);
           });
-        },
+        }
       ],
-      function (err) {
+      function(err) {
         if (err) {
           $("#KGcreator_infosDiv").val("\nALL DONE");
         }
@@ -310,7 +307,7 @@ var KGcreator_run=(function(){
   };
 
   return self;
-})()
+})();
 
 export default KGcreator_run;
-  window.KGcreator_run=KGcreator_run
+window.KGcreator_run = KGcreator_run;

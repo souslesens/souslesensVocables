@@ -29,7 +29,7 @@ Database <span id="joinTablesWidgetDialog_databaseId"></span>
         <table id="joinTablesWidgetDialog_table">
             <tr>
                 <td>From Table<span id="joinTablesWidgetDialog_fromTableId"></span></td>
-                <td>Join table<select style="width: 230px" onchange="JoinTablesWidget.showJoinTableColumns($(this).val())" id="joinTablesWidgetDialog_joinTableSelect"></select></td>
+                <td>Join table<select style="width: 230px" onchange="KGcreator_joinTables.showJoinTableColumns($(this).val())" id="joinTablesWidgetDialog_joinTableSelect"></select></td>
                 <td>To Table<span id="joinTablesWidgetDialog_toTableId"></span></td>
             </tr>
 
@@ -50,9 +50,9 @@ Database <span id="joinTablesWidgetDialog_databaseId"></span>
                     <span style="font-style: italic; color: #0d6efd" id="joinTablesWidgetDialog_fromJoinSpan"></span>
                 </td>
                 <td>
-                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.joinTable('from')"><-join From</button>
+                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_joinTables.joinTable('from')"><-join From</button>
 
-                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="JoinTablesWidget.joinTable('to')">join To-></button>
+                    <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_joinTables.joinTable('to')">join To-></button>
                 </td>
                 <td>
                     <span style="font-style: italic; color: #0d6efd" id="joinTablesWidgetDialog_toJoinSpan"></span>

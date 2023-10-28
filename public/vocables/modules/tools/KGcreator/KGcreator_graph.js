@@ -3,6 +3,10 @@ import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
 import JstreeWidget from "../../uiWidgets/jstreeWidget.js";
 import Sparql_common from "../../sparqlProxies/sparql_common.js";
 import Lineage_whiteboard from "../lineage/lineage_whiteboard.js";
+import KGcreator from "./KGcreator.js";
+import KGcreator_mappings from "./KGcreator_mappings.js";
+import KGcreator_joinTables from "./KGcreator_joinTables.js";
+
 
 var KGcreator_graph = (function () {
     var self = {};
@@ -13,8 +17,8 @@ var KGcreator_graph = (function () {
     var options = {
       visjsOptions: {
         keepNodePositionOnDrag: true,
-        onclickFn: KGcreator.onNodeClick,
-        onRightClickFn: KGcreator.showGraphPopupMenu,
+        onclickFn: KGcreator_graph.onNodeClick,
+        onRightClickFn: KGcreator_graph.showGraphPopupMenu,
         visjsOptions: {
           physics: {
             stabilization: {
@@ -46,7 +50,7 @@ var KGcreator_graph = (function () {
       }
     };
     options.visjsOptions.manipulation = {
-      enabled: true,
+      enabled: false,
       initiallyActive: true,
       deleteNode: false,
       deleteEdge: false,
@@ -59,10 +63,10 @@ var KGcreator_graph = (function () {
 
         if (sourceNode.data && sourceNode.data.type == "table" && targetNode.data && targetNode.data.type == "table") {
           var databaseSourceConfig = KGcreator.currentConfig.currentDataSource
-          return JoinTablesWidget.showJoinTablesDialog(databaseSourceConfig, sourceNode.data.id, targetNode.data.id, function(err, result) {
+          return KGcreator_joinTables.showJoinTablesDialog(databaseSourceConfig, sourceNode.data.id, targetNode.data.id, function(err, result) {
             self.rawConfig.currentDataSource.tableJoins.push(result);
 
-            self.saveSlsvSourceConfig(self.currentSource, self.rawConfig, function(err, result) {
+        self.saveSlsvSourceConfig (function(err, result) {
               if (err) {
                 return alert(err);
               }
@@ -100,7 +104,15 @@ var KGcreator_graph = (function () {
 
   self.onNodeClick = function(node, point, event) {
     PopupMenuWidget.hidePopup();
+    if(!node || !node.data)
+      return  self.currentGraphNode=null;
     self.currentGraphNode = node;
+    if( node.data.type=="table"){
+      Lineage_whiteboard.lineageVisjsGraph.network.addEdgeMode()
+    }else{
+      Lineage_whiteboard.lineageVisjsGraph.network.disableEditMode()
+
+    }
   };
 
   self.showNodeNodeInfos = function() {
@@ -128,49 +140,49 @@ var KGcreator_graph = (function () {
 
     columnNodes.forEach(function(columnNode) {
       var columnNodeId = columnNode.id;
-      var classNode = columnNode.data.classNode;
-      if (!existingNodes[columnNode.data.table]) {
-        existingNodes[columnNode.data.table] = 1;
+      var classNode = columnNode.classNode;
+      if (!existingNodes[columnNode.table]) {
+        existingNodes[columnNode.table] = 1;
         visjsData.nodes.push({
-          id: columnNode.data.table,
-          label: columnNode.data.table,
+          id: columnNode.table,
+          label: columnNode.table,
 
           shadow: Lineage_whiteboard.nodeShadow,
           shape: "ellipse",
           size: Lineage_whiteboard.defaultShapeSize,
           color: "#fff",
-          data: { id: columnNode.data.table, type: "table" }
+          data: { id: columnNode.table, type: "table" }
         });
       }
       if (!existingNodes[columnNodeId]) {
         existingNodes[columnNodeId] = 1;
         visjsData.nodes.push({
           id: columnNodeId,
-          label: columnNode.data.label,
+          label: columnNode.label,
 
           shadow: Lineage_whiteboard.nodeShadow,
           shape: "box",
           size: Lineage_whiteboard.defaultShapeSize,
           color: "#ddd",
-          data: { id: columnNode.data.id, table: columnNode.data.table, type: "column" }
+          data: { id: columnNode.id, table: columnNode.table, type: "column" }
         });
         //edge to table
-        var edgeId = columnNode.data.table + "_" + columnNodeId;
+        var edgeId = columnNode.table + "_" + columnNodeId;
         if (!existingNodes[edgeId]) {
           existingNodes[edgeId] = 1;
 
           visjsData.edges.push({
             id: edgeId,
-            from: columnNode.data.table,
+            from: columnNode.table,
             to: columnNodeId,
             data: {
               id: edgeId,
-              from: columnNode.data.table,
-              to: columnNode.data.id,
+              from: columnNode.table,
+              to: columnNode.id,
               type: "table"
             },
-            color: "#bbb"
-            // physics:false
+            color: "#bbb",
+           //  physics:false
           });
         }
 
@@ -186,11 +198,12 @@ var KGcreator_graph = (function () {
             to: classNode,
             data: {
               id: edgeId,
-              from: columnNode.data.id,
+              from: columnNode.id,
               to: classNode,
               type: "map"
             },
-            color: "blue"
+            color: "blue",
+            physics:false
           });
         }
       }
@@ -207,9 +220,9 @@ var KGcreator_graph = (function () {
       if (!tables || tables.indexOf(table) > -1) {
        KGcreator.currentConfig.currentMappings[table].tripleModels.forEach(function(triple) {
           if (triple.p == "rdf:type" && existingGraphNodes[triple.o]) {
-            columnsWithClass.push({
-              data: { id: table + "_" + triple.s, table: table, label: triple.s, type: "tableColumn", classNode: triple.o }
-            });
+            columnsWithClass.push(
+             { id: table + "_" + triple.s, table: table, label: triple.s, type: "tableColumn", classNode: triple.o }
+            );
           }
         });
       }
@@ -253,7 +266,7 @@ var KGcreator_graph = (function () {
   };
 
   self.graphTablesJoins = function(dataSource) {
-    var tableJoins =KGcreator.currentConfig.databaseSources[dataSource].tableJoins;
+    var tableJoins =KGcreator.currentConfig.currentDataSource.tableJoins;
     var edges = [];
     var existingGraphNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
     tableJoins.forEach(function(join) {
@@ -281,177 +294,18 @@ var KGcreator_graph = (function () {
   ;
 
   self.drawDataSourceMappings = function() {
-    if (!self.currentSource) {
-      alert("select a source");
+    if (!KGcreator.currentConfig.currentDataSource) {
+     return alert("select a source");
     }
     self.graphColumnToClassPredicates(null);
     self.graphColumnToColumnPredicates(null);
-    self.graphTablesJoins(self.currentConfig.currentDataSource);
+    self.graphTablesJoins(KGcreator.currentConfig.currentDataSource);
 
   };
-    self.showDialog = function (mappingObjectsMap) {
-        self.drawMappings(mappingObjectsMap, function (err, visjsData) {
-            self.loadMappingsJstree(visjsData);
-        });
-    };
 
-    self.loadMappingsJstree = function (visjsData) {
-        var jstreeData = [
-            {
-                id: "MappingFiles",
-                text: "MappingFiles",
-                parent: "#",
-                data: {
-                    type: "MappingFiles",
-                },
-            },
-            {
-                id: "Classes",
-                text: "Classes",
-                parent: "#",
-                data: {
-                    type: "Classes",
-                },
-            },
-        ];
-        // var nodes=self.mappingVisjsGraph.data.nodes.get();
-        var nodes = visjsData.nodes;
-        var existingNodes = {};
-        nodes.forEach(function (item) {
-            var jstreeNode = JSON.parse(JSON.stringify(item));
-            jstreeNode.text = jstreeNode.label;
-            if (item.data && item.data.type == "Class") {
-                jstreeNode.parent = "Classes";
-                jstreeData.push(jstreeNode);
-            }
-            if (item.data && item.data.type == "FileColumn") {
-                if (!existingNodes[jstreeNode.data.fileName]) {
-                    existingNodes[jstreeNode.data.fileName] = 1;
-                    jstreeNode.parent = "MappingFiles";
-                    jstreeData.push({
-                        id: jstreeNode.data.fileName,
-                        text: jstreeNode.data.fileName,
-                        parent: "MappingFiles",
-                        data: { id: jstreeNode.data.fileName, label: jstreeNode.data.fileName, fileName: jstreeNode.data.fileName },
-                    });
-                }
-            }
-        });
-        var options = {
-            selectTreeNodeFn: function (event, obj) {
-                if (!obj.node.data) return;
-                var fileName = obj.node.data.fileName;
-                var newNodes = [];
-                self.mappingVisjsGraph.data.nodes.get().forEach(function (visjsNode) {
-                    var hidden = true;
-                    if (obj.node.data.type == "MappingFiles" || (visjsNode.data && visjsNode.data.fileName == fileName)) {
-                        hidden = false;
-                    }
-                    newNodes.push({ id: visjsNode.id, hidden: hidden });
-                });
-                self.mappingVisjsGraph.data.nodes.update(newNodes);
-            },
-        };
 
-        JstreeWidget.loadJsTree("KGcreatorGraph_jstreeDiv", jstreeData, options);
-    };
 
-    self.drawMappings = function (mappingObjectsMap, callback) {
-        if (!mappingObjectsMap) {
-            mappingObjectsMap = { [self.currentJsonObject.fileName]: self.currentJsonObject };
-        }
-        var visjsData = { nodes: [], edges: [] };
 
-        var existingNodes = {};
-        var shape = "box";
-        for (var fileName in mappingObjectsMap) {
-            var mappingObject = mappingObjectsMap[fileName];
-            if (mappingObject.tripleModels) {
-                mappingObject.tripleModels.forEach(function (item) {
-                    function getNodeAttrs(str) {
-                        if (str.indexOf("http") > -1) {
-                            return { type: "Class", color: "#70ac47", shape: "ellipse" };
-                        }
-                        if (str.indexOf(":") > -1) {
-                            // return "#0067bb";
-                            return { type: "OwlType", color: "#aaa", shape: "ellipse" };
-                        } else {
-                            if (mappingObject.fileName) {
-                                var color = common.getResourceColor("mappingFileName", mappingObject.fileName);
-                                return { type: "FileColumn", color: color, shape: "box" };
-                            }
-                            return {};
-                        }
-                    }
-
-                    if (!existingNodes[item.s]) {
-                        existingNodes[item.s] = 1;
-                        var label = Sparql_common.getLabelFromURI(item.s);
-                        var attrs = getNodeAttrs(item.s);
-                        visjsData.nodes.push({
-                            id: item.s,
-                            label: label,
-                            shape: attrs.shape,
-                            color: attrs.color,
-                            data: {
-                                id: item.s,
-                                label: label,
-                                fileName: fileName,
-                                type: attrs.type,
-                            },
-                        });
-                    }
-                    if (!existingNodes[item.o]) {
-                        existingNodes[item.o] = 1;
-                        var label = Sparql_common.getLabelFromURI(item.o);
-
-                        var attrs = getNodeAttrs(item.o);
-                        visjsData.nodes.push({
-                            id: item.o,
-                            label: label,
-                            shape: attrs.shape,
-                            color: attrs.color,
-                            data: {
-                                id: item.s,
-                                label: label,
-                                fileName: fileName,
-                                type: attrs.type,
-                            },
-                        });
-                    }
-                    var edgeId = item.s + item.p + item.o;
-                    var label = Sparql_common.getLabelFromURI(item.p);
-                    if (!existingNodes[edgeId]) {
-                        existingNodes[edgeId] = 1;
-                        visjsData.edges.push({
-                            id: edgeId,
-                            from: item.s,
-                            to: item.o,
-                            label: label,
-                            // color: getNodeAttrs(item.o),
-                            arrows: {
-                                to: {
-                                    enabled: true,
-                                    type: Lineage_whiteboard.defaultEdgeArrowType,
-                                    scaleFactor: 0.5,
-                                },
-                            },
-                        });
-                    }
-                });
-            }
-        }
-
-        //  var html = "<div id='KGcreator_mappingsGraphDiv' style='width:1100px;height:750px'></div>";
-        $("#mainDialogDiv").dialog("open");
-        //$("#mainDialogDiv").html(html);
-        $("#mainDialogDiv").load("snippets/KGcreator/KGcreatorGraph.html", function () {
-            self.mappingVisjsGraph = new visjsGraphClass("KGcreator_mappingsGraphDiv", visjsData, {});
-            self.mappingVisjsGraph.draw();
-
-            callback(null, visjsData);
-        });
-    };
     self.groupByFile = function () {
         var nodes = self.mappingVisjsGraph.data.nodes.get();
         var newNodes = {};
@@ -481,6 +335,11 @@ var KGcreator_graph = (function () {
     };
 
 
+
+
+
+
+
   self.deleteColumnNode= function (columnNodes) {
     if (!Array.isArray(columnNodes)) {
       columnNodes = [columnNodes];
@@ -501,7 +360,67 @@ var KGcreator_graph = (function () {
 
 
 
-    self.groupByClass = function () {};
+    self.groupByClass = function () {
+
+
+
+
+    };
+
+  self.groupMappings=function(){
+    var nodes=Lineage_whiteboard.lineageVisjsGraph.data.nodes.get()
+    var visjsData={nodes:[],edges:[]}
+    var existingGraphNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
+
+    if(!existingGraphNodes["classes"]){
+      existingGraphNodes["classes"]=1
+      visjsData.nodes.push({
+        id:"_classes",
+        label:"classes",
+        shape:"dot",
+        size:5
+      })
+    }
+    if(!existingGraphNodes["mappings"]){
+      existingGraphNodes["mappings"]=1
+      visjsData.nodes.push({
+        id:"_mappings",
+        label:"mappings",
+        shape:"dot",
+        size:5
+      })
+    }
+    nodes.forEach(function(node){
+      if(node.data.type=="table") {
+        var edgeId = "_classes_" + node.id
+        if(!existingGraphNodes[edgeId]) {
+          existingGraphNodes[edgeId] = 1
+          visjsData.edges.push({
+            id: edgeId,
+            from: "_classes",
+            to: node.id,
+            width:0
+          })
+        }
+      }
+     else if(node.data.type!="column") {
+        var edgeId = "_mappings_" + node.id
+        if(!existingGraphNodes[edgeId]) {
+          existingGraphNodes[edgeId] = 1
+          visjsData.edges.push({
+            id: edgeId,
+            from: "_mappings",
+            to: node.id,
+            width:0
+          })
+        }
+      }
+
+    })
+
+    Lineage_whiteboard.lineageVisjsGraph.data.nodes.update(visjsData.nodes);
+    Lineage_whiteboard.lineageVisjsGraph.data.edges.update(visjsData.edges);
+  }
 
     self.toSVG = function () {
         self.mappingVisjsGraph.toSVG();
@@ -514,4 +433,4 @@ var KGcreator_graph = (function () {
 })();
 
 export default KGcreator_graph;
-window.KGcreatorGraph = KGcreator_graph;
+window.KGcreator_graph = KGcreator_graph;

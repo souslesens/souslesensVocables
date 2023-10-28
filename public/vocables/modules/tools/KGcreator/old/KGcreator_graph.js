@@ -61,7 +61,7 @@ var KGcreator_graph = (function() {
           return JoinTablesWidget.showJoinTablesDialog(databaseSourceConfig, sourceNode.data.id, targetNode.data.id, function(err, result) {
             self.rawConfig.currentDataSource.tableJoins.push(result);
 
-            self.saveSlsvSourceConfig(self.currentSource, self.rawConfig, function(err, result) {
+            self.saveSlsvSourceConfig( function(err, result) {
               if (err) {
                 return alert(err);
               }
@@ -280,12 +280,12 @@ var KGcreator_graph = (function() {
   ;
 
   self.drawDataSourceMappings = function() {
-    if (!self.currentSource) {
+    if (!KGcreator.currentSlsvSource) {
       alert("select a source");
     }
     self.graphColumnToClassPredicates(null);
     self.graphColumnToColumnPredicates(null);
-    self.graphTablesJoins(self.currentConfig.currentDataSource);
+    self.graphTablesJoins(KGcreator.currentConfig.currentDataSource);
 
   };
 

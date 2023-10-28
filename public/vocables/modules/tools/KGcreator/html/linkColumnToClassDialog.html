@@ -16,25 +16,23 @@
     <div>
       <div id="LinkColumn_classTypeDiv" style="color: #0d6efd; font-size: 18px; margin: 5px"></div>
 
-      <pre id="KGcreator_columnJsonDisplay" style="width: 430px; height: 530px; font-size: 12px;background-color: #1e1b1d"></pre>
+      <pre id="KGcreator_columnJsonDisplay" style="width: 430px; height: 510px; font-size: 12px;background-color: #1e1b1d"></pre>
     </div>
 
     <div>
 
       <!--    <div><span id="LinkColumn_subjectDiv"></span>&nbsp; <input type="checkbox" id="LinkColumn_isBlankNode" />isBlankNode</div>-->
-      <div class="linkColumn_tripleDiv">
-        add basic
-        <select id="LinkColumn_basicTypeSelect" onchange="KGcreator_mappings.addBasicMapping($(this).val())">
-          <option></option>
-          <option value="owl:NamedIndividual">addBasicIndividual</option>
-          <option value="owl:Class">addBasicClass</option>
-          <option value="rdf:Bag">addBasicBag</option>
-        </select>
+      <div>
 
-        <div class="linkColumn_tripleDiv" style="background-color: #eee">
-          <b> add triple</b>
+
+        <div  style="
+              border: solid 1px;
+              border-color: brown;
+              ">
+
           <div class="linkColumn_tripleDiv" style=" width: 300px;">
             <b> Subject</b>
+            <div class="editPredicatePanel_groupDiv">
             <select id="LinkColumn_subjectSelect" onchange="KGcreator_mappings.onTripleModelSelect('s',$(this).val())">
               <option value=""></option>
               <option value="_selectedColumn" selected="selected">_selectedColumn</option>
@@ -46,6 +44,7 @@
             <input id="LinkColumn_subjectInput" class="KGcreator_tripleInput" style="background-color: beige">
             isBlankNode<input type="checkbox" id="LinkColumn_isSubjectBlankNodeCBX"><br>
             lookup name<input id="LinkColumn_subjectLookupName">
+            </div>
           </div>
 
           <div id="LinkColumn_predicateSelectorDiv"></div>
@@ -61,7 +60,13 @@
           </div>
         </div>
         <div>
-
+          Basic
+          <select id="LinkColumn_basicTypeSelect" onchange="KGcreator_mappings.addBasicMapping($(this).val())">
+            <option></option>
+            <option value="owl:NamedIndividual">addBasicIndividual</option>
+            <option value="owl:Class">addBasicClass</option>
+            <option value="rdf:Bag">addBasicBag</option>
+          </select>
           <button style="margin: 5px" onclick="KGcreator_mappings.validateLinkColumnToClass()">Save mappings</button>
         </div>
       </div>

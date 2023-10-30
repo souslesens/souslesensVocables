@@ -58,26 +58,7 @@ var KGcreator_graph = (function () {
       // editEdge: false,
 
       addEdge: function(edgeData, callback) {
-        var sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from);
-        var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
-
-        if (sourceNode.data && sourceNode.data.type == "table" && targetNode.data && targetNode.data.type == "table") {
-          var databaseSourceConfig = KGcreator.currentConfig.currentDataSource
-          return KGcreator_joinTables.showJoinTablesDialog(databaseSourceConfig, sourceNode.data.id, targetNode.data.id, function(err, result) {
-            self.rawConfig.currentDataSource.tableJoins.push(result);
-
-        self.saveSlsvSourceConfig (function(err, result) {
-              if (err) {
-                return alert(err);
-              }
-
-              MainController.UI.message("join saved");
-            });
-          });
-        }
-        else {
-          return null;
-        }
+       self.onAddEdge(edgeData,callback)
       }
     };
     Lineage_whiteboard.lineageVisjsGraph = new VisjsGraphClass("KGcreator_resourceLinkGraphDiv", { nodes: [], edges: [] }, {});
@@ -138,7 +119,7 @@ var KGcreator_graph = (function () {
     var visjsData = { nodes: [], edges: [] };
     var existingNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
 
-    columnNodes.forEach(function(columnNode) {
+    columnNodes.forEach(function(columnNode,index) {
       var columnNodeId = columnNode.id;
       var classNode = columnNode.classNode;
       if (!existingNodes[columnNode.table]) {
@@ -148,7 +129,7 @@ var KGcreator_graph = (function () {
           label: columnNode.table,
 
           shadow: Lineage_whiteboard.nodeShadow,
-          shape: "ellipse",
+          shape: "box",
           size: Lineage_whiteboard.defaultShapeSize,
           color: "#fff",
           data: { id: columnNode.table, type: "table" }
@@ -161,15 +142,20 @@ var KGcreator_graph = (function () {
           label: columnNode.label,
 
           shadow: Lineage_whiteboard.nodeShadow,
-          shape: "box",
+          shape: "square",
           size: Lineage_whiteboard.defaultShapeSize,
-          color: "#ddd",
+          color: "#00afef",
+          font:{color:"#00afef"},
           data: { id: columnNode.id, table: columnNode.table, type: "column" }
         });
         //edge to table
         var edgeId = columnNode.table + "_" + columnNodeId;
         if (!existingNodes[edgeId]) {
           existingNodes[edgeId] = 1;
+
+          var  physics=true
+          if(index>0)
+            physics=false
 
           visjsData.edges.push({
             id: edgeId,
@@ -202,8 +188,12 @@ var KGcreator_graph = (function () {
               to: classNode,
               type: "map"
             },
-            color: "blue",
-            physics:false
+            color: "#aed",
+            width:2,
+            physics:physics,
+            smooth: {
+              type: "continuous",
+            },
           });
         }
       }
@@ -247,15 +237,14 @@ var KGcreator_graph = (function () {
                 from: table + "_" + triple.s,
                 to: table + "_" + triple.o,
                 label: Sparql_common.getLabelFromURI(triple.p),
-                color: "#f90edd",
+                color: "#ec56da",
                 //dashes: true,
-                arrows: {
-                  to: {
-                    enabled: true,
-                    type: "curve"
-                  }
+
+                 physics:false,
+                width:2,
+                smooth:{
+                  type: "continuous",
                 }
-                // physics:false
               });
             }
           }
@@ -266,7 +255,9 @@ var KGcreator_graph = (function () {
   };
 
   self.graphTablesJoins = function(dataSource) {
-    var tableJoins =KGcreator.currentConfig.currentDataSource.tableJoins;
+    var tableJoins =KGcreator.rawConfig.databaseSources[dataSource].tableJoins;
+    if(!tableJoins)
+      return KGcreator.rawConfig.databaseSources[dataSource].tableJoins=[]
     var edges = [];
     var existingGraphNodes = Lineage_whiteboard.lineageVisjsGraph.getExistingIdsMap();
     tableJoins.forEach(function(join) {
@@ -278,20 +269,44 @@ var KGcreator_graph = (function () {
           from: join.fromTable,
           to: join.toTable,
           label: join.fromColumn + "->" + join.toColumn,
-          color: "#0067bb",
+          color: "#70ac47",
           //dashes: true,
           arrows: {
             to: {
               enabled: true
             }
           },
-          physics: false
+          physics: false,
+          width:2
         });
       }
     });
     Lineage_whiteboard.lineageVisjsGraph.data.edges.add(edges);
   }
   ;
+  self.onAddEdge = function(edgeData, callbabck) {
+
+    var sourceNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.from);
+    var targetNode = Lineage_whiteboard.lineageVisjsGraph.data.nodes.get(edgeData.to);
+
+    if (sourceNode.data && sourceNode.data.type == "table" && targetNode.data && targetNode.data.type == "table") {
+      var databaseSourceConfig = KGcreator.currentConfig.currentDataSource;
+      return KGcreator_joinTables.showJoinTablesDialog(databaseSourceConfig, sourceNode.data.id, targetNode.data.id, function(err, result) {
+        KGcreator.rawConfig.databaseSources[databaseSourceConfig.name].tableJoins.push(result);
+
+        KGcreator.saveSlsvSourceConfig(function(err, result) {
+          if (err) {
+            return alert(err);
+          }
+
+          MainController.UI.message("join saved");
+        });
+      });
+    }
+    else {
+      return null;
+    }
+  };
 
   self.drawDataSourceMappings = function() {
     if (!KGcreator.currentConfig.currentDataSource) {
@@ -299,7 +314,7 @@ var KGcreator_graph = (function () {
     }
     self.graphColumnToClassPredicates(null);
     self.graphColumnToColumnPredicates(null);
-    self.graphTablesJoins(KGcreator.currentConfig.currentDataSource);
+    self.graphTablesJoins(KGcreator.currentConfig.currentDataSource.name);
 
   };
 

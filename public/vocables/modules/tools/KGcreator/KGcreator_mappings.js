@@ -25,7 +25,7 @@ var KGcreator_mappings=(function(){
       $("#smallDialogDiv").dialog("open");
       $("#smallDialogDiv").dialog("option","title","Mapping "+columnNode.data.table+"."+columnNode.data.id);
 
-      $("#smallDialogDiv").load("./modules/tools/KGcreator/html/linkColumnToClassDialog.html", function () {
+      $("#smallDialogDiv").load("./modules/tools/KGcreator/html/columnMappingsDialog.html", function () {
 
 
         PredicatesSelectorWidget.load("LinkColumn_predicateSelectorDiv", self.currentSlsvSource, function () {
@@ -72,6 +72,7 @@ var KGcreator_mappings=(function(){
         });
       });
     }
+
 
       ;
   self.onTripleModelSelect= function (role, value) {
@@ -279,6 +280,13 @@ var KGcreator_mappings=(function(){
       }
       $("#smallDialogDiv").dialog("close");
     }  ;
+
+  self.showTableMappings=function(node){
+
+    $("#smallDialogDiv").dialog("open");
+    $("#smallDialogDiv").dialog("option","title","Mappings : "+columnNode.data.table);
+  //  $("#smallDialogDiv").html('<pre id="KGcreator_columnJsonDisplay" style="width: 430px; height: 510px; font-size: 12px;background-color: #1e1b1d"></pre>')
+  }
 
 
 

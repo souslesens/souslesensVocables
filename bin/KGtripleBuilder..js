@@ -12,7 +12,7 @@ const SocketManager = require("./socketManager.");
 //var rootDir = "D:\\NLP\\ontologies\\CFIHOS\\CFIHOS V1.5\\CFIHOS V1.5 RDL";
 
 var KGtripleBuilder = {
-  message: function(clientSocketId, content, isError) {
+  message: function (clientSocketId, content, isError) {
     if (clientSocketId) {
       SocketManager.message(clientSocketId, "KGcreator", content);
     }
@@ -37,7 +37,7 @@ var KGtripleBuilder = {
     ["System", "System", "hasFunctionalPart"],
     ["System", "Location", "residesIn"],
     ["System", "Activity", "participantIn"],
-    ["System", "FunctionalObject", "hasFunctionalPart"]
+    ["System", "FunctionalObject", "hasFunctionalPart"],
   ],
 
   sparqlPrefixes: {
@@ -51,17 +51,17 @@ var KGtripleBuilder = {
     part14: "<http://rds.posccaesar.org/ontology/lis14/rdl/>",
     iso81346: "<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
     slsv: "<http://souslesens.org/resource/vocabulary/>",
-    dcterms: "<http://purl.org/dc/terms/>"
+    dcterms: "<http://purl.org/dc/terms/>",
   },
 
-  getSparqlPrefixesStr: function() {
+  getSparqlPrefixesStr: function () {
     var str = "";
     for (var key in KGtripleBuilder.sparqlPrefixes) {
       str += "PREFIX " + key + ": " + KGtripleBuilder.sparqlPrefixes[key] + " ";
     }
     return str;
   },
-  isUri: function(str) {
+  isUri: function (str) {
     if (!str) {
       return false;
     }
@@ -69,8 +69,7 @@ var KGtripleBuilder = {
     var array = str.split(":");
     if (array.length == 0) {
       return false;
-    }
-    else {
+    } else {
       if (prefixesArray.indexOf(array[0]) > -1 || array[0].indexOf("http") == 0) {
         return true;
       }
@@ -78,8 +77,8 @@ var KGtripleBuilder = {
     }
   },
 
-  readCsv: function(filePath, maxLines, callback) {
-    csvCrawler.readCsv({ filePath: filePath }, maxLines, function(err, result) {
+  readCsv: function (filePath, maxLines, callback) {
+    csvCrawler.readCsv({ filePath: filePath }, maxLines, function (err, result) {
       if (err) {
         return callback(err);
       }
@@ -90,10 +89,10 @@ var KGtripleBuilder = {
     });
   },
 
-  getDescription: function(filePath) {
+  getDescription: function (filePath) {
     var descriptionMap = {};
 
-    KGtripleBuilder.readCsv(filePath, null, function(err, result) {
+    KGtripleBuilder.readCsv(filePath, null, function (err, result) {
       descriptionMap = { filePath: filePath, headers: result.headers, length: result.data[0].length };
 
       fs.writeFileSync(filePath.replace(".txt", "description.json"), JSON.stringify(descriptionMap, null, 2));
@@ -109,7 +108,7 @@ var KGtripleBuilder = {
    * @param {Object} options - {sampleSize: , }
    * @param {Function} callback - Node-style async Function called to proccess result or handle error
    */
-  createTriples: function(mappings, graphUri, sparqlServerUrl, options, callback) {
+  createTriples: function (mappings, graphUri, sparqlServerUrl, options, callback) {
     //  var graphUri = "https://www.jip36-cfihos.org/ontology/cfihos_1_5/test/"
     var totalTriples = 0;
     var errors = "";
@@ -138,7 +137,7 @@ var KGtripleBuilder = {
       "req:REQ_0021": "uri",
       "req:REQ_0022": "uri",
       "rdfs:subClassOf": "uri",
-      _restriction: "uri"
+      _restriction: "uri",
     };
     var totalTriplesCount = 0;
     var totalTriples = 0;
@@ -149,7 +148,7 @@ var KGtripleBuilder = {
 
     async.eachSeries(
       mappings,
-      function(mapping, callbackEachMapping) {
+      function (mapping, callbackEachMapping) {
         var lookUpMap = {};
         var triples = [];
 
@@ -161,24 +160,24 @@ var KGtripleBuilder = {
         async.series(
           [
             // load Lookups
-            function(callbackSeries) {
+            function (callbackSeries) {
               if (mapping.lookups.length == 0) {
                 return callbackSeries();
               }
 
               async.eachSeries(
                 mapping.lookups,
-                function(lookup, callbackEachLookup) {
+                function (lookup, callbackEachLookup) {
                   if (mapping.csvDataFilePath) {
                     var lookupFilePath = lookup.filePath;
 
-                    KGtripleBuilder.readCsv(lookupFilePath, null, function(err, result) {
+                    KGtripleBuilder.readCsv(lookupFilePath, null, function (err, result) {
                       if (err) {
                         return callbackEachLookup(err);
                       }
                       var lookupLines = result.data[0];
                       lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
-                      lookupLines.forEach(function(line, index) {
+                      lookupLines.forEach(function (line, index) {
                         if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
                           return KGtripleBuilder.message(options.clientSocketId, "missing lookup line" + index + " " + lookupFilePath, true);
                         }
@@ -187,17 +186,16 @@ var KGtripleBuilder = {
 
                       callbackEachLookup();
                     });
-                  }
-                  else if (mapping.databaseSource) {
+                  } else if (mapping.databaseSource) {
                     var sqlQuery = "select distinct " + lookup.sourceColumn + "," + lookup.targetColumn + " from " + lookup.fileName;
 
-                    sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function(err, result) {
+                    sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
                       if (err) {
                         return callbackEachLookup(err);
                       }
                       var lookupLines = result;
                       lookUpMap[lookup.name] = { dictionary: {}, transformFn: lookup.transformFn };
-                      lookupLines.forEach(function(line, index) {
+                      lookupLines.forEach(function (line, index) {
                         if (![line[lookup.sourceColumn]] && line[lookup.targetColumn]) {
                           return KGtripleBuilder.message(options.clientSocketId, "missing lookup line" + index + " " + lookupFilePath, true);
                         }
@@ -209,19 +207,19 @@ var KGtripleBuilder = {
                     });
                   }
                 },
-                function(err) {
+                function (err) {
                   callbackSeries(err);
                 }
               );
             },
 
             //load csv
-            function(callbackSeries) {
+            function (callbackSeries) {
               if (!mapping.csvDataFilePath) {
                 return callbackSeries();
               }
               KGtripleBuilder.message(options.clientSocketId, "loading data from csv file", false);
-              KGtripleBuilder.readCsv(mapping.csvDataFilePath, options.sampleSize, function(err, result) {
+              KGtripleBuilder.readCsv(mapping.csvDataFilePath, options.sampleSize, function (err, result) {
                 if (err) {
                   KGtripleBuilder.message(options.clientSocketId, err, true);
 
@@ -234,7 +232,7 @@ var KGtripleBuilder = {
             },
 
             //load SQL dataSource
-            function(callbackSeries) {
+            function (callbackSeries) {
               if (!mapping.databaseSource) {
                 return callbackSeries();
               }
@@ -244,7 +242,7 @@ var KGtripleBuilder = {
               }
               var sqlQuery = "select" + limitStr + " * from " + mapping.fileName;
               KGtripleBuilder.message(options.clientSocketId, "loading data from sql server", false);
-              sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function(err, result) {
+              sqlServerProxy.getData(mapping.databaseSource.dbName, sqlQuery, function (err, result) {
                 if (err) {
                   return callbackSeries(err);
                 }
@@ -254,12 +252,12 @@ var KGtripleBuilder = {
               });
             },
             //fileProcessing
-            function(callbackSeries) {
+            function (callbackSeries) {
               if (!mapping.dataProcessing) {
                 return callbackSeries();
               }
-              csvData.forEach(function(lines) {
-                mapping.dataProcessing(lines, function(err, result) {
+              csvData.forEach(function (lines) {
+                mapping.dataProcessing(lines, function (err, result) {
                   if (err) {
                     return callbackSeries(err);
                   }
@@ -269,7 +267,7 @@ var KGtripleBuilder = {
               });
             },
 
-            function(callbackSeries) {
+            function (callbackSeries) {
               function getNewBlankNodeId() {
                 return "<_:b" + util.getRandomHexaId(10) + ">";
               }
@@ -277,7 +275,7 @@ var KGtripleBuilder = {
               function getLookupValue(lookupName, value, callback) {
                 var lookupArray = lookupName.split("|");
                 var target = null;
-                lookupArray.forEach(function(lookup, index) {
+                lookupArray.forEach(function (lookup, index) {
                   if (index > 0) {
                     var x = 3;
                   }
@@ -302,13 +300,13 @@ var KGtripleBuilder = {
               var allColumns = {};
               async.eachSeries(
                 csvData,
-                function(lines, callbackEachLines) {
+                function (lines, callbackEachLines) {
                   async.series(
                     [
-                      function(callbackSeries2) {
+                      function (callbackSeries2) {
                         async.eachSeries(
                           lines,
-                          function(line, callbackEachLines2) {
+                          function (line, callbackEachLines2) {
                             //   lines.forEach(function (line, _indexLine) {
                             //clean line content
 
@@ -318,7 +316,7 @@ var KGtripleBuilder = {
                             var lineError = "";
                             var blankNodesMap = {};
 
-                            mapping.tripleModels.forEach(function(item) {
+                            mapping.tripleModels.forEach(function (item) {
                               for (var key in line) {
                                 if (!allColumns[key]) {
                                   allColumns[key] = 1;
@@ -350,15 +348,13 @@ var KGtripleBuilder = {
                               {
                                 if (item.subjectIsSpecificUri) {
                                   subjectStr = item.s;
-                                }
-                                else if (typeof item.s === "function") {
+                                } else if (typeof item.s === "function") {
                                   try {
                                     subjectStr = item.s(line, item);
                                   } catch (e) {
                                     return (lineError = e);
                                   }
-                                }
-                                else if (item.isSubjectBlankNode) {
+                                } else if (item.isSubjectBlankNode) {
                                   if (!line[item.s]) {
                                     return;
                                   }
@@ -368,16 +364,14 @@ var KGtripleBuilder = {
                                     blankNodesMap[item.s] = blankNode;
                                   }
                                   subjectStr = blankNode;
-                                }
-                                else if (item.s === "_rowIndex") {
+                                } else if (item.s === "_rowIndex") {
                                   var blankNode = blankNodesMap["_rowIndex"];
                                   if (!blankNode) {
                                     blankNode = getNewBlankNodeId();
                                     blankNodesMap["_rowIndex"] = blankNode;
                                   }
                                   subjectStr = blankNode;
-                                }
-                                else if (item.s.indexOf("$_") == 0) {
+                                } else if (item.s.indexOf("$_") == 0) {
                                   // virtual column
                                   if (typeof item.o === "string" && item.o.indexOf("$_") != 0 && allColumns[item.o] && !line[item.o]) {
                                     // ne pas creer des triplest sans objet
@@ -390,18 +384,15 @@ var KGtripleBuilder = {
                                     blankNodesMap[item.s] = blankNode;
                                   }
                                   subjectStr = blankNode;
-                                }
-                                else if (mapping.transform && line[item.s] && mapping.transform[item.s]) {
+                                } else if (mapping.transform && line[item.s] && mapping.transform[item.s]) {
                                   try {
                                     subjectStr = mapping.transform[item.s](line[item.s], "s", item.p, line, item);
                                   } catch (e) {
                                     return (lineError = e + " " + item.s);
                                   }
-                                }
-                                else if (item.s.match(/.+:.+|http.+/)) {
+                                } else if (item.s.match(/.+:.+|http.+/)) {
                                   subjectStr = item.s;
-                                }
-                                else {
+                                } else {
                                   if (!line[item.s]) {
                                     return;
                                   }
@@ -415,8 +406,7 @@ var KGtripleBuilder = {
                                   var lookupValue = getLookupValue(item.lookup_s, subjectStr);
                                   if (!lookupValue) {
                                     missingLookups_s += 1;
-                                  }
-                                  else {
+                                  } else {
                                     subjectStr = lookupValue;
                                     okLookups_s += 1;
                                   }
@@ -435,19 +425,16 @@ var KGtripleBuilder = {
                                     blankNodesMap["_rowIndex"] = blankNode;
                                   }
                                   objectStr = blankNode;
-                                }
-                                else if (item.objectIsSpecificUri) {
+                                } else if (item.objectIsSpecificUri) {
                                   objectStr = item.o;
-                                }
-                                else if (typeof item.o === "function") {
+                                } else if (typeof item.o === "function") {
                                   try {
                                     objectStr = item.o(line, item);
                                     objectStr = util.formatStringForTriple(objectStr, false);
                                   } catch (e) {
                                     return (lineError = e);
                                   }
-                                }
-                                else if (item.o.indexOf("$_") == 0) {
+                                } else if (item.o.indexOf("$_") == 0) {
                                   // virtual column
                                   var blankNode = blankNodesMap[item.o];
                                   if (!blankNode) {
@@ -455,14 +442,11 @@ var KGtripleBuilder = {
                                     blankNodesMap[item.o] = blankNode;
                                   }
                                   objectStr = blankNode;
-                                }
-                                else if (item.o.match(/http.+/)) {
+                                } else if (item.o.match(/http.+/)) {
                                   objectStr = "<" + item.o + ">";
-                                }
-                                else if (item.o.match(/.+:.+/)) {
+                                } else if (item.o.match(/.+:.+/)) {
                                   objectStr = item.o;
-                                }
-                                else {
+                                } else {
                                   if (!line[item.o] || line[item.o] == "null") {
                                     return;
                                   }
@@ -474,31 +458,25 @@ var KGtripleBuilder = {
                                       blankNodesMap[item.o] = blankNode;
                                     }
                                     objectStr = blankNode;
-                                  }
-                                  else if (item.dataType) {
+                                  } else if (item.dataType) {
                                     var str = line[item.o];
                                     if (!str || str == "null") {
                                       return;
                                     }
                                     if (item.dataType == "xsd:dateTime") {
-                                      var isDate = function(date) {
+                                      var isDate = function (date) {
                                         return new Date(date) !== "Invalid Date" && !isNaN(new Date(date)) ? true : false;
                                       };
 
-                                      var formatDate = function(date) {
+                                      var formatDate = function (date) {
                                         return new Date(date).toISOString(); //.slice(0, 10);
                                       };
 
                                       if (!isDate(str)) {
                                         var date = util.convertFrDateStr2Date(str);
-                                        if (!date) {
-                                          return;
-                                        }
-                                        else {
-                                          str = date.toISOString();
-                                        }
-                                      }
-                                      else {
+                                        if (!date) return;
+                                        else str = date.toISOString();
+                                      } else {
                                         str = formatDate(str);
                                       }
                                     }
@@ -506,15 +484,13 @@ var KGtripleBuilder = {
                                     item.p = "owl:hasValue";
 
                                     objectStr = "'" + str + "'^^" + item.dataType;
-                                  }
-                                  else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
+                                  } else if (mapping.transform && line[item.o] && mapping.transform[item.o]) {
                                     try {
                                       objectStr = mapping.transform[item.o](line[item.o], "o", item.p, line, item);
                                     } catch (e) {
                                       return (lineError = e + " " + item.o);
                                     }
-                                  }
-                                  else {
+                                  } else {
                                     objectStr = line[item.o];
                                   }
 
@@ -525,8 +501,7 @@ var KGtripleBuilder = {
                                     var lookupValue = getLookupValue(item.lookup_o, objectStr);
                                     if (!lookupValue) {
                                       missingLookups_o += 1;
-                                    }
-                                    else {
+                                    } else {
                                       okLookups_o += 1;
                                       objectStr = lookupValue;
                                     }
@@ -543,11 +518,9 @@ var KGtripleBuilder = {
 
                                 if (subjectStr.indexOf && subjectStr.indexOf("http") == 0) {
                                   subjectStr = "<" + subjectStr + ">";
-                                }
-                                else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1) {
+                                } else if (subjectStr.indexOf && subjectStr.indexOf(":") > -1) {
                                   //pass
-                                }
-                                else {
+                                } else {
                                   subjectStr = "<" + graphUri + util.formatStringForTriple(subjectStr, true) + ">";
                                 }
                               }
@@ -557,25 +530,19 @@ var KGtripleBuilder = {
                                 objectStr = objectStr.trim();
                                 if (objectStr.indexOf && objectStr.indexOf("http") == 0) {
                                   objectStr = "<" + objectStr + ">";
-                                }
-                                else if (item.datatype) {
+                                } else if (item.datatype) {
                                   //pass
-                                }
-                                else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
+                                } else if (objectStr.indexOf && objectStr.indexOf(":") > -1 && objectStr.indexOf(" ") < 0) {
                                   // pass
-                                }
-                                else if (item.isString) {
+                                } else if (item.isString) {
                                   objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
-                                }
-                                else if (propertiesTypeMap[item.p] == "string") {
+                                } else if (propertiesTypeMap[item.p] == "string") {
                                   if (objectStr.indexOf("xsd:") < 0) {
                                     objectStr = "'" + util.formatStringForTriple(objectStr, false) + "'";
                                   }
-                                }
-                                else if (objectStr.indexOf("xsd:") > -1) {
+                                } else if (objectStr.indexOf("xsd:") > -1) {
                                   //pass
-                                }
-                                else {
+                                } else {
                                   /* if(!item.isString)
 objectStr=objectStr.replace(/[\-_]/g,"")*/
                                   objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
@@ -606,24 +573,24 @@ objectStr=objectStr.replace(/[\-_]/g,"")*/
                                   triples.push({
                                     s: blankNode,
                                     p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
-                                    o: "<http://www.w3.org/2002/07/owl#Restriction>"
+                                    o: "<http://www.w3.org/2002/07/owl#Restriction>",
                                   });
                                   triples.push({
                                     s: blankNode,
                                     p: "<http://www.w3.org/2002/07/owl#onProperty>",
-                                    o: prop
+                                    o: prop,
                                   });
                                   if (objectStr) {
                                     triples.push({
                                       s: blankNode,
                                       p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
-                                      o: objectStr
+                                      o: objectStr,
                                     });
                                   }
                                   triples.push({
                                     s: subjectStr,
                                     p: "rdfs:subClassOf",
-                                    o: blankNode
+                                    o: blankNode,
                                   });
 
                                   if (item.inverseRestrictionProperty) {
@@ -645,24 +612,24 @@ objectStr=objectStr.replace(/[\-_]/g,"")*/
                                       triples.push({
                                         s: blankNode,
                                         p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
-                                        o: "<http://www.w3.org/2002/07/owl#Restriction>"
+                                        o: "<http://www.w3.org/2002/07/owl#Restriction>",
                                       });
                                       triples.push({
                                         s: blankNode,
                                         p: "<http://www.w3.org/2002/07/owl#onProperty>",
-                                        o: prop
+                                        o: prop,
                                       });
                                       if (objectStr) {
                                         triples.push({
                                           s: blankNode,
                                           p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
-                                          o: subjectStr
+                                          o: subjectStr,
                                         });
                                       }
                                       triples.push({
                                         s: objectStr,
                                         p: "rdfs:subClassOf",
-                                        o: blankNode
+                                        o: blankNode,
                                       });
                                     }
                                   }
@@ -685,8 +652,7 @@ propertyStr = line[item.p];
                                   } catch (e) {
                                     return (lineError = e);
                                   }
-                                }
-                                else if (item.p.indexOf("$") == 0) {
+                                } else if (item.p.indexOf("$") == 0) {
                                   propertyStr = KGtripleBuilder.getUserPredicateUri(item.p, line, graphUri);
                                 }
                                 if (!propertyStr) {
@@ -703,7 +669,7 @@ propertyStr = line[item.p];
                                       triples.push({
                                         s: subjectStr,
                                         p: propertyStr,
-                                        o: objectStr
+                                        o: objectStr,
                                       });
                                     }
                                   }
@@ -712,13 +678,13 @@ propertyStr = line[item.p];
                             });
                             return callbackEachLines2(lineError);
                           },
-                          function(err) {
+                          function (err) {
                             callbackSeries2(err);
                           }
                         );
                       },
                       //write triples
-                      function(callbackSeries2) {
+                      function (callbackSeries2) {
                         if (options.sampleSize) {
                           var sampleTriples = triples.slice(0, options.sampleSize);
                           // return callbackSeries2("sample", sampleTriples);
@@ -727,7 +693,7 @@ propertyStr = line[item.p];
 
                         var uniqueSubjects = {};
                         var metaDataTriples = [];
-                        triples.forEach(function(triple) {
+                        triples.forEach(function (triple) {
                           if (!uniqueSubjects[triple.s]) {
                             uniqueSubjects[triple.s] = 1;
 
@@ -743,7 +709,7 @@ propertyStr = line[item.p];
                         var sliceIndex = 0;
                         async.eachSeries(
                           slices,
-                          function(slice, callbackEach) {
+                          function (slice, callbackEach) {
                             if (KGtripleBuilder.stopCreateTriples) {
                               var message = "mapping " + mapping.fileName + " : import interrupted by user";
                               //  KGtripleBuilder.message(options.clientSocketId,message)
@@ -766,7 +732,7 @@ callbackEach();
 
                             if (false) {
                               //check unicity of each triples (takes time)
-                              KGtripleBuilder.writeUniqueTriples(slice, graphUri, sparqlServerUrl, function(err, result) {
+                              KGtripleBuilder.writeUniqueTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
                                 if (err) {
                                   errors += err + " slice " + sliceIndex + "\n";
                                   return callbackEach(err);
@@ -777,9 +743,8 @@ callbackEach();
 
                                 callbackEach();
                               });
-                            }
-                            else {
-                              KGtripleBuilder.writeTriples(slice, graphUri, sparqlServerUrl, function(err, result) {
+                            } else {
+                              KGtripleBuilder.writeTriples(slice, graphUri, sparqlServerUrl, function (err, result) {
                                 if (err) {
                                   errors += err + " slice " + sliceIndex + "\n";
                                   return callbackEach(err);
@@ -792,28 +757,28 @@ callbackEach();
                               });
                             }
                           },
-                          function(err) {
+                          function (err) {
                             //   KGtripleBuilder.message(  options.clientSocketId,"total triples writen:" + totalTriples)
 
                             callbackSeries2(err);
                           }
                         );
-                      }
+                      },
                     ],
 
-                    function(err) {
+                    function (err) {
                       callbackEachLines(err);
                     }
                   );
                 },
-                function(err) {
+                function (err) {
                   callbackSeries(err);
                 }
               );
-            }
+            },
           ],
 
-          function(_err) {
+          function (_err) {
             var message = "------------ created triples " + totalTriples;
             if (options.deleteTriples) {
               message = "------------ deleted triples " + totalTriples;
@@ -824,7 +789,7 @@ callbackEach();
           }
         );
       },
-      function(_err) {
+      function (_err) {
         if (callback) {
           var message = "------------ created triples " + totalTriples;
           if (options.deleteTriples) {
@@ -837,7 +802,7 @@ callbackEach();
     );
   },
 
-  deleteMappingFileTriples: function(mappings, sparqlServerUrl, callback) {
+  deleteMappingFileTriples: function (mappings, sparqlServerUrl, callback) {
     var query = "";
     query += "with  GRAPH <" + mappings.graphUri + "> " + "delete {?s ?p ?o} where {?s ?p ?o. ?s <" + KGtripleBuilder.mappingFilePredicate + "> '" + mappings.fileName + "'}";
     var params = { query: query };
@@ -845,10 +810,10 @@ callbackEach();
       params.auth = {
         user: ConfigManager.config.sparql_server.user,
         pass: ConfigManager.config.sparql_server.password,
-        sendImmediately: false
+        sendImmediately: false,
       };
     }
-    httpProxy.post(sparqlServerUrl, null, params, function(err, result) {
+    httpProxy.post(sparqlServerUrl, null, params, function (err, result) {
       if (err) {
         var x = query;
         return callback(err);
@@ -858,10 +823,10 @@ callbackEach();
     });
   },
 
-  deleteTriples: function(triples, graphUri, sparqlServerUrl, callback) {
+  deleteTriples: function (triples, graphUri, sparqlServerUrl, callback) {
     var insertTriplesStr = "";
     var totalTriples = 0;
-    triples.forEach(function(triple) {
+    triples.forEach(function (triple) {
       var str = triple.s + " " + triple.p + " " + triple.o + ". ";
       insertTriplesStr += str;
     });
@@ -872,11 +837,11 @@ callbackEach();
       params.auth = {
         user: ConfigManager.config.sparql_server.user,
         pass: ConfigManager.config.sparql_server.password,
-        sendImmediately: false
+        sendImmediately: false,
       };
     }
 
-    httpProxy.post(sparqlServerUrl, null, params, function(err, _result) {
+    httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
       if (err) {
         var x = query;
         return callback(err);
@@ -885,22 +850,22 @@ callbackEach();
       return callback(null, totalTriples);
     });
   },
-  writeUniqueTriples: function(triples, graphUri, sparqlServerUrl, callback) {
+  writeUniqueTriples: function (triples, graphUri, sparqlServerUrl, callback) {
     //var tempGraphUri="http://souslesesn.org/temp/"+util.getRandomHexaId(5)+"/"
     var tempGraphUri = graphUri + "temp/";
 
     async.series(
       [
         //insert triple into tempoary graph
-        function(callbackSeries) {
-          KGtripleBuilder.writeTriples(triples, tempGraphUri, sparqlServerUrl, function(err, result) {
+        function (callbackSeries) {
+          KGtripleBuilder.writeTriples(triples, tempGraphUri, sparqlServerUrl, function (err, result) {
             return callbackSeries(err);
             callbackSeries();
           });
         },
 
         //getDifference
-        function(callbackSeries) {
+        function (callbackSeries) {
           var query = "" + "select count distinct *  " + "WHERE {" + "  GRAPH <" + tempGraphUri + "> { ?s ?p ?o }" + "  FILTER NOT EXISTS { GRAPH <" + graphUri + "> { ?s ?p ?o } }" + "}";
 
           var params = { query: query };
@@ -909,11 +874,11 @@ callbackEach();
             params.auth = {
               user: ConfigManager.config.sparql_server.user,
               pass: ConfigManager.config.sparql_server.password,
-              sendImmediately: false
+              sendImmediately: false,
             };
           }
 
-          httpProxy.post(sparqlServerUrl, null, params, function(err, _result) {
+          httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
               return callbackSeries(err);
             }
@@ -922,7 +887,7 @@ callbackEach();
         },
 
         //writeDifference
-        function(callbackSeries) {
+        function (callbackSeries) {
           var query =
             "" +
             // "WITH <" +graphUri+"> "+
@@ -944,11 +909,11 @@ callbackEach();
             params.auth = {
               user: ConfigManager.config.sparql_server.user,
               pass: ConfigManager.config.sparql_server.password,
-              sendImmediately: false
+              sendImmediately: false,
             };
           }
 
-          httpProxy.post(sparqlServerUrl, null, params, function(err, _result) {
+          httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
               return callbackSeries(err);
             }
@@ -957,7 +922,7 @@ callbackEach();
         },
 
         // delete tempGraph
-        function(callbackSeries) {
+        function (callbackSeries) {
           var query = "clear Graph  <" + tempGraphUri + "> ";
           var params = { query: query };
 
@@ -965,19 +930,19 @@ callbackEach();
             params.auth = {
               user: ConfigManager.config.sparql_server.user,
               pass: ConfigManager.config.sparql_server.password,
-              sendImmediately: false
+              sendImmediately: false,
             };
           }
 
-          httpProxy.post(sparqlServerUrl, null, params, function(err, _result) {
+          httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
               return callback(err);
             }
             callbackSeries();
           });
-        }
+        },
       ],
-      function(err) {
+      function (err) {
         return callback(err, triples.length);
       }
     );
@@ -990,10 +955,10 @@ callbackEach();
    * @param {string} sparqlServerUrl - URL of the sparql endpoint where to write the graph
    * @param {Function} callback - Node-style async Function called to proccess result or handle error
    */
-  writeTriples: function(triples, graphUri, sparqlServerUrl, callback) {
+  writeTriples: function (triples, graphUri, sparqlServerUrl, callback) {
     var insertTriplesStr = "";
     var totalTriples = 0;
-    triples.forEach(function(triple) {
+    triples.forEach(function (triple) {
       var str = triple.s + " " + triple.p + " " + triple.o + ". ";
       insertTriplesStr += str;
     });
@@ -1008,11 +973,11 @@ callbackEach();
       params.auth = {
         user: ConfigManager.config.sparql_server.user,
         pass: ConfigManager.config.sparql_server.password,
-        sendImmediately: false
+        sendImmediately: false,
       };
     }
 
-    httpProxy.post(sparqlServerUrl, null, params, function(err, _result) {
+    httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
       if (err) {
         var x = queryGraph;
         return callback(err);
@@ -1022,7 +987,7 @@ callbackEach();
     });
   },
 
-  getMetaDataTriples: function(subjectUri, options) {
+  getMetaDataTriples: function (subjectUri, options) {
     var creator = "KGcreator";
     var dateTime = "'" + util.dateToRDFString(new Date(), true) + "'^^xsd:dateTime";
 
@@ -1039,12 +1004,12 @@ callbackEach();
     metaDataTriples.push({
       s: subjectUri,
       p: "<http://purl.org/dc/terms/created>",
-      o: dateTime
+      o: dateTime,
     });
     metaDataTriples.push({
       s: subjectUri,
       p: "<" + KGtripleBuilder.mappingFilePredicate + ">",
-      o: "'" + options.mappingFileName + "'"
+      o: "'" + options.mappingFileName + "'",
     });
 
     if (options.customMetaData) {
@@ -1052,7 +1017,7 @@ callbackEach();
         metaDataTriples.push({
           s: subjectUri,
           p: "<" + predicate + ">",
-          o: options.customMetaData[predicate]
+          o: options.customMetaData[predicate],
         });
       }
     }
@@ -1066,14 +1031,14 @@ callbackEach();
    * @param {string} sparqlServerUrl - URL of the sparql endpoint
    * @param {Function} callback - Node-style async Function called to proccess result or handle error
    */
-  clearGraph: function(graphUri, sparqlServerUrl, callback) {
+  clearGraph: function (graphUri, sparqlServerUrl, callback) {
     async.series(
       [
-        function(callbackSeries) {
+        function (callbackSeries) {
           if (sparqlServerUrl) {
             return callbackSeries();
           }
-          ConfigManager.getGeneralConfig(function(err, result) {
+          ConfigManager.getGeneralConfig(function (err, result) {
             if (err) {
               return callbackSeries(err);
             }
@@ -1081,7 +1046,7 @@ callbackEach();
             callbackSeries();
           });
         },
-        function(_callbackSeries) {
+        function (_callbackSeries) {
           var query = "clear graph   <" + graphUri + ">";
           var params = { query: query };
 
@@ -1089,43 +1054,40 @@ callbackEach();
             params.auth = {
               user: ConfigManager.config.sparql_server.user,
               pass: ConfigManager.config.sparql_server.password,
-              sendImmediately: false
+              sendImmediately: false,
             };
           }
 
-          httpProxy.post(sparqlServerUrl, null, params, function(err, _result) {
+          httpProxy.post(sparqlServerUrl, null, params, function (err, _result) {
             if (err) {
               return callback(err);
             }
 
             return callback(null);
           });
-        }
+        },
       ],
-      function(err) {
+      function (err) {
         return callback(err, "graph cleared");
       }
     );
   },
   /**
-   * Generate triples from a CSV file or database
+   * Generate triples from a CSV file
    *
    * @param {string} dirName - the subdirectory of <src-dir>/data where to look for <mappingFileName>
    * @param {string} mappingFileName - name of the csv file to generate triples from (optional if null create triples from all mappings)
    * @param {Object} options - keys: sparqlServerUrl, deleteOldGraph, graphUri
    * @param {Function} callback - Node-style async Function called to proccess result or handle error
    */
-  createTriplesFromCsvOrTable: function(source,type,datasource, table, options, callback) {
+  createTriplesFromCsv: function (dirName, mappingFileName, options, callback) {
     var sparqlServerUrl;
     var output = "";
     var clientSocketId = options.clientSocketId;
-    var tableMappingsToProcess = [];
-    var sourceMappingsDir = path.join(__dirname, "../data/mappings/" + source+"/");
-    var sourceCsvDir = path.join(__dirname, "../data/CSV/" + source+"/");
-    var sourceMainJson={};
+    var allMappingFiles = [];
 
     KGtripleBuilder.stopCreateTriples = false;
-    SocketManager.clientSockets[options.clientSocketId].on("KGCreator", function(message) {
+    SocketManager.clientSockets[options.clientSocketId].on("KGCreator", function (message) {
       if (message == "stopCreateTriples") {
         KGtripleBuilder.stopCreateTriples = true;
       }
@@ -1133,23 +1095,12 @@ callbackEach();
 
     async.series(
       [
-
-        // read source main.json
-        function(callbackSeries) {
-          try {
-            var sourceMappingsDir = dataDir + source;
-            sourceMainJson = JSON.parse("" + fs.readFileSync(sourceMappingsDir));
-          } catch (e) {
-            return callbackSeries(e);
-          }
-        },
-
-        function(callbackSeries) {
+        function (callbackSeries) {
           if (options.sparqlServerUrl) {
             sparqlServerUrl = options.sparqlServerUrl;
             return callbackSeries();
           }
-          ConfigManager.getGeneralConfig(function(err, result) {
+          ConfigManager.getGeneralConfig(function (err, result) {
             if (err) {
               return callbackSeries(err);
             }
@@ -1158,11 +1109,11 @@ callbackEach();
           });
         },
         // delete old graph (optional)
-        function(callbackSeries) {
+        function (callbackSeries) {
           if (!options.deleteOldGraph) {
             return callbackSeries();
           }
-          KGtripleBuilder.clearGraph(sourceMainJson.graphUri, sparqlServerUrl, function(err, _result) {
+          KGtripleBuilder.clearGraph(options.graphUri, sparqlServerUrl, function (err, _result) {
             if (err) {
               return callbackSeries(err);
             }
@@ -1172,56 +1123,51 @@ callbackEach();
           });
         },
 
-        //get all mappings to process (if table is null
-        function(callbackSeries) {
+        function (callbackSeries) {
+          if (mappingFileName) {
+            allMappingFiles = [mappingFileName];
 
-       for (var key  in sourceMainJson.databaseSources) {
-         if (source == key) {
-           for (var key2 in sourceMainJson.databaseSources[key]) {
-             if (!table || table == key2)
-               var tableMapping = sourceMainJson.databaseSources[key][key2]
-             tableMapping.datasourceType="databaseSource"
-             tableMappingsToProcess.push(tableMapping)
-           }
-         }
-       }
-          for (var key  in sourceMainJson.csvSources) {
-
-                if (!table || table == key)
-                  var tableMapping = sourceMainJson.csvSources[key]
-            tableMapping.datasourceType="csvSource"
-                tableMappingsToProcess.push(tableMapping)
+            return callbackSeries();
+          }
+          try {
+            var mappingsDirPath = path.join(__dirname, "../data/" + dirName);
+            var files = fs.readdirSync(mappingsDirPath);
+            for (var i = 0; i < files.length; i++) {
+              var file = files[i];
+              if (file.indexOf(".json") > -1) {
+                allMappingFiles.push(file);
               }
-          return callbackSeries(e);
-          },
+            }
+          } catch (e) {
+            return callbackSeries(e);
+          }
 
+          return callbackSeries();
+        },
 
-
-        // read mapping file and prepare mappings for each tableMappingsToProcess
-        function(callbackSeries) {
+        // read mapping file and prepare mappings
+        function (callbackSeries) {
           async.eachSeries(
-            tableMappingsToProcess,
-            function(mappingFileName, callbackEach) {
-              var mappingsFilePath = path.join(__dirname, "../data/mappings" + dirName + "/" + mappingFileName);
+            allMappingFiles,
+            function (mappingFileName, callbackEach) {
+              var mappingsFilePath = path.join(__dirname, "../data/" + dirName + "/" + mappingFileName);
               var mappings = "" + fs.readFileSync(mappingsFilePath);
               mappings = JSON.parse(mappings);
               if (typeof options.dataLocation == "string") {
                 mappings.csvDataFilePath = path.join(__dirname, "../data/" + dirName + "/" + options.dataLocation);
-              }
-              else {
+              } else {
                 mappings.datasource = options.dataLocation;
               }
 
               if (options.deleteTriples) {
-                KGtripleBuilder.deleteMappingFileTriples(mappings, sparqlServerUrl, function(err, result) {
+                KGtripleBuilder.deleteMappingFileTriples(mappings, sparqlServerUrl, function (err, result) {
                   if (err) {
                     return callbackEach(err);
                   }
                   output = result;
                   return callbackEach(null, "DELETE Mapping File triples  : " + mappings.fileName + "  " + result);
                 });
-              }
-              else {
+              } else {
                 function getFunction(argsArray, fnStr, callback) {
                   try {
                     fnStr = fnStr.replace(/[/r/n/t]gm/, "");
@@ -1243,9 +1189,9 @@ callbackEach();
                   return callbackEach();
                 }
 
-                mappings.tripleModels.forEach(function(item) {
+                mappings.tripleModels.forEach(function (item) {
                   if (item.s.indexOf("function{") > -1) {
-                    getFunction(["row", "mapping"], item.s, function(err, fn) {
+                    getFunction(["row", "mapping"], item.s, function (err, fn) {
                       if (err) {
                         return callbackSeries(err + " in mapping" + JSON.stringify(item));
                       }
@@ -1253,7 +1199,7 @@ callbackEach();
                     });
                   }
                   if (item.o.indexOf("function{") > -1) {
-                    getFunction(["row", "mapping"], item.o, function(err, fn) {
+                    getFunction(["row", "mapping"], item.o, function (err, fn) {
                       if (err) {
                         return callbackSeries(err + " in mapping" + JSON.stringify(item));
                       }
@@ -1263,7 +1209,7 @@ callbackEach();
                   }
 
                   if (item.p.indexOf("function{") > -1) {
-                    getFunction(["row", "mapping"], item.p, function(err, fn) {
+                    getFunction(["row", "mapping"], item.p, function (err, fn) {
                       if (err) {
                         return callbackSeries(err + " in mapping" + JSON.stringify(item));
                       }
@@ -1275,7 +1221,7 @@ callbackEach();
                 for (var key in mappings.transform) {
                   var fnStr = mappings.transform[key];
                   if (fnStr.indexOf("function{") > -1) {
-                    getFunction(["value", "role", "prop", "row", "mapping"], fnStr, function(err, fn) {
+                    getFunction(["value", "role", "prop", "row", "mapping"], fnStr, function (err, fn) {
                       if (err) {
                         return callbackSeries(err + " in mapping" + JSON.stringify(fnStr));
                       }
@@ -1285,11 +1231,11 @@ callbackEach();
                 }
 
                 // format lookups
-                mappings.lookups.forEach(function(item) {
+                mappings.lookups.forEach(function (item) {
                   var lookupFilePath = path.join(__dirname, "../../data/" + dirName + "/" + item.fileName);
                   item.filePath = lookupFilePath;
                   if (item.transformFn) {
-                    getFunction(["value", "role", "prop", "row", "mapping"], item.transformFn, function(err, fn) {
+                    getFunction(["value", "role", "prop", "row", "mapping"], item.transformFn, function (err, fn) {
                       if (err) {
                         return callbackSeries(err + " in mapping" + JSON.stringify(item));
                       }
@@ -1305,7 +1251,7 @@ callbackEach();
 
                 var mappingsMap = { [mappings.csvDataFilePath]: mappings };
                 options.customMetaData = { [KGtripleBuilder.mappingFilePredicate]: mappings.fileName };
-                KGtripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function(err, result) {
+                KGtripleBuilder.createTriples(mappingsMap, mappings.graphUri, sparqlServerUrl, options, function (err, result) {
                   KGtripleBuilder.message(options.clientSocketId, "creating triples for mapping " + mappings.fileName);
                   if (err) {
                     return callbackSeries(err);
@@ -1313,21 +1259,20 @@ callbackEach();
                   if (options.sampleSize) {
                     output = result;
                     return callbackEach(err, output);
-                  }
-                  else {
+                  } else {
                     output = { countCreatedTriples: result };
                   }
                   callbackEach();
                 });
               }
             },
-            function(err) {
+            function (err) {
               callbackSeries(err);
             }
           );
-        }
+        },
       ],
-      function(err) {
+      function (err) {
         if (err == "sample") {
           err = null;
         }
@@ -1335,16 +1280,14 @@ callbackEach();
       }
     );
   },
-  getUserPredicateUri: function(predicate, line, graphUri) {
+  getUserPredicateUri: function (predicate, line, graphUri) {
     if (predicate.indexOf("$") == 0) {
       if (predicate.indexOf("http") < 0 && predicate.indexOf(":") < 0) {
         return graphUri + util.formatStringForTriple(line[predicate.substring(1)], true);
-      }
-      else {
+      } else {
         return line[predicate.substring(1)];
       }
-    }
-    else {
+    } else {
       return predicate;
     }
   },

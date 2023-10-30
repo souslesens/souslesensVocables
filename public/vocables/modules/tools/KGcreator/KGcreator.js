@@ -109,11 +109,18 @@ var KGcreator = (function() {
       data: payload,
       dataType: "json",
       success: function(result, _textStatus, _jqXHR) {
-        return callback(null, JSON.parse(result));
+        var json
+        try{
+          json=JSON.parse(result)
+        }catch(e){
+          return callback(e)
+        }
+        return callback(null,json );
       },
       error: function(err) {
         //    callback(err);
         var newJson = {
+          sparqlServerUrl: Config.sources[self.currentSlsvSource].sparql_server.url,
           graphUri: Config.sources[self.currentSlsvSource].graphUri,
           prefixes: {},
           databaseSources: {},
@@ -206,14 +213,14 @@ var KGcreator = (function() {
             return items;
           }
           else if (node.data.type == "table") {
-            items.mapRow = {
-              label: "mapRow",
+
+            items.showTableMappings = {
+              label: "showTableMappings",
               action: function(_e) {
                 // pb avec source
-                KGcreator_mappings.showMappingDialog();
+                KGcreator_mappings.showTableMappings(node);
               }
             };
-
             items.showSampleData = {
               label: "showSampleData",
               action: function(_e) {
@@ -333,9 +340,9 @@ var KGcreator = (function() {
 
   self.saveSlsvSourceConfig = function( callback) {
 
-    var data={};
-    var source=self.currentConfig.currentDataSource;
-    self.currentConfig.currentMappings
+    var data=  KGcreator.rawConfig;
+    var source=self.currentSlsvSource;
+
 
     var payload = {
       dir: mappingsDir + "/" + source,
@@ -690,7 +697,13 @@ var KGcreator = (function() {
       data: payload,
       dataType: "json",
       success: function(result, _textStatus, _jqXHR) {
-        callback(null, JSON.parse(result));
+        var json
+        try{
+          json=JSON.parse(result)
+        }catch(e){
+          return callback(e)
+        }
+        callback(null, json);
       },
       error(err) {
         return callback(null, {});
@@ -792,6 +805,10 @@ var KGcreator = (function() {
     });
   };
 
+
+  self.showSampleData=function(node,column,callback){
+    alert( "coming soon")
+  }
 
   self.migrateOldMappings = function(slsvSource) {
     if (!slsvSource) {

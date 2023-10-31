@@ -11,10 +11,16 @@ module.exports = function () {
             const outputPath = path.join("data/CSV", req.body.path);
             for (const file of Object.values(req.files)) {
                 const filePath = path.join(outputPath, file.name);
+
                 if (!filePath.startsWith("data/CSV/") && !filePath.startsWith("data\\CSV\\")) {
+
                     return res.status(403).json({ done: false, message: "forbidden path" });
                 }
-                await fs.mkdir(outputPath);
+
+
+               /* if(await fs.exists(outputPath)) {
+                    await fs.mkdir(outputPath);
+                }*/
                 await file.mv(filePath);
             }
         } catch (err) {

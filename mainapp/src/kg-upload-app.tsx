@@ -18,23 +18,28 @@ declare global {
         KGcreator: {
             listFiles: (subDir: string) => void;
             listTables: (subDir: string) => void;
+            createDataBaseSourceMappings: () => void;
+            createCsvSourceMappings: () => void;
             currentSourceType: string;
+            uploadFormData: any;
         };
     }
 }
 
-export default function App() {
+export default function App({ uploadFormData }: { uploadFormData: any }) {
     const [sourceType, setSourceType] = useState("");
     const [subDirs, setSubDirs] = useState<string[]>([]);
     const [subDir, setSubDir] = useState("");
     const [databases, setDatabases] = useState<string[]>([]);
     const [files, setFiles] = useState<File[]>([]);
+    const [serverfiles, setServerFiles] = useState<string[]>([]);
     const [uploadStatus, setUploadStatus] = useState("");
     const [displayNewSubDirForm, setDisplayNewSubDirForm] = useState(false);
     const [sources, setSources] = useState<string[]>([]);
     const [selectedNewSource, setSelectedNewSource] = useState("");
     const [createDirSuccess, setCreateDirSuccess] = useState(false);
     const [selectedDatabase, setSelectedDatabase] = useState("_default");
+    const [selectedFile, setSelectedFile] = useState("_default");
 
     useEffect(() => {
         void fetchSubDirs();
@@ -54,6 +59,10 @@ export default function App() {
         void fetchSources();
     }, []);
 
+    useEffect(() => {
+        void fetchFiles();
+    }, []);
+
     const uploadFileHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
         setUploadStatus("");
         if (event.currentTarget.files === null) {
@@ -66,7 +75,7 @@ export default function App() {
     const fileSubmitHandler = async (event: React.FormEvent) => {
         event.preventDefault();
         const formData = new FormData();
-        formData.append("path", subDir);
+        formData.append("path", uploadFormData.currentSource);
         files.forEach((file) => {
             formData.append(file.name, file);
         });
@@ -74,6 +83,8 @@ export default function App() {
         const response = await fetch("/api/v1/upload", { method: "POST", body: formData });
         if (response.status === 201) {
             setUploadStatus("success");
+            // reload
+            await fetchFiles()
         } else {
             setUploadStatus("error");
             // todo: display error message
@@ -101,6 +112,12 @@ export default function App() {
         const json = (await response.json()) as string[];
         setSubDirs(json);
     };
+
+    const fetchFiles = async () => {
+        const response = await fetch("/api/v1/data/files?dir=CSV/" + window.KGcreator.uploadFormData.currentSource);
+        const files = (await response.json()) as string[];
+        setServerFiles(files)
+    }
 
     const fetchFilesInSubDir = async (subDir: string) => {
         const response = await fetch("/api/v1/data/files?dir=CSV/" + subDir);
@@ -137,7 +154,15 @@ export default function App() {
     const handleDatabaseChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const db = event.currentTarget.value;
         setSelectedDatabase(db);
-        window.KGcreator.listTables(db);
+        window.KGcreator.uploadFormData.selectedDatabase = db;
+        window.KGcreator.createDataBaseSourceMappings();
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const file = event.currentTarget.value;
+        setSelectedFile(file);
+        window.KGcreator.uploadFormData.selectedFile = file
+        window.KGcreator.createCsvSourceMappings();
     };
 
     const handleClickNewSubDir = async () => {
@@ -193,6 +218,20 @@ export default function App() {
         </Form.Select>
     );
 
+    const selectFiles = (
+        <Form.Select defaultValue="_default" value={selectedFile} onChange={handleFileChange} aria-label="Select file">
+            <option value="_default" disabled={true}>
+                Select file
+            </option>
+            {serverfiles.map((file) => {
+                return (
+                    <option key={file} value={file}>
+                        {file}
+                    </option>
+                );
+            })}
+        </Form.Select>
+    );
     const browseForm = (
         <Form.Group controlId="formFileMultiple" className="mb-3">
             <Form.Control name="files" type="file" multiple accept=".csv,.tsv" onChange={uploadFileHandler} />
@@ -234,33 +273,26 @@ export default function App() {
 
     const errorMessage = (message: string) => <Alert variant="danger">{message}</Alert>;
 
-    return (
-        <Container fluid>
-            <Row>
-                <Col className="mb-3 pe-1">{selectDatabaseOrFiles}</Col>
-                {sourceType === "files" ? <Col className="mb-3 px-1">{selectSubDir}</Col> : null}
-                {sourceType === "database" ? <Col className="mb-3 px-1">{selectDatabase}</Col> : null}
-            </Row>
-            <Row>
-                {sourceType === "files" && subDir != "" ? browseForm : null}
-                {/*sourceType === "files" && subDir != "" && files.length > 0 ? progressBars : null*/}
-                {sourceType === "files" && subDir != "" && files.length > 0 ? uploadButton : null}
-                {uploadStatus === "error" ? errorMessage("Error during upload") : null}
-            </Row>
-            <Row>
-                <Col className="pe-1">{displayNewSubDirForm ? newSubDirForm : null}</Col>
-                <Col className="ps-1">
-                    {displayNewSubDirForm ? (
-                        <Button onClick={handleClickNewSubDir} variant="secondary">
-                            Add
-                        </Button>
-                    ) : null}
-                </Col>
-            </Row>
-        </Container>
-    );
+    if (window.KGcreator.uploadFormData.displayForm == "database") {
+        return <Col className="mb-3 px-1">{selectDatabase}</Col>;
+    }
+    if (window.KGcreator.uploadFormData.displayForm == "file") {
+        return (
+            <>
+                <Row>
+                    <Col className="mb-3 px-1">{selectFiles}</Col>
+                </Row>
+                <Row>
+                    {browseForm}
+                    {files.length > 0 ? uploadButton : null}
+                    {uploadStatus === "error" ? errorMessage("Error during upload") : null}
+                </Row>
+            </>
+        );
+    }
+    return <></>;
 }
 
 const container = document.getElementById("mount-kg-upload-app-here");
 const root = createRoot(container!);
-root.render(<App />);
+root.render(<App uploadFormData={window.KGcreator.uploadFormData} />);

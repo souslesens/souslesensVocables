@@ -11,7 +11,7 @@ var DataController = {
      */
     getFilesList: function (dir, callback) {
         var dirPath = path.join(__dirname, "../data/" + dir + "");
-        if (!fs.existsSync(dirPath)) return callback(null, null);
+        if (!fs.existsSync(dirPath)) return callback(null, []);
 
         fs.readdir(dirPath, function (err, result) {
             return callback(err, result);

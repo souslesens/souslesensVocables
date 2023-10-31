@@ -14,12 +14,20 @@ import KGcreator_joinTables from "./KGcreator_joinTables.js";
 var KGcreator = (function() {
   var self = {};
   self.currentConfig = {};
-  self.currentSlsvSource = {};
+  self.currentSlsvSource = "";
   self.allTriplesMappings = {};
   var mappingsDir = "mappings";
   // mappingsDir=  "CSV"
 
-  self.displayUploadApp = function() {
+  self.uploadFormData = {
+    displayForm: "",  // can be database, file or ""
+    currentSource: "",
+    selectedDatabase: "",
+    selectedFiles: []
+  }
+
+  self.displayUploadApp = function(displayForm) {
+    self.uploadFormData.displayForm = displayForm
     $.getScript("/kg_upload_app.js");
   };
 
@@ -59,6 +67,7 @@ var KGcreator = (function() {
     };
     var selectTreeNodeFn = function() {
       self.currentSlsvSource = SourceSelectorWidget.getSelectedSource()[0];
+      self.uploadFormData.currentSource = self.currentSlsvSource;
       $("#mainDialogDiv").dialog("close");
       if (!self.currentSlsvSource) {
         return alert("select a source");
@@ -197,7 +206,7 @@ var KGcreator = (function() {
             items.addDatabaseSource = {
               label: "addDatabaseSources",
               action: function(_e) {
-                KGcreator.createDataBaseSourceMappings();
+                self.displayUploadApp("database");
               }
             };
             return items;
@@ -206,8 +215,7 @@ var KGcreator = (function() {
             items.csvSources = {
               label: "addCsvSources",
               action: function(_e) {
-                // pb avec source
-                KGcreator.createCsvSourceMappings();
+                self.displayUploadApp("file");
               }
             };
             return items;
@@ -729,7 +737,10 @@ var KGcreator = (function() {
   };
 
   self.createDataBaseSourceMappings = function() {
-    var name = prompt("DBname");
+    // hide uploadApp
+    self.displayUploadApp("");
+
+    var name = self.uploadFormData.selectedDatabase;
     if (!name) {
       return;
     }
@@ -748,8 +759,10 @@ var KGcreator = (function() {
   };
 
   self.createCsvSourceMappings = function() {
-    var name = prompt("fileName");
-    if (!name) {
+    // hide uploadApp
+    self.displayUploadApp("");
+    var names = self.uploadFormData.selectedFiles;
+    if (!names) {
       return;
     }
   };

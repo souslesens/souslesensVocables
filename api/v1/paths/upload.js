@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs/promises");
 
 module.exports = function () {
     let operations = {
@@ -13,7 +14,8 @@ module.exports = function () {
                 if (!filePath.startsWith("data/CSV/") && !filePath.startsWith("data\\CSV\\")) {
                     return res.status(403).json({ done: false, message: "forbidden path" });
                 }
-                file.mv(filePath);
+                await fs.mkdir(outputPath);
+                await file.mv(filePath);
             }
         } catch (err) {
             next(err);

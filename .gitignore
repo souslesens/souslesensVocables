@@ -116,12 +116,13 @@ dist
 public/vocables/images/descriptionXX.png
 
 /config/
-
 data/**/*.json
 data/**/*.pdf
 data/**/*.zip
 data/**/*.txt
 data/**/*.csv
+
+docker-data/
 
 #React build output
 mainapp/static/*.js

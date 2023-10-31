@@ -6,12 +6,22 @@ const KGbuilder_socket=require ('./KGbuilder_socket')
 
 
 
-KGbuilder_triplesWriter={
+const KGbuilder_triplesWriter={
 
- writeTableTriplse:function() {
+    sparqlPrefixes: {
+      xs: "<http://www.w3.org/2001/XMLSchema#>",
+      rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
+      rdfs: "<http://www.w3.org/2000/01/rdf-schema#>",
+      owl: "<http://www.w3.org/2002/07/owl#>",
+      skos: "<http://www.w3.org/2004/02/skos/core#>",
+      iso14224: "<http://data.total.com/resource/tsf/iso_14224#>",
+      req: "<https://w3id.org/requirement-ontology/rdl/>",
+      part14: "<http://rds.posccaesar.org/ontology/lis14/rdl/>",
+      iso81346: "<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
+      slsv: "<http://souslesens.org/resource/vocabulary/>",
+      dcterms: "<http://purl.org/dc/terms/>"
+    },
 
-
- },
 
   writeUniqueTriples: function(triples, graphUri, sparqlServerUrl, callback) {
     //var tempGraphUri="http://souslesesn.org/temp/"+util.getRandomHexaId(5)+"/"
@@ -21,7 +31,7 @@ KGbuilder_triplesWriter={
       [
         //insert triple into tempoary graph
         function(callbackSeries) {
-          KGtripleBuilder.writeTriples(triples, tempGraphUri, sparqlServerUrl, function(err, result) {
+          KGbuilder_triplesWriter.writeTriples(triples, tempGraphUri, sparqlServerUrl, function(err, result) {
             return callbackSeries(err);
             callbackSeries();
           });
@@ -126,7 +136,7 @@ KGbuilder_triplesWriter={
       insertTriplesStr += str;
     });
 
-    var queryGraph = KGtripleBuilder.getSparqlPrefixesStr();
+    var queryGraph = KGbuilder_triplesWriter.getSparqlPrefixesStr();
 
     queryGraph += " WITH GRAPH  <" + graphUri + ">  " + "INSERT DATA" + "  {" + insertTriplesStr + "  }";
 
@@ -227,7 +237,7 @@ KGbuilder_triplesWriter={
       var str = triple.s + " " + triple.p + " " + triple.o + ". ";
       insertTriplesStr += str;
     });
-    var query = KGtripleBuilder.getSparqlPrefixesStr();
+    var query = KGbuilder_triplesWriter.getSparqlPrefixesStr();
     query += "DELETE DATA {  GRAPH <" + graphUri + "> {  " + insertTriplesStr + " }  } ";
     var params = { query: query };
     if (ConfigManager.config && sparqlServerUrl.indexOf(ConfigManager.config.default_sparql_url) == 0) {
@@ -250,11 +260,13 @@ KGbuilder_triplesWriter={
 
   getSparqlPrefixesStr: function() {
     var str = "";
-    for (var key in KGbuilder_main.sparqlPrefixes) {
-      str += "PREFIX " + key + ": " + KGbuilder_main.sparqlPrefixes[key] + " ";
+    for (var key in KGbuilder_triplesWriter.sparqlPrefixes) {
+      str += "PREFIX " + key + ": " + KGbuilder_triplesWriter.sparqlPrefixes[key] + " ";
     }
     return str;
   },
 
 
 }
+
+module.exports=KGbuilder_triplesWriter

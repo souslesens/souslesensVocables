@@ -1,4 +1,4 @@
-const KGtripleBuilder = require("../../../../bin/KGtripleBuilder.");
+const KGbuilder_main = require("../../../../bin/KGbuilder/KGbuilder_main");
 const { processResponse } = require("../utils");
 
 module.exports = function() {
@@ -8,7 +8,7 @@ module.exports = function() {
 
   function POST(req, res, next) {
     try {
-      KGtripleBuilder.createTriplesFromCsvOrTable(req.body.source,req.body.type, req.body.datasource, req.body.table, JSON.parse(req.body.options), function(err, result) {
+        KGbuilder_main.importTriplesFromCsvOrTable(req.body.source, req.body.datasource, req.body.table, JSON.parse(req.body.options), function(err, result) {
         processResponse(res, err, result);
       });
     } catch (e) {
@@ -29,9 +29,8 @@ module.exports = function() {
         schema: {
           type: "object",
           properties: {
-            datasource: { type: "string" },
-            type: { type: "string" },
             source: { type: "string" },
+            datasource: { type: "string" },
             table: { type: "string" },
             options: { type: "string" }
           }

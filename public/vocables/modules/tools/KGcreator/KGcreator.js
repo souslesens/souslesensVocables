@@ -240,9 +240,9 @@ var KGcreator = (function() {
           else if (node.data.type == "tableColumn") {
             var KGcreatorTab = $("#KGcreator_centralPanelTabs").tabs("option", "active");
 
-            if (KGcreatorTab == 1) {
-              return (items = KGcreator.getContextMenu());
-            }
+
+           //   return (items = KGcreator.getContextMenu());
+
 
             items.mapColumn = {
               label: "map Column",

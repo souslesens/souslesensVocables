@@ -2,22 +2,10 @@ const async = require("async");
 const sqlServerProxy = require("../KG/SQLserverConnector.");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket");
-
+const KGbuilder_triplesWriter=require('./KGbuilder_triplesWriter')
 
 var KGbuilder_triplesMaker = {
-  sparqlPrefixes: {
-    xs: "<http://www.w3.org/2001/XMLSchema#>",
-    rdf: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#>",
-    rdfs: "<http://www.w3.org/2000/01/rdf-schema#>",
-    owl: "<http://www.w3.org/2002/07/owl#>",
-    skos: "<http://www.w3.org/2004/02/skos/core#>",
-    iso14224: "<http://data.total.com/resource/tsf/iso_14224#>",
-    req: "<https://w3id.org/requirement-ontology/rdl/>",
-    part14: "<http://rds.posccaesar.org/ontology/lis14/rdl/>",
-    iso81346: "<http://data.total.com/resource/tsf/IEC_ISO_81346/>",
-    slsv: "<http://souslesens.org/resource/vocabulary/>",
-    dcterms: "<http://purl.org/dc/terms/>"
-  },
+
 
     mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
     /**
@@ -49,7 +37,7 @@ var KGbuilder_triplesMaker = {
       var graphUri = tableMappings.graphUri;
 
 
-      var allColumns = {};
+     KGbuilder_triplesMaker.allColumns = {};
 
 
       async.eachSeries(data, function(line, callbackEachLine) {
@@ -64,8 +52,8 @@ var KGbuilder_triplesMaker = {
         KGbuilder_triplesMaker.blankNodesMap = {};
 
         for (var key in line) {
-          if (!allColumns[key]) {
-            allColumns[key] = 1;
+          if (!KGbuilder_triplesMaker.allColumns[key]) {
+            KGbuilder_triplesMaker.allColumns[key] = 1;
           }
           line[key] = "" + line[key];
           if (line[key] && !KGbuilder_triplesMaker.isUri(line[key])) {
@@ -73,8 +61,8 @@ var KGbuilder_triplesMaker = {
           }
         }
 
-
-        tableMappings.tripleModels.forEach(function(mapping) {
+          async.eachSeries( tableMappings.tripleModels, function(mapping, callbackEachMapping) {
+        //tableMappings.tripleModels.forEach(function(mapping) {
 
 
           if (line[mapping.s] == "null") {
@@ -94,7 +82,7 @@ var KGbuilder_triplesMaker = {
           async.series(
             [
               function(callbackSeries) {
-                KGbuilder_triplesMaker.getTripleSubject(tableMappings,mapping, line, function(err, result) {
+                KGbuilder_triplesMaker.getTripleSubject(tableMappings, mapping, line, function(err, result) {
                   if (err) {
                     return callbackSeries(err);
                   }
@@ -114,11 +102,12 @@ var KGbuilder_triplesMaker = {
                 });
               },
               function(callbackSeries) {
-                KGbuilder_triplesMaker.getTripleObject(tableMappings,mapping, line, function(err, result) {
+                KGbuilder_triplesMaker.getTripleObject(tableMappings, mapping, line, function(err, result) {
                   if (err) {
                     return callbackSeries(err);
                   }
-                  getTripleObject = result;
+
+                  objectStr = result;
                   return callbackSeries();
 
                 });
@@ -131,40 +120,45 @@ var KGbuilder_triplesMaker = {
                   KGbuilder_triplesMaker.getRestrictionTriples(mapping, subjectStr, propertyStr, objectStr, function(err, restrictionTriples) {
                     if (err) {
                       return callbackSeries(err);
-                      triples = triples.concat(restrictionTriples);
-                      return callbackSeries();
                     }
-                    else {
-                      if (subjectStr && objectStr) {
-                        if (!KGtripleBuilder.existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr]) {
-                          KGtripleBuilder.existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
-                          triples.push({
-                            s: subjectStr,
-                            p: propertyStr,
-                            o: objectStr
-                          });
-                        }
-                        return callbackSeries();
-                      }
-                    }
+                    triples = triples.concat(restrictionTriples);
+                    return callbackSeries();
                   });
                 }
-              }
+                else {
+                  if (subjectStr && propertyStr &&  objectStr) {
+                    if (!existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr]) {
+                      existingNodes[subjectStr + "_" + propertyStr + "_" + objectStr] = 1;
+                      triples.push({
+                        s: subjectStr,
+                        p: propertyStr,
+                        o: objectStr
+                      });
+                    }
 
+
+                  }/* else{
+                    console.log( "missing " +subjectStr +" "+ propertyStr +" "+  objectStr)
+                  }*/
+                  return callbackSeries();
+                }
+
+              }
             ],
             function(err) {
-              callbackEachLine(err);
+              callbackEachMapping(err);
             }
           );
-
-        });
+        },function(err){
+            callbackEachLine(err);
+          });
       }, function(err) {
         callback(err, triples);
       });
     },
 
 
-    getTripleSubject: function(tableMappings,mapping, line, callback) {
+    getTripleSubject: function(tableMappings, mapping, line, callback) {
 //get value for Subject
       var subjectStr = null;
       if (mapping.subjectIsSpecificUri) {
@@ -183,7 +177,7 @@ var KGbuilder_triplesMaker = {
       }
       else if (mapping.s.indexOf("$_") == 0) {
         // virtual column
-        if (typeof mapping.o === "string" && mapping.o.indexOf("$_") != 0 && allColumns[mapping.o] && !line[mapping.o]) {
+        if (typeof mapping.o === "string" && mapping.o.indexOf("$_") != 0 && KGbuilder_triplesMaker.allColumns[mapping.o] && !line[mapping.o]) {
           // ne pas creer des triplest sans objet
           return callback(null, null);
         }
@@ -203,7 +197,7 @@ var KGbuilder_triplesMaker = {
       }
       else {
         if (!line[mapping.s] || line[mapping.o] == "null") {
-          return callback("no mapping.subject in line " + line);
+          return callback( null, null);
         }
         subjectStr = line[mapping.s];
       }
@@ -222,7 +216,7 @@ var KGbuilder_triplesMaker = {
       }
 
       if (!subjectStr) {
-        return callback("no mapping.subject in line " + line);
+        return callback("no mapping.subject in line "+ JSON.stringify(line));
       }
 
       //format subject
@@ -242,7 +236,7 @@ var KGbuilder_triplesMaker = {
     }
     ,
 
-    getTripleObject: function(tableMappings,mapping, line, callback) {
+    getTripleObject: function(tableMappings, mapping, line, callback) {
 
       var objectStr = null;
       //get value for Object
@@ -271,7 +265,7 @@ var KGbuilder_triplesMaker = {
         }
         else {
           if (!line[mapping.o] || line[mapping.o] == "null") {
-            return callback("no mapping.object in line " + line);
+            return callback( null, null);
           }
 
           if (mapping.isObjectBlankNode) {
@@ -363,7 +357,7 @@ var KGbuilder_triplesMaker = {
         else {
           /* if(!mapping.isString)
     objectStr=objectStr.replace(/[\-_]/g,"")*/
-          objectStr = "<" + graphUri + util.formatStringForTriple(objectStr, true) + ">";
+          objectStr = "<" + tableMappings.graphUri + util.formatStringForTriple(objectStr, true) + ">";
         }
       }
 
@@ -372,7 +366,7 @@ var KGbuilder_triplesMaker = {
     }
     ,
 
-    getTriplePredicate: function(mapping, line,callback) {
+    getTriplePredicate: function(mapping, line, callback) {
 
       var propertyStr = mapping.p;
       if (typeof mapping.p === "function") {
@@ -397,36 +391,36 @@ var KGbuilder_triplesMaker = {
 
 
     getRestrictionTriples: function(mapping, subjectStr, propertyStr, ObjectStr, callback) {
-
+      var restrictionTriples = [];
       var blankNode = "<_:b" + util.getRandomHexaId(10) + ">";
 
-      if (!KGtripleBuilder.existingNodes[subjectStr + "_" + prop + "_" + objectStr]) {
-        KGtripleBuilder.existingNodes[subjectStr + "_" + prop + "_" + objectStr] = 1;
-        triples.push({
+      if (!KGbuilder_triplesMaker.existingNodes[subjectStr + "_" + prop + "_" + objectStr]) {
+        KGbuilder_triplesWriter.existingNodes[subjectStr + "_" + prop + "_" + objectStr] = 1;
+        restrictionTriples.push({
           s: blankNode,
           p: "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>",
           o: "<http://www.w3.org/2002/07/owl#Restriction>"
         });
-        triples.push({
+        restrictionTriples.push({
           s: blankNode,
           p: "<http://www.w3.org/2002/07/owl#onProperty>",
           o: propertyStr
         });
         if (objectStr) {
-          triples.push({
+          restrictionTriples.push({
             s: blankNode,
             p: "<http://www.w3.org/2002/07/owl#someValuesFrom>",
             o: objectStr
           });
         }
-        triples.push({
+        restrictionTriples.push({
           s: subjectStr,
           p: "rdfs:subClassOf",
           o: blankNode
         });
 
       }
-      return triples;
+      return callback(null, restrictionTriples);
     }
     ,
 
@@ -500,7 +494,7 @@ var KGbuilder_triplesMaker = {
       });
       metaDataTriples.push({
         s: subjectUri,
-        p: "<" + KGtripleBuilder.mappingFilePredicate + ">",
+        p: "<" + KGbuilder_triplesMaker.mappingFilePredicate + ">",
         o: "'" + options.mappingFileName + "'"
       });
 
@@ -523,7 +517,7 @@ var KGbuilder_triplesMaker = {
       if (!str) {
         return false;
       }
-      var prefixesArray = Object.keys(KGbuilder_triplesMaker.sparqlPrefixes);
+      var prefixesArray = Object.keys(KGbuilder_triplesWriter.sparqlPrefixes);
       var array = str.split(":");
       if (array.length == 0) {
         return false;

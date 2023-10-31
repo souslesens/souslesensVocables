@@ -8,6 +8,7 @@ services:
             - 8890:8890
         volumes:
             - ./tests/data/rdf:/usr/local/virtuoso-opensource/var/lib/virtuoso/db/dumps
+            - ./docker-data/virtuoso:/data  
         command: |
             sh /virtuoso/virtuoso.sh &
             sleep 10s

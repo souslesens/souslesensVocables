@@ -7,7 +7,7 @@ module.exports = function () {
     };
 
     function GET(req, res, next) {
-        dataController.readFile(req.query.dir, req.query.name, function (err, result) {
+        dataController.readFile(req.query.dir, req.query.fileName, function (err, result) {
             if (err) {
                 next(err);
             } else {
@@ -30,8 +30,8 @@ module.exports = function () {
                 required: true,
             },
             {
-                name: "name",
-                description: "name",
+                name: "fileName",
+                description: "fileName",
                 in: "query",
                 type: "string",
                 required: true,

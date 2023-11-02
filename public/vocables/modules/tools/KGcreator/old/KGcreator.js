@@ -562,7 +562,7 @@ var KGcreator = (function () {
     self.editFile = function () {
         const params = new URLSearchParams({
             dir: "CSV/" + self.currentCsvDir,
-            name: self.currentTreeNode.data.id,
+            fileName: self.currentTreeNode.data.id,
         });
         $.ajax({
             type: "GET",
@@ -1072,7 +1072,7 @@ self.saveMappings({classId:classId})
         } else {
             payload = {
                 dir: "CSV/" + self.currentCsvDir,
-                name: self.currentSource + "_" + jsonFileName,
+                fileName: self.currentSource + "_" + jsonFileName,
             };
         }
 

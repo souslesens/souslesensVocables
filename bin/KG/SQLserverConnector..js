@@ -103,21 +103,19 @@ var SQLserverConnector = {
         var connection = SQLserverConnector.getConnection();
         connection.database = dbName;
 
-            sql.connect(connection, (err) => {
-                if (err) {
-                    console.log(err);
-                    return callback(err); // ... error checks
-                }
+        sql.connect(connection, (err) => {
+            if (err) {
+                console.log(err);
+                return callback(err); // ... error checks
+            }
 
+            new sql.Request().query("use [" + dbName + "];" + query, (err, result) => {
+                //  new sql.Request().query(query, (err, result) => {
+                if (err) return callback(err);
 
-                new sql.Request().query("use [" + dbName + "];" + query, (err, result) => {
-                    //  new sql.Request().query(query, (err, result) => {
-                    if (err) return callback(err);
-
-                    return callback(null, result.recordset);
-                });
+                return callback(null, result.recordset);
             });
-
+        });
     },
 
     getFetchedData: function (dbName, query, processorFn, fetchSize, uniqueTriples, callback) {

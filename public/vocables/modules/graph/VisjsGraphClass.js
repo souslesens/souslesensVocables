@@ -876,7 +876,7 @@ const VisjsGraphClass = function (graphDiv, data, options) {
 
         var payload = {
             dir: "graphs/",
-            name: fileName,
+            fileName: fileName,
         };
 
         $.ajax({

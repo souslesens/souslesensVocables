@@ -37,33 +37,11 @@
     </ul>
 
     <div id="KGcreator_runmappingsTab" style="display: flex; flex-direction: row">
-      <!--  <div style="display: flex; flex-direction: column; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
-            <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
-                <div class="KGcreator_tripleDiv">
-                    Subject
-                    <select id="KGcreator_subjectSelect" onchange="KGcreator.onTripleModelSelect('s',$(this).val())"></select>
-                    <input id="KGcreator_subjectInput" class="KGcreator_tripleInput" />
-                    <div><input type="checkbox" id="KGcreator_isSubjectBlankNodeCBX" />isBlankNode</div>
-                    lookup name<input id="KGcreator_subjectLookupName" />
-                </div>
-
-                <div class="KGcreator_tripleDivXX" id="sharedPredicatesPanel" style="display: flex; flex-direction: row"></div>
-
-                <div></div>
-            </div>
-
-            <div style="width: 100%; display: flex; flex-direction: column; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
-
-                <pre id="KGcreator_mainJsonDisplay" style="width: 100%; max-width: 700px; height: 640px"></pre>
-            </div>
-        </div>-->
-
         <div class="lineage_actionDiv" style="display: flex; flex-direction: column">
             <div class="lineage_button_group" style="min-width: 300px">
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.saveDataSourceMappings()">Save mappings</button>
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_graph.drawMappings()">draw mappings</button>
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_graph.drawAllMappings()">draw all mappings</button>
-
 
                 <button onclick="KGcreator.migrateOldMappings()">migrateOldMappings</button>
 
@@ -80,7 +58,9 @@
             </div>
             <div class="lineage_button_group" style="width: 600px">
                 <button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator_run.deleteKGcreatorTriples()">delete current file triples</button>
-                <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="KGcreator_deleteKGcreatorTriplesBtn" onclick="KGcreator_run.deleteKGcreatorTriples('all')">delete ALL KGreator triples</button>
+                <button class="btn btn-sm my-1 py-0 btn-outline-primary" id="KGcreator_deleteKGcreatorTriplesBtn" onclick="KGcreator_run.deleteKGcreatorTriples('all')">
+                    delete ALL KGreator triples
+                </button>
 
                 <!--<button class="btn btn-sm my-1 py-0 btn-outline-primary" onclick="KGcreator.clearGraph()" style="background-color: #fbcb09 !important">Clear entire graph</button>-->
 
@@ -88,13 +68,13 @@
             </div>
 
             <div style="display: flex; flex-direction: row; border: #6e2500 solid 1px; border-radius: 3px; margin: 3px; padding: 3px">
-                <textarea style="width: 100%; height: 740px; overflow: auto" id="KGcreator_infosDiv"></textarea>
+                <textarea style="width: 800px; height: 740px; overflow: auto" id="KGcreator_infosDiv"></textarea>
             </div>
         </div>
     </div>
 
     <div id="KGcreator_resourceslinkingTab" style="display: flex; flex-direction: row">
-        <div id="KGcreator_resourceLinkGraphDiv" style="height: 800px;"></div>
+        <div id="KGcreator_resourceLinkGraphDiv" style="height: 800px"></div>
         <div id="KGcreator_resourceLinkRightPanel" style="height: 800px; width: 200px"></div>
     </div>
 </div>

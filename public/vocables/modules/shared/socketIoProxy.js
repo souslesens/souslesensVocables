@@ -1,4 +1,4 @@
-import KGcreator_run from "../modules/tools/KGcreator/KGcreator_run";
+import KGcreator_run from "../tools/KGcreator/KGcreator_run.js";
 
 const socket = io();
 // client-side

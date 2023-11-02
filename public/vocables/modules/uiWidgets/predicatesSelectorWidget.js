@@ -8,71 +8,69 @@ import IndividualValueFilterWidget from "./individualValuefilterWidget.js";
 var PredicatesSelectorWidget = (function () {
     var self = {};
 
+    self.usualProperties = [
+        "rdf:type",
+        "rdfs:subClassOf",
+        "rdfs:label",
+        "rdfs:isDefinedBy",
+        "rdfs:comment",
+        "rdfs:member",
+        "slsv:next",
+        "owl:sameAs",
+        "owl:equivalentClass",
 
-  self.usualProperties = [
-    "rdf:type",
-    "rdfs:subClassOf",
-    "rdfs:label",
-    "rdfs:isDefinedBy",
-    "rdfs:comment",
-    "rdfs:member",
-    "slsv:next",
-    "owl:sameAs",
-    "owl:equivalentClass",
+        "",
+        "xsd:string",
+        "xsd:dateTime",
+        "xsd:boolean",
+        "xsd:integer",
+        "xsd:float",
+        "xsd:double",
+        "xsd:decimal",
+        "rdf:XMLLiteral",
 
-    "",
-    "xsd:string",
-    "xsd:dateTime",
-    "xsd:boolean",
-    "xsd:integer",
-    "xsd:float",
-    "xsd:double",
-    "xsd:decimal",
-    "rdf:XMLLiteral",
+        "",
 
-    "",
+        "skos:altLabel",
+        "skos:prefLabel",
+        "skos:definition",
+        "skos:example",
+        "skos:member",
+        "dcterms:format",
+        "",
+        "_function",
+        "_restriction",
+        // "_part14Predefined",
+        "",
+        "owl:onProperty",
+        "owl:someValuesFrom",
+        "owl:allValuesFrom",
+        "owl:hasValue",
+        "rdfs:subPropertyOf",
+        "owl:inverseOf",
 
-    "skos:altLabel",
-    "skos:prefLabel",
-    "skos:definition",
-    "skos:example",
-    "skos:member",
-    "dcterms:format",
-    "",
-    "_function",
-    "_restriction",
-    // "_part14Predefined",
-    "",
-    "owl:onProperty",
-    "owl:someValuesFrom",
-    "owl:allValuesFrom",
-    "owl:hasValue",
-    "rdfs:subPropertyOf",
-    "owl:inverseOf",
+        "",
+    ];
 
-    "",
-  ];
-
-  self.usualObjectClasses = [
-    "owl:Thing",
-    "owl:Class",
-    "owl:NamedIndividual",
-    "owl:Thing",
-    "owl:ObjectProperty",
-    "owl:DatatypeProperty",
-    "owl:Restriction",
-    "rdf:Bag",
-    "rdf:List",
-    "skos:Concept",
-    "skos:Collection",
-    "slsv:TopConcept",
-    "_function",
-    // "_blankNode",
-    "_virtualColumn",
-    // "_rowIndex",
-    "",
-  ];
-
+    self.usualObjectClasses = [
+        "owl:Thing",
+        "owl:Class",
+        "owl:NamedIndividual",
+        "owl:Thing",
+        "owl:ObjectProperty",
+        "owl:DatatypeProperty",
+        "owl:Restriction",
+        "rdf:Bag",
+        "rdf:List",
+        "skos:Concept",
+        "skos:Collection",
+        "slsv:TopConcept",
+        "_function",
+        // "_blankNode",
+        "_virtualColumn",
+        // "_rowIndex",
+        "",
+    ];
 
     self.predicatesIdsMap = {};
 
@@ -152,15 +150,12 @@ var PredicatesSelectorWidget = (function () {
             });
             properties.push({ label: "-------", id: "" });
             common.fillSelectOptions(selectId, properties, true, "label", "id");
+        } else {
+            OntologyModels.registerSourcesModel([vocabulary], function (err, result) {
+                properties = OntologyModels.getPropertiesArray(vocabulary);
+                common.fillSelectOptions(selectId, properties, true, "label", "id");
+            });
         }
-        else{
-          OntologyModels.registerSourcesModel([vocabulary], function (err, result) {
-            properties = OntologyModels.getPropertiesArray(vocabulary);
-            common.fillSelectOptions(selectId, properties, true, "label", "id");
-          })
-
-        }
-
     };
 
     self.onSelectPredicateProperty = function (value) {

@@ -1,12 +1,15 @@
 const bcrypt = require("bcrypt");
 const fs = require("fs");
 const merge = require("lodash.merge");
+const YAML = require("yaml");
+
+const CONFIG_PATH = "config";
 
 // Create configs dir if not exists
-fs.mkdirSync("config/users", { recursive: true });
+fs.mkdirSync(`${CONFIG_PATH}/users`, { recursive: true });
 
 // config/users/users.json
-const usersPath = "config/users/users.json";
+const usersPath = `${CONFIG_PATH}/users/users.json`;
 if (!fs.existsSync(usersPath)) {
     const USERNAME = process.env.USER_USERNAME || "admin";
     const PASSWORD = process.env.USER_PASSWORD || "admin";
@@ -25,11 +28,11 @@ if (!fs.existsSync(usersPath)) {
         },
     };
 
-    fs.writeFileSync("config/users/users.json", JSON.stringify(user_json, null, 2));
+    fs.writeFileSync(`${CONFIG_PATH}/users/users.json`, JSON.stringify(user_json, null, 2));
 }
 
 // config/blenderSources.json
-const blenderSourcesPath = "config/blenderSources.json";
+const blenderSourcesPath = `${CONFIG_PATH}/blenderSources.json`;
 const blenderSourcesTemplatePath = "config_templates/blenderSources.json.default";
 
 if (!fs.existsSync(blenderSourcesPath)) {
@@ -39,14 +42,14 @@ if (!fs.existsSync(blenderSourcesPath)) {
 }
 
 // config/mainConfig.json
-const mainConfigPath = "config/mainConfig.json";
-const mainConfigTemplatePath = "config_templates/mainConfig.json.default";
+const mainConfigPath = `${CONFIG_PATH}/mainConfig.yml`;
+const mainConfigTemplatePath = "config_templates/mainConfig.yml.default";
 
 // Create a config file if not already exists
 if (!fs.existsSync(mainConfigPath)) {
     // Read config template
-    fs.readFile(mainConfigTemplatePath, (_err, data) => {
-        let mainConfigJson = JSON.parse(data);
+    fs.readFile(mainConfigTemplatePath, "utf8", (_err, data) => {
+        let mainConfigJson = YAML.parse(data);
 
         // convert environment into config entries
         const environment = process.env;
@@ -64,12 +67,12 @@ if (!fs.existsSync(mainConfigPath)) {
             mainConfigJson = merge(mainConfigJson, additionalConfig);
         });
         // Write config file
-        fs.writeFileSync(mainConfigPath, JSON.stringify(mainConfigJson, null, 2));
+        fs.writeFileSync(mainConfigPath, YAML.stringify(mainConfigJson));
     });
 }
 
 // config/profiles.json
-const profilesPath = "config/profiles.json";
+const profilesPath = `${CONFIG_PATH}/profiles.json`;
 const profilesTemplatePath = "config_templates/profiles.json.default";
 if (!fs.existsSync(profilesPath)) {
     fs.readFile(profilesTemplatePath, (_err, data) => {
@@ -78,7 +81,7 @@ if (!fs.existsSync(profilesPath)) {
 }
 
 // config/sources.json
-const sourcesPath = "config/sources.json";
+const sourcesPath = `${CONFIG_PATH}/sources.json`;
 const sourcesTemplatePath = "config_templates/sources.json.default";
 if (!fs.existsSync(sourcesPath)) {
     fs.readFile(sourcesTemplatePath, (_err, data) => {

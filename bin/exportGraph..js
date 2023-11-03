@@ -14,7 +14,8 @@ var httpProxy = require("./httpProxy.");
 var util = require("./util.");
 
 const path = require("path");
-//const { configPath } = require("../model/config");
+const { config } = require("../model/config");
+
 const jsonFileStorage = require("./jsonFileStorage");
 var ExportGraph = {
     execute: function (sparqlUrl, graphUri, filePath, callback) {
@@ -91,12 +92,8 @@ var ExportGraph = {
                     jsonFileStorage.retrieve(path.resolve(sourcesPath), function (err, _sources) {
                         source = _sources[_source];
                         graphUri = source.graphUri;
-                        configPath = path.join(__dirname, "../" + "config" + "/mainConfig.json");
-                        jsonFileStorage.retrieve(path.resolve(configPath), function (err, _config) {
-                            Config = _config;
-
-                            return callbackSeries0();
-                        });
+                        Config = config;
+                        return callbackSeries0();
                     });
                 },
 

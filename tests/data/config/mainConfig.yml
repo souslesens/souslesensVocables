@@ -1,0 +1,48 @@
+souslesensUrl: http://localhost:3011
+listenPort: "3011"
+default_sparql_url: http://localhost:8899/sparql
+auth: local
+defaultGroups: []
+logDir: logs
+sentryDsnNode: ""
+sentryDsnJsFront: ""
+tools_available:
+    - lineage
+    - KGcreator
+    - Standardizer
+    - admin
+    - ConfigEditor
+keycloak:
+    realm: ""
+    publicClient: false
+    clientID: ""
+    clientSecret: ""
+    authServerURL: ""
+SQLserver:
+    user: sa
+    password: superSecretP4ssword
+    server: localhost
+    database: master
+    trustServerCertificate: true
+sparql_server:
+    url: http://localhost:8899/sparql
+ElasticSearch:
+    url: http://localhost:9201/
+    other_servers: []
+annotator:
+    tikaServerUrl: localhost:41001
+    spacyServerUrl: localhost:8001/pos
+    parsedDocumentsHomeDir: null
+    uploadDirPath: null
+wiki:
+    url: ""
+authenticationDatabase:
+    host: localhost
+    port: 3306
+    user: slsv
+    password: slsv
+    database: slsv
+    table: user
+    loginColumn: login
+    passwordColumn: password
+    groupsColumn: groups

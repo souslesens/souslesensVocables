@@ -44,9 +44,7 @@ var DataController = {
      */
     readFile: function (dir, fileName, callback) {
         var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
-        if (!fs.existsSync(filePath)) {
-            return callback("file does not exist", null);
-        }
+        if (!fs.existsSync(filePath)) return callback("file does not exist", null);
         fs.readFile(filePath, function (err, result) {
             var data = "" + result;
             return callback(err, data);

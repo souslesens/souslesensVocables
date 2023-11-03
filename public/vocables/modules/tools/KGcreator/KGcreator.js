@@ -23,7 +23,7 @@ var KGcreator = (function() {
     displayForm: "",  // can be database, file or ""
     currentSource: "",
     selectedDatabase: "",
-    selectedFile: ""
+    selectedFiles: []
   }
 
   self.displayUploadApp = function(displayForm) {
@@ -248,9 +248,9 @@ var KGcreator = (function() {
           else if (node.data.type == "tableColumn") {
             var KGcreatorTab = $("#KGcreator_centralPanelTabs").tabs("option", "active");
 
-            if (KGcreatorTab == 1) {
-              return (items = KGcreator.getContextMenu());
-            }
+
+           //   return (items = KGcreator.getContextMenu());
+
 
             items.mapColumn = {
               label: "map Column",
@@ -761,8 +761,8 @@ var KGcreator = (function() {
   self.createCsvSourceMappings = function() {
     // hide uploadApp
     self.displayUploadApp("");
-    var name = self.uploadFormData.selectedFile;
-    if (!name) {
+    var names = self.uploadFormData.selectedFiles;
+    if (!names) {
       return;
     }
   };

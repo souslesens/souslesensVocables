@@ -1,15 +1,15 @@
 var fs = require("fs");
 var path = require("path");
-var csvCrawler = require("../_csvCrawler.");
 var async = require("async");
+
+var csvCrawler = require("../_csvCrawler.");
 var util = require("../util.");
 var httpProxy = require("../httpProxy.");
-//var sqlServerProxy = require("../KG/SQLserverConnector.");
+const ConfigManager = require("../configManager.");
 
-//var ConfigManager = require("../configManager.");
-
+const SocketManager = require("../socketManager.");
 const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
-var KGbuilder_triplesWriter=require('./KGbuilder_triplesWriter');
+const KGbuilder_triplesWriter=require('./KGbuilder_triplesWriter');
 
 
 
@@ -24,12 +24,13 @@ var KGbuilder_main = {
   /**
    * Generate triples from a CSV file or database
    *
-   * @param {string} dirName - the subdirectory of <src-dir>/data where to look for <mappingFileName>
-   * @param {string} mappingFileName - name of the csv file to generate triples from (optional if null create triples from all mappings)
-   * @param {Object} options - keys: sparqlServerUrl, deleteOldGraph, graphUri
-   * @param {Function} callback - Node-style async Function called to proccess result or handle error
+   * @param {string} source - slsv source
+   * @param {string} datasource - datasource (database or csv file)
+   * @param {array} tables - tables to import or null if import all tables
+   * @param {Object} options -
+   * @param {Function} options - Node-style async Function called to proccess result or handle error
    */
-  createTriplesFromCsvOrTable: function(source, datasource, tables, options, callback) {
+ importTriplesFromCsvOrTable: function(source, datasource, tables, options, callback) {
 
     //  var sparqlServerUrl;
     var output = "";
@@ -39,13 +40,14 @@ var KGbuilder_main = {
     var sourceMainJson = {};
     var dataSourceConfig = {};
     var dataSourceMappings = {};
-    var data=[]
+    var data=[];
+    var triples=[]
 
     KGbuilder_main.stopCreateTriples = false;
     if (options.clientSocketId) {
       SocketManager.clientSockets[options.clientSocketId].on("KGCreator", function(message) {
         if (message == "stopCreateTriples") {
-          KGtripleBuilder.stopCreateTriples = true;
+          KGbuilder_main.stopCreateTriples = true;
         }
       });
     }
@@ -168,7 +170,7 @@ var KGbuilder_main = {
                 return callbackSeries();
               }
 
-              KGtripleBuilder.clearGraph(sourceMainJson.graphUri,mappings.sparqlServerUrl, function(err, _result) {
+              KGbuilder_triplesWriter.clearGraph(sourceMainJson.graphUri,mappings.sparqlServerUrl, function(err, _result) {
                 if (err) {
                   return callbackSeries(err);
                 }
@@ -206,82 +208,78 @@ var KGbuilder_main = {
                 }
                 if (options.sampleSize) {
                   output = result;
-                  return callbackEach(err, output);
+                  return callback(null, output);
                 }
                 else {
-                  output = { countCreatedTriples: result };
+                  triples=result;
+                  callbackSeries();
                 }
-                callbackEach();
+
               });
             }
 
             ,
 
-            function(callbackSeries) {
-
-              if (options.sampleSize) {
-                var sampleTriples = triples.slice(0, options.sampleSize);
-                return callback(null, sampleTriples);
-              }
-            }
-
-            ,
 
             //add metadata
             function(callbackSeries) {
               var uniqueSubjects = {};
-              var metaDataTriples = [];
               triples.forEach(function(triple) {
                 if (!uniqueSubjects[triple.s]) {
                   uniqueSubjects[triple.s] = 1;
 
-                  metaDataTriples = metaDataTriples.concat(KGtripleBuilder.getMetaDataTriples(triple.s, { mappingFileName: tableMappings.fileName }));
+                  triples = triples.concat(KGbuilder_triplesMaker.getMetaDataTriples(triple.s, { mappingFileName: mappings.table }));
                 }
               });
-            }
-
+              callbackSeries()
+             }
             ,
 
             //writeTriples
             function(callbackSeries) {
-              triples = triples.concat(metaDataTriples);
 
-             KGbuilder_socket.message(options.clientSocketId, "mapping " + tableMappings.fileName + " : writing triples:" + triples.length);
 
-              var slices = util.sliceArray(triples, 200);
-              triples = [];
+             KGbuilder_socket.message(options.clientSocketId, "table " + mappings.table + " : writing triples:" + triples.length);
+
+
               var sliceIndex = 0;
-              async.eachSeries(
-                slices,
-                function(slice, callbackEach) {
-                  if (KGtripleBuilder.stopCreateTriples) {
-                    var message = "mapping " + tableMappings.fileName + " : import interrupted by user";
-                    //KGbuilder_socket.message(options.clientSocketId,message)
+              var totalTriples=0
+              var slices = util.sliceArray(triples, 200);
+              async.eachSeries(slices, function(triplesSlice, callbackEach) {
+
+                  if (KGbuilder_main.stopCreateTriples) {
+                    var message = "mapping " + mappings.table+ " : import interrupted by user";
+                    KGbuilder_socket.message(options.clientSocketId,message);
                     return callbackEach(message);
                   }
 
-                  KGtripleBuilder.writeTriples(slice, graphUri, sparqlServerUrl, function(err, result) {
+
+                  KGbuilder_triplesWriter.writeTriples (triplesSlice, mappings.graphUri, mappings.sparqlServerUrl, function(err, result) {
                     if (err) {
-                      errors += err + " slice " + sliceIndex + "\n";
+                     var error= " slice " + sliceIndex + "/"+slices.length+"\n";
+                      KGbuilder_socket.message(options.clientSocketId,error);
                       return callbackEach(err);
                     }
                     sliceIndex += 1;
                     totalTriples += result;
-                   KGbuilder_socket.message(options.clientSocketId, "mapping " + tableMappings.fileName + " : writen triples:" + totalTriples);
+                   KGbuilder_socket.message(options.clientSocketId, "table " + mappings.table + " : writen triples:" + totalTriples);
 
                     callbackEach();
                   });
 
-                });
+                },function(err){
+                if(err)
+                  return callbackSeries(err)
+                output="(created  triples for table " + mappings.table + " :" + totalTriples
+                return callbackSeries()
+              });
             }
 
 
           ],
 
           function(err) {
-            if (err == "sample") {
-              err = null;
-            }
+
             return callback(err, output);
           }
         )
@@ -309,6 +307,12 @@ var KGbuilder_main = {
         try {
           var mainJsonPath = sourceMappingsDir + "main.json";
           sourceMainJson = JSON.parse("" + fs.readFileSync(mainJsonPath));
+          if(sourceMainJson.sparqlServerUrl=="_default"){
+            sourceMainJson.sparqlServerUrl=ConfigManager.config.default_sparql_url
+
+          }
+
+
         } catch (e) {
           return callbackSeries(e);
         }
@@ -374,9 +378,9 @@ var KGbuilder_main = {
 
 module.exports = KGbuilder_main;
 
-if (true) {
+if (false) {
   var options = {};
-  KGbuilder_main.createTriplesFromCsvOrTable("LIFEX_DALIA",
+  KGbuilder_main.importTriplesFromCsvOrTable("LIFEX_DALIA",
     "lifex_dalia_db",
     "dbo.V_jobcard",
     options,

@@ -7,128 +7,98 @@ var KGcreator_run = (function() {
   var self = {};
 
 
-  self.createTriples = function(test, _options, callback) {
-    if (!_options) {
-      _options = {};
+  self.createTriples = function(sampleData, allmappings, callback) {
+
+    var table = null;
+    if (KGcreator.currentTreeNode.data.type == "tableColumn") {
+      table = KGcreator.currentTreeNode.data.parent;
     }
-    MainController.UI.message("creating triples...");
-    $("#KGcreator_infosDiv").val("creating triples...");
-    if (!mappings) {
-      if (callback) {
-        return callback("no currentJsonObject");
-      }
-      return;
+    else if (KGcreator.currentTreeNode.data.type == "table") {
+      table = KGcreator.currentTreeNode.data.id;
+    }
+    else if (KGcreator.currentTreeNode.data.type == "csvFile") {
+      table = KGcreator.currentTreeNode.data.id;
+    }
+    else if (KGcreator.currentTreeNode.data.type == "databaseSource") {
+      table = null;
+    }
+    else if (KGcreator.currentTreeNode.data.type == "csvSource") {
+      table = null;
+    }
+    else {
+      return alert("select a node");
     }
 
-    var dataLocation = "";
 
-
-    var mappings = KGcreator.currentConfig.currentMappings;
-
-    if (!mappings.graphUri) {
-      var graphUri = "";
-      if (self.currentGraphUri) {
-        graphUri = self.currentGraphUri;
-      }
-      graphUri = prompt("enter graphUri", graphUri);
-      if (!graphUri) {
+    if (!sampleData) {
+      if (!confirm("create triples for " + KGcreator.currentConfig.currentDataSource.name + " " + table || "")) {
         return;
       }
-
-      mappings.graphUri = graphUri;
-
     }
+
+
     var options = {};
-    if (test) {
+    if (sampleData) {
       options = {
         deleteOldGraph: false,
-        sampleSize: 500,
-        dataLocation: dataLocation
+        sampleSize: 500
+
       };
     }
     else {
       options = {
-        deleteOldGraph: false,
-        dataLocation: dataLocation
+        deleteOldGraph: false
       };
     }
-    if (_options.deleteTriples) {
-      options.deleteTriples = true;
-    }
+
 
     if (Config.clientSocketId) {
       options.clientSocketId = Config.clientSocketId;
     }
 
-    self.saveMappings(null, function(_err, _result) {
-      if (_err) {
-        return alert(_err);
-      }
 
-      $("#KGcreator_infosDiv").val("");
+    var payload = {
 
-      var payload = {
-
-        source: KGcreator.currentSlsvSource,
-        type: KGcreator.currentConfig.currentDataSource.type,
-        datasource: KGcreator.currentConfig.currentDataSource.name,
-        table: KGcreator.currentConfig.currentDataSource.currentTable,
-        options: JSON.stringify(options)
-      };
+      source: KGcreator.currentSlsvSource,
+      datasource: KGcreator.currentConfig.currentDataSource.name,
+      table: table,
+      options: JSON.stringify(options)
+    };
 
 
-      if (self.currentSourceType == "CSV") {
-        payload = {
-          dir: "CSV/" + self.currentCsvDir,
-          fileName: self.currentSource + "_" + mappings.fileName + ".json",
-          options: JSON.stringify(options)
-        };
-      }
-      else if (self.currentSourceType == "DATABASE") {
-        payload = {
-          dir: "CSV/" + self.currentSlsvSource,
-          fileName: self.currentDbName + "_" + mappings.fileName + ".json",
-          options: JSON.stringify(options)
-        };
-      }
+    MainController.UI.message("creating triples...");
+    $.ajax({
+      type: "POST",
+      url: `${Config.apiUrl}/kg/triples`,
+      data: payload,
+      dataType: "json",
+      success: function(result, _textStatus, _jqXHR) {
+        if (sampleData) {
+          var str = JSON.stringify(result, null, 2);
 
-      if (_options && _options.allMappings) {
-        payload.fileName = null;
-      }
-
-      $.ajax({
-        type: "POST",
-        url: `${Config.apiUrl}/kg/triples`,
-        data: payload,
-        dataType: "json",
-        success: function(result, _textStatus, _jqXHR) {
-          if (test) {
-            var str = JSON.stringify(result, null, 2);
-
-            $("#KGcreator_infosDiv").val(str);
-            MainController.UI.message("", true);
+          $("#KGcreator_infosDiv").val(str);
+          MainController.UI.message("", true);
+        }
+        else {
+          if (_options.deleteTriples) {
+            $("#KGcreator_infosDiv").val(result.result);
+            MainController.UI.message(result.result, true);
           }
           else {
-            if (_options.deleteTriples) {
-              $("#KGcreator_infosDiv").val(result.result);
-              MainController.UI.message(result.result, true);
-            }
-            else {
-              $("#KGcreator_infosDiv").val(result.countCreatedTriples + " triples created in graph " + mappings.graphUri);
-              MainController.UI.message("triples created", true);
-            }
+            $("#KGcreator_infosDiv").val(result.countCreatedTriples + " triples created in graph " + mappings.graphUri);
+            MainController.UI.message("triples created", true);
           }
-          if (callback) {
-            return callback();
-          }
-        },
-        error(err) {
-          if (callback) {
-            return callback(err.responseText);
-          }
-          return alert(err.responseText);
         }
-      });
+        if (callback) {
+          return callback();
+        }
+      },
+      error(err) {
+        if (callback) {
+          return callback(err.responseText);
+        }
+        return alert(err.responseText);
+      }
     });
   };
 
@@ -259,6 +229,12 @@ var KGcreator_run = (function() {
         }
       });
     }
+  };
+
+  self.socketMessage = function (message) {
+    //  console.log(message)
+    MainController.UI.message(message);
+    //  $("#KGcreator_infosDiv").append(message+"\n")
   };
 
 

@@ -1,18 +1,18 @@
-import VisjsGraphClass from "../graph/VisjsGraphClass.js";
-import Lineage_sources from "../tools/lineage/lineage_sources.js";
-import OntologyModels from "../shared/ontologyModels.js";
-import Sparql_common from "../sparqlProxies/sparql_common.js";
-import Lineage_relationIndividualsFilter from "../tools/lineage/lineage_relationIndividualsFilter.js";
-import Sparql_proxy from "../sparqlProxies/sparql_proxy.js";
-import PopupMenuWidget from "./popupMenuWidget.js";
-import Export from "../shared/export.js";
-import common from "../shared/common.js";
-import Lineage_whiteboard from "../tools/lineage/lineage_whiteboard.js";
-import IndividualAggregateWidget from "./individualAggregateWidget.js";
-import IndividualValueFilterWidget from "./individualValuefilterWidget.js";
-import SimpleListSelectorWidget from "./simpleListSelectorWidget.js";
+import VisjsGraphClass from "../../graph/VisjsGraphClass.js";
+import Lineage_sources from "../../tools/lineage/lineage_sources.js";
+import OntologyModels from "../../shared/ontologyModels.js";
+import Sparql_common from "../../sparqlProxies/sparql_common.js";
+import Lineage_relationIndividualsFilter from "../../tools/lineage/lineage_relationIndividualsFilter.js";
+import Sparql_proxy from "../../sparqlProxies/sparql_proxy.js";
+import PopupMenuWidget from "../../uiWidgets/popupMenuWidget.js";
+import Export from "../../shared/export.js";
+import common from "../../shared/common.js";
+import Lineage_whiteboard from "../../tools/lineage/lineage_whiteboard.js";
+import IndividualAggregateWidget from "../../uiWidgets/individualAggregateWidget.js";
+import IndividualValueFilterWidget from "../../uiWidgets/individualValuefilterWidget.js";
+import SimpleListSelectorWidget from "../../uiWidgets/simpleListSelectorWidget.js";
 import TimeLineWidget from "./timeLineWidget.js";
-import VirtualKGquery from "../shared/virtualKGquery.js";
+import VirtualKGquery from "../KGquery/virtualKGquery.js";
 
 var KGqueryWidget = (function () {
     var self = {};
@@ -30,7 +30,7 @@ var KGqueryWidget = (function () {
     self.showDialog = function () {
         $("#mainDialogDiv2").dialog("open");
         $("#mainDialogDiv2").dialog("option", "title", "Query");
-        if (!self.isLoaded) {
+        if (true || !self.isLoaded) {
             $("#mainDialogDiv2").load("snippets/KGqueryWidget.html", function () {
                 self.source = Lineage_sources.activeSource;
                 self.drawVisjsModel();

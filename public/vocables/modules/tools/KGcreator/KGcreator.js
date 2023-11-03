@@ -174,10 +174,7 @@ var KGcreator = (function () {
                         };
 
                         KGcreator.loadDataBaseSource(self.currentSlsvSource, obj.node.id, obj.node.data.sqlType);
-                    }
-
-
-                    else if (obj.node.data.type == "csvFile") {
+                    } else if (obj.node.data.type == "csvFile") {
                         self.currentConfig.currentDataSource = {
                             name: obj.node.id,
                             tables: [],
@@ -187,23 +184,15 @@ var KGcreator = (function () {
                         };
 
                         KGcreator.loadCsvSource(self.currentSlsvSource, obj.node.id);
-                    }
-
-
-
-                    else if (obj.node.data.type == "table") {
+                    } else if (obj.node.data.type == "table") {
                         var mappingObj = self.currentConfig.currentMappings[obj.node.data.id];
 
                         var columns = self.currentConfig.currentDataSource.tables[obj.node.data.id];
                         var table = obj.node.data.id;
                         self.currentConfig.currentDataSource.currentTable = table;
                         self.showTablesColumnTree(table, columns);
-                    }
-
-                    else if (obj.node.data.type == "tableColumn") {
-                    }
-
-                    else if (obj.node.data.type == "csvFileColumn") {
+                    } else if (obj.node.data.type == "tableColumn") {
+                    } else if (obj.node.data.type == "csvFileColumn") {
                     }
                 },
 
@@ -498,7 +487,7 @@ var KGcreator = (function () {
                             return callbackSeries();
                         }
                         self.currentConfig.currentMappings = mappings;
-                        var tableObj={[fileName]:[]}
+                        var tableObj = { [fileName]: [] };
                         self.currentConfig.currentDataSource.tables = [tableObj];
 
                         //  self.currentConfig.databaseSources[dataSource].mappings = mappings;

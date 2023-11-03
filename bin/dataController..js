@@ -11,7 +11,9 @@ var DataController = {
      */
     getFilesList: function (dir, callback) {
         var dirPath = path.join(__dirname, "../data/" + dir + "");
-        if (!fs.existsSync(dirPath)) return callback(null, null);
+        if (!fs.existsSync(dirPath)) {
+            return callback(null, null);
+        }
 
         fs.readdir(dirPath, function (err, result) {
             return callback(err, result);
@@ -42,7 +44,9 @@ var DataController = {
      */
     readFile: function (dir, fileName, callback) {
         var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
-        if (!fs.existsSync(filePath)) return callback("file does not exist", null);
+        if (!fs.existsSync(filePath)) {
+            return callback("file does not exist", null);
+        }
         fs.readFile(filePath, function (err, result) {
             var data = "" + result;
             return callback(err, data);
@@ -83,12 +87,18 @@ var DataController = {
      *   function to be called with the file content as second argument
      */
     readCsv: function (dir, fileName, options, callback) {
-        if (!options) options = {};
+        if (!options) {
+            options = {};
+        }
 
         var filePath = path.join(__dirname, "../data/" + dir + "/" + fileName);
-        if (!fs.existsSync(filePath)) return callback("file " + filePath + "does not exist", null);
+        if (false && !fs.existsSync(filePath)) {
+            return callback("file " + filePath + "does not exist", null);
+        }
         csvCrawler.readCsv({ filePath: filePath }, options.lines || 1000000, function (err, result) {
-            if (err) return callback(err, null);
+            if (err) {
+                return callback(err, null);
+            }
             var data = result.data;
             var headers = result.headers;
             return callback(null, { headers: headers, data: data });

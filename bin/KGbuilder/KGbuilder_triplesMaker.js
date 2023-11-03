@@ -3,8 +3,9 @@ const sqlServerProxy = require("../KG/SQLserverConnector.");
 const util = require("../util.");
 const KGbuilder_socket = require("./KGbuilder_socket");
 const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
-
+var csvCrawler = require("../_csvCrawler.");
 const dataController = require("../dataController.");
+const path = require("path");
 var KGbuilder_triplesMaker = {
     mappingFilePredicate: "http://souslesens.org/KGcreator#mappingFile",
     /**
@@ -469,7 +470,6 @@ var KGbuilder_triplesMaker = {
         }
     },
     readCsv: function (filePath, maxLines, callback) {
-        dataController.readCsv(req.query.dir, req.query.fileName, options, function (err, result) {
         csvCrawler.readCsv({ filePath: filePath }, maxLines, function (err, result) {
             if (err) {
                 return callback(err);
@@ -524,8 +524,8 @@ var KGbuilder_triplesMaker = {
                     return callback(err);
                 }
                 KGbuilder_socket.message(options.clientSocketId, " data loaded", false);
-                tableData = result.data;
-                callback();
+                tableData = result.data[0];
+                callback(null, tableData);
             });
         } else if (tableMappings.datasourceConfig) {
             var limitStr = "";

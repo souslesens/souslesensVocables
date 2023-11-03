@@ -303,7 +303,8 @@ var KGbuilder_main = {
                                 tablemappings.datasourceConfig = dataSourceMappings.config;
                             } else {
                                 //csvFile
-                                tablemappings.csvDataFilePath = csvDir + key ;
+
+                                tablemappings.csvDataFilePath = csvDir + key;
                             }
                             tablemappings.prefixes = sourceMainJson.prefixes;
                             tablemappings.graphUri = sourceMainJson.graphUri;

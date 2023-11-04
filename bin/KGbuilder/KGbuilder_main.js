@@ -10,8 +10,12 @@ const ConfigManager = require("../configManager.");
 const SocketManager = require("../socketManager.");
 const KGbuilder_triplesMaker = require("./KGbuilder_triplesMaker");
 const KGbuilder_triplesWriter = require("./KGbuilder_triplesWriter");
+const KGbuilder_socket = require("./KGbuilder_socket");
 
 var KGbuilder_main = {
+
+
+
     /**
      * Generate triples from a CSV file or database
      *
@@ -126,35 +130,7 @@ var KGbuilder_main = {
                             callbackSeries();
                         },
 
-                        //delete deleteMappingFileTriples
-                        function (callbackSeries) {
-                            if (!options.deleteTriples) {
-                                return callbackSeries();
-                            }
 
-                            KGbuilder_triplesWriter.deleteMappingFileTriples(mappings, function (err, result) {
-                                if (err) {
-                                    return callbackSeries(err);
-                                }
-                                output = result;
-                                return callbackSeries(null, "DELETE Mapping File triples  : " + mappings.table + "  " + result);
-                            });
-                        },
-                        // delete all  graph (optional)
-                        function (callbackSeries) {
-                            if (!options.deleteOldGraph) {
-                                return callbackSeries();
-                            }
-
-                            KGbuilder_triplesWriter.clearGraph(sourceMainJson.graphUri, mappings.sparqlServerUrl, function (err, _result) {
-                                if (err) {
-                                    return callbackSeries(err);
-                                }
-                                KGbuilder_socket.message(options.clientSocketId, "graph deleted");
-
-                                callbackSeries();
-                            });
-                        },
 
                         //load data
                         function (callbackSeries) {
@@ -244,6 +220,20 @@ var KGbuilder_main = {
         });
     },
 
+    getSourceConfig: function (source,callback){
+        var sourceMappingsDir = path.join(__dirname, "../../data/mappings/" + source + "/");
+        try {
+            var mainJsonPath = sourceMappingsDir + "main.json";
+           var sourceMainJson = JSON.parse("" + fs.readFileSync(mainJsonPath));
+            if (sourceMainJson.sparqlServerUrl == "_default") {
+                sourceMainJson.sparqlServerUrl = ConfigManager.config.default_sparql_url;
+            }
+        } catch (e) {
+            return callback(e);
+        }
+        callback(null,sourceMainJson);
+    },
+
     initMappings: function (source, datasource, tables, options, callback) {
         var tableMappingsToProcess = [];
         var sourceMappingsDir = path.join(__dirname, "../../data/mappings/" + source + "/");
@@ -256,16 +246,14 @@ var KGbuilder_main = {
             [
                 // read source main.json
                 function (callbackSeries) {
-                    try {
-                        var mainJsonPath = sourceMappingsDir + "main.json";
-                        sourceMainJson = JSON.parse("" + fs.readFileSync(mainJsonPath));
-                        if (sourceMainJson.sparqlServerUrl == "_default") {
-                            sourceMainJson.sparqlServerUrl = ConfigManager.config.default_sparql_url;
-                        }
-                    } catch (e) {
-                        return callbackSeries(e);
-                    }
-                    callbackSeries();
+
+                KGbuilder_main.getSourceConfig(source,function(err,result){
+                    if(err)
+                        return callbackSeries(err)
+                    sourceMainJson=result;
+                    callbackSeries()
+                })
+
                 },
                 // read datasourceMappings
                 function (callbackSeries) {
@@ -321,6 +309,53 @@ var KGbuilder_main = {
             }
         );
     },
+    /**
+     *
+     *
+     *
+     * @param source
+     * @param datasource
+     * @param tables list of table otherwise if null delete all KGcreator triples
+     * @param options
+     * @param callback
+     */
+    deleteKGcreatorTriples:function(source, tables,callback) {
+
+        KGbuilder_main.getSourceConfig(source, function(err, sourceMainJson) {
+            if (err)
+                return callbackSeries(err)
+
+
+            //delete allKGCreator triples
+            if (!tables) {
+                KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl,sourceMainJson.graphUri, null, function(err, result) {
+                    if (err)
+                        return callback(err)
+                    return callback(null, "deleted all triples :" + result + " in source :" + source);
+                })
+
+
+            }// delete specifc triples with predicate
+            else {
+                if (!Array.isArray(tables))
+                    tables = [tables]
+var totalTriples=0
+                async.eachSeries(tables, function(table, callbackEach) {
+                    KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl,sourceMainJson.graphUri, table, function(err, result) {
+                        if (err)
+                            return callbackEach(err)
+                         //   KGbuilder_socket.message(options.clientSocketId, "deleted triples :" + result + " in table " + mappings.table)
+                        totalTriples+=result;
+                        return callbackEach(err);
+                    })
+                }, function(err) {
+                    return callback(null, "deleted triples  in tables " + tables.toString() +" : "+totalTriples);
+                })
+            }
+        })
+    },
+
+
 };
 
 module.exports = KGbuilder_main;

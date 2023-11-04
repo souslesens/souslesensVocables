@@ -4,6 +4,7 @@ const { processResponse } = require("../utils");
 module.exports = function () {
     let operations = {
         POST,
+        DELETE
     };
 
     function POST(req, res, next) {
@@ -48,6 +49,46 @@ module.exports = function () {
             },
         },
     };
+
+    DELETE.apiDoc = {
+        summary: "delete KGcreator triples",
+        security: [{ restrictLoggedUser: [] }],
+        operationId: "deleteKGcreatorTriples",
+
+        parameters: [
+            {
+                name: "source",
+                description: "source",
+                type: "string",
+                in: "query",
+                required: false,
+            },
+            {
+                name: "tables",
+                description: "tables",
+                type: "string",
+                in: "query",
+                required: false,
+            },
+        ],
+        responses: {
+            200: {
+                description: "Results",
+                schema: {
+                    type: "object",
+                },
+            },
+        },
+    };
+    async function DELETE(req, res, next) {
+        try {
+            KGbuilder_main.deleteKGcreatorTriples(req.body.source, JSON.parse( req.body.tables), function (err, result) {
+                processResponse(res, err, result);
+            });
+        } catch (e) {
+            next(e);
+        }
+    }
 
     return operations;
 };

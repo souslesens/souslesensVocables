@@ -17,9 +17,21 @@ var KGcreator = (function () {
     var mappingsDir = "mappings";
     // mappingsDir=  "CSV"
 
-    self.displayUploadApp = function () {
+
+
+    self.uploadFormData = {
+        displayForm: "",  // can be database, file or ""
+        currentSource: "",
+        selectedDatabase: "",
+        selectedFiles: []
+    }
+
+    self.displayUploadApp = function(displayForm) {
+        self.uploadFormData.displayForm = displayForm
         $.getScript("/kg_upload_app.js");
     };
+
+
 
     self.onLoaded = function () {
         $("#actionDivContolPanelDiv").load("./modules/tools/KGcreator/html/leftPanel.html", function () {
@@ -38,7 +50,7 @@ var KGcreator = (function () {
                         },
                     });
 
-                    if (!authentication.currentUser.groupes.indexOf("admin") > -1) {
+                    if (!authentication.currentUser.groupes.indexOf("admin") <0) {
                         $("#KGcreator_deleteKGcreatorTriplesBtn").css("display", "none");
                     }
                     MainController.UI.showHideRightPanel("hide");
@@ -54,6 +66,7 @@ var KGcreator = (function () {
         };
         var selectTreeNodeFn = function () {
             self.currentSlsvSource = SourceSelectorWidget.getSelectedSource()[0];
+            $("#KGcreator_slsvSource").html(self.currentSlsvSource)
             $("#mainDialogDiv").dialog("close");
             if (!self.currentSlsvSource) {
                 return alert("select a source");
@@ -202,7 +215,8 @@ var KGcreator = (function () {
                         items.addDatabaseSource = {
                             label: "addDatabaseSources",
                             action: function (_e) {
-                                KGcreator.createDataBaseSourceMappings();
+                                self.displayUploadApp("database");
+                               // KGcreator.createDataBaseSourceMappings();
                             },
                         };
                         return items;
@@ -211,7 +225,8 @@ var KGcreator = (function () {
                             label: "addCsvSources",
                             action: function (_e) {
                                 // pb avec source
-                                KGcreator.createCsvSourceMappings();
+                                self.displayUploadApp("file");
+                               // KGcreator.createCsvSourceMappings();
                             },
                         };
                         return items;
@@ -705,30 +720,52 @@ var KGcreator = (function () {
     };
 
     self.createDataBaseSourceMappings = function () {
-        var name = prompt("DBname");
-        if (!name) {
+        // hide uploadApp
+        self.displayUploadApp("");
+
+        var datasourceName = self.uploadFormData.selectedDatabase;
+        if (!datasourceName) {
             return;
         }
-        self.currentConfig.databaseSources[name] = {
+        var type="sql.sqlserver"
+        self.currentConfig.databaseSources[datasourceName] = {
             type: "sql.sqlserver",
             connection: "_default",
-            tableJoins: [],
+            tableJoins: []
         };
 
-        self.saveSlsvSourceConfig(function (err, result) {
+        self.addDataSource(datasourceName);
+    };
+
+    self.createCsvSourceMappings = function () {
+        // hide uploadApp
+        self.displayUploadApp("");
+        var datasourceName = self.uploadFormData.selectedFiles[0];
+        if (!datasourceName) {
+            return;
+        }
+
+            self.currentConfig.csvSources[datasourceName] = {};
+
+    };
+
+    self.addDataSource=function(type,name){
+        JstreeWidget.addNodesToJstree("KGcreator_csvTreeDiv", table, jstreeData);
+        jstreeData.push({
+            id: datasodatasourceNameurce,
+            text: datasourceName,
+            parent: "databaseSources",
+            data: { id: datasourceName, type: "databaseSource", sqlType: datasourceName },
+        });
+        self.loadDataBaseSource()
+
+        self.saveSlsvSourceConfig( function(err, result) {
             if (err) {
                 return alert(err);
             }
             MainController.UI.message("source " + name + " saved");
         });
-    };
-
-    self.createCsvSourceMappings = function () {
-        var name = prompt("fileName");
-        if (!name) {
-            return;
-        }
-    };
+    }
 
     self.listDatabaseTables = function (databaseSource, type, callback) {
         const params = new URLSearchParams({

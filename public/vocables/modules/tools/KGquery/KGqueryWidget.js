@@ -31,7 +31,7 @@ var KGqueryWidget = (function () {
         $("#mainDialogDiv2").dialog("open");
         $("#mainDialogDiv2").dialog("option", "title", "Query");
         if (true || !self.isLoaded) {
-            $("#mainDialogDiv2").load("snippets/KGqueryWidget.html", function () {
+            $("#mainDialogDiv2").load("modules/tools/KGquery/html/KGqueryWidget.html", function () {
                 self.source = Lineage_sources.activeSource;
                 self.drawVisjsModel();
                 self.isLoaded = true;
@@ -585,105 +585,118 @@ return alert("missing target node in  path");
         }
         var inferredModel = [];
         var dataTypes = {};
-
+        var existingNodes = {};
         var visjsData = { nodes: [], edges: [] };
+        var sources=Config.sources[source].imports;
+        if(!sources){
+            sources=[]
+        }
+        sources.push(source)
 
-        async.series(
-            [
-                //get effective distinct ObjectProperties
-                function (callbackSeries) {
-                    OntologyModels.getInferredModel(source, {}, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
-                        inferredModel = result;
+        async.eachSeries(sources,function(source,callbackEach) {
 
-                        if (inferredModel.length == 0) {
-                            callbackSeries("no inferred model for source " + source);
-                        } else {
-                            callbackSeries();
-                        }
-                    });
-                },
+            async.series(
+              [
+                  //get effective distinct ObjectProperties
+                  function(callbackSeries) {
 
-                function (callbackSeries) {
-                    OntologyModels.getInferredClassValueDataTypes(source, {}, function (err, result) {
-                        if (err) {
-                            return callbackSeries(err);
-                        }
+                      OntologyModels.getInferredModel(source, {}, function(err, result) {
+                          if (err) {
+                              return callbackSeries(err);
+                          }
+                          inferredModel =inferredModel.concat(result) ;
 
-                        result.forEach(function (item) {
-                            dataTypes[item.class.value] = item.datatype.value;
-                        });
-                        callbackSeries();
-                    });
-                },
+                              callbackSeries();
 
-                function (callbackSeries) {
-                    var existingNodes = {};
+                      });
+                  },
 
-                    var source = self.source;
-                    inferredModel.forEach(function (item) {
-                        item.sClass = item.sClass || item.sparent;
-                        item.oClass = item.oClass || item.oparent;
+                  function(callbackSeries) {
+                      OntologyModels.getInferredClassValueDataTypes(source, {}, function(err, result) {
+                          if (err) {
+                              return callbackSeries(err);
+                          }
 
-                        item.sClassLabel = item.sClassLabel || item.sparentLabel;
-                        item.oClassLabel = item.oClassLabel || item.oparentLabel;
+                          result.forEach(function(item) {
+                              dataTypes[item.class.value] = item.datatype.value;
+                          });
+                          callbackSeries();
+                      });
+                  },
 
-                        if (!existingNodes[item.sClass.value]) {
-                            existingNodes[item.sClass.value] = 1;
-                            self.visjsNodeOptions.color = common.getResourceColor("class", item.sClass.value, "palette");
-                            var label = item.sClassLabel ? item.sClassLabel.value : Sparql_common.getLabelFromURI(item.sClass.value);
-                            self.visjsNodeOptions.data = { datatype: dataTypes[item.sClass.value], source: source, id: item.sClass.value, label: label };
+                  function(callbackSeries) {
 
-                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.sClass.value, label, null, self.visjsNodeOptions));
-                        }
-                        if (!existingNodes[item.oClass.value]) {
-                            existingNodes[item.oClass.value] = 1;
-                            var label = item.oClassLabel ? item.oClassLabel.value : Sparql_common.getLabelFromURI(item.oClass.value);
-                            self.visjsNodeOptions.data = { datatype: dataTypes[item.oClass.value], id: item.oClass.value, label: label };
-                            self.visjsNodeOptions.color = common.getResourceColor("class", item.oClass.value, "palette");
-                            visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, label, null, self.visjsNodeOptions));
-                        }
-                        var edgeId = item.sClass.value + "_" + item.prop.value + "_" + item.oClass.value;
-                        if (!existingNodes[edgeId]) {
-                            existingNodes[edgeId] = 1;
+                      return callbackSeries();
+                  },
+              ],
+              function(err) {
+                  if (err) {
+                      return callbackEach(err);
+                  }
 
-                            visjsData.edges.push({
-                                id: edgeId,
-                                from: item.sClass.value,
-                                to: item.oClass.value,
-                                label: item.propLabel.value,
-                                font: { color: Lineage_whiteboard.defaultPredicateEdgeColor },
-                                data: {
-                                    propertyId: item.prop.value,
-                                    source: source,
-                                    propertyLabel: item.propLabel.value,
-                                },
-
-                                arrows: {
-                                    to: {
-                                        enabled: true,
-                                        type: "solid",
-                                        scaleFactor: 0.5,
-                                    },
-                                },
-                                // dashes: true,
-                                color: Lineage_whiteboard.defaultPredicateEdgeColor,
-                            });
-                        }
-                    });
-                    return callbackSeries();
-                },
-            ],
-            function (err) {
-                if (err) {
-                    return callback(err);
-                }
-
-                return callback(null, visjsData);
+                  return callbackEach(null, );
+              }
+            );
+        },function(err){
+            if(err)
+                return callback()
+            if (inferredModel.length == 0) {
+                callback("no inferred model for source " + source);
             }
-        );
+
+            var source = self.source;
+            inferredModel.forEach(function(item) {
+                item.sClass = item.sClass || item.sparent;
+                item.oClass = item.oClass || item.oparent;
+
+                item.sClassLabel = item.sClassLabel || item.sparentLabel;
+                item.oClassLabel = item.oClassLabel || item.oparentLabel;
+
+                if (!existingNodes[item.sClass.value]) {
+                    existingNodes[item.sClass.value] = 1;
+                    self.visjsNodeOptions.color = common.getResourceColor("class", item.sClass.value, "palette");
+                    var label = item.sClassLabel ? item.sClassLabel.value : Sparql_common.getLabelFromURI(item.sClass.value);
+                    self.visjsNodeOptions.data = { datatype: dataTypes[item.sClass.value], source: source, id: item.sClass.value, label: label };
+
+                    visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.sClass.value, label, null, self.visjsNodeOptions));
+                }
+                if (!existingNodes[item.oClass.value]) {
+                    existingNodes[item.oClass.value] = 1;
+                    var label = item.oClassLabel ? item.oClassLabel.value : Sparql_common.getLabelFromURI(item.oClass.value);
+                    self.visjsNodeOptions.data = { datatype: dataTypes[item.oClass.value], id: item.oClass.value, label: label };
+                    self.visjsNodeOptions.color = common.getResourceColor("class", item.oClass.value, "palette");
+                    visjsData.nodes.push(VisjsUtil.getVisjsNode(source, item.oClass.value, label, null, self.visjsNodeOptions));
+                }
+                var edgeId = item.sClass.value + "_" + item.prop.value + "_" + item.oClass.value;
+                if (!existingNodes[edgeId]) {
+                    existingNodes[edgeId] = 1;
+
+                    visjsData.edges.push({
+                        id: edgeId,
+                        from: item.sClass.value,
+                        to: item.oClass.value,
+                        label: item.propLabel.value,
+                        font: { color: Lineage_whiteboard.defaultPredicateEdgeColor },
+                        data: {
+                            propertyId: item.prop.value,
+                            source: source,
+                            propertyLabel: item.propLabel.value,
+                        },
+
+                        arrows: {
+                            to: {
+                                enabled: true,
+                                type: "solid",
+                                scaleFactor: 0.5,
+                            },
+                        },
+                        // dashes: true,
+                        color: Lineage_whiteboard.defaultPredicateEdgeColor,
+                    });
+                }
+            });
+                return callback(null,visjsData)
+        })
     };
 
     self.queryResultToVisjsGraph = function (result) {

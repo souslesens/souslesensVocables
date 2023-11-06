@@ -7,6 +7,7 @@ const allTools = {
     SPARQL: { label: "SPARQL endpoint", multiSources: 0, controller: SPARQL_endpoint, toolDescriptionImg: null },
     admin: { label: "Admin", multiSources: 0, controller: Admin, toolDescriptionImg: null },
     ConfigEditor: { label: "ConfigEditor", noSource: 1, controller: ConfigEditor, toolDescriptionImg: null },
+    GraphManagement: { label: "GraphManagement", noSource: 1, controller: GraphManagement, toolDescriptionImg: null },
 };
 
 async function loadToolsAndPlugins() {

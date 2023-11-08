@@ -1,8 +1,11 @@
 const { rdfDataModel } = require("../../../../model/rdfData");
+const { ulid } = require("ulid");
+const fs = require("fs");
 
 module.exports = function () {
     let operations = {
         GET,
+        POST,
     };
 
     async function GET(req, res, next) {
@@ -17,6 +20,63 @@ module.exports = function () {
             res.status(500).send({ error: error });
         }
     }
+
+    async function POST(req, res, next) {
+        try {
+            const first = JSON.parse(req.body.first);
+            const last = JSON.parse(req.body.last);
+            const id = JSON.parse(req.body.id);
+            const file = req.files.data;
+
+            // first chunk, create a file
+            if (first) {
+                // generate random id
+                const id = ulid();
+                file.mv(`/tmp/${id}.nt`);
+                res.status(200).send({ id: id });
+                return;
+            }
+
+            // middle or last chunk, append data
+            fs.appendFileSync(`/tmp/${id}.nt`, file.data);
+
+            // last chunk, upload file to endpoint
+            // TODO:
+
+            res.status(200).send({ id: id });
+        } catch (error) {
+            return res.status(500).json({ error: error });
+        }
+    }
+
+    POST.apiDoc = {
+        security: [{ restrictLoggedUser: [] }],
+        summary: "Post a RDF graph",
+        description: "Post a RDF graph",
+        parameters: [
+            {
+                name: "body",
+                description: "body",
+                in: "body",
+                schema: {
+                    type: "object",
+                    properties: {
+                        first: { type: "string" },
+                        last: { type: "string" },
+                        id: { type: "string" },
+                    },
+                },
+            },
+        ],
+        responses: {
+            200: {
+                description: "Upload ok",
+                schema: {
+                    type: "object",
+                },
+            },
+        },
+    };
 
     GET.apiDoc = {
         security: [{ restrictLoggedUser: [] }],

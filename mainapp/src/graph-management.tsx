@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import Modal from "react-bootstrap/Modal";
 import ProgressBar from "react-bootstrap/ProgressBar";
 import Stack from "react-bootstrap/Stack";
 import Table from "react-bootstrap/Table";
@@ -14,10 +15,13 @@ export default function GraphManagement() {
     const [uploadButtonsDisabled, setUploadButtonsDisabled] = useState(false);
     const [downloadPercent, setDownloadPercent] = useState(0);
     const [uploadPercent, setUploadPercent] = useState(0);
+    const [uploadProgress, setUploadProgress] = useState(false);
+    const [uploadfile, setUploadFile] = useState<File[]>([]);
     const [downloadingSource, setDownloadingSource] = useState("");
     const [uploadingSource, setUploadingSource] = useState("");
     const [error, setError] = useState(false);
     const [uploadError, setUploadError] = useState(false);
+    const [displayModal, setDisplayModal] = useState(false);
 
     useEffect(() => {
         void fetchSources();
@@ -41,7 +45,71 @@ export default function GraphManagement() {
     };
 
     const handleUploadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
-        //
+        setUploadingSource(event.currentTarget.id);
+        setUploadProgress(false);
+        setDisplayModal(true);
+    };
+
+    const handleHideUploadModal = () => {
+        setUploadingSource("");
+        setDisplayModal(false);
+    };
+
+    const handleUploadGraph = async () => {
+        // init progress bar
+        setUploadProgress(true);
+        setUploadPercent(0);
+
+        // get file
+        const file = uploadfile[0];
+
+        // get file size and chunk size
+        const chunkSize = 40000;
+        const fileSize = file.size;
+
+        // init values
+        let firstChunk = true;
+        let lastChunk = false;
+        let chunkId = null;
+
+        // iterate over file and send chunks to server
+        for (let start = 0; start < fileSize; start += chunkSize) {
+            // set percent for progress bar
+            const percent = (start * 100) / fileSize;
+            setUploadPercent(Math.round(percent));
+
+            // slice file
+            const end = start + chunkSize;
+            const chunk = file.slice(start, end);
+
+            // build formData
+            const formData = new FormData();
+            formData.append("first", JSON.stringify(firstChunk));
+            formData.append("last", JSON.stringify(lastChunk));
+            formData.append("id", JSON.stringify(chunkId));
+            formData.append("data", chunk);
+
+            // POST data
+            const res = await fetch("/api/v1/rdf/graph", { method: "post", body: formData });
+            const json = await res.json();
+
+            // Set values for next iteration
+            firstChunk = false;
+            lastChunk = start + chunkSize >= fileSize ? true : false;
+            chunkId = json.id;
+        }
+    };
+
+    const handleCancelUpload = async () => {
+        setUploadProgress(false);
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.currentTarget.files === null) {
+            return;
+        }
+        const filesList = Array.from(event.currentTarget.files);
+        setUploadFile(filesList);
     };
 
     const handleDownloadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -90,6 +158,39 @@ export default function GraphManagement() {
         }
     };
 
+    const uploadModal = (
+        <Modal show={displayModal} onHide={handleHideUploadModal} size="lg" aria-labelledby="contained-modal-title-vcenter" centered>
+            <Modal.Header closeButton>
+                <Modal.Title id="contained-modal-title-vcenter">{uploadingSource.replace("upload-", "")}</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                <Form>
+                    <Stack>
+                        <Form.Group controlId="formUploadGraph" className="mb-3">
+                            <Form.Label>Choose RDF graph to upload</Form.Label>
+                            <Form.Control onChange={handleFileChange} required={true} type="file" disabled={uploadProgress} />
+                        </Form.Group>
+                        <Stack direction="horizontal" gap={1}>
+                            {!uploadProgress ? (
+                                <Button disabled={uploadfile.length < 1 ? true : false} type="submit" onClick={handleUploadGraph} style={{ flex: 1 }}>
+                                    Upload
+                                </Button>
+                            ) : null}
+                            {uploadProgress ? (
+                                <ProgressBar label={uploadPercent == 100 ? "Completed" : ""} style={{ flex: 1, display: "flex", height: "3.1em" }} id={`progress-toto`} now={uploadPercent} />
+                            ) : null}
+                            {uploadProgress ? (
+                                <Button variant="danger" onClick={handleCancelUpload} disabled={uploadPercent == 100}>
+                                    Cancel
+                                </Button>
+                            ) : null}
+                        </Stack>
+                    </Stack>
+                </Form>
+            </Modal.Body>
+        </Modal>
+    );
+
     const tableBody = Object.entries(sources).map(([sourceName, source]) => {
         return (
             <tr>
@@ -119,18 +220,21 @@ export default function GraphManagement() {
     });
 
     return (
-        <Stack style={{ overflow: "auto", height: "90vh" }}>
-            <Table>
-                <thead style={{ position: "sticky", top: 0, "z-index": 10, "background-color": "white" }}>
-                    <tr>
-                        <th>Source</th>
-                        <th>Graph URI</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>{tableBody}</tbody>
-            </Table>
-        </Stack>
+        <>
+            {uploadModal}
+            <Stack style={{ overflow: "auto", height: "90vh" }}>
+                <Table>
+                    <thead style={{ position: "sticky", top: 0, "z-index": 10, "background-color": "white" }}>
+                        <tr>
+                            <th>Source</th>
+                            <th>Graph URI</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>{tableBody}</tbody>
+                </Table>
+            </Stack>
+        </>
     );
 }
 

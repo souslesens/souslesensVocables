@@ -26,7 +26,14 @@ module.exports = function () {
             const first = JSON.parse(req.body.first);
             const last = JSON.parse(req.body.last);
             const id = JSON.parse(req.body.id);
+            const clean = JSON.parse(req.body.clean);
             const file = req.files.data;
+
+            if (clean) {
+                fs.rmSync(`/tmp/${id}.nt`);
+                res.status(200).send({ id: id });
+                return;
+            }
 
             // first chunk, create a file
             if (first) {
@@ -64,6 +71,7 @@ module.exports = function () {
                         first: { type: "string" },
                         last: { type: "string" },
                         id: { type: "string" },
+                        clean: { type: "string" },
                     },
                 },
             },

@@ -58,7 +58,7 @@ var KGbuilder_main = {
 
                         // load Lookups
                         function (callbackSeries) {
-                            if (mappings.lookups.length == 0) {
+                            if (!mappings.lookups || mappings.lookups.length == 0) {
                                 return callbackSeries();
                             }
                             KGbuilder_triplesMaker.loadLookups(mappings, function (err, result) {
@@ -327,7 +327,7 @@ var KGbuilder_main = {
 
 
             //delete allKGCreator triples
-            if (!tables) {
+            if (!tables || tables.length==0) {
                 KGbuilder_triplesWriter.deleteKGcreatorTriples(sourceMainJson.sparqlServerUrl,sourceMainJson.graphUri, null, function(err, result) {
                     if (err)
                         return callback(err)

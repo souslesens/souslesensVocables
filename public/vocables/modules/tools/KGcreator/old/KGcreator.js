@@ -514,7 +514,7 @@ var KGcreator = (function () {
                     return;
                 }
                 $("#KGcreator_dialogDiv").load("snippets/KGcreator/lookupDialog.html", function () {
-                    $("#KGCreator_lookupFileName").val(self.currentTreeNode.data.id);
+                    $("#KGCreator_lookupTable").val(self.currentTreeNode.data.id);
                 });
                 $("#KGcreator_dialogDiv").dialog("open");
             },
@@ -896,7 +896,7 @@ predicate = self.getPredefinedPart14PredicateFromClasses(subject, object);
     self.addLookup = function () {
         var lookup = {
             name: $("#KGCreator_lookupName").val(),
-            fileName: $("#KGCreator_lookupFileName").val(),
+            fileName: $("#KGCreator_lookupTable").val(),
             sourceColumn: $("#KGCreator_lookupSourceColumn").val(),
             targetColumn: $("#KGCreator_lookupTargetColumn").val(),
             transformFn: $("#KGCreator_lookupTransformFn").val().replace(/"/g, "'"),

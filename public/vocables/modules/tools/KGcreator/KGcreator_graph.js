@@ -484,6 +484,10 @@ var KGcreator_graph = (function () {
                             attrs.shape = "box";
                             drawRelation = false;
                         }
+                      /*  if (item.isString) {
+                            attrs.shape = "text";
+
+                        }*/
 
                         visjsData.nodes.push({
                             id: sId,

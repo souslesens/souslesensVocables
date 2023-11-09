@@ -76,7 +76,7 @@ var KGcreator_run = (function() {
             MainController.UI.message(result.result, true);
           }
           else {
-            $("#KGcreator_infosDiv").val(result.countCreatedTriples + " triples created in graph " + mappings.graphUri);
+            $("#KGcreator_infosDiv").val(result.countCreatedTriples + " triples created in graph " + KGcreator.currentConfig.graphUri);
             MainController.UI.message("triples created", true);
           }
         }
@@ -161,10 +161,10 @@ var KGcreator_run = (function() {
   };
 
   self.deleteKGcreatorTriples = function(deleteAllKGcreatorTriples, callback) {
-    if (!confirm("Do you really want to delete  triples created with KGCreator in table or file " + table)) {
+    if (!confirm("Do you really want to delete  triples created with KGCreator in datasource "+ KGcreator.currentConfig.currentDataSource.name)) {
       return;
     }
-    var table = null;
+    var tables = [];
     if (!deleteAllKGcreatorTriples) {
       if (!KGcreator.currentTreeNode && (KGcreator.currentTreeNode.data.type == "table" || KGcreator.currentTreeNode.data.type == "csvFile")) {
         if (callback) {
@@ -172,12 +172,13 @@ var KGcreator_run = (function() {
         }
         return;
       }
-      table = KGcreator.currentTreeNode.data.id;
+      tables.push(KGcreator.currentTreeNode.data.id);
+
     }
 
     var payload = {
       source: KGcreator.currentSlsvSource,
-      tables: JSON.stringify([table])
+      tables: JSON.stringify(tables)
 
     };
     MainController.UI.message("deleting KGcreator  triples...");

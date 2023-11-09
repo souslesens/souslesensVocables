@@ -57,7 +57,7 @@ const KGbuilder_triplesWriter = {
                 return callback(err);
             }
             totalTriples += triples.length;
-            return callback(null, totalTriples);
+            return callback(null, {countCreatedTriples:totalTriples});
         });
     },
 

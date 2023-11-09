@@ -133,6 +133,7 @@ var KGcreator = (function () {
             sparqlServerUrl: Config.sources[self.currentSlsvSource].sparql_server.url,
             graphUri: Config.sources[self.currentSlsvSource].graphUri,
             prefixes: {},
+            lookups: {},
             databaseSources: {},
             csvSources: {},
         };
@@ -256,6 +257,20 @@ var KGcreator = (function () {
                                 KGcreator_mappings.showTableMappings(node);
                             },
                         };
+                        items.lookups = {
+                            label: "lookups",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_mappings.showLookupsDialog(node);
+                            },
+                        };
+                        items.tranforms = {
+                            label: "tranforms",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_mappings.showTranformsDialog(node);
+                            },
+                        };
                         items.showSampleData = {
                             label: "showSampleData",
                             action: function (_e) {
@@ -305,6 +320,20 @@ var KGcreator = (function () {
                             action: function (_e) {
                                 // pb avec source
                                 KGcreator_mappings.showTableMappings(node);
+                            },
+                        };
+                        items.lookups = {
+                            label: "lookups",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_mappings.showLookupsDialog(node);
+                            },
+                        };
+                        items.tranforms = {
+                            label: "tranforms",
+                            action: function (_e) {
+                                // pb avec source
+                                KGcreator_mappings.showTranformsDialog(node);
                             },
                         };
 
@@ -451,7 +480,7 @@ var KGcreator = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    self.loadSourceMappings(slsvSource, dataSource, function (err, mappings) {
+                    self.loadDataSourceMappings(slsvSource, dataSource, function (err, mappings) {
                         if (err) {
                             return callbackSeries();
                         }
@@ -489,6 +518,8 @@ var KGcreator = (function () {
                         dataType: "json",
                         success: function (result, _textStatus, _jqXHR) {
                             columns = result.headers;
+                            var tableObj = { [fileName]: columns };
+                            self.currentConfig.currentDataSource.tables = tableObj;
                             callbackSeries();
                         },
                         error: function (err) {
@@ -497,13 +528,12 @@ var KGcreator = (function () {
                     });
                 },
                 function (callbackSeries) {
-                    self.loadSourceMappings(slsvSource, fileName, function (err, mappings) {
+                    self.loadDataSourceMappings(slsvSource, fileName, function (err, mappings) {
                         if (err) {
                             return callbackSeries();
                         }
                         self.currentConfig.currentMappings = mappings;
-                        var tableObj = { [fileName]: [] };
-                        self.currentConfig.currentDataSource.tables = [tableObj];
+
 
                         //  self.currentConfig.databaseSources[dataSource].mappings = mappings;
                         callbackSeries();
@@ -511,10 +541,19 @@ var KGcreator = (function () {
                 },
                 function (callbackSeries) {
                     var jstreeData = [];
+
+
                     columns.forEach(function (column) {
+                        var label=column
+
+                        var columnMappings = self.getColumnsMappings(fileName, null, "s");
+
+                        if (columnMappings[column]) {
+                            label = "<span class='KGcreator_fileWithMappings'>" + column + "</span>";
+                        }
                         jstreeData.push({
                             id: fileName + "_" + column,
-                            text: column,
+                            text: label,
                             parent: fileName,
                             data: { id: column, table: fileName, label: column, type: "tableColumn" },
                         });
@@ -524,6 +563,11 @@ var KGcreator = (function () {
                     KGcreator_graph.graphColumnToClassPredicates([fileName]);
                     callbackSeries();
                 },
+                function (callbackSeries) {
+
+
+                    callbackSeries();
+            }
             ],
             function (err) {
                 if (err) {
@@ -636,7 +680,7 @@ var KGcreator = (function () {
     };
 
     self.getIndividualMapping = function (source, className) {
-        self.loadSourceMappings(source, self.currentConfig.currentDataSource, function (err, allTripleMappings) {
+        self.loadDataSourceMappings(source, self.currentConfig.currentDataSource, function (err, allTripleMappings) {
             if (err) {
                 return callback(err);
             }
@@ -676,7 +720,7 @@ var KGcreator = (function () {
         return matches;
     };
 
-    self.loadSourceMappings = function (slsvSource, dataSource, callback) {
+    self.loadDataSourceMappings = function (slsvSource, dataSource, callback) {
         var payload = {
             dir: mappingsDir + "/" + slsvSource,
             fileName: dataSource + ".json",

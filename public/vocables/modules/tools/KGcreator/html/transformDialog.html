@@ -1,18 +1,42 @@
-<b>Create transform</b> function (value, role, prop, row)
-<ul>
-    <li>value : current cell object</li>
-    <li>role : s|p|o</li>
-    <li>prop : current mapping property</li>
-    <li>row : current row object</li>
-    <li>mapping : current mapping object</li>
-</ul>
-column<input id="KGcreator_transformColumn" /> function body<br />
-<textarea id="KGcreator_fnBody" style="width: 600px; height: 200px"></textarea>
+<style>
+    .linkColumn_tripleDiv {
+        margin: 2px;
+        padding: 2px;
+        border-radius: 3px;
+    }
+</style>
 
 <div>
-    <span id="KGcreator_testFnResult"></span>
-    <button onclick="KGcreator.createPrefixTransformFn()">prefix URI</button>
-    <button onclick="KGcreator.testFunction()">Test</button>
-    <button onclick="KGcreator.addTransformFunction()">Add</button>
-    <button onclick="$('#KGcreator_dialogDiv').dialog('close')">cancel</button>
+  <div style="display: flex; flex-direction: column; justify-content: space-evenly">
+    <div>
+      <div id="LinkColumn_classTypeDiv" style="color: #0d6efd; font-size: 18px; margin: 5px"></div>
+
+      <pre id="KGcreator_transformJsonDisplay" style="width: 95%px; height: 250px; font-size: 12px; background-color: #1e1b1d"></pre>
+    </div>
+
+
+    <div style="display: flex;flex-direction: row">
+      <div style="    width: 40%;">
+        <b>Create transform</b> function (value, role, prop, row)
+        <ul>
+          <li>value : current cell object</li>
+          <li>role : s|p|o</li>
+          <li>prop : current mapping property</li>
+          <li>row : current row object</li>
+          <li>mapping : current mapping object</li>
+        </ul>
+      </div>
+      <div>
+        column<select id="KGcreator_transformColumnSelect"></select> function body<br />
+        <textarea id="KGcreator_fnBody" style="width: 450px; height: 200px"></textarea>
+        <br>
+
+        <span id="KGcreator_testFnResult"></span>
+        <button onclick="KGcreator_mappings.createPrefixTransformFn()">prefix URI</button>
+        <button onclick="KGcreator_mappings.testFunction()">Test</button>
+        <button onclick="KGcreator_mappings.addTransformFunction()">Add</button>
+        <button onclick="KGcreator_mappings.saveTransform()">Save</button>
+      </div>
+    </div>
+  </div>
 </div>

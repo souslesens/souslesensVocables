@@ -218,6 +218,8 @@ var KGbuilder_triplesMaker = {
         }
         return callback(null, subjectStr);
     },
+
+
     getTripleObject: function (tableMappings, mapping, line, callback) {
         var objectStr = null;
         //get value for Object

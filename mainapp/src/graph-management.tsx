@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createRoot } from "react-dom/client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
@@ -17,7 +17,7 @@ export default function GraphManagement() {
     const [currentSource, setCurrentSource] = useState<string | null>(null);
     const [transferPercent, setTransferPercent] = useState(0);
     const [currentOperation, setCurrentOperation] = useState<string | null>(null);
-    const [cancelCurrentOperation, setCancelCurrentOperation] = useState(false);
+    const cancelCurrentOperation = useRef(false);
 
     // error management
     const [error, setError] = useState(false);
@@ -114,7 +114,7 @@ export default function GraphManagement() {
     };
 
     const handleCancelUpload = () => {
-        setCancelCurrentOperation(true);
+        cancelCurrentOperation.current = true;
         setCurrentOperation(null);
         setDisplayModal(null);
         setCurrentSource(null);
@@ -135,7 +135,7 @@ export default function GraphManagement() {
         const percent = Math.min(Math.round((offset * 100) / graphSize), 100);
         setTransferPercent(percent);
 
-        console.log("cancelCurrentOperation", cancelCurrentOperation);
+        console.log("cancelCurrentOperation", cancelCurrentOperation.current);
 
         if (offset < graphSize) {
             const data = await fetchGraphPart(graphUri, pageSize, offset);
@@ -156,6 +156,7 @@ export default function GraphManagement() {
             const pageSize = graphInfo.pageSize;
 
             const blobParts = await recursDownloadSource(sourceName, graphUri, 0, graphSize, pageSize, []);
+            cancelCurrentOperation.current = false;
 
             // create a blob and a link to dwl data, autoclick to autodownload
             const blob = new Blob(blobParts, { type: "text/plain" });

@@ -10,18 +10,24 @@ import Stack from "react-bootstrap/Stack";
 import Table from "react-bootstrap/Table";
 
 export default function GraphManagement() {
+    // sources fetched from server
     const [sources, setSources] = useState<Record<string, any>>({});
-    const [buttonsDisabled, setButtonsDisabled] = useState(false);
-    const [uploadButtonsDisabled, setUploadButtonsDisabled] = useState(false);
-    const [downloadPercent, setDownloadPercent] = useState(0);
-    const [uploadPercent, setUploadPercent] = useState(0);
-    const [uploadProgress, setUploadProgress] = useState(false);
-    const [uploadfile, setUploadFile] = useState<File[]>([]);
-    const [downloadingSource, setDownloadingSource] = useState("");
-    const [uploadingSource, setUploadingSource] = useState("");
+
+    // status of download/upload
+    const [currentSource, setCurrentSource] = useState<string | null>(null);
+    const [transferPercent, setTransferPercent] = useState(0);
+    const [currentOperation, setCurrentOperation] = useState<string | null>(null);
+    const [cancelCurrentOperation, setCancelCurrentOperation] = useState(false);
+
+    // error management
     const [error, setError] = useState(false);
-    const [uploadError, setUploadError] = useState(false);
-    const [displayModal, setDisplayModal] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
+
+    // upload
+    const [uploadfile, setUploadFile] = useState<File[]>([]);
+
+    // modal
+    const [displayModal, setDisplayModal] = useState<string | null>(null);
 
     useEffect(() => {
         void fetchSources();
@@ -45,20 +51,27 @@ export default function GraphManagement() {
     };
 
     const handleUploadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
-        setUploadingSource(event.currentTarget.id);
-        setUploadProgress(false);
-        setDisplayModal(true);
+        setCurrentSource(event.currentTarget.id.replace("upload-", ""));
+        setCurrentOperation(null);
+        setDisplayModal("upload");
+    };
+
+    const handleDownloadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
+        setCurrentSource(event.currentTarget.id);
+        setCurrentOperation(null);
+        setDisplayModal("download");
+        await downloadSource(event.currentTarget.id, event.currentTarget.value);
     };
 
     const handleHideUploadModal = () => {
-        setUploadingSource("");
-        setDisplayModal(false);
+        setCurrentSource(null);
+        setDisplayModal(null);
     };
 
     const handleUploadGraph = async () => {
         // init progress bar
-        setUploadProgress(true);
-        setUploadPercent(0);
+        setCurrentOperation("upload");
+        setTransferPercent(0);
 
         // get file
         const file = uploadfile[0];
@@ -76,7 +89,7 @@ export default function GraphManagement() {
         for (let start = 0; start < fileSize; start += chunkSize) {
             // set percent for progress bar
             const percent = (start * 100) / fileSize;
-            setUploadPercent(Math.round(percent));
+            setTransferPercent(Math.round(percent));
 
             // slice file
             const end = start + chunkSize;
@@ -100,8 +113,13 @@ export default function GraphManagement() {
         }
     };
 
-    const handleCancelUpload = async () => {
-        setUploadProgress(false);
+    const handleCancelUpload = () => {
+        setCancelCurrentOperation(true);
+        setCurrentOperation(null);
+        setDisplayModal(null);
+        setCurrentSource(null);
+        // setTransferPercent(0);
+        setUploadFile([]);
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,33 +130,32 @@ export default function GraphManagement() {
         setUploadFile(filesList);
     };
 
-    const handleDownloadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
-        try {
-            const graphUri = event.currentTarget.value;
-            const sourceName = event.currentTarget.id;
+    const recursDownloadSource = async (sourceName: string, graphUri: string, offset: number, graphSize: number, pageSize: number, blobParts: any[]) => {
+        // percent
+        const percent = Math.min(Math.round((offset * 100) / graphSize), 100);
+        setTransferPercent(percent);
 
-            setButtonsDisabled(true);
-            setDownloadingSource(sourceName);
-            setDownloadPercent(0);
+        console.log("cancelCurrentOperation", cancelCurrentOperation);
+
+        if (offset < graphSize) {
+            const data = await fetchGraphPart(graphUri, pageSize, offset);
+            blobParts.push(data);
+            blobParts = await recursDownloadSource(sourceName, graphUri, offset + pageSize, graphSize, pageSize, blobParts);
+        }
+        return blobParts;
+    };
+
+    const downloadSource = async (sourceName: string, graphUri: string) => {
+        try {
+            setCurrentSource(sourceName);
+            setTransferPercent(0);
+            setCurrentOperation("download");
 
             const graphInfo = await fetchSourceInfo(graphUri);
             const graphSize = graphInfo.graphSize;
             const pageSize = graphInfo.pageSize;
 
-            let offset = 0;
-            let percent = 0;
-            let blobParts = [];
-
-            // fetch all parts of the graph and store them into blobParts
-            while (offset < graphSize) {
-                const data = await fetchGraphPart(graphUri, pageSize, offset);
-                blobParts.push(data);
-
-                offset += pageSize;
-                percent = Math.round((offset * 100) / graphSize);
-                percent = percent > 100 ? 100 : percent;
-                setDownloadPercent(percent);
-            }
+            const blobParts = await recursDownloadSource(sourceName, graphUri, 0, graphSize, pageSize, []);
 
             // create a blob and a link to dwl data, autoclick to autodownload
             const blob = new Blob(blobParts, { type: "text/plain" });
@@ -147,46 +164,64 @@ export default function GraphManagement() {
             link.href = URL.createObjectURL(blob);
             link.click();
             URL.revokeObjectURL(link.href);
-
-            setButtonsDisabled(false);
-            setDownloadingSource("");
         } catch (error) {
             console.error(error);
             setError(true);
-            setButtonsDisabled(false);
-            setDownloadingSource("");
         }
     };
+
+    const downloadModalContent = (
+        <>
+            <Stack direction="horizontal" gap={1}>
+                {currentOperation == "download" ? (
+                    <ProgressBar label={transferPercent == 100 ? "Completed" : ""} style={{ flex: 1, display: "flex", height: "3.1em" }} id={`progress-bar`} now={transferPercent} />
+                ) : null}
+                {currentOperation == "download" ? (
+                    <Button variant="danger" onClick={handleCancelUpload} disabled={transferPercent == 100}>
+                        Cancel
+                    </Button>
+                ) : null}
+            </Stack>
+        </>
+    );
+
+    const uploadModalContent = (
+        <Form>
+            <Stack>
+                <Form.Group controlId="formUploadGraph" className="mb-3">
+                    <Form.Label>Choose RDF graph to upload</Form.Label>
+                    <Form.Control onChange={handleFileChange} required={true} type="file" disabled={currentOperation == "upload"} />
+                </Form.Group>
+                <Stack direction="horizontal" gap={1}>
+                    {!currentOperation ? (
+                        <Button disabled={uploadfile.length < 1 ? true : false} type="submit" onClick={handleUploadGraph} style={{ flex: 1 }}>
+                            Upload
+                        </Button>
+                    ) : null}
+                    {currentOperation == "upload" ? (
+                        <ProgressBar label={transferPercent == 100 ? "Completed" : ""} style={{ flex: 1, display: "flex", height: "3.1em" }} id={`progress-toto`} now={transferPercent} />
+                    ) : null}
+                    {currentOperation == "upload" ? (
+                        <Button variant="danger" onClick={handleCancelUpload} disabled={transferPercent == 100}>
+                            Cancel
+                        </Button>
+                    ) : null}
+                </Stack>
+            </Stack>
+        </Form>
+    );
 
     const uploadModal = (
         <Modal show={displayModal} onHide={handleHideUploadModal} size="lg" aria-labelledby="contained-modal-title-vcenter" centered>
             <Modal.Header closeButton>
-                <Modal.Title id="contained-modal-title-vcenter">{uploadingSource.replace("upload-", "")}</Modal.Title>
+                <Modal.Title id="contained-modal-title-vcenter">
+                    {displayModal == "upload" ? "Uploading" : null}
+                    {displayModal == "download" ? "Downloading" : null} {currentSource}
+                </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <Form>
-                    <Stack>
-                        <Form.Group controlId="formUploadGraph" className="mb-3">
-                            <Form.Label>Choose RDF graph to upload</Form.Label>
-                            <Form.Control onChange={handleFileChange} required={true} type="file" disabled={uploadProgress} />
-                        </Form.Group>
-                        <Stack direction="horizontal" gap={1}>
-                            {!uploadProgress ? (
-                                <Button disabled={uploadfile.length < 1 ? true : false} type="submit" onClick={handleUploadGraph} style={{ flex: 1 }}>
-                                    Upload
-                                </Button>
-                            ) : null}
-                            {uploadProgress ? (
-                                <ProgressBar label={uploadPercent == 100 ? "Completed" : ""} style={{ flex: 1, display: "flex", height: "3.1em" }} id={`progress-toto`} now={uploadPercent} />
-                            ) : null}
-                            {uploadProgress ? (
-                                <Button variant="danger" onClick={handleCancelUpload} disabled={uploadPercent == 100}>
-                                    Cancel
-                                </Button>
-                            ) : null}
-                        </Stack>
-                    </Stack>
-                </Form>
+                {displayModal == "upload" ? uploadModalContent : null}
+                {displayModal == "download" ? downloadModalContent : null}
             </Modal.Body>
         </Modal>
     );
@@ -198,21 +233,12 @@ export default function GraphManagement() {
                 <td>{source.graphUri}</td>
                 <td>
                     <Stack direction="horizontal" gap={1}>
-                        <Button disabled={uploadButtonsDisabled} variant={uploadError ? "danger" : "secondary"} value={source.graphUri} id={`upload-${sourceName}`} onClick={handleUploadSource}>
-                            {uploadButtonsDisabled ? (uploadingSource == sourceName ? `${uploadPercent}%` : "Upload") : "Upload"}
+                        <Button variant={error ? "danger" : "secondary"} value={source.graphUri} id={`upload-${sourceName}`} onClick={handleUploadSource}>
+                            Upload
                         </Button>
-                        <Button
-                            style={{ flex: 1, display: downloadingSource == sourceName ? "none" : "inline-block" }}
-                            disabled={buttonsDisabled}
-                            variant={error ? "danger" : "primary"}
-                            value={source.graphUri}
-                            id={sourceName}
-                            onClick={handleDownloadSource}
-                            visuallyHidden={downloadingSource == sourceName}
-                        >
-                            {buttonsDisabled ? (downloadingSource == sourceName ? `${downloadPercent}%` : "Download") : "Download"}
+                        <Button variant={error ? "danger" : "primary"} value={source.graphUri} id={sourceName} onClick={handleDownloadSource}>
+                            Download
                         </Button>
-                        <ProgressBar style={{ flex: 1, display: downloadingSource != sourceName ? "none" : "flex", height: "3.1em" }} id={`progress-${sourceName}`} now={downloadPercent} />
                     </Stack>
                 </td>
             </tr>

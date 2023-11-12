@@ -461,7 +461,7 @@ return;*/
             $("#actionDivContolPanelDiv").html("");
             $("#rightPanelDivInner").html("");
 
-            if (toolId == "lineage") {
+            if (toolId == "lineage" || toolId == "KGquery") {
                 Lineage_sources.setAllWhiteBoardSources(true);
                 $("#accordion").accordion("option", { active: 2 });
                 MainController.currentSource = null;

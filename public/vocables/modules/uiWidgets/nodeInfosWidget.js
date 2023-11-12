@@ -618,6 +618,7 @@ defaultLang = 'en';*/
                 str += "</table>";
                 $("#nodeInfos_individualsDiv").html(str);
             }
+            if(callback)
             callback();
         });
     };
@@ -813,6 +814,19 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
         if (confirm("delete node " + self.currentNodeId)) {
             async.series(
                 [
+                    // Update cache when it's a property
+                    function (callbackSeries) {
+                        if (Config.ontologiesVocabularyModels[self.currentNode.data.source]["properties"][self.currentNodeId]) {
+                            var data = {};
+                            data["constraints"] = [self.currentNodeId];
+                            data["properties"] = [self.currentNodeId];
+                            OntologyModels.updateModel(self.currentNode.data.source, data, { remove: true }, function (err, result2) {
+                                callbackSeries(err);
+                            });
+                        } else {
+                            callbackSeries();
+                        }
+                    },
                     //delete triples where id is subject
                     function (callbackSeries) {
                         Sparql_generic.deleteTriples(self.currentSource, self.currentNodeId, null, null, function (err, _result) {
@@ -831,6 +845,7 @@ object+="@"+currentEditingItem.item.value["xml:lang"]*/
                             return callbackSeries(err);
                         });
                     },
+
                     //update trees
                     function (callbackSeries) {
                         if (self.currentNode.from || self.currentNode.data.type == "http://www.w3.org/2002/07/owl#ObjectProperty") {

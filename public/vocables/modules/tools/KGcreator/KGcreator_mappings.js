@@ -311,7 +311,17 @@ return alert("select a field (column)");
     if (!KGcreator.currentConfig.currentMappings[columnNode.data.table]) {
       KGcreator.currentConfig.currentMappings[columnNode.data.table] = { tripleModels: [], transforms: [] };
     }
-    KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels = self.currentColumn.triples;
+    var newColumnMappings=self.columnJsonEditor.get()
+
+    //concat new triples from editor with other mappings in table
+    KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels.forEach(function(triple){
+      if(triple.s.indexOf(columnNode.data.id)==0 || triple.s.indexOf(columnNode.data.id)==1 )//include "$_ blanknode
+        return;
+        newColumnMappings.push(triple)
+    })
+
+
+    KGcreator.currentConfig.currentMappings[columnNode.data.table].tripleModels =newColumnMappings;
     KGcreator.saveDataSourceMappings();
 
     JstreeWidget.setSelectedNodeStyle({ color: "#0067bb" });
@@ -380,6 +390,7 @@ return alert("select a field (column)");
 
     });
   };
+
 
   return self;
 })

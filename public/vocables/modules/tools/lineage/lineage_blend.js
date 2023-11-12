@@ -241,11 +241,21 @@ var Lineage_blend = (function () {
 
                                                 var cssClass = propStatusCssClassMap[group];
                                                 var parent = property.source;
+                                                if (property.parent) {
+                                                    parent = property.parent;
+                                                }
+                                                /*
+                                                if(parent==undefined){
+                                                    parent='http://rds.posccaesar.org/ontology/lis14/rdl/arrangedPartOf';
+                                                    property.source="ISO_15926-part-14_PCA";
 
+                                                }
+                                                */
                                                 array.push({
                                                     id: propId,
                                                     text: "<span class='" + cssClass + "'>" + label + "</span>",
                                                     parent: parent,
+
                                                     data: {
                                                         propLabel: property.label,
                                                         id: propId,
@@ -291,13 +301,47 @@ var Lineage_blend = (function () {
                                             if (!self.domainOntologyProperties) {
                                                 self.domainOntologyProperties = [];
                                             }
-                                            self.domainOntologyProperties.push({
+                                            var newProp = {
                                                 id: result.uri,
                                                 label: subPropertyLabel,
                                                 superProp: self.currentPropertiesTreeNode.data.id,
-                                            });
-
+                                            };
+                                            self.domainOntologyProperties.push(newProp);
+                                            var propId = newProp.id;
+                                            /*
                                             OntologyModels.registerSourcesModel(Lineage_sources.activeSource, function (err, result2) {
+                                                if (err) {
+                                                    return alert(err.responsetext);
+                                                }
+
+                                                var jstreeData = [
+                                                    {
+                                                        id: result.uri,
+                                                        text: subPropertyLabel,
+                                                        parent: self.currentPropertiesTreeNode.data.id,
+                                                        data: {
+                                                            id: result.uri,
+                                                            label: subPropertyLabel,
+                                                            source: Lineage_sources.activeSource,
+                                                        },
+                                                    },
+                                                ];
+
+                                                JstreeWidget.addNodesToJstree("lineageAddEdgeDialog_authorizedPredicatesTreeDiv", self.currentPropertiesTreeNode.data.id, jstreeData, options);
+                                            });
+                                            */
+                                            var superpropConstraints = JSON.parse(
+                                                JSON.stringify(Config.ontologiesVocabularyModels[Config.currentTopLevelOntology]["constraints"][self.currentPropertiesTreeNode.data.id])
+                                            );
+                                            superpropConstraints.source = Lineage_sources.activeSource;
+                                            superpropConstraints.label = subPropertyLabel;
+                                            superpropConstraints.parent = self.currentPropertiesTreeNode.data.id;
+                                            superpropConstraints.superProp = self.currentPropertiesTreeNode.data.id;
+                                            var propertiesToAdd = {};
+                                            propertiesToAdd[propId] = newProp;
+                                            var constraintsToAdd = {};
+                                            constraintsToAdd[propId] = superpropConstraints;
+                                            OntologyModels.updateModel(Lineage_sources.activeSource, { properties: propertiesToAdd, constraints: constraintsToAdd }, null, function (err, result2) {
                                                 if (err) {
                                                     return alert(err.responsetext);
                                                 }
@@ -855,6 +899,7 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                     propertyLabel: propLabel,
                     propertyId: obj.node.data.id,
                 };
+                OntologyModels.updateModel;
             }
 
             Lineage_whiteboard.lineageVisjsGraph.data.edges.add([newEdge]);
@@ -1124,6 +1169,13 @@ if (array.length > 0) classLabel = array[array.length - 1];*/
                         }
                         Sparql_generic.deleteTriples(inSource, null, null, inverseRestriction, function (_err, _result) {
                             callbackSeries();
+                        });
+                    },
+                    function (callbackSeries) {
+                        // update OntologyModel by removing restriction
+                        var dataToRemove = { restrictions: [restrictionNode.data.propertyId] };
+                        OntologyModels.updateModel(inSource, dataToRemove, { remove: true }, function (err, result) {
+                            callback(err);
                         });
                     },
                 ],

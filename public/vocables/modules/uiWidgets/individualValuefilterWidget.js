@@ -15,10 +15,11 @@ var IndividualValueFilterWidget = (function () {
         String: ["rdfs:label", "rdfs:isDefinedBy", "rdfs:comment", "skos:altLabel", "skos:prefLabel", "skos:definition", "skos:example"],
     };
 
-    self.showDialog = function (divId, varName, classId, datatype, validateFn) {
+    self.showDialog = function (divId,source, varName, classId, datatype, validateFn) {
         self.varName = varName;
         self.validateFn = validateFn;
         self.classId = classId;
+        self.currentSource=source
 
         if (!divId) {
             divId = "smallDialogDiv";
@@ -166,7 +167,7 @@ var IndividualValueFilterWidget = (function () {
         if (classId == "anyClass") {
             classId = null;
         }
-        Sparql_OWL.getDistinctClassLabels(Lineage_sources.activeSource, [classId], {}, function (err, result) {
+        Sparql_OWL.getDistinctClassLabels(self.currentSource, [classId], {}, function (err, result) {
             var jstreeData = [];
             result.forEach(function (item) {
                 jstreeData.push({
@@ -182,42 +183,7 @@ var IndividualValueFilterWidget = (function () {
             });
             return callback(null, jstreeData);
         });
-        /*  var options = { type: classId, includeBlankNodes: 1 };
-    Sparql_OWL.getDictionary(Lineage_sources.activeSource, options, null, function(err, result) {*/
 
-        /*   var options = { classFilter: classId, skosLabels: true };
-         var indexes = [Lineage_sources.activeSource.toLowerCase()];
-         SearchUtil.getElasticSearchMatches([term], indexes, mode, 0, 1000, options, function(err, result) {
-        return alert(err);
-      }
-
-      var matches = [];
-      result.forEach(function(item, index) {
-        if (item.error) {
-          return alert(err);
-        }
-        var hits = item.hits.hits;
-        var uniqueItems = {};
-        hits.forEach(function(hit) {
-          if (!uniqueItems[hit._source.id]) {
-            uniqueItems[hit._source.id] = 1;
-            matches.push(hit._source);
-          }
-        });
-      });
-
-      var jstreeData = [];
-      matches.forEach(function(item) {
-        jstreeData.push({
-          id: item.id,
-          text: item.label,
-          parent: "#"
-        });
-      });
-      return callback(null, jstreeData);
-    });
-
-       */
     };
 
     return self;

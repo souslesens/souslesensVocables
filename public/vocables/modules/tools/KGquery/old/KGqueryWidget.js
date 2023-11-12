@@ -33,7 +33,7 @@ var KGqueryWidget = (function() {
     if (true || !self.isLoaded) {
       $("#mainDialogDiv2").load("modules/tools/KGquery/html/KGqueryWidget.html", function() {
         self.source = Lineage_sources.activeSource;
-        self.drawVisjsModel();
+        KGquery.drawVisjsModel();
         self.isLoaded = true;
       });
     }
@@ -326,7 +326,7 @@ var KGqueryWidget = (function() {
     var varName = [self.getVarName(aClass, true)];
     var datatype = aClass.data.datatype;
 
-    IndividualValueFilterWidget.showDialog(null, varName, aClass.id, datatype, function(err, filter) {
+    IndividualValueFilterWidget.showDialog(null, self.currentSource,varName, aClass.id, datatype, function(err, filter) {
       if (err) {
         return alert(err);
       }

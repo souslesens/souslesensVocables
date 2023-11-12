@@ -76,7 +76,7 @@ var KGcreator_run = (function() {
             MainController.UI.message(result.result, true);
           }
           else {
-            $("#KGcreator_infosDiv").val(result.countCreatedTriples + " triples created in graph " + KGcreator.currentConfig.graphUri);
+            $("#KGcreator_infosDiv").val(result + " triples created in graph " + KGcreator.currentConfig.graphUri);
             MainController.UI.message("triples created", true);
           }
         }

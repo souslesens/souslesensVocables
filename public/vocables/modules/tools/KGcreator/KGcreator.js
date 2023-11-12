@@ -9,6 +9,7 @@ import KGcreator_mappings from "./KGcreator_mappings.js";
 import KGcreator_run from "./KGcreator_run.js";
 import KGcreator_joinTables from "./KGcreator_joinTables.js";
 
+
 var KGcreator = (function () {
     var self = {};
     self.currentConfig = {};
@@ -61,6 +62,16 @@ var KGcreator = (function () {
     };
 
     self.showSourcesDialog = function (callback) {
+
+        if ( Config.tools["KGcreator"].urlParam_source) {
+            self.currentSlsvSource=Config.tools["KGcreator"].urlParam_source;
+            self.initSource();
+            return;
+        }
+
+
+
+
         var options = {
             withCheckboxes: false,
         };

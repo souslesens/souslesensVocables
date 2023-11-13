@@ -1,5 +1,9 @@
 const { rdfDataModel } = require("../../../../model/rdfData");
+const { config } = require("../../../../model/config");
+const userManager = require("../../../../bin/user.");
+const { sourceModel, SourceModel } = require("../../../../model/sources");
 const { ulid } = require("ulid");
+const path = require("path");
 const fs = require("fs");
 
 module.exports = function () {
@@ -10,9 +14,20 @@ module.exports = function () {
 
     async function GET(req, res, next) {
         try {
-            const graphUri = req.query.graph;
+            const sourceName = req.query.source;
             const limit = req.query.limit;
             const offset = req.query.offset;
+
+            const userInfo = await userManager.getUser(req.user);
+            const userSources = await sourceModel.getUserSources(userInfo.user);
+
+            if (!Object.keys(userSources).includes(sourceName)) {
+                res.status(404).send({ error: `${sourceName} not found` });
+                return;
+            }
+
+            const graphUri = userSources[sourceName].graphUri;
+
             const data = await rdfDataModel.getGraphPartNt(graphUri, limit, offset);
             res.status(200).send(data);
         } catch (error) {
@@ -22,37 +37,61 @@ module.exports = function () {
     }
 
     async function POST(req, res, next) {
+        const last = JSON.parse(req.body.last);
+        const id = JSON.parse(req.body.id) || ulid();
+        const clean = JSON.parse(req.body.clean);
+        const file = req.files.data;
+
+        const tmpPath = `/tmp/${id}.nt`;
+        const uploadedPath = path.resolve("data/uploaded_rdf_data");
+        const filePathToUpload = `${uploadedPath}/${id}.nt`;
+
         try {
-            const first = JSON.parse(req.body.first);
-            const last = JSON.parse(req.body.last);
-            const id = JSON.parse(req.body.id);
-            const clean = JSON.parse(req.body.clean);
-            const file = req.files.data;
+            const sourceName = JSON.parse(req.body.source);
+
+            const userInfo = await userManager.getUser(req.user);
+            const userSources = await sourceModel.getUserSources(userInfo.user);
+
+            if (!Object.keys(userSources).includes(sourceName)) {
+                if (userSources[sourceName].accessControl != "readwrite") {
+                    res.status(503).send({ error: `Not authorized to write ${sourceName}` });
+                }
+                return;
+            }
+            const graphUri = userSources[sourceName].graphUri;
 
             if (clean) {
-                fs.rmSync(`/tmp/${id}.nt`);
+                fs.rmSync(tmpPath);
                 res.status(200).send({ id: id });
                 return;
             }
 
-            // first chunk, create a file
-            if (first) {
-                // generate random id
-                const id = ulid();
-                file.mv(`/tmp/${id}.nt`);
-                res.status(200).send({ id: id });
-                return;
-            }
-
-            // middle or last chunk, append data
-            fs.appendFileSync(`/tmp/${id}.nt`, file.data);
+            // append data to file (create it first time)
+            fs.appendFileSync(tmpPath, file.data);
 
             // last chunk, upload file to endpoint
-            // TODO:
+            if (last) {
+                // create exposed directory if not exists
+                if (!fs.existsSync(uploadedPath)) {
+                    fs.mkdirSync(uploadedPath);
+                }
 
+                // move file to this dir
+                fs.renameSync(tmpPath, filePathToUpload);
+
+                // Load file into triplestore
+                const slsUrlForTriplestore = config.souslesensUrlForVirtuoso ? config.souslesensUrlForVirtuoso : souslesensUrl;
+                const fileToUploadUrl = `${slsUrlForTriplestore}/upload/rdf/${id}.nt`;
+                await rdfDataModel.loadGraph(graphUri, fileToUploadUrl);
+                // clean
+                fs.rmSync(filePathToUpload);
+            }
             res.status(200).send({ id: id });
         } catch (error) {
-            return res.status(500).json({ error: error });
+            // clean
+            fs.rmSync(filePathToUpload);
+            console.error(error);
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -68,7 +107,6 @@ module.exports = function () {
                 schema: {
                     type: "object",
                     properties: {
-                        first: { type: "string" },
                         last: { type: "string" },
                         id: { type: "string" },
                         clean: { type: "string" },
@@ -93,8 +131,8 @@ module.exports = function () {
         operationId: "RDF get graph",
         parameters: [
             {
-                name: "graph",
-                description: "URI of the graph to retrieve",
+                name: "source",
+                description: "Source name of the graph to retrieve",
                 in: "query",
                 type: "string",
                 required: true,

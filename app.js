@@ -87,6 +87,7 @@ if (config.auth !== "disabled") {
 // Static content
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname, "mainapp/static")));
+app.use("/upload/rdf", express.static(path.join(__dirname, "data/uploaded_rdf_data")));
 
 async function loggedIn(req, _res, next) {
     if (req.isAuthenticated || config.auth === "disabled") {

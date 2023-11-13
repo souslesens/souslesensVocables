@@ -2,6 +2,7 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 import { useState, useEffect, useRef } from "react";
 
+import Alert from "react-bootstrap/Alert";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
 import Modal from "react-bootstrap/Modal";
@@ -18,6 +19,7 @@ export default function GraphManagement() {
     const [transferPercent, setTransferPercent] = useState(0);
     const [currentOperation, setCurrentOperation] = useState<string | null>(null);
     const cancelCurrentOperation = useRef(false);
+    const [animatedProgressBar, setAnimatedProgressBar] = useState(false);
 
     // error management
     const [error, setError] = useState(false);
@@ -39,28 +41,28 @@ export default function GraphManagement() {
         setSources(json.resources);
     };
 
-    const fetchSourceInfo = async (graphUri: string) => {
-        const response = await fetch(`/api/v1/rdf/graph/info?graph=${graphUri}`);
+    const fetchSourceInfo = async (sourceName: string) => {
+        const response = await fetch(`/api/v1/rdf/graph/info?source=${sourceName}`);
         const json = await response.json();
         return json;
     };
 
-    const fetchGraphPart = async (graphUri: string, limit: number, offset: number) => {
-        const response = await fetch(`/api/v1/rdf/graph/?graph=${graphUri}&limit=${limit}&offset=${offset}`);
+    const fetchGraphPart = async (sourceName: string, limit: number, offset: number) => {
+        const response = await fetch(`/api/v1/rdf/graph/?source=${sourceName}&limit=${limit}&offset=${offset}`);
         return await response.text();
     };
 
     const handleUploadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
-        setCurrentSource(event.currentTarget.id.replace("upload-", ""));
+        setCurrentSource(event.currentTarget.value);
         setCurrentOperation(null);
         setDisplayModal("upload");
     };
 
     const handleDownloadSource = async (event: React.MouseEvent<HTMLButtonElement>) => {
-        setCurrentSource(event.currentTarget.id);
+        setCurrentSource(event.currentTarget.value);
         setCurrentOperation(null);
         setDisplayModal("download");
-        await downloadSource(event.currentTarget.id, event.currentTarget.value);
+        await downloadSource(event.currentTarget.value);
     };
 
     const handleHideModal = () => {
@@ -69,6 +71,9 @@ export default function GraphManagement() {
         setCurrentSource(null);
         setTransferPercent(0);
         setUploadFile([]);
+        setError(false);
+        setErrorMessage("");
+        setAnimatedProgressBar(false);
         if (currentOperation) {
             cancelCurrentOperation.current = true;
         }
@@ -84,12 +89,11 @@ export default function GraphManagement() {
         const file = uploadfile[0];
 
         // get file size and chunk size
-        const chunkSize = 40000;
+        const chunkSize = 1000000;
         const fileSize = file.size;
 
         // init values
         let firstChunk = true;
-        let lastChunk = false;
         let chunkId = null;
 
         // iterate over file and send chunks to server
@@ -102,13 +106,23 @@ export default function GraphManagement() {
             const end = start + chunkSize;
             const chunk = file.slice(start, end);
 
+            // last ?
+            const lastChunk = start + chunkSize >= fileSize ? true : false;
+            if (lastChunk) {
+                setAnimatedProgressBar(true);
+            }
+
             // build formData
             const formData = new FormData();
-            formData.append("first", JSON.stringify(firstChunk));
-            formData.append("last", JSON.stringify(lastChunk));
-            formData.append("id", JSON.stringify(chunkId));
-            formData.append("clean", JSON.stringify(false));
-            formData.append("data", chunk);
+            Object.entries({
+                source: JSON.stringify(currentSource),
+                last: JSON.stringify(lastChunk),
+                id: JSON.stringify(chunkId),
+                clean: JSON.stringify(false),
+                data: chunk,
+            }).forEach(([key, value]) => {
+                formData.append(key, value);
+            });
 
             // if cancel button is pressed, remove uploaded file and return
             if (cancelCurrentOperation.current) {
@@ -119,13 +133,22 @@ export default function GraphManagement() {
 
             // POST data
             const res = await fetch("/api/v1/rdf/graph", { method: "post", body: formData });
-            const json = await res.json();
+            if (res.status != 200) {
+                setError(true);
+                const message = await res.json();
+                console.error(message.error);
+                setErrorMessage(message.error);
+                return;
+            } else {
+                const json = await res.json();
 
-            // Set values for next iteration
-            firstChunk = false;
-            lastChunk = start + chunkSize >= fileSize ? true : false;
-            chunkId = json.id;
+                // Set values for next iteration
+                firstChunk = false;
+                chunkId = json.id;
+            }
         }
+        setTransferPercent(100);
+        setAnimatedProgressBar(false);
     };
 
     const handleCancelOperation = () => {
@@ -135,6 +158,9 @@ export default function GraphManagement() {
         setCurrentSource(null);
         setTransferPercent(0);
         setUploadFile([]);
+        setError(false);
+        setErrorMessage("");
+        setAnimatedProgressBar(false);
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -145,7 +171,7 @@ export default function GraphManagement() {
         setUploadFile(filesList);
     };
 
-    const recursDownloadSource = async (sourceName: string, graphUri: string, offset: number, graphSize: number, pageSize: number, blobParts: any[]) => {
+    const recursDownloadSource = async (sourceName: string, offset: number, graphSize: number, pageSize: number, blobParts: any[]) => {
         // percent
         const percent = Math.min(Math.round((offset * 100) / graphSize), 100);
         setTransferPercent(percent);
@@ -156,25 +182,25 @@ export default function GraphManagement() {
         }
 
         if (offset < graphSize) {
-            const data = await fetchGraphPart(graphUri, pageSize, offset);
+            const data = await fetchGraphPart(sourceName, pageSize, offset);
             blobParts.push(data);
-            blobParts = await recursDownloadSource(sourceName, graphUri, offset + pageSize, graphSize, pageSize, blobParts);
+            blobParts = await recursDownloadSource(sourceName, offset + pageSize, graphSize, pageSize, blobParts);
         }
         return blobParts;
     };
 
-    const downloadSource = async (sourceName: string, graphUri: string) => {
+    const downloadSource = async (sourceName: string) => {
         try {
             setCurrentSource(sourceName);
             setTransferPercent(0);
             setCurrentOperation("download");
             cancelCurrentOperation.current = false;
 
-            const graphInfo = await fetchSourceInfo(graphUri);
+            const graphInfo = await fetchSourceInfo(sourceName);
             const graphSize = graphInfo.graphSize;
             const pageSize = graphInfo.pageSize;
 
-            const blobParts = await recursDownloadSource(sourceName, graphUri, 0, graphSize, pageSize, []);
+            const blobParts = await recursDownloadSource(sourceName, 0, graphSize, pageSize, []);
             if (blobParts.length == 0) {
                 return;
             }
@@ -221,7 +247,13 @@ export default function GraphManagement() {
                         </Button>
                     ) : null}
                     {currentOperation == "upload" ? (
-                        <ProgressBar label={transferPercent == 100 ? "Completed" : ""} style={{ flex: 1, display: "flex", height: "3.1em" }} id={`progress-toto`} now={transferPercent} />
+                        <ProgressBar
+                            animated={animatedProgressBar}
+                            label={transferPercent == 100 ? (!error ? "Completed" : "") : animatedProgressBar ? "Uploading to triplestore" : ""}
+                            style={{ flex: 1, display: "flex", height: "3.1em" }}
+                            id={`progress-toto`}
+                            now={transferPercent}
+                        />
                     ) : null}
                     {currentOperation == "upload" ? (
                         <Button variant="danger" onClick={handleCancelOperation} disabled={transferPercent == 100}>
@@ -242,8 +274,15 @@ export default function GraphManagement() {
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                {displayModal == "upload" ? uploadModalContent : null}
-                {displayModal == "download" ? downloadModalContent : null}
+                <Stack gap={3}>
+                    {displayModal == "upload" ? uploadModalContent : null}
+                    {displayModal == "download" ? downloadModalContent : null}
+                    {error ? (
+                        <Alert style={{ mt: "1em" }} variant="danger">
+                            {errorMessage}
+                        </Alert>
+                    ) : null}
+                </Stack>
             </Modal.Body>
         </Modal>
     );
@@ -255,10 +294,10 @@ export default function GraphManagement() {
                 <td>{source.graphUri}</td>
                 <td>
                     <Stack direction="horizontal" gap={1}>
-                        <Button variant={error ? "danger" : "secondary"} value={source.graphUri} id={`upload-${sourceName}`} onClick={handleUploadSource}>
+                        <Button disabled={source.accessControl != "readwrite"} variant="secondary" value={sourceName} onClick={handleUploadSource}>
                             Upload
                         </Button>
-                        <Button variant={error ? "danger" : "primary"} value={source.graphUri} id={sourceName} onClick={handleDownloadSource}>
+                        <Button variant="primary" value={sourceName} onClick={handleDownloadSource}>
                             Download
                         </Button>
                     </Stack>

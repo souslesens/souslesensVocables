@@ -1,5 +1,6 @@
 {
     "souslesensUrl": "http://localhost:3010",
+    "souslesensUrlForVirtuoso": "http://host.docker.internal:3010",
     "listenPort": "3010",
     "serverUrl": "../slsv",
     "auth": "local",

@@ -31,6 +31,9 @@ class RdfDataModel {
         } else {
             response = await fetch(url);
         }
+        if (response.status !== 200) {
+            throw new Error(await response.text());
+        }
         if (jsonOutput) {
             const json = await response.json();
             const bindings = json["results"]["bindings"];
@@ -114,6 +117,17 @@ class RdfDataModel {
      */
     getGraphPartNt = async (graphUri, limit, offset) => {
         return await this.getGraphPart(graphUri, limit, offset, false);
+    };
+
+    /**
+     * @param {string} graphUri - The Graph URI
+     * @param {string} graphPath - URL of data
+     * @returns {Promise<any>} - response
+     */
+    loadGraph = async (graphUri, graphPath) => {
+        const query = `LOAD <${graphPath}> INTO GRAPH <${graphUri}>`;
+        const json = await this._query(query, true);
+        return json;
     };
 }
 

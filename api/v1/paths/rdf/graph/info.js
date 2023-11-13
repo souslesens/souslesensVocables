@@ -1,4 +1,6 @@
 const { rdfDataModel } = require("../../../../../model/rdfData");
+const userManager = require("../../../../../bin/user.");
+const { sourceModel } = require("../../../../../model/sources");
 
 module.exports = function () {
     let operations = {
@@ -7,7 +9,18 @@ module.exports = function () {
 
     async function GET(req, res, _next) {
         try {
-            const graphUri = req.query.graph;
+            const sourceName = req.query.source;
+
+            const userInfo = await userManager.getUser(req.user);
+            const userSources = await sourceModel.getUserSources(userInfo.user);
+
+            if (!Object.keys(userSources).includes(sourceName)) {
+                res.status(404).send({ error: `${sourceName} not found` });
+                return;
+            }
+
+            const graphUri = userSources[sourceName].graphUri;
+
             const graphSize = await rdfDataModel.getTripleCount(graphUri);
             const pageSize = Math.min(await rdfDataModel.getPageSize(graphUri), 2000);
             res.status(200).send({ graph: graphUri, graphSize: graphSize, pageSize: pageSize });
@@ -23,8 +36,8 @@ module.exports = function () {
         operationId: "RDF get graph info",
         parameters: [
             {
-                name: "graph",
-                description: "URI of the graph to retrieve",
+                name: "source",
+                description: "Source name of the graph to retrieve",
                 in: "query",
                 type: "string",
                 required: true,
